@@ -133,22 +133,23 @@ Link: https://github.com/centerofci/mathesar/pull/2981
   initcond = '(0,0)'
 );
 
-
-CREATE OR REPLACE FUNCTION dow_to_degrees(_date DATE)
-	returns DOUBLE PRECISION AS $$
-    SELECT (EXTRACT(DOW FROM _date)::double precision) * 360 / 7;    
+CREATE OR REPLACE FUNCTION
+msar.time_since_start_of_week_to_degrees(timestamp_ TIMESTAMP) RETURNS DOUBLE PRECISION AS $$/*
+*/
+SELECT (EXTRACT(DOW FROM timestamp_::date) * 86400 + EXTRACT(EPOCH FROM timestamp_::time))::double precision / 1680;    
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION degrees_to_dow(degrees DOUBLE PRECISION)
-	returns INT AS $$
-    SELECT (ROUND(degrees * 7 / 360)::int) % 7;
+CREATE OR REPLACE FUNCTION 
+msar.degrees_to_seconds_passed_since_start_of_week(degrees DOUBLE PRECISION) RETURNS DOUBLE PRECISION AS $$/*
+*/
+SELECT ((degrees::numeric % 360 + 360) %360)::double precision * 1680;
 $$ LANGUAGE SQL;
 
 
 
-CREATE OR REPLACE FUNCTION dow_to_string(_dow INT)
-    RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION 
+msar.dow_to_string(_dow INT) RETURNS TEXT AS $$	
     SELECT CASE
         WHEN _dow = 0 THEN 'Sunday'
         WHEN _dow = 1 THEN 'Monday'
@@ -161,32 +162,50 @@ CREATE OR REPLACE FUNCTION dow_to_string(_dow INT)
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION accum_dow(state DOUBLE PRECISION[], _date DATE)
-	RETURNS DOUBLE PRECISION[] as $$
-	SELECT ARRAY[state[1] + SIND(dow_to_degrees(_date)), state[2] + COSD(dow_to_degrees(_date))];
+CREATE OR REPLACE FUNCTION 
+msar.add_timestamp_to_vector(point_ point, timestamp_ TIMESTAMP) RETURNS point as $$/*
+
+*/
+WITH t(degrees) AS (SELECT msar.time_since_start_of_week_to_degrees(timestamp_))
+SELECT point_ + point(sind(degrees), cosd(degrees)) FROM t;
 $$ LANGUAGE SQL STRICT;
 
 
-CREATE OR REPLACE FUNCTION final_func_peak_dow(state DOUBLE PRECISION[])
-    RETURNS TEXT AS $$
-	SELECT CASE
-        WHEN @state[1] + @state[2] < 1e-10 THEN NULL
-        ELSE dow_to_string(
-                degrees_to_dow(
-                    CASE
-                        WHEN ATAN2D(state[1], state[2]) < 0 THEN ATAN2D(state[1], state[2]) + 360
-                        ELSE ATAN2D(state[1], state[2])
-                    END
-                )
-        )
-    END;
+CREATE OR REPLACE FUNCTION 
+msar.point_to_day_of_week(point_ point) RETURNS text AS $$/*
+Convert a point to degrees and then to time.
+
+Point is converted to time by:
+- first converting to degrees by calculating the inverse tangent of the point
+- then converting the degrees to the time.
+- If the point is on or very near the origin, we return null.
+
+Args:
+  point_: A point that represents a vector
+
+Returns:
+  time corresponding to the vector represented by point_.
+*/
+SELECT CASE
+  /*
+  When both sine and cosine are zero, the answer should be null.
+
+  To avoid garbage output caused by the precision errors of the float
+  variables, it's better to extend the condition to:
+  Output is null when the distance of the point from the origin is less than
+  a certain epsilon. (Epsilon here is 1e-10)
+  */
+  WHEN point_ <-> point(0,0) < 1e-15 THEN NULL
+  ELSE msar.dow_to_string(msar.degrees_to_seconds_passed_since_start_of_week(atan2d(point_[0],point_[1]))::int / (86400))
+END;
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE AGGREGATE peak_day_of_week (DATE)
+CREATE OR REPLACE AGGREGATE 
+msar.peak_day_of_week (TIMESTAMP)
 (
-    sfunc = accum_dow,
-    stype = DOUBLE PRECISION[],
-    finalfunc = final_func_peak_dow,
-    initcond = '{0,0}'
+    sfunc = msar.add_timestamp_to_vector,
+    stype = point,
+    finalfunc = msar.point_to_day_of_week,
+    initcond = '(0,0)'
 );
