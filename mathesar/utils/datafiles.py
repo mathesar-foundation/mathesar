@@ -72,12 +72,14 @@ def create_datafile(data):
             quotechar=dialect.quotechar,
         )
     else:
+        max_level = data.get('max_level', 0)
         datafile = DataFile(
             file=raw_file,
             base_name=base_name,
             type=type,
             created_from=created_from,
             header=header,
+            max_level=max_level
         )
     datafile.save()
     raw_file.close()
