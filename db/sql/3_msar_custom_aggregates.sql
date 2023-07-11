@@ -1,5 +1,5 @@
 /*
-This script defines all the necessary functions to be used for custom aggregates.
+This script defines all the necessary functions to be used for custom aggregates in general.
 
 Currently, we have the following custom aggregate(s):
   - msar.peak_time(time): Calculate the 'average time' (interpreted as peak time) for a column.
@@ -17,6 +17,10 @@ CREATE SCHEMA IF NOT EXISTS msar;
 CREATE OR REPLACE FUNCTION 
 msar.time_to_degrees(time_ TIME) RETURNS DOUBLE PRECISION AS $$/*
 Convert the given time to degrees (on a 24 hour clock, indexed from midnight).
+
+To get the fraction of 86400 seconds passed, we divide time_ by 86400 and then 
+to get the equivalent fraction of 360°, we multiply by 360, which is equivalent
+to divide by 240. 
 
 Examples:
   00:00:00 =>   0
@@ -36,6 +40,10 @@ Steps:
 - First, the degrees value is confined to range [0,360°)
 - Then the resulting value is converted to time indexed from midnight.
 
+To get the fraction of 360°, we divide degrees value by 360 and then to get the
+equivalent fractions of 86400 seconds, we multiply by 86400, which is equivalent
+to multiply by 240. 
+
 Examples:
     0 => 00:00:00
    90 => 06:00:00
@@ -51,7 +59,7 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.add_time_to_vector(sum_so_far point, time_ TIME) RETURNS point as $$/*
+msar.add_time_to_vector(point_ point, time_ TIME) RETURNS point as $$/*
 Add the given time, converted to a vector on unit circle, to the vector given in first argument.
 
 We add a time to a point by
@@ -59,14 +67,14 @@ We add a time to a point by
 - adding that point to the point given in the first argument.
 
 Args:
-  sum_so_far: This is a point representing the sum of point so far.
-  time_: This is the time to be added to the running sum.
+  point_: A point representing a vector.
+  time_: A time that is converted to a vector and added to the vector represented by point_.
 
 Returns:
-  updated value of sum_so_far after adding the time_ to the previous value of sum_so_far.
+  point that stores the resultant vector after the addition.
 */
 WITH t(degrees) AS (SELECT msar.time_to_degrees(time_))
-SELECT sum_so_far + point(sind(degrees), cosd(degrees)) FROM t;
+SELECT point_ + point(sind(degrees), cosd(degrees)) FROM t;
 $$ LANGUAGE SQL STRICT;
 
 
@@ -75,21 +83,19 @@ msar.point_to_time(point_ point) RETURNS TIME AS $$/*
 Convert a point to degrees and then to time.
 
 Point is converted to time by:
-- first converting a point to degrees by calculating the inverse tangent of
-  (sum(sine)/sum(cosine))
+- first converting to degrees by calculating the inverse tangent of the point
 - then converting the degrees to the time.
 - If the point is on or very near the origin, we return null.
 
 Args:
-  state: point_ stores the sum of all the times converted to points
+  point_: A point that represents a vector
 
 Returns:
-  time corresponding to the point_ that stores the cumulative sum of points.
+  time corresponding to the vector represented by point_.
 */
 SELECT CASE
   /*
-  When both sum(sine) and sum(cosine) are zero, the time variables are evenly
-  spaced and the answer should be null.
+  When both sine and cosine are zero, the answer should be null.
 
   To avoid garbage output caused by the precision errors of the float
   variables, it's better to extend the condition to:
@@ -106,13 +112,16 @@ CREATE OR REPLACE AGGREGATE
 msar.peak_time (TIME)/*
 Takes a column of type time and calculates the peak time.
 
+State value:
+  - state value is a variable of type point which stores the running vector
+    sum of the points represented by the time variables.
+
 Steps:
   - Convert time to degrees.
   - Calculate sine and cosine of the degrees.
-  - Add this to the state point so that we have the summation of
-    sine and cosine.
-  - Calculate the inverse tangent from the state point.
-  - Convert this to time, which is the result.
+  - Add this to the state point to update the running sum.
+  - Calculate the inverse tangent of the state point.
+  - Convert the result to time, which is the peak time.
 
 Refer to the following PR to learn more.
 Link: https://github.com/centerofci/mathesar/pull/2981
