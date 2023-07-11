@@ -162,8 +162,11 @@ export function putAPI<T>(url: string, data: unknown): CancellablePromise<T> {
   return sendXHRRequest('PUT', url, data);
 }
 
-export function deleteAPI<T>(url: string): CancellablePromise<T> {
-  return sendXHRRequest('DELETE', url);
+export function deleteAPI<T>(
+  url: string,
+  data?: unknown,
+): CancellablePromise<T> {
+  return sendXHRRequest('DELETE', url, data);
 }
 
 export function uploadFile<T>(
