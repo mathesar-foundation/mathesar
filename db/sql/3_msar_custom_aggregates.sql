@@ -78,7 +78,7 @@ Point is converted to time by:
 - first converting a point to degrees by calculating the inverse tangent of
   (sum(sine)/sum(cosine))
 - then converting the degrees to the time.
-- If the point is on the origin, will return null.
+- If the point is on or very near the origin, we return null.
 
 Args:
   state: point_ stores the sum of all the times converted to points
