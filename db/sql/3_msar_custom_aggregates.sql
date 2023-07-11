@@ -134,9 +134,10 @@ Link: https://github.com/centerofci/mathesar/pull/2981
   initcond = '(0,0)'
 );
 
+
 CREATE OR REPLACE FUNCTION
 msar.time_since_start_of_week_to_degrees(timestamp_ TIMESTAMP) RETURNS DOUBLE PRECISION AS $$/*
-Convert timestamp to degrees (in seconds passed since the start of week).
+Convert timestamp to degrees (considering seconds passed since the start of week).
 
 To get the fraction of 7 * 86400 seconds passed, we divide time_ by 7 * 86400 and then to get
 the equivalent fraction of 360°, we multiply by 360, which is equivalent to divide by 1680.
@@ -254,14 +255,14 @@ Steps:
   - Calculate sine and cosine of the degrees.
   - Add this to the state point to update the running sum.
   - Calculate the inverse tangent of the state point.
-  - Convert the result a day of week which is the peak day_of_week.
+  - Convert the result a day of week which is the peak day of week.
 
 Refer to the following PR to learn more.
 Link: https://github.com/centerofci/mathesar/pull/3004
 */
 (
-    sfunc = msar.add_time_of_week_to_vector,
-    stype = point,
-    finalfunc = msar.point_to_day_of_week,
-    initcond = '(0,0)'
+  sfunc = msar.add_time_of_week_to_vector,
+  stype = point,
+  finalfunc = msar.point_to_day_of_week,
+  initcond = '(0,0)'
 );
