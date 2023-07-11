@@ -65,10 +65,8 @@ Args:
 Returns:
   updated value of sum_so_far after adding the time_ to the previous value of sum_so_far.
 */
-SELECT point(
-  sum_so_far[0] + sind(msar.time_to_degrees(time_)),
-  sum_so_far[1] + cosd(msar.time_to_degrees(time_))
-);
+WITH t(degrees) AS (SELECT msar.time_to_degrees(time_))
+SELECT sum_so_far + point(sind(degrees), cosd(degrees)) FROM t;
 $$ LANGUAGE SQL STRICT;
 
 
