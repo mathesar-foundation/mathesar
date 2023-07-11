@@ -46,7 +46,7 @@ Examples:
 
 Inverse of msar.time_to_degrees.
 */
-SELECT MAKE_INTERVAL(secs => ((degrees::numeric % 360 + 360) % 360)::double precision * 86400 / 360)::time;
+SELECT MAKE_INTERVAL(secs => ((degrees::numeric % 360 + 360) % 360)::double precision * 240)::time;
 $$ LANGUAGE SQL;
 
 
