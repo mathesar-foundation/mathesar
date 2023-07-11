@@ -15,7 +15,7 @@ access hints on what composition of functions and parameters should be valid.
 from abc import ABC, abstractmethod
 import warnings
 
-from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER, TIME, DATE
+from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER, TIME
 from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
@@ -420,7 +420,7 @@ class PeakTime(DBFunction):
         return sa_call_sql_function('msar.peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
 
 
-class Peak_Day_of_Week(DBFunction):
+class PeakDayOfWeek(DBFunction):
     id = 'peak_day_of_week'
     name = 'peak_day_of_week'
     hints = tuple([
@@ -429,8 +429,7 @@ class Peak_Day_of_Week(DBFunction):
 
     @staticmethod
     def to_sa_expression(column_expr):
-        column_expr = cast(column_expr, DATE)
-        return sa_call_sql_function('peak_day_of_week', column_expr, return_type=PostgresType.TEXT)
+        return sa_call_sql_function('msar.peak_day_of_week', column_expr, return_type=PostgresType.TEXT)
 
 
 class Min(DBFunction):
