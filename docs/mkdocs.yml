@@ -25,6 +25,7 @@ nav:
       - Introduction: user-guide/index.md
       - Syncing database changes: user-guide/syncing-db.md
       - Users & access levels: user-guide/users.md
+      - Importing data into Mathesar: user-guide/importing-data.md
 
 plugins:
   - search:
