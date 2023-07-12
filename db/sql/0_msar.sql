@@ -1643,7 +1643,10 @@ BEGIN
   );
   IF unique_link THEN
     con_defs := jsonb_build_array(
-      jsonb_build_object('name', null, 'type', 'u', 'columns', added_col_ids)
+      jsonb_build_object(
+        'name', null,
+        'type', 'u',
+        'columns', added_col_ids)
     ) || con_defs;
   END IF;
   PERFORM msar.add_constraints(to_rel_id , con_defs);
