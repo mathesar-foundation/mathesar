@@ -1619,41 +1619,35 @@ Args:
 */
 DECLARE
   pk_col_id smallint;
-  pk_col_type text;
   col_defs jsonb;
-  added_col_id smallint[];
-  uq_con_def jsonb;
-  fk_con_def jsonb;
+  added_col_ids smallint[];
+  con_defs jsonb;
 BEGIN
   pk_col_id := msar.get_pk_column(from_rel_id);
-  pk_col_type := msar.get_column_type(from_rel_id, pk_col_id);
-  col_defs := format(
-    '[{
-        "name": "%s",
-        "type": {"name": "%s"}
-      }]', col_name, pk_col_type)::jsonb;
-  added_col_id := msar.add_columns(to_rel_id , col_defs , false);
-  fk_con_def := format(
-    '[{
-        "name": null,
-        "type": "f",
-        "columns": [%s],
-        "deferrable": false,
-        "fkey_relation_id": %s,
-        "fkey_columns": [%s]
-      }]', added_col_id[1], from_rel_id, pk_col_id)::jsonb;
-  IF unique_link
-  THEN
-    uq_con_def := format(
-      '[{
-        "name": null,
-        "type": "u",
-        "columns": [%s]
-      }]', added_col_id[1])::jsonb;
-  PERFORM msar.add_constraints(to_rel_id, uq_con_def);
+  col_defs := jsonb_build_array(
+    jsonb_build_object(
+      'name', col_name,
+      'type', jsonb_build_object('name', msar.get_column_type(from_rel_id, pk_col_id))
+    )
+  );
+  added_col_ids := msar.add_columns(to_rel_id , col_defs , false);
+  con_defs := jsonb_build_array(
+    jsonb_build_object(
+      'name', null,
+      'type', 'f',
+      'columns', added_col_ids,
+      'deferrable', false,
+      'fkey_relation_id', from_rel_id::integer,
+      'fkey_columns', jsonb_build_array(pk_col_id)
+    )
+  );
+  IF unique_link THEN
+    con_defs := jsonb_build_array(
+      jsonb_build_object('name', null, 'type', 'u', 'columns', added_col_ids)
+    ) || con_defs;
   END IF;
-  PERFORM msar.add_constraints(to_rel_id , fk_con_def);
-  RETURN added_col_id[1];
+  PERFORM msar.add_constraints(to_rel_id , con_defs);
+  RETURN added_col_ids[1];
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
