@@ -167,7 +167,6 @@ SELECT ((degrees::numeric % 360 + 360) %360)::double precision * 1680;
 $$ LANGUAGE SQL;
 
 
-
 CREATE OR REPLACE FUNCTION 
 msar.day_of_week_int_to_string(day_of_week INT) RETURNS TEXT AS $$/*
 Convert integer representing day of week to string
