@@ -255,7 +255,7 @@ Steps:
   - Calculate sine and cosine of the degrees.
   - Add this to the state point to update the running sum.
   - Calculate the inverse tangent of the state point.
-  - Convert the result a day of week which is the peak day of week.
+  - Convert the result to a day of week which is the peak day of week.
 
 Refer to the following PR to learn more.
 Link: https://github.com/centerofci/mathesar/pull/3004
