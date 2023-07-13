@@ -992,6 +992,7 @@ BEGIN
     to_rel_id => 'movies'::regclass::oid,
     col_name => 'act_id');
   RETURN NEXT has_column('movies', 'act_id');
+  RETURN NEXT col_type_is('movies', 'act_id', 'integer');
   RETURN NEXT col_is_fk('movies', 'act_id');
 END;
 $$ LANGUAGE plpgsql;
@@ -1005,6 +1006,7 @@ BEGIN
     col_name => 'act_id',
     unique_link => true);
   RETURN NEXT has_column('movies', 'act_id');
+  RETURN NEXT col_type_is('movies', 'act_id', 'integer');
   RETURN NEXT col_is_fk('movies', 'act_id');
   RETURN NEXT col_is_unique('movies', 'act_id');
 END;
@@ -1013,6 +1015,19 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_create_many_to_many_link() RETURNS SETOF TEXT AS $$
 BEGIN
+  PERFORM msar.create_many_to_many_link(
+    sch_id => 'public'::regnamespace::oid,
+    tab_name => 'movies_actors',
+    from_rel_ids => '{}'::oid[] || 'movies'::regclass::oid || 'actors'::regclass::oid,
+    col_names => '{"movie_id", "actor_id"}'::text[]
+  );
+  RETURN NEXT has_table('public'::name, 'movies_actors'::name);
+  RETURN NEXT has_column('movies_actors', 'movie_id');
+  RETURN NEXT col_type_is('movies_actors', 'movie_id', 'integer');
+  RETURN NEXT col_is_fk('movies_actors', 'movie_id');
+  RETURN NEXT has_column('movies_actors', 'actor_id');
+  RETURN NEXT col_type_is('movies_actors', 'actor_id', 'integer');
+  RETURN NEXT col_is_fk('movies_actors', 'actor_id');
 END;
 $$ LANGUAGE plpgsql;
 

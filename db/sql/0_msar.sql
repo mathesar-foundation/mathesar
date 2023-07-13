@@ -1675,8 +1675,8 @@ Args:
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, rel_name , NULL, NULL, NULL);
-  SELECT msar.create_many_to_one_link(a.rel_id, added_table_id, b.col_name)
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name , NULL, NULL, NULL);
+  PERFORM msar.create_many_to_one_link(a.rel_id, added_table_id, b.col_name)
   FROM unnest(from_rel_ids) WITH ORDINALITY AS a(rel_id, idx)
   JOIN unnest(col_names) WITH ORDINALITY AS b(col_name, idx) USING (idx);
   RETURN added_table_id;
