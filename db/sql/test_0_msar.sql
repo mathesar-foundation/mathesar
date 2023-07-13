@@ -990,7 +990,8 @@ BEGIN
   PERFORM msar.create_many_to_one_link(
     from_rel_id => 'actors'::regclass::oid,
     to_rel_id => 'movies'::regclass::oid,
-    col_name => 'act_id');
+    col_name => 'act_id'
+  );
   RETURN NEXT has_column('movies', 'act_id');
   RETURN NEXT col_type_is('movies', 'act_id', 'integer');
   RETURN NEXT col_is_fk('movies', 'act_id');
@@ -1004,7 +1005,8 @@ BEGIN
     from_rel_id => 'actors'::regclass::oid,
     to_rel_id => 'movies'::regclass::oid,
     col_name => 'act_id',
-    unique_link => true);
+    unique_link => true
+  );
   RETURN NEXT has_column('movies', 'act_id');
   RETURN NEXT col_type_is('movies', 'act_id', 'integer');
   RETURN NEXT col_is_fk('movies', 'act_id');
