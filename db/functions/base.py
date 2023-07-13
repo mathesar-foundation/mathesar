@@ -420,22 +420,6 @@ class PeakTime(DBFunction):
         return sa_call_sql_function('msar.peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
 
 
-class PeakDayOfWeek(DBFunction):
-    id = 'peak_day_of_week'
-    name = 'peak_day_of_week'
-    hints = tuple([
-        hints.aggregation
-    ])
-
-    @staticmethod
-    def to_sa_expression(column_expr):
-        """
-        Perform aggregation msar.peak_day_of_week on timestamp column and returns a text
-        representing the day of week
-        """
-        return sa_call_sql_function('msar.peak_day_of_week', column_expr, return_type=PostgresType.TEXT)
-
-
 class PeakMonth(DBFunction):
     id = 'peak_month'
     name = 'peak_month'
