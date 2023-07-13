@@ -30,11 +30,11 @@ def validate_json_format(data_file_content):
     raise database_api_exceptions.UnsupportedJSONFormat()
 
 
-def get_flattened_keys(json_dict, max_level, prefix='', keys=[]):
+def get_flattened_keys(json_dict, max_level, keys, prefix=''):
     for key, value in json_dict.items():
         flattened_key = f"{prefix}{key}"
-        if isinstance(value, dict) and max_level != 0:
-            get_flattened_keys(value, max_level - 1, f"{flattened_key}.", keys)
+        if isinstance(value, dict) and max_level > 0:
+            get_flattened_keys(value, max_level - 1, keys, f"{flattened_key}.")
         else:
             keys.append(flattened_key)
     return keys
@@ -47,12 +47,12 @@ def get_column_names_from_json(data_file, max_level):
     if isinstance(data, list):
         all_keys = []
         for obj in data:
-            for key in get_flattened_keys(obj, max_level):
+            for key in get_flattened_keys(obj, max_level, []):
                 if key not in all_keys:
                     all_keys.append(key)
         return all_keys
     else:
-        return get_flattened_keys(data, max_level)
+        return get_flattened_keys(data, max_level, [])
 
 
 def insert_data_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level):
