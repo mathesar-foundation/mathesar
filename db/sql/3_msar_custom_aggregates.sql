@@ -173,7 +173,7 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION 
 msar.month_int_to_string(month_ INT) RETURNS TEXT AS $$/*
-Convert integer representing day of week to string
+Convert integer representing month to string
 
 Examples:
    0 => January
