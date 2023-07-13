@@ -463,6 +463,38 @@ class IdentifierTooLong(MathesarAPIException):
         super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
+class InvalidJSONFormat(MathesarAPIException):
+    error_code = ErrorCodes.InvalidJSONFormat.value
+
+    def __init__(
+            self,
+            exception=None,
+            message='Invalid JSON file.',
+            field=None,
+            details=None,
+            status_code=status.HTTP_400_BAD_REQUEST
+    ):
+        if exception is None:
+            exception = Exception(message)
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class UnsupportedJSONFormat(MathesarAPIException):
+    error_code = ErrorCodes.UnsupportedJSONFormat.value
+
+    def __init__(
+            self,
+            exception=None,
+            message='This JSON format is not supported.',
+            field=None,
+            details=None,
+            status_code=status.HTTP_400_BAD_REQUEST
+    ):
+        if exception is None:
+            exception = Exception(message)
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
 class DynamicDefaultModificationError(Exception):
     def __init__(self, column=None):
         self.column = column

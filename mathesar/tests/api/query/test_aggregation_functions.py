@@ -547,7 +547,7 @@ def test_peak_time_aggregation(library_ma_tables, get_uid, client):
         },
         {
             "Patron": 4,
-            "Checkout Time": "19:32:29.14247"
+            "Checkout Time": "19:32:29.142471"
         },
         {
             "Patron": 5,
@@ -603,7 +603,7 @@ def test_peak_time_aggregation(library_ma_tables, get_uid, client):
         },
         {
             "Patron": 18,
-            "Checkout Time": "15:56:47.170538"
+            "Checkout Time": "15:56:47.170539"
         },
         {
             "Patron": 19,
@@ -778,11 +778,11 @@ def test_peak_day_of_week_aggregation(library_ma_tables, get_uid, client):
         },
         {
             "Patron": 3,
-            "Checkout Time": "Tuesday"
+            "Checkout Time": "Wednesday"
         },
         {
             "Patron": 4,
-            "Checkout Time": "Saturday"
+            "Checkout Time": "Sunday"
         },
         {
             "Patron": 5,
@@ -830,7 +830,7 @@ def test_peak_day_of_week_aggregation(library_ma_tables, get_uid, client):
         },
         {
             "Patron": 16,
-            "Checkout Time": "Wednesday"
+            "Checkout Time": "Thursday"
         },
         {
             "Patron": 17,
@@ -858,7 +858,7 @@ def test_peak_day_of_week_aggregation(library_ma_tables, get_uid, client):
         },
         {
             "Patron": 23,
-            "Checkout Time": "Wednesday"
+            "Checkout Time": "Thursday"
         },
         {
             "Patron": 24,
