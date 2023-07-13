@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 import warnings
 
 from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER, TIME
-from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
+from sqlalchemy.dialects.postgresql import array_agg, TEXT, array, DATE
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
 
@@ -436,7 +436,7 @@ class PeakDayOfWeek(DBFunction):
         return sa_call_sql_function('msar.peak_day_of_week', column_expr, return_type=PostgresType.TEXT)
 
 
-class Peak_Month(DBFunction):
+class PeakMonth(DBFunction):
     id = 'peak_month'
     name = 'peak_month'
     hints = tuple([
@@ -446,7 +446,7 @@ class Peak_Month(DBFunction):
     @staticmethod
     def to_sa_expression(column_expr):
         column_expr = cast(column_expr, DATE)
-        return sa_call_sql_function('peak_month', column_expr, return_type=PostgresType.TEXT)
+        return sa_call_sql_function('msar.peak_month', column_expr, return_type=PostgresType.TEXT)
 
 
 class Min(DBFunction):
