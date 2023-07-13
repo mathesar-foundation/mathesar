@@ -301,3 +301,35 @@ def library_ma_tables(db_table_to_dj_table, library_db_tables):
 def payments_ma_table(db_table_to_dj_table, payments_db_table):
     reset_reflection()
     return db_table_to_dj_table(payments_db_table)
+
+
+@pytest.fixture
+def table_with_unknown_types(create_schema, get_uid, engine):
+    prefix = "unknown_types"
+    schema_name = f"schema_{prefix}_{get_uid()}"
+    schema = create_schema(schema_name)
+    db_name = schema.database.name
+    table_name = f"table_{prefix}_{get_uid()}"
+    fq_table_name = f"\"{schema_name}\".\"{table_name}\""
+    query = f"""
+        CREATE EXTENSION IF NOT EXISTS citext;
+        CREATE TABLE {fq_table_name} (
+            text_column CITEXT,
+            point_column POINT
+        );
+        INSERT INTO {fq_table_name} (text_column, point_column)
+        VALUES
+            ('Row 1', '(1.23, 4.56)'),
+            ('Row 2', '(7.89, 0.12)'),
+            ('Row 3', '(3.45, 6.78)');
+    """
+    with engine.connect() as conn:
+        conn.execute(text(query))
+        conn.commit()
+    reset_reflection(db_name=db_name)
+    # NOTE filtering by name is impossible here, because db object names are a dynamic properties, not model fields
+    all_tables = Table.current_objects.all()
+    for table in all_tables:
+        if table.name == table_name:
+            return table
+    raise Exception("Should never happen.")
