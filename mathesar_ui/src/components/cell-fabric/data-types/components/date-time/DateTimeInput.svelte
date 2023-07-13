@@ -61,6 +61,12 @@
     }
   }
 
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === 'Tab') {
+      close();
+    }
+  }
+
   function onDropdownClose() {
     dispatch('blur');
   }
@@ -72,6 +78,7 @@
   }
 </script>
 
+<!-- Added double keydown because event type changes to custom event after bubbling up -->
 <FormattedInput
   {...$$restProps}
   bind:value
@@ -81,6 +88,7 @@
   on:focus={open}
   on:focus
   on:blur={checkAndBlur}
+  on:keydown={onKeydown}
   on:keydown
   on:artificialInput
   on:artificialChange
