@@ -270,7 +270,7 @@ Link: https://github.com/centerofci/mathesar/pull/3004
 
 CREATE OR REPLACE FUNCTION 
 msar.month_to_degrees(date_ DATE) returns DOUBLE PRECISION AS $$/*
-Convert discreet month to degrees.
+Convert discrete month to degrees.
 
 To get the fraction of 12 months passed, we extract the month from date, subtract 1 from 
 the result to confine it in range [0, 12) and divide by 12, then to get the equivalent
@@ -288,7 +288,7 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION 
 msar.degrees_to_month(degrees DOUBLE PRECISION) RETURNS INT AS $$/*
-Convert degrees to discreet month.
+Convert degrees to discrete month.
 
 To get the fraction of 360°, we divide degrees value by 360 and then to get the equivalent 
 fractions of 12 months, we multiply by 12, which is equivalent to divide by 30.
@@ -353,18 +353,18 @@ $$ LANGUAGE SQL STRICT;
 
 CREATE OR REPLACE FUNCTION 
 msar.point_to_month(point_ point) RETURNS text AS $$/*
-Convert a point to degrees and then to discreet month.
+Convert a point to degrees and then to discrete month.
 
 Point is converted to month by:
 - first converting to degrees by calculating the inverse tangent of the point.
-- then converting the degrees to the discreet month.
+- then converting the degrees to the discrete month.
 - If the point is on or very near to the origin, we return null.
 
 Args:
   point_: A point that represents a vector.
 
 Returns:
-  discreet corresponding to the vector represented by point_.
+  discrete corresponding to the vector represented by point_.
 */
 SELECT CASE
   /*
@@ -390,7 +390,7 @@ State value:
     sum of the points represented by the date variables.
 
 Steps:
-  - Convert date to discreet month.
+  - Convert date to discrete month.
   - convert the result to degrees.
   - Calculate sine and cosine of the degrees.
   - Add this to the state point to update the running sum.
