@@ -169,7 +169,6 @@
       );
       dataFileDetails = await promises.dataFileFetchPromise;
     }
-    console.log(dataFileDetails)
     useFirstRowAsHeader = dataFileDetails.header;
     return dataFileDetails;
   }
