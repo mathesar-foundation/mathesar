@@ -1609,7 +1609,7 @@ msar.create_many_to_one_link(
   unique_link boolean DEFAULT false
 ) RETURNS smallint AS $$/* 
 Create a many-to-one or a one-to-one link between tables, returning the attnum of the newly created
-column.
+column, returning the attnum of the added column.
 
 Args:
   from_rel_id: The OID of the referent table.
