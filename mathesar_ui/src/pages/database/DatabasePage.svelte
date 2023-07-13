@@ -5,6 +5,9 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import DatabaseNavigationList from './DatabaseNavigationList.svelte';
   import DatabaseDetails from './DatabaseDetails.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
 </script>

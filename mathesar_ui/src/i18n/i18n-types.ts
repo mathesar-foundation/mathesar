@@ -3,9 +3,7 @@
 import type {
   BaseTranslation as BaseTranslationType,
   LocalizedString,
-  RequiredParams,
 } from 'typesafe-i18n';
-import type { BaseFormatters } from 'typesafe-i18n/types/runtime/src/core.mjs';
 
 export type BaseTranslation = BaseTranslationType;
 export type BaseLocale = 'en';
@@ -18,25 +16,24 @@ export type Translations = RootTranslation;
 
 type RootTranslation = {
   /**
-   * Hi {name}! Please leave a star if you like this project: https://github.com/ivanhofer/typesafe-i18n
-   * @param {string} name
-   */
-  HI: RequiredParams<'name'>;
-  /**
-   * All Databases
+   * A​l​l​ ​D​a​t​a​b​a​s​e​s
    */
   allDatabases: string;
+  /**
+   * D​a​t​a​b​a​s​e​ ​w​i​t​h​ ​n​a​m​e​ ​<​>​d​a​t​a​b​a​s​e​N​a​m​e​<​>​ ​i​s​ ​n​o​t​ ​f​o​u​n​d​.
+   */
+  databaseWithNameNotFound: string;
 };
 
 export type TranslationFunctions = {
   /**
-   * Hi {name}! Please leave a star if you like this project: https://github.com/ivanhofer/typesafe-i18n
-   */
-  HI: (arg: { name: string }) => LocalizedString;
-  /**
    * All Databases
    */
   allDatabases: () => LocalizedString;
+  /**
+   * Database with name <>databaseName<> is not found.
+   */
+  databaseWithNameNotFound: () => LocalizedString;
 };
 
-export type Formatters = BaseFormatters;
+export type Formatters = {};
