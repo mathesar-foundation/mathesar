@@ -1,4 +1,5 @@
 import os
+import pandas
 from time import time
 from io import TextIOWrapper
 
@@ -6,6 +7,9 @@ import requests
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
+from mathesar.api.exceptions.database_exceptions import (
+    exceptions as database_api_exceptions
+)
 from mathesar.errors import URLDownloadError
 from mathesar.imports.csv import get_sv_dialect, get_file_encoding
 from mathesar.imports.json import is_valid_json, validate_json_format
@@ -29,6 +33,17 @@ def _download_datafile(url):
     return temp_file
 
 
+def _get_file_type(raw_file):
+    file_extension = os.path.splitext(raw_file.name)[1][1:]
+    if file_extension in ['csv', 'tsv', 'json']:
+        return file_extension
+    try:
+        pandas.read_excel(raw_file)
+        return 'excel'
+    except pandas.errors.ParserError:
+        raise database_api_exceptions.UnsupportedFileFormat()
+
+
 def create_datafile(data):
     header = data.get('header', True)
 
@@ -43,12 +58,12 @@ def create_datafile(data):
         raw_file = _download_datafile(data['url'])
         created_from = 'url'
         base_name = raw_file.name
-        type = os.path.splitext(raw_file.name)[1][1:]
+        type = _get_file_type(raw_file)
     elif 'file' in data:
         raw_file = data['file']
         created_from = 'file'
         base_name = raw_file.name
-        type = os.path.splitext(raw_file.name)[1][1:]
+        type = _get_file_type(raw_file)
 
     if base_name:
         max_length = DataFile._meta.get_field('base_name').max_length

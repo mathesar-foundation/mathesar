@@ -65,3 +65,4 @@ class ErrorCodes(Enum):
     DynamicDefaultAlterationToStaticDefault = 4424
     InvalidJSONFormat = 4425
     UnsupportedJSONFormat = 4426
+    UnsupportedFileFormat = 4427

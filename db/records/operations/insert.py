@@ -89,6 +89,12 @@ def insert_records_from_json(table, engine, json_filepath, column_names, max_lev
     insert_record_or_records(table, engine, data)
 
 
+def insert_records_from_excel(table, engine, excel_filepath):
+    df = pandas.read_excel(excel_filepath)
+    records = json.loads(df.to_json(orient='records'))
+    insert_record_or_records(table, engine, records)
+
+
 def insert_records_from_csv(table, engine, csv_filepath, column_names, header, delimiter=None, escape=None, quote=None, encoding=None):
     with open(csv_filepath, "r", encoding=encoding) as csv_file:
         with engine.begin() as conn:
