@@ -1528,3 +1528,43 @@ BEGIN
   RETURN created_table_id;
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- Rename columns ----------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.rename_column(tab_name text, old_col_name text, new_col_name text) RETURNS text AS $$/*
+Change a column name, returning the command executed
+
+Args:
+  tab_name: The qualified, quoted name of the table where we'll change a column name
+  old_col_name: The quoted name of the column to change.
+  new_col_name: The quoted new name for the column.
+*/
+DECLARE
+  cmd_template text;
+BEGIN
+  cmd_template := 'ALTER TABLE %s RENAME COLUMN %s TO %s';
+  RETURN __msar.exec_ddl(cmd_template, tab_name, old_col_name, new_col_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.rename_column(tab_id oid, col_id integer, new_col_name text) RETURNS smallint AS $$/*
+Change a column name, returning the command executed
+
+Args:
+  tab_name: The qualified, quoted name of the table where we'll change a column name
+  old_col_name: The quoted name of the column to change.
+  new_col_name: The quoted new name for the column.
+*/
+BEGIN
+  PERFORM __msar.rename_column(
+    tab_name => __msar.get_relation_name(tab_id),
+    old_col_name => msar.get_column_name(tab_id, col_id),
+    new_col_name => new_col_name
+  );
+  RETURN col_id;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
