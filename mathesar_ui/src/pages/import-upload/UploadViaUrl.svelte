@@ -1,12 +1,14 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
+  import { postAPI } from '@mathesar/api/utils/requestUtils';
   import {
+    Button,
+    LabeledInput,
     SpinnerButton,
     TextInput,
-    LabeledInput,
-    Button,
   } from '@mathesar/component-library';
-  import { postAPI } from '@mathesar/api/utils/requestUtils';
+  import UploadFormatHelp from './UploadFormatHelp.svelte';
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
@@ -36,11 +38,7 @@
   <TextInput bind:value={url} aria-label="URL" disabled={isLoading} />
 </LabeledInput>
 
-<div class="help-content">
-  The data must be in tabular format (CSV, TSV etc) or JSON. See relevant <a
-    href="https://docs.mathesar.org/user-guide/importing-data/">documentation</a
-  >.
-</div>
+<UploadFormatHelp />
 
 <slot />
 
