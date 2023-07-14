@@ -71,7 +71,10 @@
   />
   {#if !uploadProgress}
     <div class="help-content">
-      The file must be in tabular format (CSV, TSV etc.)
+      The file must be in tabular format (CSV, TSV etc) or JSON. See relevant <a
+        href="https://docs.mathesar.org/user-guide/importing-data/"
+        >documentation</a
+      >.
     </div>
   {/if}
 </div>
