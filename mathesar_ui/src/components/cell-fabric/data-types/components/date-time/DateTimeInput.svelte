@@ -78,7 +78,6 @@
   }
 </script>
 
-<!-- Added double keydown because event type changes to custom event after bubbling up -->
 <FormattedInput
   {...$$restProps}
   bind:value
