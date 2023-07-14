@@ -855,13 +855,13 @@ SELECT COALESCE(
     '(' || topts.precision || ', ' || topts.scale || ')',
     '(' || topts.precision || ')',
     ''
-  ) || CASE WHEN topts.array_ THEN '[]' ELSE '' END
+  ) || CASE WHEN topts."array" THEN '[]' ELSE '' END
 )
 FROM
   jsonb_to_record(typ_jsonb)
     AS typ(id oid, schema text, name text, modifier integer, options jsonb),
   jsonb_to_record(typ_jsonb -> 'options')
-    AS topts(length integer, precision integer, scale integer, fields text, array_ boolean);
+    AS topts(length integer, precision integer, scale integer, fields text, "array" boolean);
 $$ LANGUAGE SQL;
 
 
@@ -1545,7 +1545,11 @@ DECLARE
   cmd_template text;
 BEGIN
   cmd_template := 'ALTER TABLE %s RENAME COLUMN %s TO %s';
-  RETURN __msar.exec_ddl(cmd_template, tab_name, old_col_name, new_col_name);
+  IF old_col_name <> new_col_name THEN
+    RETURN __msar.exec_ddl(cmd_template, tab_name, old_col_name, new_col_name);
+  ELSE
+    RETURN null;
+  END IF;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1555,16 +1559,66 @@ msar.rename_column(tab_id oid, col_id integer, new_col_name text) RETURNS smalli
 Change a column name, returning the command executed
 
 Args:
-  tab_name: The qualified, quoted name of the table where we'll change a column name
-  old_col_name: The quoted name of the column to change.
-  new_col_name: The quoted new name for the column.
+  tab_id: The OID of the table whose column we're renaming
+  col_id: The ID of the column to rename
+  new_col_name: The unquoted new name for the column.
 */
 BEGIN
   PERFORM __msar.rename_column(
     tab_name => __msar.get_relation_name(tab_id),
     old_col_name => msar.get_column_name(tab_id, col_id),
-    new_col_name => new_col_name
+    new_col_name => quote_ident(new_col_name)
   );
   RETURN col_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_retype_text(tab_id oid, col_id integer, new_type jsonb) RETURNS text AS $$/*
+*/
+SELECT 'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || ' TYPE '
+  || msar.build_type_text(new_type);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_not_null_text(tab_id oid, col_id integer, not_null boolean) RETURNS text AS $$/*
+*/
+SELECT 'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || CASE WHEN not_null THEN ' SET ' ELSE ' DROP ' END
+  || 'NOT NULL';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_drop_text(tab_id oid, col_id integer) RETURNS text AS $$/*
+*/
+SELECT 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id)
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.process_col_alter_jsonb(tab_id oid, col_alters jsonb) RETURNS text AS $$/*
+*/
+SELECT concat_ws(
+  ', ',
+  string_agg(__msar.build_col_retype_text(tab_id, x.attnum, x.type), ', ')
+    FILTER (WHERE __msar.build_col_retype_text(tab_id, x.attnum, x.type) IS NOT NULL),
+  string_agg(__msar.build_col_not_null_text(tab_id, x.attnum, x.not_null), ', ')
+    FILTER (WHERE __msar.build_col_not_null_text(tab_id, x.attnum, x.not_null) IS NOT NULL),
+  string_agg(__msar.build_col_drop_text(tab_id, x.attnum), ', ')
+    FILTER (WHERE x.delete AND __msar.build_col_drop_text(tab_id, x.attnum) IS NOT NULL)
+)
+FROM jsonb_to_recordset(col_alters)
+  AS x(attnum integer, name text, type jsonb, not_null boolean, delete boolean);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+-- CREATE OR REPLACE FUNCTION
+-- msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS smallint[] AS $$/*
+-- */
+-- $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
