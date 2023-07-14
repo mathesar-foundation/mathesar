@@ -4,7 +4,7 @@ from django.db import models
 from mathesar.models.base import BaseModel
 
 
-class PublishedLink(BaseModel):
+class SharedEntity(BaseModel):
     slug = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     enabled = models.BooleanField(default=True)
 
@@ -12,13 +12,13 @@ class PublishedLink(BaseModel):
         abstract = True
 
 
-class PublishedTableLink(PublishedLink):
+class SharedTable(SharedEntity):
     table = models.ForeignKey(
-        'Table', on_delete=models.CASCADE, related_name='published_links'
+        'Table', on_delete=models.CASCADE, related_name='shared_table'
     )
 
 
-class PublishedQueryLink(PublishedLink):
+class SharedQuery(SharedEntity):
     query = models.ForeignKey(
-        'UIQuery', on_delete=models.CASCADE, related_name='published_links'
+        'UIQuery', on_delete=models.CASCADE, related_name='shared_query'
     )
