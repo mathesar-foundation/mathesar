@@ -31,6 +31,10 @@ ui_router.register(r'schema_roles', ui_viewsets.SchemaRoleViewSet, basename='sch
 ui_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
 ui_table_router.register(r'records', ui_viewsets.RecordViewSet, basename='table-record')
 
+# Shares
+ui_router.register(r'tables/(?P<table_pk>[^/.]+)/shares', ui_viewsets.SharedTableViewSet, basename='shared-table')
+ui_router.register(r'queries/(?P<query_pk>[^/.]+)/shares', ui_viewsets.SharedQueryViewSet, basename='shared-query')
+
 urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),

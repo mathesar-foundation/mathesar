@@ -5,6 +5,7 @@ import re
 from db.records.operations import group
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Table
+from mathesar.models.query import UIQuery
 from mathesar.utils.preview import column_alias_from_preview_template
 
 DATA_KEY = 'data'
@@ -30,6 +31,18 @@ def get_table_or_404(pk):
             message="Table doesn't exist"
         )
     return table
+
+
+def get_query_or_404(pk):
+    try:
+        query = UIQuery.objects.get(id=pk)
+    except UIQuery.DoesNotExist:
+        raise generic_api_exceptions.NotFoundAPIException(
+            NotFound,
+            error_code=ErrorCodes.QueryNotFound.value,
+            message="Query doesn't exist"
+        )
+    return query
 
 
 def process_annotated_records(record_list, column_name_id_map=None, preview_metadata=None):
