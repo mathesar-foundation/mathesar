@@ -15,7 +15,7 @@
    */
 
   const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
-  const DEFAULT_ESTIMATED_ITEM_SIZE = 30;
+  const DEFAULT_ESTIMATED_ITEM_SIZE = 32;
 </script>
 
 <script lang="ts">
