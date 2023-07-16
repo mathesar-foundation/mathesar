@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: Mathesar API
+  version: 1.0.0
+paths:
+  /api/db/v0/databases/:
+    get:
+      operationId: api_db_v0_databases_list
+      parameters:
+      - in: query
+        name: deleted
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDatabaseList'
+          description: ''
+  /api/db/v0/databases/{id}/:
+    get:
+      operationId: api_db_v0_databases_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/db/v0/databases/{id}/functions/:
+    get:
+      operationId: api_db_v0_databases_functions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/db/v0/databases/{id}/types/:
+    get:
+      operationId: api_db_v0_databases_types_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+components:
+  schemas:
+    Database:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        deleted:
+          type: boolean
+          readOnly: true
+        supported_types_url:
+          type: string
+          readOnly: true
+      required:
+      - deleted
+      - id
+      - name
+      - supported_types_url
+    PaginatedDatabaseList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Database'
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
+
+
+
+
+
