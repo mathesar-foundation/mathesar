@@ -22,7 +22,7 @@ class DataFileSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         model = DataFile
         fields = [
             'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter',
-            'escapechar', 'quotechar', 'paste', 'url', 'created_from'
+            'escapechar', 'quotechar', 'paste', 'url', 'created_from', 'max_level'
         ]
         extra_kwargs = {
             'file': {'required': False},
