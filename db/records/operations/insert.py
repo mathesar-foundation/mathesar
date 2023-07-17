@@ -33,7 +33,7 @@ def insert_record_or_records(table, engine, record_data):
     return None
 
 
-def insert_records_from_json(table, engine, json_filepath, column_names):
+def insert_records_from_json(table, engine, json_filepath, column_names, max_level):
     """
     Normalizes JSON data and inserts it into a table.
 
@@ -42,6 +42,7 @@ def insert_records_from_json(table, engine, json_filepath, column_names):
         engine: MockConnection. The SQLAlchemy engine.
         json_filepath: str. The path to the stored JSON data file.
         column_names: List[str]. List of column names.
+        max_level: int. The depth upto which JSON dict should be flattened.
 
     Algorithm:
         1.  We convert JSON data into Python object using json.load().
@@ -68,15 +69,14 @@ def insert_records_from_json(table, engine, json_filepath, column_names):
     """
     data: JSON object. The data we want to normalize.
     max_level: int. Max number of levels(depth of dict) to normalize.
-        If None, normalizes all levels. Normalizing a dict involes flattening it,
-        a behaviour we want to avoid since we have JSON dict as one of the data types.
-        Hence, max_level is kept 0.
+        Normalizing a dict involes flattening it and if max_level is None,
+        pandas normalizes all levels. Default max_level is kept 0.
     meta: Fields to use as metadata for each record in resulting table. Without meta,
         the method chooses keys from the first JSON object it encounters as column names.
         We provide column names as meta, because we want all possible keys as columns in
         our table and not just the keys from the first JSON object.
     """
-    df = pandas.json_normalize(data, max_level=0, meta=column_names)
+    df = pandas.json_normalize(data, max_level=max_level, meta=column_names)
     data = json.loads(df.to_json(orient='records'))
 
     for i, row in enumerate(data):
