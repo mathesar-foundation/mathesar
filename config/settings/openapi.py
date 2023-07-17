@@ -5,4 +5,3 @@ def custom_preprocessing_hook(endpoints):
         if path.startswith("/api/db/v0/databases/"):
             filtered.append((path, path_regex, method, callback))
     return filtered
-
