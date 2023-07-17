@@ -24,7 +24,7 @@ If you un-check **"Use first row as header"**, then Mathesar will generate defau
 
 ## Importing JSON data {:#json}
 
-The JSON data must be structured in of the following ways:
+The JSON data must be structured in one of the following ways:
 
 - **An array of objects**
 
