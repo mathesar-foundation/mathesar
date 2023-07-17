@@ -1583,6 +1583,9 @@ SELECT 'ALTER COLUMN '
   || msar.build_type_text(new_type)
   || ' USING '
   || CASE
+    -- We fall back silently to default casting behavior if the mathesar_types namespace is missing.
+    -- However, we do throw an error in cases where the schema exists, but the type casting function
+    -- doesn't. This is assumed to be an error the user should know about.
     WHEN EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='mathesar_types') THEN
       msar.get_cast_function_name(msar.build_type_text(new_type)::regtype)
       || '(' || msar.get_column_name(tab_id, col_id) || ')'
