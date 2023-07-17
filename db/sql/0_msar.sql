@@ -1575,6 +1575,32 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+__msar.build_col_not_null_text(tab_id oid, col_id integer, not_null boolean) RETURNS text AS $$/*
+*/
+SELECT 'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || CASE WHEN not_null THEN ' SET ' ELSE ' DROP ' END
+  || 'NOT NULL';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_drop_text(tab_id oid, col_id integer, col_delete boolean) RETURNS text AS $$/*
+*/
+SELECT CASE
+  WHEN col_delete THEN 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id) ELSE null
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_default_text(tab_id oid, col_id integer, col_default text) RETURNS text AS $$/*
+*/
+SELECT format('ALTER COLUMN %s SET DEFAULT %L', msar.get_column_name(tab_id, col_id), col_default);
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
 __msar.build_col_retype_text(tab_id oid, col_id integer, new_type jsonb) RETURNS text AS $$/*
 */
 SELECT 'ALTER COLUMN '
@@ -1596,41 +1622,24 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.build_col_not_null_text(tab_id oid, col_id integer, not_null boolean) RETURNS text AS $$/*
-*/
-SELECT 'ALTER COLUMN '
-  || msar.get_column_name(tab_id, col_id)
-  || CASE WHEN not_null THEN ' SET ' ELSE ' DROP ' END
-  || 'NOT NULL';
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-__msar.build_col_drop_text(tab_id oid, col_id integer, col_delete boolean) RETURNS text AS $$/*
-*/
-SELECT CASE
-  WHEN col_delete THEN 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id) ELSE null
-END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.process_col_alter_jsonb(tab_id oid, col_alters jsonb) RETURNS text AS $$/*
 */
 SELECT nullif(
   concat_ws(
     ', ',
     string_agg(__msar.build_col_retype_text(tab_id, x.attnum, x.type), ', ')
-      FILTER (WHERE __msar.build_col_retype_text(tab_id, x.attnum, x.type) IS NOT NULL),
+      FILTER (WHERE x.type IS NOT NULL),
+    string_agg(__msar.build_col_default_text(tab_id, x.attnum, x.default_), ', ')
+      FILTER (WHERE x.default_ IS NOT NULL),
     string_agg(__msar.build_col_not_null_text(tab_id, x.attnum, x.not_null), ', ')
-      FILTER (WHERE __msar.build_col_not_null_text(tab_id, x.attnum, x.not_null) IS NOT NULL),
+      FILTER (WHERE x.not_null IS NOT NULL),
     string_agg(__msar.build_col_drop_text(tab_id, x.attnum, x.delete), ', ')
-      FILTER (WHERE __msar.build_col_drop_text(tab_id, x.attnum, x.delete) IS NOT NULL)
+      FILTER (WHERE x.delete IS NOT NULL)
   ),
   ''
 )
 FROM jsonb_to_recordset(col_alters)
-  AS x(attnum integer, type jsonb, not_null boolean, delete boolean);
+  AS x(attnum integer, type jsonb, not_null boolean, delete boolean, default_ text);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
