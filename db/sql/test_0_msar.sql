@@ -1047,3 +1047,81 @@ BEGIN
   );
 END;
 $f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_column_alter() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE col_alters (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    col1 text NOT NULL,
+    col2 numeric DEFAULT 5,
+    "Col sp" text,
+    col_opts numeric(5, 3),
+    coltim timestamp DEFAULT now()
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_process_col_alter_jsonb() RETURNS SETOF TEXT AS $f$/*
+These don't actually modify the table, so we can run multiple tests in the same test.
+
+Only need to test null/empty behavior here, since main functionality is tested by testing
+msar.alter_columns
+
+It's debatable whether this test should continue to exist, but it was useful for initial
+development.
+*/
+DECLARE
+  tab_id oid;
+BEGIN
+  tab_id := 'col_alters'::regclass::oid;
+  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2}]'), null);
+  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2, "name": "blah"}]'), null);
+  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[]'), null);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_single_name() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
+  RETURN NEXT hasnt_column('col_alters', 'col1');
+  RETURN NEXT has_column('col_alters', 'blah');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_multi_names() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "name": "new space"},
+    {"attnum": 4, "name": "nospace"}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
+  RETURN NEXT hasnt_column('col_alters', 'col1');
+  RETURN NEXT has_column('col_alters', 'new space');
+  RETURN NEXT hasnt_column('col_alters', 'Col sp');
+  RETURN NEXT has_column('col_alters', 'nospace');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_type() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "type": {"name": "varchar", "options": {"length": 48}}},
+    {"attnum": 3, "type": {"name": "integer"}},
+    {"attnum": 4, "type": {"name": "integer"}}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4]);
+  RETURN NEXT col_type_is('col_alters', 'col1', 'character varying(48)');
+  RETURN NEXT col_type_is('col_alters', 'col2', 'integer');
+  RETURN NEXT col_default_is('col_alters', 'col2', 5);
+  RETURN NEXT col_type_is('col_alters', 'Col sp', 'integer');
+END;
+$f$ LANGUAGE plpgsql;
