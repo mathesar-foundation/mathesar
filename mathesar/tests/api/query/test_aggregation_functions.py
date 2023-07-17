@@ -481,6 +481,179 @@ def test_max_aggregation(library_ma_tables, get_uid, client):
     assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
 
 
+def test_peak_time_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Time": "Checkout Time",
+            "Patron": "Patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Patron",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Time",
+                            "function": "peak_time",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {
+            "Patron": 1,
+            "Checkout Time": "12:54:00.286569"
+        },
+        {
+            "Patron": 2,
+            "Checkout Time": "12:33:56.911007"
+        },
+        {
+            "Patron": 3,
+            "Checkout Time": "15:59:15.468421"
+        },
+        {
+            "Patron": 4,
+            "Checkout Time": "19:32:29.142471"
+        },
+        {
+            "Patron": 5,
+            "Checkout Time": "13:14:47.698064"
+        },
+        {
+            "Patron": 6,
+            "Checkout Time": "14:03:59.331127"
+        },
+        {
+            "Patron": 7,
+            "Checkout Time": "12:39:06.036969"
+        },
+        {
+            "Patron": 8,
+            "Checkout Time": "13:11:37.322141"
+        },
+        {
+            "Patron": 9,
+            "Checkout Time": "15:42:14.208165"
+        },
+        {
+            "Patron": 10,
+            "Checkout Time": "15:34:02.558857"
+        },
+        {
+            "Patron": 11,
+            "Checkout Time": "14:25:18.50151"
+        },
+        {
+            "Patron": 12,
+            "Checkout Time": "19:38:12.268677"
+        },
+        {
+            "Patron": 13,
+            "Checkout Time": "12:31:00.403794"
+        },
+        {
+            "Patron": 14,
+            "Checkout Time": "13:26:25.293263"
+        },
+        {
+            "Patron": 15,
+            "Checkout Time": "13:34:53.582087"
+        },
+        {
+            "Patron": 16,
+            "Checkout Time": "15:23:23.148845"
+        },
+        {
+            "Patron": 17,
+            "Checkout Time": "16:39:21.51814"
+        },
+        {
+            "Patron": 18,
+            "Checkout Time": "15:56:47.170539"
+        },
+        {
+            "Patron": 19,
+            "Checkout Time": "13:05:33.506587"
+        },
+        {
+            "Patron": 20,
+            "Checkout Time": "15:45:13.753633"
+        },
+        {
+            "Patron": 21,
+            "Checkout Time": "11:40:36.809586"
+        },
+        {
+            "Patron": 22,
+            "Checkout Time": "13:25:09.374102"
+        },
+        {
+            "Patron": 23,
+            "Checkout Time": "14:18:54.097847"
+        },
+        {
+            "Patron": 24,
+            "Checkout Time": "15:30:34.310875"
+        },
+        {
+            "Patron": 25,
+            "Checkout Time": "13:03:00.9767"
+        },
+        {
+            "Patron": 26,
+            "Checkout Time": "17:14:35.469216"
+        },
+        {
+            "Patron": 27,
+            "Checkout Time": "13:41:13.814894"
+        },
+        {
+            "Patron": 28,
+            "Checkout Time": "15:51:15.074412"
+        },
+        {
+            "Patron": 29,
+            "Checkout Time": "16:03:31.517422"
+        }
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Patron']) == expect_records
+
+
 def test_min_aggregation(library_ma_tables, get_uid, client):
     _ = library_ma_tables
     checkouts = {
