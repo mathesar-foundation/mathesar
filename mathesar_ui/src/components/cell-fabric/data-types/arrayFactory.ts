@@ -42,7 +42,7 @@ function makeDisplayFormatter(
         },
         config,
       )(cellValue);
-    }
+    } 
     return String(cellValue);
   };
 }
@@ -62,12 +62,24 @@ export default function arrayType(
         ),
       },
     }),
-    getInput: (): ComponentAndProps => ({ component: TextInput }),
+    getInput: (
+      column: ArrayLikeColumn,
+    ): ComponentAndProps => ({ 
+      component: ArrayCell,
+      props: {
+        formatElementForDisplay: makeDisplayFormatter(
+          componentFactoryMap,
+          column,
+        ),
+      }, 
+    }),
     getDisplayFormatter: (column: ArrayLikeColumn) => {
       const formatOneValue = makeDisplayFormatter(componentFactoryMap, column);
+
       return (cellValue: unknown) => {
+        //console.log(cellValue);
         if (Array.isArray(cellValue)) {
-          return cellValue.map(formatOneValue).join(', ');
+          return cellValue.map(formatOneValue);
         }
         return formatOneValue(cellValue);
       };

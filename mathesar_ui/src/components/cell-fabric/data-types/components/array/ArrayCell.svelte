@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import { isDefinedNonNullable, Chip } from '@mathesar-component-library';
+  import { createEventDispatcher, onMount } from 'svelte';
+  import { isDefinedNonNullable, Chip, TextInput } from '@mathesar-component-library';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import { labeledCount } from '@mathesar/utils/languageUtils';
@@ -8,6 +8,7 @@
   import type { ArrayCellProps } from '../typeDefinitions';
 
   type $$Props = ArrayCellProps;
+  type Value = $$Generic;
 
   const dispatch = createEventDispatcher();
 
@@ -18,8 +19,34 @@
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let formatElementForDisplay: $$Props['formatElementForDisplay'];
 
+  let isEditMode = false;
+  let lastSavedValue: Value | undefined | null = undefined;
+
+  function initLastSavedValue() {
+    lastSavedValue = value;
+  }
+
+  function revertValue() {
+    value = lastSavedValue;
+  }
+
   function handleWrapperKeyDown(e: KeyboardEvent) {
     switch (e.key) {
+      case 'Enter':
+        if (isEditMode) {
+          resetEditMode();
+        } else {
+          setModeToEdit();
+        }
+        // Preventing default behaviour here. Interesting problem: If this is
+        // not prevented, the textarea gets a new line break. Needs more digging
+        // down.
+        e.preventDefault();
+        break;
+      case 'Escape':
+        revertValue();
+        resetEditMode();
+        break;
       case 'Tab':
       case 'ArrowLeft':
       case 'ArrowRight':
@@ -40,6 +67,34 @@
       dispatch('activate');
     }
   }
+
+  function dispatchUpdate() {
+    if (value === lastSavedValue) {
+      return;
+    }
+    initLastSavedValue();
+    dispatch('update', {
+      value,
+    });
+  }
+
+  function setModeToEdit() {
+    if (!disabled) {
+      isEditMode = true;
+    }
+  }
+
+  function resetEditMode() {
+    isEditMode = false;
+  }
+
+  function handleInputBlur() {
+    dispatchUpdate();
+    resetEditMode();
+  }
+
+  onMount(initLastSavedValue);
+
 </script>
 
 <CellWrapper
@@ -47,31 +102,46 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
+  let:handleInputBlur
+  let:handleInputKeydown
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:mousedown={handleMouseDown}
+  on:activate
+  on:update
+  on:dblclick={setModeToEdit}
 >
-  <CellValue {value}>
-    {#if isDefinedNonNullable(value)}
-      {#if isIndependentOfSheet}
-        <div class="count">{labeledCount(value, 'values')}</div>
+  {#if isEditMode}
+    <TextInput
+      focusOnMount={true}
+      {disabled}
+      bind:value
+      on:blur={handleInputBlur}
+      on:keydown={handleInputKeydown}
+    />
+  {:else}
+    <CellValue {value}>
+      {#if isDefinedNonNullable(value)}
+        {#if isIndependentOfSheet}
+          <div class="count">{labeledCount(value, 'values')}</div>
+        {/if}
+        <div>
+          {#each value as entry}
+            <Chip
+              display={isIndependentOfSheet ? 'inline-block' : 'inline'}
+              background="var(--slate-200)"
+            >
+              {#if entry === null}
+                <Null />
+              {:else}
+                {formatElementForDisplay(entry)}
+              {/if}
+            </Chip>
+          {/each}
+        </div>
       {/if}
-      <div>
-        {#each value as entry}
-          <Chip
-            display={isIndependentOfSheet ? 'inline-block' : 'inline'}
-            background="var(--slate-200)"
-          >
-            {#if entry === null}
-              <Null />
-            {:else}
-              {formatElementForDisplay(entry)}
-            {/if}
-          </Chip>
-        {/each}
-      </div>
-    {/if}
-  </CellValue>
+    </CellValue>
+  {/if}
 </CellWrapper>
 
 <style lang="scss">
