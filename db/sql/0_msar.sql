@@ -1580,7 +1580,15 @@ __msar.build_col_retype_text(tab_id oid, col_id integer, new_type jsonb) RETURNS
 SELECT 'ALTER COLUMN '
   || msar.get_column_name(tab_id, col_id)
   || ' TYPE '
-  || msar.build_type_text(new_type);
+  || msar.build_type_text(new_type)
+  || ' USING '
+  || CASE
+    WHEN EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='mathesar_types') THEN
+      msar.get_cast_function_name(msar.build_type_text(new_type)::regtype)
+      || '(' || msar.get_column_name(tab_id, col_id) || ')'
+    ELSE
+      msar.get_column_name(tab_id, col_id) || '::' || msar.build_type_text(new_type)
+  END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1595,30 +1603,53 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.build_col_drop_text(tab_id oid, col_id integer) RETURNS text AS $$/*
+__msar.build_col_drop_text(tab_id oid, col_id integer, col_delete boolean) RETURNS text AS $$/*
 */
-SELECT 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id)
+SELECT CASE
+  WHEN col_delete THEN 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id) ELSE null
+END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.process_col_alter_jsonb(tab_id oid, col_alters jsonb) RETURNS text AS $$/*
 */
-SELECT concat_ws(
-  ', ',
-  string_agg(__msar.build_col_retype_text(tab_id, x.attnum, x.type), ', ')
-    FILTER (WHERE __msar.build_col_retype_text(tab_id, x.attnum, x.type) IS NOT NULL),
-  string_agg(__msar.build_col_not_null_text(tab_id, x.attnum, x.not_null), ', ')
-    FILTER (WHERE __msar.build_col_not_null_text(tab_id, x.attnum, x.not_null) IS NOT NULL),
-  string_agg(__msar.build_col_drop_text(tab_id, x.attnum), ', ')
-    FILTER (WHERE x.delete AND __msar.build_col_drop_text(tab_id, x.attnum) IS NOT NULL)
+SELECT nullif(
+  concat_ws(
+    ', ',
+    string_agg(__msar.build_col_retype_text(tab_id, x.attnum, x.type), ', ')
+      FILTER (WHERE __msar.build_col_retype_text(tab_id, x.attnum, x.type) IS NOT NULL),
+    string_agg(__msar.build_col_not_null_text(tab_id, x.attnum, x.not_null), ', ')
+      FILTER (WHERE __msar.build_col_not_null_text(tab_id, x.attnum, x.not_null) IS NOT NULL),
+    string_agg(__msar.build_col_drop_text(tab_id, x.attnum, x.delete), ', ')
+      FILTER (WHERE __msar.build_col_drop_text(tab_id, x.attnum, x.delete) IS NOT NULL)
+  ),
+  ''
 )
 FROM jsonb_to_recordset(col_alters)
-  AS x(attnum integer, name text, type jsonb, not_null boolean, delete boolean);
+  AS x(attnum integer, type jsonb, not_null boolean, delete boolean);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
--- CREATE OR REPLACE FUNCTION
--- msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS smallint[] AS $$/*
--- */
--- $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION
+msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$/*
+*/
+DECLARE
+  r RECORD;
+  col_alter_str text;
+BEGIN
+  col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
+  IF col_alter_str IS NOT NULL THEN
+    PERFORM __msar.exec_ddl(
+      'ALTER TABLE %s %s',
+      __msar.get_relation_name(tab_id),
+      msar.process_col_alter_jsonb(tab_id, col_alters)
+    );
+  END IF;
+  FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
+  LOOP
+    PERFORM msar.rename_column(tab_id, r.attnum, r.name);
+  END LOOP;
+  RETURN array_agg(x.attnum) FROM jsonb_to_recordset(col_alters) AS x(attnum integer);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
