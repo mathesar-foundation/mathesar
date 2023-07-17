@@ -1140,3 +1140,48 @@ BEGIN
   RETURN NEXT columns_are('col_alters', ARRAY['id', 'col2', 'Col sp', 'coltim']);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_nullable() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "not_null": false},
+    {"attnum": 5, "not_null": true}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT col_is_null('col_alters', 'col1');
+  RETURN NEXT col_not_null('col_alters', 'col_opts');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_combo() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {
+      "attnum": 2,
+      "name": "nullab numeric",
+      "not_null": false,
+      "type": {"name": "numeric", "options": {"precision": 8, "scale": 4}}
+    },
+    {"attnum": 3, "name": "newcol2"},
+    {"attnum": 4, "delete": true},
+    {"attnum": 5, "not_null": true},
+    {"attnum": 6, "name": "timecol", "not_null": true}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(
+    msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4, 5, 6]
+  );
+  RETURN NEXT columns_are(
+    'col_alters', ARRAY['id', 'nullab numeric', 'newcol2', 'col_opts', 'timecol']
+  );
+  RETURN NEXT col_is_null('col_alters', 'nullab numeric');
+  RETURN NEXT col_type_is('col_alters', 'nullab numeric', 'numeric(8,4)');
+  -- This test checks that nothing funny happened when dropping column 4
+  RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(5,3)');
+  RETURN NEXT col_not_null('col_alters', 'col_opts');
+  RETURN NEXT col_not_null('col_alters', 'timecol');
+END;
+$f$ LANGUAGE plpgsql;
