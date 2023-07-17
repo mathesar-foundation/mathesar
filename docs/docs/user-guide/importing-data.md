@@ -10,8 +10,8 @@ Fields in the CSV data may be delimited by any of the following characters:
 
 | Name | Character | Notes |
 | -- | -- | -- |
-| Comma | `,` | This yields a traditional CSV file, aka "**C**omma **S**eparated **V**alue" |
-| Tab | _(not printable)_ | This is sometimes referred to as a _TSV_ file, for "**T**ab **S**eparated **V**alue"  |
+| Comma | `,` | A traditional CSV file (a "**C**omma **S**eparated **V**alue" document) |
+| Tab | _(not printable)_ | This is sometimes referred to as a _TSV_ file (a "**T**ab **S**eparated **V**alue" document) |
 | Semicolon | `;` |  |
 | Colon | `:` |  |
 | Pipe | `|` |  |
