@@ -1600,24 +1600,41 @@ SELECT format('ALTER COLUMN %s SET DEFAULT %L', msar.get_column_name(tab_id, col
 $$ LANGUAGE SQL;
 
 
+CREATE OR REPLACE FUNCTION __msar.build_cast_expr(val text, type_ jsonb) RETURNS text AS $$/*
+Build an expression for casting a column in Mathesar.
+
+We fall back silently to default casting behavior if the mathesar_types namespace is missing.
+However, we do throw an error in cases where the schema exists, but the type casting function
+doesn't. This is assumed to be an error the user should know about.
+*/
+SELECT CASE
+  WHEN EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='mathesar_types') THEN
+    msar.get_cast_function_name(msar.build_type_text(type_)::regtype)
+    || '(' || val || ')'
+  ELSE
+    val || '::' || msar.build_type_text(type_)
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 __msar.build_col_retype_text(tab_id oid, col_id integer, new_type jsonb) RETURNS text AS $$/*
 */
-SELECT 'ALTER COLUMN '
+SELECT concat_ws(
+  ', ',
+  'ALTER COLUMN ' || msar.get_column_name(tab_id, col_id) || ' DROP DEFAULT',
+  'ALTER COLUMN '
   || msar.get_column_name(tab_id, col_id)
   || ' TYPE '
   || msar.build_type_text(new_type)
   || ' USING '
-  || CASE
-    -- We fall back silently to default casting behavior if the mathesar_types namespace is missing.
-    -- However, we do throw an error in cases where the schema exists, but the type casting function
-    -- doesn't. This is assumed to be an error the user should know about.
-    WHEN EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='mathesar_types') THEN
-      msar.get_cast_function_name(msar.build_type_text(new_type)::regtype)
-      || '(' || msar.get_column_name(tab_id, col_id) || ')'
-    ELSE
-      msar.get_column_name(tab_id, col_id) || '::' || msar.build_type_text(new_type)
-  END;
+  || __msar.build_cast_expr(msar.get_column_name(tab_id, col_id), new_type),
+  'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || ' SET DEFAULT '
+  || __msar.build_cast_expr(pg_get_expr(adbin, tab_id), new_type)
+)
+FROM (SELECT tab_id, col_id) as args LEFT JOIN pg_attrdef ON adrelid=tab_id AND adnum=col_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
