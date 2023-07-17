@@ -1,24 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  import {
-    Button,
-    FileUpload as FileUploadComponent,
-  } from '@mathesar-component-library';
+  import { FileUpload as FileUploadComponent } from '@mathesar-component-library';
   import type {
     FileUpload,
     FileUploadAddDetail,
   } from '@mathesar-component-library/types';
   import type { UploadCompletionOpts } from '@mathesar/api/utils/requestUtils';
   import { uploadFile } from '@mathesar/api/utils/requestUtils';
-  import UploadFormatHelp from './UploadFormatHelp.svelte';
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
 
   export let isLoading: boolean;
-  export let showCancelButton: boolean;
-  export let hideAllActions = false;
 
   let uploads: FileUpload[] | undefined;
   let uploadProgress: UploadCompletionOpts | undefined;
@@ -71,16 +65,4 @@
     disabled={isLoading}
     on:add={(e) => uploadNewFile(e.detail)}
   />
-
-  <UploadFormatHelp />
 </div>
-
-<slot />
-
-{#if !hideAllActions && showCancelButton}
-  <div class="buttons">
-    <Button appearance="secondary" on:click={() => dispatch('cancel')}>
-      Cancel
-    </Button>
-  </div>
-{/if}

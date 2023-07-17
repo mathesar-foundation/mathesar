@@ -2,19 +2,11 @@
   import { createEventDispatcher } from 'svelte';
 
   import { postAPI } from '@mathesar/api/utils/requestUtils';
-  import {
-    Button,
-    LabeledInput,
-    SpinnerButton,
-    TextArea,
-  } from '@mathesar/component-library';
-  import UploadFormatHelp from './UploadFormatHelp.svelte';
+  import { LabeledInput, TextArea } from '@mathesar/component-library';
   import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
   export let isLoading: boolean;
-  export let showCancelButton: boolean;
-  export let hideAllActions = false;
 
   let clipboardContent = '';
 
@@ -34,23 +26,3 @@
 <LabeledInput label="Paste the data you want to import" layout="stacked">
   <TextArea bind:value={clipboardContent} rows={10} disabled={isLoading} />
 </LabeledInput>
-
-<UploadFormatHelp />
-
-<slot />
-
-{#if !hideAllActions}
-  <div class="buttons">
-    {#if showCancelButton}
-      <Button appearance="secondary" on:click={() => dispatch('cancel')}>
-        Cancel
-      </Button>
-    {/if}
-    <SpinnerButton
-      onClick={importFromText}
-      label="Continue"
-      disabled={!clipboardContent || isLoading}
-      class="continue-action"
-    />
-  </div>
-{/if}

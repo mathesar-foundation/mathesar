@@ -37,23 +37,3 @@
 >
   <TextInput bind:value={url} aria-label="URL" disabled={isLoading} />
 </LabeledInput>
-
-<UploadFormatHelp />
-
-<slot />
-
-{#if !hideAllActions}
-  <div class="buttons">
-    {#if showCancelButton}
-      <Button appearance="secondary" on:click={() => dispatch('cancel')}>
-        Cancel
-      </Button>
-    {/if}
-    <SpinnerButton
-      onClick={importFromURL}
-      label="Continue"
-      disabled={!url || isLoading}
-      class="continue-action"
-    />
-  </div>
-{/if}

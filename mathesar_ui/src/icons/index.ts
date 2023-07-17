@@ -64,6 +64,7 @@ import {
   faCircleInfo,
   faUserGear,
   faFilterCircleXmark,
+  faMicroscope,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -105,6 +106,7 @@ export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconGoToMarketingSite: IconProps = { data: faGlobe };
 export const iconImportData: IconProps = { data: faUpload };
+export const iconInferColumnType: IconProps = { data: faMicroscope };
 export const iconJoinEmailList: IconProps = { data: faEnvelope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
