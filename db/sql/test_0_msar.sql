@@ -1088,8 +1088,10 @@ DECLARE
   col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
 BEGIN
   RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
-  RETURN NEXT hasnt_column('col_alters', 'col1');
-  RETURN NEXT has_column('col_alters', 'blah');
+  RETURN NEXT columns_are(
+    'col_alters',
+    ARRAY['id', 'blah', 'col2', 'Col sp', 'col_opts', 'coltim']
+  );
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -1102,10 +1104,10 @@ DECLARE
   ]$j$;
 BEGIN
   RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
-  RETURN NEXT hasnt_column('col_alters', 'col1');
-  RETURN NEXT has_column('col_alters', 'new space');
-  RETURN NEXT hasnt_column('col_alters', 'Col sp');
-  RETURN NEXT has_column('col_alters', 'nospace');
+  RETURN NEXT columns_are(
+    'col_alters',
+    ARRAY['id', 'new space', 'col2', 'nospace', 'col_opts', 'coltim']
+  );
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -1123,5 +1125,18 @@ BEGIN
   RETURN NEXT col_type_is('col_alters', 'col2', 'integer');
   RETURN NEXT col_default_is('col_alters', 'col2', 5);
   RETURN NEXT col_type_is('col_alters', 'Col sp', 'integer');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_drop() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "delete": true},
+    {"attnum": 5, "delete": true}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT columns_are('col_alters', ARRAY['id', 'col2', 'Col sp', 'coltim']);
 END;
 $f$ LANGUAGE plpgsql;
