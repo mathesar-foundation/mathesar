@@ -7,7 +7,6 @@ from mathesar.models.shares import SharedTable, SharedQuery
 class SharedEntitySerializer(MathesarErrorMessageMixin, serializers.Serializer):
     class Meta:
         fields = ['id', 'slug', 'enabled']
-        abstract = True
 
 
 class SharedTableSerializer(SharedEntitySerializer, serializers.ModelSerializer):

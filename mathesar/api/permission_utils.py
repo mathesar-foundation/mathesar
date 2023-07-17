@@ -61,8 +61,20 @@ class TableAccessInspector(AbstractAccessInspector):
         self.user = user
         self.table = table
         self.schema_access_inspector = SchemaAccessInspector(self.user, self.table.schema)
-    
+
     # Currently, there's no access controls on individual tables.
     # If users have access to db or schema, they have access to the tables within them.
+    def has_role(self, allowed_roles):
+        return self.schema_access_inspector.has_role(allowed_roles)
+
+
+class QueryAccessInspector(AbstractAccessInspector):
+    def __init__(self, user, query):
+        self.user = user
+        self.query = query
+        self.schema_access_inspector = SchemaAccessInspector(self.user, self.table.schema)
+
+    # Currently, there's no access controls on individual queries.
+    # If users have access to db or schema, they have access to the queries within them.
     def has_role(self, allowed_roles):
         return self.schema_access_inspector.has_role(allowed_roles)
