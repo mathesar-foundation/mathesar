@@ -1,12 +1,26 @@
 from abc import ABC, abstractmethod
 
 from mathesar.models.users import DatabaseRole, Role, SchemaRole
+from mathesar.models.shares import SharedTable, SharedQuery
 
 
 class AbstractAccessInspector(ABC):
     @abstractmethod
-    def has_role(self, allowed_roles):
+    def __init__(self, user):
+        self.user = user
+
+    @abstractmethod
+    def is_role_present(self, allowed_roles):
         pass
+
+    def has_role(self, allowed_roles, *args, **kwargs):
+        if self.user.is_superuser:
+            return True
+
+        if self.user.is_anonymous:
+            return False
+
+        return self.is_role_present(allowed_roles)
 
     def is_atleast_manager(self):
         return self.has_role((Role.MANAGER.value))
@@ -16,19 +30,16 @@ class AbstractAccessInspector(ABC):
         return self.has_role(allowed_roles)
 
     def is_atleast_viewer(self):
-        allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER. value)
+        allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
         return self.has_role(allowed_roles)
 
 
 class DatabaseAccessInspector(AbstractAccessInspector):
     def __init__(self, user, database):
-        self.user = user
+        super().__init__(user)
         self.database = database
 
-    def has_role(self, allowed_roles):
-        if self.user.is_superuser:
-            return True
-
+    def is_role_present(self, allowed_roles):
         has_db_role = DatabaseRole.objects.filter(
             user=self.user,
             database=self.database,
@@ -40,11 +51,11 @@ class DatabaseAccessInspector(AbstractAccessInspector):
 
 class SchemaAccessInspector(AbstractAccessInspector):
     def __init__(self, user, schema):
-        self.user = user
+        super().__init__(user)
         self.schema = schema
         self.db_access_inspector = DatabaseAccessInspector(self.user, self.schema.database)
 
-    def has_role(self, allowed_roles):
+    def is_role_present(self, allowed_roles):
         has_db_role = self.db_access_inspector.has_role(allowed_roles)
 
         has_schema_role = SchemaRole.objects.filter(
@@ -57,24 +68,46 @@ class SchemaAccessInspector(AbstractAccessInspector):
 
 
 class TableAccessInspector(AbstractAccessInspector):
-    def __init__(self, user, table):
-        self.user = user
+    def __init__(self, user, table, token=None):
+        super().__init__(user)
         self.table = table
+        self.token = token
         self.schema_access_inspector = SchemaAccessInspector(self.user, self.table.schema)
 
     # Currently, there's no access controls on individual tables.
     # If users have access to db or schema, they have access to the tables within them.
-    def has_role(self, allowed_roles):
+    def is_role_present(self, allowed_roles):
         return self.schema_access_inspector.has_role(allowed_roles)
+
+    def is_atleast_viewer(self):
+        if self.user.is_anonymous:
+            return SharedTable.objects.filter(
+                table=self.table,
+                slug=self.token,
+                enabled=True
+            ).exists()
+
+        return super().is_atleast_viewer()
 
 
 class QueryAccessInspector(AbstractAccessInspector):
-    def __init__(self, user, query):
-        self.user = user
+    def __init__(self, user, query, token=None):
+        super().__init__(user)
         self.query = query
-        self.schema_access_inspector = SchemaAccessInspector(self.user, self.table.schema)
+        self.token = token
+        self.schema_access_inspector = SchemaAccessInspector(self.user, self.query.base_table.schema)
 
     # Currently, there's no access controls on individual queries.
     # If users have access to db or schema, they have access to the queries within them.
-    def has_role(self, allowed_roles):
+    def is_role_present(self, allowed_roles):
         return self.schema_access_inspector.has_role(allowed_roles)
+
+    def is_atleast_viewer(self):
+        if self.user.is_anonymous:
+            return SharedQuery.objects.filter(
+                query=self.query,
+                slug=self.token,
+                enabled=True
+            ).exists()
+
+        return super().is_atleast_viewer()

@@ -14,7 +14,7 @@ class SharedTableAccessPolicy(AccessPolicy):
         },
         {
             'action': ['create', 'destroy', 'update', 'partial_update'],
-            'principal': ['authenticated'],
+            'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': 'is_atleast_table_manager'
         },
@@ -39,7 +39,7 @@ class SharedQueryAccessPolicy(AccessPolicy):
         },
         {
             'action': ['create', 'destroy', 'update', 'partial_update'],
-            'principal': ['authenticated'],
+            'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': 'is_atleast_query_editor'
         },
