@@ -1,3 +1,4 @@
+from uuid import UUID
 from rest_framework.exceptions import NotFound
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api_exceptions
 import re
@@ -149,3 +150,11 @@ def follows_json_number_spec(number):
         if re.search(pattern, number) is not None:
             return True
     return False
+
+
+def is_valid_uuid_v4(value):
+    try:
+        UUID(str(value), version=4)
+        return True
+    except ValueError:
+        return False

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from mathesar.api.utils import is_valid_uuid_v4
 from mathesar.models.users import DatabaseRole, Role, SchemaRole
 from mathesar.models.shares import SharedTable, SharedQuery
 
@@ -13,7 +14,7 @@ class AbstractAccessInspector(ABC):
     def is_role_present(self, allowed_roles):
         pass
 
-    def has_role(self, allowed_roles, *args, **kwargs):
+    def has_role(self, allowed_roles):
         if self.user.is_superuser:
             return True
 
@@ -71,7 +72,7 @@ class TableAccessInspector(AbstractAccessInspector):
     def __init__(self, user, table, token=None):
         super().__init__(user)
         self.table = table
-        self.token = token
+        self.token = token if is_valid_uuid_v4(token) else None
         self.schema_access_inspector = SchemaAccessInspector(self.user, self.table.schema)
 
     # Currently, there's no access controls on individual tables.
@@ -80,15 +81,15 @@ class TableAccessInspector(AbstractAccessInspector):
         return self.schema_access_inspector.has_role(allowed_roles)
 
     def is_atleast_viewer(self):
-        if self.user.is_anonymous:
-            if self.token is None:
-                return False
-
-            return SharedTable.objects.filter(
+        if self.token is not None:
+            is_table_shared = SharedTable.objects.filter(
                 table=self.table,
                 slug=self.token,
                 enabled=True
             ).exists()
+
+            if is_table_shared:
+                return True
 
         return super().is_atleast_viewer()
 
@@ -97,7 +98,7 @@ class QueryAccessInspector(AbstractAccessInspector):
     def __init__(self, user, query, token=None):
         super().__init__(user)
         self.query = query
-        self.token = token
+        self.token = token if is_valid_uuid_v4(token) else None
         self.schema_access_inspector = SchemaAccessInspector(self.user, self.query.base_table.schema)
 
     # Currently, there's no access controls on individual queries.
@@ -106,11 +107,14 @@ class QueryAccessInspector(AbstractAccessInspector):
         return self.schema_access_inspector.has_role(allowed_roles)
 
     def is_atleast_viewer(self):
-        if self.user.is_anonymous:
-            return SharedQuery.objects.filter(
+        if self.token is not None:
+            is_query_shared = SharedQuery.objects.filter(
                 query=self.query,
                 slug=self.token,
                 enabled=True
             ).exists()
+
+            if is_query_shared:
+                return True
 
         return super().is_atleast_viewer()
