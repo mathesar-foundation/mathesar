@@ -14,7 +14,7 @@ import type {
   QueryColumnMetaData,
 } from '@mathesar/api/types/queries';
 import { runQuery } from '@mathesar/stores/queries';
-import { SheetSelection } from '@mathesar/components/sheet';
+import { LegacySheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type QueryModel from './QueryModel';
 import QueryInspector from './QueryInspector';
@@ -42,7 +42,7 @@ export interface QueryRowsData {
   rows: QueryRow[];
 }
 
-export type QuerySheetSelection = SheetSelection<
+export type QuerySheetSelection = LegacySheetSelection<
   QueryRow,
   ProcessedQueryOutputColumn
 >;
@@ -81,7 +81,7 @@ export default class QueryRunner<
     this.query = writable(query);
     this.speculateProcessedColumns();
     void this.run();
-    this.selection = new SheetSelection({
+    this.selection = new LegacySheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
       getColumnOrder: () =>
         [...get(this.processedColumns).values()].map((column) => column.id),

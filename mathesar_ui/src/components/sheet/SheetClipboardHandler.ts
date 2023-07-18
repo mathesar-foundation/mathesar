@@ -2,9 +2,9 @@ import * as Papa from 'papaparse';
 import { get } from 'svelte/store';
 
 import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
-import SheetSelection, {
+import LegacySheetSelection, {
   isCellSelected,
-} from '@mathesar/components/sheet/SheetSelection';
+} from '@mathesar/components/sheet/LegacySheetSelection';
 import type { ClipboardHandler } from '@mathesar/stores/clipboard';
 import type {
   ProcessedColumn,
@@ -76,7 +76,7 @@ interface SheetClipboardHandlerDeps<
   Row extends QueryRow | RecordRow,
   Column extends ProcessedQueryOutputColumn | ProcessedColumn,
 > {
-  selection: SheetSelection<Row, Column>;
+  selection: LegacySheetSelection<Row, Column>;
   toast: MakeToast;
   getRows(): Row[];
   getColumnsMap(): ReadableMapLike<Column['id'], Column>;

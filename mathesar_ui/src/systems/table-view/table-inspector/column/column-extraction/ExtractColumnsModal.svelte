@@ -48,7 +48,11 @@
 
   export let controller: ExtractColumnsModalController;
 
-  $: ({ processedColumns, constraintsDataStore, selection } = $tabularData);
+  $: ({
+    processedColumns,
+    constraintsDataStore,
+    legacySelection: selection,
+  } = $tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: availableProcessedColumns = [...$processedColumns.values()];
   $: ({ targetType, columns, isOpen } = controller);

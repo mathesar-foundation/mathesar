@@ -29,7 +29,7 @@
   let activeTab: TabItem;
 
   const tabularData = getTabularDataStoreFromContext();
-  $: ({ selection } = $tabularData);
+  $: ({ legacySelection: selection } = $tabularData);
   $: ({ selectedCells } = selection);
 
   $: {

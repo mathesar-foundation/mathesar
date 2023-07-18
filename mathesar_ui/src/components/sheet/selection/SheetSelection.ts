@@ -67,7 +67,7 @@ function basisFromPlaceholderCell(activeCellId: string): Basis {
   };
 }
 
-export default class Selection {
+export default class SheetSelection {
   private readonly plane: Plane;
 
   private readonly basis: Basis;
@@ -93,15 +93,15 @@ export default class Selection {
     return this.basis.columnIds;
   }
 
-  private withBasis(basis: Basis): Selection {
-    return new Selection(this.plane, basis);
+  private withBasis(basis: Basis): SheetSelection {
+    return new SheetSelection(this.plane, basis);
   }
 
   /**
    * @returns a new selection with all cells selected. The active cell will be
    * the cell in the first row and first column.
    */
-  ofAllDataCells(): Selection {
+  ofAllDataCells(): SheetSelection {
     if (!this.plane.hasResultRows) {
       return this.withBasis(basisFromZeroEmptyColumns());
     }
@@ -112,7 +112,7 @@ export default class Selection {
    * @returns a new selection with the cell in the first row and first column
    * selected.
    */
-  ofFirstDataCell(): Selection {
+  ofFirstDataCell(): SheetSelection {
     const firstCellId = first(this.plane.allDataCells());
     if (firstCellId === undefined) {
       return this.withBasis(basisFromZeroEmptyColumns());
@@ -129,7 +129,7 @@ export default class Selection {
    * of data rows, and will never include the placeholder row, even if a user
    * drags to select it.
    */
-  ofRowRange(rowIdA: string, rowIdB: string): Selection {
+  ofRowRange(rowIdA: string, rowIdB: string): SheetSelection {
     return this.withBasis(
       basisFromDataCells(
         this.plane.dataCellsInFlexibleRowRange(rowIdA, rowIdB),
@@ -141,7 +141,7 @@ export default class Selection {
    * @returns a new selection of all data cells in all columns between the
    * provided columnIds, inclusive.
    */
-  ofColumnRange(columnIdA: string, columnIdB: string): Selection {
+  ofColumnRange(columnIdA: string, columnIdB: string): SheetSelection {
     const newBasis = this.plane.hasResultRows
       ? basisFromDataCells(
           this.plane.dataCellsInColumnRange(columnIdA, columnIdB),
@@ -159,7 +159,7 @@ export default class Selection {
    * selection is made only of data cells, and will never include cells in the
    * placeholder row, even if a user drags to select a cell in it.
    */
-  ofCellRange(cellIdA: string, cellIdB: string): Selection {
+  ofCellRange(cellIdA: string, cellIdB: string): SheetSelection {
     return this.withBasis(
       basisFromDataCells(
         this.plane.dataCellsInFlexibleCellRange(cellIdA, cellIdB),
@@ -172,14 +172,14 @@ export default class Selection {
    * Note that we do not support selections of multiple cells in the placeholder
    * row.
    */
-  atPlaceholderCell(cellId: string): Selection {
+  atPlaceholderCell(cellId: string): SheetSelection {
     return this.withBasis(basisFromPlaceholderCell(cellId));
   }
 
   /**
    * @returns a new selection formed from one cell within the data rows.
    */
-  atDataCell(cellId: string): Selection {
+  atDataCell(cellId: string): SheetSelection {
     return this.withBasis(basisFromDataCells([cellId], cellId));
   }
 
@@ -187,7 +187,7 @@ export default class Selection {
    * @returns a new selection that fits within the provided plane. This is
    * useful when a column is deleted, reordered, or inserted.
    */
-  forNewPlane(plane: Plane): Selection {
+  forNewPlane(plane: Plane): SheetSelection {
     throw new Error('Not implemented');
   }
 
@@ -201,7 +201,7 @@ export default class Selection {
    * by the active cell (also the first cell selected when dragging) and the
    * provided cell.
    */
-  drawnToCell(cellId: string): Selection {
+  drawnToCell(cellId: string): SheetSelection {
     return this.ofCellRange(this.activeCellId ?? cellId, cellId);
   }
 
@@ -209,14 +209,14 @@ export default class Selection {
    * @returns a new selection formed by the cells in all the rows between the
    * active cell and the provided row, inclusive.
    */
-  drawnToRow(rowId: string): Selection {
+  drawnToRow(rowId: string): SheetSelection {
     const activeRowId = this.activeCellId
       ? parseCellId(this.activeCellId).rowId
       : rowId;
     return this.ofRowRange(activeRowId, rowId);
   }
 
-  drawnToColumn(columnId: string): Selection {
+  drawnToColumn(columnId: string): SheetSelection {
     // TODO improve handling for empty columns
 
     const activeColumnId = this.activeCellId
@@ -230,7 +230,7 @@ export default class Selection {
    * spreadsheets. If the active cell can be moved in the provided direction,
    * then a new selection is created with only that one cell selected.
    */
-  collapsedAndMoved(direction: Direction): Selection {
+  collapsedAndMoved(direction: Direction): SheetSelection {
     if (this.basis.type === 'emptyColumns') {
       const offset = getColumnOffset(direction);
       const newActiveColumnId = this.plane.columnIds.collapsedOffset(
@@ -272,7 +272,9 @@ export default class Selection {
    *
    * This is to handle the `Tab` and `Shift+Tab` keys.
    */
-  withActiveCellAdvanced(direction: 'forward' | 'back' = 'forward'): Selection {
+  withActiveCellAdvanced(
+    direction: 'forward' | 'back' = 'forward',
+  ): SheetSelection {
     throw new Error('Not implemented');
   }
 
@@ -291,7 +293,7 @@ export default class Selection {
    * the active cell. We chose to mimic Google Sheets behavior here because it
    * is simpler.
    */
-  resized(direction: Direction): Selection {
+  resized(direction: Direction): SheetSelection {
     throw new Error('Not implemented');
   }
 }

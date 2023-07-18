@@ -29,8 +29,13 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, columnsDataStore, meta, processedColumns, selection } =
-    $tabularData);
+  $: ({
+    recordsData,
+    columnsDataStore,
+    meta,
+    processedColumns,
+    legacySelection: selection,
+  } = $tabularData);
   $: ({
     rowStatus,
     rowCreationStatus,

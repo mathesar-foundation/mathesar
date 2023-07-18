@@ -5,7 +5,7 @@ export { default as SheetPositionableCell } from './SheetPositionableCell.svelte
 export { default as SheetCellResizer } from './SheetCellResizer.svelte';
 export { default as SheetVirtualRows } from './SheetVirtualRows.svelte';
 export { default as SheetRow } from './SheetRow.svelte';
-export { default as SheetSelection } from './SheetSelection';
+export { default as LegacySheetSelection } from './LegacySheetSelection';
 export {
   isColumnSelected,
   isRowSelected,
@@ -14,4 +14,4 @@ export {
   isCellActive,
   scrollBasedOnActiveCell,
   scrollBasedOnSelection,
-} from './SheetSelection';
+} from './LegacySheetSelection';

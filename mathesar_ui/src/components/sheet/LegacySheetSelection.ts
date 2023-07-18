@@ -196,7 +196,10 @@ export function getSelectedRowIndex(selectedCell: string): number {
   return Number(selectedCell.split(ROW_COLUMN_SEPARATOR)[0]);
 }
 
-export default class SheetSelection<
+/**
+ * @deprecated
+ */
+export default class LegacySheetSelection<
   Row extends SelectionRow,
   Column extends SelectionColumn,
 > {

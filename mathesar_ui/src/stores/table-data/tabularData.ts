@@ -11,7 +11,7 @@ import type { TableEntry } from '@mathesar/api/types/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/api/utils/requestUtils';
 import type { Column } from '@mathesar/api/types/tables/columns';
-import { SheetSelection } from '@mathesar/components/sheet';
+import { LegacySheetSelection } from '@mathesar/components/sheet';
 import { getColumnOrder } from '@mathesar/utils/tables';
 import { Meta } from './meta';
 import { ColumnsDataStore } from './columns';
@@ -44,7 +44,10 @@ export interface TabularDataProps {
   >[0]['hasEnhancedPrimaryKeyCell'];
 }
 
-export type TabularDataSelection = SheetSelection<RecordRow, ProcessedColumn>;
+export type TabularDataSelection = LegacySheetSelection<
+  RecordRow,
+  ProcessedColumn
+>;
 
 export class TabularData {
   id: DBObjectEntry['id'];
@@ -63,7 +66,7 @@ export class TabularData {
 
   isLoading: Readable<boolean>;
 
-  selection: TabularDataSelection;
+  legacySelection: TabularDataSelection;
 
   table: TableEntry;
 
@@ -109,7 +112,7 @@ export class TabularData {
 
     this.table = props.table;
 
-    this.selection = new SheetSelection({
+    this.legacySelection = new LegacySheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
       getColumnOrder: () =>
         getColumnOrder([...get(this.processedColumns).values()], this.table),
@@ -218,7 +221,7 @@ export class TabularData {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
-    this.selection.destroy();
+    this.legacySelection.destroy();
   }
 }
 

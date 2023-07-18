@@ -21,7 +21,7 @@
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
-  $: ({ processedColumns, selection } = $tabularData);
+  $: ({ processedColumns, legacySelection: selection } = $tabularData);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: selectedColumns = (() => {
     const ids = selection.getSelectedUniqueColumnsId(

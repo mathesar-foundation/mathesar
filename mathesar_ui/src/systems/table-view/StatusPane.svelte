@@ -32,7 +32,7 @@
     isLoading,
     columnsDataStore,
     constraintsDataStore,
-    selection,
+    legacySelection: selection,
   } = $tabularData);
   $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);

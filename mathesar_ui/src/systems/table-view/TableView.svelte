@@ -40,8 +40,13 @@
   $: usesVirtualList = context === 'page';
   $: allowsDdlOperations = context === 'page' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
-  $: ({ processedColumns, display, isLoading, selection, recordsData } =
-    $tabularData);
+  $: ({
+    processedColumns,
+    display,
+    isLoading,
+    legacySelection: selection,
+    recordsData,
+  } = $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
     selection,
     toast,

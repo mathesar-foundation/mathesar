@@ -28,7 +28,7 @@
   $: columnOrder = columnOrder ?? [];
   $: columnOrderString = columnOrder.map(String);
 
-  $: ({ selection, processedColumns } = $tabularData);
+  $: ({ legacySelection: selection, processedColumns } = $tabularData);
   $: ({
     selectedCells,
     columnsSelectedWhenTheTableIsEmpty,

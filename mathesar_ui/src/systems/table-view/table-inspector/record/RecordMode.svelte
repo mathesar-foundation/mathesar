@@ -14,7 +14,7 @@
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
-  $: ({ selection, recordsData } = $tabularData);
+  $: ({ legacySelection: selection, recordsData } = $tabularData);
   $: ({ selectedCells } = selection);
   $: selectedRowIndices = $selectedCells
     .valuesArray()
