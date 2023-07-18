@@ -14,9 +14,11 @@ from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.api.ui.serializers.users import UserSerializer
+from mathesar.api.utils import is_valid_uuid_v4
 from mathesar.database.types import UIType
 from mathesar.models.base import Database, Schema, Table
 from mathesar.models.query import UIQuery
+from mathesar.models.shares import SharedTable
 from mathesar.state import reset_reflection
 from mathesar import __version__
 
@@ -99,18 +101,29 @@ def get_user_data(request):
     return user_serializer.data
 
 
-def get_common_data(request, database=None, schema=None):
+def get_base_data_unauth_routes(request, database=None, schema=None):
     return {
         'current_db': database.name if database else None,
         'current_schema': schema.id if schema else None,
+        'schemas': [],
+        'databases': [],
+        'tables': [],
+        'queries': [],
+        'abstract_types': get_ui_type_list(request, database),
+        'user': get_user_data(request),
+        'is_authenticated': not request.user.is_anonymous,
+        'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
+        'current_release_tag_name': __version__,
+    }
+
+
+def get_common_data(request, database=None, schema=None):
+    return {
+        **get_base_data_unauth_routes(request, database, schema),
         'schemas': get_schema_list(request, database),
         'databases': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
-        'abstract_types': get_ui_type_list(request, database),
-        'user': get_user_data(request),
-        'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
-        'current_release_tag_name': __version__,
     }
 
 
@@ -153,6 +166,32 @@ def render_schema(request, database, schema):
     else:
         # We are redirecting so that the correct URL is passed to the frontend.
         return redirect('schema_home', db_name=database.name, schema_id=schema.id)
+
+
+def get_common_data_for_shared_table(request, table):
+    schema = table.schema if table else None
+    database = schema.database if schema else None
+    schemas = [schema] if schema else []
+    databases = [database] if database else []
+    tables = [table] if table else []
+    return {
+        **get_base_data_unauth_routes(request, database, schema),
+        'schemas': SchemaSerializer(
+            schemas,
+            many=True,
+            context={'request': request}
+        ).data,
+        'databases': DatabaseSerializer(
+            databases,
+            many=True,
+            context={'request': request}
+        ).data,
+        'tables': TableSerializer(
+            tables,
+            many=True,
+            context={'request': request}
+        ).data,
+    }
 
 
 @login_required
@@ -200,6 +239,18 @@ def schemas(request, db_name):
     database = get_current_database(request, db_name)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, None)
+    })
+
+
+def shared_table(request, slug):
+    shared_table_link = SharedTable.get_by_slug(slug) if is_valid_uuid_v4(slug) else None
+    table = shared_table_link.table if shared_table_link else None
+
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data_for_shared_table(request, table),
+        'route_specific_data': {
+            'shared_table': {'table_id': table.id if table else None}
+        }
     })
 
 

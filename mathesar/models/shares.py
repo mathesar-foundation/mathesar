@@ -11,6 +11,10 @@ class SharedEntity(BaseModel):
     class Meta:
         abstract = True
 
+    @classmethod
+    def get_by_slug(self, slug):
+        return self.objects.filter(slug=slug, enabled=True).first()
+
 
 class SharedTable(SharedEntity):
     table = models.ForeignKey(

@@ -50,6 +50,7 @@ urlpatterns = [
     path('administration/users/', views.admin_home, name='admin_users_home'),
     path('administration/users/<user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
+    path('shares/tables/<slug>/', views.shared_table, name='shared_table'),
     path('db/', views.home, name='db_home'),
     path('db/<db_name>/', views.schemas, name='schemas'),
     re_path(
