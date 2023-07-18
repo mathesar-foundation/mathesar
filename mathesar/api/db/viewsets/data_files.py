@@ -15,15 +15,12 @@ from mathesar.api.serializers.data_files import DataFileSerializer
 from mathesar.utils.datafiles import create_datafile
 from drf_spectacular.utils import extend_schema
 
-
-
 class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
     queryset = DataFile.objects.all().order_by('-created_at')
     serializer_class = DataFileSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DataFileFilter
-    
     @extend_schema(
         request=DataFileSerializer,
         responses={
@@ -52,7 +49,6 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
                 [exception_body],
                 status.HTTP_405_METHOD_NOT_ALLOWED
             )
-    
     @extend_schema(
         request=DataFileSerializer,
         responses={
