@@ -1,11 +1,11 @@
-import IdSequence from '../IdSequence';
+import Series from '../Series';
 import Plane from '../Plane';
 import { Direction } from '../Direction';
 
 test('Plane with placeholder row', () => {
   const p = new Plane(
-    new IdSequence(['r1', 'r2', 'r3', 'r4']),
-    new IdSequence(['c1', 'c2', 'c3', 'c4']),
+    new Series(['r1', 'r2', 'r3', 'r4']),
+    new Series(['c1', 'c2', 'c3', 'c4']),
     'PL',
   );
 

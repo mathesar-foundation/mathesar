@@ -1,7 +1,7 @@
 import { ImmutableMap } from '@mathesar/component-library';
 import { filter, findBest, firstHighest, firstLowest } from 'iter-tools';
 
-export default class IdSequence<Id> {
+export default class Series<Id> {
   private readonly values: Id[];
 
   /** Maps the id value to its index */
@@ -16,7 +16,7 @@ export default class IdSequence<Id> {
       values.map((value, index) => [value, index]),
     );
     if (new Set(values).size !== values.length) {
-      throw new Error('Duplicate values are not allowed within an IdSequence.');
+      throw new Error('Duplicate values are not allowed within a Series.');
     }
   }
 

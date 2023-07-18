@@ -3,7 +3,7 @@ import { map } from 'iter-tools';
 import { cartesianProduct } from '@mathesar/utils/iterUtils';
 import { makeCellId, parseCellId } from '../cellIds';
 import { Direction, getColumnOffset, getRowOffset } from './Direction';
-import type IdSequence from './IdSequence';
+import type Series from './Series';
 
 function makeCells(
   rowIds: Iterable<string>,
@@ -45,15 +45,15 @@ function adjacentPlaceholderCell(cellId: string): AdjacentCell {
 }
 
 export default class Plane {
-  readonly rowIds: IdSequence<string>;
+  readonly rowIds: Series<string>;
 
-  readonly columnIds: IdSequence<string>;
+  readonly columnIds: Series<string>;
 
   readonly placeholderRowId: string | undefined;
 
   constructor(
-    rowIds: IdSequence<string>,
-    columnIds: IdSequence<string>,
+    rowIds: Series<string>,
+    columnIds: Series<string>,
     placeholderRowId: string | undefined,
   ) {
     this.rowIds = rowIds;

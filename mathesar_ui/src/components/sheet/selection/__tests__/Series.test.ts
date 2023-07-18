@@ -1,7 +1,7 @@
-import IdSequence from '../IdSequence';
+import Series from '../Series';
 
-test('IdSequence', () => {
-  const s = new IdSequence(['h', 'i', 'j', 'k', 'l']);
+test('Series', () => {
+  const s = new Series(['h', 'i', 'j', 'k', 'l']);
   expect(s.length).toBe(5);
   expect(s.first).toBe('h');
   expect(s.last).toBe('l');
