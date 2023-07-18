@@ -81,6 +81,9 @@ class TableAccessInspector(AbstractAccessInspector):
 
     def is_atleast_viewer(self):
         if self.user.is_anonymous:
+            if self.token is None:
+                return False
+
             return SharedTable.objects.filter(
                 table=self.table,
                 slug=self.token,

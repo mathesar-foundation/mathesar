@@ -6,6 +6,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from sqlalchemy.exc import ProgrammingError, IntegrityError
 
 from mathesar.api.db.permissions.columns import ColumnAccessPolicy
@@ -29,6 +30,7 @@ from mathesar.models.base import Column
 class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     serializer_class = ColumnSerializer
     pagination_class = DefaultLimitOffsetPagination
+    permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = ColumnAccessPolicy
 
     def get_queryset(self):

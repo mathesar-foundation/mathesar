@@ -1,7 +1,7 @@
 from rest_access_policy import AccessPolicy
 
-from mathesar.api.utils import get_table_or_404, get_query_or_404
-from mathesar.api.permission_utils import TableAccessInspector, QueryAccessInspector
+from mathesar.api.utils import get_query_or_404
+from mathesar.api.permission_utils import QueryAccessInspector
 
 
 class SharedTableAccessPolicy(AccessPolicy):
@@ -10,23 +10,15 @@ class SharedTableAccessPolicy(AccessPolicy):
             'action': ['list', 'retrieve'],
             'principal': 'authenticated',
             'effect': 'allow',
-            'condition_expression': 'is_atleast_table_viewer'
+            'condition_expression': 'is_atleast_viewer_nested_table_resource'
         },
         {
             'action': ['create', 'destroy', 'update', 'partial_update'],
             'principal': 'authenticated',
             'effect': 'allow',
-            'condition_expression': 'is_atleast_table_manager'
+            'condition_expression': 'is_atleast_manager_nested_table_resource'
         },
     ]
-
-    def is_atleast_table_viewer(self, request, view, action):
-        table = get_table_or_404(view.kwargs['table_pk'])
-        return TableAccessInspector(request.user, table).is_atleast_viewer()
-
-    def is_atleast_table_manager(self, request, view, action):
-        table = get_table_or_404(view.kwargs['table_pk'])
-        return TableAccessInspector(request.user, table).is_atleast_manager()
 
 
 class SharedQueryAccessPolicy(AccessPolicy):

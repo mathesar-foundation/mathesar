@@ -1,8 +1,7 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
-from mathesar.api.utils import get_table_or_404
-from mathesar.models.users import DatabaseRole, Role, SchemaRole
+from mathesar.models.users import Role
 
 
 class ColumnAccessPolicy(AccessPolicy):
@@ -14,7 +13,13 @@ class ColumnAccessPolicy(AccessPolicy):
 
     statements = [
         {
-            'action': ['list', 'retrieve', 'dependents'],
+            'action': ['list', 'retrieve'],
+            'principal': '*',
+            'effect': 'allow',
+            'condition_expression': 'is_atleast_viewer_nested_table_resource'
+        },
+        {
+            'action': ['dependents'],
             'principal': 'authenticated',
             'effect': 'allow',
         },
@@ -22,7 +27,7 @@ class ColumnAccessPolicy(AccessPolicy):
             'action': ['destroy', 'update', 'partial_update', 'create'],
             'principal': 'authenticated',
             'effect': 'allow',
-            'condition_expression': ['(is_superuser or is_table_manager)']
+            'condition_expression': 'is_atleast_manager_nested_table_resource'
         },
     ]
 
@@ -41,20 +46,3 @@ class ColumnAccessPolicy(AccessPolicy):
             qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
 
         return qs
-
-    def is_table_manager(self, request, view, action):
-        # Column access control is based on Schema and Database Roles as of now
-        # TODO Include Table Role based access when Table Roles are introduced
-        table = get_table_or_404(view.kwargs['table_pk'])
-
-        is_schema_manager = SchemaRole.objects.filter(
-            user=request.user,
-            schema=table.schema,
-            role=Role.MANAGER.value
-        ).exists()
-        is_db_manager = DatabaseRole.objects.filter(
-            user=request.user,
-            database=table.schema.database,
-            role=Role.MANAGER.value
-        ).exists()
-        return is_db_manager or is_schema_manager
