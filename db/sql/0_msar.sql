@@ -865,6 +865,12 @@ FROM
 $$ LANGUAGE SQL;
 
 
+CREATE OR REPLACE FUNCTION msar.build_type_text_nullable(typ_jsonb jsonb) RETURNS text AS $$
+SELECT msar.build_type_text(typ_jsonb);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+
 CREATE OR REPLACE FUNCTION __msar.build_col_def_text(col __msar.col_def) RETURNS text AS $$/*
 Build appropriate text defining the given column for table creation or alteration.
 */
@@ -1574,6 +1580,57 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION __msar.build_cast_expr(val text, type_ text) RETURNS text AS $$/*
+Build an expression for casting a column in Mathesar.
+
+We fall back silently to default casting behavior if the mathesar_types namespace is missing.
+However, we do throw an error in cases where the schema exists, but the type casting function
+doesn't. This is assumed to be an error the user should know about.
+*/
+SELECT CASE
+  WHEN EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='mathesar_types') THEN
+    msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
+  ELSE
+    val || '::' || type_::regtype::text
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_drop_default_text(tab_id oid, col_id integer, new_type text, new_default jsonb)
+  RETURNS TEXT AS $$/*
+*/
+SELECT CASE WHEN new_type IS NOT NULL OR jsonb_typeof(new_default)='null' THEN
+  'ALTER COLUMN ' || msar.get_column_name(tab_id, col_id) || ' DROP DEFAULT'
+ END;
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_retype_text(tab_id oid, col_id integer, new_type text) RETURNS text AS $$/*
+*/
+SELECT 'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || ' TYPE '
+  || new_type
+  || ' USING '
+  || __msar.build_cast_expr(msar.get_column_name(tab_id, col_id), new_type);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION __msar.build_col_default_text(
+  tab_id oid,
+  col_id integer,
+  old_default text,
+  new_default jsonb,
+  new_type text
+) RETURNS text AS $$/*
+*/
+SELECT
+  format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id))
+  || COALESCE(new_default #>> '{}', __msar.build_cast_expr(old_default, new_type));
+$$ LANGUAGE SQL;
+
+
 CREATE OR REPLACE FUNCTION
 __msar.build_col_not_null_text(tab_id oid, col_id integer, not_null boolean) RETURNS text AS $$/*
 */
@@ -1587,76 +1644,47 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 __msar.build_col_drop_text(tab_id oid, col_id integer, col_delete boolean) RETURNS text AS $$/*
 */
-SELECT CASE
-  WHEN col_delete THEN 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id) ELSE null
-END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-__msar.build_col_default_text(tab_id oid, col_id integer, col_default text) RETURNS text AS $$/*
-*/
-SELECT format('ALTER COLUMN %s SET DEFAULT %L', msar.get_column_name(tab_id, col_id), col_default);
-$$ LANGUAGE SQL;
-
-
-CREATE OR REPLACE FUNCTION __msar.build_cast_expr(val text, type_ jsonb) RETURNS text AS $$/*
-Build an expression for casting a column in Mathesar.
-
-We fall back silently to default casting behavior if the mathesar_types namespace is missing.
-However, we do throw an error in cases where the schema exists, but the type casting function
-doesn't. This is assumed to be an error the user should know about.
-*/
-SELECT CASE
-  WHEN EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='mathesar_types') THEN
-    msar.get_cast_function_name(msar.build_type_text(type_)::regtype)
-    || '(' || val || ')'
-  ELSE
-    val || '::' || msar.build_type_text(type_)
-END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-__msar.build_col_retype_text(tab_id oid, col_id integer, new_type jsonb) RETURNS text AS $$/*
-*/
-SELECT concat_ws(
-  ', ',
-  'ALTER COLUMN ' || msar.get_column_name(tab_id, col_id) || ' DROP DEFAULT',
-  'ALTER COLUMN '
-  || msar.get_column_name(tab_id, col_id)
-  || ' TYPE '
-  || msar.build_type_text(new_type)
-  || ' USING '
-  || __msar.build_cast_expr(msar.get_column_name(tab_id, col_id), new_type),
-  'ALTER COLUMN '
-  || msar.get_column_name(tab_id, col_id)
-  || ' SET DEFAULT '
-  || __msar.build_cast_expr(pg_get_expr(adbin, tab_id), new_type)
-)
-FROM (SELECT tab_id, col_id) as args LEFT JOIN pg_attrdef ON adrelid=tab_id AND adnum=col_id;
+SELECT CASE WHEN col_delete THEN 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id) END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.process_col_alter_jsonb(tab_id oid, col_alters jsonb) RETURNS text AS $$/*
 */
-SELECT nullif(
-  concat_ws(
-    ', ',
-    string_agg(__msar.build_col_retype_text(tab_id, x.attnum, x.type), ', ')
-      FILTER (WHERE x.type IS NOT NULL),
-    string_agg(__msar.build_col_default_text(tab_id, x.attnum, x.default_), ', ')
-      FILTER (WHERE x.default_ IS NOT NULL),
-    string_agg(__msar.build_col_not_null_text(tab_id, x.attnum, x.not_null), ', ')
-      FILTER (WHERE x.not_null IS NOT NULL),
-    string_agg(__msar.build_col_drop_text(tab_id, x.attnum, x.delete), ', ')
-      FILTER (WHERE x.delete IS NOT NULL)
-  ),
-  ''
+-- We have to deserialize manually here, since we need to handle the 'default' key carefully. The
+-- standard jsonb_to_recordset converts all jsonb nulls into SQL NULLs, which is undesireable in our
+-- case. This would prevent us from having a JSONB null represent 'set the column default to null'.
+WITH prepped_alters AS (
+  SELECT
+    tab_id,
+    (col_alter_obj ->> 'attnum')::integer AS col_id,
+    format_type(atttypid, atttypmod) AS old_type,
+    msar.build_type_text_nullable(col_alter_obj -> 'type') AS new_type,
+    pg_get_expr(adbin, tab_id) old_default,
+    col_alter_obj -> 'default' AS new_default,
+    (col_alter_obj -> 'not_null')::boolean AS not_null,
+    (col_alter_obj -> 'delete')::boolean AS delete_
+  FROM
+    (SELECT tab_id) as arg,
+    jsonb_array_elements(col_alters) as t(col_alter_obj)
+    INNER JOIN pg_attribute ON (t.col_alter_obj ->> 'attnum')::smallint=attnum AND tab_id=attrelid
+    LEFT JOIN pg_attrdef ON (t.col_alter_obj ->> 'attnum')::smallint=adnum AND tab_id=adrelid
 )
-FROM jsonb_to_recordset(col_alters)
-  AS x(attnum integer, type jsonb, not_null boolean, delete boolean, default_ text);
+SELECT string_agg(
+  nullif(
+    concat_ws(
+      ', ',
+      __msar.build_col_drop_default_text(tab_id, col_id, new_type, new_default),
+      __msar.build_col_retype_text(tab_id, col_id, new_type),
+      __msar.build_col_default_text(tab_id, col_id, old_default, new_default, new_type),
+      __msar.build_col_not_null_text(tab_id, col_id, not_null),
+      __msar.build_col_drop_text(tab_id, col_id, delete_)
+    ),
+    ''
+  ),
+  ', '
+)
+FROM prepped_alters;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
