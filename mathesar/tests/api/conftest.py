@@ -312,6 +312,7 @@ def table_with_unknown_types(create_schema, get_uid, engine):
     table_name = f"table_{prefix}_{get_uid()}"
     fq_table_name = f"\"{schema_name}\".\"{table_name}\""
     query = f"""
+        SET search_path="{schema_name}";
         CREATE EXTENSION IF NOT EXISTS citext;
         CREATE TABLE {fq_table_name} (
             text_column CITEXT,
