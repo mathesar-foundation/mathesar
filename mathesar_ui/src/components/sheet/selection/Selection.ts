@@ -1,31 +1,28 @@
 import { first } from 'iter-tools';
 
 import { ImmutableSet } from '@mathesar/component-library';
-import type Plane from './Plane';
+import { assertExhaustive } from '@mathesar/utils/typeUtils';
 import { parseCellId } from '../cellIds';
+import { Direction, getColumnOffset } from './Direction';
+import type Plane from './Plane';
 
-export enum Direction {
-  Up = 'up',
-  Down = 'down',
-  Left = 'left',
-  Right = 'right',
-}
+/**
+ * - `'dataCells'` means that the selection contains data cells. This is by
+ *   far the most common type of selection basis.
+ *
+ * - `'emptyColumns'` is used when the sheet has no rows. In this case we
+ *   still want to allow the user to select columns, so we use this basis.
+ *
+ * - `'placeholderCell'` is used when the user is selecting a cell in the
+ *   placeholder row. This is a special case because we don't want to allow
+ *   the user to select multiple cells in the placeholder row, and we also
+ *   don't want to allow selections that include cells in data rows _and_ the
+ *   placeholder row.
+ */
+type BasisType = 'dataCells' | 'emptyColumns' | 'placeholderCell';
 
 interface Basis {
-  /**
-   * - `'dataCells'` means that the selection contains data cells. This is by
-   *   far the most common type of selection basis.
-   *
-   * - `'emptyColumns'` is used when the sheet has no rows. In this case we
-   *   still want to allow the user to select columns, so we use this basis.
-   *
-   * - `'placeholderCell'` is used when the user is selecting a cell in the
-   *   placeholder row. This is a special case because we don't want to allow
-   *   the user to select multiple cells in the placeholder row, and we also
-   *   don't want to allow selections that include cells in data rows _and_ the
-   *   placeholder row.
-   */
-  readonly type: 'dataCells' | 'emptyColumns' | 'placeholderCell';
+  readonly type: BasisType;
   readonly activeCellId: string | undefined;
   readonly cellIds: ImmutableSet<string>;
   readonly rowIds: ImmutableSet<string>;
@@ -101,8 +98,8 @@ export default class Selection {
   }
 
   /**
-   * @returns a new selection with all cells selected. The active cell will be the
-   * cell in the first row and first column.
+   * @returns a new selection with all cells selected. The active cell will be
+   * the cell in the first row and first column.
    */
   ofAllDataCells(): Selection {
     if (!this.plane.hasResultRows) {
@@ -133,7 +130,11 @@ export default class Selection {
    * drags to select it.
    */
   ofRowRange(rowIdA: string, rowIdB: string): Selection {
-    throw new Error('Not implemented');
+    return this.withBasis(
+      basisFromDataCells(
+        this.plane.dataCellsInFlexibleRowRange(rowIdA, rowIdB),
+      ),
+    );
   }
 
   /**
@@ -141,10 +142,12 @@ export default class Selection {
    * provided columnIds, inclusive.
    */
   ofColumnRange(columnIdA: string, columnIdB: string): Selection {
-    if (!this.plane.hasResultRows) {
-      throw new Error('Not implemented');
-    }
-    throw new Error('Not implemented');
+    const newBasis = this.plane.hasResultRows
+      ? basisFromDataCells(
+          this.plane.dataCellsInColumnRange(columnIdA, columnIdB),
+        )
+      : basisFromEmptyColumns(this.plane.columnIds.range(columnIdA, columnIdB));
+    return this.withBasis(newBasis);
   }
 
   /**
@@ -157,7 +160,11 @@ export default class Selection {
    * placeholder row, even if a user drags to select a cell in it.
    */
   ofCellRange(cellIdA: string, cellIdB: string): Selection {
-    throw new Error('Not implemented');
+    return this.withBasis(
+      basisFromDataCells(
+        this.plane.dataCellsInFlexibleCellRange(cellIdA, cellIdB),
+      ),
+    );
   }
 
   /**
@@ -166,7 +173,14 @@ export default class Selection {
    * row.
    */
   atPlaceholderCell(cellId: string): Selection {
-    throw new Error('Not implemented');
+    return this.withBasis(basisFromPlaceholderCell(cellId));
+  }
+
+  /**
+   * @returns a new selection formed from one cell within the data rows.
+   */
+  atDataCell(cellId: string): Selection {
+    return this.withBasis(basisFromDataCells([cellId], cellId));
   }
 
   /**
@@ -188,7 +202,7 @@ export default class Selection {
    * provided cell.
    */
   drawnToCell(cellId: string): Selection {
-    throw new Error('Not implemented');
+    return this.ofCellRange(this.activeCellId ?? cellId, cellId);
   }
 
   /**
@@ -196,11 +210,19 @@ export default class Selection {
    * active cell and the provided row, inclusive.
    */
   drawnToRow(rowId: string): Selection {
-    throw new Error('Not implemented');
+    const activeRowId = this.activeCellId
+      ? parseCellId(this.activeCellId).rowId
+      : rowId;
+    return this.ofRowRange(activeRowId, rowId);
   }
 
   drawnToColumn(columnId: string): Selection {
-    throw new Error('Not implemented');
+    // TODO improve handling for empty columns
+
+    const activeColumnId = this.activeCellId
+      ? parseCellId(this.activeCellId).columnId
+      : columnId;
+    return this.ofColumnRange(activeColumnId, columnId);
   }
 
   /**
@@ -209,7 +231,39 @@ export default class Selection {
    * then a new selection is created with only that one cell selected.
    */
   collapsedAndMoved(direction: Direction): Selection {
-    throw new Error('Not implemented');
+    if (this.basis.type === 'emptyColumns') {
+      const offset = getColumnOffset(direction);
+      const newActiveColumnId = this.plane.columnIds.collapsedOffset(
+        this.basis.columnIds,
+        offset,
+      );
+      if (newActiveColumnId === undefined) {
+        // If we couldn't shift in the direction, then do nothing
+        return this;
+      }
+      return this.withBasis(basisFromEmptyColumns([newActiveColumnId]));
+    }
+
+    if (this.activeCellId === undefined) {
+      // If no cells are selected, then select the first data cell
+      return this.ofFirstDataCell();
+    }
+
+    const adjacent = this.plane.getAdjacentCell(this.activeCellId, direction);
+
+    if (adjacent.type === 'none') {
+      // If we can't move anywhere, then do nothing
+      return this;
+    }
+    if (adjacent.type === 'dataCell') {
+      // Move to an adjacent data cell
+      return this.atDataCell(adjacent.cellId);
+    }
+    if (adjacent.type === 'placeholderCell') {
+      // Move to an adjacent placeholder cell
+      return this.atPlaceholderCell(adjacent.cellId);
+    }
+    return assertExhaustive(adjacent);
   }
 
   /**
