@@ -18,7 +18,14 @@ from mathesar.models.query import DBQuery
 from mathesar.utils.preview import compute_path_prefix, compute_path_str
 
 
-def test_record_list(create_patents_table, client):
+@pytest.mark.parametrize(
+    "table_fixture,expected_count",
+    [
+        ["patents_table",1393],
+        ["table_with_unknown_types",3],
+    ],
+)
+def test_record_list(table_fixture, expected_count, request, client):
     """
     Desired format:
     {
@@ -48,19 +55,17 @@ def test_record_list(create_patents_table, client):
         ]
     }
     """
-    table_name = 'NASA Record List'
-    table = create_patents_table(table_name)
-
+    table = request.getfixturevalue(table_fixture)
     response = client.get(f'/api/db/v0/tables/{table.id}/records/')
+    response_json = response.json()
     assert response.status_code == 200
-
-    response_data = response.json()
-    record_data = response_data['results'][0]
-    assert response_data['count'] == 1393
-    assert response_data['grouping'] is None
-    assert len(response_data['results']) == 50
+    response_first_record = response_json['results'][0]
+    assert response_json['count'] == expected_count
+    assert response_json['grouping'] is None
+    count_per_page = 50
+    assert len(response_json['results']) == min(count_per_page, expected_count)
     for column_id in table.columns.all().values_list('id', flat=True):
-        assert str(column_id) in record_data
+        assert str(column_id) in response_first_record
 
 
 list_client_with_different_roles = [
