@@ -1,3 +1,4 @@
+from sqlalchemy.sql.sqltypes import ARRAY
 from db.types.custom import datetime, email, money, multicurrency, uri, char, json_object, json_array
 from db.types.base import PostgresType, MathesarCustomType
 
