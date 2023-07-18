@@ -803,6 +803,7 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     assert response_data[0]["message"] == "This field is required."
     assert response_data[0]["field"] == "type"
 
+
 def test_list_columns_with_unknown_types(table_with_unknown_types, client):
     table = table_with_unknown_types
     response = client.get(

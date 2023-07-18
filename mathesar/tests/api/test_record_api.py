@@ -21,8 +21,8 @@ from mathesar.utils.preview import compute_path_prefix, compute_path_str
 @pytest.mark.parametrize(
     "table_fixture,expected_count",
     [
-        ["patents_table",1393],
-        ["table_with_unknown_types",3],
+        ["patents_table", 1393],
+        ["table_with_unknown_types", 3],
     ],
 )
 def test_record_list(table_fixture, expected_count, request, client):
