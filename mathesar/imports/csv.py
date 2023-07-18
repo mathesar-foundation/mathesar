@@ -21,6 +21,14 @@ SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
 
+def is_valid_csv(data):
+    try:
+        csv.reader(data)
+    except (csv.CsvError, ValueError):
+        return False
+    return True
+
+
 def get_file_encoding(file):
     """
     Given a file, uses charset_normalizer if installed or chardet which is installed as part of clevercsv module to
