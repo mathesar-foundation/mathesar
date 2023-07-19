@@ -1768,6 +1768,7 @@ BEGIN
     PERFORM msar.rename_column(tab_id, r.attnum, r.name);
   END LOOP;
   RETURN array_agg(x.attnum) FROM jsonb_to_recordset(col_alters) AS x(attnum integer);
+END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
