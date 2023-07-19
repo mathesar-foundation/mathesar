@@ -58,7 +58,7 @@ def _get_file_type(raw_file):
         else:
             return 'excel'
 
-    if is_valid_csv:
+    if is_valid_csv(raw_file):
         return file_extension if file_extension in ['csv', 'tsv'] else 'csv'
     elif is_valid_json(raw_file):
         return 'json'

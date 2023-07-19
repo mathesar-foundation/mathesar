@@ -91,9 +91,7 @@ def insert_records_from_json(table, engine, json_filepath, column_names, max_lev
 
 def insert_records_from_excel(table, engine, excel_filepath):
     df = pandas.read_excel(excel_filepath)
-    print(df)
     records = json.loads(df.to_json(orient='records'))
-    print("Record: ", records[2])
     insert_record_or_records(table, engine, records)
 
 
