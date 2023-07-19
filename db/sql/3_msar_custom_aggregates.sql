@@ -172,32 +172,6 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.month_int_to_string(month_ INT) RETURNS TEXT AS $$/*
-Convert integer representing month to string
-
-Examples:
-   0 => January
-   1 => February
-   and so on...
-*/
-SELECT CASE
-  WHEN month_ = 1 THEN 'January'
-  WHEN month_ = 2 THEN 'February'
-  WHEN month_ = 3 THEN 'March'
-  WHEN month_ = 4 THEN 'April'
-  WHEN month_ = 5 THEN 'May'
-  WHEN month_ = 6 THEN 'June'
-  WHEN month_ = 7 THEN 'July'
-  WHEN month_ = 8 THEN 'August'
-  WHEN month_ = 9 THEN 'September'
-  WHEN month_ = 10 THEN 'October'
-  WHEN month_ = 11 THEN 'November'
-  WHEN month_ = 12 THEN 'December'
-END;
-$$ LANGUAGE SQL;
-
-
-CREATE OR REPLACE FUNCTION 
 msar.add_month_to_vector(point_ point, date_ DATE) RETURNS point as $$/*
 Add the month, converted to a vector on unit circle, to the vector in the first argument.
 
@@ -219,7 +193,7 @@ $$ LANGUAGE SQL STRICT;
 
 
 CREATE OR REPLACE FUNCTION 
-msar.point_to_month(point_ point) RETURNS text AS $$/*
+msar.point_to_month(point_ point) RETURNS int AS $$/*
 Convert a point to degrees and then to discrete month.
 
 Point is converted to month by:
@@ -231,7 +205,7 @@ Args:
   point_: A point that represents a vector.
 
 Returns:
-  discrete corresponding to the vector represented by point_.
+  discrete month corresponding to the vector represented by point_.
 */
 SELECT CASE
   /*
@@ -243,7 +217,7 @@ SELECT CASE
   a certain epsilon. (Epsilon here is 1e-10)
   */
   WHEN point_ <-> point(0,0) < 1e-10 THEN NULL
-  ELSE msar.month_int_to_string(msar.degrees_to_month(atan2d(point_[0],point_[1])))
+  ELSE msar.degrees_to_month(atan2d(point_[0],point_[1]))
 END;
 $$ LANGUAGE SQL;
 

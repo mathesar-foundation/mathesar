@@ -770,119 +770,119 @@ def test_peak_month_aggregation(library_ma_tables, get_uid, client):
     expect_records = [
         {
             "Patron": 1,
-            "Checkout Time": "May"
+            "Checkout Time": 5
         },
         {
             "Patron": 2,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 3,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 4,
-            "Checkout Time": "May"
+            "Checkout Time": 5
         },
         {
             "Patron": 5,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 6,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 7,
-            "Checkout Time": "May"
+            "Checkout Time": 5
         },
         {
             "Patron": 8,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 9,
-            "Checkout Time": "May"
+            "Checkout Time": 5
         },
         {
             "Patron": 10,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 11,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 12,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 13,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 14,
-            "Checkout Time": "May"
+            "Checkout Time": 5
         },
         {
             "Patron": 15,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 16,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 17,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 18,
-            "Checkout Time": "May"
+            "Checkout Time": 5
         },
         {
             "Patron": 19,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 20,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 21,
-            "Checkout Time": "May"
+            "Checkout Time": 5
         },
         {
             "Patron": 22,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 23,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 24,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 25,
-            "Checkout Time": "May"
+            "Checkout Time": 5
         },
         {
             "Patron": 26,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         },
         {
             "Patron": 27,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 28,
-            "Checkout Time": "June"
+            "Checkout Time": 6
         },
         {
             "Patron": 29,
-            "Checkout Time": "July"
+            "Checkout Time": 7
         }
     ]
     actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
