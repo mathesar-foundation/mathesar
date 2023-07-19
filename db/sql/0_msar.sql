@@ -297,6 +297,66 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_pk_column(rel_id oid) RETURNS smallint AS $$/*
+Return the first column attnum in the primary key of a given relation (e.g., table).
+
+Args:
+  rel_id: The OID of the relation.
+*/
+SELECT conkey[1]
+FROM pg_constraint
+WHERE contype='p'
+AND conrelid=rel_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_pk_column(sch_name text, rel_name text) RETURNS smallint AS $$/*
+Return the first column attnum in the primary key of a given relation (e.g., table).
+
+Args:
+  sch_name: The schema of the relation, unquoted.
+  rel_name: The name of the relation, unqualified and unquoted.
+*/
+SELECT conkey[1]
+FROM pg_constraint
+WHERE contype='p'
+AND conrelid=msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_column_type(rel_id oid, col_id smallint) RETURNS text AS $$/*
+Return the type of a given column in a relation.
+
+Args:
+  rel_id: The OID of the relation.
+  col_id: The attnum of the column in the relation.
+*/
+SELECT atttypid::regtype
+FROM pg_attribute
+WHERE attnum = col_id
+AND attrelid = rel_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_column_type(sch_name text, rel_name text, col_name text) RETURNS text AS $$/*
+Return the type of a given column in a relation.
+
+Args:
+  sch_name: The schema of the relation, unquoted.
+  rel_name: The name of the relation, unqualified and unquoted.
+  col_name: The name of the column in the relation, unquoted.
+*/
+SELECT atttypid::regtype
+FROM pg_attribute
+WHERE attname = quote_ident(col_name)
+AND attrelid = msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ALTER SCHEMA FUNCTIONS
@@ -1708,5 +1768,98 @@ BEGIN
     PERFORM msar.rename_column(tab_id, r.attnum, r.name);
   END LOOP;
   RETURN array_agg(x.attnum) FROM jsonb_to_recordset(col_alters) AS x(attnum integer);
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- MATHESAR LINK FUNCTIONS
+--
+-- Add a link to the table.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+-- Create a Many-to-One or a One-to-One link -------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.create_many_to_one_link(
+  from_rel_id oid,
+  to_rel_id oid,
+  col_name text,
+  unique_link boolean DEFAULT false
+) RETURNS smallint AS $$/* 
+Create a many-to-one or a one-to-one link between tables, returning the attnum of the newly created
+column, returning the attnum of the added column.
+
+Args:
+  from_rel_id: The OID of the referent table.
+  to_rel_id: The OID of the referrer table.
+  col_name: Name of the new column to be created in the referrer table, unqoted. 
+  unique_link: Whether to make the link one-to-one instead of many-to-one.
+*/
+DECLARE
+  pk_col_id smallint;
+  col_defs jsonb;
+  added_col_ids smallint[];
+  con_defs jsonb;
+BEGIN
+  pk_col_id := msar.get_pk_column(from_rel_id);
+  col_defs := jsonb_build_array(
+    jsonb_build_object(
+      'name', col_name,
+      'type', jsonb_build_object('name', msar.get_column_type(from_rel_id, pk_col_id))
+    )
+  );
+  added_col_ids := msar.add_columns(to_rel_id , col_defs , false);
+  con_defs := jsonb_build_array(
+    jsonb_build_object(
+      'name', null,
+      'type', 'f',
+      'columns', added_col_ids,
+      'deferrable', false,
+      'fkey_relation_id', from_rel_id::integer,
+      'fkey_columns', jsonb_build_array(pk_col_id)
+    )
+  );
+  IF unique_link THEN
+    con_defs := jsonb_build_array(
+      jsonb_build_object(
+        'name', null,
+        'type', 'u',
+        'columns', added_col_ids)
+    ) || con_defs;
+  END IF;
+  PERFORM msar.add_constraints(to_rel_id , con_defs);
+  RETURN added_col_ids[1];
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+-- Create a Many-to-Many link ----------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.create_many_to_many_link(
+  sch_id oid,
+  tab_name text,
+  from_rel_ids oid[],
+  col_names text[]
+) RETURNS oid AS $$/* 
+Create a many-to-many link between tables, returning the oid of the newly created table.
+
+Args:
+  sch_id: The OID of the schema in which new referrer table is to be created.
+  tab_name: Name of the referrer table to be created.
+  from_rel_ids: The OIDs of the referent tables.
+  col_names: Names of the new column to be created in the referrer table, unqoted.
+*/
+DECLARE
+  added_table_id oid;
+BEGIN
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name , NULL, NULL, NULL);
+  PERFORM msar.create_many_to_one_link(a.rel_id, added_table_id, b.col_name)
+  FROM unnest(from_rel_ids) WITH ORDINALITY AS a(rel_id, idx)
+  JOIN unnest(col_names) WITH ORDINALITY AS b(col_name, idx) USING (idx);
+  RETURN added_table_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.errors import URLDownloadError
 from mathesar.imports.csv import get_sv_dialect, get_file_encoding
-from mathesar.imports.json import validate_json_format
+from mathesar.imports.json import is_valid_json, validate_json_format
 from mathesar.models.base import DataFile
 
 
@@ -34,11 +34,11 @@ def create_datafile(data):
 
     # Validation guarentees only one arg will be present
     if 'paste' in data:
-        name = str(int(time())) + '.tsv'
+        type = 'json' if is_valid_json(data['paste']) else 'tsv'
+        name = str(int(time())) + '.' + type
         raw_file = ContentFile(str.encode(data['paste']), name=name)
         created_from = 'paste'
         base_name = ''
-        type = 'tsv'
     elif 'url' in data:
         raw_file = _download_datafile(data['url'])
         created_from = 'url'
@@ -72,12 +72,14 @@ def create_datafile(data):
             quotechar=dialect.quotechar,
         )
     else:
+        max_level = data.get('max_level', 0)
         datafile = DataFile(
             file=raw_file,
             base_name=base_name,
             type=type,
             created_from=created_from,
             header=header,
+            max_level=max_level
         )
     datafile.save()
     raw_file.close()
