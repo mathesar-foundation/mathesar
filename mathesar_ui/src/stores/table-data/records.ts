@@ -29,6 +29,7 @@ import {
   patchAPI,
   postAPI,
 } from '@mathesar/api/utils/requestUtils';
+import Series from '@mathesar/components/sheet/selection/Series';
 import type Pagination from '@mathesar/utils/Pagination';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
@@ -293,6 +294,8 @@ export class RecordsData {
 
   error: Writable<string | undefined>;
 
+  selectableRowIds: Readable<Series<string>>;
+
   private promise: CancellablePromise<ApiRecordsResponse> | undefined;
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
@@ -338,6 +341,15 @@ export class RecordsData {
     this.contextualFilters = contextualFilters;
     this.url = `/api/db/v0/tables/${this.parentId}/records/`;
     void this.fetch();
+
+    this.selectableRowIds = derived(
+      [this.savedRecords, this.newRecords],
+      ([savedRecords, newRecords]) =>
+        new Series([
+          ...savedRecords.map((r) => r.identifier),
+          ...newRecords.map((r) => r.identifier),
+        ]),
+    );
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
     this.requestParamsUnsubscriber =

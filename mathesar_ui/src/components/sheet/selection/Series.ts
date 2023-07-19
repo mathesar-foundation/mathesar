@@ -1,5 +1,6 @@
-import { ImmutableMap } from '@mathesar/component-library';
 import { filter, findBest, firstHighest, firstLowest } from 'iter-tools';
+
+import { ImmutableMap } from '@mathesar/component-library';
 
 export default class Series<Id> {
   private readonly values: Id[];
@@ -10,7 +11,7 @@ export default class Series<Id> {
   /**
    * @throws Error if duplicate values are provided
    */
-  constructor(values: Id[]) {
+  constructor(values: Id[] = []) {
     this.values = values;
     this.indexLookup = new ImmutableMap(
       values.map((value, index) => [value, index]),

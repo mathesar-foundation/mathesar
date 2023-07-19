@@ -4,22 +4,26 @@ import { ImmutableSet } from '@mathesar/component-library';
 import { assertExhaustive } from '@mathesar/utils/typeUtils';
 import { parseCellId } from '../cellIds';
 import { Direction, getColumnOffset } from './Direction';
-import type Plane from './Plane';
+import Plane from './Plane';
 
 /**
- * - `'dataCells'` means that the selection contains data cells. This is by
- *   far the most common type of selection basis.
+ * - `'dataCells'` means that the selection contains data cells. This is by far
+ *   the most common type of selection basis.
  *
- * - `'emptyColumns'` is used when the sheet has no rows. In this case we
- *   still want to allow the user to select columns, so we use this basis.
+ * - `'emptyColumns'` is used when the sheet has no rows. In this case we still
+ *   want to allow the user to select columns, so we use this basis.
  *
  * - `'placeholderCell'` is used when the user is selecting a cell in the
- *   placeholder row. This is a special case because we don't want to allow
- *   the user to select multiple cells in the placeholder row, and we also
- *   don't want to allow selections that include cells in data rows _and_ the
+ *   placeholder row. This is a special case because we don't want to allow the
+ *   user to select multiple cells in the placeholder row, and we also don't
+ *   want to allow selections that include cells in data rows _and_ the
  *   placeholder row.
+ *
+ * - `'empty'` is used when no cells are selected. We try to avoid this state,
+ *   but we also allow for it because it makes it easier to construct selection
+ *   instances if we don't already have the full plane data.
  */
-type BasisType = 'dataCells' | 'emptyColumns' | 'placeholderCell';
+type BasisType = 'dataCells' | 'emptyColumns' | 'placeholderCell' | 'empty';
 
 interface Basis {
   readonly type: BasisType;
@@ -67,12 +71,22 @@ function basisFromPlaceholderCell(activeCellId: string): Basis {
   };
 }
 
+function emptyBasis(): Basis {
+  return {
+    type: 'empty',
+    activeCellId: undefined,
+    cellIds: new ImmutableSet(),
+    columnIds: new ImmutableSet(),
+    rowIds: new ImmutableSet(),
+  };
+}
+
 export default class SheetSelection {
   private readonly plane: Plane;
 
   private readonly basis: Basis;
 
-  constructor(plane: Plane, basis: Basis) {
+  constructor(plane: Plane = new Plane(), basis: Basis = emptyBasis()) {
     this.plane = plane;
     this.basis = basis;
   }
@@ -187,7 +201,8 @@ export default class SheetSelection {
    * @returns a new selection that fits within the provided plane. This is
    * useful when a column is deleted, reordered, or inserted.
    */
-  forNewPlane(plane: Plane): SheetSelection {
+  forNewPlane(newPlane: Plane): SheetSelection {
+    // TODO_NEXT
     throw new Error('Not implemented');
   }
 

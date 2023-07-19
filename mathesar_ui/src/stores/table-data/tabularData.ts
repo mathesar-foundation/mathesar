@@ -1,30 +1,34 @@
 import { getContext, setContext } from 'svelte';
 import {
   derived,
-  writable,
   get,
+  writable,
   type Readable,
   type Writable,
 } from 'svelte/store';
+
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/types/tables';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { States } from '@mathesar/api/utils/requestUtils';
 import type { Column } from '@mathesar/api/types/tables/columns';
+import { States } from '@mathesar/api/utils/requestUtils';
 import { LegacySheetSelection } from '@mathesar/components/sheet';
-import { getColumnOrder } from '@mathesar/utils/tables';
-import { Meta } from './meta';
+import Plane from '@mathesar/components/sheet/selection/Plane';
+import Series from '@mathesar/components/sheet/selection/Series';
+import SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { getColumnOrder, orderProcessedColumns } from '@mathesar/utils/tables';
 import { ColumnsDataStore } from './columns';
-import type { RecordRow, TableRecordsData } from './records';
-import { RecordsData } from './records';
-import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
+import { Display } from './display';
+import { Meta } from './meta';
 import type {
   ProcessedColumn,
   ProcessedColumnsStore,
 } from './processedColumns';
 import { processColumn } from './processedColumns';
+import type { RecordRow, TableRecordsData } from './records';
+import { RecordsData } from './records';
 
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
@@ -56,7 +60,10 @@ export class TabularData {
 
   columnsDataStore: ColumnsDataStore;
 
+  /** TODO eliminate `processedColumns` in favor of `orderedProcessedColumns` */
   processedColumns: ProcessedColumnsStore;
+
+  orderedProcessedColumns: ProcessedColumnsStore;
 
   constraintsDataStore: ConstraintsDataStore;
 
@@ -68,7 +75,11 @@ export class TabularData {
 
   legacySelection: TabularDataSelection;
 
+  selection: Writable<SheetSelection>;
+
   table: TableEntry;
+
+  cleanupFunctions: (() => void)[] = [];
 
   constructor(props: TabularDataProps) {
     const contextualFilters =
@@ -111,6 +122,27 @@ export class TabularData {
     );
 
     this.table = props.table;
+
+    this.orderedProcessedColumns = derived(this.processedColumns, (p) =>
+      orderProcessedColumns(p, this.table),
+    );
+
+    const plane = derived(
+      [this.recordsData.selectableRowIds, this.orderedProcessedColumns],
+      ([selectableRowIds, orderedProcessedColumns]) => {
+        const columnIds = new Series(
+          [...orderedProcessedColumns.values()].map((c) => String(c.id)),
+        );
+        return new Plane(selectableRowIds, columnIds);
+      },
+    );
+
+    // TODO add id of placeholder row to selection
+    this.selection = writable(new SheetSelection());
+
+    this.cleanupFunctions.push(
+      plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
+    );
 
     this.legacySelection = new LegacySheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
@@ -222,6 +254,7 @@ export class TabularData {
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
     this.legacySelection.destroy();
+    this.cleanupFunctions.forEach((f) => f());
   }
 }
 
