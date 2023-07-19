@@ -29,7 +29,7 @@ def _create_split_tables(extracted_table_name, extracted_columns, remainder_tabl
         fk_column_name = f"mathesar_temp_{fk_column_name}"
     remainder_table_oid = get_oid_from_table(remainder_table_name, schema, engine)
     extracted_table_oid = get_oid_from_table(extracted_table_name, schema, engine)
-    create_foreign_key_link(engine, schema, fk_column_name, remainder_table_oid, extracted_table_oid)
+    create_foreign_key_link(engine, fk_column_name, remainder_table_oid, extracted_table_oid)
     # TODO reuse metadata
     remainder_table_with_fk_key = reflect_table(remainder_table_name, schema, engine, metadata=get_empty_metadata())
     return extracted_table, remainder_table_with_fk_key, fk_column_name
