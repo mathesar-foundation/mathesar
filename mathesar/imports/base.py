@@ -5,7 +5,6 @@ from mathesar.imports.json import create_db_table_from_json_data_file
 from db.tables.operations.select import get_oid_from_table
 from mathesar.errors import InvalidTableError
 
-ALLOWED_DELIMITERS = ",\t:|;"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
