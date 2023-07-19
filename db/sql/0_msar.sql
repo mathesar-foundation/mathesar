@@ -1741,7 +1741,14 @@ Args:
 */
 SELECT
   format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id))
-  || COALESCE(new_default #>> '{}', __msar.build_cast_expr(old_default, new_type));
+  || CASE
+    WHEN jsonb_typeof(new_default)='null' THEN
+      null
+    WHEN new_default #>> '{}' IS NOT NULL THEN
+      format('%L', new_default #>> '{}')  -- sanitize since this could be user input.
+    ELSE
+      __msar.build_cast_expr(old_default, new_type)
+  END;
 $$ LANGUAGE SQL;
 
 
