@@ -61,6 +61,12 @@
     }
   }
 
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === 'Tab') {
+      close();
+    }
+  }
+
   function onDropdownClose() {
     dispatch('blur');
   }
@@ -81,6 +87,7 @@
   on:focus={open}
   on:focus
   on:blur={checkAndBlur}
+  on:keydown={onKeydown}
   on:keydown
   on:artificialInput
   on:artificialChange
