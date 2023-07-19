@@ -252,7 +252,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo useradd gunicorn -g gunicorn
     ```
 
-1. Add gunicorn user ownership to .media directory
+1. Make the `gunicorn` user the owner of the `.media` directory
 
     ```sh
     sudo chown -R gunicorn:gunicorn .media/
