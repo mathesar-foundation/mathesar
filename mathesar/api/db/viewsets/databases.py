@@ -17,6 +17,8 @@ from mathesar.api.serializers.functions import DBFunctionSerializer
 
 from db.types.base import get_available_known_db_types
 from mathesar.api.serializers.db_types import DBTypeSerializer
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
 
 
 class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -40,6 +42,13 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixi
         serializer = DBFunctionSerializer(supported_db_functions, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        request=None,
+        responses={
+            status.HTTP_200_OK: DBTypeSerializer(many=True),
+            status.HTTP_404_NOT_FOUND: 'Custom error response for resource not found',
+        },
+    )
     @action(methods=['get'], detail=True)
     def types(self, request, pk=None):
         database = self.get_object()
