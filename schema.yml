@@ -1,0 +1,274 @@
+openapi: 3.0.3
+info:
+  title: Mathesar API
+  version: 1.0.0
+paths:
+  /api/db/v0/schemas/:
+    get:
+      operationId: api_db_v0_schemas_list
+      parameters:
+      - in: query
+        name: database
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSchemaList'
+          description: ''
+    post:
+      operationId: api_db_v0_schemas_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Schema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Schema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Schema'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+          description: ''
+  /api/db/v0/schemas/{id}/:
+    get:
+      operationId: api_db_v0_schemas_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this schema.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+          description: ''
+    patch:
+      operationId: api_db_v0_schemas_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this schema.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSchema'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+          description: ''
+    delete:
+      operationId: api_db_v0_schemas_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this schema.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/db/v0/schemas/{id}/dependents/:
+    get:
+      operationId: api_db_v0_schemas_dependents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this schema.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+          description: ''
+components:
+  schemas:
+    PaginatedSchemaList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schema'
+    PatchedSchema:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        database:
+          type: string
+        has_dependents:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          nullable: true
+        num_tables:
+          type: string
+          readOnly: true
+        num_queries:
+          type: string
+          readOnly: true
+    Schema:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        database:
+          type: string
+        has_dependents:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          nullable: true
+        num_tables:
+          type: string
+          readOnly: true
+        num_queries:
+          type: string
+          readOnly: true
+      required:
+      - database
+      - has_dependents
+      - id
+      - name
+      - num_queries
+      - num_tables
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
+
