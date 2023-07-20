@@ -1200,6 +1200,18 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_alter_columns_type_options() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 5, "type": {"options": {"precision": 4}}}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[5]);
+  RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(4,0)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_alter_columns_drop() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_alters_jsonb jsonb := $j$[

@@ -925,8 +925,16 @@ FROM
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION msar.build_type_text_nullable(typ_jsonb jsonb) RETURNS text AS $$
-SELECT msar.build_type_text(typ_jsonb);
+CREATE OR REPLACE FUNCTION
+msar.build_type_text_complete(typ_jsonb jsonb, old_type text) RETURNS text AS $$
+SELECT msar.build_type_text(
+  jsonb_strip_nulls(
+    jsonb_build_object(
+      'name', COALESCE(typ_jsonb ->> 'name', old_type),
+      'options', typ_jsonb -> 'options'
+    )
+  )
+);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -1819,8 +1827,7 @@ WITH prepped_alters AS (
   SELECT
     tab_id,
     (col_alter_obj ->> 'attnum')::integer AS col_id,
-    format_type(atttypid, atttypmod) AS old_type,
-    msar.build_type_text_nullable(col_alter_obj -> 'type') AS new_type,
+    msar.build_type_text_complete(col_alter_obj -> 'type', format_type(atttypid, null)) AS new_type,
     pg_get_expr(adbin, tab_id) old_default,
     col_alter_obj -> 'default' AS new_default,
     (col_alter_obj -> 'not_null')::boolean AS not_null,
