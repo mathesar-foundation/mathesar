@@ -1,4 +1,5 @@
 import json
+import pandas
 import tempfile
 
 from psycopg2 import sql
@@ -32,9 +33,52 @@ def insert_record_or_records(table, engine, record_data):
     return None
 
 
-def insert_records_from_json(table, engine, json_filepath):
+def insert_records_from_json(table, engine, json_filepath, column_names, max_level):
+    """
+    Normalizes JSON data and inserts it into a table.
+
+    Args:
+        table: Table. The table to insert JSON data into.
+        engine: MockConnection. The SQLAlchemy engine.
+        json_filepath: str. The path to the stored JSON data file.
+        column_names: List[str]. List of column names.
+        max_level: int. The depth upto which JSON dict should be flattened.
+
+    Algorithm:
+        1.  We convert JSON data into Python object using json.load().
+        2.  We normalize data into a pandas dataframe using pandas.json_normalize() method.
+            The method takes column names as meta. We provide all possible keys as column
+            names, hence it adds missing keys to JSON objects and marks their values as NaN.
+        3.  We convert the dataframe to JSON using to_json() method and then to a Python object.
+            This method replaces 'NaN' values in the dataframe with 'None' values in Python
+            object. The reason behind not using df.to_dict() method is beacuse it stringifies
+            'NaN' values rather than converting them to a 'None' value.
+        4.  The processed data is now a list of dict objects. Each dict has same keys, that are
+            the column names of the table. We loop through each dict object, and if any value is
+            a dict or a list, we stringify them before inserting them into the table. This way,
+            our type inference logic kicks in later on converting them into
+            'MathesarCustomType.MATHESAR_JSON_OBJECT' and 'MathesarCustomType.MATHESAR_JSON_ARRAY'
+            respectively.
+        5.  We pass data (a list of dicts) to 'insert_record_or_records()' method which inserts
+            them into the table.
+    """
+
     with open(json_filepath, 'r') as json_file:
         data = json.load(json_file)
+
+    """
+    data: JSON object. The data we want to normalize.
+    max_level: int. Max number of levels(depth of dict) to normalize.
+        Normalizing a dict involes flattening it and if max_level is None,
+        pandas normalizes all levels. Default max_level is kept 0.
+    meta: Fields to use as metadata for each record in resulting table. Without meta,
+        the method chooses keys from the first JSON object it encounters as column names.
+        We provide column names as meta, because we want all possible keys as columns in
+        our table and not just the keys from the first JSON object.
+    """
+    df = pandas.json_normalize(data, max_level=max_level, meta=column_names)
+    data = json.loads(df.to_json(orient='records'))
+
     for i, row in enumerate(data):
         data[i] = {
             k: json.dumps(v)
