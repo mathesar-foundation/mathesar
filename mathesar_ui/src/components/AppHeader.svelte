@@ -95,43 +95,45 @@
         </LinkMenuItem>
       </DropdownMenu>
     {/if}
-    <DropdownMenu
-      triggerAppearance="ghost"
-      size="small"
-      closeOnInnerClick={true}
-      menuStyle="--spacing-x: 0.3em;"
-    >
-      <div class="user-switcher" slot="trigger">
-        <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
-      </div>
-      {#if database}
-        <MenuHeading>Database</MenuHeading>
-        <LinkMenuItem
-          icon={iconDatabase}
-          href={getDatabasePageUrl(database.name)}
-        >
-          {database.name}
+    {#if $userProfile}
+      <DropdownMenu
+        triggerAppearance="ghost"
+        size="small"
+        closeOnInnerClick={true}
+        menuStyle="--spacing-x: 0.3em;"
+      >
+        <div class="user-switcher" slot="trigger">
+          <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
+        </div>
+        {#if database}
+          <MenuHeading>Database</MenuHeading>
+          <LinkMenuItem
+            icon={iconDatabase}
+            href={getDatabasePageUrl(database.name)}
+          >
+            {database.name}
+          </LinkMenuItem>
+          <MenuDivider />
+        {/if}
+        <MenuHeading>Signed in as</MenuHeading>
+        <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
+          {$userProfile.getDisplayName()}
         </LinkMenuItem>
         <MenuDivider />
-      {/if}
-      <MenuHeading>Signed in as</MenuHeading>
-      <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
-        {$userProfile?.getDisplayName() ?? 'User profile'}
-      </LinkMenuItem>
-      <MenuDivider />
-      {#if $userProfile?.isSuperUser}
-        <LinkMenuItem
-          icon={iconSettingsMajor}
-          href={ADMIN_URL}
-          hasNotificationDot={upgradable}
-        >
-          Administration
+        {#if $userProfile.isSuperUser}
+          <LinkMenuItem
+            icon={iconSettingsMajor}
+            href={ADMIN_URL}
+            hasNotificationDot={upgradable}
+          >
+            Administration
+          </LinkMenuItem>
+        {/if}
+        <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
+          Log Out
         </LinkMenuItem>
-      {/if}
-      <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
-        Log Out
-      </LinkMenuItem>
-    </DropdownMenu>
+      </DropdownMenu>
+    {/if}
   </div>
 </header>
 

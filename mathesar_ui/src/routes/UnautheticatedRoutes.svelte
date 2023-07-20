@@ -1,12 +1,14 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import type { CommonData } from '@mathesar/utils/preloadData';
+  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
+  import { AnonymousViewerUserModel } from '@mathesar/stores/users';
+  import SharedTableRoute from '@mathesar/routes/SharedTableRoute.svelte';
 
-  export let commonData: CommonData;
+  setUserProfileStoreInContext(new AnonymousViewerUserModel());
 </script>
 
-<Route path="/shares/*">
-  <Route path="/tables/:slug" let:meta>
-    {JSON.stringify(meta)}
+<Route path="/shares/*" firstmatch>
+  <Route path="/tables/:slug/*" let:meta>
+    <SharedTableRoute />
   </Route>
 </Route>

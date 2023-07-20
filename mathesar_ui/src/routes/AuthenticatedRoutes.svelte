@@ -4,7 +4,6 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databases } from '@mathesar/stores/databases';
   import { setReleasesStoreInContext } from '@mathesar/stores/releases';
-  import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
   import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
@@ -20,8 +19,6 @@
     // setReleasesStoreInContext('1.75.0');
     setReleasesStoreInContext(commonData.current_release_tag_name);
   }
-
-  setBreadcrumbItemsInContext([]);
 
   $: firstDatabase = $databases.data?.[0];
 </script>
