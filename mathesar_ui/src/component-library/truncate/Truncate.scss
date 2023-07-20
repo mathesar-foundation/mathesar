@@ -24,3 +24,6 @@
   border-radius: 0.2rem;
   max-width: var(--tooltip-max-width, 22rem);
 }
+.truncate.right-align {
+  text-align: right;
+}

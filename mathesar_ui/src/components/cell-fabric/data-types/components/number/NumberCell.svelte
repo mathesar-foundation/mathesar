@@ -16,6 +16,7 @@
   export let formatterOptions: $$Props['formatterOptions'];
   export let horizontalAlignment: HorizontalAlignment = 'right';
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
+  export let truncatePassthrough: $$Props['truncatePassthrough'];
   export let formatForDisplay: $$Props['formatForDisplay'];
 </script>
 
@@ -25,6 +26,7 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
+  {truncatePassthrough}
   {searchValue}
   formatValue={formatForDisplay}
   {horizontalAlignment}

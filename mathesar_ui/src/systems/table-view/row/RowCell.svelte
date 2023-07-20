@@ -161,6 +161,7 @@
       {isSelectedInRange}
       {value}
       {isProcessing}
+      truncatePassthrough={true}
       recordSummary={$recordSummaries
         .get(String(column.id))
         ?.get(String(value))}

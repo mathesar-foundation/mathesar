@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount } from 'svelte';
 
   import {
+    Truncate,
     compareWholeValues,
     getValueComparisonOutcome,
     splitMatchParts,
@@ -28,6 +29,7 @@
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
   export let searchValue: unknown | undefined = undefined;
   export let isIndependentOfSheet = false;
+  export let truncatePassthrough = false;
   export let highlightSubstringMatches = true;
 
   let cellRef: HTMLElement;
@@ -173,9 +175,15 @@
       class:nowrap={!isActive && !isIndependentOfSheet}
       class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
     >
-      <slot name="content" {value} {formatValue} {matchParts}>
-        <CellValue value={formattedValue} {matchParts} />
-      </slot>
+      <Truncate
+        {horizontalAlignment}
+        lines={isActive && multiLineTruncate ? 2 : 1}
+        passthrough={truncatePassthrough}
+      >
+        <slot name="content" {value} {formatValue} {matchParts}>
+          <CellValue value={formattedValue} {matchParts} />
+        </slot>
+      </Truncate>
     </div>
   {/if}
 </CellWrapper>

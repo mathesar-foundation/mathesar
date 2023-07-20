@@ -48,12 +48,9 @@
   $: recordSummary = $recordSummaries
     .get(String(column.id))
     ?.get(String(value));
-  $: displayedValue = recordSummary ?? String(value) ?? '';
-  $: title =
-    displayedValue.length > titlingThreshold ? displayedValue : undefined;
 </script>
 
-<Cell rowType="dataRow" columnType="dataColumn" {title}>
+<Cell rowType="dataRow" columnType="dataColumn">
   <CellFabric
     columnFabric={processedColumn}
     {value}
@@ -61,5 +58,6 @@
     disabled
     showAsSkeleton={!rowHasSavedRecord(row)}
     {searchValue}
+    truncatePassthrough={false}
   />
 </Cell>

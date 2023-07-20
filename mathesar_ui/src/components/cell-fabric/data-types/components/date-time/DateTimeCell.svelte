@@ -10,6 +10,7 @@
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
+  export let truncatePassthrough: $$Props['truncatePassthrough'];
 
   export let type: $$Props['type'];
   export let formattingString: $$Props['formattingString'];
@@ -26,6 +27,7 @@
   {disabled}
   highlightSubstringMatches={false}
   {isIndependentOfSheet}
+  {truncatePassthrough}
   let:handleInputBlur
   let:handleInputKeydown
   formatValue={formatForDisplay}

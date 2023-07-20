@@ -28,6 +28,7 @@
   export let searchValue: unknown | undefined = undefined;
   export let isProcessing = false;
   export let isIndependentOfSheet = false;
+  export let truncatePassthrough = false;
 
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
@@ -62,6 +63,7 @@
     {setRecordSummary}
     {searchValue}
     {isProcessing}
+    {truncatePassthrough}
     bind:value
     on:movementKeyDown
     on:activate

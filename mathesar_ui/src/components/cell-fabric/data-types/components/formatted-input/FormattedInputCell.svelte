@@ -10,6 +10,7 @@
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
+  export let truncatePassthrough: $$Props['truncatePassthrough'];
   export let formatter: $$Props['formatter'];
   export let formatForDisplay: $$Props['formatForDisplay'];
 
@@ -25,6 +26,7 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
+  {truncatePassthrough}
   horizontalAlignment="right"
   let:handleInputBlur
   let:handleInputKeydown
