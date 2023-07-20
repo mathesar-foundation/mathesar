@@ -24,6 +24,7 @@
   setNewImperativeFilterControllerInContext();
 
   export let table: TableEntry;
+  export let isSharedConsumer = false;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: ({ query } = $router);
@@ -35,6 +36,9 @@
     table,
   });
   $: tabularDataStore.set(tabularData);
+  $: context = isSharedConsumer
+    ? 'shared-consumer-page'
+    : ('page' as 'page' | 'shared-consumer-page');
 
   function handleMetaSerializationChange(s: string) {
     router.location.query.set(metaSerializationQueryKey, s);
@@ -47,8 +51,8 @@
 
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
-    <ActionsPane {table} />
-    <TableView {table} />
+    <ActionsPane {table} {context} />
+    <TableView {table} {context} />
   </div>
 </LayoutWithHeader>
 
