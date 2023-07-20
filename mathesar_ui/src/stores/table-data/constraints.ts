@@ -4,6 +4,7 @@ import {
   getAPI,
   postAPI,
   States,
+  addQueryParamsToUrl,
 } from '@mathesar/api/utils/requestUtils';
 import type {
   Writable,
@@ -14,9 +15,10 @@ import type {
 } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 import type { CancellablePromise } from '@mathesar-component-library';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Constraint as ApiConstraint } from '@mathesar/api/types/tables/constraints';
 import type { Column } from '@mathesar/api/types/tables/columns';
+import type { ShareConsumer } from '@mathesar/utils/shares';
 
 /**
  * When representing a constraint on the front end, we directly use the object
@@ -86,7 +88,7 @@ function api(url: string) {
 }
 
 export class ConstraintsDataStore implements Writable<ConstraintsData> {
-  private parentId: DBObjectEntry['id'];
+  private tableId: TableEntry['id'];
 
   private store: Writable<ConstraintsData>;
 
@@ -96,7 +98,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   private api: ReturnType<typeof api>;
 
-  private fetchCallback: (storeData: ConstraintsData) => void;
+  readonly shareConsumer?: ShareConsumer;
 
   /**
    * A set of column ids representing columns which have single-column unique
@@ -107,18 +109,26 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
    */
   uniqueColumns: Readable<Set<number>>;
 
-  constructor(
-    parentId: number,
-    fetchCallback: (storeData: ConstraintsData) => void = () => {},
-  ) {
-    this.parentId = parentId;
+  constructor({
+    tableId,
+    shareConsumer,
+  }: {
+    tableId: TableEntry['id'];
+    shareConsumer?: ShareConsumer;
+  }) {
+    this.tableId = tableId;
+    this.shareConsumer = shareConsumer;
     this.store = writable({
       state: States.Loading,
       constraints: [],
     });
     this.uniqueColumns = uniqueColumns(this.store);
-    this.fetchCallback = fetchCallback;
-    this.api = api(`/api/db/v0/tables/${this.parentId}/constraints/`);
+    this.api = api(
+      addQueryParamsToUrl(
+        `/api/db/v0/tables/${this.tableId}/constraints/`,
+        shareConsumer?.getQueryParams(),
+      ),
+    );
     void this.fetch();
   }
 
@@ -155,7 +165,6 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
         constraints: response.results,
       };
       this.set(storeData);
-      this.fetchCallback?.(storeData);
       return storeData;
     } catch (err) {
       this.set({

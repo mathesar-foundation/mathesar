@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
-from mathesar.api.utils import SHARED_LINK_SLUG_REQUEST_HEADER
+from mathesar.api.utils import SHARED_LINK_UUID_QUERY_PARAM
 from mathesar.api.permission_utils import TableAccessInspector
 from mathesar.models.users import Role
 
@@ -119,7 +119,7 @@ class TableAccessPolicy(AccessPolicy):
         return TableAccessInspector(
             request.user,
             table,
-            token=request.headers.get(SHARED_LINK_SLUG_REQUEST_HEADER)
+            token=request.headers.get(SHARED_LINK_UUID_QUERY_PARAM)
         ).is_atleast_viewer()
 
     def is_atleast_table_manager(self, request, view, action):
