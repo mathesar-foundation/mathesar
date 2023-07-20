@@ -11,7 +11,7 @@ from mathesar.utils.preview import column_alias_from_preview_template
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
-SHARED_LINK_SLUG_REQUEST_HEADER = 'shared-link-slug'
+SHARED_LINK_UUID_QUERY_PARAM = 'shared-link-uuid'
 
 
 def get_table_or_404(pk):

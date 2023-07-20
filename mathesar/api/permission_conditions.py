@@ -1,4 +1,4 @@
-from mathesar.api.utils import get_table_or_404, SHARED_LINK_SLUG_REQUEST_HEADER
+from mathesar.api.utils import get_table_or_404, SHARED_LINK_UUID_QUERY_PARAM
 from mathesar.api.permission_utils import TableAccessInspector
 
 # These are available to all AccessPolicy instances
@@ -29,5 +29,5 @@ def is_atleast_viewer_nested_table_resource(request, view, action):
     return TableAccessInspector(
         request.user,
         table,
-        token=request.headers.get(SHARED_LINK_SLUG_REQUEST_HEADER)
+        token=request.query_params.get(SHARED_LINK_UUID_QUERY_PARAM)
     ).is_atleast_viewer()
