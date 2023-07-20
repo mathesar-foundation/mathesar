@@ -40,6 +40,7 @@ export const querySummarizationFunctionIds = [
   'max',
   'min',
   'mean',
+  'peak_time',
 ] as const;
 
 export type QuerySummarizationFunctionId =

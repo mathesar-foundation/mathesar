@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from django.core.cache import cache
@@ -26,6 +27,19 @@ def long_column_data_file():
             created_from='file',
             base_name='longdatafiled',
             type='csv'
+        )
+    return data_file
+
+
+@pytest.fixture
+def missing_keys_json_data_file():
+    data_filepath = 'mathesar/tests/data/json_parsing/missing_keys.json'
+    with open(data_filepath, "rb") as json_file:
+        data_file = DataFile.objects.create(
+            file=File(json_file),
+            created_from='file',
+            base_name='missing_keys',
+            type='json'
         )
     return data_file
 
@@ -1902,3 +1916,97 @@ def test_create_table_long_name_data_file(client, long_column_data_file, schema)
     )
     # This just makes sure we can get records. This was a bug with long column names.
     client.get(f'/api/db/v0/tables/{table.id}/records/')
+
+
+def test_create_table_and_normalize_json_data_file(client, missing_keys_json_data_file, schema):
+    table_name = 'Missing keys'
+    expt_name = _get_expected_name(table_name, data_file=missing_keys_json_data_file)
+    first_row = (1, 'Matt', 'Murdock', 'Male', '["Stick", "Foggy"]', '{"street": "210", "city": "NY"}', None)
+    column_names = [
+        "first_name", "last_name", "gender", "friends", "address", "email"
+    ]
+
+    check_create_table_response(
+        client, table_name, expt_name, missing_keys_json_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def _create_json_datafile_using_max_level_param(json_filepath, max_level):
+    with open(json_filepath, "rb") as json_file:
+        data_file = DataFile.objects.create(
+            file=File(json_file),
+            created_from='file',
+            base_name='nested objects',
+            type='json',
+            max_level=max_level
+        )
+    return data_file
+
+
+def test_create_table_with_nested_json_objects(client, schema):
+    nested_json_objects_file_path = 'mathesar/tests/data/json_parsing/nested_objects.json'
+    test_datafile_objects = [
+        _create_json_datafile_using_max_level_param(nested_json_objects_file_path, max_level)
+        for max_level in range(4)
+    ]
+    expected_data = [
+        {
+            "first_row": (
+                1, "John Doe", "30", "john.doe@example.com", json.dumps({
+                    "name": "frontend",
+                    "project": {
+                        "name": "Project A",
+                        "status": "In Progress",
+                        "team": {
+                            "lead": "John",
+                            "members": ["Mary", "Mark"]
+                        }
+                    }
+                })
+            ),
+            "column_names": ["name", "age", "email", "division"]
+        },
+        {
+            "first_row": (
+                1, "John Doe", "30", "john.doe@example.com", "frontend", json.dumps({
+                    "name": "Project A",
+                    "status": "In Progress",
+                    "team": {
+                        "lead": "John",
+                        "members": ["Mary", "Mark"]
+                    }
+                })
+            ),
+            "column_names": ["name", "age", "email", "division.name", "division.project"]
+        },
+        {
+            "first_row": (
+                1, "John Doe", "30", "john.doe@example.com", "frontend", "Project A", "In Progress", json.dumps({
+                    "lead": "John",
+                    "members": ["Mary", "Mark"]
+                })
+            ),
+            "column_names": [
+                "name", "age", "email", "division.name", "division.project.name",
+                "division.project.status", "division.project.team"
+            ]
+        },
+        {
+            "first_row": (
+                1, "John Doe", "30", "john.doe@example.com", "frontend", "Project A", "In Progress",
+                "John", '["Mary", "Mark"]'
+            ),
+            "column_names": [
+                "name", "age", "email", "division.name", "division.project.name",
+                "division.project.status", "division.project.team.lead", "division.project.team.members"
+            ]
+        }
+    ]
+
+    for index, datafile in enumerate(test_datafile_objects):
+        table_name = f'Table {index}'
+        check_create_table_response(
+            client, table_name, table_name, datafile, schema, expected_data[index]["first_row"],
+            expected_data[index]["column_names"], import_target_table=None
+        )
