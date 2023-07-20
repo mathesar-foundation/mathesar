@@ -1227,6 +1227,55 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_alter_columns_leaves_defaults() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 3, "type": {"name": "integer"}},
+    {"attnum": 6, "type": {"name": "date"}}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT col_default_is('col_alters', 'col2', '5');
+  RETURN NEXT col_default_is('col_alters', 'coltim', '(now())::date');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_drops_defaults() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 3, "default": null},
+    {"attnum": 6, "type": {"name": "date"}, "default": null}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT col_hasnt_default('col_alters', 'col2');
+  RETURN NEXT col_hasnt_default('col_alters', 'coltim');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_sets_defaults() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "default": "test34"},
+    {"attnum": 3, "default": 8},
+    {"attnum": 5, "type": {"name": "integer"}, "default": 7},
+    {"attnum": 6, "type": {"name": "text"}, "default": "test12"}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(
+    msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb),
+    ARRAY[2, 3, 5, 6]
+  );
+  RETURN NEXT col_default_is('col_alters', 'col1', 'test34');
+  RETURN NEXT col_default_is('col_alters', 'col2', '8');
+  RETURN NEXT col_default_is('col_alters', 'col_opts', '7');
+  RETURN NEXT col_default_is('col_alters', 'coltim', 'test12');
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_alter_columns_combo() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_alters_jsonb jsonb := $j$[
