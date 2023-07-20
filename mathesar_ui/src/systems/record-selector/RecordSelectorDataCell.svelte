@@ -35,7 +35,6 @@
    * approach here proves to be insufficient, then we can explore more
    * sophisticated approaches, potentially using the `overflowObserver` action.
    */
-  const titlingThreshold = 25;
 
   export let row: RecordRow;
   export let processedColumn: ProcessedColumn;
