@@ -14,6 +14,7 @@
       initialValue={$tables.data.get($tabularData.id)?.description ?? ''}
       onSubmit={(description) => onUpdate({ description })}
       isLongText
+      {...$$restProps}
     />
   </div>
 </EditTableHOC>
