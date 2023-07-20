@@ -82,8 +82,8 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
   peak_month: {
     label: 'Peak month',
     inputOutputTypeMap: {
-      [abstractTypeCategory.DateTime]: abstractTypeCategory.Text,
-      [abstractTypeCategory.Date]: abstractTypeCategory.Text,
+      [abstractTypeCategory.DateTime]: abstractTypeCategory.Number,
+      [abstractTypeCategory.Date]: abstractTypeCategory.Number,
     },
   },
 };
