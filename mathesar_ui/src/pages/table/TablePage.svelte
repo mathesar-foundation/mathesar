@@ -12,6 +12,7 @@
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { ShareConsumer } from '@mathesar/utils/shares';
   import { setNewImperativeFilterControllerInContext } from './ImperativeFilterController';
 
   const metaSerializationQueryKey = 'q';
@@ -24,7 +25,7 @@
   setNewImperativeFilterControllerInContext();
 
   export let table: TableEntry;
-  export let isSharedConsumer = false;
+  export let shareConsumer: ShareConsumer | undefined;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: ({ query } = $router);
@@ -34,9 +35,10 @@
     abstractTypesMap,
     meta,
     table,
+    shareConsumer,
   });
   $: tabularDataStore.set(tabularData);
-  $: context = isSharedConsumer
+  $: context = shareConsumer
     ? 'shared-consumer-page'
     : ('page' as 'page' | 'shared-consumer-page');
 

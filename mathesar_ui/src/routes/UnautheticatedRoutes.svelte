@@ -9,6 +9,6 @@
 
 <Route path="/shares/*" firstmatch>
   <Route path="/tables/:slug/*" let:meta>
-    <SharedTableRoute />
+    <SharedTableRoute slug={String(meta.params.slug)} />
   </Route>
 </Route>
