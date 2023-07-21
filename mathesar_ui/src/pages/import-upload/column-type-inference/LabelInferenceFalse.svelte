@@ -5,5 +5,5 @@
 
 <NameWithIcon icon={iconUiTypeText} truncate={false}>
   Use "Text" for all column types
-  <em>(faster)</em>
+  <em>(faster for large imports)</em>
 </NameWithIcon>

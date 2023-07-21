@@ -10,7 +10,7 @@
   bind:value
   boxed
   options={[true, false]}
-  label="Column type inference"
+  label="Column types"
   getRadioLabel={(v) =>
     v ? { component: LabelInferenceTrue } : { component: LabelInferenceFalse }}
 />

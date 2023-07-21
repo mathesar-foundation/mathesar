@@ -1,16 +1,120 @@
 <script lang="ts">
+  import { router } from 'tinro';
+
+  import {
+    RadioGroup,
+    TextArea,
+    iconUploadFile,
+  } from '@mathesar-component-library';
+  import type { IconProps } from '@mathesar-component-library/types';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { dataFilesApi } from '@mathesar/api/dataFiles';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import {
+    Field,
+    FieldLayout,
+    FormSubmit,
+    makeForm,
+    requiredField,
+  } from '@mathesar/components/form';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { iconPaste, iconUrl } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import {
+    getImportPreviewPageUrl,
+    getTablePageUrl,
+  } from '@mathesar/routes/urls';
+  import { createTable, patchTable } from '@mathesar/stores/tables';
+  import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import DataFileInput from './DataFileInput.svelte';
   import ColumnTypeInferenceInput from './column-type-inference/ColumnTypeInferenceInput.svelte';
-  import DataSourceInput from './data-source/DataSourceInput.svelte';
-  import { SpinnerButton } from '@mathesar-component-library';
-  import { FieldLayout } from '@mathesar/components/form';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let database: Database;
   export let schema: SchemaEntry;
 
-  let useColumnTypeInference = true;
+  interface UploadMethod {
+    key: 'file' | 'url' | 'clipboard';
+    label: string;
+    icon: IconProps;
+  }
+  const uploadMethods: UploadMethod[] = [
+    { key: 'file', label: 'Upload a file', icon: iconUploadFile },
+    { key: 'url', label: 'Provide a URL to the file', icon: iconUrl },
+    { key: 'clipboard', label: 'Copy and paste text', icon: iconPaste },
+  ];
+
+  const uploadMethod = requiredField<UploadMethod>(uploadMethods[0]);
+  const urlToFile = requiredField('');
+  const clipboardContent = requiredField('');
+  const fileUploadId = requiredField<number | undefined>(undefined);
+  const useColumnTypeInference = requiredField(true);
+
+  $: form = (() => {
+    const commonFields = { uploadMethod, useColumnTypeInference };
+    if ($uploadMethod.key === 'file') {
+      return makeForm({ ...commonFields, fileUploadId });
+    }
+    if ($uploadMethod.key === 'url') {
+      return makeForm({ ...commonFields, urlToFile });
+    }
+    if ($uploadMethod.key === 'clipboard') {
+      return makeForm({ ...commonFields, clipboardContent });
+    }
+    return assertExhaustive($uploadMethod.key);
+  })();
+
+  let status: RequestStatus | undefined;
+
+  function reset() {
+    form.reset();
+    status = undefined;
+  }
+
+  async function getDataFileId() {
+    if ($uploadMethod.key === 'file') {
+      if ($fileUploadId === undefined) {
+        throw new Error('No file uploaded');
+      }
+      return $fileUploadId;
+    }
+    if ($uploadMethod.key === 'url') {
+      return (await dataFilesApi.addViaUrlToFile($urlToFile)).id;
+    }
+    if ($uploadMethod.key === 'clipboard') {
+      return (await dataFilesApi.addViaText($clipboardContent)).id;
+    }
+    assertExhaustive($uploadMethod.key);
+  }
+
+  async function proceed() {
+    try {
+      status = { state: 'processing' };
+      const dataFileId = await getDataFileId();
+      if (dataFileId === undefined) {
+        return;
+      }
+      const table = await createTable(database, schema, {
+        dataFiles: [dataFileId],
+      });
+      if ($useColumnTypeInference) {
+        router.goto(
+          getImportPreviewPageUrl(database.name, schema.id, table.id),
+          true,
+        );
+      } else {
+        await patchTable(table.id, { import_verified: true });
+        router.goto(getTablePageUrl(database.name, schema.id, table.id), true);
+      }
+      status = undefined;
+    } catch (err) {
+      status = { state: 'failure', errors: [getErrorMessage(err)] };
+    }
+  }
 </script>
 
 <svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
@@ -24,20 +128,88 @@
   }}
 >
   <h1>Create a table by importing your data</h1>
+
   <div class="import-file-view">
-    <FieldLayout>
-      <DataSourceInput {database} {schema} />
-    </FieldLayout>
-
-    <FieldLayout>
-      <ColumnTypeInferenceInput bind:value={useColumnTypeInference} />
-    </FieldLayout>
-
-    <FieldLayout>
-      <div class="submit">
-        <SpinnerButton label="Continue" disabled />
+    {#if status?.state === 'processing'}
+      <div class="uploading-info">
+        <!--
+          TODO improve styling of this content
+         -->
+        <span>Uploading Data</span>
+        <WarningBox>
+          Large data sets can sometimes take several minutes to process. Please
+          do not leave this page or close the browser tab while import is in
+          progress.
+        </WarningBox>
       </div>
-    </FieldLayout>
+    {:else if status?.state === 'failure'}
+      <ErrorBox>
+        <ul>
+          {#each status.errors as error}
+            <li>{error}</li>
+          {/each}
+        </ul>
+      </ErrorBox>
+    {:else}
+      <FieldLayout>
+        <RadioGroup
+          boxed
+          bind:value={$uploadMethod}
+          options={uploadMethods}
+          isInline
+          label="Data source"
+          getRadioLabel={(opt) => ({
+            component: NameWithIcon,
+            props: { name: opt.label, icon: opt.icon },
+          })}
+        >
+          <div class="data-source-detail" slot="extra">
+            <div class="data-source-input">
+              {#if $uploadMethod.key === 'file'}
+                <DataFileInput bind:value={$fileUploadId} />
+              {:else if $uploadMethod.key === 'url'}
+                <Field
+                  field={urlToFile}
+                  layout="stacked"
+                  label="Enter the URL of the file you want to import"
+                />
+              {:else if $uploadMethod.key === 'clipboard'}
+                <Field
+                  field={clipboardContent}
+                  label="Paste the data you want to import"
+                  layout="stacked"
+                  input={{ component: TextArea, props: { rows: 10 } }}
+                />
+              {:else}
+                {assertExhaustive($uploadMethod.key)}
+              {/if}
+            </div>
+            <div class="upload-format-help">
+              The data must be in tabular format (CSV, TSV etc) or JSON. See
+              relevant
+              <DocsLink path="/user-guide/importing-data/"
+                >documentation</DocsLink
+              >.
+            </div>
+          </div>
+        </RadioGroup>
+      </FieldLayout>
+
+      <Field
+        field={useColumnTypeInference}
+        input={{ component: ColumnTypeInferenceInput }}
+      />
+
+      <FieldLayout>
+        <FormSubmit
+          {form}
+          onProceed={proceed}
+          onCancel={reset}
+          cancelButton={{ label: 'Reset' }}
+          canCancel={$form.hasChanges}
+        />
+      </FieldLayout>
+    {/if}
   </div>
 </LayoutWithHeader>
 
@@ -50,7 +222,14 @@
     margin-bottom: 2rem;
   }
 
-  .submit {
+  .data-source-input {
+    margin: 1rem 0;
+  }
+
+  .upload-format-help {
+    line-height: 1.2;
+    color: var(--slate-500);
     text-align: right;
+    font-size: var(--text-size-small);
   }
 </style>

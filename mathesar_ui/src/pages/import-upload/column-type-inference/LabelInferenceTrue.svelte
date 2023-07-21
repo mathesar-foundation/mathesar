@@ -5,5 +5,5 @@
 
 <NameWithIcon icon={iconInferColumnType} truncate={false}>
   Analyze data and pick the best type for each column
-  <em>(slower)</em>
+  <em>(slower for large imports)</em>
 </NameWithIcon>
