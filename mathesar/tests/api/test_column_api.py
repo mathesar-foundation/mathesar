@@ -470,7 +470,7 @@ def test_column_update_type_dynamic_default(column_test_table, client):
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/", data=data
     )
-    assert response.status_code == 400
+    assert response.status_code == 200
 
 
 def test_column_update_type(column_test_table, client):
@@ -579,7 +579,7 @@ def test_column_update_invalid_type(create_patents_table, client):
     assert response.status_code == 400
     response_json = response.json()
     assert response_json[0]['code'] == ErrorCodes.InvalidTypeCast.value
-    assert response_json[0]['message'] == f"{columns[column_index]['name']} cannot be cast to bigint."
+    assert response_json[0]['message'] == f"\"{columns[column_index]['name']}\" cannot be cast to bigint."
 
 
 def test_column_update_invalid_nullable(create_patents_table, client):

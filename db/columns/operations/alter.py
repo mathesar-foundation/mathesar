@@ -1,16 +1,20 @@
+import json
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import DefaultClause, text, DDL, select
 from sqlalchemy.exc import DataError, InternalError, ProgrammingError
-from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue, StringDataRightTruncation, RaiseException, SyntaxError
-
+from psycopg.errors import (
+    InvalidTextRepresentation, InvalidParameterValue, RaiseException,
+    SyntaxError
+)
+from psycopg2 import errors as ps2err
 from db import connection as db_conn
 from db.columns.defaults import NAME, NULLABLE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
 )
-from db.columns.utils import to_mathesar_column_with_engine, get_type_options
+from db.columns.utils import get_type_options
 from db.tables.operations.select import reflect_table_from_oid
 from db.types.operations.convert import get_db_type_enum_from_class, get_db_type_enum_from_id
 from db.types.operations.cast import get_cast_function_name
@@ -19,54 +23,69 @@ from db.metadata import get_empty_metadata
 
 
 def alter_column(engine, table_oid, column_attnum, column_data):
-    TYPE_KEY = 'type'
-    TYPE_OPTIONS_KEY = 'type_options'
-    NULLABLE_KEY = NULLABLE
+    """
+    Alter a column of the a table.
+
+    Args:
+        table_oid: integer giving the OID of the table with the column.
+        column_attnum: integer giving the attnum of the column to alter.
+        column_data: dictionary describing the alterations to make.
+
+    column_data should have the form:
+    {
+        "type": <str>
+        "type_options": <dict>,
+        "column_default_dict": {"is_dynamic": <bool>, "value": <any>}
+        "nullable": <str>,
+        "name": <str>
+    }
+    """
     DEFAULT_DICT = 'column_default_dict'
     DEFAULT_KEY = 'value'
-    NAME_KEY = NAME
+    column_type = {
+        "name": column_data.get('type'),
+        "options": column_data.get('type_options')
+    }
+    new_type = {k: v for k, v in column_type.items() if v} or None
+    column_nullable = column_data.get(NULLABLE)
+    column_not_null = not column_nullable if column_nullable is not None else None
+    column_name = (column_data.get(NAME) or '').strip() or None
+    # TODO This should be consolidated with similar processing in the
+    # create_column function.
+    raw_col_alter_def = {
+        "attnum": column_attnum,
+        "type": new_type,
+        "not_null": column_not_null,
+        "name": column_name,
+    }
+    col_alter_def = {k: v for k, v in raw_col_alter_def.items() if v is not None}
+    default_dict = column_data.get(DEFAULT_DICT, {})
+    if default_dict is not None and DEFAULT_KEY in default_dict:
+        default_value = column_data.get(DEFAULT_DICT, {}).get(DEFAULT_KEY)
+        col_alter_def.update(default=default_value)
+    elif default_dict is None:
+        col_alter_def.update(default=None)
 
-    with engine.begin() as conn:
-        if TYPE_KEY in column_data:
-            new_type = get_db_type_enum_from_id(column_data[TYPE_KEY])
-            retype_column(
-                table_oid, column_attnum, engine, conn,
-                new_type=new_type,
-                type_options=column_data.get(TYPE_OPTIONS_KEY, {})
-            )
-        elif TYPE_OPTIONS_KEY in column_data:
-            retype_column(
-                table_oid, column_attnum, engine, conn,
-                type_options=column_data[TYPE_OPTIONS_KEY]
-            )
-
-        if NULLABLE_KEY in column_data:
-            nullable = column_data[NULLABLE_KEY]
-            change_column_nullable(table_oid, column_attnum, engine, conn, nullable)
-        if DEFAULT_DICT in column_data:
-            default_dict = column_data[DEFAULT_DICT]
-            default = default_dict[DEFAULT_KEY] if default_dict is not None else None
-
-            set_column_default(table_oid, column_attnum, engine, conn, default)
-        if NAME_KEY in column_data:
-            # Name always needs to be the last item altered
-            # since previous operations need the name to work
-            name = column_data[NAME_KEY]
-            rename_column(table_oid, column_attnum, engine, conn, name)
-    # TODO reuse metadata
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=get_empty_metadata())
-    reflected_table = reflect_table_from_oid(
-        table_oid,
-        engine,
-        # TODO reuse metadata
-        metadata=get_empty_metadata(),
-    )
-    reflected_column = reflected_table.columns[column_name]
-    reflected_column = to_mathesar_column_with_engine(
-        reflected_column,
-        engine,
-    )
-    return reflected_column
+    try:
+        db_conn.execute_msar_func_with_engine(
+            engine, 'alter_columns',
+            table_oid,
+            json.dumps([col_alter_def])
+        )
+    except InvalidParameterValue:
+        raise InvalidTypeOptionError
+    except InvalidTextRepresentation:
+        column_db_name = db_conn.execute_msar_func_with_engine(
+            engine, 'get_column_name', table_oid, column_attnum
+        ).fetchone()[0]
+        raise InvalidTypeError(column_db_name, column_type.get('name'))
+    except RaiseException:
+        column_db_name = db_conn.execute_msar_func_with_engine(
+            engine, 'get_column_name', table_oid, column_attnum
+        ).fetchone()[0]
+        raise InvalidTypeError(column_db_name, column_type.get('name'))
+    except SyntaxError:
+        raise InvalidTypeOptionError
 
 
 def retype_column(
@@ -104,21 +123,21 @@ def retype_column(
             type_options,
         )
     except DataError as e:
-        if type(e.orig) == InvalidParameterValue:
+        if type(e.orig) == ps2err.InvalidParameterValue:
             raise InvalidTypeOptionError
-        elif type(e.orig) == InvalidTextRepresentation:
+        elif type(e.orig) == ps2err.InvalidTextRepresentation:
             raise InvalidTypeError(column_name, new_type)
-        elif type(e.orig) == StringDataRightTruncation:
+        elif type(e.orig) == ps2err.StringDataRightTruncation:
             raise e.orig
         else:
             raise e.orig
     except InternalError as e:
-        if type(e.orig) == RaiseException:
+        if type(e.orig) == ps2err.RaiseException:
             raise InvalidTypeError(column_name, new_type)
         else:
             raise e.orig
     except ProgrammingError as e:
-        if type(e.orig) == SyntaxError:
+        if type(e.orig) == ps2err.SyntaxError:
             raise InvalidTypeOptionError
         else:
             raise e.orig

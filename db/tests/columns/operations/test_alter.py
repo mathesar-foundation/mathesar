@@ -75,35 +75,6 @@ def _get_pizza_column_data(table_oid, engine):
     return column_data
 
 
-@pytest.mark.parametrize(
-    "column_dict,func_name",
-    [
-        ({"name": "blah"}, "rename_column"),
-        ({"type": "blah"}, "retype_column"),
-        ({"type_options": {"blah": "blah"}}, "retype_column"),
-        ({"nullable": True}, "change_column_nullable"),
-        ({"column_default_dict": {"value": 1}}, "set_column_default"),
-    ]
-)
-def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema):
-    table_name = "table_with_columns"
-    engine, schema = engine_with_schema
-    metadata = MetaData(bind=engine, schema=schema)
-    column_name = 'col'
-    table = Table(table_name, metadata, Column(column_name, VARCHAR))
-    table.create()
-    table_oid = get_oid_from_table(table.name, table.schema, engine)
-    target_column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, metadata=get_empty_metadata())
-    with patch.object(alter_operations, func_name) as mock_alterer:
-        alter_column(
-            engine,
-            table_oid,
-            target_column_attnum,
-            column_dict
-        )
-        mock_alterer.assert_called_once()
-
-
 def test_rename_column_and_assert(engine_with_schema):
     old_col_name = "col1"
     new_col_name = "col2"
