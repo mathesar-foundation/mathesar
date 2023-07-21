@@ -193,7 +193,7 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'POSTPROCESSING_HOOKS': [
-        'config.settings.openapi.custom_postprocessing_hook',
+        'config.settings.openapi.remove_url_prefix_hook',
     ],
     # OTHER SETTINGS
 }

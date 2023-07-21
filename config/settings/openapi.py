@@ -1,5 +1,5 @@
-def custom_postprocessing_hook(generator, result, request, public):
-    # Modify the operation IDs in the result schema
+def remove_url_prefix_hook(generator, result, request, public):
+    # Remove namespace and version url prefix from the operation Id of the generated API schema
     for path, path_info in result['paths'].items():
         for method, operation in path_info.items():
             operation_id = operation.get('operationId')
