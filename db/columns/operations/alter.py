@@ -40,37 +40,13 @@ def alter_column(engine, table_oid, column_attnum, column_data):
         "name": <str>
     }
     """
-    DEFAULT_DICT = 'column_default_dict'
-    DEFAULT_KEY = 'value'
-    column_type = {
-        "name": column_data.get('type'),
-        "options": column_data.get('type_options')
-    }
-    new_type = {k: v for k, v in column_type.items() if v} or None
-    column_nullable = column_data.get(NULLABLE)
-    column_not_null = not column_nullable if column_nullable is not None else None
-    column_name = (column_data.get(NAME) or '').strip() or None
-    # TODO This should be consolidated with similar processing in the
-    # create_column function.
-    raw_col_alter_def = {
-        "attnum": column_attnum,
-        "type": new_type,
-        "not_null": column_not_null,
-        "name": column_name,
-    }
-    col_alter_def = {k: v for k, v in raw_col_alter_def.items() if v is not None}
-    default_dict = column_data.get(DEFAULT_DICT, {})
-    if default_dict is not None and DEFAULT_KEY in default_dict:
-        default_value = column_data.get(DEFAULT_DICT, {}).get(DEFAULT_KEY)
-        col_alter_def.update(default=default_value)
-    elif default_dict is None:
-        col_alter_def.update(default=None)
-
+    column_alter_def = _process_column_alter_dict(column_data, column_attnum)
+    requested_type = column_alter_def.get("type", {}).get("name")
     try:
         db_conn.execute_msar_func_with_engine(
             engine, 'alter_columns',
             table_oid,
-            json.dumps([col_alter_def])
+            json.dumps([column_alter_def])
         )
     except InvalidParameterValue:
         raise InvalidTypeOptionError
@@ -78,12 +54,12 @@ def alter_column(engine, table_oid, column_attnum, column_data):
         column_db_name = db_conn.execute_msar_func_with_engine(
             engine, 'get_column_name', table_oid, column_attnum
         ).fetchone()[0]
-        raise InvalidTypeError(column_db_name, column_type.get('name'))
+        raise InvalidTypeError(column_db_name, requested_type)
     except RaiseException:
         column_db_name = db_conn.execute_msar_func_with_engine(
             engine, 'get_column_name', table_oid, column_attnum
         ).fetchone()[0]
-        raise InvalidTypeError(column_db_name, column_type.get('name'))
+        raise InvalidTypeError(column_db_name, requested_type)
     except SyntaxError:
         raise InvalidTypeOptionError
 
@@ -253,7 +229,7 @@ def _check_type_option_equivalence(type_options_1, type_options_2):
     return False
 
 
-def _validate_columns_for_batch_update(table, column_data):
+def _validate_columns_for_batch_update(column_data):
     ALLOWED_KEYS = ['attnum', 'name', 'type', 'type_options', 'delete']
     for single_column_data in column_data:
         if 'attnum' not in single_column_data.keys():
@@ -331,14 +307,76 @@ def batch_alter_table_drop_columns(table_oid, column_data_list, connection, engi
 
 
 def batch_update_columns(table_oid, engine, column_data_list):
-    table = reflect_table_from_oid(
-        table_oid,
-        engine,
-        # TODO reuse metadata
-        metadata=get_empty_metadata(),
-    )
-    _validate_columns_for_batch_update(table, column_data_list)
-    with engine.begin() as conn:
-        _batch_update_column_types(table_oid, column_data_list, conn, engine)
-        _batch_alter_table_rename_columns(table_oid, column_data_list, conn, engine)
-        batch_alter_table_drop_columns(table_oid, column_data_list, conn, engine)
+    _validate_columns_for_batch_update(column_data_list)
+    try:
+        db_conn.execute_msar_func_with_engine(
+            engine, 'alter_columns',
+            table_oid,
+            json.dumps(
+                [_process_column_alter_dict(column) for column in column_data_list]
+            )
+        )
+    except InvalidParameterValue:
+        raise InvalidTypeOptionError
+    except InvalidTextRepresentation:
+        raise InvalidTypeError(None, None)
+    except RaiseException:
+        raise InvalidTypeError(None, None)
+    except SyntaxError:
+        raise InvalidTypeOptionError
+
+
+def _process_column_alter_dict(column_data, column_attnum=None):
+    """
+    Transform the column_data dict into the form needed for the DB functions.
+
+    Input column_data form:
+    {
+        "type": <str>
+        "type_options": <dict>,
+        "column_default_dict": {"is_dynamic": <bool>, "value": <any>}
+        "nullable": <bool>,
+        "name": <str>,
+        "delete": <bool>
+    }
+
+    Output form:
+    {
+        "type": {"name": <str>, "options": <dict>},
+        "name": <str>,
+        "not_null": <bool>,
+        "default": <any>,
+        "delete": <bool>
+    }
+
+    Note that keys with empty values will be dropped, unless the given "default"
+    key is explicitly set to None.
+    """
+    DEFAULT_DICT = 'column_default_dict'
+    DEFAULT_KEY = 'value'
+
+    column_type = {
+        "name": column_data.get('type'),
+        "options": column_data.get('type_options')
+    }
+    new_type = {k: v for k, v in column_type.items() if v} or None
+    column_nullable = column_data.get(NULLABLE)
+    column_delete = column_data.get("delete")
+    column_not_null = not column_nullable if column_nullable is not None else None
+    column_name = (column_data.get(NAME) or '').strip() or None
+    raw_col_alter_def = {
+        "attnum": column_attnum or column_data.get("attnum"),
+        "type": new_type,
+        "not_null": column_not_null,
+        "name": column_name,
+        "delete": column_delete
+    }
+    col_alter_def = {k: v for k, v in raw_col_alter_def.items() if v is not None}
+    default_dict = column_data.get(DEFAULT_DICT, {})
+    if default_dict is not None and DEFAULT_KEY in default_dict:
+        default_value = column_data.get(DEFAULT_DICT, {}).get(DEFAULT_KEY)
+        col_alter_def.update(default=default_value)
+    elif default_dict is None:
+        col_alter_def.update(default=None)
+
+    return col_alter_def

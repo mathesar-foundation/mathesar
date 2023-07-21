@@ -7,7 +7,10 @@ from sqlalchemy.exc import IntegrityError
 
 from db import constants
 from db.columns.operations import alter as alter_operations
-from db.columns.operations.alter import alter_column, batch_update_columns, change_column_nullable, rename_column, retype_column, set_column_default
+from db.columns.operations.alter import (
+    batch_update_columns, change_column_nullable, rename_column, retype_column,
+    set_column_default
+)
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
     get_columns_attnum_from_names,
