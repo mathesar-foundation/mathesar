@@ -75,8 +75,9 @@ function uniqueColumns(
 
 function api(url: string) {
   return {
-    get() {
-      return getAPI<PaginatedResponse<Constraint>>(`${url}?limit=500`);
+    get(queryParams: Record<string, unknown>) {
+      const requestUrl = addQueryParamsToUrl(url, queryParams);
+      return getAPI<PaginatedResponse<Constraint>>(requestUrl);
     },
     add(constraintDetails: Partial<Constraint>) {
       return postAPI<Partial<Constraint>>(url, constraintDetails);
@@ -123,12 +124,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       constraints: [],
     });
     this.uniqueColumns = uniqueColumns(this.store);
-    this.api = api(
-      addQueryParamsToUrl(
-        `/api/db/v0/tables/${this.tableId}/constraints/`,
-        shareConsumer?.getQueryParams(),
-      ),
-    );
+    this.api = api(`/api/db/v0/tables/${this.tableId}/constraints/`);
     void this.fetch();
   }
 
@@ -156,7 +152,10 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
     try {
       this.promise?.cancel();
-      this.promise = this.api.get();
+      this.promise = this.api.get({
+        limit: 500,
+        ...this.shareConsumer?.getQueryParams(),
+      });
 
       const response = await this.promise;
 

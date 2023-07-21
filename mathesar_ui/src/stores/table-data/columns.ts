@@ -22,8 +22,9 @@ import type { ShareConsumer } from '@mathesar/utils/shares';
 
 function api(url: string) {
   return {
-    get() {
-      return getAPI<PaginatedResponse<Column>>(`${url}?limit=500`);
+    get(queryParams: Record<string, unknown>) {
+      const requestUrl = addQueryParamsToUrl(url, queryParams);
+      return getAPI<PaginatedResponse<Column>>(requestUrl);
     },
     add(columnDetails: Partial<Column>) {
       return postAPI<Partial<Column>>(url, columnDetails);
@@ -75,12 +76,8 @@ export class ColumnsDataStore extends EventHandler<{
   }) {
     super();
     this.tableId = tableId;
-    this.api = api(
-      addQueryParamsToUrl(
-        `/api/db/v0/tables/${this.tableId}/columns/`,
-        shareConsumer?.getQueryParams(),
-      ),
-    );
+    this.shareConsumer = shareConsumer;
+    this.api = api(`/api/db/v0/tables/${this.tableId}/columns/`);
     this.hiddenColumns = new WritableSet(hiddenColumns);
     this.columns = derived(
       [this.fetchedColumns, this.hiddenColumns],
@@ -96,7 +93,10 @@ export class ColumnsDataStore extends EventHandler<{
     try {
       this.fetchStatus.set({ state: 'processing' });
       this.promise?.cancel();
-      this.promise = this.api.get();
+      this.promise = this.api.get({
+        limit: 500,
+        ...this.shareConsumer?.getQueryParams(),
+      });
       const response = await this.promise;
       const columns = response.results;
       this.fetchedColumns.set(columns);

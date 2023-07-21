@@ -80,6 +80,7 @@ export class TabularData {
     this.columnsDataStore = new ColumnsDataStore({
       tableId: this.id,
       hiddenColumns: contextualFilters.keys(),
+      shareConsumer: this.shareConsumer,
     });
     this.constraintsDataStore = new ConstraintsDataStore({
       tableId: this.id,
