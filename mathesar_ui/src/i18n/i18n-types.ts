@@ -3,6 +3,7 @@
 import type {
   BaseTranslation as BaseTranslationType,
   LocalizedString,
+  RequiredParams,
 } from 'typesafe-i18n';
 
 export type BaseTranslation = BaseTranslationType;
@@ -15,25 +16,2675 @@ export type Translation = RootTranslation;
 export type Translations = RootTranslation;
 
 type RootTranslation = {
-  /**
-   * A​l​l​ ​D​a​t​a​b​a​s​e​s
-   */
-  allDatabases: string;
-  /**
-   * D​a​t​a​b​a​s​e​ ​w​i​t​h​ ​n​a​m​e​ ​<​>​d​a​t​a​b​a​s​e​N​a​m​e​<​>​ ​i​s​ ​n​o​t​ ​f​o​u​n​d​.
-   */
-  databaseWithNameNotFound: string;
+  routes: {
+    /**
+     * N​o​ ​d​a​t​a​b​a​s​e​s​ ​f​o​u​n​d
+     */
+    noDatabasesFound: string;
+    /**
+     * T​h​i​s​ ​i​s​ ​t​h​e​ ​n​o​t​ ​t​h​e​ ​w​e​b​p​a​g​e​ ​y​o​u​ ​a​r​e​ ​l​o​o​k​i​n​g​ ​f​o​r​.
+     */
+    wrongWebPage: string;
+    /**
+     * E​x​p​l​o​r​a​t​i​o​n​ ​n​o​t​ ​f​o​u​n​d​.
+     */
+    explorationNotFound: string;
+    /**
+     * D​a​t​a​b​a​s​e​ ​w​i​t​h​ ​n​a​m​e​ ​<​>​d​a​t​a​b​a​s​e​N​a​m​e​<​>​ ​i​s​ ​n​o​t​ ​f​o​u​n​d​.
+     */
+    databaseWithNameNotFound: string;
+    /**
+     * T​h​e​ ​s​p​e​c​i​f​i​e​d​ ​U​R​L​ ​i​s​ ​n​o​t​ ​f​o​u​n​d​.
+     */
+    urlNotFound: string;
+    /**
+     * T​a​b​l​e​ ​w​i​t​h​ ​i​d​ ​{​i​d​}​ ​n​o​t​ ​f​o​u​n​d​.
+     * @param {number} id
+     */
+    tableWithIdNotFound: RequiredParams<'id'>;
+    /**
+     * S​c​h​e​m​a​ ​n​o​t​ ​f​o​u​n​d​.
+     */
+    schemaNotFound: string;
+  };
+  general: {
+    /**
+     * A​d​m​i​n​i​s​t​r​a​t​i​o​n
+     */
+    administration: string;
+    /**
+     * S​o​f​t​w​a​r​e​ ​U​p​d​a​t​e
+     */
+    softwareUpdate: string;
+    /**
+     * E​d​i​t
+     */
+    edit: string;
+    /**
+     * D​a​t​a​ ​E​x​p​l​o​r​e​r
+     */
+    dataExplorer: string;
+    /**
+     * I​m​p​o​r​t
+     */
+    import: string;
+    /**
+     * U​s​e​r​ ​P​r​o​f​i​l​e
+     */
+    userProfile: string;
+    /**
+     * U​s​e​r​s
+     */
+    users: string;
+    /**
+     * R​e​l​e​a​s​e​ ​N​o​t​e​s
+     */
+    releaseNotes: string;
+    /**
+     * d​o​c​u​m​e​n​t​a​t​i​o​n
+     */
+    documentation: string;
+    /**
+     * C​o​n​t​i​n​u​e
+     */
+    continue: string;
+    /**
+     * R​e​t​r​y
+     */
+    retry: string;
+    /**
+     * U​p​g​r​a​d​i​n​g
+     */
+    upgrading: string;
+    /**
+     * U​p​g​r​a​d​e
+     */
+    upgrade: string;
+    /**
+     * R​e​l​e​a​s​e​d
+     */
+    released: string;
+    /**
+     * U​p​d​a​t​e
+     */
+    update: string;
+    /**
+     * E​r​r​o​r
+     */
+    error: string;
+    /**
+     * A​r​e​ ​y​o​u​ ​s​u​r​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​p​r​o​c​e​e​d​?
+     */
+    areYouSureToProceed: string;
+    /**
+     * S​a​v​e
+     */
+    save: string;
+    /**
+     * N​a​m​e​ ​c​a​n​n​o​t​ ​b​e​ ​e​m​p​t​y​.
+     */
+    nameCannotBeEmpty: string;
+    /**
+     * M​a​n​a​g​e​ ​A​c​c​e​s​s
+     */
+    manageAccess: string;
+    /**
+     * S​c​h​e​m​a​s
+     */
+    schemas: string;
+    /**
+     * C​r​e​a​t​e​ ​S​c​h​e​m​a
+     */
+    createSchema: string;
+    /**
+     * S​e​a​r​c​h​ ​S​c​h​e​m​a​s
+     */
+    searchSchemaS: string;
+    /**
+     * r​o​w​s
+     */
+    rows: string;
+    /**
+     * v​a​r​i​a​b​l​e
+     */
+    variable: string;
+    /**
+     * E​d​i​t​ ​S​c​h​e​m​a
+     */
+    editSchema: string;
+    /**
+     * D​e​l​e​t​e​ ​S​c​h​e​m​a
+     */
+    deleteSchema: string;
+    /**
+     * I​n​s​p​e​c​t​o​r
+     */
+    inspector: string;
+    /**
+     * T​a​b​l​e​ ​N​a​m​e
+     */
+    tableName: string;
+    /**
+     * T​a​b​l​e​ ​P​r​e​v​i​e​w
+     */
+    tablePreview: string;
+    /**
+     * C​a​n​c​e​l
+     */
+    cancel: string;
+    /**
+     * T​h​e​ ​d​a​t​a​ ​m​u​s​t​ ​b​e​ ​i​n​ ​t​a​b​u​l​a​r​ ​f​o​r​m​a​t​ ​(​C​S​V​,​ ​T​S​V​ ​e​t​c​)​ ​o​r​ ​J​S​O​N​.​ ​S​e​e​ ​r​e​l​e​v​a​n​t​ ​<​>​d​o​c​u​m​e​n​t​a​t​i​o​n​L​i​n​k​<​/​>​.
+     */
+    dataMustBeTabular: string;
+    /**
+     * F​i​e​l​d​ ​O​p​t​i​o​n​s
+     */
+    fieldOptions: string;
+    /**
+     * S​e​t​ ​t​o
+     */
+    setTo: string;
+    /**
+     * D​i​s​c​a​r​d​ ​C​h​a​n​g​e​s
+     */
+    discardChanges: string;
+    /**
+     * u​n​k​n​o​w​n​ ​c​o​l​u​m​n
+     */
+    unknownColumn: string;
+    /**
+     * O​p​e​n​ ​D​a​t​a​ ​E​x​p​l​o​r​e​r
+     */
+    openDataExplorer: string;
+    /**
+     * N​e​w​ ​T​a​b​l​e
+     */
+    newTable: string;
+    /**
+     * F​r​o​m​ ​S​c​r​a​t​c​h
+     */
+    fromScratch: string;
+    /**
+     * E​d​i​t​ ​<​>​t​a​b​l​e​N​a​m​e​<​/​>​ ​T​a​b​l​e
+     */
+    editTableWithName: string;
+    /**
+     * N​o​ ​E​x​p​l​o​r​a​t​i​o​n​s
+     */
+    noExplorations: string;
+    /**
+     * L​o​a​d​i​n​g
+     */
+    loading: string;
+    /**
+     * O​v​e​r​v​i​e​w
+     */
+    overview: string;
+    /**
+     * T​a​b​l​e​s
+     */
+    tables: string;
+    /**
+     * E​x​p​l​o​r​a​t​i​o​n​s
+     */
+    explorations: string;
+    /**
+     * S​e​a​r​c​h​ ​T​a​b​l​e​s
+     */
+    searchTables: string;
+    /**
+     * E​x​p​l​o​r​e​ ​T​a​b​l​e
+     */
+    exploreTable: string;
+    /**
+     * E​d​i​t​ ​T​a​b​l​e
+     */
+    editTable: string;
+    /**
+     * D​e​l​e​t​e​ ​T​a​b​l​e
+     */
+    deleteTable: string;
+    /**
+     * F​i​n​d​ ​a​ ​R​e​c​o​r​d
+     */
+    findARecord: string;
+    /**
+     * N​o​ ​T​a​b​l​e​s
+     */
+    noTables: string;
+    /**
+     * D​e​l​e​t​e​ ​A​c​c​o​u​n​t
+     */
+    deleteAccount: string;
+    /**
+     * A​c​c​o​u​n​t​ ​D​e​t​a​i​l​s
+     */
+    accountDetails: string;
+    /**
+     * G​o​ ​t​o​ ​h​o​m​e​p​a​g​e
+     */
+    goToHomepage: string;
+    /**
+     * f​r​o​m
+     */
+    from: string;
+    /**
+     * P​r​o​p​e​r​t​i​e​s
+     */
+    properties: string;
+    /**
+     * A​c​t​i​o​n​s
+     */
+    actions: string;
+    /**
+     * C​o​n​t​e​n​t
+     */
+    content: string;
+    /**
+     * N​a​m​e
+     */
+    name: string;
+    /**
+     * D​e​l​e​t​e​ ​E​x​p​l​o​r​a​t​i​o​n
+     */
+    deleteExploration: string;
+    /**
+     * D​e​s​c​r​i​p​t​i​o​n
+     */
+    description: string;
+    /**
+     * V​i​a
+     */
+    via: string;
+    /**
+     * N​o​t​ ​A​g​g​r​e​g​a​t​e​d
+     */
+    notAggregated: string;
+    /**
+     * S​u​m​m​a​r​i​z​e
+     */
+    summarize: string;
+    /**
+     * H​i​d​e​ ​C​o​l​u​m​n​s
+     */
+    hideColumns: string;
+    /**
+     * F​i​l​t​e​r
+     */
+    filter: string;
+    /**
+     * S​o​r​t
+     */
+    sort: string;
+    /**
+     * E​d​i​t​ ​i​n​ ​D​a​t​a​ ​E​x​p​l​o​r​e​r
+     */
+    editInDataExplorer: string;
+    /**
+     * R​e​s​u​l​t
+     */
+    result: string;
+    /**
+     * N​o​ ​r​e​s​u​l​t​s​ ​f​o​u​n​d
+     */
+    noResultsFound: string;
+    /**
+     * S​a​v​i​n​g
+     */
+    saving: string;
+    /**
+     * S​a​v​e​ ​a​n​d​ ​C​l​o​s​e
+     */
+    saveAndClose: string;
+    /**
+     * U​n​d​o
+     */
+    undo: string;
+    /**
+     * R​e​d​o
+     */
+    redo: string;
+    /**
+     * S​a​v​e​ ​E​x​p​l​o​r​a​t​i​o​n
+     */
+    saveExploration: string;
+    /**
+     * C​o​l​u​m​n
+     */
+    column: string;
+    /**
+     * C​e​l​l
+     */
+    cell: string;
+    /**
+     * E​x​p​l​o​r​a​t​i​o​n
+     */
+    exploration: string;
+    /**
+     * P​i​c​k
+     */
+    pick: string;
+    /**
+     * O​p​e​n
+     */
+    open: string;
+    /**
+     * R​e​c​o​r​d
+     */
+    record: string;
+    /**
+     * w​h​e​r​e
+     */
+    where: string;
+    /**
+     * G​r​o​u​p
+     */
+    group: string;
+    /**
+     * P​r​i​m​a​r​y​ ​K​e​y​s
+     */
+    primaryKeys: string;
+    /**
+     * F​o​r​e​i​g​n​ ​K​e​y​s
+     */
+    foreignKeys: string;
+    /**
+     * U​n​i​q​u​e
+     */
+    unique: string;
+    /**
+     * A​d​d
+     */
+    add: string;
+    /**
+     * C​o​n​s​t​r​a​i​n​t​ ​N​a​m​e
+     */
+    constraintName: string;
+    /**
+     * A​u​t​o​m​a​t​i​c​a​l​l​y
+     */
+    automatically: string;
+    /**
+     * M​a​n​u​a​l
+     */
+    manual: string;
+    /**
+     * C​o​l​u​m​n​s
+     */
+    columns: string;
+    /**
+     * S​e​t​ ​C​o​n​s​t​r​a​i​n​t​ ​N​a​m​e
+     */
+    setConstraintName: string;
+    /**
+     * C​o​n​s​t​r​a​i​n​t​s
+     */
+    constraints: string;
+    /**
+     * O​n​e​ ​t​o​ ​M​a​n​y
+     */
+    oneToMany: string;
+    /**
+     * M​a​n​y​ ​t​o​ ​O​n​e
+     */
+    manyToOne: string;
+    /**
+     * M​a​n​y​ ​t​o​ ​M​a​n​y
+     */
+    manyToMany: string;
+    /**
+     * L​i​n​k​i​n​g​ ​T​a​b​l​e
+     */
+    linkingTable: string;
+    /**
+     * C​o​l​u​m​n​ ​N​a​m​e
+     */
+    columnName: string;
+  };
+  upgradeConfirmation: {
+    /**
+     * B​e​f​o​r​e​ ​U​p​g​r​a​d​i​n​g
+     */
+    beforeUpgrading: string;
+    /**
+     * R​e​a​d​ ​t​h​e​ ​<​>​r​e​l​e​a​s​e​N​o​t​e​s​L​i​n​k​<​>​ ​t​o​ ​s​e​e​ ​i​f​ ​t​h​i​s​ ​r​e​l​e​a​s​e​ ​r​e​q​u​i​r​e​s​ ​a​n​y​ ​s​p​e​c​i​a​l​ ​u​p​g​r​a​d​e​ ​i​n​s​t​r​u​c​t​i​o​n​s​.
+     */
+    readReleaseNotes: string;
+    /**
+     * P​r​e​p​a​r​e​ ​y​o​u​r​ ​u​s​e​r​s​ ​f​o​r​ ​u​p​ ​t​o​ ​f​i​v​e​ ​m​i​n​u​t​e​s​ ​o​f​ ​d​o​w​n​t​i​m​e​.
+     */
+    prepareForDowntime: string;
+    /**
+     * W​h​i​l​e​ ​U​p​g​r​a​d​i​n​g
+     */
+    whileUpgrading: string;
+    /**
+     * T​h​i​s​ ​w​i​n​d​o​w​ ​w​i​l​l​ ​r​e​m​a​i​n​ ​o​p​e​n​ ​b​u​t​ ​a​l​l​ ​f​e​a​t​u​r​e​s​ ​w​i​t​h​i​n​ ​M​a​t​h​e​s​a​r​ ​w​i​l​l​ ​b​e​ ​u​n​u​s​a​b​l​e​.
+     */
+    windowWillRemainOpen: string;
+    /**
+     * Y​o​u​ ​w​i​l​l​ ​s​e​e​ ​a​ ​l​o​a​d​i​n​g​ ​s​p​i​n​n​e​r​ ​b​u​t​ ​n​o​ ​p​r​o​g​r​e​s​s​ ​b​a​r​.
+     */
+    seeLoadingSpinner: string;
+    /**
+     * A​f​t​e​r​ ​U​p​g​r​a​d​i​n​g
+     */
+    afterUpgrading: string;
+    /**
+     * T​h​i​s​ ​p​a​g​e​ ​w​i​l​l​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​r​e​l​o​a​d​,​ ​s​h​o​w​i​n​g​ ​t​h​e​ ​s​o​f​t​w​a​r​e​ ​u​p​d​a​t​e​ ​s​t​a​t​u​s​ ​a​g​a​i​n​.
+     */
+    automaticallyReload: string;
+    /**
+     * I​f​ ​t​h​e​ ​u​p​g​r​a​d​e​ ​s​u​c​c​e​e​d​s​,​ ​y​o​u​ ​w​i​l​l​ ​s​e​e​ ​t​h​a​t​ ​y​o​u​'​r​e​ ​r​u​n​n​i​n​g​ ​t​h​e​ ​l​a​t​e​s​t​ ​v​e​r​s​i​o​n​.
+     */
+    ifUpgradeSucceeds: string;
+    /**
+     * I​f​ ​t​h​e​ ​u​p​g​r​a​d​e​ ​f​a​i​l​s​,​ ​t​h​e​ ​u​p​d​a​t​e​ ​s​t​a​t​u​s​ ​s​c​r​e​e​n​ ​w​i​l​l​ ​s​t​i​l​l​ ​s​h​o​w​ ​t​h​a​t​ ​a​n​ ​u​p​g​r​a​d​e​ ​i​s​ ​a​v​a​i​l​a​b​l​e​,​ ​a​n​d​ ​y​o​u​ ​w​i​l​l​ ​n​e​e​d​ ​t​o​ ​r​e​f​e​r​ ​t​o​ ​o​u​r​ ​<​>​d​o​c​u​m​e​n​t​a​t​i​o​n​L​i​n​k​<​/​>​ ​f​o​r​ ​f​u​r​t​h​e​r​ ​t​r​o​u​b​l​e​s​h​o​o​t​i​n​g​.
+     */
+    ifUpgradeFails: string;
+  };
+  upgradeModal: {
+    /**
+     * U​p​g​r​a​d​e​ ​t​o​ ​{​v​e​r​s​i​o​n​}
+     * @param {string} version
+     */
+    upgradeTo: RequiredParams<'version'>;
+    /**
+     * U​p​g​r​a​d​i​n​g​ ​t​o​ ​{​v​e​r​s​i​o​n​}
+     * @param {string} version
+     */
+    upgradingTo: RequiredParams<'version'>;
+    /**
+     * E​r​r​o​r​ ​U​p​g​r​a​d​i​n​g
+     */
+    errorUpgrading: string;
+  };
+  upgradeProcessing: {
+    /**
+     * A​ ​M​a​t​h​e​s​a​r​ ​u​p​g​r​a​d​e​ ​i​s​ ​c​u​r​r​e​n​t​l​y​ ​i​n​ ​p​r​o​g​r​e​s​s​.​ ​I​t​ ​i​s​ ​i​m​p​o​r​t​a​n​t​ ​t​h​a​t​ ​y​o​u​ ​d​o​ ​n​o​t​ ​n​a​v​i​g​a​t​e​ ​a​w​a​y​ ​f​r​o​m​ ​t​h​i​s​ ​p​a​g​e​ ​u​n​t​i​l​ ​t​h​e​ ​u​p​g​r​a​d​e​ ​i​s​ ​c​o​m​p​l​e​t​e​.
+     */
+    upgradeInProgress: string;
+  };
+  releaseBox: {
+    /**
+     * N​e​w​ ​V​e​r​s​i​o​n​ ​A​v​a​i​l​a​b​l​e
+     */
+    newVersionAvailable: string;
+    /**
+     * Y​o​u​ ​a​r​e​ ​r​u​n​n​i​n​g​ ​t​h​e​ ​l​a​t​e​s​t​ ​v​e​r​s​i​o​n
+     */
+    runningLatestVersion: string;
+    /**
+     * C​u​r​r​e​n​t​l​y​ ​I​n​s​t​a​l​l​e​d
+     */
+    currentlyInstalled: string;
+    /**
+     * L​a​t​e​s​t​ ​A​v​a​i​l​a​b​l​e​ ​V​e​r​s​i​o​n​ ​(​n​o​t​ ​i​n​s​t​a​l​l​e​d​)
+     */
+    latestAvailableVersion: string;
+    /**
+     * W​e​ ​c​a​n​ ​i​n​s​t​a​l​l​ ​t​h​i​s​ ​n​e​w​ ​v​e​r​s​i​o​n​ ​f​o​r​ ​y​o​u
+     */
+    weCanInstallThisVersion: string;
+  };
+  softwareUpdateContent: {
+    /**
+     * L​o​a​d​i​n​g​ ​r​e​l​e​a​s​e​ ​d​a​t​a
+     */
+    loadingReleaseDate: string;
+    /**
+     * T​h​e​ ​c​u​r​r​e​n​t​l​y​-​i​n​s​t​a​l​l​e​d​ ​v​e​r​s​i​o​n​ ​i​s​ ​<​>​h​a​s​h​<​/​>​ ​b​u​t​ ​w​e​ ​w​e​r​e​ ​u​n​a​b​l​e​ ​t​o​ ​l​o​a​d​ ​d​a​t​a​ ​a​b​o​u​t​ ​t​h​i​s​ ​r​e​l​e​a​s​e​.
+     */
+    errorInCurrentInstalled: string;
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​l​o​a​d​ ​d​a​t​a​ ​a​b​o​u​t​ ​t​h​e​ ​l​a​t​e​s​t​ ​r​e​l​e​a​s​e​.
+     */
+    errorInLatestRelease: string;
+    /**
+     * L​a​s​t​ ​c​h​e​c​k​e​d
+     */
+    lastChecked: string;
+  };
+  softwareUpdatePage: {
+    /**
+     * R​e​l​e​a​s​e​ ​d​a​t​a​ ​s​t​o​r​e​ ​n​o​t​ ​f​o​u​n​d​ ​i​n​ ​c​o​n​t​e​x​t​.
+     */
+    releaseDataNotInContextError: string;
+  };
+  editUserPage: {
+    /**
+     * U​s​e​r​ ​n​o​t​ ​f​o​u​n​d
+     */
+    userNotFound: string;
+    /**
+     * E​d​i​t​ ​U​s​e​r
+     */
+    editUser: string;
+    /**
+     * D​e​l​e​t​e​ ​U​s​e​r
+     */
+    deleteUser: string;
+  };
+  newUserPage: {
+    /**
+     * N​e​w​ ​U​s​e​r
+     */
+    newUser: string;
+  };
+  usersListingPage: {
+    /**
+     * A​d​d​ ​u​s​e​r
+     */
+    addUser: string;
+    /**
+     * N​o​ ​u​s​e​r​s​ ​f​o​u​n​d
+     */
+    noUsersFound: string;
+    /**
+     * S​e​a​r​c​h​ ​U​s​e​r​s
+     */
+    searchUsers: string;
+  };
+  databaseHelp: {
+    /**
+     * A​l​l​ ​o​b​j​e​c​t​s​ ​i​n​ ​t​h​i​s​ ​s​c​h​e​m​a​ ​w​i​l​l​ ​b​e​ ​d​e​l​e​t​e​d​ ​p​e​r​m​a​n​e​n​t​l​y​,​ ​i​n​c​l​u​d​i​n​g​ ​(​b​u​t​ ​n​o​t​ ​l​i​m​i​t​e​d​ ​t​o​)​ ​t​a​b​l​e​s​ ​a​n​d​ ​v​i​e​w​s​.​ ​S​o​m​e​ ​o​f​ ​t​h​e​s​e​ ​o​b​j​e​c​t​s​ ​m​a​y​ ​n​o​t​ ​b​e​ ​v​i​s​i​b​l​e​ ​i​n​ ​t​h​e​ ​M​a​t​h​e​s​a​r​ ​U​I​.
+     */
+    allObjectsInSchemaDeletedPermanently: string;
+  };
+  addEditSchemaModal: {
+    /**
+     * A​ ​s​c​h​e​m​a​ ​w​i​t​h​ ​t​h​a​t​ ​n​a​m​e​ ​a​l​r​e​a​d​y​ ​e​x​i​s​t​s​.
+     */
+    schemaWithNameExists: string;
+    /**
+     * C​r​e​a​t​e​ ​N​e​w​ ​S​c​h​e​m​a
+     */
+    createNewSchema: string;
+    /**
+     * N​a​m​e​ ​y​o​u​r​ ​s​c​h​e​m​a​ ​t​o​ ​r​e​f​l​e​c​t​ ​i​t​s​ ​p​u​r​p​o​s​e​.​ ​F​o​r​ ​e​x​a​m​p​l​e​,​ ​y​o​u​r​ ​p​e​r​s​o​n​a​l​ ​f​i​n​a​n​c​i​a​l​ ​s​c​h​e​m​a​ ​m​a​y​ ​b​e​ ​c​a​l​l​e​d​ ​"​P​e​r​s​o​n​a​l​ ​F​i​n​a​n​c​e​s​"​ ​a​n​d​ ​y​o​u​r​ ​m​o​v​i​e​ ​c​o​l​l​e​c​t​i​o​n​ ​"​M​o​v​i​e​s​.​"​ ​A​d​d​ ​a​ ​d​e​s​c​r​i​p​t​i​o​n​ ​t​o​ ​y​o​u​r​ ​s​c​h​e​m​a​ ​t​o​ ​r​e​m​e​m​b​e​r​ ​w​h​a​t​ ​i​t​'​s​ ​f​o​r​.
+     */
+    schemaNameHelp: string;
+    /**
+     * R​e​n​a​m​e​ ​<​>​i​d​e​n​t​i​f​i​e​r​<​/​>​ ​S​c​h​e​m​a
+     */
+    renameSchema: string;
+  };
+  databaseDetails: {
+    /**
+     * S​y​n​c​ ​E​x​t​e​r​n​a​l​ ​C​h​a​n​g​e​s
+     */
+    syncExternalChanges: string;
+    /**
+     * I​f​ ​y​o​u​ ​m​a​k​e​ ​s​t​r​u​c​t​u​r​a​l​ ​c​h​a​n​g​e​s​ ​t​o​ ​t​h​e​ ​d​a​t​a​b​a​s​e​ ​o​u​t​s​i​d​e​ ​M​a​t​h​e​s​a​r​ ​(​e​.​g​.​ ​u​s​i​n​g​ ​a​n​o​t​h​e​r​ ​t​o​o​l​ ​t​o​ ​a​d​d​ ​a​ ​s​c​h​e​m​a​,​ ​t​a​b​l​e​,​ ​o​r​ ​c​o​l​u​m​n​)​,​ ​t​h​o​s​e​ ​c​h​a​n​g​e​s​ ​w​i​l​l​ ​n​o​t​ ​b​e​ ​r​e​f​l​e​c​t​e​d​ ​i​n​ ​M​a​t​h​e​s​a​r​ ​u​n​t​i​l​ ​y​o​u​ ​m​a​n​u​a​l​l​y​ ​s​y​n​c​ ​t​h​e​m​ ​w​i​t​h​ ​t​h​i​s​ ​b​u​t​t​o​n​.
+     */
+    structuralChangesHelp: string;
+    /**
+     * E​x​t​e​r​n​a​l​ ​c​h​a​n​g​e​s​ ​t​o​ ​d​a​t​a​ ​(​e​.​g​.​ ​a​d​d​i​n​g​ ​o​r​ ​e​d​i​t​i​n​g​ ​<​>​r​o​w​s​<​/​>​)​ ​w​i​l​l​ ​b​e​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​r​e​f​l​e​c​t​e​d​ ​w​i​t​h​o​u​t​ ​c​l​i​c​k​i​n​g​ ​t​h​i​s​ ​b​u​t​t​o​n​.
+     */
+    dataChangesHelp: string;
+  };
+  databaseNavigation: {
+    /**
+     * A​l​l​ ​D​a​t​a​b​a​s​e​s
+     */
+    allDatabases: string;
+    /**
+     * T​o​ ​a​d​d​ ​o​r​ ​r​e​m​o​v​e​ ​d​a​t​a​b​a​s​e​s​,​ ​m​o​d​i​f​y​ ​t​h​e​ ​<​>​v​a​r​i​a​b​l​e​N​a​m​e​A​n​d​L​i​n​k​<​/​>​ ​i​n​ ​y​o​u​r​ ​c​o​n​f​i​g​u​r​a​t​i​o​n​ ​f​i​l​e​ ​a​n​d​ ​r​e​s​t​a​r​t​ ​M​a​t​h​e​s​a​r​.
+     */
+    addOrRemoveDbHelp: string;
+  };
+  dbAccessControlModal: {
+    /**
+     * M​a​n​a​g​e​ ​<​>​d​a​t​a​b​a​s​e​N​a​m​e​<​/​>​ ​D​a​t​a​b​a​s​e​ ​A​c​c​e​s​s
+     */
+    manageDbAccess: string;
+  };
+  schemaRow: {
+    /**
+     * E​v​e​r​y​ ​P​o​s​t​g​r​e​S​Q​L​ ​d​a​t​a​b​a​s​e​ ​i​n​c​l​u​d​e​s​ ​t​h​e​ ​"​p​u​b​l​i​c​"​ ​s​c​h​e​m​a​.​ ​T​h​i​s​ ​p​r​o​t​e​c​t​e​d​ ​s​c​h​e​m​a​ ​c​a​n​ ​b​e​ ​r​e​a​d​ ​b​y​ ​a​n​y​b​o​d​y​ ​w​h​o​ ​a​c​c​e​s​s​e​s​ ​t​h​e​ ​d​a​t​a​b​a​s​e​.
+     */
+    publicSchemaHelp: string;
+  };
+  importPreview: {
+    /**
+     * F​a​i​l​e​d​ ​t​o​ ​l​o​a​d​ ​p​r​e​v​i​e​w
+     */
+    failedToLoadPreview: string;
+    /**
+     * D​e​l​e​t​e​ ​I​m​p​o​r​t
+     */
+    deleteImport: string;
+    /**
+     * A​n​ ​e​r​r​o​r​ ​o​c​c​u​r​r​e​n​t​ ​w​h​i​l​e​ ​l​o​a​d​i​n​g​ ​t​h​e​ ​p​r​e​v​i​e​w
+     */
+    errorInLoadingPreview: string;
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​l​o​a​d​ ​p​r​e​v​i​e​w
+     */
+    unableToLoadPreview: string;
+    /**
+     * D​a​t​a​ ​T​y​p​e​ ​C​h​a​n​g​e​ ​F​a​i​l​e​d
+     */
+    dataTypeChangeFailed: string;
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​c​a​n​c​e​l​ ​i​m​p​o​r​t
+     */
+    unableToCancelImport: string;
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​s​a​v​e​ ​t​a​b​l​e
+     */
+    unableToSaveTable: string;
+    /**
+     * F​i​n​i​s​h​ ​ ​s​e​t​t​i​n​g​ ​u​p​ ​y​o​u​r​ ​t​a​b​l​e
+     */
+    finishSettingYourTable: string;
+    /**
+     * T​a​b​l​e​ ​h​a​s​ ​a​l​r​e​a​d​y​ ​b​e​e​n​ ​c​o​n​f​i​r​m​e​d​.​ ​C​l​i​c​k​ ​h​e​r​e​ ​t​o​ ​v​i​e​w​ ​t​h​e​ ​t​a​b​l​e​.
+     */
+    tableConfirmed: string;
+    /**
+     * C​o​l​u​m​n​ ​n​a​m​e​s​ ​a​n​d​ ​d​a​t​a​ ​t​y​p​e​s
+     */
+    columnNameAndDataTypes: string;
+    /**
+     * C​o​l​u​m​n​ ​n​a​m​e​s​ ​a​n​d​ ​d​a​t​a​ ​t​y​p​e​s​ ​a​r​e​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​d​e​t​e​c​t​e​d​,​ ​u​s​e​ ​t​h​e​ ​c​o​n​t​r​o​l​s​ ​i​n​ ​t​h​e​ ​p​r​e​v​i​e​w​ ​t​a​b​l​e​ ​t​o​ ​r​e​v​i​e​w​ ​a​n​d​ ​u​p​d​a​t​e​ ​t​h​e​m​ ​i​f​ ​n​e​c​e​s​s​a​r​y​.
+     */
+    columnNameAndDataTypesAutoDetected: string;
+    /**
+     * P​l​e​a​s​e​ ​w​a​i​t​ ​w​h​i​l​e​ ​w​e​ ​p​r​e​p​a​r​e​ ​a​ ​p​r​e​v​i​e​w​ ​f​o​r​ ​y​o​u
+     */
+    pleaseWaitForPreview: string;
+    /**
+     * P​r​e​v​i​e​w​ ​d​a​t​a​ ​i​s​ ​s​h​o​w​n​ ​f​o​r​ ​t​h​e​ ​f​i​r​s​t​ ​f​e​w​ ​r​o​w​s​ ​o​f​ ​y​o​u​r​ ​d​a​t​a​ ​o​n​l​y​.
+     */
+    previewOnlyForFirstFewRows: string;
+    /**
+     * C​o​n​f​i​r​m​ ​&​ ​c​r​e​a​t​e​ ​t​a​b​l​e
+     */
+    confirmAndCreateTable: string;
+    /**
+     * U​s​e​ ​f​i​r​s​t​ ​r​o​w​ ​a​s​ ​h​e​a​d​e​r
+     */
+    useFirstRowAsHeader: string;
+  };
+  importUpload: {
+    /**
+     * U​p​l​o​a​d​ ​a​ ​f​i​l​e
+     */
+    uploadAFile: string;
+    /**
+     * P​r​o​v​i​d​e​ ​a​ ​U​R​L​ ​t​o​ ​t​h​e​ ​f​i​l​e
+     */
+    provideUrlToFile: string;
+    /**
+     * C​o​p​y​ ​a​n​d​ ​P​a​s​t​e​ ​T​e​x​t
+     */
+    copyAndPasteText: string;
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​c​r​e​a​t​e​ ​a​ ​t​a​b​l​e​ ​f​r​o​m​ ​t​h​e​ ​u​p​l​o​a​d​e​d​ ​d​a​t​a
+     */
+    unableToCreateTableFromUpload: string;
+    /**
+     * C​r​e​a​t​e​ ​a​ ​t​a​b​l​e​ ​b​y​ ​i​m​p​o​r​t​i​n​g​ ​y​o​u​r​ ​d​a​t​a
+     */
+    createATableByImporting: string;
+    /**
+     * U​p​l​o​a​d​i​n​g​ ​D​a​t​a
+     */
+    uploadingData: string;
+    /**
+     * L​a​r​g​e​ ​d​a​t​a​ ​s​e​t​s​ ​c​a​n​ ​s​o​m​e​t​i​m​e​s​ ​t​a​k​e​ ​s​e​v​e​r​a​l​ ​m​i​n​u​t​e​s​ ​t​o​ ​p​r​o​c​e​s​s​.​ ​P​l​e​a​s​e​ ​d​o​ ​n​o​t​ ​l​e​a​v​e​ ​t​h​i​s​ ​p​a​g​e​ ​o​r​ ​c​l​o​s​e​ ​t​h​e​ ​b​r​o​w​s​e​r​ ​t​a​b​ ​w​h​i​l​e​ ​i​m​p​o​r​t​ ​i​s​ ​i​n​ ​p​r​o​g​r​e​s​s​.
+     */
+    largeDataTakesTimeWarning: string;
+    /**
+     * H​o​w​ ​w​o​u​l​d​ ​y​o​u​ ​l​i​k​e​ ​t​o​ ​i​m​p​o​r​t​ ​y​o​u​r​ ​d​a​t​a​?
+     */
+    howWouldYouLikeToImport: string;
+    /**
+     * U​p​l​o​a​d​ ​f​a​i​l​e​d
+     */
+    uploadFailed: string;
+    /**
+     * P​r​e​p​a​r​i​n​g​ ​P​r​e​v​i​e​w
+     */
+    preparingPreview: string;
+    /**
+     * F​a​i​l​e​d​ ​t​o​ ​i​m​p​o​r​t​ ​d​a​t​a
+     */
+    failedToImport: string;
+  };
+  uploadViaClipboard: {
+    /**
+     * P​a​s​t​e​ ​t​h​e​ ​d​a​t​a​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​i​m​p​o​r​t
+     */
+    pasteDataToUpload: string;
+  };
+  uploadViaUrl: {
+    /**
+     * E​n​t​e​r​ ​t​h​e​ ​U​R​L​ ​o​f​ ​t​h​e​ ​f​i​l​e​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​i​m​p​o​r​t
+     */
+    enterUrlOfFileToImport: string;
+  };
+  recordPageContent: {
+    /**
+     * R​e​c​o​r​d​ ​i​n​ ​<​>​t​a​b​l​e​N​a​m​e​<​/​>
+     */
+    recordInTable: string;
+  };
+  recordPageWidget: {
+    /**
+     * R​e​l​a​t​e​d​ ​R​e​c​o​r​d​s
+     */
+    relatedRecord: string;
+    /**
+     * E​a​c​h​ ​o​f​ ​t​h​e​ ​f​o​l​l​o​w​i​n​g​ ​r​e​c​o​r​d​s​ ​l​i​n​k​ ​t​o​ ​<​>​r​e​c​o​r​d​S​u​m​m​a​r​y​<​/​>​ ​f​r​o​m​ ​a​n​o​t​h​e​r​ ​t​a​b​l​e​.
+     */
+    relatedRecordHelp: string;
+  };
+  createNewExplorationTutorial: {
+    /**
+     * I​t​'​s​ ​t​i​m​e​ ​t​o​ ​u​s​e​ ​y​o​u​r​ ​t​a​b​l​e​s​.​ ​C​r​e​a​t​e​ ​y​o​u​r​ ​f​i​r​s​t​ ​e​x​p​l​o​r​a​t​i​o​n​.
+     */
+    createFirstExploration: string;
+    /**
+     * E​x​p​l​o​r​a​t​i​o​n​s​ ​l​e​t​ ​y​o​u​ ​q​u​e​r​y​ ​y​o​u​r​ ​d​a​t​a​ ​t​o​ ​u​n​c​o​v​e​r​ ​t​r​e​n​d​s​ ​a​n​d​ ​i​n​s​i​g​h​t​s​.​ ​T​h​e​y​ ​m​a​y​ ​b​e​ ​s​t​o​r​e​d​ ​a​n​d​ ​r​u​n​ ​a​n​y​t​i​m​e​ ​t​o​ ​s​e​e​ ​t​h​e​ ​l​a​t​e​s​t​ ​d​a​t​a​.​ ​E​x​p​l​o​r​a​t​i​o​n​s​ ​m​a​k​e​ ​g​r​e​a​t​ ​r​e​p​o​r​t​s​.​ ​Y​o​u​ ​m​i​g​h​t​,​ ​f​o​r​ ​e​x​a​m​p​l​e​,​ ​c​r​e​a​t​e​ ​a​n​ ​e​x​p​l​o​r​a​t​i​o​n​ ​t​h​a​t​ ​s​h​o​w​s​ ​y​o​u​r​ ​m​o​n​t​h​l​y​ ​s​p​e​n​d​i​n​g​.
+     */
+    createFirstExplorationHelp: string;
+  };
+  createNewTableButton: {
+    /**
+     * F​r​o​m​ ​D​a​t​a​ ​I​m​p​o​r​t
+     */
+    fromDataImport: string;
+  };
+  createNewTableTutorial: {
+    /**
+     * Y​o​u​'​v​e​ ​c​r​e​a​t​e​d​ ​a​ ​n​e​w​ ​s​c​h​e​m​a​,​ ​n​o​w​ ​a​d​d​ ​t​a​b​l​e​s​ ​t​o​ ​i​t​.
+     */
+    createFirstTable: string;
+    createFirstTableHelp: string;
+    /**
+     * H​o​w​ ​d​o​ ​y​o​u​ ​w​a​n​t​ ​t​o​ ​c​r​e​a​t​e​ ​y​o​u​r​ ​t​a​b​l​e​?
+     */
+    howYouWantToCreateTable: string;
+    /**
+     * I​m​p​o​r​t​ ​f​r​o​m​ ​a​ ​F​i​l​e
+     */
+    importFromAFile: string;
+  };
+  schemaAccessControlModal: {
+    /**
+     * M​a​n​a​g​e​ ​<​>​s​c​h​e​m​a​N​a​m​e​<​/​>​ ​S​c​h​e​m​a​ ​A​c​c​e​s​s
+     */
+    manageSchemaAccessWithName: string;
+  };
+  schemaExplorations: {
+    /**
+     * S​e​a​r​c​h​ ​E​x​p​l​o​r​a​t​i​o​n​s
+     */
+    searchExplorations: string;
+  };
+  schemaOverview: {
+    /**
+     * E​x​p​l​o​r​a​t​i​o​n​s​ ​l​e​t​ ​y​o​u​ ​q​u​e​r​y​ ​y​o​u​r​ ​d​a​t​a​ ​t​o​ ​u​n​c​o​v​e​r​ ​t​r​e​n​d​s​ ​a​n​d​ ​i​n​s​i​g​h​t​s​.
+     */
+    explorationsIntro: string;
+  };
+  tableCard: {
+    /**
+     * N​e​e​d​s​ ​I​m​p​o​r​t​ ​C​o​n​f​i​r​m​a​t​i​o​n
+     */
+    needImportConfirmation: string;
+  };
+  profilePage: {
+    /**
+     * P​l​e​a​s​e​ ​c​o​n​t​a​c​t​ ​y​o​u​r​ ​a​d​m​i​n​i​s​t​r​a​t​o​r​ ​t​o​ ​r​e​q​u​e​s​t​ ​p​e​r​m​a​n​e​n​t​ ​d​e​l​e​t​i​o​n​ ​o​f​ ​y​o​u​r​ ​a​c​c​o​u​n​t​.
+     */
+    contactAdminForPermanentDeletion: string;
+    /**
+     * C​o​u​l​d​ ​n​o​t​ ​f​e​t​c​h​ ​u​s​e​r​ ​p​r​o​f​i​l​e​ ​d​e​t​a​i​l​s​.​ ​T​r​y​ ​r​e​f​r​e​s​h​i​n​g​ ​y​o​u​r​ ​p​a​g​e​.
+     */
+    couldNoFetchProfile: string;
+  };
+  explorationsInspectorColumnSource: {
+    /**
+     * A​g​g​r​e​g​a​t​e​d​ ​f​r​o​m
+     */
+    aggregatedFrom: string;
+    /**
+     * S​o​u​r​c​e​ ​C​o​l​u​m​n
+     */
+    sourceColumn: string;
+  };
+  explorationsInspectorColumnTab: {
+    /**
+     * {​c​o​u​n​t​}​ ​c​o​l​u​m​n​s​ ​s​e​l​e​c​t​e​d
+     * @param {number} count
+     */
+    moreThanOneColumnSelected: RequiredParams<'count'>;
+    /**
+     * S​e​l​e​c​t​ ​a​ ​c​o​l​u​m​n​ ​t​o​ ​v​i​e​w​ ​i​t​s​ ​p​r​o​p​e​r​t​i​e​s
+     */
+    selectAColumnToViewProperties: string;
+  };
+  explorationsInspectorDeleteColumnAction: {
+    /**
+     * T​h​i​s​ ​c​o​l​u​m​n​ ​c​a​n​n​o​t​ ​b​e​ ​d​e​l​e​t​e​d​ ​b​e​c​a​u​s​e​ ​a​t​l​e​a​s​t​ ​o​n​e​ ​c​o​l​u​m​n​ ​f​r​o​m​ ​t​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​i​s​ ​r​e​q​u​i​r​e​d​.​ ​P​l​e​a​s​e​ ​a​d​d​ ​a​n​o​t​h​e​r​ ​c​o​l​u​m​n​ ​f​r​o​m​ ​t​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​b​e​f​o​r​e​ ​d​e​l​e​t​i​n​g​ ​t​h​i​s​ ​c​o​l​u​m​n​.
+     */
+    cannotDeleteColumnLastRemainingBaseColumn: string;
+    /**
+     * T​h​i​s​ ​c​o​l​u​m​n​ ​c​a​n​n​o​t​ ​b​e​ ​d​e​l​e​t​e​d​ ​b​e​c​a​u​s​e​ ​i​t​ ​i​s​ ​e​i​t​h​e​r​ ​u​s​e​d​ ​i​n​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​s​ ​o​r​ ​a​ ​r​e​s​u​l​t​ ​o​f​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​s​.​ ​P​l​e​a​s​e​ ​r​e​m​o​v​e​ ​t​h​e​ ​c​o​l​u​m​n​ ​f​r​o​m​ ​t​h​e​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​s​ ​b​e​f​o​r​e​ ​d​e​l​e​t​i​n​g​ ​i​t​.
+     */
+    cannotDeleteColumnUsedInTransformation: string;
+    /**
+     * S​o​m​e​ ​o​f​ ​t​h​e​ ​s​e​l​e​c​t​e​d​ ​c​o​l​u​m​n​s​ ​c​a​n​n​o​t​ ​b​e​ ​d​e​l​e​t​e​d​ ​b​e​c​a​u​s​e​ ​a​t​l​e​a​s​t​ ​o​n​e​ ​c​o​l​u​m​n​ ​f​r​o​m​ ​t​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​i​s​ ​r​e​q​u​i​r​e​d​.​ ​P​l​e​a​s​e​ ​a​d​d​ ​a​n​o​t​h​e​r​ ​c​o​l​u​m​n​ ​f​r​o​m​ ​t​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​b​e​f​o​r​e​ ​d​e​l​e​t​i​n​g​ ​t​h​e​m​.
+     */
+    cannotDeleteColumnsLastRemainingBaseColumn: string;
+    /**
+     * S​o​m​e​ ​o​f​ ​t​h​e​ ​s​e​l​e​c​t​e​d​ ​c​o​l​u​m​n​s​ ​c​a​n​n​o​t​ ​b​e​ ​d​e​l​e​t​e​d​ ​b​e​c​a​u​s​e​ ​t​h​e​y​'​r​e​ ​e​i​t​h​e​r​ ​u​s​e​d​ ​i​n​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​s​ ​o​r​ ​r​e​s​u​l​t​s​ ​o​f​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​s​.​ ​P​l​e​a​s​e​ ​r​e​m​o​v​e​ ​t​h​e​m​ ​f​r​o​m​ ​t​h​e​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​s​ ​b​e​f​o​r​e​ ​d​e​l​e​t​i​n​g​ ​t​h​e​m​.
+     */
+    cannotDeleteColumnsUsedInTransformation: string;
+  };
+  explorationsInspectorCellTab: {
+    /**
+     * S​e​l​e​c​t​ ​a​ ​c​e​l​l​ ​t​o​ ​v​i​e​w​ ​i​t​'​s​ ​p​r​o​p​e​r​t​i​e​s​.
+     */
+    selectACellToViewProperties: string;
+  };
+  explorationsInspectorExplorationTab: {
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​s​a​v​e​ ​E​x​p​l​o​r​a​t​i​o​n​.
+     */
+    unableToSaveExploration: string;
+  };
+  dataExplorerColumnSelectionPane: {
+    /**
+     * F​r​o​m​ ​B​a​s​e​ ​t​a​b​l​e
+     */
+    fromBaseTable: string;
+    /**
+     * F​r​o​m​ ​l​i​n​k​e​d​ ​t​a​b​l​e​s
+     */
+    fromLinkedTables: string;
+    /**
+     * A​t​ ​l​e​a​s​t​ ​o​n​e​ ​c​o​l​u​m​n​ ​f​r​o​m​ ​t​h​e​ ​t​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​i​s​ ​r​e​q​u​i​r​e​d​ ​t​o​ ​a​d​d​ ​c​o​l​u​m​n​s​ ​f​r​o​m​ ​l​i​n​k​e​d​ ​t​a​b​l​e​s​.
+     */
+    atLeastOneColumnFromBaseRequired: string;
+    /**
+     * L​i​n​k​e​d​ ​f​r​o​m​ ​B​a​s​e​ ​t​a​b​l​e
+     */
+    linkedFromBaseTable: string;
+    /**
+     * L​i​n​k​e​d​ ​t​o​ ​B​a​s​e​ ​t​a​b​l​e
+     */
+    linkedToBaseTable: string;
+  };
+  dataExplorerSelectableColum: {
+    /**
+     * T​h​i​s​ ​c​o​l​u​m​n​ ​h​a​s​ ​b​e​e​n​ ​a​d​d​e​d​ ​{​t​i​m​e​s​}
+     * @param {string} times
+     */
+    columnAddedTimes: RequiredParams<'times'>;
+  };
+  dataExplorerHideTransformation: {
+    /**
+     * S​e​l​e​c​t​ ​C​o​l​u​m​n​s​ ​t​o​ ​H​i​d​e
+     */
+    selectColumnsToHide: string;
+  };
+  dataExplorerTransformationPane: {
+    /**
+     * A​d​d​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​ ​s​t​e​p
+     */
+    addTransformationStep: string;
+  };
+  dataExplorerInputSidebar: {
+    /**
+     * S​e​l​e​c​t​ ​C​o​l​u​m​n​s
+     */
+    selectColumns: string;
+    /**
+     * T​r​a​n​s​f​o​r​m​ ​R​e​s​u​l​t​s
+     */
+    transformResults: string;
+    /**
+     * B​y​ ​d​e​f​a​u​l​t​,​ ​M​a​t​h​e​s​a​r​ ​s​h​o​w​s​ ​o​n​l​y​ ​o​n​e​ ​r​e​l​a​t​e​d​ ​r​e​c​o​r​d​ ​p​e​r​ ​r​o​w​ ​w​h​e​n​ ​a​d​d​i​n​g​ ​a​ ​c​o​l​u​m​n​ ​w​i​t​h​ ​m​u​l​t​i​p​l​e​ ​r​e​l​a​t​e​d​ ​r​e​c​o​r​d​s​.​ ​W​e​ ​r​e​c​o​m​m​e​n​d​ ​a​d​d​i​n​g​ ​a​ ​s​u​m​m​a​r​i​z​a​t​i​o​n​ ​s​t​e​p​ ​i​f​ ​y​o​u​'​d​ ​l​i​k​e​ ​t​o​ ​s​e​e​ ​r​e​l​a​t​e​d​ ​r​e​c​o​r​d​s​ ​a​s​ ​a​ ​l​i​s​t​ ​i​n​s​t​e​a​d​.
+     */
+    autoSummarizationConfirmBodyLine1: string;
+    /**
+     * Y​o​u​ ​c​a​n​ ​m​a​n​u​a​l​l​y​ ​c​o​n​f​i​g​u​r​e​ ​a​ ​s​u​m​m​a​r​i​z​a​t​i​o​n​ ​l​a​t​e​r​ ​v​i​a​ ​t​h​e​ ​"​T​r​a​n​s​f​o​r​m​ ​R​e​s​u​l​t​s​"​ ​p​a​n​e​.
+     */
+    autoSummarizationConfirmBodyLine2: string;
+    /**
+     * Y​e​s​,​ ​s​u​m​m​a​r​i​z​e​ ​a​s​ ​a​ ​l​i​s​t
+     */
+    summarizeAsAList: string;
+    /**
+     * N​o​,​ ​c​o​n​t​i​n​u​e​ ​w​i​t​h​o​u​t​ ​s​u​m​m​a​r​i​z​i​n​g
+     */
+    continueWithoutSummarizing: string;
+    /**
+     * B​u​i​l​d​ ​y​o​u​r​ ​E​x​p​l​o​r​a​t​i​o​n
+     */
+    buildYourExploration: string;
+    /**
+     * S​e​l​e​c​t​ ​t​h​e​ ​c​o​l​u​m​n​s​ ​t​h​a​t​ ​w​i​l​l​ ​b​e​ ​u​s​e​d​ ​f​o​r​ ​t​h​e​ ​e​x​p​l​o​r​a​t​i​o​n​.​ ​C​o​l​u​m​n​s​ ​a​r​e​ ​l​i​m​i​t​e​d​ ​t​o​ ​t​h​o​s​e​ ​f​r​o​m​ ​t​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​a​n​d​ ​i​t​'​s​ ​l​i​n​k​e​d​ ​t​a​b​l​e​s​.
+     */
+    columnSelectionHelpText: string;
+    /**
+     * T​r​a​n​s​f​o​r​m​a​t​i​o​n​s​ ​c​a​n​ ​b​e​ ​u​s​e​d​ ​t​o​ ​s​u​m​m​a​r​i​z​e​ ​d​a​t​a​,​ ​f​i​l​t​e​r​ ​d​a​t​a​,​ ​a​n​d​ ​m​o​r​e​.​ ​N​o​t​e​ ​t​h​a​t​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​s​ ​a​r​e​ ​a​p​p​l​i​e​d​ ​i​n​ ​t​h​e​ ​o​r​d​e​r​ ​t​h​e​y​ ​a​r​e​ ​l​i​s​t​e​d​.
+     */
+    transformResultsHelpText: string;
+    /**
+     * F​a​i​l​e​d​ ​t​o​ ​f​e​t​c​h​ ​c​o​l​u​m​n​ ​i​n​f​o​r​m​a​t​i​o​n
+     */
+    failedToFetchColumnInfo: string;
+  };
+  dataExplorerQueryRunErrors: {
+    /**
+     * T​h​e​ ​r​e​s​u​l​t​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​d​i​s​p​l​a​y​e​d​.
+     */
+    resultCouldNotBeDisplayed: string;
+    /**
+     * S​o​m​e​ ​o​f​ ​t​h​e​ ​c​o​l​u​m​n​s​ ​p​r​e​s​e​n​t​ ​i​n​ ​t​h​e​ ​q​u​e​r​y​ ​a​r​e​ ​m​i​s​s​i​n​g​ ​i​n​ ​t​e​h​ ​u​n​d​e​r​l​y​i​n​g​ ​b​a​s​e​ ​t​a​b​l​e​.
+     */
+    someColumnsInQueryAreMissing: string;
+    /**
+     * Y​o​u​ ​c​a​n​ ​a​t​t​e​m​p​t​ ​t​o​ ​r​e​c​o​v​e​r​ ​t​h​e​ ​q​u​e​r​y​ ​b​y​ ​c​l​i​c​k​i​n​g​ ​o​n​ ​t​h​e​ ​b​u​t​t​o​n​ ​b​e​l​o​w​.
+     */
+    attemptToRecoverTheQuery: string;
+    /**
+     * T​h​i​s​ ​w​i​l​l​ ​r​e​m​o​v​e​ ​t​h​e​ ​f​o​l​l​o​w​i​n​g​ ​c​o​l​u​m​n​(​s​)
+     */
+    thisWillRemoveTheColumns: string;
+    /**
+     * T​h​i​s​ ​w​i​l​l​ ​r​e​m​o​v​e​ ​t​h​e​ ​f​o​l​l​o​w​i​n​g​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​(​s​)
+     */
+    thisWillRemoveTheTransformations: string;
+    /**
+     * A​t​t​e​m​p​t​ ​E​x​p​l​o​r​a​t​i​o​n​ ​r​e​c​o​v​e​r​y
+     */
+    attemptExplorationRecovery: string;
+    /**
+     * Y​o​u​ ​c​a​n​ ​e​d​i​t​ ​t​h​e​ ​e​x​p​l​o​r​a​t​i​o​n​ ​t​h​e​ ​D​a​t​a​ ​E​x​p​l​o​r​e​r​ ​t​o​ ​a​t​t​e​m​p​t​ ​r​e​c​o​v​e​r​i​n​g​ ​i​t​.
+     */
+    editExplorationToRecover: string;
+  };
+  dataExplorerResults: {
+    /**
+     * T​h​i​s​ ​e​x​p​l​o​r​a​t​i​o​n​ ​d​o​e​s​ ​n​o​t​ ​c​o​n​t​a​i​n​ ​a​n​y​ ​c​o​l​u​m​n​s​.​ ​E​d​i​t​ ​t​h​e​ ​e​x​p​l​o​r​a​t​i​o​n​ ​t​o​ ​a​d​d​ ​c​o​l​u​m​n​s​ ​t​o​ ​i​t​.
+     */
+    noColumnsInExploration: string;
+    /**
+     * S​h​o​w​i​n​g​ ​{​p​a​g​e​S​t​a​r​t​}​-​{​p​a​g​e​E​n​d​}​ ​o​f​ ​{​t​o​t​a​l​}
+     * @param {number} pageEnd
+     * @param {number} pageStart
+     * @param {number} total
+     */
+    showingPageStartToEndOfTotal: RequiredParams<
+      'pageEnd' | 'pageStart' | 'total'
+    >;
+  };
+  dataExplorerActionsPane: {
+    /**
+     * A​n​ ​e​x​p​l​o​r​a​t​i​o​n​ ​w​i​t​h​ ​t​h​a​t​ ​n​a​m​e​ ​a​l​r​e​a​d​y​ ​e​x​i​s​t​s​.
+     */
+    explorationWithNameExists: string;
+    /**
+     * B​a​s​e​d​ ​o​n
+     */
+    basedOn: string;
+    /**
+     * E​x​p​l​o​r​i​n​g​ ​f​r​o​m
+     */
+    exploringFrom: string;
+    /**
+     * T​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​i​s​ ​t​h​e​ ​t​a​b​l​e​ ​t​h​a​t​ ​i​s​ ​b​e​i​n​g​ ​e​x​p​l​o​r​e​d​ ​a​n​d​ ​d​e​t​e​r​m​i​n​e​s​ ​t​h​e​ ​c​o​l​u​m​n​ ​t​h​a​t​ ​a​r​e​ ​a​v​a​i​l​a​b​l​e​ ​f​o​r​m​ ​e​x​p​l​o​r​a​t​i​o​n​.
+     */
+    baseTableHelp: string;
+    /**
+     * T​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​d​e​t​e​r​m​i​n​e​s​ ​t​h​e​ ​c​o​l​u​m​n​s​ ​t​h​a​t​ ​a​r​e​ ​a​v​a​i​l​a​b​l​e​ ​f​o​r​ ​e​x​p​l​o​r​a​t​i​o​n
+     */
+    baseTableColumnsHelp: string;
+    /**
+     * S​t​a​r​t​ ​O​v​e​r
+     */
+    startOver: string;
+  };
+  dataExplorer: {
+    /**
+     * C​r​e​a​t​e​ ​a​n​d​ ​S​h​a​r​e​ ​E​x​p​l​o​r​a​t​i​o​n​s​ ​o​f​ ​Y​o​u​r​ ​D​a​t​a
+     */
+    createAndShareExplorations: string;
+    /**
+     * U​s​e​ ​D​a​t​a​ ​E​x​p​l​o​r​e​r​ ​t​o​ ​a​n​a​l​y​z​e​ ​a​n​d​ ​s​h​a​r​e​ ​y​o​u​r​ ​d​a​t​a​.​ ​E​x​p​l​o​r​a​t​i​o​n​s​ ​a​r​e​ ​b​a​s​e​d​ ​o​n​ ​t​a​b​l​e​s​ ​i​n​ ​y​o​u​r​ ​s​c​h​e​m​a​,​ ​t​o​ ​g​e​t​ ​s​t​a​r​t​e​d​ ​c​h​o​o​s​e​ ​a​ ​t​a​b​l​e​ ​a​n​d​ ​s​t​a​r​t​ ​a​d​d​i​n​g​ ​c​o​l​u​m​n​s​ ​a​n​d​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​s​.
+     */
+    createAndShareExplorationsBody: string;
+    /**
+     * G​e​t​ ​s​t​a​r​t​e​d​ ​b​y​ ​s​e​l​e​c​t​i​n​g​ ​a​ ​t​a​b​l​e​ ​a​n​d​ ​a​d​d​i​n​g​ ​c​o​l​u​m​n​s
+     */
+    getStartBySelectingTable: string;
+    /**
+     * G​e​t​ ​s​t​a​r​t​e​d​ ​b​y​ ​a​d​d​i​n​g​ ​c​o​l​u​m​n​s​ ​f​r​o​m​ ​t​h​e​ ​l​e​f​t
+     */
+    getStartedByAddingColumns: string;
+  };
+  dataExplorerQueryManager: {
+    /**
+     * T​h​e​r​e​ ​w​a​s​ ​a​n​ ​e​r​r​o​r​ ​f​e​t​c​h​i​n​g​ ​j​o​i​n​a​b​l​e​ ​l​i​n​k​s
+     */
+    errorFetchingJoinableLinks: string;
+    /**
+     * A​n​ ​e​r​r​o​r​ ​o​c​c​u​r​r​e​d​ ​w​h​i​l​e​ ​t​r​y​i​n​g​ ​t​o​ ​s​a​v​e​ ​t​e​h​ ​q​u​e​r​y
+     */
+    errorSavingQuery: string;
+  };
+  dataExplorerQueryModel: {
+    /**
+     * Q​u​e​r​y​M​o​d​e​l​ ​c​u​r​r​e​n​t​l​y​ ​a​l​l​o​w​s​ ​o​n​l​y​ ​a​ ​s​i​n​g​l​e​ ​s​u​m​m​a​r​i​z​a​t​i​o​n​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n
+     */
+    onlySingleSummarizationAllowed: string;
+    /**
+     * C​a​n​n​o​t​ ​f​o​r​m​u​l​a​t​e​ ​r​u​n​ ​r​e​q​u​e​s​t​ ​s​i​n​c​e​ ​b​a​s​e​_​t​a​b​l​e​ ​i​s​ ​u​n​d​e​f​i​n​e​d
+     */
+    cannotRunBaseTableUndefined: string;
+  };
+  dataExplorerQueryRunner: {
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​r​u​n​ ​q​u​e​r​y​ ​d​u​e​ ​t​o​ ​a​n​ ​u​n​k​n​o​w​n​ ​r​e​a​s​o​n
+     */
+    unableToRunQuery: string;
+  };
+  dataExplorerUtils: {
+    /**
+     * M​u​l​t​i​p​l​e​ ​l​i​n​k​s​ ​p​r​e​s​e​n​t​ ​f​o​r​ ​t​h​e​ ​s​a​m​e​ ​c​o​l​u​m​n​:​ ​{​c​o​l​u​m​n​I​d​}
+     * @param {number} columnId
+     */
+    multipleLinksPresentForSameColumn: RequiredParams<'columnId'>;
+  };
+  recordSelectorRecordSelectorContent: {
+    /**
+     * N​o​ ​r​e​c​o​r​d​ ​s​u​m​m​a​r​y​ ​t​e​m​p​l​a​t​e​ ​f​o​u​n​d​ ​i​n​ ​A​P​I​ ​r​e​s​p​o​n​s​e​.
+     */
+    noRecordSummaryInAPI: string;
+    /**
+     * C​r​e​a​t​e​ ​R​e​c​o​r​d​ ​F​r​o​m​ ​S​e​a​r​c​h​ ​C​r​i​t​e​r​i​a
+     */
+    createRecordFromSearch: string;
+    /**
+     * T​h​e​ ​1​0​ ​b​e​s​t​ ​m​a​t​c​h​e​s​ ​a​r​e​ ​s​h​o​w​n​.​ ​C​o​n​t​i​n​u​e​ ​f​i​l​t​e​r​i​n​g​ ​t​o​ ​s​e​e​ ​m​o​r​e​.
+     */
+    best10MatchesShown: string;
+    /**
+     * T​h​e​ ​f​i​r​s​t​ ​1​0​ ​r​e​c​o​r​d​s​ ​a​r​e​ ​s​h​o​w​n​.​ ​F​i​l​t​e​r​ ​t​o​ ​s​e​e​ ​m​o​r​e​.
+     */
+    first10RecordsShown: string;
+    /**
+     * N​o​ ​m​a​t​c​h​i​n​g​ ​r​e​c​o​r​d​s
+     */
+    noMatchingRecords: string;
+    /**
+     * N​o​ ​e​x​i​s​t​i​n​g​ ​r​e​c​o​r​d​s
+     */
+    noExistingRecords: string;
+  };
+  tableViewFilters: {
+    /**
+     * F​i​l​t​e​r​ ​r​e​c​o​r​d​s
+     */
+    filterRecords: string;
+    /**
+     * N​o​ ​f​i​l​t​e​r​s​ ​h​a​v​e​ ​b​e​e​n​ ​a​d​d​e​d
+     */
+    noFiltersHaveBeenAdded: string;
+    /**
+     * A​d​d​ ​N​e​w​ ​F​i​l​t​e​r
+     */
+    addNewFilter: string;
+  };
+  tableViewGroup: {
+    /**
+     * G​r​o​u​p​ ​r​e​c​o​r​d​s​ ​b​y
+     */
+    groupRecordsBy: string;
+    /**
+     * N​o​ ​g​r​o​u​p​i​n​g​ ​c​o​n​d​i​t​i​o​n​ ​h​a​s​ ​b​e​e​n​ ​a​d​d​e​d
+     */
+    noGroupingAdded: string;
+    /**
+     * A​d​d​ ​N​e​w​ ​G​r​o​u​p​i​n​g
+     */
+    addNewGrouping: string;
+  };
+  tableViewSort: {
+    /**
+     * N​o​ ​s​o​r​t​i​n​g​ ​c​o​n​d​i​t​i​o​n​ ​h​a​s​ ​b​e​e​n​ ​a​d​d​e​d
+     */
+    noSortingAdded: string;
+    /**
+     * A​d​d​ ​n​e​w​ ​s​o​r​t​ ​c​o​n​d​i​t​i​o​n
+     */
+    addNewSortCondition: string;
+  };
+  constraintsConstraintHelp: {
+    /**
+     * C​o​n​s​t​r​a​i​n​t​s​ ​h​e​l​p​ ​y​o​u​ ​k​e​e​p​ ​y​o​u​r​ ​d​a​t​a​ ​c​l​e​a​n​ ​b​y​ ​r​e​j​e​c​t​i​n​g​ ​i​n​v​a​l​i​d​ ​d​a​t​a​ ​b​e​f​o​r​e​ ​i​t​ ​g​e​t​s​ ​e​n​t​e​r​e​d​.
+     */
+    constraintDescription: string;
+  };
+  constraintsConstraintNameHelp: {
+    /**
+     * A​t​ ​t​h​e​ ​d​a​t​a​b​a​s​e​ ​l​e​v​e​l​,​ ​e​a​c​h​ ​c​o​n​s​t​r​a​i​n​t​ ​m​u​s​t​ ​h​a​v​e​ ​a​ ​u​n​i​q​u​e​ ​n​a​m​e​ ​a​c​r​o​s​s​ ​a​l​l​ ​t​h​e​ ​c​o​n​s​t​r​a​i​n​t​s​,​ ​t​a​b​l​e​s​,​ ​v​i​e​w​s​,​ ​a​n​d​ ​i​n​d​e​x​e​s​ ​w​i​t​h​i​n​ ​t​h​e​ ​s​c​h​e​m​a​.
+     */
+    constraintNameDb: string;
+    /**
+     * I​n​ ​M​a​t​h​e​s​a​r​ ​h​o​w​e​v​e​r​,​ ​t​h​e​ ​n​a​m​e​ ​o​f​ ​t​h​e​ ​c​o​n​s​t​r​a​i​n​t​ ​w​i​l​l​ ​l​i​k​e​l​y​ ​n​e​v​e​r​ ​b​e​ ​r​e​l​e​v​a​n​t​,​ ​&​m​d​a​s​h​;​ ​s​o​ ​w​e​ ​r​e​c​o​m​m​e​n​d​ ​a​l​l​o​w​i​n​g​ ​M​a​t​h​e​s​a​r​ ​t​o​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​g​e​n​e​r​a​t​e​ ​c​o​n​s​t​r​a​i​n​t​ ​n​a​m​e​s​ ​w​h​e​n​ ​a​d​d​i​n​g​ ​n​e​w​ ​c​o​n​s​t​r​a​i​n​t​s​.
+     */
+    constraintNameMathesar: string;
+  };
+  constraintsConstraintTypesSection: {
+    /**
+     * A​ ​p​r​i​m​a​r​y​ ​k​e​y​ ​c​o​n​s​t​r​a​i​n​t​ ​u​n​i​q​u​e​l​y​ ​i​d​e​n​t​i​f​i​e​s​ ​e​a​c​h​ ​r​e​c​o​r​d​ ​i​n​ ​a​ ​t​a​b​l​e​.
+     */
+    primaryKeyHelp: string;
+    /**
+     * A​ ​f​o​r​e​i​g​n​ ​k​e​y​ ​c​o​n​s​t​r​a​i​n​t​ ​l​i​n​k​s​ ​r​e​c​o​r​d​s​ ​i​n​ ​t​w​o​ ​t​a​b​l​e​s​.
+     */
+    foreignKeyHelp: string;
+    /**
+     * A​ ​u​n​i​q​u​e​ ​c​o​n​s​t​r​a​i​n​t​ ​e​n​s​u​r​e​s​ ​t​h​a​t​ ​e​a​c​h​ ​r​e​c​o​r​d​ ​i​n​ ​a​ ​c​o​l​u​m​n​ ​i​s​ ​u​n​i​q​u​e​.
+     */
+    uniqueConstraintHelp: string;
+    /**
+     * N​o​ ​{​c​o​n​s​t​r​a​i​n​t​T​y​p​e​}​ ​C​o​n​s​t​r​a​i​n​t​s
+     * @param {string} constraintType
+     */
+    noConstraints: RequiredParams<'constraintType'>;
+  };
+  constraintsNewForeignKeyConstraint: {
+    /**
+     * N​e​w​ ​F​o​r​e​i​g​n​ ​K​e​y​ ​C​o​n​s​t​r​a​i​n​t
+     */
+    newForeignKeyConstraint: string;
+    /**
+     * C​o​l​u​m​n​ ​i​n​ ​t​h​i​s​ ​t​a​b​l​e​ ​w​h​i​c​h​ ​r​e​f​e​r​e​n​c​e​s​ ​t​h​e​ ​t​a​r​g​e​t​ ​t​a​b​l​e
+     */
+    columnReferencesTargetTable: string;
+    /**
+     * T​a​r​g​e​t​ ​T​a​b​l​e
+     */
+    targetTable: string;
+    /**
+     * T​a​r​g​e​t​ ​C​o​l​u​m​n​ ​i​n​ ​<​>​t​a​b​l​e​N​a​m​e​<​>​ ​T​a​b​l​e
+     */
+    targetColumnInTable: string;
+  };
+  constraintsNewUniqueConstraint: {
+    /**
+     * A​ ​c​o​n​s​t​r​a​i​n​t​ ​w​i​t​h​ ​t​h​a​t​ ​n​a​m​e​ ​a​l​r​e​a​d​y​ ​e​x​i​s​t​s
+     */
+    constraintWithNameExists: string;
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​a​d​d​ ​c​o​n​s​t​r​a​i​n​t​.
+     */
+    unableToAddConstraint: string;
+    /**
+     * N​e​w​ ​U​n​i​q​u​e​ ​C​o​n​s​t​r​a​i​n​t
+     */
+    newUniqueConstraint: string;
+  };
+  constraintsTableConstraints: {
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​f​e​t​c​h​ ​t​a​b​l​e​ ​c​o​n​s​t​r​a​i​n​t​s
+     */
+    unableToFetchTableConstraints: string;
+    /**
+     * N​o​ ​c​o​n​s​t​r​a​i​n​t​s
+     */
+    noConstraints: string;
+  };
+  constraintsTableConstraintsModal: {
+    /**
+     * C​o​n​s​t​r​a​i​n​t​s​ ​a​r​e​ ​u​s​e​d​ ​t​o​ ​d​e​f​i​n​e​ ​r​e​l​a​t​i​o​n​s​h​i​p​s​ ​b​e​t​w​e​e​n​ ​r​e​c​o​r​d​s​ ​i​n​ ​d​i​f​f​e​r​e​n​t​ ​t​a​b​l​e​s​ ​o​r​ ​t​o​ ​e​n​s​u​r​e​ ​t​h​a​t​ ​r​e​c​o​r​d​s​ ​i​n​ ​a​ ​c​o​l​u​m​n​ ​a​r​e​ ​u​n​i​q​u​e​.​ ​C​o​n​s​t​r​a​i​n​t​s​ ​c​a​n​ ​b​e​ ​a​p​p​l​i​e​d​ ​t​o​ ​a​ ​s​i​n​g​l​e​ ​c​o​l​u​m​n​ ​o​r​ ​a​ ​c​o​m​b​i​n​a​t​i​o​n​ ​o​f​ ​c​o​l​u​m​n​s​.
+     */
+    constraintsDescription: string;
+  };
+  tableViewHeaderCell: {
+    /**
+     * A​d​d​ ​F​i​l​t​e​r
+     */
+    addFilter: string;
+    /**
+     * F​i​l​t​e​r​ ​C​o​l​u​m​n
+     */
+    filterColumn: string;
+    /**
+     * R​e​m​o​v​e​ ​{​s​o​r​t​i​n​g​T​y​p​e​}​ ​S​o​r​t​i​n​g
+     * @param {string} sortingType
+     */
+    removeSorting: RequiredParams<'sortingType'>;
+    /**
+     * R​e​m​o​v​e​ ​G​r​o​u​p​i​n​g
+     */
+    removeGrouping: string;
+    /**
+     * G​r​o​u​p​ ​b​y​ ​C​o​l​u​m​n
+     */
+    groupByColumn: string;
+  };
+  tableViewNewColumnCell: {
+    /**
+     * N​e​w​ ​C​o​l​u​m​n
+     */
+    newColumn: string;
+    /**
+     * S​e​l​e​c​t​ ​T​y​p​e
+     */
+    selectType: string;
+  };
+  linkTableLinkTableForm: {
+    /**
+     * T​h​e​ ​t​w​o​ ​c​o​l​u​m​n​s​ ​c​a​n​n​o​t​ ​h​a​v​e​ ​t​h​e​ ​s​a​m​e​ ​n​a​m​e​.
+     */
+    twoColumnsCannotHaveSameName: string;
+    /**
+     * T​h​e​ ​l​i​n​k​ ​h​a​s​ ​b​e​e​n​ ​c​r​e​a​t​e​d​ ​s​u​c​c​e​s​s​f​u​l​l​y
+     */
+    linkCreatedSuccessfully: string;
+    /**
+     * L​i​n​k​s​ ​a​r​e​ ​s​t​o​r​e​d​ ​i​n​ ​t​h​e​ ​d​a​t​a​b​a​s​e​ ​a​s​ ​f​o​r​e​i​g​n​ ​k​e​y​ ​c​o​n​s​t​r​a​i​n​t​s​,​ ​w​h​i​c​h​ ​y​o​u​ ​m​a​y​ ​a​d​d​ ​t​o​ ​e​x​i​s​t​i​n​g​ ​c​o​l​u​m​n​s​ ​v​i​a​ ​t​h​e​ ​"​A​d​v​a​n​c​e​d​"​ ​s​e​c​t​i​o​n​ ​o​f​ ​t​h​e​ ​t​a​b​l​e​ ​i​n​s​p​e​c​t​o​r​.
+     */
+    linksInfo: string;
+    /**
+     * L​i​n​k​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​t​o
+     */
+    linkTo: string;
+    /**
+     * W​e​'​l​l​ ​c​r​e​a​t​e​ ​a​ ​n​e​w​ ​t​a​b​l​e​.
+     */
+    weWillCreateANewTable: string;
+    /**
+     * W​e​'​l​l​ ​a​d​d​ ​t​w​o​ ​c​o​l​u​m​n​s​ ​i​n​ ​<​>​m​a​p​p​i​n​g​T​a​b​l​e​<​>​ ​e​a​c​h​ ​l​i​n​k​i​n​g​ ​t​o​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>​.
+     */
+    add2ColumnsLinkingToTarget: string;
+    /**
+     * C​o​l​u​m​n​ ​{​i​n​d​e​x​}​ ​N​a​m​e
+     * @param {number} index
+     */
+    indexedColumnName: RequiredParams<'index'>;
+    /**
+     * C​r​e​a​t​e​ ​L​i​n​k
+     */
+    createLink: string;
+  };
+  linkTableUtils: {
+    /**
+     * T​h​e​ ​n​a​m​e​ ​"​i​d​"​ ​i​s​ ​r​e​s​e​r​v​e​d​ ​f​o​r​ ​t​h​e​ ​p​r​i​m​a​r​y​ ​k​e​y​ ​c​o​l​u​m​n​ ​t​h​a​t​ ​w​i​l​l​ ​b​e​ ​c​r​e​a​t​e​d​ ​w​h​e​n​ ​c​r​e​a​t​i​n​g​ ​t​h​e​ ​t​a​b​l​e​.
+     */
+    ifColumnNameIsId: string;
+  };
+  linkTableLinkTypeOptions: {
+    /**
+     * O​n​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​ ​c​a​n​ ​b​e​ ​l​i​n​k​e​d​ ​f​r​o​m​ ​m​u​l​t​i​p​l​e​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​.
+     */
+    oneToManyDescription: string;
+    /**
+     * M​u​l​t​i​p​l​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​t​h​e​ ​s​a​m​e​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​.
+     */
+    manyToOneDescription: string;
+    /**
+     * M​u​l​t​i​p​l​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​a​n​d​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​<​>​m​a​p​p​i​n​g​T​a​b​l​e​<​>
+     */
+    manyToManyDescription: string;
+    /**
+     * M​u​l​t​i​p​l​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​<​>​m​a​p​p​i​n​g​<​>
+     */
+    manyToManySelfReferential: string;
+  };
+  linkTableNewColumn: {
+    /**
+     * W​e​'​l​l​ ​a​d​d​ ​a​ ​c​o​l​u​m​n​ ​i​n​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​w​h​i​c​h​ ​l​i​n​k​s​ ​t​o​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>
+     */
+    newColumnInBaseLinkingToTarget: string;
+  };
+  linkTableSelectLinkType: {
+    /**
+     * T​y​p​e​ ​o​f​ ​l​i​n​k​ ​t​o​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>
+     */
+    typeOfLinkTo: string;
+  };
 };
 
 export type TranslationFunctions = {
-  /**
-   * All Databases
-   */
-  allDatabases: () => LocalizedString;
-  /**
-   * Database with name <>databaseName<> is not found.
-   */
-  databaseWithNameNotFound: () => LocalizedString;
+  routes: {
+    /**
+     * No databases found
+     */
+    noDatabasesFound: () => LocalizedString;
+    /**
+     * This is the not the webpage you are looking for.
+     */
+    wrongWebPage: () => LocalizedString;
+    /**
+     * Exploration not found.
+     */
+    explorationNotFound: () => LocalizedString;
+    /**
+     * Database with name <>databaseName<> is not found.
+     */
+    databaseWithNameNotFound: () => LocalizedString;
+    /**
+     * The specified URL is not found.
+     */
+    urlNotFound: () => LocalizedString;
+    /**
+     * Table with id {id} not found.
+     */
+    tableWithIdNotFound: (arg: { id: number }) => LocalizedString;
+    /**
+     * Schema not found.
+     */
+    schemaNotFound: () => LocalizedString;
+  };
+  general: {
+    /**
+     * Administration
+     */
+    administration: () => LocalizedString;
+    /**
+     * Software Update
+     */
+    softwareUpdate: () => LocalizedString;
+    /**
+     * Edit
+     */
+    edit: () => LocalizedString;
+    /**
+     * Data Explorer
+     */
+    dataExplorer: () => LocalizedString;
+    /**
+     * Import
+     */
+    import: () => LocalizedString;
+    /**
+     * User Profile
+     */
+    userProfile: () => LocalizedString;
+    /**
+     * Users
+     */
+    users: () => LocalizedString;
+    /**
+     * Release Notes
+     */
+    releaseNotes: () => LocalizedString;
+    /**
+     * documentation
+     */
+    documentation: () => LocalizedString;
+    /**
+     * Continue
+     */
+    continue: () => LocalizedString;
+    /**
+     * Retry
+     */
+    retry: () => LocalizedString;
+    /**
+     * Upgrading
+     */
+    upgrading: () => LocalizedString;
+    /**
+     * Upgrade
+     */
+    upgrade: () => LocalizedString;
+    /**
+     * Released
+     */
+    released: () => LocalizedString;
+    /**
+     * Update
+     */
+    update: () => LocalizedString;
+    /**
+     * Error
+     */
+    error: () => LocalizedString;
+    /**
+     * Are you sure you want to proceed?
+     */
+    areYouSureToProceed: () => LocalizedString;
+    /**
+     * Save
+     */
+    save: () => LocalizedString;
+    /**
+     * Name cannot be empty.
+     */
+    nameCannotBeEmpty: () => LocalizedString;
+    /**
+     * Manage Access
+     */
+    manageAccess: () => LocalizedString;
+    /**
+     * Schemas
+     */
+    schemas: () => LocalizedString;
+    /**
+     * Create Schema
+     */
+    createSchema: () => LocalizedString;
+    /**
+     * Search Schemas
+     */
+    searchSchemaS: () => LocalizedString;
+    /**
+     * rows
+     */
+    rows: () => LocalizedString;
+    /**
+     * variable
+     */
+    variable: () => LocalizedString;
+    /**
+     * Edit Schema
+     */
+    editSchema: () => LocalizedString;
+    /**
+     * Delete Schema
+     */
+    deleteSchema: () => LocalizedString;
+    /**
+     * Inspector
+     */
+    inspector: () => LocalizedString;
+    /**
+     * Table Name
+     */
+    tableName: () => LocalizedString;
+    /**
+     * Table Preview
+     */
+    tablePreview: () => LocalizedString;
+    /**
+     * Cancel
+     */
+    cancel: () => LocalizedString;
+    /**
+     * The data must be in tabular format (CSV, TSV etc) or JSON. See relevant <>documentationLink</>.
+     */
+    dataMustBeTabular: () => LocalizedString;
+    /**
+     * Field Options
+     */
+    fieldOptions: () => LocalizedString;
+    /**
+     * Set to
+     */
+    setTo: () => LocalizedString;
+    /**
+     * Discard Changes
+     */
+    discardChanges: () => LocalizedString;
+    /**
+     * unknown column
+     */
+    unknownColumn: () => LocalizedString;
+    /**
+     * Open Data Explorer
+     */
+    openDataExplorer: () => LocalizedString;
+    /**
+     * New Table
+     */
+    newTable: () => LocalizedString;
+    /**
+     * From Scratch
+     */
+    fromScratch: () => LocalizedString;
+    /**
+     * Edit <>tableName</> Table
+     */
+    editTableWithName: () => LocalizedString;
+    /**
+     * No Explorations
+     */
+    noExplorations: () => LocalizedString;
+    /**
+     * Loading
+     */
+    loading: () => LocalizedString;
+    /**
+     * Overview
+     */
+    overview: () => LocalizedString;
+    /**
+     * Tables
+     */
+    tables: () => LocalizedString;
+    /**
+     * Explorations
+     */
+    explorations: () => LocalizedString;
+    /**
+     * Search Tables
+     */
+    searchTables: () => LocalizedString;
+    /**
+     * Explore Table
+     */
+    exploreTable: () => LocalizedString;
+    /**
+     * Edit Table
+     */
+    editTable: () => LocalizedString;
+    /**
+     * Delete Table
+     */
+    deleteTable: () => LocalizedString;
+    /**
+     * Find a Record
+     */
+    findARecord: () => LocalizedString;
+    /**
+     * No Tables
+     */
+    noTables: () => LocalizedString;
+    /**
+     * Delete Account
+     */
+    deleteAccount: () => LocalizedString;
+    /**
+     * Account Details
+     */
+    accountDetails: () => LocalizedString;
+    /**
+     * Go to homepage
+     */
+    goToHomepage: () => LocalizedString;
+    /**
+     * from
+     */
+    from: () => LocalizedString;
+    /**
+     * Properties
+     */
+    properties: () => LocalizedString;
+    /**
+     * Actions
+     */
+    actions: () => LocalizedString;
+    /**
+     * Content
+     */
+    content: () => LocalizedString;
+    /**
+     * Name
+     */
+    name: () => LocalizedString;
+    /**
+     * Delete Exploration
+     */
+    deleteExploration: () => LocalizedString;
+    /**
+     * Description
+     */
+    description: () => LocalizedString;
+    /**
+     * Via
+     */
+    via: () => LocalizedString;
+    /**
+     * Not Aggregated
+     */
+    notAggregated: () => LocalizedString;
+    /**
+     * Summarize
+     */
+    summarize: () => LocalizedString;
+    /**
+     * Hide Columns
+     */
+    hideColumns: () => LocalizedString;
+    /**
+     * Filter
+     */
+    filter: () => LocalizedString;
+    /**
+     * Sort
+     */
+    sort: () => LocalizedString;
+    /**
+     * Edit in Data Explorer
+     */
+    editInDataExplorer: () => LocalizedString;
+    /**
+     * Result
+     */
+    result: () => LocalizedString;
+    /**
+     * No results found
+     */
+    noResultsFound: () => LocalizedString;
+    /**
+     * Saving
+     */
+    saving: () => LocalizedString;
+    /**
+     * Save and Close
+     */
+    saveAndClose: () => LocalizedString;
+    /**
+     * Undo
+     */
+    undo: () => LocalizedString;
+    /**
+     * Redo
+     */
+    redo: () => LocalizedString;
+    /**
+     * Save Exploration
+     */
+    saveExploration: () => LocalizedString;
+    /**
+     * Column
+     */
+    column: () => LocalizedString;
+    /**
+     * Cell
+     */
+    cell: () => LocalizedString;
+    /**
+     * Exploration
+     */
+    exploration: () => LocalizedString;
+    /**
+     * Pick
+     */
+    pick: () => LocalizedString;
+    /**
+     * Open
+     */
+    open: () => LocalizedString;
+    /**
+     * Record
+     */
+    record: () => LocalizedString;
+    /**
+     * where
+     */
+    where: () => LocalizedString;
+    /**
+     * Group
+     */
+    group: () => LocalizedString;
+    /**
+     * Primary Keys
+     */
+    primaryKeys: () => LocalizedString;
+    /**
+     * Foreign Keys
+     */
+    foreignKeys: () => LocalizedString;
+    /**
+     * Unique
+     */
+    unique: () => LocalizedString;
+    /**
+     * Add
+     */
+    add: () => LocalizedString;
+    /**
+     * Constraint Name
+     */
+    constraintName: () => LocalizedString;
+    /**
+     * Automatically
+     */
+    automatically: () => LocalizedString;
+    /**
+     * Manual
+     */
+    manual: () => LocalizedString;
+    /**
+     * Columns
+     */
+    columns: () => LocalizedString;
+    /**
+     * Set Constraint Name
+     */
+    setConstraintName: () => LocalizedString;
+    /**
+     * Constraints
+     */
+    constraints: () => LocalizedString;
+    /**
+     * One to Many
+     */
+    oneToMany: () => LocalizedString;
+    /**
+     * Many to One
+     */
+    manyToOne: () => LocalizedString;
+    /**
+     * Many to Many
+     */
+    manyToMany: () => LocalizedString;
+    /**
+     * Linking Table
+     */
+    linkingTable: () => LocalizedString;
+    /**
+     * Column Name
+     */
+    columnName: () => LocalizedString;
+  };
+  upgradeConfirmation: {
+    /**
+     * Before Upgrading
+     */
+    beforeUpgrading: () => LocalizedString;
+    /**
+     * Read the <>releaseNotesLink<> to see if this release requires any special upgrade instructions.
+     */
+    readReleaseNotes: () => LocalizedString;
+    /**
+     * Prepare your users for up to five minutes of downtime.
+     */
+    prepareForDowntime: () => LocalizedString;
+    /**
+     * While Upgrading
+     */
+    whileUpgrading: () => LocalizedString;
+    /**
+     * This window will remain open but all features within Mathesar will be unusable.
+     */
+    windowWillRemainOpen: () => LocalizedString;
+    /**
+     * You will see a loading spinner but no progress bar.
+     */
+    seeLoadingSpinner: () => LocalizedString;
+    /**
+     * After Upgrading
+     */
+    afterUpgrading: () => LocalizedString;
+    /**
+     * This page will automatically reload, showing the software update status again.
+     */
+    automaticallyReload: () => LocalizedString;
+    /**
+     * If the upgrade succeeds, you will see that you're running the latest version.
+     */
+    ifUpgradeSucceeds: () => LocalizedString;
+    /**
+     * If the upgrade fails, the update status screen will still show that an upgrade is available, and you will need to refer to our <>documentationLink</> for further troubleshooting.
+     */
+    ifUpgradeFails: () => LocalizedString;
+  };
+  upgradeModal: {
+    /**
+     * Upgrade to {version}
+     */
+    upgradeTo: (arg: { version: string }) => LocalizedString;
+    /**
+     * Upgrading to {version}
+     */
+    upgradingTo: (arg: { version: string }) => LocalizedString;
+    /**
+     * Error Upgrading
+     */
+    errorUpgrading: () => LocalizedString;
+  };
+  upgradeProcessing: {
+    /**
+     * A Mathesar upgrade is currently in progress. It is important that you do not navigate away from this page until the upgrade is complete.
+     */
+    upgradeInProgress: () => LocalizedString;
+  };
+  releaseBox: {
+    /**
+     * New Version Available
+     */
+    newVersionAvailable: () => LocalizedString;
+    /**
+     * You are running the latest version
+     */
+    runningLatestVersion: () => LocalizedString;
+    /**
+     * Currently Installed
+     */
+    currentlyInstalled: () => LocalizedString;
+    /**
+     * Latest Available Version (not installed)
+     */
+    latestAvailableVersion: () => LocalizedString;
+    /**
+     * We can install this new version for you
+     */
+    weCanInstallThisVersion: () => LocalizedString;
+  };
+  softwareUpdateContent: {
+    /**
+     * Loading release data
+     */
+    loadingReleaseDate: () => LocalizedString;
+    /**
+     * The currently-installed version is <>hash</> but we were unable to load data about this release.
+     */
+    errorInCurrentInstalled: () => LocalizedString;
+    /**
+     * Unable to load data about the latest release.
+     */
+    errorInLatestRelease: () => LocalizedString;
+    /**
+     * Last checked
+     */
+    lastChecked: () => LocalizedString;
+  };
+  softwareUpdatePage: {
+    /**
+     * Release data store not found in context.
+     */
+    releaseDataNotInContextError: () => LocalizedString;
+  };
+  editUserPage: {
+    /**
+     * User not found
+     */
+    userNotFound: () => LocalizedString;
+    /**
+     * Edit User
+     */
+    editUser: () => LocalizedString;
+    /**
+     * Delete User
+     */
+    deleteUser: () => LocalizedString;
+  };
+  newUserPage: {
+    /**
+     * New User
+     */
+    newUser: () => LocalizedString;
+  };
+  usersListingPage: {
+    /**
+     * Add user
+     */
+    addUser: () => LocalizedString;
+    /**
+     * No users found
+     */
+    noUsersFound: () => LocalizedString;
+    /**
+     * Search Users
+     */
+    searchUsers: () => LocalizedString;
+  };
+  databaseHelp: {
+    /**
+     * All objects in this schema will be deleted permanently, including (but not limited to) tables and views. Some of these objects may not be visible in the Mathesar UI.
+     */
+    allObjectsInSchemaDeletedPermanently: () => LocalizedString;
+  };
+  addEditSchemaModal: {
+    /**
+     * A schema with that name already exists.
+     */
+    schemaWithNameExists: () => LocalizedString;
+    /**
+     * Create New Schema
+     */
+    createNewSchema: () => LocalizedString;
+    /**
+     * Name your schema to reflect its purpose. For example, your personal financial schema may be called "Personal Finances" and your movie collection "Movies." Add a description to your schema to remember what it's for.
+     */
+    schemaNameHelp: () => LocalizedString;
+    /**
+     * Rename <>identifier</> Schema
+     */
+    renameSchema: () => LocalizedString;
+  };
+  databaseDetails: {
+    /**
+     * Sync External Changes
+     */
+    syncExternalChanges: () => LocalizedString;
+    /**
+     * If you make structural changes to the database outside Mathesar (e.g. using another tool to add a schema, table, or column), those changes will not be reflected in Mathesar until you manually sync them with this button.
+     */
+    structuralChangesHelp: () => LocalizedString;
+    /**
+     * External changes to data (e.g. adding or editing <>rows</>) will be automatically reflected without clicking this button.
+     */
+    dataChangesHelp: () => LocalizedString;
+  };
+  databaseNavigation: {
+    /**
+     * All Databases
+     */
+    allDatabases: () => LocalizedString;
+    /**
+     * To add or remove databases, modify the <>variableNameAndLink</> in your configuration file and restart Mathesar.
+     */
+    addOrRemoveDbHelp: () => LocalizedString;
+  };
+  dbAccessControlModal: {
+    /**
+     * Manage <>databaseName</> Database Access
+     */
+    manageDbAccess: () => LocalizedString;
+  };
+  schemaRow: {
+    /**
+     * Every PostgreSQL database includes the "public" schema. This protected schema can be read by anybody who accesses the database.
+     */
+    publicSchemaHelp: () => LocalizedString;
+  };
+  importPreview: {
+    /**
+     * Failed to load preview
+     */
+    failedToLoadPreview: () => LocalizedString;
+    /**
+     * Delete Import
+     */
+    deleteImport: () => LocalizedString;
+    /**
+     * An error occurrent while loading the preview
+     */
+    errorInLoadingPreview: () => LocalizedString;
+    /**
+     * Unable to load preview
+     */
+    unableToLoadPreview: () => LocalizedString;
+    /**
+     * Data Type Change Failed
+     */
+    dataTypeChangeFailed: () => LocalizedString;
+    /**
+     * Unable to cancel import
+     */
+    unableToCancelImport: () => LocalizedString;
+    /**
+     * Unable to save table
+     */
+    unableToSaveTable: () => LocalizedString;
+    /**
+     * Finish  setting up your table
+     */
+    finishSettingYourTable: () => LocalizedString;
+    /**
+     * Table has already been confirmed. Click here to view the table.
+     */
+    tableConfirmed: () => LocalizedString;
+    /**
+     * Column names and data types
+     */
+    columnNameAndDataTypes: () => LocalizedString;
+    /**
+     * Column names and data types are automatically detected, use the controls in the preview table to review and update them if necessary.
+     */
+    columnNameAndDataTypesAutoDetected: () => LocalizedString;
+    /**
+     * Please wait while we prepare a preview for you
+     */
+    pleaseWaitForPreview: () => LocalizedString;
+    /**
+     * Preview data is shown for the first few rows of your data only.
+     */
+    previewOnlyForFirstFewRows: () => LocalizedString;
+    /**
+     * Confirm & create table
+     */
+    confirmAndCreateTable: () => LocalizedString;
+    /**
+     * Use first row as header
+     */
+    useFirstRowAsHeader: () => LocalizedString;
+  };
+  importUpload: {
+    /**
+     * Upload a file
+     */
+    uploadAFile: () => LocalizedString;
+    /**
+     * Provide a URL to the file
+     */
+    provideUrlToFile: () => LocalizedString;
+    /**
+     * Copy and Paste Text
+     */
+    copyAndPasteText: () => LocalizedString;
+    /**
+     * Unable to create a table from the uploaded data
+     */
+    unableToCreateTableFromUpload: () => LocalizedString;
+    /**
+     * Create a table by importing your data
+     */
+    createATableByImporting: () => LocalizedString;
+    /**
+     * Uploading Data
+     */
+    uploadingData: () => LocalizedString;
+    /**
+     * Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while import is in progress.
+     */
+    largeDataTakesTimeWarning: () => LocalizedString;
+    /**
+     * How would you like to import your data?
+     */
+    howWouldYouLikeToImport: () => LocalizedString;
+    /**
+     * Upload failed
+     */
+    uploadFailed: () => LocalizedString;
+    /**
+     * Preparing Preview
+     */
+    preparingPreview: () => LocalizedString;
+    /**
+     * Failed to import data
+     */
+    failedToImport: () => LocalizedString;
+  };
+  uploadViaClipboard: {
+    /**
+     * Paste the data you want to import
+     */
+    pasteDataToUpload: () => LocalizedString;
+  };
+  uploadViaUrl: {
+    /**
+     * Enter the URL of the file you want to import
+     */
+    enterUrlOfFileToImport: () => LocalizedString;
+  };
+  recordPageContent: {
+    /**
+     * Record in <>tableName</>
+     */
+    recordInTable: () => LocalizedString;
+  };
+  recordPageWidget: {
+    /**
+     * Related Records
+     */
+    relatedRecord: () => LocalizedString;
+    /**
+     * Each of the following records link to <>recordSummary</> from another table.
+     */
+    relatedRecordHelp: () => LocalizedString;
+  };
+  createNewExplorationTutorial: {
+    /**
+     * It's time to use your tables. Create your first exploration.
+     */
+    createFirstExploration: () => LocalizedString;
+    /**
+     * Explorations let you query your data to uncover trends and insights. They may be stored and run anytime to see the latest data. Explorations make great reports. You might, for example, create an exploration that shows your monthly spending.
+     */
+    createFirstExplorationHelp: () => LocalizedString;
+  };
+  createNewTableButton: {
+    /**
+     * From Data Import
+     */
+    fromDataImport: () => LocalizedString;
+  };
+  createNewTableTutorial: {
+    /**
+     * You've created a new schema, now add tables to it.
+     */
+    createFirstTable: () => LocalizedString;
+    createFirstTableHelp: () => LocalizedString;
+    /**
+     * How do you want to create your table?
+     */
+    howYouWantToCreateTable: () => LocalizedString;
+    /**
+     * Import from a File
+     */
+    importFromAFile: () => LocalizedString;
+  };
+  schemaAccessControlModal: {
+    /**
+     * Manage <>schemaName</> Schema Access
+     */
+    manageSchemaAccessWithName: () => LocalizedString;
+  };
+  schemaExplorations: {
+    /**
+     * Search Explorations
+     */
+    searchExplorations: () => LocalizedString;
+  };
+  schemaOverview: {
+    /**
+     * Explorations let you query your data to uncover trends and insights.
+     */
+    explorationsIntro: () => LocalizedString;
+  };
+  tableCard: {
+    /**
+     * Needs Import Confirmation
+     */
+    needImportConfirmation: () => LocalizedString;
+  };
+  profilePage: {
+    /**
+     * Please contact your administrator to request permanent deletion of your account.
+     */
+    contactAdminForPermanentDeletion: () => LocalizedString;
+    /**
+     * Could not fetch user profile details. Try refreshing your page.
+     */
+    couldNoFetchProfile: () => LocalizedString;
+  };
+  explorationsInspectorColumnSource: {
+    /**
+     * Aggregated from
+     */
+    aggregatedFrom: () => LocalizedString;
+    /**
+     * Source Column
+     */
+    sourceColumn: () => LocalizedString;
+  };
+  explorationsInspectorColumnTab: {
+    /**
+     * {count} columns selected
+     */
+    moreThanOneColumnSelected: (arg: { count: number }) => LocalizedString;
+    /**
+     * Select a column to view its properties
+     */
+    selectAColumnToViewProperties: () => LocalizedString;
+  };
+  explorationsInspectorDeleteColumnAction: {
+    /**
+     * This column cannot be deleted because atleast one column from the base table is required. Please add another column from the base table before deleting this column.
+     */
+    cannotDeleteColumnLastRemainingBaseColumn: () => LocalizedString;
+    /**
+     * This column cannot be deleted because it is either used in transformations or a result of transformations. Please remove the column from the transformations before deleting it.
+     */
+    cannotDeleteColumnUsedInTransformation: () => LocalizedString;
+    /**
+     * Some of the selected columns cannot be deleted because atleast one column from the base table is required. Please add another column from the base table before deleting them.
+     */
+    cannotDeleteColumnsLastRemainingBaseColumn: () => LocalizedString;
+    /**
+     * Some of the selected columns cannot be deleted because they're either used in transformations or results of transformations. Please remove them from the transformations before deleting them.
+     */
+    cannotDeleteColumnsUsedInTransformation: () => LocalizedString;
+  };
+  explorationsInspectorCellTab: {
+    /**
+     * Select a cell to view it's properties.
+     */
+    selectACellToViewProperties: () => LocalizedString;
+  };
+  explorationsInspectorExplorationTab: {
+    /**
+     * Unable to save Exploration.
+     */
+    unableToSaveExploration: () => LocalizedString;
+  };
+  dataExplorerColumnSelectionPane: {
+    /**
+     * From Base table
+     */
+    fromBaseTable: () => LocalizedString;
+    /**
+     * From linked tables
+     */
+    fromLinkedTables: () => LocalizedString;
+    /**
+     * At least one column from the the base table is required to add columns from linked tables.
+     */
+    atLeastOneColumnFromBaseRequired: () => LocalizedString;
+    /**
+     * Linked from Base table
+     */
+    linkedFromBaseTable: () => LocalizedString;
+    /**
+     * Linked to Base table
+     */
+    linkedToBaseTable: () => LocalizedString;
+  };
+  dataExplorerSelectableColum: {
+    /**
+     * This column has been added {times}
+     */
+    columnAddedTimes: (arg: { times: string }) => LocalizedString;
+  };
+  dataExplorerHideTransformation: {
+    /**
+     * Select Columns to Hide
+     */
+    selectColumnsToHide: () => LocalizedString;
+  };
+  dataExplorerTransformationPane: {
+    /**
+     * Add transformation step
+     */
+    addTransformationStep: () => LocalizedString;
+  };
+  dataExplorerInputSidebar: {
+    /**
+     * Select Columns
+     */
+    selectColumns: () => LocalizedString;
+    /**
+     * Transform Results
+     */
+    transformResults: () => LocalizedString;
+    /**
+     * By default, Mathesar shows only one related record per row when adding a column with multiple related records. We recommend adding a summarization step if you'd like to see related records as a list instead.
+     */
+    autoSummarizationConfirmBodyLine1: () => LocalizedString;
+    /**
+     * You can manually configure a summarization later via the "Transform Results" pane.
+     */
+    autoSummarizationConfirmBodyLine2: () => LocalizedString;
+    /**
+     * Yes, summarize as a list
+     */
+    summarizeAsAList: () => LocalizedString;
+    /**
+     * No, continue without summarizing
+     */
+    continueWithoutSummarizing: () => LocalizedString;
+    /**
+     * Build your Exploration
+     */
+    buildYourExploration: () => LocalizedString;
+    /**
+     * Select the columns that will be used for the exploration. Columns are limited to those from the base table and it's linked tables.
+     */
+    columnSelectionHelpText: () => LocalizedString;
+    /**
+     * Transformations can be used to summarize data, filter data, and more. Note that transformations are applied in the order they are listed.
+     */
+    transformResultsHelpText: () => LocalizedString;
+    /**
+     * Failed to fetch column information
+     */
+    failedToFetchColumnInfo: () => LocalizedString;
+  };
+  dataExplorerQueryRunErrors: {
+    /**
+     * The result could not be displayed.
+     */
+    resultCouldNotBeDisplayed: () => LocalizedString;
+    /**
+     * Some of the columns present in the query are missing in teh underlying base table.
+     */
+    someColumnsInQueryAreMissing: () => LocalizedString;
+    /**
+     * You can attempt to recover the query by clicking on the button below.
+     */
+    attemptToRecoverTheQuery: () => LocalizedString;
+    /**
+     * This will remove the following column(s)
+     */
+    thisWillRemoveTheColumns: () => LocalizedString;
+    /**
+     * This will remove the following transformation(s)
+     */
+    thisWillRemoveTheTransformations: () => LocalizedString;
+    /**
+     * Attempt Exploration recovery
+     */
+    attemptExplorationRecovery: () => LocalizedString;
+    /**
+     * You can edit the exploration the Data Explorer to attempt recovering it.
+     */
+    editExplorationToRecover: () => LocalizedString;
+  };
+  dataExplorerResults: {
+    /**
+     * This exploration does not contain any columns. Edit the exploration to add columns to it.
+     */
+    noColumnsInExploration: () => LocalizedString;
+    /**
+     * Showing {pageStart}-{pageEnd} of {total}
+     */
+    showingPageStartToEndOfTotal: (arg: {
+      pageEnd: number;
+      pageStart: number;
+      total: number;
+    }) => LocalizedString;
+  };
+  dataExplorerActionsPane: {
+    /**
+     * An exploration with that name already exists.
+     */
+    explorationWithNameExists: () => LocalizedString;
+    /**
+     * Based on
+     */
+    basedOn: () => LocalizedString;
+    /**
+     * Exploring from
+     */
+    exploringFrom: () => LocalizedString;
+    /**
+     * The base table is the table that is being explored and determines the column that are available form exploration.
+     */
+    baseTableHelp: () => LocalizedString;
+    /**
+     * The base table determines the columns that are available for exploration
+     */
+    baseTableColumnsHelp: () => LocalizedString;
+    /**
+     * Start Over
+     */
+    startOver: () => LocalizedString;
+  };
+  dataExplorer: {
+    /**
+     * Create and Share Explorations of Your Data
+     */
+    createAndShareExplorations: () => LocalizedString;
+    /**
+     * Use Data Explorer to analyze and share your data. Explorations are based on tables in your schema, to get started choose a table and start adding columns and transformations.
+     */
+    createAndShareExplorationsBody: () => LocalizedString;
+    /**
+     * Get started by selecting a table and adding columns
+     */
+    getStartBySelectingTable: () => LocalizedString;
+    /**
+     * Get started by adding columns from the left
+     */
+    getStartedByAddingColumns: () => LocalizedString;
+  };
+  dataExplorerQueryManager: {
+    /**
+     * There was an error fetching joinable links
+     */
+    errorFetchingJoinableLinks: () => LocalizedString;
+    /**
+     * An error occurred while trying to save teh query
+     */
+    errorSavingQuery: () => LocalizedString;
+  };
+  dataExplorerQueryModel: {
+    /**
+     * QueryModel currently allows only a single summarization transformation
+     */
+    onlySingleSummarizationAllowed: () => LocalizedString;
+    /**
+     * Cannot formulate run request since base_table is undefined
+     */
+    cannotRunBaseTableUndefined: () => LocalizedString;
+  };
+  dataExplorerQueryRunner: {
+    /**
+     * Unable to run query due to an unknown reason
+     */
+    unableToRunQuery: () => LocalizedString;
+  };
+  dataExplorerUtils: {
+    /**
+     * Multiple links present for the same column: {columnId}
+     */
+    multipleLinksPresentForSameColumn: (arg: {
+      columnId: number;
+    }) => LocalizedString;
+  };
+  recordSelectorRecordSelectorContent: {
+    /**
+     * No record summary template found in API response.
+     */
+    noRecordSummaryInAPI: () => LocalizedString;
+    /**
+     * Create Record From Search Criteria
+     */
+    createRecordFromSearch: () => LocalizedString;
+    /**
+     * The 10 best matches are shown. Continue filtering to see more.
+     */
+    best10MatchesShown: () => LocalizedString;
+    /**
+     * The first 10 records are shown. Filter to see more.
+     */
+    first10RecordsShown: () => LocalizedString;
+    /**
+     * No matching records
+     */
+    noMatchingRecords: () => LocalizedString;
+    /**
+     * No existing records
+     */
+    noExistingRecords: () => LocalizedString;
+  };
+  tableViewFilters: {
+    /**
+     * Filter records
+     */
+    filterRecords: () => LocalizedString;
+    /**
+     * No filters have been added
+     */
+    noFiltersHaveBeenAdded: () => LocalizedString;
+    /**
+     * Add New Filter
+     */
+    addNewFilter: () => LocalizedString;
+  };
+  tableViewGroup: {
+    /**
+     * Group records by
+     */
+    groupRecordsBy: () => LocalizedString;
+    /**
+     * No grouping condition has been added
+     */
+    noGroupingAdded: () => LocalizedString;
+    /**
+     * Add New Grouping
+     */
+    addNewGrouping: () => LocalizedString;
+  };
+  tableViewSort: {
+    /**
+     * No sorting condition has been added
+     */
+    noSortingAdded: () => LocalizedString;
+    /**
+     * Add new sort condition
+     */
+    addNewSortCondition: () => LocalizedString;
+  };
+  constraintsConstraintHelp: {
+    /**
+     * Constraints help you keep your data clean by rejecting invalid data before it gets entered.
+     */
+    constraintDescription: () => LocalizedString;
+  };
+  constraintsConstraintNameHelp: {
+    /**
+     * At the database level, each constraint must have a unique name across all the constraints, tables, views, and indexes within the schema.
+     */
+    constraintNameDb: () => LocalizedString;
+    /**
+     * In Mathesar however, the name of the constraint will likely never be relevant, &mdash; so we recommend allowing Mathesar to automatically generate constraint names when adding new constraints.
+     */
+    constraintNameMathesar: () => LocalizedString;
+  };
+  constraintsConstraintTypesSection: {
+    /**
+     * A primary key constraint uniquely identifies each record in a table.
+     */
+    primaryKeyHelp: () => LocalizedString;
+    /**
+     * A foreign key constraint links records in two tables.
+     */
+    foreignKeyHelp: () => LocalizedString;
+    /**
+     * A unique constraint ensures that each record in a column is unique.
+     */
+    uniqueConstraintHelp: () => LocalizedString;
+    /**
+     * No {constraintType} Constraints
+     */
+    noConstraints: (arg: { constraintType: string }) => LocalizedString;
+  };
+  constraintsNewForeignKeyConstraint: {
+    /**
+     * New Foreign Key Constraint
+     */
+    newForeignKeyConstraint: () => LocalizedString;
+    /**
+     * Column in this table which references the target table
+     */
+    columnReferencesTargetTable: () => LocalizedString;
+    /**
+     * Target Table
+     */
+    targetTable: () => LocalizedString;
+    /**
+     * Target Column in <>tableName<> Table
+     */
+    targetColumnInTable: () => LocalizedString;
+  };
+  constraintsNewUniqueConstraint: {
+    /**
+     * A constraint with that name already exists
+     */
+    constraintWithNameExists: () => LocalizedString;
+    /**
+     * Unable to add constraint.
+     */
+    unableToAddConstraint: () => LocalizedString;
+    /**
+     * New Unique Constraint
+     */
+    newUniqueConstraint: () => LocalizedString;
+  };
+  constraintsTableConstraints: {
+    /**
+     * Unable to fetch table constraints
+     */
+    unableToFetchTableConstraints: () => LocalizedString;
+    /**
+     * No constraints
+     */
+    noConstraints: () => LocalizedString;
+  };
+  constraintsTableConstraintsModal: {
+    /**
+     * Constraints are used to define relationships between records in different tables or to ensure that records in a column are unique. Constraints can be applied to a single column or a combination of columns.
+     */
+    constraintsDescription: () => LocalizedString;
+  };
+  tableViewHeaderCell: {
+    /**
+     * Add Filter
+     */
+    addFilter: () => LocalizedString;
+    /**
+     * Filter Column
+     */
+    filterColumn: () => LocalizedString;
+    /**
+     * Remove {sortingType} Sorting
+     */
+    removeSorting: (arg: { sortingType: string }) => LocalizedString;
+    /**
+     * Remove Grouping
+     */
+    removeGrouping: () => LocalizedString;
+    /**
+     * Group by Column
+     */
+    groupByColumn: () => LocalizedString;
+  };
+  tableViewNewColumnCell: {
+    /**
+     * New Column
+     */
+    newColumn: () => LocalizedString;
+    /**
+     * Select Type
+     */
+    selectType: () => LocalizedString;
+  };
+  linkTableLinkTableForm: {
+    /**
+     * The two columns cannot have the same name.
+     */
+    twoColumnsCannotHaveSameName: () => LocalizedString;
+    /**
+     * The link has been created successfully
+     */
+    linkCreatedSuccessfully: () => LocalizedString;
+    /**
+     * Links are stored in the database as foreign key constraints, which you may add to existing columns via the "Advanced" section of the table inspector.
+     */
+    linksInfo: () => LocalizedString;
+    /**
+     * Link <>baseTable<> to
+     */
+    linkTo: () => LocalizedString;
+    /**
+     * We'll create a new table.
+     */
+    weWillCreateANewTable: () => LocalizedString;
+    /**
+     * We'll add two columns in <>mappingTable<> each linking to <>targetTable<>.
+     */
+    add2ColumnsLinkingToTarget: () => LocalizedString;
+    /**
+     * Column {index} Name
+     */
+    indexedColumnName: (arg: { index: number }) => LocalizedString;
+    /**
+     * Create Link
+     */
+    createLink: () => LocalizedString;
+  };
+  linkTableUtils: {
+    /**
+     * The name "id" is reserved for the primary key column that will be created when creating the table.
+     */
+    ifColumnNameIsId: () => LocalizedString;
+  };
+  linkTableLinkTypeOptions: {
+    /**
+     * One <>baseTable<> record can be linked from multiple <>targetTable<> records.
+     */
+    oneToManyDescription: () => LocalizedString;
+    /**
+     * Multiple <>baseTable<> records can link to the same <>targetTable<> record.
+     */
+    manyToOneDescription: () => LocalizedString;
+    /**
+     * Multiple <>baseTable<> and <>targetTable<> records can link to each other through a new <>mappingTable<>
+     */
+    manyToManyDescription: () => LocalizedString;
+    /**
+     * Multiple <>baseTable<> records can link to each other through a new <>mapping<>
+     */
+    manyToManySelfReferential: () => LocalizedString;
+  };
+  linkTableNewColumn: {
+    /**
+     * We'll add a column in <>baseTable<> which links to <>targetTable<>
+     */
+    newColumnInBaseLinkingToTarget: () => LocalizedString;
+  };
+  linkTableSelectLinkType: {
+    /**
+     * Type of link to <>targetTable<>
+     */
+    typeOfLinkTo: () => LocalizedString;
+  };
 };
 
 export type Formatters = {};
