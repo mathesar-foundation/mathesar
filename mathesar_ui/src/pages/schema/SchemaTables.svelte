@@ -6,6 +6,7 @@
   import TablesList from './TablesList.svelte';
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import CreateNewTableButton from './CreateNewTableButton.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let tablesMap: Map<number, TableEntry>;
 
@@ -34,7 +35,7 @@
 </script>
 
 <EntityContainerWithFilterBar
-  searchPlaceholder="Search Tables"
+  searchPlaceholder={$LL.general.searchTables()}
   bind:searchQuery={tableSearchQuery}
   on:clear={clearQuery}
 >

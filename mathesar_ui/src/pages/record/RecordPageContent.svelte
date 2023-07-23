@@ -20,6 +20,9 @@
   import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
   import type RecordStore from './RecordStore';
   import Widgets from './Widgets.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
+  import { generateSelectOptions } from '@mathesar/component-library/data-type-based-input/utils';
 
   export let record: RecordStore;
   export let tableStructure: TableStructure;
@@ -52,8 +55,11 @@
         </NameWithIcon>
       </h1>
       <div class="table-name">
-        Record in
-        <strong><TableName {table} truncate={false} /></strong>
+        <RichText text={$LL.recordPageContent.recordInTable()} let:slotName>
+          {#if slotName === 'tableName'}
+            <strong><TableName {table} truncate={false} /></strong>
+          {/if}
+        </RichText>
       </div>
       <div class="form-status"><FormStatus {form} /></div>
     </div>
@@ -66,8 +72,8 @@
       <FormSubmit
         {form}
         catchErrors
-        proceedButton={{ label: 'Save', icon: iconSave }}
-        cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
+        proceedButton={{ label: $LL.general.save(), icon: iconSave }}
+        cancelButton={{ label: $LL.general.discardChanges(), icon: iconUndo }}
         onProceed={() => record.patch($form.values)}
         getErrorMessages={(e) => {
           const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);

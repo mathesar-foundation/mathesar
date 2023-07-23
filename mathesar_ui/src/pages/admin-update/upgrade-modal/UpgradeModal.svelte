@@ -11,6 +11,7 @@
   import UpgradeConfirm from './UpgradeConfirm.svelte';
   import UpgradeError from './UpgradeError.svelte';
   import UpgradeProcessing from './UpgradeProcessing.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let controller: ModalController;
   export let release: Release;
@@ -30,9 +31,9 @@
 
   $: version = `Mathesar ${release.tagName}`;
   $: titleMap = ((): Record<Status, string> => ({
-    confirm: `Upgrade to ${version}`,
-    processing: `Upgrading to ${version}`,
-    error: 'Error Upgrading',
+    confirm: $LL.upgradeModal.upgradeTo({ version }),
+    processing: $LL.upgradeModal.upgradingTo({ version }),
+    error: $LL.upgradeModal.errorUpgrading(),
   }))();
   $: title = titleMap[state.status];
 

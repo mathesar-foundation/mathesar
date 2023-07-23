@@ -53,6 +53,7 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
   import PreviewColumn from './PreviewColumn.svelte';
   import ErrorInfo from './ErrorInfo.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -220,7 +221,7 @@
         errors: [
           err instanceof Error
             ? err.message
-            : 'An error occurred while loading the preview.',
+            : $LL.importPreview.errorInLoadingPreview(),
         ],
       };
     }
@@ -258,7 +259,9 @@
         headerUpdateRequestStatus = {
           state: 'failure',
           errors: [
-            err instanceof Error ? err.message : 'Unable to load preview',
+            err instanceof Error
+              ? err.message
+              : $LL.importPreview.unableToLoadPreview(),
           ],
         };
       }
@@ -280,8 +283,10 @@
     } catch (err) {
       const errorMessage =
         err instanceof Error
-          ? `Data Type Change Failed: ${getErrorMessage(err.message)}`
-          : 'Data Type Change Failed';
+          ? `${$LL.importPreview.dataTypeChangeFailed()}: ${getErrorMessage(
+              err.message,
+            )}`
+          : $LL.importPreview.dataTypeChangeFailed();
       typeChangeRequestStatus = {
         state: 'failure',
         errors: [errorMessage],
@@ -293,7 +298,9 @@
   function handleCancel() {
     void deleteTable(database, schema, previewTableId).catch((err) => {
       const errorMessage =
-        err instanceof Error ? err.message : 'Unable to cancel import';
+        err instanceof Error
+          ? err.message
+          : $LL.importPreview.unableToCancelImport();
       toast.error(errorMessage);
     });
     router.goto(getSchemaPageUrl(database.name, schema.id), true);
@@ -320,13 +327,17 @@
       );
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Unable to save table';
+        err instanceof Error
+          ? err.message
+          : $LL.importPreview.unableToSaveTable();
       toast.error(errorMessage);
     }
   }
 </script>
 
-<svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
+<svelte:head
+  ><title>{makeSimplePageTitle($LL.general.import())}</title></svelte:head
+>
 
 <LayoutWithHeader
   cssVariables={{
@@ -338,20 +349,22 @@
 >
   <div class="table-preview-confirmation">
     <InsetPageLayout>
-      <h1 slot="header">Finish setting up your table</h1>
+      <h1 slot="header">{$LL.importPreview.finishSettingYourTable()}</h1>
 
       {#if tableIsAlreadyConfirmed}
-        Table has already been confirmed. Click here to view the table.
+        {$LL.importPreview.tableConfirmed()}
       {:else}
         <div class="table-properties">
           <LabeledInput layout="stacked">
-            <h2 class="large-bold-header" slot="label">Table Name</h2>
+            <h2 class="large-bold-header" slot="label">
+              {$LL.general.tableName()}
+            </h2>
             <TextInput bind:value={tableName} />
           </LabeledInput>
 
           <div class="header-checkbox">
             <LabeledInput
-              label="Use first row as header"
+              label={$LL.importPreview.useFirstRowAsHeader()}
               layout="inline-input-first"
             >
               <Checkbox
@@ -363,15 +376,15 @@
           </div>
 
           <div class="help-content">
-            <h2 class="large-bold-header">Column names and data types</h2>
+            <h2 class="large-bold-header">
+              {$LL.importPreview.columnNameAndDataTypes()}
+            </h2>
             <p>
-              Column names and data types are automatically detected, use the
-              controls in the preview table to review and update them if
-              necessary.
+              {$LL.importPreview.columnNameAndDataTypesAutoDetected()}
             </p>
             {#if isLoading}
               <InfoBox fullWidth>
-                <span>Please wait while we prepare a preview for you</span>
+                <span>{$LL.importPreview.pleaseWaitForPreview()}</span>
                 <Spinner />
               </InfoBox>
             {:else if previewRequestStatus?.state === 'failure'}
@@ -388,7 +401,7 @@
               />
             {:else}
               <InfoBox fullWidth>
-                Preview data is shown for the first few rows of your data only.
+                {$LL.importPreview.previewOnlyForFirstFewRows()}
               </InfoBox>
             {/if}
           </div>
@@ -400,7 +413,7 @@
       {#if processedColumns.length > 0}
         <div class="table-preview-content">
           <div class="preview">
-            <h2 class="large-bold-header">Table Preview</h2>
+            <h2 class="large-bold-header">{$LL.general.tablePreview()}</h2>
             <div class="content">
               <div class="sheet-holder">
                 <Sheet
@@ -478,7 +491,9 @@
               onCancel={handleCancel}
               onProceed={finishImport}
               cancelButton={{ icon: iconDeleteMajor }}
-              proceedButton={{ label: 'Confirm & create table' }}
+              proceedButton={{
+                label: $LL.importPreview.confirmAndCreateTable(),
+              }}
               {canProceed}
             />
           {/if}

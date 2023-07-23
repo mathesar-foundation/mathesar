@@ -7,6 +7,7 @@
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -39,13 +40,13 @@
 </script>
 
 <EntityContainerWithFilterBar
-  searchPlaceholder="Search Explorations"
+  searchPlaceholder={$LL.schemaExplorations.searchExplorations()}
   bind:searchQuery={explorationsSearchQuery}
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
     <AnchorButton href={getDataExplorerPageUrl(database.name, schema.id)}>
-      Open Data Explorer
+      {$LL.general.openDataExplorer()}
     </AnchorButton>
   </svelte:fragment>
   <svelte:fragment slot="resultInfo">

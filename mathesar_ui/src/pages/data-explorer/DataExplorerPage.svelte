@@ -10,6 +10,7 @@
     getSchemaPageUrl,
     getExplorationPageUrl,
   } from '@mathesar/routes/urls';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -34,7 +35,8 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($query.name ?? 'Data Explorer')}</title>
+  <title>{makeSimplePageTitle($query.name ?? $LL.general.dataExplorer())}</title
+  >
 </svelte:head>
 
 <LayoutWithHeader fitViewport>

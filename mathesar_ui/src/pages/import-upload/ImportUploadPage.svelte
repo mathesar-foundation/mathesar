@@ -15,19 +15,24 @@
   import UploadViaFile from './UploadViaFile.svelte';
   import UploadViaUrl from './UploadViaUrl.svelte';
   import UploadViaClipboard from './UploadViaClipboard.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
 
   const uploadMethods = [
-    { label: 'Upload a file', component: UploadViaFile, icon: iconUploadFile },
     {
-      label: 'Provide a URL to the file',
+      label: $LL.importUpload.uploadAFile(),
+      component: UploadViaFile,
+      icon: iconUploadFile,
+    },
+    {
+      label: $LL.importUpload.provideURLToFile(),
       component: UploadViaUrl,
       icon: iconUrl,
     },
     {
-      label: 'Copy and Paste Text',
+      label: $LL.importUpload.copyAndPasteText(),
       component: UploadViaClipboard,
       icon: iconPaste,
     },
@@ -66,7 +71,7 @@
       const message =
         err instanceof Error
           ? err.message
-          : 'Unable to create a table from the uploaded data';
+          : $LL.importUpload.unableToCreateTableFromUpload();
       tableCreationProgress = {
         state: 'failure',
         errors: [message],
@@ -75,7 +80,9 @@
   }
 </script>
 
-<svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
+<svelte:head
+  ><title>{makeSimplePageTitle($LL.general.import())}</title></svelte:head
+>
 
 <LayoutWithHeader
   restrictWidth
@@ -85,15 +92,13 @@
     '--layout-background-color': 'var(--sand-200)',
   }}
 >
-  <h1>Create a table by importing your data</h1>
+  <h1>{$LL.importUpload.createATableByImporting()}</h1>
   <div class="import-file-view">
     {#if isLoading || isError}
       <div class="uploading-info">
-        <span>Uploading Data</span>
+        <span>{$LL.importUpload.uploadingData()}</span>
         <WarningBox>
-          Large data sets can sometimes take several minutes to process. Please
-          do not leave this page or close the browser tab while import is in
-          progress.
+          {$LL.importUpload.largeDataTakesTimeWarning()}
         </WarningBox>
       </div>
     {:else}
@@ -102,7 +107,7 @@
           bind:value={uploadMethod}
           options={uploadMethods}
           isInline
-          label="How would you like to import your data?"
+          label={$LL.importUpload.howWouldYouLikeToImport()}
           getRadioLabel={(opt) => ({
             component: NameWithIcon,
             props: {
@@ -125,7 +130,7 @@
         on:error={(e) => {
           uploadStatus = {
             state: 'failure',
-            errors: [e.detail ?? 'Upload failed'],
+            errors: [e.detail ?? $LL.importUpload.failedToImport()],
           };
         }}
         showCancelButton={isError}
@@ -139,7 +144,7 @@
           <div class="preview-status">
             <StatusIndicator
               state="processing"
-              messages={{ processing: 'Preparing Preview' }}
+              messages={{ processing: $LL.importUpload.preparingPreview() }}
             />
           </div>
         {/if}
@@ -147,7 +152,7 @@
         {#if errorMessage}
           <div class="errors">
             <ErrorBox>
-              <span class="title">Failed to import data</span>
+              <span class="title">{$LL.importUpload.failedToImport()}</span>
               <span>{errorMessage}</span>
             </ErrorBox>
           </div>

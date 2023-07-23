@@ -28,6 +28,7 @@
   import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
   import EditTable from './EditTable.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const recordSelector = getRecordSelectorFromContext();
   const editTableModalController = modal.spawnModalController();
@@ -98,7 +99,7 @@
     </div>
     <div class="bottom">
       {#if isTableImportConfirmationNeeded}
-        Needs Import Confirmation
+        {$LL.tableCard.needImportConfirmation()}
       {/if}
     </div>
   </a>
@@ -123,11 +124,11 @@
     >
       {#if !isTableImportConfirmationNeeded}
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
-          Explore Table
+          {$LL.general.exploreTable()}
         </LinkMenuItem>
         {#if canExecuteDDL}
           <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-            Edit Table
+            {$LL.general.editTable()}
           </ButtonMenuItem>
         {/if}
       {/if}
@@ -137,7 +138,7 @@
           danger
           icon={iconDeleteMajor}
         >
-          Delete Table
+          {$LL.general.deleteTable()}
         </ButtonMenuItem>
       {/if}
     </DropdownMenu>
@@ -154,7 +155,7 @@
       on:click={handleFindRecord}
     >
       <Icon {...iconSelectRecord} />
-      <span class="label">Find a Record</span>
+      <span class="label">{$LL.general.findARecord()}</span>
     </button>
   {/if}
 </div>

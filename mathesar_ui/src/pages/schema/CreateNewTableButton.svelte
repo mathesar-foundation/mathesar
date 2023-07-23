@@ -11,6 +11,7 @@
   import { iconAddNew } from '@mathesar/icons';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -29,7 +30,7 @@
   showArrow={true}
   triggerAppearance="primary"
   closeOnInnerClick={true}
-  label="New Table"
+  label={$LL.general.newTable()}
 >
   <div slot="trigger">
     {#if isCreatingNewTable}
@@ -37,11 +38,12 @@
     {:else}
       <Icon {...iconAddNew} />
     {/if}
-    <span>New Table</span>
+    <span>{$LL.general.newTable()}</span>
   </div>
-  <ButtonMenuItem on:click={handleCreateEmptyTable}>From Scratch</ButtonMenuItem
-  >
+  <ButtonMenuItem on:click={handleCreateEmptyTable}>
+    {$LL.general.fromScratch()}
+  </ButtonMenuItem>
   <LinkMenuItem href={getImportPageUrl(database.name, schema.id)}>
-    From Data Import
+    {$LL.createNewTableButton.fromDataImport()}
   </LinkMenuItem>
 </DropdownMenu>

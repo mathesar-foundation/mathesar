@@ -12,6 +12,7 @@
   import CreateNewTableButton from './CreateNewTableButton.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
@@ -76,11 +77,11 @@
       <div class="vertical-container">
         <OverviewHeader title="Explore your Data" />
         <span>
-          Explorations let you query your data to uncover trends and insights.
+          {$LL.schemaOverview.explorationsIntro()}
         </span>
         <div>
           <AnchorButton href={getDataExplorerPageUrl(database.name, schema.id)}>
-            Open Data Explorer
+            {$LL.general.openDataExplorer()}
           </AnchorButton>
         </div>
       </div>

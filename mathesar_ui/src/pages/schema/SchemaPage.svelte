@@ -26,6 +26,7 @@
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import SchemaAccessControlModal from './SchemaAccessControlModal.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -63,18 +64,18 @@
 
   $: tabs = [
     {
-      label: 'Overview',
+      label: $LL.general.overview(),
       id: 'overview',
       href: getSchemaPageUrl(database.name, schema.id),
     },
     {
-      label: 'Tables',
+      label: $LL.general.tables(),
       id: 'tables',
       count: tablesMap.size,
       href: getSchemaPageTablesSectionUrl(database.name, schema.id),
     },
     {
-      label: 'Explorations',
+      label: $LL.general.explorations(),
       id: 'explorations',
       count: explorationsMap.size,
       href: getSchemaPageExplorationsSectionUrl(database.name, schema.id),
@@ -121,13 +122,13 @@
       {#if !isDefault && canExecuteDDL}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
-          <span>Edit Schema</span>
+          <span>{$LL.general.editSchema()}</span>
         </Button>
       {/if}
       {#if canEditPermissions}
         <Button on:click={manageAccess} appearance="secondary">
           <Icon {...iconManageAccess} />
-          <span>Manage Access</span>
+          <span>{$LL.general.manageAccess()}</span>
         </Button>
       {/if}
     </div>

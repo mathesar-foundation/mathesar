@@ -3,6 +3,7 @@
   import { Button, Icon } from '@mathesar-component-library';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -10,16 +11,16 @@
 </script>
 
 <ErrorBox fullWidth>
-  <div class="title">Failed to load preview</div>
+  <div class="title">{$LL.importPreview.failedToLoadPreview()}</div>
   <div>{errors.join(',')}</div>
   <div class="buttons">
     <Button appearance="primary" on:click={() => dispatch('retry')}>
-      Retry
+      {$LL.general.retry()}
     </Button>
     <span>or</span>
     <Button appearance="outline-primary" on:click={() => dispatch('delete')}>
       <Icon {...iconDeleteMajor} />
-      <span>Delete import</span>
+      <span>{$LL.importPreview.deleteImport()}</span>
     </Button>
   </div>
 </ErrorBox>

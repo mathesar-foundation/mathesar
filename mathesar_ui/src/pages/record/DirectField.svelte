@@ -18,6 +18,7 @@
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import type RecordStore from './RecordStore';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -76,7 +77,7 @@
           showArrow={false}
           triggerAppearance="plain"
           closeOnInnerClick={true}
-          ariaLabel="{column.name} Field Options"
+          ariaLabel="{column.name} {$LL.general.fieldOptions()}"
           icon={iconExpandDown}
         >
           <ButtonMenuItem
@@ -84,7 +85,8 @@
             on:click={() => field.set(null)}
             {disabled}
           >
-            Set to <Null />
+            {$LL.general.setTo()}
+            <Null />
           </ButtonMenuItem>
         </DropdownMenu>
       </div>

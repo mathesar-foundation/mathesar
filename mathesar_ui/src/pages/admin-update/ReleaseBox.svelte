@@ -10,6 +10,7 @@
   import type { Release } from '@mathesar/stores/releases';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import UpgradeModal from './upgrade-modal/UpgradeModal.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const modalController = modal.spawnModalController();
 
@@ -33,15 +34,15 @@
   <div class="type">
     {#if type === 'available-upgrade'}
       <Icon {...iconUpgradeAvailable} />
-      New Version Available
+      {$LL.releaseBox.newVersionAvailable()}
     {:else if type === 'currently-installed-and-latest'}
       <Icon {...iconCurrentlyInstalledVersion} />
-      You are running the latest version
+      {$LL.releaseBox.runningLatestVersion()}
     {:else if type === 'current'}
       <Icon {...iconCurrentlyInstalledVersion} />
-      Currently Installed
+      {$LL.releaseBox.currentlyInstalled()}
     {:else if type === 'latest'}
-      Latest Available Version (not installed)
+      {$LL.releaseBox.latestAvailableVersion()}
     {:else}
       {assertExhaustive(type)}
     {/if}
@@ -53,17 +54,18 @@
       <div class="version">{release.tagName}</div>
     </div>
     <div class="right">
-      <div class="date">Released {dateString}</div>
+      <div class="date">{$LL.general.released()} {dateString}</div>
       <a href={release.notesUrl} class="notes" target="_blank">
-        Release Notes <Icon {...iconExternalHyperlink} />
+        {$LL.general.releaseNotes()}
+        <Icon {...iconExternalHyperlink} />
       </a>
     </div>
   </div>
   {#if type === 'available-upgrade'}
     <div class="update-action">
-      <div class="message">We can install this new version for you</div>
+      <div class="message">{$LL.releaseBox.weCanInstallThisVersion()}</div>
       <Button appearance="secondary" on:click={() => modalController.open()}>
-        Upgrade...
+        {$LL.general.upgrade()}...
       </Button>
     </div>
   {/if}

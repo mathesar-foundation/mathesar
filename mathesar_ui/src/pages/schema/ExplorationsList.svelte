@@ -4,6 +4,7 @@
   import { iconExploration } from '@mathesar/icons';
   import ExplorationItem from './ExplorationItem.svelte';
   import EmptyEntity from './EmptyEntity.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let explorations: QueryInstance[];
   export let database: Database;
@@ -19,7 +20,7 @@
     {/if}
   {:else}
     <EmptyEntity icon={iconExploration}>
-      <p>No Explorations</p>
+      <p>{$LL.general.noExplorations()}</p>
     </EmptyEntity>
   {/each}
 </div>

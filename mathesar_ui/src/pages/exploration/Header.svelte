@@ -5,6 +5,7 @@
   import { iconExploration, iconInspector } from '@mathesar/icons';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -26,7 +27,7 @@
         class="btn btn-primary"
         href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}
       >
-        <span>Edit in Data Explorer</span>
+        <span>{$LL.dataExplorerHeader.editInDataExplorer()}</span>
       </a>
     {/if}
     <Button
@@ -36,7 +37,7 @@
       }}
     >
       <Icon {...iconInspector} />
-      <span>Inspector</span>
+      <span>{$LL.general.inspector()}</span>
     </Button>
   </svelte:fragment>
 </EntityPageHeader>

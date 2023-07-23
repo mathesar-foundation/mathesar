@@ -13,6 +13,8 @@
   export let isLoading: boolean;
   export let showCancelButton: boolean;
   export let hideAllActions = false;
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   let url: string;
 
@@ -30,16 +32,23 @@
 </script>
 
 <LabeledInput
-  label="Enter the URL of the file you want to import"
+  label={$LL.uploadViaUrl.enterUrlOfFileToImport()}
   layout="stacked"
 >
   <TextInput bind:value={url} aria-label="URL" disabled={isLoading} />
 </LabeledInput>
 
 <div class="help-content">
-  The data must be in tabular format (CSV, TSV etc) or JSON. See relevant <a
-    href="https://docs.mathesar.org/user-guide/importing-data/">documentation</a
-  >.
+  <RichText text={$LL.general.dataMustBeTabular()} let:slotName>
+    {#if slotName === 'documentationLink'}
+      <a
+        href="https://docs.mathesar.org/user-guide/importing-data/"
+        target="_blank"
+      >
+        {$LL.general.documentation()}
+      </a>
+    {/if}
+  </RichText>
 </div>
 
 <slot />
@@ -48,12 +57,12 @@
   <div class="buttons">
     {#if showCancelButton}
       <Button appearance="secondary" on:click={() => dispatch('cancel')}>
-        Cancel
+        {$LL.general.cancel()}
       </Button>
     {/if}
     <SpinnerButton
       onClick={importFromURL}
-      label="Continue"
+      label={$LL.general.continue()}
       disabled={!url || isLoading}
       class="continue-action"
     />

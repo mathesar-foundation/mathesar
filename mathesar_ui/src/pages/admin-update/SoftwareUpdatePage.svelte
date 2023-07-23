@@ -3,18 +3,19 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
   import SoftwareUpdateContent from './SoftwareUpdateContent.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const releaseDataStore = getReleaseDataStoreFromContext();
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle('Software Update')}</title>
+  <title>{makeSimplePageTitle($LL.general.softwareUpdate())}</title>
 </svelte:head>
 
-<h1>Software Update</h1>
+<h1>{$LL.general.softwareUpdate()}</h1>
 
 {#if releaseDataStore}
   <SoftwareUpdateContent {releaseDataStore} />
 {:else}
-  <ErrorBox>Release data store not found in context.</ErrorBox>
+  <ErrorBox>{$LL.softwareUpdatePage.releaseDataNotInContextError()}</ErrorBox>
 {/if}

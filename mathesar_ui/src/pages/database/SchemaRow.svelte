@@ -15,6 +15,7 @@
   } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -51,7 +52,7 @@
           menuStyle="--spacing-y:0.8em;"
         >
           <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}>
-            Edit Schema
+            {$LL.general.editSchema()}
           </ButtonMenuItem>
           <MenuDivider />
           <ButtonMenuItem
@@ -59,7 +60,7 @@
             on:click={() => dispatch('delete')}
             icon={iconDeleteMajor}
           >
-            Delete Schema
+            {$LL.general.deleteSchema()}
           </ButtonMenuItem>
         </DropdownMenu>
       </div>
@@ -76,8 +77,7 @@
 
   {#if isDefault}
     <InfoBox>
-      Every PostgreSQL database includes the "public" schema. This protected
-      schema can be read by anybody who accesses the database.
+      {$LL.schemaRow.publicSchemaHelp()}
     </InfoBox>
   {/if}
 

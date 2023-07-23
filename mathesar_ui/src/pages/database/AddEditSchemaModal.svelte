@@ -11,6 +11,8 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   export let database: Database;
   export let controller: ModalController;
@@ -29,10 +31,10 @@
 
   function getNameValidationErrors(name: string) {
     if (!name.trim()) {
-      return ['Name cannot be empty.'];
+      return [$LL.general.nameCannotBeEmpty()];
     }
     if (nameIsDuplicate(name)) {
-      return ['A schema with that name already exists.'];
+      return [$LL.addEditSchemaModal.schemaWithNameExists()];
     }
     return [];
   }
@@ -56,24 +58,27 @@
   {getNameValidationErrors}
   getInitialName={() => schema?.name ?? ''}
   getInitialDescription={() => schema?.description ?? ''}
-  saveButtonLabel={schema ? 'Save' : 'Create New Schema'}
+  saveButtonLabel={schema
+    ? $LL.general.save()
+    : $LL.addEditSchemaModal.createNewSchema()}
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
       <InfoBox>
-        Name your schema to reflect its purpose. For example, your personal
-        financial schema may be called "Personal Finances" and your movie
-        collection "Movies." Add a description to your schema to remember what
-        it's for.
+        {$LL.addEditSchemaModal.schemaNameHelp()}
       </InfoBox>
     {/if}
   </svelte:fragment>
 
   <span slot="title" let:initialName>
     {#if schema}
-      Rename <Identifier>{initialName}</Identifier> Schema
+      <RichText text={$LL.addEditSchemaModal.renameSchema()} let:slotName>
+        {#if slotName === 'identifier'}
+          <Identifier>{initialName}</Identifier>
+        {/if}
+      </RichText>
     {:else}
-      Create Schema
+      {$LL.general.createSchema()}
     {/if}
   </span>
 </NameAndDescInputModalForm>

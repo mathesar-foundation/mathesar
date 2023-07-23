@@ -7,6 +7,8 @@
   import { toast } from '@mathesar/stores/toast';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import ReleaseBox from './ReleaseBox.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   export let releaseDataStore: ReleaseDataStore;
 
@@ -35,13 +37,18 @@
   {@const { current, latest } = value}
   <div class="releases">
     {#if $loading}
-      <div>Loading release data</div>
+      <div>{$LL.softwareUpdateContent.loadingReleaseDate()}</div>
       <div><Spinner /></div>
     {:else if !current}
       <ErrorBox>
-        The currently-installed version is
-        <strong>{timestampedReleaseData.inputHash}</strong>
-        but we were unable to load data about this release.
+        <RichText
+          text={$LL.softwareUpdateContent.errorInCurrentInstalled()}
+          let:slotName
+        >
+          {#if slotName === 'hash'}
+            <strong>{timestampedReleaseData.inputHash}</strong>
+          {/if}
+        </RichText>
       </ErrorBox>
       {#if latest}
         <ReleaseBox release={latest} type={'latest'} />
@@ -50,7 +57,7 @@
       <ReleaseBox release={current} type="currently-installed-and-latest" />
     {:else if !latest}
       <ReleaseBox release={current} type="current" />
-      <ErrorBox>Unable to load data about the latest release.</ErrorBox>
+      <ErrorBox>{$LL.softwareUpdateContent.errorInLatestRelease()}</ErrorBox>
     {:else if upgradeStatus === 'upgradable'}
       <ReleaseBox release={latest} type={'available-upgrade'} />
       <ReleaseBox release={current} type={'current'} />
@@ -62,7 +69,7 @@
     {/if}
   </div>
 {:else}
-  <div>Loading release data</div>
+  <div>{$LL.softwareUpdateContent.loadingReleaseDate()}</div>
   <div><Spinner /></div>
 {/if}
 

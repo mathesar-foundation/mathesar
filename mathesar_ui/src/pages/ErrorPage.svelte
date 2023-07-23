@@ -1,18 +1,21 @@
 <script lang="ts">
   import { AnchorButton } from '@mathesar/component-library';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let showGoToRoot = true;
 </script>
 
 <LayoutWithHeader>
   <div class="error-page-container">
-    <h1>Error</h1>
+    <h1>{$LL.general.error()}</h1>
     <div>
       <slot />
     </div>
     {#if showGoToRoot}
-      <AnchorButton appearance="primary" href="/">Go to homepage</AnchorButton>
+      <AnchorButton appearance="primary" href="/">
+        {$LL.general.goToHomepage()}
+      </AnchorButton>
     {/if}
   </div>
 </LayoutWithHeader>

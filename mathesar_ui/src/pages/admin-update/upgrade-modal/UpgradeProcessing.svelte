@@ -1,17 +1,17 @@
 <script lang="ts">
   import { Spinner } from '@mathesar-component-library';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 </script>
 
 <WarningBox>
   <p>
-    A Mathesar upgrade is currently in progress. It is important that you do not
-    navigate away from this page until the upgrade is complete.
+    {$LL.upgradeProcessing.upgradeInProgress()}
   </p>
 </WarningBox>
 <div class="upgrading">
   <div class="spinner"><Spinner /></div>
-  <div>Upgrading...</div>
+  <div>{$LL.general.upgrading()}...</div>
 </div>
 
 <style>

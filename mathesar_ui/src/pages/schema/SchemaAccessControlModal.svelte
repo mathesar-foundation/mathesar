@@ -13,6 +13,8 @@
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { AccessControlView } from '@mathesar/systems/users-and-permissions';
   import type { ObjectRoleMap } from '@mathesar/utils/permissions';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   export let controller: ModalController;
   export let database: Database;
@@ -56,7 +58,14 @@
   closeOn={['button', 'esc', 'overlay']}
 >
   <svelte:fragment slot="title">
-    Manage <Identifier>{schema.name}</Identifier> Schema Access
+    <RichText
+      text={$LL.schemaAccessControlModal.manageSchemaAccessWithName()}
+      let:slotName
+    >
+      {#if slotName === 'schemaName'}
+        <Identifier>{schema.name}</Identifier>
+      {/if}
+    </RichText>
   </svelte:fragment>
 
   {#if $requestStatus?.state === 'success'}
@@ -69,7 +78,7 @@
       {getUserRoles}
     />
   {:else if $requestStatus?.state === 'processing'}
-    <div>Loading</div>
+    <div>{$LL.general.loading()}</div>
   {:else if $requestStatus?.state === 'failure'}
     <ErrorBox>
       {$requestStatus.errors.join(', ')}

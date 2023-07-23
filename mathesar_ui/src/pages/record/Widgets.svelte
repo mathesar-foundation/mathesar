@@ -8,6 +8,8 @@
   import { iconRecord } from '@mathesar/icons';
   import { tables } from '@mathesar/stores/tables';
   import TableWidget from './TableWidget.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   export let recordPk: string;
   export let recordSummary: string;
@@ -24,7 +26,7 @@
     const table = $tables.data.get(joinableTable.target);
     if (!table) return undefined;
     const id = joinableTable.jp_path[0].slice(-1)[0];
-    const name = columnNameMap.get(id) ?? '(unknown column)';
+    const name = columnNameMap.get(id) ?? `(${$LL.general.unknownColumn()})`;
     return { table, fkColumn: { id, name } };
   }
 
@@ -38,13 +40,15 @@
 {#if tableWidgetInputs.length}
   <div class="widgets-area">
     <h2 class="passthrough">
-      Related Records
+      {$LL.recordPageWidget.relatedRecord()}
       <Help>
-        Each of the following records links to
-        <NameWithIcon icon={iconRecord} truncate={false}>
-          <strong>{recordSummary}</strong>
-        </NameWithIcon>
-        from another table.
+        <RichText text={$LL.recordPageWidget.relatedRecordHelp()} let:slotName>
+          {#if slotName === 'recordSummary'}
+            <NameWithIcon icon={iconRecord} truncate={false}>
+              <strong>{recordSummary}</strong>
+            </NameWithIcon>
+          {/if}
+        </RichText>
       </Help>
     </h2>
     <div class="widgets">

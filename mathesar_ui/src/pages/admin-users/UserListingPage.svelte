@@ -10,6 +10,7 @@
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import UserRow from './UserRow.svelte';
   import UserSkeleton from './UserSkeleton.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   let filterQuery = '';
 
@@ -39,7 +40,9 @@
   $: userCountText = filteredUsers.length ? `(${filteredUsers.length})` : '';
 </script>
 
-<svelte:head><title>{makeSimplePageTitle('Users')}</title></svelte:head>
+<svelte:head
+  ><title>{makeSimplePageTitle($LL.general.users())}</title></svelte:head
+>
 
 <h1>Users {userCountText}</h1>
 
@@ -48,14 +51,14 @@
     <UserSkeleton />
   {:else if $requestStatus?.state === 'success'}
     <EntityContainerWithFilterBar
-      searchPlaceholder="Search Users"
+      searchPlaceholder={$LL.usersListingPage.searchUsers()}
       bind:searchQuery={filterQuery}
       on:clear={handleClearFilterQuery}
     >
       <slot slot="action">
         <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
           <Icon {...iconAddNew} />
-          <span>Add user</span>
+          <span>{$LL.usersListingPage.addUser()}</span>
         </AnchorButton>
       </slot>
       <slot slot="resultInfo">
@@ -75,13 +78,15 @@
             {/each}
           </div>
         {:else if filteredUsers.length === 0}
-          <p class="no-users-found-text">No users found</p>
+          <p class="no-users-found-text">
+            {$LL.usersListingPage.noUsersFound()}
+          </p>
         {/if}
       </slot>
     </EntityContainerWithFilterBar>
   {:else if $requestStatus?.state === 'failure'}
     <ErrorBox>
-      <p>Error: {$requestStatus.errors}</p>
+      <p>{$LL.general.error()}: {$requestStatus.errors}</p>
     </ErrorBox>
   {/if}
 </section>

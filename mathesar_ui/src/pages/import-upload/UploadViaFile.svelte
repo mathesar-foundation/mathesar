@@ -11,6 +11,8 @@
   import { uploadFile } from '@mathesar/api/utils/requestUtils';
   import type { UploadCompletionOpts } from '@mathesar/api/utils/requestUtils';
   import type { UploadEvents } from './uploadUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   const dispatch = createEventDispatcher<UploadEvents>();
 
@@ -71,10 +73,16 @@
   />
   {#if !uploadProgress}
     <div class="help-content">
-      The file must be in tabular format (CSV, TSV etc) or JSON. See relevant <a
-        href="https://docs.mathesar.org/user-guide/importing-data/"
-        >documentation</a
-      >.
+      <RichText text={$LL.general.dataMustBeTabular()} let:slotName>
+        {#if slotName === 'documentationLink'}
+          <a
+            href="https://docs.mathesar.org/user-guide/importing-data/"
+            target="_blank"
+          >
+            {$LL.general.documentation()}
+          </a>
+        {/if}
+      </RichText>
     </div>
   {/if}
 </div>
@@ -84,7 +92,7 @@
 {#if !hideAllActions && showCancelButton}
   <div class="buttons">
     <Button appearance="secondary" on:click={() => dispatch('cancel')}>
-      Cancel
+      {$LL.general.cancel()}
     </Button>
   </div>
 {/if}

@@ -13,6 +13,8 @@
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { AccessControlView } from '@mathesar/systems/users-and-permissions';
   import type { ObjectRoleMap } from '@mathesar/utils/permissions';
+  import RichText from '@mathesar/components/RichText.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let controller: ModalController;
   export let database: Database;
@@ -39,7 +41,11 @@
 
 <ControlledModal {controller} closeOn={['button', 'esc', 'overlay']}>
   <svelte:fragment slot="title">
-    Manage <Identifier>{database.name}</Identifier> Database Access
+    <RichText text={$LL.dbAccessControlModal.manageDbAccess()} let:slotName>
+      {#if slotName === 'databaseName'}
+        <Identifier>{database.name}</Identifier>
+      {/if}
+    </RichText>
   </svelte:fragment>
 
   {#if $requestStatus?.state === 'success'}

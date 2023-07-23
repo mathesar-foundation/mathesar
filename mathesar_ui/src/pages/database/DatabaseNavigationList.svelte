@@ -11,6 +11,7 @@
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import type { Database } from '@mathesar/AppTypes';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   export let database: Database;
 </script>
@@ -20,14 +21,23 @@
     <MenuHeading
       style="display:flex;align-items:center;margin-bottom:var(--size-super-ultra-small)"
     >
-      <span class="title">{$LL.allDatabases()} ({$databases.data.length})</span>
+      <span class="title"
+        >{$LL.databaseNavigation.allDatabases()} ({$databases.data
+          .length})</span
+      >
       <span class="help">
         <Help>
-          To add or remove databases, modify the
-          <DocsLink path="/configuration/env-variables/#mathesar_databases">
-            <code>MATHESAR_DATABASES</code> variable
-          </DocsLink>
-          in your configuration file and restart Mathesar.
+          <RichText
+            text={$LL.databaseNavigation.addOrRemoveDbHelp()}
+            let:slotName
+          >
+            {#if slotName === 'variableNameAndLink'}
+              <DocsLink path="/configuration/env-variables/#mathesar_databases">
+                <code>MATHESAR_DATABASES</code>
+                {$LL.general.variable()}
+              </DocsLink>
+            {/if}
+          </RichText>
         </Help>
       </span>
     </MenuHeading>

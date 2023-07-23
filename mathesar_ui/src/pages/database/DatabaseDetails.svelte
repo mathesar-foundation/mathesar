@@ -32,6 +32,8 @@
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
@@ -125,7 +127,7 @@
         {#if canEditPermissions}
           <Button on:click={manageAccess} appearance="secondary">
             <Icon {...iconManageAccess} />
-            <span>Manage Access</span>
+            <span>{$LL.general.manageAccess()}</span>
           </Button>
         {/if}
         <DropdownMenu
@@ -143,18 +145,20 @@
             on:click={reflect}
           >
             <div class="reflect">
-              Sync External Changes
+              {$LL.databaseDetails.syncExternalChanges()}
               <Help>
                 <p>
-                  If you make structural changes to the database outside
-                  Mathesar (e.g. using another tool to add a schema, table, or
-                  column), those changes will not be reflected in Mathesar until
-                  you manually sync them with this button.
+                  {$LL.databaseDetails.structuralChangesHelp()}
                 </p>
                 <p>
-                  External changes to data (e.g. adding or editing
-                  <em>rows</em>) will be automatically reflected without
-                  clicking this button.
+                  <RichText
+                    text={$LL.databaseDetails.syncExternalChanges()}
+                    let:slotName
+                  >
+                    {#if slotName === 'rows'}
+                      <em>{$LL.general.rows()}</em>
+                    {/if}
+                  </RichText>
                 </p>
               </Help>
             </div>
@@ -167,10 +171,12 @@
 
 <div class="schema-list-wrapper">
   <div class="schema-list-title-container">
-    <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
+    <h2 class="schema-list-title">
+      {$LL.general.schemas()} ({schemasMap.size})
+    </h2>
   </div>
   <EntityContainerWithFilterBar
-    searchPlaceholder="Search Schemas"
+    searchPlaceholder={$LL.general.searchSchemaS()}
     bind:searchQuery={filterQuery}
     on:clear={handleClearFilterQuery}
   >
@@ -178,7 +184,7 @@
       {#if canExecuteDDL}
         <Button on:click={addSchema} appearance="primary">
           <Icon {...iconAddNew} />
-          <span>Create Schema</span>
+          <span>{$LL.general.createSchema()}</span>
         </Button>
       {/if}
     </svelte:fragment>

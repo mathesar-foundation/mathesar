@@ -4,6 +4,7 @@
   import { iconTable } from '@mathesar/icons';
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let tables: TableEntry[];
   export let database: Database;
@@ -16,7 +17,7 @@
     <TableCard {canExecuteDDL} {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>
-      <p>No Tables</p>
+      <p>{$LL.general.noTables()}</p>
     </EmptyEntity>
   {/each}
 </div>

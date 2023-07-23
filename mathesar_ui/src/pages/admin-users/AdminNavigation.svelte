@@ -7,6 +7,7 @@
     ADMIN_USERS_PAGE_URL,
   } from '@mathesar/routes/urls';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const releaseDataStore = getReleaseDataStoreFromContext();
 
@@ -25,7 +26,7 @@
         icon={iconSettingsMajor}
         hasNotificationDot={upgradable}
       >
-        Update
+        {$LL.general.update()}
       </MenuItemContents>
     </a>
     <a
@@ -34,7 +35,9 @@
       class="menu-item menu-item-link"
       use:active
     >
-      <MenuItemContents icon={iconMultipleUsers}>Users</MenuItemContents>
+      <MenuItemContents icon={iconMultipleUsers}>
+        {$LL.general.users()}</MenuItemContents
+      >
     </a>
   </Menu>
 </div>

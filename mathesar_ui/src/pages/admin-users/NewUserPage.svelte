@@ -11,6 +11,7 @@
   import { UserDetailsForm } from '@mathesar/systems/users-and-permissions';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import FormBox from './FormBox.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const usersStore = getUsersStoreFromContext();
 
@@ -24,12 +25,12 @@
   item={{
     type: 'simple',
     href: ADMIN_USERS_PAGE_ADD_NEW_URL,
-    label: 'New User',
+    label: $LL.newUserPage.newUser(),
     icon: iconAddUser,
   }}
 />
 
-<h1><Icon {...iconAddUser} /> New User</h1>
+<h1><Icon {...iconAddUser} /> {$LL.newUserPage.newUser()}</h1>
 
 <FormBox>
   <UserDetailsForm on:create={(e) => onUserCreate(e.detail)} />

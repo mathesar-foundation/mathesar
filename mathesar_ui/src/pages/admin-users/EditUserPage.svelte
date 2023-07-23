@@ -17,6 +17,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { UserModel } from '@mathesar/stores/users';
   import FormBox from './FormBox.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
   const usersStore = getUsersStoreFromContext();
@@ -52,7 +53,7 @@
     {#if $requestStatus?.state === 'failure'}
       {$requestStatus.errors}
     {:else}
-      User not found
+      {$LL.editUserPage.userNotFound()}
     {/if}
   {:else}
     <AppendBreadcrumb
@@ -65,7 +66,7 @@
     />
     <h1>
       <Icon {...iconEditUser} />
-      Edit User: <strong>{userModel.username}</strong>
+      {$LL.editUserPage.editUser()}: <strong>{userModel.username}</strong>
     </h1>
     <FormBox>
       <UserDetailsForm user={userModel.getUser()} on:update={onUserUpdate} />
@@ -84,7 +85,7 @@
           onClick={() => deleteUser(userModel)}
           icon={iconDeleteMajor}
           danger
-          label="Delete User"
+          label={$LL.editUserPage.deleteUser()}
           appearance="default"
         />
       </FormBox>

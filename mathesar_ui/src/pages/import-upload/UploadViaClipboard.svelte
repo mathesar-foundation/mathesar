@@ -8,6 +8,8 @@
   } from '@mathesar/component-library';
   import { postAPI } from '@mathesar/api/utils/requestUtils';
   import type { UploadEvents } from './uploadUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   const dispatch = createEventDispatcher<UploadEvents>();
   export let isLoading: boolean;
@@ -29,14 +31,23 @@
   }
 </script>
 
-<LabeledInput label="Paste the data you want to import" layout="stacked">
+<LabeledInput
+  label={$LL.uploadViaClipboard.pasteDataToUpload()}
+  layout="stacked"
+>
   <TextArea bind:value={clipboardContent} rows={10} disabled={isLoading} />
 </LabeledInput>
 <div class="help-content">
-  The data must be in tabular format (CSV, TSV etc) or JSON. See relevant <a
-    href="https://docs.mathesar.org/user-guide/importing-data/"
-    target="_blank">documentation</a
-  >.
+  <RichText text={$LL.general.dataMustBeTabular()} let:slotName>
+    {#if slotName === 'documentationLink'}
+      <a
+        href="https://docs.mathesar.org/user-guide/importing-data/"
+        target="_blank"
+      >
+        {$LL.general.documentation()}
+      </a>
+    {/if}
+  </RichText>
 </div>
 
 <slot />
@@ -45,12 +56,12 @@
   <div class="buttons">
     {#if showCancelButton}
       <Button appearance="secondary" on:click={() => dispatch('cancel')}>
-        Cancel
+        {$LL.general.cancel()}
       </Button>
     {/if}
     <SpinnerButton
       onClick={importFromText}
-      label="Continue"
+      label={$LL.general.continue()}
       disabled={!clipboardContent || isLoading}
       class="continue-action"
     />
