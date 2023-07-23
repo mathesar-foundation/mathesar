@@ -8,6 +8,7 @@
   } from '@mathesar/systems/users-and-permissions';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
 
@@ -15,7 +16,9 @@
 </script>
 
 <svelte:head>
-  <title>{userProfile?.getDisplayName() ?? 'User profile'} | Mathesar</title>
+  <title
+    >{userProfile?.getDisplayName() ?? $LL.general.userProfile()} | Mathesar</title
+  >
 </svelte:head>
 
 <LayoutWithHeader
@@ -27,10 +30,12 @@
   }}
 >
   <InsetPageLayout hasMultipleSections>
-    <h1 slot="header">User Profile</h1>
+    <h1 slot="header">{$LL.general.userProfile()}</h1>
     {#if userProfile}
       <InsetPageSection>
-        <h2 class="large-bold-header" slot="header">Account Details</h2>
+        <h2 class="large-bold-header" slot="header">
+          {$LL.general.accountDetails()}
+        </h2>
         <UserDetailsForm user={userProfile.getUser()} />
       </InsetPageSection>
       <InsetPageSection>
@@ -39,17 +44,18 @@
 
       {#if !userProfile.isSuperUser}
         <InsetPageSection>
-          <h2 class="large-bold-header" slot="header">Delete Account</h2>
+          <h2 class="large-bold-header" slot="header">
+            {$LL.general.deleteAccount()}
+          </h2>
           <div>
-            Please contact your administrator to request permanent deletion of
-            your account
+            {$LL.profilePage.contactAdminForPermanentDeletion()}
           </div>
         </InsetPageSection>
       {/if}
     {:else}
       <!-- This should never happen -->
       <ErrorBox>
-        Could not fetch user profile details. Try refreshing your page.
+        {$LL.profilePage.couldNoFetchProfile()}
       </ErrorBox>
     {/if}
   </InsetPageLayout>
