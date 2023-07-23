@@ -6,6 +6,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconImportData } from '@mathesar/icons';
   import { getImportPageUrl } from './urls';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -15,7 +16,7 @@
   item={{
     type: 'simple',
     href: getImportPageUrl(database.name, schema.id),
-    label: 'Import',
+    label: $LL.general.import(),
     icon: iconImportData,
   }}
 />

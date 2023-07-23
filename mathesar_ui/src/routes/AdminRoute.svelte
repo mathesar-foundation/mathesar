@@ -10,13 +10,14 @@
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
   import { ADMIN_UPDATE_PAGE_URL, ADMIN_URL } from './urls';
   import UsersRoute from './UsersRoute.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 </script>
 
 <AppendBreadcrumb
   item={{
     type: 'simple',
     href: ADMIN_URL,
-    label: 'Administration',
+    label: $LL.general.administration(),
     icon: iconSettingsMajor,
   }}
 />
@@ -33,7 +34,7 @@
     slot="secondary-header"
     theme="light"
     pageTitleAndMetaProps={{
-      name: 'Administration',
+      name: $LL.general.administration(),
       icon: iconSettingsMajor,
     }}
   />
@@ -44,7 +45,7 @@
         item={{
           type: 'simple',
           href: ADMIN_UPDATE_PAGE_URL,
-          label: 'Software Update',
+          label: $LL.general.softwareUpdate(),
         }}
       />
       <SoftwareUpdate />

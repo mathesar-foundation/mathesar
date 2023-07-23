@@ -13,6 +13,7 @@
   import TableRoute from './TableRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
   import ExplorationRoute from './ExplorationRoute.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -97,5 +98,5 @@
     <SchemaPage {database} {schema} section={path} />
   </MultiPathRoute>
 {:else}
-  <ErrorPage>Schema not found.</ErrorPage>
+  <ErrorPage>{$LL.routes.schemaNotFound()}</ErrorPage>
 {/if}

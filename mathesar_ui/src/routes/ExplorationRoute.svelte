@@ -4,6 +4,7 @@
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
   import { queries } from '@mathesar/stores/queries';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -24,7 +25,7 @@
 
   <ExplorationPage {database} {schema} {query} />
 {:else if Number.isNaN(queryId)}
-  <ErrorPage>The specified URL is not found.</ErrorPage>
+  <ErrorPage>{$LL.routes.urlNotFound()}</ErrorPage>
 {:else}
-  <ErrorPage>Table with id {queryId} not found.</ErrorPage>
+  <ErrorPage>{$LL.routes.tableWithIdNotFound({ id: queryId })}</ErrorPage>
 {/if}

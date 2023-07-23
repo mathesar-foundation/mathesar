@@ -20,6 +20,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconEdit, iconExploration } from '@mathesar/icons';
   import { readable, type Readable } from 'svelte/store';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -133,7 +134,7 @@
       item={{
         type: 'simple',
         href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
-        label: 'Edit',
+        label: $LL.general.edit(),
         icon: iconEdit,
       }}
     />
@@ -142,7 +143,7 @@
       item={{
         type: 'simple',
         href: getExplorationEditorPageUrl(database.name, schema.id, $query.id),
-        label: 'Data Explorer',
+        label: $LL.general.dataExplorer(),
         icon: iconExploration,
       }}
     />
@@ -152,7 +153,7 @@
     item={{
       type: 'simple',
       href: getDataExplorerPageUrl(database.name, schema.id),
-      label: 'Data Explorer',
+      label: $LL.general.dataExplorer(),
       icon: iconExploration,
     }}
   />
@@ -163,5 +164,5 @@
 {#if queryManager}
   <DataExplorerPage {queryManager} {database} {schema} />
 {:else if is404}
-  <ErrorPage>Exploration not found.</ErrorPage>
+  <ErrorPage>{$LL.routes.explorationNotFound()}</ErrorPage>
 {/if}

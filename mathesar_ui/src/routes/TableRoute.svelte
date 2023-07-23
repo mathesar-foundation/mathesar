@@ -8,6 +8,7 @@
   import { currentTableId, tables } from '@mathesar/stores/tables';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import RecordPageRoute from './RecordPageRoute.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -39,5 +40,5 @@
     />
   </Route>
 {:else}
-  <ErrorPage>Table with id {tableId} not found.</ErrorPage>
+  <ErrorPage>{$LL.routes.tableWithIdNotFound({ id: tableId })}</ErrorPage>
 {/if}

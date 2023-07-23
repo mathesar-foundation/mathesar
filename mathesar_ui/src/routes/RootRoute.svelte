@@ -9,6 +9,7 @@
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
   import { getDatabasePageUrl } from './urls';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   setBreadcrumbItemsInContext([]);
 
@@ -23,7 +24,7 @@
     <Route path="/" redirect={getDatabasePageUrl(firstDatabase.name)} />
   {:else}
     <Route path="/">
-      <ErrorPage>No databases found</ErrorPage>
+      <ErrorPage>{$LL.routes.noDatabasesFound()}</ErrorPage>
     </Route>
   {/if}
 
@@ -42,6 +43,6 @@
   </Route>
 
   <Route fallback>
-    <ErrorPage>This is the not the webpage you are looking for.</ErrorPage>
+    <ErrorPage>{$LL.routes.wrongWebPage()}</ErrorPage>
   </Route>
 </Route>

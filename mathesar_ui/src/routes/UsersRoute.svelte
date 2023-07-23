@@ -7,6 +7,7 @@
   import EditUserPage from '@mathesar/pages/admin-users/EditUserPage.svelte';
   import { setUsersStoreInContext } from '@mathesar/stores/users';
   import { ADMIN_USERS_PAGE_URL } from '@mathesar/routes/urls';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   setUsersStoreInContext();
 </script>
@@ -15,7 +16,7 @@
   item={{
     type: 'simple',
     href: ADMIN_USERS_PAGE_URL,
-    label: 'Users',
+    label: $LL.general.users(),
     icon: iconMultipleUsers,
   }}
 />

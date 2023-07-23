@@ -35,7 +35,7 @@
   </Route>
 {:else}
   <ErrorPage>
-    <RichText text={$LL.databaseWithNameNotFound()} let:slotName>
+    <RichText text={$LL.routes.databaseWithNameNotFound()} let:slotName>
       {#if slotName === 'databaseName'}
         <Identifier>{databaseName}</Identifier>
       {/if}
