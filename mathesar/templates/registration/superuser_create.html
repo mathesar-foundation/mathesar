@@ -1,0 +1,102 @@
+{% extends 'mathesar/login_base.html' %}
+
+{% block h1 %}Welcome! Lets create a superuser{% endblock %}
+
+{% block box_content %}
+  <form
+    method="post"
+    onsubmit="showLoadingStatus('Creating superuser...');"
+  >
+    {% csrf_token %}
+    <div class="labeled-input layout-stacked">
+      <label for="id_username" class="label-component">
+        <span class="label-content">
+          <span class="label">Username</span>
+          <span class="input">
+            <input type="text" name="username"
+            class="input-element{% if form.username.errors %} has-error{% endif %}"
+            value="{% if form.username.value %}{{form.username.value}}{% endif %}"
+            autofocus autocapitalize="none" autocomplete="username"
+            required id="id_username">
+          </span>
+          {% if form.username.errors %}
+            <span class="help error">
+              {% for error in form.username.errors %}
+                <span>{{error|escape}}</span>
+              {% endfor %}
+            </span>
+          {% endif %}
+        </span>
+      </label>
+    </div>
+      <div class="labeled-input layout-stacked">
+        <label for="id_username" class="label-component">
+          <span class="label-content">
+            <span class="label">New Password</span>
+            <span class="input">
+              <input
+                type="password"
+                name="password1"
+                class="input-element{% if form.password1.errors %} has-error{% endif %}"
+                value="{% if form.password1.value %}{{form.password1.value}}{% endif %}"
+                autofocus
+                autocapitalize="none"
+                autocomplete="new-password"
+                required
+                id="id_password1"
+              />
+            </span>
+            {% if form.password1.errors %}
+              <span class="help error">
+                {% for error in form.password1.errors %}
+                  <span>{{error|escape}}</span>
+                {% endfor %}
+              </span>
+            {% endif %}
+          </span>
+        </label>
+      </div>
+      <div class="labeled-input layout-stacked">
+        <label for="id_username" class="label-component">
+          <span class="label-content">
+            <span class="label">Confirm</span>
+            <span class="input">
+              <input
+                type="password"
+                name="password2"
+                class="input-element{% if form.password2.errors %} has-error{% endif %}"
+                value="{% if form.password2.value %}{{form.password2.value}}{% endif %}"
+                autofocus
+                autocapitalize="none"
+                autocomplete="new-password"
+                required
+                id="id_password2"
+              />
+            </span>
+            {% if form.password2.errors %}
+              <span class="help error">
+                {% for error in form.password2.errors %}
+                  <span>{{error|escape}}</span>
+                {% endfor %}
+              </span>
+            {% endif %}
+          </span>
+        </label>
+      </div>
+    {% if form.non_field_errors %}
+      <div class="error-message">
+        <div class="icon">&#9888;</div>
+        <div>
+          {% for error in form.non_field_errors %}
+            <span>{{error|escape}}</span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+    <div class="footer">
+      <button class="btn btn-primary submit-button" type="submit">
+        Log In
+      </button>
+    </div>
+  </form>
+{% endblock %}
