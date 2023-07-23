@@ -24,6 +24,7 @@
     RecordSelectorResult,
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -89,7 +90,9 @@
       const tableEntry = $tables.data.get(tableId);
       const template = tableEntry?.settings?.preview_settings?.template;
       if (!template) {
-        throw new Error('No record summary template found in API response.');
+        throw new Error(
+          $LL.recordSelectorRecordSelectorContent.noRecordSummaryInAPI(),
+        );
       }
       const recordSummary = renderTransitiveRecordSummary({
         inputData: buildInputData(record),
@@ -139,7 +142,11 @@
       </div>
     {:else}
       <div class="no-results">
-        No {#if hasSearchQueries}matching{:else}existing{/if} records
+        {#if hasSearchQueries}
+          {$LL.recordSelectorRecordSelectorContent.noMatchingRecords()}
+        {:else}
+          {$LL.recordSelectorRecordSelectorContent.noExistingRecords()}
+        {/if}
       </div>
     {/if}
   {/if}
@@ -159,16 +166,18 @@
           }}
         >
           <Icon {...iconAddNew} />
-          <span>Create Record From Search Criteria</span>
+          <span
+            >{$LL.recordSelectorRecordSelectorContent.createRecordFromSearch()}</span
+          >
         </Button>
       </div>
     {/if}
     {#if records.length === 10 && isInitialized}
       <div class="message">
         {#if hasSearchQueries}
-          The 10 best matches are shown. Continue filtering to see more.
+          {$LL.recordSelectorRecordSelectorContent.best10MatchesShown()}
         {:else}
-          The first 10 records are shown. Filter to see more.
+          {$LL.recordSelectorRecordSelectorContent.first10RecordsShown()}
         {/if}
       </div>
     {/if}

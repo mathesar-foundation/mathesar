@@ -10,10 +10,11 @@
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const verbMap = new Map<RecordSelectorPurpose, string>([
-    ['dataEntry', 'Pick'],
-    ['navigation', 'Open'],
+    ['dataEntry', $LL.general.pick()],
+    ['navigation', $LL.general.open()],
   ]);
   /**
    * This is the distance between the top of the nested selector window and the
@@ -69,7 +70,7 @@
           {getArticleForWord(tableName)}
           <TableName table={{ name: tableName }} truncate={false} />
         {/if}
-        Record
+        {$LL.general.record()}
       </span>
 
       <RecordSelectorContent

@@ -8,6 +8,7 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import type QueryRunner from '../QueryRunner';
   import QueryManager from '../QueryManager';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
   export let errors: ApiMultiError | string[];
@@ -25,7 +26,9 @@
 
 <div class="query-run-errors">
   <ErrorBox fullWidth>
-    <p class="error-header">The result could not be displayed.</p>
+    <p class="error-header">
+      {$LL.dataExplorerQueryRunErrors.resultCouldNotBeDisplayed()}
+    </p>
     {#if errors instanceof ApiMultiError}
       {#each errors.errors as apierror}
         <ul>
@@ -33,8 +36,7 @@
             {@const columnId = Number(apierror.detail.column_id)}
             <li class="error">
               <p class="strong">
-                Some of the columns present in the query are missing in the
-                underlying base table.
+                {$LL.dataExplorerQueryRunErrors.someColumnsInQueryAreMissing()}
               </p>
               {#if queryManager}
                 {@const columnsAndTransformsToDelete =
@@ -46,11 +48,12 @@
                 {@const transformsWithIndex =
                   columnsAndTransformsToDelete.transformsUsingColumnIds}
                 <p>
-                  You can attempt to recover the query by clicking on the button
-                  below.
+                  {$LL.dataExplorerQueryRunErrors.attemptToRecoverTheQuery()}
                 </p>
                 {#if initialColumns.length > 0}
-                  <p>This will remove the following column(s):</p>
+                  <p>
+                    {$LL.dataExplorerQueryRunErrors.thisWillRemoveTheColumns()}:
+                  </p>
                   <ul class="removal-list">
                     {#each initialColumns as initialColumn (initialColumn.alias)}
                       <li>
@@ -61,7 +64,9 @@
                   </ul>
                 {/if}
                 {#if transformsWithIndex.length > 0}
-                  <p>This will remove the following transformation(s):</p>
+                  <p>
+                    {$LL.dataExplorerQueryRunErrors.thisWillRemoveTheTransformations()}:
+                  </p>
                   <ul class="removal-list">
                     {#each transformsWithIndex as transformInfo (transformInfo)}
                       <li>
@@ -76,13 +81,12 @@
                     appearance="secondary"
                     on:click={() => deleteMissingColumns(columnId)}
                   >
-                    Attempt Exploration recovery
+                    {$LL.dataExplorerQueryRunErrors.attemptExplorationRecovery()}
                   </Button>
                 </p>
               {:else if $currentDatabase && $currentSchema && $query.id}
                 <p>
-                  You can edit the exploration in the Data Explorer to attempt
-                  recovering it.
+                  {$LL.dataExplorerQueryRunErrors.editExplorationToRecover()}
                 </p>
                 <p>
                   <a
@@ -93,7 +97,7 @@
                       $query.id,
                     )}
                   >
-                    Edit in Data Explorer
+                    {$LL.general.editInDataExplorer()}
                   </a>
                 </p>
               {/if}

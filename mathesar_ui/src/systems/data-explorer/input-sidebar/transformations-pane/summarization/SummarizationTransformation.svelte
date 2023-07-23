@@ -11,6 +11,7 @@
   import type { ProcessedQueryResultColumnMap } from '../../../utils';
   import Aggregation from './Aggregation.svelte';
   import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -91,7 +92,7 @@
   />
   {#if groups.size > 0}
     <section>
-      <LabeledInput label="Not Aggregated" layout="stacked">
+      <LabeledInput label={$LL.general.notAggregated()} layout="stacked">
         <MultiSelect
           values={[...groups.values()].map((entry) => entry.inputAlias)}
           options={[...columns.without(model.columnIdentifier).values()].map(

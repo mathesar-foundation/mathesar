@@ -7,6 +7,7 @@
   import type { Column } from '@mathesar/api/types/tables/columns';
   import { Icon, iconError, Spinner } from '@mathesar/component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let constraint: Constraint;
 
@@ -30,7 +31,7 @@
 
 <div class="constraint-details">
   <div>
-    <span>Constraint Name:</span>
+    <span>{$LL.general.constraintName()}:</span>
     <span>{constraint.name}</span>
   </div>
   {#if referentTable}

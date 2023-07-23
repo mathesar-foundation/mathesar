@@ -16,6 +16,7 @@ import type {
 import { runQuery } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { standaloneTranslator } from '@mathesar/i18n/standalone-translator';
 import type QueryModel from './QueryModel';
 import QueryInspector from './QueryInspector';
 import {
@@ -173,7 +174,7 @@ export default class QueryRunner<
         const errorMessage =
           err instanceof Error
             ? err.message
-            : 'Unable to run query due to an unknown reason';
+            : standaloneTranslator().dataExplorerQueryRunner.unableToRunQuery();
         this.runState.set({ state: 'failure', errors: [errorMessage] });
       }
     }

@@ -5,6 +5,7 @@
     ProcessedQueryResultColumn,
     ProcessedQueryResultColumnMap,
   } from '../../utils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let columnInformation: ProcessedQueryResultColumn;
   export let columnsMetaData: ProcessedQueryResultColumnMap;
@@ -57,7 +58,7 @@
 
 {#if aggregationColumn}
   <div data-identifier="aggregation-source">
-    <h1>Aggregated from</h1>
+    <h1>{$LL.explorationsInspectorColumnSource.aggregatedFrom()}</h1>
     <div class="column-info">
       <span class="tag">
         <ColumnName
@@ -74,7 +75,7 @@
 
 {#if source}
   <div data-identifier="column-source">
-    <h1>Source Column</h1>
+    <h1>{$LL.explorationsInspectorColumnSource.sourceColumn()}</h1>
     <div class="column-info">
       <span class="tag">
         <ColumnName
@@ -85,7 +86,7 @@
           }}
         />
       </span>
-      <span class="from">from</span>
+      <span class="from">{$LL.general.from()}</span>
       <span class="tag">
         <TableName
           isLoading={!source.table.name}

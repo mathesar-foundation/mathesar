@@ -25,14 +25,16 @@
   } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
   import { getAvailableName } from '@mathesar/utils/db';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
 
   type NamingStrategy = 'auto' | 'manual';
   const namingStrategyLabelMap = new Map<NamingStrategy, string>([
-    ['auto', 'Automatically'],
-    ['manual', 'Manually'],
+    ['auto', $LL.general.automatically()],
+    ['manual', $LL.general.manual()],
   ]);
   const namingStrategies = [...namingStrategyLabelMap.keys()];
 
@@ -43,6 +45,7 @@
     _column: ProcessedColumn | undefined,
     reservedNames: Set<string>,
   ): string {
+    // TODO: i18n
     const desiredName = `FK_${_tableName}_${_column?.column.name ?? ''}`;
     return getAvailableName(desiredName, reservedNames);
   }
@@ -115,7 +118,9 @@
 </script>
 
 <div class="add-new-fk-constraint">
-  <span class="title">New Foreign Key Constraint</span>
+  <span class="title"
+    >{$LL.constraintsNewForeignKeyConstraint.newForeignKeyConstraint()}</span
+  >
 
   <Field
     field={baseColumn}
@@ -124,14 +129,14 @@
       props: { columns: baseTableColumns },
     }}
     layout="stacked"
-    label="Column in this table which references the target table"
+    label={$LL.constraintsNewForeignKeyConstraint.columnReferencesTargetTable()}
   />
 
   <Field
     field={targetTable}
     input={{ component: SelectTable, props: { autoSelect: 'clear', tables } }}
     layout="stacked"
-    label="Target Table"
+    label={$LL.constraintsNewForeignKeyConstraint.targetTable()}
   />
 
   {#if $targetTable}
@@ -147,9 +152,14 @@
         layout="stacked"
       >
         <span slot="label">
-          Target Column in
-          <TableName table={$targetTable} bold truncate={false} />
-          Table
+          <RichText
+            text={$LL.constraintsNewForeignKeyConstraint.targetColumnInTable()}
+            let:slotName
+          >
+            {#if slotName === 'tableName'}
+              <TableName table={$targetTable} bold truncate={false} />
+            {/if}
+          </RichText>
         </span>
       </Field>
     {/if}
@@ -163,12 +173,17 @@
       on:change={handleNamingStrategyChange}
       getRadioLabel={(s) => namingStrategyLabelMap.get(s) ?? ''}
     >
-      Set Constraint Name <ConstraintNameHelp />
+      {$LL.general.setConstraintName()}
+      <ConstraintNameHelp />
     </RadioGroup>
   </FieldLayout>
 
   {#if $namingStrategy === 'manual'}
-    <Field field={constraintName} layout="stacked" label="Constraint Name" />
+    <Field
+      field={constraintName}
+      layout="stacked"
+      label={$LL.general.constraintName()}
+    />
   {/if}
 
   <FormSubmit
@@ -177,7 +192,7 @@
     onProceed={handleSave}
     onCancel={onClose}
     size="small"
-    proceedButton={{ label: 'Add' }}
+    proceedButton={{ label: $LL.general.add() }}
   />
 </div>
 

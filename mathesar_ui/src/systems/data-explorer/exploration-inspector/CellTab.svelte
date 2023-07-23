@@ -1,6 +1,7 @@
 <script lang="ts">
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import type QueryRunner from '../QueryRunner';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryHandler: QueryRunner;
   $: ({ selection, processedColumns } = queryHandler);
@@ -34,7 +35,7 @@
 >
   {#if selectedCellValue !== undefined}
     <section class="cell-content">
-      <header>Content</header>
+      <header>{$LL.general.content()}</header>
       <div class="content">
         {#if processedQueryColumn}
           <CellFabric
@@ -47,7 +48,7 @@
       </div>
     </section>
   {:else}
-    Select a cell to view it's properties.
+    {$LL.explorationsInspectorCellTab.selectACellToViewProperties()}
   {/if}
 </div>
 

@@ -10,6 +10,7 @@
   import type { FilterCombination } from '@mathesar/api/types/tables/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher<{
     remove: number;
@@ -40,7 +41,7 @@
     recordSummaryStore={recordsData.recordSummaries}
   >
     {#if index === 0}
-      <InputGroupText>where</InputGroupText>
+      <InputGroupText>{$LL.general.where()}</InputGroupText>
     {:else if index === 1}
       <Select
         options={filterCombinations}

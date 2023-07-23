@@ -5,6 +5,7 @@
   import { pluralize } from '@mathesar/utils/languageUtils';
   import type QueryManager from '../../QueryManager';
   import type { ProcessedQueryOutputColumn } from '../../utils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let selectedColumns: ProcessedQueryOutputColumn[];
   export let queryManager: QueryManager;
@@ -55,29 +56,21 @@
 </script>
 
 <Collapsible isOpen triggerAppearance="plain">
-  <span slot="header">Actions</span>
+  <span slot="header">{$LL.general.actions()}</span>
   <div slot="content" class="section-content actions">
     {#if disallowColumnDeletion}
       <div class="warning">
         <WarningBox>
           {#if selectedColumnAliases.length === 1}
             {#if denyDeletionDueToLastRemainingBaseColumn}
-              This column cannot be deleted because atleast one column from the
-              base table is required. Please add another column from the base
-              table before deleting this column.
+              {$LL.explorationsInspectorDeleteColumnAction.cannotDeleteColumnLastRemainingBaseColumn()}
             {:else}
-              This column cannot be deleted because it is either used in
-              transformations or a result of transformations. Please remove the
-              column from the transformations before deleting it.
+              {$LL.explorationsInspectorDeleteColumnAction.cannotDeleteColumnUsedInTransformation()}
             {/if}
           {:else if denyDeletionDueToLastRemainingBaseColumn}
-            Some of the selected columns cannot be deleted because atleast one
-            column from the base table is required. Please add another column
-            from the base table before deleting them.
+            {$LL.explorationsInspectorDeleteColumnAction.cannotDeleteColumnsLastRemainingBaseColumn()}
           {:else}
-            Some of the selected columns cannot be deleted because they're
-            either used in transformations or results of transformations. Please
-            remove them from the transformations before deleting them.
+            {$LL.explorationsInspectorDeleteColumnAction.cannotDeleteColumnsUsedInTransformation()}
           {/if}
         </WarningBox>
       </div>

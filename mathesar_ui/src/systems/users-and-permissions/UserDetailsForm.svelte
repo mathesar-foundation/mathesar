@@ -6,6 +6,7 @@
     PasswordInput,
     TextInput,
     hasProperty,
+    Select,
   } from '@mathesar-component-library';
   import userApi, { type User } from '@mathesar/api/users';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
@@ -23,6 +24,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import SelectUserType from './SelectUserType.svelte';
   import UserFormInput from './UserFormInput.svelte';
+  import SelectPreferredLanguage from './SelectPreferredLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -41,6 +43,7 @@
     ),
   ]);
   $: email = optionalField(user?.email ?? '', [isEmail()]);
+  $: preferredLanguage = requiredField(user?.preferred_language ?? '');
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
@@ -49,7 +52,7 @@
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = { fullName, username, email, userType };
+    const fields = { fullName, username, email, userType, preferredLanguage };
     return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
@@ -61,6 +64,7 @@
       username: formValues.username,
       email: formValues.email,
       is_superuser: formValues.userType === 'admin',
+      preferred_language: formValues.preferredLanguage,
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
@@ -139,6 +143,14 @@
       }}
     />
   {/if}
+
+  <UserFormInput
+    label="Preferred Language"
+    field={preferredLanguage}
+    input={{
+      component: SelectPreferredLanguage,
+    }}
+  />
 
   <UserFormInput
     label="Role *"

@@ -9,6 +9,7 @@
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -46,7 +47,7 @@
 </script>
 
 <div class="groups" class:grouped={$grouping.entries.length > 0}>
-  <header>Group records by</header>
+  <header>{$LL.tableViewGroup.groupRecordsBy()}</header>
   <div class="content">
     {#each $grouping.entries as groupEntry, index (index)}
       <GroupEntryComponent
@@ -63,12 +64,12 @@
           index < $grouping.entries.length - 1}
       />
     {:else}
-      <span class="muted">No grouping condition has been added</span>
+      <span class="muted">{$LL.tableViewGroup.noGroupingAdded()}</span>
     {/each}
   </div>
   <footer>
     <DropdownMenu
-      label="Add New Grouping"
+      label={$LL.tableViewGroup.addNewGrouping()}
       disabled={availableColumns.length === 0}
       triggerAppearance="secondary"
     >

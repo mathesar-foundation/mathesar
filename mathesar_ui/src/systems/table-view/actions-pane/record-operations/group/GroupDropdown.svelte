@@ -6,6 +6,7 @@
   import BadgeCount from '@mathesar/component-library/badge-count/BadgeCount.svelte';
   import { iconGrouping } from '@mathesar/icons';
   import type { Grouping } from '@mathesar/stores/table-data';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import Group from './Group.svelte';
 
   interface $$Props extends ComponentProps<Dropdown> {
@@ -19,12 +20,13 @@
   showArrow={false}
   triggerAppearance="secondary"
   {...$$restProps}
-  ariaLabel="Group"
+  ariaLabel={$LL.general.group()}
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconGrouping} />
     <span class="responsive-button-label">
-      Group <BadgeCount value={$grouping.entries.length} />
+      {$LL.general.group()}
+      <BadgeCount value={$grouping.entries.length} />
     </span>
   </svelte:fragment>
   <Group slot="content" {grouping} />

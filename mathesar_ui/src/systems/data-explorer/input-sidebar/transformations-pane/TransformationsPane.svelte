@@ -19,6 +19,7 @@
   import SortTransformation from './SortTransformation.svelte';
   import QuerySortTransformationModel from '../../QuerySortTransformationModel';
   import type { QueryTransformationModel } from '../../QueryModel';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryManager: QueryManager;
 
@@ -176,23 +177,27 @@
 
   <div class="add-transform-control">
     <DropdownMenu
-      label="Add transformation step"
+      label={$LL.dataExplorerTransformationPane.addTransformationStep()}
       icon={iconAddNew}
       disabled={$processedColumns.size === 0}
       triggerAppearance="secondary"
     >
-      <ButtonMenuItem on:click={addFilter}>Filter</ButtonMenuItem>
+      <ButtonMenuItem on:click={addFilter}
+        >{$LL.general.filter()}</ButtonMenuItem
+      >
       <ButtonMenuItem
         disabled={!isSortableColumnPresent}
-        on:click={addSortTransform}>Sort</ButtonMenuItem
+        on:click={addSortTransform}>{$LL.general.sort()}</ButtonMenuItem
       >
       <ButtonMenuItem
         disabled={$query.hasSummarizationTransform()}
         on:click={addSummarization}
       >
-        Summarize
+        {$LL.general.summarize()}
       </ButtonMenuItem>
-      <ButtonMenuItem on:click={addHideTransform}>Hide Columns</ButtonMenuItem>
+      <ButtonMenuItem on:click={addHideTransform}
+        >{$LL.general.hideColumns()}</ButtonMenuItem
+      >
     </DropdownMenu>
   </div>
 </div>

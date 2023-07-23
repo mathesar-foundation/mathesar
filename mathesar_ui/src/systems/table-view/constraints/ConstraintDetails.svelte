@@ -1,11 +1,12 @@
 <script lang="ts">
   import type { Constraint } from '@mathesar/stores/table-data';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let constraint: Constraint;
 </script>
 
 <div class="constraint-details">
-  <span>Constraint Name:</span>
+  <span>{$LL.general.constraintName()}:</span>
   <span>{constraint.name}</span>
 </div>
 

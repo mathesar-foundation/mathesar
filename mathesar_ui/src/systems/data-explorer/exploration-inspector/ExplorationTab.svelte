@@ -19,6 +19,7 @@
   import { toast } from '@mathesar/stores/toast';
   import type QueryRunner from '../QueryRunner';
   import QueryManager from '../QueryManager';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -76,7 +77,9 @@
       query.set(updatedQuery);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Unable to save Exploration.';
+        err instanceof Error
+          ? err.message
+          : $LL.explorationsInspectorExplorationTab.unableToSaveExploration();
       toast.error(message);
     }
   }
@@ -96,14 +99,14 @@
 </script>
 
 <Collapsible isOpen triggerAppearance="plain">
-  <span slot="header">Properties</span>
+  <span slot="header">{$LL.general.properties()}</span>
   <div slot="content" class="section-content">
     <Form>
       <FormField>
-        <LabeledInput label="Name" layout="stacked">
+        <LabeledInput label={$LL.general.name()} layout="stacked">
           <TextInput
             value={name}
-            aria-label="name"
+            aria-label={$LL.general.name()}
             on:change={handleNameChange}
             on:input={setHasChangesToTrue}
             disabled={!canEditMetadata}
@@ -111,10 +114,10 @@
         </LabeledInput>
       </FormField>
       <FormField>
-        <LabeledInput label="Description" layout="stacked">
+        <LabeledInput label={$LL.general.description()} layout="stacked">
           <TextArea
             value={description}
-            aria-label="description"
+            aria-label={$LL.general.description()}
             on:change={handleDescriptionChange}
             on:input={setHasChangesToTrue}
             disabled={!canEditMetadata}
@@ -126,7 +129,7 @@
         <FormField>
           <CancelOrProceedButtonPair
             cancelButton={{ icon: undefined }}
-            proceedButton={{ icon: undefined, label: 'Save' }}
+            proceedButton={{ icon: undefined, label: $LL.general.save() }}
             onCancel={handleCancel}
             onProceed={handleSave}
           />
@@ -138,7 +141,7 @@
 
 {#if canEditMetadata}
   <Collapsible isOpen triggerAppearance="plain">
-    <span slot="header">Actions</span>
+    <span slot="header">{$LL.general.actions()}</span>
     <div slot="content" class="section-content actions">
       <Button
         class="delete-button"
@@ -146,7 +149,7 @@
         on:click={handleDeleteExploration}
       >
         <Icon {...iconDeleteMajor} />
-        <span>Delete Exploration</span>
+        <span>{$LL.general.deleteExploration()}</span>
       </Button>
     </div>
   </Collapsible>

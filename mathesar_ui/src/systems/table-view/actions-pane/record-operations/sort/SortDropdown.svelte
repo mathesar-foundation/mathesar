@@ -5,6 +5,7 @@
   import { BadgeCount, Dropdown, Icon } from '@mathesar-component-library';
   import { iconSorting } from '@mathesar/icons';
   import type { Sorting } from '@mathesar/stores/table-data';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import Sort from './Sort.svelte';
 
   interface $$Props extends ComponentProps<Dropdown> {
@@ -18,12 +19,13 @@
   showArrow={false}
   triggerAppearance="secondary"
   {...$$restProps}
-  ariaLabel="Sort"
+  ariaLabel={$LL.general.sort()}
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconSorting} />
     <span class="responsive-button-label">
-      Sort <BadgeCount value={$sorting.size} />
+      {$LL.general.sort()}
+      <BadgeCount value={$sorting.size} />
     </span>
   </svelte:fragment>
   <Sort slot="content" {sorting} />

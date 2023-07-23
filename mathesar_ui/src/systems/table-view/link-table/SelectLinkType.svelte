@@ -3,9 +3,11 @@
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';
   import LinkTypeOption from './LinkTypeOption.svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   export let linkTypes: LinkType[];
   export let isSelfReferential: boolean;
@@ -17,7 +19,11 @@
 <FieldLayout>
   <fieldset>
     <legend>
-      Type of Link to <Pill table={target} which="target" />:
+      <RichText text={$LL.linkTableSelectLinkType.typeOfLinkTo()} let:slotName>
+        {#if slotName === 'targetTable'}
+          <Pill table={target} which="target" />:
+        {/if}
+      </RichText>
     </legend>
     <div class="options">
       {#each linkTypes as linkType (linkType)}

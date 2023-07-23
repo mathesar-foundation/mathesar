@@ -7,6 +7,7 @@
   import { iconFiltering } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
   import type { Filtering } from '@mathesar/stores/table-data';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import Filter from './Filter.svelte';
 
   interface $$Props extends ComponentProps<Dropdown> {
@@ -36,7 +37,8 @@
   <svelte:fragment slot="trigger">
     <Icon {...iconFiltering} size="0.8em" />
     <span class="responsive-button-label">
-      Filter <BadgeCount value={$filtering.entries.length} />
+      {$LL.general.filter()}
+      <BadgeCount value={$filtering.entries.length} />
     </span>
   </svelte:fragment>
   <Filter slot="content" {filtering} />

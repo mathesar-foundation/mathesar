@@ -9,6 +9,7 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import ConstraintTypeSection from './ConstraintTypeSection.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -56,10 +57,10 @@
   {#if shouldShowLoadingSpinner}
     <Icon {...iconLoading} />
   {:else if state === States.Error}
-    <div>Unable to fetch table constraints</div>
+    <div>{$LL.constraintsTableConstraints.unableToFetchTableConstraints()}</div>
     <div>{errorMsg}</div>
   {:else if isEmpty}
-    <div>No constraints</div>
+    <div>{$LL.constraintsTableConstraints.noConstraints()}</div>
   {:else}
     <div class="constraints-list">
       <ConstraintTypeSection

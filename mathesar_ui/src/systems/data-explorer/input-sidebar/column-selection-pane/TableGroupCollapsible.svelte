@@ -8,6 +8,7 @@
   } from '@mathesar-component-library';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { ColumnWithLink } from '../../utils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
@@ -36,7 +37,7 @@
         </span>
         <span class="fk-column">
           <Truncate>
-            via {column.name}
+            {$LL.general.via()}
           </Truncate>
         </span>
       </Button>

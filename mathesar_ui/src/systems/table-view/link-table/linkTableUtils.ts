@@ -1,13 +1,13 @@
 import type { TableEntry } from '@mathesar/api/types/tables';
 import { invalidIf } from '@mathesar/components/form';
+import { standaloneTranslator } from '@mathesar/i18n/standalone-translator';
 import { getAvailableName } from '@mathesar/utils/db';
 
 export type LinkType = 'manyToOne' | 'oneToMany' | 'manyToMany';
 
 export const columnNameIsNotId = invalidIf(
   (columnName: string) => columnName === 'id',
-  'The name "id" is reserved for the primary key column that will be ' +
-    'created when creating the table.',
+  standaloneTranslator().linkTableUtils.ifColumnNameIsId(),
 );
 
 export function suggestMappingTableName(

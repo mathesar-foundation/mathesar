@@ -5,6 +5,7 @@
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconInspector, iconTable } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
@@ -44,10 +45,10 @@
       disabled={$isLoading}
       on:click={toggleTableInspector}
       active={$isTableInspectorVisible}
-      aria-label="Inspector"
+      aria-label={$LL.general.inspector()}
     >
       <Icon {...iconInspector} />
-      <span class="responsive-button-label">Inspector</span>
+      <span class="responsive-button-label">{$LL.general.inspector()}</span>
     </Button>
   </div>
 </EntityPageHeader>

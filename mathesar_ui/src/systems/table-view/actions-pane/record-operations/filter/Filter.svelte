@@ -16,6 +16,7 @@
   } from '@mathesar/stores/table-data';
   import { deepCloneFiltering } from '../utils';
   import FilterEntries from './FilterEntries.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   const imperativeFilterController = getImperativeFilterControllerFromContext();
@@ -113,7 +114,7 @@
 </script>
 
 <div class="filters" class:filtered={filterCount} bind:this={element}>
-  <div class="header">Filter records</div>
+  <div class="header">{$LL.tableViewFilters.filterRecords()}</div>
   <div class="content">
     {#if filterCount}
       <FilterEntries
@@ -124,7 +125,7 @@
         on:updateCombination={(e) => setCombination(e.detail)}
       />
     {:else}
-      <span class="muted">No filters have been added</span>
+      <span class="muted">{$LL.tableViewFilters.noFiltersHaveBeenAdded()}</span>
     {/if}
   </div>
   {#if $processedColumns.size}
@@ -138,7 +139,7 @@
         }}
       >
         <Icon {...iconAddNew} />
-        <span>Add New Filter</span>
+        <span>{$LL.tableViewFilters.addNewFilter()}</span>
       </Button>
     </div>
   {/if}

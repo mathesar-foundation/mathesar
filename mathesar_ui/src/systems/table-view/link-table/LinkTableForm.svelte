@@ -38,6 +38,7 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import { makeSingular } from '@mathesar/utils/languageUtils';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import Pill from './LinkTablePill.svelte';
   import NewColumn from './NewColumn.svelte';
   import SelectLinkType from './SelectLinkType.svelte';
@@ -46,6 +47,7 @@
     suggestMappingTableName,
     type LinkType,
   } from './linkTableUtils';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -144,7 +146,7 @@
           comboInvalidIf(
             [columnNameMappingToBase, columnNameMappingToTarget],
             ([a, b]) => a === b,
-            'The two columns cannot have the same name.',
+            $LL.linkTableLinkTableForm.twoColumnsCannotHaveSameName(),
           ),
         ],
       );
@@ -210,7 +212,7 @@
 
   async function handleSave(values: FilledFormValues<typeof form>) {
     await postAPI('/api/db/v0/links/', getRequestBody(values));
-    toast.success('The link has been created successfully');
+    toast.success($LL.linkTableLinkTableForm.linkCreatedSuccessfully());
     await reFetchOtherThingsThatChanged();
     close();
   }
@@ -219,8 +221,7 @@
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
-      Links are stored in the database as foreign key constraints, which you may
-      add to existing columns via the "Advanced" section of the table inspector.
+      {$LL.linkTableLinkTableForm.linksInfo()}
     </InfoBox>
   </FieldLayout>
 
@@ -232,7 +233,11 @@
     }}
   >
     <span slot="label">
-      Link <Pill table={base} which="base" /> to
+      <RichText text={$LL.linkTableLinkTableForm.linkTo()} let:slotName>
+        {#if slotName === 'baseTable'}
+          <Pill table={base} which="base" />
+        {/if}
+      </RichText>
     </span>
   </Field>
 
@@ -258,21 +263,40 @@
           <NewColumn {base} {target} field={columnNameInBase} />
         {:else if $linkType === 'manyToMany'}
           {#if isSelfReferential}
-            <p>We'll create a new table.</p>
+            <p>{$LL.linkTableLinkTableForm.weWillCreateANewTable()}</p>
             <Field field={mappingTableName} label="Table Name" />
             {#if $mappingTableName}
               <p>
-                We'll add two columns in
-                <Pill table={{ name: $mappingTableName }} which="mapping" />,
-                each linking to
-                <Pill table={target} which="target" />.
+                <RichText
+                  text={$LL.linkTableLinkTableForm.add2ColumnsLinkingToTarget()}
+                  let:slotName
+                >
+                  {#if slotName === 'mappingTable'}
+                    <Pill
+                      table={{ name: $mappingTableName }}
+                      which="mapping"
+                    />,
+                  {:else if slotName === 'targetTable'}
+                    <Pill table={target} which="target" />
+                  {/if}
+                </RichText>
               </p>
-              <Field field={columnNameMappingToBase} label="Column 1 Name" />
-              <Field field={columnNameMappingToTarget} label="Column 2 Name" />
+              <Field
+                field={columnNameMappingToBase}
+                label={$LL.linkTableLinkTableForm.indexedColumnName({
+                  index: 1,
+                })}
+              />
+              <Field
+                field={columnNameMappingToTarget}
+                label={$LL.linkTableLinkTableForm.indexedColumnName({
+                  index: 2,
+                })}
+              />
             {/if}
           {:else}
-            <p>We'll create a new table.</p>
-            <Field field={mappingTableName} label="Table Name" />
+            <p>{$LL.linkTableLinkTableForm.weWillCreateANewTable()}</p>
+            <Field field={mappingTableName} label={$LL.general.tableName()} />
             {#if $mappingTableName}
               <NewColumn
                 base={{ name: $mappingTableName }}
@@ -303,7 +327,10 @@
     catchErrors
     {canProceed}
     onCancel={close}
-    proceedButton={{ label: 'Create Link', icon: iconTableLink }}
+    proceedButton={{
+      label: $LL.linkTableLinkTableForm.createLink(),
+      icon: iconTableLink,
+    }}
     onProceed={handleSave}
   />
 </div>

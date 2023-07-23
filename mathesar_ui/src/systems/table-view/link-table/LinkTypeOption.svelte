@@ -3,9 +3,11 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import Diagram from './diagram/Diagram.svelte';
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';
+  import RichText from '@mathesar/components/RichText.svelte';
 
   export let linkType: LinkType;
   export let isSelfReferential: boolean;
@@ -16,13 +18,13 @@
   $: checked = linkType === $field;
   $: label = (() => {
     if (linkType === 'oneToMany') {
-      return 'One to Many';
+      return $LL.general.oneToMany();
     }
     if (linkType === 'manyToOne') {
-      return 'Many to One';
+      return $LL.general.manyToOne();
     }
     if (linkType === 'manyToMany') {
-      return 'Many to Many';
+      return $LL.general.manyToMany();
     }
     return assertExhaustive(linkType);
   })();
@@ -47,30 +49,58 @@
     </span>
     <span class="description">
       {#if linkType === 'oneToMany'}
-        One
-        <Pill table={base} which="base" />
-        record can be linked from multiple
-        <Pill table={target} which="target" />
-        records.
+        <RichText
+          text={$LL.linkTableLinkTypeOptions.oneToManyDescription()}
+          let:slotName
+        >
+          {#if slotName === 'baseTable'}
+            <Pill table={base} which="base" />
+          {:else if slotName === 'targetTable'}
+            <Pill table={target} which="target" />
+          {/if}
+        </RichText>
       {:else if linkType === 'manyToOne'}
-        Multiple
-        <Pill table={base} which="base" />
-        records can link to the same
-        <Pill table={target} which="target" />
-        record.
+        <RichText
+          text={$LL.linkTableLinkTypeOptions.manyToOneDescription()}
+          let:slotName
+        >
+          {#if slotName === 'baseTable'}
+            <Pill table={base} which="base" />
+          {:else if slotName === 'targetTable'}
+            <Pill table={target} which="target" />
+          {/if}
+        </RichText>
       {:else if linkType === 'manyToMany'}
         {#if isSelfReferential}
-          Multiple
-          <Pill table={base} which="base" />
-          records can link to each other through a new
-          <Pill table={{ name: 'Linking Table' }} which="mapping" />
+          <RichText
+            text={$LL.linkTableLinkTypeOptions.manyToManySelfReferential()}
+            let:slotName
+          >
+            {#if slotName === 'baseTable'}
+              <Pill table={base} which="base" />
+            {:else if slotName === 'mappingTable'}
+              <Pill
+                table={{ name: $LL.general.linkingTable() }}
+                which="mapping"
+              />
+            {/if}
+          </RichText>
         {:else}
-          Multiple
-          <Pill table={base} which="base" />
-          and
-          <Pill table={target} which="target" />
-          records can link to each other through a new
-          <Pill table={{ name: 'Linking Table' }} which="mapping" />
+          <RichText
+            text={$LL.linkTableLinkTypeOptions.manyToManyDescription()}
+            let:slotName
+          >
+            {#if slotName === 'baseTable'}
+              <Pill table={base} which="base" />
+            {:else if slotName === 'targetTable'}
+              <Pill table={target} which="target" />
+            {:else if slotName === 'mappingTable'}
+              <Pill
+                table={{ name: $LL.general.linkingTable() }}
+                which="mapping"
+              />
+            {/if}
+          </RichText>
         {/if}
       {:else}
         {assertExhaustive(linkType)}

@@ -4,6 +4,7 @@
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { numberOfTimes } from '@mathesar/utils/languageUtils';
   import type { ColumnWithLink } from '../../utils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -33,7 +34,9 @@
             {usageCount}
           </Badge>
           <svelte:fragment slot="content">
-            This column has been added {numberOfTimes(usageCount)}
+            {$LL.dataExplorerSelectableColum.columnAddedTimes({
+              times: numberOfTimes(usageCount),
+            })}
           </svelte:fragment>
         </Tooltip>
       {/if}

@@ -9,6 +9,7 @@
   } from '@mathesar/components/form';
   import { columnNameIsAvailable } from '@mathesar/utils/columnUtils';
   import { iconAddNew } from '@mathesar/icons';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import ColumnTypeSelector from './ColumnTypeSelector.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -36,7 +37,7 @@
   closeOnInnerClick={false}
   triggerAppearance="secondary"
   showArrow={false}
-  ariaLabel="New Column"
+  ariaLabel={$LL.tableViewNewColumnCell.newColumn()}
   on:close={form.reset}
   disabled={$isSubmitting}
 >
@@ -48,17 +49,21 @@
     {/if}
   </svelte:fragment>
   <div slot="content" class="new-column-dropdown" let:close>
-    <Field field={columnName} label="Column Name" layout="stacked" />
+    <Field
+      field={columnName}
+      label={$LL.tableViewNewColumnCell.columnName()}
+      layout="stacked"
+    />
     <Field
       field={columnType}
       input={{ component: ColumnTypeSelector }}
-      label="Select Type"
+      label={$LL.tableViewNewColumnCell.selectType()}
       layout="stacked"
     />
     <div class="submit">
       <FormSubmit
         {form}
-        proceedButton={{ label: 'Add' }}
+        proceedButton={{ label: $LL.general.add() }}
         onProceed={() => addColumn(close)}
         onCancel={close}
         catchErrors

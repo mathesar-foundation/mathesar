@@ -8,6 +8,7 @@
   import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
   import type QueryManager from '../QueryManager';
   import type { ColumnWithLink } from '../utils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
@@ -17,8 +18,14 @@
   $: ({ inputColumnsFetchState } = $state);
 
   const tabs = [
-    { id: 'column-selection', label: 'Select Columns' },
-    { id: 'transform-results', label: 'Transform Results' },
+    {
+      id: 'column-selection',
+      label: $LL.dataExplorerInputSidebar.selectColumns(),
+    },
+    {
+      id: 'transform-results',
+      label: $LL.dataExplorerInputSidebar.transformResults(),
+    },
   ];
   let activeTab = tabs[0];
 
@@ -43,17 +50,15 @@
           },
         },
         body: [
-          `By default, Mathesar shows only one related record per row when adding a
-                column with multiple related records. We recommend adding a summarization
-                step if you'd like to see related records as a list instead.`,
-          'You can manually configure a summarization later via the "Transform Results" pane.',
+          $LL.dataExplorerInputSidebar.autoSummarizationConfirmBodyLine1(),
+          $LL.dataExplorerInputSidebar.autoSummarizationConfirmBodyLine2(),
         ],
         proceedButton: {
-          label: 'Yes, summarize as a list',
+          label: $LL.dataExplorerInputSidebar.summarizeAsAList(),
           icon: undefined,
         },
         cancelButton: {
-          label: 'No, continue without summarizing',
+          label: $LL.dataExplorerInputSidebar.continueWithoutSummarizing(),
           icon: undefined,
         },
       });
@@ -84,7 +89,7 @@
 </script>
 
 <aside class="input-sidebar">
-  <header>Build your Exploration</header>
+  <header>{$LL.dataExplorerInputSidebar.buildYourExploration()}</header>
   <section class="input-pane">
     <TabContainer
       {tabs}
@@ -100,8 +105,7 @@
       {:else if inputColumnsFetchState?.state === 'success'}
         {#if activeTab?.id === 'column-selection'}
           <div class="help-text">
-            Select the columns that will be used for the exploration. Columns
-            are limited to those from the base table and its linked tables.
+            {$LL.dataExplorerInputSidebar.columnSelectionHelpText()}
           </div>
           <ColumnSelectionPane
             {queryManager}
@@ -110,15 +114,13 @@
           />
         {:else if activeTab?.id === 'transform-results'}
           <div class="help-text">
-            Transformations can be used to summarize data, filter data, and
-            more. Note that transformations are applied in the order they are
-            listed.
+            {$LL.dataExplorerInputSidebar.transformResultsHelpText()}
           </div>
           <TransformationsPane {queryManager} />
         {/if}
       {:else if inputColumnsFetchState?.state === 'failure'}
         <ErrorBox>
-          Failed to fetch column information:
+          {$LL.dataExplorerInputSidebar.failedToFetchColumnInfo()}:
           {inputColumnsFetchState?.errors.join(';')}
         </ErrorBox>
       {/if}

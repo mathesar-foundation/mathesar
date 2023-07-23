@@ -3,13 +3,14 @@
   import type QueryManager from '../QueryManager';
   import Results from './Results.svelte';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
 </script>
 
 <section data-identifier="result">
   <header>
-    <span class="title">Result</span>
+    <span class="title">{$LL.general.result()}</span>
     <div class="actions">
       <QueryRefreshButton queryRunner={queryHandler} />
     </div>

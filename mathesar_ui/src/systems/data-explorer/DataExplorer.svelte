@@ -7,6 +7,7 @@
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import type { ColumnWithLink } from './utils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
@@ -33,18 +34,16 @@
         <div class="tutorial-holder">
           <Tutorial>
             <span slot="title">
-              Create and Share Explorations of Your Data
+              {$LL.dataExplorer.createAndShareExplorations()}
             </span>
             <span slot="body">
-              Use Data Explorer to analyze and share your data. Explorations are
-              based on tables in your schema, to get started choose a table and
-              start adding columns and transformations.
+              {$LL.dataExplorer.createAndShareExplorationsBody()}
             </span>
           </Tutorial>
         </div>
       {/if}
       <div class="help-text">
-        Get started by selecting a table and adding columns
+        {$LL.dataExplorer.getStartBySelectingTable()}
       </div>
     </div>
   {:else}
@@ -52,7 +51,7 @@
       <WithInputSidebar {queryManager} {linkCollapsibleOpenState}>
         {#if hasNoColumns}
           <div class="help-text">
-            Get started by adding columns from the left
+            {$LL.dataExplorer.getStartedByAddingColumns()}
           </div>
         {:else}
           <WithExplorationInspector

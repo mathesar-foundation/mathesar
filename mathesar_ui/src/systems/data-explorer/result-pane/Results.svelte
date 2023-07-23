@@ -21,6 +21,7 @@
   import QueryRunErrors from './QueryRunErrors.svelte';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
   export let isExplorationPage = false;
@@ -66,8 +67,7 @@
 <div data-identifier="query-run-result">
   {#if !initial_columns.length}
     <div class="empty-state">
-      This exploration does not contain any columns. Edit the exploration to add
-      columns to it.
+      {$LL.dataExplorerResults.noColumnsInExploration()}
     </div>
   {:else if errors}
     <div class="empty-state">
@@ -149,13 +149,14 @@
     <div data-identifier="status-bar">
       {#if totalCount}
         <div>
-          Showing {$pagination.leftBound}-{Math.min(
-            totalCount,
-            $pagination.rightBound,
-          )} of {totalCount}
+          {$LL.dataExplorerResults.showingPageStartToEndOfTotal({
+            pageStart: $pagination.leftBound,
+            pageEnd: Math.min(totalCount, $pagination.rightBound),
+            total: totalCount,
+          })}
         </div>
       {:else if recordRunState === 'success'}
-        No results found
+        {$LL.general.noResultsFound()}
       {/if}
       <div class="pagination-controls">
         <PaginationGroup

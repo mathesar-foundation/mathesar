@@ -9,6 +9,7 @@
   import SortEntry from '@mathesar/components/sort-entry/SortEntry.svelte';
   import type { SortDirection } from '@mathesar/components/sort-entry/utils';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -50,7 +51,7 @@
 </script>
 
 <div class="sorters">
-  <div class="header">Sort</div>
+  <div class="header">{$LL.general.sort()}</div>
   <div class="content">
     {#each [...$sorting] as [columnId, sortDirection], index (columnId)}
       <SortEntry
@@ -71,14 +72,14 @@
           )}
       />
     {:else}
-      <span>No sorting condition has been added</span>
+      <span>{$LL.tableViewSort.noSortingAdded()}</span>
     {/each}
   </div>
   {#if availableColumnIds.length > 0}
     <div class="footer">
       <Button appearance="secondary" on:click={addSortColumn}>
         <Icon {...iconAddNew} />
-        <span>Add new sort condition</span>
+        <span>{$LL.tableViewSort.addNewSortCondition()}</span>
       </Button>
     </div>
   {/if}

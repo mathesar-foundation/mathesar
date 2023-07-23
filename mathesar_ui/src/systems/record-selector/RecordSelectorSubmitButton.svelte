@@ -4,6 +4,7 @@
   import { Icon } from '@mathesar-component-library';
   import { iconLinkToRecordPage, iconPickRecord } from '@mathesar/icons';
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -11,7 +12,7 @@
   export let isSelected: boolean;
 
   $: icon = purpose === 'dataEntry' ? iconPickRecord : iconLinkToRecordPage;
-  $: phrase = purpose === 'dataEntry' ? 'Pick' : 'Open';
+  $: phrase = purpose === 'dataEntry' ? $LL.general.pick() : $LL.general.open();
   $: element = purpose === 'dataEntry' ? 'button' : 'div';
 
   function handleClick() {

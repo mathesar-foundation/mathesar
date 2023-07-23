@@ -4,6 +4,7 @@
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type QueryHideTransformationModel from '../../QueryHideTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../utils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -17,7 +18,10 @@
   }
 </script>
 
-<LabeledInput label="Select Columns to Hide" layout="stacked">
+<LabeledInput
+  label={$LL.dataExplorerHideTransformation.selectColumnsToHide()}
+  layout="stacked"
+>
   <MultiSelect
     values={model.columnAliases}
     options={[...columns.values()].map((entry) => entry.column.alias)}

@@ -5,6 +5,7 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import ConstraintCollapseHeader from './ConstraintCollapseHeader.svelte';
   import NewUniqueConstraint from './NewUniqueConstraint.svelte';
   import NewFkConstraint from './NewFkConstraint.svelte';
@@ -31,19 +32,17 @@
   let isAddingNewConstraint = false;
 
   const helpMap: Record<ConstraintType, string> = {
-    primary:
-      'A primary key constraint uniquely identifies each record in a table.',
-    foreignkey: 'A foreign key constraint links records in two tables.',
-    unique:
-      'A unique constraint ensures that each record in a column is unique.',
+    primary: $LL.constraintsConstraintTypesSection.primaryKeyHelp(),
+    foreignkey: $LL.constraintsConstraintTypesSection.foreignKeyHelp(),
+    unique: $LL.constraintsConstraintTypesSection.uniqueConstraintHelp(),
     check: '',
     exclude: '',
   };
 
   const titleMap: Record<ConstraintType, string> = {
-    primary: 'Primary Keys',
-    foreignkey: 'Foreign Keys',
-    unique: 'Unique',
+    primary: $LL.general.primaryKeys(),
+    foreignkey: $LL.general.foreignKeys(),
+    unique: $LL.general.unique(),
     check: '',
     exclude: '',
   };
@@ -60,7 +59,7 @@
     void confirmDelete({
       identifierType: 'Constraint',
       identifierName: constraint.name,
-      body: ['Are you sure you want to proceed?'],
+      body: [$LL.general.areYouSureToProceed()],
       onProceed: () => constraintsDataStore.remove(constraint.id),
     });
   }
@@ -81,7 +80,7 @@
     </span>
     {#if canAdd}
       <Button appearance="plain-primary" size="small" on:click={addConstraint}>
-        Add
+        {$LL.general.add()}
       </Button>
     {/if}
   </span>
@@ -120,7 +119,11 @@
     </Collapsible>
   {:else}
     {#if !isAddingNewConstraint}
-      <span class="null">No {titleMap[constraintType]} Constraints</span>
+      <span class="null">
+        {$LL.constraintsConstraintTypesSection.noConstraints({
+          constraintType: titleMap[constraintType],
+        })}
+      </span>
     {/if}
   {/each}
 </div>

@@ -17,6 +17,7 @@
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let processedColumn: ProcessedColumn;
 
@@ -71,9 +72,9 @@
 
 <ButtonMenuItem icon={iconAddFilter} on:click={addFilter}>
   {#if filterCount > 0}
-    Add Filter
+    {$LL.tableViewHeaderCell.addFilter()}
   {:else}
-    Filter Column
+    {$LL.tableViewHeaderCell.filterColumn()}
   {/if}
 </ButtonMenuItem>
 {#if filterCount > 0}
@@ -87,36 +88,42 @@
 
 {#if currentSorting === 'ASCENDING'}
   <ButtonMenuItem icon={iconSortAscending} on:click={removeSorting}>
-    Remove {sortingLabel.ASCENDING} Sorting
+    {$LL.tableViewHeaderCell.removeSorting({
+      sortingType: sortingLabel.ASCENDING,
+    })}
   </ButtonMenuItem>
 {:else}
   <ButtonMenuItem
     icon={iconSortAscending}
     on:click={() => applySorting('ASCENDING')}
   >
-    Sort {sortingLabel.ASCENDING}
+    {$LL.general.sort()}
+    {sortingLabel.ASCENDING}
   </ButtonMenuItem>
 {/if}
 
 {#if currentSorting === 'DESCENDING'}
   <ButtonMenuItem icon={iconSortDescending} on:click={removeSorting}>
-    Remove {sortingLabel.DESCENDING} Sorting
+    {$LL.tableViewHeaderCell.removeSorting({
+      sortingType: sortingLabel.DESCENDING,
+    })}
   </ButtonMenuItem>
 {:else}
   <ButtonMenuItem
     icon={iconSortDescending}
     on:click={() => applySorting('DESCENDING')}
   >
-    Sort {sortingLabel.DESCENDING}
+    {$LL.general.sort()}
+    {sortingLabel.DESCENDING}
   </ButtonMenuItem>
 {/if}
 
 {#if hasGrouping}
   <ButtonMenuItem icon={iconGrouping} on:click={removeGrouping}>
-    Remove Grouping
+    {$LL.tableViewHeaderCell.removeGrouping()}
   </ButtonMenuItem>
 {:else}
   <ButtonMenuItem icon={iconGrouping} on:click={addGrouping}>
-    Group by Column
+    {$LL.tableViewHeaderCell.groupByColumn()}
   </ButtonMenuItem>
 {/if}

@@ -4,6 +4,7 @@
   import type QueryManager from '../../QueryManager';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
   import type { ColumnWithLink } from '../../utils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
@@ -21,7 +22,7 @@
 
 <div data-identifier="column-selection-list">
   <section>
-    <header>From Base table</header>
+    <header>{$LL.dataExplorerColumnSelectionPane.fromBaseTable()}</header>
     <div class="content">
       {#each [...baseTableColumns] as [columnId, column] (columnId)}
         <SelectableColumn
@@ -34,18 +35,19 @@
   </section>
   {#if !hasInitialColumns && (hasLinksFromBaseTable || hasLinksToBaseTable)}
     <section>
-      <header>From linked tables</header>
+      <header>{$LL.dataExplorerColumnSelectionPane.fromLinkedTables()}</header>
       <div class="content">
         <div class="help-text">
-          At least one column from the base table is required to add columns
-          from linked tables.
+          {$LL.dataExplorerColumnSelectionPane.atLeastOneColumnFromBaseRequired()}
         </div>
       </div>
     </section>
   {:else}
     {#if hasLinksFromBaseTable}
       <section>
-        <header>Linked from Base table</header>
+        <header>
+          {$LL.dataExplorerColumnSelectionPane.linkedFromBaseTable()}
+        </header>
         <div class="content">
           <SelectableColumnTree
             columnsWithLinks={baseTableColumnsWithLinks}
@@ -58,7 +60,9 @@
     {/if}
     {#if hasLinksToBaseTable}
       <section>
-        <header>Linked to Base table</header>
+        <header>
+          {$LL.dataExplorerColumnSelectionPane.linkedToBaseTable()}
+        </header>
         <div class="content" data-identifier="referenced-by-tables">
           {#if hasInitialColumns}
             <!--table.id is not unique here. Same table can be present multiple times-->

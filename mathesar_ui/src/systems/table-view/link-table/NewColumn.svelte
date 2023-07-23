@@ -2,10 +2,12 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import { Spinner } from '@mathesar-component-library';
   import { Field, type FieldStore } from '@mathesar/components/form';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type { ComponentProps } from 'svelte';
   import Pill from './LinkTablePill.svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
 
-  const label = 'Column Name';
+  const label = $LL.general.columnName();
 
   type Which = ComponentProps<Pill>['which'];
 
@@ -18,10 +20,16 @@
 </script>
 
 <p>
-  We'll add a column in
-  <Pill table={base} which={baseWhich} />
-  which links to
-  <Pill table={target} which={targetWhich} />.
+  <RichText
+    text={$LL.linkTableNewColumn.newColumnInBaseLinkingToTarget()}
+    let:slotName
+  >
+    {#if slotName === 'baseTable'}
+      <Pill table={base} which={baseWhich} />
+    {:else if slotName === 'targetTable'}
+      <Pill table={target} which={targetWhich} />.
+    {/if}
+  </RichText>
 </p>
 {#if targetColumnsAreLoading}
   <!--

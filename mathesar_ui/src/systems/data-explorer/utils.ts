@@ -32,6 +32,7 @@ import type {
   JoinableTablesResult,
 } from '@mathesar/api/types/tables/joinable_tables';
 import type { Column } from '@mathesar/api/types/tables/columns';
+import { standaloneTranslator } from '@mathesar/i18n/standalone-translator';
 import type QueryModel from './QueryModel';
 
 type ProcessedQueryResultColumnSource =
@@ -137,7 +138,11 @@ export function getLinkFromColumn(
   }
   if (allLinksFromColumn.length > 1) {
     // This scenario should never occur
-    throw new Error(`Multiple links present for the same column: ${columnId}`);
+    throw new Error(
+      standaloneTranslator().dataExplorerUtils.multipleLinksPresentForSameColumn(
+        { columnId },
+      ),
+    );
   }
   const link = allLinksFromColumn[0];
   const toTableInfo = result.tables[link.target];

@@ -1,8 +1,8 @@
 <script>
   import { Help } from '@mathesar/component-library';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
 </script>
 
 <Help>
-  Constraints help you keep your data clean by rejecting invalid data before it
-  gets entered.
+  {$LL.constraintsConstraintHelp.constraintDescription()}
 </Help>

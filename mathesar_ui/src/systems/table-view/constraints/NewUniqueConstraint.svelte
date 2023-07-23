@@ -17,14 +17,15 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
 
   type NamingStrategy = 'auto' | 'manual';
   const namingStrategyLabelMap = new Map<NamingStrategy, string>([
-    ['auto', 'Automatically'],
-    ['manual', 'Manually'],
+    ['auto', $LL.general.automatically()],
+    ['manual', $LL.general.manual()],
   ]);
   const namingStrategies = [...namingStrategyLabelMap.keys()];
 
@@ -49,10 +50,10 @@
       return [];
     }
     if (!_constraintName?.trim()) {
-      return ['Name cannot be empty'];
+      return [$LL.general.nameCannotBeEmpty()];
     }
     if (_existingConstraintNames.has(_constraintName?.trim())) {
-      return ['A constraint with that name already exists'];
+      return [$LL.constraintsNewUniqueConstraint.constraintWithNameExists()];
     }
     return [];
   }
@@ -108,8 +109,12 @@
       init();
       onClose?.();
     } catch (error) {
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      toast.error(`Unable to add constraint. ${error.message as string}`);
+      toast.error(
+        `${$LL.constraintsNewUniqueConstraint.unableToAddConstraint()}. ${
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+          error.message as string
+        }`,
+      );
     }
   }
 
@@ -119,10 +124,10 @@
 </script>
 
 <div class="add-new-unique-constraint">
-  <span>New Unique Constraint</span>
+  <span>{$LL.constraintsNewUniqueConstraint.newUniqueConstraint()}</span>
   <Form>
     <FormField>
-      <LabeledInput label="Columns" layout="stacked">
+      <LabeledInput label={$LL.general.columns()} layout="stacked">
         <MultiSelect
           bind:values={constraintColumns}
           options={columnsInTable}
@@ -150,13 +155,14 @@
         on:change={handleNamingStrategyChange}
         getRadioLabel={(s) => namingStrategyLabelMap.get(s) ?? ''}
       >
-        Set Constraint Name <ConstraintNameHelp />
+        {$LL.general.setConstraintName()}
+        <ConstraintNameHelp />
       </RadioGroup>
     </FormField>
 
     {#if namingStrategy === 'manual'}
       <FormField errors={nameValidationErrors}>
-        <LabeledInput label="Constraint Name" layout="stacked">
+        <LabeledInput label={$LL.general.constraintName()} layout="stacked">
           <TextInput
             bind:value={constraintName}
             hasError={nameValidationErrors.length > 0}
@@ -169,7 +175,7 @@
   <CancelOrProceedButtonPair
     onProceed={handleSave}
     onCancel={handleCancel}
-    proceedButton={{ label: 'Add' }}
+    proceedButton={{ label: $LL.general.add() }}
     {canProceed}
     size="small"
   />
