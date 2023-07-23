@@ -111,6 +111,7 @@ def get_common_data(request, database=None, schema=None):
         'user': get_user_data(request),
         'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
         'current_release_tag_name': __version__,
+        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
     }
 
 
