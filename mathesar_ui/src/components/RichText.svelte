@@ -1,5 +1,5 @@
 <script lang="ts">
-  const RICH_TEXT_REGEX = /(\w*<>\w+<>\w*)/gm;
+  const RICH_TEXT_REGEX = /\w*<>(\w+)<>\w*/gm;
   export let text: string;
 
   type PrefixAndSlotTuple = [prefix: string, slotName: string];
