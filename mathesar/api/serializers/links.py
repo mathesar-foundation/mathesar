@@ -42,7 +42,6 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         reference_table = validated_data['reference_table']
         create_foreign_key_link(
             reference_table.schema._sa_engine,
-            reference_table._sa_table.schema,
             validated_data.get('reference_column_name'),
             reference_table.oid,
             validated_data.get('referent_table').oid,

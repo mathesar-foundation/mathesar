@@ -14,6 +14,8 @@ from psycopg2.errors import IntegrityError, DataError
 
 from mathesar.state import reset_reflection
 
+# The user-facing documentation replicates these delimiter characters. If you
+# change this variable, please update the documentation as well.
 ALLOWED_DELIMITERS = ",\t:|;"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10

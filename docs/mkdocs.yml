@@ -23,6 +23,7 @@ nav:
       - Uninstall Mathesar: administration/uninstall.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
+      - Importing data: user-guide/importing-data.md
       - Syncing database changes: user-guide/syncing-db.md
       - Users & access levels: user-guide/users.md
 

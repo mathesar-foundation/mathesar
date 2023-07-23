@@ -72,6 +72,13 @@ const functionsResponse: AbstractTypeSummarizationFunctionsResponse = {
       [abstractTypeCategory.Duration]: abstractTypeCategory.Duration,
     },
   },
+  peak_time: {
+    label: 'Peak time',
+    inputOutputTypeMap: {
+      [abstractTypeCategory.DateTime]: abstractTypeCategory.Time,
+      [abstractTypeCategory.Time]: abstractTypeCategory.Time,
+    },
+  },
 };
 
 export function getSummarizationFunctionsForAbstractType(
