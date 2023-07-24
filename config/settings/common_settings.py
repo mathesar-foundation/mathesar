@@ -253,3 +253,7 @@ LANGUAGES = [
     ('en', _('English')),
     ('ja', _('Japanese')),
 ]
+LANGUAGE_COOKIE_NAME='user_preferred_language'
+LOCALE_PATHS=[
+    'translations'
+]
