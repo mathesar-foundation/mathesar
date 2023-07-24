@@ -22,10 +22,7 @@ class ConstraintViewSet(AccessViewSetMixin, ListModelMixin, RetrieveModelMixin, 
     access_policy = ConstraintAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy.scope_queryset(
-            self.request,
-            Constraint.objects.filter(table__id=self.kwargs['table_pk']).order_by('-created_at')
-        )
+        return Constraint.objects.filter(table__id=self.kwargs['table_pk']).order_by('-created_at')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

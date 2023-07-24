@@ -34,9 +34,7 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = ColumnAccessPolicy
 
     def get_queryset(self):
-        queryset = self.access_policy.scope_queryset(
-            self.request, Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
-        )
+        queryset = Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
         # Prefetching instead of using select_related because select_related uses joins,
         # and we need a reuse of individual Django object instead of its data
         prefetched_queryset = queryset.prefetch_related('table').prefetch('name')

@@ -24,19 +24,3 @@ class ConstraintAccessPolicy(AccessPolicy):
             'condition_expression': 'is_atleast_manager_nested_table_resource'
         },
     ]
-
-    @classmethod
-    def scope_queryset(cls, request, qs):
-        if not (request.user.is_superuser or request.user.is_anonymous):
-            allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
-            permissible_database_role_filter = (
-                Q(table__schema__database__database_role__role__in=allowed_roles)
-                & Q(table__schema__database__database_role__user=request.user)
-            )
-            permissible_schema_roles_filter = (
-                Q(table__schema__schema_role__role__in=allowed_roles)
-                & Q(table__schema__schema_role__user=request.user)
-            )
-            qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
-
-        return qs
