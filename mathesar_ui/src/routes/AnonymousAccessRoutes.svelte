@@ -7,8 +7,6 @@
   setUserProfileStoreInContext(new AnonymousViewerUserModel());
 </script>
 
-<Route path="/shares/*" firstmatch>
-  <Route path="/tables/:slug/*" let:meta>
-    <SharedTableRoute slug={String(meta.params.slug)} />
-  </Route>
+<Route path="/tables/:slug/*" let:meta>
+  <SharedTableRoute slug={String(meta.params.slug)} />
 </Route>

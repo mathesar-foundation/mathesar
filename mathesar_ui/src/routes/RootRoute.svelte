@@ -19,11 +19,17 @@
 
 {#if commonData.routing_context === 'anonymous'}
   <Route path="/*" firstmatch>
-    <AnonymousAccessRoutes />
+    <Route path="/shares/*" firstmatch>
+      <AnonymousAccessRoutes />
 
-    <Route fallback let:meta>
+      <Route fallback>
+        <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+      </Route>
+    </Route>
+
+    <Route fallback>
       <!--Reload page to let server routing take over-->
-      <RouteObserver {meta} on:load={() => window.location.reload()} />
+      <RouteObserver on:load={() => window.location.reload()} />
     </Route>
   </Route>
 {:else}
@@ -31,6 +37,11 @@
     {#if commonData.is_authenticated}
       <AuthenticatedRoutes {commonData} />
     {/if}
+
+    <Route path="/shares/*">
+      <!--Reload page to let server routing take over-->
+      <RouteObserver on:load={() => window.location.reload()} />
+    </Route>
 
     <Route fallback>
       <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
