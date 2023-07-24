@@ -16,7 +16,6 @@
     'left',
     'bottom',
   ];
-  export let horizontalAlignment = 'left';
 
   let element: HTMLSpanElement;
   let dropdownIsOpen = false;
@@ -53,7 +52,6 @@
     bind:this={element}
     class="truncate"
     class:multiline
-    class:right-align={horizontalAlignment === 'right'}
     {style}
     on:mouseenter={handleHover}
     on:mouseleave={() => {

@@ -176,7 +176,6 @@
       class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
     >
       <Truncate
-        {horizontalAlignment}
         lines={isActive && multiLineTruncate ? 2 : 1}
         passthrough={!showTruncationPopover}
       >
@@ -193,6 +192,7 @@
     overflow: hidden;
     position: relative;
     text-overflow: ellipsis;
+    text-align: inherit;
 
     &.nowrap {
       white-space: nowrap;

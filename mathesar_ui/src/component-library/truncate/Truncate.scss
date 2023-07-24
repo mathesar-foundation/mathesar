@@ -1,6 +1,6 @@
 .truncate {
   overflow: hidden;
-  text-align: left;
+  text-align: inherit;
 }
 .truncate:not(.multiline) {
   display: block;
@@ -23,7 +23,4 @@
   background: var(--sand-100);
   border-radius: 0.2rem;
   max-width: var(--tooltip-max-width, 22rem);
-}
-.truncate.right-align {
-  text-align: right;
 }
