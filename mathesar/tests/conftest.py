@@ -409,6 +409,12 @@ def client(admin_user):
 
 
 @pytest.fixture
+def anonymous_client():
+    client = APIClient()
+    return client
+
+
+@pytest.fixture
 def client_bob(user_bob):
     client = APIClient()
     client.login(username='bob', password='password')
