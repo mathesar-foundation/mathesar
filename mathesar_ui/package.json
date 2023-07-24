@@ -12,8 +12,8 @@
     "test": "vitest",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "i18n:typesafe-i18n": "typesafe-i18n",
-    "i18n:upload-source-string": "tsx src/i18n/export.ts"
+    "i18n:generate-translation-types": "typesafe-i18n",
+    "i18n:upload-source-strings": "tsx src/i18n/export.ts"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^6.5.12",
