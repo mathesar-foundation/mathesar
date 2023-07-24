@@ -1,7 +1,9 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
-from mathesar.models.users import DatabaseRole, Role, SchemaRole
+from mathesar.api.utils import SHARED_LINK_UUID_QUERY_PARAM
+from mathesar.api.permission_utils import TableAccessInspector
+from mathesar.models.users import Role
 
 
 class TableAccessPolicy(AccessPolicy):
@@ -14,11 +16,18 @@ class TableAccessPolicy(AccessPolicy):
 
     statements = [
         {
+            'action': [
+                'retrieve',
+            ],
+            'principal': '*',
+            'effect': 'allow',
+            'condition_expression': 'is_atleast_table_viewer'
+        },
+        {
             # Restrictions for the create method is done by the Serializers when creating the schema,
             # As the permissions depend on the database object.
             'action': [
                 'list',
-                'retrieve',
                 'create',
                 'type_suggestions',
                 'dependents',
@@ -28,7 +37,6 @@ class TableAccessPolicy(AccessPolicy):
             'principal': 'authenticated',
             'effect': 'allow',
         },
-
         {
             'action': [
                 'destroy',
@@ -42,7 +50,7 @@ class TableAccessPolicy(AccessPolicy):
             ],
             'principal': 'authenticated',
             'effect': 'allow',
-            'condition_expression': ['(is_superuser or is_table_manager)']
+            'condition_expression': 'is_atleast_table_manager'
         },
     ]
 
@@ -106,18 +114,14 @@ class TableAccessPolicy(AccessPolicy):
         allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
         return TableAccessPolicy._scope_queryset(request, qs, allowed_roles)
 
-    def is_table_manager(self, request, view, action):
-        # Table access control is based on Schema and Database Roles as of now
-        # TODO Include Table Role based access when Table Roles are introduced
+    def is_atleast_table_viewer(self, request, view, action):
         table = view.get_object()
-        is_schema_manager = SchemaRole.objects.filter(
-            user=request.user,
-            schema=table.schema,
-            role=Role.MANAGER.value
-        ).exists()
-        is_db_manager = DatabaseRole.objects.filter(
-            user=request.user,
-            database=table.schema.database,
-            role=Role.MANAGER.value
-        ).exists()
-        return is_db_manager or is_schema_manager
+        return TableAccessInspector(
+            request.user,
+            table,
+            token=request.headers.get(SHARED_LINK_UUID_QUERY_PARAM)
+        ).is_atleast_viewer()
+
+    def is_atleast_table_manager(self, request, view, action):
+        table = view.get_object()
+        return TableAccessInspector(request.user, table).is_atleast_manager()
