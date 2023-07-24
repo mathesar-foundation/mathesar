@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 import warnings
 
 from sqlalchemy import column, not_, and_, or_, func, literal, cast, distinct, INTEGER, TIME
-from sqlalchemy.dialects.postgresql import array_agg, TEXT, array
+from sqlalchemy.dialects.postgresql import array_agg, TEXT, array, DATE
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
 
@@ -418,6 +418,19 @@ class PeakTime(DBFunction):
     def to_sa_expression(column_expr):
         column_expr = cast(column_expr, TIME)
         return sa_call_sql_function('msar.peak_time', column_expr, return_type=PostgresType.TIME_WITHOUT_TIME_ZONE)
+
+
+class PeakMonth(DBFunction):
+    id = 'peak_month'
+    name = 'peak_month'
+    hints = tuple([
+        hints.aggregation
+    ])
+
+    @staticmethod
+    def to_sa_expression(column_expr):
+        column_expr = cast(column_expr, DATE)
+        return sa_call_sql_function('msar.peak_month', column_expr, return_type=PostgresType.TEXT)
 
 
 class Min(DBFunction):

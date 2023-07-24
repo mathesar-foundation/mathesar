@@ -252,6 +252,12 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo useradd gunicorn -g gunicorn
     ```
 
+1. Make the `gunicorn` user the owner of the `.media` directory
+
+    ```sh
+    sudo chown -R gunicorn:gunicorn .media/
+    ```
+
 1. Create the Gunicorn systemd service file.
 
     ```sh
