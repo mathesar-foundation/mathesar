@@ -119,7 +119,7 @@ class TableAccessPolicy(AccessPolicy):
         return TableAccessInspector(
             request.user,
             table,
-            token=request.headers.get(SHARED_LINK_UUID_QUERY_PARAM)
+            token=request.query_params.get(SHARED_LINK_UUID_QUERY_PARAM)
         ).is_atleast_viewer()
 
     def is_atleast_table_manager(self, request, view, action):
