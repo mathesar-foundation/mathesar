@@ -6,7 +6,6 @@
     PasswordInput,
     TextInput,
     hasProperty,
-    Select,
   } from '@mathesar-component-library';
   import userApi, { type User } from '@mathesar/api/users';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
@@ -145,7 +144,7 @@
   {/if}
 
   <UserFormInput
-    label="Preferred Language"
+    label="Preferred Language *"
     field={preferredLanguage}
     input={{
       component: SelectPreferredLanguage,

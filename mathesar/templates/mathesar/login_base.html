@@ -116,6 +116,9 @@
       font-size: var(--size-xx-large);
       text-align: center;
     }
+    .login-card .language-selector {
+      display: block;
+    }
     @media (max-width: 50rem) {
       .unsupported-device {
         display: block;
@@ -133,6 +136,7 @@
   {% if development_mode %}
     <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
     <script type="module" src="{{ client_dev_url }}/src/component-library/styles.scss"></script>
+    <script type="module" src="{{ client_dev_url }}/src/i18n/{{ preferred_language }}/index.ts"></script>
     <script type="module" defer>
       (function () {
         document.body.style.visibility = 'visible';
@@ -192,5 +196,22 @@
   <div class="login-card align-center">
     <h1>{% block h1 %} {% endblock %}</h1>
     {% block box_content %} {% endblock %}
+    {% comment %} 
+      Update the UI as per the product's
+      design language.
+    {% endcomment %}
+    <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+      <input name="next" type="hidden" value="{{ redirect_to }}">
+      <select name="language" onchange="form.submit()" class="language-selector align-center">
+          {% get_current_language as LANGUAGE_CODE %}
+          {% get_available_languages as LANGUAGES %}
+          {% get_language_info_list for LANGUAGES as languages %}
+          {% for language in languages %}
+              <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                  {{ language.name_local }} ({{ language.code }})
+              </option>
+          {% endfor %}
+      </select>
+    </form>
   </div>
 {% endblock %}
