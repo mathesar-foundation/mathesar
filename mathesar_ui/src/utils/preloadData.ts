@@ -19,6 +19,7 @@ export interface CommonData {
   live_demo_mode: boolean;
   current_release_tag_name: string;
   is_authenticated: boolean;
+  routing_context: 'normal' | 'anonymous';
 }
 
 function getData<T>(selector: string): T | undefined {

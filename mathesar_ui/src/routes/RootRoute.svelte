@@ -3,22 +3,37 @@
   import type { CommonData } from '@mathesar/utils/preloadData';
   import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import RouteObserver from '@mathesar/components/routing/RouteObserver.svelte';
   import AuthenticatedRoutes from './AuthenticatedRoutes.svelte';
-  import UnautheticatedRoutes from './UnautheticatedRoutes.svelte';
+  import AnonymousAccessRoutes from './AnonymousAccessRoutes.svelte';
 
   setBreadcrumbItemsInContext([]);
 
   export let commonData: CommonData;
 </script>
 
-<Route path="/*" firstmatch>
-  <UnautheticatedRoutes />
+<!-- 
+  We're explicity having two separate routing context for the app to avoid the user
+  from client routing across either of them.
+-->
 
-  {#if commonData.is_authenticated}
-    <AuthenticatedRoutes {commonData} />
-  {/if}
+{#if commonData.routing_context === 'anonymous'}
+  <Route path="/*" firstmatch>
+    <AnonymousAccessRoutes />
 
-  <Route fallback>
-    <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+    <Route fallback let:meta>
+      <!--Reload page to let server routing take over-->
+      <RouteObserver {meta} on:load={() => window.location.reload()} />
+    </Route>
   </Route>
-</Route>
+{:else}
+  <Route path="/*" firstmatch>
+    {#if commonData.is_authenticated}
+      <AuthenticatedRoutes {commonData} />
+    {/if}
+
+    <Route fallback>
+      <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+    </Route>
+  </Route>
+{/if}

@@ -101,7 +101,7 @@ def get_user_data(request):
     return user_serializer.data
 
 
-def get_base_data_unauth_routes(request, database=None, schema=None):
+def get_base_data_all_routes(request, database=None, schema=None):
     return {
         'current_db': database.name if database else None,
         'current_schema': schema.id if schema else None,
@@ -119,11 +119,12 @@ def get_base_data_unauth_routes(request, database=None, schema=None):
 
 def get_common_data(request, database=None, schema=None):
     return {
-        **get_base_data_unauth_routes(request, database, schema),
+        **get_base_data_all_routes(request, database, schema),
         'schemas': get_schema_list(request, database),
         'databases': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
+        'routing_context': 'normal',
     }
 
 
@@ -175,7 +176,7 @@ def get_common_data_for_shared_table(request, table):
     databases = [database] if database else []
     tables = [table] if table else []
     return {
-        **get_base_data_unauth_routes(request, database, schema),
+        **get_base_data_all_routes(request, database, schema),
         'schemas': SchemaSerializer(
             schemas,
             many=True,
@@ -191,6 +192,7 @@ def get_common_data_for_shared_table(request, table):
             many=True,
             context={'request': request}
         ).data,
+        'routing_context': 'anonymous',
     }
 
 
