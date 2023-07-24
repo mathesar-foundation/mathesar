@@ -38,6 +38,7 @@
   on:update
 >
   <NumberCellInput
+    focusOnMount={true}
     {disabled}
     bind:value
     {...formatterOptions}

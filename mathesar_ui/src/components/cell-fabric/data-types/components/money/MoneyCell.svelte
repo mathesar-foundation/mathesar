@@ -34,6 +34,7 @@
   on:update
 >
   <MoneyCellInput
+    focusOnMount={true}
     {disabled}
     bind:value
     {...formatterOptions}
