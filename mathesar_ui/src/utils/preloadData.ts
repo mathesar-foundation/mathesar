@@ -7,7 +7,7 @@ import type { TableEntry } from '@mathesar/api/types/tables';
 import type { QueryInstance } from '@mathesar/api/types/queries';
 import type { User } from '@mathesar/api/users';
 
-interface CommonData {
+export interface CommonData {
   databases: Database[];
   schemas: SchemaResponse[];
   tables: TableEntry[];
@@ -18,18 +18,17 @@ interface CommonData {
   user: User;
   live_demo_mode: boolean;
   current_release_tag_name: string;
+  is_authenticated: boolean;
+  routing_context: 'normal' | 'anonymous';
 }
 
-function getData<T>(selector: string, retainData = false): T | undefined {
+function getData<T>(selector: string): T | undefined {
   const preloadedData = document.querySelector<Element>(selector);
   if (!preloadedData?.textContent) {
     return undefined;
   }
   try {
     const data = JSON.parse(preloadedData.textContent) as T;
-    if (!retainData) {
-      preloadedData.remove();
-    }
     return data;
   } catch (err) {
     console.error(err);
@@ -42,5 +41,5 @@ export function preloadRouteData<T>(routeName: string): T | undefined {
 }
 
 export function preloadCommonData(): CommonData | undefined {
-  return getData('#common-data', true);
+  return getData('#common-data');
 }
