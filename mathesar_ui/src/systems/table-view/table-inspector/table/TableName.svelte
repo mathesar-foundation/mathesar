@@ -18,6 +18,7 @@
       initialValue={$tables.data.get($tabularData.id)?.name ?? ''}
       onSubmit={(name) => onUpdate({ name })}
       getValidationErrors={getNameValidationErrors}
+      {...$$restProps}
     />
   </div>
 </EditTableHOC>
