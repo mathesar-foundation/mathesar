@@ -6,17 +6,17 @@ import {
   type Writable,
 } from 'svelte/store';
 import type { Tab } from '@mathesar-component-library/types';
-import { standaloneTranslator } from '@mathesar/i18n/standalone-translator';
+import { getTranslator } from '@mathesar/i18n/getTranslator';
 import type QueryModel from './QueryModel';
 
 const generalTabs: Tab[] = [
-  { id: 'inspect-column', label: standaloneTranslator().general.column() },
-  { id: 'inspect-cell', label: standaloneTranslator().general.cell() },
+  { id: 'inspect-column', label: getTranslator().general.column() },
+  { id: 'inspect-cell', label: getTranslator().general.cell() },
 ];
 const tabsWhenQueryIsSaved: Tab[] = [
   {
     id: 'inspect-exploration',
-    label: standaloneTranslator().general.exploration(),
+    label: getTranslator().general.exploration(),
   },
   ...generalTabs,
 ];

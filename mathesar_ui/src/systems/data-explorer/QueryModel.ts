@@ -6,7 +6,7 @@ import type {
 } from '@mathesar/api/types/queries';
 import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
-import { standaloneTranslator } from '@mathesar/i18n/standalone-translator';
+import { getTranslator } from '@mathesar/i18n/getTranslator';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
@@ -248,7 +248,7 @@ export default class QueryModel {
     if (this.hasSummarizationTransform()) {
       // This should never happen
       throw new Error(
-        standaloneTranslator().dataExplorerQueryModel.onlySingleSummarizationAllowed(),
+        getTranslator().dataExplorerQueryModel.onlySingleSummarizationAllowed(),
       );
     }
     return this.addTransform(summarizationTransformationModel);
@@ -435,7 +435,7 @@ export default class QueryModel {
   toRunRequestJson(): Omit<QueryRunRequest, 'parameters'> {
     if (this.base_table === undefined) {
       throw new Error(
-        standaloneTranslator().dataExplorerQueryModel.cannotRunBaseTableUndefined(),
+        getTranslator().dataExplorerQueryModel.cannotRunBaseTableUndefined(),
       );
     }
     const transformations = this.isValid

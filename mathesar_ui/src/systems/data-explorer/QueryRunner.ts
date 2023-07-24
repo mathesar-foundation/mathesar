@@ -16,7 +16,7 @@ import type {
 import { runQuery } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { standaloneTranslator } from '@mathesar/i18n/standalone-translator';
+import { getTranslator } from '@mathesar/i18n/getTranslator';
 import type QueryModel from './QueryModel';
 import QueryInspector from './QueryInspector';
 import {
@@ -174,7 +174,7 @@ export default class QueryRunner<
         const errorMessage =
           err instanceof Error
             ? err.message
-            : standaloneTranslator().dataExplorerQueryRunner.unableToRunQuery();
+            : getTranslator().dataExplorerQueryRunner.unableToRunQuery();
         this.runState.set({ state: 'failure', errors: [errorMessage] });
       }
     }

@@ -13,7 +13,7 @@ import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_t
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { standaloneTranslator } from '@mathesar/i18n/standalone-translator';
+import { getTranslator } from '@mathesar/i18n/getTranslator';
 import QueryModel from './QueryModel';
 import type { QueryModelUpdateDiff } from './QueryModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
@@ -157,7 +157,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       const error =
         err instanceof Error
           ? err.message
-          : standaloneTranslator().dataExplorerQueryManager.errorFetchingJoinableLinks();
+          : getTranslator().dataExplorerQueryManager.errorFetchingJoinableLinks();
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'failure', errors: [error] },
@@ -329,9 +329,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       const errors =
         err instanceof Error
           ? [err.message]
-          : [
-              standaloneTranslator().dataExplorerQueryManager.errorSavingQuery(),
-            ];
+          : [getTranslator().dataExplorerQueryManager.errorSavingQuery()];
       this.state.update((_state) => ({
         ..._state,
         saveState: {
