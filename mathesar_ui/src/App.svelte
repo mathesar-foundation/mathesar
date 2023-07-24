@@ -18,13 +18,6 @@
   import { setLocale } from './i18n/i18n-svelte';
   import { loadLocaleAsync } from './i18n/i18n-util.async';
 
-  (() => {
-    // TODO: Later load this in parallel with first chunk
-    void loadLocaleAsync('en')
-      .then(() => setLocale('en'))
-      .catch(() => {});
-  })();
-
   const commonData = preloadCommonData();
   if (commonData?.user) {
     const userProfile = setUserProfileStoreInContext(commonData.user);
