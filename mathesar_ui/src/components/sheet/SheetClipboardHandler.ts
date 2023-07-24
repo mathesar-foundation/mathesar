@@ -124,7 +124,7 @@ export class SheetClipboardHandler<
             processedColumns,
             rowId,
             columnId,
-            'raw',
+            'formatted',
             recordSummaries,
           );
           plainTextRow.push(cellText);
