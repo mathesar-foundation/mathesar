@@ -878,6 +878,71 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 -- Add columns to table ----------------------------------------------------------------------------
 
+CREATE OR REPLACE FUNCTION
+__msar.prepare_fields_arg(fields text) RETURNS text AS $$/*
+This function emulates the conversion of string `fields` argument for interval
+types into the correct integer, emulating the process in the PostgreSQL source code.
+*/
+SELECT COALESCE(
+  sum(1<<code)::text,
+  '32767'  -- 0x7FFF in decimal; This represents no field argument.
+)
+FROM (
+  VALUES
+    ('MONTH', 1),
+    ('YEAR', 2),
+    ('DAY', 3),
+    ('HOUR', 10),
+    ('MINUTE', 11),
+    ('SECOND', 12)
+) AS field_map(field, code)
+WHERE fields ILIKE '%' || field || '%';
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION __msar.build_typmodin_arg(
+  typ_options jsonb, timespan_flag boolean
+) RETURNS cstring[] AS $$/*
+*/
+SELECT array_remove(
+  ARRAY[
+    typ_options ->> 'length',
+    CASE WHEN timespan_flag THEN __msar.prepare_fields_arg(typ_options ->> 'fields') END,
+    typ_options ->> 'precision',
+    typ_options ->> 'scale'
+  ],
+  null
+)::cstring[]
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.get_formatted_base_type(typ_name text, typ_options jsonb) RETURNS text AS $$ /*
+This function first parses the given name and options using internal PostgreSQL
+functions before formatting the type.
+*/
+DECLARE
+  typ_id oid;
+  timespan_flag boolean;
+  typmodin_func text;
+  typmod integer;
+BEGIN
+  typ_id := typ_name::regtype::oid;
+  typmodin_func := typmodin::text FROM pg_type WHERE oid=typ_id AND typmodin<>0;
+  timespan_flag := typcategory='T' FROM pg_type WHERE oid=typ_id;
+  IF jsonb_typeof(typ_options) = 'null' OR typ_options IS NULL OR typmodin_func IS NULL THEN
+    typmod := NULL;
+  ELSE
+    EXECUTE format(
+      'SELECT %I(%L)',
+      typmodin_func,
+      __msar.build_typmodin_arg(typ_options, timespan_flag)
+    ) INTO typmod;
+  END IF;
+  RETURN format_type(typ_id::integer, typmod::integer);
+END;
+$$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION
 msar.build_type_text(typ_jsonb jsonb) RETURNS text AS $$/*
@@ -902,26 +967,17 @@ All fields are optional, and a null value as input returns 'text'
 */
 SELECT COALESCE(
   -- First choice is the type specified by numeric IDs, since they're most reliable.
-  format_type(typ.id, typ.modifier),
+  format_type((typ_jsonb ->> 'id')::integer, (typ_jsonb ->> 'modifier')::integer),
   -- Second choice is the type specified by string IDs.
-  COALESCE(
-    msar.get_fully_qualified_object_name(typ.schema, typ.name),
-    typ.name,
-    'text'  -- We fall back to 'text' when input is null or empty.
-  )::regtype::text || COALESCE(  -- This section builds the type options blob.
-    '(' || topts.length || ')',
-    ' ' || topts.fields || ' (' || topts.precision || ')',
-    ' ' || topts.fields,
-    '(' || topts.precision || ', ' || topts.scale || ')',
-    '(' || topts.precision || ')',
-    ''
-  ) || CASE WHEN topts."array" THEN '[]' ELSE '' END
+  __msar.get_formatted_base_type(
+    COALESCE(
+      msar.get_fully_qualified_object_name(typ_jsonb ->> 'schema', typ_jsonb ->> 'name'),
+      typ_jsonb ->> 'name',
+      'text'  -- We fall back to 'text' when input is null or empty.
+    ),
+    typ_jsonb -> 'options'
+  ) || CASE WHEN (typ_jsonb -> 'options' ->> 'array')::boolean THEN '[]' ELSE '' END
 )
-FROM
-  jsonb_to_record(typ_jsonb)
-    AS typ(id oid, schema text, name text, modifier integer, options jsonb),
-  jsonb_to_record(typ_jsonb -> 'options')
-    AS topts(length integer, precision integer, scale integer, fields text, "array" boolean);
 $$ LANGUAGE SQL;
 
 

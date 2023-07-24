@@ -336,6 +336,18 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_columns_timestamp_prec() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := $j$
+    [{"type": {"name": "timestamp", "options": {"precision": 3}}}]
+  $j$;
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp(3) without time zone');
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_columns_timestamp_raw_default() RETURNS SETOF TEXT AS $f$
 /*
 This test will fail if the default is being sanitized, but will succeed if it's not.
@@ -379,15 +391,6 @@ BEGIN
     ),
     '42704',
     'type "taxt" does not exist'
-  );
-  RETURN NEXT throws_ok(
-    format(
-      'SELECT msar.add_columns(tab_id => %s, col_defs => ''%s'');',
-      'add_col_testable'::regclass::oid,
-      '[{"type": {"name": "text", "options": {"length": 234}}}]'::jsonb
-    ),
-    '42601',
-    'type modifier is not allowed for type "text"'
   );
   RETURN NEXT throws_ok(
     format(
