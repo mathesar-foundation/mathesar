@@ -3,7 +3,7 @@
   import { tableInspectorWidth } from '@mathesar/stores/localStorage';
   import TableInspector from './TableInspector.svelte';
 
-  export let context: 'page' | 'widget';
+  export let context: 'page' | 'widget' | 'shared-consumer-page';
   export let showTableInspector: boolean;
 </script>
 
