@@ -1,6 +1,6 @@
 <script lang="ts">
   import { takeLast } from 'iter-tools';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { writable, type Writable } from 'svelte/store';
 
   import { Button, Icon } from '@mathesar-component-library';
@@ -129,7 +129,14 @@
   </div>
   {#if $processedColumns.size}
     <div class="footer">
-      <Button appearance="secondary" on:click={() => addFilter()}>
+      <Button
+        appearance="secondary"
+        on:click={async () => {
+          addFilter();
+          await tick();
+          activateLastFilterInput();
+        }}
+      >
         <Icon {...iconAddNew} />
         <span>Add New Filter</span>
       </Button>

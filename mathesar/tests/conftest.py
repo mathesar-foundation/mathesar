@@ -20,7 +20,7 @@ from db.columns.operations.select import get_column_attnum_from_name
 from db.schemas.utils import get_schema_oid_from_name
 
 import mathesar.tests.conftest
-from mathesar.imports.csv import create_table_from_csv
+from mathesar.imports.base import create_table_from_data_file
 from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.models.base import Column as mathesar_model_column
 from mathesar.models.users import DatabaseRole, SchemaRole, User
@@ -181,6 +181,11 @@ def patents_csv_filepath():
 
 
 @pytest.fixture(scope='session')
+def patents_json_filepath():
+    return 'mathesar/tests/data/patents.json'
+
+
+@pytest.fixture(scope='session')
 def table_with_id_col_filepath():
     return 'mathesar/tests/data/table_with_id_col.csv'
 
@@ -322,26 +327,20 @@ def create_table(create_schema):
     def _create_table(table_name, schema_name, csv_filepath):
         data_file = _get_datafile_for_path(csv_filepath)
         schema_model = create_schema(schema_name)
-        return create_table_from_csv(data_file, table_name, schema_model)
+        return create_table_from_data_file(data_file, table_name, schema_model)
     return _create_table
 
 
 def _get_datafile_for_path(path):
     with open(path, 'rb') as file:
-        datafile = DataFile.objects.create(file=File(file))
+        datafile = DataFile.objects.create(file=File(file), type='csv')
         return datafile
 
 
 @pytest.fixture
 def create_column():
     def _create_column(table, column_data):
-        column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(
-            table.oid,
-            [column.name],
-            table.schema._sa_engine,
-            metadata=get_empty_metadata()
-        )
+        attnum = table.add_column(column_data)[0]
         column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
         return column[0]
     return _create_column

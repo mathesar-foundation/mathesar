@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.errors import URLDownloadError
 from mathesar.imports.csv import get_sv_dialect, get_file_encoding
+from mathesar.imports.json import is_valid_json, validate_json_format
 from mathesar.models.base import DataFile
 
 
@@ -33,7 +34,8 @@ def create_datafile(data):
 
     # Validation guarentees only one arg will be present
     if 'paste' in data:
-        name = str(int(time())) + '.tsv'
+        type = 'json' if is_valid_json(data['paste']) else 'tsv'
+        name = str(int(time())) + '.' + type
         raw_file = ContentFile(str.encode(data['paste']), name=name)
         created_from = 'paste'
         base_name = ''
@@ -41,10 +43,12 @@ def create_datafile(data):
         raw_file = _download_datafile(data['url'])
         created_from = 'url'
         base_name = raw_file.name
+        type = os.path.splitext(raw_file.name)[1][1:]
     elif 'file' in data:
         raw_file = data['file']
         created_from = 'file'
         base_name = raw_file.name
+        type = os.path.splitext(raw_file.name)[1][1:]
 
     if base_name:
         max_length = DataFile._meta.get_field('base_name').max_length
@@ -53,17 +57,30 @@ def create_datafile(data):
 
     encoding = get_file_encoding(raw_file.file)
     text_file = TextIOWrapper(raw_file.file, encoding=encoding)
-    dialect = get_sv_dialect(text_file)
-
-    datafile = DataFile(
-        file=raw_file,
-        base_name=base_name,
-        created_from=created_from,
-        header=header,
-        delimiter=dialect.delimiter,
-        escapechar=dialect.escapechar,
-        quotechar=dialect.quotechar,
-    )
+    if type == 'json':
+        validate_json_format(raw_file)
+    if type == 'csv' or type == 'tsv':
+        dialect = get_sv_dialect(text_file)
+        datafile = DataFile(
+            file=raw_file,
+            base_name=base_name,
+            type=type,
+            created_from=created_from,
+            header=header,
+            delimiter=dialect.delimiter,
+            escapechar=dialect.escapechar,
+            quotechar=dialect.quotechar,
+        )
+    else:
+        max_level = data.get('max_level', 0)
+        datafile = DataFile(
+            file=raw_file,
+            base_name=base_name,
+            type=type,
+            created_from=created_from,
+            header=header,
+            max_level=max_level
+        )
     datafile.save()
     raw_file.close()
 

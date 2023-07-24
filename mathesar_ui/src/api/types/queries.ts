@@ -28,6 +28,25 @@ export interface QueryInstanceFilterTransformation {
   spec: FilterCondition;
 }
 
+// This is defined as a value instead of a type because we have a need to
+// iterate over it.
+export const querySummarizationFunctionIds = [
+  'distinct_aggregate_to_array',
+  'count',
+  'sum',
+  'median',
+  'mode',
+  'percentage_true',
+  'max',
+  'min',
+  'mean',
+  'peak_time',
+  'peak_month',
+] as const;
+
+export type QuerySummarizationFunctionId =
+  typeof querySummarizationFunctionIds[number];
+
 export interface QueryInstanceSummarizationTransformation {
   type: 'summarize';
   spec: {
@@ -40,7 +59,7 @@ export interface QueryInstanceSummarizationTransformation {
     aggregation_expressions?: {
       input_alias: string;
       output_alias: string;
-      function: 'distinct_aggregate_to_array' | 'count';
+      function: QuerySummarizationFunctionId;
     }[];
   };
 }
