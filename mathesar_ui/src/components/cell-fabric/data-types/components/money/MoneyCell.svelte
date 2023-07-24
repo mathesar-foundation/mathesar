@@ -13,7 +13,7 @@
   export let formatterOptions: $$Props['formatterOptions'];
   export let formatForDisplay: $$Props['formatForDisplay'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
-  export let truncatePassthrough: $$Props['truncatePassthrough'];
+  export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
 </script>
 
 <SteppedInputCell
@@ -23,7 +23,7 @@
   {disabled}
   {searchValue}
   {isIndependentOfSheet}
-  {truncatePassthrough}
+  {showTruncationPopover}
   formatValue={formatForDisplay}
   horizontalAlignment="right"
   let:handleInputBlur

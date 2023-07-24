@@ -32,6 +32,6 @@
     disabled
     showAsSkeleton={!rowHasSavedRecord(row)}
     {searchValue}
-    truncatePassthrough={false}
+    showTruncationPopover
   />
 </Cell>

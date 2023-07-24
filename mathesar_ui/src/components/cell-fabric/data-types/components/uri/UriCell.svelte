@@ -16,7 +16,7 @@
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
-  export let truncatePassthrough: $$Props['truncatePassthrough'];
+  export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
 </script>
 
 <SteppedInputCell
@@ -26,7 +26,7 @@
   {disabled}
   {searchValue}
   {isIndependentOfSheet}
-  {truncatePassthrough}
+  {showTruncationPopover}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown

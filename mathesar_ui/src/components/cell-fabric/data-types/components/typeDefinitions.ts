@@ -18,7 +18,7 @@ export interface CellTypeProps<Value> {
   searchValue?: unknown;
   isProcessing: boolean;
   isIndependentOfSheet: boolean;
-  truncatePassthrough: boolean;
+  showTruncationPopover: boolean;
 }
 
 // Primary key

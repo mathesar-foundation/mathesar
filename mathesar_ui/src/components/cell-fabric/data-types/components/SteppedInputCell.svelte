@@ -29,7 +29,7 @@
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
   export let searchValue: unknown | undefined = undefined;
   export let isIndependentOfSheet = false;
-  export let truncatePassthrough = false;
+  export let showTruncationPopover = false;
   export let highlightSubstringMatches = true;
 
   let cellRef: HTMLElement;
@@ -178,7 +178,7 @@
       <Truncate
         {horizontalAlignment}
         lines={isActive && multiLineTruncate ? 2 : 1}
-        passthrough={truncatePassthrough}
+        passthrough={!showTruncationPopover}
       >
         <slot name="content" {value} {formatValue} {matchParts}>
           <CellValue value={formattedValue} {matchParts} />
