@@ -9,7 +9,7 @@ import type {
 export type BaseTranslation = BaseTranslationType;
 export type BaseLocale = 'en';
 
-export type Locales = 'de' | 'en';
+export type Locales = 'en' | 'ja';
 
 export type Translation = RootTranslation;
 
@@ -173,7 +173,7 @@ type RootTranslation = {
      */
     cancel: string;
     /**
-     * T​h​e​ ​d​a​t​a​ ​m​u​s​t​ ​b​e​ ​i​n​ ​t​a​b​u​l​a​r​ ​f​o​r​m​a​t​ ​(​C​S​V​,​ ​T​S​V​ ​e​t​c​)​ ​o​r​ ​J​S​O​N​.​ ​S​e​e​ ​r​e​l​e​v​a​n​t​ ​<​>​d​o​c​u​m​e​n​t​a​t​i​o​n​L​i​n​k​<​/​>​.
+     * T​h​e​ ​d​a​t​a​ ​m​u​s​t​ ​b​e​ ​i​n​ ​t​a​b​u​l​a​r​ ​f​o​r​m​a​t​ ​(​C​S​V​,​ ​T​S​V​ ​e​t​c​)​ ​o​r​ ​J​S​O​N​.​ ​S​e​e​ ​r​e​l​e​v​a​n​t​ ​<​>​d​o​c​u​m​e​n​t​a​t​i​o​n​L​i​n​k​<​>​.
      */
     dataMustBeTabular: string;
     /**
@@ -205,7 +205,7 @@ type RootTranslation = {
      */
     fromScratch: string;
     /**
-     * E​d​i​t​ ​<​>​t​a​b​l​e​N​a​m​e​<​/​>​ ​T​a​b​l​e
+     * E​d​i​t​ ​<​>​t​a​b​l​e​N​a​m​e​<​>​ ​T​a​b​l​e
      */
     editTableWithName: string;
     /**
@@ -479,7 +479,7 @@ type RootTranslation = {
      */
     ifUpgradeSucceeds: string;
     /**
-     * I​f​ ​t​h​e​ ​u​p​g​r​a​d​e​ ​f​a​i​l​s​,​ ​t​h​e​ ​u​p​d​a​t​e​ ​s​t​a​t​u​s​ ​s​c​r​e​e​n​ ​w​i​l​l​ ​s​t​i​l​l​ ​s​h​o​w​ ​t​h​a​t​ ​a​n​ ​u​p​g​r​a​d​e​ ​i​s​ ​a​v​a​i​l​a​b​l​e​,​ ​a​n​d​ ​y​o​u​ ​w​i​l​l​ ​n​e​e​d​ ​t​o​ ​r​e​f​e​r​ ​t​o​ ​o​u​r​ ​<​>​d​o​c​u​m​e​n​t​a​t​i​o​n​L​i​n​k​<​/​>​ ​f​o​r​ ​f​u​r​t​h​e​r​ ​t​r​o​u​b​l​e​s​h​o​o​t​i​n​g​.
+     * I​f​ ​t​h​e​ ​u​p​g​r​a​d​e​ ​f​a​i​l​s​,​ ​t​h​e​ ​u​p​d​a​t​e​ ​s​t​a​t​u​s​ ​s​c​r​e​e​n​ ​w​i​l​l​ ​s​t​i​l​l​ ​s​h​o​w​ ​t​h​a​t​ ​a​n​ ​u​p​g​r​a​d​e​ ​i​s​ ​a​v​a​i​l​a​b​l​e​,​ ​a​n​d​ ​y​o​u​ ​w​i​l​l​ ​n​e​e​d​ ​t​o​ ​r​e​f​e​r​ ​t​o​ ​o​u​r​ ​<​>​d​o​c​u​m​e​n​t​a​t​i​o​n​L​i​n​k​<​>​ ​f​o​r​ ​f​u​r​t​h​e​r​ ​t​r​o​u​b​l​e​s​h​o​o​t​i​n​g​.
      */
     ifUpgradeFails: string;
   };
@@ -533,7 +533,7 @@ type RootTranslation = {
      */
     loadingReleaseDate: string;
     /**
-     * T​h​e​ ​c​u​r​r​e​n​t​l​y​-​i​n​s​t​a​l​l​e​d​ ​v​e​r​s​i​o​n​ ​i​s​ ​<​>​h​a​s​h​<​/​>​ ​b​u​t​ ​w​e​ ​w​e​r​e​ ​u​n​a​b​l​e​ ​t​o​ ​l​o​a​d​ ​d​a​t​a​ ​a​b​o​u​t​ ​t​h​i​s​ ​r​e​l​e​a​s​e​.
+     * T​h​e​ ​c​u​r​r​e​n​t​l​y​-​i​n​s​t​a​l​l​e​d​ ​v​e​r​s​i​o​n​ ​i​s​ ​<​>​h​a​s​h​<​>​ ​b​u​t​ ​w​e​ ​w​e​r​e​ ​u​n​a​b​l​e​ ​t​o​ ​l​o​a​d​ ​d​a​t​a​ ​a​b​o​u​t​ ​t​h​i​s​ ​r​e​l​e​a​s​e​.
      */
     errorInCurrentInstalled: string;
     /**
@@ -605,7 +605,7 @@ type RootTranslation = {
      */
     schemaNameHelp: string;
     /**
-     * R​e​n​a​m​e​ ​<​>​i​d​e​n​t​i​f​i​e​r​<​/​>​ ​S​c​h​e​m​a
+     * R​e​n​a​m​e​ ​<​>​i​d​e​n​t​i​f​i​e​r​<​>​ ​S​c​h​e​m​a
      */
     renameSchema: string;
   };
@@ -619,7 +619,7 @@ type RootTranslation = {
      */
     structuralChangesHelp: string;
     /**
-     * E​x​t​e​r​n​a​l​ ​c​h​a​n​g​e​s​ ​t​o​ ​d​a​t​a​ ​(​e​.​g​.​ ​a​d​d​i​n​g​ ​o​r​ ​e​d​i​t​i​n​g​ ​<​>​r​o​w​s​<​/​>​)​ ​w​i​l​l​ ​b​e​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​r​e​f​l​e​c​t​e​d​ ​w​i​t​h​o​u​t​ ​c​l​i​c​k​i​n​g​ ​t​h​i​s​ ​b​u​t​t​o​n​.
+     * E​x​t​e​r​n​a​l​ ​c​h​a​n​g​e​s​ ​t​o​ ​d​a​t​a​ ​(​e​.​g​.​ ​a​d​d​i​n​g​ ​o​r​ ​e​d​i​t​i​n​g​ ​<​>​r​o​w​s​<​>​)​ ​w​i​l​l​ ​b​e​ ​a​u​t​o​m​a​t​i​c​a​l​l​y​ ​r​e​f​l​e​c​t​e​d​ ​w​i​t​h​o​u​t​ ​c​l​i​c​k​i​n​g​ ​t​h​i​s​ ​b​u​t​t​o​n​.
      */
     dataChangesHelp: string;
   };
@@ -629,13 +629,13 @@ type RootTranslation = {
      */
     allDatabases: string;
     /**
-     * T​o​ ​a​d​d​ ​o​r​ ​r​e​m​o​v​e​ ​d​a​t​a​b​a​s​e​s​,​ ​m​o​d​i​f​y​ ​t​h​e​ ​<​>​v​a​r​i​a​b​l​e​N​a​m​e​A​n​d​L​i​n​k​<​/​>​ ​i​n​ ​y​o​u​r​ ​c​o​n​f​i​g​u​r​a​t​i​o​n​ ​f​i​l​e​ ​a​n​d​ ​r​e​s​t​a​r​t​ ​M​a​t​h​e​s​a​r​.
+     * T​o​ ​a​d​d​ ​o​r​ ​r​e​m​o​v​e​ ​d​a​t​a​b​a​s​e​s​,​ ​m​o​d​i​f​y​ ​t​h​e​ ​<​>​v​a​r​i​a​b​l​e​N​a​m​e​A​n​d​L​i​n​k​<​>​ ​i​n​ ​y​o​u​r​ ​c​o​n​f​i​g​u​r​a​t​i​o​n​ ​f​i​l​e​ ​a​n​d​ ​r​e​s​t​a​r​t​ ​M​a​t​h​e​s​a​r​.
      */
     addOrRemoveDbHelp: string;
   };
   dbAccessControlModal: {
     /**
-     * M​a​n​a​g​e​ ​<​>​d​a​t​a​b​a​s​e​N​a​m​e​<​/​>​ ​D​a​t​a​b​a​s​e​ ​A​c​c​e​s​s
+     * M​a​n​a​g​e​ ​<​>​d​a​t​a​b​a​s​e​N​a​m​e​<​>​ ​D​a​t​a​b​a​s​e​ ​A​c​c​e​s​s
      */
     manageDbAccess: string;
   };
@@ -767,7 +767,7 @@ type RootTranslation = {
   };
   recordPageContent: {
     /**
-     * R​e​c​o​r​d​ ​i​n​ ​<​>​t​a​b​l​e​N​a​m​e​<​/​>
+     * R​e​c​o​r​d​ ​i​n​ ​<​>​t​a​b​l​e​N​a​m​e​<​>
      */
     recordInTable: string;
   };
@@ -777,7 +777,7 @@ type RootTranslation = {
      */
     relatedRecord: string;
     /**
-     * E​a​c​h​ ​o​f​ ​t​h​e​ ​f​o​l​l​o​w​i​n​g​ ​r​e​c​o​r​d​s​ ​l​i​n​k​ ​t​o​ ​<​>​r​e​c​o​r​d​S​u​m​m​a​r​y​<​/​>​ ​f​r​o​m​ ​a​n​o​t​h​e​r​ ​t​a​b​l​e​.
+     * E​a​c​h​ ​o​f​ ​t​h​e​ ​f​o​l​l​o​w​i​n​g​ ​r​e​c​o​r​d​s​ ​l​i​n​k​ ​t​o​ ​<​>​r​e​c​o​r​d​S​u​m​m​a​r​y​<​>​ ​f​r​o​m​ ​a​n​o​t​h​e​r​ ​t​a​b​l​e​.
      */
     relatedRecordHelp: string;
   };
@@ -814,7 +814,7 @@ type RootTranslation = {
   };
   schemaAccessControlModal: {
     /**
-     * M​a​n​a​g​e​ ​<​>​s​c​h​e​m​a​N​a​m​e​<​/​>​ ​S​c​h​e​m​a​ ​A​c​c​e​s​s
+     * M​a​n​a​g​e​ ​<​>​s​c​h​e​m​a​N​a​m​e​<​>​ ​S​c​h​e​m​a​ ​A​c​c​e​s​s
      */
     manageSchemaAccessWithName: string;
   };
@@ -1512,7 +1512,7 @@ export type TranslationFunctions = {
      */
     cancel: () => LocalizedString;
     /**
-     * The data must be in tabular format (CSV, TSV etc) or JSON. See relevant <>documentationLink</>.
+     * The data must be in tabular format (CSV, TSV etc) or JSON. See relevant <>documentationLink<>.
      */
     dataMustBeTabular: () => LocalizedString;
     /**
@@ -1544,7 +1544,7 @@ export type TranslationFunctions = {
      */
     fromScratch: () => LocalizedString;
     /**
-     * Edit <>tableName</> Table
+     * Edit <>tableName<> Table
      */
     editTableWithName: () => LocalizedString;
     /**
@@ -1818,7 +1818,7 @@ export type TranslationFunctions = {
      */
     ifUpgradeSucceeds: () => LocalizedString;
     /**
-     * If the upgrade fails, the update status screen will still show that an upgrade is available, and you will need to refer to our <>documentationLink</> for further troubleshooting.
+     * If the upgrade fails, the update status screen will still show that an upgrade is available, and you will need to refer to our <>documentationLink<> for further troubleshooting.
      */
     ifUpgradeFails: () => LocalizedString;
   };
@@ -1870,7 +1870,7 @@ export type TranslationFunctions = {
      */
     loadingReleaseDate: () => LocalizedString;
     /**
-     * The currently-installed version is <>hash</> but we were unable to load data about this release.
+     * The currently-installed version is <>hash<> but we were unable to load data about this release.
      */
     errorInCurrentInstalled: () => LocalizedString;
     /**
@@ -1942,7 +1942,7 @@ export type TranslationFunctions = {
      */
     schemaNameHelp: () => LocalizedString;
     /**
-     * Rename <>identifier</> Schema
+     * Rename <>identifier<> Schema
      */
     renameSchema: () => LocalizedString;
   };
@@ -1956,7 +1956,7 @@ export type TranslationFunctions = {
      */
     structuralChangesHelp: () => LocalizedString;
     /**
-     * External changes to data (e.g. adding or editing <>rows</>) will be automatically reflected without clicking this button.
+     * External changes to data (e.g. adding or editing <>rows<>) will be automatically reflected without clicking this button.
      */
     dataChangesHelp: () => LocalizedString;
   };
@@ -1966,13 +1966,13 @@ export type TranslationFunctions = {
      */
     allDatabases: () => LocalizedString;
     /**
-     * To add or remove databases, modify the <>variableNameAndLink</> in your configuration file and restart Mathesar.
+     * To add or remove databases, modify the <>variableNameAndLink<> in your configuration file and restart Mathesar.
      */
     addOrRemoveDbHelp: () => LocalizedString;
   };
   dbAccessControlModal: {
     /**
-     * Manage <>databaseName</> Database Access
+     * Manage <>databaseName<> Database Access
      */
     manageDbAccess: () => LocalizedString;
   };
@@ -2104,7 +2104,7 @@ export type TranslationFunctions = {
   };
   recordPageContent: {
     /**
-     * Record in <>tableName</>
+     * Record in <>tableName<>
      */
     recordInTable: () => LocalizedString;
   };
@@ -2114,7 +2114,7 @@ export type TranslationFunctions = {
      */
     relatedRecord: () => LocalizedString;
     /**
-     * Each of the following records link to <>recordSummary</> from another table.
+     * Each of the following records link to <>recordSummary<> from another table.
      */
     relatedRecordHelp: () => LocalizedString;
   };
@@ -2151,7 +2151,7 @@ export type TranslationFunctions = {
   };
   schemaAccessControlModal: {
     /**
-     * Manage <>schemaName</> Schema Access
+     * Manage <>schemaName<> Schema Access
      */
     manageSchemaAccessWithName: () => LocalizedString;
   };
