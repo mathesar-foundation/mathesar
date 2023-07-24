@@ -1,21 +1,14 @@
-from unittest.mock import patch
-
-from psycopg2.errors import NotNullViolation
 import pytest
 from sqlalchemy import Column, select, Table, MetaData, VARCHAR, INTEGER
-from sqlalchemy.exc import IntegrityError
 
 from db import constants
-from db.columns.operations import alter as alter_operations
 from db.columns.operations.alter import (
-    batch_update_columns, change_column_nullable, rename_column, retype_column,
-    set_column_default
+    batch_update_columns, rename_column, set_column_default
 )
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
     get_columns_attnum_from_names,
 )
-from db.columns.utils import to_mathesar_column_with_engine
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
@@ -23,9 +16,6 @@ from db.tests.columns.utils import column_test_dict, create_test_table, get_defa
 from db.types.base import PostgresType
 from db.types.operations.convert import get_db_type_enum_from_class
 from db.metadata import get_empty_metadata
-
-
-nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
 
 
 def _rename_column_and_assert(table, old_col_name, new_col_name, engine):
@@ -148,195 +138,6 @@ def test_rename_column_index(engine_with_schema):
         index_columns = index["column_names"]
     assert old_col_name not in index_columns
     assert new_col_name in index_columns
-
-
-def test_retype_column_correct_column(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "atableone"
-    target_type = PostgresType.BOOLEAN
-    target_column_name = "thecolumntochange"
-    nontarget_column_name = "notthecolumntochange"
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(target_column_name, INTEGER),
-        Column(nontarget_column_name, VARCHAR),
-    )
-    table.create()
-    table_oid = get_oid_from_table(table.name, table.schema, engine)
-    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        with patch.object(alter_operations, "alter_column_type") as mock_retyper:
-            retype_column(table_oid, target_column_attnum, engine, conn, target_type)
-        mock_retyper.assert_called_with(
-            table_oid,
-            target_column_name,
-            engine,
-            conn,
-            PostgresType.BOOLEAN,
-            {},
-        )
-
-
-@pytest.mark.parametrize('target_type', [PostgresType.NUMERIC])
-def test_retype_column_adds_options(engine_with_schema, target_type):
-    engine, schema = engine_with_schema
-    table_name = "atableone"
-    target_column_name = "thecolumntochange"
-    nontarget_column_name = "notthecolumntochange"
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(target_column_name, INTEGER),
-        Column(nontarget_column_name, VARCHAR),
-    )
-    table.create()
-    type_options = {"precision": 5}
-    table_oid = get_oid_from_table(table.name, table.schema, engine)
-    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
-
-    with engine.begin() as conn:
-        with patch.object(alter_operations, "alter_column_type") as mock_retyper:
-            retype_column(table_oid, target_column_attnum, engine, conn, target_type, type_options)
-        mock_retyper.assert_called_with(
-            table_oid,
-            target_column_name,
-            engine,
-            conn,
-            target_type,
-            type_options,
-        )
-
-
-def test_retype_column_options_only(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "atableone"
-    target_column_name = "thecolumntochange"
-    target_type = PostgresType.CHARACTER_VARYING
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(target_column_name, VARCHAR),
-    )
-    table.create()
-    type_options = {"length": 5}
-    table_oid = get_oid_from_table(table.name, table.schema, engine)
-    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        with patch.object(alter_operations, "alter_column_type") as mock_retyper:
-            retype_column(
-                table_oid, target_column_attnum, engine, conn, new_type=None, type_options=type_options
-            )
-        mock_retyper.assert_called_with(
-            table_oid,
-            target_column_name,
-            engine,
-            conn,
-            target_type,
-            type_options,
-        )
-
-
-@pytest.mark.parametrize("nullable_tup", nullable_changes)
-def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
-    engine, schema = engine_with_schema
-    table_name = "atablefornulling"
-    target_column_name = "thecolumntochange"
-    nontarget_column_name = "notthecolumntochange"
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(target_column_name, INTEGER, nullable=nullable_tup[0]),
-        Column(nontarget_column_name, VARCHAR),
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        change_column_nullable(
-            table_oid,
-            target_column_attnum,
-            engine,
-            conn,
-            nullable_tup[1],
-        )
-    changed_table = reflect_table(table_name, schema, engine, metadata=get_empty_metadata())
-    changed_column = to_mathesar_column_with_engine(
-        changed_table.columns[0],
-        engine
-    )
-    assert changed_column.nullable is nullable_tup[1]
-
-
-@pytest.mark.parametrize("nullable_tup", nullable_changes)
-def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
-    engine, schema = engine_with_schema
-    table_name = "atablefornulling"
-    target_column_name = "thecolumntochange"
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(target_column_name, INTEGER, nullable=nullable_tup[0]),
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    ins = table.insert().values(
-        [
-            {target_column_name: 1},
-            {target_column_name: 2},
-            {target_column_name: 3},
-        ]
-    )
-    with engine.begin() as conn:
-        conn.execute(ins)
-    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        change_column_nullable(
-            table_oid,
-            target_column_attnum,
-            engine,
-            conn,
-            nullable_tup[1],
-        )
-    changed_table = reflect_table(table_name, schema, engine, metadata=get_empty_metadata())
-    changed_column = to_mathesar_column_with_engine(
-        changed_table.columns[0],
-        engine
-    )
-    assert changed_column.nullable is nullable_tup[1]
-
-
-def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "atablefornulling"
-    target_column_name = "thecolumntochange"
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(target_column_name, INTEGER, nullable=True),
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine, metadata=get_empty_metadata())
-    ins = table.insert().values(
-        [
-            {target_column_name: 1},
-            {target_column_name: 2},
-            {target_column_name: None},
-        ]
-    )
-    with engine.begin() as conn:
-        conn.execute(ins)
-    with engine.begin() as conn:
-        with pytest.raises(IntegrityError) as e:
-            change_column_nullable(
-                table_oid,
-                target_column_attnum,
-                engine,
-                conn,
-                False,
-            )
-            assert type(e.orig) == NotNullViolation
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
