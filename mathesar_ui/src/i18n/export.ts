@@ -7,11 +7,12 @@ const logger = console;
 const sendSourceContentToTransifex = async (
   sourceContent: BaseTranslation | BaseTranslation[],
 ) => {
-  // TODO: Move this to .env file
-  const TRANSIFEX_TOKEN = '';
-  const ORG_SLUG = 'mathesar';
-  const PROJECT_SLUG = 'mathesar';
-  const RESOURCE_SLUG = 'mathesar_ui';
+  const {
+    TRANSIFEX_TOKEN,
+    TRANSIFEX_ORG_SLUG,
+    TRANSIFEX_PROJECT_SLUG,
+    TRANSIFEX_FE_RESOURCE_SLUG,
+  } = process.env;
 
   transifexApi.setup({
     auth: TRANSIFEX_TOKEN,
@@ -25,14 +26,14 @@ const sendSourceContentToTransifex = async (
    */
   /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
   const organization = await transifexApi.Organization.get({
-    slug: ORG_SLUG,
+    slug: TRANSIFEX_ORG_SLUG,
   });
   // @ts-expect-error Incorrect typings from the package
   const projects = await organization.fetch('projects');
   // @ts-expect-error Incorrect typings from the package
-  const project = await projects.get({ slug: PROJECT_SLUG });
+  const project = await projects.get({ slug: TRANSIFEX_PROJECT_SLUG });
   const resources = await project.fetch('resources');
-  const resource = await resources.get({ slug: RESOURCE_SLUG });
+  const resource = await resources.get({ slug: TRANSIFEX_FE_RESOURCE_SLUG });
   const content = JSON.stringify(sourceContent);
 
   logger.info(`Uploading source content of length ${content.length}`);
