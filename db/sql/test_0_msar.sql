@@ -1033,6 +1033,35 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- msar.schema_ddl --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_create_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_schema('create_schema'::text, false);
+  RETURN NEXT has_schema('create_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_drop_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA drop_test_schema;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test_drop_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema('drop_test_schema', false, false);
+  RETURN NEXT hasnt_schema('drop_test_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION test_drop_schema_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema('drop_test_schema'::regnamespace::oid, false, false);
+  RETURN NEXT hasnt_schema('drop_test_schema');
+END;
+$$ LANGUAGE plpgsql;
 
 -- msar.add_mathesar_table
 
