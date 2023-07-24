@@ -25,7 +25,7 @@
   setNewImperativeFilterControllerInContext();
 
   export let table: TableEntry;
-  export let shareConsumer: ShareConsumer | undefined;
+  export let shareConsumer: ShareConsumer | undefined = undefined;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: ({ query } = $router);
