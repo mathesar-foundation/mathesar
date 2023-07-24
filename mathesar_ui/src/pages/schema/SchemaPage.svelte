@@ -19,6 +19,7 @@
   import { States } from '@mathesar/api/utils/requestUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { logEvent } from '@mathesar/utils/telemetry';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
@@ -26,7 +27,6 @@
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import SchemaAccessControlModal from './SchemaAccessControlModal.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

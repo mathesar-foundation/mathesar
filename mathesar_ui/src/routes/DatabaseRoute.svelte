@@ -7,9 +7,9 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { currentDBName, databases } from '@mathesar/stores/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import SchemaRoute from './SchemaRoute.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
   import RichText from '@mathesar/components/RichText.svelte';
+  import SchemaRoute from './SchemaRoute.svelte';
 
   export let databaseName: string;
 

@@ -8,6 +8,7 @@
     Collapsible,
   } from '@mathesar-component-library';
   import { iconAddNew, iconDeleteMajor } from '@mathesar/icons';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QueryManager from '../../QueryManager';
   import FilterTransformation from './FilterTransformation.svelte';
   import QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
@@ -19,7 +20,6 @@
   import SortTransformation from './SortTransformation.svelte';
   import QuerySortTransformationModel from '../../QuerySortTransformationModel';
   import type { QueryTransformationModel } from '../../QueryModel';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryManager: QueryManager;
 

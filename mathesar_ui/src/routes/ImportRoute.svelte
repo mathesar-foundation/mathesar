@@ -5,8 +5,8 @@
   import ImportPreviewPage from '@mathesar/pages/import-preview/ImportPreviewPage.svelte';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconImportData } from '@mathesar/icons';
-  import { getImportPageUrl } from './urls';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import { getImportPageUrl } from './urls';
 
   export let database: Database;
   export let schema: SchemaEntry;

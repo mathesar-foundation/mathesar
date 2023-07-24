@@ -5,9 +5,9 @@
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import ExplorationsList from './ExplorationsList.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

@@ -14,8 +14,8 @@
     iconNotEditable,
   } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
   const dispatch = createEventDispatcher();
 

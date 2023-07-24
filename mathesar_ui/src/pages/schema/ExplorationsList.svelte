@@ -2,9 +2,9 @@
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconExploration } from '@mathesar/icons';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import ExplorationItem from './ExplorationItem.svelte';
   import EmptyEntity from './EmptyEntity.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let explorations: QueryInstance[];
   export let database: Database;

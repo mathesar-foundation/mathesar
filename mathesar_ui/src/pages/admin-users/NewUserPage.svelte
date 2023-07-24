@@ -10,8 +10,8 @@
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { UserDetailsForm } from '@mathesar/systems/users-and-permissions';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import FormBox from './FormBox.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import FormBox from './FormBox.svelte';
 
   const usersStore = getUsersStoreFromContext();
 

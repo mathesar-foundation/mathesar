@@ -7,8 +7,8 @@
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
   import { currentTableId, tables } from '@mathesar/stores/tables';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import RecordPageRoute from './RecordPageRoute.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RecordPageRoute from './RecordPageRoute.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

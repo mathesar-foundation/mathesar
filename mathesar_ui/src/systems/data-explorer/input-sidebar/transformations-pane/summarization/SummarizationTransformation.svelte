@@ -7,11 +7,11 @@
   } from '@mathesar-component-library';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QuerySummarizationTransformationModel from '../../../QuerySummarizationTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../../utils';
   import Aggregation from './Aggregation.svelte';
   import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 

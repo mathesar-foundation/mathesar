@@ -10,7 +10,7 @@
     const split = string.split(RICH_TEXT_REGEX);
 
     let index = 0;
-    let prefixAndSlotTuples: PrefixAndSlotTuple[] = [];
+    const prefixAndSlotTuples: PrefixAndSlotTuple[] = [];
     while (index <= split.length) {
       const currentPart = split[index] ?? '';
       const nextPart = split[index + 1] ?? '';

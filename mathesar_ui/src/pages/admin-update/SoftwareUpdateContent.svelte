@@ -6,9 +6,9 @@
   import type { ReleaseDataStore } from '@mathesar/stores/releases';
   import { toast } from '@mathesar/stores/toast';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import ReleaseBox from './ReleaseBox.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
   import RichText from '@mathesar/components/RichText.svelte';
+  import ReleaseBox from './ReleaseBox.svelte';
 
   export let releaseDataStore: ReleaseDataStore;
 

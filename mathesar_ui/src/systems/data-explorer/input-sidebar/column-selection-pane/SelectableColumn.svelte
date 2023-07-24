@@ -3,8 +3,8 @@
   import { Button, Badge, Tooltip } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { numberOfTimes } from '@mathesar/utils/languageUtils';
-  import type { ColumnWithLink } from '../../utils';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import type { ColumnWithLink } from '../../utils';
 
   const dispatch = createEventDispatcher();
 

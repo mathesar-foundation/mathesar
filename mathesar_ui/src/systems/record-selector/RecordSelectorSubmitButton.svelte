@@ -3,8 +3,8 @@
 
   import { Icon } from '@mathesar-component-library';
   import { iconLinkToRecordPage, iconPickRecord } from '@mathesar/icons';
-  import type { RecordSelectorPurpose } from './recordSelectorUtils';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import type { RecordSelectorPurpose } from './recordSelectorUtils';
 
   const dispatch = createEventDispatcher();
 

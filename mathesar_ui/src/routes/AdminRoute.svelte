@@ -8,9 +8,9 @@
   import SoftwareUpdate from '@mathesar/pages/admin-update/SoftwareUpdatePage.svelte';
   import AdminNavigation from '@mathesar/pages/admin-users/AdminNavigation.svelte';
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import { ADMIN_UPDATE_PAGE_URL, ADMIN_URL } from './urls';
   import UsersRoute from './UsersRoute.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 </script>
 
 <AppendBreadcrumb

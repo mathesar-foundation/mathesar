@@ -2,8 +2,8 @@
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
-  import SoftwareUpdateContent from './SoftwareUpdateContent.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import SoftwareUpdateContent from './SoftwareUpdateContent.svelte';
 
   const releaseDataStore = getReleaseDataStoreFromContext();
 </script>

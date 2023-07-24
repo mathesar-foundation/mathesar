@@ -3,9 +3,9 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { pluralize } from '@mathesar/utils/languageUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QueryManager from '../../QueryManager';
   import type { ProcessedQueryOutputColumn } from '../../utils';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let selectedColumns: ProcessedQueryOutputColumn[];
   export let queryManager: QueryManager;

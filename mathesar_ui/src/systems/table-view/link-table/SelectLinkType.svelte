@@ -4,10 +4,10 @@
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';
   import LinkTypeOption from './LinkTypeOption.svelte';
-  import RichText from '@mathesar/components/RichText.svelte';
 
   export let linkTypes: LinkType[];
   export let isSelfReferential: boolean;

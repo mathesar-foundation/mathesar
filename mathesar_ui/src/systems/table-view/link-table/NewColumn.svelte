@@ -4,8 +4,8 @@
   import { Field, type FieldStore } from '@mathesar/components/form';
   import { LL } from '@mathesar/i18n/i18n-svelte';
   import type { ComponentProps } from 'svelte';
-  import Pill from './LinkTablePill.svelte';
   import RichText from '@mathesar/components/RichText.svelte';
+  import Pill from './LinkTablePill.svelte';
 
   const label = $LL.general.columnName();
 

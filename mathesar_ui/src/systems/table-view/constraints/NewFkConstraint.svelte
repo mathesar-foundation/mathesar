@@ -26,8 +26,8 @@
   import { importVerifiedTables } from '@mathesar/stores/tables';
   import { getAvailableName } from '@mathesar/utils/db';
   import { LL } from '@mathesar/i18n/i18n-svelte';
-  import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
   import RichText from '@mathesar/components/RichText.svelte';
+  import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
 

@@ -27,8 +27,8 @@
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
-  import EditTable from './EditTable.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import EditTable from './EditTable.svelte';
 
   const recordSelector = getRecordSelectorFromContext();
   const editTableModalController = modal.spawnModalController();

@@ -2,9 +2,9 @@
   import { createEventDispatcher } from 'svelte';
   import { MultiSelect, LabeledInput } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QueryHideTransformationModel from '../../QueryHideTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../utils';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 

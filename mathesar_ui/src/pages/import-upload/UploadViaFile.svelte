@@ -10,9 +10,9 @@
   } from '@mathesar-component-library/types';
   import { uploadFile } from '@mathesar/api/utils/requestUtils';
   import type { UploadCompletionOpts } from '@mathesar/api/utils/requestUtils';
-  import type { UploadEvents } from './uploadUtils';
   import { LL } from '@mathesar/i18n/i18n-svelte';
   import RichText from '@mathesar/components/RichText.svelte';
+  import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
 

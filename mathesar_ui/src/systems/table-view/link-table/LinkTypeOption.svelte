@@ -4,10 +4,10 @@
   import type { FieldStore } from '@mathesar/components/form';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
   import Diagram from './diagram/Diagram.svelte';
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';
-  import RichText from '@mathesar/components/RichText.svelte';
 
   export let linkType: LinkType;
   export let isSelfReferential: boolean;

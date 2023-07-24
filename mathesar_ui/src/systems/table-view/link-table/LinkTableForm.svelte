@@ -39,6 +39,7 @@
   import { makeSingular } from '@mathesar/utils/languageUtils';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
   import Pill from './LinkTablePill.svelte';
   import NewColumn from './NewColumn.svelte';
   import SelectLinkType from './SelectLinkType.svelte';
@@ -47,7 +48,6 @@
     suggestMappingTableName,
     type LinkType,
   } from './linkTableUtils';
-  import RichText from '@mathesar/components/RichText.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 

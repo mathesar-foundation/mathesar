@@ -1,11 +1,11 @@
 <script lang="ts">
   import TableName from '@mathesar/components/TableName.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type {
     ProcessedQueryResultColumn,
     ProcessedQueryResultColumnMap,
   } from '../../utils';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let columnInformation: ProcessedQueryResultColumn;
   export let columnsMetaData: ProcessedQueryResultColumnMap;

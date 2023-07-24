@@ -8,10 +8,10 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import databaseApi from '@mathesar/api/databases';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import UpgradeConfirm from './UpgradeConfirm.svelte';
   import UpgradeError from './UpgradeError.svelte';
   import UpgradeProcessing from './UpgradeProcessing.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let controller: ModalController;
   export let release: Release;

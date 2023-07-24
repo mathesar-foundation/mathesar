@@ -7,8 +7,8 @@
     Truncate,
   } from '@mathesar-component-library';
   import TableName from '@mathesar/components/TableName.svelte';
-  import type { ColumnWithLink } from '../../utils';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import type { ColumnWithLink } from '../../utils';
 
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};

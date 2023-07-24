@@ -1,10 +1,10 @@
 <script lang="ts">
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import SelectableColumnTree from './SelectableColumnTree.svelte';
   import SelectableColumn from './SelectableColumn.svelte';
   import type QueryManager from '../../QueryManager';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
   import type { ColumnWithLink } from '../../utils';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =

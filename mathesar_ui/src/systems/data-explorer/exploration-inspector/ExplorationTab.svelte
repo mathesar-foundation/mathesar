@@ -17,9 +17,9 @@
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QueryRunner from '../QueryRunner';
   import QueryManager from '../QueryManager';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
 

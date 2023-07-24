@@ -1,13 +1,13 @@
 <script lang="ts">
   import { Tutorial } from '@mathesar-component-library';
   import { queries } from '@mathesar/stores/queries';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import ActionsPane from './ActionsPane.svelte';
   import type QueryManager from './QueryManager';
   import { WithExplorationInspector } from './exploration-inspector';
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import type { ColumnWithLink } from './utils';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =

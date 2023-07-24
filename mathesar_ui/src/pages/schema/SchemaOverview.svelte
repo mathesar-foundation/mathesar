@@ -4,6 +4,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { AnchorButton } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
@@ -12,7 +13,6 @@
   import CreateNewTableButton from './CreateNewTableButton.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;

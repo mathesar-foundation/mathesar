@@ -5,11 +5,11 @@
   import { databases } from '@mathesar/stores/databases';
   import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
   import { getDatabasePageUrl } from './urls';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   setBreadcrumbItemsInContext([]);
 

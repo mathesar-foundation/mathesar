@@ -2,9 +2,9 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let tables: TableEntry[];
   export let database: Database;

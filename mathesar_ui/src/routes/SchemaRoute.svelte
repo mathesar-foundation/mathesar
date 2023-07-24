@@ -9,11 +9,11 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import DataExplorerRoute from './DataExplorerRoute.svelte';
   import TableRoute from './TableRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
   import ExplorationRoute from './ExplorationRoute.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 

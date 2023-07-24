@@ -2,8 +2,8 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { AnchorButton, Tutorial } from '@mathesar/component-library';
   import { getImportPageUrl } from '@mathesar/routes/urls';
-  import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

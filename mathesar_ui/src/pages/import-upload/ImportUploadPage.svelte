@@ -12,10 +12,10 @@
   import { iconUrl, iconPaste } from '@mathesar/icons';
   import { createTable } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import UploadViaFile from './UploadViaFile.svelte';
   import UploadViaUrl from './UploadViaUrl.svelte';
   import UploadViaClipboard from './UploadViaClipboard.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

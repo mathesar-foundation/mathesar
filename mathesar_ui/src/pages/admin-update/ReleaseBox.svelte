@@ -9,8 +9,8 @@
   import { modal } from '@mathesar/stores/modal';
   import type { Release } from '@mathesar/stores/releases';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import UpgradeModal from './upgrade-modal/UpgradeModal.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import UpgradeModal from './upgrade-modal/UpgradeModal.svelte';
 
   const modalController = modal.spawnModalController();
 

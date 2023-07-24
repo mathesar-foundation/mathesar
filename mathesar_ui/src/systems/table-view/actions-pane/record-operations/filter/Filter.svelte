@@ -14,9 +14,9 @@
     getTabularDataStoreFromContext,
     type Filtering,
   } from '@mathesar/stores/table-data';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import { deepCloneFiltering } from '../utils';
   import FilterEntries from './FilterEntries.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   const imperativeFilterController = getImperativeFilterControllerFromContext();

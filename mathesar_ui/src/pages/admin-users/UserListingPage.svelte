@@ -8,9 +8,9 @@
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import UserRow from './UserRow.svelte';
   import UserSkeleton from './UserSkeleton.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   let filterQuery = '';
 

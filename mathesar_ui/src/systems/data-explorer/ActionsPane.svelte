@@ -26,9 +26,9 @@
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import { queries } from '@mathesar/stores/queries';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const dispatch = createEventDispatcher();
   const saveModalController = modal.spawnModalController();

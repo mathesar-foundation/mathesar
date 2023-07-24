@@ -5,11 +5,11 @@
     LabeledInput,
     TextInput,
   } from '@mathesar-component-library';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QueryRunner from '../../QueryRunner';
   import QueryManager from '../../QueryManager';
   import ColumnSource from './ColumnSource.svelte';
   import DeleteColumnAction from './DeleteColumnAction.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import type QueryRunner from '../QueryRunner';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import type QueryRunner from '../QueryRunner';
 
   export let queryHandler: QueryRunner;
   $: ({ selection, processedColumns } = queryHandler);

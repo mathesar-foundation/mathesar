@@ -16,8 +16,8 @@
   } from '@mathesar/systems/users-and-permissions';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { UserModel } from '@mathesar/stores/users';
-  import FormBox from './FormBox.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
+  import FormBox from './FormBox.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
   const usersStore = getUsersStoreFromContext();

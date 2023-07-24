@@ -7,9 +7,9 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { iconRecord } from '@mathesar/icons';
   import { tables } from '@mathesar/stores/tables';
-  import TableWidget from './TableWidget.svelte';
   import { LL } from '@mathesar/i18n/i18n-svelte';
   import RichText from '@mathesar/components/RichText.svelte';
+  import TableWidget from './TableWidget.svelte';
 
   export let recordPk: string;
   export let recordSummary: string;

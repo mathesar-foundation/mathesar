@@ -51,9 +51,9 @@
   import { toast } from '@mathesar/stores/toast';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import PreviewColumn from './PreviewColumn.svelte';
   import ErrorInfo from './ErrorInfo.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

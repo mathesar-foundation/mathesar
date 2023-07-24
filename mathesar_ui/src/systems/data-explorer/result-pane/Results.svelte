@@ -15,13 +15,13 @@
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
   import QueryRunErrors from './QueryRunErrors.svelte';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
   export let isExplorationPage = false;

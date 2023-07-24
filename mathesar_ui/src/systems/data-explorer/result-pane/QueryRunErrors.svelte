@@ -6,9 +6,9 @@
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import type QueryRunner from '../QueryRunner';
   import QueryManager from '../QueryManager';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
   export let errors: ApiMultiError | string[];

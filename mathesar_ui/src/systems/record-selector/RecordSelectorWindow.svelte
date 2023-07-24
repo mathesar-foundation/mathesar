@@ -7,10 +7,10 @@
   import { getArticleForWord } from '@mathesar/utils/languageUtils';
   import Pagination from '@mathesar/utils/Pagination';
   import { tables } from '@mathesar/stores/tables';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
 
   const verbMap = new Map<RecordSelectorPurpose, string>([
     ['dataEntry', $LL.general.pick()],
