@@ -71,7 +71,7 @@ def _is_col_orderable(col):
     without additional logic). We only want to order by orderably columns.
     """
     data_type = col.type
-    non_orderable_type = ['Binary', 'LargeBinary', 'PickleType', 'ARRAY', 'JSON', 'JSONB']
+    non_orderable_type = ['Binary', 'LargeBinary', 'PickleType', 'ARRAY', 'JSON', 'JSONB', 'NULL']
     return str(data_type) not in non_orderable_type
 
 
