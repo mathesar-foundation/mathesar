@@ -20,8 +20,10 @@ from mathesar.models.base import Column, Constraint, Table
 class TableFilteredPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
     """
     Limits the accepted related primary key values to a specific table.
-    For example, If the PrimaryKeyRelatedField is for a Column object,
-     only columns of a said table are accepted.
+    For example, if the PrimaryKeyRelatedField is instantiated with a
+    Column queryset, only columns in the "associated table" are
+    accepted. The "associated table" is defined by the context dict's
+    `table_id` value.
     """
     def get_queryset(self):
         table_id = self.context.get('table_id', None)
