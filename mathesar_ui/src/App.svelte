@@ -35,7 +35,7 @@
           translations.lang,
           JSON.parse(translations.translationStrings),
         );
-        setLocale('en');
+        setLocale(translations.lang);
         isTranslationsLoaded = true;
         clearInterval(checkTranslationsInterval);
       }

@@ -24,6 +24,9 @@
   import SelectUserType from './SelectUserType.svelte';
   import UserFormInput from './UserFormInput.svelte';
   import SelectPreferredLanguage from './SelectPreferredLanguage.svelte';
+  import { locale, setLocale } from '@mathesar/i18n/i18n-svelte';
+  import { loadLocaleAsync } from '@mathesar/i18n/i18n-util.async';
+  import type { Locales } from '@mathesar/i18n/i18n-types';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -79,6 +82,12 @@
       await userApi.update(user.id, request);
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
+      }
+
+      const updatedLocale = request.preferred_language as Locales;
+      if ($locale !== updatedLocale) {
+        await loadLocaleAsync(updatedLocale);
+        setLocale(updatedLocale);
       }
       dispatch('update');
       return;
