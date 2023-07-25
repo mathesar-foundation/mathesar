@@ -1,6 +1,4 @@
 import json
-from alembic.migration import MigrationContext
-from alembic.operations import Operations
 from psycopg.errors import (
     InvalidTextRepresentation, InvalidParameterValue, RaiseException,
     SyntaxError
@@ -8,9 +6,6 @@ from psycopg.errors import (
 from db import connection as db_conn
 from db.columns.defaults import NAME, NULLABLE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
-from db.columns.operations.select import get_column_name_from_attnum
-from db.tables.operations.select import reflect_table_from_oid
-from db.metadata import get_empty_metadata
 
 
 def alter_column(engine, table_oid, column_attnum, column_data, connection=None):
@@ -78,21 +73,14 @@ def alter_column_type(
     )
 
 
-# TODO Remove after implementing splitting/merging and column moving in SQL
 def rename_column(table_oid, column_attnum, engine, connection, new_name):
-    table = reflect_table_from_oid(
-        table_oid,
+    alter_column(
         engine,
-        connection_to_use=connection,
-        # TODO reuse metadata
-        metadata=get_empty_metadata(),
+        table_oid,
+        column_attnum,
+        {"name": new_name},
+        connection=connection
     )
-    # TODO reuse metadata
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine=engine, metadata=get_empty_metadata())
-    column = table.columns[column_name]
-    ctx = MigrationContext.configure(connection)
-    op = Operations(ctx)
-    op.alter_column(table.name, column.name, new_column_name=new_name, schema=table.schema)
 
 
 def _validate_columns_for_batch_update(column_data):
