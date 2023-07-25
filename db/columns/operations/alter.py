@@ -13,6 +13,7 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
     Alter a column of the a table.
 
     Args:
+        engine: An SQLAlchemy engine defining the database connection string.
         table_oid: integer giving the OID of the table with the column.
         column_attnum: integer giving the attnum of the column to alter.
         column_data: dictionary describing the alterations to make.
@@ -64,6 +65,17 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
 def alter_column_type(
     table_oid, column_attnum, engine, connection, target_type, type_options=None
 ):
+    """
+    Alter the type of a single column.
+
+    Args:
+        table_oid: integer giving the OID of the table with the column.
+        column_attnum: integer giving the attnum of the column.
+        engine: SQLAlchemy engine defining the connection string for the DB.
+        connection: psycopg2 connection object.
+        target_type: PostgresType defining the type to alter to.
+        type_options: dict defining the options for the type to alter to.
+    """
     alter_column(
         engine,
         table_oid,
@@ -73,7 +85,18 @@ def alter_column_type(
     )
 
 
+# TODO remove once table splitting logic is moved to SQL.
 def rename_column(table_oid, column_attnum, engine, connection, new_name):
+    """
+    Rename a single column.
+
+    Args:
+        table_oid: integer giving the OID of the table with the column.
+        column_attnum: integer giving the attnum of the column.
+        engine: SQLAlchemy engine defining the connection string for the DB.
+        connection: psycopg2 connection object.
+        new_name: string giving the new name for the column.
+    """
     alter_column(
         engine,
         table_oid,
