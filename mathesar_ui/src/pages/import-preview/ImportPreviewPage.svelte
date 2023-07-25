@@ -1,58 +1,59 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { router } from 'tinro';
+
   import {
-    getImportPreviewPageUrl,
-    getTablePageUrl,
-    getSchemaPageUrl,
-  } from '@mathesar/routes/urls';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
-  import {
-    Sheet,
-    SheetHeader,
-    SheetCell,
-    SheetCellResizer,
-    SheetRow,
-  } from '@mathesar/components/sheet';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import {
-    Checkbox,
-    LabeledInput,
-    TextInput,
-    Spinner,
     CancelOrProceedButtonPair,
     CancellablePromise,
+    Checkbox,
+    LabeledInput,
+    Spinner,
+    TextInput,
   } from '@mathesar-component-library';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import { getAPI, patchAPI } from '@mathesar/api/utils/requestUtils';
   import type {
-    RequestStatus,
     PaginatedResponse,
+    RequestStatus,
   } from '@mathesar/api/utils/requestUtils';
+  import { getAPI, patchAPI } from '@mathesar/api/utils/requestUtils';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { getCellCap } from '@mathesar/components/cell-fabric/utils';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import {
-    getTableFromStoreOrApi,
-    getTypeSuggestionsForTable,
-    generateTablePreview,
-    patchTable,
-    deleteTable,
-    createTable,
-  } from '@mathesar/stores/tables';
+    Sheet,
+    SheetCell,
+    SheetCellResizer,
+    SheetHeader,
+    SheetRow,
+  } from '@mathesar/components/sheet';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import {
+    getImportPreviewPageUrl,
+    getSchemaPageUrl,
+    getTablePageUrl,
+  } from '@mathesar/routes/urls';
   import {
     currentDbAbstractTypes,
     getAbstractTypeForDbType,
   } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
-  import { iconDeleteMajor } from '@mathesar/icons';
-  import { getCellCap } from '@mathesar/components/cell-fabric/utils';
+  import {
+    createTable,
+    deleteTable,
+    generateTablePreview,
+    getTableFromStoreOrApi,
+    getTypeSuggestionsForTable,
+    patchTable,
+  } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import PreviewColumn from './PreviewColumn.svelte';
   import ErrorInfo from './ErrorInfo.svelte';
+  import PreviewColumn from './PreviewColumn.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
