@@ -1,6 +1,7 @@
 import inspect
+from sqlalchemy.types import NullType
 from db.engine import get_dummy_engine
-from db.types.base import PostgresType, MathesarCustomType, UnknownDbTypeId
+from db.types.base import PostgresType, MathesarCustomType, UnknownType
 
 
 def get_db_type_enum_from_id(db_type_id):
@@ -18,12 +19,11 @@ def get_db_type_enum_from_id(db_type_id):
         try:
             return MathesarCustomType(db_type_id)
         except ValueError:
+            if db_type_id == UnknownType().id:
+                return UnknownType()
             return None
 
 
-# NOTE it is confusing to need an instance of engine here, since we usually use engines for making
-# actual queries; it's a smell to see an engine being needed where we don't make a query.
-# TODO consider alternatives.
 def get_db_type_enum_from_class(sa_type):
     if not inspect.isclass(sa_type):
         # Instead of extracting classes from instances, we're supporting a single type of parameter
@@ -34,11 +34,14 @@ def get_db_type_enum_from_class(sa_type):
         db_type = get_db_type_enum_from_id(db_type_id)
         if db_type:
             return db_type
-    raise UnknownDbTypeId
 
 
 def _sa_type_class_to_db_type_id(sa_type_class):
-    return _get_sa_type_class_id_from_ischema_names(sa_type_class)
+    db_type_id = _get_sa_type_class_id_from_ischema_names(sa_type_class)
+    if db_type_id is not None:
+        return db_type_id
+    elif sa_type_class == NullType:
+        return UnknownType().id
 
 
 def _get_sa_type_class_id_from_ischema_names(sa_type_class1):
