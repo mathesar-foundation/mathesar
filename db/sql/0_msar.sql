@@ -906,8 +906,19 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 __msar.prepare_fields_arg(fields text) RETURNS text AS $$/*
-This function emulates the conversion of string `fields` argument for interval
-types into the correct integer, emulating the process in the PostgreSQL source code.
+Convert the `fields` argument into an integer for use with the integertypmodin system function.
+
+Args:
+  fields: A string corresponding to the documented options from the doumentation at
+          https://www.postgresql.org/docs/13/datatype-datetime.html
+
+In order to construct the argument for intervaltypmodin, needed for constructing the typmod value
+for INTERVAL types with arguments, we need to apply a transformation to the correct integer. This
+transformation is quite arcane, and is lifted straight from the PostgreSQL C code. Given a non-null
+fields argument, the steps are:
+- Assign each substring of valid `fields` arguments the correct integer (from the Postgres src).
+- Apply a bitshift mapping each integer to the according power of 2.
+- Sum the results to get an integer signifying the fields argument.
 */
 SELECT COALESCE(
   sum(1<<code)::text,
@@ -929,6 +940,14 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION __msar.build_typmodin_arg(
   typ_options jsonb, timespan_flag boolean
 ) RETURNS cstring[] AS $$/*
+Build an array to be used as the argument for a typmodin function.
+
+Timespans have to be handled slightly differently since they have a tricky `fields` argument that
+requires special processing. See __msar.prepare_fields_arg for more details.
+
+Args:
+  typ_options: JSONB giving options fields as per the description in msar.build_type_text.
+  timespan_flag: true if the associated type is a timespan, false otherwise.
 */
 SELECT array_remove(
   ARRAY[
@@ -944,8 +963,17 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 __msar.get_formatted_base_type(typ_name text, typ_options jsonb) RETURNS text AS $$ /*
-This function first parses the given name and options using internal PostgreSQL
-functions before formatting the type.
+Build the appropriate type definition string, without Array brackets.
+
+This function uses some PostgreSQL internal functions to do its work. In particular, for any type
+that takes options, This function uses the typmodin (read "type modification input") system
+functions to convert the given options into a typmod integer. The typ_name given is converted into
+the OID of the named type. These two pieces let us call `format_type` to get a canonical string
+representation of the definition of the type, with its options.
+
+Args:
+  typ_name: This should be qualified and quoted as needed.
+  typ_options: These should be in the form described in msar.build_type_text.
 */
 DECLARE
   typ_id oid;
@@ -953,17 +981,23 @@ DECLARE
   typmodin_func text;
   typmod integer;
 BEGIN
+  -- Here we just get the OID of the type.
   typ_id := typ_name::regtype::oid;
+  -- This is a lookup of the function name for the typmodin function associated with the type, if
+  -- one exists.
   typmodin_func := typmodin::text FROM pg_type WHERE oid=typ_id AND typmodin<>0;
+  -- This flag is needed since timespan types need special handling when converting the options into
+  -- the form needed to call the typmodin function.
   timespan_flag := typcategory='T' FROM pg_type WHERE oid=typ_id;
   IF (
-    jsonb_typeof(typ_options) = 'null'
-    OR typ_options IS NULL
-    OR typ_options='{}'::jsonb
-    OR typmodin_func IS NULL
+    jsonb_typeof(typ_options) = 'null'  -- The caller passed no type options
+    OR typ_options IS NULL -- The caller didn't even pass the type options key
+    OR typ_options='{}'::jsonb  -- The caller passed an empty type options object
+    OR typmodin_func IS NULL  -- The type doesn't actually accept type options
   ) THEN
     typmod := NULL;
   ELSE
+    -- Here, we actually run the typmod function to get the output for use in the format_type call.
     EXECUTE format(
       'SELECT %I(%L)',
       typmodin_func,
