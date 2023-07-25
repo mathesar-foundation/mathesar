@@ -1032,7 +1032,10 @@ All fields are optional, and a null value as input returns 'text'
 */
 SELECT COALESCE(
   -- First choice is the type specified by numeric IDs, since they're most reliable.
-  format_type((typ_jsonb ->> 'id')::integer, (typ_jsonb ->> 'modifier')::integer),
+  format_type(
+    (typ_jsonb ->> 'id')::integer,
+    (typ_jsonb ->> 'modifier')::integer
+  ),
   -- Second choice is the type specified by string IDs.
   __msar.get_formatted_base_type(
     COALESCE(
@@ -1041,7 +1044,11 @@ SELECT COALESCE(
       'text'  -- We fall back to 'text' when input is null or empty.
     ),
     typ_jsonb -> 'options'
-  ) || CASE WHEN (typ_jsonb -> 'options' ->> 'array')::boolean THEN '[]' ELSE '' END
+  ) || CASE
+    WHEN (typ_jsonb -> 'options' ->> 'array')::boolean THEN
+      '[]'
+    ELSE ''
+  END
 )
 $$ LANGUAGE SQL;
 
