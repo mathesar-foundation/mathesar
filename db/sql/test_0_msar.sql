@@ -963,6 +963,77 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+-- msar.create_link -------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION setup_link_tables() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE actors (id SERIAL PRIMARY KEY, actor_name text);
+  INSERT INTO actors(actor_name) VALUES 
+  ('Cillian Murphy'),
+  ('Leonardo DiCaprio'),
+  ('Margot Robbie'),
+  ('Ryan Gosling'),
+  ('Ana de Armas'); 
+  CREATE TABLE movies (id SERIAL PRIMARY KEY, movie_name text);
+  INSERT INTO movies(movie_name) VALUES
+  ('The Wolf of Wall Street'),
+  ('Inception'),
+  ('Oppenheimer'),
+  ('Barbie'),
+  ('Blade Runner 2049');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_many_to_one_link() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_many_to_one_link(
+    from_rel_id => 'actors'::regclass::oid,
+    to_rel_id => 'movies'::regclass::oid,
+    col_name => 'act_id'
+  );
+  RETURN NEXT has_column('movies', 'act_id');
+  RETURN NEXT col_type_is('movies', 'act_id', 'integer');
+  RETURN NEXT col_is_fk('movies', 'act_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_one_to_one_link() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_many_to_one_link(
+    from_rel_id => 'actors'::regclass::oid,
+    to_rel_id => 'movies'::regclass::oid,
+    col_name => 'act_id',
+    unique_link => true
+  );
+  RETURN NEXT has_column('movies', 'act_id');
+  RETURN NEXT col_type_is('movies', 'act_id', 'integer');
+  RETURN NEXT col_is_fk('movies', 'act_id');
+  RETURN NEXT col_is_unique('movies', 'act_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_many_to_many_link() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_many_to_many_link(
+    sch_id => 'public'::regnamespace::oid,
+    tab_name => 'movies_actors',
+    from_rel_ids => '{}'::oid[] || 'movies'::regclass::oid || 'actors'::regclass::oid,
+    col_names => '{"movie_id", "actor_id"}'::text[]
+  );
+  RETURN NEXT has_table('public'::name, 'movies_actors'::name);
+  RETURN NEXT has_column('movies_actors', 'movie_id');
+  RETURN NEXT col_type_is('movies_actors', 'movie_id', 'integer');
+  RETURN NEXT col_is_fk('movies_actors', 'movie_id');
+  RETURN NEXT has_column('movies_actors', 'actor_id');
+  RETURN NEXT col_type_is('movies_actors', 'actor_id', 'integer');
+  RETURN NEXT col_is_fk('movies_actors', 'actor_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- msar.add_mathesar_table
 
 CREATE OR REPLACE FUNCTION setup_create_table() RETURNS SETOF TEXT AS $f$

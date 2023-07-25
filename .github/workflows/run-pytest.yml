@@ -2,10 +2,14 @@ name: Run Python tests
 on: 
   push:
     paths:
-      - '**.py'
+      - '*.py'
+      - 'mathesar/**'
+      - 'db/**'
   pull_request:
     paths:
-      - '**.py'
+      - '*.py'
+      - 'mathesar/**'
+      - 'db/**'
 
 
 jobs:
