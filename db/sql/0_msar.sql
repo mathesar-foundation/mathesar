@@ -258,9 +258,15 @@ Determine whether the default value for the given column is an expression or con
 
 If the column default is an expression, then we return 'True', since that could be dynamic. If the
 column default is a simple constant, we return 'False'. The check is not very sophisticated, and
-errs on the side of returning 'True'. For example, the following would return 'True':
-- 3 + 5
-- mathesar_types.cast_to_integer('8')
+errs on the side of returning 'True'. We simply pull apart the pg_node_tree representation of the
+expression, and check whether the root node is a known function call type. Note that we do *not*
+search any deeper in the tree than the root node. This means we won't notice that some expressions
+are actually constant (or at least static), if they have a function call or operator as their root
+node.
+
+For example, the following would return 'True', even though they're not dynamic:
+  3 + 5
+  mathesar_types.cast_to_integer('8')
 
 Args:
   tab_id: The OID of the table with the column.
@@ -1007,7 +1013,22 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_type_text_complete(typ_jsonb jsonb, old_type text) RETURNS text AS $$
+msar.build_type_text_complete(typ_jsonb jsonb, old_type text) RETURNS text AS $$/*
+Build the text name of a type, using the old type as a base if only options are given.
+
+The main use for this is to allow for altering only the options of the type of a column.
+
+Args:
+  typ_jsonb: This is a jsonb denoting the new type.
+  old_type: This is the old type name, with no options.
+
+The typ_jsonb should be in the form:
+{
+  "name": <str> (optional),
+  "options": <obj> (optional)
+}
+
+*/
 SELECT msar.build_type_text(
   jsonb_strip_nulls(
     jsonb_build_object(
@@ -1832,19 +1853,31 @@ DECLARE
   default_expr text;
   raw_default_expr text;
 BEGIN
+  -- In this case, we assume the intent is to clear out the original default.
   IF jsonb_typeof(new_default)='null' THEN
     default_expr := null;
+  -- We get the root JSONB value as text if it exists.
   ELSEIF new_default #>> '{}' IS NOT NULL THEN
     default_expr := format('%L', new_default #>> '{}');  -- sanitize since this could be user input.
+  -- At this point, we know we're not setting a new default, or dropping the old one.
+  -- So, we check whether the original default is potentially dynamic, and whether we need to cast
+  -- it to a new type.
   ELSEIF msar.is_default_possibly_dynamic(tab_id, col_id) AND new_type IS NOT NULL THEN
-    -- We just cast the possibly dynamic expression to the new type in this case.
+    -- We add casting the possibly dynamic expression to the new type as part of the default
+    -- expression in this case.
     default_expr := __msar.build_cast_expr(old_default, new_type);
   ELSEIF old_default IS NOT NULL AND new_type IS NOT NULL THEN
-    -- If we arrive here, then we know the old_default is a constant value.
-    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type)) INTO raw_default_expr;
+    -- If we arrive here, then we know the old_default is a constant value, and we want to cast the
+    -- old default value to the new type *before* setting it as the new default. This avoids
+    -- building up nested cast functions in the default expression.
+    -- The first step is to execute the cast expression, putting the result into a new variable.
+    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type))
+      INTO raw_default_expr;
+    -- Then we format that new variable's value as a literal.
     default_expr := format('%L', raw_default_expr);
   END IF;
-  RETURN format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id)) || default_expr;
+  RETURN
+    format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id)) || default_expr;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1917,6 +1950,8 @@ WITH prepped_alters AS (
     tab_id,
     (col_alter_obj ->> 'attnum')::integer AS col_id,
     msar.build_type_text_complete(col_alter_obj -> 'type', format_type(atttypid, null)) AS new_type,
+    -- We get the old default expression from a catalog table before modifying anything, so we can
+    -- reset it properly if we alter the column type.
     pg_get_expr(adbin, tab_id) old_default,
     col_alter_obj -> 'default' AS new_default,
     (col_alter_obj -> 'not_null')::boolean AS not_null,
