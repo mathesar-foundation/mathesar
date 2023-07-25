@@ -383,6 +383,13 @@ AND attrelid = msar.get_relation_oid(sch_name, rel_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
+Return true if the given schema exists in the current database, false otherwise.
+*/
+SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ALTER SCHEMA FUNCTIONS
@@ -1813,7 +1820,7 @@ Args:
   type_: This type name string must cast properly to a regtype.
 */
 SELECT CASE
-  WHEN EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='mathesar_types') THEN
+  WHEN msar.schema_exists('mathesar_types') THEN
     msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
   ELSE
     val || '::' || type_::regtype::text
