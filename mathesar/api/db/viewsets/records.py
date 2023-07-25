@@ -70,7 +70,6 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
         name_converted_search = [{**column, 'column': column_ids_to_names[column['field']]} for column in search_fuzzy]
 
         try:
-
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table, column_names_to_ids,
                 filters=filter_processed,
