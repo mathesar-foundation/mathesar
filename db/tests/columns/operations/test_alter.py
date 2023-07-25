@@ -1,18 +1,15 @@
-import pytest
 from sqlalchemy import Column, select, Table, MetaData, VARCHAR, INTEGER
 
 from db import constants
-from db.columns.operations.alter import (
-    batch_update_columns, rename_column, set_column_default
-)
+from db.columns.operations.alter import batch_update_columns, rename_column
 from db.columns.operations.select import (
-    get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
+    get_column_attnum_from_name, get_column_name_from_attnum,
     get_columns_attnum_from_names,
 )
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
-from db.tests.columns.utils import column_test_dict, create_test_table, get_default
+from db.tests.columns.utils import create_test_table
 from db.types.base import PostgresType
 from db.types.operations.convert import get_db_type_enum_from_class
 from db.metadata import get_empty_metadata
@@ -138,77 +135,6 @@ def test_rename_column_index(engine_with_schema):
         index_columns = index["column_names"]
     assert old_col_name not in index_columns
     assert new_col_name in index_columns
-
-
-@pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_create(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
-    table_name = "create_column_default_table"
-    column_name = "create_column_default_column"
-    _, set_default, expt_default = column_test_dict[col_type].values()
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(column_name, col_type)
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        set_column_default(table_oid, column_attnum, engine, conn, set_default)
-
-    default = get_column_default(table_oid, column_attnum, engine, metadata=get_empty_metadata())
-    created_default = get_default(engine, table)
-
-    assert default == expt_default
-    assert created_default == expt_default
-
-
-@pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_update(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
-    table_name = "update_column_default_table"
-    column_name = "update_column_default_column"
-    start_default, set_default, expt_default = column_test_dict[col_type].values()
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(column_name, col_type, server_default=start_default)
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        set_column_default(table_oid, column_attnum, engine, conn, set_default)
-    default = get_column_default(table_oid, column_attnum, engine, metadata=get_empty_metadata())
-    created_default = get_default(engine, table)
-
-    assert default != start_default
-    assert default == expt_default
-    assert created_default == expt_default
-
-
-@pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_delete(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
-    table_name = "delete_column_default_table"
-    column_name = "delete_column_default_column"
-    _, set_default, _ = column_test_dict[col_type].values()
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(column_name, col_type, server_default=set_default)
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        set_column_default(table_oid, column_attnum, engine, conn, None)
-    default = get_column_default(table_oid, column_attnum, engine, metadata=get_empty_metadata())
-    created_default = get_default(engine, table)
-
-    assert default is None
-    assert created_default is None
 
 
 def test_batch_update_columns_no_changes(engine_with_schema):

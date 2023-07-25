@@ -1,8 +1,6 @@
 import json
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-from sqlalchemy import DefaultClause
-from sqlalchemy.exc import DataError
 from psycopg.errors import (
     InvalidTextRepresentation, InvalidParameterValue, RaiseException,
     SyntaxError
@@ -10,9 +8,7 @@ from psycopg.errors import (
 from db import connection as db_conn
 from db.columns.defaults import NAME, NULLABLE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
-from db.columns.operations.select import (
-    get_column_name_from_attnum,
-)
+from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations.select import reflect_table_from_oid
 from db.metadata import get_empty_metadata
 
@@ -48,10 +44,13 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
         except InvalidParameterValue:
             raise InvalidTypeOptionError
         except InvalidTextRepresentation:
-            column_db_name = db_conn.execute_msar_func_with_engine(
-                engine, 'get_column_name', table_oid, column_attnum
-            ).fetchone()[0]
-            raise InvalidTypeError(column_db_name, requested_type)
+            if column_alter_def.get('default') is None:
+                column_db_name = db_conn.execute_msar_func_with_engine(
+                    engine, 'get_column_name', table_oid, column_attnum
+                ).fetchone()[0]
+                raise InvalidTypeError(column_db_name, requested_type)
+            else:
+                raise InvalidDefaultError
         except RaiseException:
             column_db_name = db_conn.execute_msar_func_with_engine(
                 engine, 'get_column_name', table_oid, column_attnum
@@ -77,28 +76,6 @@ def alter_column_type(
         {"type": target_type.id, "type_options": type_options},
         connection=connection
     )
-
-
-def set_column_default(table_oid, column_attnum, engine, connection, default, metadata=None):
-    metadata = metadata if metadata else get_empty_metadata()
-    table = reflect_table_from_oid(
-        table_oid,
-        engine,
-        connection_to_use=connection,
-        metadata=metadata,
-    )
-    # TODO reuse metadata
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=metadata)
-    default_clause = DefaultClause(str(default)) if default is not None else default
-    try:
-        ctx = MigrationContext.configure(connection)
-        op = Operations(ctx)
-        op.alter_column(table.name, column_name, schema=table.schema, server_default=default_clause)
-    except DataError as e:
-        if (type(e.orig) == InvalidTextRepresentation):
-            raise InvalidDefaultError
-        else:
-            raise e
 
 
 # TODO Remove after implementing splitting/merging and column moving in SQL
