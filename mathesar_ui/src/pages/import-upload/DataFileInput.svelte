@@ -75,12 +75,11 @@
       request = api.addViaUpload(formData, handleProgressChange);
       const response = await request;
       dataFileId = response.id;
-    } catch (err) {
-      toast.fromError(err);
-      dataFileId = undefined;
-    } finally {
       isUploading = false;
       request = undefined;
+    } catch (err) {
+      toast.fromError(err);
+      init();
     }
   }
 
