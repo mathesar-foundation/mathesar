@@ -2,6 +2,7 @@ import json
 
 import pytest
 from sqlalchemy import Column as SAColumn, ForeignKey, Integer, MetaData, Table as SATable, select
+from sqlalchemy.sql import text
 
 from db.columns.operations.select import get_column_attnum_from_name
 from db.constraints.base import UniqueConstraint
@@ -9,6 +10,34 @@ from db.tables.operations.select import get_oid_from_table
 from mathesar.models.base import Constraint, Table, Column
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from db.metadata import get_empty_metadata
+from mathesar.state import reset_reflection
+
+
+@pytest.fixture
+def multi_column_primary_key_table(create_schema, get_uid, engine):
+    prefix = "multi_col_pk"
+    schema_name = f"schema_{prefix}_{get_uid()}"
+    schema = create_schema(schema_name)
+    db_name = schema.database.name
+    table_name = f"table_{prefix}_{get_uid()}"
+    query = f"""
+        CREATE TABLE "{schema_name}"."{table_name}" (
+            column1 INT,
+            column2 INT,
+            column3 INT,
+            PRIMARY KEY (column1, column2)
+        );
+    """
+    with engine.connect() as conn:
+        conn.execute(text(query))
+        conn.commit()
+    reset_reflection(db_name=db_name)
+    # NOTE filtering by name is impossible here, because db object names are a dynamic properties, not model fields
+    all_tables = Table.current_objects.all()
+    for table in all_tables:
+        if table.name == table_name:
+            return table
+    raise Exception("Should never happen.")
 
 
 def _verify_primary_and_unique_constraints(response):
@@ -582,3 +611,21 @@ def test_invalid_constraint_type(create_patents_table, client):
     assert response.status_code == 400
     assert response_data['code'] == ErrorCodes.UnsupportedConstraint.value
     assert f'Operations related to {invalid_constraint} constraint are currently not supported' in response_data['message']
+
+
+def test_multi_column_primary_key_constraint_list(multi_column_primary_key_table, client):
+    table = multi_column_primary_key_table
+    response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
+    response_data = response.json()
+    constraints_data = response_data['results']
+    assert len(constraints_data) == 1
+    constraint_data = constraints_data[0]
+    assert constraint_data['type'] == 'primary'
+    expected_pk_col_names = set(['column1', 'column2'])
+    expected_pk_col_ids = set(
+        col.id
+        for col
+        in table.columns.all()
+        if col.name in expected_pk_col_names
+    )
+    assert set(constraint_data['columns']) == expected_pk_col_ids
