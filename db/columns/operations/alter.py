@@ -1,7 +1,7 @@
 import json
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-from sqlalchemy import DefaultClause, text, DDL, select
+from sqlalchemy import DefaultClause
 from sqlalchemy.exc import DataError
 from psycopg.errors import (
     InvalidTextRepresentation, InvalidParameterValue, RaiseException,
@@ -11,11 +11,9 @@ from db import connection as db_conn
 from db.columns.defaults import NAME, NULLABLE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 from db.columns.operations.select import (
-    get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
+    get_column_name_from_attnum,
 )
 from db.tables.operations.select import reflect_table_from_oid
-from db.types.operations.cast import get_cast_function_name
-from db.utils import execute_statement
 from db.metadata import get_empty_metadata
 
 
@@ -65,55 +63,20 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
         db_conn.execute_msar_func_with_psycopg2_conn(
             connection, 'alter_columns',
             table_oid,
-            json.dumps([column_alter_def])
+            f"'{json.dumps([column_alter_def])}'"
         )
 
 
 def alter_column_type(
-    table_oid, column_name, engine, connection, target_type, type_options=None, metadata=None, columns_might_have_defaults=True,
+    table_oid, column_attnum, engine, connection, target_type, type_options=None
 ):
-    if type_options is None:
-        type_options = {}
-    metadata = metadata if metadata else get_empty_metadata()
-    type_options = type_options if type_options is not None else {}
-    _preparer = engine.dialect.identifier_preparer
-    table = reflect_table_from_oid(
-        table_oid,
+    alter_column(
         engine,
-        connection_to_use=connection,
-        metadata=metadata,
+        table_oid,
+        column_attnum,
+        {"type": target_type.id, "type_options": type_options},
+        connection=connection
     )
-    column = table.columns[column_name]
-    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine=engine, metadata=metadata, connection_to_use=connection)
-
-    if columns_might_have_defaults:
-        default = get_column_default(table_oid, column_attnum, engine=engine, metadata=metadata, connection_to_use=connection)
-        if default is not None:
-            default_text = column.server_default.arg.text
-        set_column_default(table_oid, column_attnum, engine, connection, None, metadata=metadata)
-
-    prepared_table_name = _preparer.format_table(table)
-    prepared_column_name = _preparer.format_column(column)
-    prepared_type_name = target_type.get_sa_instance_compiled(
-        engine=engine,
-        type_options=type_options
-    )
-    cast_function_name = get_cast_function_name(target_type)
-    alter_stmt = f"""
-    ALTER TABLE {prepared_table_name}
-      ALTER COLUMN {prepared_column_name}
-      TYPE {prepared_type_name}
-      USING {cast_function_name}({prepared_column_name});
-    """
-
-    execute_statement(engine, DDL(alter_stmt), connection)
-
-    if columns_might_have_defaults:
-        if default is not None:
-            cast_stmt = f"{cast_function_name}({default_text})"
-            default_stmt = select(text(cast_stmt))
-            new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
-            set_column_default(table_oid, column_attnum, engine, connection, new_default)
 
 
 def set_column_default(table_oid, column_attnum, engine, connection, default, metadata=None):
