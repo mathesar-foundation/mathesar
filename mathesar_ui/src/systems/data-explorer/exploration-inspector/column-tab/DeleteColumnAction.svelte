@@ -63,14 +63,14 @@
         <WarningBox>
           {#if selectedColumnAliases.length === 1}
             {#if denyDeletionDueToLastRemainingBaseColumn}
-              {$LL.explorationsInspectorDeleteColumnAction.cannotDeleteColumnLastRemainingBaseColumn()}
+              {$LL.deleteColumnAction.cannotDeleteColumnLastRemainingBaseColumn()}
             {:else}
-              {$LL.explorationsInspectorDeleteColumnAction.cannotDeleteColumnUsedInTransformation()}
+              {$LL.deleteColumnAction.cannotDeleteColumnUsedInTransformation()}
             {/if}
           {:else if denyDeletionDueToLastRemainingBaseColumn}
-            {$LL.explorationsInspectorDeleteColumnAction.cannotDeleteColumnsLastRemainingBaseColumn()}
+            {$LL.deleteColumnAction.cannotDeleteColumnsLastRemainingBaseColumn()}
           {:else}
-            {$LL.explorationsInspectorDeleteColumnAction.cannotDeleteColumnsUsedInTransformation()}
+            {$LL.deleteColumnAction.cannotDeleteColumnsUsedInTransformation()}
           {/if}
         </WarningBox>
       </div>

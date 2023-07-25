@@ -22,7 +22,7 @@
 
 <div data-identifier="column-selection-list">
   <section>
-    <header>{$LL.dataExplorerColumnSelectionPane.fromBaseTable()}</header>
+    <header>{$LL.columnSelectionPane.fromBaseTable()}</header>
     <div class="content">
       {#each [...baseTableColumns] as [columnId, column] (columnId)}
         <SelectableColumn
@@ -35,10 +35,10 @@
   </section>
   {#if !hasInitialColumns && (hasLinksFromBaseTable || hasLinksToBaseTable)}
     <section>
-      <header>{$LL.dataExplorerColumnSelectionPane.fromLinkedTables()}</header>
+      <header>{$LL.columnSelectionPane.fromLinkedTables()}</header>
       <div class="content">
         <div class="help-text">
-          {$LL.dataExplorerColumnSelectionPane.atLeastOneColumnFromBaseRequired()}
+          {$LL.columnSelectionPane.atLeastOneColumnFromBaseRequired()}
         </div>
       </div>
     </section>
@@ -46,7 +46,7 @@
     {#if hasLinksFromBaseTable}
       <section>
         <header>
-          {$LL.dataExplorerColumnSelectionPane.linkedFromBaseTable()}
+          {$LL.columnSelectionPane.linkedFromBaseTable()}
         </header>
         <div class="content">
           <SelectableColumnTree
@@ -61,7 +61,7 @@
     {#if hasLinksToBaseTable}
       <section>
         <header>
-          {$LL.dataExplorerColumnSelectionPane.linkedToBaseTable()}
+          {$LL.columnSelectionPane.linkedToBaseTable()}
         </header>
         <div class="content" data-identifier="referenced-by-tables">
           {#if hasInitialColumns}

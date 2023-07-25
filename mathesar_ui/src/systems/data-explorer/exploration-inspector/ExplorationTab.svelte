@@ -79,7 +79,7 @@
       const message =
         err instanceof Error
           ? err.message
-          : $LL.explorationsInspectorExplorationTab.unableToSaveExploration();
+          : $LL.explorationTab.unableToSaveExploration();
       toast.error(message);
     }
   }

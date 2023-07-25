@@ -19,7 +19,7 @@
 <FieldLayout>
   <fieldset>
     <legend>
-      <RichText text={$LL.linkTableSelectLinkType.typeOfLinkTo()} let:slotName>
+      <RichText text={$LL.selectLinkType.typeOfLinkTo()} let:slotName>
         {#if slotName === 'targetTable'}
           <Pill table={target} which="target" />:
         {/if}

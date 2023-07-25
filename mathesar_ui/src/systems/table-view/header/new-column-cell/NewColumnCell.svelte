@@ -37,7 +37,7 @@
   closeOnInnerClick={false}
   triggerAppearance="secondary"
   showArrow={false}
-  ariaLabel={$LL.tableViewNewColumnCell.newColumn()}
+  ariaLabel={$LL.newColumnCell.newColumn()}
   on:close={form.reset}
   disabled={$isSubmitting}
 >
@@ -51,13 +51,13 @@
   <div slot="content" class="new-column-dropdown" let:close>
     <Field
       field={columnName}
-      label={$LL.tableViewNewColumnCell.columnName()}
+      label={$LL.newColumnCell.columnName()}
       layout="stacked"
     />
     <Field
       field={columnType}
       input={{ component: ColumnTypeSelector }}
-      label={$LL.tableViewNewColumnCell.selectType()}
+      label={$LL.newColumnCell.selectType()}
       layout="stacked"
     />
     <div class="submit">

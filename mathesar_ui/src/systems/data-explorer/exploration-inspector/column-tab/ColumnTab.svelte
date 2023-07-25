@@ -72,7 +72,7 @@
 
 {#if hasMultipleSelectedColumns}
   <div class="section-content">
-    {$LL.explorationsInspectorColumnTab.moreThanOneColumnSelected({
+    {$LL.columnTab.moreThanOneColumnSelected({
       count: selectedColumns.length,
     })}
   </div>
@@ -101,6 +101,6 @@
 
 {#if !selectedColumn}
   <div class="section-content">
-    {$LL.explorationsInspectorColumnTab.selectAColumnToViewProperties()}
+    {$LL.columnTab.selectAColumnToViewProperties()}
   </div>
 {/if}

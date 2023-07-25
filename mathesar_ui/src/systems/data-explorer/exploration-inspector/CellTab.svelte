@@ -48,7 +48,7 @@
       </div>
     </section>
   {:else}
-    {$LL.explorationsInspectorCellTab.selectACellToViewProperties()}
+    {$LL.cellTab.selectACellToViewProperties()}
   {/if}
 </div>
 

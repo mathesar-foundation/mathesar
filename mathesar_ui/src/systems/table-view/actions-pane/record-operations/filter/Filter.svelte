@@ -114,7 +114,7 @@
 </script>
 
 <div class="filters" class:filtered={filterCount} bind:this={element}>
-  <div class="header">{$LL.tableViewFilters.filterRecords()}</div>
+  <div class="header">{$LL.recordOperationsFilters.filterRecords()}</div>
   <div class="content">
     {#if filterCount}
       <FilterEntries
@@ -125,7 +125,9 @@
         on:updateCombination={(e) => setCombination(e.detail)}
       />
     {:else}
-      <span class="muted">{$LL.tableViewFilters.noFiltersHaveBeenAdded()}</span>
+      <span class="muted"
+        >{$LL.recordOperationsFilters.noFiltersHaveBeenAdded()}</span
+      >
     {/if}
   </div>
   {#if $processedColumns.size}
@@ -139,7 +141,7 @@
         }}
       >
         <Icon {...iconAddNew} />
-        <span>{$LL.tableViewFilters.addNewFilter()}</span>
+        <span>{$LL.recordOperationsFilters.addNewFilter()}</span>
       </Button>
     </div>
   {/if}

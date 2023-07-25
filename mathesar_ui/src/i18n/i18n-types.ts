@@ -441,7 +441,7 @@ type RootTranslation = {
      */
     columnName: string;
   };
-  upgradeConfirmation: {
+  upgradeConfirm: {
     /**
      * B​e​f​o​r​e​ ​U​p​g​r​a​d​i​n​g
      */
@@ -623,7 +623,7 @@ type RootTranslation = {
      */
     dataChangesHelp: string;
   };
-  databaseNavigation: {
+  databaseNavigationList: {
     /**
      * A​l​l​ ​D​a​t​a​b​a​s​e​s
      */
@@ -645,7 +645,7 @@ type RootTranslation = {
      */
     publicSchemaHelp: string;
   };
-  importPreview: {
+  importPreviewErrorInfo: {
     /**
      * F​a​i​l​e​d​ ​t​o​ ​l​o​a​d​ ​p​r​e​v​i​e​w
      */
@@ -654,6 +654,8 @@ type RootTranslation = {
      * D​e​l​e​t​e​ ​I​m​p​o​r​t
      */
     deleteImport: string;
+  };
+  importPreviewPage: {
     /**
      * A​n​ ​e​r​r​o​r​ ​o​c​c​u​r​r​e​n​t​ ​w​h​i​l​e​ ​l​o​a​d​i​n​g​ ​t​h​e​ ​p​r​e​v​i​e​w
      */
@@ -707,7 +709,7 @@ type RootTranslation = {
      */
     useFirstRowAsHeader: string;
   };
-  importUpload: {
+  importUploadPage: {
     /**
      * U​p​l​o​a​d​ ​a​ ​f​i​l​e
      */
@@ -771,7 +773,7 @@ type RootTranslation = {
      */
     recordInTable: string;
   };
-  recordPageWidget: {
+  recordWidgets: {
     /**
      * R​e​l​a​t​e​d​ ​R​e​c​o​r​d​s
      */
@@ -846,7 +848,7 @@ type RootTranslation = {
      */
     couldNoFetchProfile: string;
   };
-  explorationsInspectorColumnSource: {
+  columnSource: {
     /**
      * A​g​g​r​e​g​a​t​e​d​ ​f​r​o​m
      */
@@ -856,7 +858,7 @@ type RootTranslation = {
      */
     sourceColumn: string;
   };
-  explorationsInspectorColumnTab: {
+  columnTab: {
     /**
      * {​c​o​u​n​t​}​ ​c​o​l​u​m​n​s​ ​s​e​l​e​c​t​e​d
      * @param {number} count
@@ -867,7 +869,7 @@ type RootTranslation = {
      */
     selectAColumnToViewProperties: string;
   };
-  explorationsInspectorDeleteColumnAction: {
+  deleteColumnAction: {
     /**
      * T​h​i​s​ ​c​o​l​u​m​n​ ​c​a​n​n​o​t​ ​b​e​ ​d​e​l​e​t​e​d​ ​b​e​c​a​u​s​e​ ​a​t​l​e​a​s​t​ ​o​n​e​ ​c​o​l​u​m​n​ ​f​r​o​m​ ​t​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​i​s​ ​r​e​q​u​i​r​e​d​.​ ​P​l​e​a​s​e​ ​a​d​d​ ​a​n​o​t​h​e​r​ ​c​o​l​u​m​n​ ​f​r​o​m​ ​t​h​e​ ​b​a​s​e​ ​t​a​b​l​e​ ​b​e​f​o​r​e​ ​d​e​l​e​t​i​n​g​ ​t​h​i​s​ ​c​o​l​u​m​n​.
      */
@@ -885,19 +887,19 @@ type RootTranslation = {
      */
     cannotDeleteColumnsUsedInTransformation: string;
   };
-  explorationsInspectorCellTab: {
+  cellTab: {
     /**
      * S​e​l​e​c​t​ ​a​ ​c​e​l​l​ ​t​o​ ​v​i​e​w​ ​i​t​'​s​ ​p​r​o​p​e​r​t​i​e​s​.
      */
     selectACellToViewProperties: string;
   };
-  explorationsInspectorExplorationTab: {
+  explorationTab: {
     /**
      * U​n​a​b​l​e​ ​t​o​ ​s​a​v​e​ ​E​x​p​l​o​r​a​t​i​o​n​.
      */
     unableToSaveExploration: string;
   };
-  dataExplorerColumnSelectionPane: {
+  columnSelectionPane: {
     /**
      * F​r​o​m​ ​B​a​s​e​ ​t​a​b​l​e
      */
@@ -919,26 +921,26 @@ type RootTranslation = {
      */
     linkedToBaseTable: string;
   };
-  dataExplorerSelectableColum: {
+  selectableColum: {
     /**
      * T​h​i​s​ ​c​o​l​u​m​n​ ​h​a​s​ ​b​e​e​n​ ​a​d​d​e​d​ ​{​t​i​m​e​s​}
      * @param {string} times
      */
     columnAddedTimes: RequiredParams<'times'>;
   };
-  dataExplorerHideTransformation: {
+  hideTransformation: {
     /**
      * S​e​l​e​c​t​ ​C​o​l​u​m​n​s​ ​t​o​ ​H​i​d​e
      */
     selectColumnsToHide: string;
   };
-  dataExplorerTransformationPane: {
+  transformationPane: {
     /**
      * A​d​d​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n​ ​s​t​e​p
      */
     addTransformationStep: string;
   };
-  dataExplorerInputSidebar: {
+  inputSidebar: {
     /**
      * S​e​l​e​c​t​ ​C​o​l​u​m​n​s
      */
@@ -980,7 +982,7 @@ type RootTranslation = {
      */
     failedToFetchColumnInfo: string;
   };
-  dataExplorerQueryRunErrors: {
+  queryRunErrors: {
     /**
      * T​h​e​ ​r​e​s​u​l​t​ ​c​o​u​l​d​ ​n​o​t​ ​b​e​ ​d​i​s​p​l​a​y​e​d​.
      */
@@ -1069,7 +1071,7 @@ type RootTranslation = {
      */
     getStartedByAddingColumns: string;
   };
-  dataExplorerQueryManager: {
+  queryManager: {
     /**
      * T​h​e​r​e​ ​w​a​s​ ​a​n​ ​e​r​r​o​r​ ​f​e​t​c​h​i​n​g​ ​j​o​i​n​a​b​l​e​ ​l​i​n​k​s
      */
@@ -1079,7 +1081,7 @@ type RootTranslation = {
      */
     errorSavingQuery: string;
   };
-  dataExplorerQueryModel: {
+  queryModel: {
     /**
      * Q​u​e​r​y​M​o​d​e​l​ ​c​u​r​r​e​n​t​l​y​ ​a​l​l​o​w​s​ ​o​n​l​y​ ​a​ ​s​i​n​g​l​e​ ​s​u​m​m​a​r​i​z​a​t​i​o​n​ ​t​r​a​n​s​f​o​r​m​a​t​i​o​n
      */
@@ -1089,7 +1091,7 @@ type RootTranslation = {
      */
     cannotRunBaseTableUndefined: string;
   };
-  dataExplorerQueryRunner: {
+  queryRunner: {
     /**
      * U​n​a​b​l​e​ ​t​o​ ​r​u​n​ ​q​u​e​r​y​ ​d​u​e​ ​t​o​ ​a​n​ ​u​n​k​n​o​w​n​ ​r​e​a​s​o​n
      */
@@ -1102,7 +1104,7 @@ type RootTranslation = {
      */
     multipleLinksPresentForSameColumn: RequiredParams<'columnId'>;
   };
-  recordSelectorRecordSelectorContent: {
+  recordSelectorContent: {
     /**
      * N​o​ ​r​e​c​o​r​d​ ​s​u​m​m​a​r​y​ ​t​e​m​p​l​a​t​e​ ​f​o​u​n​d​ ​i​n​ ​A​P​I​ ​r​e​s​p​o​n​s​e​.
      */
@@ -1128,7 +1130,7 @@ type RootTranslation = {
      */
     noExistingRecords: string;
   };
-  tableViewFilters: {
+  recordOperationsFilters: {
     /**
      * F​i​l​t​e​r​ ​r​e​c​o​r​d​s
      */
@@ -1142,7 +1144,7 @@ type RootTranslation = {
      */
     addNewFilter: string;
   };
-  tableViewGroup: {
+  recordOperationsGroup: {
     /**
      * G​r​o​u​p​ ​r​e​c​o​r​d​s​ ​b​y
      */
@@ -1156,7 +1158,7 @@ type RootTranslation = {
      */
     addNewGrouping: string;
   };
-  tableViewSort: {
+  recordOperationsSort: {
     /**
      * N​o​ ​s​o​r​t​i​n​g​ ​c​o​n​d​i​t​i​o​n​ ​h​a​s​ ​b​e​e​n​ ​a​d​d​e​d
      */
@@ -1166,7 +1168,7 @@ type RootTranslation = {
      */
     addNewSortCondition: string;
   };
-  constraintsConstraintHelp: {
+  constraintHelp: {
     /**
      * C​o​n​s​t​r​a​i​n​t​s​ ​h​e​l​p​ ​y​o​u​ ​k​e​e​p​ ​y​o​u​r​ ​d​a​t​a​ ​c​l​e​a​n​ ​b​y​ ​r​e​j​e​c​t​i​n​g​ ​i​n​v​a​l​i​d​ ​d​a​t​a​ ​b​e​f​o​r​e​ ​i​t​ ​g​e​t​s​ ​e​n​t​e​r​e​d​.
      */
@@ -1182,7 +1184,7 @@ type RootTranslation = {
      */
     constraintNameMathesar: string;
   };
-  constraintsConstraintTypesSection: {
+  constraintNameHelp: {
     /**
      * A​ ​p​r​i​m​a​r​y​ ​k​e​y​ ​c​o​n​s​t​r​a​i​n​t​ ​u​n​i​q​u​e​l​y​ ​i​d​e​n​t​i​f​i​e​s​ ​e​a​c​h​ ​r​e​c​o​r​d​ ​i​n​ ​a​ ​t​a​b​l​e​.
      */
@@ -1201,7 +1203,7 @@ type RootTranslation = {
      */
     noConstraints: RequiredParams<'constraintType'>;
   };
-  constraintsNewForeignKeyConstraint: {
+  newForeignKeyConstraint: {
     /**
      * N​e​w​ ​F​o​r​e​i​g​n​ ​K​e​y​ ​C​o​n​s​t​r​a​i​n​t
      */
@@ -1219,7 +1221,7 @@ type RootTranslation = {
      */
     targetColumnInTable: string;
   };
-  constraintsNewUniqueConstraint: {
+  newUniqueConstraint: {
     /**
      * A​ ​c​o​n​s​t​r​a​i​n​t​ ​w​i​t​h​ ​t​h​a​t​ ​n​a​m​e​ ​a​l​r​e​a​d​y​ ​e​x​i​s​t​s
      */
@@ -1233,7 +1235,7 @@ type RootTranslation = {
      */
     newUniqueConstraint: string;
   };
-  constraintsTableConstraints: {
+  tableConstraints: {
     /**
      * U​n​a​b​l​e​ ​t​o​ ​f​e​t​c​h​ ​t​a​b​l​e​ ​c​o​n​s​t​r​a​i​n​t​s
      */
@@ -1243,13 +1245,13 @@ type RootTranslation = {
      */
     noConstraints: string;
   };
-  constraintsTableConstraintsModal: {
+  tableConstraintsModal: {
     /**
      * C​o​n​s​t​r​a​i​n​t​s​ ​a​r​e​ ​u​s​e​d​ ​t​o​ ​d​e​f​i​n​e​ ​r​e​l​a​t​i​o​n​s​h​i​p​s​ ​b​e​t​w​e​e​n​ ​r​e​c​o​r​d​s​ ​i​n​ ​d​i​f​f​e​r​e​n​t​ ​t​a​b​l​e​s​ ​o​r​ ​t​o​ ​e​n​s​u​r​e​ ​t​h​a​t​ ​r​e​c​o​r​d​s​ ​i​n​ ​a​ ​c​o​l​u​m​n​ ​a​r​e​ ​u​n​i​q​u​e​.​ ​C​o​n​s​t​r​a​i​n​t​s​ ​c​a​n​ ​b​e​ ​a​p​p​l​i​e​d​ ​t​o​ ​a​ ​s​i​n​g​l​e​ ​c​o​l​u​m​n​ ​o​r​ ​a​ ​c​o​m​b​i​n​a​t​i​o​n​ ​o​f​ ​c​o​l​u​m​n​s​.
      */
     constraintsDescription: string;
   };
-  tableViewHeaderCell: {
+  columnHEaderContextMenu: {
     /**
      * A​d​d​ ​F​i​l​t​e​r
      */
@@ -1272,7 +1274,7 @@ type RootTranslation = {
      */
     groupByColumn: string;
   };
-  tableViewNewColumnCell: {
+  newColumnCell: {
     /**
      * N​e​w​ ​C​o​l​u​m​n
      */
@@ -1282,7 +1284,7 @@ type RootTranslation = {
      */
     selectType: string;
   };
-  linkTableLinkTableForm: {
+  linkTableForm: {
     /**
      * T​h​e​ ​t​w​o​ ​c​o​l​u​m​n​s​ ​c​a​n​n​o​t​ ​h​a​v​e​ ​t​h​e​ ​s​a​m​e​ ​n​a​m​e​.
      */
@@ -1323,7 +1325,7 @@ type RootTranslation = {
      */
     ifColumnNameIsId: string;
   };
-  linkTableLinkTypeOptions: {
+  linkTypeOptions: {
     /**
      * O​n​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​ ​c​a​n​ ​b​e​ ​l​i​n​k​e​d​ ​f​r​o​m​ ​m​u​l​t​i​p​l​e​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​.
      */
@@ -1341,13 +1343,13 @@ type RootTranslation = {
      */
     manyToManySelfReferential: string;
   };
-  linkTableNewColumn: {
+  newColumn: {
     /**
      * W​e​'​l​l​ ​a​d​d​ ​a​ ​c​o​l​u​m​n​ ​i​n​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​w​h​i​c​h​ ​l​i​n​k​s​ ​t​o​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>
      */
     newColumnInBaseLinkingToTarget: string;
   };
-  linkTableSelectLinkType: {
+  selectLinkType: {
     /**
      * T​y​p​e​ ​o​f​ ​l​i​n​k​ ​t​o​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>
      */
@@ -1780,7 +1782,7 @@ export type TranslationFunctions = {
      */
     columnName: () => LocalizedString;
   };
-  upgradeConfirmation: {
+  upgradeConfirm: {
     /**
      * Before Upgrading
      */
@@ -1960,7 +1962,7 @@ export type TranslationFunctions = {
      */
     dataChangesHelp: () => LocalizedString;
   };
-  databaseNavigation: {
+  databaseNavigationList: {
     /**
      * All Databases
      */
@@ -1982,7 +1984,7 @@ export type TranslationFunctions = {
      */
     publicSchemaHelp: () => LocalizedString;
   };
-  importPreview: {
+  importPreviewErrorInfo: {
     /**
      * Failed to load preview
      */
@@ -1991,6 +1993,8 @@ export type TranslationFunctions = {
      * Delete Import
      */
     deleteImport: () => LocalizedString;
+  };
+  importPreviewPage: {
     /**
      * An error occurrent while loading the preview
      */
@@ -2044,7 +2048,7 @@ export type TranslationFunctions = {
      */
     useFirstRowAsHeader: () => LocalizedString;
   };
-  importUpload: {
+  importUploadPage: {
     /**
      * Upload a file
      */
@@ -2108,7 +2112,7 @@ export type TranslationFunctions = {
      */
     recordInTable: () => LocalizedString;
   };
-  recordPageWidget: {
+  recordWidgets: {
     /**
      * Related Records
      */
@@ -2183,7 +2187,7 @@ export type TranslationFunctions = {
      */
     couldNoFetchProfile: () => LocalizedString;
   };
-  explorationsInspectorColumnSource: {
+  columnSource: {
     /**
      * Aggregated from
      */
@@ -2193,7 +2197,7 @@ export type TranslationFunctions = {
      */
     sourceColumn: () => LocalizedString;
   };
-  explorationsInspectorColumnTab: {
+  columnTab: {
     /**
      * {count} columns selected
      */
@@ -2203,7 +2207,7 @@ export type TranslationFunctions = {
      */
     selectAColumnToViewProperties: () => LocalizedString;
   };
-  explorationsInspectorDeleteColumnAction: {
+  deleteColumnAction: {
     /**
      * This column cannot be deleted because atleast one column from the base table is required. Please add another column from the base table before deleting this column.
      */
@@ -2221,19 +2225,19 @@ export type TranslationFunctions = {
      */
     cannotDeleteColumnsUsedInTransformation: () => LocalizedString;
   };
-  explorationsInspectorCellTab: {
+  cellTab: {
     /**
      * Select a cell to view it's properties.
      */
     selectACellToViewProperties: () => LocalizedString;
   };
-  explorationsInspectorExplorationTab: {
+  explorationTab: {
     /**
      * Unable to save Exploration.
      */
     unableToSaveExploration: () => LocalizedString;
   };
-  dataExplorerColumnSelectionPane: {
+  columnSelectionPane: {
     /**
      * From Base table
      */
@@ -2255,25 +2259,25 @@ export type TranslationFunctions = {
      */
     linkedToBaseTable: () => LocalizedString;
   };
-  dataExplorerSelectableColum: {
+  selectableColum: {
     /**
      * This column has been added {times}
      */
     columnAddedTimes: (arg: { times: string }) => LocalizedString;
   };
-  dataExplorerHideTransformation: {
+  hideTransformation: {
     /**
      * Select Columns to Hide
      */
     selectColumnsToHide: () => LocalizedString;
   };
-  dataExplorerTransformationPane: {
+  transformationPane: {
     /**
      * Add transformation step
      */
     addTransformationStep: () => LocalizedString;
   };
-  dataExplorerInputSidebar: {
+  inputSidebar: {
     /**
      * Select Columns
      */
@@ -2315,7 +2319,7 @@ export type TranslationFunctions = {
      */
     failedToFetchColumnInfo: () => LocalizedString;
   };
-  dataExplorerQueryRunErrors: {
+  queryRunErrors: {
     /**
      * The result could not be displayed.
      */
@@ -2403,7 +2407,7 @@ export type TranslationFunctions = {
      */
     getStartedByAddingColumns: () => LocalizedString;
   };
-  dataExplorerQueryManager: {
+  queryManager: {
     /**
      * There was an error fetching joinable links
      */
@@ -2413,7 +2417,7 @@ export type TranslationFunctions = {
      */
     errorSavingQuery: () => LocalizedString;
   };
-  dataExplorerQueryModel: {
+  queryModel: {
     /**
      * QueryModel currently allows only a single summarization transformation
      */
@@ -2423,7 +2427,7 @@ export type TranslationFunctions = {
      */
     cannotRunBaseTableUndefined: () => LocalizedString;
   };
-  dataExplorerQueryRunner: {
+  queryRunner: {
     /**
      * Unable to run query due to an unknown reason
      */
@@ -2437,7 +2441,7 @@ export type TranslationFunctions = {
       columnId: number;
     }) => LocalizedString;
   };
-  recordSelectorRecordSelectorContent: {
+  recordSelectorContent: {
     /**
      * No record summary template found in API response.
      */
@@ -2463,7 +2467,7 @@ export type TranslationFunctions = {
      */
     noExistingRecords: () => LocalizedString;
   };
-  tableViewFilters: {
+  recordOperationsFilters: {
     /**
      * Filter records
      */
@@ -2477,7 +2481,7 @@ export type TranslationFunctions = {
      */
     addNewFilter: () => LocalizedString;
   };
-  tableViewGroup: {
+  recordOperationsGroup: {
     /**
      * Group records by
      */
@@ -2491,7 +2495,7 @@ export type TranslationFunctions = {
      */
     addNewGrouping: () => LocalizedString;
   };
-  tableViewSort: {
+  recordOperationsSort: {
     /**
      * No sorting condition has been added
      */
@@ -2501,7 +2505,7 @@ export type TranslationFunctions = {
      */
     addNewSortCondition: () => LocalizedString;
   };
-  constraintsConstraintHelp: {
+  constraintHelp: {
     /**
      * Constraints help you keep your data clean by rejecting invalid data before it gets entered.
      */
@@ -2517,7 +2521,7 @@ export type TranslationFunctions = {
      */
     constraintNameMathesar: () => LocalizedString;
   };
-  constraintsConstraintTypesSection: {
+  constraintNameHelp: {
     /**
      * A primary key constraint uniquely identifies each record in a table.
      */
@@ -2535,7 +2539,7 @@ export type TranslationFunctions = {
      */
     noConstraints: (arg: { constraintType: string }) => LocalizedString;
   };
-  constraintsNewForeignKeyConstraint: {
+  newForeignKeyConstraint: {
     /**
      * New Foreign Key Constraint
      */
@@ -2553,7 +2557,7 @@ export type TranslationFunctions = {
      */
     targetColumnInTable: () => LocalizedString;
   };
-  constraintsNewUniqueConstraint: {
+  newUniqueConstraint: {
     /**
      * A constraint with that name already exists
      */
@@ -2567,7 +2571,7 @@ export type TranslationFunctions = {
      */
     newUniqueConstraint: () => LocalizedString;
   };
-  constraintsTableConstraints: {
+  tableConstraints: {
     /**
      * Unable to fetch table constraints
      */
@@ -2577,13 +2581,13 @@ export type TranslationFunctions = {
      */
     noConstraints: () => LocalizedString;
   };
-  constraintsTableConstraintsModal: {
+  tableConstraintsModal: {
     /**
      * Constraints are used to define relationships between records in different tables or to ensure that records in a column are unique. Constraints can be applied to a single column or a combination of columns.
      */
     constraintsDescription: () => LocalizedString;
   };
-  tableViewHeaderCell: {
+  columnHEaderContextMenu: {
     /**
      * Add Filter
      */
@@ -2605,7 +2609,7 @@ export type TranslationFunctions = {
      */
     groupByColumn: () => LocalizedString;
   };
-  tableViewNewColumnCell: {
+  newColumnCell: {
     /**
      * New Column
      */
@@ -2615,7 +2619,7 @@ export type TranslationFunctions = {
      */
     selectType: () => LocalizedString;
   };
-  linkTableLinkTableForm: {
+  linkTableForm: {
     /**
      * The two columns cannot have the same name.
      */
@@ -2655,7 +2659,7 @@ export type TranslationFunctions = {
      */
     ifColumnNameIsId: () => LocalizedString;
   };
-  linkTableLinkTypeOptions: {
+  linkTypeOptions: {
     /**
      * One <>baseTable<> record can be linked from multiple <>targetTable<> records.
      */
@@ -2673,13 +2677,13 @@ export type TranslationFunctions = {
      */
     manyToManySelfReferential: () => LocalizedString;
   };
-  linkTableNewColumn: {
+  newColumn: {
     /**
      * We'll add a column in <>baseTable<> which links to <>targetTable<>
      */
     newColumnInBaseLinkingToTarget: () => LocalizedString;
   };
-  linkTableSelectLinkType: {
+  selectLinkType: {
     /**
      * Type of link to <>targetTable<>
      */

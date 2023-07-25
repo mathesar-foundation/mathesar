@@ -5,9 +5,9 @@
 
 <Help>
   <p>
-    {$LL.constraintsConstraintNameHelp.constraintNameDb()}
+    {$LL.constraintNameHelp.constraintNameDb()}
   </p>
   <p>
-    {$LL.constraintsConstraintNameHelp.constraintNameMathesar()}
+    {$LL.constraintNameHelp.constraintNameMathesar()}
   </p>
 </Help>

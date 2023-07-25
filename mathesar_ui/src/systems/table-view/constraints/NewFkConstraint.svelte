@@ -119,7 +119,7 @@
 
 <div class="add-new-fk-constraint">
   <span class="title"
-    >{$LL.constraintsNewForeignKeyConstraint.newForeignKeyConstraint()}</span
+    >{$LL.newForeignKeyConstraint.newForeignKeyConstraint()}</span
   >
 
   <Field
@@ -129,14 +129,14 @@
       props: { columns: baseTableColumns },
     }}
     layout="stacked"
-    label={$LL.constraintsNewForeignKeyConstraint.columnReferencesTargetTable()}
+    label={$LL.newForeignKeyConstraint.columnReferencesTargetTable()}
   />
 
   <Field
     field={targetTable}
     input={{ component: SelectTable, props: { autoSelect: 'clear', tables } }}
     layout="stacked"
-    label={$LL.constraintsNewForeignKeyConstraint.targetTable()}
+    label={$LL.newForeignKeyConstraint.targetTable()}
   />
 
   {#if $targetTable}
@@ -153,7 +153,7 @@
       >
         <span slot="label">
           <RichText
-            text={$LL.constraintsNewForeignKeyConstraint.targetColumnInTable()}
+            text={$LL.newForeignKeyConstraint.targetColumnInTable()}
             let:slotName
           >
             {#if slotName === 'tableName'}

@@ -27,7 +27,7 @@
 <div class="query-run-errors">
   <ErrorBox fullWidth>
     <p class="error-header">
-      {$LL.dataExplorerQueryRunErrors.resultCouldNotBeDisplayed()}
+      {$LL.queryRunErrors.resultCouldNotBeDisplayed()}
     </p>
     {#if errors instanceof ApiMultiError}
       {#each errors.errors as apierror}
@@ -36,7 +36,7 @@
             {@const columnId = Number(apierror.detail.column_id)}
             <li class="error">
               <p class="strong">
-                {$LL.dataExplorerQueryRunErrors.someColumnsInQueryAreMissing()}
+                {$LL.queryRunErrors.someColumnsInQueryAreMissing()}
               </p>
               {#if queryManager}
                 {@const columnsAndTransformsToDelete =
@@ -48,11 +48,11 @@
                 {@const transformsWithIndex =
                   columnsAndTransformsToDelete.transformsUsingColumnIds}
                 <p>
-                  {$LL.dataExplorerQueryRunErrors.attemptToRecoverTheQuery()}
+                  {$LL.queryRunErrors.attemptToRecoverTheQuery()}
                 </p>
                 {#if initialColumns.length > 0}
                   <p>
-                    {$LL.dataExplorerQueryRunErrors.thisWillRemoveTheColumns()}:
+                    {$LL.queryRunErrors.thisWillRemoveTheColumns()}:
                   </p>
                   <ul class="removal-list">
                     {#each initialColumns as initialColumn (initialColumn.alias)}
@@ -65,7 +65,7 @@
                 {/if}
                 {#if transformsWithIndex.length > 0}
                   <p>
-                    {$LL.dataExplorerQueryRunErrors.thisWillRemoveTheTransformations()}:
+                    {$LL.queryRunErrors.thisWillRemoveTheTransformations()}:
                   </p>
                   <ul class="removal-list">
                     {#each transformsWithIndex as transformInfo (transformInfo)}
@@ -81,12 +81,12 @@
                     appearance="secondary"
                     on:click={() => deleteMissingColumns(columnId)}
                   >
-                    {$LL.dataExplorerQueryRunErrors.attemptExplorationRecovery()}
+                    {$LL.queryRunErrors.attemptExplorationRecovery()}
                   </Button>
                 </p>
               {:else if $currentDatabase && $currentSchema && $query.id}
                 <p>
-                  {$LL.dataExplorerQueryRunErrors.editExplorationToRecover()}
+                  {$LL.queryRunErrors.editExplorationToRecover()}
                 </p>
                 <p>
                   <a

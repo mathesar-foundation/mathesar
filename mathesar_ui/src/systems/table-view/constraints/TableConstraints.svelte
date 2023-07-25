@@ -57,10 +57,10 @@
   {#if shouldShowLoadingSpinner}
     <Icon {...iconLoading} />
   {:else if state === States.Error}
-    <div>{$LL.constraintsTableConstraints.unableToFetchTableConstraints()}</div>
+    <div>{$LL.tableConstraints.unableToFetchTableConstraints()}</div>
     <div>{errorMsg}</div>
   {:else if isEmpty}
-    <div>{$LL.constraintsTableConstraints.noConstraints()}</div>
+    <div>{$LL.tableConstraints.noConstraints()}</div>
   {:else}
     <div class="constraints-list">
       <ConstraintTypeSection

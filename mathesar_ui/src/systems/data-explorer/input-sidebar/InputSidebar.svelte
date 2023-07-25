@@ -20,11 +20,11 @@
   const tabs = [
     {
       id: 'column-selection',
-      label: $LL.dataExplorerInputSidebar.selectColumns(),
+      label: $LL.inputSidebar.selectColumns(),
     },
     {
       id: 'transform-results',
-      label: $LL.dataExplorerInputSidebar.transformResults(),
+      label: $LL.inputSidebar.transformResults(),
     },
   ];
   let activeTab = tabs[0];
@@ -50,15 +50,15 @@
           },
         },
         body: [
-          $LL.dataExplorerInputSidebar.autoSummarizationConfirmBodyLine1(),
-          $LL.dataExplorerInputSidebar.autoSummarizationConfirmBodyLine2(),
+          $LL.inputSidebar.autoSummarizationConfirmBodyLine1(),
+          $LL.inputSidebar.autoSummarizationConfirmBodyLine2(),
         ],
         proceedButton: {
-          label: $LL.dataExplorerInputSidebar.summarizeAsAList(),
+          label: $LL.inputSidebar.summarizeAsAList(),
           icon: undefined,
         },
         cancelButton: {
-          label: $LL.dataExplorerInputSidebar.continueWithoutSummarizing(),
+          label: $LL.inputSidebar.continueWithoutSummarizing(),
           icon: undefined,
         },
       });
@@ -89,7 +89,7 @@
 </script>
 
 <aside class="input-sidebar">
-  <header>{$LL.dataExplorerInputSidebar.buildYourExploration()}</header>
+  <header>{$LL.inputSidebar.buildYourExploration()}</header>
   <section class="input-pane">
     <TabContainer
       {tabs}
@@ -105,7 +105,7 @@
       {:else if inputColumnsFetchState?.state === 'success'}
         {#if activeTab?.id === 'column-selection'}
           <div class="help-text">
-            {$LL.dataExplorerInputSidebar.columnSelectionHelpText()}
+            {$LL.inputSidebar.columnSelectionHelpText()}
           </div>
           <ColumnSelectionPane
             {queryManager}
@@ -114,13 +114,13 @@
           />
         {:else if activeTab?.id === 'transform-results'}
           <div class="help-text">
-            {$LL.dataExplorerInputSidebar.transformResultsHelpText()}
+            {$LL.inputSidebar.transformResultsHelpText()}
           </div>
           <TransformationsPane {queryManager} />
         {/if}
       {:else if inputColumnsFetchState?.state === 'failure'}
         <ErrorBox>
-          {$LL.dataExplorerInputSidebar.failedToFetchColumnInfo()}:
+          {$LL.inputSidebar.failedToFetchColumnInfo()}:
           {inputColumnsFetchState?.errors.join(';')}
         </ErrorBox>
       {/if}

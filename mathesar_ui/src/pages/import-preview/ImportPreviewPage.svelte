@@ -221,7 +221,7 @@
         errors: [
           err instanceof Error
             ? err.message
-            : $LL.importPreview.errorInLoadingPreview(),
+            : $LL.importPreviewPage.errorInLoadingPreview(),
         ],
       };
     }
@@ -261,7 +261,7 @@
           errors: [
             err instanceof Error
               ? err.message
-              : $LL.importPreview.unableToLoadPreview(),
+              : $LL.importPreviewPage.unableToLoadPreview(),
           ],
         };
       }
@@ -283,10 +283,10 @@
     } catch (err) {
       const errorMessage =
         err instanceof Error
-          ? `${$LL.importPreview.dataTypeChangeFailed()}: ${getErrorMessage(
+          ? `${$LL.importPreviewPage.dataTypeChangeFailed()}: ${getErrorMessage(
               err.message,
             )}`
-          : $LL.importPreview.dataTypeChangeFailed();
+          : $LL.importPreviewPage.dataTypeChangeFailed();
       typeChangeRequestStatus = {
         state: 'failure',
         errors: [errorMessage],
@@ -300,7 +300,7 @@
       const errorMessage =
         err instanceof Error
           ? err.message
-          : $LL.importPreview.unableToCancelImport();
+          : $LL.importPreviewPage.unableToCancelImport();
       toast.error(errorMessage);
     });
     router.goto(getSchemaPageUrl(database.name, schema.id), true);
@@ -329,7 +329,7 @@
       const errorMessage =
         err instanceof Error
           ? err.message
-          : $LL.importPreview.unableToSaveTable();
+          : $LL.importPreviewPage.unableToSaveTable();
       toast.error(errorMessage);
     }
   }
@@ -349,10 +349,10 @@
 >
   <div class="table-preview-confirmation">
     <InsetPageLayout>
-      <h1 slot="header">{$LL.importPreview.finishSettingYourTable()}</h1>
+      <h1 slot="header">{$LL.importPreviewPage.finishSettingYourTable()}</h1>
 
       {#if tableIsAlreadyConfirmed}
-        {$LL.importPreview.tableConfirmed()}
+        {$LL.importPreviewPage.tableConfirmed()}
       {:else}
         <div class="table-properties">
           <LabeledInput layout="stacked">
@@ -364,7 +364,7 @@
 
           <div class="header-checkbox">
             <LabeledInput
-              label={$LL.importPreview.useFirstRowAsHeader()}
+              label={$LL.importPreviewPage.useFirstRowAsHeader()}
               layout="inline-input-first"
             >
               <Checkbox
@@ -377,14 +377,14 @@
 
           <div class="help-content">
             <h2 class="large-bold-header">
-              {$LL.importPreview.columnNameAndDataTypes()}
+              {$LL.importPreviewPage.columnNameAndDataTypes()}
             </h2>
             <p>
-              {$LL.importPreview.columnNameAndDataTypesAutoDetected()}
+              {$LL.importPreviewPage.columnNameAndDataTypesAutoDetected()}
             </p>
             {#if isLoading}
               <InfoBox fullWidth>
-                <span>{$LL.importPreview.pleaseWaitForPreview()}</span>
+                <span>{$LL.importPreviewPage.pleaseWaitForPreview()}</span>
                 <Spinner />
               </InfoBox>
             {:else if previewRequestStatus?.state === 'failure'}
@@ -401,7 +401,7 @@
               />
             {:else}
               <InfoBox fullWidth>
-                {$LL.importPreview.previewOnlyForFirstFewRows()}
+                {$LL.importPreviewPage.previewOnlyForFirstFewRows()}
               </InfoBox>
             {/if}
           </div>
@@ -492,7 +492,7 @@
               onProceed={finishImport}
               cancelButton={{ icon: iconDeleteMajor }}
               proceedButton={{
-                label: $LL.importPreview.confirmAndCreateTable(),
+                label: $LL.importPreviewPage.confirmAndCreateTable(),
               }}
               {canProceed}
             />

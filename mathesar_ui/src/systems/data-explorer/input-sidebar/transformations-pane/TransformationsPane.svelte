@@ -177,7 +177,7 @@
 
   <div class="add-transform-control">
     <DropdownMenu
-      label={$LL.dataExplorerTransformationPane.addTransformationStep()}
+      label={$LL.transformationPane.addTransformationStep()}
       icon={iconAddNew}
       disabled={$processedColumns.size === 0}
       triggerAppearance="secondary"

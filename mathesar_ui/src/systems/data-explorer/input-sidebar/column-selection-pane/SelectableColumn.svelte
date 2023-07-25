@@ -34,7 +34,7 @@
             {usageCount}
           </Badge>
           <svelte:fragment slot="content">
-            {$LL.dataExplorerSelectableColum.columnAddedTimes({
+            {$LL.selectableColum.columnAddedTimes({
               times: numberOfTimes(usageCount),
             })}
           </svelte:fragment>

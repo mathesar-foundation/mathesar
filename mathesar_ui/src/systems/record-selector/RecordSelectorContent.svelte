@@ -90,9 +90,7 @@
       const tableEntry = $tables.data.get(tableId);
       const template = tableEntry?.settings?.preview_settings?.template;
       if (!template) {
-        throw new Error(
-          $LL.recordSelectorRecordSelectorContent.noRecordSummaryInAPI(),
-        );
+        throw new Error($LL.recordSelectorContent.noRecordSummaryInAPI());
       }
       const recordSummary = renderTransitiveRecordSummary({
         inputData: buildInputData(record),
@@ -143,9 +141,9 @@
     {:else}
       <div class="no-results">
         {#if hasSearchQueries}
-          {$LL.recordSelectorRecordSelectorContent.noMatchingRecords()}
+          {$LL.recordSelectorContent.noMatchingRecords()}
         {:else}
-          {$LL.recordSelectorRecordSelectorContent.noExistingRecords()}
+          {$LL.recordSelectorContent.noExistingRecords()}
         {/if}
       </div>
     {/if}
@@ -166,18 +164,16 @@
           }}
         >
           <Icon {...iconAddNew} />
-          <span
-            >{$LL.recordSelectorRecordSelectorContent.createRecordFromSearch()}</span
-          >
+          <span>{$LL.recordSelectorContent.createRecordFromSearch()}</span>
         </Button>
       </div>
     {/if}
     {#if records.length === 10 && isInitialized}
       <div class="message">
         {#if hasSearchQueries}
-          {$LL.recordSelectorRecordSelectorContent.best10MatchesShown()}
+          {$LL.recordSelectorContent.best10MatchesShown()}
         {:else}
-          {$LL.recordSelectorRecordSelectorContent.first10RecordsShown()}
+          {$LL.recordSelectorContent.first10RecordsShown()}
         {/if}
       </div>
     {/if}

@@ -58,7 +58,7 @@
 
 {#if aggregationColumn}
   <div data-identifier="aggregation-source">
-    <h1>{$LL.explorationsInspectorColumnSource.aggregatedFrom()}</h1>
+    <h1>{$LL.columnSource.aggregatedFrom()}</h1>
     <div class="column-info">
       <span class="tag">
         <ColumnName
@@ -75,7 +75,7 @@
 
 {#if source}
   <div data-identifier="column-source">
-    <h1>{$LL.explorationsInspectorColumnSource.sourceColumn()}</h1>
+    <h1>{$LL.columnSource.sourceColumn()}</h1>
     <div class="column-info">
       <span class="tag">
         <ColumnName

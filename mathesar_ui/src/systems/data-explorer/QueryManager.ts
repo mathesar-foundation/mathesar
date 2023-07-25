@@ -157,7 +157,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       const error =
         err instanceof Error
           ? err.message
-          : getTranslator().dataExplorerQueryManager.errorFetchingJoinableLinks();
+          : getTranslator().queryManager.errorFetchingJoinableLinks();
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'failure', errors: [error] },
@@ -329,7 +329,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       const errors =
         err instanceof Error
           ? [err.message]
-          : [getTranslator().dataExplorerQueryManager.errorSavingQuery()];
+          : [getTranslator().queryManager.errorSavingQuery()];
       this.state.update((_state) => ({
         ..._state,
         saveState: {

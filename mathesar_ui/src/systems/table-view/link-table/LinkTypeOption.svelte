@@ -50,7 +50,7 @@
     <span class="description">
       {#if linkType === 'oneToMany'}
         <RichText
-          text={$LL.linkTableLinkTypeOptions.oneToManyDescription()}
+          text={$LL.linkTypeOptions.oneToManyDescription()}
           let:slotName
         >
           {#if slotName === 'baseTable'}
@@ -61,7 +61,7 @@
         </RichText>
       {:else if linkType === 'manyToOne'}
         <RichText
-          text={$LL.linkTableLinkTypeOptions.manyToOneDescription()}
+          text={$LL.linkTypeOptions.manyToOneDescription()}
           let:slotName
         >
           {#if slotName === 'baseTable'}
@@ -73,7 +73,7 @@
       {:else if linkType === 'manyToMany'}
         {#if isSelfReferential}
           <RichText
-            text={$LL.linkTableLinkTypeOptions.manyToManySelfReferential()}
+            text={$LL.linkTypeOptions.manyToManySelfReferential()}
             let:slotName
           >
             {#if slotName === 'baseTable'}
@@ -87,7 +87,7 @@
           </RichText>
         {:else}
           <RichText
-            text={$LL.linkTableLinkTypeOptions.manyToManyDescription()}
+            text={$LL.linkTypeOptions.manyToManyDescription()}
             let:slotName
           >
             {#if slotName === 'baseTable'}

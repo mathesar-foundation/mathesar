@@ -12,7 +12,7 @@
 <ControlledModal {controller}>
   <span slot="title">{$LL.general.constraints()}</span>
   <span class="description">
-    {$LL.constraintsTableConstraintsModal.constraintsDescription()}
+    {$LL.tableConstraintsModal.constraintsDescription()}
   </span>
   <TableConstraints />
 </ControlledModal>

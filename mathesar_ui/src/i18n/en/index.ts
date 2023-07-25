@@ -113,7 +113,7 @@ const en: BaseTranslation = {
     linkingTable: 'Linking Table',
     columnName: 'Column Name',
   },
-  upgradeConfirmation: {
+  upgradeConfirm: {
     beforeUpgrading: 'Before Upgrading',
     readReleaseNotes:
       'Read the <>releaseNotesLink<> to see if this release requires any special upgrade instructions.',
@@ -188,7 +188,7 @@ const en: BaseTranslation = {
     dataChangesHelp:
       'External changes to data (e.g. adding or editing <>rows<>) will be automatically reflected without clicking this button.',
   },
-  databaseNavigation: {
+  databaseNavigationList: {
     allDatabases: 'All Databases',
     addOrRemoveDbHelp:
       'To add or remove databases, modify the <>variableNameAndLink<> in your configuration file and restart Mathesar.',
@@ -200,9 +200,11 @@ const en: BaseTranslation = {
     publicSchemaHelp:
       'Every PostgreSQL database includes the "public" schema. This protected schema can be read by anybody who accesses the database.',
   },
-  importPreview: {
+  importPreviewErrorInfo: {
     failedToLoadPreview: 'Failed to load preview',
     deleteImport: 'Delete Import',
+  },
+  importPreviewPage: {
     errorInLoadingPreview: 'An error occurrent while loading the preview',
     unableToLoadPreview: 'Unable to load preview',
     dataTypeChangeFailed: 'Data Type Change Failed',
@@ -220,7 +222,7 @@ const en: BaseTranslation = {
     confirmAndCreateTable: 'Confirm & create table',
     useFirstRowAsHeader: 'Use first row as header',
   },
-  importUpload: {
+  importUploadPage: {
     uploadAFile: 'Upload a file',
     provideUrlToFile: 'Provide a URL to the file',
     copyAndPasteText: 'Copy and Paste Text',
@@ -244,7 +246,7 @@ const en: BaseTranslation = {
   recordPageContent: {
     recordInTable: 'Record in <>tableName<>',
   },
-  recordPageWidget: {
+  recordWidgets: {
     relatedRecord: 'Related Records',
     relatedRecordHelp:
       'Each of the following records link to <>recordSummary<> from another table.',
@@ -283,15 +285,15 @@ const en: BaseTranslation = {
     couldNoFetchProfile:
       'Could not fetch user profile details. Try refreshing your page.',
   },
-  explorationsInspectorColumnSource: {
+  columnSource: {
     aggregatedFrom: 'Aggregated from',
     sourceColumn: 'Source Column',
   },
-  explorationsInspectorColumnTab: {
+  columnTab: {
     moreThanOneColumnSelected: '{count: number} columns selected',
     selectAColumnToViewProperties: 'Select a column to view its properties',
   },
-  explorationsInspectorDeleteColumnAction: {
+  deleteColumnAction: {
     cannotDeleteColumnLastRemainingBaseColumn:
       'This column cannot be deleted because atleast one column from the base table is required. Please add another column from the base table before deleting this column.',
     cannotDeleteColumnUsedInTransformation:
@@ -301,13 +303,13 @@ const en: BaseTranslation = {
     cannotDeleteColumnsUsedInTransformation:
       "Some of the selected columns cannot be deleted because they're either used in transformations or results of transformations. Please remove them from the transformations before deleting them.",
   },
-  explorationsInspectorCellTab: {
+  cellTab: {
     selectACellToViewProperties: "Select a cell to view it's properties.",
   },
-  explorationsInspectorExplorationTab: {
+  explorationTab: {
     unableToSaveExploration: 'Unable to save Exploration.',
   },
-  dataExplorerColumnSelectionPane: {
+  columnSelectionPane: {
     fromBaseTable: 'From Base table',
     fromLinkedTables: 'From linked tables',
     atLeastOneColumnFromBaseRequired:
@@ -315,16 +317,16 @@ const en: BaseTranslation = {
     linkedFromBaseTable: 'Linked from Base table',
     linkedToBaseTable: 'Linked to Base table',
   },
-  dataExplorerSelectableColum: {
+  selectableColum: {
     columnAddedTimes: 'This column has been added {times: string}',
   },
-  dataExplorerHideTransformation: {
+  hideTransformation: {
     selectColumnsToHide: 'Select Columns to Hide',
   },
-  dataExplorerTransformationPane: {
+  transformationPane: {
     addTransformationStep: 'Add transformation step',
   },
-  dataExplorerInputSidebar: {
+  inputSidebar: {
     selectColumns: 'Select Columns',
     transformResults: 'Transform Results',
     autoSummarizationConfirmBodyLine1:
@@ -340,7 +342,7 @@ const en: BaseTranslation = {
       'Transformations can be used to summarize data, filter data, and more. Note that transformations are applied in the order they are listed.',
     failedToFetchColumnInfo: 'Failed to fetch column information',
   },
-  dataExplorerQueryRunErrors: {
+  queryRunErrors: {
     resultCouldNotBeDisplayed: 'The result could not be displayed.',
     someColumnsInQueryAreMissing:
       'Some of the columns present in the query are missing in teh underlying base table.',
@@ -378,24 +380,24 @@ const en: BaseTranslation = {
       'Get started by selecting a table and adding columns',
     getStartedByAddingColumns: 'Get started by adding columns from the left',
   },
-  dataExplorerQueryManager: {
+  queryManager: {
     errorFetchingJoinableLinks: 'There was an error fetching joinable links',
     errorSavingQuery: 'An error occurred while trying to save teh query',
   },
-  dataExplorerQueryModel: {
+  queryModel: {
     onlySingleSummarizationAllowed:
       'QueryModel currently allows only a single summarization transformation',
     cannotRunBaseTableUndefined:
       'Cannot formulate run request since base_table is undefined',
   },
-  dataExplorerQueryRunner: {
+  queryRunner: {
     unableToRunQuery: 'Unable to run query due to an unknown reason',
   },
   dataExplorerUtils: {
     multipleLinksPresentForSameColumn:
       'Multiple links present for the same column: {columnId: number}',
   },
-  recordSelectorRecordSelectorContent: {
+  recordSelectorContent: {
     noRecordSummaryInAPI: 'No record summary template found in API response.',
     createRecordFromSearch: 'Create Record From Search Criteria',
     best10MatchesShown:
@@ -404,21 +406,21 @@ const en: BaseTranslation = {
     noMatchingRecords: 'No matching records',
     noExistingRecords: 'No existing records',
   },
-  tableViewFilters: {
+  recordOperationsFilters: {
     filterRecords: 'Filter records',
     noFiltersHaveBeenAdded: 'No filters have been added',
     addNewFilter: 'Add New Filter',
   },
-  tableViewGroup: {
+  recordOperationsGroup: {
     groupRecordsBy: 'Group records by',
     noGroupingAdded: 'No grouping condition has been added',
     addNewGrouping: 'Add New Grouping',
   },
-  tableViewSort: {
+  recordOperationsSort: {
     noSortingAdded: 'No sorting condition has been added',
     addNewSortCondition: 'Add new sort condition',
   },
-  constraintsConstraintHelp: {
+  constraintHelp: {
     constraintDescription:
       'Constraints help you keep your data clean by rejecting invalid data before it gets entered.',
   },
@@ -428,7 +430,7 @@ const en: BaseTranslation = {
     constraintNameMathesar:
       'In Mathesar however, the name of the constraint will likely never be relevant, &mdash; so we recommend allowing Mathesar to automatically generate constraint names when adding new constraints.',
   },
-  constraintsConstraintTypesSection: {
+  constraintNameHelp: {
     primaryKeyHelp:
       'A primary key constraint uniquely identifies each record in a table.',
     foreignKeyHelp: 'A foreign key constraint links records in two tables.',
@@ -436,38 +438,38 @@ const en: BaseTranslation = {
       'A unique constraint ensures that each record in a column is unique.',
     noConstraints: 'No {constraintType: string} Constraints',
   },
-  constraintsNewForeignKeyConstraint: {
+  newForeignKeyConstraint: {
     newForeignKeyConstraint: 'New Foreign Key Constraint',
     columnReferencesTargetTable:
       'Column in this table which references the target table',
     targetTable: 'Target Table',
     targetColumnInTable: 'Target Column in <>tableName<> Table',
   },
-  constraintsNewUniqueConstraint: {
+  newUniqueConstraint: {
     constraintWithNameExists: 'A constraint with that name already exists',
     unableToAddConstraint: 'Unable to add constraint.',
     newUniqueConstraint: 'New Unique Constraint',
   },
-  constraintsTableConstraints: {
+  tableConstraints: {
     unableToFetchTableConstraints: 'Unable to fetch table constraints',
     noConstraints: 'No constraints',
   },
-  constraintsTableConstraintsModal: {
+  tableConstraintsModal: {
     constraintsDescription:
       'Constraints are used to define relationships between records in different tables or to ensure that records in a column are unique. Constraints can be applied to a single column or a combination of columns.',
   },
-  tableViewHeaderCell: {
+  columnHEaderContextMenu: {
     addFilter: 'Add Filter',
     filterColumn: 'Filter Column',
     removeSorting: 'Remove {sortingType: string} Sorting',
     removeGrouping: 'Remove Grouping',
     groupByColumn: 'Group by Column',
   },
-  tableViewNewColumnCell: {
+  newColumnCell: {
     newColumn: 'New Column',
     selectType: 'Select Type',
   },
-  linkTableLinkTableForm: {
+  linkTableForm: {
     twoColumnsCannotHaveSameName: 'The two columns cannot have the same name.',
     linkCreatedSuccessfully: 'The link has been created successfully',
     linksInfo:
@@ -483,7 +485,7 @@ const en: BaseTranslation = {
     ifColumnNameIsId:
       'The name "id" is reserved for the primary key column that will be created when creating the table.',
   },
-  linkTableLinkTypeOptions: {
+  linkTypeOptions: {
     oneToManyDescription:
       'One <>baseTable<> record can be linked from multiple <>targetTable<> records.',
     manyToOneDescription:
@@ -493,11 +495,11 @@ const en: BaseTranslation = {
     manyToManySelfReferential:
       'Multiple <>baseTable<> records can link to each other through a new <>mapping<>',
   },
-  linkTableNewColumn: {
+  newColumn: {
     newColumnInBaseLinkingToTarget:
       "We'll add a column in <>baseTable<> which links to <>targetTable<>",
   },
-  linkTableSelectLinkType: {
+  selectLinkType: {
     typeOfLinkTo: 'Type of link to <>targetTable<>',
   },
 };

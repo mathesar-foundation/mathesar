@@ -20,10 +20,7 @@
 </script>
 
 <p>
-  <RichText
-    text={$LL.linkTableNewColumn.newColumnInBaseLinkingToTarget()}
-    let:slotName
-  >
+  <RichText text={$LL.newColumn.newColumnInBaseLinkingToTarget()} let:slotName>
     {#if slotName === 'baseTable'}
       <Pill table={base} which={baseWhich} />
     {:else if slotName === 'targetTable'}

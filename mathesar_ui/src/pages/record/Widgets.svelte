@@ -40,9 +40,9 @@
 {#if tableWidgetInputs.length}
   <div class="widgets-area">
     <h2 class="passthrough">
-      {$LL.recordPageWidget.relatedRecord()}
+      {$LL.recordWidgets.relatedRecord()}
       <Help>
-        <RichText text={$LL.recordPageWidget.relatedRecordHelp()} let:slotName>
+        <RichText text={$LL.recordWidgets.relatedRecordHelp()} let:slotName>
           {#if slotName === 'recordSummary'}
             <NameWithIcon icon={iconRecord} truncate={false}>
               <strong>{recordSummary}</strong>

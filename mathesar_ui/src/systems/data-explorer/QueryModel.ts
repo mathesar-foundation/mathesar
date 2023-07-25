@@ -248,7 +248,7 @@ export default class QueryModel {
     if (this.hasSummarizationTransform()) {
       // This should never happen
       throw new Error(
-        getTranslator().dataExplorerQueryModel.onlySingleSummarizationAllowed(),
+        getTranslator().queryModel.onlySingleSummarizationAllowed(),
       );
     }
     return this.addTransform(summarizationTransformationModel);
@@ -434,9 +434,7 @@ export default class QueryModel {
 
   toRunRequestJson(): Omit<QueryRunRequest, 'parameters'> {
     if (this.base_table === undefined) {
-      throw new Error(
-        getTranslator().dataExplorerQueryModel.cannotRunBaseTableUndefined(),
-      );
+      throw new Error(getTranslator().queryModel.cannotRunBaseTableUndefined());
     }
     const transformations = this.isValid
       ? this.transformationModels

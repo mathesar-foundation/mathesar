@@ -72,9 +72,9 @@
 
 <ButtonMenuItem icon={iconAddFilter} on:click={addFilter}>
   {#if filterCount > 0}
-    {$LL.tableViewHeaderCell.addFilter()}
+    {$LL.columnHEaderContextMenu.addFilter()}
   {:else}
-    {$LL.tableViewHeaderCell.filterColumn()}
+    {$LL.columnHEaderContextMenu.filterColumn()}
   {/if}
 </ButtonMenuItem>
 {#if filterCount > 0}
@@ -88,7 +88,7 @@
 
 {#if currentSorting === 'ASCENDING'}
   <ButtonMenuItem icon={iconSortAscending} on:click={removeSorting}>
-    {$LL.tableViewHeaderCell.removeSorting({
+    {$LL.columnHEaderContextMenu.removeSorting({
       sortingType: sortingLabel.ASCENDING,
     })}
   </ButtonMenuItem>
@@ -104,7 +104,7 @@
 
 {#if currentSorting === 'DESCENDING'}
   <ButtonMenuItem icon={iconSortDescending} on:click={removeSorting}>
-    {$LL.tableViewHeaderCell.removeSorting({
+    {$LL.columnHEaderContextMenu.removeSorting({
       sortingType: sortingLabel.DESCENDING,
     })}
   </ButtonMenuItem>
@@ -120,10 +120,10 @@
 
 {#if hasGrouping}
   <ButtonMenuItem icon={iconGrouping} on:click={removeGrouping}>
-    {$LL.tableViewHeaderCell.removeGrouping()}
+    {$LL.columnHEaderContextMenu.removeGrouping()}
   </ButtonMenuItem>
 {:else}
   <ButtonMenuItem icon={iconGrouping} on:click={addGrouping}>
-    {$LL.tableViewHeaderCell.groupByColumn()}
+    {$LL.columnHEaderContextMenu.groupByColumn()}
   </ButtonMenuItem>
 {/if}

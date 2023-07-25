@@ -72,14 +72,14 @@
           )}
       />
     {:else}
-      <span>{$LL.tableViewSort.noSortingAdded()}</span>
+      <span>{$LL.recordOperationsSort.noSortingAdded()}</span>
     {/each}
   </div>
   {#if availableColumnIds.length > 0}
     <div class="footer">
       <Button appearance="secondary" on:click={addSortColumn}>
         <Icon {...iconAddNew} />
-        <span>{$LL.tableViewSort.addNewSortCondition()}</span>
+        <span>{$LL.recordOperationsSort.addNewSortCondition()}</span>
       </Button>
     </div>
   {/if}

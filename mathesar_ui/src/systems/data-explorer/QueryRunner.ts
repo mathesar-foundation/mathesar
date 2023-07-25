@@ -174,7 +174,7 @@ export default class QueryRunner<
         const errorMessage =
           err instanceof Error
             ? err.message
-            : getTranslator().dataExplorerQueryRunner.unableToRunQuery();
+            : getTranslator().queryRunner.unableToRunQuery();
         this.runState.set({ state: 'failure', errors: [errorMessage] });
       }
     }

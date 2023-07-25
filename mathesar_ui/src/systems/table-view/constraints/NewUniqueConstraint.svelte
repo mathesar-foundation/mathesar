@@ -53,7 +53,7 @@
       return [$LL.general.nameCannotBeEmpty()];
     }
     if (_existingConstraintNames.has(_constraintName?.trim())) {
-      return [$LL.constraintsNewUniqueConstraint.constraintWithNameExists()];
+      return [$LL.newUniqueConstraint.constraintWithNameExists()];
     }
     return [];
   }
@@ -110,7 +110,7 @@
       onClose?.();
     } catch (error) {
       toast.error(
-        `${$LL.constraintsNewUniqueConstraint.unableToAddConstraint()}. ${
+        `${$LL.newUniqueConstraint.unableToAddConstraint()}. ${
           // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
           error.message as string
         }`,
@@ -124,7 +124,7 @@
 </script>
 
 <div class="add-new-unique-constraint">
-  <span>{$LL.constraintsNewUniqueConstraint.newUniqueConstraint()}</span>
+  <span>{$LL.newUniqueConstraint.newUniqueConstraint()}</span>
   <Form>
     <FormField>
       <LabeledInput label={$LL.general.columns()} layout="stacked">

@@ -146,7 +146,7 @@
           comboInvalidIf(
             [columnNameMappingToBase, columnNameMappingToTarget],
             ([a, b]) => a === b,
-            $LL.linkTableLinkTableForm.twoColumnsCannotHaveSameName(),
+            $LL.linkTableForm.twoColumnsCannotHaveSameName(),
           ),
         ],
       );
@@ -212,7 +212,7 @@
 
   async function handleSave(values: FilledFormValues<typeof form>) {
     await postAPI('/api/db/v0/links/', getRequestBody(values));
-    toast.success($LL.linkTableLinkTableForm.linkCreatedSuccessfully());
+    toast.success($LL.linkTableForm.linkCreatedSuccessfully());
     await reFetchOtherThingsThatChanged();
     close();
   }
@@ -221,7 +221,7 @@
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
-      {$LL.linkTableLinkTableForm.linksInfo()}
+      {$LL.linkTableForm.linksInfo()}
     </InfoBox>
   </FieldLayout>
 
@@ -233,7 +233,7 @@
     }}
   >
     <span slot="label">
-      <RichText text={$LL.linkTableLinkTableForm.linkTo()} let:slotName>
+      <RichText text={$LL.linkTableForm.linkTo()} let:slotName>
         {#if slotName === 'baseTable'}
           <Pill table={base} which="base" />
         {/if}
@@ -263,12 +263,12 @@
           <NewColumn {base} {target} field={columnNameInBase} />
         {:else if $linkType === 'manyToMany'}
           {#if isSelfReferential}
-            <p>{$LL.linkTableLinkTableForm.weWillCreateANewTable()}</p>
+            <p>{$LL.linkTableForm.weWillCreateANewTable()}</p>
             <Field field={mappingTableName} label="Table Name" />
             {#if $mappingTableName}
               <p>
                 <RichText
-                  text={$LL.linkTableLinkTableForm.add2ColumnsLinkingToTarget()}
+                  text={$LL.linkTableForm.add2ColumnsLinkingToTarget()}
                   let:slotName
                 >
                   {#if slotName === 'mappingTable'}
@@ -283,19 +283,19 @@
               </p>
               <Field
                 field={columnNameMappingToBase}
-                label={$LL.linkTableLinkTableForm.indexedColumnName({
+                label={$LL.linkTableForm.indexedColumnName({
                   index: 1,
                 })}
               />
               <Field
                 field={columnNameMappingToTarget}
-                label={$LL.linkTableLinkTableForm.indexedColumnName({
+                label={$LL.linkTableForm.indexedColumnName({
                   index: 2,
                 })}
               />
             {/if}
           {:else}
-            <p>{$LL.linkTableLinkTableForm.weWillCreateANewTable()}</p>
+            <p>{$LL.linkTableForm.weWillCreateANewTable()}</p>
             <Field field={mappingTableName} label={$LL.general.tableName()} />
             {#if $mappingTableName}
               <NewColumn
@@ -328,7 +328,7 @@
     {canProceed}
     onCancel={close}
     proceedButton={{
-      label: $LL.linkTableLinkTableForm.createLink(),
+      label: $LL.linkTableForm.createLink(),
       icon: iconTableLink,
     }}
     onProceed={handleSave}

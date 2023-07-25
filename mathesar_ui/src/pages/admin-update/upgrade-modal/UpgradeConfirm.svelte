@@ -15,10 +15,10 @@
   export let onClose: () => void;
 </script>
 
-<p>{$LL.upgradeConfirmation.beforeUpgrading()}</p>
+<p>{$LL.upgradeConfirm.beforeUpgrading()}</p>
 <ul>
   <li>
-    <RichText text={$LL.upgradeConfirmation.readReleaseNotes()} let:slotName>
+    <RichText text={$LL.upgradeConfirm.readReleaseNotes()} let:slotName>
       {#if slotName === 'releaseNotesLink'}
         <a href={release.notesUrl} target="_blank">
           {$LL.general.releaseNotes()}
@@ -26,25 +26,25 @@
       {/if}
     </RichText>
   </li>
-  <li>{$LL.upgradeConfirmation.prepareForDowntime()}</li>
+  <li>{$LL.upgradeConfirm.prepareForDowntime()}</li>
 </ul>
-<p>{$LL.upgradeConfirmation.whileUpgrading()}</p>
+<p>{$LL.upgradeConfirm.whileUpgrading()}</p>
 <ul>
   <li>
-    {$LL.upgradeConfirmation.windowWillRemainOpen()}
+    {$LL.upgradeConfirm.windowWillRemainOpen()}
   </li>
-  <li>{$LL.upgradeConfirmation.seeLoadingSpinner()}</li>
+  <li>{$LL.upgradeConfirm.seeLoadingSpinner()}</li>
 </ul>
-<p>{$LL.upgradeConfirmation.seeLoadingSpinner()}</p>
+<p>{$LL.upgradeConfirm.seeLoadingSpinner()}</p>
 <ul>
   <li>
-    {$LL.upgradeConfirmation.afterUpgrading()}
+    {$LL.upgradeConfirm.afterUpgrading()}
   </li>
   <li>
-    {$LL.upgradeConfirmation.ifUpgradeSucceeds()}
+    {$LL.upgradeConfirm.ifUpgradeSucceeds()}
   </li>
   <li>
-    <RichText text={$LL.upgradeConfirmation.ifUpgradeFails()} let:slotName>
+    <RichText text={$LL.upgradeConfirm.ifUpgradeFails()} let:slotName>
       {#if slotName === 'documentationLink'}
         <a href="https://docs.mathesar.org/">{$LL.general.documentation()}</a>
       {/if}

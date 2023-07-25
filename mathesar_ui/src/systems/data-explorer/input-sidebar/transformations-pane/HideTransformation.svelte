@@ -19,7 +19,7 @@
 </script>
 
 <LabeledInput
-  label={$LL.dataExplorerHideTransformation.selectColumnsToHide()}
+  label={$LL.hideTransformation.selectColumnsToHide()}
   layout="stacked"
 >
   <MultiSelect

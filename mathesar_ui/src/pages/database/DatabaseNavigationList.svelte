@@ -22,13 +22,13 @@
       style="display:flex;align-items:center;margin-bottom:var(--size-super-ultra-small)"
     >
       <span class="title"
-        >{$LL.databaseNavigation.allDatabases()} ({$databases.data
+        >{$LL.databaseNavigationList.allDatabases()} ({$databases.data
           .length})</span
       >
       <span class="help">
         <Help>
           <RichText
-            text={$LL.databaseNavigation.addOrRemoveDbHelp()}
+            text={$LL.databaseNavigationList.addOrRemoveDbHelp()}
             let:slotName
           >
             {#if slotName === 'variableNameAndLink'}

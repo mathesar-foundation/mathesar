@@ -47,7 +47,7 @@
 </script>
 
 <div class="groups" class:grouped={$grouping.entries.length > 0}>
-  <header>{$LL.tableViewGroup.groupRecordsBy()}</header>
+  <header>{$LL.recordOperationsGroup.groupRecordsBy()}</header>
   <div class="content">
     {#each $grouping.entries as groupEntry, index (index)}
       <GroupEntryComponent
@@ -64,12 +64,12 @@
           index < $grouping.entries.length - 1}
       />
     {:else}
-      <span class="muted">{$LL.tableViewGroup.noGroupingAdded()}</span>
+      <span class="muted">{$LL.recordOperationsGroup.noGroupingAdded()}</span>
     {/each}
   </div>
   <footer>
     <DropdownMenu
-      label={$LL.tableViewGroup.addNewGrouping()}
+      label={$LL.recordOperationsGroup.addNewGrouping()}
       disabled={availableColumns.length === 0}
       triggerAppearance="secondary"
     >

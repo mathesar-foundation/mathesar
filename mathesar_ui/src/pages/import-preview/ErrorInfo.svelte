@@ -11,7 +11,7 @@
 </script>
 
 <ErrorBox fullWidth>
-  <div class="title">{$LL.importPreview.failedToLoadPreview()}</div>
+  <div class="title">{$LL.importPreviewErrorInfo.failedToLoadPreview()}</div>
   <div>{errors.join(',')}</div>
   <div class="buttons">
     <Button appearance="primary" on:click={() => dispatch('retry')}>
@@ -20,7 +20,7 @@
     <span>or</span>
     <Button appearance="outline-primary" on:click={() => dispatch('delete')}>
       <Icon {...iconDeleteMajor} />
-      <span>{$LL.importPreview.deleteImport()}</span>
+      <span>{$LL.importPreviewErrorInfo.deleteImport()}</span>
     </Button>
   </div>
 </ErrorBox>

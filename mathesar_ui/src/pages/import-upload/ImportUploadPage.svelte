@@ -22,17 +22,17 @@
 
   const uploadMethods = [
     {
-      label: $LL.importUpload.uploadAFile(),
+      label: $LL.importUploadPage.uploadAFile(),
       component: UploadViaFile,
       icon: iconUploadFile,
     },
     {
-      label: $LL.importUpload.provideURLToFile(),
+      label: $LL.importUploadPage.provideURLToFile(),
       component: UploadViaUrl,
       icon: iconUrl,
     },
     {
-      label: $LL.importUpload.copyAndPasteText(),
+      label: $LL.importUploadPage.copyAndPasteText(),
       component: UploadViaClipboard,
       icon: iconPaste,
     },
@@ -71,7 +71,7 @@
       const message =
         err instanceof Error
           ? err.message
-          : $LL.importUpload.unableToCreateTableFromUpload();
+          : $LL.importUploadPage.unableToCreateTableFromUpload();
       tableCreationProgress = {
         state: 'failure',
         errors: [message],
@@ -92,13 +92,13 @@
     '--layout-background-color': 'var(--sand-200)',
   }}
 >
-  <h1>{$LL.importUpload.createATableByImporting()}</h1>
+  <h1>{$LL.importUploadPage.createATableByImporting()}</h1>
   <div class="import-file-view">
     {#if isLoading || isError}
       <div class="uploading-info">
-        <span>{$LL.importUpload.uploadingData()}</span>
+        <span>{$LL.importUploadPage.uploadingData()}</span>
         <WarningBox>
-          {$LL.importUpload.largeDataTakesTimeWarning()}
+          {$LL.importUploadPage.largeDataTakesTimeWarning()}
         </WarningBox>
       </div>
     {:else}
@@ -107,7 +107,7 @@
           bind:value={uploadMethod}
           options={uploadMethods}
           isInline
-          label={$LL.importUpload.howWouldYouLikeToImport()}
+          label={$LL.importUploadPage.howWouldYouLikeToImport()}
           getRadioLabel={(opt) => ({
             component: NameWithIcon,
             props: {
@@ -130,7 +130,7 @@
         on:error={(e) => {
           uploadStatus = {
             state: 'failure',
-            errors: [e.detail ?? $LL.importUpload.failedToImport()],
+            errors: [e.detail ?? $LL.importUploadPage.failedToImport()],
           };
         }}
         showCancelButton={isError}
@@ -144,7 +144,7 @@
           <div class="preview-status">
             <StatusIndicator
               state="processing"
-              messages={{ processing: $LL.importUpload.preparingPreview() }}
+              messages={{ processing: $LL.importUploadPage.preparingPreview() }}
             />
           </div>
         {/if}
@@ -152,7 +152,7 @@
         {#if errorMessage}
           <div class="errors">
             <ErrorBox>
-              <span class="title">{$LL.importUpload.failedToImport()}</span>
+              <span class="title">{$LL.importUploadPage.failedToImport()}</span>
               <span>{errorMessage}</span>
             </ErrorBox>
           </div>
