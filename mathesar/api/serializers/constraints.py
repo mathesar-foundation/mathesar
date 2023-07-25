@@ -17,14 +17,15 @@ from mathesar.api.serializers.shared_serializers import (
 from mathesar.models.base import Column, Constraint, Table
 
 
-class TableFilteredColumnsField(serializers.PrimaryKeyRelatedField):
+class TableFilteredPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
     """
-    A field. Meant to be instantiated with the Column model's queryset.
-    Provides a way to reference columns that are on this constraint's table.
+    Limits the accepted related primary key values to a specific table.
+    For example, If the PrimaryKeyRelatedField is for a Column object,
+     only columns of a said table are accepted.
     """
     def get_queryset(self):
         table_id = self.context.get('table_id', None)
-        queryset = super(TableFilteredColumnsField, self).get_queryset()
+        queryset = super(TableFilteredPrimaryKeyRelatedField, self).get_queryset()
         if table_id is None or not queryset:
             return None
         return queryset.filter(table__id=table_id)
@@ -33,7 +34,7 @@ class TableFilteredColumnsField(serializers.PrimaryKeyRelatedField):
 class BaseConstraintSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
     type = serializers.CharField()
-    columns = TableFilteredColumnsField(queryset=Column.current_objects, many=True)
+    columns = TableFilteredPrimaryKeyRelatedField(queryset=Column.current_objects, many=True)
 
     class Meta:
         model = Constraint
