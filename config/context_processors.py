@@ -18,12 +18,7 @@ def frontend_settings(request):
         frontend_settings['client_dev_url'] = settings.MATHESAR_CLIENT_DEV_URL
     return frontend_settings
 
-# TODO: Get rid of this function 
-# By setting the preferred_language in the cookies
-# Setting the cookie when the user updates his own profile
-# should be enough!
-# What if he chooses a language before login and after login
-# user.preferred_language has a different lang? How to decide?
+
 def get_user_preferred_language_from_request(request):
     # https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#how-django-discovers-language-preference
     # This automatically fallbacks to en because of https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-LANGUAGE_CODE

@@ -30,7 +30,6 @@
         // @ts-expect-error
         window.translations;
       if (translations) {
-        console.log({ translations });
         loadTranslationsIntoMemory(
           translations.lang,
           JSON.parse(translations.translationStrings),

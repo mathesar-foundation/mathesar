@@ -11,7 +11,6 @@ const en: BaseTranslation = {
     tableWithIdNotFound: 'Table with id {id: number} not found.',
     schemaNotFound: 'Schema not found.',
   },
-  // TODO: Check for casing and formatters
   general: {
     administration: 'Administration',
     softwareUpdate: 'Software Update',
