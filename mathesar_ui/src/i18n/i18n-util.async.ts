@@ -33,3 +33,11 @@ export const loadLocaleAsync = async (locale: Locales): Promise<void> => {
 
 export const loadAllLocalesAsync = (): Promise<void[]> =>
   Promise.all(locales.map(loadLocaleAsync));
+
+export const loadTranslationsIntoMemory = (
+  locale: Locales,
+  translations: Translations,
+) => {
+  updateDictionary(locale, translations);
+  loadFormatters(locale);
+};

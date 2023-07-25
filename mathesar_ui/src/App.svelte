@@ -16,7 +16,31 @@
   import { setReleasesStoreInContext } from './stores/releases';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import { setLocale } from './i18n/i18n-svelte';
-  import { loadLocaleAsync } from './i18n/i18n-util.async';
+  import type { Locales, Translations } from './i18n/i18n-types';
+  import { loadTranslationsIntoMemory } from './i18n/i18n-util.async';
+  import { onMount } from 'svelte';
+  import Spinner from './component-library/spinner/Spinner.svelte';
+
+  let isTranslationsLoaded = false;
+  onMount(() => {
+    const checkTranslationsInterval = setInterval(() => {
+      const translations:
+        | { lang: Locales; translationStrings: string }
+        | undefined =
+        // @ts-expect-error
+        window.translations;
+      if (translations) {
+        console.log({ translations });
+        loadTranslationsIntoMemory(
+          translations.lang,
+          JSON.parse(translations.translationStrings),
+        );
+        setLocale('en');
+        isTranslationsLoaded = true;
+        clearInterval(checkTranslationsInterval);
+      }
+    }, 100);
+  });
 
   const commonData = preloadCommonData();
   if (commonData?.user) {
@@ -68,14 +92,19 @@
 
 <svelte:body on:copy={handleCopy} />
 
-<ToastPresenter entries={toast.entries} />
-<Confirmation controller={confirmationController} />
-<ModalRecordSelector
-  {recordSelectorController}
-  modalController={recordSelectorModal}
-/>
-
-<RootRoute />
+{#if isTranslationsLoaded}
+  <ToastPresenter entries={toast.entries} />
+  <Confirmation controller={confirmationController} />
+  <ModalRecordSelector
+    {recordSelectorController}
+    modalController={recordSelectorModal}
+  />
+  <RootRoute />
+{:else}
+  <div class="app-loader">
+    <Spinner size="2rem" />
+  </div>
+{/if}
 
 <!--
   Supporting aliases in scss within the preprocessor is a bit of work.
@@ -258,5 +287,13 @@
 
   .bold-header {
     font-weight: 500;
+  }
+
+  .app-loader {
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    display: flex;
   }
 </style>
