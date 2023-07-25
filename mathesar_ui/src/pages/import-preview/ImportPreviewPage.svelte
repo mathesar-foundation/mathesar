@@ -4,22 +4,18 @@
 
   import {
     CancelOrProceedButtonPair,
-    CancellablePromise,
     Checkbox,
     LabeledInput,
     Spinner,
     TextInput,
   } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { columnsApi } from '@mathesar/api/columns';
+  import { dataFilesApi } from '@mathesar/api/dataFiles';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import type {
-    PaginatedResponse,
-    RequestStatus,
-  } from '@mathesar/api/utils/requestUtils';
-  import { getAPI, patchAPI } from '@mathesar/api/utils/requestUtils';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import { getCellCap } from '@mathesar/components/cell-fabric/utils';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import {
     Sheet,
@@ -37,11 +33,7 @@
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
-  import {
-    currentDbAbstractTypes,
-    getAbstractTypeForDbType,
-  } from '@mathesar/stores/abstract-types';
-  import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     createTable,
     deleteTable,
@@ -54,24 +46,37 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
   import ErrorInfo from './ErrorInfo.svelte';
   import PreviewColumn from './PreviewColumn.svelte';
+  import {
+    getSkeletonRecords,
+    processColumns,
+    type ColumnProperties,
+  } from './importPreviewPageUtils';
 
   export let database: Database;
   export let schema: SchemaEntry;
-  export let previewTableId: number;
+  export let tableId: number;
+  export let useColumnTypeInference = false;
 
   let tableIsAlreadyConfirmed = false;
-
   let previewRequestStatus: RequestStatus;
   let headerUpdateRequestStatus: RequestStatus;
   let typeChangeRequestStatus: RequestStatus;
   let tableName = '';
   let useFirstRowAsHeader = true;
-
   let tableInfo: TableEntry;
   let dataFileDetails: { id: number; header: boolean };
   let columns: Column[] = [];
-  // Add a couple empty records to show skeleton upon initial load
-  let records: Record<string, unknown>[] = [{}, {}];
+  let records = getSkeletonRecords();
+  let columnPropertiesMap: Record<Column['id'], ColumnProperties> = {};
+
+  let previewTableLoadRequest:
+    | ReturnType<typeof generateTablePreview>
+    | undefined;
+  let columnsFetchRequest: ReturnType<typeof columnsApi.list> | undefined;
+  let dataFileFetchRequest: ReturnType<typeof dataFilesApi.get> | undefined;
+  let typeSuggestionRequest:
+    | ReturnType<typeof getTypeSuggestionsForTable>
+    | undefined;
 
   $: isLoading =
     previewRequestStatus?.state === 'processing' ||
@@ -82,74 +87,24 @@
     !showTableSkeleton &&
     previewRequestStatus?.state !== 'failure' &&
     headerUpdateRequestStatus?.state !== 'failure';
-
-  let columnProperties: Record<
-    Column['id'],
-    { selected: boolean; displayName: string }
-  > = {};
-
-  const promises: {
-    previewTableLoadPromise?: CancellablePromise<{
-      records: Record<string, unknown>[];
-    }>;
-    columnsFetchPromise?: CancellablePromise<PaginatedResponse<Column>>;
-    dataFileFetchPromise?: CancellablePromise<{ id: number; header: boolean }>;
-    typeSuggestionPromise?: ReturnType<typeof getTypeSuggestionsForTable>;
-  } = {};
-
-  function processColumns(
-    _columns: Column[],
-    abstractTypeMap: AbstractTypesMap,
-  ) {
-    return _columns.map((column) => {
-      const abstractType = getAbstractTypeForDbType(
-        column.type,
-        abstractTypeMap,
-      );
-      return {
-        id: column.id,
-        column,
-        abstractType,
-        cellComponentAndProps: getCellCap({
-          cellInfo: abstractType.cellInfo,
-          column,
-        }),
-      };
-    });
-  }
-
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
   async function loadTablePreview(_columns: Column[]) {
-    promises.previewTableLoadPromise?.cancel();
-    promises.previewTableLoadPromise = generateTablePreview(
-      previewTableId,
-      _columns.map((column) => ({
-        id: column.id,
-        name: column.name,
-        type: column.type,
-        type_options: column.type_options,
-        display_options: column.display_options,
-      })),
-    );
-    const response = await promises.previewTableLoadPromise;
-    records = response.records;
+    previewTableLoadRequest?.cancel();
+    previewTableLoadRequest = generateTablePreview(tableId, _columns);
+    records = (await previewTableLoadRequest).records;
   }
 
   async function fetchTableInfo() {
-    if (previewTableId !== tableInfo?.id) {
-      tableInfo = await getTableFromStoreOrApi(previewTableId);
+    if (tableId !== tableInfo?.id) {
+      tableInfo = await getTableFromStoreOrApi(tableId);
       tableName = tableInfo.name;
     }
-    // TODO: Move this request to /api
-    // Get `valid_target_types` in Table response
-    promises.columnsFetchPromise?.cancel();
-    promises.columnsFetchPromise = getAPI<PaginatedResponse<Column>>(
-      `/api/db/v0/tables/${previewTableId}/columns/?limit=500`,
-    );
-    const columnData = await promises.columnsFetchPromise;
+    columnsFetchRequest?.cancel();
+    columnsFetchRequest = columnsApi.list(tableId);
+    const columnData = await columnsFetchRequest;
     columns = columnData.results;
-    columnProperties = columns.reduce(
+    columnPropertiesMap = columns.reduce(
       (_columnProperties, column) => ({
         ..._columnProperties,
         [column.id]: {
@@ -164,11 +119,9 @@
 
   async function fetchDataFileDetails(_dataFileId: number) {
     if (_dataFileId !== dataFileDetails?.id) {
-      promises.dataFileFetchPromise?.cancel();
-      promises.dataFileFetchPromise = getAPI<{ id: number; header: boolean }>(
-        `/api/db/v0/data_files/${_dataFileId}/`,
-      );
-      dataFileDetails = await promises.dataFileFetchPromise;
+      dataFileFetchRequest?.cancel();
+      dataFileFetchRequest = dataFilesApi.get(_dataFileId);
+      dataFileDetails = await dataFileFetchRequest;
     }
     useFirstRowAsHeader = dataFileDetails.header;
     return dataFileDetails;
@@ -189,9 +142,11 @@
        */
       await tick();
       previewRequestStatus = { state: 'processing' };
-      promises.typeSuggestionPromise?.cancel();
-      promises.typeSuggestionPromise =
-        getTypeSuggestionsForTable(_previewTableId);
+
+      if (useColumnTypeInference) {
+        typeSuggestionRequest?.cancel();
+        typeSuggestionRequest = getTypeSuggestionsForTable(_previewTableId);
+      }
       const tableDetails = await fetchTableInfo();
 
       if (tableDetails.import_verified || !tableDetails.data_files?.length) {
@@ -206,11 +161,14 @@
       const dataFileDetailsPromise = fetchDataFileDetails(
         tableDetails.data_files[0],
       );
-      const typeSuggestions = await promises.typeSuggestionPromise;
-      columns = columns.map((column) => ({
-        ...column,
-        type: typeSuggestions[column.name] ?? column.type,
-      }));
+
+      if (useColumnTypeInference && typeSuggestionRequest) {
+        const typeSuggestions = await typeSuggestionRequest;
+        columns = columns.map((column) => ({
+          ...column,
+          type: typeSuggestions[column.name] ?? column.type,
+        }));
+      }
 
       const previewPromise = loadTablePreview(columns);
       await Promise.all([dataFileDetailsPromise, previewPromise]);
@@ -227,40 +185,35 @@
     }
   }
 
-  $: void onPreviewTableIdChange(previewTableId);
+  $: void onPreviewTableIdChange(tableId);
 
   async function updateDataFileHeader() {
     if (dataFileDetails) {
       try {
         headerUpdateRequestStatus = { state: 'processing' };
         dataFileDetails.header = useFirstRowAsHeader;
-        const deleteTablePromise = deleteTable(
-          database,
-          schema,
-          previewTableId,
-        );
-        const patchDataFilePromise = patchAPI(
-          `/api/db/v0/data_files/${dataFileDetails.id}/`,
-          {
+        await Promise.all([
+          deleteTable(database, schema, tableId),
+          dataFilesApi.update(dataFileDetails.id, {
             header: useFirstRowAsHeader,
-          },
-        );
-        await Promise.all([deleteTablePromise, patchDataFilePromise]);
+          }),
+        ]);
         tableInfo = await createTable(database, schema, {
           name: tableName,
           dataFiles: [dataFileDetails.id],
         });
         headerUpdateRequestStatus = { state: 'success' };
-        router.goto(
-          getImportPreviewPageUrl(database.name, schema.id, tableInfo.id),
-          true,
+        const newUrl = getImportPreviewPageUrl(
+          database.name,
+          schema.id,
+          tableInfo.id,
+          { useColumnTypeInference },
         );
+        router.goto(newUrl, true);
       } catch (err) {
         headerUpdateRequestStatus = {
           state: 'failure',
-          errors: [
-            err instanceof Error ? err.message : 'Unable to load preview',
-          ],
+          errors: [getErrorMessage(err)],
         };
       }
     }
@@ -292,7 +245,7 @@
   }
 
   function handleCancel() {
-    void deleteTable(database, schema, previewTableId).catch((err) => {
+    void deleteTable(database, schema, tableId).catch((err) => {
       const errorMessage =
         err instanceof Error ? err.message : 'Unable to cancel import';
       toast.error(errorMessage);
@@ -302,23 +255,20 @@
 
   async function finishImport() {
     try {
-      await patchTable(previewTableId, {
+      await patchTable(tableId, {
         name: tableName,
         import_verified: true,
         columns: columns
-          .filter((column) => columnProperties[column.id]?.selected)
+          .filter((column) => columnPropertiesMap[column.id]?.selected)
           .map((column) => ({
             id: column.id,
-            name: columnProperties[column.id].displayName,
+            name: columnPropertiesMap[column.id].displayName,
             type: column.type,
             type_options: column.type_options,
             display_options: column.display_options,
           })),
       });
-      router.goto(
-        getTablePageUrl(database.name, schema.id, previewTableId),
-        true,
-      );
+      router.goto(getTablePageUrl(database.name, schema.id, tableId), true);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unable to save table';
@@ -366,9 +316,9 @@
           <div class="help-content">
             <h2 class="large-bold-header">Column names and data types</h2>
             <p>
-              Column names and data types are automatically detected, use the
-              controls in the preview table to review and update them if
-              necessary.
+              Column names {#if useColumnTypeInference} and data types {/if} are
+              automatically detected, use the controls in the preview table to review
+              and update them if necessary.
             </p>
             {#if isLoading}
               <InfoBox fullWidth>
@@ -378,7 +328,7 @@
             {:else if previewRequestStatus?.state === 'failure'}
               <ErrorInfo
                 errors={previewRequestStatus.errors}
-                on:retry={() => onPreviewTableIdChange(previewTableId)}
+                on:retry={() => onPreviewTableIdChange(tableId)}
                 on:delete={handleCancel}
               />
             {:else if headerUpdateRequestStatus?.state === 'failure'}
@@ -421,9 +371,10 @@
                             {isLoading}
                             {processedColumn}
                             {updateTypeRelatedOptions}
-                            bind:selected={columnProperties[processedColumn.id]
-                              .selected}
-                            bind:displayName={columnProperties[
+                            bind:selected={columnPropertiesMap[
+                              processedColumn.id
+                            ].selected}
+                            bind:displayName={columnPropertiesMap[
                               processedColumn.id
                             ].displayName}
                           />

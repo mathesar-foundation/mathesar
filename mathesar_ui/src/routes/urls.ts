@@ -30,12 +30,37 @@ export function getImportPageUrl(
   return `${getSchemaPageUrl(databaseName, schemaId)}import/`;
 }
 
+interface ImportPreviewPageQueryParams {
+  useColumnTypeInference: boolean;
+}
+
+const TYPE_INFERENCE_QUERY_PARAM = 'inference';
+
+function serializeImportPreviewPageQueryParams(
+  p: ImportPreviewPageQueryParams,
+): string {
+  return new URLSearchParams({
+    [TYPE_INFERENCE_QUERY_PARAM]: JSON.stringify(p.useColumnTypeInference),
+  }).toString();
+}
+
+export function getImportPreviewPageQueryParams(
+  queryParams: Record<string, unknown>,
+): ImportPreviewPageQueryParams {
+  return {
+    useColumnTypeInference: queryParams[TYPE_INFERENCE_QUERY_PARAM] === 'true',
+  };
+}
+
 export function getImportPreviewPageUrl(
   databaseName: string,
   schemaId: number,
   previewTableId: number,
+  options: { useColumnTypeInference: boolean },
 ): string {
-  return `${getImportPageUrl(databaseName, schemaId)}${previewTableId}/`;
+  const importPageUrl = getImportPageUrl(databaseName, schemaId);
+  const q = serializeImportPreviewPageQueryParams(options);
+  return `${importPageUrl}${previewTableId}/?${q}`;
 }
 
 export function getDataExplorerPageUrl(

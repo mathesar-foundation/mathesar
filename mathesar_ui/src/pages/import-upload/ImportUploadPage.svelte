@@ -10,6 +10,7 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { dataFilesApi } from '@mathesar/api/dataFiles';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
@@ -19,20 +20,17 @@
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconPaste, iconUrl } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import {
-    getImportPreviewPageUrl,
-    getTablePageUrl,
-  } from '@mathesar/routes/urls';
-  import { createTable, patchTable } from '@mathesar/stores/tables';
+  import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
+  import { createTable } from '@mathesar/stores/tables';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import DataFileInput from './DataFileInput.svelte';
   import ColumnTypeInferenceInput from './column-type-inference/ColumnTypeInferenceInput.svelte';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -88,7 +86,7 @@
     if ($uploadMethod.key === 'clipboard') {
       return (await dataFilesApi.addViaText($clipboardContent)).id;
     }
-    assertExhaustive($uploadMethod.key);
+    return assertExhaustive($uploadMethod.key);
   }
 
   async function proceed() {
@@ -101,15 +99,13 @@
       const table = await createTable(database, schema, {
         dataFiles: [dataFileId],
       });
-      if ($useColumnTypeInference) {
-        router.goto(
-          getImportPreviewPageUrl(database.name, schema.id, table.id),
-          true,
-        );
-      } else {
-        await patchTable(table.id, { import_verified: true });
-        router.goto(getTablePageUrl(database.name, schema.id, table.id), true);
-      }
+      const previewPage = getImportPreviewPageUrl(
+        database.name,
+        schema.id,
+        table.id,
+        { useColumnTypeInference: $useColumnTypeInference },
+      );
+      router.goto(previewPage, true);
       status = undefined;
     } catch (err) {
       status = { state: 'failure', errors: [getErrorMessage(err)] };
@@ -131,17 +127,15 @@
 
   <div class="import-file-view">
     {#if status?.state === 'processing'}
-      <div class="uploading-info">
-        <!--
-          TODO improve styling of this content
-         -->
-        <span>Uploading Data</span>
-        <WarningBox>
-          Large data sets can sometimes take several minutes to process. Please
-          do not leave this page or close the browser tab while import is in
-          progress.
-        </WarningBox>
+      <h2>Processing Data</h2>
+      <div class="processing-spinner">
+        <Spinner />
       </div>
+      <WarningBox>
+        Large data sets can sometimes take several minutes to process. Please do
+        not leave this page or close the browser tab while import is in
+        progress.
+      </WarningBox>
     {:else if status?.state === 'failure'}
       <ErrorBox>
         <ul>
@@ -231,5 +225,11 @@
     color: var(--slate-500);
     text-align: right;
     font-size: var(--text-size-small);
+  }
+
+  .processing-spinner {
+    color: var(--slate-400);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
   }
 </style>
