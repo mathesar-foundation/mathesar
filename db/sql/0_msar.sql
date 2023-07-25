@@ -253,6 +253,26 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.is_default_possibly_dynamic(tab_id oid, col_id integer) RETURNS boolean AS $$/*
+Determine whether the default value for the given column is an expression or constant.
+
+If the column default is an expression, then we return 'True', since that could be dynamic. If the
+column default is a simple constant, we return 'False'. The check is not very sophisticated, and
+errs on the side of returning 'True'. For example, the following would return 'True':
+- 3 + 5
+- mathesar_types.cast_to_integer('8')
+
+Args:
+  tab_id: The OID of the table with the column.
+  col_id: The attnum of the column in the table.
+*/
+SELECT split_part(substring(adbin, 2), ' ', 1) IN (('SQLVALUEFUNCTION'), ('FUNCEXPR'))
+FROM pg_attrdef
+WHERE adrelid=tab_id AND adnum=col_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_cast_function_name(target_type regtype) RETURNS text AS $$/*
 Return a string giving the appropriate name of the casting function for the target_type.
 
@@ -930,7 +950,12 @@ BEGIN
   typ_id := typ_name::regtype::oid;
   typmodin_func := typmodin::text FROM pg_type WHERE oid=typ_id AND typmodin<>0;
   timespan_flag := typcategory='T' FROM pg_type WHERE oid=typ_id;
-  IF jsonb_typeof(typ_options) = 'null' OR typ_options IS NULL OR typmodin_func IS NULL THEN
+  IF (
+    jsonb_typeof(typ_options) = 'null'
+    OR typ_options IS NULL
+    OR typ_options='{}'::jsonb
+    OR typmodin_func IS NULL
+  ) THEN
     typmod := NULL;
   ELSE
     EXECUTE format(
@@ -1803,17 +1828,25 @@ Args:
                represent 'drop the column default'.
   new_type: The target type to which we'll cast the new default.
 */
-SELECT
-  format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id))
-  || CASE
-    WHEN jsonb_typeof(new_default)='null' THEN
-      null
-    WHEN new_default #>> '{}' IS NOT NULL THEN
-      format('%L', new_default #>> '{}')  -- sanitize since this could be user input.
-    ELSE
-      __msar.build_cast_expr(old_default, new_type)
-  END;
-$$ LANGUAGE SQL;
+DECLARE
+  default_expr text;
+  raw_default_expr text;
+BEGIN
+  IF jsonb_typeof(new_default)='null' THEN
+    default_expr := null;
+  ELSEIF new_default #>> '{}' IS NOT NULL THEN
+    default_expr := format('%L', new_default #>> '{}');  -- sanitize since this could be user input.
+  ELSEIF msar.is_default_possibly_dynamic(tab_id, col_id) AND new_type IS NOT NULL THEN
+    -- We just cast the possibly dynamic expression to the new type in this case.
+    default_expr := __msar.build_cast_expr(old_default, new_type);
+  ELSEIF old_default IS NOT NULL AND new_type IS NOT NULL THEN
+    -- If we arrive here, then we know the old_default is a constant value.
+    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type)) INTO raw_default_expr;
+    default_expr := format('%L', raw_default_expr);
+  END IF;
+  RETURN format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id)) || default_expr;
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION

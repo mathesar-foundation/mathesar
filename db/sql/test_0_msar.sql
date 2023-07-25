@@ -1144,7 +1144,7 @@ Only need to test null/empty behavior here, since main functionality is tested b
 msar.alter_columns
 
 It's debatable whether this test should continue to exist, but it was useful for initial
-development.
+development, and runs quickly.
 */
 DECLARE
   tab_id oid;
