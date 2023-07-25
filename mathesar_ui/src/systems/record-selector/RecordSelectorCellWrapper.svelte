@@ -10,7 +10,6 @@
   export let rowIsSelected = false;
   export let columnType: CellLayoutColumnType;
   export let overflowDetails: OverflowDetails | undefined = undefined;
-  export let title: string | undefined = undefined;
   export let showAboveOverlay = false;
 
   $: hasOverflowTop = ensureReadable(overflowDetails?.hasOverflowTop ?? false);
@@ -27,7 +26,6 @@
   class:table-overflow-top={$hasOverflowTop}
   class:table-overflow-left={$hasOverflowLeft}
   class:show-above-overlay={showAboveOverlay}
-  {title}
 >
   <slot />
 </div>
