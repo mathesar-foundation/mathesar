@@ -1,4 +1,4 @@
-<!-- 
+<!--
   TODO: Implement the loader while renaming
   when implementing rename functionality
   using table inspector

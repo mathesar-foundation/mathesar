@@ -1,4 +1,4 @@
-<!-- 
+<!--
   @component
 
   Enables inline editing with support for "Save" & "Cancel" actions.

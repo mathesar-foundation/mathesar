@@ -7,14 +7,14 @@
     Button,
   } from '@mathesar/component-library';
   import { postAPI } from '@mathesar/api/utils/requestUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import RichText from '@mathesar/components/RichText.svelte';
+  import type { UploadEvents } from './uploadUtils';
 
   const dispatch = createEventDispatcher<UploadEvents>();
   export let isLoading: boolean;
   export let showCancelButton: boolean;
   export let hideAllActions = false;
-  import { LL } from '@mathesar/i18n/i18n-svelte';
-  import RichText from '@mathesar/components/RichText.svelte';
-  import type { UploadEvents } from './uploadUtils';
 
   let url: string;
 

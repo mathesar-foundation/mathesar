@@ -5,7 +5,7 @@
   import VirtualList from './virtual-list/VirtualList.svelte';
   import type { Props as VirtualListProps } from './virtual-list/listUtils';
 
-  const { stores, api } = getSheetContext();
+  const { stores, api: sheetApi } = getSheetContext();
   const { rowWidth, horizontalScrollOffset, scrollOffset } = stores;
 
   export let itemCount: VirtualListProps['itemCount'];
@@ -29,10 +29,10 @@
       let:items
       let:api
       on:scroll={(e) => {
-        api.setScrollOffset(e.detail);
+        sheetApi.setScrollOffset(e.detail);
       }}
       on:h-scroll={(e) => {
-        api.setHorizontalScrollOffset(e.detail);
+        sheetApi.setHorizontalScrollOffset(e.detail);
       }}
     >
       <slot {items} {api} />

@@ -50,7 +50,7 @@
     isOpen = !isOpen;
   }
 
-  function close() {
+  function handleClose() {
     isOpen = false;
   }
 </script>
@@ -88,7 +88,7 @@
   {preferredPlacement}
   class={contentClass}
   {closeOnInnerClick}
-  on:close={close}
+  on:close={handleClose}
   on:open
   on:close
   let:close

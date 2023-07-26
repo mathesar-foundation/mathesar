@@ -25,7 +25,8 @@
   import RowContextOptions from './RowContextOptions.svelte';
 
   export let row: Row;
-  export let style: { [key: string]: string | number };
+  let sheetRowStyles: { [key: string]: string | number };
+  export { sheetRowStyles as style };
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -71,7 +72,7 @@
   };
 </script>
 
-<SheetRow {style} let:htmlAttributes let:styleString>
+<SheetRow style={sheetRowStyles} let:htmlAttributes let:styleString>
   <div
     class="row"
     class:selected={isSelected}

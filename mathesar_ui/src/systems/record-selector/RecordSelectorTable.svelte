@@ -233,7 +233,7 @@
             {overflowDetails}
           />
           {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-            {@const column = processedColumn.column}
+            {@const { column } = processedColumn}
             <RecordSelectorColumnHeaderCell
               hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
               {overflowDetails}

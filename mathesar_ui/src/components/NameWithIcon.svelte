@@ -20,8 +20,8 @@
       {#if isLoading}
         <Spinner />
       {:else}
-        {#each icons as icon}
-          <Icon {...icon} size="min(1em, 0.75em + 0.25rem)" />
+        {#each icons as _icon}
+          <Icon {..._icon} size="min(1em, 0.75em + 0.25rem)" />
         {/each}
       {/if}
     </span>&nbsp;<span class="name">

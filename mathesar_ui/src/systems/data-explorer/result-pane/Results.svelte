@@ -86,10 +86,10 @@
           columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
           isStatic
           isControlCell
-          let:htmlAttributes
+          let:htmlAttributes={headerCellHtmlAttributes}
           let:style
         >
-          <div {...htmlAttributes} {style} />
+          <div {...headerCellHtmlAttributes} {style} />
         </SheetCell>
 
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
@@ -113,9 +113,13 @@
       >
         {#each items as item (item.key)}
           {#if rows[item.index] || showDummyGhostRow}
-            <SheetRow style={item.style} let:htmlAttributes let:styleString>
+            <SheetRow
+              style={item.style}
+              let:htmlAttributes={rowCellHtmlAttributes}
+              let:styleString
+            >
               <div
-                {...htmlAttributes}
+                {...rowCellHtmlAttributes}
                 style="--cell-height:{rowHeightPx - 1}px;{styleString}"
               >
                 <SheetCell

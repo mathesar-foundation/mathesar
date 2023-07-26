@@ -25,7 +25,9 @@
     optionToCompare: Option | undefined,
     selectedOption: Option | undefined,
   ) => boolean = (a, b) => a === b;
-  export let disabled = false;
+
+  let isGroupDisabled = false;
+  export { isGroupDisabled as disabled };
 
   function handleChange(option: Option, checked: boolean) {
     if (checked) {
@@ -40,7 +42,7 @@
   {isInline}
   {options}
   {label}
-  {disabled}
+  disabled={isGroupDisabled}
   let:option
   let:disabled
   on:change

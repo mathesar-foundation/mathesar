@@ -425,10 +425,10 @@
                     {#each processedColumns as processedColumn (processedColumn.id)}
                       <SheetCell
                         columnIdentifierKey={processedColumn.id}
-                        let:htmlAttributes
+                        let:htmlAttributes={headerCellHtmlAttributes}
                         let:style
                       >
-                        <div {...htmlAttributes} {style}>
+                        <div {...headerCellHtmlAttributes} {style}>
                           <PreviewColumn
                             {isLoading}
                             {processedColumn}
@@ -454,10 +454,10 @@
                         position: 'relative',
                         height: 30,
                       }}
-                      let:htmlAttributes
+                      let:htmlAttributes={rowCellHtmlAttributes}
                       let:styleString
                     >
-                      <div {...htmlAttributes} style={styleString}>
+                      <div {...rowCellHtmlAttributes} style={styleString}>
                         {#each processedColumns as processedColumn (processedColumn)}
                           <SheetCell
                             columnIdentifierKey={processedColumn.id}

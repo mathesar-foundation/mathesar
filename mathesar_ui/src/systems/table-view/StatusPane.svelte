@@ -74,7 +74,7 @@
         size="medium"
         appearance="primary"
         on:click={() => {
-          recordsData.addEmptyRecord();
+          void recordsData.addEmptyRecord();
           selection.selectAndActivateFirstDataEntryCellInLastRow();
         }}
       >

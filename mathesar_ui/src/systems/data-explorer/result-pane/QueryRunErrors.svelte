@@ -19,7 +19,7 @@
 
   function deleteMissingColumns(column_id: number) {
     if (queryManager) {
-      queryManager.update((q) => q.withoutColumnsById([column_id]));
+      void queryManager.update((q) => q.withoutColumnsById([column_id]));
     }
   }
 </script>

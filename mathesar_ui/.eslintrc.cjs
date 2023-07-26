@@ -1,4 +1,4 @@
-const typescript = require('typescript');
+// const typescript = require('typescript');
 
 module.exports = {
   root: true,
@@ -9,7 +9,7 @@ module.exports = {
     project: ['./tsconfig.json'],
     extraFileExtensions: ['.svelte', '.cjs'],
   },
-  plugins: ['svelte3', '@typescript-eslint'],
+  plugins: ['@typescript-eslint'],
   extends: [
     'airbnb-base',
     'airbnb-typescript/base',
@@ -17,6 +17,7 @@ module.exports = {
     'plugin:promise/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:svelte/recommended',
   ],
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
@@ -42,7 +43,10 @@ module.exports = {
   overrides: [
     {
       files: ['*.svelte'],
-      processor: 'svelte3/svelte3',
+      parser: 'svelte-eslint-parser',
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+      },
       rules: {
         'import/first': 'off',
         'import/no-duplicates': 'off',
@@ -75,6 +79,8 @@ module.exports = {
         '@typescript-eslint/no-unsafe-argument': 'off',
         'no-sequences': 'off',
         '@typescript-eslint/no-unused-expressions': 'off',
+        'prefer-destructuring': 'warn',
+        '@typescript-eslint/no-use-before-define': ['error', 'nofunc'],
       },
     },
     {
@@ -134,10 +140,11 @@ module.exports = {
   },
   globals: {
     vi: true,
+    $$Generic: true,
   },
   settings: {
-    'svelte3/typescript': () => typescript,
-    'svelte3/ignore-styles': ({ lang }) => lang === 'scss',
+    // 'svelte3/typescript': () => typescript,
+    // 'svelte3/ignore-styles': ({ lang }) => lang === 'scss',
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],
