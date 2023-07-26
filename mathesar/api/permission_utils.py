@@ -24,14 +24,14 @@ class AbstractAccessInspector(ABC):
         return self.is_role_present(allowed_roles)
 
     def is_atleast_manager(self):
-        return self.has_role((Role.MANAGER.value))
+        return self.has_role([Role.MANAGER.value])
 
     def is_atleast_editor(self):
-        allowed_roles = (Role.MANAGER.value, Role.EDITOR.value)
+        allowed_roles = [Role.MANAGER.value, Role.EDITOR.value]
         return self.has_role(allowed_roles)
 
     def is_atleast_viewer(self):
-        allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
+        allowed_roles = [Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value]
         return self.has_role(allowed_roles)
 
 
