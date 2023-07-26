@@ -1,5 +1,3 @@
-// const typescript = require('typescript');
-
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
@@ -39,6 +37,8 @@ module.exports = {
     'no-restricted-syntax': 0,
     '@typescript-eslint/require-await': 'off',
     'class-methods-use-this': 'off',
+    // Since functions are hoisted
+    '@typescript-eslint/no-use-before-define': ['error', 'nofunc'],
   },
   overrides: [
     {
@@ -47,6 +47,7 @@ module.exports = {
       parserOptions: {
         parser: '@typescript-eslint/parser',
       },
+      extends: ['plugin:@intlify/svelte/recommended'],
       rules: {
         'import/first': 'off',
         'import/no-duplicates': 'off',
@@ -79,8 +80,7 @@ module.exports = {
         '@typescript-eslint/no-unsafe-argument': 'off',
         'no-sequences': 'off',
         '@typescript-eslint/no-unused-expressions': 'off',
-        'prefer-destructuring': 'warn',
-        '@typescript-eslint/no-use-before-define': ['error', 'nofunc'],
+        '@intlify/svelte/no-raw-text': 'warn',
       },
     },
     {
@@ -143,8 +143,6 @@ module.exports = {
     $$Generic: true,
   },
   settings: {
-    // 'svelte3/typescript': () => typescript,
-    // 'svelte3/ignore-styles': ({ lang }) => lang === 'scss',
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],

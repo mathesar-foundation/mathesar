@@ -24,6 +24,7 @@
   let isTranslationsLoaded = false;
   onMount(() => {
     const checkTranslationsInterval = setInterval(() => {
+      // eslint-disable-next-line prefer-destructuring
       const translations:
         | { lang: Locales; translationStrings: string }
         | undefined =
