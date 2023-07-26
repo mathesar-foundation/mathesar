@@ -30,7 +30,7 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import DataFileInput from './DataFileInput.svelte';
-  import ColumnTypeInferenceInput from './column-type-inference/ColumnTypeInferenceInput.svelte';
+  import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
