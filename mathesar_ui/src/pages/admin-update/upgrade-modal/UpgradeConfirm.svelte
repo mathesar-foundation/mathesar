@@ -7,8 +7,6 @@
   import type { Release } from '@mathesar/stores/releases';
   import { LL } from '@mathesar/i18n/i18n-svelte';
   import RichText from '@mathesar/components/RichText.svelte';
-  import { text } from 'svelte/internal';
-  import { generateSelectOptions } from '@mathesar/component-library/data-type-based-input/utils';
 
   export let release: Release;
   export let onProceed: () => void;

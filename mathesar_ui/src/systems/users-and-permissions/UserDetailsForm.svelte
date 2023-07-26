@@ -21,12 +21,12 @@
   } from '@mathesar/components/form';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import SelectUserType from './SelectUserType.svelte';
-  import UserFormInput from './UserFormInput.svelte';
-  import SelectPreferredLanguage from './SelectPreferredLanguage.svelte';
   import { locale, setLocale } from '@mathesar/i18n/i18n-svelte';
   import { loadLocaleAsync } from '@mathesar/i18n/i18n-util.async';
   import type { Locales } from '@mathesar/i18n/i18n-types';
+  import SelectUserType from './SelectUserType.svelte';
+  import UserFormInput from './UserFormInput.svelte';
+  import SelectPreferredLanguage from './SelectPreferredLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();

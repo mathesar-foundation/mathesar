@@ -18,7 +18,6 @@
   import { currentTable } from '@mathesar/stores/tables';
   import { LL } from '@mathesar/i18n/i18n-svelte';
   import RichText from '@mathesar/components/RichText.svelte';
-  import { generateSelectOptions } from '@mathesar/component-library/data-type-based-input/utils';
   import DirectField from './DirectField.svelte';
   import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
   import type RecordStore from './RecordStore';

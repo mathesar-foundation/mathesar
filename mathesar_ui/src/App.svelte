@@ -10,15 +10,15 @@
     setRecordSelectorControllerInContext,
   } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import { onMount } from 'svelte';
   import RootRoute from './routes/RootRoute.svelte';
   import { setNewClipboardHandlerStoreInContext } from './stores/clipboard';
   import { modal } from './stores/modal';
   import { setReleasesStoreInContext } from './stores/releases';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import { setLocale } from './i18n/i18n-svelte';
-  import type { Locales, Translations } from './i18n/i18n-types';
+  import type { Locales } from './i18n/i18n-types';
   import { loadTranslationsIntoMemory } from './i18n/i18n-util.async';
-  import { onMount } from 'svelte';
   import Spinner from './component-library/spinner/Spinner.svelte';
 
   let isTranslationsLoaded = false;
@@ -27,7 +27,7 @@
       const translations:
         | { lang: Locales; translationStrings: string }
         | undefined =
-        // @ts-expect-error
+        // @ts-expect-error added by index.html
         window.translations;
       if (translations) {
         loadTranslationsIntoMemory(
