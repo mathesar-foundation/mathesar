@@ -1,18 +1,14 @@
 import warnings
-from psycopg.errors import DuplicateColumn
-from psycopg2.errors import NotNullViolation, StringDataRightTruncation
+from psycopg.errors import DuplicateColumn, InvalidTextRepresentation, NotNullViolation
+from psycopg2.errors import StringDataRightTruncation
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-from sqlalchemy.exc import ProgrammingError, IntegrityError
 
 from mathesar.api.db.permissions.columns import ColumnAccessPolicy
-from mathesar.api.exceptions.database_exceptions import (
-    exceptions as database_api_exceptions,
-    base_exceptions as database_base_api_exceptions,
-)
+from mathesar.api.exceptions.database_exceptions import exceptions as database_api_exceptions
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
@@ -119,8 +115,8 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     message='This type cast is not implemented',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-            except ProgrammingError as e:
-                raise database_base_api_exceptions.ProgrammingAPIException(
+            except InvalidTextRepresentation as e:
+                raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
@@ -160,16 +156,13 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-            except IntegrityError as e:
-                if type(e.orig) == NotNullViolation:
-                    raise database_api_exceptions.NotNullViolationAPIException(
-                        e,
-                        field="nullable",
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        table=table,
-                    )
-                else:
-                    raise base_api_exceptions.MathesarAPIException(e)
+            except NotNullViolation as e:
+                raise database_api_exceptions.NotNullViolationAPIException(
+                    e,
+                    field="nullable",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    table=table,
+                )
             except StringDataRightTruncation as e:
                 raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,
