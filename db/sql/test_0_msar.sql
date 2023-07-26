@@ -1033,6 +1033,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
 -- msar.schema_ddl --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_create_schema() RETURNS SETOF TEXT AS $$
@@ -1049,19 +1050,57 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION test_drop_schema() RETURNS SETOF TEXT AS $$
+
+CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_false() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.drop_schema('drop_test_schema', false, false);
   RETURN NEXT hasnt_schema('drop_test_schema');
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.drop_schema(''%s'', false, false);', 
+      'drop_non_existing_schema'
+    ),
+    '3F000'
+  );
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION test_drop_schema_oid() RETURNS SETOF TEXT AS $$
+
+CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_true() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema('drop_test_schema', false, true);
+  RETURN NEXT hasnt_schema('drop_test_schema');
+  RETURN NEXT lives_ok(
+    format(
+      'SELECT msar.drop_schema(''%s'', false, true);', 
+      'drop_non_existing_schema'
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_using_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.drop_schema('drop_test_schema'::regnamespace::oid, false, false);
   RETURN NEXT hasnt_schema('drop_test_schema');
 END;
 $$ LANGUAGE plpgsql;
+
+
+/* CREATE OR REPLACE FUNCTION test_drop_schema_cascade() RETURNS SETOF TEXT AS $$
+BEGIN
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_restricted() RETURNS SETOF TEXT AS $$
+BEGIN
+  
+END;
+$$ LANGUAGE plpgsql; */
+
 
 -- msar.add_mathesar_table
 
