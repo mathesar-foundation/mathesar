@@ -300,9 +300,11 @@
             <TextInput bind:value={tableName} />
           </LabeledInput>
 
-          <div class="header-checkbox">
+          <div class="help-content">
+            <h2 class="large-bold-header">Column names and data types</h2>
+
             <LabeledInput
-              label="Use first row as header"
+              label="Take column names from the first data row"
               layout="inline-input-first"
             >
               <Checkbox
@@ -311,18 +313,14 @@
                 on:change={updateDataFileHeader}
               />
             </LabeledInput>
-          </div>
-
-          <div class="help-content">
-            <h2 class="large-bold-header">Column names and data types</h2>
             <p>
               Column names {#if useColumnTypeInference} and data types {/if} are
-              automatically detected, use the controls in the preview table to review
+              automatically detected. Use the controls in the preview table to review
               and update them if necessary.
             </p>
             {#if isLoading}
               <InfoBox fullWidth>
-                <span>Please wait while we prepare a preview for you</span>
+                <span>Preparing preview</span>
                 <Spinner />
               </InfoBox>
             {:else if previewRequestStatus?.state === 'failure'}
@@ -337,10 +335,6 @@
                 on:retry={updateDataFileHeader}
                 on:delete={handleCancel}
               />
-            {:else}
-              <InfoBox fullWidth>
-                Preview data is shown for the first few rows of your data only.
-              </InfoBox>
             {/if}
           </div>
         </div>
@@ -418,6 +412,12 @@
                   {/each}
                 </Sheet>
               </div>
+              <div class="truncation-alert">
+                <InfoBox>
+                  Preview data is shown for the first few rows of your data
+                  only.
+                </InfoBox>
+              </div>
             </div>
           </div>
         </div>
@@ -454,18 +454,14 @@
         margin-bottom: 1rem;
       }
 
-      .header-checkbox {
-        font-size: var(--text-size-large);
-      }
+      // .help-content {
+      //   margin-top: 2rem;
+      //   line-height: 1.6;
 
-      .help-content {
-        margin-top: 2rem;
-        line-height: 1.6;
-
-        p {
-          margin: var(--size-xx-small) 0;
-        }
-      }
+      //   p {
+      //     margin: var(--size-xx-small) 0;
+      //   }
+      // }
     }
 
     .table-preview-content {
@@ -487,7 +483,7 @@
         .content {
           padding: var(--inset-page-section-padding);
           background: var(--slate-50);
-          margin-bottom: 5rem;
+          // margin-bottom: 5rem;
         }
 
         .sheet-holder {
@@ -528,5 +524,9 @@
         margin-right: auto;
       }
     }
+  }
+  .truncation-alert {
+    margin: 1rem auto 0 auto;
+    max-width: max-content;
   }
 </style>
