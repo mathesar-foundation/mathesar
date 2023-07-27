@@ -17,7 +17,7 @@ def superuser_must_not_exists(view_function=None):
     return wrapper
 
 
-def least_one_superuser_exists(view_function=None):
+def superuser_exists(view_function=None):
     """
     Decorator for views that checks if at least one superuser exists
     and redirects to the superuser create screen if none exists
