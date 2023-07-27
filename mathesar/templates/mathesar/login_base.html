@@ -116,6 +116,13 @@
       font-size: var(--size-xx-large);
       text-align: center;
     }
+    .login-card .language-selector {
+      display: block;
+      background-color: transparent;
+      border: 1px solid var(--slate-200);
+      border-radius: 0.285rem;
+      cursor: pointer;
+    }
     @media (max-width: 50rem) {
       .unsupported-device {
         display: block;
@@ -192,5 +199,18 @@
   <div class="login-card align-center">
     <h1>{% block h1 %} {% endblock %}</h1>
     {% block box_content %} {% endblock %}
+    <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+      <input name="next" type="hidden" value="{{ redirect_to }}">
+      <select name="language" onchange="form.submit()" class="language-selector align-center">
+          {% get_current_language as LANGUAGE_CODE %}
+          {% get_available_languages as LANGUAGES %}
+          {% get_language_info_list for LANGUAGES as languages %}
+          {% for language in languages %}
+              <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                  {{ language.name_local }} ({{ language.code }})
+              </option>
+          {% endfor %}
+      </select>
+    </form>
   </div>
 {% endblock %}
