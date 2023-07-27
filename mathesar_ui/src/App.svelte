@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
-
   import {
     Confirmation,
     Spinner,
@@ -8,7 +6,6 @@
   } from '@mathesar-component-library';
   import { confirmationController } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
-  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
   import {
     RecordSelectorController,
     setRecordSelectorControllerInContext,
@@ -17,7 +14,6 @@
   import RootRoute from './routes/RootRoute.svelte';
   import { setNewClipboardHandlerStoreInContext } from './stores/clipboard';
   import { modal } from './stores/modal';
-  import { setReleasesStoreInContext } from './stores/releases';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
   import { loadLocaleAsync } from './i18n/i18n-load';
   import { setLocale } from './i18n/i18n-svelte';
@@ -36,17 +32,6 @@
   })();
 
   const commonData = preloadCommonData();
-  if (commonData?.user) {
-    const userProfile = setUserProfileStoreInContext(commonData.user);
-    if (get(userProfile).isSuperUser) {
-      // Toggle these lines to test with a mock tag name
-      // setReleasesStoreInContext('1.75.0');
-      setReleasesStoreInContext(commonData.current_release_tag_name);
-    }
-  } else {
-    // This should never occur
-    // TODO: Throw an application wide error
-  }
 
   const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
   const recordSelectorModal = modal.spawnModalController();
@@ -92,7 +77,9 @@
     {recordSelectorController}
     modalController={recordSelectorModal}
   />
-  <RootRoute />
+  {#if commonData}
+    <RootRoute {commonData} />
+  {/if}
 {:else}
   <div class="app-loader">
     <Spinner size="2rem" />
