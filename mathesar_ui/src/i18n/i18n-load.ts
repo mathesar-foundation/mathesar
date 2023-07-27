@@ -30,3 +30,11 @@ export async function loadLocaleAsync(locale: Locales): Promise<void> {
   updateTranslationsDictionary(locale, await importLocaleAsync(locale));
   loadFormatters(locale);
 }
+
+export function loadTranslationsIntoMemory(
+  locale: Locales,
+  translations: Translations,
+) {
+  updateTranslationsDictionary(locale, translations);
+  loadFormatters(locale);
+}

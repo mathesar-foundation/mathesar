@@ -19,21 +19,28 @@
   import { modal } from './stores/modal';
   import { setReleasesStoreInContext } from './stores/releases';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
-  import { loadLocaleAsync } from './i18n/i18n-load';
   import { setLocale } from './i18n/i18n-svelte';
+  import type { Locales } from './i18n/i18n-types';
+  import { loadTranslationsIntoMemory } from './i18n/i18n-load';
 
-  /**
-   * Later the translations file will be loaded
-   * in parallel to the FE's first chunk
-   */
   let isTranslationsLoaded = false;
-  (() => {
-    void loadLocaleAsync('en').then(() => {
-      setLocale('en');
+  const checkTranslationsInterval = setInterval(() => {
+    // eslint-disable-next-line prefer-destructuring
+    const translations:
+      | { lang: Locales; translationStrings: string }
+      | undefined =
+      // @ts-expect-error added by index.html
+      window.translations;
+    if (translations) {
+      loadTranslationsIntoMemory(
+        translations.lang,
+        JSON.parse(translations.translationStrings),
+      );
+      setLocale(translations.lang);
       isTranslationsLoaded = true;
-      return true;
-    });
-  })();
+      clearInterval(checkTranslationsInterval);
+    }
+  }, 100);
 
   const commonData = preloadCommonData();
   if (commonData?.user) {
