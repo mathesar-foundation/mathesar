@@ -6,6 +6,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
 
 from db.types.exceptions import UnsupportedTypeException
@@ -37,6 +38,7 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = TableFilter
+    permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = TableAccessPolicy
 
     def get_queryset(self):

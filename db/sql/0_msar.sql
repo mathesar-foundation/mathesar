@@ -253,6 +253,32 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.is_default_possibly_dynamic(tab_id oid, col_id integer) RETURNS boolean AS $$/*
+Determine whether the default value for the given column is an expression or constant.
+
+If the column default is an expression, then we return 'True', since that could be dynamic. If the
+column default is a simple constant, we return 'False'. The check is not very sophisticated, and
+errs on the side of returning 'True'. We simply pull apart the pg_node_tree representation of the
+expression, and check whether the root node is a known function call type. Note that we do *not*
+search any deeper in the tree than the root node. This means we won't notice that some expressions
+are actually constant (or at least static), if they have a function call or operator as their root
+node.
+
+For example, the following would return 'True', even though they're not dynamic:
+  3 + 5
+  mathesar_types.cast_to_integer('8')
+
+Args:
+  tab_id: The OID of the table with the column.
+  col_id: The attnum of the column in the table.
+*/
+SELECT split_part(substring(adbin, 2), ' ', 1) IN (('SQLVALUEFUNCTION'), ('FUNCEXPR'))
+FROM pg_attrdef
+WHERE adrelid=tab_id AND adnum=col_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_cast_function_name(target_type regtype) RETURNS text AS $$/*
 Return a string giving the appropriate name of the casting function for the target_type.
 
@@ -354,6 +380,13 @@ SELECT atttypid::regtype
 FROM pg_attribute
 WHERE attname = quote_ident(col_name)
 AND attrelid = msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
+Return true if the given schema exists in the current database, false otherwise.
+*/
+SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -878,6 +911,110 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 -- Add columns to table ----------------------------------------------------------------------------
 
+CREATE OR REPLACE FUNCTION
+__msar.prepare_fields_arg(fields text) RETURNS text AS $$/*
+Convert the `fields` argument into an integer for use with the integertypmodin system function.
+
+Args:
+  fields: A string corresponding to the documented options from the doumentation at
+          https://www.postgresql.org/docs/13/datatype-datetime.html
+
+In order to construct the argument for intervaltypmodin, needed for constructing the typmod value
+for INTERVAL types with arguments, we need to apply a transformation to the correct integer. This
+transformation is quite arcane, and is lifted straight from the PostgreSQL C code. Given a non-null
+fields argument, the steps are:
+- Assign each substring of valid `fields` arguments the correct integer (from the Postgres src).
+- Apply a bitshift mapping each integer to the according power of 2.
+- Sum the results to get an integer signifying the fields argument.
+*/
+SELECT COALESCE(
+  sum(1<<code)::text,
+  '32767'  -- 0x7FFF in decimal; This represents no field argument.
+)
+FROM (
+  VALUES
+    ('MONTH', 1),
+    ('YEAR', 2),
+    ('DAY', 3),
+    ('HOUR', 10),
+    ('MINUTE', 11),
+    ('SECOND', 12)
+) AS field_map(field, code)
+WHERE fields ILIKE '%' || field || '%';
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION __msar.build_typmodin_arg(
+  typ_options jsonb, timespan_flag boolean
+) RETURNS cstring[] AS $$/*
+Build an array to be used as the argument for a typmodin function.
+
+Timespans have to be handled slightly differently since they have a tricky `fields` argument that
+requires special processing. See __msar.prepare_fields_arg for more details.
+
+Args:
+  typ_options: JSONB giving options fields as per the description in msar.build_type_text.
+  timespan_flag: true if the associated type is a timespan, false otherwise.
+*/
+SELECT array_remove(
+  ARRAY[
+    typ_options ->> 'length',
+    CASE WHEN timespan_flag THEN __msar.prepare_fields_arg(typ_options ->> 'fields') END,
+    typ_options ->> 'precision',
+    typ_options ->> 'scale'
+  ],
+  null
+)::cstring[]
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.get_formatted_base_type(typ_name text, typ_options jsonb) RETURNS text AS $$ /*
+Build the appropriate type definition string, without Array brackets.
+
+This function uses some PostgreSQL internal functions to do its work. In particular, for any type
+that takes options, This function uses the typmodin (read "type modification input") system
+functions to convert the given options into a typmod integer. The typ_name given is converted into
+the OID of the named type. These two pieces let us call `format_type` to get a canonical string
+representation of the definition of the type, with its options.
+
+Args:
+  typ_name: This should be qualified and quoted as needed.
+  typ_options: These should be in the form described in msar.build_type_text.
+*/
+DECLARE
+  typ_id oid;
+  timespan_flag boolean;
+  typmodin_func text;
+  typmod integer;
+BEGIN
+  -- Here we just get the OID of the type.
+  typ_id := typ_name::regtype::oid;
+  -- This is a lookup of the function name for the typmodin function associated with the type, if
+  -- one exists.
+  typmodin_func := typmodin::text FROM pg_type WHERE oid=typ_id AND typmodin<>0;
+  -- This flag is needed since timespan types need special handling when converting the options into
+  -- the form needed to call the typmodin function.
+  timespan_flag := typcategory='T' FROM pg_type WHERE oid=typ_id;
+  IF (
+    jsonb_typeof(typ_options) = 'null'  -- The caller passed no type options
+    OR typ_options IS NULL -- The caller didn't even pass the type options key
+    OR typ_options='{}'::jsonb  -- The caller passed an empty type options object
+    OR typmodin_func IS NULL  -- The type doesn't actually accept type options
+  ) THEN
+    typmod := NULL;
+  ELSE
+    -- Here, we actually run the typmod function to get the output for use in the format_type call.
+    EXECUTE format(
+      'SELECT %I(%L)',
+      typmodin_func,
+      __msar.build_typmodin_arg(typ_options, timespan_flag)
+    ) INTO typmod;
+  END IF;
+  RETURN format_type(typ_id::integer, typmod::integer);
+END;
+$$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION
 msar.build_type_text(typ_jsonb jsonb) RETURNS text AS $$/*
@@ -902,27 +1039,54 @@ All fields are optional, and a null value as input returns 'text'
 */
 SELECT COALESCE(
   -- First choice is the type specified by numeric IDs, since they're most reliable.
-  format_type(typ.id, typ.modifier),
+  format_type(
+    (typ_jsonb ->> 'id')::integer,
+    (typ_jsonb ->> 'modifier')::integer
+  ),
   -- Second choice is the type specified by string IDs.
-  COALESCE(
-    msar.get_fully_qualified_object_name(typ.schema, typ.name),
-    typ.name,
-    'text'  -- We fall back to 'text' when input is null or empty.
-  )::regtype::text || COALESCE(  -- This section builds the type options blob.
-    '(' || topts.length || ')',
-    ' ' || topts.fields || ' (' || topts.precision || ')',
-    ' ' || topts.fields,
-    '(' || topts.precision || ', ' || topts.scale || ')',
-    '(' || topts.precision || ')',
-    ''
-  ) || CASE WHEN topts.array_ THEN '[]' ELSE '' END
+  __msar.get_formatted_base_type(
+    COALESCE(
+      msar.get_fully_qualified_object_name(typ_jsonb ->> 'schema', typ_jsonb ->> 'name'),
+      typ_jsonb ->> 'name',
+      'text'  -- We fall back to 'text' when input is null or empty.
+    ),
+    typ_jsonb -> 'options'
+  ) || CASE
+    WHEN (typ_jsonb -> 'options' ->> 'array')::boolean THEN
+      '[]'
+    ELSE ''
+  END
 )
-FROM
-  jsonb_to_record(typ_jsonb)
-    AS typ(id oid, schema text, name text, modifier integer, options jsonb),
-  jsonb_to_record(typ_jsonb -> 'options')
-    AS topts(length integer, precision integer, scale integer, fields text, array_ boolean);
 $$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_type_text_complete(typ_jsonb jsonb, old_type text) RETURNS text AS $$/*
+Build the text name of a type, using the old type as a base if only options are given.
+
+The main use for this is to allow for altering only the options of the type of a column.
+
+Args:
+  typ_jsonb: This is a jsonb denoting the new type.
+  old_type: This is the old type name, with no options.
+
+The typ_jsonb should be in the form:
+{
+  "name": <str> (optional),
+  "options": <obj> (optional)
+}
+
+*/
+SELECT msar.build_type_text(
+  jsonb_strip_nulls(
+    jsonb_build_object(
+      'name', COALESCE(typ_jsonb ->> 'name', old_type),
+      'options', typ_jsonb -> 'options'
+    )
+  )
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 
 CREATE OR REPLACE FUNCTION __msar.build_col_def_text(col __msar.col_def) RETURNS text AS $$/*
@@ -1588,6 +1752,318 @@ BEGIN
   RETURN created_table_id;
 END;
 $$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- COLUMN ALTERATION FUNCTIONS
+--
+-- Functions in this section should be related to altering columns' names, types, and constraints.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+-- Rename columns ----------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.rename_column(tab_name text, old_col_name text, new_col_name text) RETURNS text AS $$/*
+Change a column name, returning the command executed
+
+Args:
+  tab_name: The qualified, quoted name of the table where we'll change a column name
+  old_col_name: The quoted name of the column to change.
+  new_col_name: The quoted new name for the column.
+*/
+DECLARE
+  cmd_template text;
+BEGIN
+  cmd_template := 'ALTER TABLE %s RENAME COLUMN %s TO %s';
+  IF old_col_name <> new_col_name THEN
+    RETURN __msar.exec_ddl(cmd_template, tab_name, old_col_name, new_col_name);
+  ELSE
+    RETURN null;
+  END IF;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.rename_column(tab_id oid, col_id integer, new_col_name text) RETURNS smallint AS $$/*
+Change a column name, returning the command executed
+
+Args:
+  tab_id: The OID of the table whose column we're renaming
+  col_id: The ID of the column to rename
+  new_col_name: The unquoted new name for the column.
+*/
+BEGIN
+  PERFORM __msar.rename_column(
+    tab_name => __msar.get_relation_name(tab_id),
+    old_col_name => msar.get_column_name(tab_id, col_id),
+    new_col_name => quote_ident(new_col_name)
+  );
+  RETURN col_id;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION __msar.build_cast_expr(val text, type_ text) RETURNS text AS $$/*
+Build an expression for casting a column in Mathesar, returning the text of that expression.
+
+We fall back silently to default casting behavior if the mathesar_types namespace is missing.
+However, we do throw an error in cases where the schema exists, but the type casting function
+doesn't. This is assumed to be an error the user should know about.
+
+Args:
+  val: This is quite general, and isn't sanitized in any way. It can be either a literal or a column
+       identifier, since we want to be able to produce a casting expression in either case.
+  type_: This type name string must cast properly to a regtype.
+*/
+SELECT CASE
+  WHEN msar.schema_exists('mathesar_types') THEN
+    msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
+  ELSE
+    val || '::' || type_::regtype::text
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_drop_default_expr(tab_id oid, col_id integer, new_type text, new_default jsonb)
+  RETURNS TEXT AS $$/*
+Build an expression for dropping a column's default, returning the text of that expression.
+
+This function is private, and not general: It builds an expression in the context of the
+msar.process_col_alter_jsonb function and should not otherwise be called independently, since it has
+logic specific to that context. In that setting, we drop the default for the specified column if the
+caller specifies that we're setting a new_default of NULL, or if we're changing the type of the
+column.
+
+Args:
+  tab_id: The OID of the table where the column with the default to be dropped lives.
+  col_id: The attnum of the column with the undesired default.
+  new_type: This gives the function context letting it know whether to drop the default or not. If
+            we are setting a new type for the column, we will always drop the default first.
+  new_default: This also gives us context letting us know whether to drop the default. By setting
+               the 'new_default' to (jsonb) null, the caller specifies that we should drop the
+               column's default.
+*/
+SELECT CASE WHEN new_type IS NOT NULL OR jsonb_typeof(new_default)='null' THEN
+  'ALTER COLUMN ' || msar.get_column_name(tab_id, col_id) || ' DROP DEFAULT'
+ END;
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_retype_expr(tab_id oid, col_id integer, new_type text) RETURNS text AS $$/*
+Build an expression to change a column's type, returning the text of that expression.
+
+Note that this function wraps the type alteration in a cast expression. If we have the custom
+mathesar_types cast functions available, we prefer those to the default PostgreSQL casting behavior.
+
+Args:
+  tab_id: The OID of the table containing the column whose type we'll alter.
+  col_id: The attnum of the column whose type we'll alter.
+  new_type: The target type to which we'll alter the column.
+*/
+SELECT 'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || ' TYPE '
+  || new_type
+  || ' USING '
+  || __msar.build_cast_expr(msar.get_column_name(tab_id, col_id), new_type);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION __msar.build_col_default_expr(
+  tab_id oid,
+  col_id integer,
+  old_default text,
+  new_default jsonb,
+  new_type text
+) RETURNS text AS $$/*
+Build an expression to set a column's default value, returning the text of that expression.
+
+This function is private, and not general. The expression it builds is in the context of the calling
+msar.process_col_alter_jsonb function. In particular, this function can also reset the original
+default after a column type alteration, but cast to the new type of the column. We also avoid
+setting a new default in cases where the new default argument is (sql) NULL, or a JSONB null.
+
+Args:
+  tab_id: The OID of the table containing the column whose default we'll alter.
+  col_id: The attnum of the column whose default we'll alter.
+  old_default: The current default. In some cases in the context of the caller, we want to reset the
+               original default, but cast to a new type.
+  new_default: The new desired default. It's left as JSONB since we are using JSONB 'null' values to
+               represent 'drop the column default'.
+  new_type: The target type to which we'll cast the new default.
+*/
+DECLARE
+  default_expr text;
+  raw_default_expr text;
+BEGIN
+  -- In this case, we assume the intent is to clear out the original default.
+  IF jsonb_typeof(new_default)='null' THEN
+    default_expr := null;
+  -- We get the root JSONB value as text if it exists.
+  ELSEIF new_default #>> '{}' IS NOT NULL THEN
+    default_expr := format('%L', new_default #>> '{}');  -- sanitize since this could be user input.
+  -- At this point, we know we're not setting a new default, or dropping the old one.
+  -- So, we check whether the original default is potentially dynamic, and whether we need to cast
+  -- it to a new type.
+  ELSEIF msar.is_default_possibly_dynamic(tab_id, col_id) AND new_type IS NOT NULL THEN
+    -- We add casting the possibly dynamic expression to the new type as part of the default
+    -- expression in this case.
+    default_expr := __msar.build_cast_expr(old_default, new_type);
+  ELSEIF old_default IS NOT NULL AND new_type IS NOT NULL THEN
+    -- If we arrive here, then we know the old_default is a constant value, and we want to cast the
+    -- old default value to the new type *before* setting it as the new default. This avoids
+    -- building up nested cast functions in the default expression.
+    -- The first step is to execute the cast expression, putting the result into a new variable.
+    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type))
+      INTO raw_default_expr;
+    -- Then we format that new variable's value as a literal.
+    default_expr := format('%L', raw_default_expr);
+  END IF;
+  RETURN
+    format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id)) || default_expr;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_not_null_expr(tab_id oid, col_id integer, not_null boolean) RETURNS text AS $$/*
+Build an expression to alter a column's NOT NULL setting, returning the text of that expression.
+
+Args:
+  tab_id: The OID of the table containing the column whose nullability we'll alter.
+  col_id: The attnum of the column whose nullability we'll alter.
+  not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
+*/
+SELECT 'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || CASE WHEN not_null THEN ' SET ' ELSE ' DROP ' END
+  || 'NOT NULL';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_drop_text(tab_id oid, col_id integer, col_delete boolean) RETURNS text AS $$/*
+Build an expression to drop a column from a table, returning the text of that expression.
+
+Args:
+  tab_id: The OID of the table containing the column whose nullability we'll alter.
+  col_id: The attnum of the column whose nullability we'll alter.
+  col_delete: If true, we drop the column. If false or null, we do nothing.
+*/
+SELECT CASE WHEN col_delete THEN 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id) END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.process_col_alter_jsonb(tab_id oid, col_alters jsonb) RETURNS text AS $$/*
+Turn a JSONB array representing a set of desired column alterations into a text expression.
+
+Args:
+  tab_id The OID of the table whose columns we'll alter.
+  col_alters: a JSONB array defining the list of column alterations.
+
+The col_alters JSONB should have the form:
+[
+  {
+    "attnum": <int>,
+    "type": <obj> (optional),
+    "default": <any> (optional),
+    "not_null": <bool> (optional),
+    "delete": <bool> (optional),
+    "name": <str> (optional),
+  },
+  {
+    ...
+  },
+  ...
+]
+
+Notes on the col_alters JSONB
+- For more info about the type object, see the msar.build_type_text function.
+- The "name" key isn't used in this function; it's included here for completeness.
+- A possible 'gotcha' is the "default" key.
+  - If omitted, no change to the default for the given column will occur, other than to cast it to
+    the new type if a type change is specified.
+  - If, on the other hand, the "default" key is set to an explicit value of null, then we will
+    interpret that as a directive to set the column's default to NULL, i.e., we'll drop the current
+    default setting.
+*/
+WITH prepped_alters AS (
+  SELECT
+    tab_id,
+    (col_alter_obj ->> 'attnum')::integer AS col_id,
+    msar.build_type_text_complete(col_alter_obj -> 'type', format_type(atttypid, null)) AS new_type,
+    -- We get the old default expression from a catalog table before modifying anything, so we can
+    -- reset it properly if we alter the column type.
+    pg_get_expr(adbin, tab_id) old_default,
+    col_alter_obj -> 'default' AS new_default,
+    (col_alter_obj -> 'not_null')::boolean AS not_null,
+    (col_alter_obj -> 'delete')::boolean AS delete_
+  FROM
+    (SELECT tab_id) as arg,
+    jsonb_array_elements(col_alters) as t(col_alter_obj)
+    INNER JOIN pg_attribute ON (t.col_alter_obj ->> 'attnum')::smallint=attnum AND tab_id=attrelid
+    LEFT JOIN pg_attrdef ON (t.col_alter_obj ->> 'attnum')::smallint=adnum AND tab_id=adrelid
+)
+SELECT string_agg(
+  nullif(
+    concat_ws(
+      ', ',
+      __msar.build_col_drop_default_expr(tab_id, col_id, new_type, new_default),
+      __msar.build_col_retype_expr(tab_id, col_id, new_type),
+      __msar.build_col_default_expr(tab_id, col_id, old_default, new_default, new_type),
+      __msar.build_col_not_null_expr(tab_id, col_id, not_null),
+      __msar.build_col_drop_text(tab_id, col_id, delete_)
+    ),
+    ''
+  ),
+  ', '
+)
+FROM prepped_alters;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$/*
+Alter columns of the given table in bulk, returning the IDs of the columns so altered.
+
+Args:
+  tab_id: The OID of the table whose columns we'll alter.
+  col_alters: a JSONB describing the alterations to make.
+
+For the specification of the col_alters JSONB, see the msar.process_col_alter_jsonb function.
+
+Note that all alterations except renaming are done in bulk, and then all name changes are done one
+at a time afterwards. This is because the SQL design specifies at most one name-changing clause per
+query.
+*/
+DECLARE
+  r RECORD;
+  col_alter_str text;
+BEGIN
+  -- Get the string specifying all non-name-change alterations to perform.
+  col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
+  -- Perform the non-name-change alterations
+  IF col_alter_str IS NOT NULL THEN
+    PERFORM __msar.exec_ddl(
+      'ALTER TABLE %s %s',
+      __msar.get_relation_name(tab_id),
+      msar.process_col_alter_jsonb(tab_id, col_alters)
+    );
+  END IF;
+  -- Here, we perform all name-changing alterations.
+  FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
+  LOOP
+    PERFORM msar.rename_column(tab_id, r.attnum, r.name);
+  END LOOP;
+  RETURN array_agg(x.attnum) FROM jsonb_to_recordset(col_alters) AS x(attnum integer);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
