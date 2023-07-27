@@ -65,6 +65,8 @@ import {
   faUserGear,
   faFilterCircleXmark,
   faMicroscope,
+  faDiagramNext,
+  faWandSparkles,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -129,6 +131,8 @@ export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
 export const iconPaste: IconProps = { data: faPaste };
 export const iconLogout: IconProps = { data: faArrowRightFromBracket };
+export const iconUseFirstRowAsColumnName: IconProps = { data: faDiagramNext };
+export const iconUseFirstRowAsData: IconProps = { data: faWandSparkles };
 
 // THINGS
 //

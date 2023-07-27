@@ -51,18 +51,20 @@
     processColumns,
     type ColumnProperties,
   } from './importPreviewPageUtils';
+  import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
+  import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
+  import { FieldLayout } from '@mathesar/components/form';
 
   export let database: Database;
   export let schema: SchemaEntry;
   export let tableId: number;
   export let useColumnTypeInference = false;
+  export let firstRowIsHeader = false;
 
-  let tableIsAlreadyConfirmed = false;
   let previewRequestStatus: RequestStatus;
   let headerUpdateRequestStatus: RequestStatus;
   let typeChangeRequestStatus: RequestStatus;
   let tableName = '';
-  let useFirstRowAsHeader = true;
   let tableInfo: TableEntry;
   let dataFileDetails: { id: number; header: boolean };
   let columns: Column[] = [];
@@ -84,6 +86,7 @@
   $: showTableSkeleton =
     isLoading || typeChangeRequestStatus?.state === 'processing';
   $: canProceed =
+    !isLoading &&
     !showTableSkeleton &&
     previewRequestStatus?.state !== 'failure' &&
     headerUpdateRequestStatus?.state !== 'failure';
@@ -123,7 +126,7 @@
       dataFileFetchRequest = dataFilesApi.get(_dataFileId);
       dataFileDetails = await dataFileFetchRequest;
     }
-    useFirstRowAsHeader = dataFileDetails.header;
+    firstRowIsHeader = dataFileDetails.header;
     return dataFileDetails;
   }
 
@@ -132,7 +135,7 @@
    * 1. whenever user redirects to a different preview
    * 2. whenever user toggles first row as header checkbox
    */
-  async function onPreviewTableIdChange(_previewTableId: number) {
+  async function onPreviewTableIdChange(_tableId: number) {
     try {
       /**
        * Since this method is async and is called reactively on the component,
@@ -145,22 +148,16 @@
 
       if (useColumnTypeInference) {
         typeSuggestionRequest?.cancel();
-        typeSuggestionRequest = getTypeSuggestionsForTable(_previewTableId);
+        typeSuggestionRequest = getTypeSuggestionsForTable(_tableId);
       }
-      const tableDetails = await fetchTableInfo();
+      const table = await fetchTableInfo();
 
-      if (tableDetails.import_verified || !tableDetails.data_files?.length) {
-        // Do not allow preview since table is already verified
-        // Show 404 or error message here
-        tableIsAlreadyConfirmed = true;
+      if (table.import_verified || !table.data_files?.length) {
+        router.goto(getTablePageUrl(database.name, schema.id, table.id));
         return;
       }
 
-      tableIsAlreadyConfirmed = false;
-
-      const dataFileDetailsPromise = fetchDataFileDetails(
-        tableDetails.data_files[0],
-      );
+      const dataFileDetailsPromise = fetchDataFileDetails(table.data_files[0]);
 
       if (useColumnTypeInference && typeSuggestionRequest) {
         const typeSuggestions = await typeSuggestionRequest;
@@ -191,11 +188,11 @@
     if (dataFileDetails) {
       try {
         headerUpdateRequestStatus = { state: 'processing' };
-        dataFileDetails.header = useFirstRowAsHeader;
+        dataFileDetails.header = firstRowIsHeader;
         await Promise.all([
           deleteTable(database, schema, tableId),
           dataFilesApi.update(dataFileDetails.id, {
-            header: useFirstRowAsHeader,
+            header: firstRowIsHeader,
           }),
         ]);
         tableInfo = await createTable(database, schema, {
@@ -207,7 +204,7 @@
           database.name,
           schema.id,
           tableInfo.id,
-          { useColumnTypeInference },
+          { useColumnTypeInference, firstRowIsHeader },
         );
         router.goto(newUrl, true);
       } catch (err) {
@@ -217,6 +214,10 @@
         };
       }
     }
+  }
+
+  async function updateInference() {
+    // TODO
   }
 
   async function updateTypeRelatedOptions(updatedColumn: Column) {
@@ -280,250 +281,183 @@
 <svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
 
 <LayoutWithHeader
+  fitViewport
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-data-pages)',
-    '--layout-background-color': 'var(--sand-200)',
+    '--layout-background-color': 'var(--slate-50)',
     '--inset-page-section-padding': 'var(--size-xx-large)',
     '--page-padding': 'var(--outer-page-padding-for-inset-page)',
   }}
 >
-  <div class="table-preview-confirmation">
-    <InsetPageLayout>
-      <h1 slot="header">Finish setting up your table</h1>
-
-      {#if tableIsAlreadyConfirmed}
-        Table has already been confirmed. Click here to view the table.
-      {:else}
-        <div class="table-properties">
-          <LabeledInput layout="stacked">
-            <h2 class="large-bold-header" slot="label">Table Name</h2>
+  <div class="import-preview-page">
+    <div class="page-content">
+      <InsetPageLayout>
+        <h1 slot="header">Finish setting up your table</h1>
+        <FieldLayout>
+          <LabeledInput label="Table Name">
             <TextInput bind:value={tableName} />
           </LabeledInput>
+        </FieldLayout>
+        <FieldLayout>
+          <ColumnNamingStrategyInput
+            bind:value={firstRowIsHeader}
+            on:change={updateDataFileHeader}
+            disabled={isLoading}
+          />
+        </FieldLayout>
+        <FieldLayout>
+          <ColumnTypeInferenceInput
+            bind:value={useColumnTypeInference}
+            on:change={updateInference}
+            disabled={isLoading}
+          />
+        </FieldLayout>
+        <FieldLayout>
+          <InfoBox>
+            You can customize column names and types within the preview below.
+          </InfoBox>
+        </FieldLayout>
+      </InsetPageLayout>
 
-          <div class="help-content">
-            <h2 class="large-bold-header">Column names and data types</h2>
-
-            <LabeledInput
-              label="Take column names from the first data row"
-              layout="inline-input-first"
+      <h2 class="large-bold-header preview-header">Table Preview</h2>
+      <div class="preview-content">
+        {#if isLoading}
+          <div class="loading"><Spinner /></div>
+        {:else if previewRequestStatus?.state === 'failure'}
+          <ErrorInfo
+            errors={previewRequestStatus.errors}
+            on:retry={() => onPreviewTableIdChange(tableId)}
+            on:delete={handleCancel}
+          />
+        {:else if headerUpdateRequestStatus?.state === 'failure'}
+          <ErrorInfo
+            errors={headerUpdateRequestStatus.errors}
+            on:retry={updateDataFileHeader}
+            on:delete={handleCancel}
+          />
+        {:else}
+          <div class="sheet-holder">
+            <Sheet
+              restrictWidthToRowWidth
+              columns={processedColumns}
+              getColumnIdentifier={(c) => c.id}
             >
-              <Checkbox
-                bind:checked={useFirstRowAsHeader}
-                disabled={isLoading}
-                on:change={updateDataFileHeader}
-              />
-            </LabeledInput>
-            <p>
-              Column names {#if useColumnTypeInference} and data types {/if} are
-              automatically detected. Use the controls in the preview table to review
-              and update them if necessary.
-            </p>
-            {#if isLoading}
-              <InfoBox fullWidth>
-                <span>Preparing preview</span>
-                <Spinner />
-              </InfoBox>
-            {:else if previewRequestStatus?.state === 'failure'}
-              <ErrorInfo
-                errors={previewRequestStatus.errors}
-                on:retry={() => onPreviewTableIdChange(tableId)}
-                on:delete={handleCancel}
-              />
-            {:else if headerUpdateRequestStatus?.state === 'failure'}
-              <ErrorInfo
-                errors={headerUpdateRequestStatus.errors}
-                on:retry={updateDataFileHeader}
-                on:delete={handleCancel}
-              />
-            {/if}
-          </div>
-        </div>
-      {/if}
-    </InsetPageLayout>
-
-    {#if !tableIsAlreadyConfirmed}
-      {#if processedColumns.length > 0}
-        <div class="table-preview-content">
-          <div class="preview">
-            <h2 class="large-bold-header">Table Preview</h2>
-            <div class="content">
-              <div class="sheet-holder">
-                <Sheet
-                  restrictWidthToRowWidth
-                  columns={processedColumns}
-                  getColumnIdentifier={(c) => c.id}
+              <SheetHeader inheritFontStyle>
+                {#each processedColumns as processedColumn (processedColumn.id)}
+                  <SheetCell
+                    columnIdentifierKey={processedColumn.id}
+                    let:htmlAttributes
+                    let:style
+                  >
+                    <div {...htmlAttributes} {style}>
+                      <PreviewColumn
+                        {isLoading}
+                        {processedColumn}
+                        {updateTypeRelatedOptions}
+                        bind:selected={columnPropertiesMap[processedColumn.id]
+                          .selected}
+                        bind:displayName={columnPropertiesMap[
+                          processedColumn.id
+                        ].displayName}
+                      />
+                      <SheetCellResizer
+                        columnIdentifierKey={processedColumn.id}
+                        minColumnWidth={120}
+                      />
+                    </div>
+                  </SheetCell>
+                {/each}
+              </SheetHeader>
+              {#each records as record (record)}
+                <SheetRow
+                  style={{ position: 'relative', height: 30 }}
+                  let:htmlAttributes
+                  let:styleString
                 >
-                  <SheetHeader inheritFontStyle>
-                    {#each processedColumns as processedColumn (processedColumn.id)}
+                  <div {...htmlAttributes} style={styleString}>
+                    {#each processedColumns as processedColumn (processedColumn)}
                       <SheetCell
                         columnIdentifierKey={processedColumn.id}
                         let:htmlAttributes
                         let:style
                       >
                         <div {...htmlAttributes} {style}>
-                          <PreviewColumn
-                            {isLoading}
-                            {processedColumn}
-                            {updateTypeRelatedOptions}
-                            bind:selected={columnPropertiesMap[
-                              processedColumn.id
-                            ].selected}
-                            bind:displayName={columnPropertiesMap[
-                              processedColumn.id
-                            ].displayName}
-                          />
-                          <SheetCellResizer
-                            columnIdentifierKey={processedColumn.id}
-                            minColumnWidth={120}
+                          <CellFabric
+                            columnFabric={processedColumn}
+                            value={record[processedColumn.column.name]}
+                            showAsSkeleton={showTableSkeleton}
+                            disabled={true}
                           />
                         </div>
                       </SheetCell>
                     {/each}
-                  </SheetHeader>
-
-                  {#each records as record (record)}
-                    <SheetRow
-                      style={{
-                        position: 'relative',
-                        height: 30,
-                      }}
-                      let:htmlAttributes
-                      let:styleString
-                    >
-                      <div {...htmlAttributes} style={styleString}>
-                        {#each processedColumns as processedColumn (processedColumn)}
-                          <SheetCell
-                            columnIdentifierKey={processedColumn.id}
-                            let:htmlAttributes
-                            let:style
-                          >
-                            <div {...htmlAttributes} {style}>
-                              <CellFabric
-                                columnFabric={processedColumn}
-                                value={record[processedColumn.column.name]}
-                                showAsSkeleton={showTableSkeleton}
-                                disabled={true}
-                              />
-                            </div>
-                          </SheetCell>
-                        {/each}
-                      </div>
-                    </SheetRow>
-                  {/each}
-                </Sheet>
-              </div>
-              <div class="truncation-alert">
-                <InfoBox>
-                  Preview data is shown for the first few rows of your data
-                  only.
-                </InfoBox>
-              </div>
-            </div>
+                  </div>
+                </SheetRow>
+              {/each}
+            </Sheet>
           </div>
-        </div>
-      {/if}
-
-      <div class="footer">
-        <div class="contain-width">
-          {#if !isLoading}
-            <CancelOrProceedButtonPair
-              onCancel={handleCancel}
-              onProceed={finishImport}
-              cancelButton={{ icon: iconDeleteMajor }}
-              proceedButton={{ label: 'Confirm & create table' }}
-              {canProceed}
-            />
-          {/if}
-        </div>
+          <div class="truncation-alert">
+            <InfoBox>
+              Preview data is shown for the first few rows of your data only.
+            </InfoBox>
+          </div>
+        {/if}
       </div>
-    {/if}
+    </div>
+
+    <div class="footer">
+      <CancelOrProceedButtonPair
+        onCancel={handleCancel}
+        onProceed={finishImport}
+        cancelButton={{ icon: iconDeleteMajor }}
+        proceedButton={{ label: 'Confirm & create table' }}
+        {canProceed}
+      />
+    </div>
   </div>
 </LayoutWithHeader>
 
-<style lang="scss">
-  .table-preview-confirmation {
+<style>
+  .import-preview-page {
+    display: grid;
+    grid-template: 1fr auto / 1fr;
+    height: 100%;
     --sheet-header-height: 5.25rem;
-    position: relative;
-
-    h2 {
-      margin: 0;
-    }
-
-    .table-properties {
-      > :global(.labeled-input) {
-        margin-bottom: 1rem;
-      }
-
-      // .help-content {
-      //   margin-top: 2rem;
-      //   line-height: 1.6;
-
-      //   p {
-      //     margin: var(--size-xx-small) 0;
-      //   }
-      // }
-    }
-
-    .table-preview-content {
-      overflow: hidden;
-      margin-top: var(--size-x-large);
-
-      .preview {
-        margin: 0 auto;
-        overflow: hidden;
-        max-width: 100%;
-        background: var(--white);
-        border-top: solid 1px var(--slate-300);
-
-        h2 {
-          padding: var(--size-small) var(--inset-page-section-padding);
-          border-bottom: 1px solid var(--slate-200);
-        }
-
-        .content {
-          padding: var(--inset-page-section-padding);
-          background: var(--slate-50);
-          // margin-bottom: 5rem;
-        }
-
-        .sheet-holder {
-          border: 1px solid var(--slate-200);
-          max-width: fit-content;
-          min-height: 20rem;
-          overflow: auto;
-          margin: 0 auto;
-          background: var(--white);
-        }
-
-        :global(.sheet) {
-          min-width: 64.8rem;
-          margin: 0 auto;
-        }
-
-        :global(.sheet [data-sheet-element='header']) {
-          background: var(--slate-100);
-        }
-
-        :global(.sheet [data-sheet-element='row'] [data-sheet-element='cell']) {
-          background: var(--white);
-        }
-      }
-    }
-
-    .footer {
-      width: 100%;
-      border-top: 1px solid var(--slate-200);
-      padding: 1rem 1rem 2rem 1rem;
-      background: var(--white);
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      > .contain-width {
-        max-width: var(--max-layout-width);
-        margin-left: auto;
-        margin-right: auto;
-      }
-    }
+  }
+  .page-content {
+    overflow: auto;
+  }
+  .loading {
+    text-align: center;
+    font-size: 2rem;
+    color: var(--slate-500);
+  }
+  .preview-header {
+    margin: 0;
+    padding: var(--size-small) var(--inset-page-section-padding);
+    border-bottom: 1px solid var(--slate-200);
+    border-top: solid 1px var(--slate-300);
+    background: var(--white);
+  }
+  .preview-content {
+    padding: var(--inset-page-section-padding);
+  }
+  .sheet-holder {
+    max-width: fit-content;
+    overflow: auto;
+    margin: 0 auto;
+    border: 1px solid var(--slate-200);
+  }
+  :global(.sheet [data-sheet-element='header']) {
+    background: var(--slate-100);
+  }
+  :global(.sheet [data-sheet-element='row'] [data-sheet-element='cell']) {
+    background: var(--white);
+  }
+  .footer {
+    border-top: 1px solid var(--slate-200);
+    padding: 1rem 1rem 1rem 1rem;
+    background: var(--white);
   }
   .truncation-alert {
     margin: 1rem auto 0 auto;

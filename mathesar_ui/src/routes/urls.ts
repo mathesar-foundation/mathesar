@@ -32,15 +32,18 @@ export function getImportPageUrl(
 
 interface ImportPreviewPageQueryParams {
   useColumnTypeInference: boolean;
+  firstRowIsHeader: boolean;
 }
 
 const TYPE_INFERENCE_QUERY_PARAM = 'inference';
+const FIRST_ROW_IS_HEADER_QUERY_PARAM = 'header';
 
 function serializeImportPreviewPageQueryParams(
   p: ImportPreviewPageQueryParams,
 ): string {
   return new URLSearchParams({
     [TYPE_INFERENCE_QUERY_PARAM]: JSON.stringify(p.useColumnTypeInference),
+    [FIRST_ROW_IS_HEADER_QUERY_PARAM]: JSON.stringify(p.firstRowIsHeader),
   }).toString();
 }
 
@@ -49,6 +52,7 @@ export function getImportPreviewPageQueryParams(
 ): ImportPreviewPageQueryParams {
   return {
     useColumnTypeInference: queryParams[TYPE_INFERENCE_QUERY_PARAM] === 'true',
+    firstRowIsHeader: queryParams[FIRST_ROW_IS_HEADER_QUERY_PARAM] === 'true',
   };
 }
 
@@ -56,7 +60,7 @@ export function getImportPreviewPageUrl(
   databaseName: string,
   schemaId: number,
   previewTableId: number,
-  options: { useColumnTypeInference: boolean },
+  options: ImportPreviewPageQueryParams,
 ): string {
   const importPageUrl = getImportPageUrl(databaseName, schemaId);
   const q = serializeImportPreviewPageQueryParams(options);
