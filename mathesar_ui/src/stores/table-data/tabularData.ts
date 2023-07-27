@@ -17,6 +17,7 @@ import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { getColumnOrder, orderProcessedColumns } from '@mathesar/utils/tables';
+import type { ShareConsumer } from '@mathesar/utils/shares';
 import { ColumnsDataStore } from './columns';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
@@ -35,6 +36,7 @@ export interface TabularDataProps {
   abstractTypesMap: AbstractTypesMap;
   table: TableEntry;
   meta?: Meta;
+  shareConsumer?: ShareConsumer;
   /**
    * Keys are columns ids. Values are cell values.
    *
@@ -81,22 +83,30 @@ export class TabularData {
 
   cleanupFunctions: (() => void)[] = [];
 
+  shareConsumer?: ShareConsumer;
+
   constructor(props: TabularDataProps) {
     const contextualFilters =
       props.contextualFilters ?? new Map<number, string | number>();
     this.id = props.id;
     this.meta = props.meta ?? new Meta();
+    this.shareConsumer = props.shareConsumer;
     this.columnsDataStore = new ColumnsDataStore({
-      parentId: this.id,
+      tableId: this.id,
       hiddenColumns: contextualFilters.keys(),
+      shareConsumer: this.shareConsumer,
     });
-    this.constraintsDataStore = new ConstraintsDataStore(this.id);
-    this.recordsData = new RecordsData(
-      this.id,
-      this.meta,
-      this.columnsDataStore,
+    this.constraintsDataStore = new ConstraintsDataStore({
+      tableId: this.id,
+      shareConsumer: this.shareConsumer,
+    });
+    this.recordsData = new RecordsData({
+      tableId: this.id,
+      meta: this.meta,
+      columnsDataStore: this.columnsDataStore,
       contextualFilters,
-    );
+      shareConsumer: this.shareConsumer,
+    });
     this.display = new Display(
       this.meta,
       this.columnsDataStore,

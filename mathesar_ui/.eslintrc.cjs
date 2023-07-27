@@ -22,6 +22,7 @@ module.exports = {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': ['warn', { allow: ['error'] }],
     'generator-star-spacing': 'off',
+    'no-continue': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/ban-ts-comment': [
       'error',

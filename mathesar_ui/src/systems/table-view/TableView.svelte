@@ -22,7 +22,7 @@
   import StatusPane from './StatusPane.svelte';
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
 
-  type Context = 'page' | 'widget';
+  type Context = 'page' | 'widget' | 'shared-consumer-page';
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
@@ -37,8 +37,8 @@
   export let context: Context = 'page';
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
 
-  $: usesVirtualList = context === 'page';
-  $: allowsDdlOperations = context === 'page' && canExecuteDDL;
+  $: usesVirtualList = context !== 'widget';
+  $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
   $: ({
     processedColumns,
@@ -98,7 +98,7 @@
     // We only activate the first cell on the page, not in the widget. Doing so
     // on the widget causes the cell to focus and the page to scroll down to
     // bring that element into view.
-    if (_context === 'page' && !_isLoading) {
+    if (_context !== 'widget' && !_isLoading) {
       _selection.selectAndActivateFirstCellIfExists();
     }
   }

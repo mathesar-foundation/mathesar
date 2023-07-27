@@ -24,7 +24,7 @@
     'canEditTableRecords',
   );
 
-  export let context: 'page' | 'widget' = 'page';
+  export let context: 'page' | 'widget' | 'shared-consumer-page' = 'page';
 
   $: ({
     recordsData,
@@ -45,7 +45,7 @@
     $columnsFetchStatus?.state === 'failure' ||
     recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
-  $: hasNewRecordButton = context === 'page' && canEditTableRecords;
+  $: hasNewRecordButton = context !== 'widget' && canEditTableRecords;
   $: refreshButtonState = (() => {
     let buttonState: 'loading' | 'error' | undefined = undefined;
     if ($isLoading) {
@@ -66,6 +66,7 @@
   class="status-pane"
   class:context-widget={context === 'widget'}
   class:context-page={context === 'page'}
+  class:context-shared-consumer-page={context === 'shared-consumer-page'}
 >
   <div class="status-pane-items-section">
     {#if hasNewRecordButton}
@@ -117,7 +118,8 @@
     flex-shrink: 0;
     flex-basis: 32px;
 
-    &.context-page {
+    &.context-page,
+    &.context-shared-consumer-page {
       background-color: var(--slate-100);
     }
 

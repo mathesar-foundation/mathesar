@@ -1,3 +1,4 @@
+from uuid import UUID
 from rest_framework.exceptions import NotFound
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api_exceptions
 import re
@@ -5,10 +6,12 @@ import re
 from db.records.operations import group
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Table
+from mathesar.models.query import UIQuery
 from mathesar.utils.preview import column_alias_from_preview_template
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
+SHARED_LINK_UUID_QUERY_PARAM = 'shared-link-uuid'
 
 
 def get_table_or_404(pk):
@@ -30,6 +33,18 @@ def get_table_or_404(pk):
             message="Table doesn't exist"
         )
     return table
+
+
+def get_query_or_404(pk):
+    try:
+        query = UIQuery.objects.get(id=pk)
+    except UIQuery.DoesNotExist:
+        raise generic_api_exceptions.NotFoundAPIException(
+            NotFound,
+            error_code=ErrorCodes.QueryNotFound.value,
+            message="Query doesn't exist"
+        )
+    return query
 
 
 def process_annotated_records(record_list, column_name_id_map=None, preview_metadata=None):
@@ -135,3 +150,11 @@ def follows_json_number_spec(number):
         if re.search(pattern, number) is not None:
             return True
     return False
+
+
+def is_valid_uuid_v4(value):
+    try:
+        UUID(str(value), version=4)
+        return True
+    except ValueError:
+        return False

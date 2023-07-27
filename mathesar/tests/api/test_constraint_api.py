@@ -2,6 +2,7 @@ import json
 
 import pytest
 from sqlalchemy import Column as SAColumn, ForeignKey, Integer, MetaData, Table as SATable, select
+from sqlalchemy.sql import text
 
 from db.columns.operations.select import get_column_attnum_from_name
 from db.constraints.base import UniqueConstraint
@@ -9,6 +10,34 @@ from db.tables.operations.select import get_oid_from_table
 from mathesar.models.base import Constraint, Table, Column
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from db.metadata import get_empty_metadata
+from mathesar.state import reset_reflection
+
+
+@pytest.fixture
+def multi_column_primary_key_table(create_schema, get_uid, engine):
+    prefix = "multi_col_pk"
+    schema_name = f"schema_{prefix}_{get_uid()}"
+    schema = create_schema(schema_name)
+    db_name = schema.database.name
+    table_name = f"table_{prefix}_{get_uid()}"
+    query = f"""
+        CREATE TABLE "{schema_name}"."{table_name}" (
+            column1 INT,
+            column2 INT,
+            column3 INT,
+            PRIMARY KEY (column1, column2)
+        );
+    """
+    with engine.connect() as conn:
+        conn.execute(text(query))
+        conn.commit()
+    reset_reflection(db_name=db_name)
+    # NOTE filtering by name is impossible here, because db object names are a dynamic properties, not model fields
+    all_tables = Table.current_objects.all()
+    for table in all_tables:
+        if table.name == table_name:
+            return table
+    raise Exception("Should never happen.")
 
 
 def _verify_primary_and_unique_constraints(response):
@@ -58,12 +87,12 @@ write_client_with_different_roles = [
 
 
 list_client_with_different_roles = [
-    ('superuser_client_factory', 2, 2),
-    ('db_manager_client_factory', 2, 2),
-    ('db_editor_client_factory', 2, 2),
-    ('schema_manager_client_factory', 2, 0),
-    ('schema_viewer_client_factory', 2, 0),
-    ('db_viewer_schema_manager_client_factory', 2, 2)
+    ('superuser_client_factory', 2, 200, 2),
+    ('db_manager_client_factory', 2, 200, 2),
+    ('db_editor_client_factory', 2, 200, 2),
+    ('schema_manager_client_factory', 2, 403, 0),
+    ('schema_viewer_client_factory', 2, 403, 0),
+    ('db_viewer_schema_manager_client_factory', 2, 200, 2)
 ]
 
 
@@ -94,12 +123,13 @@ def test_default_constraint_list(create_patents_table, client):
     assert constraint_data['type'] == 'primary'
 
 
-@pytest.mark.parametrize('client_name,expected_constraint_count,different_schema_expected_constraint_count', list_client_with_different_roles)
+@pytest.mark.parametrize('client_name,expected_constraint_count,different_schema_status_code,different_schema_expected_constraint_count', list_client_with_different_roles)
 def test_constraint_list_based_on_permissions(
         create_patents_table,
         request,
         client_name,
         expected_constraint_count,
+        different_schema_status_code,
         different_schema_expected_constraint_count
 ):
     table_name = 'NASA Constraint List 1'
@@ -116,8 +146,10 @@ def test_constraint_list_based_on_permissions(
     response_data = response.json()
     assert response_data['count'] == expected_constraint_count
     response = client.get(f'/api/db/v0/tables/{different_schema_table.id}/constraints/')
-    response_data = response.json()
-    assert response_data['count'] == different_schema_expected_constraint_count
+    assert response.status_code == different_schema_status_code
+    if different_schema_status_code == 200:
+        response_data = response.json()
+        assert response_data['count'] == different_schema_expected_constraint_count
 
 
 def test_existing_foreign_key_constraint_list(patent_schema, client):
@@ -547,8 +579,8 @@ def test_drop_nonexistent_table(client):
     response = client.delete('/api/db/v0/tables/9387489/constraints/4234/')
     assert response.status_code == 404
     response_data = response.json()[0]
-    assert response_data['message'] == "Not found."
-    assert response_data['code'] == ErrorCodes.NotFound.value
+    assert response_data['message'] == "Table doesn't exist"
+    assert response_data['code'] == ErrorCodes.TableNotFound.value
 
 
 def test_empty_column_list(create_patents_table, client):
@@ -582,3 +614,21 @@ def test_invalid_constraint_type(create_patents_table, client):
     assert response.status_code == 400
     assert response_data['code'] == ErrorCodes.UnsupportedConstraint.value
     assert f'Operations related to {invalid_constraint} constraint are currently not supported' in response_data['message']
+
+
+def test_multi_column_primary_key_constraint_list(multi_column_primary_key_table, client):
+    table = multi_column_primary_key_table
+    response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
+    response_data = response.json()
+    constraints_data = response_data['results']
+    assert len(constraints_data) == 1
+    constraint_data = constraints_data[0]
+    assert constraint_data['type'] == 'primary'
+    expected_pk_col_names = set(['column1', 'column2'])
+    expected_pk_col_ids = set(
+        col.id
+        for col
+        in table.columns.all()
+        if col.name in expected_pk_col_names
+    )
+    assert set(constraint_data['columns']) == expected_pk_col_ids

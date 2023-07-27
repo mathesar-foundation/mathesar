@@ -172,7 +172,7 @@ class MathesarColumn(Column):
                 ),
                 key=lambda db_type: db_type.id
             )
-            return valid_target_types if valid_target_types else None
+            return valid_target_types if valid_target_types else []
 
     @property
     def column_attnum(self):
