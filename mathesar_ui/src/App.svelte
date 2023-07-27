@@ -1,7 +1,11 @@
 <script lang="ts">
   import { get } from 'svelte/store';
 
-  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
+  import {
+    Confirmation,
+    Spinner,
+    ToastPresenter,
+  } from '@mathesar-component-library';
   import { confirmationController } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
@@ -15,6 +19,21 @@
   import { modal } from './stores/modal';
   import { setReleasesStoreInContext } from './stores/releases';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
+  import { loadLocaleAsync } from './i18n/i18n-load';
+  import { setLocale } from './i18n/i18n-svelte';
+
+  /**
+   * Later the translations file will be loaded
+   * in parallel to the FE's first chunk
+   */
+  let isTranslationsLoaded = false;
+  (() => {
+    void loadLocaleAsync('en').then(() => {
+      setLocale('en');
+      isTranslationsLoaded = true;
+      return true;
+    });
+  })();
 
   const commonData = preloadCommonData();
   if (commonData?.user) {
@@ -66,14 +85,19 @@
 
 <svelte:body on:copy={handleCopy} />
 
-<ToastPresenter entries={toast.entries} />
-<Confirmation controller={confirmationController} />
-<ModalRecordSelector
-  {recordSelectorController}
-  modalController={recordSelectorModal}
-/>
-
-<RootRoute />
+{#if isTranslationsLoaded}
+  <ToastPresenter entries={toast.entries} />
+  <Confirmation controller={confirmationController} />
+  <ModalRecordSelector
+    {recordSelectorController}
+    modalController={recordSelectorModal}
+  />
+  <RootRoute />
+{:else}
+  <div class="app-loader">
+    <Spinner size="2rem" />
+  </div>
+{/if}
 
 <!--
   Supporting aliases in scss within the preprocessor is a bit of work.
@@ -256,5 +280,13 @@
 
   .bold-header {
     font-weight: 500;
+  }
+
+  .app-loader {
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    display: flex;
   }
 </style>

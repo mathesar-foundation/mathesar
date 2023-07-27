@@ -6,7 +6,6 @@
 import type {
   BaseTranslation as BaseTranslationType,
   LocalizedString,
-  RequiredParams,
 } from 'typesafe-i18n';
 
 export type BaseTranslation = BaseTranslationType;
@@ -19,18 +18,113 @@ export type Translation = RootTranslation;
 export type Translations = RootTranslation;
 
 type RootTranslation = {
-  /**
-   * H​i​ ​{​n​a​m​e​}​!​ ​P​l​e​a​s​e​ ​l​e​a​v​e​ ​a​ ​s​t​a​r​ ​i​f​ ​y​o​u​ ​l​i​k​e​ ​t​h​i​s​ ​p​r​o​j​e​c​t​:​ ​h​t​t​p​s​:​/​/​g​i​t​h​u​b​.​c​o​m​/​i​v​a​n​h​o​f​e​r​/​t​y​p​e​s​a​f​e​-​i​1​8​n
-   * @param {string} name
-   */
-  HI: RequiredParams<'name'>;
+  importUploadPage: {
+    /**
+     * U​p​l​o​a​d​ ​a​ ​f​i​l​e
+     */
+    uploadAFile: string;
+    /**
+     * P​r​o​v​i​d​e​ ​a​ ​U​R​L​ ​t​o​ ​t​h​e​ ​f​i​l​e
+     */
+    provideUrlToFile: string;
+    /**
+     * C​o​p​y​ ​a​n​d​ ​P​a​s​t​e​ ​T​e​x​t
+     */
+    copyAndPasteText: string;
+    /**
+     * U​n​a​b​l​e​ ​t​o​ ​c​r​e​a​t​e​ ​a​ ​t​a​b​l​e​ ​f​r​o​m​ ​t​h​e​ ​u​p​l​o​a​d​e​d​ ​d​a​t​a
+     */
+    unableToCreateTableFromUpload: string;
+    /**
+     * C​r​e​a​t​e​ ​a​ ​t​a​b​l​e​ ​b​y​ ​i​m​p​o​r​t​i​n​g​ ​y​o​u​r​ ​d​a​t​a
+     */
+    createATableByImporting: string;
+    /**
+     * U​p​l​o​a​d​i​n​g​ ​D​a​t​a
+     */
+    uploadingData: string;
+    /**
+     * L​a​r​g​e​ ​d​a​t​a​ ​s​e​t​s​ ​c​a​n​ ​s​o​m​e​t​i​m​e​s​ ​t​a​k​e​ ​s​e​v​e​r​a​l​ ​m​i​n​u​t​e​s​ ​t​o​ ​p​r​o​c​e​s​s​.​ ​P​l​e​a​s​e​ ​d​o​ ​n​o​t​ ​l​e​a​v​e​ ​t​h​i​s​ ​p​a​g​e​ ​o​r​ ​c​l​o​s​e​ ​t​h​e​ ​b​r​o​w​s​e​r​ ​t​a​b​ ​w​h​i​l​e​ ​i​m​p​o​r​t​ ​i​s​ ​i​n​ ​p​r​o​g​r​e​s​s​.
+     */
+    largeDataTakesTimeWarning: string;
+    /**
+     * H​o​w​ ​w​o​u​l​d​ ​y​o​u​ ​l​i​k​e​ ​t​o​ ​i​m​p​o​r​t​ ​y​o​u​r​ ​d​a​t​a​?
+     */
+    howWouldYouLikeToImport: string;
+    /**
+     * U​p​l​o​a​d​ ​f​a​i​l​e​d
+     */
+    uploadFailed: string;
+    /**
+     * P​r​e​p​a​r​i​n​g​ ​P​r​e​v​i​e​w
+     */
+    preparingPreview: string;
+    /**
+     * F​a​i​l​e​d​ ​t​o​ ​i​m​p​o​r​t​ ​d​a​t​a
+     */
+    failedToImport: string;
+  };
+  general: {
+    /**
+     * I​m​p​o​r​t
+     */
+    import: string;
+  };
 };
 
 export type TranslationFunctions = {
-  /**
-   * Hi {name}! Please leave a star if you like this project: https://github.com/ivanhofer/typesafe-i18n
-   */
-  HI: (arg: { name: string }) => LocalizedString;
+  importUploadPage: {
+    /**
+     * Upload a file
+     */
+    uploadAFile: () => LocalizedString;
+    /**
+     * Provide a URL to the file
+     */
+    provideUrlToFile: () => LocalizedString;
+    /**
+     * Copy and Paste Text
+     */
+    copyAndPasteText: () => LocalizedString;
+    /**
+     * Unable to create a table from the uploaded data
+     */
+    unableToCreateTableFromUpload: () => LocalizedString;
+    /**
+     * Create a table by importing your data
+     */
+    createATableByImporting: () => LocalizedString;
+    /**
+     * Uploading Data
+     */
+    uploadingData: () => LocalizedString;
+    /**
+     * Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while import is in progress.
+     */
+    largeDataTakesTimeWarning: () => LocalizedString;
+    /**
+     * How would you like to import your data?
+     */
+    howWouldYouLikeToImport: () => LocalizedString;
+    /**
+     * Upload failed
+     */
+    uploadFailed: () => LocalizedString;
+    /**
+     * Preparing Preview
+     */
+    preparingPreview: () => LocalizedString;
+    /**
+     * Failed to import data
+     */
+    failedToImport: () => LocalizedString;
+  };
+  general: {
+    /**
+     * Import
+     */
+    import: () => LocalizedString;
+  };
 };
 
 export type Formatters = {};
