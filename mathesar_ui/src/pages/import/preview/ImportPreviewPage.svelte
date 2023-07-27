@@ -4,7 +4,6 @@
 
   import {
     CancelOrProceedButtonPair,
-    Checkbox,
     LabeledInput,
     Spinner,
     TextInput,
@@ -16,6 +15,7 @@
   import type { Column } from '@mathesar/api/types/tables/columns';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { FieldLayout } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import {
     Sheet,
@@ -44,6 +44,8 @@
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
+  import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
   import ErrorInfo from './ErrorInfo.svelte';
   import PreviewColumn from './PreviewColumn.svelte';
   import {
@@ -51,9 +53,9 @@
     processColumns,
     type ColumnProperties,
   } from './importPreviewPageUtils';
-  import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
-  import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
-  import { FieldLayout } from '@mathesar/components/form';
+
+  /** Set via back-end */
+  const TRUNCATION_LIMIT = 20;
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -396,11 +398,11 @@
               {/each}
             </Sheet>
           </div>
-          <div class="truncation-alert">
-            <InfoBox>
-              Preview data is shown for the first few rows of your data only.
-            </InfoBox>
-          </div>
+          {#if records.length === TRUNCATION_LIMIT}
+            <div class="truncation-alert">
+              (Preview is truncated at {TRUNCATION_LIMIT} rows.)
+            </div>
+          {/if}
         {/if}
       </div>
     </div>
@@ -470,5 +472,6 @@
   .truncation-alert {
     margin: 1rem auto 0 auto;
     max-width: max-content;
+    color: var(--color-text-muted);
   }
 </style>
