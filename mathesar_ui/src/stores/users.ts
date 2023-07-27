@@ -29,6 +29,8 @@ export class UserModel {
 
   readonly username: User['username'];
 
+  readonly preferredLanguage: User['preferred_language'];
+
   private databaseRoles: Map<DatabaseRole['database'], DatabaseRole>;
 
   private schemaRoles: Map<SchemaRole['schema'], SchemaRole>;
@@ -45,6 +47,7 @@ export class UserModel {
     this.fullName = userDetails.full_name;
     this.email = userDetails.email;
     this.username = userDetails.username;
+    this.preferredLanguage = userDetails.preferred_language;
   }
 
   hasPermission(
@@ -119,6 +122,7 @@ export class UserModel {
       schema_roles: [...this.schemaRoles.values()],
       full_name: this.fullName,
       email: this.email,
+      preferred_language: this.preferredLanguage,
     };
   }
 

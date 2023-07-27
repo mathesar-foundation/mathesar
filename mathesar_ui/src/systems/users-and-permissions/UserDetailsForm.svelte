@@ -21,8 +21,12 @@
   } from '@mathesar/components/form';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { locale, setLocale } from '@mathesar/i18n/i18n-svelte';
+  import { loadLocaleAsync } from '@mathesar/i18n/i18n-load';
+  import type { Locales } from '@mathesar/i18n/i18n-types';
   import SelectUserType from './SelectUserType.svelte';
   import UserFormInput from './UserFormInput.svelte';
+  import SelectPreferredLanguage from './SelectPreferredLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -41,6 +45,7 @@
     ),
   ]);
   $: email = optionalField(user?.email ?? '', [isEmail()]);
+  $: preferredLanguage = requiredField(user?.preferred_language ?? '');
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
@@ -49,7 +54,7 @@
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = { fullName, username, email, userType };
+    const fields = { fullName, username, email, userType, preferredLanguage };
     return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
@@ -61,6 +66,7 @@
       username: formValues.username,
       email: formValues.email,
       is_superuser: formValues.userType === 'admin',
+      preferred_language: formValues.preferredLanguage,
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
@@ -76,6 +82,12 @@
       await userApi.update(user.id, request);
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
+      }
+
+      const updatedLocale = request.preferred_language as Locales;
+      if ($locale !== updatedLocale) {
+        await loadLocaleAsync(updatedLocale);
+        setLocale(updatedLocale);
       }
       dispatch('update');
       return;
@@ -139,6 +151,14 @@
       }}
     />
   {/if}
+
+  <UserFormInput
+    label="Preferred Language *"
+    field={preferredLanguage}
+    input={{
+      component: SelectPreferredLanguage,
+    }}
+  />
 
   <UserFormInput
     label="Role *"
