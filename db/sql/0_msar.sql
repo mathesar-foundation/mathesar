@@ -875,7 +875,8 @@ CREATE OR REPLACE FUNCTION msar.get_duplicate_col_defs(
   tab_id oid,
   col_ids smallint[],
   new_names text[],
-  copy_defaults boolean
+  copy_defaults boolean,
+  copy_not_null boolean DEFAULT false
 ) RETURNS __msar.col_def[] AS $$/*
 Get an array of __msar.col_def from given columns in a table.
 
@@ -892,8 +893,8 @@ SELECT array_agg(
     quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, pg_columns.attnum))),
     -- build text specifying the type of the duplicate column
     format_type(atttypid, atttypmod),
-    -- set the duplicate column to be nullable, since it will initially be empty
-    false,
+    -- set the NOT NULL value
+    CASE WHEN copy_not_null THEN attnotnull ELSE false END,
     -- set the default value for the duplicate column if specified
     CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END,
     -- We don't set a duplicate column as a primary key, since that would cause an error.
