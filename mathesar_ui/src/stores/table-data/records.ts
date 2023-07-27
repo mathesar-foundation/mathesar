@@ -12,7 +12,7 @@ import {
   isDefinedNonNullable,
   type CancellablePromise,
 } from '@mathesar-component-library';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import type {
   GetRequestParams as ApiGetRequestParams,
@@ -28,10 +28,12 @@ import {
   getAPI,
   patchAPI,
   postAPI,
+  getQueryStringFromParams,
 } from '@mathesar/api/utils/requestUtils';
 import type Pagination from '@mathesar/utils/Pagination';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
+import type { ShareConsumer } from '@mathesar/utils/shares';
 import type { ColumnsDataStore } from './columns';
 import type { Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
@@ -51,7 +53,11 @@ export interface RecordsRequestParamsData {
   searchFuzzy: SearchFuzzy;
 }
 
-function buildFetchQueryString(data: RecordsRequestParamsData): string {
+interface RecordsFetchQueryParamsData extends RecordsRequestParamsData {
+  shareConsumer?: ShareConsumer;
+}
+
+function buildFetchQueryString(data: RecordsFetchQueryParamsData): string {
   const params: ApiGetRequestParams = {
     ...data.pagination.recordsRequestParams(),
     ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
@@ -59,11 +65,11 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
     ...data.filtering.recordsRequestParams(),
     ...data.searchFuzzy.recordsRequestParams(),
   };
-  const entries: [string, string][] = Object.entries(params).map(([k, v]) => {
-    const value = typeof v === 'string' ? v : JSON.stringify(v);
-    return [k, value];
-  });
-  return new URLSearchParams(entries).toString();
+  const paramsWithShareConsumer = {
+    ...params,
+    ...data.shareConsumer?.getQueryParams(),
+  };
+  return getQueryStringFromParams(paramsWithShareConsumer);
 }
 
 export interface RecordGroup {
@@ -269,7 +275,7 @@ function preprocessRecords({
 }
 
 export class RecordsData {
-  private parentId: DBObjectEntry['id'];
+  private tableId: TableEntry['id'];
 
   private url: string;
 
@@ -311,14 +317,23 @@ export class RecordsData {
    */
   private contextualFilters: Map<number, number | string>;
 
-  constructor(
-    parentId: number,
-    meta: Meta,
-    columnsDataStore: ColumnsDataStore,
-    contextualFilters: Map<number, number | string>,
-  ) {
-    this.parentId = parentId;
+  readonly shareConsumer?: ShareConsumer;
 
+  constructor({
+    tableId,
+    meta,
+    columnsDataStore,
+    contextualFilters,
+    shareConsumer,
+  }: {
+    tableId: TableEntry['id'];
+    meta: Meta;
+    columnsDataStore: ColumnsDataStore;
+    contextualFilters: Map<number, number | string>;
+    shareConsumer?: ShareConsumer;
+  }) {
+    this.tableId = tableId;
+    this.shareConsumer = shareConsumer;
     this.state = writable(States.Loading);
     this.savedRecordRowsWithGroupHeaders = writable([]);
     this.newRecords = writable([]);
@@ -336,7 +351,7 @@ export class RecordsData {
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.contextualFilters = contextualFilters;
-    this.url = `/api/db/v0/tables/${this.parentId}/records/`;
+    this.url = `/api/db/v0/tables/${this.tableId}/records/`;
     void this.fetch();
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
@@ -387,6 +402,7 @@ export class RecordsData {
       const queryString = buildFetchQueryString({
         ...params,
         filtering: params.filtering.withEntries(contextualFilterEntries),
+        shareConsumer: this.shareConsumer,
       });
       this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${queryString}`);
       const response = await this.promise;
@@ -466,7 +482,7 @@ export class RecordsData {
     let shouldReFetchRecords = successRowKeys.size > 0;
     if (keysToDelete.length > 0) {
       const recordIds = [...keysToDelete];
-      const bulkDeleteURL = `/api/ui/v0/tables/${this.parentId}/records/delete/`;
+      const bulkDeleteURL = `/api/ui/v0/tables/${this.tableId}/records/delete/`;
       try {
         await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
         keysToDelete.forEach((key) => successRowKeys.add(key));
