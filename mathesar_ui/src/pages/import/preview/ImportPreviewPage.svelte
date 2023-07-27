@@ -451,8 +451,16 @@
   :global(.sheet [data-sheet-element='header']) {
     background: var(--slate-100);
   }
-  :global(.sheet [data-sheet-element='row'] [data-sheet-element='cell']) {
+  :global(.sheet [data-sheet-element='cell']) {
     background: var(--white);
+  }
+  :global(.sheet [data-sheet-element] [data-sheet-element='cell']:last-child) {
+    border-right: none;
+  }
+  :global(.sheet
+      [data-sheet-element='row']:last-child
+      [data-sheet-element='cell']) {
+    border-bottom: none;
   }
   .footer {
     border-top: 1px solid var(--slate-200);
