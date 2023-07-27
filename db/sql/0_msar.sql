@@ -2261,12 +2261,14 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.extract_columns_from_table(tab_id oid, col_ids integer[], new_tab_name text, fk_col_name text)
-  RETURNS oid AS $f$
+msar.extract_columns_from_table(
+  tab_id oid, col_ids integer[], new_tab_name text, fk_col_name text
+) RETURNS jsonb AS $f$
 DECLARE
-  extracted_table_id oid;
   extracted_col_defs CONSTANT jsonb := msar.get_extracted_col_def_jsonb(tab_id, col_ids);
   fkey_name CONSTANT text := msar.build_unique_fkey_column_name(tab_id, fk_col_name, new_tab_name);
+  extracted_table_id integer;
+  fkey_attnum integer;
 BEGIN
   extracted_table_id := msar.add_mathesar_table(
     msar.get_relation_namespace_oid(tab_id),
@@ -2275,7 +2277,7 @@ BEGIN
     null,
     format('Extracted from %s', __msar.get_relation_name(tab_id))
   );
-  PERFORM msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
+  fkey_attnum := msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
   PERFORM __msar.exec_ddl($t$
     WITH fkey_cte AS (
       SELECT id, %1$s, dense_rank() OVER (ORDER BY %1$s) AS __msar_tmp_id
@@ -2293,6 +2295,6 @@ BEGIN
     fkey_name  -- goes to %4$I
   ) FROM jsonb_array_elements(extracted_col_defs) AS col_def;
   PERFORM msar.drop_columns(tab_id, variadic col_ids);
-  RETURN extracted_table_id;
+  RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
 END;
 $f$ LANGUAGE plpgsql;

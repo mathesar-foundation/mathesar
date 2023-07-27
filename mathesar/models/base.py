@@ -614,7 +614,7 @@ class Table(DatabaseObject, Relation):
         remainder_column_names = column_names_id_map.keys() - extracted_column_names
 
         # Mutate on Postgres
-        extracted_sa_table, remainder_sa_table, linking_fk_column_attnum = extract_columns_from_table(
+        extracted_table_oid, remainder_table_oid, linking_fk_column_attnum = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
             extracted_table_name,
@@ -625,8 +625,6 @@ class Table(DatabaseObject, Relation):
         engine = self._sa_engine
 
         # Replicate mutation on Django, so that Django-layer-specific information is preserved
-        extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
-        remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
         extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
         extracted_table.save()
 
