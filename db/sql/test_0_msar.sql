@@ -991,8 +991,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_many_to_one_link() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.create_many_to_one_link(
-    from_rel_id => 'actors'::regclass::oid,
-    to_rel_id => 'movies'::regclass::oid,
+    frel_id => 'actors'::regclass::oid,
+    rel_id => 'movies'::regclass::oid,
     col_name => 'act_id'
   );
   RETURN NEXT has_column('movies', 'act_id');
@@ -1005,8 +1005,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_one_to_one_link() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.create_many_to_one_link(
-    from_rel_id => 'actors'::regclass::oid,
-    to_rel_id => 'movies'::regclass::oid,
+    frel_id => 'actors'::regclass::oid,
+    rel_id => 'movies'::regclass::oid,
     col_name => 'act_id',
     unique_link => true
   );

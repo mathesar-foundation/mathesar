@@ -2080,8 +2080,8 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.create_many_to_one_link(
-  from_rel_id oid,
-  to_rel_id oid,
+  frel_id oid,
+  rel_id oid,
   col_name text,
   unique_link boolean DEFAULT false
 ) RETURNS smallint AS $$/* 
@@ -2089,9 +2089,9 @@ Create a many-to-one or a one-to-one link between tables, returning the attnum o
 column, returning the attnum of the added column.
 
 Args:
-  from_rel_id: The OID of the referent table.
-  to_rel_id: The OID of the referrer table.
-  col_name: Name of the new column to be created in the referrer table, unqoted. 
+  frel_id: The OID of the referent table.
+  rel_id: The OID of the referrer table.
+  col_name: Name of the new column to be created in the referrer table, unquoted.
   unique_link: Whether to make the link one-to-one instead of many-to-one.
 */
 DECLARE
@@ -2100,21 +2100,21 @@ DECLARE
   added_col_ids smallint[];
   con_defs jsonb;
 BEGIN
-  pk_col_id := msar.get_pk_column(from_rel_id);
+  pk_col_id := msar.get_pk_column(frel_id);
   col_defs := jsonb_build_array(
     jsonb_build_object(
       'name', col_name,
-      'type', jsonb_build_object('name', msar.get_column_type(from_rel_id, pk_col_id))
+      'type', jsonb_build_object('name', msar.get_column_type(frel_id, pk_col_id))
     )
   );
-  added_col_ids := msar.add_columns(to_rel_id , col_defs , false);
+  added_col_ids := msar.add_columns(rel_id , col_defs , false);
   con_defs := jsonb_build_array(
     jsonb_build_object(
       'name', null,
       'type', 'f',
       'columns', added_col_ids,
       'deferrable', false,
-      'fkey_relation_id', from_rel_id::integer,
+      'fkey_relation_id', frel_id::integer,
       'fkey_columns', jsonb_build_array(pk_col_id)
     )
   );
@@ -2126,7 +2126,7 @@ BEGIN
         'columns', added_col_ids)
     ) || con_defs;
   END IF;
-  PERFORM msar.add_constraints(to_rel_id , con_defs);
+  PERFORM msar.add_constraints(rel_id , con_defs);
   RETURN added_col_ids[1];
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
