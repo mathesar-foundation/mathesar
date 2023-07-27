@@ -321,6 +321,11 @@ def create_patents_table(patents_csv_filepath, patent_schema, create_table):
     return _create_table
 
 
+@pytest.fixture
+def patents_table(create_patents_table, uid):
+    return create_patents_table(f"table_patents_{uid}")
+
+
 # TODO rename to create_ma_table_from_csv
 @pytest.fixture
 def create_table(create_schema):
