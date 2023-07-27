@@ -35,6 +35,7 @@ Because function signatures are used informationally in command-generated tables
 needs to be conserved. As a compromise between readability and terseness, we use the following
 conventions in variable naming:
 
+attribute  -> att
 schema     -> sch
 table      -> tab
 column     -> col
@@ -174,6 +175,19 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_relation_namespace_oid(rel_id oid) RETURNS oid AS $$/*
+Get the OID of the namespace containing the given relation.
+
+Most useful for getting the OID of the schema of a given table.
+
+Args:
+  rel_id: The OID of the relation whose namespace we want to find.
+*/
+SELECT relnamespace FROM pg_class WHERE oid=rel_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+
 CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_id integer) RETURNS text AS $$/*
 Return the name for a given column in a given relation (e.g., table).
@@ -238,6 +252,19 @@ FROM jsonb_array_elements(columns) AS x(col);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_attnum(rel_id oid, att_name text) RETURNS smallint AS $$/*
+Get the attnum for a given attribute in the relation. Returns null if no such attribute exists.
+
+Usually, this will be used to get the attnum for a column of a table.
+
+Args:
+  rel_id: The relation where we'll look for the attribute.
+  att_name: The name of the attribute, unquoted.
+*/
+SELECT attnum FROM pg_attribute WHERE attrelid=rel_id AND attname=att_name;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.is_pkey_col(rel_id oid, col_id integer) RETURNS boolean AS $$/*
 Return whether the given column is in the primary key of the given relation (e.g., table).
@@ -247,7 +274,7 @@ Args:
   col_id:  The attnum of the column in the relation.
 */
 BEGIN
-  RETURN ARRAY[col_attnum::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id;
+  RETURN ARRAY[col_id::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id and contype='p';
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -380,6 +407,13 @@ SELECT atttypid::regtype
 FROM pg_attribute
 WHERE attname = quote_ident(col_name)
 AND attrelid = msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
+Return true if the given column exists in the table, false otherwise.
+*/
+SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -882,7 +916,7 @@ Get an array of __msar.col_def from given columns in a table.
 
 Args:
   tab_id: The OID of the table containing the column whose definition we want.
-  col_id: The attnum of the column whose definition we want.
+  col_ids: The attnums of the column whose definitions we want.
   new_names: The desired names of the column defs. Must be in same order as col_ids, and same
     length.
   copy_defaults: Whether or not we should copy the defaults
@@ -907,6 +941,39 @@ FROM pg_attribute AS pg_columns
   LEFT JOIN pg_attrdef AS pg_column_defaults
     ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
 WHERE pg_columns.attrelid=tab_id;
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_extracted_col_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
+Get a JSON array of column definitions from given columns for creation of extracted table.
+
+See the msar.process_col_def_jsonb for a description of the JSON.
+
+Args:
+  tab_id: The OID of the table containing the column whose definition we want.
+  col_ids: The attnum of the column whose definitions we want.
+*/
+
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'name', attname,
+    'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
+    'not_null', attnotnull,
+    'default',
+    -- We only copy non-dynamic default expressions to new table to avoid weird double-use of
+    -- sequences.
+    CASE WHEN NOT msar.is_default_possibly_dynamic(tab_id, col_id) THEN
+      pg_get_expr(adbin, tab_id)
+    END
+  )
+)
+FROM pg_attribute AS pg_columns
+  JOIN unnest(col_ids) AS columns_to_copy(col_id)
+    ON pg_columns.attnum=columns_to_copy.col_id
+  LEFT JOIN pg_attrdef AS pg_column_defaults
+    ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
+WHERE pg_columns.attrelid=tab_id AND NOT msar.is_pkey_col(tab_id, col_id);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -2159,3 +2226,73 @@ BEGIN
   RETURN added_table_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- TABLE SPLITTING FUNCTIONS
+--
+-- Functions to extract columns from a table
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+msar.build_unique_column_name_unquoted(tab_id oid, col_name text) RETURNS text AS $$
+DECLARE
+  col_attnum smallint;
+BEGIN
+  col_attnum := msar.get_attnum(tab_id, col_name);
+  RETURN CASE
+    WHEN col_attnum IS NOT NULL THEN msar.get_fresh_copy_name(tab_id, col_attnum) ELSE col_name
+  END;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unique_fkey_column_name(tab_id oid, fk_col_name text, frel_name text)
+  RETURNS text AS $$/*
+*/
+BEGIN
+  fk_col_name := COALESCE(fk_col_name, format('%s_id', frel_name));
+  RETURN msar.build_unique_column_name_unquoted(tab_id, fk_col_name);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.extract_columns_from_table(tab_id oid, col_ids integer[], new_tab_name text, fk_col_name text)
+  RETURNS oid AS $f$
+DECLARE
+  extracted_table_id oid;
+  extracted_col_defs CONSTANT jsonb := msar.get_extracted_col_def_jsonb(tab_id, col_ids);
+  fkey_name CONSTANT text := msar.build_unique_fkey_column_name(tab_id, fk_col_name, new_tab_name);
+BEGIN
+  extracted_table_id := msar.add_mathesar_table(
+    msar.get_relation_namespace_oid(tab_id),
+    new_tab_name,
+    extracted_col_defs,
+    null,
+    format('Extracted from %s', __msar.get_relation_name(tab_id))
+  );
+  PERFORM msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
+  PERFORM __msar.exec_ddl($t$
+    WITH fkey_cte AS (
+      SELECT id, %1$s, dense_rank() OVER (ORDER BY %1$s) AS __msar_tmp_id
+      FROM %2$s
+    ), ins_cte AS (
+      INSERT INTO %3$s (%1$s)
+      SELECT DISTINCT %1$s FROM fkey_cte ORDER BY %1$s
+    )
+    UPDATE %2$s SET %4$I=__msar_tmp_id FROM fkey_cte WHERE
+    %2$s.id=fkey_cte.id
+    $t$,
+    string_agg(quote_ident(col_def ->> 'name'), ', '),  -- goes to %1$s
+    __msar.get_relation_name(tab_id),  -- goes to %2$s
+    __msar.get_relation_name(extracted_table_id),  -- goes to %3$s
+    fkey_name  -- goes to %4$I
+  ) FROM jsonb_array_elements(extracted_col_defs) AS col_def;
+  PERFORM msar.drop_columns(tab_id, variadic col_ids);
+  RETURN extracted_table_id;
+END;
+$f$ LANGUAGE plpgsql;
