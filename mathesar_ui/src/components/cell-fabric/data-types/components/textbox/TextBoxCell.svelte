@@ -11,6 +11,7 @@
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
+  export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
 
   // Db options
   export let length: $$Props['length'] = undefined;
@@ -23,6 +24,7 @@
   {disabled}
   {searchValue}
   {isIndependentOfSheet}
+  {showTruncationPopover}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown

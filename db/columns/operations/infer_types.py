@@ -5,7 +5,10 @@ from sqlalchemy.exc import DatabaseError
 
 from db.columns.exceptions import DagCycleError
 from db.columns.operations.alter import alter_column_type
-from db.columns.operations.select import determine_whether_column_contains_data
+from db.columns.operations.select import (
+    determine_whether_column_contains_data,
+    get_column_attnum_from_name
+)
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types
 from db.metadata import get_empty_metadata
@@ -41,6 +44,7 @@ TYPE_INFERENCE_DAG = {
 }
 
 
+# TODO This logic should be moved to the DB ASAP for speed and clarity.
 def infer_column_type(
         schema,
         table_name,
@@ -102,17 +106,16 @@ def infer_column_type(
     dag_node = type_classes_to_dag_nodes.get(column_type_class)
     logger.debug(f"dag_node: {dag_node}")
     types_to_cast_to = type_inference_dag.get(dag_node, [])
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, metadata)
     for db_type in types_to_cast_to:
         try:
             with engine.begin() as conn:
                 alter_column_type(
                     table_oid,
-                    column_name,
+                    column_attnum,
                     engine,
                     conn,
                     db_type,
-                    metadata=metadata,
-                    columns_might_have_defaults=columns_might_have_defaults,
                 )
             logger.info(f"Column {column_name} altered to type {db_type.id}")
             column_type_class = infer_column_type(

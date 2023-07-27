@@ -1,22 +1,19 @@
 import warnings
-from psycopg2.errors import DuplicateColumn, NotNullViolation, StringDataRightTruncation
+from psycopg.errors import DuplicateColumn, InvalidTextRepresentation, NotNullViolation
+from psycopg2.errors import StringDataRightTruncation
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-from sqlalchemy.exc import ProgrammingError, IntegrityError
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from mathesar.api.db.permissions.columns import ColumnAccessPolicy
-from mathesar.api.exceptions.database_exceptions import (
-    exceptions as database_api_exceptions,
-    base_exceptions as database_base_api_exceptions,
-)
+from mathesar.api.exceptions.database_exceptions import exceptions as database_api_exceptions
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 )
-from db.columns.operations.select import get_column_attnum_from_name
 from db.types.exceptions import InvalidTypeParameters
 from mathesar.api.serializers.dependents import DependentSerializer, DependentFilterSerializer
 from db.records.exceptions import UndefinedFunction
@@ -24,18 +21,16 @@ from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models.base import Column
-from mathesar.state import get_cached_metadata
 
 
 class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     serializer_class = ColumnSerializer
     pagination_class = DefaultLimitOffsetPagination
+    permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = ColumnAccessPolicy
 
     def get_queryset(self):
-        queryset = self.access_policy.scope_queryset(
-            self.request, Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
-        )
+        queryset = Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
         # Prefetching instead of using select_related because select_related uses joins,
         # and we need a reuse of individual Django object instead of its data
         prefetched_queryset = queryset.prefetch_related('table').prefetch('name')
@@ -48,7 +43,7 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         type_options = request.data.get('type_options', None)
         if 'source_column' in serializer.validated_data:
-            column = table.duplicate_column(
+            column_attnum = table.duplicate_column(
                 serializer.validated_data['source_column'],
                 serializer.validated_data['copy_source_data'],
                 serializer.validated_data['copy_source_constraints'],
@@ -57,18 +52,15 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         else:
             try:
                 # TODO Refactor add_column to user serializer validated date instead of request data
-                column = table.add_column(request.data)
-            except ProgrammingError as e:
-                if type(e.orig) == DuplicateColumn:
-                    name = request.data['name']
-                    raise database_api_exceptions.DuplicateTableAPIException(
-                        e,
-                        message=f'Column {name} already exists',
-                        field='name',
-                        status_code=status.HTTP_400_BAD_REQUEST
-                    )
-                else:
-                    raise database_base_api_exceptions.ProgrammingAPIException(e)
+                column_attnum = table.add_column(request.data)[0]
+            except DuplicateColumn as e:
+                name = request.data['name']
+                raise database_api_exceptions.DuplicateTableAPIException(
+                    e,
+                    message=f'Column {name} already exists',
+                    field='name',
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             except TypeError as e:
                 raise base_api_exceptions.TypeErrorAPIException(
                     e,
@@ -94,12 +86,6 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-        column_attnum = get_column_attnum_from_name(
-            table.oid,
-            column.name,
-            table.schema._sa_engine,
-            metadata=get_cached_metadata(),
-        )
         # The created column's Django model was automatically reflected. It can be reflected.
         dj_column = Column.objects.get(
             table=table,
@@ -129,8 +115,8 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     message='This type cast is not implemented',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-            except ProgrammingError as e:
-                raise database_base_api_exceptions.ProgrammingAPIException(
+            except InvalidTextRepresentation as e:
+                raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
@@ -170,16 +156,13 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-            except IntegrityError as e:
-                if type(e.orig) == NotNullViolation:
-                    raise database_api_exceptions.NotNullViolationAPIException(
-                        e,
-                        field="nullable",
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        table=table,
-                    )
-                else:
-                    raise base_api_exceptions.MathesarAPIException(e)
+            except NotNullViolation as e:
+                raise database_api_exceptions.NotNullViolationAPIException(
+                    e,
+                    field="nullable",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    table=table,
+                )
             except StringDataRightTruncation as e:
                 raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,

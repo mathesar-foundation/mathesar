@@ -99,12 +99,12 @@ def test_column_list(column_test_table, client):
 
 
 list_client_with_different_roles = [
-    ('superuser_client_factory', 8, 8),
-    ('db_manager_client_factory', 8, 8),
-    ('db_editor_client_factory', 8, 8),
-    ('schema_manager_client_factory', 8, 0),
-    ('schema_viewer_client_factory', 8, 0),
-    ('db_viewer_schema_manager_client_factory', 8, 8)
+    ('superuser_client_factory', 8, 200, 8),
+    ('db_manager_client_factory', 8, 200, 8),
+    ('db_editor_client_factory', 8, 200, 8),
+    ('schema_manager_client_factory', 8, 403, 0),
+    ('schema_viewer_client_factory', 8, 403, 0),
+    ('db_viewer_schema_manager_client_factory', 8, 200, 8)
 ]
 
 write_client_with_different_roles = [
@@ -117,8 +117,15 @@ write_client_with_different_roles = [
 ]
 
 
-@pytest.mark.parametrize('client_name,expected_count,different_schema_expected_count', list_client_with_different_roles)
-def test_column_list_based_on_permissions(create_patents_table, request, client_name, expected_count, different_schema_expected_count):
+@pytest.mark.parametrize('client_name,expected_count,different_schema_status_code,different_schema_expected_count', list_client_with_different_roles)
+def test_column_list_based_on_permissions(
+    create_patents_table,
+    request,
+    client_name,
+    expected_count,
+    different_schema_status_code,
+    different_schema_expected_count
+):
     table_name = 'NASA Column List 1'
     table = create_patents_table(table_name)
     different_schema_table = create_patents_table(table_name, schema_name="Different Schema")
@@ -127,27 +134,37 @@ def test_column_list_based_on_permissions(create_patents_table, request, client_
     response_data = response.json()
     assert response_data['count'] == expected_count
     response = client.get(f"/api/db/v0/tables/{different_schema_table.id}/columns/")
-    response_data = response.json()
-    assert response_data['count'] == different_schema_expected_count
+    assert response.status_code == different_schema_status_code
+    if different_schema_status_code == 200:
+        response_data = response.json()
+        assert response_data['count'] == different_schema_expected_count
 
 
-def test_column_create(column_test_table, client):
+@pytest.mark.parametrize(
+    "table_fixture",
+    [
+        "column_test_table",
+        "table_with_unknown_types",
+    ],
+)
+def test_column_create(table_fixture, client, request):
+    table = request.getfixturevalue(table_fixture)
     name = "anewcolumn"
     db_type = PostgresType.NUMERIC
-    num_columns = len(column_test_table.sa_columns)
+    num_columns = len(table.sa_columns)
     data = {
         "name": name,
         "type": db_type.id,
         "display_options": {"show_as_percentage": True},
-        "nullable": False
+        "nullable": True
     }
     response = client.post(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/",
+        f"/api/db/v0/tables/{table.id}/columns/",
         data=data,
     )
     assert response.status_code == 201
     new_columns_response = client.get(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+        f"/api/db/v0/tables/{table.id}/columns/"
     )
     assert new_columns_response.json()["count"] == num_columns + 1
     actual_new_col = new_columns_response.json()["results"][-1]
@@ -334,7 +351,7 @@ def test_column_create_some_parameters(column_test_table, client):
 def test_column_create_no_name_parameter(column_test_table, client):
     db_type = PostgresType.BOOLEAN
     num_columns = len(column_test_table.sa_columns)
-    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
+    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns + 1}"
     data = {
         "type": db_type.id
     }
@@ -355,7 +372,7 @@ def test_column_create_name_parameter_empty(column_test_table, client):
     name = ""
     db_type = PostgresType.BOOLEAN
     num_columns = len(column_test_table.sa_columns)
-    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
+    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns + 1}"
     data = {
         "name": name, "type": db_type.id
     }
@@ -372,36 +389,52 @@ def test_column_create_name_parameter_empty(column_test_table, client):
     assert actual_new_col["type"] == db_type.id
 
 
-def test_column_update_name(column_test_table, client):
+@pytest.mark.parametrize(
+    "table_fixture",
+    [
+        "column_test_table",
+        "table_with_unknown_types",
+    ],
+)
+def test_column_update_name(table_fixture, request, client):
+    table = request.getfixturevalue(table_fixture)
     name = "updatedname"
     data = {"name": name}
-    column = column_test_table.get_columns_by_name(['mycolumn1'])[0]
+    column = table.columns.last()
     response = client.patch(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/", data=data
+        f"/api/db/v0/tables/{table.id}/columns/{column.id}/", data=data
     )
     assert response.status_code == 200
     assert response.json()["name"] == name
     response = client.get(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/"
+        f"/api/db/v0/tables/{table.id}/columns/{column.id}/"
     )
     assert response.status_code == 200
     assert response.json()["name"] == name
 
 
-def test_column_update_typeget_all_columns(column_test_table_with_service_layer_options, client):
-    table, _ = column_test_table_with_service_layer_options
-    colum_name = "mycolumn2"
-    column = table.get_columns_by_name([colum_name])[0]
+@pytest.mark.parametrize(
+    "table_fixture,expected_status_code",
+    [
+        ["column_test_table", 200],
+        # NOTE we don't cast from unknown types
+        ["table_with_unknown_types", 400],
+    ],
+)
+def test_column_update_type_get_all_columns(table_fixture, expected_status_code, request, client):
+    table = request.getfixturevalue(table_fixture)
+    column = table.columns.last()
     column_id = column.id
     display_options_data = {'type': 'BOOLEAN'}
-    client.patch(
+    response = client.patch(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
         display_options_data,
     )
-    new_columns_response = client.get(
+    assert response.status_code == expected_status_code
+    response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/"
     )
-    assert new_columns_response.status_code == 200
+    assert response.status_code == 200
 
 
 def test_column_with_dynamic_default_update_default(column_test_table, client):
@@ -470,7 +503,7 @@ def test_column_update_type_dynamic_default(column_test_table, client):
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/", data=data
     )
-    assert response.status_code == 400
+    assert response.status_code == 200
 
 
 def test_column_update_type(column_test_table, client):
@@ -579,7 +612,7 @@ def test_column_update_invalid_type(create_patents_table, client):
     assert response.status_code == 400
     response_json = response.json()
     assert response_json[0]['code'] == ErrorCodes.InvalidTypeCast.value
-    assert response_json[0]['message'] == f"{columns[column_index]['name']} cannot be cast to bigint."
+    assert response_json[0]['message'] == f"\"{columns[column_index]['name']}\" cannot be cast to bigint."
 
 
 def test_column_update_invalid_nullable(create_patents_table, client):
@@ -778,3 +811,23 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     assert response.status_code == 400
     assert response_data[0]["message"] == "This field is required."
     assert response_data[0]["field"] == "type"
+
+
+def test_list_columns_with_unknown_types(table_with_unknown_types, client):
+    table = table_with_unknown_types
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/", data={}
+    )
+    response_data = response.json()
+    assert response.status_code == 200
+    was_col1_found = False
+    was_col2_found = False
+    for response_column in response_data['results']:
+        if response_column['name'] == 'text_column':
+            assert response_column['type'] == '__unknown__'
+            was_col1_found = True
+        if response_column['name'] == 'point_column':
+            assert response_column['type'] == '__unknown__'
+            was_col2_found = True
+    assert was_col1_found
+    assert was_col2_found

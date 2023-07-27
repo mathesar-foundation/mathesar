@@ -17,7 +17,7 @@ from db.columns.operations.select import (
     get_column_attnum_from_names_as_map, get_column_name_from_attnum,
     get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
 )
-from db.constraints.operations.create import create_constraint
+from db.constraints.operations.create import add_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_record_from_oid
 from db.constraints import utils as constraint_utils
@@ -532,11 +532,7 @@ class Table(DatabaseObject, Relation):
         # the most newly-created constraint. Other methods (e.g., trying to get
         # a constraint by name when it wasn't set here) are even less robust.
         constraint_oid = max(
-            create_constraint(
-                self._sa_table.schema,
-                self.schema._sa_engine,
-                constraint_obj
-            )
+            add_constraint(constraint_obj, engine=self._sa_engine)
         )
         result = Constraint.current_objects.create(oid=constraint_oid, table=self)
         reset_reflection(db_name=self.schema.database.name)
@@ -878,6 +874,7 @@ class DataFile(BaseModel):
 
     base_name = models.CharField(max_length=100)
     header = models.BooleanField(default=True)
+    max_level = models.IntegerField(default=0, blank=True)
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
