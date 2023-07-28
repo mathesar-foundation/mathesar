@@ -1,11 +1,11 @@
 import warnings
 import pytest
 from sqlalchemy import (
-    String, Integer, Column, Table, MetaData, DateTime, func, text, DefaultClause,
+    String, Integer, Column, Table, MetaData, DateTime, func
 )
 from db.columns.exceptions import DynamicDefaultWarning
 from db.columns.operations.select import (
-    get_column_attnum_from_name, get_column_default, _is_default_expr_dynamic,
+    get_column_attnum_from_name, get_column_default,
     get_column_name_from_attnum, get_columns_attnum_from_names,
 )
 from db.tables.operations.select import get_oid_from_table
@@ -118,9 +118,3 @@ default_expression_test_list = [
     ("'abcde'::CHAR(3)", False),
     ("'abcde'::CHAR(5)", False),
 ]
-
-
-@pytest.mark.parametrize("default_expr,is_dynamic", default_expression_test_list)
-def test_is_default_expr_dynamic(default_expr, is_dynamic):
-    default_clause = DefaultClause(text(default_expr))
-    assert _is_default_expr_dynamic(default_clause) is is_dynamic

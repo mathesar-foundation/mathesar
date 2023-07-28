@@ -9,8 +9,11 @@
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
 
+  type TableActionsContext = 'page' | 'shared-consumer-page';
+
   const tabularData = getTabularDataStoreFromContext();
 
+  export let context: TableActionsContext = 'page';
   export let table: Pick<TableEntry, 'name' | 'description'>;
 
   $: ({ meta, isLoading, display } = $tabularData);
@@ -35,20 +38,24 @@
     <GroupDropdown {grouping} />
   </div>
 
-  <ModificationStatus requestState={$sheetState} />
+  {#if context === 'page'}
+    <ModificationStatus requestState={$sheetState} />
+  {/if}
 
   <div class="aux-actions" slot="actions-right">
-    <Button
-      appearance="secondary"
-      size="medium"
-      disabled={$isLoading}
-      on:click={toggleTableInspector}
-      active={$isTableInspectorVisible}
-      aria-label="Inspector"
-    >
-      <Icon {...iconInspector} />
-      <span class="responsive-button-label">Inspector</span>
-    </Button>
+    {#if context === 'page'}
+      <Button
+        appearance="secondary"
+        size="medium"
+        disabled={$isLoading}
+        on:click={toggleTableInspector}
+        active={$isTableInspectorVisible}
+        aria-label="Inspector"
+      >
+        <Icon {...iconInspector} />
+        <span class="responsive-button-label">Inspector</span>
+      </Button>
+    {/if}
   </div>
 </EntityPageHeader>
 

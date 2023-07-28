@@ -9,6 +9,7 @@ class ErrorCodes(Enum):
     NotFound = 4005
     TableNotFound = 4041
     RecordNotFound = 4042
+    QueryNotFound = 4061
     UnknownError = 4999
     # Generic Errors
     ProgrammingError = 4101

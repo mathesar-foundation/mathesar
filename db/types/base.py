@@ -88,6 +88,15 @@ class DatabaseType(OrderByIds):
         return self.id
 
 
+class UnknownType(DatabaseType):
+    """
+    Meant to represent types that are not enumerated by the other DatabaseType
+    subclasses. Currently, we don't support knowing what an unknown type
+    actually is (e.g. what it is called). Our representation of SA's NullType.
+    """
+    value = "__unknown__"
+
+
 class PostgresType(DatabaseType, Enum):
     """
     This only includes built-in Postgres types that SQLAlchemy supports.
@@ -252,7 +261,3 @@ def get_type_ids_on_database(engine):
             in connection.execute(select_statement)
         )
         return db_type_ids
-
-
-class UnknownDbTypeId(Exception):
-    pass
