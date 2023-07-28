@@ -7,7 +7,9 @@ from db.columns.operations.select import (
     get_columns_attnum_from_names,
 )
 from db.tables.operations.create import create_mathesar_table
-from db.tables.operations.select import get_oid_from_table, reflect_table
+from db.tables.operations.select import (
+    get_oid_from_table, reflect_table, reflect_table_from_oid
+)
 from db.tables.operations.split import extract_columns_from_table
 from db.tests.columns.utils import create_test_table
 from db.types.base import PostgresType
@@ -78,18 +80,21 @@ def test_rename_column_and_assert(engine_with_schema):
 
 def test_rename_column_foreign_keys(engine_with_schema):
     engine, schema = engine_with_schema
+    metadata = get_empty_metadata()
     table_name = "table_to_split"
     columns_list = [Column("Filler 1", INTEGER), Column("Filler 2", INTEGER)]
     create_mathesar_table(table_name, schema, columns_list, engine)
     table_oid = get_oid_from_table(table_name, schema, engine)
     extracted_cols = ["Filler 1"]
-    extracted_col_attnums = get_columns_attnum_from_names(table_oid, extracted_cols, engine, metadata=get_empty_metadata())
-    extracted, remainder, fk_attnum = extract_columns_from_table(
+    extracted_col_attnums = get_columns_attnum_from_names(
+        table_oid, extracted_cols, engine, metadata=metadata
+    )
+    extracted_table_oid, remainder_table_oid, fk_attnum = extract_columns_from_table(
         table_oid, extracted_col_attnums, "Extracted", schema, engine
     )
-    remainder_table_oid = get_oid_from_table(remainder.name, schema, engine)
-
-    fk_name = get_column_name_from_attnum(remainder_table_oid, fk_attnum, engine, get_empty_metadata())
+    remainder = reflect_table_from_oid(remainder_table_oid, engine, metadata)
+    extracted = reflect_table_from_oid(extracted_table_oid, engine, metadata)
+    fk_name = get_column_name_from_attnum(remainder_table_oid, fk_attnum, engine, metadata)
     new_fk_name = "new_" + fk_name
     remainder = _rename_column_and_assert(remainder, fk_name, new_fk_name, engine)
 

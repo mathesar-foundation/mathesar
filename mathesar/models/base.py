@@ -622,8 +622,6 @@ class Table(DatabaseObject, Relation):
             self._sa_engine,
             relationship_fk_column_name
         )
-        engine = self._sa_engine
-
         # Replicate mutation on Django, so that Django-layer-specific information is preserved
         extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
         extracted_table.save()
