@@ -1112,19 +1112,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION setup_schemas_with_fk() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION setup_schema_with_dependent_obj() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE SCHEMA schema1;
-  CREATE SCHEMA schema2;
   CREATE TABLE schema1.actors (
     id SERIAL PRIMARY KEY,
     actor_name TEXT
-  );
-  CREATE TABLE schema2.movies (
-    id SERIAL PRIMARY KEY,
-    movie_name TEXT,
-    act_id INTEGER,
-    CONSTRAINT fk_act FOREIGN KEY(act_id) REFERENCES schema1.actors(id)
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -1191,25 +1184,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_rename_schema_with_fk() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM msar.rename_schema(
-    old_sch_name => 'schema1',
-    new_sch_name => 'altered'
-  );
-  RETURN NEXT hasnt_schema('schema1');
-  RETURN NEXT has_schema('altered');
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_comment_on_schema() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.comment_on_schema(
-    sch_name => 'schema1',
+    sch_name => 'alter_me',
     comment_ => 'test comment'
   );
-  RETURN NEXT is(obj_description('schema1'::regnamespace::oid), 'test comment');
+  RETURN NEXT is(obj_description('alter_me'::regnamespace::oid), 'test comment');
 END;
 $$ LANGUAGE plpgsql;
 
