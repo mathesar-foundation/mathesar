@@ -945,6 +945,30 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_unique_column_name_unquoted(tab_id oid, col_name text) RETURNS text AS $$
+DECLARE
+  col_attnum smallint;
+BEGIN
+  col_attnum := msar.get_attnum(tab_id, col_name);
+  RETURN CASE
+    WHEN col_attnum IS NOT NULL THEN msar.get_fresh_copy_name(tab_id, col_attnum) ELSE col_name
+  END;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unique_fkey_column_name(tab_id oid, fk_col_name text, frel_name text)
+  RETURNS text AS $$/*
+*/
+BEGIN
+  fk_col_name := COALESCE(fk_col_name, format('%s_id', frel_name));
+  RETURN msar.build_unique_column_name_unquoted(tab_id, fk_col_name);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_extracted_col_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
 Get a JSON array of column definitions from given columns for creation of extracted table.
 
@@ -2238,29 +2262,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Functions to extract columns from a table
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION
-msar.build_unique_column_name_unquoted(tab_id oid, col_name text) RETURNS text AS $$
-DECLARE
-  col_attnum smallint;
-BEGIN
-  col_attnum := msar.get_attnum(tab_id, col_name);
-  RETURN CASE
-    WHEN col_attnum IS NOT NULL THEN msar.get_fresh_copy_name(tab_id, col_attnum) ELSE col_name
-  END;
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION
-msar.build_unique_fkey_column_name(tab_id oid, fk_col_name text, frel_name text)
-  RETURNS text AS $$/*
-*/
-BEGIN
-  fk_col_name := COALESCE(fk_col_name, format('%s_id', frel_name));
-  RETURN msar.build_unique_column_name_unquoted(tab_id, fk_col_name);
-END;
-$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION

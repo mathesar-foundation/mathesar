@@ -1058,7 +1058,7 @@ BEGIN
     $q$SELECT attidentity
     FROM pg_attribute
     WHERE attrelid='tab_create_schema.anewtable'::regclass::oid and attname='id'$q$,
-    $v$VALUES ('a'::"char")$v$,
+    $v$VALUES ('d'::"char")$v$,
     'id column should be generated always as identity'
   );
 END;
