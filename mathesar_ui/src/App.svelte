@@ -23,12 +23,10 @@
    * in parallel to the FE's first chunk
    */
   let isTranslationsLoaded = false;
-  (() => {
-    void loadLocaleAsync('en').then(() => {
-      setLocale('en');
-      isTranslationsLoaded = true;
-      return true;
-    });
+  void (async () => {
+    await loadLocaleAsync('en');
+    setLocale('en');
+    isTranslationsLoaded = true;
   })();
 
   const commonData = preloadCommonData();
