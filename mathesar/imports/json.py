@@ -9,7 +9,7 @@ from db.tables.operations.drop import drop_table
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
-from mathesar.imports.utils import process_column_names
+from mathesar.imports.utils import get_alternate_column_names, process_column_names
 from db.constants import ID, ID_ORIGINAL
 from psycopg2.errors import IntegrityError, DataError
 
@@ -95,10 +95,7 @@ def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
         update_pk_sequence_to_latest(engine, table)
     except (IntegrityError, DataError):
         drop_table(name=name, schema=schema.name, engine=engine)
-        column_names_alt = [
-            fieldname if fieldname != ID else ID_ORIGINAL
-            for fieldname in column_names
-        ]
+        column_names_alt = get_alternate_column_names(column_names)
         table = insert_data_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
 
     reset_reflection(db_name=db_name)
