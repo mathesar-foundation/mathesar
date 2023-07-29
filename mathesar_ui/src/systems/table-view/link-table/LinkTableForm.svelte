@@ -61,7 +61,7 @@
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
   $: targetColumnsStore = target
-    ? new ColumnsDataStore({ parentId: target.id })
+    ? new ColumnsDataStore({ tableId: target.id })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);

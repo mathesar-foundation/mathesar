@@ -13,6 +13,7 @@
   export let formatterOptions: $$Props['formatterOptions'];
   export let formatForDisplay: $$Props['formatForDisplay'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
+  export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
 </script>
 
 <SteppedInputCell
@@ -22,6 +23,7 @@
   {disabled}
   {searchValue}
   {isIndependentOfSheet}
+  {showTruncationPopover}
   formatValue={formatForDisplay}
   horizontalAlignment="right"
   let:handleInputBlur
@@ -32,6 +34,7 @@
   on:update
 >
   <MoneyCellInput
+    focusOnMount={true}
     {disabled}
     bind:value
     {...formatterOptions}
