@@ -10,7 +10,6 @@ from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
 from mathesar.imports.utils import get_alternate_column_names, process_column_names
-from db.constants import ID, ID_ORIGINAL
 from psycopg2.errors import IntegrityError, DataError
 
 from mathesar.state import reset_reflection

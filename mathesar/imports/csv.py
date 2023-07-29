@@ -9,7 +9,7 @@ from db.tables.operations.create import create_string_column_table
 from db.tables.operations.drop import drop_table
 from mathesar.errors import InvalidTableError
 from mathesar.imports.utils import get_alternate_column_names, process_column_names
-from db.constants import ID, ID_ORIGINAL, COLUMN_NAME_TEMPLATE
+from db.constants import COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
 from mathesar.state import reset_reflection
