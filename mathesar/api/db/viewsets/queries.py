@@ -87,7 +87,6 @@ class QueryViewSet(
                 "records": paginated_records.data,
                 "output_columns": columns,
                 "column_metadata": column_metadata,
-                "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
             }
         )
 
