@@ -25,7 +25,7 @@ import type { InputColumnsStoreSubstance } from './utils';
 import QueryRunner from './QueryRunner';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
-export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
+export default class QueryManager extends QueryRunner {
   private undoRedoManager: QueryUndoRedoManager;
 
   private cacheManagers: {
@@ -68,19 +68,31 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
 
   private querySavePromise: CancellablePromise<QueryInstance> | undefined;
 
-  // Listeners
+  private onSaveCallback: (instance: QueryInstance) => unknown;
 
-  private runUnsubscriber;
-
-  constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
-    super(query, abstractTypeMap);
+  constructor({
+    query,
+    abstractTypeMap,
+    onSave,
+  }: {
+    query: QueryModel;
+    abstractTypeMap: AbstractTypesMap;
+    onSave?: (instance: QueryInstance) => unknown;
+  }) {
+    super({
+      query,
+      abstractTypeMap,
+      onRun: (response: QueryRunResponse) => {
+        this.checkAndUpdateSummarizationAfterRun(
+          new QueryModel(response.query),
+        );
+      },
+    });
+    this.onSaveCallback = onSave ?? (() => {});
     const undoRedoManager = new QueryUndoRedoManager();
     undoRedoManager.pushState(query, query.isValid);
     this.undoRedoManager = undoRedoManager;
     void this.calculateInputColumnTree();
-    this.runUnsubscriber = this.on('run', (response: QueryRunResponse) => {
-      this.checkAndUpdateSummarizationAfterRun(new QueryModel(response.query));
-    });
   }
 
   private async calculateInputColumnTree(): Promise<void> {
@@ -317,7 +329,7 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
       }
       const result = await this.querySavePromise;
       this.query.update((qr) => qr.withId(result.id).model);
-      await this.dispatch('save', result);
+      await this.onSaveCallback(result);
       this.state.update((_state) => ({
         ..._state,
         saveState: { state: 'success' },
@@ -361,7 +373,6 @@ export default class QueryManager extends QueryRunner<{ save: QueryInstance }> {
 
   destroy(): void {
     super.destroy();
-    this.runUnsubscriber();
     this.baseTableFetchPromise?.cancel();
     this.joinableColumnsfetchPromise?.cancel();
     this.querySavePromise?.cancel();

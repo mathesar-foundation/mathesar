@@ -2,11 +2,7 @@ import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { ApiMultiError } from '@mathesar/api/utils/errors';
-import {
-  ImmutableMap,
-  CancellablePromise,
-  EventHandler,
-} from '@mathesar-component-library';
+import { ImmutableMap, CancellablePromise } from '@mathesar-component-library';
 import Pagination from '@mathesar/utils/Pagination';
 import type {
   QueryResultRecord,
@@ -28,10 +24,6 @@ import {
   type InputColumnsStoreSubstance,
 } from './utils';
 
-// TODO: Find a better way to implement type safety here
-type QueryRunEvent = { run: QueryRunResponse };
-type Events = Record<string, unknown> & Partial<QueryRunEvent>;
-
 export interface QueryRow {
   record: QueryResultRecord;
   rowIndex: number;
@@ -47,9 +39,7 @@ export type QuerySheetSelection = SheetSelection<
   ProcessedQueryOutputColumn
 >;
 
-export default class QueryRunner<
-  T extends Events = Events,
-> extends EventHandler<T & QueryRunEvent> {
+export default class QueryRunner {
   query: Writable<QueryModel>;
 
   abstractTypeMap: AbstractTypesMap;
@@ -75,10 +65,20 @@ export default class QueryRunner<
 
   private runPromise: CancellablePromise<QueryRunResponse> | undefined;
 
-  constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
-    super();
+  private onRunCallback: (results: QueryRunResponse) => unknown;
+
+  constructor({
+    query,
+    abstractTypeMap,
+    onRun,
+  }: {
+    query: QueryModel;
+    abstractTypeMap: AbstractTypesMap;
+    onRun?: (instance: QueryRunResponse) => unknown;
+  }) {
     this.abstractTypeMap = abstractTypeMap;
     this.query = writable(query);
+    this.onRunCallback = onRun ?? (() => {});
     this.speculateProcessedColumns();
     void this.run();
     this.selection = new SheetSelection({
@@ -163,7 +163,7 @@ export default class QueryRunner<
           rowIndex: index,
         })),
       });
-      await this.dispatch('run', response);
+      await this.onRunCallback(response);
       this.runState.set({ state: 'success' });
       return response;
     } catch (err) {
@@ -243,7 +243,6 @@ export default class QueryRunner<
   }
 
   destroy(): void {
-    super.destroy();
     this.selection.destroy();
     this.runPromise?.cancel();
   }

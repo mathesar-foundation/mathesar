@@ -31,10 +31,13 @@
 
   function createQueryRunner(
     _query: QueryInstance,
-    abstractTypesMap: AbstractTypesMap,
+    abstractTypeMap: AbstractTypesMap,
   ) {
     queryRunner?.destroy();
-    queryRunner = new QueryRunner(new QueryModel(_query), abstractTypesMap);
+    queryRunner = new QueryRunner({
+      query: new QueryModel(_query),
+      abstractTypeMap,
+    });
   }
 
   $: createQueryRunner(query, $currentDbAbstractTypes.data);
