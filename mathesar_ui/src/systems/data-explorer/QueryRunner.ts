@@ -13,6 +13,7 @@ import type {
 import { runQuery, fetchQueryResults } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import type { ShareConsumer } from '@mathesar/utils/shares';
 import type QueryModel from './QueryModel';
 import QueryInspector from './QueryInspector';
 import {
@@ -70,9 +71,11 @@ export default class QueryRunner {
 
   private runMode: QueryRunMode;
 
-  private onRunWithObjectCallback: (results: QueryRunResponse) => unknown;
+  private onRunWithObjectCallback?: (results: QueryRunResponse) => unknown;
 
-  private onRunWithIdCallback: (results: QueryResultsResponse) => unknown;
+  private onRunWithIdCallback?: (results: QueryResultsResponse) => unknown;
+
+  private shareConsumer?: ShareConsumer;
 
   constructor({
     query,
@@ -80,18 +83,21 @@ export default class QueryRunner {
     runMode,
     onRunWithObject,
     onRunWithId,
+    shareConsumer,
   }: {
     query: QueryModel;
     abstractTypeMap: AbstractTypesMap;
     runMode?: QueryRunMode;
     onRunWithObject?: (instance: QueryRunResponse) => unknown;
     onRunWithId?: (instance: QueryResultsResponse) => unknown;
+    shareConsumer?: ShareConsumer;
   }) {
     this.abstractTypeMap = abstractTypeMap;
     this.runMode = runMode ?? 'queryObject';
     this.query = writable(query);
-    this.onRunWithObjectCallback = onRunWithObject ?? (() => {});
-    this.onRunWithIdCallback = onRunWithId ?? (() => {});
+    this.onRunWithObjectCallback = onRunWithObject;
+    this.onRunWithIdCallback = onRunWithId;
+    this.shareConsumer = shareConsumer;
     this.speculateProcessedColumns();
     void this.run();
     this.selection = new SheetSelection({
@@ -164,7 +170,8 @@ export default class QueryRunner {
         this.runPromise = internalRunPromise;
         const internalResponse = await internalRunPromise;
         response = internalResponse;
-        triggerCallback = () => this.onRunWithObjectCallback(internalResponse);
+        triggerCallback = () =>
+          this.onRunWithObjectCallback?.(internalResponse);
       } else {
         const queryId = queryModel.id;
         if (!queryId) {
@@ -174,9 +181,12 @@ export default class QueryRunner {
           });
           return undefined;
         }
-        this.runPromise = fetchQueryResults(queryModel.id, paginationParams);
+        this.runPromise = fetchQueryResults(queryModel.id, {
+          ...paginationParams,
+          ...this.shareConsumer?.getQueryParams(),
+        });
         response = await this.runPromise;
-        triggerCallback = () => this.onRunWithIdCallback(response);
+        triggerCallback = () => this.onRunWithIdCallback?.(response);
       }
 
       const columnsMetaData = processColumnMetaData(
