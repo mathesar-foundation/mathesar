@@ -21,6 +21,7 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': ['warn', { allow: ['error'] }],
+    'no-continue': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/ban-ts-comment': [
       'error',
