@@ -37,6 +37,7 @@
     queryRunner = new QueryRunner({
       query: new QueryModel(_query),
       abstractTypeMap,
+      runMode: 'queryId',
     });
   }
 

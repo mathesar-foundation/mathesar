@@ -7,9 +7,10 @@ import Pagination from '@mathesar/utils/Pagination';
 import type {
   QueryResultRecord,
   QueryRunResponse,
+  QueryResultsResponse,
   QueryColumnMetaData,
 } from '@mathesar/api/types/queries';
-import { runQuery } from '@mathesar/stores/queries';
+import { runQuery, fetchQueryResults } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type QueryModel from './QueryModel';
@@ -39,6 +40,8 @@ export type QuerySheetSelection = SheetSelection<
   ProcessedQueryOutputColumn
 >;
 
+type QueryRunMode = 'queryId' | 'queryObject';
+
 export default class QueryRunner {
   query: Writable<QueryModel>;
 
@@ -63,22 +66,32 @@ export default class QueryRunner {
 
   inspector: QueryInspector;
 
-  private runPromise: CancellablePromise<QueryRunResponse> | undefined;
+  private runPromise: CancellablePromise<QueryResultsResponse> | undefined;
 
-  private onRunCallback: (results: QueryRunResponse) => unknown;
+  private runMode: QueryRunMode;
+
+  private onRunWithObjectCallback: (results: QueryRunResponse) => unknown;
+
+  private onRunWithIdCallback: (results: QueryResultsResponse) => unknown;
 
   constructor({
     query,
     abstractTypeMap,
-    onRun,
+    runMode,
+    onRunWithObject,
+    onRunWithId,
   }: {
     query: QueryModel;
     abstractTypeMap: AbstractTypesMap;
-    onRun?: (instance: QueryRunResponse) => unknown;
+    runMode?: QueryRunMode;
+    onRunWithObject?: (instance: QueryRunResponse) => unknown;
+    onRunWithId?: (instance: QueryResultsResponse) => unknown;
   }) {
     this.abstractTypeMap = abstractTypeMap;
+    this.runMode = runMode ?? 'queryObject';
     this.query = writable(query);
-    this.onRunCallback = onRun ?? (() => {});
+    this.onRunWithObjectCallback = onRunWithObject ?? (() => {});
+    this.onRunWithIdCallback = onRunWithId ?? (() => {});
     this.speculateProcessedColumns();
     void this.run();
     this.selection = new SheetSelection({
@@ -123,7 +136,7 @@ export default class QueryRunner {
     );
   }
 
-  async run(): Promise<QueryRunResponse | undefined> {
+  async run(): Promise<QueryResultsResponse | undefined> {
     this.runPromise?.cancel();
     const queryModel = this.getQueryModel();
 
@@ -136,16 +149,36 @@ export default class QueryRunner {
       return undefined;
     }
 
+    let response: QueryResultsResponse;
+    let triggerCallback: () => unknown;
     try {
-      const paginationRequest = get(this.pagination).recordsRequestParams();
+      const paginationParams = get(this.pagination).recordsRequestParams();
       this.runState.set({ state: 'processing' });
-      this.runPromise = runQuery({
-        ...queryModel.toRunRequestJson(),
-        parameters: {
-          ...paginationRequest,
-        },
-      });
-      const response = await this.runPromise;
+      if (this.runMode === 'queryObject') {
+        const internalRunPromise = runQuery({
+          ...queryModel.toRunRequestJson(),
+          parameters: {
+            ...paginationParams,
+          },
+        });
+        this.runPromise = internalRunPromise;
+        const internalResponse = await internalRunPromise;
+        response = internalResponse;
+        triggerCallback = () => this.onRunWithObjectCallback(internalResponse);
+      } else {
+        const queryId = queryModel.id;
+        if (!queryId) {
+          this.runState.set({
+            state: 'failure',
+            errors: ['Query does not contain an id'],
+          });
+          return undefined;
+        }
+        this.runPromise = fetchQueryResults(queryModel.id, paginationParams);
+        response = await this.runPromise;
+        triggerCallback = () => this.onRunWithIdCallback(response);
+      }
+
       const columnsMetaData = processColumnMetaData(
         response.column_metadata,
         this.abstractTypeMap,
@@ -163,7 +196,7 @@ export default class QueryRunner {
           rowIndex: index,
         })),
       });
-      await this.onRunCallback(response);
+      await triggerCallback();
       this.runState.set({ state: 'success' });
       return response;
     } catch (err) {

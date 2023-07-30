@@ -39,6 +39,7 @@ import {
   getAPI,
   postAPI,
   putAPI,
+  addQueryParamsToUrl,
 } from '@mathesar/api/utils/requestUtils';
 import type {
   RequestStatus,
@@ -52,6 +53,7 @@ import type {
   QueryGetResponse,
   QueryRunRequest,
   QueryRunResponse,
+  QueryResultsResponse,
 } from '@mathesar/api/types/queries';
 import { CancellablePromise } from '@mathesar-component-library';
 
@@ -275,6 +277,17 @@ export function runQuery(
   request: QueryRunRequest,
 ): CancellablePromise<QueryRunResponse> {
   return postAPI('/api/db/v0/queries/run/', request);
+}
+
+export function fetchQueryResults(
+  queryId: number,
+  params: { limit: number; offset: number } = { limit: 100, offset: 0 },
+): CancellablePromise<QueryResultsResponse> {
+  const url = addQueryParamsToUrl(
+    `/api/db/v0/queries/${queryId}/results/`,
+    params,
+  );
+  return getAPI(url);
 }
 
 export function deleteQuery(queryId: number): CancellablePromise<void> {
