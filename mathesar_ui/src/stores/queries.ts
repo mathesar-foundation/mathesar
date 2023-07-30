@@ -56,6 +56,7 @@ import type {
   QueryResultsResponse,
 } from '@mathesar/api/types/queries';
 import { CancellablePromise } from '@mathesar-component-library';
+import { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
 
 import { currentSchemaId, addCountToSchemaNumExplorations } from './schemas';
 
@@ -281,7 +282,11 @@ export function runQuery(
 
 export function fetchQueryResults(
   queryId: number,
-  params: { limit: number; offset: number } = { limit: 100, offset: 0 },
+  params?: {
+    limit: number;
+    offset: number;
+    [SHARED_LINK_UUID_QUERY_PARAM]?: string;
+  },
 ): CancellablePromise<QueryResultsResponse> {
   const url = addQueryParamsToUrl(
     `/api/db/v0/queries/${queryId}/results/`,
