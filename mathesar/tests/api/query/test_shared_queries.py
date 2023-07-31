@@ -22,7 +22,14 @@ def shared_test_query(create_minimal_patents_query):
         'different_schema_query': different_schema_query,
         'different_schema_share': different_schema_share,
     }
+
+    # cleanup
     share.delete()
+    query.delete()
+    query.base_table.delete()
+    different_schema_share.delete()
+    different_schema_query.delete()
+    different_schema_query.base_table.delete()
 
 
 read_client_with_different_roles = [

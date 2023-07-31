@@ -25,6 +25,7 @@ def shared_test_table(create_patents_table, uid):
     }
     share.delete()
     table.delete()
+    different_schema_share.delete()
     different_schema_table.delete()
 
 

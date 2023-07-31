@@ -50,4 +50,9 @@ def create_minimal_patents_query(create_patents_table, get_uid, patent_schema):
 
 @pytest.fixture
 def minimal_patents_query(create_minimal_patents_query):
-    return create_minimal_patents_query()
+    query = create_minimal_patents_query()
+    yield query
+
+    # cleanup
+    query.delete()
+    query.base_table.delete()
