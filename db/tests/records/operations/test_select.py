@@ -53,8 +53,8 @@ def test_get_column_cast_records(engine_with_schema):
     records = get_column_cast_records(engine, table, column_definitions)
     for record in records:
         assert (
-            type(record[COL1 + "_mod"]) == str
-            and type(record[COL2 + "_mod"]) == Decimal
+            type(record[COL1 + "_mod"]) is str
+            and type(record[COL2 + "_mod"]) is Decimal
         )
 
 
@@ -84,8 +84,8 @@ def test_get_column_cast_records_options(engine_with_schema):
     records = get_column_cast_records(engine, table, column_definitions)
     for record in records:
         assert (
-            type(record[COL1 + "_mod"]) == str
-            and type(record[COL2 + "_mod"]) == Decimal
+            type(record[COL1 + "_mod"]) is str
+            and type(record[COL2 + "_mod"]) is Decimal
         )
 
 
