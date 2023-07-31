@@ -5,6 +5,7 @@ from rest_access_policy import AccessViewSetMixin
 from rest_framework import viewsets
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 
 from mathesar.api.db.permissions.query import QueryAccessPolicy
@@ -30,10 +31,22 @@ class QueryViewSet(
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = UIQueryFilter
+    permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = QueryAccessPolicy
 
     def get_queryset(self):
-        queryset = self.access_policy.scope_queryset(self.request, UIQuery.objects.all())
+        queryset = None
+        if self.action == "results" or self.action == "retrieve" or self.action is None:
+            # Permission for both these actions are handled at QueryAccessPolicy
+            # Scoping is automatically handled by DRF since these are nested urls
+            # which contain the pk of the query
+            # It is essential to include None here, because it's called again by
+            # `filter_queryset` with action `None` after the query is formed
+            # TODO: Move these actions to separate viewsets to make this cleaner
+            queryset = UIQuery.objects.all().order_by('-created_at')
+        else:
+            queryset = self.access_policy.scope_queryset(self.request, UIQuery.objects.all())
+
         schema_id = self.request.query_params.get('schema')
         if schema_id:
             queryset = queryset.filter(base_table__schema=schema_id)
