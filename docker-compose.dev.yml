@@ -23,9 +23,10 @@ services:
       file: docker-compose.yml
       service: service
     environment:
-      - DJANGO_DATABASE_URL=postgres://spec:spec@mathesar_dev_db:5432/mathesar_django
-      - MATHESAR_DATABASES=(mathesar_tables|postgresql://spec:spec@mathesar_dev_db:5432/mathesar)
+      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
+      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
     container_name: mathesar_service_test
+    image: mathesar/mathesar-test:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -36,7 +37,6 @@ services:
     # On testing, the HTTP port is exposed to other containers, and the host.
     ports:
       - "8000:8000"
-    command: dockerize -wait tcp://mathesar_dev_db:5432 -timeout 30s ./db/sql/run_tests.sh
   # A Django development webserver + Svelte development server used when developing Mathesar.
   #  The code changes are hot reloaded and debug flags are enabled to aid developers working on Mathesar.
   #  It is not recommended to use this service in production environment.
@@ -58,8 +58,8 @@ services:
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
-      - MATHESAR_DATABASES=(mathesar_tables|postgresql://spec:spec@mathesar_dev_db:5432/mathesar)
-    command: dockerize -wait tcp://mathesar_dev_db:5432 -timeout 30s ./dev-run.sh
+      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
+    entrypoint: dockerize -wait tcp://mathesar_dev_db:5432 -timeout 30s ./dev-run.sh
     volumes:
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/

@@ -56,9 +56,14 @@ services:
       - DJANGO_DATABASE_URL=${DJANGO_DATABASE_URL-postgres://mathesar:mathesar@mathesar_db:5432/mathesar_django}
       - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+    entrypoint: ./run.sh
     volumes:
       - static:/code/static
       - media:/code/media
+    depends_on:
+      # Comment the below field to disable starting the database service automatically
+      db:
+        condition: service_healthy
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     healthcheck:
