@@ -189,7 +189,6 @@ def test_shared_table_view_requests(
 ):
     client = request.getfixturevalue(client_name)(shared_test_table["table"].schema)
 
-    # Accessing with valid token
     table_url = f'/api/db/v0/tables/{shared_test_table["table"].id}'
     share_uuid_param = f'shared-link-uuid={shared_test_table["share"].slug}'
     invalid_share_uuid_param = f'shared-link-uuid={uuid.uuid4()}'

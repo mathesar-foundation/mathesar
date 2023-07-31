@@ -1,4 +1,5 @@
 import pytest
+import uuid
 
 from mathesar.models.shares import SharedQuery
 
@@ -154,3 +155,61 @@ def test_shared_query_delete(
         assert SharedQuery.objects.filter(id=shared_test_query['share'].id).first() is None
     else:
         assert response.status_code == 403
+
+
+# Query endpoints with share-link-uuid token
+
+queries_request_client_with_different_roles = [
+    # (client_name, same_schema_invalid_token_status, different_schema_invalid_token_status)
+    ('superuser_client_factory', 200, 200),
+    ('db_manager_client_factory', 200, 200),
+    ('db_editor_client_factory', 200, 200),
+    ('schema_manager_client_factory', 200, 403),
+    ('schema_viewer_client_factory', 200, 403),
+    ('db_viewer_schema_manager_client_factory', 200, 200),
+    ('anonymous_client_factory', 401, 401)
+]
+
+
+@pytest.mark.parametrize('client_name,same_schema_invalid_token_status,different_schema_invalid_token_status', queries_request_client_with_different_roles)
+@pytest.mark.parametrize('endpoint', ['/', '/results/'])
+def test_shared_query_view_requests(
+    shared_test_query,
+    request,
+    endpoint,
+    client_name,
+    same_schema_invalid_token_status,
+    different_schema_invalid_token_status
+):
+    client = request.getfixturevalue(client_name)(shared_test_query["query"].base_table.schema)
+
+    query_url = f'/api/db/v0/queries/{shared_test_query["query"].id}'
+    share_uuid_param = f'shared-link-uuid={shared_test_query["share"].slug}'
+    invalid_share_uuid_param = f'shared-link-uuid={uuid.uuid4()}'
+    different_schema_query_url = f'/api/db/v0/queries/{shared_test_query["different_schema_query"].id}'
+    different_schema_query_uuid_param = f'shared-link-uuid={shared_test_query["different_schema_share"].slug}'
+    is_result_endpoint = endpoint == '/results/'
+
+    response = client.get(f'{query_url}{endpoint}?{share_uuid_param}')
+    response_data = response.json()
+    assert response.status_code == 200
+    if is_result_endpoint:
+        assert response_data['records']['count'] == 1393
+
+    response = client.get(f'{query_url}{endpoint}?{invalid_share_uuid_param}')
+    response_data = response.json()
+    assert response.status_code == same_schema_invalid_token_status
+    if same_schema_invalid_token_status == 200 and is_result_endpoint:
+        assert response_data['records']['count'] == 1393
+
+    response = client.get(f'{different_schema_query_url}{endpoint}?{different_schema_query_uuid_param}')
+    response_data = response.json()
+    assert response.status_code == 200
+    if is_result_endpoint:
+        assert response_data['records']['count'] == 1393
+
+    response = client.get(f'{different_schema_query_url}{endpoint}?{invalid_share_uuid_param}')
+    response_data = response.json()
+    assert response.status_code == different_schema_invalid_token_status
+    if different_schema_invalid_token_status == 200 and is_result_endpoint:
+        assert response_data['records']['count'] == 1393
