@@ -49,9 +49,9 @@ class GroupBy:
             prefix_length=None,
             extract_field=None,
     ):
-        self._columns = tuple(columns) if type(columns) != str else tuple([columns])
+        self._columns = tuple(columns) if type(columns) is not str else tuple([columns])
         self._mode = mode
-        if type(preproc) == str:
+        if type(preproc) is str:
             self._preproc = tuple([preproc])
         elif preproc is not None:
             self._preproc = tuple(preproc)
@@ -134,7 +134,7 @@ class GroupBy:
 
         elif (
                 self.mode == GroupMode.PERCENTILE.value
-                and not type(self.num_groups) == int
+                and not type(self.num_groups) is int
         ):
             raise records_exceptions.BadGroupFormat(
                 f'{GroupMode.PERCENTILE.value} mode requires integer num_groups'
@@ -182,7 +182,7 @@ class GroupBy:
             )
 
         for col in self.columns:
-            if type(col) != str:
+            if type(col) is not str:
                 raise records_exceptions.BadGroupFormat(
                     f"Group column {col} must be a string."
                 )
