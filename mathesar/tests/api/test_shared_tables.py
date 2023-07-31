@@ -1,4 +1,5 @@
 import pytest
+import uuid
 
 from mathesar.models.shares import SharedTable
 
@@ -160,3 +161,59 @@ def test_shared_table_delete(
         assert SharedTable.objects.filter(id=shared_test_table['share'].id).first() is None
     else:
         assert response.status_code == 403
+
+
+# Table endpoints with share-link-uuid token
+
+tables_request_client_with_different_roles = [
+    # (client_name, same_schema_invalid_token_status, different_schema_invalid_token_status)
+    ('superuser_client_factory', 200, 200),
+    ('db_manager_client_factory', 200, 200),
+    ('db_editor_client_factory', 200, 200),
+    ('schema_manager_client_factory', 200, 403),
+    ('schema_viewer_client_factory', 200, 403),
+    ('db_viewer_schema_manager_client_factory', 200, 200),
+    ('anonymous_client_factory', 401, 401)
+]
+
+
+@pytest.mark.parametrize('client_name,same_schema_invalid_token_status,different_schema_invalid_token_status', tables_request_client_with_different_roles)
+@pytest.mark.parametrize('endpoint', ['columns', 'constraints', 'records'])
+def test_shared_table_view_requests(
+    shared_test_table,
+    request,
+    endpoint,
+    client_name,
+    same_schema_invalid_token_status,
+    different_schema_invalid_token_status
+):
+    client = request.getfixturevalue(client_name)(shared_test_table["table"].schema)
+
+    # Accessing with valid token
+    table_url = f'/api/db/v0/tables/{shared_test_table["table"].id}'
+    share_uuid_param = f'shared-link-uuid={shared_test_table["share"].slug}'
+    invalid_share_uuid_param = f'shared-link-uuid={uuid.uuid4()}'
+    different_schema_table_url = f'/api/db/v0/tables/{shared_test_table["different_schema_table"].id}'
+    different_schema_table_uuid_param = f'shared-link-uuid={shared_test_table["different_schema_share"].slug}'
+
+    response = client.get(f'{table_url}/{endpoint}/?{share_uuid_param}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert len(response_data['results']) >= 1
+
+    response = client.get(f'{table_url}/{endpoint}/?{invalid_share_uuid_param}')
+    response_data = response.json()
+    assert response.status_code == same_schema_invalid_token_status
+    if same_schema_invalid_token_status == 200:
+        assert len(response_data['results']) >= 1
+
+    response = client.get(f'{different_schema_table_url}/{endpoint}/?{different_schema_table_uuid_param}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert len(response_data['results']) >= 1
+
+    response = client.get(f'{different_schema_table_url}/{endpoint}/?{invalid_share_uuid_param}')
+    response_data = response.json()
+    assert response.status_code == different_schema_invalid_token_status
+    if different_schema_invalid_token_status == 200:
+        assert len(response_data['results']) >= 1

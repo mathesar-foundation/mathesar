@@ -536,3 +536,11 @@ def superuser_client_factory(client):
     def _client(schema):
         return client
     return _client
+
+
+@pytest.fixture
+def anonymous_client_factory():
+    def _client(schema):
+        client = APIClient()
+        return client
+    return _client
