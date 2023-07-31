@@ -4,7 +4,7 @@ import uuid
 from mathesar.models.shares import SharedQuery
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def shared_test_query(create_minimal_patents_query):
     query = create_minimal_patents_query()
     share = SharedQuery.objects.create(
