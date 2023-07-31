@@ -48,12 +48,15 @@
   }
 </script>
 
-<LinkMenuItem
-  href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
-  icon={iconExternalLink}
->
-  Go to Record Page
-</LinkMenuItem>
+{#if !recordsData.rowHasError(row)}
+  <LinkMenuItem
+    href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
+    icon={iconExternalLink}
+  >
+    Go to Record Page
+  </LinkMenuItem>
+{/if}
+
 {#if canEditTableRecords}
   <ButtonMenuItem on:click={handleDeleteRecords} icon={iconDeleteMajor}>
     Delete Record

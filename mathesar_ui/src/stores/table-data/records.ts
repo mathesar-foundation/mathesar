@@ -724,6 +724,15 @@ export class RecordsData {
     return [...get(this.savedRecords), ...get(this.newRecords)];
   }
 
+  rowHasError(row: Row) {
+    const pkColumn = get(this.columnsDataStore.pkColumn);
+    const rowKey = getRowKey(row, pkColumn?.id);
+    if (get(this.meta.rowsWithClientSideErrors).has(rowKey)) {
+      return true;
+    }
+    return false;
+  }
+
   destroy(): void {
     this.promise?.cancel();
     this.promise = undefined;
