@@ -1037,6 +1037,167 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- msar.schema_ddl --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_create_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_schema(
+    sch_name => 'create_schema'::text,
+    if_not_exists => false
+  );
+  RETURN NEXT has_schema('create_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_drop_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA drop_test_schema;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_false() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'drop_test_schema', 
+    cascade_ => false, 
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => false
+      );', 
+      'drop_non_existing_schema'
+    ),
+    '3F000',
+    'schema "drop_non_existing_schema" does not exist'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_true() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'drop_test_schema',
+    cascade_ => false,
+    if_exists => true
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+  RETURN NEXT lives_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => true
+      );', 
+      'drop_non_existing_schema'
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_using_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_id => 'drop_test_schema'::regnamespace::oid,
+    cascade_ => false,
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_schema_with_dependent_obj() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA schema1;
+  CREATE TABLE schema1.actors (
+    id SERIAL PRIMARY KEY,
+    actor_name TEXT
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_cascade() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'schema1',
+    cascade_ => true,
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('schema1');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_restricted() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => false
+      );',
+      'schema1'
+    ),
+    '2BP01',
+    'cannot drop schema schema1 because other objects depend on it'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_alter_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA alter_me;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_rename_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.rename_schema(
+    old_sch_name => 'alter_me',
+    new_sch_name => 'altered'
+  );
+  RETURN NEXT hasnt_schema('alter_me');
+  RETURN NEXT has_schema('altered');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_rename_schema_using_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.rename_schema(
+    sch_id => 'alter_me'::regnamespace::oid,
+    new_sch_name => 'altered'
+  );
+  RETURN NEXT hasnt_schema('alter_me');
+  RETURN NEXT has_schema('altered');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_comment_on_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.comment_on_schema(
+    sch_name => 'alter_me',
+    comment_ => 'test comment'
+  );
+  RETURN NEXT is(obj_description('alter_me'::regnamespace::oid), 'test comment');
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- msar.add_mathesar_table
 
 CREATE OR REPLACE FUNCTION setup_create_table() RETURNS SETOF TEXT AS $f$

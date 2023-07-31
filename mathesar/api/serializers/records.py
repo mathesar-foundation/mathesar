@@ -35,20 +35,20 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except IntegrityError as e:
-            if type(e.orig) == NotNullViolation:
+            if type(e.orig) is NotNullViolation:
                 raise database_api_exceptions.NotNullViolationAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                     table=table
                 )
-            elif type(e.orig) == UniqueViolation:
+            elif type(e.orig) is UniqueViolation:
                 raise database_api_exceptions.UniqueViolationAPIException(
                     e,
                     message="The requested update violates a uniqueness constraint",
                     table=table,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
-            elif type(e.orig) == CheckViolation:
+            elif type(e.orig) is CheckViolation:
                 raise database_api_exceptions.CheckViolationAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
@@ -62,20 +62,20 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
         try:
             record = table.create_record_or_records(validated_data)
         except IntegrityError as e:
-            if type(e.orig) == NotNullViolation:
+            if type(e.orig) is NotNullViolation:
                 raise database_api_exceptions.NotNullViolationAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                     table=table
                 )
-            elif type(e.orig) == UniqueViolation:
+            elif type(e.orig) is UniqueViolation:
                 raise database_api_exceptions.UniqueViolationAPIException(
                     e,
                     message="The requested insert violates a uniqueness constraint",
                     table=table,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
-            elif type(e.orig) == CheckViolation:
+            elif type(e.orig) is CheckViolation:
                 raise database_api_exceptions.CheckViolationAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
