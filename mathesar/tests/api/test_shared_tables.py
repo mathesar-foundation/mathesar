@@ -4,7 +4,7 @@ import uuid
 from mathesar.models.shares import SharedTable
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def shared_test_table(create_patents_table, uid):
     table_name = f"shared_test_table_{uid}"
     table = create_patents_table(table_name)
