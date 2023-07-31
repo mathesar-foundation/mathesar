@@ -63,10 +63,10 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo -u postgres psql
     ```
 
-1. Mathesar needs a Postgres superuser to function correctly. Let's create a superuser.
+1. Let's create a Postgres user for Mathesar
 
     ```postgresql
-    CREATE USER mathesar WITH SUPERUSER ENCRYPTED PASSWORD '1234';
+    CREATE USER mathesar WITH ENCRYPTED PASSWORD '1234';
     ```
 
     !!! warning "Customize your password"
@@ -75,13 +75,13 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Next, we have to create a database for storing Mathesar metadata.
 
     ```postgresql
-    CREATE DATABASE mathesar_django;
+    CREATE DATABASE mathesar_django OWNER mathesar;
     ```
 
 1. Now we let us create a database for storing your data.
 
     ```postgresql
-    CREATE DATABASE your_db_name;
+    CREATE DATABASE your_db_name OWNER mathesar;
     ```
 
 1. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to exit the `psql` shell.
