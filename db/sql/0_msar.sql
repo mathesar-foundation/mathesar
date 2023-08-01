@@ -909,8 +909,7 @@ CREATE OR REPLACE FUNCTION msar.get_duplicate_col_defs(
   tab_id oid,
   col_ids smallint[],
   new_names text[],
-  copy_defaults boolean,
-  copy_not_null boolean DEFAULT false
+  copy_defaults boolean
 ) RETURNS __msar.col_def[] AS $$/*
 Get an array of __msar.col_def from given columns in a table.
 
@@ -920,6 +919,7 @@ Args:
   new_names: The desired names of the column defs. Must be in same order as col_ids, and same
     length.
   copy_defaults: Whether or not we should copy the defaults
+  copy_not_null: Whether or not we should copy the NOT NULL setting.
 */
 SELECT array_agg(
   (
@@ -927,8 +927,8 @@ SELECT array_agg(
     quote_ident(COALESCE(new_name, msar.get_fresh_copy_name(tab_id, pg_columns.attnum))),
     -- build text specifying the type of the duplicate column
     format_type(atttypid, atttypmod),
-    -- set the NOT NULL value
-    CASE WHEN copy_not_null THEN attnotnull ELSE false END,
+    -- set the duplicate column to be nullable, since it will initially be empty
+    false,
     -- set the default value for the duplicate column if specified
     CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END,
     -- We don't set a duplicate column as a primary key, since that would cause an error.
@@ -987,7 +987,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION
 msar.get_extracted_col_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
-Get a JSON array of column definitions from given columns for creation of extracted table.
+Get a JSON array of column definitions from given columns for creation of an extracted table.
 
 See the msar.process_col_def_jsonb for a description of the JSON.
 
@@ -1002,8 +1002,7 @@ SELECT jsonb_agg(
     'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
     'not_null', attnotnull,
     'default',
-    -- We only copy non-dynamic default expressions to new table to avoid weird double-use of
-    -- sequences.
+    -- We only copy non-dynamic default expressions to new table to avoid double-use of sequences.
     CASE WHEN NOT msar.is_default_possibly_dynamic(tab_id, col_id) THEN
       pg_get_expr(adbin, tab_id)
     END
@@ -1644,7 +1643,6 @@ DECLARE
   tab_name text;
   col_name text;
   created_col_id smallint;
-  col_not_null boolean;
 BEGIN
   col_defs := msar.get_duplicate_col_defs(
     tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
