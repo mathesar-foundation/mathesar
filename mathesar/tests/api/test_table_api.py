@@ -1672,7 +1672,7 @@ def test_table_extract_columns_specify_fk_column_name(create_patents_table, clie
     remainder_table = Table.objects.get(id=remainder_table_id)
     metadata = get_empty_metadata()
     relationship_fk_column_attnum = get_column_attnum_from_name(remainder_table.oid, relationship_fk_column_name, remainder_table._sa_engine, metadata=metadata)
-    assert relationship_fk_column_attnum is None
+    assert relationship_fk_column_attnum is not None
     assert fk_column == Column.objects.get(table_id=remainder_table_id, attnum=relationship_fk_column_attnum).id
 
 
