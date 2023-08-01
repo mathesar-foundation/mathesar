@@ -945,7 +945,15 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_unique_column_name_unquoted(tab_id oid, col_name text) RETURNS text AS $$
+msar.build_unique_column_name_unquoted(tab_id oid, col_name text) RETURNS text AS $$/*
+Get a unique column name based on the given name.
+
+Args:
+  tab_id: The OID of the table where the column name should be unique.
+  col_name: The resulting column name will be equal to or at least based on this.
+
+See the msar.get_fresh_copy_name function for how unique column names are generated.
+*/
 DECLARE
   col_attnum smallint;
 BEGIN
@@ -954,12 +962,21 @@ BEGIN
     WHEN col_attnum IS NOT NULL THEN msar.get_fresh_copy_name(tab_id, col_attnum) ELSE col_name
   END;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.build_unique_fkey_column_name(tab_id oid, fk_col_name text, frel_name text)
   RETURNS text AS $$/*
+Create a unique name for a foreign key column.
+
+Args:
+  tab_id: The OID of the table where the column name should be unique.
+  fk_col_name: The base name for the foreign key column.
+  frel_name: The name of the referent table. Used for creating fk_col_name if not given.
+
+Note that frel_name will be used to build the foreign key column name if it's not given. The result
+will be of the form: <frel_name>_id. Then, we apply some logic to ensure the result is unique.
 */
 BEGIN
   fk_col_name := COALESCE(fk_col_name, format('%s_id', frel_name));
