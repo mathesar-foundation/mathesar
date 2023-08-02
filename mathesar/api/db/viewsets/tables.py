@@ -155,7 +155,7 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
         try:
             preview_records = table.get_preview(columns)
         except (DataError, IntegrityError) as e:
-            if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
+            if type(e.orig) is InvalidTextRepresentation or type(e.orig) is CheckViolation:
                 raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
