@@ -966,6 +966,69 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+-- msar.drop_constraint ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION setup_drop_constraint() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE category(
+    id serial primary key,
+    item_category text,
+    CONSTRAINT uq_cat UNIQUE(item_category)
+  );
+  CREATE TABLE orders (
+    id serial primary key,
+    item_name text,
+    price integer,
+    category_id integer,
+    CONSTRAINT fk_cat FOREIGN KEY(category_id) REFERENCES category(id)
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_constraint() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_constraint(
+    sch_name => 'public',
+    tab_name => 'category',
+    con_name => 'uq_cat'
+  );
+  PERFORM msar.drop_constraint(
+    sch_name => 'public',
+    tab_name => 'orders',
+    con_name => 'fk_cat'
+  );
+  /* There isn't a col_isnt_unique function in pgTAP so we are improvising
+  by adding 2 same values here.*/
+  INSERT INTO category(item_category) VALUES ('tech'),('tech');
+  RETURN NEXT col_isnt_fk('orders', 'category_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_constraint_using_oid() RETURNS SETOF TEXT AS $$
+DECLARE
+  uq_cat_oid oid;
+  fk_cat_oid oid;
+BEGIN
+  uq_cat_oid := oid FROM pg_constraint WHERE conname='uq_cat';
+  fk_cat_oid := oid FROM pg_constraint WHERE conname='fk_cat';
+  PERFORM msar.drop_constraint(
+    tab_id => 'category'::regclass::oid,
+    con_id => uq_cat_oid
+  );
+  PERFORM msar.drop_constraint(
+    tab_id => 'orders'::regclass::oid,
+    con_id => fk_cat_oid
+  );
+  /* There isn't a col_isnt_unique function in pgTAP so we are improvising
+  by adding 2 same values here.*/
+  INSERT INTO category(item_category) VALUES ('tech'),('tech');
+  RETURN NEXT col_isnt_fk('orders', 'category_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- msar.create_link -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION setup_link_tables() RETURNS SETOF TEXT AS $$
