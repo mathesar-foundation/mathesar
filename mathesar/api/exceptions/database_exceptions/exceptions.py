@@ -309,11 +309,14 @@ class NotNullViolationAPIException(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             table=None
     ):
-        exception_diagnostics = exception.orig.diag
+        try:
+            exception_diagnostics = exception.orig.diag
+        except Exception:
+            exception_diagnostics = exception.diag
         message_str = message if message is not None else exception_diagnostics.message_primary
         column_attnum = get_column_attnum_from_name(
             table.oid,
-            exception.orig.diag.column_name,
+            exception_diagnostics.column_name,
             table.schema._sa_engine,
             metadata=get_cached_metadata(),
         )
