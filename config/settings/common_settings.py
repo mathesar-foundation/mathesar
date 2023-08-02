@@ -256,3 +256,6 @@ LANGUAGES = [
     ('ja', gettext_lazy('Japanese')),
 ]
 LANGUAGE_COOKIE_NAME = 'user_preferred_language'
+LOCALE_PATHS = [
+    'translations'
+]

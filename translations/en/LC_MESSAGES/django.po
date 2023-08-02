@@ -1,0 +1,126 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-02 02:36+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: config/settings/common_settings.py:255
+msgid "English"
+msgstr ""
+
+#: config/settings/common_settings.py:256
+msgid "Japanese"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:4
+msgid "login"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:167
+msgid "unsupported screen size"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:169
+msgid ""
+"Mathesar is a spreadsheet-like application with a rich UI that does not yet "
+"function well on screens this small. Improved support for mobile devices is "
+"on our"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:172
+msgid "roadmap"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:176
+msgid ""
+"You can still use this demo site, but some features may not work correctly. "
+"We encourage you to try Mathesar on a device with a larger screen."
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:181
+msgid "live demo mode"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:184
+msgid "Mathesar's live demo is available to anyone to try out."
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:187
+msgid "Use the following credentials to login"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:189
+#: mathesar/templates/registration/login.html:16
+msgid "username"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:190
+#: mathesar/templates/registration/login.html:37
+msgid "password"
+msgstr ""
+
+#: mathesar/templates/mathesar/login_base.html:194
+msgid "Keep in mind that the data in the live demo is reset regularly."
+msgstr ""
+
+#: mathesar/templates/registration/login.html:3
+msgid "Logging In..."
+msgstr ""
+
+#: mathesar/templates/registration/login.html:5
+msgid "Log in to Mathesar"
+msgstr ""
+
+#: mathesar/templates/registration/login.html:65
+msgid "log in"
+msgstr ""
+
+#: mathesar/templates/users/password_reset_confirmation.html:4
+msgid "update your password"
+msgstr ""
+
+#: mathesar/templates/users/password_reset_confirmation.html:8
+msgid ""
+"Since your password was set by an administrator, you need to update your "
+"password to continue."
+msgstr ""
+
+#: mathesar/templates/users/password_reset_confirmation.html:14
+msgid "new password"
+msgstr ""
+
+#: mathesar/templates/users/password_reset_confirmation.html:41
+msgid "confirm"
+msgstr ""
+
+#: mathesar/templates/users/password_reset_confirmation.html:67
+msgid "update password"
+msgstr ""
+
+#: mathesar/templates/users/password_reset_confirmation.html:71
+msgid "After updating your password, you'll need to log in again."
+msgstr ""
+
+#: mathesar/templates/users/password_reset_confirmation.html:76
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
+
+#: mathesar/users/password_reset.py:24
+msgid "Change Default Password"
+msgstr ""
