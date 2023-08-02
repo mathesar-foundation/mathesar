@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { getContext, tick } from 'svelte';
   import {
     SpinnerButton,
     Spinner,
@@ -6,6 +7,7 @@
     InputGroup,
     Button,
     Icon,
+    type AccompanyingElements,
   } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import type { ShareApi, Share } from '@mathesar/api/shares';
@@ -19,6 +21,14 @@
   } from '@mathesar/icons';
   import Errors from '@mathesar/components/Errors.svelte';
   import { toast } from '@mathesar/stores/toast';
+  import {
+    confirm,
+    confirmationController,
+  } from '@mathesar/stores/confirmation';
+
+  const dropdownAccompanyingElements = getContext<
+    AccompanyingElements | undefined
+  >('dropdownAccompanyingElements');
 
   export let entityId: number;
   export let api: ShareApi;
@@ -59,8 +69,38 @@
     }
   }
 
+  function setConfirmModalToAccompanyDropdown(): () => void {
+    if (!dropdownAccompanyingElements) {
+      return () => {};
+    }
+    const modal = document.querySelector<HTMLElement>(
+      `[data-modal-id='${confirmationController.modal.modalId}']`,
+    );
+    if (!modal) {
+      return () => {};
+    }
+    return dropdownAccompanyingElements.add(modal);
+  }
+
   async function regenerateLink() {
-    toast.error('Not implemented yet');
+    const confirmationPromise = confirm({
+      title: 'Remove old link and create a new link?',
+      body: [
+        'Once you regenerate a new link, the old link will no longer work',
+        'Are you sure you want to proceed?',
+      ],
+      proceedButton: {
+        label: 'Regenerate link',
+        icon: undefined,
+      },
+    });
+    await tick();
+    const cleanupDropdown = setConfirmModalToAccompanyDropdown();
+    const isConfirmed = await confirmationPromise;
+    cleanupDropdown();
+    if (isConfirmed) {
+      toast.error('Not implemented yet');
+    }
   }
 
   async function disableLink() {
@@ -70,7 +110,21 @@
         This state should never occur`,
       );
     }
-    share = await api.update(entityId, share.id, { enabled: false });
+    const confirmationPromise = confirm({
+      title: 'Disable link?',
+      body: 'Are you sure you want to proceed?',
+      proceedButton: {
+        label: 'Disable link',
+        icon: undefined,
+      },
+    });
+    await tick();
+    const cleanupDropdown = setConfirmModalToAccompanyDropdown();
+    const isConfirmed = await confirmationPromise;
+    cleanupDropdown();
+    if (isConfirmed) {
+      share = await api.update(entityId, share.id, { enabled: false });
+    }
   }
 
   $: shareLink = share
