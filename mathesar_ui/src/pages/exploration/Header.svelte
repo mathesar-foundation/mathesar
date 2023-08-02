@@ -5,6 +5,7 @@
   import { iconExploration, iconInspector } from '@mathesar/icons';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
+  import ShareExplorationDropdown from './ShareExplorationDropdown.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -29,6 +30,7 @@
         <span>Edit in Data Explorer</span>
       </a>
     {/if}
+    <ShareExplorationDropdown id={query.id} />
     <Button
       appearance="secondary"
       on:click={() => {

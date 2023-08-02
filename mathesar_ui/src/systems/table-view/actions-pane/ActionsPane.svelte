@@ -8,6 +8,7 @@
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
+  import ShareTableDropdown from './ShareTableDropdown.svelte';
 
   type TableActionsContext = 'page' | 'shared-consumer-page';
 
@@ -16,7 +17,7 @@
   export let context: TableActionsContext = 'page';
   export let table: Pick<TableEntry, 'name' | 'description'>;
 
-  $: ({ meta, isLoading, display } = $tabularData);
+  $: ({ id, meta, isLoading, display } = $tabularData);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
 
@@ -44,6 +45,8 @@
 
   <div class="aux-actions" slot="actions-right">
     {#if context === 'page'}
+      <ShareTableDropdown {id} />
+
       <Button
         appearance="secondary"
         size="medium"
