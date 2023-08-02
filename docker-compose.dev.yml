@@ -57,8 +57,8 @@ services:
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
-      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@localhost:5432/mathesar_django
-      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@localhost:5432/mathesar)
+      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_db:5432/mathesar_django
+      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)
     entrypoint: ./dev-run.sh
     volumes:
       - .:/code/
@@ -70,7 +70,6 @@ services:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
-      - "5432"
 volumes:
   ui_node_modules:
   dev_postgres_data:
