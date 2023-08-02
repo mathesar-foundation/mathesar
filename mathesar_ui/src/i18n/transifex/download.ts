@@ -53,7 +53,7 @@ async function fetchTranslations() {
 
       logger.info(`Fetching translations json for ${languageCode}`);
       const response = await fetch(url);
-      const translations: BaseTranslation = await response.json();
+      const translations = (await response.json()) as BaseTranslation;
       return [languageCode, translations];
     }),
   );
