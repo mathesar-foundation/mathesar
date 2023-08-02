@@ -129,3 +129,4 @@ COPY . .
 RUN sudo npm install -g npm-force-resolutions
 RUN cd mathesar_ui && npm install --unsafe-perm && npm run build
 EXPOSE 8000 3000 6006
+ENTRYPOINT ["./run.sh"]
