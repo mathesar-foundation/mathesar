@@ -38,9 +38,8 @@
     shareConsumer,
   });
   $: tabularDataStore.set(tabularData);
-  $: context = shareConsumer
-    ? 'shared-consumer-page'
-    : ('page' as 'page' | 'shared-consumer-page');
+  let context: 'shared-consumer-page' | 'page' = 'page';
+  $: context = shareConsumer ? 'shared-consumer-page' : 'page';
 
   function handleMetaSerializationChange(s: string) {
     router.location.query.set(metaSerializationQueryKey, s);

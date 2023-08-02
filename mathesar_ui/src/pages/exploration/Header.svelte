@@ -12,6 +12,7 @@
   export let query: QueryInstance;
   export let isInspectorOpen = true;
   export let canEditMetadata: boolean;
+  export let context: 'page' | 'shared-consumer-page' = 'page';
 </script>
 
 <EntityPageHeader
@@ -22,15 +23,17 @@
   }}
 >
   <svelte:fragment slot="actions-right">
-    {#if canEditMetadata}
-      <a
-        class="btn btn-primary"
-        href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}
-      >
-        <span>Edit in Data Explorer</span>
-      </a>
+    {#if context !== 'shared-consumer-page'}
+      {#if canEditMetadata}
+        <a
+          class="btn btn-primary"
+          href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}
+        >
+          <span>Edit in Data Explorer</span>
+        </a>
+      {/if}
+      <ShareExplorationDropdown id={query.id} />
     {/if}
-    <ShareExplorationDropdown id={query.id} />
     <Button
       appearance="secondary"
       on:click={() => {
