@@ -64,6 +64,8 @@ import {
   faCircleInfo,
   faUserGear,
   faFilterCircleXmark,
+  faShareFromSquare,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -93,6 +95,7 @@ export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
+export const iconCopyMajor: IconProps = { data: faCopy };
 /** TODO: use faBinary once it's available (via newer FontAwesome version) */
 export const iconCopyRawContent: IconProps = { data: faCopy };
 export const iconCopyFormattedContent: IconProps = { data: faCopy };
@@ -127,6 +130,9 @@ export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
 export const iconPaste: IconProps = { data: faPaste };
 export const iconLogout: IconProps = { data: faArrowRightFromBracket };
+export const iconShare: IconProps = { data: faShareFromSquare };
+export const iconRecreate: IconProps = { data: faRedo };
+export const iconDisable: IconProps = { data: faXmark };
 
 // THINGS
 //
