@@ -15,6 +15,7 @@
     iconAddNew,
     iconRecreate,
     iconDisable,
+    iconOpenLinkInNewTab,
   } from '@mathesar/icons';
   import Errors from '@mathesar/components/Errors.svelte';
   import { toast } from '@mathesar/stores/toast';
@@ -26,6 +27,7 @@
     description: string;
     empty: string;
   };
+  export let getLink: (s: Share) => string;
 
   let loadRequestStatus: RequestStatus = { state: 'processing' };
   let share: Share | undefined = undefined;
@@ -70,6 +72,10 @@
     }
     share = await api.update(entityId, share.id, { enabled: false });
   }
+
+  $: shareLink = share
+    ? `${window.location.origin}${getLink(share)}`
+    : undefined;
 </script>
 
 <div class="share-entity-container">
@@ -86,10 +92,13 @@
     {:else if loadRequestStatus.state === 'success'}
       {#if share && share.enabled}
         <InputGroup>
-          <TextInput disabled value={share.slug} />
+          <TextInput disabled value={shareLink} />
           <Button appearance="secondary">
             <Icon {...iconCopyMajor} />
           </Button>
+          <a class="btn btn-secondary" target="_blank" href={shareLink}>
+            <Icon {...iconOpenLinkInNewTab} />
+          </a>
         </InputGroup>
         <div class="share-control-options">
           <SpinnerButton

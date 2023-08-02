@@ -4,6 +4,7 @@
   import { Dropdown, Icon } from '@mathesar-component-library';
   import ShareEntity from '@mathesar/systems/shares/ShareEntity.svelte';
   import tableShareApi from '@mathesar/api/tableShares';
+  import { getSharedTablePageUrl } from '@mathesar/routes/urls';
 
   export let id: TableEntry['id'];
 </script>
@@ -27,5 +28,6 @@
       description: 'Give read-only access to this table to anyone via a link.',
       empty: 'This table is currently not shared.',
     }}
+    getLink={(share) => getSharedTablePageUrl(share.slug)}
   />
 </Dropdown>

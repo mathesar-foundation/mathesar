@@ -4,6 +4,7 @@
   import { Dropdown, Icon } from '@mathesar-component-library';
   import ShareEntity from '@mathesar/systems/shares/ShareEntity.svelte';
   import queryShareApi from '@mathesar/api/queryShares';
+  import { getSharedExplorationPageUrl } from '@mathesar/routes/urls';
 
   export let id: QueryInstance['id'];
 </script>
@@ -28,5 +29,6 @@
         'Give read-only access to this exploration to anyone via a link.',
       empty: 'This exploration is currently not shared.',
     }}
+    getLink={(share) => getSharedExplorationPageUrl(share.slug)}
   />
 </Dropdown>
