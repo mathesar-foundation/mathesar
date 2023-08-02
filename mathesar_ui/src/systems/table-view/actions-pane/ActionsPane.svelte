@@ -5,6 +5,9 @@
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconInspector, iconTable } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
@@ -13,6 +16,7 @@
   type TableActionsContext = 'page' | 'shared-consumer-page';
 
   const tabularData = getTabularDataStoreFromContext();
+  const userProfile = getUserProfileStoreFromContext();
 
   export let context: TableActionsContext = 'page';
   export let table: Pick<TableEntry, 'name' | 'description'>;
@@ -20,6 +24,10 @@
   $: ({ id, meta, isLoading, display } = $tabularData);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
+  $: canEditMetadata = !!$userProfile?.hasPermission(
+    { database: $currentDatabase, schema: $currentSchema },
+    'canEditMetadata',
+  );
 
   function toggleTableInspector() {
     isTableInspectorVisible.set(!$isTableInspectorVisible);
@@ -45,7 +53,9 @@
 
   <div class="aux-actions" slot="actions-right">
     {#if context === 'page'}
-      <ShareTableDropdown {id} />
+      {#if canEditMetadata}
+        <ShareTableDropdown {id} />
+      {/if}
 
       <Button
         appearance="secondary"
