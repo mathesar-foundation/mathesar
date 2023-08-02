@@ -13,7 +13,8 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "i18n:generate-translation-types": "typesafe-i18n",
-    "i18n:upload-source-strings": "tsx src/i18n/transifex/upload.ts"
+    "i18n:upload-source-strings": "tsx src/i18n/transifex/upload.ts",
+    "i18n:download-translations": "tsx src/i18n/transifex/download.ts"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^6.5.12",
@@ -68,8 +69,11 @@
     "dayjs": "^1.11.5",
     "fast-diff": "^1.2.0",
     "flatpickr": "^4.6.13",
+    "i": "^0.3.7",
     "iter-tools": "^7.4.0",
     "js-cookie": "^3.0.1",
+    "node-fetch": "^3.3.2",
+    "npm": "^9.8.1",
     "papaparse": "^5.4.1",
     "perfect-scrollbar": "^1.5.5"
   }

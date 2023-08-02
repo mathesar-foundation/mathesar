@@ -1,31 +1,16 @@
 import { readTranslationFromDisk } from 'typesafe-i18n/exporter';
 import { transifexApi } from '@transifex/api';
 import type { BaseTranslation } from 'typesafe-i18n';
-import * as readline from 'readline';
 import {
   TRANSIFEX_ORG_SLUG,
   TRANSIFEX_PROJECT_SLUG,
   TRANSIFEX_FE_RESOURCE_SLUG,
+  TRANSIFEX_HOST,
+  BASE_LOCALE,
 } from './constants';
+import { logger, promptTransifexToken } from './utils';
 
-const logger = console;
-
-async function promptTransifexToken(): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise<string>((resolve) => {
-    rl.question(
-      "API token not found. Please provide it. If you don't have an API token, you can generate one in https://app.transifex.com/user/settings/api/",
-      resolve,
-    );
-  }).finally(() => {
-    rl.close();
-  });
-}
-
-async function sendSourceContentToTransifex(
+async function uploadSourceContent(
   sourceContent: BaseTranslation | BaseTranslation[],
 ) {
   const TRANSIFEX_TOKEN =
@@ -33,7 +18,7 @@ async function sendSourceContentToTransifex(
 
   transifexApi.setup({
     auth: TRANSIFEX_TOKEN,
-    host: 'https://rest.api.transifex.com',
+    host: TRANSIFEX_HOST,
   });
 
   /**
@@ -65,9 +50,9 @@ async function sendSourceContentToTransifex(
 }
 
 async function exportAndUploadSourceContent() {
-  const sourceLocale = 'en';
+  const sourceLocale = BASE_LOCALE;
   const mapping = await readTranslationFromDisk(sourceLocale);
-  await sendSourceContentToTransifex(mapping.translations);
+  await uploadSourceContent(mapping.translations);
 }
 
 void exportAndUploadSourceContent();
