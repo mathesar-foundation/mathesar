@@ -2,7 +2,7 @@
 set -e
 
 # Generate source strings from django code
-python manage.py makemessages -l en
+python manage.py makemessages
 echo 'Generated source messages from django app'
 
 # Push django source strings to transifex
