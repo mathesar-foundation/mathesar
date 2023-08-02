@@ -63,7 +63,7 @@ def get_column_names_from_json(data_file, max_level):
         return get_flattened_keys(data, max_level)
 
 
-def insert_data_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level):
+def insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level):
     table = create_string_column_table(
         name=name,
         schema=schema.name,
@@ -90,12 +90,12 @@ def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
         get_column_names_from_json(json_filepath, max_level)
     )
     try:
-        table = insert_data_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level)
+        table = insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level)
         update_pk_sequence_to_latest(engine, table)
     except (IntegrityError, DataError):
         drop_table(name=name, schema=schema.name, engine=engine)
         column_names_alt = get_alternate_column_names(column_names)
-        table = insert_data_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
+        table = insert_records_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
 
     reset_reflection(db_name=db_name)
     return table

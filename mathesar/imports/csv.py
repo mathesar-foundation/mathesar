@@ -117,7 +117,7 @@ def get_sv_reader(file, header, dialect=None):
     return reader
 
 
-def insert_data_from_csv_data_file(name, schema, column_names, engine, comment, data_file):
+def insert_records_from_csv_data_file(name, schema, column_names, engine, comment, data_file):
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
                                         data_file.escapechar)
     encoding = get_file_encoding(data_file.file)
@@ -153,11 +153,11 @@ def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = process_column_names(sv_reader.fieldnames)
     try:
-        table = insert_data_from_csv_data_file(name, schema, column_names, engine, comment, data_file)
+        table = insert_records_from_csv_data_file(name, schema, column_names, engine, comment, data_file)
         update_pk_sequence_to_latest(engine, table)
     except (IntegrityError, DataError):
         drop_table(name=name, schema=schema.name, engine=engine)
         column_names_alt = get_alternate_column_names(column_names)
-        insert_data_from_csv_data_file(name, schema, column_names_alt, engine, comment, data_file)
+        insert_records_from_csv_data_file(name, schema, column_names_alt, engine, comment, data_file)
     reset_reflection(db_name=db_name)
     return table
