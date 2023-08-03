@@ -24,7 +24,7 @@ You can create a new PostgreSQL database while setting up Mathesar or use our UI
 To connect Mathesar to an existing database:
 
 - The external database should be able to accept network connections from your Mathesar server.
-- You'll need to set up a database user for Mathesar to use. The user should own that database, [see PostgreSQL docs for more information](https://www.postgresql.org/docs/9.0/ddl-priv.html)
+- You'll need to set up a database user for Mathesar to use. The user should own that database, [see PostgreSQL docs for more information](https://www.postgresql.org/docs/13/ddl-priv.html)
 - Have the following information handy before installation:
     - Database hostname
     - Database port

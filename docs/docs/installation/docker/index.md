@@ -25,7 +25,7 @@ You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
 You'll need to:
 
 - Create a database user for Mathesar to use.
-- Create a PostgreSQL database for Mathesar's internal usage owned by that database user, [see PostgreSQL docs for more information](https://www.postgresql.org/docs/9.0/ddl-priv.html)
+- Create a PostgreSQL database for Mathesar's internal usage owned by that database user, [see PostgreSQL docs for more information](https://www.postgresql.org/docs/13/ddl-priv.html)
 - Ensure that this database can accept network connections from the machine you're installing Mathesar on.
 - Have the following information for this database handy before installation:
     - Database hostname
