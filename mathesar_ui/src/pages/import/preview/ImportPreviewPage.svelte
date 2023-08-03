@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { tick } from 'svelte';
   import { router } from 'tinro';
 
   import {
@@ -13,7 +12,6 @@
   import { dataFilesApi } from '@mathesar/api/dataFiles';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import { FieldLayout } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
@@ -33,9 +31,9 @@
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
-    createTable,
     deleteTable,
     generateTablePreview,
     getTableFromStoreOrApi,
@@ -43,211 +41,110 @@
     patchTable,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { getErrorMessage } from '@mathesar/utils/errors';
   import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
   import ErrorInfo from './ErrorInfo.svelte';
   import PreviewColumn from './PreviewColumn.svelte';
   import {
+    buildColumnPropertiesMap,
+    finalizeColumns,
     getSkeletonRecords,
+    makeHeaderUpdateRequest,
     processColumns,
-    type ColumnProperties,
   } from './importPreviewPageUtils';
 
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
 
+  const columnsFetch = new AsyncStore(columnsApi.list);
+  const dataFileFetch = new AsyncStore(dataFilesApi.get);
+  const previewRequest = new AsyncStore(generateTablePreview);
+  const typeSuggestionsRequest = new AsyncStore(getTypeSuggestionsForTable);
+  const headerUpdate = makeHeaderUpdateRequest();
+
   export let database: Database;
   export let schema: SchemaEntry;
   export let tableId: number;
   export let useColumnTypeInference = false;
-  export let firstRowIsHeader = false;
 
-  let previewRequestStatus: RequestStatus;
-  let headerUpdateRequestStatus: RequestStatus;
-  let typeChangeRequestStatus: RequestStatus;
   let tableName = '';
-  let tableInfo: TableEntry;
-  let dataFileDetails: { id: number; header: boolean };
+  let firstRowIsHeader = true;
+  let table: TableEntry;
   let columns: Column[] = [];
-  let records = getSkeletonRecords();
-  let columnPropertiesMap: Record<Column['id'], ColumnProperties> = {};
+  let columnPropertiesMap = buildColumnPropertiesMap([]);
 
-  let previewTableLoadRequest:
-    | ReturnType<typeof generateTablePreview>
-    | undefined;
-  let columnsFetchRequest: ReturnType<typeof columnsApi.list> | undefined;
-  let dataFileFetchRequest: ReturnType<typeof dataFilesApi.get> | undefined;
-  let typeSuggestionRequest:
-    | ReturnType<typeof getTypeSuggestionsForTable>
-    | undefined;
-
-  $: isLoading =
-    previewRequestStatus?.state === 'processing' ||
-    headerUpdateRequestStatus?.state === 'processing';
-  $: showTableSkeleton =
-    isLoading || typeChangeRequestStatus?.state === 'processing';
-  $: canProceed =
-    !isLoading &&
-    !showTableSkeleton &&
-    previewRequestStatus?.state !== 'failure' &&
-    headerUpdateRequestStatus?.state !== 'failure';
+  $: records =
+    $previewRequest.settlement?.state === 'resolved'
+      ? $previewRequest.settlement.value.records
+      : getSkeletonRecords();
+  $: formInputsAreDisabled = !$previewRequest.isOk || $headerUpdate.isLoading;
+  $: canProceed = $previewRequest.isOk && $headerUpdate.isStable;
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
+  $: url = getImportPreviewPageUrl(database.name, schema.id, tableId, {
+    useColumnTypeInference,
+  });
+  $: router.goto(url, true);
 
-  async function loadTablePreview(_columns: Column[]) {
-    previewTableLoadRequest?.cancel();
-    previewTableLoadRequest = generateTablePreview(tableId, _columns);
-    records = (await previewTableLoadRequest).records;
-  }
-
-  async function fetchTableInfo() {
-    if (tableId !== tableInfo?.id) {
-      tableInfo = await getTableFromStoreOrApi(tableId);
-      tableName = tableInfo.name;
+  async function init(_tableId: number) {
+    if (tableId !== table?.id) {
+      // TODO need loading spinner for this
+      table = await getTableFromStoreOrApi(tableId);
+      // TODO maybe don't change it if the user has customized it
+      tableName = table.name;
     }
-    columnsFetchRequest?.cancel();
-    columnsFetchRequest = columnsApi.list(tableId);
-    const columnData = await columnsFetchRequest;
-    columns = columnData.results;
-    columnPropertiesMap = columns.reduce(
-      (_columnProperties, column) => ({
-        ..._columnProperties,
-        [column.id]: {
-          selected: true,
-          displayName: column.name,
-        },
-      }),
-      {},
-    );
-    return tableInfo;
-  }
+    const columnData = await columnsFetch.run(tableId);
+    columns = columnData.resolvedValue?.results ?? [];
+    columnPropertiesMap = buildColumnPropertiesMap(columns);
 
-  async function fetchDataFileDetails(_dataFileId: number) {
-    if (_dataFileId !== dataFileDetails?.id) {
-      dataFileFetchRequest?.cancel();
-      dataFileFetchRequest = dataFilesApi.get(_dataFileId);
-      dataFileDetails = await dataFileFetchRequest;
+    const dataFileId = table.data_files?.[0];
+    if (table.import_verified || dataFileId === undefined) {
+      router.goto(getTablePageUrl(database.name, schema.id, table.id));
+      return;
     }
-    firstRowIsHeader = dataFileDetails.header;
-    return dataFileDetails;
-  }
 
-  /**
-   * Preview table id will change,
-   * 1. whenever user redirects to a different preview
-   * 2. whenever user toggles first row as header checkbox
-   */
-  async function onPreviewTableIdChange(_tableId: number) {
-    try {
-      /**
-       * Since this method is async and is called reactively on the component,
-       * the prop updates in this method would only occur when it finishes
-       * execution. Hence, it is essential to await a tick to ensure that
-       * prop updates happen during method execution.
-       */
-      await tick();
-      previewRequestStatus = { state: 'processing' };
-
-      if (useColumnTypeInference) {
-        typeSuggestionRequest?.cancel();
-        typeSuggestionRequest = getTypeSuggestionsForTable(_tableId);
-      }
-      const table = await fetchTableInfo();
-
-      if (table.import_verified || !table.data_files?.length) {
-        router.goto(getTablePageUrl(database.name, schema.id, table.id));
-        return;
-      }
-
-      const dataFileDetailsPromise = fetchDataFileDetails(table.data_files[0]);
-
-      if (useColumnTypeInference && typeSuggestionRequest) {
-        const typeSuggestions = await typeSuggestionRequest;
+    if (useColumnTypeInference) {
+      const response = await typeSuggestionsRequest.run(tableId);
+      if (response.settlement?.state === 'resolved') {
+        const typeSuggestions = response.settlement.value;
         columns = columns.map((column) => ({
           ...column,
           type: typeSuggestions[column.name] ?? column.type,
         }));
       }
-
-      const previewPromise = loadTablePreview(columns);
-      await Promise.all([dataFileDetailsPromise, previewPromise]);
-      previewRequestStatus = { state: 'success' };
-    } catch (err) {
-      previewRequestStatus = {
-        state: 'failure',
-        errors: [
-          err instanceof Error
-            ? err.message
-            : 'An error occurred while loading the preview.',
-        ],
-      };
     }
+
+    await Promise.all([
+      dataFileFetch.run(dataFileId),
+      previewRequest.run({ id: tableId, columns: columns }),
+    ]);
   }
 
-  $: void onPreviewTableIdChange(tableId);
+  $: void init(tableId);
 
   async function updateDataFileHeader() {
-    if (dataFileDetails) {
-      try {
-        headerUpdateRequestStatus = { state: 'processing' };
-        dataFileDetails.header = firstRowIsHeader;
-        await Promise.all([
-          deleteTable(database, schema, tableId),
-          dataFilesApi.update(dataFileDetails.id, {
-            header: firstRowIsHeader,
-          }),
-        ]);
-        tableInfo = await createTable(database, schema, {
-          name: tableName,
-          dataFiles: [dataFileDetails.id],
-        });
-        headerUpdateRequestStatus = { state: 'success' };
-        const newUrl = getImportPreviewPageUrl(
-          database.name,
-          schema.id,
-          tableInfo.id,
-          { useColumnTypeInference, firstRowIsHeader },
-        );
-        router.goto(newUrl, true);
-      } catch (err) {
-        headerUpdateRequestStatus = {
-          state: 'failure',
-          errors: [getErrorMessage(err)],
-        };
-      }
-    }
+    headerUpdate.run({
+      database,
+      dataFileId: 0, // TODO
+      firstRowIsHeader,
+      schema,
+      tableId,
+      tableName,
+    });
   }
 
   async function updateInference() {
     // TODO
   }
 
-  async function updateTypeRelatedOptions(updatedColumn: Column) {
-    try {
-      typeChangeRequestStatus = { state: 'processing' };
-      const newColumns = columns.map((column) => {
-        if (column.id === updatedColumn.id) {
-          return updatedColumn;
-        }
-        return column;
-      });
-      await loadTablePreview(newColumns);
-      columns = newColumns;
-      typeChangeRequestStatus = { state: 'success' };
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? `Data Type Change Failed: ${getErrorMessage(err.message)}`
-          : 'Data Type Change Failed';
-      typeChangeRequestStatus = {
-        state: 'failure',
-        errors: [errorMessage],
-      };
-      throw new Error(errorMessage);
-    }
+  function updateTypeRelatedOptions(updatedColumn: Column) {
+    columns = columns.map((c) =>
+      c.id === updatedColumn.id ? updatedColumn : c,
+    );
+    return previewRequest.run({ id: tableId, columns });
   }
 
   function handleCancel() {
+    // TODO wrap in an AsyncStore
     void deleteTable(database, schema, tableId).catch((err) => {
       const errorMessage =
         err instanceof Error ? err.message : 'Unable to cancel import';
@@ -261,15 +158,7 @@
       await patchTable(tableId, {
         name: tableName,
         import_verified: true,
-        columns: columns
-          .filter((column) => columnPropertiesMap[column.id]?.selected)
-          .map((column) => ({
-            id: column.id,
-            name: columnPropertiesMap[column.id].displayName,
-            type: column.type,
-            type_options: column.type_options,
-            display_options: column.display_options,
-          })),
+        columns: finalizeColumns(columns, columnPropertiesMap),
       });
       router.goto(getTablePageUrl(database.name, schema.id, tableId), true);
     } catch (err) {
@@ -304,14 +193,14 @@
           <ColumnNamingStrategyInput
             bind:value={firstRowIsHeader}
             on:change={updateDataFileHeader}
-            disabled={isLoading}
+            disabled={formInputsAreDisabled}
           />
         </FieldLayout>
         <FieldLayout>
           <ColumnTypeInferenceInput
             bind:value={useColumnTypeInference}
             on:change={updateInference}
-            disabled={isLoading}
+            disabled={formInputsAreDisabled}
           />
         </FieldLayout>
         <FieldLayout>
@@ -323,17 +212,17 @@
 
       <h2 class="large-bold-header preview-header">Table Preview</h2>
       <div class="preview-content">
-        {#if isLoading}
+        {#if !$previewRequest.hasInitialized}
           <div class="loading"><Spinner /></div>
-        {:else if previewRequestStatus?.state === 'failure'}
+        {:else if $previewRequest.settlement?.state === 'rejected'}
           <ErrorInfo
-            errors={previewRequestStatus.errors}
-            on:retry={() => onPreviewTableIdChange(tableId)}
+            error={$previewRequest.settlement.error}
+            on:retry={() => init(tableId)}
             on:delete={handleCancel}
           />
-        {:else if headerUpdateRequestStatus?.state === 'failure'}
+        {:else if $headerUpdate.settlement?.state === 'rejected'}
           <ErrorInfo
-            errors={headerUpdateRequestStatus.errors}
+            error={$headerUpdate.settlement.error}
             on:retry={updateDataFileHeader}
             on:delete={handleCancel}
           />
@@ -353,7 +242,7 @@
                   >
                     <div {...htmlAttributes} {style}>
                       <PreviewColumn
-                        {isLoading}
+                        isLoading={$previewRequest.isLoading}
                         {processedColumn}
                         {updateTypeRelatedOptions}
                         bind:selected={columnPropertiesMap[processedColumn.id]
@@ -387,7 +276,7 @@
                           <CellFabric
                             columnFabric={processedColumn}
                             value={record[processedColumn.column.name]}
-                            showAsSkeleton={showTableSkeleton}
+                            showAsSkeleton={$previewRequest.isLoading}
                             disabled={true}
                           />
                         </div>

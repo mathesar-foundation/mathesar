@@ -399,10 +399,13 @@ export function getTypeSuggestionsForTable(
   );
 }
 
-export function generateTablePreview(
-  id: TableEntry['id'],
-  columns: MinimalColumnDetails[],
-): CancellablePromise<{
+export function generateTablePreview({
+  id,
+  columns,
+}: {
+  id: TableEntry['id'];
+  columns: MinimalColumnDetails[];
+}): CancellablePromise<{
   records: Record<string, unknown>[];
 }> {
   return postAPI(`/api/db/v0/tables/${id}/previews/`, { columns });

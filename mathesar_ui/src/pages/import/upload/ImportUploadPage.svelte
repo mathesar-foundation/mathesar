@@ -103,10 +103,7 @@
         database.name,
         schema.id,
         table.id,
-        {
-          useColumnTypeInference: $useColumnTypeInference,
-          firstRowIsHeader: true,
-        },
+        { useColumnTypeInference: $useColumnTypeInference },
       );
       router.goto(previewPage, true);
       status = undefined;
