@@ -7,13 +7,15 @@ from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tests.tables import utils as test_utils
 from db.metadata import get_empty_metadata
+from db.schemas.utils import get_schema_oid_from_name
 
 
 def test_rename_table(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "test_rename_table"
     new_table_name = "test_rename_table_new"
-    old_table = create_mathesar_table(table_name, schema, [], engine)
+    schema_oid = get_schema_oid_from_name(schema, engine)
+    old_table = create_mathesar_table(engine, table_name, schema_oid)
     old_oid = get_oid_from_table(old_table.name, old_table.schema, engine)
 
     rename_table(table_name, schema, engine, new_table_name)
@@ -52,8 +54,8 @@ def test_rename_table_foreign_key(engine_with_schema):
     table_name = "test_rename_table_foreign_key"
     new_table_name = "test_rename_table_foreign_key_new"
     related_table_name = "test_rename_table_foreign_key_related"
-
-    table = create_mathesar_table(table_name, schema, [], engine)
+    schema_oid = get_schema_oid_from_name(schema, engine)
+    table = create_mathesar_table(engine, table_name, schema_oid)
     related_table = test_utils.create_related_table(related_table_name, table, schema, engine)
 
     rename_table(table_name, schema, engine, new_table_name)

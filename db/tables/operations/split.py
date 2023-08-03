@@ -12,14 +12,16 @@ from db.tables.operations.alter import update_pk_sequence_to_latest
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table, reflect_table_from_oid
 from db.metadata import get_empty_metadata
+from db.schemas.utils import get_schema_oid_from_name
 
 
 def _create_split_tables(extracted_table_name, extracted_columns, remainder_table_name, schema, engine, fk_column_name=None):
+    schema_oid = get_schema_oid_from_name(schema, engine)
     extracted_table = create_mathesar_table(
-        extracted_table_name,
-        schema,
-        extracted_columns,
         engine,
+        extracted_table_name,
+        schema_oid,
+        extracted_columns,
     )
     fk_column_name = fk_column_name if fk_column_name else f"{extracted_table.name}_{constants.ID}"
     extracted_column_names = [

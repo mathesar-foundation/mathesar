@@ -25,14 +25,13 @@ def test_create_foreign_key_link(engine_with_schema, unique_link):
     assert call_args[5] == unique_link or False
 
 
-@pytest.mark.skip(reason="Python layer function not calling the sql layer function yet.")
 def test_many_to_many_link(engine_with_schema):
     engine, schema = engine_with_schema
     referents = {'referent_table_oids': [12345, 54321], 'column_names': ['movie_id', 'actor_id']}
     with patch.object(link_create, 'execute_msar_func_with_engine') as mock_exec:
         link_create.create_many_to_many_link(
             engine=engine,
-            schema=schema,
+            schema_oid=schema,
             referents=referents,
             map_table_name='movies_actors'
         )

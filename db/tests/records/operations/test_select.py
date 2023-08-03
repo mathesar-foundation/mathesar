@@ -6,6 +6,7 @@ from sqlalchemy import Column, VARCHAR
 from db.records.operations.select import get_records, get_column_cast_records
 from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType
+from db.schemas.utils import get_schema_oid_from_name
 
 
 def test_get_records_gets_all_records(roster_table_obj):
@@ -35,8 +36,9 @@ def test_get_column_cast_records(engine_with_schema):
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
+    schema_oid = get_schema_oid_from_name(schema, engine)
     table = create_mathesar_table(
-        table_name, schema, column_list, engine
+        engine, table_name, schema_oid, column_list
     )
     ins = table.insert().values(
         [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
@@ -66,8 +68,9 @@ def test_get_column_cast_records_options(engine_with_schema):
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
+    schema_oid = get_schema_oid_from_name(schema, engine)
     table = create_mathesar_table(
-        table_name, schema, column_list, engine
+        engine, table_name, schema_oid, column_list
     )
     ins = table.insert().values(
         [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
