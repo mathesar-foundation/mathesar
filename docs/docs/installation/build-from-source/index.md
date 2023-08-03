@@ -224,15 +224,6 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     python install.py --skip-confirm | tee /tmp/install.py.log
     ```
 
-1. Create a Mathesar admin/superuser:
-
-    ```sh
-    python manage.py createsuperuser
-    ```
-
-    A prompt will appear to ask for the superuser details. Fill in the details to create a superuser. At least one superuser is necessary for accessing Mathesar.
-    
-    See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
 1. Create a media directory for storing user-uploaded media
 
@@ -395,7 +386,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     ```
 
 
-Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
+Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`.
 
 
 ## Administration
