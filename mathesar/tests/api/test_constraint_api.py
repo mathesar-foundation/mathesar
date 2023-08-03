@@ -66,14 +66,14 @@ def _verify_foreign_key_constraint(
     assert constraint_data['onupdate'] == onupdate
     assert constraint_data['ondelete'] == ondelete
     assert constraint_data['deferrable'] == deferrable
-    assert 'id' in constraint_data and type(constraint_data['id']) == int
+    assert 'id' in constraint_data and type(constraint_data['id']) is int
 
 
 def _verify_unique_constraint(constraint_data, columns, name):
     assert constraint_data['columns'] == columns
     assert constraint_data['name'] == name
     assert constraint_data['type'] == 'unique'
-    assert 'id' in constraint_data and type(constraint_data['id']) == int
+    assert 'id' in constraint_data and type(constraint_data['id']) is int
 
 
 write_client_with_different_roles = [
@@ -118,7 +118,7 @@ def test_default_constraint_list(create_patents_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1
     assert constraint_data['columns'] == [constraint_column_id]
-    assert 'id' in constraint_data and type(constraint_data['id']) == int
+    assert 'id' in constraint_data and type(constraint_data['id']) is int
     assert constraint_data['name'] == 'NASA Constraint List 0_pkey'
     assert constraint_data['type'] == 'primary'
 

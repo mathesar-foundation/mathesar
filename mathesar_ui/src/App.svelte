@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
+  import {
+    Confirmation,
+    Spinner,
+    ToastPresenter,
+  } from '@mathesar-component-library';
   import { confirmationController } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import {
@@ -11,6 +15,19 @@
   import { setNewClipboardHandlerStoreInContext } from './stores/clipboard';
   import { modal } from './stores/modal';
   import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
+  import { loadLocaleAsync } from './i18n/i18n-load';
+  import { setLocale } from './i18n/i18n-svelte';
+
+  /**
+   * Later the translations file will be loaded
+   * in parallel to the FE's first chunk
+   */
+  let isTranslationsLoaded = false;
+  void (async () => {
+    await loadLocaleAsync('en');
+    setLocale('en');
+    isTranslationsLoaded = true;
+  })();
 
   const commonData = preloadCommonData();
 
@@ -51,15 +68,20 @@
 
 <svelte:body on:copy={handleCopy} />
 
-<ToastPresenter entries={toast.entries} />
-<Confirmation controller={confirmationController} />
-<ModalRecordSelector
-  {recordSelectorController}
-  modalController={recordSelectorModal}
-/>
-
-{#if commonData}
-  <RootRoute {commonData} />
+{#if isTranslationsLoaded}
+  <ToastPresenter entries={toast.entries} />
+  <Confirmation controller={confirmationController} />
+  <ModalRecordSelector
+    {recordSelectorController}
+    modalController={recordSelectorModal}
+  />
+  {#if commonData}
+    <RootRoute {commonData} />
+  {/if}
+{:else}
+  <div class="app-loader">
+    <Spinner size="2rem" />
+  </div>
 {/if}
 
 <!--
@@ -243,5 +265,13 @@
 
   .bold-header {
     font-weight: 500;
+  }
+
+  .app-loader {
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    display: flex;
   }
 </style>
