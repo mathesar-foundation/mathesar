@@ -299,9 +299,17 @@ Args:
   tab_id: The OID of the table with the column.
   col_id: The attnum of the column in the table.
 */
-SELECT split_part(substring(adbin, 2), ' ', 1) IN (('SQLVALUEFUNCTION'), ('FUNCEXPR'))
-FROM pg_attrdef
-WHERE adrelid=tab_id AND adnum=col_id;
+SELECT
+  -- This is a typical dynamic default like NOW() or CURRENT_DATE
+  (split_part(substring(adbin, 2), ' ', 1) IN (('SQLVALUEFUNCTION'), ('FUNCEXPR')))
+  OR
+  -- This is an identity column `GENERATED {ALWAYS | DEFAULT} AS IDENTITY`
+  (attidentity <> '')
+  OR
+  -- Other generated columns show up here.
+  (attgenerated <> '')
+FROM pg_attribute LEFT JOIN pg_attrdef ON attrelid=adrelid AND attnum=adnum
+WHERE attrelid=tab_id AND attnum=col_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
