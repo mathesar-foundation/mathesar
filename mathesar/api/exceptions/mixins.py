@@ -24,7 +24,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
             # Since our exception is an object instead of a string, the object properties are mistaken to be fields of a serializer,
             # and it gets converted into {'field': [error strings]} by DRF
             # We need to convert it to dictionary of list of object and return it instead of passing it down the line
-            scalar_errors = dict(map(lambda item: (item[0], item[1][0] if type(item[1]) == list else item[1]), errors.items()))
+            scalar_errors = dict(map(lambda item: (item[0], item[1][0] if type(item[1]) is list else item[1]), errors.items()))
             return [scalar_errors]
         for error_type in errors:
             error = errors[error_type]
@@ -35,12 +35,12 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                     pretty.extend(self.get_non_field_error_entries(errors[error_type]))
             else:
                 field = self.get_serializer_fields(self.initial_data).fields[error_type]
-                if isinstance(field, Serializer) and type(errors[error_type]) == dict:
+                if isinstance(field, Serializer) and type(errors[error_type]) is dict:
                     field.initial_data = self.initial_data[error_type]
                     child_errors = field.build_pretty_errors(errors[error_type])
                     pretty += child_errors
                     continue
-                if isinstance(field, ListSerializer) and type(errors[error_type]) == list:
+                if isinstance(field, ListSerializer) and type(errors[error_type]) is list:
                     pretty_child_errors = []
                     for index, child_error in enumerate(errors[error_type]):
                         child_field = field.child

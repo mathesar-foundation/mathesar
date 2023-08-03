@@ -966,6 +966,69 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+-- msar.drop_constraint ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION setup_drop_constraint() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE category(
+    id serial primary key,
+    item_category text,
+    CONSTRAINT uq_cat UNIQUE(item_category)
+  );
+  CREATE TABLE orders (
+    id serial primary key,
+    item_name text,
+    price integer,
+    category_id integer,
+    CONSTRAINT fk_cat FOREIGN KEY(category_id) REFERENCES category(id)
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_constraint() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_constraint(
+    sch_name => 'public',
+    tab_name => 'category',
+    con_name => 'uq_cat'
+  );
+  PERFORM msar.drop_constraint(
+    sch_name => 'public',
+    tab_name => 'orders',
+    con_name => 'fk_cat'
+  );
+  /* There isn't a col_isnt_unique function in pgTAP so we are improvising
+  by adding 2 same values here.*/
+  INSERT INTO category(item_category) VALUES ('tech'),('tech');
+  RETURN NEXT col_isnt_fk('orders', 'category_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_constraint_using_oid() RETURNS SETOF TEXT AS $$
+DECLARE
+  uq_cat_oid oid;
+  fk_cat_oid oid;
+BEGIN
+  uq_cat_oid := oid FROM pg_constraint WHERE conname='uq_cat';
+  fk_cat_oid := oid FROM pg_constraint WHERE conname='fk_cat';
+  PERFORM msar.drop_constraint(
+    tab_id => 'category'::regclass::oid,
+    con_id => uq_cat_oid
+  );
+  PERFORM msar.drop_constraint(
+    tab_id => 'orders'::regclass::oid,
+    con_id => fk_cat_oid
+  );
+  /* There isn't a col_isnt_unique function in pgTAP so we are improvising
+  by adding 2 same values here.*/
+  INSERT INTO category(item_category) VALUES ('tech'),('tech');
+  RETURN NEXT col_isnt_fk('orders', 'category_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- msar.create_link -------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION setup_link_tables() RETURNS SETOF TEXT AS $$
@@ -1033,6 +1096,167 @@ BEGIN
   RETURN NEXT has_column('movies_actors', 'actor_id');
   RETURN NEXT col_type_is('movies_actors', 'actor_id', 'integer');
   RETURN NEXT col_is_fk('movies_actors', 'actor_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.schema_ddl --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_create_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_schema(
+    sch_name => 'create_schema'::text,
+    if_not_exists => false
+  );
+  RETURN NEXT has_schema('create_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_drop_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA drop_test_schema;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_false() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'drop_test_schema', 
+    cascade_ => false, 
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => false
+      );', 
+      'drop_non_existing_schema'
+    ),
+    '3F000',
+    'schema "drop_non_existing_schema" does not exist'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_true() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'drop_test_schema',
+    cascade_ => false,
+    if_exists => true
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+  RETURN NEXT lives_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => true
+      );', 
+      'drop_non_existing_schema'
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_using_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_id => 'drop_test_schema'::regnamespace::oid,
+    cascade_ => false,
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_schema_with_dependent_obj() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA schema1;
+  CREATE TABLE schema1.actors (
+    id SERIAL PRIMARY KEY,
+    actor_name TEXT
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_cascade() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'schema1',
+    cascade_ => true,
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('schema1');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_restricted() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => false
+      );',
+      'schema1'
+    ),
+    '2BP01',
+    'cannot drop schema schema1 because other objects depend on it'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_alter_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA alter_me;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_rename_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.rename_schema(
+    old_sch_name => 'alter_me',
+    new_sch_name => 'altered'
+  );
+  RETURN NEXT hasnt_schema('alter_me');
+  RETURN NEXT has_schema('altered');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_rename_schema_using_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.rename_schema(
+    sch_id => 'alter_me'::regnamespace::oid,
+    new_sch_name => 'altered'
+  );
+  RETURN NEXT hasnt_schema('alter_me');
+  RETURN NEXT has_schema('altered');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_comment_on_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.comment_on_schema(
+    sch_name => 'alter_me',
+    comment_ => 'test comment'
+  );
+  RETURN NEXT is(obj_description('alter_me'::regnamespace::oid), 'test comment');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1320,3 +1544,32 @@ BEGIN
   RETURN NEXT col_not_null('col_alters', 'timecol');
 END;
 $f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_dynamic_defaults() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE defaults_test (
+    id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    col1 integer DEFAULT 5,
+    col2 integer DEFAULT 3::integer,
+    col3 timestamp DEFAULT NOW(),
+    col4 date DEFAULT '2023-01-01',
+    col5 date DEFAULT CURRENT_DATE
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_is_possibly_dynamic() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid;
+BEGIN
+  tab_id := 'defaults_test'::regclass::oid;
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 1), true);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 2), false);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 3), false);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 4), true);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 5), false);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 6), true);
+END;
+$$ LANGUAGE plpgsql;
