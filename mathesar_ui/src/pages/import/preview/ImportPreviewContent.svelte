@@ -3,16 +3,20 @@
 
   import {
     CancelOrProceedButtonPair,
-    LabeledInput,
     Spinner,
-    TextInput,
   } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { columnsApi } from '@mathesar/api/columns';
   import type { DataFile } from '@mathesar/api/types/dataFiles';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import { FieldLayout } from '@mathesar/components/form';
+  import {
+    Field,
+    FieldLayout,
+    makeForm,
+    requiredField,
+    uniqueWith,
+  } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import {
@@ -27,6 +31,7 @@
     generateTablePreview,
     getTypeSuggestionsForTable,
     patchTable,
+    tables,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
@@ -56,16 +61,23 @@
   export let dataFile: DataFile;
   export let useColumnTypeInference = false;
 
-  let customizedTableName = '';
   let columns: Column[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([]);
 
+  $: otherTableNames = [...$tables.data.values()]
+    .filter((t) => t.id !== table.id)
+    .map((t) => t.name);
+  $: customizedTableName = requiredField(table.name, [
+    uniqueWith(otherTableNames, 'A table with this name already exists.'),
+  ]);
+  $: form = makeForm({ customizedTableName });
   $: records =
     $previewRequest.settlement?.state === 'resolved'
       ? $previewRequest.settlement.value.records
       : getSkeletonRecords();
   $: formInputsAreDisabled = !$previewRequest.isOk || $headerUpdate.isLoading;
-  $: canProceed = $previewRequest.isOk && $headerUpdate.isStable;
+  $: canProceed =
+    $previewRequest.isOk && $headerUpdate.isStable && $form.canSubmit;
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
   $: url = getImportPreviewPageUrl(database.name, schema.id, table.id, {
     useColumnTypeInference,
@@ -73,8 +85,7 @@
   $: router.goto(url, true);
 
   async function init() {
-    // TODO: don't re-run this when the user changes `useColumnTypeInference`
-    customizedTableName = table.name;
+    console.log('INIT');
 
     const columnData = await columnsFetch.run(table.id);
     columns = columnData.resolvedValue?.results ?? [];
@@ -103,7 +114,7 @@
       firstRowIsHeader: !dataFile.header,
       schema,
       table,
-      customizedTableName,
+      customizedTableName: $customizedTableName,
     });
   }
 
@@ -131,7 +142,7 @@
   async function finishImport() {
     try {
       await patchTable(table.id, {
-        name: customizedTableName,
+        name: $customizedTableName,
         import_verified: true,
         columns: finalizeColumns(columns, columnPropertiesMap),
       });
@@ -145,11 +156,7 @@
 </script>
 
 <ImportPreviewLayout>
-  <FieldLayout>
-    <LabeledInput label="Table Name">
-      <TextInput bind:value={customizedTableName} />
-    </LabeledInput>
-  </FieldLayout>
+  <Field field={customizedTableName} label="Table Name" />
   <FieldLayout>
     <ColumnNamingStrategyInput
       value={dataFile.header}
@@ -176,6 +183,7 @@
       {#if !$previewRequest.hasInitialized}
         <div class="loading"><Spinner /></div>
       {:else if $previewRequest.settlement?.state === 'rejected'}
+        <!-- TODO improve these error boxes -->
         <ErrorInfo
           error={$previewRequest.settlement.error}
           on:retry={() => init()}
