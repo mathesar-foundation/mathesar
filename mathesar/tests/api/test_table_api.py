@@ -1488,7 +1488,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client):
     response_json = response.json()
 
     assert response.status_code == 400
-    assert f"{column_data[3]['name']} cannot be cast to boolean" in response_json[0]['message']
+    assert response_json[0]['message'] == "Invalid type cast requested."
 
 
 def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client):
@@ -1504,7 +1504,7 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
-    assert f"{column_data[3]['name']} cannot be cast to boolean" in response_json[0]['message']
+    assert response_json[0]['message'] == "Invalid type cast requested."
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
@@ -1525,7 +1525,7 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
-    assert f"{column_data[3]['name']} cannot be cast to boolean" in response_json[0]['message']
+    assert response_json[0]['message'] == "Invalid type cast requested."
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
@@ -1546,7 +1546,7 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
-    assert f"{column_data[3]['name']} cannot be cast to boolean" in response_json[0]['message']
+    assert response_json[0]['message'] == "Invalid type cast requested."
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
@@ -1569,7 +1569,7 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
-    assert f"{column_data[3]['name']} cannot be cast to boolean" in response_json[0]['message']
+    assert response_json[0]['message'] == "Invalid type cast requested."
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed

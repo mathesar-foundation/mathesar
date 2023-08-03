@@ -159,22 +159,22 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
         try:
             result = conn.execute(ins)
         except IntegrityError as e:
-            if type(e.orig) == NotNullViolation:
+            if type(e.orig) is NotNullViolation:
                 raise NotNullError
-            elif type(e.orig) == ForeignKeyViolation:
+            elif type(e.orig) is ForeignKeyViolation:
                 raise ForeignKeyError
-            elif type(e.orig) == UniqueViolation:
+            elif type(e.orig) is UniqueViolation:
                 # ToDo: Try to differentiate between the types of unique violations
                 # Scenario 1: Adding a duplicate value into a column with uniqueness constraint in the target table.
                 # Scenario 2: Adding a non existing value twice in a column with uniqueness constraint in the target table.
                 # Both the scenarios currently result in the same exception being thrown.
                 raise UniqueValueError
-            elif type(e.orig) == ExclusionViolation:
+            elif type(e.orig) is ExclusionViolation:
                 raise ExclusionError
             else:
                 raise e
         except ProgrammingError as e:
-            if type(e.orig) == DatatypeMismatch:
+            if type(e.orig) is DatatypeMismatch:
                 raise TypeMismatchError
             else:
                 raise e
