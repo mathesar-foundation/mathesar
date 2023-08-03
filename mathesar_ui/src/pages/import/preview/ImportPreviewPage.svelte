@@ -12,16 +12,8 @@
   import { dataFilesApi } from '@mathesar/api/dataFiles';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Column } from '@mathesar/api/types/tables/columns';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import { FieldLayout } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
-  import {
-    Sheet,
-    SheetCell,
-    SheetCellResizer,
-    SheetHeader,
-    SheetRow,
-  } from '@mathesar/components/sheet';
   import { iconDeleteMajor } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -44,7 +36,7 @@
   import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
   import ErrorInfo from './ErrorInfo.svelte';
-  import PreviewColumn from './PreviewColumn.svelte';
+  import ImportPreview from './ImportPreview.svelte';
   import {
     buildColumnPropertiesMap,
     finalizeColumns,
@@ -228,64 +220,13 @@
           />
         {:else}
           <div class="sheet-holder">
-            <Sheet
-              restrictWidthToRowWidth
+            <ImportPreview
               columns={processedColumns}
-              getColumnIdentifier={(c) => c.id}
-            >
-              <SheetHeader inheritFontStyle>
-                {#each processedColumns as processedColumn (processedColumn.id)}
-                  <SheetCell
-                    columnIdentifierKey={processedColumn.id}
-                    let:htmlAttributes
-                    let:style
-                  >
-                    <div {...htmlAttributes} {style}>
-                      <PreviewColumn
-                        isLoading={$previewRequest.isLoading}
-                        {processedColumn}
-                        {updateTypeRelatedOptions}
-                        bind:selected={columnPropertiesMap[processedColumn.id]
-                          .selected}
-                        bind:displayName={columnPropertiesMap[
-                          processedColumn.id
-                        ].displayName}
-                      />
-                      <SheetCellResizer
-                        columnIdentifierKey={processedColumn.id}
-                        minColumnWidth={120}
-                      />
-                    </div>
-                  </SheetCell>
-                {/each}
-              </SheetHeader>
-              {#each records as record (record)}
-                <SheetRow
-                  style={{ position: 'relative', height: 30 }}
-                  let:htmlAttributes
-                  let:styleString
-                >
-                  <div {...htmlAttributes} style={styleString}>
-                    {#each processedColumns as processedColumn (processedColumn)}
-                      <SheetCell
-                        columnIdentifierKey={processedColumn.id}
-                        let:htmlAttributes
-                        let:style
-                      >
-                        <div {...htmlAttributes} {style}>
-                          <CellFabric
-                            columnFabric={processedColumn}
-                            value={record[processedColumn.column.name]}
-                            showAsSkeleton={$previewRequest.isLoading}
-                            disabled={true}
-                          />
-                        </div>
-                      </SheetCell>
-                    {/each}
-                  </div>
-                </SheetRow>
-              {/each}
-            </Sheet>
+              isLoading={$previewRequest.isLoading}
+              {updateTypeRelatedOptions}
+              {columnPropertiesMap}
+              {records}
+            />
           </div>
           {#if records.length === TRUNCATION_LIMIT}
             <div class="truncation-alert">
@@ -338,20 +279,6 @@
     overflow: auto;
     margin: 0 auto;
     border: 1px solid var(--slate-200);
-  }
-  :global(.sheet [data-sheet-element='header']) {
-    background: var(--slate-100);
-  }
-  :global(.sheet [data-sheet-element='cell']) {
-    background: var(--white);
-  }
-  :global(.sheet [data-sheet-element] [data-sheet-element='cell']:last-child) {
-    border-right: none;
-  }
-  :global(.sheet
-      [data-sheet-element='row']:last-child
-      [data-sheet-element='cell']) {
-    border-bottom: none;
   }
   .footer {
     border-top: 1px solid var(--slate-200);

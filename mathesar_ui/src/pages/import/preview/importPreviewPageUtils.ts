@@ -21,7 +21,7 @@ export function getSkeletonRecords(): Record<string, unknown>[] {
   return [{}, {}];
 }
 
-interface ProcessedPreviewColumn {
+export interface ProcessedPreviewColumn {
   id: number;
   column: Column;
   abstractType: AbstractType;
