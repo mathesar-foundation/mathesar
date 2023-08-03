@@ -22,6 +22,7 @@
   } from '@mathesar/components/form';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import { iconPaste, iconUrl } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
@@ -41,9 +42,21 @@
     icon: IconProps;
   }
   const uploadMethods: UploadMethod[] = [
-    { key: 'file', label: 'Upload a file', icon: iconUploadFile },
-    { key: 'url', label: 'Provide a URL to the file', icon: iconUrl },
-    { key: 'clipboard', label: 'Copy and paste text', icon: iconPaste },
+    {
+      key: 'file',
+      label: $LL.importUploadPage.uploadAFile(),
+      icon: iconUploadFile,
+    },
+    {
+      key: 'url',
+      label: $LL.importUploadPage.provideUrlToFile(),
+      icon: iconUrl,
+    },
+    {
+      key: 'clipboard',
+      label: $LL.importUploadPage.copyAndPasteText(),
+      icon: iconPaste,
+    },
   ];
 
   const uploadMethod = requiredField<UploadMethod>(uploadMethods[0]);
@@ -76,7 +89,7 @@
   async function getDataFileId() {
     if ($uploadMethod.key === 'file') {
       if ($fileUploadId === undefined) {
-        throw new Error('No file uploaded');
+        throw new Error($LL.general.noFileUploaded());
       }
       return $fileUploadId;
     }
@@ -113,7 +126,9 @@
   }
 </script>
 
-<svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
+<svelte:head>
+  <title>{makeSimplePageTitle($LL.general.import())}</title>
+</svelte:head>
 
 <LayoutWithHeader
   restrictWidth
@@ -123,18 +138,16 @@
     '--layout-background-color': 'var(--sand-200)',
   }}
 >
-  <h1>Create a table by importing your data</h1>
+  <h1>{$LL.importUploadPage.createATableByImporting()}</h1>
 
   <div class="import-file-view">
     {#if status?.state === 'processing'}
-      <h2>Processing Data</h2>
+      <h2>{$LL.general.processingData()}</h2>
       <div class="processing-spinner">
         <Spinner />
       </div>
       <WarningBox>
-        Large data sets can sometimes take several minutes to process. Please do
-        not leave this page or close the browser tab while import is in
-        progress.
+        {$LL.importUploadPage.largeDataTakesTimeWarning()}
       </WarningBox>
     {:else if status?.state === 'failure'}
       <ErrorBox>
@@ -151,7 +164,7 @@
           bind:value={$uploadMethod}
           options={uploadMethods}
           isInline
-          label="Data source"
+          label={$LL.general.dataSource()}
           getRadioLabel={(opt) => ({
             component: NameWithIcon,
             props: { name: opt.label, icon: opt.icon },
