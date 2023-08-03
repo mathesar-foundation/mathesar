@@ -41,6 +41,11 @@
 
   let loadRequestStatus: RequestStatus = { state: 'processing' };
   let share: Share | undefined = undefined;
+  let linkInput: HTMLInputElement;
+
+  $: shareLink = share
+    ? `${window.location.origin}${getLink(share)}`
+    : undefined;
 
   async function fetchShares() {
     if (!api || !entityId) {
@@ -127,9 +132,19 @@
     }
   }
 
-  $: shareLink = share
-    ? `${window.location.origin}${getLink(share)}`
-    : undefined;
+  async function copyLink() {
+    if (linkInput && shareLink) {
+      linkInput.select();
+      try {
+        await navigator.clipboard.writeText(shareLink);
+      } catch {
+        // Incase the browser does not have support for navigator.clipboard.writeText
+        // or restricts permissions to clipboard
+        document.execCommand('copy');
+      }
+      toast.info('Link copied');
+    }
+  }
 </script>
 
 <div class="share-entity-container">
@@ -146,8 +161,8 @@
     {:else if loadRequestStatus.state === 'success'}
       {#if share && share.enabled}
         <InputGroup>
-          <TextInput disabled value={shareLink} />
-          <Button appearance="secondary">
+          <TextInput bind:element={linkInput} readonly value={shareLink} />
+          <Button appearance="secondary" on:click={copyLink}>
             <Icon {...iconCopyMajor} />
           </Button>
           <a class="btn btn-secondary" target="_blank" href={shareLink}>
