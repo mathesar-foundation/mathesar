@@ -5,7 +5,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 
 
-def superuser_must_not_exists(view_function=None):
+def superuser_must_not_exist(view_function=None):
     """
     Decorator for views that redirects to the home page if at least one superuser exists
     """
