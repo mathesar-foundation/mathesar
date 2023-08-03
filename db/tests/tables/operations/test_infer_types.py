@@ -256,8 +256,14 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
 
 
 def test_update_table_column_types_infers_non_default_types(engine_with_schema):
-    col1 = Column("col1", VARCHAR)
-    col2 = Column("col2", VARCHAR)
+    col1 = {
+        "name": "col1",
+        "type": {"name": PostgresType.CHARACTER_VARYING.id}
+    }
+    col2 = {
+        "name": "col2",
+        "type": {"name": PostgresType.CHARACTER_VARYING.id}
+    }
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     metadata = MetaData()
@@ -277,7 +283,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
         call(
             schema,
             table_name,
-            col1.name,
+            col1["name"],
             engine,
             metadata=metadata,
             columns_might_have_defaults=True,
@@ -285,7 +291,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
         call(
             schema,
             table_name,
-            col2.name,
+            col2["name"],
             engine,
             metadata=metadata,
             columns_might_have_defaults=True,

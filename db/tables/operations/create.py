@@ -8,6 +8,8 @@ from sqlalchemy.schema import DDLElement
 import json
 from db.connection import execute_msar_func_with_engine
 from db.types.base import PostgresType
+from db.tables.operations.select import reflect_table_from_oid
+from db.metadata import get_empty_metadata
 
 
 def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraints=[], comment=None):
@@ -38,7 +40,7 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
     # if comment is not None:  # this check avoids an unneeded DB call
     #     comment_on_table(name, schema, engine, comment)
     # return table
-    return execute_msar_func_with_engine(
+    table_oid = execute_msar_func_with_engine(
         engine,
         'add_mathesar_table',
         schema_oid,
@@ -47,13 +49,15 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
         json.dumps(constraints),
         comment
     ).fetchone()[0]
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
+    return table
 
 
 class DuplicateTable(Exception):
     pass
 
 
-def create_string_column_table(name, schema, column_names, engine, comment=None):
+def create_string_column_table(name, schema_oid, column_names, engine, comment=None):
     """
     This method creates a Postgres table in the specified schema, with all
     columns being String type.
@@ -64,7 +68,8 @@ def create_string_column_table(name, schema, column_names, engine, comment=None)
             "type": {"name": PostgresType.TEXT.id}
         } for column_name in column_names
     ]
-    table = create_mathesar_table(name, schema, columns_, engine, comment=comment)
+    table_oid = create_mathesar_table(engine, name, schema_oid, columns_, comment=comment)
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     return table
 
 

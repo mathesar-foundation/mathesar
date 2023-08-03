@@ -14,7 +14,7 @@ from mathesar.state import reset_reflection
 def insert_records_from_dataframe(name, schema, column_names, engine, comment, dataframe):
     table = create_string_column_table(
         name=name,
-        schema=schema.name,
+        schema_oid=schema.oid,
         column_names=column_names,
         engine=engine,
         comment=comment,
