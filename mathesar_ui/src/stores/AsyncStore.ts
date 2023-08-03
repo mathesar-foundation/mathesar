@@ -81,6 +81,12 @@ export class AsyncStoreValue<T, E> {
       : undefined;
   }
 
+  get error(): E | undefined {
+    return this.settlement?.state === 'rejected'
+      ? this.settlement.error
+      : undefined;
+  }
+
   get isRejected(): boolean {
     return !this.isLoading && this.settlement?.state === 'rejected';
   }

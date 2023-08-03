@@ -1,10 +1,11 @@
 import type { CancellablePromise } from '@mathesar-component-library';
+import type { DataFile } from './types/dataFiles';
 import {
+  getAPI,
+  patchAPI,
   postAPI,
   uploadFile,
   type UploadCompletionOpts,
-  getAPI,
-  patchAPI,
 } from './utils/requestUtils';
 
 const ENDPOINT = '/api/db/v0/data_files/';
@@ -19,7 +20,7 @@ function postToEndpoint(body: PostParams) {
 }
 
 function get(id: number) {
-  return getAPI<{ id: number; header: boolean }>(`${ENDPOINT}${id}/`);
+  return getAPI<DataFile>(`${ENDPOINT}${id}/`);
 }
 
 function addViaUpload(

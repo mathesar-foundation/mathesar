@@ -1,8 +1,11 @@
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-import { columnsApi } from '@mathesar/api/columns';
 import { dataFilesApi } from '@mathesar/api/dataFiles';
+import type { DataFile } from '@mathesar/api/types/dataFiles';
+import type {
+  MinimalColumnDetails,
+  TableEntry,
+} from '@mathesar/api/types/tables';
 import type { Column } from '@mathesar/api/types/tables/columns';
-import { ImmutableMap } from '@mathesar-component-library';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import AsyncStore from '@mathesar/stores/AsyncStore';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
@@ -11,7 +14,6 @@ import type {
   AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
 import { createTable, deleteTable } from '@mathesar/stores/tables';
-import type { MinimalColumnDetails } from '@mathesar/api/types/tables';
 
 /**
  * This is to improve loading experience by seeding the table with empty
@@ -50,19 +52,19 @@ export function makeHeaderUpdateRequest() {
   interface Props {
     database: Database;
     schema: SchemaEntry;
-    tableId: number;
-    dataFileId: number;
+    table: Pick<TableEntry, 'id'>;
+    dataFile: Pick<DataFile, 'id'>;
     firstRowIsHeader: boolean;
-    tableName: string;
+    customizedTableName: string;
   }
   async function updateHeader(p: Props) {
     await Promise.all([
-      deleteTable(p.database, p.schema, p.tableId),
-      dataFilesApi.update(p.dataFileId, { header: p.firstRowIsHeader }),
+      deleteTable(p.database, p.schema, p.table.id),
+      dataFilesApi.update(p.dataFile.id, { header: p.firstRowIsHeader }),
     ]);
     return createTable(p.database, p.schema, {
-      name: p.tableName,
-      dataFiles: [p.dataFileId],
+      name: p.customizedTableName,
+      dataFiles: [p.dataFile.id],
     });
   }
   return new AsyncStore(updateHeader);

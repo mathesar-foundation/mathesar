@@ -399,16 +399,14 @@ export function getTypeSuggestionsForTable(
   );
 }
 
-export function generateTablePreview({
-  id,
-  columns,
-}: {
-  id: TableEntry['id'];
+export function generateTablePreview(props: {
+  table: Pick<TableEntry, 'id'>;
   columns: MinimalColumnDetails[];
 }): CancellablePromise<{
   records: Record<string, unknown>[];
 }> {
-  return postAPI(`/api/db/v0/tables/${id}/previews/`, { columns });
+  const { columns, table } = props;
+  return postAPI(`/api/db/v0/tables/${table.id}/previews/`, { columns });
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(
