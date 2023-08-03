@@ -1,9 +1,10 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
+from demo.utils import get_is_live_demo_mode, get_live_demo_db_name
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.query import QueryAccessPolicy
@@ -35,13 +36,33 @@ def get_schema_list(request, database):
 
 
 def _get_permissible_db_queryset(request):
-    qs = Database.objects.filter(deleted=False)
-    permission_restricted_qs = DatabaseAccessPolicy.scope_queryset(request, qs)
-    schema_qs = Schema.objects.all()
-    permitted_schemas = SchemaAccessPolicy.scope_queryset(request, schema_qs)
-    databases_from_permitted_schema = Database.objects.filter(schemas__in=permitted_schemas, deleted=False)
-    permission_restricted_qs = permission_restricted_qs | databases_from_permitted_schema
-    return permission_restricted_qs.distinct()
+    """
+    Returns the queryset for databases a user is permitted to access.
+
+    Note, databases that a user is permitted to access is the union of those
+    permitted by DatabaseAccessPolicy and those containing Schemas permitted
+    by SchemaAccessPolicy.
+
+    Note, the live demo mode is an exception where the user is only permitted
+    to access the database generated for him. We treat that as a subset of the
+    databases the user can normally access, just in case someone finds a way to
+    manipulate how we define whether we're in demo mode and which db is a
+    user's demo db.
+    """
+    dbs_qs = Database.objects.filter(deleted=False)
+    permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
+    schemas_qs = Schema.objects.all()
+    permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
+    dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=False)
+    permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
+    permitted_dbs_qs = permitted_dbs_qs.distinct()
+    if get_is_live_demo_mode():
+        live_demo_db_name = get_live_demo_db_name(request)
+        if live_demo_db_name:
+            permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
+        else:
+            raise Exception('This should never happen')
+    return permitted_dbs_qs
 
 
 def get_database_list(request):
@@ -112,7 +133,7 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'abstract_types': get_ui_type_list(request, database),
         'user': get_user_data(request),
         'is_authenticated': not request.user.is_anonymous,
-        'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
+        'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
     }
 
@@ -134,7 +155,7 @@ def get_current_database(request, db_name):
     if db_name is not None:
         current_database = get_object_or_404(permitted_databases, name=db_name)
     else:
-        request_database_name = request.GET.get('database')
+        request_database_name = get_live_demo_db_name(request)
         try:
             if request_database_name is not None:
                 # Try to get the database named specified in the request
