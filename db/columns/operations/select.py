@@ -1,6 +1,6 @@
 import warnings
 
-from sqlalchemy import and_, asc, cast, select, text, exists
+from sqlalchemy import and_, asc, cast, select, text, exists, Identity
 
 from db.columns.exceptions import DynamicDefaultWarning
 from db.connection import execute_msar_func_with_engine
@@ -118,14 +118,16 @@ def get_column_default_dict(table_oid, attnum, engine, metadata, connection_to_u
         metadata=metadata,
         connection_to_use=connection_to_use,
     )
+    default = column.server_default
 
-    if column.server_default is None:
+    if default is None:
         return
 
     is_dynamic = execute_msar_func_with_engine(
         engine, 'is_default_possibly_dynamic', table_oid, attnum
     ).fetchone()[0]
-    sql_text = str(column.server_default.arg)
+
+    sql_text = str(default.arg) if not isinstance(default, Identity) else 'identity'
 
     if is_dynamic:
         warnings.warn(
