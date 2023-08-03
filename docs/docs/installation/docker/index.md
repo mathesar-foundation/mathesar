@@ -44,7 +44,7 @@ Have the following information for all databases you'd like to connect to Mathes
 - Database password
 
 !!! warning "Database creation"
-    Whenever the Docker container is started, we will attempt to create any databases in this list that don't already exist if the user has [`CREATEDB` privilege](https://www.postgresql.org/docs/current/sql-createrole.html). So you don't need to ensure that they are created before installation.
+    Whenever the Docker container is started, we will attempt to create any databases in this list that don't already exist if the user has [`CREATEDB` privilege](https://www.postgresql.org/docs/13/sql-createrole.html). So you don't need to ensure that they are created before installation.
 
 ## Installation Steps
 
