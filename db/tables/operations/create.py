@@ -40,7 +40,7 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
     # if comment is not None:  # this check avoids an unneeded DB call
     #     comment_on_table(name, schema, engine, comment)
     # return table
-    table_oid = execute_msar_func_with_engine(
+    return execute_msar_func_with_engine(
         engine,
         'add_mathesar_table',
         schema_oid,
@@ -49,8 +49,6 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
         json.dumps(constraints),
         comment
     ).fetchone()[0]
-    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    return table
 
 
 class DuplicateTable(Exception):
