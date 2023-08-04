@@ -287,6 +287,13 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.is_mathesar_id_column(tab_id oid, col_id integer) RETURNS boolean AS $$
+SELECT col_id=1 AND attname='id' AND atttypid='integer'::regtype::oid AND attidentity <> ''
+FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_cast_function_name(target_type regtype) RETURNS text AS $$/*
 Return a string giving the appropriate name of the casting function for the target_type.
 
@@ -2000,6 +2007,7 @@ Notes on the col_alters JSONB
   - If, on the other hand, the "default" key is set to an explicit value of null, then we will
     interpret that as a directive to set the column's default to NULL, i.e., we'll drop the current
     default setting.
+- If the column is a default mathesar ID column, we will silently skip it so it won't be altered.
 */
 WITH prepped_alters AS (
   SELECT
@@ -2017,6 +2025,7 @@ WITH prepped_alters AS (
     jsonb_array_elements(col_alters) as t(col_alter_obj)
     INNER JOIN pg_attribute ON (t.col_alter_obj ->> 'attnum')::smallint=attnum AND tab_id=attrelid
     LEFT JOIN pg_attrdef ON (t.col_alter_obj ->> 'attnum')::smallint=adnum AND tab_id=adrelid
+  WHERE NOT msar.is_mathesar_id_column(tab_id, (t.col_alter_obj ->> 'attnum')::integer)
 )
 SELECT string_agg(
   nullif(
