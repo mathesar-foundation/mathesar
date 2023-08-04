@@ -25,7 +25,7 @@
     router.goto(getTablePageUrl(database.name, schema.id, tableId));
   }
 
-  $: (async () => {
+  $: void (async () => {
     const table = (await tableFetch.run(tableId)).resolvedValue;
     if (!table) {
       return;

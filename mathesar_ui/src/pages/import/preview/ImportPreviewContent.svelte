@@ -85,8 +85,6 @@
   $: router.goto(url, true);
 
   async function init() {
-    console.log('INIT');
-
     const columnData = await columnsFetch.run(table.id);
     columns = columnData.resolvedValue?.results ?? [];
     columnPropertiesMap = buildColumnPropertiesMap(columns);
