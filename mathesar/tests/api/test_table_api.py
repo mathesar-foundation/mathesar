@@ -45,6 +45,19 @@ def missing_keys_json_data_file():
 
 
 @pytest.fixture
+def misaligned_table_excel_data_file():
+    data_filepath = 'mathesar/tests/data/excel_parsing/misaligned_table.xlsx'
+    with open(data_filepath, "rb") as json_file:
+        data_file = DataFile.objects.create(
+            file=File(json_file),
+            created_from='file',
+            base_name='missaligned_table',
+            type='excel'
+        )
+    return data_file
+
+
+@pytest.fixture
 def schema_name():
     return 'table_tests'
 
@@ -2010,3 +2023,15 @@ def test_create_table_with_nested_json_objects(client, schema):
             client, table_name, table_name, datafile, schema, expected_data[index]["first_row"],
             expected_data[index]["column_names"], import_target_table=None
         )
+
+
+def test_create_table_and_normalize_excel_data_file(client, misaligned_table_excel_data_file, schema):
+    table_name = 'misaligned_table'
+    expt_name = _get_expected_name(table_name, data_file=misaligned_table_excel_data_file)
+    first_row = (1, 'John', '25', 'Male')
+    column_names = ["Name", "Age", "Gender"]
+
+    check_create_table_response(
+        client, table_name, expt_name, misaligned_table_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
