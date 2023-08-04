@@ -27,7 +27,6 @@
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
-    deleteTable,
     generateTablePreview,
     getTypeSuggestionsForTable,
     patchTable,
@@ -43,6 +42,7 @@
     buildColumnPropertiesMap,
     finalizeColumns,
     getSkeletonRecords,
+    makeDeleteTableRequest,
     makeHeaderUpdateRequest,
     processColumns,
   } from './importPreviewPageUtils';
@@ -54,6 +54,7 @@
   const previewRequest = new AsyncStore(generateTablePreview);
   const typeSuggestionsRequest = new AsyncStore(getTypeSuggestionsForTable);
   const headerUpdate = makeHeaderUpdateRequest();
+  const cancelationRequest = makeDeleteTableRequest();
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -127,14 +128,13 @@
     return previewRequest.run({ table, columns });
   }
 
-  function handleCancel() {
-    // TODO wrap in an AsyncStore
-    void deleteTable(database, schema, table.id).catch((err) => {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Unable to cancel import';
-      toast.error(errorMessage);
-    });
-    router.goto(getSchemaPageUrl(database.name, schema.id), true);
+  async function handleCancel() {
+    const response = await cancelationRequest.run({ database, schema, table });
+    if (response.isOk) {
+      router.goto(getSchemaPageUrl(database.name, schema.id), true);
+    } else {
+      toast.fromError(response.error);
+    }
   }
 
   async function finishImport() {
@@ -146,9 +146,7 @@
       });
       router.goto(getTablePageUrl(database.name, schema.id, table.id), true);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Unable to save table';
-      toast.error(errorMessage);
+      toast.fromError(err);
     }
   }
 </script>
@@ -213,13 +211,17 @@
   </svelte:fragment>
 
   <svelte:fragment slot="footer">
-    <CancelOrProceedButtonPair
-      onCancel={handleCancel}
-      onProceed={finishImport}
-      cancelButton={{ icon: iconDeleteMajor }}
-      proceedButton={{ label: 'Confirm & create table' }}
-      {canProceed}
-    />
+    {#if $cancelationRequest.isLoading}
+      Cleaning up... <Spinner />
+    {:else}
+      <CancelOrProceedButtonPair
+        onCancel={handleCancel}
+        onProceed={finishImport}
+        cancelButton={{ icon: iconDeleteMajor }}
+        proceedButton={{ label: 'Confirm & create table' }}
+        {canProceed}
+      />
+    {/if}
   </svelte:fragment>
 </ImportPreviewLayout>
 

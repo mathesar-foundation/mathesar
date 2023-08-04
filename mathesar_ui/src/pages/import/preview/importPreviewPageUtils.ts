@@ -70,6 +70,17 @@ export function makeHeaderUpdateRequest() {
   return new AsyncStore(updateHeader);
 }
 
+export function makeDeleteTableRequest() {
+  interface Props {
+    database: Database;
+    schema: SchemaEntry;
+    table: Pick<TableEntry, 'id'>;
+  }
+  return new AsyncStore((props: Props) =>
+    deleteTable(props.database, props.schema, props.table.id),
+  );
+}
+
 export interface ColumnProperties {
   selected: boolean;
   displayName: string;
