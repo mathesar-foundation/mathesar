@@ -1,5 +1,6 @@
 from django.conf import settings
 
+
 def get_is_live_demo_mode():
     """
     Will return true when in live demo mode.
@@ -8,6 +9,7 @@ def get_is_live_demo_mode():
     explicitly check whether we're in it.
     """
     return getattr(settings, 'MATHESAR_LIVE_DEMO', False)
+
 
 def get_live_demo_db_name(request):
     """
@@ -18,6 +20,7 @@ def get_live_demo_db_name(request):
     that.
     """
     return request.GET.get('demo_database_name')
+
 
 def set_live_demo_db_name(request, db_name):
     """
