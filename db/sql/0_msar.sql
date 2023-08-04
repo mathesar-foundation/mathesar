@@ -1010,6 +1010,7 @@ SELECT jsonb_agg(
     'not_null', attnotnull,
     'default',
     -- We only copy non-dynamic default expressions to new table to avoid double-use of sequences.
+    -- Sequences are owned by a specific column, and can't be reused without error.
     CASE WHEN NOT msar.is_default_possibly_dynamic(tab_id, col_id) THEN
       pg_get_expr(adbin, tab_id)
     END
@@ -2204,8 +2205,8 @@ Create a many-to-one or a one-to-one link between tables, returning the attnum o
 column, returning the attnum of the added column.
 
 Args:
-  frel_id: The OID of the referent table.
-  rel_id: The OID of the referrer table.
+  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
+  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
   col_name: Name of the new column to be created in the referrer table, unquoted.
   unique_link: Whether to make the link one-to-one instead of many-to-one.
 */
@@ -2308,6 +2309,7 @@ DECLARE
   extracted_table_id integer;
   fkey_attnum integer;
 BEGIN
+  -- Begin by creating a new table with column definitions matching the extracted columns.
   extracted_table_id := msar.add_mathesar_table(
     msar.get_relation_namespace_oid(tab_id),
     new_tab_name,
@@ -2315,7 +2317,11 @@ BEGIN
     null,
     format('Extracted from %s', __msar.get_relation_name(tab_id))
   );
+  -- Create a new fkey column and foreign key linking the original table to the extracted one.
   fkey_attnum := msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
+  -- Insert the data from the original table's columns into the extracted columns, and add
+  -- appropriate fkey values to the new fkey column in the original table to give the proper
+  -- mapping.
   PERFORM __msar.exec_ddl($t$
     WITH fkey_cte AS (
       SELECT id, %1$s, dense_rank() OVER (ORDER BY %1$s) AS __msar_tmp_id
@@ -2327,12 +2333,20 @@ BEGIN
     UPDATE %2$s SET %4$I=__msar_tmp_id FROM fkey_cte WHERE
     %2$s.id=fkey_cte.id
     $t$,
-    string_agg(quote_ident(col_def ->> 'name'), ', '),  -- goes to %1$s
-    __msar.get_relation_name(tab_id),  -- goes to %2$s
-    __msar.get_relation_name(extracted_table_id),  -- goes to %3$s
-    fkey_name  -- goes to %4$I
+    -- %1$s  This is a comma separated string of the extracted column names
+    string_agg(quote_ident(col_def ->> 'name'), ', '),
+    -- %2$s  This is the name of the original (remainder) table
+    __msar.get_relation_name(tab_id),
+    -- %3$s  This is the new extracted table name
+    __msar.get_relation_name(extracted_table_id),
+    -- %4$I  This is the name of the fkey column in the remainder table.
+    fkey_name
   ) FROM jsonb_array_elements(extracted_col_defs) AS col_def;
+  -- Drop the original versions of the extracted columns from the original table.
   PERFORM msar.drop_columns(tab_id, variadic col_ids);
+  -- In case the user wanted to give a name to the fkey column matching one of the extracted
+  -- columns, perform that operation now (since the original will now be dropped from the original
+  -- table)
   IF fk_col_name IS NOT NULL AND fk_col_name IN (
     SELECT col_def ->> 'name'
     FROM jsonb_array_elements(extracted_col_defs) AS col_def
