@@ -72,24 +72,15 @@
     uniqueWith(otherTableNames, 'A table with this name already exists.'),
   ]);
   $: form = makeForm({ customizedTableName });
-  $: records =
-    $previewRequest.settlement?.state === 'resolved'
-      ? $previewRequest.settlement.value.records
-      : getSkeletonRecords();
-  $: formInputsAreDisabled = !$previewRequest.isOk || $headerUpdate.isLoading;
-  $: canProceed =
-    $previewRequest.isOk && $headerUpdate.isStable && $form.canSubmit;
+  $: records = $previewRequest.resolvedValue?.records ?? getSkeletonRecords();
+  $: formInputsAreDisabled = !$previewRequest.isOk;
+  $: canProceed = $previewRequest.isOk && $form.canSubmit;
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
-  $: url = getImportPreviewPageUrl(database.name, schema.id, table.id, {
-    useColumnTypeInference,
-  });
-  $: router.goto(url, true);
 
   async function init() {
     const columnData = await columnsFetch.run(table.id);
     columns = columnData.resolvedValue?.results ?? [];
     columnPropertiesMap = buildColumnPropertiesMap(columns);
-
     if (useColumnTypeInference) {
       const response = await typeSuggestionsRequest.run(table.id);
       if (response.settlement?.state === 'resolved') {
@@ -100,14 +91,27 @@
         }));
       }
     }
-
     await previewRequest.run({ table, columns });
   }
-
   $: table, useColumnTypeInference, void init();
 
+  function reload(props: {
+    table?: TableEntry;
+    useColumnTypeInference?: boolean;
+  }) {
+    const tableId = props.table?.id ?? table.id;
+    router.goto(
+      getImportPreviewPageUrl(database.name, schema.id, tableId, {
+        useColumnTypeInference:
+          props.useColumnTypeInference ?? useColumnTypeInference,
+      }),
+      true,
+    );
+  }
+
   async function toggleHeader() {
-    void headerUpdate.run({
+    previewRequest.reset();
+    const response = await headerUpdate.run({
       database,
       dataFile,
       firstRowIsHeader: !dataFile.header,
@@ -115,10 +119,14 @@
       table,
       customizedTableName: $customizedTableName,
     });
+    if (response.resolvedValue) {
+      reload({ table: response.resolvedValue });
+    }
   }
 
   async function toggleInference() {
-    // TODO
+    previewRequest.reset();
+    reload({ useColumnTypeInference: !useColumnTypeInference });
   }
 
   function updateTypeRelatedOptions(updatedColumn: Column) {
@@ -128,7 +136,7 @@
     return previewRequest.run({ table, columns });
   }
 
-  async function handleCancel() {
+  async function cancel() {
     const response = await cancelationRequest.run({ database, schema, table });
     if (response.isOk) {
       router.goto(getSchemaPageUrl(database.name, schema.id), true);
@@ -162,7 +170,7 @@
   </FieldLayout>
   <FieldLayout>
     <ColumnTypeInferenceInput
-      bind:value={useColumnTypeInference}
+      value={useColumnTypeInference}
       on:change={toggleInference}
       disabled={formInputsAreDisabled}
     />
@@ -178,18 +186,17 @@
     <div class="preview-content">
       {#if !$previewRequest.hasInitialized}
         <div class="loading"><Spinner /></div>
-      {:else if $previewRequest.settlement?.state === 'rejected'}
-        <!-- TODO improve these error boxes -->
+      {:else if $previewRequest.error}
         <ErrorInfo
-          error={$previewRequest.settlement.error}
-          on:retry={() => init()}
-          on:delete={handleCancel}
+          error={$previewRequest.error}
+          on:retry={init}
+          on:delete={cancel}
         />
-      {:else if $headerUpdate.settlement?.state === 'rejected'}
+      {:else if $headerUpdate.error}
         <ErrorInfo
-          error={$headerUpdate.settlement.error}
-          on:retry={() => init()}
-          on:delete={handleCancel}
+          error={$headerUpdate.error}
+          on:retry={init}
+          on:delete={cancel}
         />
       {:else}
         <div class="sheet-holder">
@@ -215,7 +222,7 @@
       Cleaning up... <Spinner />
     {:else}
       <CancelOrProceedButtonPair
-        onCancel={handleCancel}
+        onCancel={cancel}
         onProceed={finishImport}
         cancelButton={{ icon: iconDeleteMajor }}
         proceedButton={{ label: 'Confirm & create table' }}

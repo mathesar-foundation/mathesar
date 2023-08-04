@@ -149,10 +149,21 @@ export default class AsyncStore<Props, T>
     }
   }
 
+  /**
+   * Cancels the promise, if possible. Retains the current value.
+   */
   cancel() {
     if (this.promise && 'cancel' in this.promise) {
       this.promise.cancel();
     }
+  }
+
+  /**
+   * Resets the store to its initial state before it has been run.
+   */
+  reset() {
+    this.cancel();
+    this.value.set(new AsyncStoreValue({ isLoading: false }));
   }
 }
 
