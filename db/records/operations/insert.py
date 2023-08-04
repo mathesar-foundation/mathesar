@@ -33,6 +33,18 @@ def insert_record_or_records(table, engine, record_data):
     return None
 
 
+def get_records_from_dataframe(df):
+    """
+    We convert the dataframe to JSON using to_json() method and then to a Python object.
+    This method replaces 'NaN' values in the dataframe with 'None' values in Python
+    object. The reason behind not using df.to_dict() method is beacuse it stringifies
+    'NaN' values rather than converting them to a 'None' value.
+    We pass 'records' as the orientation parameter because we want each record to contain
+    data of a single row and not of a single column (which is the default behaviour).
+    """
+    return json.loads(df.to_json(orient='records'))
+
+
 def insert_records_from_json(table, engine, json_filepath, column_names, max_level):
     """
     Normalizes JSON data and inserts it into a table.
@@ -49,10 +61,7 @@ def insert_records_from_json(table, engine, json_filepath, column_names, max_lev
         2.  We normalize data into a pandas dataframe using pandas.json_normalize() method.
             The method takes column names as meta. We provide all possible keys as column
             names, hence it adds missing keys to JSON objects and marks their values as NaN.
-        3.  We convert the dataframe to JSON using to_json() method and then to a Python object.
-            This method replaces 'NaN' values in the dataframe with 'None' values in Python
-            object. The reason behind not using df.to_dict() method is beacuse it stringifies
-            'NaN' values rather than converting them to a 'None' value.
+        3.  We get records from the dataframe using the method get_records_from_dataframe().
         4.  The processed data is now a list of dict objects. Each dict has same keys, that are
             the column names of the table. We loop through each dict object, and if any value is
             a dict or a list, we stringify them before inserting them into the table. This way,
@@ -77,16 +86,21 @@ def insert_records_from_json(table, engine, json_filepath, column_names, max_lev
         our table and not just the keys from the first JSON object.
     """
     df = pandas.json_normalize(data, max_level=max_level, meta=column_names)
-    data = json.loads(df.to_json(orient='records'))
+    records = get_records_from_dataframe(df)
 
-    for i, row in enumerate(data):
-        data[i] = {
+    for i, row in enumerate(records):
+        records[i] = {
             k: json.dumps(v)
             if (isinstance(v, dict) or isinstance(v, list))
             else v
             for k, v in row.items()
         }
-    insert_record_or_records(table, engine, data)
+    insert_record_or_records(table, engine, records)
+
+
+def insert_records_from_excel(table, engine, dataframe):
+    records = get_records_from_dataframe(dataframe)
+    insert_record_or_records(table, engine, records)
 
 
 def insert_records_from_csv(table, engine, csv_filepath, column_names, header, delimiter=None, escape=None, quote=None, encoding=None):
