@@ -83,7 +83,16 @@ def test_rename_column_foreign_keys(engine_with_schema):
     engine, schema = engine_with_schema
     metadata = get_empty_metadata()
     table_name = "table_to_split"
-    columns_list = [Column("Filler 1", INTEGER), Column("Filler 2", INTEGER)]
+    columns_list = [
+        {
+            "name": "Filler 1",
+            "type": {"name": PostgresType.INTEGER.id}
+        },
+        {
+            "name": "Filler 2",
+            "type": {"name": PostgresType.INTEGER.id}
+        }
+    ]
     schema_oid = get_schema_oid_from_name(schema, engine)
     create_mathesar_table(engine, table_name, schema_oid, columns_list)
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -111,7 +120,8 @@ def test_rename_column_sequence(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
     schema_oid = get_schema_oid_from_name(schema, engine)
-    table = create_mathesar_table(engine, table_name, schema_oid)
+    table_oid = create_mathesar_table(engine, table_name, schema_oid)
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     with engine.begin() as conn:
         ins = table.insert()
         conn.execute(ins)

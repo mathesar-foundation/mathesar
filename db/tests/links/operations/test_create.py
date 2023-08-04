@@ -26,19 +26,19 @@ def test_create_foreign_key_link(engine_with_schema, unique_link):
 
 
 def test_many_to_many_link(engine_with_schema):
-    engine, schema = engine_with_schema
+    engine = engine_with_schema
     referents = {'referent_table_oids': [12345, 54321], 'column_names': ['movie_id', 'actor_id']}
     with patch.object(link_create, 'execute_msar_func_with_engine') as mock_exec:
         link_create.create_many_to_many_link(
             engine=engine,
-            schema_oid=schema,
-            referents=referents,
+            schema_oid=2200,
+            referents_dict=referents,
             map_table_name='movies_actors'
         )
     call_args = mock_exec.call_args_list[0][0]
     assert call_args[0] == engine
     assert call_args[1] == "create_many_to_many_link"
-    assert call_args[2] == schema
+    assert call_args[2] == 2200
     assert call_args[3] == "movies_actors"
     assert call_args[4] == referents['referent_table_oids']
     assert call_args[5] == referents['column_names']

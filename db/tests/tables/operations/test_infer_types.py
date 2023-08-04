@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import call, patch
-from sqlalchemy import Column, MetaData, Table, select, VARCHAR
+from sqlalchemy import Column, MetaData, Table, select
 
 from db.columns.operations.infer_types import infer_column_type
 from db.tables.operations import infer_types as infer_operations
@@ -301,12 +301,11 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
 
 
 def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
-    column_list = [Column("checkcol", VARCHAR, primary_key=True)]
     engine, schema = engine_with_schema
     table_name = "t1"
     schema_oid = get_schema_oid_from_name(schema, engine)
     create_mathesar_table(
-        engine, table_name, schema_oid, column_list
+        engine, table_name, schema_oid
     )
     with patch.object(infer_operations, "infer_column_type") as mock_infer:
         infer_operations.update_table_column_types(

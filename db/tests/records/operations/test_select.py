@@ -1,12 +1,11 @@
 from decimal import Decimal
 from collections import Counter
-
-from sqlalchemy import Column, VARCHAR
-
 from db.records.operations.select import get_records, get_column_cast_records
 from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType
 from db.schemas.utils import get_schema_oid_from_name
+from db.metadata import get_empty_metadata
+from db.tables.operations.select import reflect_table_from_oid
 
 
 def test_get_records_gets_all_records(roster_table_obj):
@@ -31,15 +30,22 @@ def test_get_records_gets_limited_offset_records(roster_table_obj):
 def test_get_column_cast_records(engine_with_schema):
     COL1 = "col1"
     COL2 = "col2"
-    col1 = Column(COL1, VARCHAR)
-    col2 = Column(COL2, VARCHAR)
+    col1 = {
+        "name": COL1,
+        "type": {"name": PostgresType.CHARACTER_VARYING.id}
+    }
+    col2 = {
+        "name": COL2,
+        "type": {"name": PostgresType.CHARACTER_VARYING.id}
+    }
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
     schema_oid = get_schema_oid_from_name(schema, engine)
-    table = create_mathesar_table(
+    table_oid = create_mathesar_table(
         engine, table_name, schema_oid, column_list
     )
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     ins = table.insert().values(
         [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
     )
@@ -63,15 +69,22 @@ def test_get_column_cast_records(engine_with_schema):
 def test_get_column_cast_records_options(engine_with_schema):
     COL1 = "col1"
     COL2 = "col2"
-    col1 = Column(COL1, VARCHAR)
-    col2 = Column(COL2, VARCHAR)
+    col1 = {
+        "name": COL1,
+        "type": {"name": PostgresType.CHARACTER_VARYING.id}
+    }
+    col2 = {
+        "name": COL2,
+        "type": {"name": PostgresType.CHARACTER_VARYING.id}
+    }
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
     schema_oid = get_schema_oid_from_name(schema, engine)
-    table = create_mathesar_table(
+    table_oid = create_mathesar_table(
         engine, table_name, schema_oid, column_list
     )
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     ins = table.insert().values(
         [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
     )
