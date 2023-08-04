@@ -35,6 +35,7 @@ Because function signatures are used informationally in command-generated tables
 needs to be conserved. As a compromise between readability and terseness, we use the following
 conventions in variable naming:
 
+attribute  -> att
 schema     -> sch
 table      -> tab
 column     -> col
@@ -174,6 +175,19 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_relation_namespace_oid(rel_id oid) RETURNS oid AS $$/*
+Get the OID of the namespace containing the given relation.
+
+Most useful for getting the OID of the schema of a given table.
+
+Args:
+  rel_id: The OID of the relation whose namespace we want to find.
+*/
+SELECT relnamespace FROM pg_class WHERE oid=rel_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+
 CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_id integer) RETURNS text AS $$/*
 Return the name for a given column in a given relation (e.g., table).
@@ -238,6 +252,19 @@ FROM jsonb_array_elements(columns) AS x(col);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_attnum(rel_id oid, att_name text) RETURNS smallint AS $$/*
+Get the attnum for a given attribute in the relation. Returns null if no such attribute exists.
+
+Usually, this will be used to get the attnum for a column of a table.
+
+Args:
+  rel_id: The relation where we'll look for the attribute.
+  att_name: The name of the attribute, unquoted.
+*/
+SELECT attnum FROM pg_attribute WHERE attrelid=rel_id AND attname=att_name;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.is_pkey_col(rel_id oid, col_id integer) RETURNS boolean AS $$/*
 Return whether the given column is in the primary key of the given relation (e.g., table).
@@ -247,7 +274,7 @@ Args:
   col_id:  The attnum of the column in the relation.
 */
 BEGIN
-  RETURN ARRAY[col_attnum::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id;
+  RETURN ARRAY[col_id::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id and contype='p';
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -388,6 +415,13 @@ SELECT atttypid::regtype
 FROM pg_attribute
 WHERE attname = quote_ident(col_name)
 AND attrelid = msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
+Return true if the given column exists in the table, false otherwise.
+*/
+SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -889,7 +923,7 @@ Get an array of __msar.col_def from given columns in a table.
 
 Args:
   tab_id: The OID of the table containing the column whose definition we want.
-  col_id: The attnum of the column whose definition we want.
+  col_ids: The attnums of the columns whose definitions we want.
   new_names: The desired names of the column defs. Must be in same order as col_ids, and same
     length.
   copy_defaults: Whether or not we should copy the defaults
@@ -914,6 +948,80 @@ FROM pg_attribute AS pg_columns
   LEFT JOIN pg_attrdef AS pg_column_defaults
     ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
 WHERE pg_columns.attrelid=tab_id;
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unique_column_name_unquoted(tab_id oid, col_name text) RETURNS text AS $$/*
+Get a unique column name based on the given name.
+
+Args:
+  tab_id: The OID of the table where the column name should be unique.
+  col_name: The resulting column name will be equal to or at least based on this.
+
+See the msar.get_fresh_copy_name function for how unique column names are generated.
+*/
+DECLARE
+  col_attnum smallint;
+BEGIN
+  col_attnum := msar.get_attnum(tab_id, col_name);
+  RETURN CASE
+    WHEN col_attnum IS NOT NULL THEN msar.get_fresh_copy_name(tab_id, col_attnum) ELSE col_name
+  END;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unique_fkey_column_name(tab_id oid, fk_col_name text, frel_name text)
+  RETURNS text AS $$/*
+Create a unique name for a foreign key column.
+
+Args:
+  tab_id: The OID of the table where the column name should be unique.
+  fk_col_name: The base name for the foreign key column.
+  frel_name: The name of the referent table. Used for creating fk_col_name if not given.
+
+Note that frel_name will be used to build the foreign key column name if it's not given. The result
+will be of the form: <frel_name>_id. Then, we apply some logic to ensure the result is unique.
+*/
+BEGIN
+  fk_col_name := COALESCE(fk_col_name, format('%s_id', frel_name));
+  RETURN msar.build_unique_column_name_unquoted(tab_id, fk_col_name);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_extracted_col_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
+Get a JSON array of column definitions from given columns for creation of an extracted table.
+
+See the msar.process_col_def_jsonb for a description of the JSON.
+
+Args:
+  tab_id: The OID of the table containing the column whose definition we want.
+  col_ids: The attnum of the column whose definitions we want.
+*/
+
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'name', attname,
+    'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
+    'not_null', attnotnull,
+    'default',
+    -- We only copy non-dynamic default expressions to new table to avoid double-use of sequences.
+    -- Sequences are owned by a specific column, and can't be reused without error.
+    CASE WHEN NOT msar.is_default_possibly_dynamic(tab_id, col_id) THEN
+      pg_get_expr(adbin, tab_id)
+    END
+  )
+)
+FROM pg_attribute AS pg_columns
+  JOIN unnest(col_ids) AS columns_to_copy(col_id)
+    ON pg_columns.attnum=columns_to_copy.col_id
+  LEFT JOIN pg_attrdef AS pg_column_defaults
+    ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
+WHERE pg_columns.attrelid=tab_id AND NOT msar.is_pkey_col(tab_id, col_id);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -1107,7 +1215,9 @@ SELECT format(
   CASE WHEN col.not_null THEN 'NOT NULL' END,
   'DEFAULT ' || col.default_,
   -- This can be used to define our default Mathesar primary key column.
-  CASE WHEN col.identity_ THEN 'GENERATED ALWAYS AS IDENTITY PRIMARY KEY' END
+  -- TODO: We should really consider doing GENERATED *ALWAYS* (rather than BY DEFAULT), but this
+  -- breaks some other assumptions.
+  CASE WHEN col.identity_ THEN 'GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY' END
 );
 $$ LANGUAGE SQL;
 
@@ -1540,7 +1650,6 @@ DECLARE
   tab_name text;
   col_name text;
   created_col_id smallint;
-  col_not_null boolean;
 BEGIN
   col_defs := msar.get_duplicate_col_defs(
     tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
@@ -2087,8 +2196,8 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.create_many_to_one_link(
-  from_rel_id oid,
-  to_rel_id oid,
+  frel_id oid,
+  rel_id oid,
   col_name text,
   unique_link boolean DEFAULT false
 ) RETURNS smallint AS $$/* 
@@ -2096,9 +2205,9 @@ Create a many-to-one or a one-to-one link between tables, returning the attnum o
 column, returning the attnum of the added column.
 
 Args:
-  from_rel_id: The OID of the referent table.
-  to_rel_id: The OID of the referrer table.
-  col_name: Name of the new column to be created in the referrer table, unqoted. 
+  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
+  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
+  col_name: Name of the new column to be created in the referrer table, unquoted.
   unique_link: Whether to make the link one-to-one instead of many-to-one.
 */
 DECLARE
@@ -2107,21 +2216,21 @@ DECLARE
   added_col_ids smallint[];
   con_defs jsonb;
 BEGIN
-  pk_col_id := msar.get_pk_column(from_rel_id);
+  pk_col_id := msar.get_pk_column(frel_id);
   col_defs := jsonb_build_array(
     jsonb_build_object(
       'name', col_name,
-      'type', jsonb_build_object('name', msar.get_column_type(from_rel_id, pk_col_id))
+      'type', jsonb_build_object('name', msar.get_column_type(frel_id, pk_col_id))
     )
   );
-  added_col_ids := msar.add_columns(to_rel_id , col_defs , false);
+  added_col_ids := msar.add_columns(rel_id , col_defs , false);
   con_defs := jsonb_build_array(
     jsonb_build_object(
       'name', null,
       'type', 'f',
       'columns', added_col_ids,
       'deferrable', false,
-      'fkey_relation_id', from_rel_id::integer,
+      'fkey_relation_id', frel_id::integer,
       'fkey_columns', jsonb_build_array(pk_col_id)
     )
   );
@@ -2133,7 +2242,7 @@ BEGIN
         'columns', added_col_ids)
     ) || con_defs;
   END IF;
-  PERFORM msar.add_constraints(to_rel_id , con_defs);
+  PERFORM msar.add_constraints(rel_id , con_defs);
   RETURN added_col_ids[1];
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -2166,3 +2275,84 @@ BEGIN
   RETURN added_table_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- TABLE SPLITTING FUNCTIONS
+--
+-- Functions to extract columns from a table
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.extract_columns_from_table(
+  tab_id oid, col_ids integer[], new_tab_name text, fk_col_name text
+) RETURNS jsonb AS $f$/*
+Extract columns from a table to create a new table, linked by a foreign key.
+
+Args:
+  tab_id: The OID of the table whose columns we'll extract
+  col_ids: An array of the attnums of the columns to extract
+  new_tab_name: The name of the new table to be made from the extracted columns, unquoted
+  fk_col_name: The name to give the new foreign key column in the remainder table (optional)
+
+The extraction takes a set of columns from the table, and creates a new table from the set of
+*distinct* tuples those columns comprise. We also add a new foreign key column to the original
+ (remainder) table that links it to the new extracted table so they can be easily rejoined. The
+ extracted columns are removed from the remainder table.
+*/
+DECLARE
+  extracted_col_defs CONSTANT jsonb := msar.get_extracted_col_def_jsonb(tab_id, col_ids);
+  fkey_name CONSTANT text := msar.build_unique_fkey_column_name(tab_id, fk_col_name, new_tab_name);
+  extracted_table_id integer;
+  fkey_attnum integer;
+BEGIN
+  -- Begin by creating a new table with column definitions matching the extracted columns.
+  extracted_table_id := msar.add_mathesar_table(
+    msar.get_relation_namespace_oid(tab_id),
+    new_tab_name,
+    extracted_col_defs,
+    null,
+    format('Extracted from %s', __msar.get_relation_name(tab_id))
+  );
+  -- Create a new fkey column and foreign key linking the original table to the extracted one.
+  fkey_attnum := msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
+  -- Insert the data from the original table's columns into the extracted columns, and add
+  -- appropriate fkey values to the new fkey column in the original table to give the proper
+  -- mapping.
+  PERFORM __msar.exec_ddl($t$
+    WITH fkey_cte AS (
+      SELECT id, %1$s, dense_rank() OVER (ORDER BY %1$s) AS __msar_tmp_id
+      FROM %2$s
+    ), ins_cte AS (
+      INSERT INTO %3$s (%1$s)
+      SELECT DISTINCT %1$s FROM fkey_cte ORDER BY %1$s
+    )
+    UPDATE %2$s SET %4$I=__msar_tmp_id FROM fkey_cte WHERE
+    %2$s.id=fkey_cte.id
+    $t$,
+    -- %1$s  This is a comma separated string of the extracted column names
+    string_agg(quote_ident(col_def ->> 'name'), ', '),
+    -- %2$s  This is the name of the original (remainder) table
+    __msar.get_relation_name(tab_id),
+    -- %3$s  This is the new extracted table name
+    __msar.get_relation_name(extracted_table_id),
+    -- %4$I  This is the name of the fkey column in the remainder table.
+    fkey_name
+  ) FROM jsonb_array_elements(extracted_col_defs) AS col_def;
+  -- Drop the original versions of the extracted columns from the original table.
+  PERFORM msar.drop_columns(tab_id, variadic col_ids);
+  -- In case the user wanted to give a name to the fkey column matching one of the extracted
+  -- columns, perform that operation now (since the original will now be dropped from the original
+  -- table)
+  IF fk_col_name IS NOT NULL AND fk_col_name IN (
+    SELECT col_def ->> 'name'
+    FROM jsonb_array_elements(extracted_col_defs) AS col_def
+  ) THEN
+    PERFORM msar.rename_column(tab_id, fkey_attnum, fk_col_name);
+  END IF;
+  RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
+END;
+$f$ LANGUAGE plpgsql;
