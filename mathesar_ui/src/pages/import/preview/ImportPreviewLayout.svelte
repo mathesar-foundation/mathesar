@@ -13,7 +13,7 @@
   }}
 >
   <div class="import-preview-content">
-    <div class="page-content">
+    <div class="page-content" class:has-preview={$$slots.preview}>
       <InsetPageLayout>
         <h1 slot="header">Finish setting up your table</h1>
         <slot />
@@ -38,7 +38,10 @@
   .page-content {
     overflow: auto;
   }
-  .footer {
+  .page-content:not(.has-preview) {
+    background: var(--sand-200);
+  }
+  .footer:not(:empty) {
     border-top: 1px solid var(--slate-200);
     padding: 1rem 1rem 1rem 1rem;
     background: var(--white);
