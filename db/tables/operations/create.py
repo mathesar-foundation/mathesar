@@ -1,10 +1,5 @@
-# from sqlalchemy import Column, TEXT, Table, MetaData
 from sqlalchemy.ext import compiler
 from sqlalchemy.schema import DDLElement
-
-# from db.columns.utils import init_mathesar_table_column_list_with_defaults
-# from db.schemas.operations.create import create_schema
-# from db.tables.operations.alter import comment_on_table
 import json
 from db.connection import execute_msar_func_with_engine
 from db.types.base import PostgresType
