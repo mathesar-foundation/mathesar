@@ -57,6 +57,10 @@
     { database, schema },
     'canEditTableRecords',
   );
+  $: canViewLinkedEntities = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canViewLinkedEntities',
+  );
   $: recordsDataState = recordsData.state;
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
@@ -161,6 +165,7 @@
       {isSelectedInRange}
       {value}
       {isProcessing}
+      {canViewLinkedEntities}
       recordSummary={$recordSummaries
         .get(String(column.id))
         ?.get(String(value))}
