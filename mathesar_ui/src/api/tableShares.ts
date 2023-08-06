@@ -30,10 +30,17 @@ function update(
   );
 }
 
+function regenerate(tableId: number, shareId: TableShare['id']) {
+  return postAPI<TableShare>(
+    `/api/ui/v0/tables/${tableId}/shares/${shareId}/regenerate/`,
+  );
+}
+
 const tableShare: ShareApi<TableShare, UnsavedShare> = {
   list,
   add,
   update,
+  regenerate,
 };
 
 export default tableShare;

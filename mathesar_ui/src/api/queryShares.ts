@@ -30,10 +30,17 @@ function update(
   );
 }
 
+function regenerate(queryId: number, shareId: QueryShare['id']) {
+  return postAPI<QueryShare>(
+    `/api/ui/v0/tables/${queryId}/shares/${shareId}/regenerate/`,
+  );
+}
+
 const queryShare: ShareApi<QueryShare, UnsavedQueryShare> = {
   list,
   add,
   update,
+  regenerate,
 };
 
 export default queryShare;

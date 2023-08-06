@@ -88,6 +88,12 @@
   }
 
   async function regenerateLink() {
+    if (!share) {
+      throw new Error(
+        `Unable to regenerate link for share.
+        This state should never occur`,
+      );
+    }
     const confirmationPromise = confirm({
       title: 'Remove old link and create a new link?',
       body: [
@@ -104,7 +110,8 @@
     const isConfirmed = await confirmationPromise;
     cleanupDropdown();
     if (isConfirmed) {
-      toast.error('Not implemented yet');
+      share = await api.regenerate(entityId, share.id);
+      toast.success('The link has been successfully regenerated');
     }
   }
 
