@@ -164,6 +164,25 @@ def test_shared_query_delete(
         assert response.status_code == 403
 
 
+@pytest.mark.parametrize('client_name,is_allowed', write_client_with_different_roles)
+def test_shared_query_regenerate_link(
+    shared_test_query,
+    request,
+    client_name,
+    is_allowed
+):
+    client = request.getfixturevalue(client_name)(shared_test_query["query"].base_table.schema)
+    old_slug = str(shared_test_query["share"].slug)
+    response = client.post(f'/api/ui/v0/queries/{shared_test_query["query"].id}/shares/{shared_test_query["share"].id}/regenerate/')
+    response_data = response.json()
+
+    if is_allowed:
+        assert response.status_code == 200
+        assert response_data['slug'] != old_slug
+    else:
+        assert response.status_code == 403
+
+
 # Query endpoints with share-link-uuid token
 
 queries_request_client_with_different_roles = [

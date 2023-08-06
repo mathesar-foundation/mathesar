@@ -164,6 +164,25 @@ def test_shared_table_delete(
         assert response.status_code == 403
 
 
+@pytest.mark.parametrize('client_name,is_allowed', write_client_with_different_roles)
+def test_shared_table_regenerate_link(
+    shared_test_table,
+    request,
+    client_name,
+    is_allowed
+):
+    client = request.getfixturevalue(client_name)(shared_test_table["table"].schema)
+    old_slug = str(shared_test_table["share"].slug)
+    response = client.post(f'/api/ui/v0/tables/{shared_test_table["table"].id}/shares/{shared_test_table["share"].id}/regenerate/')
+    response_data = response.json()
+
+    if is_allowed:
+        assert response.status_code == 200
+        assert response_data['slug'] != old_slug
+    else:
+        assert response.status_code == 403
+
+
 # Table endpoints with share-link-uuid token
 
 tables_request_client_with_different_roles = [
