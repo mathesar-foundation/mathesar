@@ -14,6 +14,7 @@
 
   interface $$Props extends ComponentProps<Dropdown> {
     filtering: Writable<Filtering>;
+    canViewLinkedEntities: boolean;
   }
 
   const imperativeFilterController = getImperativeFilterControllerFromContext();
@@ -22,6 +23,11 @@
   $: ({ processedColumns, recordsData } = $tabularData);
 
   export let filtering: Writable<Filtering>;
+  export let canViewLinkedEntities = true;
+
+  $: processedColumnsToShow = canViewLinkedEntities
+    ? $processedColumns
+    : new Map([...$processedColumns].filter(([, entry]) => !entry.linkFk));
 
   let isOpen = false;
 
@@ -48,7 +54,7 @@
   <Filter
     slot="content"
     {filtering}
-    processedColumns={$processedColumns}
+    processedColumns={processedColumnsToShow}
     recordSummaries={recordsData.recordSummaries}
   />
 </Dropdown>
