@@ -6,7 +6,10 @@
   import BadgeCount from '@mathesar/component-library/badge-count/BadgeCount.svelte';
   import { iconFiltering } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
-  import type { Filtering } from '@mathesar/stores/table-data';
+  import {
+    getTabularDataStoreFromContext,
+    type Filtering,
+  } from '@mathesar/stores/table-data';
   import Filter from './Filter.svelte';
 
   interface $$Props extends ComponentProps<Dropdown> {
@@ -14,6 +17,9 @@
   }
 
   const imperativeFilterController = getImperativeFilterControllerFromContext();
+
+  const tabularData = getTabularDataStoreFromContext();
+  $: ({ processedColumns, recordsData } = $tabularData);
 
   export let filtering: Writable<Filtering>;
 
@@ -39,5 +45,10 @@
       Filter <BadgeCount value={$filtering.entries.length} />
     </span>
   </svelte:fragment>
-  <Filter slot="content" {filtering} />
+  <Filter
+    slot="content"
+    {filtering}
+    processedColumns={$processedColumns}
+    recordSummaries={recordsData.recordSummaries}
+  />
 </Dropdown>
