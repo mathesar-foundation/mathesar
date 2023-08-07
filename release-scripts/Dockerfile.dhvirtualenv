@@ -8,7 +8,7 @@ RUN apt-get update -qq -o Acquire::Languages=none \
         -yqq --no-install-recommends -o Dpkg::Options::=--force-unsafe-io \
         build-essential debhelper devscripts equivs lsb-release libparse-debianchangelog-perl \
         python3 python3-setuptools python3-pip python3-dev \
-        python3-sphinx python3-mock dh-exec dh-python python3-sphinx-rtd-theme \
+        dh-exec dh-python \
     && if test "$(lsb_release -cs)" = 'bionic' ; then \
         apt-get install -yqq --no-install-recommends -o Dpkg::Options::=--force-unsafe-io \
                         -t bionic-backports debhelper; fi \

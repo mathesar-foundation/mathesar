@@ -7,7 +7,7 @@
 PACKAGE_NAME:=`dh_listpackages`
 
 override_dh_installsystemd:
-	dh_installsystemd --name=matrix-synapse
+	dh_installsystemd --name=mathesar
 
 # we don't really want to strip the symbols from our object files.
 override_dh_strip:
