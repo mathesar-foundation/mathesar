@@ -46,7 +46,7 @@ class QueryViewSet(
         Returns a properly scoped queryset.
 
         Access to queries may require different access controls, some of which
-        require scoping while others do not. See
+        include scoping while others do not. See
         `QueryAccessPolicy.get_should_queryset_be_scoped` docstring for more
         information.
         """
