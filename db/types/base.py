@@ -8,7 +8,7 @@ from db.utils import OrderByIds
 
 class DatabaseType(OrderByIds):
 
-    value: str  # noqa: NT001
+    value = ''
 
     @property
     def id(self):
