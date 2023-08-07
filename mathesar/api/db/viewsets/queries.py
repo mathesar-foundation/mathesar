@@ -35,7 +35,6 @@ class QueryViewSet(
     access_policy = QueryAccessPolicy
 
     def get_queryset(self):
-        queryset = None
         queryset = self._get_scoped_queryset()
         schema_id = self.request.query_params.get('schema')
         if schema_id:
