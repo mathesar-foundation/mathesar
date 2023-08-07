@@ -11,7 +11,7 @@ CHECK_ROWS = 10
 
 
 def create_table_from_data_file(data_file, name, schema, comment=None):
-    engine = create_mathesar_engine(schema.database.name)
+    engine = schema._sa_engine
     if data_file.type == 'csv' or data_file.type == 'tsv':
         db_table = create_db_table_from_csv_data_file(
             data_file, name, schema, comment=comment
