@@ -1,20 +1,11 @@
 import warnings
 
-from pglast import Node, parse_sql
-from sqlalchemy import and_, asc, cast, select, text, exists
+from sqlalchemy import and_, asc, cast, select, text, exists, Identity
 
 from db.columns.exceptions import DynamicDefaultWarning
+from db.connection import execute_msar_func_with_engine
 from db.tables.operations.select import reflect_table_from_oid
 from db.utils import execute_statement, get_pg_catalog_table
-
-# These tags define which nodes in the AST built by pglast we consider to be
-# "dynamic" when found in a column default clause.  The nodes are best
-# documented by C header files that define the underlying structs:
-# https://github.com/pganalyze/libpg_query/blob/13-latest/src/postgres/include/nodes/parsenodes.h
-# https://github.com/pganalyze/libpg_query/blob/13-latest/src/postgres/include/nodes/primnodes.h
-# It's possible that more dynamic nodes will be found.  Their tags should be
-# added to this set.
-DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
 def get_column_attnum_from_names_as_map(table_oid, column_names, engine, metadata, connection_to_use=None):
@@ -127,11 +118,16 @@ def get_column_default_dict(table_oid, attnum, engine, metadata, connection_to_u
         metadata=metadata,
         connection_to_use=connection_to_use,
     )
-    if column.server_default is None:
+    default = column.server_default
+
+    if default is None:
         return
 
-    is_dynamic = _is_default_expr_dynamic(column.server_default)
-    sql_text = str(column.server_default.arg)
+    is_dynamic = execute_msar_func_with_engine(
+        engine, 'is_default_possibly_dynamic', table_oid, attnum
+    ).fetchone()[0]
+
+    sql_text = str(default.arg) if not isinstance(default, Identity) else 'identity'
 
     if is_dynamic:
         warnings.warn(
@@ -203,12 +199,3 @@ def _statement_for_triples_of_column_name_and_attnum_and_table_oid(
         conditions.append(attnum_positive)
     sel = sel.where(and_(*conditions))
     return sel
-
-
-def _is_default_expr_dynamic(server_default):
-    prepared_expr = f"""SELECT {server_default.arg.text};"""
-    expr_ast_root = Node(parse_sql(prepared_expr))
-    ast_nodes = {
-        n.node_tag for n in expr_ast_root.traverse() if isinstance(n, Node)
-    }
-    return not ast_nodes.isdisjoint(DYNAMIC_NODE_TAGS)

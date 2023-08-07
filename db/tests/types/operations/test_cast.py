@@ -1066,9 +1066,10 @@ def test_alter_column_type_alters_column_type(
     )
     input_table.create()
     with engine.begin() as conn:
+        table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
         alter_column_type(
-            get_oid_from_table(TABLE_NAME, schema, engine),
-            COLUMN_NAME,
+            table_oid,
+            get_column_attnum_from_name(table_oid, COLUMN_NAME, engine, metadata),
             engine,
             conn,
             target_type,
@@ -1187,9 +1188,10 @@ def test_alter_column_type_casts_column_data_args(
     ins = input_table.insert(values=(value,))
     with engine.begin() as conn:
         conn.execute(ins)
+        table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
         alter_column_type(
-            get_oid_from_table(TABLE_NAME, schema, engine),
-            COLUMN_NAME,
+            table_oid,
+            get_column_attnum_from_name(table_oid, COLUMN_NAME, engine, metadata),
             engine,
             conn,
             target_type,
@@ -1236,6 +1238,7 @@ def test_alter_column_casts_data_gen(
     source_sa_type = source_type.get_sa_class(engine)
     default_unsupported = [
         MathesarCustomType.MULTICURRENCY_MONEY,
+        PostgresType.CHARACTER,
         PostgresType.JSON,
         PostgresType.JSONB,
         MathesarCustomType.MATHESAR_JSON_ARRAY,
@@ -1262,9 +1265,10 @@ def test_alter_column_casts_data_gen(
     ins = input_table.insert().values(testcol=in_val)
     with engine.begin() as conn:
         conn.execute(ins)
+        table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
         alter_column_type(
-            get_oid_from_table(TABLE_NAME, schema, engine),
-            COLUMN_NAME,
+            table_oid,
+            get_column_attnum_from_name(table_oid, COLUMN_NAME, engine, metadata),
             engine,
             conn,
             target_type
@@ -1320,12 +1324,14 @@ def test_alter_column_type_raises_on_bad_column_data(
     with engine.begin() as conn:
         conn.execute(ins)
         with pytest.raises(Exception):
+            table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
             alter_column_type(
-                get_oid_from_table(TABLE_NAME, schema, engine),
-                COLUMN_NAME,
+                table_oid,
+                get_column_attnum_from_name(table_oid, COLUMN_NAME, engine, metadata),
                 engine,
                 conn,
-                target_type
+                target_type,
+                None
             )
 
 
@@ -1348,9 +1354,10 @@ def test_alter_column_type_raises_on_bad_parameters(
     with engine.begin() as conn:
         conn.execute(ins)
         with pytest.raises(DataError) as e:
+            table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
             alter_column_type(
-                get_oid_from_table(TABLE_NAME, schema, engine),
-                COLUMN_NAME,
+                table_oid,
+                get_column_attnum_from_name(table_oid, COLUMN_NAME, engine, metadata),
                 engine,
                 conn,
                 PostgresType.NUMERIC,

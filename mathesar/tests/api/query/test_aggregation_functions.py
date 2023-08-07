@@ -716,6 +716,179 @@ def test_min_aggregation(library_ma_tables, get_uid, client):
     assert sorted(actual_records, key=lambda x: x['Checkout Month']) == expect_records
 
 
+def test_peak_month_aggregation(library_ma_tables, get_uid, client):
+    _ = library_ma_tables
+    checkouts = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Checkouts"]
+    columns = {
+        c["name"]: c for c in checkouts["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": checkouts["id"],
+        "initial_columns": [
+            {"id": columns["Checkout Time"]["id"], "alias": "Checkout Time"},
+            {"id": columns["Patron"]["id"], "alias": "Patron"},
+        ],
+        "display_names": {
+            "Checkout Time": "Checkout Time",
+            "Patron": "Patron",
+        },
+        "display_options": {
+            "Checkout Time": {
+                display_option_origin: "Checkout Time",
+            },
+            "Patron": {
+                display_option_origin: "Patron",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "Patron",
+                            "output_alias": "Patron",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "Checkout Time",
+                            "output_alias": "Checkout Time",
+                            "function": "peak_month",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {
+            "Patron": 1,
+            "Checkout Time": 5
+        },
+        {
+            "Patron": 2,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 3,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 4,
+            "Checkout Time": 5
+        },
+        {
+            "Patron": 5,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 6,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 7,
+            "Checkout Time": 5
+        },
+        {
+            "Patron": 8,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 9,
+            "Checkout Time": 5
+        },
+        {
+            "Patron": 10,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 11,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 12,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 13,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 14,
+            "Checkout Time": 5
+        },
+        {
+            "Patron": 15,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 16,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 17,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 18,
+            "Checkout Time": 5
+        },
+        {
+            "Patron": 19,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 20,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 21,
+            "Checkout Time": 5
+        },
+        {
+            "Patron": 22,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 23,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 24,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 25,
+            "Checkout Time": 5
+        },
+        {
+            "Patron": 26,
+            "Checkout Time": 7
+        },
+        {
+            "Patron": 27,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 28,
+            "Checkout Time": 6
+        },
+        {
+            "Patron": 29,
+            "Checkout Time": 7
+        }
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['Patron']) == expect_records
+
+
 def test_percentage_true_aggregation(payments_ma_table, get_uid, client):
     _ = payments_ma_table
     payments = {
@@ -791,6 +964,394 @@ def test_percentage_true_aggregation(payments_ma_table, get_uid, client):
     ]
     actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
     assert sorted(actual_records, key=lambda x: x['Payment Mode']) == expect_records
+
+
+def test_list_aggregation_mathesar_json_array(players_ma_table, get_uid, client):
+    _ = players_ma_table
+    players = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Players"]
+    columns = {
+        c["name"]: c for c in players["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": players["id"],
+        "initial_columns": [
+            {"id": columns["ballon_dor"]["id"], "alias": "ballon_dor"},
+            {"id": columns["country"]["id"], "alias": "country"},
+            {"id": columns["titles"]["id"], "alias": "titles"},
+        ],
+        "display_names": {
+            "ballon_dor": "ballon_dor",
+            "country": "country",
+            "titles": "titles",
+        },
+        "display_options": {
+            "country": {
+                display_option_origin: "country",
+            },
+            "ballon_dor": {
+                display_option_origin: "ballon_dor",
+            },
+            "titles": {
+                display_option_origin: "titles",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "country",
+                            "output_alias": "country",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "ballon_dor",
+                            "output_alias": "ballon_dor",
+                            "function": "distinct_aggregate_to_array",
+                        },
+                        {
+                            "input_alias": "titles",
+                            "output_alias": "titles",
+                            "function": "distinct_aggregate_to_array",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {
+            "country": "Argentina",
+            "ballon_dor": [
+                [
+                    1957,
+                    1959,
+                    1960
+                ],
+                [
+                    2009,
+                    2011,
+                    2012,
+                    2013,
+                    2016,
+                    2019,
+                    2021
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 4,
+                        "world_cup": 1
+                    }
+                ],
+                [
+                    {
+                        "ucl": 5,
+                        "world_cup": 0
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Brazil",
+            "ballon_dor": [
+                [
+                    1962
+                ],
+                [
+                    1999
+                ],
+                [
+                    2005
+                ],
+                [
+                    2007
+                ],
+                [
+                    1997,
+                    2002
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 0,
+                        "world_cup": 2
+                    }
+                ],
+                [
+                    {
+                        "ucl": 1,
+                        "world_cup": 1
+                    }
+                ],
+                [
+                    {
+                        "ucl": 3,
+                        "world_cup": 2
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Croatia",
+            "ballon_dor": [
+                [
+                    2018
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 4,
+                        "world_cup": 0
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "England",
+            "ballon_dor": [
+                [
+                    1966
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 1,
+                        "world_cup": 1
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "France",
+            "ballon_dor": [
+                [
+                    1958
+                ],
+                [
+                    1998
+                ],
+                [
+                    1983,
+                    1984,
+                    1985
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 0,
+                        "world_cup": 0
+                    }
+                ],
+                [
+                    {
+                        "ucl": 1,
+                        "world_cup": 0
+                    }
+                ],
+                [
+                    {
+                        "ucl": 1,
+                        "world_cup": 1
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Germany",
+            "ballon_dor": [
+                [
+                    1970
+                ],
+                [
+                    1990
+                ],
+                [
+                    1972,
+                    1976
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 0,
+                        "world_cup": 1
+                    }
+                ],
+                [
+                    {
+                        "ucl": 3,
+                        "world_cup": 1
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Hungary",
+            "ballon_dor": [
+                [
+                    1959
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 3,
+                        "world_cup": 0
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Italy",
+            "ballon_dor": [
+                [
+                    1969
+                ],
+                [
+                    1993
+                ],
+                [
+                    2006
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 0,
+                        "world_cup": 0
+                    }
+                ],
+                [
+                    {
+                        "ucl": 0,
+                        "world_cup": 1
+                    }
+                ],
+                [
+                    {
+                        "ucl": 2,
+                        "world_cup": 1
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Liberia",
+            "ballon_dor": [
+                [
+                    1995
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 0,
+                        "world_cup": 0
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Netherlands",
+            "ballon_dor": [
+                [
+                    1971,
+                    1973,
+                    1974
+                ],
+                [
+                    1988,
+                    1992,
+                    1993
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 3,
+                        "world_cup": 0
+                    }
+                ],
+                [
+                    {
+                        "ucl": 3,
+                        "world_cup": 1
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Portugal",
+            "ballon_dor": [
+                [
+                    2008,
+                    2010,
+                    2014,
+                    2015,
+                    2017
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 5,
+                        "world_cup": 0
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Soviet Union",
+            "ballon_dor": [
+                [
+                    1963
+                ],
+                [
+                    1975
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 0,
+                        "world_cup": 0
+                    }
+                ]
+            ]
+        },
+        {
+            "country": "Ukraine",
+            "ballon_dor": [
+                [
+                    2004
+                ]
+            ],
+            "titles": [
+                [
+                    {
+                        "ucl": 1,
+                        "world_cup": 0
+                    }
+                ]
+            ]
+        }
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['country']) == expect_records
 
 
 def test_Mathesar_money_distinct_list_aggregation(library_ma_tables, get_uid, client):
