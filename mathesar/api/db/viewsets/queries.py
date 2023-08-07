@@ -51,7 +51,7 @@ class QueryViewSet(
         information.
         """
         should_queryset_be_scoped = \
-            QueryAccessPolicy.get_should_queryset_be_scoped(self.action)
+            not QueryAccessPolicy.get_should_queryset_be_unscoped(self.action)
         if should_queryset_be_scoped:
             queryset = self.access_policy.scope_queryset(
                 self.request,

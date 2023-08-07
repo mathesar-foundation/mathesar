@@ -42,7 +42,7 @@ class QueryAccessPolicy(AccessPolicy):
     ]
 
     @staticmethod
-    def get_should_queryset_be_scoped(viewset_action):
+    def get_should_queryset_be_unscoped(viewset_action):
         """
         Tells you if the queryset for passed viewset action should be scoped
         using this class's `scope_queryset`.
