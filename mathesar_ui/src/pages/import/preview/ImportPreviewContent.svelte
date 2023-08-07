@@ -78,8 +78,12 @@
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
   async function init() {
-    const columnData = await columnsFetch.run(table.id);
-    columns = columnData.resolvedValue?.results ?? [];
+    const columnsResponse = await columnsFetch.run(table.id);
+    const fetchedColumns = columnsResponse?.resolvedValue?.results;
+    if (!fetchedColumns) {
+      return;
+    }
+    columns = fetchedColumns;
     columnPropertiesMap = buildColumnPropertiesMap(columns);
     if (useColumnTypeInference) {
       const response = await typeSuggestionsRequest.run(table.id);
@@ -184,7 +188,13 @@
   <svelte:fragment slot="preview">
     <h2 class="large-bold-header preview-header">Table Preview</h2>
     <div class="preview-content">
-      {#if !$previewRequest.hasInitialized}
+      {#if $columnsFetch.error}
+        <ErrorInfo
+          error={$columnsFetch.error}
+          on:retry={init}
+          on:delete={cancel}
+        />
+      {:else if !$previewRequest.hasInitialized}
         <div class="loading"><Spinner /></div>
       {:else if $previewRequest.error}
         <ErrorInfo
