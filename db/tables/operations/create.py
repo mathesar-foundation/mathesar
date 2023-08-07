@@ -33,6 +33,7 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
     ).fetchone()[0]
 
 
+# TODO stop relying on reflections, instead return oid of the created table.
 def create_string_column_table(name, schema_oid, column_names, engine, comment=None):
     """
     This method creates a Postgres table in the specified schema, with all
