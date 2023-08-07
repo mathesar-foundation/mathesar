@@ -1,4 +1,3 @@
-from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Table
 from mathesar.imports.csv import create_db_table_from_csv_data_file
 from mathesar.imports.excel import create_db_table_from_excel_data_file
