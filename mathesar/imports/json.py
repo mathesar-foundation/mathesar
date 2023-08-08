@@ -66,7 +66,7 @@ def get_column_names_from_json(data_file, max_level):
 def insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level):
     table = create_string_column_table(
         name=name,
-        schema=schema.name,
+        schema_oid=schema.oid,
         column_names=column_names,
         engine=engine,
         comment=comment,

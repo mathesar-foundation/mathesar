@@ -123,7 +123,7 @@ def insert_records_from_csv_data_file(name, schema, column_names, engine, commen
     encoding = get_file_encoding(data_file.file)
     table = create_string_column_table(
         name=name,
-        schema=schema.name,
+        schema_oid=schema.oid,
         column_names=column_names,
         engine=engine,
         comment=comment,
