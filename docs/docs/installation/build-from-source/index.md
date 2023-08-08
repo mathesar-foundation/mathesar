@@ -385,9 +385,10 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo journalctl --priority=notice --unit=caddy.service
     ```
 
+### Set up your user account
+Mathesar is now installed! You can use it by visiting the URL `xDOMAIN_NAMEx`.
 
-Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`.
-
+You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
 
 ## Administration
 

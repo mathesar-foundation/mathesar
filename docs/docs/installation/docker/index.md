@@ -82,6 +82,12 @@ Have the following information for all databases you'd like to connect to Mathes
     docker logs -f mathesar_service
     ```
 
+1. Set up your user account
+
+    Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up.
+
+    You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
+
 ## Upgrading Mathesar {:#upgrade}
 
 1. Stop your existing Mathesar container:

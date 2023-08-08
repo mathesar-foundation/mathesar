@@ -89,4 +89,10 @@
         docker compose -f docker-compose.yml up watchtower -d
         ```
 
+1. Set up your user account
+
+    Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up.
+
+    You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
+
 {% include 'snippets/docker-compose-administration.md' %}
