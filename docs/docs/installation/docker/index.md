@@ -5,7 +5,7 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
 !!! warning "Limitations"
     This installation procedure is intended for users who want to quickly run Mathesar on their local machine without exposing it to the internet.
 
-    Please use the [Docker Compose installation documentation](../docker-compose/index.md) if you plan to expose Mathesar to the internet. We will be adding information setting up a production server to this documentation in [our next release](https://github.com/centerofci/mathesar/issues/3122)
+    For now, please use the [Docker Compose installation documentation](../docker-compose/index.md) if you plan to expose Mathesar to the internet. We will provide more information on how to use this installation method for production servers [soon](https://github.com/centerofci/mathesar/issues/3122).
 
 
 ## Prerequisites
@@ -26,7 +26,7 @@ You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
     ```bash
     docker run \
       --detach
-      -e SECRET_KEY='<replace with a 50 character string>' \
+      -e SECRET_KEY='<replace with a random 50 character string>' \
       -e ALLOWED_HOSTS='.localhost, 127.0.0.1, [::1]' \
       -v static:/code/static \
       -v media:/code/media \
