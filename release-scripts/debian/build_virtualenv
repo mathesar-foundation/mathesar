@@ -28,61 +28,26 @@ case $(dpkg-architecture -q DEB_HOST_ARCH) in
 esac
 
 
-# Use --no-deps to only install pinned versions in exported_requirements.txt,
+# Use --no-deps to only install pinned versions in requirements.txt,
 # and to avoid https://github.com/pypa/pip/issues/9644
-dh_virtualenv \
-    --install-suffix "matrix-synapse" \
-    --builtin-venv \
-    --python "$SNAKE" \
-    --upgrade-pip \
-    --preinstall="lxml" \
-    --preinstall="mock" \
-    --preinstall="wheel" \
-    --extra-pip-arg="--no-deps" \
-    --extra-pip-arg="--no-cache-dir" \
-    --extra-pip-arg="--compile" \
-    --extras="all,systemd,test" \
-    --requirements="requirements.txt"
+dh_virtualenv
 
 PACKAGE_BUILD_DIR="$(pwd)/debian/mathesar"
-VIRTUALENV_DIR="${PACKAGE_BUILD_DIR}${DH_VIRTUALENV_INSTALL_ROOT}/matrix-synapse"
+VIRTUALENV_DIR="${PACKAGE_BUILD_DIR}${DH_VIRTUALENV_INSTALL_ROOT}/mathesar"
 TARGET_PYTHON="${VIRTUALENV_DIR}/bin/python"
 
-case "$DEB_BUILD_OPTIONS" in
-    *nocheck*)
-        # Skip running tests if "nocheck" present in $DEB_BUILD_OPTIONS
-        ;;
-
-    *)
-        # Copy tests to a temporary directory so that we can put them on the
-        # PYTHONPATH without putting the uninstalled synapse on the pythonpath.
-        tmpdir=$(mktemp -d)
-        trap 'rm -r $tmpdir' EXIT
-
-        cp -r tests "$tmpdir"
-
-        # To avoid pulling in the unbuilt Synapse in the local directory
-        pushd /
-
-        PYTHONPATH="$tmpdir" \
-            "${TARGET_PYTHON}" -m twisted.trial --reporter=text -j2 tests
-
-        popd
-
-        ;;
-esac
 
 # build the config file
 "${TARGET_PYTHON}" "${VIRTUALENV_DIR}/bin/generate_config" \
-        --config-dir="/etc/matrix-synapse" \
-        --data-dir="/var/lib/matrix-synapse" |
+        --config-dir="/etc/mathesar" \
+        --data-dir="/var/lib/mathesar" |
     perl -pe '
 # tweak the paths to the tls certs and signing keys
 /^tls_.*_path:/ and s/SERVERNAME/homeserver/;
 /^signing_key_path:/ and s/SERVERNAME/homeserver/;
 
 # tweak the pid file location
-/^pid_file:/ and s#:.*#: "/var/run/matrix-synapse.pid"#;
+/^pid_file:/ and s#:.*#: "/var/run/mathesar.pid"#;
 
 # tweak the path to the log config
 /^log_config:/ and s/SERVERNAME\.log\.config/log.yaml/;
@@ -91,20 +56,20 @@ esac
 /^media_store_path:/ and s#/media_store#/media#;
 
 # remove the server_name setting, which is set in a separate file
-/^server_name:/ and $_ = "#\n# This is set in /etc/matrix-synapse/conf.d/server_name.yaml for Debian installations.\n# $_";
+/^server_name:/ and $_ = "#\n# This is set in /etc/mathesar/conf.d/server_name.yaml for Debian installations.\n# $_";
 
 # remove the report_stats setting, which is set in a separate file
 /^# report_stats:/ and $_ = "";
 
-' > "${PACKAGE_BUILD_DIR}/etc/matrix-synapse/homeserver.yaml"
+' > "${PACKAGE_BUILD_DIR}/etc/mathesar/homeserver.yaml"
 
 # build the log config file
 "${TARGET_PYTHON}" "${VIRTUALENV_DIR}/bin/generate_log_config" \
-        --output-file="${PACKAGE_BUILD_DIR}/etc/matrix-synapse/log.yaml"
+        --output-file="${PACKAGE_BUILD_DIR}/etc/mathesar/log.yaml"
 
 # add a dependency on the right version of python to substvars.
 PYPKG=$(basename "$SNAKE")
-echo "synapse:pydepends=$PYPKG" >> debian/mathesar.substvars
+echo "mathesar:pydepends=$PYPKG" >> debian/mathesar.substvars
 
 
 # add a couple of triggers.  This is needed so that dh-virtualenv can rebuild

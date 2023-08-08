@@ -7,14 +7,18 @@ set -ex
 # Get the codename from distro env
 DIST='ubuntu:jammy'
 
+sudo rm -r build
 # we get a read-only copy of the source: make a writeable copy
-cp -aT ../mathesar build/mathesar/
-cp -aT ../config build/config/
-cp -aT ../db build/db
-cp -aT ../media build/media
-cp -aT ../install.py build/install.py
-cp -aT ../manage.py build/manage.py
-cp -aT debian build/debian
+mkdir build
+cp ../requirements.txt build/requirements.txt
+cp ../pyproject.toml build/pyproject.toml
+cp -r ../mathesar build/mathesar/
+cp -r ../config build/config/
+cp -r ../db build/db
+cp -r ../media build/media
+cp ../install.py build/install.py
+cp ../manage.py build/manage.py
+cp -r debian build/debian
 cd build
 
 dpkg-buildpackage -us -uc
