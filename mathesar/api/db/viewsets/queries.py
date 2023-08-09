@@ -47,7 +47,7 @@ class QueryViewSet(
 
         Access to queries may require different access controls, some of which
         include scoping while others do not. See
-        `QueryAccessPolicy.get_should_queryset_be_scoped` docstring for more
+        `QueryAccessPolicy.get_should_queryset_be_unscoped` docstring for more
         information.
         """
         should_queryset_be_scoped = \
@@ -58,7 +58,7 @@ class QueryViewSet(
                 UIQuery.objects.all()
             )
         else:
-            queryset = UIQuery.objects.all().order_by('-created_at')
+            queryset = UIQuery.objects.all()
         return queryset
 
     @action(methods=['get'], detail=True)
