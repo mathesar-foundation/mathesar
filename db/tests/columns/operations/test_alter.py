@@ -15,6 +15,7 @@ from db.tests.columns.utils import create_test_table
 from db.types.base import PostgresType
 from db.types.operations.convert import get_db_type_enum_from_class
 from db.metadata import get_empty_metadata
+from db.schemas.utils import get_schema_oid_from_name
 
 
 def _rename_column_and_assert(table, old_col_name, new_col_name, engine):
@@ -82,8 +83,18 @@ def test_rename_column_foreign_keys(engine_with_schema):
     engine, schema = engine_with_schema
     metadata = get_empty_metadata()
     table_name = "table_to_split"
-    columns_list = [Column("Filler 1", INTEGER), Column("Filler 2", INTEGER)]
-    create_mathesar_table(table_name, schema, columns_list, engine)
+    columns_list = [
+        {
+            "name": "Filler 1",
+            "type": {"name": PostgresType.INTEGER.id}
+        },
+        {
+            "name": "Filler 2",
+            "type": {"name": PostgresType.INTEGER.id}
+        }
+    ]
+    schema_oid = get_schema_oid_from_name(schema, engine)
+    create_mathesar_table(engine, table_name, schema_oid, columns_list)
     table_oid = get_oid_from_table(table_name, schema, engine)
     extracted_cols = ["Filler 1"]
     extracted_col_attnums = get_columns_attnum_from_names(
@@ -108,7 +119,9 @@ def test_rename_column_sequence(engine_with_schema):
     new_col_name = "new_" + constants.ID
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
-    table = create_mathesar_table(table_name, schema, [], engine)
+    schema_oid = get_schema_oid_from_name(schema, engine)
+    table_oid = create_mathesar_table(engine, table_name, schema_oid)
+    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     with engine.begin() as conn:
         ins = table.insert()
         conn.execute(ins)
