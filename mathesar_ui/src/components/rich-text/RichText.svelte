@@ -32,31 +32,18 @@
   ```
  -->
 <script lang="ts">
-  const RICH_TEXT_REGEX = /\w*\[(\w+)\]\w*/gm;
+  import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import { parse } from './richTextUtils';
+
   export let text: string;
-
-  type PrefixAndSlotTuple = [prefix: string, slotName: string];
-  function splitInThreePartsRecursively(
-    string: string,
-  ): Array<PrefixAndSlotTuple> {
-    // every odd element will a slotName
-    const split = string.split(RICH_TEXT_REGEX);
-
-    let index = 0;
-    const prefixAndSlotTuples: PrefixAndSlotTuple[] = [];
-    while (index <= split.length) {
-      const currentPart = split[index] ?? '';
-      const nextPart = split[index + 1] ?? '';
-      prefixAndSlotTuples.push([currentPart, nextPart]);
-      index += 2;
-    }
-
-    return prefixAndSlotTuples;
-  }
-
-  $: splitText = splitInThreePartsRecursively(text);
 </script>
 
-{#each splitText as [prefix, slotName]}
-  {prefix}{#if slotName}<slot {slotName} />{/if}
+{#each parse(text) as token}
+  {#if token.type === 'text'}
+    {token.content}
+  {:else if token.type === 'slot'}
+    <slot slotName={token.name} />
+  {:else}
+    {assertExhaustive(token)}
+  {/if}
 {/each}
