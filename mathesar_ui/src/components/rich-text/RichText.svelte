@@ -1,27 +1,35 @@
 <!-- 
   @component
-  
-  Use this component to render strings having component/html tags 
-  embedded in it. It enables the translations of such strings.
 
-  It breaks the translations strings(passed in the prop named `text`) 
-  with `[uniqueSlotNameWithinTheString]` identifiers into named slots.
-
-  Ex: 
-  If the string is - 
-  This <TableName /> comes under <SchemaName /> of the <DatabaseName /> db.
-
-  The translations string could be - 
-  This [tableName] comes under [schemaName] of the [databaseName] db.
-
-  There will three slots with the following names 
-  1. tableName
-  2. schemaName
-  3. databaseName
-
-  This enables the translations of such strings while maintaining the 
+  Use this component to render translated strings that contain components or
+  html tags. This enables the translations of such strings while maintaining the
   context for the translator using the slot names. 
-  
+
+  ## Step 1
+
+  In you source translation strings, specify named slots within square brackets.
+  For example:
+
+  ```
+  The [tableName] table belongs to the [schemaName] schema.
+  ```
+
+  Slot names can only contain letters, numbers and underscores.
+
+  ## Step 2
+
+  Render the component with condition children that match the slot names. For
+  example:
+
+  ```svelte
+  <RichText text={$LL.text()} let:slotName>
+    {#if slotName === 'tableName'}
+      <TableName {table} />
+    {:else if slotName === 'schemaName'}
+      <SchemaName {schema} />
+    {/if}
+  </RichText>
+  ```
  -->
 <script lang="ts">
   const RICH_TEXT_REGEX = /\w*\[(\w+)\]\w*/gm;
