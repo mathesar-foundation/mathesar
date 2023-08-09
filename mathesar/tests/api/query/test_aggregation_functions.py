@@ -966,6 +966,89 @@ def test_percentage_true_aggregation(payments_ma_table, get_uid, client):
     assert sorted(actual_records, key=lambda x: x['Payment Mode']) == expect_records
 
 
+def test_list_aggregation_intrval(athletes_ma_table, get_uid, client):
+    _ = athletes_ma_table
+    athletes = {
+        t["name"]: t for t in client.get("/api/db/v0/tables/").json()["results"]
+    }["Marathon"]
+    columns = {
+        c["name"]: c for c in athletes["columns"]
+    }
+    request_data = {
+        "name": get_uid(),
+        "base_table": athletes["id"],
+        "initial_columns": [
+            {"id": columns["city"]["id"], "alias": "city"},
+            {"id": columns["finish time"]["id"], "alias": "finish time"},
+        ],
+        "display_names": {
+            "city": "city",
+            "finish time": "finish time",
+        },
+        "display_options": {
+            "ciy": {
+                display_option_origin: "country",
+            },
+            "finish time": {
+                display_option_origin: "finish time",
+            },
+        },
+        "transformations": [
+            {
+                "spec": {
+                    "grouping_expressions": [
+                        {
+                            "input_alias": "city",
+                            "output_alias": "city",
+                        }
+                    ],
+                    "aggregation_expressions": [
+                        {
+                            "input_alias": "finish time",
+                            "output_alias": "finish time",
+                            "function": "distinct_aggregate_to_array",
+                        }
+                    ]
+                },
+                "type": "summarize",
+            }
+        ]
+    }
+    response = client.post('/api/db/v0/queries/', data=request_data)
+    assert response.status_code == 201
+    query_id = response.json()['id']
+    expect_records = [
+        {
+            "city": "Berlin",
+            "finish time": [
+                "02:01:39",
+                "02:02:57",
+                "02:03:23",
+                "02:03:59",
+                "02:04:00"
+            ]
+        },
+        {
+            "city": "Chicago",
+            "finish time": [
+                "02:14:04",
+                "02:17:45"
+            ]
+        },
+        {
+            "city": "London",
+            "finish time": [
+                "02:15:25",
+                "02:17:56",
+                "02:18:35"
+            ]
+        }
+    ]
+    actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
+    assert sorted(actual_records, key=lambda x: x['city']) == expect_records
+
+
+
 def test_list_aggregation_mathesar_json_array(players_ma_table, get_uid, client):
     _ = players_ma_table
     players = {
