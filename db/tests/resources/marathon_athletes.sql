@@ -48,4 +48,3 @@ INSERT INTO "Marathon" ("athlete", "gender", "finish time", "city") VALUES
 
 INSERT INTO "Marathon" ("athlete", "gender", "finish time", "city") VALUES
 ('Florence Kiplagat', 'Female', 'PT2H17M45S', 'Chicago');
-

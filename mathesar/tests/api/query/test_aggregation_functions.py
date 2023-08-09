@@ -1048,7 +1048,6 @@ def test_list_aggregation_intrval(athletes_ma_table, get_uid, client):
     assert sorted(actual_records, key=lambda x: x['city']) == expect_records
 
 
-
 def test_list_aggregation_mathesar_json_array(players_ma_table, get_uid, client):
     _ = players_ma_table
     players = {
