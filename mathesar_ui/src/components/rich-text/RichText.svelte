@@ -5,14 +5,14 @@
   embedded in it. It enables the translations of such strings.
 
   It breaks the translations strings(passed in the prop named `text`) 
-  with `<>uniqueSlotNameWithinTheString<>` identifiers into named slots.
+  with `[uniqueSlotNameWithinTheString]` identifiers into named slots.
 
   Ex: 
   If the string is - 
   This <TableName /> comes under <SchemaName /> of the <DatabaseName /> db.
 
   The translations string could be - 
-  This <>tableName<> comes under <>schemaName<> of the <>databaseName<> db.
+  This [tableName] comes under [schemaName] of the [databaseName] db.
 
   There will three slots with the following names 
   1. tableName
@@ -24,7 +24,7 @@
   
  -->
 <script lang="ts">
-  const RICH_TEXT_REGEX = /\w*<>(\w+)<>\w*/gm;
+  const RICH_TEXT_REGEX = /\w*\[(\w+)\]\w*/gm;
   export let text: string;
 
   type PrefixAndSlotTuple = [prefix: string, slotName: string];

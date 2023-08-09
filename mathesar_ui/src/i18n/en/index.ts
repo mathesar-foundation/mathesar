@@ -25,13 +25,13 @@ const en: BaseTranslation = {
   },
   linkTypeOptions: {
     oneToManyDescription:
-      'One <>baseTable<> record can be linked from multiple <>targetTable<> records.',
+      'One [baseTable] record can be linked from multiple [targetTable] records.',
     manyToOneDescription:
-      'Multiple <>baseTable<> records can link to the same <>targetTable<> record.',
+      'Multiple [baseTable] records can link to the same [targetTable] record.',
     manyToManyDescription:
-      'Multiple <>baseTable<> and <>targetTable<> records can link to each other through a new <>mappingTable<>',
+      'Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]',
     manyToManySelfReferential:
-      'Multiple <>baseTable<> records can link to each other through a new <>mapping<>',
+      'Multiple [baseTable] records can link to each other through a new [mapping]',
   },
 };
 
