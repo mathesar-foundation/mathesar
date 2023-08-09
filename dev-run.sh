@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-
 # Start the database
 if [[ -z "${DJANGO_DATABASE_URL}" ]]; then
   echo "Starting inbuilt database"
   ./db-run.sh
-  export DJANGO_DATABASE_URL='postgres://mathesar:mathesar@localhost:5432/mathesar_django'
+  export DJANGO_DATABASE_URL='postgres://postgres:mathesar@localhost:5432/mathesar_django'
   if [[ -z "${MATHESAR_DATABASES}" ]]; then
-    export MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@localhost:5432/mathesar)'
+    export MATHESAR_DATABASES='(mathesar_tables|postgresql://postgres:mathesar@localhost:5432/mathesar)'
   fi
 fi
 
