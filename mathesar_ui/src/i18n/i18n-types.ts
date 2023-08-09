@@ -88,19 +88,19 @@ type RootTranslation = {
   };
   linkTypeOptions: {
     /**
-     * O​n​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​ ​c​a​n​ ​b​e​ ​l​i​n​k​e​d​ ​f​r​o​m​ ​m​u​l​t​i​p​l​e​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​.
+     * O​n​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​ ​c​a​n​ ​b​e​ ​l​i​n​k​e​d​ ​f​r​o​m​ ​m​u​l​t​i​p​l​e​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​.
      */
     oneToManyDescription: string;
     /**
-     * M​u​l​t​i​p​l​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​t​h​e​ ​s​a​m​e​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​.
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​t​h​e​ ​s​a​m​e​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​.
      */
     manyToOneDescription: string;
     /**
-     * M​u​l​t​i​p​l​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​a​n​d​ ​<​>​t​a​r​g​e​t​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​<​>​m​a​p​p​i​n​g​T​a​b​l​e​<​>
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​a​n​d​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​[​m​a​p​p​i​n​g​T​a​b​l​e​]
      */
     manyToManyDescription: string;
     /**
-     * M​u​l​t​i​p​l​e​ ​<​>​b​a​s​e​T​a​b​l​e​<​>​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​<​>​m​a​p​p​i​n​g​<​>
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​[​m​a​p​p​i​n​g​]
      */
     manyToManySelfReferential: string;
   };
@@ -177,19 +177,19 @@ export type TranslationFunctions = {
   };
   linkTypeOptions: {
     /**
-     * One <>baseTable<> record can be linked from multiple <>targetTable<> records.
+     * One [baseTable] record can be linked from multiple [targetTable] records.
      */
     oneToManyDescription: () => LocalizedString;
     /**
-     * Multiple <>baseTable<> records can link to the same <>targetTable<> record.
+     * Multiple [baseTable] records can link to the same [targetTable] record.
      */
     manyToOneDescription: () => LocalizedString;
     /**
-     * Multiple <>baseTable<> and <>targetTable<> records can link to each other through a new <>mappingTable<>
+     * Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]
      */
     manyToManyDescription: () => LocalizedString;
     /**
-     * Multiple <>baseTable<> records can link to each other through a new <>mapping<>
+     * Multiple [baseTable] records can link to each other through a new [mapping]
      */
     manyToManySelfReferential: () => LocalizedString;
   };
