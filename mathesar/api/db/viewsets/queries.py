@@ -5,6 +5,7 @@ from rest_access_policy import AccessViewSetMixin
 from rest_framework import viewsets
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 
 from mathesar.api.db.permissions.query import QueryAccessPolicy
@@ -30,14 +31,35 @@ class QueryViewSet(
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = UIQueryFilter
+    permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = QueryAccessPolicy
 
     def get_queryset(self):
-        queryset = self.access_policy.scope_queryset(self.request, UIQuery.objects.all())
+        queryset = self._get_scoped_queryset()
         schema_id = self.request.query_params.get('schema')
         if schema_id:
             queryset = queryset.filter(base_table__schema=schema_id)
         return queryset.order_by('-created_at')
+
+    def _get_scoped_queryset(self):
+        """
+        Returns a properly scoped queryset.
+
+        Access to queries may require different access controls, some of which
+        include scoping while others do not. See
+        `QueryAccessPolicy.get_should_queryset_be_unscoped` docstring for more
+        information.
+        """
+        should_queryset_be_scoped = \
+            not QueryAccessPolicy.get_should_queryset_be_unscoped(self.action)
+        if should_queryset_be_scoped:
+            queryset = self.access_policy.scope_queryset(
+                self.request,
+                UIQuery.objects.all()
+            )
+        else:
+            queryset = UIQuery.objects.all()
+        return queryset
 
     @action(methods=['get'], detail=True)
     def records(self, request, pk=None):
@@ -87,7 +109,6 @@ class QueryViewSet(
                 "records": paginated_records.data,
                 "output_columns": columns,
                 "column_metadata": column_metadata,
-                "parameters": {k: json.loads(request.GET[k]) for k in request.GET},
             }
         )
 

@@ -18,7 +18,7 @@ from mathesar.api.utils import is_valid_uuid_v4
 from mathesar.database.types import UIType
 from mathesar.models.base import Database, Schema, Table
 from mathesar.models.query import UIQuery
-from mathesar.models.shares import SharedTable
+from mathesar.models.shares import SharedTable, SharedQuery
 from mathesar.state import reset_reflection
 from mathesar import __version__
 
@@ -169,30 +169,53 @@ def render_schema(request, database, schema):
         return redirect('schema_home', db_name=database.name, schema_id=schema.id)
 
 
-def get_common_data_for_shared_table(request, table):
-    schema = table.schema if table else None
+def get_common_data_for_shared_entity(request, schema=None):
     database = schema.database if schema else None
     schemas = [schema] if schema else []
     databases = [database] if database else []
-    tables = [table] if table else []
+    serialized_schemas = SchemaSerializer(
+        schemas,
+        many=True,
+        context={'request': request}
+    ).data
+    serialized_databases = DatabaseSerializer(
+        databases,
+        many=True,
+        context={'request': request}
+    ).data
     return {
         **get_base_data_all_routes(request, database, schema),
-        'schemas': SchemaSerializer(
-            schemas,
-            many=True,
-            context={'request': request}
-        ).data,
-        'databases': DatabaseSerializer(
-            databases,
-            many=True,
-            context={'request': request}
-        ).data,
-        'tables': TableSerializer(
-            tables,
-            many=True,
-            context={'request': request}
-        ).data,
+        'schemas': serialized_schemas,
+        'databases': serialized_databases,
         'routing_context': 'anonymous',
+    }
+
+
+def get_common_data_for_shared_table(request, table):
+    tables = [table] if table else []
+    serialized_tables = TableSerializer(
+        tables,
+        many=True,
+        context={'request': request}
+    ).data
+    schema = table.schema if table else None
+    return {
+        **get_common_data_for_shared_entity(request, schema),
+        'tables': serialized_tables,
+    }
+
+
+def get_common_data_for_shared_query(request, query):
+    queries = [query] if query else []
+    serialized_queries = QuerySerializer(
+        queries,
+        many=True,
+        context={'request': request}
+    ).data
+    schema = query.base_table.schema if query else None
+    return {
+        **get_common_data_for_shared_entity(request, schema),
+        'queries': serialized_queries,
     }
 
 
@@ -252,6 +275,18 @@ def shared_table(request, slug):
         'common_data': get_common_data_for_shared_table(request, table),
         'route_specific_data': {
             'shared_table': {'table_id': table.id if table else None}
+        }
+    })
+
+
+def shared_query(request, slug):
+    shared_query_link = SharedQuery.get_by_slug(slug) if is_valid_uuid_v4(slug) else None
+    query = shared_query_link.query if shared_query_link else None
+
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data_for_shared_query(request, query),
+        'route_specific_data': {
+            'shared_query': {'query_id': query.id if query else None}
         }
     })
 
