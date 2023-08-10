@@ -18,6 +18,28 @@ export type Translation = RootTranslation;
 export type Translations = RootTranslation;
 
 type RootTranslation = {
+  general: {
+    /**
+     * I​m​p​o​r​t
+     */
+    import: string;
+    /**
+     * O​n​e​ ​t​o​ ​M​a​n​y
+     */
+    oneToMany: string;
+    /**
+     * M​a​n​y​ ​t​o​ ​O​n​e
+     */
+    manyToOne: string;
+    /**
+     * M​a​n​y​ ​t​o​ ​M​a​n​y
+     */
+    manyToMany: string;
+    /**
+     * L​i​n​k​i​n​g​ ​T​a​b​l​e
+     */
+    linkingTable: string;
+  };
   importUploadPage: {
     /**
      * U​p​l​o​a​d​ ​a​ ​f​i​l​e
@@ -64,15 +86,49 @@ type RootTranslation = {
      */
     failedToImport: string;
   };
-  general: {
+  linkTypeOptions: {
     /**
-     * I​m​p​o​r​t
+     * O​n​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​ ​c​a​n​ ​b​e​ ​l​i​n​k​e​d​ ​f​r​o​m​ ​m​u​l​t​i​p​l​e​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​.
      */
-    import: string;
+    oneToManyDescription: string;
+    /**
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​t​h​e​ ​s​a​m​e​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​.
+     */
+    manyToOneDescription: string;
+    /**
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​a​n​d​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​[​m​a​p​p​i​n​g​T​a​b​l​e​]
+     */
+    manyToManyDescription: string;
+    /**
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​[​m​a​p​p​i​n​g​]
+     */
+    manyToManySelfReferential: string;
   };
 };
 
 export type TranslationFunctions = {
+  general: {
+    /**
+     * Import
+     */
+    import: () => LocalizedString;
+    /**
+     * One to Many
+     */
+    oneToMany: () => LocalizedString;
+    /**
+     * Many to One
+     */
+    manyToOne: () => LocalizedString;
+    /**
+     * Many to Many
+     */
+    manyToMany: () => LocalizedString;
+    /**
+     * Linking Table
+     */
+    linkingTable: () => LocalizedString;
+  };
   importUploadPage: {
     /**
      * Upload a file
@@ -119,11 +175,23 @@ export type TranslationFunctions = {
      */
     failedToImport: () => LocalizedString;
   };
-  general: {
+  linkTypeOptions: {
     /**
-     * Import
+     * One [baseTable] record can be linked from multiple [targetTable] records.
      */
-    import: () => LocalizedString;
+    oneToManyDescription: () => LocalizedString;
+    /**
+     * Multiple [baseTable] records can link to the same [targetTable] record.
+     */
+    manyToOneDescription: () => LocalizedString;
+    /**
+     * Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]
+     */
+    manyToManyDescription: () => LocalizedString;
+    /**
+     * Multiple [baseTable] records can link to each other through a new [mapping]
+     */
+    manyToManySelfReferential: () => LocalizedString;
   };
 };
 

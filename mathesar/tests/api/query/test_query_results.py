@@ -54,13 +54,5 @@ def test_query_results_minimal(client, minimal_patents_query):
                 'input_alias': None,
             }
         },
-        'parameters': {
-            'order_by': [
-                {'field': 'col1', 'direction': 'asc'},
-                {'field': 'col2', 'direction': 'desc'}
-            ],
-            'limit': 2,
-            'offset': 3,
-        }
     }
     assert actual_response_json == expect_response_json
