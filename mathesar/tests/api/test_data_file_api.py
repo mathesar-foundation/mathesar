@@ -124,15 +124,15 @@ def test_data_file_create_json(client, patents_json_filepath, header):
     )
 
 
-@pytest.mark.parametrize('header', [True, False])
-def test_data_file_create_excel(client, patents_excel_filepath, header):
+@pytest.mark.parametrize('has_header', [True, False])
+def test_data_file_create_excel(client, patents_excel_filepath, has_header):
     num_data_files = DataFile.objects.count()
 
     with open(patents_excel_filepath, 'rb') as excel_file:
-        data = {'file': excel_file, 'header': header}
+        data = {'file': excel_file, 'header': has_header}
         response = client.post('/api/db/v0/data_files/', data, format='multipart')
     check_create_data_file_response(
-        response, num_data_files, 'file', 'patents', ',', '"', '', header
+        response, num_data_files, 'file', 'patents', ',', '"', '', has_header
     )
 
 

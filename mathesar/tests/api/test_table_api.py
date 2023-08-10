@@ -45,9 +45,8 @@ def missing_keys_json_data_file():
 
 
 @pytest.fixture
-def patents_excel_data_file():
-    data_filepath = 'mathesar/tests/data/patents.xlsx'
-    with open(data_filepath, "rb") as excel_file:
+def patents_excel_data_file(patents_excel_filepath):
+    with open(patents_excel_filepath, "rb") as excel_file:
         data_file = DataFile.objects.create(
             file=File(excel_file),
             created_from='file',
