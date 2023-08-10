@@ -1,7 +1,7 @@
 {% extends 'mathesar/base.html' %}
-{% load static %}
+{% load i18n static %}
 
-{% block title %}Login{% endblock %}
+{% block title %}{% translate "login"|title %}{% endblock %}
 
 {% block styles %}
   {% if development_mode %}
@@ -157,35 +157,34 @@
   {% if live_demo_mode %}
     <div class="unsupported-device">
       <div class="warning-icon">⚠️</div>
-      <p class="title">Unsupported Screen Size</p>
+      <p class="title">{% translate "unsupported screen size"|title %}</p>
       <p>
-        Mathesar is a spreadsheet-like application with a rich UI that does not
-        yet function well on screens this small. Improved support for mobile
-        devices is on our
+      {% translate "Mathesar is a spreadsheet-like application with a rich UI that does not yet function well on screens this small. Improved support for mobile devices is on our" %}
+        
         <a href="https://mathesar.org/roadmap.html" target="_blank">
-          roadmap
+          {% translate "roadmap" %}
         </a>.
       </p>
       <p>
-        You can still use this demo site, but some features may not work
-        correctly. We encourage you to try Mathesar on a device with a larger
-        screen.
+      {% translate "You can still use this demo site, but some features may not work correctly. We encourage you to try Mathesar on a device with a larger screen." %}
     </p>
     </div>
     <div class="tutorial align-center">
       <div class="header">
-        <strong>Live Demo Mode</strong>
+        <strong>{% translate "live demo mode"|title %}</strong>
       </div>
       <div class="body">
-        Mathesar's live demo is available to anyone to try out.
+      {% translate "Mathesar's live demo is available to anyone to try out." %}
+        
         {% if live_demo_username and live_demo_password %}
-          Use the following credentials to login:
+          {% translate "Use the following credentials to login" %}:
           <ul>
-            <li>username: <strong>{{live_demo_username}}</strong></li>
-            <li>password: <strong>{{live_demo_password}}</strong></li>
+            <li>{% translate "username" %}: <strong>{{live_demo_username}}</strong></li>
+            <li>{% translate "password" %}: <strong>{{live_demo_password}}</strong></li>
           </ul>
         {% endif %}
-        Keep in mind that the data in the live demo is reset regularly.
+
+        {% translate "Keep in mind that the data in the live demo is reset regularly." %}
       </div>
     </div>
   {% endif %}

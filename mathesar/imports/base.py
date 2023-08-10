@@ -1,4 +1,3 @@
-from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Table
 from mathesar.imports.csv import create_db_table_from_csv_data_file
 from mathesar.imports.excel import create_db_table_from_excel_data_file
@@ -11,7 +10,7 @@ CHECK_ROWS = 10
 
 
 def create_table_from_data_file(data_file, name, schema, comment=None):
-    engine = create_mathesar_engine(schema.database.name)
+    engine = schema._sa_engine
     if data_file.type == 'csv' or data_file.type == 'tsv':
         db_table = create_db_table_from_csv_data_file(
             data_file, name, schema, comment=comment
