@@ -44,7 +44,7 @@ write_client_with_different_roles = [
     # client_name, is_allowed
     ('superuser_client_factory', True),
     ('db_manager_client_factory', True),
-    ('db_editor_client_factory', False),
+    ('db_editor_client_factory', True),
     ('schema_manager_client_factory', True),
     ('schema_viewer_client_factory', False),
     ('db_viewer_schema_manager_client_factory', True)
