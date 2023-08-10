@@ -3,9 +3,11 @@ from sqlalchemy.dialects.postgresql import DATE as SA_DATE
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
 from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
+from sqlalchemy.dialects.postgresql import TEXT as SA_TEXT
 from sqlalchemy.types import TypeDecorator
 
 from db.types.exceptions import InvalidTypeParameters
+from db.types.custom.underlying_type import HasUnderlyingType
 
 
 class DATE(TypeDecorator):
@@ -48,9 +50,10 @@ class TIME_WITHOUT_TIME_ZONE(TypeDecorator):
         )
 
 
-class TIME_WITH_TIME_ZONE(TypeDecorator):
+class TIME_WITH_TIME_ZONE(TypeDecorator, HasUnderlyingType):
     impl = SA_TIME
     cache_ok = True
+    underlying_type = SA_TEXT
 
     def __init__(self, *args, precision=None, **kwargs):
         # On reflection timezone is passed as a kwarg, so we need to make
