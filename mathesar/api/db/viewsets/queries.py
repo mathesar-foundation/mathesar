@@ -35,22 +35,31 @@ class QueryViewSet(
     access_policy = QueryAccessPolicy
 
     def get_queryset(self):
-        queryset = None
-        if self.action == "results" or self.action == "retrieve" or self.action is None:
-            # Permission for both these actions are handled at QueryAccessPolicy
-            # Scoping is automatically handled by DRF since these are nested urls
-            # which contain the pk of the query
-            # It is essential to include None here, because it's called again by
-            # `filter_queryset` with action `None` after the query is formed
-            # TODO: Move these actions to separate viewsets to make this cleaner
-            queryset = UIQuery.objects.all().order_by('-created_at')
-        else:
-            queryset = self.access_policy.scope_queryset(self.request, UIQuery.objects.all())
-
+        queryset = self._get_scoped_queryset()
         schema_id = self.request.query_params.get('schema')
         if schema_id:
             queryset = queryset.filter(base_table__schema=schema_id)
         return queryset.order_by('-created_at')
+
+    def _get_scoped_queryset(self):
+        """
+        Returns a properly scoped queryset.
+
+        Access to queries may require different access controls, some of which
+        include scoping while others do not. See
+        `QueryAccessPolicy.get_should_queryset_be_unscoped` docstring for more
+        information.
+        """
+        should_queryset_be_scoped = \
+            not QueryAccessPolicy.get_should_queryset_be_unscoped(self.action)
+        if should_queryset_be_scoped:
+            queryset = self.access_policy.scope_queryset(
+                self.request,
+                UIQuery.objects.all()
+            )
+        else:
+            queryset = UIQuery.objects.all()
+        return queryset
 
     @action(methods=['get'], detail=True)
     def records(self, request, pk=None):
