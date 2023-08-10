@@ -1,6 +1,13 @@
 import type { BaseTranslation } from '../i18n-types.js';
 
 const en: BaseTranslation = {
+  general: {
+    import: 'Import',
+    oneToMany: 'One to Many',
+    manyToOne: 'Many to One',
+    manyToMany: 'Many to Many',
+    linkingTable: 'Linking Table',
+  },
   importUploadPage: {
     uploadAFile: 'Upload a file',
     provideUrlToFile: 'Provide a URL to the file',
@@ -16,8 +23,15 @@ const en: BaseTranslation = {
     preparingPreview: 'Preparing Preview',
     failedToImport: 'Failed to import data',
   },
-  general: {
-    import: 'Import',
+  linkTypeOptions: {
+    oneToManyDescription:
+      'One [baseTable] record can be linked from multiple [targetTable] records.',
+    manyToOneDescription:
+      'Multiple [baseTable] records can link to the same [targetTable] record.',
+    manyToManyDescription:
+      'Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]',
+    manyToManySelfReferential:
+      'Multiple [baseTable] records can link to each other through a new [mapping]',
   },
 };
 
