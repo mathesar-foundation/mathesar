@@ -71,6 +71,16 @@ def test_long_identifier_in_prexisting_db(dj_model_of_preexisting_db, client):
     json = response.json()
     assert response.status_code == 200
     column_json = json['results'][0]
+    column_id = column_json['id']
+    assert len(column_json['name']) == POSTGRES_IDENTIFIER_SIZE_LIMIT
+    db_type = PostgresType.BOOLEAN
+    data = {"type": db_type.id}
+    response = client.patch(
+        f"/api/db/v0/tables/{table_id}/columns/{column_id}/", data=data
+    )
+    assert response.status_code == 200
+    json = response.json()
+    column_json = json
     assert len(column_json['name']) == POSTGRES_IDENTIFIER_SIZE_LIMIT
 
 
