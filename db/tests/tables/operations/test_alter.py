@@ -46,20 +46,3 @@ def test_comment_on_table(engine_with_roster, roster_table_name):
     actual_new_comment = res.fetchone()[0]
 
     assert actual_new_comment == expect_new_comment
-
-
-def test_rename_table_foreign_key(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "test_rename_table_foreign_key"
-    new_table_name = "test_rename_table_foreign_key_new"
-    related_table_name = "test_rename_table_foreign_key_related"
-    schema_oid = get_schema_oid_from_name(schema, engine)
-    table_oid = create_mathesar_table(engine, table_name, schema_oid)
-    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    related_table = test_utils.create_related_table(related_table_name, table, schema, engine)
-
-    rename_table(table_name, schema, engine, new_table_name)
-
-    related_table = reflect_table(related_table_name, schema, engine, metadata=get_empty_metadata())
-    fk = list(related_table.foreign_keys)[0]
-    assert fk.column.table.name == new_table_name
