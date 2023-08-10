@@ -11,7 +11,6 @@ docker_setup_env() {
 	fi
 }
 
-
 docker_setup_env
 # only run initialization on an empty data directory
 if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
@@ -19,6 +18,8 @@ if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
   cp -p -f -r /etc/postgresql/13/mathesar/* "$PGDATA"
   sed -i "s|^hba_file =.*|hba_file = '$PGDATA/pg_hba.conf'|" "$PGDATA/postgresql.conf"
   sed -i "s|^ident_file =.*|ident_file = '$PGDATA/pg_ident.conf'|" "$PGDATA/postgresql.conf"
+  sed -i 's/^host\s\+all\s\+all\s\+::1\/128\s\+md5$/# &/' "$PGDATA/pg_hba.conf"
+
   # Create a temporary postgres server for setting password to the postgres user and for creating the default database
   pg_ctlcluster 13 mathesar start
   sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'mathesar';"
