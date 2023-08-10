@@ -53,7 +53,7 @@ def dj_model_of_preexisting_db(worker_id, FUN_create_dj_db, FUN_engine_cache):
     return db_model
 
 
-def test_long_identifier_in_prexisting_db(dj_model_of_preexisting_db, client):
+def test_long_identifier_in_prexisting_db(dj_model_of_preexisting_db, client):  # noqa: F841
     """
     Checks that the table and column endpoints work for a third-party db with
     an identifier that has maximum length supported by Postgres.
