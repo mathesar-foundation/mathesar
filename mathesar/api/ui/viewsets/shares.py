@@ -19,7 +19,7 @@ class SharedTableViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         serializer.save(table_id=self.kwargs['table_pk'])
 
 
-class SharedQueryViewSet(viewsets.ModelViewSet):
+class SharedQueryViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
     serializer_class = SharedQuerySerializer
     access_policy = SharedQueryAccessPolicy

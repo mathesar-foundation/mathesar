@@ -27,10 +27,10 @@
   onMount(() => handleUnmount);
 </script>
 
-{#if table}
-  <Route path="/">
+<Route path="/">
+  {#if table}
     <TablePage {table} {shareConsumer} />
-  </Route>
-{:else}
-  <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
-{/if}
+  {:else}
+    <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+  {/if}
+</Route>

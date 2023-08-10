@@ -1,12 +1,13 @@
 import pytest
 from unittest.mock import call, patch
-from sqlalchemy import Column, MetaData, Table, select, VARCHAR
+from sqlalchemy import Column, MetaData, Table, select
 
 from db.columns.operations.infer_types import infer_column_type
 from db.tables.operations import infer_types as infer_operations
 from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType, MathesarCustomType
 from db.types.operations.convert import get_db_type_enum_from_class
+from db.schemas.utils import get_schema_oid_from_name
 
 
 type_data_list = [
@@ -241,8 +242,9 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
     column_list = []
     engine, schema = engine_with_schema
     table_name = "t1"
+    schema_oid = get_schema_oid_from_name(schema, engine)
     create_mathesar_table(
-        table_name, schema, column_list, engine
+        engine, table_name, schema_oid, column_list
     )
     with patch.object(infer_operations, "infer_column_type") as mock_infer:
         infer_operations.update_table_column_types(
@@ -254,14 +256,21 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
 
 
 def test_update_table_column_types_infers_non_default_types(engine_with_schema):
-    col1 = Column("col1", VARCHAR)
-    col2 = Column("col2", VARCHAR)
+    col1 = {
+        "name": "col1",
+        "type": {"name": PostgresType.CHARACTER_VARYING.id}
+    }
+    col2 = {
+        "name": "col2",
+        "type": {"name": PostgresType.CHARACTER_VARYING.id}
+    }
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     metadata = MetaData()
     table_name = "table_with_columns"
+    schema_oid = get_schema_oid_from_name(schema, engine)
     create_mathesar_table(
-        table_name, schema, column_list, engine
+        engine, table_name, schema_oid, column_list
     )
     with patch.object(infer_operations, "infer_column_type") as mock_infer:
         infer_operations.update_table_column_types(
@@ -274,7 +283,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
         call(
             schema,
             table_name,
-            col1.name,
+            col1["name"],
             engine,
             metadata=metadata,
             columns_might_have_defaults=True,
@@ -282,7 +291,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
         call(
             schema,
             table_name,
-            col2.name,
+            col2["name"],
             engine,
             metadata=metadata,
             columns_might_have_defaults=True,
@@ -292,11 +301,11 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
 
 
 def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
-    column_list = [Column("checkcol", VARCHAR, primary_key=True)]
     engine, schema = engine_with_schema
     table_name = "t1"
+    schema_oid = get_schema_oid_from_name(schema, engine)
     create_mathesar_table(
-        table_name, schema, column_list, engine
+        engine, table_name, schema_oid
     )
     with patch.object(infer_operations, "infer_column_type") as mock_infer:
         infer_operations.update_table_column_types(

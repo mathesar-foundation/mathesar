@@ -304,9 +304,9 @@ def create_mathesar_table(create_db_schema):
     ):
         # We use a fixture for schema creation, so that it gets cleaned up.
         create_db_schema(schema_name, engine, schema_mustnt_exist=False)
+        schema_oid = get_schema_oid_from_name(schema_name, engine)
         return actual_create_mathesar_table(
-            name=table_name, schema=schema_name, columns=columns,
-            engine=engine, metadata=metadata
+            engine=engine, table_name=table_name, schema_oid=schema_oid, columns=columns,
         )
     yield _create_mathesar_table
 
@@ -539,5 +539,13 @@ def superuser_client_factory(client):
      to the same behaviour as other role based client factories
     """
     def _client(schema):
+        return client
+    return _client
+
+
+@pytest.fixture
+def anonymous_client_factory():
+    def _client(schema):
+        client = APIClient()
         return client
     return _client

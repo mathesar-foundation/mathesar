@@ -14,6 +14,7 @@
     QueryRunner,
     WithExplorationInspector,
   } from '@mathesar/systems/data-explorer';
+  import type { ShareConsumer } from '@mathesar/utils/shares';
   import Header from './Header.svelte';
 
   const userProfile = getUserProfileStoreFromContext();
@@ -21,6 +22,7 @@
   export let database: Database;
   export let schema: SchemaEntry;
   export let query: QueryInstance;
+  export let shareConsumer: ShareConsumer | undefined = undefined;
 
   $: canEditMetadata =
     $userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
@@ -31,10 +33,15 @@
 
   function createQueryRunner(
     _query: QueryInstance,
-    abstractTypesMap: AbstractTypesMap,
+    abstractTypeMap: AbstractTypesMap,
   ) {
     queryRunner?.destroy();
-    queryRunner = new QueryRunner(new QueryModel(_query), abstractTypesMap);
+    queryRunner = new QueryRunner({
+      query: new QueryModel(_query),
+      abstractTypeMap,
+      runMode: 'queryId',
+      shareConsumer,
+    });
   }
 
   $: createQueryRunner(query, $currentDbAbstractTypes.data);
