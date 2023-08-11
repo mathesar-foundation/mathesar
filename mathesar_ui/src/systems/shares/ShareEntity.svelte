@@ -97,11 +97,11 @@
     const confirmationPromise = confirm({
       title: 'Remove old link and create a new link?',
       body: [
-        'Once you regenerate a new link, the old link will no longer work',
+        'Once you regenerate a new link, the old link will no longer work.',
         'Are you sure you want to proceed?',
       ],
       proceedButton: {
-        label: 'Regenerate link',
+        label: 'Regenerate Link',
         icon: undefined,
       },
     });
@@ -123,10 +123,10 @@
       );
     }
     const confirmationPromise = confirm({
-      title: 'Disable link?',
+      title: 'Disable Link?',
       body: 'Are you sure you want to proceed?',
       proceedButton: {
-        label: 'Disable link',
+        label: 'Disable Link',
         icon: undefined,
       },
     });
@@ -181,13 +181,13 @@
             appearance="secondary"
             onClick={regenerateLink}
             icon={iconRecreate}
-            label="Regenerate link"
+            label="Regenerate Link"
           />
           <SpinnerButton
             appearance="secondary"
             onClick={disableLink}
             icon={iconDisable}
-            label="Disable link"
+            label="Disable Link"
           />
         </div>
       {:else}
@@ -198,7 +198,7 @@
           <SpinnerButton
             onClick={generateOrEnableShare}
             icon={iconAddNew}
-            label="Create link"
+            label="Create Link"
           />
         </div>
       {/if}
