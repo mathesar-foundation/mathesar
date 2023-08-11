@@ -28,6 +28,10 @@
     { database: $currentDatabase, schema: $currentSchema },
     'canEditMetadata',
   );
+  $: canViewLinkedEntities = !!$userProfile?.hasPermission(
+    { database: $currentDatabase, schema: $currentSchema },
+    'canViewLinkedEntities',
+  );
 
   function toggleTableInspector() {
     isTableInspectorVisible.set(!$isTableInspectorVisible);
@@ -42,7 +46,7 @@
   }}
 >
   <div class="quick-access">
-    <FilterDropdown {filtering} />
+    <FilterDropdown {filtering} {canViewLinkedEntities} />
     <SortDropdown {sorting} />
     <GroupDropdown {grouping} />
   </div>

@@ -57,6 +57,10 @@
     { database, schema },
     'canEditTableRecords',
   );
+  $: canViewLinkedEntities = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canViewLinkedEntities',
+  );
   $: recordsDataState = recordsData.state;
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
@@ -96,6 +100,7 @@
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
+  $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -161,6 +166,7 @@
       {isSelectedInRange}
       {value}
       {isProcessing}
+      {canViewLinkedEntities}
       recordSummary={$recordSummaries
         .get(String(column.id))
         ?.get(String(value))}
@@ -188,29 +194,35 @@
       }}
     />
     <ContextMenu>
-      <MenuHeading>Cell</MenuHeading>
-      <ButtonMenuItem
-        icon={iconSetToNull}
-        disabled={!canSetNull}
-        on:click={() => setValue(null)}
-      >
-        Set to <Null />
-      </ButtonMenuItem>
-      {#if linkedRecordHref}
-        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-          Go To Linked Record
-        </LinkMenuItem>
+      {#if canEditTableRecords || showLinkedRecordHyperLink}
+        <MenuHeading>Cell</MenuHeading>
+        {#if canEditTableRecords}
+          <ButtonMenuItem
+            icon={iconSetToNull}
+            disabled={!canSetNull}
+            on:click={() => setValue(null)}
+          >
+            Set to <Null />
+          </ButtonMenuItem>
+        {/if}
+        {#if showLinkedRecordHyperLink && linkedRecordHref}
+          <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
+            Go To Linked Record
+          </LinkMenuItem>
+        {/if}
+        <MenuDivider />
       {/if}
-      <MenuDivider />
 
       <!-- Column Attributes -->
       <MenuHeading>Column</MenuHeading>
       <ColumnHeaderContextMenu {processedColumn} />
-      <MenuDivider />
 
       <!-- Row -->
-      <MenuHeading>Row</MenuHeading>
-      <RowContextOptions recordPk={rowKey} {recordsData} {row} />
+      {#if canEditTableRecords || showLinkedRecordHyperLink}
+        <MenuDivider />
+        <MenuHeading>Row</MenuHeading>
+        <RowContextOptions recordPk={rowKey} {recordsData} {row} />
+      {/if}
     </ContextMenu>
     {#if errors.length}
       <CellErrors {errors} forceShowErrors={isActive} />

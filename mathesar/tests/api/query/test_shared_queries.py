@@ -5,7 +5,7 @@ from mathesar.models.shares import SharedQuery
 
 
 @pytest.fixture
-def shared_test_query(create_minimal_patents_query):
+def schemas_with_shared_queries(create_minimal_patents_query):
     query = create_minimal_patents_query()
     share = SharedQuery.objects.create(
         query=query,
@@ -17,10 +17,12 @@ def shared_test_query(create_minimal_patents_query):
         enabled=True,
     )
     yield {
-        'query': query,
-        'share': share,
+        'patent_schema': query.base_table.schema,
+        'patent_query': query,
+        'patent_query_share': share,
+        'different_schema': different_schema_query.base_table.schema,
         'different_schema_query': different_schema_query,
-        'different_schema_share': different_schema_share,
+        'different_schema_query_share': different_schema_share,
     }
 
     # cleanup
@@ -56,53 +58,53 @@ write_client_with_different_roles = [
 
 @pytest.mark.parametrize('client_name,different_schema_status_code', read_client_with_different_roles)
 def test_shared_query_list(
-    shared_test_query,
+    schemas_with_shared_queries,
     request,
     client_name,
     different_schema_status_code,
 ):
-    client = request.getfixturevalue(client_name)(shared_test_query["query"].base_table.schema)
-    response = client.get(f'/api/ui/v0/queries/{shared_test_query["query"].id}/shares/')
+    client = request.getfixturevalue(client_name)(schemas_with_shared_queries["patent_schema"])
+    response = client.get(f'/api/ui/v0/queries/{schemas_with_shared_queries["patent_query"].id}/shares/')
     response_data = response.json()
 
     assert response.status_code == 200
     assert response_data['count'] == 1
     assert len(response_data['results']) == 1
     result = response_data['results'][0]
-    assert result['slug'] == str(shared_test_query['share'].slug)
-    assert result['enabled'] == shared_test_query['share'].enabled
+    assert result['slug'] == str(schemas_with_shared_queries['patent_query_share'].slug)
+    assert result['enabled'] == schemas_with_shared_queries['patent_query_share'].enabled
 
-    response = client.get(f'/api/ui/v0/queries/{shared_test_query["different_schema_query"].id}/shares/')
+    response = client.get(f'/api/ui/v0/queries/{schemas_with_shared_queries["different_schema_query"].id}/shares/')
     assert response.status_code == different_schema_status_code
     if different_schema_status_code == 200:
         response_data = response.json()
         assert len(response_data['results']) == 1
         result = response_data['results'][0]
-        assert result['slug'] == str(shared_test_query['different_schema_share'].slug)
-        assert result['enabled'] == shared_test_query['different_schema_share'].enabled
+        assert result['slug'] == str(schemas_with_shared_queries['different_schema_query_share'].slug)
+        assert result['enabled'] == schemas_with_shared_queries['different_schema_query_share'].enabled
 
 
 @pytest.mark.parametrize('client_name,different_schema_status_code', read_client_with_different_roles)
 def test_shared_query_retrieve(
-    shared_test_query,
+    schemas_with_shared_queries,
     request,
     client_name,
     different_schema_status_code,
 ):
-    client = request.getfixturevalue(client_name)(shared_test_query["query"].base_table.schema)
-    response = client.get(f'/api/ui/v0/queries/{shared_test_query["query"].id}/shares/{shared_test_query["share"].id}/')
+    client = request.getfixturevalue(client_name)(schemas_with_shared_queries["patent_schema"])
+    response = client.get(f'/api/ui/v0/queries/{schemas_with_shared_queries["patent_query"].id}/shares/{schemas_with_shared_queries["patent_query_share"].id}/')
     response_data = response.json()
 
     assert response.status_code == 200
-    assert response_data['slug'] == str(shared_test_query['share'].slug)
-    assert response_data['enabled'] == shared_test_query['share'].enabled
+    assert response_data['slug'] == str(schemas_with_shared_queries['patent_query_share'].slug)
+    assert response_data['enabled'] == schemas_with_shared_queries['patent_query_share'].enabled
 
-    response = client.get(f'/api/ui/v0/queries/{shared_test_query["different_schema_query"].id}/shares/{shared_test_query["different_schema_share"].id}/')
+    response = client.get(f'/api/ui/v0/queries/{schemas_with_shared_queries["different_schema_query"].id}/shares/{schemas_with_shared_queries["different_schema_query_share"].id}/')
     assert response.status_code == different_schema_status_code
     if different_schema_status_code == 200:
         response_data = response.json()
-        assert response_data['slug'] == str(shared_test_query['different_schema_share'].slug)
-        assert response_data['enabled'] == shared_test_query['different_schema_share'].enabled
+        assert response_data['slug'] == str(schemas_with_shared_queries['different_schema_query_share'].slug)
+        assert response_data['enabled'] == schemas_with_shared_queries['different_schema_query_share'].enabled
 
 
 @pytest.mark.parametrize('client_name,is_allowed', write_client_with_different_roles)
@@ -129,19 +131,19 @@ def test_shared_query_create(
 
 @pytest.mark.parametrize('client_name,is_allowed', write_client_with_different_roles)
 def test_shared_query_patch(
-    shared_test_query,
+    schemas_with_shared_queries,
     request,
     client_name,
     is_allowed
 ):
-    client = request.getfixturevalue(client_name)(shared_test_query["query"].base_table.schema)
+    client = request.getfixturevalue(client_name)(schemas_with_shared_queries["patent_schema"])
     data = {'enabled': False}
-    response = client.patch(f'/api/ui/v0/queries/{shared_test_query["query"].id}/shares/{shared_test_query["share"].id}/', data)
+    response = client.patch(f'/api/ui/v0/queries/{schemas_with_shared_queries["patent_query"].id}/shares/{schemas_with_shared_queries["patent_query_share"].id}/', data)
     response_data = response.json()
 
     if is_allowed:
         assert response.status_code == 200
-        assert response_data['slug'] == str(shared_test_query['share'].slug)
+        assert response_data['slug'] == str(schemas_with_shared_queries['patent_query_share'].slug)
         assert response_data['enabled'] is False
     else:
         assert response.status_code == 403
@@ -149,17 +151,36 @@ def test_shared_query_patch(
 
 @pytest.mark.parametrize('client_name,is_allowed', write_client_with_different_roles)
 def test_shared_query_delete(
-    shared_test_query,
+    schemas_with_shared_queries,
     request,
     client_name,
     is_allowed
 ):
-    client = request.getfixturevalue(client_name)(shared_test_query["query"].base_table.schema)
-    response = client.delete(f'/api/ui/v0/queries/{shared_test_query["query"].id}/shares/{shared_test_query["share"].id}/')
+    client = request.getfixturevalue(client_name)(schemas_with_shared_queries["patent_schema"])
+    response = client.delete(f'/api/ui/v0/queries/{schemas_with_shared_queries["patent_query"].id}/shares/{schemas_with_shared_queries["patent_query_share"].id}/')
 
     if is_allowed:
         assert response.status_code == 204
-        assert SharedQuery.objects.filter(id=shared_test_query['share'].id).first() is None
+        assert SharedQuery.objects.filter(id=schemas_with_shared_queries['patent_query_share'].id).first() is None
+    else:
+        assert response.status_code == 403
+
+
+@pytest.mark.parametrize('client_name,is_allowed', write_client_with_different_roles)
+def test_shared_query_regenerate_link(
+    schemas_with_shared_queries,
+    request,
+    client_name,
+    is_allowed
+):
+    client = request.getfixturevalue(client_name)(schemas_with_shared_queries["patent_schema"])
+    old_slug = str(schemas_with_shared_queries["patent_query_share"].slug)
+    response = client.post(f'/api/ui/v0/queries/{schemas_with_shared_queries["patent_query"].id}/shares/{schemas_with_shared_queries["patent_query_share"].id}/regenerate/')
+    response_data = response.json()
+
+    if is_allowed:
+        assert response.status_code == 200
+        assert response_data['slug'] != old_slug
     else:
         assert response.status_code == 403
 
@@ -181,20 +202,20 @@ queries_request_client_with_different_roles = [
 @pytest.mark.parametrize('client_name,same_schema_invalid_token_status,different_schema_invalid_token_status', queries_request_client_with_different_roles)
 @pytest.mark.parametrize('endpoint', ['/', '/results/'])
 def test_shared_query_view_requests(
-    shared_test_query,
+    schemas_with_shared_queries,
     request,
     endpoint,
     client_name,
     same_schema_invalid_token_status,
     different_schema_invalid_token_status
 ):
-    client = request.getfixturevalue(client_name)(shared_test_query["query"].base_table.schema)
+    client = request.getfixturevalue(client_name)(schemas_with_shared_queries["patent_schema"])
 
-    query_url = f'/api/db/v0/queries/{shared_test_query["query"].id}'
-    share_uuid_param = f'shared-link-uuid={shared_test_query["share"].slug}'
+    query_url = f'/api/db/v0/queries/{schemas_with_shared_queries["patent_query"].id}'
+    share_uuid_param = f'shared-link-uuid={schemas_with_shared_queries["patent_query_share"].slug}'
     invalid_share_uuid_param = f'shared-link-uuid={uuid.uuid4()}'
-    different_schema_query_url = f'/api/db/v0/queries/{shared_test_query["different_schema_query"].id}'
-    different_schema_query_uuid_param = f'shared-link-uuid={shared_test_query["different_schema_share"].slug}'
+    different_schema_query_url = f'/api/db/v0/queries/{schemas_with_shared_queries["different_schema_query"].id}'
+    different_schema_query_uuid_param = f'shared-link-uuid={schemas_with_shared_queries["different_schema_query_share"].slug}'
     is_result_endpoint = endpoint == '/results/'
 
     response = client.get(f'{query_url}{endpoint}?{share_uuid_param}')
