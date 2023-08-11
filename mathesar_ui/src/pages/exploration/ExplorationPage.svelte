@@ -44,6 +44,8 @@
     });
   }
 
+  let context: 'shared-consumer-page' | 'page' = 'page';
+  $: context = shareConsumer ? 'shared-consumer-page' : 'page';
   $: createQueryRunner(query, $currentDbAbstractTypes.data);
 
   function gotoSchemaPage() {
@@ -64,6 +66,7 @@
         {database}
         {schema}
         {canEditMetadata}
+        {context}
       />
       <WithExplorationInspector
         {isInspectorOpen}

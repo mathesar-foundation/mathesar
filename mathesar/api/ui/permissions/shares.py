@@ -16,7 +16,7 @@ class SharedTableAccessPolicy(AccessPolicy):
             'action': ['create', 'destroy', 'update', 'partial_update'],
             'principal': 'authenticated',
             'effect': 'allow',
-            'condition_expression': 'is_atleast_manager_nested_table_resource'
+            'condition_expression': 'is_atleast_editor_nested_table_resource'
         },
     ]
 
