@@ -18,3 +18,4 @@ def remove_url_prefix_hook(result, **kwargs):
                     operation['operationId'] = operation_id.replace('ui_v0_', '')
 
     return result
+
