@@ -336,6 +336,18 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_columns_timestamp_prec() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := $j$
+    [{"type": {"name": "timestamp", "options": {"precision": 3}}}]
+  $j$;
+BEGIN
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp(3) without time zone');
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_columns_timestamp_raw_default() RETURNS SETOF TEXT AS $f$
 /*
 This test will fail if the default is being sanitized, but will succeed if it's not.
@@ -379,15 +391,6 @@ BEGIN
     ),
     '42704',
     'type "taxt" does not exist'
-  );
-  RETURN NEXT throws_ok(
-    format(
-      'SELECT msar.add_columns(tab_id => %s, col_defs => ''%s'');',
-      'add_col_testable'::regclass::oid,
-      '[{"type": {"name": "text", "options": {"length": 234}}}]'::jsonb
-    ),
-    '42601',
-    'type modifier is not allowed for type "text"'
   );
   RETURN NEXT throws_ok(
     format(
@@ -963,6 +966,301 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+-- msar.drop_constraint ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION setup_drop_constraint() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE category(
+    id serial primary key,
+    item_category text,
+    CONSTRAINT uq_cat UNIQUE(item_category)
+  );
+  CREATE TABLE orders (
+    id serial primary key,
+    item_name text,
+    price integer,
+    category_id integer,
+    CONSTRAINT fk_cat FOREIGN KEY(category_id) REFERENCES category(id)
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_constraint() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_constraint(
+    sch_name => 'public',
+    tab_name => 'category',
+    con_name => 'uq_cat'
+  );
+  PERFORM msar.drop_constraint(
+    sch_name => 'public',
+    tab_name => 'orders',
+    con_name => 'fk_cat'
+  );
+  /* There isn't a col_isnt_unique function in pgTAP so we are improvising
+  by adding 2 same values here.*/
+  INSERT INTO category(item_category) VALUES ('tech'),('tech');
+  RETURN NEXT col_isnt_fk('orders', 'category_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_constraint_using_oid() RETURNS SETOF TEXT AS $$
+DECLARE
+  uq_cat_oid oid;
+  fk_cat_oid oid;
+BEGIN
+  uq_cat_oid := oid FROM pg_constraint WHERE conname='uq_cat';
+  fk_cat_oid := oid FROM pg_constraint WHERE conname='fk_cat';
+  PERFORM msar.drop_constraint(
+    tab_id => 'category'::regclass::oid,
+    con_id => uq_cat_oid
+  );
+  PERFORM msar.drop_constraint(
+    tab_id => 'orders'::regclass::oid,
+    con_id => fk_cat_oid
+  );
+  /* There isn't a col_isnt_unique function in pgTAP so we are improvising
+  by adding 2 same values here.*/
+  INSERT INTO category(item_category) VALUES ('tech'),('tech');
+  RETURN NEXT col_isnt_fk('orders', 'category_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.create_link -------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION setup_link_tables() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE actors (id SERIAL PRIMARY KEY, actor_name text);
+  INSERT INTO actors(actor_name) VALUES 
+  ('Cillian Murphy'),
+  ('Leonardo DiCaprio'),
+  ('Margot Robbie'),
+  ('Ryan Gosling'),
+  ('Ana de Armas'); 
+  CREATE TABLE movies (id SERIAL PRIMARY KEY, movie_name text);
+  INSERT INTO movies(movie_name) VALUES
+  ('The Wolf of Wall Street'),
+  ('Inception'),
+  ('Oppenheimer'),
+  ('Barbie'),
+  ('Blade Runner 2049');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_many_to_one_link() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_many_to_one_link(
+    frel_id => 'actors'::regclass::oid,
+    rel_id => 'movies'::regclass::oid,
+    col_name => 'act_id'
+  );
+  RETURN NEXT has_column('movies', 'act_id');
+  RETURN NEXT col_type_is('movies', 'act_id', 'integer');
+  RETURN NEXT col_is_fk('movies', 'act_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_one_to_one_link() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_many_to_one_link(
+    frel_id => 'actors'::regclass::oid,
+    rel_id => 'movies'::regclass::oid,
+    col_name => 'act_id',
+    unique_link => true
+  );
+  RETURN NEXT has_column('movies', 'act_id');
+  RETURN NEXT col_type_is('movies', 'act_id', 'integer');
+  RETURN NEXT col_is_fk('movies', 'act_id');
+  RETURN NEXT col_is_unique('movies', 'act_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_many_to_many_link() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_many_to_many_link(
+    sch_id => 'public'::regnamespace::oid,
+    tab_name => 'movies_actors',
+    from_rel_ids => '{}'::oid[] || 'movies'::regclass::oid || 'actors'::regclass::oid,
+    col_names => '{"movie_id", "actor_id"}'::text[]
+  );
+  RETURN NEXT has_table('public'::name, 'movies_actors'::name);
+  RETURN NEXT has_column('movies_actors', 'movie_id');
+  RETURN NEXT col_type_is('movies_actors', 'movie_id', 'integer');
+  RETURN NEXT col_is_fk('movies_actors', 'movie_id');
+  RETURN NEXT has_column('movies_actors', 'actor_id');
+  RETURN NEXT col_type_is('movies_actors', 'actor_id', 'integer');
+  RETURN NEXT col_is_fk('movies_actors', 'actor_id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.schema_ddl --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_create_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_schema(
+    sch_name => 'create_schema'::text,
+    if_not_exists => false
+  );
+  RETURN NEXT has_schema('create_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_drop_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA drop_test_schema;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_false() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'drop_test_schema', 
+    cascade_ => false, 
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => false
+      );', 
+      'drop_non_existing_schema'
+    ),
+    '3F000',
+    'schema "drop_non_existing_schema" does not exist'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_true() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'drop_test_schema',
+    cascade_ => false,
+    if_exists => true
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+  RETURN NEXT lives_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => true
+      );', 
+      'drop_non_existing_schema'
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_using_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_id => 'drop_test_schema'::regnamespace::oid,
+    cascade_ => false,
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('drop_test_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_schema_with_dependent_obj() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA schema1;
+  CREATE TABLE schema1.actors (
+    id SERIAL PRIMARY KEY,
+    actor_name TEXT
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_cascade() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.drop_schema(
+    sch_name => 'schema1',
+    cascade_ => true,
+    if_exists => false
+  );
+  RETURN NEXT hasnt_schema('schema1');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_restricted() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.drop_schema(
+        sch_name => ''%s'',
+        cascade_ => false,
+        if_exists => false
+      );',
+      'schema1'
+    ),
+    '2BP01',
+    'cannot drop schema schema1 because other objects depend on it'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_alter_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA alter_me;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_rename_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.rename_schema(
+    old_sch_name => 'alter_me',
+    new_sch_name => 'altered'
+  );
+  RETURN NEXT hasnt_schema('alter_me');
+  RETURN NEXT has_schema('altered');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_rename_schema_using_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.rename_schema(
+    sch_id => 'alter_me'::regnamespace::oid,
+    new_sch_name => 'altered'
+  );
+  RETURN NEXT hasnt_schema('alter_me');
+  RETURN NEXT has_schema('altered');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_comment_on_schema() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.comment_on_schema(
+    sch_name => 'alter_me',
+    comment_ => 'test comment'
+  );
+  RETURN NEXT is(obj_description('alter_me'::regnamespace::oid), 'test comment');
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- msar.add_mathesar_table
 
 CREATE OR REPLACE FUNCTION setup_create_table() RETURNS SETOF TEXT AS $f$
@@ -984,7 +1282,7 @@ BEGIN
     $q$SELECT attidentity
     FROM pg_attribute
     WHERE attrelid='tab_create_schema.anewtable'::regclass::oid and attname='id'$q$,
-    $v$VALUES ('a'::"char")$v$,
+    $v$VALUES ('d'::"char")$v$,
     'id column should be generated always as identity'
   );
 END;
@@ -1047,3 +1345,533 @@ BEGIN
   );
 END;
 $f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_column_alter() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE col_alters (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    col1 text NOT NULL,
+    col2 numeric DEFAULT 5,
+    "Col sp" text,
+    col_opts numeric(5, 3),
+    coltim timestamp DEFAULT now()
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_process_col_alter_jsonb() RETURNS SETOF TEXT AS $f$/*
+These don't actually modify the table, so we can run multiple tests in the same test.
+
+Only need to test null/empty behavior here, since main functionality is tested by testing
+msar.alter_columns
+
+It's debatable whether this test should continue to exist, but it was useful for initial
+development, and runs quickly.
+*/
+DECLARE
+  tab_id oid;
+BEGIN
+  tab_id := 'col_alters'::regclass::oid;
+  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2}]'), null);
+  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[{"attnum": 2, "name": "blah"}]'), null);
+  RETURN NEXT is(msar.process_col_alter_jsonb(tab_id, '[]'), null);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_single_name() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := '[{"attnum": 2, "name": "blah"}]';
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2]);
+  RETURN NEXT columns_are(
+    'col_alters',
+    ARRAY['id', 'blah', 'col2', 'Col sp', 'col_opts', 'coltim']
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_multi_names() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "name": "new space"},
+    {"attnum": 4, "name": "nospace"}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 4]);
+  RETURN NEXT columns_are(
+    'col_alters',
+    ARRAY['id', 'new space', 'col2', 'nospace', 'col_opts', 'coltim']
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_type() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "type": {"name": "varchar", "options": {"length": 48}}},
+    {"attnum": 3, "type": {"name": "integer"}},
+    {"attnum": 4, "type": {"name": "integer"}}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4]);
+  RETURN NEXT col_type_is('col_alters', 'col1', 'character varying(48)');
+  RETURN NEXT col_type_is('col_alters', 'col2', 'integer');
+  RETURN NEXT col_default_is('col_alters', 'col2', 5);
+  RETURN NEXT col_type_is('col_alters', 'Col sp', 'integer');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_type_options() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 5, "type": {"options": {"precision": 4}}}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[5]);
+  RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(4,0)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_drop() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "delete": true},
+    {"attnum": 5, "delete": true}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT columns_are('col_alters', ARRAY['id', 'col2', 'Col sp', 'coltim']);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_nullable() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "not_null": false},
+    {"attnum": 5, "not_null": true}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 5]);
+  RETURN NEXT col_is_null('col_alters', 'col1');
+  RETURN NEXT col_not_null('col_alters', 'col_opts');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_leaves_defaults() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 3, "type": {"name": "integer"}},
+    {"attnum": 6, "type": {"name": "date"}}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT col_default_is('col_alters', 'col2', '5');
+  RETURN NEXT col_default_is('col_alters', 'coltim', '(now())::date');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_drops_defaults() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 3, "default": null},
+    {"attnum": 6, "type": {"name": "date"}, "default": null}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[3, 6]);
+  RETURN NEXT col_hasnt_default('col_alters', 'col2');
+  RETURN NEXT col_hasnt_default('col_alters', 'coltim');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_sets_defaults() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {"attnum": 2, "default": "test34"},
+    {"attnum": 3, "default": 8},
+    {"attnum": 5, "type": {"name": "integer"}, "default": 7},
+    {"attnum": 6, "type": {"name": "text"}, "default": "test12"}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(
+    msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb),
+    ARRAY[2, 3, 5, 6]
+  );
+  RETURN NEXT col_default_is('col_alters', 'col1', 'test34');
+  RETURN NEXT col_default_is('col_alters', 'col2', '8');
+  RETURN NEXT col_default_is('col_alters', 'col_opts', '7');
+  RETURN NEXT col_default_is('col_alters', 'coltim', 'test12');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_alter_columns_combo() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_alters_jsonb jsonb := $j$[
+    {
+      "attnum": 2,
+      "name": "nullab numeric",
+      "not_null": false,
+      "type": {"name": "numeric", "options": {"precision": 8, "scale": 4}}
+    },
+    {"attnum": 3, "name": "newcol2"},
+    {"attnum": 4, "delete": true},
+    {"attnum": 5, "not_null": true},
+    {"attnum": 6, "name": "timecol", "not_null": true}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(
+    msar.alter_columns('col_alters'::regclass::oid, col_alters_jsonb), ARRAY[2, 3, 4, 5, 6]
+  );
+  RETURN NEXT columns_are(
+    'col_alters', ARRAY['id', 'nullab numeric', 'newcol2', 'col_opts', 'timecol']
+  );
+  RETURN NEXT col_is_null('col_alters', 'nullab numeric');
+  RETURN NEXT col_type_is('col_alters', 'nullab numeric', 'numeric(8,4)');
+  -- This test checks that nothing funny happened when dropping column 4
+  RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(5,3)');
+  RETURN NEXT col_not_null('col_alters', 'col_opts');
+  RETURN NEXT col_not_null('col_alters', 'timecol');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_roster() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE "Roster" (
+    id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    "Student Name" text,
+    "Teacher" text,
+    "Teacher Email" text,
+    "Subject" varchar(20),
+    "Grade" integer
+);
+INSERT INTO "Roster"
+  ("Student Name", "Teacher", "Teacher Email", "Subject", "Grade")
+VALUES
+  ('Stephanie Norris', 'James Jones', 'jamesjones@gmail.com', 'Physics', 43),
+  ('Stephanie Norris', 'Brooke Bowen', 'brookebowen@yahoo.com', 'P.E.', 37),
+  ('Stephanie Norris', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 55),
+  ('Stephanie Norris', 'Joseph Hill', 'josephhill@gmail.com', 'Biology', 41),
+  ('Stephanie Norris', 'Julie Garza', 'juliegarza@yahoo.com', 'Physics', 62),
+  ('Shannon Ramos', 'James Jones', 'jamesjones@gmail.com', 'Math', 44),
+  ('Shannon Ramos', 'Anna Cortez', 'annacortez@yahoo.com', 'Reading', 56),
+  ('Shannon Ramos', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Art', 31),
+  ('Shannon Ramos', 'Amber Hudson', 'amberhudson@hotmail.com', 'Art', 77),
+  ('Shannon Ramos', 'Michael Harding', 'michaelharding@yahoo.com', 'Music', 40),
+  ('Tyler Harris', 'James Jones', 'jamesjones@gmail.com', 'Math', 92),
+  ('Tyler Harris', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 87),
+  ('Tyler Harris', 'Brett Bennett', 'brettbennett@gmail.com', 'Reading', 30),
+  ('Tyler Harris', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 66),
+  ('Tyler Harris', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 81),
+  ('Lee Henderson', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 59),
+  ('Lee Henderson', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'History', 33),
+  ('Lee Henderson', 'Brett Bennett', 'brettbennett@gmail.com', 'Reading', 82),
+  ('Lee Henderson', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 95),
+  ('Lee Henderson', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 93),
+  ('Amber Swanson', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Math', 67),
+  ('Amber Swanson', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 62),
+  ('Amber Swanson', 'Julie Garza', 'juliegarza@yahoo.com', 'Math', 65),
+  ('Amber Swanson', 'Brooke Bowen', 'brookebowen@yahoo.com', 'History', 47),
+  ('Amber Swanson', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Chemistry', 44),
+  ('Jeffrey Juarez', 'Brett Bennett', 'brettbennett@gmail.com', 'Writing', 65),
+  ('Jeffrey Juarez', 'Amber Hudson', 'amberhudson@hotmail.com', 'Art', 57),
+  ('Jeffrey Juarez', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Chemistry', 47),
+  ('Jeffrey Juarez', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Biology', 73),
+  ('Jeffrey Juarez', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 49),
+  ('Jennifer Carlson', 'Barbara Riley', 'barbarariley@hotmail.com', 'Biology', 61),
+  ('Jennifer Carlson', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Art', 68),
+  ('Jennifer Carlson', 'Brooke Bowen', 'brookebowen@yahoo.com', 'History', 68),
+  ('Jennifer Carlson', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Physics', 43),
+  ('Jennifer Carlson', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 80),
+  ('Chelsea Smith', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 37),
+  ('Chelsea Smith', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Physics', 95),
+  ('Chelsea Smith', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 49),
+  ('Chelsea Smith', 'Joseph Hill', 'josephhill@gmail.com', 'Biology', 75),
+  ('Chelsea Smith', 'Brooke Bowen', 'brookebowen@yahoo.com', 'P.E.', 100),
+  ('Dana Webb', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Biology', 87),
+  ('Dana Webb', 'Michael Harding', 'michaelharding@yahoo.com', 'Music', 87),
+  ('Dana Webb', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 78),
+  ('Dana Webb', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 34),
+  ('Dana Webb', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 83),
+  ('Philip Taylor', 'Amber Hudson', 'amberhudson@hotmail.com', 'Music', 39),
+  ('Philip Taylor', 'Brett Bennett', 'brettbennett@gmail.com', 'Reading', 48),
+  ('Philip Taylor', 'Joseph Hill', 'josephhill@gmail.com', 'Biology', 84),
+  ('Philip Taylor', 'Joseph Hill', 'josephhill@gmail.com', 'Chemistry', 26),
+  ('Philip Taylor', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 92),
+  ('Christopher Bell', 'Danny Davis', 'dannydavis@hotmail.com', 'Writing', 96),
+  ('Christopher Bell', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 74),
+  ('Christopher Bell', 'Barbara Riley', 'barbarariley@hotmail.com', 'Biology', 64),
+  ('Christopher Bell', 'Amber Hudson', 'amberhudson@hotmail.com', 'Music', 83),
+  ('Christopher Bell', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 90),
+  ('Stacy Barnett', 'Barbara Riley', 'barbarariley@hotmail.com', 'Biology', 55),
+  ('Stacy Barnett', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 99),
+  ('Stacy Barnett', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 70),
+  ('Stacy Barnett', 'Teresa Chambers', 'teresachambers@gmail.com', 'Physics', 78),
+  ('Stacy Barnett', 'Jean Hayes DVM', 'jeanhayesdvm@hotmail.com', 'P.E.', 72),
+  ('Mary Carroll', 'Brooke Bowen', 'brookebowen@yahoo.com', 'History', 73),
+  ('Mary Carroll', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 87),
+  ('Mary Carroll', 'Grant Mcdonald', 'grantmcdonald@gmail.com', 'Writing', 37),
+  ('Mary Carroll', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'P.E.', 98),
+  ('Mary Carroll', 'Brett Bennett', 'brettbennett@gmail.com', 'Writing', 57),
+  ('Susan Hoover', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 41),
+  ('Susan Hoover', 'Brett Bennett', 'brettbennett@gmail.com', 'Reading', 77),
+  ('Susan Hoover', 'Amber Hudson', 'amberhudson@hotmail.com', 'Music', 48),
+  ('Susan Hoover', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'History', 41),
+  ('Susan Hoover', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 89),
+  ('Jennifer Park', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 96),
+  ('Jennifer Park', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 25),
+  ('Jennifer Park', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 43),
+  ('Jennifer Park', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Biology', 50),
+  ('Jennifer Park', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 82),
+  ('Jennifer Ortiz', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 94),
+  ('Jennifer Ortiz', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Chemistry', 26),
+  ('Jennifer Ortiz', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 28),
+  ('Jennifer Ortiz', 'Barbara Riley', 'barbarariley@hotmail.com', 'Biology', 33),
+  ('Jennifer Ortiz', 'Anna Cortez', 'annacortez@yahoo.com', 'Writing', 98),
+  ('Robert Lamb', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'History', 89),
+  ('Robert Lamb', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 99),
+  ('Robert Lamb', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 55),
+  ('Robert Lamb', 'Anna Cortez', 'annacortez@yahoo.com', 'Writing', 32),
+  ('Robert Lamb', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Biology', 83),
+  ('Judy Martinez', 'Danny Davis', 'dannydavis@hotmail.com', 'Writing', 99),
+  ('Judy Martinez', 'Grant Mcdonald', 'grantmcdonald@gmail.com', 'Writing', 59),
+  ('Judy Martinez', 'Grant Mcdonald', 'grantmcdonald@hotmail.com', 'Reading', 66),
+  ('Judy Martinez', 'Jean Hayes DVM', 'jeanhayesdvm@hotmail.com', 'P.E.', 83),
+  ('Judy Martinez', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 75),
+  ('Christy Meyer', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 60),
+  ('Christy Meyer', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 90),
+  ('Christy Meyer', 'Brett Bennett', 'brettbennett@gmail.com', 'Writing', 72),
+  ('Christy Meyer', 'Joseph Hill', 'josephhill@gmail.com', 'Biology', 37),
+  ('Christy Meyer', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 78),
+  ('Evelyn Anderson', 'Brett Bennett', 'brettbennett@gmail.com', 'Writing', 64),
+  ('Evelyn Anderson', 'Jean Hayes DVM', 'jeanhayesdvm@hotmail.com', 'History', 68),
+  ('Evelyn Anderson', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 49),
+  ('Evelyn Anderson', 'Amber Hudson', 'amberhudson@hotmail.com', 'Art', 42),
+  ('Evelyn Anderson', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'History', 95),
+  ('Bethany Bell', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 36),
+  ('Bethany Bell', 'Julie Garza', 'juliegarza@yahoo.com', 'Physics', 62),
+  ('Bethany Bell', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 50),
+  ('Bethany Bell', 'Grant Mcdonald', 'grantmcdonald@gmail.com', 'Writing', 93),
+  ('Bethany Bell', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 73),
+  ('Leslie Hart', 'Grant Mcdonald', 'grantmcdonald@gmail.com', 'Writing', 45),
+  ('Leslie Hart', 'Amber Hudson', 'amberhudson@hotmail.com', 'Music', 79),
+  ('Leslie Hart', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'P.E.', 57),
+  ('Leslie Hart', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Music', 76),
+  ('Leslie Hart', 'James Jones', 'jamesjones@gmail.com', 'Math', 75),
+  ('Carolyn Durham', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'P.E.', 60),
+  ('Carolyn Durham', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Music', 28),
+  ('Carolyn Durham', 'Barbara Riley', 'barbarariley@hotmail.com', 'Biology', 25),
+  ('Carolyn Durham', 'Grant Mcdonald', 'grantmcdonald@hotmail.com', 'Reading', 49),
+  ('Carolyn Durham', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Physics', 69),
+  ('Daniel Martin', 'Michael Harding', 'michaelharding@yahoo.com', 'Music', 60),
+  ('Daniel Martin', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'P.E.', 32),
+  ('Daniel Martin', 'Anna Cortez', 'annacortez@yahoo.com', 'Reading', 75),
+  ('Daniel Martin', 'Julie Garza', 'juliegarza@yahoo.com', 'Physics', 78),
+  ('Daniel Martin', 'Barbara Riley', 'barbarariley@hotmail.com', 'Biology', 74),
+  ('Jessica Jackson', 'Danny Davis', 'dannydavis@hotmail.com', 'Writing', 34),
+  ('Jessica Jackson', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Math', 78),
+  ('Jessica Jackson', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Chemistry', 67),
+  ('Jessica Jackson', 'Joseph Hill', 'josephhill@gmail.com', 'Biology', 68),
+  ('Jessica Jackson', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 88),
+  ('Stephanie Mendez', 'Brooke Bowen', 'brookebowen@yahoo.com', 'History', 93),
+  ('Stephanie Mendez', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 73),
+  ('Stephanie Mendez', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Art', 27),
+  ('Stephanie Mendez', 'Teresa Chambers', 'teresachambers@gmail.com', 'Physics', 41),
+  ('Stephanie Mendez', 'Grant Mcdonald', 'grantmcdonald@hotmail.com', 'Reading', 98),
+  ('Kevin Griffith', 'Joseph Hill', 'josephhill@gmail.com', 'Chemistry', 54),
+  ('Kevin Griffith', 'Michael Harding', 'michaelharding@yahoo.com', 'Music', 57),
+  ('Kevin Griffith', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 92),
+  ('Kevin Griffith', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 82),
+  ('Kevin Griffith', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'History', 48),
+  ('Debra Johnson', 'Barbara Riley', 'barbarariley@hotmail.com', 'Biology', 38),
+  ('Debra Johnson', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'P.E.', 44),
+  ('Debra Johnson', 'Jean Hayes DVM', 'jeanhayesdvm@hotmail.com', 'History', 32),
+  ('Debra Johnson', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 32),
+  ('Debra Johnson', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 41),
+  ('Mark Frazier', 'Joseph Hill', 'josephhill@gmail.com', 'Biology', 78),
+  ('Mark Frazier', 'Amber Hudson', 'amberhudson@hotmail.com', 'Art', 25),
+  ('Mark Frazier', 'Julie Garza', 'juliegarza@yahoo.com', 'Math', 93),
+  ('Mark Frazier', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 98),
+  ('Mark Frazier', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Music', 75),
+  ('Jessica Jones', 'Anna Cortez', 'annacortez@yahoo.com', 'Reading', 34),
+  ('Jessica Jones', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 46),
+  ('Jessica Jones', 'Grant Mcdonald', 'grantmcdonald@gmail.com', 'Writing', 95),
+  ('Jessica Jones', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 41),
+  ('Jessica Jones', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 97),
+  ('Brandon Robinson', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'P.E.', 38),
+  ('Brandon Robinson', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Chemistry', 64),
+  ('Brandon Robinson', 'Grant Mcdonald', 'grantmcdonald@gmail.com', 'Writing', 53),
+  ('Brandon Robinson', 'Joseph Hill', 'josephhill@gmail.com', 'Chemistry', 56),
+  ('Brandon Robinson', 'Anna Cortez', 'annacortez@yahoo.com', 'Reading', 39),
+  ('Timothy Lowe', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'P.E.', 43),
+  ('Timothy Lowe', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Music', 74),
+  ('Timothy Lowe', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 62),
+  ('Timothy Lowe', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 99),
+  ('Timothy Lowe', 'Grant Mcdonald', 'grantmcdonald@gmail.com', 'Writing', 76),
+  ('Samantha Rivera', 'James Jones', 'jamesjones@gmail.com', 'Math', 38),
+  ('Samantha Rivera', 'Joseph Hill', 'josephhill@gmail.com', 'Biology', 34),
+  ('Samantha Rivera', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 55),
+  ('Samantha Rivera', 'Jean Hayes DVM', 'jeanhayesdvm@hotmail.com', 'P.E.', 91),
+  ('Samantha Rivera', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 35),
+  ('Matthew Brown', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Art', 37),
+  ('Matthew Brown', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Math', 59),
+  ('Matthew Brown', 'James Jones', 'jamesjones@gmail.com', 'Math', 83),
+  ('Matthew Brown', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Chemistry', 100),
+  ('Matthew Brown', 'Michael Harding', 'michaelharding@yahoo.com', 'Music', 40),
+  ('Mary Gonzalez', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 30),
+  ('Mary Gonzalez', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'P.E.', 50),
+  ('Mary Gonzalez', 'Jean Hayes DVM', 'jeanhayesdvm@hotmail.com', 'History', 52),
+  ('Mary Gonzalez', 'Brooke Bowen', 'brookebowen@yahoo.com', 'P.E.', 94),
+  ('Mary Gonzalez', 'James Jones', 'jamesjones@gmail.com', 'Physics', 39),
+  ('Mr. Patrick Weber MD', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'P.E.', 58),
+  ('Mr. Patrick Weber MD', 'Brooke Bowen', 'brookebowen@yahoo.com', 'History', 31),
+  ('Mr. Patrick Weber MD', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Art', 73),
+  ('Mr. Patrick Weber MD', 'Michael Harding', 'michaelharding@yahoo.com', 'Music', 72),
+  ('Mr. Patrick Weber MD', 'Julie Garza', 'juliegarza@yahoo.com', 'Math', 51),
+  ('Jill Walker', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Music', 43),
+  ('Jill Walker', 'Brett Bennett', 'brettbennett@gmail.com', 'Writing', 80),
+  ('Jill Walker', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 25),
+  ('Jill Walker', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Math', 39),
+  ('Jill Walker', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 70),
+  ('Jacob Higgins', 'Teresa Chambers', 'teresachambers@gmail.com', 'Physics', 95),
+  ('Jacob Higgins', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 88),
+  ('Jacob Higgins', 'Brooke Bowen', 'brookebowen@yahoo.com', 'History', 47),
+  ('Jacob Higgins', 'Grant Mcdonald', 'grantmcdonald@hotmail.com', 'Reading', 59),
+  ('Jacob Higgins', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Chemistry', 53),
+  ('Paula Thompson', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Biology', 52),
+  ('Paula Thompson', 'Anna Cortez', 'annacortez@yahoo.com', 'Reading', 42),
+  ('Paula Thompson', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Physics', 98),
+  ('Paula Thompson', 'Amber Hudson', 'amberhudson@hotmail.com', 'Art', 28),
+  ('Paula Thompson', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 53),
+  ('Tyler Phelps', 'Amber Hudson', 'amberhudson@hotmail.com', 'Music', 33),
+  ('Tyler Phelps', 'Brett Bennett', 'brettbennett@gmail.com', 'Writing', 91),
+  ('Tyler Phelps', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 81),
+  ('Tyler Phelps', 'Joseph Hill', 'josephhill@gmail.com', 'Chemistry', 30),
+  ('Tyler Phelps', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 86),
+  ('John Schaefer', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Physics', 44),
+  ('John Schaefer', 'Joseph Hill', 'josephhill@gmail.com', 'Biology', 69),
+  ('John Schaefer', 'Anna Cortez', 'annacortez@yahoo.com', 'Writing', 80),
+  ('John Schaefer', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 69),
+  ('John Schaefer', 'Joseph Hill', 'josephhill@gmail.com', 'Chemistry', 45),
+  ('Eric Kerr', 'Brooke Bowen', 'brookebowen@yahoo.com', 'P.E.', 45),
+  ('Eric Kerr', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 90),
+  ('Eric Kerr', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'P.E.', 50),
+  ('Eric Kerr', 'Anna Cortez', 'annacortez@yahoo.com', 'Writing', 92),
+  ('Eric Kerr', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 77),
+  ('Mikayla Miller', 'Julie Garza', 'juliegarza@yahoo.com', 'Physics', 61),
+  ('Mikayla Miller', 'Brett Bennett', 'brettbennett@gmail.com', 'Writing', 30),
+  ('Mikayla Miller', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Art', 88),
+  ('Mikayla Miller', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Biology', 68),
+  ('Mikayla Miller', 'Anna Cortez', 'annacortez@yahoo.com', 'Writing', 41),
+  ('Alejandro Lam', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Music', 48),
+  ('Alejandro Lam', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 40),
+  ('Alejandro Lam', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'P.E.', 40),
+  ('Alejandro Lam', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 49),
+  ('Alejandro Lam', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 49),
+  ('Katelyn Ray', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 60),
+  ('Katelyn Ray', 'Grant Mcdonald', 'grantmcdonald@hotmail.com', 'Reading', 65),
+  ('Katelyn Ray', 'Julie Garza', 'juliegarza@yahoo.com', 'Math', 82),
+  ('Katelyn Ray', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 70),
+  ('Katelyn Ray', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Biology', 59),
+  ('Carla Rivera', 'Amber Hudson', 'amberhudson@hotmail.com', 'Music', 67),
+  ('Carla Rivera', 'Julie Garza', 'juliegarza@yahoo.com', 'Physics', 70),
+  ('Carla Rivera', 'Amber Hudson', 'amberhudson@hotmail.com', 'Art', 94),
+  ('Carla Rivera', 'Anna Cortez', 'annacortez@yahoo.com', 'Reading', 36),
+  ('Carla Rivera', 'Michael Harding', 'michaelharding@yahoo.com', 'Art', 51),
+  ('Larry Alexander', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'History', 57),
+  ('Larry Alexander', 'Joseph Hill', 'josephhill@gmail.com', 'Chemistry', 97),
+  ('Larry Alexander', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Art', 89),
+  ('Larry Alexander', 'Teresa Chambers', 'teresachambers@hotmail.com', 'Math', 66),
+  ('Larry Alexander', 'Brooke Bowen', 'brookebowen@yahoo.com', 'History', 92),
+  ('Michael Knox', 'Stephanie Ross', 'stephanieross@yahoo.com', 'Art', 72),
+  ('Michael Knox', 'Krista Ramirez', 'kristaramirez@yahoo.com', 'History', 65),
+  ('Michael Knox', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 49),
+  ('Michael Knox', 'Barbara Riley', 'barbarariley@hotmail.com', 'Chemistry', 29),
+  ('Michael Knox', 'Jason Aguilar', 'jasonaguilar@gmail.com', 'Chemistry', 83),
+  ('Alexander Brown', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Music', 89),
+  ('Alexander Brown', 'Deanna Juarez', 'deannajuarez@hotmail.com', 'Chemistry', 94),
+  ('Alexander Brown', 'Anna Cortez', 'annacortez@yahoo.com', 'Writing', 93),
+  ('Alexander Brown', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Math', 35),
+  ('Alexander Brown', 'Whitney Figueroa', 'whitneyfigueroa@gmail.com', 'Physics', 71),
+  ('Anne Sloan', 'Jennifer Anderson', 'jenniferanderson@yahoo.com', 'Art', 38),
+  ('Anne Sloan', 'Brooke Bowen', 'brookebowen@yahoo.com', 'P.E.', 69),
+  ('Anne Sloan', 'Danny Davis', 'dannydavis@yahoo.com', 'Reading', 86),
+  ('Anne Sloan', 'Anna Cortez', 'annacortez@yahoo.com', 'Writing', 39),
+  ('Anne Sloan', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'P.E.', 96);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_extract_columns() RETURNS SETOF TEXT AS $f$
+BEGIN
+  CREATE TABLE roster_snapshot AS SELECT * FROM "Roster" ORDER BY id;
+  PERFORM msar.extract_columns_from_table('"Roster"'::regclass::oid, ARRAY[3, 4], 'Teachers', null);
+  RETURN NEXT columns_are('Teachers', ARRAY['id', 'Teacher', 'Teacher Email']);
+  RETURN NEXT columns_are('Roster', ARRAY['id', 'Student Name', 'Subject', 'Grade', 'Teachers_id']);
+  RETURN NEXT fk_ok('Roster', 'Teachers_id', 'Teachers', 'id');
+  RETURN NEXT set_eq(
+    'SELECT "Teacher", "Teacher Email" FROM "Teachers"',
+    'SELECT DISTINCT "Teacher", "Teacher Email" FROM roster_snapshot',
+    'Extracted data should be unique tuples'
+  );
+  RETURN NEXT results_eq(
+    'SELECT "Student Name", "Subject", "Grade" FROM "Roster" ORDER BY id',
+    'SELECT "Student Name", "Subject", "Grade" FROM roster_snapshot ORDER BY id',
+    'Remainder data should be unchanged'
+  );
+  RETURN NEXT results_eq(
+    $q$
+    SELECT r.id, "Student Name", "Teacher", "Teacher Email", "Subject", "Grade"
+    FROM "Roster" r LEFT JOIN "Teachers" t ON r."Teachers_id"=t.id ORDER BY r.id
+    $q$,
+    'SELECT * FROM roster_snapshot ORDER BY id',
+    'Joining extracted data should recover original'
+  );
+  RETURN NEXT lives_ok(
+    $i$
+    INSERT INTO "Teachers" ("Teacher", "Teacher Email") VALUES ('Miyagi', 'miyagi@karatekid.com')
+    $i$,
+    'The new id column should be incremented to avoid collision'
+  );
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION setup_dynamic_defaults() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE defaults_test (
+    id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    col1 integer DEFAULT 5,
+    col2 integer DEFAULT 3::integer,
+    col3 timestamp DEFAULT NOW(),
+    col4 date DEFAULT '2023-01-01',
+    col5 date DEFAULT CURRENT_DATE
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_is_possibly_dynamic() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid;
+BEGIN
+  tab_id := 'defaults_test'::regclass::oid;
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 1), true);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 2), false);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 3), false);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 4), true);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 5), false);
+  RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 6), true);
+END;
+$$ LANGUAGE plpgsql;

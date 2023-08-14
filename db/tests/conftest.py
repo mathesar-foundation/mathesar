@@ -4,7 +4,9 @@ import pytest
 from sqlalchemy import MetaData, text, Table
 
 from db import constants
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import (
+    get_columns_attnum_from_names, get_column_attnum_from_name
+)
 from db.tables.operations.split import extract_columns_from_table
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import MathesarCustomType
@@ -268,13 +270,16 @@ def uris_table_obj(engine_with_uris, uris_table_name):
     with engine.begin() as conn:
         uri_column_name = "uri"
         uri_type = MathesarCustomType.URI
+        table_oid = get_oid_from_table(table.name, schema, engine)
+        uri_column_attnum = get_column_attnum_from_name(
+            table_oid, uri_column_name, engine, metadata
+        )
         alter_column_type(
-            get_oid_from_table(table.name, schema, engine),
-            uri_column_name,
+            table_oid,
+            uri_column_attnum,
             engine,
             conn,
             uri_type,
-            metadata=metadata,
         )
     yield table, engine
 

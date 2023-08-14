@@ -5,7 +5,7 @@ info:
 paths:
   /api/db/v0/data_files/:
     get:
-      operationId: api_db_v0_data_files_list
+      operationId: api_data_files_list
       parameters:
       - in: query
         name: database
@@ -70,7 +70,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedDataFileList'
           description: ''
     post:
-      operationId: api_db_v0_data_files_create
+      operationId: api_data_files_create
       tags:
       - api
       requestBody:
@@ -96,7 +96,7 @@ paths:
           description: ''
   /api/db/v0/data_files/{id}/:
     get:
-      operationId: api_db_v0_data_files_retrieve
+      operationId: api_data_files_retrieve
       parameters:
       - in: path
         name: id
@@ -117,7 +117,7 @@ paths:
                 $ref: '#/components/schemas/DataFile'
           description: ''
     patch:
-      operationId: api_db_v0_data_files_partial_update
+      operationId: api_data_files_partial_update
       parameters:
       - in: path
         name: id
@@ -150,16 +150,6 @@ paths:
           description: ''
 components:
   schemas:
-    CreatedFromEnum:
-      enum:
-      - FILE
-      - PASTE
-      - URL
-      type: string
-      description: |-
-        * `FILE` - File
-        * `PASTE` - Paste
-        * `URL` - Url
     DataFile:
       type: object
       properties:
@@ -193,9 +183,20 @@ components:
           type: string
           format: uri
         created_from:
-          allOf:
-          - $ref: '#/components/schemas/CreatedFromEnum'
+          enum:
+          - FILE
+          - PASTE
+          - URL
+          type: string
+          description: |-
+            * `FILE` - File
+            * `PASTE` - Paste
+            * `URL` - Url
           readOnly: true
+        max_level:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
       required:
       - created_from
       - id
@@ -254,9 +255,20 @@ components:
           type: string
           format: uri
         created_from:
-          allOf:
-          - $ref: '#/components/schemas/CreatedFromEnum'
+          enum:
+          - FILE
+          - PASTE
+          - URL
+          type: string
+          description: |-
+            * `FILE` - File
+            * `PASTE` - Paste
+            * `URL` - Url
           readOnly: true
+        max_level:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
   securitySchemes:
     cookieAuth:
       type: apiKey
@@ -267,4 +279,3 @@ components:
       in: header
       name: Authorization
       description: Token-based authentication with required prefix "Token"
-

@@ -193,3 +193,6 @@ test-results/
 
 # core dumps generated sometimes when something goes wrong with Playwright
 core
+
+# non tracked settings
+config/settings/local.py

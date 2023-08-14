@@ -1,81 +1,59 @@
-from alembic.operations import Operations
-from alembic.migration import MigrationContext
-from sqlalchemy import ForeignKey, MetaData
-
-from db.columns.base import MathesarColumn
-from db.constraints.utils import naming_convention
-from db.tables.operations.create import create_mathesar_table
-from db.tables.operations.select import reflect_table_from_oid, reflect_tables_from_oids
-from db.tables.utils import get_primary_key_column
-from db.metadata import get_empty_metadata
+from db.connection import execute_msar_func_with_engine
 
 
 def create_foreign_key_link(
         engine,
-        schema,
         referrer_column_name,
         referrer_table_oid,
         referent_table_oid,
         unique_link=False
 ):
-    with engine.begin() as conn:
-        referent_table = reflect_table_from_oid(
-            referent_table_oid,
-            engine,
-            connection_to_use=conn,
-            # TODO reuse metadata
-            metadata=get_empty_metadata(),
-        )
-        referrer_table = reflect_table_from_oid(
-            referrer_table_oid,
-            engine,
-            connection_to_use=conn,
-            # TODO reuse metadata
-            metadata=get_empty_metadata(),
-        )
-        primary_key_column = get_primary_key_column(referent_table)
-        # TODO reuse metadata
-        metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
-        opts = {
-            'target_metadata': metadata
-        }
-        ctx = MigrationContext.configure(conn, opts=opts)
-        op = Operations(ctx)
-        column = MathesarColumn(
-            referrer_column_name, primary_key_column.type
-        )
-        op.add_column(referrer_table.name, column, schema=schema)
-        if unique_link:
-            op.create_unique_constraint(None, referrer_table.name, [referrer_column_name], schema=schema)
-        op.create_foreign_key(
-            None,
-            referrer_table.name,
-            referent_table.name,
-            [column.name],
-            [primary_key_column.name],
-            source_schema=schema,
-            referent_schema=schema
-        )
+    """
+    Creates a Many-to-One or One-to-One link.
+
+    Args:
+        engine: SQLAlchemy engine object for connecting.
+        referrer_column_name: Name of the new column to be created
+                              in the referrer table.
+        referrer_table_oid: The OID of the referrer table.
+        referent_table_oid: The OID of the referent table.
+        unique_link: Whether to make the link one-to-one
+                     instead of many-to-one.
+
+    Returns:
+        Returns the attnum of the newly created column.
+    """
+    return execute_msar_func_with_engine(
+        engine,
+        'create_many_to_one_link',
+        referent_table_oid,
+        referrer_table_oid,
+        referrer_column_name,
+        unique_link
+    ).fetchone()[0]
 
 
-def create_many_to_many_link(engine, schema, map_table_name, referents):
-    with engine.begin() as conn:
-        referent_tables_oid = [referent['referent_table'] for referent in referents]
-        referent_tables = reflect_tables_from_oids(
-            referent_tables_oid, engine, connection_to_use=conn, metadata=get_empty_metadata()
-        )
-        metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
-        # Throws sqlalchemy.exc.NoReferencedTableError if metadata is not reflected.
-        metadata.reflect()
-        referrer_columns = []
-        for referent in referents:
-            referent_table_oid = referent['referent_table']
-            referent_table = referent_tables[referent_table_oid]
-            col_name = referent['column_name']
-            primary_key_column = get_primary_key_column(referent_table)
-            foreign_keys = {ForeignKey(primary_key_column)}
-            column = MathesarColumn(
-                col_name, primary_key_column.type, foreign_keys=foreign_keys,
-            )
-            referrer_columns.append(column)
-        create_mathesar_table(map_table_name, schema, referrer_columns, engine, metadata)
+def create_many_to_many_link(engine, schema_oid, map_table_name, referents_dict):
+    """
+    Creates a Many-to-Many link.
+
+    Args:
+        engine: SQLAlchemy engine object for connecting.
+        schema_oid: The OID of the schema in
+                    which new referrer table is to be created.
+        map_table_name: Name of the referrer table to be created.
+        referents_dict: A python dict that contain 2 keys
+                        'referent_table_oids' & 'column_names' with values as
+                        ordered lists of table_oids & col_names respectively
+
+    Returns:
+        Returns the OID of the newly created table.
+    """
+    return execute_msar_func_with_engine(
+        engine,
+        'create_many_to_many_link',
+        schema_oid,
+        map_table_name,
+        referents_dict['referent_table_oids'],
+        referents_dict['column_names']
+    ).fetchone()[0]

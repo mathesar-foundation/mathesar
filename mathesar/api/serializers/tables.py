@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
 
 from db.types.operations.convert import get_db_type_enum_from_id
-from db.tables.operations.create import DuplicateTable
+from psycopg.errors import DuplicateTable
 from db.columns.exceptions import InvalidTypeError
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.db.permissions.table import TableAccessPolicy

@@ -31,6 +31,10 @@ ui_router.register(r'schema_roles', ui_viewsets.SchemaRoleViewSet, basename='sch
 ui_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
 ui_table_router.register(r'records', ui_viewsets.RecordViewSet, basename='table-record')
 
+# Shares
+ui_router.register(r'tables/(?P<table_pk>[^/.]+)/shares', ui_viewsets.SharedTableViewSet, basename='shared-table')
+ui_router.register(r'queries/(?P<query_pk>[^/.]+)/shares', ui_viewsets.SharedQueryViewSet, basename='shared-query')
+
 urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
@@ -46,6 +50,8 @@ urlpatterns = [
     path('administration/users/', views.admin_home, name='admin_users_home'),
     path('administration/users/<user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
+    path('shares/tables/<slug>/', views.shared_table, name='shared_table'),
+    path('shares/explorations/<slug>/', views.shared_query, name='shared_query'),
     path('db/', views.home, name='db_home'),
     path('db/<db_name>/', views.schemas, name='schemas'),
     re_path(
