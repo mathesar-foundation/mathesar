@@ -6,6 +6,7 @@ def custom_preprocessing_hook(endpoints):
             filtered.append((path, path_regex, method, callback))
     return filtered
 
+
 def remove_url_prefix_hook(result, **kwargs):
     # Remove namespace and version URL prefix from the operation Id of the generated API schema
     for path, path_info in result['paths'].items():
@@ -18,4 +19,3 @@ def remove_url_prefix_hook(result, **kwargs):
                     operation['operationId'] = operation_id.replace('ui_v0_', '')
 
     return result
-
