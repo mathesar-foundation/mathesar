@@ -57,7 +57,8 @@ export interface ProcessedColumn extends CellColumnFabric {
 }
 
 /** Maps column ids to processed columns */
-export type ProcessedColumnsStore = Readable<Map<number, ProcessedColumn>>;
+export type ProcessedColumns = Map<number, ProcessedColumn>;
+export type ProcessedColumnsStore = Readable<ProcessedColumns>;
 
 export function processColumn({
   tableId,

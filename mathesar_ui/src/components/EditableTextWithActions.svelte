@@ -52,7 +52,7 @@
 </script>
 
 <div class="editable-text">
-  {#if !isEditable}
+  {#if !isEditable || disabled}
     <svelte:component
       this={inputElement}
       on:focus={makeEditable}

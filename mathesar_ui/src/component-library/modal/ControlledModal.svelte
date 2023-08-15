@@ -23,6 +23,7 @@
   on:open
   on:close
   {canScrollBody}
+  modalId={controller.modalId}
 >
   <slot />
   <slot name="title" slot="title" />
