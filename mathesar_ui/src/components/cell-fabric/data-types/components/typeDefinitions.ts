@@ -18,6 +18,8 @@ export interface CellTypeProps<Value> {
   searchValue?: unknown;
   isProcessing: boolean;
   isIndependentOfSheet: boolean;
+  showTruncationPopover: boolean;
+  canViewLinkedEntities: boolean;
 }
 
 // Primary key

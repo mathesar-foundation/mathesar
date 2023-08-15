@@ -4,6 +4,7 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from sqlalchemy.exc import IntegrityError, DataError
 
 from mathesar.api.db.permissions.records import RecordAccessPolicy
@@ -26,6 +27,7 @@ from mathesar.utils.json import MathesarJSONRenderer
 
 
 class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = RecordAccessPolicy
 
     # There is no 'update' method.
@@ -68,7 +70,6 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
         name_converted_search = [{**column, 'column': column_ids_to_names[column['field']]} for column in search_fuzzy]
 
         try:
-
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table, column_names_to_ids,
                 filters=filter_processed,

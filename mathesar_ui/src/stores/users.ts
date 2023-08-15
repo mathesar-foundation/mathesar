@@ -162,6 +162,24 @@ export class UserModel {
   }
 }
 
+export class AnonymousViewerUserModel extends UserModel {
+  constructor() {
+    super({
+      id: 0,
+      is_superuser: false,
+      database_roles: [],
+      schema_roles: [],
+      username: 'Anonymous',
+      full_name: 'Anonymous',
+      email: null,
+    });
+  }
+
+  hasPermission() {
+    return false;
+  }
+}
+
 const contextKey = Symbol('users list store');
 
 class WritableUsersStore {

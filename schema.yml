@@ -3,9 +3,9 @@ info:
   title: Mathesar API
   version: 1.0.0
 paths:
-  /api/db/v0/schemas/:
+  /api/db/v0/data_files/:
     get:
-      operationId: api_db_v0_schemas_list
+      operationId: data_files_list
       parameters:
       - in: query
         name: database
@@ -58,7 +58,270 @@ paths:
         explode: false
         style: form
       tags:
-      - api
+      - data_files
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDataFileList'
+          description: ''
+    post:
+      operationId: data_files_create
+      tags:
+      - data_files
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataFile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DataFile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DataFile'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataFile'
+          description: ''
+  /api/db/v0/data_files/{id}/:
+    get:
+      operationId: data_files_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this data file.
+        required: true
+      tags:
+      - data_files
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataFile'
+          description: ''
+    patch:
+      operationId: data_files_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this data file.
+        required: true
+      tags:
+      - data_files
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDataFile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDataFile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDataFile'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataFile'
+          description: ''
+  /api/db/v0/databases/:
+    get:
+      operationId: databases_list
+      parameters:
+      - in: query
+        name: deleted
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - databases
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDatabaseList'
+          description: ''
+  /api/db/v0/databases/{id}/:
+    get:
+      operationId: databases_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - databases
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/db/v0/databases/{id}/functions/:
+    get:
+      operationId: databases_functions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - databases
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/db/v0/databases/{id}/types/:
+    get:
+      operationId: databases_types_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - databases
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/db/v0/schemas/:
+    get:
+      operationId: schemas_list
+      parameters:
+      - in: query
+        name: database
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - schemas
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -70,9 +333,9 @@ paths:
                 $ref: '#/components/schemas/PaginatedSchemaList'
           description: ''
     post:
-      operationId: api_db_v0_schemas_create
+      operationId: schemas_create
       tags:
-      - api
+      - schemas
       requestBody:
         content:
           application/json:
@@ -97,7 +360,7 @@ paths:
           description: ''
   /api/db/v0/schemas/{id}/:
     get:
-      operationId: api_db_v0_schemas_retrieve
+      operationId: schemas_retrieve
       parameters:
       - in: path
         name: id
@@ -106,7 +369,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - api
+      - schemas
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -118,7 +381,7 @@ paths:
                 $ref: '#/components/schemas/Schema'
           description: ''
     patch:
-      operationId: api_db_v0_schemas_partial_update
+      operationId: schemas_partial_update
       parameters:
       - in: path
         name: id
@@ -127,7 +390,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - api
+      - schemas
       requestBody:
         content:
           application/json:
@@ -150,7 +413,7 @@ paths:
                 $ref: '#/components/schemas/Schema'
           description: ''
     delete:
-      operationId: api_db_v0_schemas_destroy
+      operationId: schemas_destroy
       parameters:
       - in: path
         name: id
@@ -159,7 +422,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - api
+      - schemas
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -168,7 +431,7 @@ paths:
           description: No response body
   /api/db/v0/schemas/{id}/dependents/:
     get:
-      operationId: api_db_v0_schemas_dependents_retrieve
+      operationId: schemas_dependents_retrieve
       parameters:
       - in: path
         name: id
@@ -177,7 +440,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - api
+      - schemas
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -190,6 +453,118 @@ paths:
           description: ''
 components:
   schemas:
+    DataFile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        file:
+          type: string
+          format: uri
+        table_imported_to:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        header:
+          type: boolean
+          default: true
+        delimiter:
+          type: string
+          maxLength: 1
+        escapechar:
+          type: string
+          maxLength: 1
+        quotechar:
+          type: string
+          maxLength: 1
+        paste:
+          type: string
+        url:
+          type: string
+          format: uri
+        created_from:
+          enum:
+          - FILE
+          - PASTE
+          - URL
+          type: string
+          description: |-
+            * `FILE` - File
+            * `PASTE` - Paste
+            * `URL` - Url
+          readOnly: true
+        max_level:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - created_from
+      - id
+      - table_imported_to
+      - user
+    Database:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        deleted:
+          type: boolean
+          readOnly: true
+        supported_types_url:
+          type: string
+          readOnly: true
+      required:
+      - deleted
+      - id
+      - name
+      - supported_types_url
+    PaginatedDataFileList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataFile'
+    PaginatedDatabaseList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Database'
     PaginatedSchemaList:
       type: object
       properties:
@@ -210,6 +585,53 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Schema'
+    PatchedDataFile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        file:
+          type: string
+          format: uri
+        table_imported_to:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        header:
+          type: boolean
+          default: true
+        delimiter:
+          type: string
+          maxLength: 1
+        escapechar:
+          type: string
+          maxLength: 1
+        quotechar:
+          type: string
+          maxLength: 1
+        paste:
+          type: string
+        url:
+          type: string
+          format: uri
+        created_from:
+          enum:
+          - FILE
+          - PASTE
+          - URL
+          type: string
+          description: |-
+            * `FILE` - File
+            * `PASTE` - Paste
+            * `URL` - Url
+          readOnly: true
+        max_level:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
     PatchedSchema:
       type: object
       properties:
