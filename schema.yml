@@ -1,0 +1,281 @@
+openapi: 3.0.3
+info:
+  title: Mathesar API
+  version: 1.0.0
+paths:
+  /api/db/v0/data_files/:
+    get:
+      operationId: api_data_files_list
+      parameters:
+      - in: query
+        name: database
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDataFileList'
+          description: ''
+    post:
+      operationId: api_data_files_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataFile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DataFile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DataFile'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataFile'
+          description: ''
+  /api/db/v0/data_files/{id}/:
+    get:
+      operationId: api_data_files_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this data file.
+        required: true
+      tags:
+      - api
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataFile'
+          description: ''
+    patch:
+      operationId: api_data_files_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this data file.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDataFile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDataFile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDataFile'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataFile'
+          description: ''
+components:
+  schemas:
+    DataFile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        file:
+          type: string
+          format: uri
+        table_imported_to:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        header:
+          type: boolean
+          default: true
+        delimiter:
+          type: string
+          maxLength: 1
+        escapechar:
+          type: string
+          maxLength: 1
+        quotechar:
+          type: string
+          maxLength: 1
+        paste:
+          type: string
+        url:
+          type: string
+          format: uri
+        created_from:
+          enum:
+          - FILE
+          - PASTE
+          - URL
+          type: string
+          description: |-
+            * `FILE` - File
+            * `PASTE` - Paste
+            * `URL` - Url
+          readOnly: true
+        max_level:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - created_from
+      - id
+      - table_imported_to
+      - user
+    PaginatedDataFileList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataFile'
+    PatchedDataFile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        file:
+          type: string
+          format: uri
+        table_imported_to:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        header:
+          type: boolean
+          default: true
+        delimiter:
+          type: string
+          maxLength: 1
+        escapechar:
+          type: string
+          maxLength: 1
+        quotechar:
+          type: string
+          maxLength: 1
+        paste:
+          type: string
+        url:
+          type: string
+          format: uri
+        created_from:
+          enum:
+          - FILE
+          - PASTE
+          - URL
+          type: string
+          description: |-
+            * `FILE` - File
+            * `PASTE` - Paste
+            * `URL` - Url
+          readOnly: true
+        max_level:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
