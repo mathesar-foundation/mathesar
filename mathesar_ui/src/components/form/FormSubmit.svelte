@@ -3,7 +3,7 @@
 
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
-  import Errors from './Errors.svelte';
+  import Errors from '@mathesar/components/Errors.svelte';
   import type { FilledFormValues, Form } from './form';
 
   type F = $$Generic<Form>;

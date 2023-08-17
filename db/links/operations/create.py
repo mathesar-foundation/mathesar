@@ -1,12 +1,4 @@
-from sqlalchemy import ForeignKey, MetaData
 from db.connection import execute_msar_func_with_engine
-
-from db.columns.base import MathesarColumn
-from db.constraints.utils import naming_convention
-from db.tables.operations.create import create_mathesar_table
-from db.tables.operations.select import reflect_tables_from_oids
-from db.tables.utils import get_primary_key_column
-from db.metadata import get_empty_metadata
 
 
 def create_foreign_key_link(
@@ -41,24 +33,27 @@ def create_foreign_key_link(
     ).fetchone()[0]
 
 
-def create_many_to_many_link(engine, schema, map_table_name, referents):
-    with engine.begin() as conn:
-        referent_tables_oid = [referent['referent_table'] for referent in referents]
-        referent_tables = reflect_tables_from_oids(
-            referent_tables_oid, engine, connection_to_use=conn, metadata=get_empty_metadata()
-        )
-        metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
-        # Throws sqlalchemy.exc.NoReferencedTableError if metadata is not reflected.
-        metadata.reflect()
-        referrer_columns = []
-        for referent in referents:
-            referent_table_oid = referent['referent_table']
-            referent_table = referent_tables[referent_table_oid]
-            col_name = referent['column_name']
-            primary_key_column = get_primary_key_column(referent_table)
-            foreign_keys = {ForeignKey(primary_key_column)}
-            column = MathesarColumn(
-                col_name, primary_key_column.type, foreign_keys=foreign_keys,
-            )
-            referrer_columns.append(column)
-        create_mathesar_table(map_table_name, schema, referrer_columns, engine, metadata)
+def create_many_to_many_link(engine, schema_oid, map_table_name, referents_dict):
+    """
+    Creates a Many-to-Many link.
+
+    Args:
+        engine: SQLAlchemy engine object for connecting.
+        schema_oid: The OID of the schema in
+                    which new referrer table is to be created.
+        map_table_name: Name of the referrer table to be created.
+        referents_dict: A python dict that contain 2 keys
+                        'referent_table_oids' & 'column_names' with values as
+                        ordered lists of table_oids & col_names respectively
+
+    Returns:
+        Returns the OID of the newly created table.
+    """
+    return execute_msar_func_with_engine(
+        engine,
+        'create_many_to_many_link',
+        schema_oid,
+        map_table_name,
+        referents_dict['referent_table_oids'],
+        referents_dict['column_names']
+    ).fetchone()[0]
