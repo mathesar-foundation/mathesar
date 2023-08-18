@@ -18,6 +18,7 @@
   export let disabled: $$Props['disabled'];
   export let tableId: $$Props['tableId'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
+  export let canViewLinkedEntities: $$Props['canViewLinkedEntities'];
 
   $: href = $storeToGetRecordPageUrl({ tableId, recordId: value });
 
@@ -66,14 +67,16 @@
         {value}
       {/if}
     </span>
-    <a
-      {href}
-      class="link"
-      title="Go To Record {value}"
-      on:contextmenu={handleContextMenu}
-    >
-      <Icon {...iconLinkToRecordPage} />
-    </a>
+    {#if canViewLinkedEntities}
+      <a
+        {href}
+        class="link"
+        title="Go To Record {value}"
+        on:contextmenu={handleContextMenu}
+      >
+        <Icon {...iconLinkToRecordPage} />
+      </a>
+    {/if}
   </div>
 </CellWrapper>
 

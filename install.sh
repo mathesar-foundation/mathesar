@@ -358,24 +358,6 @@ clear -x
 printf "
 --------------------------------------------------------------------------------
 
-ADMIN USER CONFIGURATION
-
-You'll use these credentials to login to Mathesar in the web interface.
-
---------------------------------------------------------------------------------
-
-"
-
-read -r -p "Choose an admin username [admin]: " superuser_username
-superuser_username=${superuser_username:-admin}
-read -r -p "Choose an admin email [$superuser_username@example.com]: " superuser_email
-superuser_email=${superuser_email:-"$superuser_username@example.com"}
-superuser_password=$(create_password)
-printf "\n"
-clear -x
-printf "
---------------------------------------------------------------------------------
-
 CONFIGURATION DIRECTORY
 
 Mathesar needs to create a configuration directory on your machine. Using the
@@ -403,7 +385,6 @@ ALLOWED_HOSTS='${allowed_hosts}'
 SECRET_KEY='${secret_key}'
 DJANGO_DATABASE_URL='${django_database_url}'
 MATHESAR_DATABASES='(mathesar_tables|${mathesar_database_url})'
-DJANGO_SUPERUSER_PASSWORD='${superuser_password}'
 DOMAIN_NAME='${domain_name}'
 HTTP_PORT='${http_port}'
 HTTPS_PORT='${https_port}'
@@ -441,9 +422,7 @@ printf "
 --------------------------------------------------------------------------------
 
 Service is ready and healthy!
-Adding admin user to Django webservice now.
 "
-docker exec mathesar_service python manage.py createsuperuser --no-input --username "$superuser_username" --email "$superuser_email"
 read -r -p "
 Press ENTER to continue. "
 printf "\n"
