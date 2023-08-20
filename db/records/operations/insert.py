@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch, UniqueViolation, ExclusionViolation
 from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
 from db.columns.base import MathesarColumn
+from db.constants import ID, ID_ORIGINAL
 from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
 from sqlalchemy import select
@@ -21,14 +22,31 @@ def insert_record_or_records(table, engine, record_data):
     """
     id_value = None
     with engine.begin() as connection:
-        result = connection.execute(table.insert(), record_data)
-        # If there was only a single record created, return the record.
-        if result.rowcount == 1:
-            # We need to manually commit insertion so that we can retrieve the record.
-            connection.commit()
-            id_value = result.inserted_primary_key[0]
-            if id_value is not None:
-                return get_record(table, engine, id_value)
+        try:
+            result = connection.execute(table.insert(), record_data)
+            # If there was only a single record created, return the record.
+            if result.rowcount == 1:
+                # We need to manually commit insertion so that we can retrieve the record.
+                connection.commit()
+                id_value = result.inserted_primary_key[0]
+                if id_value is not None:
+                    return get_record(table, engine, id_value)
+        except IntegrityError as e:
+            if type(e.orig) is NotNullViolation:
+                raise NotNullError
+            elif type(e.orig) is ForeignKeyViolation:
+                raise ForeignKeyError
+            elif type(e.orig) is UniqueViolation:
+                raise UniqueValueError
+            elif type(e.orig) is ExclusionViolation:
+                raise ExclusionError
+            else:
+                raise e
+        except ProgrammingError as e:
+            if type(e.orig) is DatatypeMismatch:
+                raise TypeMismatchError
+            else:
+                raise e
     # Do not return any records if multiple rows were added.
     return None
 
@@ -89,6 +107,8 @@ def insert_records_from_json(table, engine, json_filepath, column_names, max_lev
     records = get_records_from_dataframe(df)
 
     for i, row in enumerate(records):
+        if ID in row and ID_ORIGINAL in column_names:
+            row[ID_ORIGINAL] = row.pop("id")
         records[i] = {
             k: json.dumps(v)
             if (isinstance(v, dict) or isinstance(v, list))
