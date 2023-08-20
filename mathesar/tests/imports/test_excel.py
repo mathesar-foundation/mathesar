@@ -9,23 +9,12 @@ from db.schemas.operations.create import create_schema
 from db.schemas.utils import get_schema_oid_from_name
 from psycopg.errors import DuplicateTable
 
-TEST_SCHEMA = "import_excel_schema"
-
 
 @pytest.fixture
 def data_file(patents_excel_filepath):
     with open(patents_excel_filepath, "rb") as excel_file:
         data_file = DataFile.objects.create(file=File(excel_file), type='excel')
     return data_file
-
-
-@pytest.fixture()
-def schema(engine, test_db_model):
-    create_schema(TEST_SCHEMA, engine)
-    schema_oid = get_schema_oid_from_name(TEST_SCHEMA, engine)
-    yield Schema.current_objects.create(oid=schema_oid, database=test_db_model)
-    with engine.begin() as conn:
-        conn.execute(text(f'DROP SCHEMA "{TEST_SCHEMA}" CASCADE;'))
 
 
 def check_excel_upload(table, table_name, schema, num_records, row, cols):
@@ -38,7 +27,10 @@ def check_excel_upload(table, table_name, schema, num_records, row, cols):
         assert col in table.sa_column_names
 
 
-def test_excel_upload(data_file, schema):
+def test_excel_upload(data_file, engine_with_schema):
+    engine, schema_name = engine_with_schema
+    schema_oid = get_schema_oid_from_name(schema_name, engine)
+    schema = Schema.objects.get(oid=schema_oid)
     table_name = "NASA 1"
     table = create_table_from_data_file(data_file, table_name, schema)
 
@@ -67,9 +59,12 @@ def test_excel_upload(data_file, schema):
     )
 
 
-def test_excel_upload_with_duplicate_table_name(data_file, schema):
+def test_excel_upload_with_duplicate_table_name(data_file, engine_with_schema):
     table_name = "NASA 2"
 
+    engine, schema_name = engine_with_schema
+    schema_oid = get_schema_oid_from_name(schema_name, engine)
+    schema = Schema.objects.get(oid=schema_oid)
     table = create_table_from_data_file(data_file, table_name, schema)
     assert table is not None
     assert table.name == table_name
@@ -80,7 +75,10 @@ def test_excel_upload_with_duplicate_table_name(data_file, schema):
         create_table_from_data_file(data_file, table_name, schema)
 
 
-def test_excel_upload_table_imported_to(data_file, schema):
+def test_excel_upload_table_imported_to(data_file, engine_with_schema):
+    engine, schema_name = engine_with_schema
+    schema_oid = get_schema_oid_from_name(schema_name, engine)
+    schema = Schema.objects.get(oid=schema_oid)
     table = create_table_from_data_file(data_file, "NASA", schema)
     data_file.refresh_from_db()
     assert data_file.table_imported_to == table
