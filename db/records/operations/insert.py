@@ -22,31 +22,14 @@ def insert_record_or_records(table, engine, record_data):
     """
     id_value = None
     with engine.begin() as connection:
-        try:
-            result = connection.execute(table.insert(), record_data)
-            # If there was only a single record created, return the record.
-            if result.rowcount == 1:
-                # We need to manually commit insertion so that we can retrieve the record.
-                connection.commit()
-                id_value = result.inserted_primary_key[0]
-                if id_value is not None:
-                    return get_record(table, engine, id_value)
-        except IntegrityError as e:
-            if type(e.orig) is NotNullViolation:
-                raise NotNullError
-            elif type(e.orig) is ForeignKeyViolation:
-                raise ForeignKeyError
-            elif type(e.orig) is UniqueViolation:
-                raise UniqueValueError
-            elif type(e.orig) is ExclusionViolation:
-                raise ExclusionError
-            else:
-                raise e
-        except ProgrammingError as e:
-            if type(e.orig) is DatatypeMismatch:
-                raise TypeMismatchError
-            else:
-                raise e
+        result = connection.execute(table.insert(), record_data)
+        # If there was only a single record created, return the record.
+        if result.rowcount == 1:
+            # We need to manually commit insertion so that we can retrieve the record.
+            connection.commit()
+            id_value = result.inserted_primary_key[0]
+            if id_value is not None:
+                return get_record(table, engine, id_value)
     # Do not return any records if multiple rows were added.
     return None
 

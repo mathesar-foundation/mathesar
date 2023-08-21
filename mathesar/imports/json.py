@@ -1,7 +1,7 @@
 import json
 from json.decoder import JSONDecodeError
 
-from db.columns.exceptions import NotNullError, UniqueValueError
+# from db.columns.exceptions import NotNullError, UniqueValueError
 from db.tables.operations.alter import update_pk_sequence_to_latest
 from mathesar.database.base import create_mathesar_engine
 from db.records.operations.insert import insert_records_from_json
@@ -12,6 +12,7 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.imports.utils import get_alternate_column_names, process_column_names
 from psycopg2.errors import IntegrityError, DataError
+from sqlalchemy.exc import IntegrityError as sqlalchemy_integrity_error
 
 from mathesar.state import reset_reflection
 
@@ -93,7 +94,7 @@ def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
     try:
         table = insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level)
         update_pk_sequence_to_latest(engine, table)
-    except (IntegrityError, DataError, NotNullError, UniqueValueError):
+    except (IntegrityError, DataError, sqlalchemy_integrity_error):
         drop_table(name=name, schema=schema.name, engine=engine)
         column_names_alt = get_alternate_column_names(column_names)
         table = insert_records_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
