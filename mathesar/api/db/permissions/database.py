@@ -11,7 +11,7 @@ class DatabaseAccessPolicy(AccessPolicy):
     """
     statements = [
         {
-            'action': ['list', 'retrieve', 'types', 'functions'],
+            'action': ['create', 'list', 'retrieve', 'types', 'functions'],
             'principal': 'authenticated',
             'effect': 'allow',
         }

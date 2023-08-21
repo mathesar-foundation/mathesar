@@ -110,6 +110,8 @@ _engine_cache = {}
 
 
 class Database(ReflectionManagerMixin, BaseModel):
+    db_username = models.CharField(max_length=255)
+    db_password = models.CharField(max_length=255)
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()

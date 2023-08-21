@@ -19,7 +19,7 @@ from db.types.base import get_available_known_db_types
 from mathesar.api.serializers.db_types import DBTypeSerializer
 
 
-class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -31,6 +31,10 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixi
             self.request,
             Database.objects.all().order_by('-created_at')
         )
+
+    def create(self, request):
+        serializer = DatabaseSerializer(request)
+        pass
 
     @action(methods=['get'], detail=True)
     def functions(self, request, pk=None):

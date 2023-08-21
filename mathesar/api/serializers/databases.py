@@ -7,12 +7,15 @@ from mathesar.models.base import Database
 
 
 class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
+    name = serializers.CharField()
+    db_username = serializers.CharField()
+    db_password = serializers.CharField()
     supported_types_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Database
-        fields = ['id', 'name', 'deleted', 'supported_types_url']
-        read_only_fields = ['id', 'name', 'deleted', 'supported_types_url']
+        fields = ['id', 'name', 'deleted', 'supported_types_url', 'db_username', 'db_password']
+        read_only_fields = ['id', 'deleted', 'supported_types_url']
 
     def get_supported_types_url(self, obj):
         if isinstance(obj, Database):
