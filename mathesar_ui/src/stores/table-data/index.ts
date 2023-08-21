@@ -46,6 +46,7 @@ export {
 } from './tabularData';
 export {
   type ProcessedColumn,
+  type ProcessedColumns,
   type ProcessedColumnsStore,
 } from './processedColumns';
 export {

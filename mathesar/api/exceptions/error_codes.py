@@ -9,6 +9,7 @@ class ErrorCodes(Enum):
     NotFound = 4005
     TableNotFound = 4041
     RecordNotFound = 4042
+    QueryNotFound = 4061
     UnknownError = 4999
     # Generic Errors
     ProgrammingError = 4101
@@ -65,3 +66,4 @@ class ErrorCodes(Enum):
     DynamicDefaultAlterationToStaticDefault = 4424
     InvalidJSONFormat = 4425
     UnsupportedJSONFormat = 4426
+    UnsupportedFileFormat = 4427

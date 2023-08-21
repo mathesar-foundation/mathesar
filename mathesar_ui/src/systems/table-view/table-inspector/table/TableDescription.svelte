@@ -5,6 +5,8 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
   const tabularData = getTabularDataStoreFromContext();
+
+  export let disabled = false;
 </script>
 
 <EditTableHOC let:onUpdate tableId={$tabularData.id}>
@@ -14,6 +16,7 @@
       initialValue={$tables.data.get($tabularData.id)?.description ?? ''}
       onSubmit={(description) => onUpdate({ description })}
       isLongText
+      {disabled}
     />
   </div>
 </EditTableHOC>

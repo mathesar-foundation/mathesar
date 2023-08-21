@@ -3,6 +3,7 @@ from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from sqlalchemy.exc import ProgrammingError
 
 import mathesar.api.exceptions.database_exceptions.base_exceptions as base_database_api_exceptions
@@ -17,13 +18,11 @@ from mathesar.models.base import Constraint
 class ConstraintViewSet(AccessViewSetMixin, ListModelMixin, RetrieveModelMixin, CreateModelMixin, viewsets.GenericViewSet):
     serializer_class = ConstraintSerializer
     pagination_class = DefaultLimitOffsetPagination
+    permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = ConstraintAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy.scope_queryset(
-            self.request,
-            Constraint.objects.filter(table__id=self.kwargs['table_pk']).order_by('-created_at')
-        )
+        return Constraint.objects.filter(table__id=self.kwargs['table_pk']).order_by('-created_at')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -36,7 +35,7 @@ class ConstraintViewSet(AccessViewSetMixin, ListModelMixin, RetrieveModelMixin, 
         try:
             constraint.drop()
         except ProgrammingError as e:
-            if type(e.orig) == UndefinedObject:
+            if type(e.orig) is UndefinedObject:
                 raise base_api_exceptions.NotFoundAPIException(e)
             else:
                 raise base_database_api_exceptions.ProgrammingAPIException(e)
