@@ -1,7 +1,6 @@
 import json
 from json.decoder import JSONDecodeError
 
-# from db.columns.exceptions import NotNullError, UniqueValueError
 from db.tables.operations.alter import update_pk_sequence_to_latest
 from mathesar.database.base import create_mathesar_engine
 from db.records.operations.insert import insert_records_from_json
