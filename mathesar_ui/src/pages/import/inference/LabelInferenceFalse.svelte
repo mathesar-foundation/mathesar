@@ -4,6 +4,6 @@
 </script>
 
 <NameWithIcon icon={iconUiTypeText} truncate={false}>
-  Use "Text" for all column types
+  Use "Text" for all column data types
   <em>(faster for large imports)</em>
 </NameWithIcon>

@@ -16,7 +16,7 @@
   on:change
   boxed
   options={[true, false]}
-  label="Column Types"
+  label="Column Data Types"
   getRadioLabel={(v) =>
     v ? { component: LabelInferenceTrue } : { component: LabelInferenceFalse }}
   {...$$restProps}
