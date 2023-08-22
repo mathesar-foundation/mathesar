@@ -785,3 +785,15 @@ def test_schema_role_create_multiple_roles_on_same_object(client, user_bob):
 
         assert response.status_code == 500
         assert response_data[0]['code'] == 4201
+
+
+def test_superuser_create_redirect_if_superuser_exists(client, admin_user):
+    response = client.get('/auth/create_superuser/')
+    assert response.status_code == 302
+    assert response.url == '/'
+
+
+def test_login_redirect_if_superuser_not_exists(anonymous_client):
+    response = anonymous_client.get('/auth/login/')
+    assert response.status_code == 302
+    assert response.url == '/auth/create_superuser/'

@@ -25,4 +25,8 @@ export interface ShareApi<
     shareId: number,
     share: Partial<U>,
   ) => ReturnType<typeof patchAPI<T>>;
+  regenerate: (
+    entityId: number,
+    shareId: number,
+  ) => ReturnType<typeof postAPI<T>>;
 }

@@ -5,7 +5,9 @@ from rest_framework_nested import routers
 from mathesar import views
 from mathesar.api.db import viewsets as db_viewsets
 from mathesar.api.ui import viewsets as ui_viewsets
+from mathesar.users.decorators import superuser_exist, superuser_must_not_exist
 from mathesar.users.password_reset import MathesarPasswordResetConfirmView
+from mathesar.users.superuser_create import SuperuserFormView
 
 db_router = routers.DefaultRouter()
 db_router.register(r'tables', db_viewsets.TableViewSet, basename='table')
@@ -42,7 +44,8 @@ urlpatterns = [
     path('api/ui/v0/', include(ui_table_router.urls)),
     path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),
     path('auth/password_reset_confirm', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('auth/login/', LoginView.as_view(redirect_authenticated_user=True), name='login'),
+    path('auth/login/', superuser_exist(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
+    path('auth/create_superuser/', superuser_must_not_exist(SuperuserFormView.as_view()), name='superuser_create'),
     path('auth/', include('django.contrib.auth.urls')),
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
