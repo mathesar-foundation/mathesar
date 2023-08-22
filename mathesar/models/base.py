@@ -8,6 +8,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.hashers import make_password
+from config.settings.common_settings import SECRET_KEY
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -110,13 +112,21 @@ _engine_cache = {}
 
 
 class Database(ReflectionManagerMixin, BaseModel):
+    name = models.CharField(max_length=128, unique=True)
     db_username = models.CharField(max_length=255)
     db_password = models.CharField(max_length=255)
+    db_host = models.CharField(max_length=255)
+    db_port = models.IntegerField()
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()
-    name = models.CharField(max_length=128, unique=True)
     deleted = models.BooleanField(blank=True, default=False)
+
+    def save(self, *args, **kwargs):
+        if self.db_username and self.db_password:
+            self.db_username = make_password(self.db_username, salt=SECRET_KEY)
+            self.db_password = make_password(self.db_password, salt=SECRET_KEY)
+        super().save(*args, **kwargs)
 
     @property
     def _sa_engine(self):

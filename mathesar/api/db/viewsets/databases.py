@@ -1,8 +1,7 @@
 from django_filters import rest_framework as filters
 from rest_access_policy import AccessViewSetMixin
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
@@ -17,6 +16,7 @@ from mathesar.api.serializers.functions import DBFunctionSerializer
 
 from db.types.base import get_available_known_db_types
 from mathesar.api.serializers.db_types import DBTypeSerializer
+from mathesar.api.utils import is_valid_pg_creds
 
 
 class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
@@ -33,8 +33,15 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         )
 
     def create(self, request):
-        serializer = DatabaseSerializer(request)
-        pass
+        serializer = DatabaseSerializer(data=request.data)
+        serializer.is_valid()
+        try:
+            credentials = dict(serializer.validated_data)
+            if is_valid_pg_creds(credentials):
+                Database.objects.create(**credentials).save()
+        except Exception as e:
+            raise e
+        return Response(dict(serializer.data), status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=True)
     def functions(self, request, pk=None):

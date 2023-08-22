@@ -8,6 +8,8 @@ from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Table
 from mathesar.models.query import UIQuery
 from mathesar.utils.preview import column_alias_from_preview_template
+import psycopg
+from psycopg.errors import OperationalError
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
@@ -158,3 +160,17 @@ def is_valid_uuid_v4(value):
         return True
     except ValueError:
         return False
+
+
+def is_valid_pg_creds(credentials):
+    dbname = credentials["name"]
+    user = credentials["db_username"]
+    password = credentials["db_password"]
+    host = credentials["db_host"]
+    port = credentials["db_port"]
+    conn_str = f'dbname={dbname} user={user} password={password} host={host} port={port}'
+    try:
+        with psycopg.connect(conn_str):
+            return True
+    except OperationalError as e:
+        raise e

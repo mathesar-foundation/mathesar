@@ -10,11 +10,13 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
     name = serializers.CharField()
     db_username = serializers.CharField()
     db_password = serializers.CharField()
+    db_host = serializers.CharField()
+    db_port = serializers.IntegerField()
     supported_types_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Database
-        fields = ['id', 'name', 'deleted', 'supported_types_url', 'db_username', 'db_password']
+        fields = ['id', 'name', 'deleted', 'supported_types_url', 'db_username', 'db_password', 'db_host', 'db_port']
         read_only_fields = ['id', 'deleted', 'supported_types_url']
 
     def get_supported_types_url(self, obj):
