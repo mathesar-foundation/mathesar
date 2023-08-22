@@ -23,8 +23,6 @@
   />
 
   <ExplorationPage {database} {schema} {query} />
-{:else if Number.isNaN(queryId)}
-  <ErrorPage>The specified URL is not found.</ErrorPage>
 {:else}
-  <ErrorPage>Table with id {queryId} not found.</ErrorPage>
+  <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
 {/if}

@@ -172,7 +172,7 @@ export function getAPI<T>(url: string): CancellablePromise<T> {
   return sendXHRRequest('GET', url);
 }
 
-export function postAPI<T>(url: string, data: unknown): CancellablePromise<T> {
+export function postAPI<T>(url: string, data?: unknown): CancellablePromise<T> {
   return sendXHRRequest('POST', url, data);
 }
 

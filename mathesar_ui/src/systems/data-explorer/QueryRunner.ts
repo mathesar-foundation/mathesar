@@ -2,20 +2,18 @@ import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { ApiMultiError } from '@mathesar/api/utils/errors';
-import {
-  ImmutableMap,
-  CancellablePromise,
-  EventHandler,
-} from '@mathesar-component-library';
+import { ImmutableMap, CancellablePromise } from '@mathesar-component-library';
 import Pagination from '@mathesar/utils/Pagination';
 import type {
   QueryResultRecord,
   QueryRunResponse,
+  QueryResultsResponse,
   QueryColumnMetaData,
 } from '@mathesar/api/types/queries';
-import { runQuery } from '@mathesar/stores/queries';
+import { runQuery, fetchQueryResults } from '@mathesar/stores/queries';
 import { LegacySheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import type { ShareConsumer } from '@mathesar/utils/shares';
 import type QueryModel from './QueryModel';
 import QueryInspector from './QueryInspector';
 import {
@@ -27,10 +25,6 @@ import {
   type ProcessedQueryOutputColumnMap,
   type InputColumnsStoreSubstance,
 } from './utils';
-
-// TODO: Find a better way to implement type safety here
-type QueryRunEvent = { run: QueryRunResponse };
-type Events = Record<string, unknown> & Partial<QueryRunEvent>;
 
 export interface QueryRow {
   record: QueryResultRecord;
@@ -47,9 +41,9 @@ export type QuerySheetSelection = LegacySheetSelection<
   ProcessedQueryOutputColumn
 >;
 
-export default class QueryRunner<
-  T extends Events = Events,
-> extends EventHandler<T & QueryRunEvent> {
+type QueryRunMode = 'queryId' | 'queryObject';
+
+export default class QueryRunner {
   query: Writable<QueryModel>;
 
   abstractTypeMap: AbstractTypesMap;
@@ -73,12 +67,37 @@ export default class QueryRunner<
 
   inspector: QueryInspector;
 
-  private runPromise: CancellablePromise<QueryRunResponse> | undefined;
+  private runPromise: CancellablePromise<QueryResultsResponse> | undefined;
 
-  constructor(query: QueryModel, abstractTypeMap: AbstractTypesMap) {
-    super();
+  private runMode: QueryRunMode;
+
+  private onRunWithObjectCallback?: (results: QueryRunResponse) => unknown;
+
+  private onRunWithIdCallback?: (results: QueryResultsResponse) => unknown;
+
+  private shareConsumer?: ShareConsumer;
+
+  constructor({
+    query,
+    abstractTypeMap,
+    runMode,
+    onRunWithObject,
+    onRunWithId,
+    shareConsumer,
+  }: {
+    query: QueryModel;
+    abstractTypeMap: AbstractTypesMap;
+    runMode?: QueryRunMode;
+    onRunWithObject?: (instance: QueryRunResponse) => unknown;
+    onRunWithId?: (instance: QueryResultsResponse) => unknown;
+    shareConsumer?: ShareConsumer;
+  }) {
     this.abstractTypeMap = abstractTypeMap;
+    this.runMode = runMode ?? 'queryObject';
     this.query = writable(query);
+    this.onRunWithObjectCallback = onRunWithObject;
+    this.onRunWithIdCallback = onRunWithId;
+    this.shareConsumer = shareConsumer;
     this.speculateProcessedColumns();
     void this.run();
     this.selection = new LegacySheetSelection({
@@ -123,7 +142,7 @@ export default class QueryRunner<
     );
   }
 
-  async run(): Promise<QueryRunResponse | undefined> {
+  async run(): Promise<QueryResultsResponse | undefined> {
     this.runPromise?.cancel();
     const queryModel = this.getQueryModel();
 
@@ -136,16 +155,40 @@ export default class QueryRunner<
       return undefined;
     }
 
+    let response: QueryResultsResponse;
+    let triggerCallback: () => unknown;
     try {
-      const paginationRequest = get(this.pagination).recordsRequestParams();
+      const paginationParams = get(this.pagination).recordsRequestParams();
       this.runState.set({ state: 'processing' });
-      this.runPromise = runQuery({
-        ...queryModel.toRunRequestJson(),
-        parameters: {
-          ...paginationRequest,
-        },
-      });
-      const response = await this.runPromise;
+      if (this.runMode === 'queryObject') {
+        const internalRunPromise = runQuery({
+          ...queryModel.toRunRequestJson(),
+          parameters: {
+            ...paginationParams,
+          },
+        });
+        this.runPromise = internalRunPromise;
+        const internalResponse = await internalRunPromise;
+        response = internalResponse;
+        triggerCallback = () =>
+          this.onRunWithObjectCallback?.(internalResponse);
+      } else {
+        const queryId = queryModel.id;
+        if (!queryId) {
+          this.runState.set({
+            state: 'failure',
+            errors: ['Query does not contain an id'],
+          });
+          return undefined;
+        }
+        this.runPromise = fetchQueryResults(queryModel.id, {
+          ...paginationParams,
+          ...this.shareConsumer?.getQueryParams(),
+        });
+        response = await this.runPromise;
+        triggerCallback = () => this.onRunWithIdCallback?.(response);
+      }
+
       const columnsMetaData = processColumnMetaData(
         response.column_metadata,
         this.abstractTypeMap,
@@ -163,7 +206,7 @@ export default class QueryRunner<
           rowIndex: index,
         })),
       });
-      await this.dispatch('run', response);
+      await triggerCallback();
       this.runState.set({ state: 'success' });
       return response;
     } catch (err) {
@@ -243,7 +286,6 @@ export default class QueryRunner<
   }
 
   destroy(): void {
-    super.destroy();
     this.selection.destroy();
     this.runPromise?.cancel();
   }

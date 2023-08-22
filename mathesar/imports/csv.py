@@ -8,8 +8,8 @@ from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.drop import drop_table
 from mathesar.errors import InvalidTableError
-from mathesar.imports.utils import process_column_names
-from db.constants import ID, ID_ORIGINAL, COLUMN_NAME_TEMPLATE
+from mathesar.imports.utils import get_alternate_column_names, process_column_names
+from db.constants import COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
 from mathesar.state import reset_reflection
@@ -19,6 +19,14 @@ from mathesar.state import reset_reflection
 ALLOWED_DELIMITERS = ",\t:|;"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
+
+
+def is_valid_csv(data):
+    try:
+        csv.reader(data)
+    except (csv.CsvError, ValueError):
+        return False
+    return True
 
 
 def get_file_encoding(file):
@@ -109,13 +117,13 @@ def get_sv_reader(file, header, dialect=None):
     return reader
 
 
-def insert_data_from_csv_data_file(name, schema, column_names, engine, comment, data_file):
+def insert_records_from_csv_data_file(name, schema, column_names, engine, comment, data_file):
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
                                         data_file.escapechar)
     encoding = get_file_encoding(data_file.file)
     table = create_string_column_table(
         name=name,
-        schema=schema.name,
+        schema_oid=schema.oid,
         column_names=column_names,
         engine=engine,
         comment=comment,
@@ -145,14 +153,11 @@ def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = process_column_names(sv_reader.fieldnames)
     try:
-        table = insert_data_from_csv_data_file(name, schema, column_names, engine, comment, data_file)
+        table = insert_records_from_csv_data_file(name, schema, column_names, engine, comment, data_file)
         update_pk_sequence_to_latest(engine, table)
     except (IntegrityError, DataError):
         drop_table(name=name, schema=schema.name, engine=engine)
-        column_names_alt = [
-            column_name if column_name != ID else ID_ORIGINAL
-            for column_name in column_names
-        ]
-        insert_data_from_csv_data_file(name, schema, column_names_alt, engine, comment, data_file)
+        column_names_alt = get_alternate_column_names(column_names)
+        insert_records_from_csv_data_file(name, schema, column_names_alt, engine, comment, data_file)
     reset_reflection(db_name=db_name)
     return table

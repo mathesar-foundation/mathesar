@@ -35,7 +35,7 @@ class ConstraintViewSet(AccessViewSetMixin, ListModelMixin, RetrieveModelMixin, 
         try:
             constraint.drop()
         except ProgrammingError as e:
-            if type(e.orig) == UndefinedObject:
+            if type(e.orig) is UndefinedObject:
                 raise base_api_exceptions.NotFoundAPIException(e)
             else:
                 raise base_database_api_exceptions.ProgrammingAPIException(e)
