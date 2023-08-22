@@ -18,6 +18,40 @@ export type Translation = RootTranslation;
 export type Translations = RootTranslation;
 
 type RootTranslation = {
+  general: {
+    /**
+     * D​a​t​a​ ​S​o​u​r​c​e
+     */
+    dataSource: string;
+    /**
+     * I​m​p​o​r​t
+     */
+    import: string;
+    /**
+     * L​i​n​k​i​n​g​ ​T​a​b​l​e
+     */
+    linkingTable: string;
+    /**
+     * M​a​n​y​ ​t​o​ ​M​a​n​y
+     */
+    manyToMany: string;
+    /**
+     * M​a​n​y​ ​t​o​ ​O​n​e
+     */
+    manyToOne: string;
+    /**
+     * N​o​ ​f​i​l​e​ ​u​p​l​o​a​d​e​d
+     */
+    noFileUploaded: string;
+    /**
+     * O​n​e​ ​t​o​ ​M​a​n​y
+     */
+    oneToMany: string;
+    /**
+     * P​r​o​c​e​s​s​i​n​g​ ​D​a​t​a
+     */
+    processingData: string;
+  };
   importUploadPage: {
     /**
      * U​p​l​o​a​d​ ​a​ ​f​i​l​e
@@ -40,27 +74,61 @@ type RootTranslation = {
      */
     largeDataTakesTimeWarning: string;
   };
-  general: {
+  linkTypeOptions: {
     /**
-     * I​m​p​o​r​t
+     * O​n​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​ ​c​a​n​ ​b​e​ ​l​i​n​k​e​d​ ​f​r​o​m​ ​m​u​l​t​i​p​l​e​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​.
      */
-    import: string;
+    oneToManyDescription: string;
     /**
-     * D​a​t​a​ ​S​o​u​r​c​e
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​t​h​e​ ​s​a​m​e​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​.
      */
-    dataSource: string;
+    manyToOneDescription: string;
     /**
-     * P​r​o​c​e​s​s​i​n​g​ ​D​a​t​a
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​a​n​d​ ​[​t​a​r​g​e​t​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​[​m​a​p​p​i​n​g​T​a​b​l​e​]
      */
-    processingData: string;
+    manyToManyDescription: string;
     /**
-     * N​o​ ​f​i​l​e​ ​u​p​l​o​a​d​e​d
+     * M​u​l​t​i​p​l​e​ ​[​b​a​s​e​T​a​b​l​e​]​ ​r​e​c​o​r​d​s​ ​c​a​n​ ​l​i​n​k​ ​t​o​ ​e​a​c​h​ ​o​t​h​e​r​ ​t​h​r​o​u​g​h​ ​a​ ​n​e​w​ ​[​m​a​p​p​i​n​g​]
      */
-    noFileUploaded: string;
+    manyToManySelfReferential: string;
   };
 };
 
 export type TranslationFunctions = {
+  general: {
+    /**
+     * Data Source
+     */
+    dataSource: () => LocalizedString;
+    /**
+     * Import
+     */
+    import: () => LocalizedString;
+    /**
+     * Linking Table
+     */
+    linkingTable: () => LocalizedString;
+    /**
+     * Many to Many
+     */
+    manyToMany: () => LocalizedString;
+    /**
+     * Many to One
+     */
+    manyToOne: () => LocalizedString;
+    /**
+     * No file uploaded
+     */
+    noFileUploaded: () => LocalizedString;
+    /**
+     * One to Many
+     */
+    oneToMany: () => LocalizedString;
+    /**
+     * Processing Data
+     */
+    processingData: () => LocalizedString;
+  };
   importUploadPage: {
     /**
      * Upload a file
@@ -83,23 +151,23 @@ export type TranslationFunctions = {
      */
     largeDataTakesTimeWarning: () => LocalizedString;
   };
-  general: {
+  linkTypeOptions: {
     /**
-     * Import
+     * One [baseTable] record can be linked from multiple [targetTable] records.
      */
-    import: () => LocalizedString;
+    oneToManyDescription: () => LocalizedString;
     /**
-     * Data Source
+     * Multiple [baseTable] records can link to the same [targetTable] record.
      */
-    dataSource: () => LocalizedString;
+    manyToOneDescription: () => LocalizedString;
     /**
-     * Processing Data
+     * Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]
      */
-    processingData: () => LocalizedString;
+    manyToManyDescription: () => LocalizedString;
     /**
-     * No file uploaded
+     * Multiple [baseTable] records can link to each other through a new [mapping]
      */
-    noFileUploaded: () => LocalizedString;
+    manyToManySelfReferential: () => LocalizedString;
   };
 };
 

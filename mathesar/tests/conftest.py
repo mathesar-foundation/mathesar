@@ -414,6 +414,12 @@ def client(admin_user):
 
 
 @pytest.fixture
+def anonymous_client():
+    client = APIClient()
+    return client
+
+
+@pytest.fixture
 def client_bob(user_bob):
     client = APIClient()
     client.login(username='bob', password='password')
@@ -534,5 +540,13 @@ def superuser_client_factory(client):
      to the same behaviour as other role based client factories
     """
     def _client(schema):
+        return client
+    return _client
+
+
+@pytest.fixture
+def anonymous_client_factory():
+    def _client(schema):
+        client = APIClient()
         return client
     return _client

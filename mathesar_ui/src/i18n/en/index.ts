@@ -1,6 +1,16 @@
 import type { BaseTranslation } from '../i18n-types.js';
 
 const en: BaseTranslation = {
+  general: {
+    dataSource: 'Data Source',
+    import: 'Import',
+    linkingTable: 'Linking Table',
+    manyToMany: 'Many to Many',
+    manyToOne: 'Many to One',
+    noFileUploaded: 'No file uploaded',
+    oneToMany: 'One to Many',
+    processingData: 'Processing Data',
+  },
   importUploadPage: {
     uploadAFile: 'Upload a file',
     provideUrlToFile: 'Provide a URL to the file',
@@ -9,11 +19,15 @@ const en: BaseTranslation = {
     largeDataTakesTimeWarning:
       'Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress.',
   },
-  general: {
-    import: 'Import',
-    dataSource: 'Data Source',
-    processingData: 'Processing Data',
-    noFileUploaded: 'No file uploaded',
+  linkTypeOptions: {
+    oneToManyDescription:
+      'One [baseTable] record can be linked from multiple [targetTable] records.',
+    manyToOneDescription:
+      'Multiple [baseTable] records can link to the same [targetTable] record.',
+    manyToManyDescription:
+      'Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]',
+    manyToManySelfReferential:
+      'Multiple [baseTable] records can link to each other through a new [mapping]',
   },
 };
 
