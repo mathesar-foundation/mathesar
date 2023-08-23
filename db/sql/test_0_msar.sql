@@ -303,7 +303,6 @@ BEGIN
 END;
 $f$ LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION test_add_columns_interval_precision() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"precision": 6}}}]';
@@ -314,38 +313,39 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_add_columns_interval_fields() RETURNS SETOF TEXT AS $f$
-DECLARE
-  col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"fields": "year"}}}]';
-BEGIN
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval year');
-END;
-$f$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_add_columns_interval_fields_prec() RETURNS SETOF TEXT AS $f$
-DECLARE
-  col_create_arr jsonb := $j$
-    [{"type": {"name": "interval", "options": {"fields": "second", "precision": 3}}}]
-  $j$;
-BEGIN
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval second(3)');
-END;
-$f$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_add_columns_timestamp_prec() RETURNS SETOF TEXT AS $f$
-DECLARE
-  col_create_arr jsonb := $j$
-    [{"type": {"name": "timestamp", "options": {"precision": 3}}}]
-  $j$;
-BEGIN
-  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
-  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp(3) without time zone');
-END;
-$f$ LANGUAGE plpgsql;
+-- upstream pgTAP bug: https://github.com/theory/pgtap/issues/315
+-- CREATE OR REPLACE FUNCTION test_add_columns_interval_fields() RETURNS SETOF TEXT AS $f$
+-- DECLARE
+--   col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"fields": "year"}}}]';
+-- BEGIN
+--   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+--   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval year');
+-- END;
+-- $f$ LANGUAGE plpgsql;
+--
+--
+-- CREATE OR REPLACE FUNCTION test_add_columns_interval_fields_prec() RETURNS SETOF TEXT AS $f$
+-- DECLARE
+--   col_create_arr jsonb := $j$
+--     [{"type": {"name": "interval", "options": {"fields": "second", "precision": 3}}}]
+--   $j$;
+-- BEGIN
+--   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+--   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval second(3)');
+-- END;
+-- $f$ LANGUAGE plpgsql;
+--
+--
+-- CREATE OR REPLACE FUNCTION test_add_columns_timestamp_prec() RETURNS SETOF TEXT AS $f$
+-- DECLARE
+--   col_create_arr jsonb := $j$
+--     [{"type": {"name": "timestamp", "options": {"precision": 3}}}]
+--   $j$;
+-- BEGIN
+--   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+--   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp(3) without time zone');
+-- END;
+-- $f$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_add_columns_timestamp_raw_default() RETURNS SETOF TEXT AS $f$
@@ -527,14 +527,15 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_copy_column_interval_notation() RETURNS SETOF TEXT AS $f$
-BEGIN
-  PERFORM msar.copy_column(
-    'copy_coltest'::regclass::oid, 7::smallint, null, false, false
-  );
-  RETURN NEXT col_type_is('copy_coltest', 'col6 1', 'interval second(3)');
-END;
-$f$ LANGUAGE plpgsql;
+-- upstream pgTAP bug: https://github.com/theory/pgtap/issues/315
+-- CREATE OR REPLACE FUNCTION test_copy_column_interval_notation() RETURNS SETOF TEXT AS $f$
+-- BEGIN
+--   PERFORM msar.copy_column(
+--     'copy_coltest'::regclass::oid, 7::smallint, null, false, false
+--   );
+--   RETURN NEXT col_type_is('copy_coltest', 'col6 1', 'interval second(3)');
+-- END;
+-- $f$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_copy_column_space_name() RETURNS SETOF TEXT AS $f$
