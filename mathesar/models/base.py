@@ -14,6 +14,7 @@ from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
+    get_column_description,
     get_column_attnum_from_names_as_map, get_column_name_from_attnum,
     get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
 )
@@ -760,6 +761,10 @@ class Column(ReflectionManagerMixin, BaseModel):
             )
         else:
             return name
+
+    @property
+    def description(self):
+        return get_column_description(self.table.oid, self.attnum, self._sa_engine)
 
     @property
     def ui_type(self):
