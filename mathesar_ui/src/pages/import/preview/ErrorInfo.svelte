@@ -6,12 +6,12 @@
 
   const dispatch = createEventDispatcher();
 
-  export let errors: string[];
+  export let error: string;
 </script>
 
 <ErrorBox fullWidth>
   <div class="title">Failed to load preview</div>
-  <div>{errors.join(',')}</div>
+  <div>{error}</div>
   <div class="buttons">
     <Button appearance="primary" on:click={() => dispatch('retry')}>
       Retry
