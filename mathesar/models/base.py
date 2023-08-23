@@ -476,7 +476,6 @@ class Table(DatabaseObject, Relation):
 
     def update_sa_table(self, update_params):
         result = model_utils.update_sa_table(self, update_params)
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def delete_sa_table(self):
