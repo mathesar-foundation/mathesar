@@ -20,6 +20,14 @@ MATHESAR_LIVE_DEMO_PASSWORD=password
 
 `MATHESAR_LIVE_DEMO_USERNAME` and `MATHESAR_LIVE_DEMO_PASSWORD` are optional – if you set these, then the login credentials will be shown on the login page. If either is omitted, credentials will not be shown.
 
+If you've not yet created the template database, you'll have to run the Django management command for that:
+
+```
+docker exec mathesar_service_dev sh -c "python manage.py setup_demo_template_db"
+```
+
+That might require you to restart or [rebuild/recreate your docker compose environment](https://github.com/centerofci/mathesar/blob/develop/DEVELOPER_GUIDE.md#rebuilding-the-docker-images).
+
 ## Details
 
 Below information is up-to-date as of time of writting (2023-07-05).
