@@ -7,7 +7,7 @@ from mathesar.models.base import Database
 
 
 class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
-    db_name = serializers.CharField()
+    name = serializers.CharField()
     db_username = serializers.CharField()
     db_password = serializers.CharField()
     db_host = serializers.CharField()
@@ -16,7 +16,7 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
 
     class Meta:
         model = Database
-        fields = ['id', 'db_name', 'deleted', 'supported_types_url', 'db_username', 'db_password', 'db_host', 'db_port']
+        fields = ['id', 'name', 'deleted', 'supported_types_url', 'db_username', 'db_password', 'db_host', 'db_port']
         read_only_fields = ['id', 'deleted', 'supported_types_url']
 
     def validate(self, data):

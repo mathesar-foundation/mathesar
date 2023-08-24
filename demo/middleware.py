@@ -36,7 +36,7 @@ class LiveDemoModeMiddleware:
             )
             append_db_and_arxiv_schema_to_log(db_name, ARXIV)
             reset_reflection(db_name=db_name)
-            engine = create_mathesar_engine(db_name)
+            engine = create_mathesar_engine(created)
             customize_settings(engine)
             load_custom_explorations(engine)
             engine.dispose()

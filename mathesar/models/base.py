@@ -8,8 +8,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from django.contrib.auth.hashers import make_password
-from config.settings.common_settings import SECRET_KEY
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -123,11 +121,11 @@ class Database(ReflectionManagerMixin, BaseModel):
     objects = DatabaseObjectManager()
     deleted = models.BooleanField(blank=True, default=False)
 
-    def save(self, *args, **kwargs):
-        if self.db_username and self.db_password:
-            self.db_username = make_password(self.db_username, salt=SECRET_KEY)
-            self.db_password = make_password(self.db_password, salt=SECRET_KEY)
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if self.db_username and self.db_password:
+    #         self.db_username = make_password(self.db_username, salt=SECRET_KEY)
+    #         self.db_password = make_password(self.db_password, salt=SECRET_KEY)
+    #     super().save(*args, **kwargs)
 
     @property
     def _sa_engine(self):
@@ -139,7 +137,7 @@ class Database(ReflectionManagerMixin, BaseModel):
             engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
         else:
-            engine = create_mathesar_engine(db_name=db_name)
+            engine = create_mathesar_engine(self)
             _engine_cache[db_name] = engine
         return engine
 

@@ -82,8 +82,8 @@ def insert_records_from_json_data_file(name, schema, column_names, engine, comme
 
 
 def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
-    db_name = schema.database.name
-    engine = create_mathesar_engine(db_name)
+    db = schema.database
+    engine = create_mathesar_engine(db)
     json_filepath = data_file.file.path
     max_level = data_file.max_level
     column_names = process_column_names(
@@ -97,5 +97,5 @@ def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
         column_names_alt = get_alternate_column_names(column_names)
         table = insert_records_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
 
-    reset_reflection(db_name=db_name)
+    reset_reflection(db_name=db.name)
     return table

@@ -37,7 +37,7 @@ def main():
         try:
             install_on_db_with_key(credentials, skip_confirm)
             Database.objects.create(
-                db_name=credentials["NAME"],
+                name=credentials["NAME"],
                 db_username=credentials["USER"],
                 db_password=credentials["PASSWORD"],
                 db_host=credentials["HOST"],
@@ -51,7 +51,7 @@ def main():
 
 def install_on_db_with_key(credentials, skip_confirm):
     return install.install_mathesar(
-        db_name=credentials["NAME"],
+        name=credentials["NAME"],
         db_username=credentials["USER"],
         db_password=credentials["PASSWORD"],
         db_host=credentials["HOST"],
