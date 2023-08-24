@@ -64,6 +64,12 @@ import {
   faCircleInfo,
   faUserGear,
   faFilterCircleXmark,
+  faMicroscope,
+  faDiagramNext,
+  faWandSparkles,
+  faShareFromSquare,
+  faXmark,
+  faExternalLink,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -93,6 +99,7 @@ export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
+export const iconCopyMajor: IconProps = { data: faCopy };
 /** TODO: use faBinary once it's available (via newer FontAwesome version) */
 export const iconCopyRawContent: IconProps = { data: faCopy };
 export const iconCopyFormattedContent: IconProps = { data: faCopy };
@@ -105,6 +112,7 @@ export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconGoToMarketingSite: IconProps = { data: faGlobe };
 export const iconImportData: IconProps = { data: faUpload };
+export const iconInferColumnType: IconProps = { data: faMicroscope };
 export const iconJoinEmailList: IconProps = { data: faEnvelope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
@@ -127,6 +135,12 @@ export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
 export const iconPaste: IconProps = { data: faPaste };
 export const iconLogout: IconProps = { data: faArrowRightFromBracket };
+export const iconUseFirstRowAsColumnName: IconProps = { data: faDiagramNext };
+export const iconUseFirstRowAsData: IconProps = { data: faWandSparkles };
+export const iconShare: IconProps = { data: faShareFromSquare };
+export const iconRecreate: IconProps = { data: faRedo };
+export const iconDisable: IconProps = { data: faXmark };
+export const iconOpenLinkInNewTab = { data: faExternalLink };
 
 // THINGS
 //
