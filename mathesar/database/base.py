@@ -20,6 +20,7 @@ def create_mathesar_engine(db_name):
     return engine.create_future_engine_with_custom_types(**credentials)
 
 
+# TODO don't rely on getting credentials from settings.
 def _get_credentials_for_db_name_in_settings(db_name):
     settings_entry = settings.DATABASES[db_name]
     return dict(
@@ -31,6 +32,7 @@ def _get_credentials_for_db_name_in_settings(db_name):
     )
 
 
+# TODO don't rely on getting credentials from settings.
 def _get_credentials_for_db_name_not_in_settings(db_name):
     settings_entry = settings.DATABASES[DEFAULT_DB]
     return dict(

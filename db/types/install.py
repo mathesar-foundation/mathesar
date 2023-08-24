@@ -22,7 +22,13 @@ def install_mathesar_on_database(engine):
 
 
 def uninstall_mathesar_from_database(engine):
+    _cascade_sql_func_schema(engine)
     _cascade_type_schema(engine)
+
+
+def _cascade_sql_func_schema(engine):
+    drop_schema('__msar', engine, cascade=True)
+    drop_schema('msar', engine, cascade=True)
 
 
 def _cascade_type_schema(engine):

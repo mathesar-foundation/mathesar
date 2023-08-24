@@ -11,9 +11,15 @@ class DatabaseAccessPolicy(AccessPolicy):
     """
     statements = [
         {
-            'action': ['create', 'list', 'retrieve', 'types', 'functions'],
+            'action': ['list', 'retrieve', 'types', 'functions'],
             'principal': 'authenticated',
             'effect': 'allow',
+        },
+        {
+            'action': ['create', 'partial_update', 'destroy'],
+            'principal': 'authenticated',
+            'effect': 'allow',
+            'condition': 'is_superuser'
         }
     ]
 

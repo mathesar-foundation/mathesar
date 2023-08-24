@@ -117,6 +117,7 @@ class Database(ReflectionManagerMixin, BaseModel):
     db_password = models.CharField(max_length=255)
     db_host = models.CharField(max_length=255)
     db_port = models.IntegerField()
+    editable = models.BooleanField(default=True)
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()

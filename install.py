@@ -10,6 +10,7 @@ from django.core import management
 from decouple import config as decouple_config
 from django.conf import settings
 from db import install
+from django.db.utils import IntegrityError
 
 
 def main():
@@ -23,6 +24,7 @@ def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
     django.setup()
     management.call_command('migrate')
+    from mathesar.models.base import Database
     debug_mode = decouple_config('DEBUG', default=False, cast=bool)
     #
     if not debug_mode:
@@ -31,16 +33,29 @@ def main():
     django_db_key = decouple_config('DJANGO_DATABASE_KEY', default="default")
     user_databases = [key for key in settings.DATABASES if key != django_db_key]
     for database_key in user_databases:
-        install_on_db_with_key(database_key, skip_confirm)
+        credentials = settings.DATABASES[database_key]
+        try:
+            install_on_db_with_key(credentials, skip_confirm)
+            Database.objects.create(
+                db_name=credentials["NAME"],
+                db_username=credentials["USER"],
+                db_password=credentials["PASSWORD"],
+                db_host=credentials["HOST"],
+                db_port=credentials["PORT"],
+                editable=False
+            ).save()
+        except IntegrityError as e:
+            if not e.args[0].startswith('duplicate key value violates unique constraint'):
+                raise e
 
 
-def install_on_db_with_key(database_key, skip_confirm):
-    install.install_mathesar(
-        database_name=settings.DATABASES[database_key]["NAME"],
-        username=settings.DATABASES[database_key]["USER"],
-        password=settings.DATABASES[database_key]["PASSWORD"],
-        hostname=settings.DATABASES[database_key]["HOST"],
-        port=settings.DATABASES[database_key]["PORT"],
+def install_on_db_with_key(credentials, skip_confirm):
+    return install.install_mathesar(
+        db_name=credentials["NAME"],
+        db_username=credentials["USER"],
+        db_password=credentials["PASSWORD"],
+        db_host=credentials["HOST"],
+        db_port=credentials["PORT"],
         skip_confirm=skip_confirm
     )
 
