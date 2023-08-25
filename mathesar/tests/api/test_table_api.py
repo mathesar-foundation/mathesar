@@ -1898,7 +1898,7 @@ def test_create_table_with_nested_json_objects(client, schema):
 
 def test_create_table_and_normalize_excel_data_file(client, misaligned_table_excel_data_file, schema):
     table_name = 'misaligned_table'
-    expt_name = _get_expected_name(table_name, data_file=misaligned_table_excel_data_file)
+    expt_name = get_expected_name(table_name, data_file=misaligned_table_excel_data_file)
     first_row = (1, 'John', '25', 'Male')
     column_names = ["Name", "Age", "Gender"]
 
