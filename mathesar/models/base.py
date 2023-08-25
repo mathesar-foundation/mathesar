@@ -92,7 +92,7 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
     """
     Objects that can be referenced using a database identifier
     """
-    oid = models.IntegerField()
+    oid = models.PositiveIntegerField()
 
     class Meta:
         abstract = True
@@ -884,7 +884,7 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = ArrayField(models.IntegerField(), null=True, default=None)
+    column_order = ArrayField(models.PositiveIntegerField(), null=True, default=None)
 
 
 def _create_table_settings(tables):
