@@ -1897,7 +1897,7 @@ def test_create_table_with_nested_json_objects(client, schema):
 
 def test_create_table_using_excel_data_file(client, patents_excel_data_file, schema):
     table_name = 'patents'
-    expt_name = _get_expected_name(table_name, data_file=patents_excel_data_file)
+    expt_name = get_expected_name(table_name, data_file=patents_excel_data_file)
     first_row = (
         1,
         "NASA Kennedy Space Center",
