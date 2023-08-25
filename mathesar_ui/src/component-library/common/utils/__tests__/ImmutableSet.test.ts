@@ -20,3 +20,15 @@ test('union', () => {
   expect(a.union(empty).valuesArray()).toEqual([2, 7, 13, 19, 5]);
   expect(empty.union(a).valuesArray()).toEqual([2, 7, 13, 19, 5]);
 });
+
+test('intersect', () => {
+  const a = new ImmutableSet([2, 7, 13, 19, 5]);
+  const b = new ImmutableSet([23, 13, 3, 2]);
+  const empty = new ImmutableSet<number>();
+  expect(a.intersect(a).valuesArray()).toEqual([2, 7, 13, 19, 5]);
+  expect(a.intersect(b).valuesArray()).toEqual([2, 13]);
+  expect(b.intersect(a).valuesArray()).toEqual([13, 2]);
+  expect(a.intersect(empty).valuesArray()).toEqual([]);
+  expect(empty.intersect(a).valuesArray()).toEqual([]);
+  expect(empty.intersect(empty).valuesArray()).toEqual([]);
+});
