@@ -25,6 +25,14 @@ import Plane from './Plane';
  */
 type BasisType = 'dataCells' | 'emptyColumns' | 'placeholderCell' | 'empty';
 
+/**
+ * This type stores data about "which cells are selected", with some redundancy
+ * for efficient and consistent lookup across different kinds of selections.
+ *
+ * Due to the redundant nature of some properties on this type, you should be
+ * sure to only instantiate Basis using the utility functions below. This will
+ * ensure that the data is always valid.
+ */
 interface Basis {
   readonly type: BasisType;
   readonly activeCellId: string | undefined;
@@ -81,6 +89,15 @@ function emptyBasis(): Basis {
   };
 }
 
+/**
+ * This is an immutable data structure which fully represents the state of a
+ * selection selection of cells along with the Plane in which they were
+ * selected.
+ *
+ * We store the Plane here so to make it possible to provide methods on
+ * `SheetSelection` instances which return new mutations of the selection that
+ * are still valid within the Plane.
+ */
 export default class SheetSelection {
   private readonly plane: Plane;
 

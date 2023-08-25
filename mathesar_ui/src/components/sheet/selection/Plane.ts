@@ -44,6 +44,18 @@ function adjacentPlaceholderCell(cellId: string): AdjacentCell {
   return { type: 'placeholderCell', cellId };
 }
 
+/**
+ * A Plane is like a coordinate system for a sheet. We can query it to find the
+ * ids of cells within certain bounding rectangles.
+ *
+ * The Plane can also have a "placeholder row", which is a row at the bottom of
+ * the sheet that provides a visual cue to the user that they can add more rows.
+ * It never contains any data, but we allow the user to move the active cell
+ * into the placeholder row in order to easily add more rows.
+ *
+ * The term "Flexible" is used in methods to indicate that it will gracefully
+ * handle ids of cells within the placeholder row.
+ */
 export default class Plane {
   readonly rowIds: Series<string>;
 

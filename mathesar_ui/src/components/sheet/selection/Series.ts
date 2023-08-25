@@ -2,16 +2,20 @@ import { filter, findBest, firstHighest, firstLowest } from 'iter-tools';
 
 import { ImmutableMap } from '@mathesar/component-library';
 
-export default class Series<Id> {
-  private readonly values: Id[];
+/**
+ * A Series is an immutable ordered collection of values with methods that
+ * provide efficient access to _ranges_ of those values.
+ */
+export default class Series<Value> {
+  private readonly values: Value[];
 
   /** Maps the id value to its index */
-  private readonly indexLookup: ImmutableMap<Id, number>;
+  private readonly indexLookup: ImmutableMap<Value, number>;
 
   /**
    * @throws Error if duplicate values are provided
    */
-  constructor(values: Id[] = []) {
+  constructor(values: Value[] = []) {
     this.values = values;
     this.indexLookup = new ImmutableMap(
       values.map((value, index) => [value, index]),
@@ -21,7 +25,7 @@ export default class Series<Id> {
     }
   }
 
-  private getIndex(value: Id): number | undefined {
+  private getIndex(value: Value): number | undefined {
     return this.indexLookup.get(value);
   }
 
@@ -36,7 +40,7 @@ export default class Series<Id> {
    *
    * @throws an Error if either value is not present in the sequence
    */
-  range(a: Id, b: Id): Iterable<Id> {
+  range(a: Value, b: Value): Iterable<Value> {
     const aIndex = this.getIndex(a);
     const bIndex = this.getIndex(b);
 
@@ -50,15 +54,15 @@ export default class Series<Id> {
     return this.values.slice(startIndex, endIndex + 1);
   }
 
-  get first(): Id | undefined {
+  get first(): Value | undefined {
     return this.values[0];
   }
 
-  get last(): Id | undefined {
+  get last(): Value | undefined {
     return this.values[this.values.length - 1];
   }
 
-  has(value: Id): boolean {
+  has(value: Value): boolean {
     return this.getIndex(value) !== undefined;
   }
 
@@ -72,18 +76,18 @@ export default class Series<Id> {
    * https://github.com/iter-tools/iter-tools/blob/d7.5/API.md#compare-values-and-return-true-or-false
    */
   best(
-    values: Iterable<Id>,
+    values: Iterable<Value>,
     comparator: (best: number, v: number) => boolean,
-  ): Id | undefined {
+  ): Value | undefined {
     const validValues = filter((v) => this.has(v), values);
     return findBest(comparator, (v) => this.getIndex(v) ?? 0, validValues);
   }
 
-  min(values: Iterable<Id>): Id | undefined {
+  min(values: Iterable<Value>): Value | undefined {
     return this.best(values, firstLowest);
   }
 
-  max(values: Iterable<Id>): Id | undefined {
+  max(values: Iterable<Value>): Value | undefined {
     return this.best(values, firstHighest);
   }
 
@@ -94,7 +98,7 @@ export default class Series<Id> {
    * given value. If no such value is present, then `undefined` will be
    * returned.
    */
-  offset(value: Id, offset: number): Id | undefined {
+  offset(value: Value, offset: number): Value | undefined {
     if (offset === 0) {
       return this.has(value) ? value : undefined;
     }
@@ -112,7 +116,7 @@ export default class Series<Id> {
    * value in the block. If no such value is present, then `undefined` will be
    * returned. If offset is zero, then `undefined` will be returned.
    */
-  collapsedOffset(values: Iterable<Id>, offset: number): Id | undefined {
+  collapsedOffset(values: Iterable<Value>, offset: number): Value | undefined {
     if (offset === 0) {
       return undefined;
     }
@@ -123,7 +127,7 @@ export default class Series<Id> {
     return this.offset(outerValue, offset);
   }
 
-  [Symbol.iterator](): Iterator<Id> {
+  [Symbol.iterator](): Iterator<Value> {
     return this.values[Symbol.iterator]();
   }
 }
