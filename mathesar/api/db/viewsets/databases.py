@@ -13,7 +13,6 @@ from mathesar.api.serializers.databases import DatabaseSerializer
 
 from db.functions.operations.check_support import get_supported_db_functions
 from mathesar.api.serializers.functions import DBFunctionSerializer
-from db.engine import create_future_engine
 from db.types.base import get_available_known_db_types
 from db.types.install import uninstall_mathesar_from_database
 from db.install import install_mathesar
@@ -37,14 +36,11 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def create(self, request):
         serializer = DatabaseSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        try:
-            credentials = serializer.validated_data
-            # if is_valid_pg_creds(credentials):
+        credentials = serializer.validated_data
+        if is_valid_pg_creds(credentials):
             Database.objects.create(**credentials).save()
             install_mathesar(**credentials, skip_confirm=True)
-        except Exception as e:
-            raise e
-        return Response(dict(serializer.data), status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
         db_object = self.get_object()
@@ -53,22 +49,15 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             credentials = serializer.validated_data
             if is_valid_pg_creds(credentials):
-                print(credentials)
                 serializer.save()
                 install_mathesar(**credentials, skip_confirm=True)
-        return Response(dict(serializer.data))
+        return Response(serializer.data)
 
     def destroy(self, request, pk=None):
         db_object = self.get_object()
-        """ if request.get('del_msar_schemas'):
-            engine = create_future_engine(
-                db_object.db_username,
-                db_object.db_password,
-                db_object.db_host,
-                db_object.db_name,
-                db_object.db_port
-            )
-            uninstall_mathesar_from_database(engine) """
+        if request.query_params.get('del_msar_schemas'):
+            engine = db_object._sa_engine
+            uninstall_mathesar_from_database(engine)
         db_object.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

@@ -19,13 +19,6 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         fields = ['id', 'name', 'deleted', 'supported_types_url', 'db_username', 'db_password', 'db_host', 'db_port']
         read_only_fields = ['id', 'deleted', 'supported_types_url']
 
-    def validate(self, data):
-        if self.partial:
-            # XOR to check whether we are receiving both username & password during a patch request.
-            if bool(data.get('db_username')) is not bool(data.get('db_password')):
-                raise Exception("Both username & password are required")
-        return data
-
     def get_supported_types_url(self, obj):
         if isinstance(obj, Database):
             # Only get records if we are serializing an existing table

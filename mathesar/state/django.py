@@ -59,8 +59,7 @@ def sync_databases_status(databases):
             db._sa_engine.connect()
             db._sa_engine.dispose()
             _set_db_is_deleted(db, False)
-        except (OperationalError, KeyError) as e:
-            raise e
+        except (OperationalError, KeyError):
             _set_db_is_deleted(db, True)
 
 
