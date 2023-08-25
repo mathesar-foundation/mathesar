@@ -64,6 +64,9 @@ import {
   faCircleInfo,
   faUserGear,
   faFilterCircleXmark,
+  faMicroscope,
+  faDiagramNext,
+  faWandSparkles,
   faShareFromSquare,
   faXmark,
   faExternalLink,
@@ -109,6 +112,7 @@ export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconGoToMarketingSite: IconProps = { data: faGlobe };
 export const iconImportData: IconProps = { data: faUpload };
+export const iconInferColumnType: IconProps = { data: faMicroscope };
 export const iconJoinEmailList: IconProps = { data: faEnvelope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
@@ -131,6 +135,8 @@ export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
 export const iconPaste: IconProps = { data: faPaste };
 export const iconLogout: IconProps = { data: faArrowRightFromBracket };
+export const iconUseFirstRowAsColumnName: IconProps = { data: faDiagramNext };
+export const iconUseFirstRowAsData: IconProps = { data: faWandSparkles };
 export const iconShare: IconProps = { data: faShareFromSquare };
 export const iconRecreate: IconProps = { data: faRedo };
 export const iconDisable: IconProps = { data: faXmark };

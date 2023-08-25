@@ -20,25 +20,37 @@ export type Translations = RootTranslation;
 type RootTranslation = {
   general: {
     /**
+     * D​a​t​a​ ​S​o​u​r​c​e
+     */
+    dataSource: string;
+    /**
      * I​m​p​o​r​t
      */
     import: string;
     /**
-     * O​n​e​ ​t​o​ ​M​a​n​y
+     * L​i​n​k​i​n​g​ ​T​a​b​l​e
      */
-    oneToMany: string;
-    /**
-     * M​a​n​y​ ​t​o​ ​O​n​e
-     */
-    manyToOne: string;
+    linkingTable: string;
     /**
      * M​a​n​y​ ​t​o​ ​M​a​n​y
      */
     manyToMany: string;
     /**
-     * L​i​n​k​i​n​g​ ​T​a​b​l​e
+     * M​a​n​y​ ​t​o​ ​O​n​e
      */
-    linkingTable: string;
+    manyToOne: string;
+    /**
+     * N​o​ ​f​i​l​e​ ​u​p​l​o​a​d​e​d
+     */
+    noFileUploaded: string;
+    /**
+     * O​n​e​ ​t​o​ ​M​a​n​y
+     */
+    oneToMany: string;
+    /**
+     * P​r​o​c​e​s​s​i​n​g​ ​D​a​t​a
+     */
+    processingData: string;
   };
   importUploadPage: {
     /**
@@ -54,37 +66,13 @@ type RootTranslation = {
      */
     copyAndPasteText: string;
     /**
-     * U​n​a​b​l​e​ ​t​o​ ​c​r​e​a​t​e​ ​a​ ​t​a​b​l​e​ ​f​r​o​m​ ​t​h​e​ ​u​p​l​o​a​d​e​d​ ​d​a​t​a
-     */
-    unableToCreateTableFromUpload: string;
-    /**
      * C​r​e​a​t​e​ ​a​ ​t​a​b​l​e​ ​b​y​ ​i​m​p​o​r​t​i​n​g​ ​y​o​u​r​ ​d​a​t​a
      */
     createATableByImporting: string;
     /**
-     * U​p​l​o​a​d​i​n​g​ ​D​a​t​a
-     */
-    uploadingData: string;
-    /**
-     * L​a​r​g​e​ ​d​a​t​a​ ​s​e​t​s​ ​c​a​n​ ​s​o​m​e​t​i​m​e​s​ ​t​a​k​e​ ​s​e​v​e​r​a​l​ ​m​i​n​u​t​e​s​ ​t​o​ ​p​r​o​c​e​s​s​.​ ​P​l​e​a​s​e​ ​d​o​ ​n​o​t​ ​l​e​a​v​e​ ​t​h​i​s​ ​p​a​g​e​ ​o​r​ ​c​l​o​s​e​ ​t​h​e​ ​b​r​o​w​s​e​r​ ​t​a​b​ ​w​h​i​l​e​ ​i​m​p​o​r​t​ ​i​s​ ​i​n​ ​p​r​o​g​r​e​s​s​.
+     * L​a​r​g​e​ ​d​a​t​a​ ​s​e​t​s​ ​c​a​n​ ​s​o​m​e​t​i​m​e​s​ ​t​a​k​e​ ​s​e​v​e​r​a​l​ ​m​i​n​u​t​e​s​ ​t​o​ ​p​r​o​c​e​s​s​.​ ​P​l​e​a​s​e​ ​d​o​ ​n​o​t​ ​l​e​a​v​e​ ​t​h​i​s​ ​p​a​g​e​ ​o​r​ ​c​l​o​s​e​ ​t​h​e​ ​b​r​o​w​s​e​r​ ​t​a​b​ ​w​h​i​l​e​ ​t​h​e​ ​i​m​p​o​r​t​ ​i​s​ ​i​n​ ​p​r​o​g​r​e​s​s​.
      */
     largeDataTakesTimeWarning: string;
-    /**
-     * H​o​w​ ​w​o​u​l​d​ ​y​o​u​ ​l​i​k​e​ ​t​o​ ​i​m​p​o​r​t​ ​y​o​u​r​ ​d​a​t​a​?
-     */
-    howWouldYouLikeToImport: string;
-    /**
-     * U​p​l​o​a​d​ ​f​a​i​l​e​d
-     */
-    uploadFailed: string;
-    /**
-     * P​r​e​p​a​r​i​n​g​ ​P​r​e​v​i​e​w
-     */
-    preparingPreview: string;
-    /**
-     * F​a​i​l​e​d​ ​t​o​ ​i​m​p​o​r​t​ ​d​a​t​a
-     */
-    failedToImport: string;
   };
   linkTypeOptions: {
     /**
@@ -109,25 +97,37 @@ type RootTranslation = {
 export type TranslationFunctions = {
   general: {
     /**
+     * Data Source
+     */
+    dataSource: () => LocalizedString;
+    /**
      * Import
      */
     import: () => LocalizedString;
     /**
-     * One to Many
+     * Linking Table
      */
-    oneToMany: () => LocalizedString;
-    /**
-     * Many to One
-     */
-    manyToOne: () => LocalizedString;
+    linkingTable: () => LocalizedString;
     /**
      * Many to Many
      */
     manyToMany: () => LocalizedString;
     /**
-     * Linking Table
+     * Many to One
      */
-    linkingTable: () => LocalizedString;
+    manyToOne: () => LocalizedString;
+    /**
+     * No file uploaded
+     */
+    noFileUploaded: () => LocalizedString;
+    /**
+     * One to Many
+     */
+    oneToMany: () => LocalizedString;
+    /**
+     * Processing Data
+     */
+    processingData: () => LocalizedString;
   };
   importUploadPage: {
     /**
@@ -143,37 +143,13 @@ export type TranslationFunctions = {
      */
     copyAndPasteText: () => LocalizedString;
     /**
-     * Unable to create a table from the uploaded data
-     */
-    unableToCreateTableFromUpload: () => LocalizedString;
-    /**
      * Create a table by importing your data
      */
     createATableByImporting: () => LocalizedString;
     /**
-     * Uploading Data
-     */
-    uploadingData: () => LocalizedString;
-    /**
-     * Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while import is in progress.
+     * Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress.
      */
     largeDataTakesTimeWarning: () => LocalizedString;
-    /**
-     * How would you like to import your data?
-     */
-    howWouldYouLikeToImport: () => LocalizedString;
-    /**
-     * Upload failed
-     */
-    uploadFailed: () => LocalizedString;
-    /**
-     * Preparing Preview
-     */
-    preparingPreview: () => LocalizedString;
-    /**
-     * Failed to import data
-     */
-    failedToImport: () => LocalizedString;
   };
   linkTypeOptions: {
     /**

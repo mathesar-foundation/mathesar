@@ -87,14 +87,15 @@
       }
     }
 
-    &:focus,
+    &:focus {
+      border-color: var(--sky-600);
+      border-width: 2px;
+    }
     &:hover {
       background: var(--slate-50-tentative);
     }
-
-    &:active,
-    &.in {
-      background: var(--slate-100);
+    &.dragging-over {
+      background: var(--sky-200);
     }
   }
 
