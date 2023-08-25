@@ -1,23 +1,20 @@
-<script lang="ts" context="module">
-  let id = 0;
-
-  function getId() {
-    id += 1;
-    return id;
-  }
-</script>
-
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Icon, Progress, formatSize } from '@mathesar-component-library';
+
   import {
     iconFile,
     iconUploadFile,
   } from '@mathesar-component-library-dir/common/icons';
+  import {
+    formatSize,
+    getGloballyUniqueId,
+  } from '@mathesar-component-library-dir/common/utils';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import Progress from '@mathesar-component-library-dir/progress/Progress.svelte';
   import type { FileUpload, FileUploadAddDetail } from './FileUploadTypes';
 
   const dispatch = createEventDispatcher<{ add: FileUploadAddDetail }>();
-  const componentId = `file-import-${getId()}`;
+  const componentId = getGloballyUniqueId();
 
   export let fileProgress: Record<string, number | undefined> | undefined =
     undefined;
@@ -26,27 +23,20 @@
   export let disabled = false;
 
   let fileId = 0;
-  let state = 'idle';
+  let isDraggingOver = false;
 
   function processFiles(event: Event, files: FileList | File[]) {
     const newUploads: FileUpload[] = [];
-
     for (const file of files) {
-      newUploads.push({
-        fileId: `${componentId}-${fileId}`,
-        file,
-      });
+      newUploads.push({ fileId: `${componentId}-${fileId}`, file });
       fileId += 1;
     }
     fileUploads = [...(fileUploads || []), ...newUploads];
-
-    const fileUploadAddEvent: FileUploadAddDetail = {
+    dispatch('add', {
       added: newUploads,
       all: fileUploads,
       originalEvent: event,
-    };
-
-    dispatch('add', fileUploadAddEvent);
+    });
   }
 
   function onChange(event: Event) {
@@ -58,16 +48,14 @@
   }
 
   function onFileDrop(event: DragEvent) {
+    isDraggingOver = false;
     if (!disabled) {
       const fileList = event.dataTransfer?.files;
-      if (!fileList) {
+      if (!fileList || fileList.length === 0) {
         return;
       }
-      if (multiple) {
-        processFiles(event, fileList);
-      } else {
-        processFiles(event, [fileList[0]]);
-      }
+      const files = multiple ? fileList : [fileList[0]];
+      processFiles(event, files);
     }
   }
 
@@ -86,19 +74,16 @@
   {#if fileUploads && fileUploads.length > 0}
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
+        {@const percentage = Math.round(fileProgress?.[upload.fileId] ?? 0)}
         <div class="file">
           <div class="file-info">
             <div class="file-name">
               <Icon {...iconFile} />
               <span>{upload.file.name}</span>
             </div>
-            <Progress
-              percentage={Math.round(fileProgress?.[upload.fileId] ?? 0)}
-            />
+            <Progress {percentage} />
             <div class="upload-info">
-              <span>
-                Uploaded {Math.round(fileProgress?.[upload.fileId] ?? 0)}%
-              </span>
+              <span>Uploaded {percentage}%</span>
               <span>{formatSize(upload.file.size)}</span>
             </div>
           </div>
@@ -119,20 +104,21 @@
     <label
       tabindex="0"
       for={componentId}
-      class="file-upload-trigger {state}"
+      class="file-upload-trigger"
+      class:dragging-over={isDraggingOver}
       on:keydown={checkAndOpen}
       on:drop|preventDefault|stopPropagation={onFileDrop}
       on:dragenter|preventDefault|stopPropagation={() => {
-        state = 'in';
+        isDraggingOver = true;
       }}
       on:dragover|preventDefault|stopPropagation={() => {
-        state = 'in';
+        isDraggingOver = true;
       }}
       on:dragleave|preventDefault|stopPropagation={() => {
-        state = 'out';
+        isDraggingOver = false;
       }}
       on:dragend|preventDefault|stopPropagation={() => {
-        state = 'out';
+        isDraggingOver = false;
       }}
     >
       <slot>

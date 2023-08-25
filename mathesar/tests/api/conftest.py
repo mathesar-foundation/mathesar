@@ -310,6 +310,12 @@ def players_ma_table(db_table_to_dj_table, players_db_table):
 
 
 @pytest.fixture
+def athletes_ma_table(db_table_to_dj_table, athletes_db_table):
+    reset_reflection()
+    return db_table_to_dj_table(athletes_db_table)
+
+
+@pytest.fixture
 def table_with_unknown_types(create_schema, get_uid, engine):
     prefix = "unknown_types"
     schema_name = f"schema_{prefix}_{get_uid()}"

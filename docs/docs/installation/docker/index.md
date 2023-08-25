@@ -83,14 +83,11 @@ Have the following information for all databases you'd like to connect to Mathes
     docker logs -f mathesar_service
     ```
 
-1. Create a superuser
-    ```bash
-    docker exec -it mathesar_service python manage.py createsuperuser
-    ```
-    A prompt will appear to ask for the superuser details, fill in the details to create a superuser. At least one superuser is necessary for accessing Mathesar.
+1. Set up your user account
 
-    See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
+    Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up.
 
+    You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
 
 ## Upgrading Mathesar {:#upgrade}
 
