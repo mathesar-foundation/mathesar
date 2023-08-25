@@ -41,13 +41,14 @@ def patents_excel_data_file(patents_excel_filepath):
     return data_file
 
 
+@pytest.fixture
 def misaligned_table_excel_data_file():
     data_filepath = 'mathesar/tests/data/excel_parsing/misaligned_table.xlsx'
     with open(data_filepath, "rb") as excel_file:
         data_file = DataFile.objects.create(
             file=File(excel_file),
             created_from='file',
-            base_name='missaligned_table',
+            base_name='misaligned_table',
             type='excel'
         )
     return data_file
