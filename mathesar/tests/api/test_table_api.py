@@ -41,6 +41,18 @@ def patents_excel_data_file(patents_excel_filepath):
     return data_file
 
 
+def misaligned_table_excel_data_file():
+    data_filepath = 'mathesar/tests/data/excel_parsing/misaligned_table.xlsx'
+    with open(data_filepath, "rb") as excel_file:
+        data_file = DataFile.objects.create(
+            file=File(excel_file),
+            created_from='file',
+            base_name='missaligned_table',
+            type='excel'
+        )
+    return data_file
+
+
 @pytest.fixture
 def schema_name():
     return 'table_tests'
@@ -1920,5 +1932,17 @@ def test_create_table_using_excel_data_file(client, patents_excel_data_file, sch
 
     check_create_table_response(
         client, table_name, expt_name, patents_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_and_normalize_excel_data_file(client, misaligned_table_excel_data_file, schema):
+    table_name = 'misaligned_table'
+    expt_name = get_expected_name(table_name, data_file=misaligned_table_excel_data_file)
+    first_row = (1, 'John', '25', 'Male')
+    column_names = ["Name", "Age", "Gender"]
+
+    check_create_table_response(
+        client, table_name, expt_name, misaligned_table_excel_data_file, schema, first_row,
         column_names, import_target_table=None
     )

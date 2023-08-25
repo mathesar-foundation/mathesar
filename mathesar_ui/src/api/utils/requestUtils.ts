@@ -224,7 +224,7 @@ export function uploadFile<T>(
             resolve(request.response as T);
           }
         } else {
-          reject(new Error('An error has occurred while uploading file'));
+          reject(new Error('An error has occurred while uploading a file.'));
         }
       });
     },
