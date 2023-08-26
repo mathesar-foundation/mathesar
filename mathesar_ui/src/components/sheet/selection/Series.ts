@@ -1,10 +1,9 @@
 import { filter, findBest, firstHighest, firstLowest } from 'iter-tools';
-
-import { ImmutableMap } from '@mathesar/component-library';
+import { ImmutableMap } from '@mathesar-component-library';
 
 /**
- * A Series is an immutable ordered collection of values with methods that
- * provide efficient access to _ranges_ of those values.
+ * A Series is an immutable ordered collection of unique values with methods
+ * that provide efficient access to _ranges_ of those values.
  */
 export default class Series<Value> {
   private readonly values: Value[];
