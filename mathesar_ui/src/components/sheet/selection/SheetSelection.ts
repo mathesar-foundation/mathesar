@@ -219,8 +219,66 @@ export default class SheetSelection {
    * useful when a column is deleted, reordered, or inserted.
    */
   forNewPlane(newPlane: Plane): SheetSelection {
-    // TODO_NEXT
-    throw new Error('Not implemented');
+    if (this.basis.type === 'dataCells') {
+      if (!newPlane.hasResultRows) {
+        return new SheetSelection(newPlane, basisFromZeroEmptyColumns());
+      }
+      const minColumnId = newPlane.columnIds.min(this.basis.columnIds);
+      const maxColumnId = newPlane.columnIds.max(this.basis.columnIds);
+      const minRowId = newPlane.rowIds.min(this.basis.rowIds);
+      const maxRowId = newPlane.rowIds.max(this.basis.rowIds);
+      if (
+        minColumnId === undefined ||
+        maxColumnId === undefined ||
+        minRowId === undefined ||
+        maxRowId === undefined
+      ) {
+        return new SheetSelection(newPlane);
+      }
+      const cellIds = newPlane.dataCellsInFlexibleRowColumnRange(
+        minRowId,
+        maxRowId,
+        minColumnId,
+        maxColumnId,
+      );
+      return new SheetSelection(newPlane, basisFromDataCells(cellIds));
+    }
+
+    if (this.basis.type === 'emptyColumns') {
+      if (newPlane.hasResultRows) {
+        return new SheetSelection(newPlane);
+      }
+      const minColumnId = newPlane.columnIds.min(this.basis.columnIds);
+      const maxColumnId = newPlane.columnIds.max(this.basis.columnIds);
+      if (minColumnId === undefined || maxColumnId === undefined) {
+        return new SheetSelection(newPlane, basisFromZeroEmptyColumns());
+      }
+      const columnIds = newPlane.columnIds.range(minColumnId, maxColumnId);
+      return new SheetSelection(newPlane, basisFromEmptyColumns(columnIds));
+    }
+
+    if (this.basis.type === 'placeholderCell') {
+      const columnId = first(this.basis.columnIds);
+      if (columnId === undefined) {
+        return new SheetSelection(newPlane);
+      }
+      const newPlaneHasSelectedCell =
+        newPlane.columnIds.has(columnId) &&
+        newPlane.placeholderRowId === this.plane.placeholderRowId;
+      if (newPlaneHasSelectedCell) {
+        // If we can retain the selected placeholder cell, then do so.
+        return new SheetSelection(newPlane, basisFromPlaceholderCell(columnId));
+      }
+      // Otherwise, return an empty selection
+      return new SheetSelection(newPlane);
+    }
+
+    if (this.basis.type === 'empty') {
+      // If the selection is empty, we keep it empty.
+      return new SheetSelection(newPlane);
+    }
+
+    return assertExhaustive(this.basis.type);
   }
 
   /**

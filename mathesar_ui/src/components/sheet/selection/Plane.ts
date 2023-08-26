@@ -145,16 +145,40 @@ export default class Plane {
   ): Iterable<string> {
     const cellA = parseCellId(cellIdA);
     const cellB = parseCellId(cellIdB);
-    const rowIdA = this.normalizeFlexibleRowId(cellA.rowId);
+    return this.dataCellsInFlexibleRowColumnRange(
+      cellA.rowId,
+      cellB.rowId,
+      cellA.columnId,
+      cellB.columnId,
+    );
+  }
+
+  /**
+   * @returns an iterable of all the data cells in the plane that are within the
+   * rectangle bounded by the given rows and columns. This does not include
+   * header cells.
+   *
+   * If either of the provided rowIds are placeholder cells, then cells in the
+   * last row and last column will be used in their place. This ensures that the
+   * selection is made only of data cells, and will never include the
+   * placeholder cell, even if a user drags to select it.
+   */
+  dataCellsInFlexibleRowColumnRange(
+    flexibleRowIdA: string,
+    flexibleRowIdB: string,
+    columnIdA: string,
+    columnIdB: string,
+  ): Iterable<string> {
+    const rowIdA = this.normalizeFlexibleRowId(flexibleRowIdA);
     if (rowIdA === undefined) {
       return [];
     }
-    const rowIdB = this.normalizeFlexibleRowId(cellB.rowId);
+    const rowIdB = this.normalizeFlexibleRowId(flexibleRowIdB);
     if (rowIdB === undefined) {
       return [];
     }
     const rowIds = this.rowIds.range(rowIdA, rowIdB);
-    const columnIds = this.columnIds.range(cellA.columnId, cellB.columnId);
+    const columnIds = this.columnIds.range(columnIdA, columnIdB);
     return makeCells(rowIds, columnIds);
   }
 
