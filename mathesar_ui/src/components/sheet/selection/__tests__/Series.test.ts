@@ -1,44 +1,78 @@
 import Series from '../Series';
 
-test('Series', () => {
-  const s = new Series(['h', 'i', 'j', 'k', 'l']);
-  expect(s.length).toBe(5);
-  expect(s.first).toBe('h');
-  expect(s.last).toBe('l');
+describe('Series', () => {
+  const h = 'h';
+  const i = 'i';
+  const j = 'j';
+  const k = 'k';
+  const l = 'l';
+  const all = [h, i, j, k, l];
+  const s = new Series(all);
 
-  expect([...s]).toEqual(['h', 'i', 'j', 'k', 'l']);
+  test('basics', () => {
+    expect(s.length).toBe(5);
+    expect(s.first).toBe(h);
+    expect(s.last).toBe(l);
+    expect([...s]).toEqual(all);
+  });
 
-  expect(s.min(['i', 'j', 'k'])).toBe('i');
-  expect(s.min(['k', 'j', 'i'])).toBe('i');
-  expect(s.min(['i', 'NOPE'])).toBe('i');
-  expect(s.min(['NOPE'])).toBe(undefined);
-  expect(s.min([])).toBe(undefined);
+  test.each([
+    [[i, j, k], i],
+    [[k, j, i], i],
+    [[i, 'NOPE'], i],
+    [['NOPE'], undefined],
+    [[], undefined],
+  ])('min %#', (input, expected) => {
+    expect(s.min(input)).toBe(expected);
+  });
 
-  expect(s.max(['i', 'j', 'k'])).toBe('k');
-  expect(s.max(['k', 'j', 'i'])).toBe('k');
-  expect(s.max(['i', 'NOPE'])).toBe('i');
-  expect(s.max(['NOPE'])).toBe(undefined);
-  expect(s.max([])).toBe(undefined);
+  test.each([
+    [[i, j, k], k],
+    [[k, j, i], k],
+    [[i, 'NOPE'], i],
+    [['NOPE'], undefined],
+    [[], undefined],
+  ])('max %#', (input, expected) => {
+    expect(s.max(input)).toBe(expected);
+  });
 
-  expect([...s.range('i', 'k')]).toEqual(['i', 'j', 'k']);
-  expect([...s.range('k', 'i')]).toEqual(['i', 'j', 'k']);
-  expect([...s.range('i', 'i')]).toEqual(['i']);
-  expect(() => s.range('i', 'NOPE')).toThrow();
+  test.each([
+    [i, k, [i, j, k]],
+    [k, i, [i, j, k]],
+    [i, i, [i]],
+  ])('range %#', (a, b, expected) => {
+    expect([...s.range(a, b)]).toEqual(expected);
+  });
 
-  expect(s.offset('i', 0)).toBe('i');
-  expect(s.offset('i', 1)).toBe('j');
-  expect(s.offset('i', 2)).toBe('k');
-  expect(s.offset('i', -1)).toBe('h');
-  expect(s.offset('i', -2)).toBe(undefined);
-  expect(s.offset('NOPE', 0)).toBe(undefined);
-  expect(s.offset('NOPE', 1)).toBe(undefined);
+  test.each([
+    [i, 'NOPE'],
+    ['NOPE', i],
+  ])('range failures %#', (a, b) => {
+    expect(() => s.range(a, b)).toThrow();
+  });
 
-  expect(s.collapsedOffset(['i', 'k'], 0)).toBe(undefined);
-  expect(s.collapsedOffset(['i', 'k'], 1)).toBe('l');
-  expect(s.collapsedOffset(['i', 'k'], 2)).toBe(undefined);
-  expect(s.collapsedOffset(['i', 'k'], -1)).toBe('h');
-  expect(s.collapsedOffset(['i', 'k'], -2)).toBe(undefined);
-  expect(s.collapsedOffset(['i', 'NOPE'], 0)).toBe(undefined);
-  expect(s.collapsedOffset(['i', 'NOPE'], 1)).toBe('j');
-  expect(s.collapsedOffset([], 0)).toBe(undefined);
+  test.each([
+    [i, 0, i],
+    [i, 1, j],
+    [i, 2, k],
+    [i, -1, h],
+    [i, -2, undefined],
+    ['NOPE', 0, undefined],
+    ['NOPE', 1, undefined],
+  ])('offset %#', (value, offset, expected) => {
+    expect(s.offset(value, offset)).toBe(expected);
+  });
+
+  test.each([
+    [[i, k], 0, undefined],
+    [[i, k], 1, l],
+    [[i, k], 2, undefined],
+    [[i, k], -1, h],
+    [[i, k], -2, undefined],
+    [[i, 'NOPE'], 0, undefined],
+    [[i, 'NOPE'], 1, j],
+    [[], 0, undefined],
+  ])('collapsedOffset %#', (values, offset, expected) => {
+    expect(s.collapsedOffset(values, offset)).toBe(expected);
+  });
 });
