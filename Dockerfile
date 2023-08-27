@@ -9,8 +9,8 @@ RUN set -ex; \
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - ; \
     echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/pgdg.list; \
     apt-get update -y; \
-    apt-get install -y --no-install-recommends \
-        postgresql-13 postgresql-client-13 postgresql-contrib-13 \
+     apt-get install -y --no-install-recommends \
+        postgresql-15 postgresql-client-15 postgresql-contrib-15 \
     ; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \
@@ -19,6 +19,7 @@ RUN set -ex; \
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
 ENV PGDATA /var/lib/postgresql/mathesar
+VOLUME /etc/postgres/15/mathesar
 VOLUME /var/lib/postgresql/mathesar
 
 
