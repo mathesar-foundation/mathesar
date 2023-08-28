@@ -1,26 +1,27 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import type { Writable } from 'svelte/store';
 
   import {
     ButtonMenuItem,
     ContextMenu,
     LinkMenuItem,
-    WritableMap,
     MenuDivider,
     MenuHeading,
+    WritableMap,
   } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { States } from '@mathesar/api/utils/requestUtils';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
-    isCellActive,
-    isCellSelected,
-    scrollBasedOnActiveCell,
     SheetCell,
+    scrollBasedOnActiveCell,
   } from '@mathesar/components/sheet';
+  import { makeCellId } from '@mathesar/components/sheet/cellIds';
+  import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
@@ -31,15 +32,14 @@
     type ProcessedColumn,
     type RecordRow,
     type RecordsData,
-    type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import CellErrors from './CellErrors.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
 
   export let recordsData: RecordsData;
-  export let selection: TabularDataSelection;
+  export let selection: Writable<SheetSelection>;
   export let row: RecordRow;
   export let rowHasErrors = false;
   export let key: CellKey;
@@ -51,6 +51,7 @@
 
   const userProfile = getUserProfileStoreFromContext();
 
+  $: cellId = makeCellId(row.identifier, String(processedColumn.id));
   $: database = $currentDatabase;
   $: schema = $currentSchema;
   $: canEditTableRecords = !!$userProfile?.hasPermission(
@@ -65,28 +66,8 @@
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
-  $: ({ activeCell, selectedCells } = selection);
-  $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-
-  /**
-   * The name indicates that this boolean is only true when more than one cell
-   * is selected. However, because of the bug that [the active cell and selected
-   * cells do not remain in sync when using keyboard][1] this boolean is
-   * sometimes true even when multiple cells are selected. This is to
-   * differentiate between different active and selected cell using blue
-   * background styling for selected cell and blue border styling for active
-   * cell.
-   *
-   * The above bug can be fixed when following two conditions are met
-   *
-   * - We are working on keyboard accessability of the application.
-   * - `selectedCells` and `activeCell` are merged in a single store.
-   *
-   * [1]: https://github.com/centerofci/mathesar/issues/1534
-   */
-  $: isSelectedInRange =
-    isCellSelected($selectedCells, row, processedColumn) &&
-    $selectedCells.size > 1;
+  $: isActive = $selection.activeCellId === cellId;
+  $: isSelectedInRange = $selection.cellIds.has(cellId);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -112,13 +93,14 @@
   async function moveThroughCells(
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
-    const { originalEvent } = event.detail;
-    const type = selection.handleKeyEventsOnActiveCell(originalEvent);
-    if (type) {
-      originalEvent.stopPropagation();
-      originalEvent.preventDefault();
-      await checkTypeAndScroll(type);
-    }
+    // // TODO_3037
+    // const { originalEvent } = event.detail;
+    // const type = selection.handleKeyEventsOnActiveCell(originalEvent);
+    // if (type) {
+    //   originalEvent.stopPropagation();
+    //   originalEvent.preventDefault();
+    //   await checkTypeAndScroll(type);
+    // }
   }
 
   async function setValue(newValue: unknown) {
@@ -179,18 +161,20 @@
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
       on:movementKeyDown={moveThroughCells}
-      on:activate={() => {
-        selection.activateCell(row, processedColumn);
-      }}
+      on:activate={() => selection.update((s) => s.ofOneCell(cellId))}
       on:update={valueUpdated}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
       on:onSelectionStart={() => {
-        selection.onStartSelection(row, processedColumn);
+        // // TODO_3037
+        // selection.onStartSelection(row, processedColumn);
       }}
       on:onMouseEnterCellWhileSelection={() => {
-        // This enables the click + drag to
-        // select multiple cells
-        selection.onMouseEnterCellWhileSelection(row, processedColumn);
+        // // This enables the click + drag to
+        // // select multiple cells
+        // //
+        // // TODO_3037
+        // //
+        // selection.onMouseEnterCellWhileSelection(row, processedColumn);
       }}
     />
     <ContextMenu>

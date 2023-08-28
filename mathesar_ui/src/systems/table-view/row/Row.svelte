@@ -11,11 +11,7 @@
     ID_ROW_CONTROL_COLUMN,
     type Row,
   } from '@mathesar/stores/table-data';
-  import {
-    SheetRow,
-    SheetCell,
-    isRowSelected,
-  } from '@mathesar/components/sheet';
+  import { SheetRow, SheetCell } from '@mathesar/components/sheet';
   import { rowHeightPx } from '@mathesar/geometry';
   import { ContextMenu } from '@mathesar/component-library';
   import NewRecordMessage from './NewRecordMessage.svelte';
@@ -29,13 +25,8 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({
-    recordsData,
-    columnsDataStore,
-    meta,
-    processedColumns,
-    legacySelection: selection,
-  } = $tabularData);
+  $: ({ recordsData, columnsDataStore, meta, processedColumns, selection } =
+    $tabularData);
   $: ({
     rowStatus,
     rowCreationStatus,
@@ -50,29 +41,31 @@
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
-  $: ({ selectedCells } = selection);
-  $: isSelected = rowHasRecord(row) && isRowSelected($selectedCells, row);
+  $: isSelected = $selection.rowIds.has(row.identifier);
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
   function checkAndCreateEmptyRow() {
-    if (isPlaceholderRow(row)) {
-      void recordsData.addEmptyRecord();
-      selection.selectAndActivateFirstDataEntryCellInLastRow();
-    }
+    // // TODO_3037
+    // if (isPlaceholderRow(row)) {
+    //   void recordsData.addEmptyRecord();
+    //   selection.selectAndActivateFirstDataEntryCellInLastRow();
+    // }
   }
 
   const handleRowMouseDown = () => {
-    if (rowHasRecord(row) && !isPlaceholderRow(row)) {
-      selection.onRowSelectionStart(row);
-    }
+    // // TODO_3037
+    // if (rowHasRecord(row) && !isPlaceholderRow(row)) {
+    //   selection.onRowSelectionStart(row);
+    // }
   };
 
   const handleRowMouseEnter = () => {
-    if (rowHasRecord(row) && !isPlaceholderRow(row)) {
-      selection.onMouseEnterRowHeaderWhileSelection(row);
-    }
+    // // TODO_3037
+    // if (rowHasRecord(row) && !isPlaceholderRow(row)) {
+    //   selection.onMouseEnterRowHeaderWhileSelection(row);
+    // }
   };
 </script>
 

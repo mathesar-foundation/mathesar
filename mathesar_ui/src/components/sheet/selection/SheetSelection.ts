@@ -55,6 +55,10 @@ function basisFromDataCells(
   };
 }
 
+function basisFromOneDataCell(cellId: string): Basis {
+  return basisFromDataCells([cellId], cellId);
+}
+
 function basisFromEmptyColumns(columnIds: Iterable<string>): Basis {
   return {
     type: 'emptyColumns',
@@ -106,6 +110,8 @@ export default class SheetSelection {
   constructor(plane: Plane = new Plane(), basis: Basis = emptyBasis()) {
     this.plane = plane;
     this.basis = basis;
+    // TODO validate that basis is valid within plane. For example, remove
+    // selected cells from the basis that do not occur within the plane.
   }
 
   get activeCellId() {
@@ -199,19 +205,17 @@ export default class SheetSelection {
   }
 
   /**
-   * @returns a new selection formed from one cell within the placeholder row.
-   * Note that we do not support selections of multiple cells in the placeholder
-   * row.
+   * @returns a new selection formed from one cell within the data rows or the
+   * placeholder row.
    */
-  atPlaceholderCell(cellId: string): SheetSelection {
-    return this.withBasis(basisFromPlaceholderCell(cellId));
-  }
-
-  /**
-   * @returns a new selection formed from one cell within the data rows.
-   */
-  atDataCell(cellId: string): SheetSelection {
-    return this.withBasis(basisFromDataCells([cellId], cellId));
+  ofOneCell(cellId: string): SheetSelection {
+    const { rowId } = parseCellId(cellId);
+    const { placeholderRowId } = this.plane;
+    const makeBasis =
+      rowId === placeholderRowId
+        ? basisFromPlaceholderCell
+        : basisFromOneDataCell;
+    return this.withBasis(makeBasis(cellId));
   }
 
   /**
@@ -233,6 +237,10 @@ export default class SheetSelection {
         minRowId === undefined ||
         maxRowId === undefined
       ) {
+        // TODO: in some cases maybe we can be smarter here. Instead of
+        // returning an empty selection, we could try to return a selection of
+        // the same dimensions that is placed as close as possible to the
+        // original selection.
         return new SheetSelection(newPlane);
       }
       const cellIds = newPlane.dataCellsInFlexibleRowColumnRange(
@@ -345,13 +353,9 @@ export default class SheetSelection {
       // If we can't move anywhere, then do nothing
       return this;
     }
-    if (adjacent.type === 'dataCell') {
-      // Move to an adjacent data cell
-      return this.atDataCell(adjacent.cellId);
-    }
-    if (adjacent.type === 'placeholderCell') {
-      // Move to an adjacent placeholder cell
-      return this.atPlaceholderCell(adjacent.cellId);
+    if (adjacent.type === 'dataCell' || adjacent.type === 'placeholderCell') {
+      // Move to an adjacent data cell or adjacent placeholder cell
+      return this.ofOneCell(adjacent.cellId);
     }
     return assertExhaustive(adjacent);
   }
