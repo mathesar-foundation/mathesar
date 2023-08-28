@@ -16,6 +16,7 @@
   export let formatterOptions: $$Props['formatterOptions'];
   export let horizontalAlignment: HorizontalAlignment = 'right';
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
+  export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
   export let formatForDisplay: $$Props['formatForDisplay'];
 </script>
 
@@ -25,6 +26,7 @@
   {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
+  {showTruncationPopover}
   {searchValue}
   formatValue={formatForDisplay}
   {horizontalAlignment}
@@ -36,6 +38,7 @@
   on:update
 >
   <NumberCellInput
+    focusOnMount={true}
     {disabled}
     bind:value
     {...formatterOptions}

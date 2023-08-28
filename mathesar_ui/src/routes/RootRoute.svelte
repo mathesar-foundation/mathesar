@@ -1,47 +1,50 @@
 <script lang="ts">
   import { Route } from 'tinro';
-
-  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import { databases } from '@mathesar/stores/databases';
+  import type { CommonData } from '@mathesar/utils/preloadData';
   import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import DatabaseRoute from './DatabaseRoute.svelte';
-  import UserProfileRoute from './UserProfileRoute.svelte';
-  import AdminRoute from './AdminRoute.svelte';
-  import { getDatabasePageUrl } from './urls';
+  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import RouteObserver from '@mathesar/components/routing/RouteObserver.svelte';
+  import AuthenticatedRoutes from './AuthenticatedRoutes.svelte';
+  import AnonymousAccessRoutes from './AnonymousAccessRoutes.svelte';
 
   setBreadcrumbItemsInContext([]);
 
-  const userProfileStore = getUserProfileStoreFromContext();
-  $: userProfile = $userProfileStore;
-
-  $: firstDatabase = $databases.data?.[0];
+  export let commonData: CommonData;
 </script>
 
-<Route path="/*" firstmatch>
-  {#if firstDatabase}
-    <Route path="/" redirect={getDatabasePageUrl(firstDatabase.name)} />
-  {:else}
-    <Route path="/">
-      <ErrorPage>No databases found</ErrorPage>
+<!-- 
+  We're explicity having two separate routing context for the app to avoid the user
+  from client routing across either of them.
+-->
+
+{#if commonData.routing_context === 'anonymous'}
+  <Route path="/*" firstmatch>
+    <Route path="/shares/*" firstmatch>
+      <AnonymousAccessRoutes />
+
+      <Route fallback>
+        <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+      </Route>
     </Route>
-  {/if}
 
-  <Route path="/profile">
-    <UserProfileRoute />
-  </Route>
-
-  {#if userProfile?.isSuperUser}
-    <Route path="/administration/*" firstmatch>
-      <AdminRoute />
+    <Route fallback>
+      <!--Reload page to let server routing take over-->
+      <RouteObserver on:load={() => window.location.reload()} />
     </Route>
-  {/if}
-
-  <Route path="/db/:databaseName/*" let:meta firstmatch>
-    <DatabaseRoute databaseName={meta.params.databaseName} />
   </Route>
+{:else}
+  <Route path="/*" firstmatch>
+    {#if commonData.is_authenticated}
+      <AuthenticatedRoutes {commonData} />
+    {/if}
 
-  <Route fallback>
-    <ErrorPage>This is the not the webpage you are looking for.</ErrorPage>
+    <Route path="/shares/*">
+      <!--Reload page to let server routing take over-->
+      <RouteObserver on:load={() => window.location.reload()} />
+    </Route>
+
+    <Route fallback>
+      <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+    </Route>
   </Route>
-</Route>
+{/if}

@@ -56,7 +56,7 @@ function makeProxyForIsOpen({
  * Controls one modal.
  */
 export default class ModalController {
-  private modalId: number;
+  readonly modalId: number;
 
   private modalStackStore: Writable<ModalStack>;
 

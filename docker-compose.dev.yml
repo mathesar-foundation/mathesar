@@ -6,6 +6,7 @@ services:
   # It is used to run automated test cases to verify if the app works as intended
   dev-db:
     container_name: mathesar_dev_db
+    command: ["postgres", "-c", "shared_preload_libraries=plugin_debugger"]
     build:
       context: .
       dockerfile: Dockerfile.devdb

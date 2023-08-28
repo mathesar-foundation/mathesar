@@ -1,45 +1,49 @@
 import {
-  writable,
-  type Readable,
-  type Writable,
-  type Unsubscriber,
   derived,
   get,
+  writable,
+  type Readable,
+  type Unsubscriber,
+  type Writable,
 } from 'svelte/store';
+
 import {
-  States,
-  getAPI,
-  deleteAPI,
-  patchAPI,
-  postAPI,
-} from '@mathesar/api/utils/requestUtils';
-import {
+  getGloballyUniqueId,
   isDefinedNonNullable,
   type CancellablePromise,
-  getGloballyUniqueId,
 } from '@mathesar-component-library';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/types/tables';
+import type { Column } from '@mathesar/api/types/tables/columns';
 import type {
-  Result as ApiRecord,
-  Response as ApiRecordsResponse,
+  GetRequestParams as ApiGetRequestParams,
   Group as ApiGroup,
   Grouping as ApiGrouping,
+  Result as ApiRecord,
+  Response as ApiRecordsResponse,
   GroupingMode,
-  GetRequestParams as ApiGetRequestParams,
 } from '@mathesar/api/types/tables/records';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import { getErrorMessage } from '@mathesar/utils/errors';
+import {
+  States,
+  deleteAPI,
+  getAPI,
+  patchAPI,
+  postAPI,
+  getQueryStringFromParams,
+} from '@mathesar/api/utils/requestUtils';
 import type Pagination from '@mathesar/utils/Pagination';
-import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
-import type { Meta } from './meta';
-import type { RowKey } from './utils';
-import { validateRow, getCellKey } from './utils';
+import { getErrorMessage } from '@mathesar/utils/errors';
+import { pluralize } from '@mathesar/utils/languageUtils';
+import type { ShareConsumer } from '@mathesar/utils/shares';
 import type { ColumnsDataStore } from './columns';
-import type { Sorting } from './sorting';
-import type { Grouping as GroupingRequest } from './grouping';
 import type { Filtering } from './filtering';
-import type { SearchFuzzy } from './searchFuzzy';
+import type { Grouping as GroupingRequest } from './grouping';
+import type { Meta } from './meta';
 import RecordSummaryStore from './record-summaries/RecordSummaryStore';
+import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
+import type { SearchFuzzy } from './searchFuzzy';
+import type { Sorting } from './sorting';
+import type { RowKey } from './utils';
+import { getCellKey, validateRow } from './utils';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;
@@ -49,7 +53,11 @@ export interface RecordsRequestParamsData {
   searchFuzzy: SearchFuzzy;
 }
 
-function buildFetchQueryString(data: RecordsRequestParamsData): string {
+interface RecordsFetchQueryParamsData extends RecordsRequestParamsData {
+  shareConsumer?: ShareConsumer;
+}
+
+function buildFetchQueryString(data: RecordsFetchQueryParamsData): string {
   const params: ApiGetRequestParams = {
     ...data.pagination.recordsRequestParams(),
     ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
@@ -57,11 +65,11 @@ function buildFetchQueryString(data: RecordsRequestParamsData): string {
     ...data.filtering.recordsRequestParams(),
     ...data.searchFuzzy.recordsRequestParams(),
   };
-  const entries: [string, string][] = Object.entries(params).map(([k, v]) => {
-    const value = typeof v === 'string' ? v : JSON.stringify(v);
-    return [k, value];
-  });
-  return new URLSearchParams(entries).toString();
+  const paramsWithShareConsumer = {
+    ...params,
+    ...data.shareConsumer?.getQueryParams(),
+  };
+  return getQueryStringFromParams(paramsWithShareConsumer);
 }
 
 export interface RecordGroup {
@@ -267,7 +275,7 @@ function preprocessRecords({
 }
 
 export class RecordsData {
-  private parentId: DBObjectEntry['id'];
+  private tableId: TableEntry['id'];
 
   private url: string;
 
@@ -309,14 +317,23 @@ export class RecordsData {
    */
   private contextualFilters: Map<number, number | string>;
 
-  constructor(
-    parentId: number,
-    meta: Meta,
-    columnsDataStore: ColumnsDataStore,
-    contextualFilters: Map<number, number | string>,
-  ) {
-    this.parentId = parentId;
+  readonly shareConsumer?: ShareConsumer;
 
+  constructor({
+    tableId,
+    meta,
+    columnsDataStore,
+    contextualFilters,
+    shareConsumer,
+  }: {
+    tableId: TableEntry['id'];
+    meta: Meta;
+    columnsDataStore: ColumnsDataStore;
+    contextualFilters: Map<number, number | string>;
+    shareConsumer?: ShareConsumer;
+  }) {
+    this.tableId = tableId;
+    this.shareConsumer = shareConsumer;
     this.state = writable(States.Loading);
     this.savedRecordRowsWithGroupHeaders = writable([]);
     this.newRecords = writable([]);
@@ -334,7 +351,7 @@ export class RecordsData {
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.contextualFilters = contextualFilters;
-    this.url = `/api/db/v0/tables/${this.parentId}/records/`;
+    this.url = `/api/db/v0/tables/${this.tableId}/records/`;
     void this.fetch();
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
@@ -385,6 +402,7 @@ export class RecordsData {
       const queryString = buildFetchQueryString({
         ...params,
         filtering: params.filtering.withEntries(contextualFilterEntries),
+        shareConsumer: this.shareConsumer,
       });
       this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${queryString}`);
       const response = await this.promise;
@@ -459,21 +477,18 @@ export class RecordsData {
       );
     }
 
+    const keysToDelete = primaryKeysOfSavedRows;
+
     let shouldReFetchRecords = successRowKeys.size > 0;
-    if (primaryKeysOfSavedRows.length > 0) {
-      // TODO: Convert this to single request
-      const promises = primaryKeysOfSavedRows.map((pk) =>
-        deleteAPI<RowKey>(`${this.url}${pk}/`)
-          .then(() => {
-            successRowKeys.add(pk);
-            return successRowKeys;
-          })
-          .catch((error: unknown) => {
-            failures.set(pk, getErrorMessage(error));
-            return failures;
-          }),
-      );
-      await Promise.all(promises);
+    if (keysToDelete.length > 0) {
+      const recordIds = [...keysToDelete];
+      const bulkDeleteURL = `/api/ui/v0/tables/${this.tableId}/records/delete/`;
+      try {
+        await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
+        keysToDelete.forEach((key) => successRowKeys.add(key));
+      } catch (error) {
+        failures.set(keysToDelete.join(','), getErrorMessage(error));
+      }
       shouldReFetchRecords = true;
     }
 
@@ -506,7 +521,7 @@ export class RecordsData {
       await this.fetch(true);
     }
 
-    this.meta.rowCreationStatus.delete([...savedRecordKeys]);
+    this.meta.rowCreationStatus.delete(Array.from(savedRecordKeys, String));
     this.meta.clearAllStatusesAndErrorsForRows([...successRowKeys]);
     this.meta.rowDeletionStatus.setEntries(
       [...failures.entries()].map(([rowKey, errorMsg]) => [
@@ -514,13 +529,12 @@ export class RecordsData {
         { state: 'failure', errors: [errorMsg] },
       ]),
     );
+    this.meta.rowDeletionStatus.clear();
 
     if (failures.size > 0) {
-      if (failures.size === 1) {
-        throw Error('Unable to delete row!');
-      } else {
-        throw Error('Unable to delete some rows!');
-      }
+      const uiMsg = `Unable to delete ${pluralize(keysToDelete, 'rows')}.`;
+      const apiMsg = [...failures.values()].join('\n');
+      throw new Error(`${uiMsg} ${apiMsg}`);
     }
   }
 
