@@ -31,10 +31,28 @@ def insert_records_from_dataframe(name, schema, column_names, engine, comment, d
     return table
 
 
+def remove_empty_rows_and_columns_from_dataframe(df):
+    if df.iloc[0].isna().any():
+
+        # drop rows with all NaN values
+        df.dropna(how='all', inplace=True)
+
+        # drop columns with all NaN values
+        df.dropna(axis=1, how='all', inplace=True)
+
+    if all(df.columns.str.startswith('Unnamed')):
+        df.columns = df.iloc[0]
+        df = df[1:]
+
+    return df
+
+
 def create_db_table_from_excel_data_file(data_file, name, schema, comment=None):
     db_name = schema.database.name
     engine = create_mathesar_engine(db_name)
-    dataframe = pandas.read_excel(data_file.file.path)
+    dataframe = remove_empty_rows_and_columns_from_dataframe(
+        pandas.read_excel(data_file.file.path)
+    )
     column_names = process_column_names(dataframe.columns)
     try:
         table = insert_records_from_dataframe(name, schema, column_names, engine, comment, dataframe)
