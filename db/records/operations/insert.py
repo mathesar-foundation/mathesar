@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch, UniqueViolation, ExclusionViolation
 from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
 from db.columns.base import MathesarColumn
+from db.constants import ID, ID_ORIGINAL
 from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
 from sqlalchemy import select
@@ -89,6 +90,8 @@ def insert_records_from_json(table, engine, json_filepath, column_names, max_lev
     records = get_records_from_dataframe(df)
 
     for i, row in enumerate(records):
+        if ID in row and ID_ORIGINAL in column_names:
+            row[ID_ORIGINAL] = row.pop("id")
         records[i] = {
             k: json.dumps(v)
             if (isinstance(v, dict) or isinstance(v, list))
