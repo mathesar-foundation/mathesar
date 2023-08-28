@@ -66,7 +66,9 @@ export function getLinkForTableItem(
   table: Pick<TableEntry, 'import_verified' | 'data_files' | 'id'>,
 ) {
   if (isTableImportConfirmationRequired(table)) {
-    return getImportPreviewPageUrl(databaseName, schemaId, table.id);
+    return getImportPreviewPageUrl(databaseName, schemaId, table.id, {
+      useColumnTypeInference: true,
+    });
   }
   return getTablePageUrl(databaseName, schemaId, table.id);
 }

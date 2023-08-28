@@ -54,7 +54,7 @@ def create_db(request, SES_engine_cache):
     A factory for Postgres mathesar-installed databases. A fixture made of this method tears down
     created dbs when leaving scope.
 
-    This method is used to create two fixtures with different scopes, that's why it's not a fixture
+    This method is used to create fixtures with different scopes, that's why it's not a fixture
     itself.
     """
     engine_cache = SES_engine_cache

@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from demo.utils import get_is_live_demo_mode
+
 from db import engine
 DEFAULT_DB = 'default'
 
@@ -12,7 +14,7 @@ def create_mathesar_engine(db_model):
     try:
         credentials = _get_credentials_for_db_name_in_settings(db_model)
     except KeyError:
-        if hasattr(settings, 'MATHESAR_LIVE_DEMO') and settings.MATHESAR_LIVE_DEMO:
+        if get_is_live_demo_mode():
             credentials = _get_credentials_for_db_name_not_in_settings(db_model)
         else:
             raise
