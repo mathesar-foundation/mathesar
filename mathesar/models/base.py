@@ -900,6 +900,8 @@ def _create_table_settings(tables):
 
 
 def _set_default_preview_template(table):
+    if not hasattr(table, 'settings'):
+        _create_table_settings([table])
     if not table.settings.preview_settings.customized:
         preview_template = compute_default_preview_template(table)
         preview_settings = table.settings.preview_settings
