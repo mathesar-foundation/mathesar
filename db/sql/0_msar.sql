@@ -899,7 +899,8 @@ CREATE TYPE __msar.col_def AS (
   type_ text, -- The type of the column to create, fully specced with arguments.
   not_null boolean, -- A boolean to describe whether the column is nullable or not.
   default_ text, -- Text SQL giving the default value for the column.
-  identity_ boolean -- A boolean giving whether the column is an identity pkey column.
+  identity_ boolean, -- A boolean giving whether the column is an identity pkey column.
+  description text -- A text that will become a comment for the column
 );
 
 
@@ -956,7 +957,8 @@ SELECT array_agg(
     -- set the default value for the duplicate column if specified
     CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END,
     -- We don't set a duplicate column as a primary key, since that would cause an error.
-    false
+    false,
+    col_description(tab_id, pg_columns.attnum)
   )::__msar.col_def
 )
 FROM pg_attribute AS pg_columns
@@ -1266,7 +1268,8 @@ The col_defs should have the form:
       "options": <obj> (optional),
     },
     "not_null": <bool> (optional; default false),
-    "default": <any> (optional)
+    "default": <any> (optional),
+    "description": <str> (optional)
   },
   {
     ...
@@ -1301,7 +1304,8 @@ WITH attnum_cte AS (
         format('%L', col_def_obj ->> 'default')
     END,
     -- We don't allow setting the primary key column manually
-    false
+    false,
+    COALESCE(quote_literal(col_def_obj ->> 'description'), NULL)
   )::__msar.col_def AS col_defs
   FROM attnum_cte, jsonb_array_elements(col_defs) AS col_def_obj
   WHERE col_def_obj ->> 'name' IS NULL OR col_def_obj ->> 'name' <> 'id'
@@ -1310,8 +1314,9 @@ SELECT array_cat(
   CASE
     WHEN create_id THEN
       -- The below tuple defines a default 'id' column for Mathesar.  It has name id, type integer,
-      -- it's not null, and it uses the 'identity' functionality to generate default values.
-      ARRAY[('id', 'integer', true, null, true)]::__msar.col_def[]
+      -- it's not null, it uses the 'identity' functionality to generate default values, doesn't
+      -- have a comment.
+      ARRAY[('id', 'integer', true, null, true, NULL)]::__msar.col_def[]
   END,
   array_agg(col_defs)
 )
@@ -1350,9 +1355,16 @@ Args:
 */
 DECLARE
   col_create_defs __msar.col_def[];
+  col_create_def record;
 BEGIN
   col_create_defs := msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
+
+  FOREACH col_create_def IN ARRAY col_create_defs
+  LOOP
+    PERFORM msar.comment_on_column(tab_id, col_create_def.name_, col_create_def.description);
+  END LOOP;
+
   RETURN array_agg(attnum)
     FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
     INNER JOIN unnest(col_create_defs) R
@@ -2192,6 +2204,15 @@ BEGIN
       msar.process_col_alter_jsonb(tab_id, col_alters)
     );
   END IF;
+  -- Here, we perform all description-changing alterations.
+  FOR r in SELECT attnum, description FROM jsonb_to_recordset(col_alters) AS x(attnum integer, description text)
+  LOOP
+    PERFORM msar.comment_on_column(
+      tab_id := tab_id,
+      col_id := r.attnum,
+      comment_ := r.description
+    );
+  END LOOP;
   -- Here, we perform all name-changing alterations.
   FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
   LOOP
@@ -2200,6 +2221,76 @@ BEGIN
   RETURN array_agg(x.attnum) FROM jsonb_to_recordset(col_alters) AS x(attnum integer);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+-- Comment on column --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+msar.comment_on_column(tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
+Change the description of a column, returning command executed.
+
+Args:
+  tab_name: The name of the table containg the column whose comment we will change.
+  col_name: The name of the column whose comment we'll change
+  comment_: The new comment. Any quotes or special characters must be escaped.
+*/
+SELECT __msar.exec_ddl(
+  'COMMENT ON COLUMN %s.%s IS %s',
+  tab_name,
+  col_name,
+  quote_literal(comment_)
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.comment_on_column(sch_name text, tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
+Change the description of a column, returning command executed.
+
+Args:
+  sch_name: The schema of the table whose column's comment we will change.
+  tab_name: The name of the table whose column's comment we will change.
+  col_name: The name of the column whose comment we will change.
+  comment_: The new comment.
+*/
+SELECT msar.comment_on_column(
+  msar.get_fully_qualified_object_name(sch_name, tab_name),
+  col_name,
+  comment_
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION
+msar.comment_on_column(tab_id oid, col_name text, comment_ text) RETURNS text AS $$/*
+Change the description of a column, returning command executed.
+
+Args:
+  tab_id: The OID of the table containg the column whose comment we will change.
+  col_name: The name of the column whose comment we'll change
+  comment_: The new comment. Any quotes or special characters must be escaped.
+*/
+SELECT msar.comment_on_column(
+  __msar.get_relation_name(tab_id),
+  col_name,
+  comment_
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.comment_on_column(tab_id oid, col_id integer, comment_ text) RETURNS text AS $$/*
+Change the description of a column, returning command executed.
+
+Args:
+  tab_id: The OID of the table containg the column whose comment we will change.
+  col_id: The ATTNUM of the column whose comment we will change.
+  comment_: The new comment.
+*/
+SELECT msar.comment_on_column(
+  __msar.get_relation_name(tab_id),
+  msar.get_column_name(tab_id, col_id),
+  comment_
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------

@@ -4,7 +4,7 @@ from psycopg.errors import (
     SyntaxError
 )
 from db import connection as db_conn
-from db.columns.defaults import NAME, NULLABLE
+from db.columns.defaults import NAME, NULLABLE, DESCRIPTION
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 
 
@@ -25,13 +25,15 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
         "type_options": <dict>,
         "column_default_dict": {"is_dynamic": <bool>, "value": <any>}
         "nullable": <str>,
-        "name": <str>
+        "name": <str>,
+        "description": <str>
     }
     """
     column_alter_def = _process_column_alter_dict(column_data, column_attnum)
     requested_type = column_alter_def.get("type", {}).get("name")
     if connection is None:
         try:
+            breakpoint()
             db_conn.execute_msar_func_with_engine(
                 engine, 'alter_columns',
                 table_oid,
@@ -196,6 +198,7 @@ def _process_column_alter_dict(column_data, column_attnum=None):
         "not_null": <bool>,
         "default": <any>,
         "delete": <bool>
+        "description": <str>
     }
 
     Note that keys with empty values will be dropped, unless the given "default"
@@ -213,12 +216,14 @@ def _process_column_alter_dict(column_data, column_attnum=None):
     column_delete = column_data.get("delete")
     column_not_null = not column_nullable if column_nullable is not None else None
     column_name = (column_data.get(NAME) or '').strip() or None
+    column_description = (column_data.get(DESCRIPTION) or '').strip() or None
     raw_col_alter_def = {
         "attnum": column_attnum or column_data.get("attnum"),
         "type": new_type,
         "not_null": column_not_null,
         "name": column_name,
-        "delete": column_delete
+        "delete": column_delete,
+        "description": column_description,
     }
     col_alter_def = {k: v for k, v in raw_col_alter_def.items() if v is not None}
     default_dict = column_data.get(DEFAULT_DICT, {})
