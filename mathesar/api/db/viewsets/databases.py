@@ -51,6 +51,7 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             if is_valid_pg_creds(credentials):
                 serializer.save()
                 install_mathesar(**credentials, skip_confirm=True)
+        # TODO This will raise an error if db_object is not editable handle it properly.
         return Response(serializer.data)
 
     def destroy(self, request, pk=None):
