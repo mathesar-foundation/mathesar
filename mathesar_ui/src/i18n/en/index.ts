@@ -2,26 +2,22 @@ import type { BaseTranslation } from '../i18n-types.js';
 
 const en: BaseTranslation = {
   general: {
+    dataSource: 'Data Source',
     import: 'Import',
-    oneToMany: 'One to Many',
-    manyToOne: 'Many to One',
-    manyToMany: 'Many to Many',
     linkingTable: 'Linking Table',
+    manyToMany: 'Many to Many',
+    manyToOne: 'Many to One',
+    noFileUploaded: 'No file uploaded',
+    oneToMany: 'One to Many',
+    processingData: 'Processing Data',
   },
   importUploadPage: {
     uploadAFile: 'Upload a file',
     provideUrlToFile: 'Provide a URL to the file',
     copyAndPasteText: 'Copy and Paste Text',
-    unableToCreateTableFromUpload:
-      'Unable to create a table from the uploaded data',
     createATableByImporting: 'Create a table by importing your data',
-    uploadingData: 'Uploading Data',
     largeDataTakesTimeWarning:
-      'Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while import is in progress.',
-    howWouldYouLikeToImport: 'How would you like to import your data?',
-    uploadFailed: 'Upload failed',
-    preparingPreview: 'Preparing Preview',
-    failedToImport: 'Failed to import data',
+      'Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress.',
   },
   linkTypeOptions: {
     oneToManyDescription:

@@ -186,6 +186,11 @@ def patents_json_filepath():
 
 
 @pytest.fixture(scope='session')
+def patents_excel_filepath():
+    return 'mathesar/tests/data/patents.xlsx'
+
+
+@pytest.fixture(scope='session')
 def table_with_id_col_filepath():
     return 'mathesar/tests/data/table_with_id_col.csv'
 
@@ -228,6 +233,36 @@ def col_headers_empty_csv_filepath():
 @pytest.fixture(scope='session')
 def non_unicode_csv_filepath():
     return 'mathesar/tests/data/non_unicode_files/utf_16_le.csv'
+
+
+@pytest.fixture(scope='session')
+def duplicate_id_table_csv_filepath():
+    return 'mathesar/tests/data/csv_parsing/duplicate_id_table.csv'
+
+
+@pytest.fixture(scope='session')
+def null_id_table_csv_filepath():
+    return 'mathesar/tests/data/csv_parsing/null_id_table.csv'
+
+
+@pytest.fixture(scope='session')
+def duplicate_id_table_json_filepath():
+    return 'mathesar/tests/data/json_parsing/duplicate_id_table.json'
+
+
+@pytest.fixture(scope='session')
+def null_id_table_json_filepath():
+    return 'mathesar/tests/data/json_parsing/null_id_table.json'
+
+
+@pytest.fixture(scope='session')
+def duplicate_id_table_excel_filepath():
+    return 'mathesar/tests/data/excel_parsing/duplicate_id_table.xlsx'
+
+
+@pytest.fixture(scope='session')
+def null_id_table_excel_filepath():
+    return 'mathesar/tests/data/excel_parsing/null_id_table.xlsx'
 
 
 @pytest.fixture
