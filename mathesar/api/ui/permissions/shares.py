@@ -13,10 +13,10 @@ class SharedTableAccessPolicy(AccessPolicy):
             'condition_expression': 'is_atleast_viewer_nested_table_resource'
         },
         {
-            'action': ['create', 'destroy', 'update', 'partial_update'],
+            'action': ['create', 'destroy', 'update', 'partial_update', 'regenerate'],
             'principal': 'authenticated',
             'effect': 'allow',
-            'condition_expression': 'is_atleast_manager_nested_table_resource'
+            'condition_expression': 'is_atleast_editor_nested_table_resource'
         },
     ]
 
@@ -30,7 +30,7 @@ class SharedQueryAccessPolicy(AccessPolicy):
             'condition_expression': 'is_atleast_query_viewer'
         },
         {
-            'action': ['create', 'destroy', 'update', 'partial_update'],
+            'action': ['create', 'destroy', 'update', 'partial_update', 'regenerate'],
             'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': 'is_atleast_query_editor'

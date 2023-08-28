@@ -33,24 +33,24 @@
 
   function createQueryManager(queryInstance: UnsavedQueryInstance) {
     queryManager?.destroy();
-    queryManager = new QueryManager(
-      new QueryModel(queryInstance),
-      $currentDbAbstractTypes.data,
-    );
+    queryManager = new QueryManager({
+      query: new QueryModel(queryInstance),
+      abstractTypeMap: $currentDbAbstractTypes.data,
+      onSave: async (instance) => {
+        try {
+          const url = getExplorationEditorPageUrl(
+            database.name,
+            schema.id,
+            instance.id,
+          );
+          router.goto(url, true);
+        } catch (err) {
+          console.error('There was an error when updating the URL', err);
+        }
+      },
+    });
     query = queryManager.query;
     is404 = false;
-    queryManager.on('save', async (instance) => {
-      try {
-        const url = getExplorationEditorPageUrl(
-          database.name,
-          schema.id,
-          instance.id,
-        );
-        router.goto(url, true);
-      } catch (err) {
-        console.error('There was an error when updating the URL', err);
-      }
-    });
   }
 
   function removeQueryManager(): void {

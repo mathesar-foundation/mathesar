@@ -1,0 +1,67 @@
+{% extends 'mathesar/base.html' %}
+{% load static %}
+
+{% block styles %}
+  {% if development_mode %}
+    <!--
+      In development mode, vite loads mathesar-component-library
+      styles, which takes a while. This leads to a flickering
+      effect where elements are shown without styles as soon
+      as they render.
+      This block hides them until vite loads the styles.
+      This is not a concern during production.
+    -->
+    <style type="text/css">
+      body {
+        visibility: hidden;
+      }
+    </style>
+  {% else %}
+    {% for css_file in manifest_data.module_css %}
+      <link rel="stylesheet" href="{% static css_file %}" />
+    {% endfor %}
+  {% endif %}
+
+  <style type="text/css">
+    .message-box.error-message,
+    .message-box.warning-message {
+      margin-top: var(--size-small);
+      border: 1px solid var(--red-200);
+      border-radius: var(--border-radius-m);
+      padding: var(--size-x-small);
+      display: flex;
+    }
+    .message-box.error-message .icon,
+    .message-box.warning-message .icon{
+      font-weight: bold;
+      margin-right: 0.5rem;
+      opacity: 0.7;
+    } 
+    .message-box.error-message {
+      background: var(--red-100);
+      border-color: var(--red-200);
+    }
+    .message-box.warning-message {
+      background: var(--yellow-100);
+      border-color: var(--red-200);
+    }
+  </style>
+
+
+  {% block page_styles %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+  {% if development_mode %}
+    <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
+    <script type="module" src="{{ client_dev_url }}/src/component-library/styles.scss"></script>
+    <script type="module" defer>
+      (function () {
+        document.body.style.visibility = 'visible';
+      })();
+    </script>
+  {% endif %}
+
+  {% block page_scripts %}{% endblock %}
+{% endblock %}
+

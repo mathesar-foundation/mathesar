@@ -14,6 +14,7 @@
   export let labelKey = 'label';
   export let getLabel: LabelGetter<Option> = (o: Option) =>
     defaultGetLabel(o, labelKey);
+  export let boxed = false;
 
   export let getDisabled: (value: Option | undefined) => boolean = () => false;
 </script>
@@ -21,6 +22,7 @@
 <fieldset
   class="fieldset-group"
   class:inline={isInline}
+  class:boxed
   class:has-label={!!label}
   aria-label={ariaLabel}
   on:change
@@ -43,4 +45,5 @@
       </li>
     {/each}
   </ul>
+  <slot name="extra" />
 </fieldset>
