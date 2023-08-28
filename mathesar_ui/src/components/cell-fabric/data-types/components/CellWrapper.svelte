@@ -143,11 +143,10 @@
     }
 
     &.is-active {
-      box-shadow: 0 0 0 2px var(--slate-300);
-      border-radius: 2px;
+      box-shadow: inset 0 0 0 2px var(--slate-300);
 
       &.is-focused {
-        box-shadow: 0 0 0 2px var(--sky-700);
+        box-shadow: inset 0 0 0 2px var(--sky-700);
       }
     }
 
