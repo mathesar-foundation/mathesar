@@ -6,6 +6,7 @@ from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
 from db.columns.operations.select import get_column_attnum_from_name, get_column_attnum_from_names_as_map
+from db.constants import ID, ID_ORIGINAL
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
 from mathesar.models.users import DatabaseRole, SchemaRole
@@ -49,6 +50,78 @@ def misaligned_table_excel_data_file():
             file=File(excel_file),
             created_from='file',
             base_name='misaligned_table',
+            type='excel'
+        )
+    return data_file
+
+
+@pytest.fixture
+def duplicate_id_csv_data_file(duplicate_id_table_csv_filepath):
+    with open(duplicate_id_table_csv_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='duplicate_id',
+            type='csv'
+        )
+    return data_file
+
+
+@pytest.fixture
+def null_id_csv_data_file(null_id_table_csv_filepath):
+    with open(null_id_table_csv_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='null_id',
+            type='csv'
+        )
+    return data_file
+
+
+@pytest.fixture
+def duplicate_id_json_data_file(duplicate_id_table_json_filepath):
+    with open(duplicate_id_table_json_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='duplicate_id',
+            type='json'
+        )
+    return data_file
+
+
+@pytest.fixture
+def null_id_json_data_file(null_id_table_json_filepath):
+    with open(null_id_table_json_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='null_id',
+            type='json'
+        )
+    return data_file
+
+
+@pytest.fixture
+def duplicate_id_excel_data_file(duplicate_id_table_excel_filepath):
+    with open(duplicate_id_table_excel_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='duplicate_id',
+            type='excel'
+        )
+    return data_file
+
+
+@pytest.fixture
+def null_id_excel_data_file(null_id_table_excel_filepath):
+    with open(null_id_table_excel_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='null_id',
             type='excel'
         )
     return data_file
@@ -1945,5 +2018,77 @@ def test_create_table_and_normalize_excel_data_file(client, misaligned_table_exc
 
     check_create_table_response(
         client, table_name, expt_name, misaligned_table_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_duplicate_id_csv_data_file(client, duplicate_id_csv_data_file, schema):
+    table_name = 'duplicate_id'
+    expt_name = get_expected_name(table_name, data_file=duplicate_id_csv_data_file)
+    first_row = (1, '1', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, duplicate_id_csv_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_null_id_csv_data_file(client, null_id_csv_data_file, schema):
+    table_name = 'null_id'
+    expt_name = get_expected_name(table_name, data_file=null_id_csv_data_file)
+    first_row = (1, '1', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, null_id_csv_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_duplicate_id_json_data_file(client, duplicate_id_json_data_file, schema):
+    table_name = 'duplicate_id'
+    expt_name = get_expected_name(table_name, data_file=duplicate_id_json_data_file)
+    first_row = (1, '1', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, duplicate_id_json_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_null_id_json_data_file(client, null_id_json_data_file, schema):
+    table_name = 'null_id'
+    expt_name = get_expected_name(table_name, data_file=null_id_json_data_file)
+    first_row = (1, '1.0', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, null_id_json_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_duplicate_id_excel_data_file(client, duplicate_id_excel_data_file, schema):
+    table_name = 'duplicate_id'
+    expt_name = get_expected_name(table_name, data_file=duplicate_id_excel_data_file)
+    first_row = (1, '1', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, duplicate_id_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_null_id_excel_data_file(client, null_id_excel_data_file, schema):
+    table_name = 'null_id'
+    expt_name = get_expected_name(table_name, data_file=null_id_excel_data_file)
+    first_row = (1, '1.0', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, null_id_excel_data_file, schema, first_row,
         column_names, import_target_table=None
     )
