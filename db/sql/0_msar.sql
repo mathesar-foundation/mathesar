@@ -1305,6 +1305,7 @@ WITH attnum_cte AS (
     END,
     -- We don't allow setting the primary key column manually
     false,
+    -- Set the description for the column
     COALESCE(quote_literal(col_def_obj ->> 'description'), NULL)
   )::__msar.col_def AS col_defs
   FROM attnum_cte, jsonb_array_elements(col_defs) AS col_def_obj
@@ -1362,7 +1363,11 @@ BEGIN
 
   FOREACH col_create_def IN ARRAY col_create_defs
   LOOP
-    PERFORM msar.comment_on_column(tab_id, col_create_def.name_, col_create_def.description);
+    PERFORM __msar.comment_on_column(
+      tab_id,
+      col_create_def.name_,
+      col_create_def.description
+    );
   END LOOP;
 
   RETURN array_agg(attnum)
@@ -2207,10 +2212,10 @@ BEGIN
   -- Here, we perform all description-changing alterations.
   FOR r in SELECT attnum, description FROM jsonb_to_recordset(col_alters) AS x(attnum integer, description text)
   LOOP
-    PERFORM msar.comment_on_column(
+    PERFORM __msar.comment_on_column(
       tab_id := tab_id,
       col_id := r.attnum,
-      comment_ := r.description
+      comment_ := quote_literal(r.description)
     );
   END LOOP;
   -- Here, we perform all name-changing alterations.
@@ -2226,7 +2231,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Comment on column --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-msar.comment_on_column(tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_column(tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
 Change the description of a column, returning command executed.
 
 Args:
@@ -2238,12 +2243,12 @@ SELECT __msar.exec_ddl(
   'COMMENT ON COLUMN %s.%s IS %s',
   tab_name,
   col_name,
-  quote_literal(comment_)
+  comment_
 );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
-msar.comment_on_column(sch_name text, tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_column(sch_name text, tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
 Change the description of a column, returning command executed.
 
 Args:
@@ -2252,7 +2257,7 @@ Args:
   col_name: The name of the column whose comment we will change.
   comment_: The new comment.
 */
-SELECT msar.comment_on_column(
+SELECT __msar.comment_on_column(
   msar.get_fully_qualified_object_name(sch_name, tab_name),
   col_name,
   comment_
@@ -2260,7 +2265,7 @@ SELECT msar.comment_on_column(
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
-msar.comment_on_column(tab_id oid, col_name text, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_column(tab_id oid, col_name text, comment_ text) RETURNS text AS $$/*
 Change the description of a column, returning command executed.
 
 Args:
@@ -2268,7 +2273,7 @@ Args:
   col_name: The name of the column whose comment we'll change
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
-SELECT msar.comment_on_column(
+SELECT __msar.comment_on_column(
   __msar.get_relation_name(tab_id),
   col_name,
   comment_
@@ -2277,7 +2282,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.comment_on_column(tab_id oid, col_id integer, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_column(tab_id oid, col_id integer, comment_ text) RETURNS text AS $$/*
 Change the description of a column, returning command executed.
 
 Args:
@@ -2285,7 +2290,7 @@ Args:
   col_id: The ATTNUM of the column whose comment we will change.
   comment_: The new comment.
 */
-SELECT msar.comment_on_column(
+SELECT __msar.comment_on_column(
   __msar.get_relation_name(tab_id),
   msar.get_column_name(tab_id, col_id),
   comment_

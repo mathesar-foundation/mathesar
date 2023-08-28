@@ -54,8 +54,12 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
                 engine, 'get_column_name', table_oid, column_attnum
             ).fetchone()[0]
             raise InvalidTypeError(column_db_name, requested_type)
-        except SyntaxError:
-            raise InvalidTypeOptionError
+        except SyntaxError as e:
+            # TODO this except catch is too broad; syntax errors can be caused
+            # by many things, especially programmer errors during development.
+            # find a way to be more selective about what we call an invalid
+            # type option error.
+            raise InvalidTypeOptionError(e)
     else:
         db_conn.execute_msar_func_with_psycopg2_conn(
             connection, 'alter_columns',
