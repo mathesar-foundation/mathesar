@@ -248,3 +248,5 @@ DRF_ACCESS_POLICY = {
 }
 # List of Template names that contains additional script tags to be added to the base template
 BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
+
+SALT_KEY = SECRET_KEY

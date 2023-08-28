@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-
+from encrypted_fields.fields import EncryptedCharField
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
@@ -111,8 +111,8 @@ _engine_cache = {}
 
 class Database(ReflectionManagerMixin, BaseModel):
     name = models.CharField(max_length=128, unique=True)
-    db_username = models.CharField(max_length=255)
-    db_password = models.CharField(max_length=255)
+    db_username = EncryptedCharField(max_length=255)
+    db_password = EncryptedCharField(max_length=255)
     db_host = models.CharField(max_length=255)
     db_port = models.IntegerField()
     editable = models.BooleanField(default=True)

@@ -1,5 +1,4 @@
 from db import engine
-DEFAULT_DB = 'default'
 
 
 def create_mathesar_engine(db_model):
