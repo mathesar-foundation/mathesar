@@ -33,7 +33,13 @@ def test_db_name(worker_id):
 @pytest.fixture
 def db_dj_model(test_db_name):
     _recreate_db(test_db_name)
-    db = Database.objects.get_or_create(name=test_db_name)[0]
+    db = Database.objects.get_or_create(
+        name=test_db_name,
+        db_username='mathesar',
+        db_password='mathesar',
+        db_host='mathesar_dev_db',
+        db_port=5432
+    )[0]
     reflect_db_objects(get_empty_metadata())
     yield db
     _remove_db(test_db_name)

@@ -121,12 +121,6 @@ class Database(ReflectionManagerMixin, BaseModel):
     objects = DatabaseObjectManager()
     deleted = models.BooleanField(blank=True, default=False)
 
-    # def save(self, *args, **kwargs):
-    #     if self.db_username and self.db_password:
-    #         self.db_username = make_password(self.db_username, salt=SECRET_KEY)
-    #         self.db_password = make_password(self.db_password, salt=SECRET_KEY)
-    #     super().save(*args, **kwargs)
-
     @property
     def _sa_engine(self):
         global _engine_cache
