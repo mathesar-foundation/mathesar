@@ -1,5 +1,3 @@
-from django.conf import settings
-
 from demo.utils import get_is_live_demo_mode
 
 from db import engine
