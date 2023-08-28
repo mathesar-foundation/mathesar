@@ -33,7 +33,7 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
     requested_type = column_alter_def.get("type", {}).get("name")
     if connection is None:
         try:
-            breakpoint()
+            #breakpoint()
             db_conn.execute_msar_func_with_engine(
                 engine, 'alter_columns',
                 table_oid,

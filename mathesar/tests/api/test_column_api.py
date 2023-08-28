@@ -834,18 +834,18 @@ def test_list_columns_with_unknown_types(table_with_unknown_types, client):
 
 
 @pytest.mark.parametrize(
-    'description_to_set',
+    'expected_description',
     [
         None,
         'Some comment',
     ]
 )
-def test_column_description(column_test_table, client, description_to_set):
+def test_column_description_when_patching(column_test_table, client, expected_description):
     table = column_test_table
     column = table.columns.first()
     assert column is not None
-    if description_to_set is not None:
-        data = dict(description=description_to_set)
+    if expected_description is not None:
+        data = dict(description=expected_description)
         response = client.patch(
             f"/api/db/v0/tables/{table.id}/columns/{column.id}/",
             data=data
@@ -858,4 +858,33 @@ def test_column_description(column_test_table, client, description_to_set):
     response_data = response.json()
     assert response.status_code == 200
     actual_description = response_data.get('description')
-    assert actual_description == description_to_set
+    assert actual_description == expected_description
+
+
+@pytest.mark.parametrize(
+    'expected_description',
+    [
+        None,
+        'Some comment',
+    ]
+)
+def test_column_description_when_creating(column_test_table, client, expected_description):
+    table = column_test_table
+    column_id = None
+    data = dict(type='text')
+    if expected_description is not None:
+        data['description'] = expected_description
+    response = client.post(
+        f"/api/db/v0/tables/{table.id}/columns/",
+        data=data
+    )
+    response_data = response.json()
+    assert response.status_code == 201
+    column_id = response_data['id']
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+    )
+    response_data = response.json()
+    assert response.status_code == 200
+    actual_description = response_data.get('description')
+    assert actual_description == expected_description
