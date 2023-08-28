@@ -14,7 +14,6 @@ def get_column_description(oid, attnum, engine):
     with psycopg.connect(conn_str) as conn:
         row = conn.execute(f"SELECT col_description({oid}, {attnum})").fetchone()
         description = row[0]
-    #breakpoint()
     return description
 
 

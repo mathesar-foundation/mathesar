@@ -109,7 +109,6 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             warnings.filterwarnings("error", category=DynamicDefaultWarning)
             try:
                 attnum = column_instance._sa_column.column_attnum
-                #breakpoint()
                 table.alter_column(attnum, serializer.validated_data)
             except UndefinedFunction as e:
                 raise database_api_exceptions.UndefinedFunctionAPIException(
