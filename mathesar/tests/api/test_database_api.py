@@ -3,14 +3,22 @@ from django.core.cache import cache
 from sqlalchemy import text
 
 from db.metadata import get_empty_metadata
-from mathesar.database.base import create_mathesar_engine
 from mathesar.models.users import DatabaseRole
 from mathesar.state.django import reflect_db_objects
 from mathesar.models.base import Table, Schema, Database
+from django.conf import settings
+from db.engine import create_future_engine_with_custom_types
 
 
 def _recreate_db(db_name):
-    root_engine = create_mathesar_engine('default')
+    credentials = settings.DATABASES['default']
+    root_engine = create_future_engine_with_custom_types(
+        credentials['USER'],
+        credentials['PASSWORD'],
+        credentials['HOST'],
+        credentials['NAME'],
+        credentials['PORT']
+    )
     with root_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
         conn.execute(text(f"DROP DATABASE IF EXISTS {db_name} WITH (FORCE);"))
@@ -18,7 +26,15 @@ def _recreate_db(db_name):
 
 
 def _remove_db(db_name):
-    root_engine = create_mathesar_engine('default')
+    print(settings.DATABASES['default'])
+    credentials = settings.DATABASES['default']
+    root_engine = create_future_engine_with_custom_types(
+        credentials['USER'],
+        credentials['PASSWORD'],
+        credentials['HOST'],
+        credentials['NAME'],
+        credentials['PORT']
+    )
     with root_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
         conn.execute(text(f"DROP DATABASE IF EXISTS {db_name} WITH (FORCE);"))
