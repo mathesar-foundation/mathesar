@@ -30,13 +30,25 @@ def missing_keys_json_data_file():
 
 
 @pytest.fixture
+def patents_excel_data_file(patents_excel_filepath):
+    with open(patents_excel_filepath, "rb") as excel_file:
+        data_file = DataFile.objects.create(
+            file=File(excel_file),
+            created_from='file',
+            base_name='patents',
+            type='excel'
+        )
+    return data_file
+
+
+@pytest.fixture
 def misaligned_table_excel_data_file():
     data_filepath = 'mathesar/tests/data/excel_parsing/misaligned_table.xlsx'
     with open(data_filepath, "rb") as excel_file:
         data_file = DataFile.objects.create(
             file=File(excel_file),
             created_from='file',
-            base_name='missaligned_table',
+            base_name='misaligned_table',
             type='excel'
         )
     return data_file
@@ -1894,6 +1906,35 @@ def test_create_table_with_nested_json_objects(client, schema):
             client, table_name, table_name, datafile, schema, expected_data[index]["first_row"],
             expected_data[index]["column_names"], import_target_table=None
         )
+
+
+def test_create_table_using_excel_data_file(client, patents_excel_data_file, schema):
+    table_name = 'patents'
+    expt_name = get_expected_name(table_name, data_file=patents_excel_data_file)
+    first_row = (
+        1,
+        "NASA Kennedy Space Center",
+        "Application",
+        "KSC-12871",
+        "0",
+        "13/033,085",
+        "Polyimide Wire Insulation Repair System",
+        None,
+    )
+    column_names = [
+        "Center",
+        "Status",
+        "Case Number",
+        "Patent Number",
+        "Application SN",
+        "Title",
+        "Patent Expiration Date",
+    ]
+
+    check_create_table_response(
+        client, table_name, expt_name, patents_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
 
 
 def test_create_table_and_normalize_excel_data_file(client, misaligned_table_excel_data_file, schema):
