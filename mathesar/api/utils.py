@@ -9,7 +9,7 @@ from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Table
 from mathesar.models.query import UIQuery
 from mathesar.utils.preview import column_alias_from_preview_template
-from mathesar.api.exceptions.generic_exceptions.base_exceptions import BadDBCrededentials
+from mathesar.api.exceptions.generic_exceptions.base_exceptions import BadDBCredentials
 import psycopg
 
 DATA_KEY = 'data'
@@ -174,7 +174,7 @@ def is_valid_pg_creds(credentials):
         with psycopg.connect(conn_str):
             return True
     except psycopg.errors.OperationalError as e:
-        raise BadDBCrededentials(
+        raise BadDBCredentials(
             exception=e,
             detail=e.args[0],
             status_code=status.HTTP_400_BAD_REQUEST

@@ -17,6 +17,7 @@ from mathesar.api.exceptions.data_import_exceptions import exceptions as data_im
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.exception_mappers import integrity_error_mapper
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import get_default_api_exception
+from mathesar.api.exceptions.validation_exceptions.base_exceptions import MathesarValidationException
 from mathesar.errors import URLDownloadError, URLNotReachable, URLInvalidContentTypeError
 
 exception_map = {
@@ -61,6 +62,8 @@ def mathesar_exception_handler(exc, context):
         response = exception_handler(api_exception, context)
 
     if response is not None:
+        if isinstance(exc, MathesarValidationException):
+            return response
         # Check if conforms to the api spec
         if is_pretty(response.data):
             # Validation exception converts error_codes from integer to string, we need to convert it back into

@@ -42,6 +42,7 @@ class ErrorCodes(Enum):
     BadDBCredentials = 4428
     ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
+    EditingNotAllowed = 4429
     MappingsNotFound = 4417
     MultipleDataFiles = 4400
     MoneyDisplayOptionConflict = 4407

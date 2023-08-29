@@ -118,7 +118,7 @@ class NetworkException(MathesarAPIException):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class BadDBCrededentials(MathesarAPIException):
+class BadDBCredentials(MathesarAPIException):
     error_code = ErrorCodes.BadDBCredentials.value
 
     def __init__(

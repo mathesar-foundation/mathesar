@@ -18,6 +18,7 @@ from db.types.install import uninstall_mathesar_from_database
 from db.install import install_mathesar
 from mathesar.api.serializers.db_types import DBTypeSerializer
 from mathesar.api.utils import is_valid_pg_creds
+from mathesar.api.exceptions.validation_exceptions.exceptions import EditingDBCredentialsNotAllowed
 
 
 class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
@@ -51,8 +52,8 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             if is_valid_pg_creds(credentials):
                 serializer.save()
                 install_mathesar(**credentials, skip_confirm=True)
-        # TODO This will raise an error if db_object is not editable handle it properly.
-        return Response(serializer.data)
+            return Response(serializer.data)
+        raise EditingDBCredentialsNotAllowed()
 
     def destroy(self, request, pk=None):
         db_object = self.get_object()
