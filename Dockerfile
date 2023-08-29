@@ -3,7 +3,7 @@ ARG PYTHON_REQUIREMENTS=requirements.txt
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
 
-ENV PG_MAJOR 13
+ENV PG_MAJOR 15
 
 RUN set -ex; \
     curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - ; \
