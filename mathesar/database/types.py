@@ -10,9 +10,6 @@ from db.types.hintsets import db_types_hinted
 
 
 class UIType(Enum):
-    id = ''
-    display_name = ''
-    db_types = []
 
     BOOLEAN = (
         'boolean',
