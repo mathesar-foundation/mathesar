@@ -26,7 +26,6 @@ def _recreate_db(db_name):
 
 
 def _remove_db(db_name):
-    print(settings.DATABASES['default'])
     credentials = settings.DATABASES['default']
     root_engine = create_future_engine_with_custom_types(
         credentials['USER'],
