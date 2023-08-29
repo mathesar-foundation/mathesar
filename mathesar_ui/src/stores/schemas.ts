@@ -36,6 +36,12 @@ const dbSchemasRequestMap: Map<
   CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
 > = new Map();
 
+function findStoreBySchemaId(id: SchemaEntry['id']) {
+  return [...dbSchemaStoreMap.values()].find((entry) =>
+    get(entry).data.has(id),
+  );
+}
+
 function setDBSchemaStore(
   database: Database['name'],
   schemas: SchemaResponse[],
@@ -84,6 +90,47 @@ function removeSchemaInDBSchemaStore(
   if (store) {
     store.update((value) => {
       value.data?.delete(schemaId);
+      return {
+        ...value,
+        data: new Map(value.data),
+      };
+    });
+  }
+}
+
+export function addCountToSchemaNumTables(
+  database: Database,
+  schema: SchemaEntry,
+  count: number,
+) {
+  const store = dbSchemaStoreMap.get(database.name);
+  if (store) {
+    store.update((value) => {
+      const schemaToModify = value.data.get(schema.id);
+      if (schemaToModify) {
+        schemaToModify.num_tables += count;
+        value.data.set(schema.id, schemaToModify);
+      }
+      return {
+        ...value,
+        data: new Map(value.data),
+      };
+    });
+  }
+}
+
+export function addCountToSchemaNumExplorations(
+  schemaId: SchemaEntry['id'],
+  count: number,
+) {
+  const store = findStoreBySchemaId(schemaId);
+  if (store) {
+    store.update((value) => {
+      const schemaToModify = value.data.get(schemaId);
+      if (schemaToModify) {
+        schemaToModify.num_queries += count;
+        value.data.set(schemaId, schemaToModify);
+      }
       return {
         ...value,
         data: new Map(value.data),

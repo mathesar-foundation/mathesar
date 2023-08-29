@@ -59,6 +59,28 @@ export function getMostImportantRequestStatusState(
   return result;
 }
 
+export function getQueryStringFromParams<T extends Record<string, unknown>>(
+  queryParams: T,
+) {
+  const entries: [string, string][] = Object.entries(queryParams).map(
+    ([k, v]) => {
+      const value = typeof v === 'string' ? v : JSON.stringify(v);
+      return [k, value];
+    },
+  );
+  return new URLSearchParams(entries).toString();
+}
+
+export function addQueryParamsToUrl(
+  url: string,
+  queryParams?: Record<string, unknown>,
+) {
+  if (queryParams) {
+    return `${url}?${getQueryStringFromParams(queryParams)}`;
+  }
+  return url;
+}
+
 export interface UploadCompletionOpts {
   loaded: number;
   total: number;
@@ -150,7 +172,7 @@ export function getAPI<T>(url: string): CancellablePromise<T> {
   return sendXHRRequest('GET', url);
 }
 
-export function postAPI<T>(url: string, data: unknown): CancellablePromise<T> {
+export function postAPI<T>(url: string, data?: unknown): CancellablePromise<T> {
   return sendXHRRequest('POST', url, data);
 }
 
@@ -162,8 +184,11 @@ export function putAPI<T>(url: string, data: unknown): CancellablePromise<T> {
   return sendXHRRequest('PUT', url, data);
 }
 
-export function deleteAPI<T>(url: string): CancellablePromise<T> {
-  return sendXHRRequest('DELETE', url);
+export function deleteAPI<T>(
+  url: string,
+  data?: unknown,
+): CancellablePromise<T> {
+  return sendXHRRequest('DELETE', url, data);
 }
 
 export function uploadFile<T>(

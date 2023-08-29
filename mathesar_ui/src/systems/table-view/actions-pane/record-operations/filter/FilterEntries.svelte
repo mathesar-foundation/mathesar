@@ -4,12 +4,13 @@
   import {
     filterCombinations,
     defaultFilterCombination,
-    getTabularDataStoreFromContext,
     type FilterEntry,
+    type ProcessedColumns,
   } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/types/tables/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 
   const dispatch = createEventDispatcher<{
     remove: number;
@@ -17,27 +18,26 @@
     updateCombination: FilterCombination;
   }>();
 
-  const tabularData = getTabularDataStoreFromContext();
-  $: ({ processedColumns, recordsData } = $tabularData);
-
+  export let processedColumns: ProcessedColumns;
+  export let recordSummaries: RecordSummaryStore;
   export let entries: FilterEntry[];
   export let filterCombination: FilterCombination = defaultFilterCombination;
 </script>
 
 {#each entries as entry, index (entry)}
   <FilterEntryComponent
-    columns={$processedColumns}
+    columns={processedColumns}
     getColumnLabel={(column) =>
-      $processedColumns.get(column.id)?.column.name ?? ''}
+      processedColumns.get(column.id)?.column.name ?? ''}
     getColumnConstraintType={(column) =>
-      getColumnConstraintTypeByColumnId(column.id, $processedColumns)}
+      getColumnConstraintTypeByColumnId(column.id, processedColumns)}
     bind:columnIdentifier={entry.columnId}
     bind:conditionIdentifier={entry.conditionId}
     bind:value={entry.value}
     numberOfFilters={entries.length}
     on:removeFilter={() => dispatch('remove', index)}
     on:update
-    recordSummaryStore={recordsData.recordSummaries}
+    recordSummaryStore={recordSummaries}
   >
     {#if index === 0}
       <InputGroupText>where</InputGroupText>

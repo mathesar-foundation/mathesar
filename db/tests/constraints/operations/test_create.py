@@ -1,108 +1,34 @@
 import pytest
-from sqlalchemy import String, Integer, Column, Table, MetaData
-from sqlalchemy.exc import ProgrammingError
-
-from db.columns.operations.select import get_column_attnum_from_name, get_columns_attnum_from_names
-from db.constraints.base import UniqueConstraint
-from db.constraints.operations.create import create_constraint, create_unique_constraint
-from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
-from db.tests.constraints import utils as test_utils
-from db.metadata import get_empty_metadata
+from unittest.mock import patch
+import db.constraints.operations.create as con_create
+from db.constraints.base import UniqueConstraint, ForeignKeyConstraint
 
 
-def test_create_single_column_unique_constraint(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "orders_1"
-    unique_column_name = 'product_name'
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column('order_id', Integer, primary_key=True),
-        Column(unique_column_name, String),
-    )
-    table.create()
-    test_utils.assert_only_primary_key_present(table)
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    unique_column_attnum = get_column_attnum_from_name(table_oid, unique_column_name, engine, metadata=get_empty_metadata())
-    create_constraint(schema, engine, UniqueConstraint(None, table_oid, [unique_column_attnum]))
-    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    test_utils.assert_primary_key_and_unique_present(altered_table)
-
-    unique_constraint = test_utils.get_first_unique_constraint(altered_table)
-    assert unique_constraint.name == f'{table_name}_{unique_column_name}_key'
-    assert len(list(unique_constraint.columns)) == 1
-    assert list(unique_constraint.columns)[0].name == unique_column_name
-
-
-def test_create_multiple_column_unique_constraint(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "orders_2"
-    unique_column_names = ['product_name', 'customer_name']
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column('order_id', Integer, primary_key=True),
-        Column(unique_column_names[0], String),
-        Column(unique_column_names[1], String),
-    )
-    table.create()
-    test_utils.assert_only_primary_key_present(table)
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    unique_column_attnums = get_columns_attnum_from_names(table_oid, unique_column_names, engine, metadata=get_empty_metadata())
-    create_constraint(schema, engine, UniqueConstraint(None, table_oid, unique_column_attnums))
-    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    test_utils.assert_primary_key_and_unique_present(altered_table)
-
-    unique_constraint = test_utils.get_first_unique_constraint(altered_table)
-    unique_column_name_1 = unique_column_names[0]
-    assert unique_constraint.name == f'{table_name}_{unique_column_name_1}_key'
-    assert len(list(unique_constraint.columns)) == 2
-    assert set([column.name for column in unique_constraint.columns]) == set(unique_column_names)
-
-
-def test_create_unique_constraint_with_custom_name(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "orders_4"
-    unique_column_name = 'product_name'
-    constraint_name = 'unique_product_name'
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column('order_id', Integer, primary_key=True),
-        Column(unique_column_name, String),
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    unique_column_attnum = get_column_attnum_from_name(table_oid, unique_column_name, engine, metadata=get_empty_metadata())
-    create_constraint(schema, engine, UniqueConstraint(constraint_name, table_oid, [unique_column_attnum]))
-
-    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    test_utils.assert_primary_key_and_unique_present(altered_table)
-
-    unique_constraint = test_utils.get_first_unique_constraint(altered_table)
-    assert unique_constraint.name == constraint_name
-    assert len(list(unique_constraint.columns)) == 1
-    assert list(unique_constraint.columns)[0].name == unique_column_name
-
-
-def test_create_unique_constraint_with_duplicate_name(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "orders_4"
-    unique_column_names = ['product_name', 'customer_name']
-    constraint_name = 'unique_product_name'
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column('order_id', Integer, primary_key=True),
-        Column(unique_column_names[0], String),
-        Column(unique_column_names[1], String),
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    unique_column_attnum = get_column_attnum_from_name(table_oid, unique_column_names[0], engine, metadata=get_empty_metadata())
-    create_constraint(schema, engine, UniqueConstraint(constraint_name, table_oid, [unique_column_attnum]))
-
-    altered_table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    test_utils.assert_primary_key_and_unique_present(altered_table)
-    with pytest.raises(ProgrammingError):
-        create_unique_constraint(table.name, schema, engine, [unique_column_names[1]], constraint_name)
+@pytest.mark.parametrize(
+    "constraint_obj", [
+        (UniqueConstraint(
+            name='test_uq_con',
+            table_oid=12345,
+            columns_attnum=[80085, 53301]
+        )),
+        (ForeignKeyConstraint(
+            name='test_fk_con',
+            table_oid=12345,
+            columns_attnum=[80085],
+            referent_table_oid=54321,
+            referent_columns_attnum=[53301],
+            options={'match_type': 'f', 'on_update': 'r', 'on_delete': 'c'}
+        ))]
+)
+def test_add_constraint_db(engine_with_schema, constraint_obj):
+    engine = engine_with_schema
+    with patch.object(con_create, 'execute_msar_func_with_engine') as mock_exec:
+        con_create.add_constraint(
+            engine=engine,
+            constraint_obj=constraint_obj
+        )
+    call_args = mock_exec.call_args_list[0][0]
+    assert call_args[0] == engine
+    assert call_args[1] == "add_constraints"
+    assert call_args[2] == constraint_obj.table_oid
+    assert call_args[3] == constraint_obj.get_constraint_def_json()

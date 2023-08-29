@@ -1,9 +1,11 @@
+import * as Papa from 'papaparse';
 import { get } from 'svelte/store';
 
 import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
 import SheetSelection, {
   isCellSelected,
 } from '@mathesar/components/sheet/SheetSelection';
+import type { AbstractTypeCategoryIdentifier } from '@mathesar/stores/abstract-types/types';
 import type { ClipboardHandler } from '@mathesar/stores/clipboard';
 import type {
   ProcessedColumn,
@@ -19,36 +21,33 @@ const MIME_PLAIN_TEXT = 'text/plain';
 const MIME_MATHESAR_SHEET_CLIPBOARD =
   'application/x-vnd.mathesar-sheet-clipboard';
 
-type CopyingStrategy = 'raw' | 'formatted';
-
 /** Keys are row ids, values are records */
 type IndexedRecords = Map<number, Record<string, unknown>>;
 
-function getCellText<
+function getRawCellValue<
   Column extends ProcessedQueryOutputColumn | ProcessedColumn,
 >(
   indexedRecords: IndexedRecords,
-  columnsMap: ReadableMapLike<Column['id'], Column>,
   rowId: number,
   columnId: Column['id'],
-  strategy: CopyingStrategy,
+): unknown {
+  return indexedRecords.get(rowId)?.[String(columnId)];
+}
+
+function getFormattedCellValue<
+  Column extends ProcessedQueryOutputColumn | ProcessedColumn,
+>(
+  rawCellValue: unknown,
+  columnsMap: ReadableMapLike<Column['id'], Column>,
+  columnId: Column['id'],
   recordSummaries: RecordSummariesForSheet,
 ): string {
-  const record = indexedRecords.get(rowId);
-  if (!record) {
-    return '';
-  }
-  const rawCellValue: unknown = record[String(columnId)];
   if (rawCellValue === undefined || rawCellValue === null) {
     return '';
   }
-  const stringifiedRawCellValue = String(rawCellValue);
-  if (strategy === 'raw') {
-    return stringifiedRawCellValue;
-  }
   const processedColumn = columnsMap.get(columnId);
   if (!processedColumn) {
-    return stringifiedRawCellValue;
+    return String(rawCellValue);
   }
   const formattedValue = processedColumn.formatCellValue(
     rawCellValue,
@@ -60,8 +59,21 @@ function getCellText<
   return formattedValue;
 }
 
+function serializeTsv(data: string[][]): string {
+  return Papa.unparse(data, {
+    delimiter: '\t',
+    escapeFormulae: true,
+  });
+}
+
 export interface SheetClipboardStats {
   cellCount: number;
+}
+
+export interface StructuredCell {
+  type: AbstractTypeCategoryIdentifier;
+  raw: unknown;
+  formatted: string;
 }
 
 interface SheetClipboardHandlerDeps<
@@ -99,45 +111,63 @@ export class SheetClipboardHandler<
     return this.deps.selection.getSelectedUniqueRowsId(cells);
   }
 
-  private getCopyContent(): string {
+  private getCopyContent(): { structured: string; tsv: string } {
     const cells = get(this.deps.selection.selectedCells);
-    let result = '';
     const indexedRecords = new Map(
       this.deps.getRows().map((r) => [r.rowIndex, r.record]),
     );
-    const processedColumns = this.deps.getColumnsMap();
+    const columns = this.deps.getColumnsMap();
     const recordSummaries = this.deps.getRecordSummaries();
+
+    const tsvRows: string[][] = [];
+    const structuredRows: StructuredCell[][] = [];
     for (const rowId of this.getRowIds(cells)) {
-      let isFirstColumn = true;
+      const tsvRow: string[] = [];
+      const structuredRow: StructuredCell[] = [];
       for (const columnId of this.getColumnIds(cells)) {
-        if (!isFirstColumn) {
-          result += '\t';
+        const column = columns.get(columnId);
+        if (!isCellSelected(cells, { rowIndex: rowId }, { id: columnId })) {
+          // Ignore cells that are not selected.
+          continue;
         }
-        if (isCellSelected(cells, { rowIndex: rowId }, { id: columnId })) {
-          result += getCellText(
-            indexedRecords,
-            processedColumns,
-            rowId,
-            columnId,
-            'formatted',
-            recordSummaries,
-          );
+        if (!column) {
+          // Ignore cells with no associated column. This should never happen.
+          continue;
         }
-        isFirstColumn = false;
+        const rawCellValue = getRawCellValue(indexedRecords, rowId, columnId);
+        const formattedCellValue = getFormattedCellValue(
+          rawCellValue,
+          columns,
+          columnId,
+          recordSummaries,
+        );
+        const type = column.abstractType.identifier;
+        structuredRow.push({
+          type,
+          raw: rawCellValue,
+          formatted: formattedCellValue,
+        });
+        tsvRow.push(formattedCellValue);
       }
-      result += '\n';
+      tsvRows.push(tsvRow);
+      structuredRows.push(structuredRow);
     }
     this.deps.toast.info(`Copied ${labeledCount(cells.size, 'cells')}.`);
-    return result;
+    return {
+      structured: JSON.stringify(structuredRows),
+      tsv: serializeTsv(tsvRows),
+    };
   }
 
   handleCopy(event: ClipboardEvent): void {
     if (event.clipboardData == null) {
       return;
     }
-    const text = this.getCopyContent();
-    event.clipboardData.setData(MIME_PLAIN_TEXT, text);
-    // TODO put Mathesar-specific representation of raw data in JSON below
-    event.clipboardData.setData(MIME_MATHESAR_SHEET_CLIPBOARD, '');
+    const content = this.getCopyContent();
+    event.clipboardData.setData(MIME_PLAIN_TEXT, content.tsv);
+    event.clipboardData.setData(
+      MIME_MATHESAR_SHEET_CLIPBOARD,
+      content.structured,
+    );
   }
 }

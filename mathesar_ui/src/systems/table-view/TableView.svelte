@@ -15,12 +15,14 @@
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { orderProcessedColumns } from '@mathesar/utils/tables';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
   import WithTableInspector from './table-inspector/WithTableInspector.svelte';
 
-  type Context = 'page' | 'widget';
+  type Context = 'page' | 'widget' | 'shared-consumer-page';
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
@@ -33,9 +35,10 @@
   );
 
   export let context: Context = 'page';
+  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
 
-  $: usesVirtualList = context === 'page';
-  $: allowsDdlOperations = context === 'page' && canExecuteDDL;
+  $: usesVirtualList = context !== 'widget';
+  $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
@@ -52,6 +55,8 @@
   $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
+  $: ({ settings } = table);
+  $: ({ column_order: columnOrder } = settings);
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open
@@ -60,9 +65,13 @@
    */
   $: supportsTableInspector = context === 'page';
   $: sheetColumns = (() => {
+    const orderedProcessedColumns = orderProcessedColumns(
+      $processedColumns,
+      table,
+    );
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...$processedColumns.values(),
+      ...orderedProcessedColumns.values(),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
@@ -84,7 +93,7 @@
     // We only activate the first cell on the page, not in the widget. Doing so
     // on the widget causes the cell to focus and the page to scroll down to
     // bring that element into view.
-    if (_context === 'page' && !_isLoading) {
+    if (_context !== 'widget' && !_isLoading) {
       _selection.selectAndActivateFirstCellIfExists();
     }
   }
@@ -119,7 +128,7 @@
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
         >
-          <Header {hasNewColumnButton} />
+          <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
         </Sheet>
       {/if}

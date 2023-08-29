@@ -12,6 +12,7 @@
   import { iconUrl, iconPaste } from '@mathesar/icons';
   import { createTable } from '@mathesar/stores/tables';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { LL } from '@mathesar/i18n/i18n-svelte';
   import UploadViaFile from './UploadViaFile.svelte';
   import UploadViaUrl from './UploadViaUrl.svelte';
   import UploadViaClipboard from './UploadViaClipboard.svelte';
@@ -20,14 +21,18 @@
   export let schema: SchemaEntry;
 
   const uploadMethods = [
-    { label: 'Upload a file', component: UploadViaFile, icon: iconUploadFile },
     {
-      label: 'Provide a URL to the file',
+      label: $LL.importUploadPage.uploadAFile(),
+      component: UploadViaFile,
+      icon: iconUploadFile,
+    },
+    {
+      label: $LL.importUploadPage.provideUrlToFile(),
       component: UploadViaUrl,
       icon: iconUrl,
     },
     {
-      label: 'Copy and Paste Text',
+      label: $LL.importUploadPage.copyAndPasteText(),
       component: UploadViaClipboard,
       icon: iconPaste,
     },
@@ -58,7 +63,7 @@
     const { dataFileId } = uploadInfo;
     try {
       tableCreationProgress = { state: 'processing' };
-      const table = await createTable(schema.id, {
+      const table = await createTable(database, schema, {
         dataFiles: [dataFileId],
       });
       router.goto(getImportPreviewPageUrl(database.name, schema.id, table.id));
@@ -66,7 +71,7 @@
       const message =
         err instanceof Error
           ? err.message
-          : 'Unable to create a table from the uploaded data';
+          : $LL.importUploadPage.unableToCreateTableFromUpload();
       tableCreationProgress = {
         state: 'failure',
         errors: [message],
@@ -75,7 +80,9 @@
   }
 </script>
 
-<svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
+<svelte:head>
+  <title>{makeSimplePageTitle($LL.general.import())}</title>
+</svelte:head>
 
 <LayoutWithHeader
   restrictWidth
@@ -85,15 +92,13 @@
     '--layout-background-color': 'var(--sand-200)',
   }}
 >
-  <h1>Create a table by importing your data</h1>
+  <h1>{$LL.importUploadPage.createATableByImporting()}</h1>
   <div class="import-file-view">
     {#if isLoading || isError}
       <div class="uploading-info">
-        <span>Uploading Data</span>
+        <span>{$LL.importUploadPage.uploadingData()}</span>
         <WarningBox>
-          Large data sets can sometimes take several minutes to process. Please
-          do not leave this page or close the browser tab while import is in
-          progress.
+          {$LL.importUploadPage.largeDataTakesTimeWarning()}
         </WarningBox>
       </div>
     {:else}
@@ -102,7 +107,7 @@
           bind:value={uploadMethod}
           options={uploadMethods}
           isInline
-          label="How would you like to import your data?"
+          label={$LL.importUploadPage.howWouldYouLikeToImport()}
           getRadioLabel={(opt) => ({
             component: NameWithIcon,
             props: {
@@ -125,7 +130,7 @@
         on:error={(e) => {
           uploadStatus = {
             state: 'failure',
-            errors: [e.detail ?? 'Upload failed'],
+            errors: [e.detail ?? $LL.importUploadPage.failedToImport()],
           };
         }}
         showCancelButton={isError}
@@ -139,7 +144,7 @@
           <div class="preview-status">
             <StatusIndicator
               state="processing"
-              messages={{ processing: 'Preparing Preview' }}
+              messages={{ processing: $LL.importUploadPage.preparingPreview() }}
             />
           </div>
         {/if}
@@ -147,7 +152,7 @@
         {#if errorMessage}
           <div class="errors">
             <ErrorBox>
-              <span class="title">Failed to import data</span>
+              <span class="title">{$LL.importUploadPage.failedToImport()}</span>
               <span>{errorMessage}</span>
             </ErrorBox>
           </div>

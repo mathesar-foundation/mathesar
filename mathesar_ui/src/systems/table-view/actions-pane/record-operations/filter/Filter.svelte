@@ -1,6 +1,6 @@
 <script lang="ts">
   import { takeLast } from 'iter-tools';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { writable, type Writable } from 'svelte/store';
 
   import { Button, Icon } from '@mathesar-component-library';
@@ -10,17 +10,19 @@
   import { FILTER_INPUT_CLASS } from '@mathesar/components/filter-entry/utils';
   import { iconAddNew } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
-  import {
-    getTabularDataStoreFromContext,
-    type Filtering,
+  import type {
+    Filtering,
+    ProcessedColumns,
   } from '@mathesar/stores/table-data';
+  import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import { deepCloneFiltering } from '../utils';
   import FilterEntries from './FilterEntries.svelte';
 
-  const tabularData = getTabularDataStoreFromContext();
   const imperativeFilterController = getImperativeFilterControllerFromContext();
 
   export let filtering: Writable<Filtering>;
+  export let processedColumns: ProcessedColumns;
+  export let recordSummaries: RecordSummaryStore;
 
   // This component is not reactive towards $filtering
   // to avoid having to sync states and handle unnecessary set calls,
@@ -31,12 +33,11 @@
 
   let element: HTMLElement;
 
-  $: ({ processedColumns } = $tabularData);
   $: filterCount = $internalFiltering.entries.length;
 
   function checkAndSetExternalFiltering() {
     const validFilters = $internalFiltering.entries.filter((filter) => {
-      const column = $processedColumns.get(filter.columnId);
+      const column = processedColumns.get(filter.columnId);
       const condition = column?.allowedFiltersMap.get(filter.conditionId);
       if (condition) {
         return validateFilterEntry(condition, filter.value);
@@ -56,8 +57,8 @@
   function addFilter(columnId?: number) {
     const column =
       columnId === undefined
-        ? [...$processedColumns.values()][0]
-        : $processedColumns.get(columnId);
+        ? [...processedColumns.values()][0]
+        : processedColumns.get(columnId);
     if (!column) {
       return;
     }
@@ -117,6 +118,8 @@
   <div class="content">
     {#if filterCount}
       <FilterEntries
+        {processedColumns}
+        {recordSummaries}
         bind:entries={$internalFiltering.entries}
         bind:filterCombination={$internalFiltering.combination}
         on:remove={(e) => removeFilter(e.detail)}
@@ -127,9 +130,16 @@
       <span class="muted">No filters have been added</span>
     {/if}
   </div>
-  {#if $processedColumns.size}
+  {#if processedColumns.size}
     <div class="footer">
-      <Button appearance="secondary" on:click={() => addFilter()}>
+      <Button
+        appearance="secondary"
+        on:click={async () => {
+          addFilter();
+          await tick();
+          activateLastFilterInput();
+        }}
+      >
         <Icon {...iconAddNew} />
         <span>Add New Filter</span>
       </Button>

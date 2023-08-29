@@ -15,12 +15,11 @@ Mathesar is built using:
 
 > **Note:** If you are developing on Windows, first install [WSL](https://learn.microsoft.com/en-us/windows/wsl/install). Then do all of your development work from within the WSL shell, including running commands like `git clone` and `docker compose`.
 
-1. Ensure ensure that you have [Docker](https://docs.docker.com/get-docker/) installed.
+1. Ensure that you have [Docker](https://docs.docker.com/get-docker/) installed.
 
 1. Clone the repository and `cd` into it.
 
-1. Copy the `.env.example` file to `.env` like so:
-
+1. Copy the .env file by running the following command in the repository's root directory:
     ```
     cp .env.example .env
     ```
@@ -65,19 +64,25 @@ See our [API guide](./mathesar/api/README.md) for more information on API usage 
 
 We use [pytest](https://docs.pytest.org) for our backend tests.
 
-- Run all backend tests:
+- Run all python backend tests:
 
     ```
     docker exec mathesar_service_dev pytest mathesar/ db/
     ```
 
-- Run a specific test, by name:
+- Run a specific python test, by name:
 
     ```
     docker exec mathesar_service_dev pytest -k "test_name"
     ```
+    
+- See the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html), or run pytest with the `--help` flag to learn about more options for running tests.
 
-- See the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html), or run pytest with the `--help` flag to lear about more options for running tests.
+- Run all SQL tests:
+
+    ```
+    docker exec mathesar_dev_db /bin/bash sql/run_tests.sh
+    ```
 
 ## Front end development
 
@@ -165,7 +170,7 @@ Hot module replacement for front end code does not work when the project is pres
 
 If you you see the following error after attempting to start Docker, then the port used by Postgres is already in use on your host machine.
 
-> ERROR: for db Cannot start server db: driver failed programming external connectivity on endpoint mathesar_db (70c521f468cf2bd54014f089f0051ba28e2514667): Error starting userland proxy: listen tcp4 0.0.0.0:5432: bind: address already in use.
+> ERROR: for db Cannot start server db: driver failed programming external connectivity on endpoint mathesar_dev_db (70c521f468cf2bd54014f089f0051ba28e2514667): Error starting userland proxy: listen tcp4 0.0.0.0:5432: bind: address already in use.
 
 1. First stop Postgres on your host machine.
 

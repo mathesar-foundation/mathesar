@@ -20,6 +20,16 @@
  *
  * This store would be a good place to start since the usage
  * is limited compared to the other stores.
+ *
+ * Note: Some methods in this file directly make use of currentSchemaId,
+ * and they need to be refactored to get schemaId as an argument.
+ *
+ * Reason behing using currentSchemaId:
+ * Initially, queries were not designed on the backend to be part of schemas,
+ * i.e. queries were on the same hierarchial level as schemas. The frontend
+ * followed the same structure on this store. The UX however, expects queries
+ * to be placed within schemas. This conflict was handled on this store leading
+ * to having us use the currentSchemaId store directly.
  */
 
 import { derived, writable, get } from 'svelte/store';
@@ -29,6 +39,7 @@ import {
   getAPI,
   postAPI,
   putAPI,
+  addQueryParamsToUrl,
 } from '@mathesar/api/utils/requestUtils';
 import type {
   RequestStatus,
@@ -42,16 +53,19 @@ import type {
   QueryGetResponse,
   QueryRunRequest,
   QueryRunResponse,
+  QueryResultsResponse,
 } from '@mathesar/api/types/queries';
 import { CancellablePromise } from '@mathesar-component-library';
+import { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
 
-import { currentSchemaId } from './schemas';
+import { currentSchemaId, addCountToSchemaNumExplorations } from './schemas';
 
 const commonData = preloadCommonData();
 
 export type UnsavedQueryInstance = Partial<QueryInstance>;
 
 export interface QueriesStoreSubstance {
+  schemaId: SchemaEntry['id'];
   requestStatus: RequestStatus;
   data: Map<QueryInstance['id'], QueryInstance>;
 }
@@ -83,6 +97,7 @@ function setSchemaQueriesStore(
   }
 
   const storeValue: QueriesStoreSubstance = {
+    schemaId,
     requestStatus: { state: 'success' },
     data: queries,
   };
@@ -97,7 +112,7 @@ function setSchemaQueriesStore(
   return store;
 }
 
-function findSchemaStoreForTable(id: QueryInstance['id']) {
+function findSchemaStoreForQuery(id: QueryInstance['id']) {
   return [...schemasCacheManager.cache.values()].find((entry) =>
     get(entry).data.has(id),
   );
@@ -153,6 +168,7 @@ export function getQueriesStoreForSchema(
   let store = schemasCacheManager.get(schemaId);
   if (!store) {
     store = writable({
+      schemaId,
       requestStatus: { state: 'processing' },
       data: new Map(),
     });
@@ -169,9 +185,8 @@ export function getQueriesStoreForSchema(
   return store;
 }
 
-export const queries: Readable<QueriesStoreSubstance> = derived(
-  currentSchemaId,
-  ($currentSchemaId, set) => {
+export const queries: Readable<Omit<QueriesStoreSubstance, 'schemaId'>> =
+  derived(currentSchemaId, ($currentSchemaId, set) => {
     let unsubscribe: Unsubscriber;
 
     if (!$currentSchemaId) {
@@ -189,16 +204,16 @@ export const queries: Readable<QueriesStoreSubstance> = derived(
     return () => {
       unsubscribe?.();
     };
-  },
-);
+  });
 
 export function createQuery(
   newQuery: UnsavedQueryInstance,
 ): CancellablePromise<QueryGetResponse> {
   const promise = postAPI<QueryGetResponse>('/api/db/v0/queries/', newQuery);
   void promise.then((instance) => {
+    addCountToSchemaNumExplorations(instance.schema, 1);
     void refetchQueriesForSchema(instance.schema);
-    return undefined;
+    return instance;
   });
   return promise;
 }
@@ -265,14 +280,33 @@ export function runQuery(
   return postAPI('/api/db/v0/queries/run/', request);
 }
 
+export function fetchQueryResults(
+  queryId: number,
+  params?: {
+    limit: number;
+    offset: number;
+    [SHARED_LINK_UUID_QUERY_PARAM]?: string;
+  },
+): CancellablePromise<QueryResultsResponse> {
+  const url = addQueryParamsToUrl(
+    `/api/db/v0/queries/${queryId}/results/`,
+    params,
+  );
+  return getAPI(url);
+}
+
 export function deleteQuery(queryId: number): CancellablePromise<void> {
   const promise = deleteAPI<void>(`/api/db/v0/queries/${queryId}/`);
 
   void promise.then(() => {
-    findSchemaStoreForTable(queryId)?.update((storeData) => {
-      storeData.data.delete(queryId);
-      return { ...storeData, data: new Map(storeData.data) };
-    });
+    const store = findSchemaStoreForQuery(queryId);
+    if (store) {
+      store.update((storeData) => {
+        storeData.data.delete(queryId);
+        return { ...storeData, data: new Map(storeData.data) };
+      });
+      addCountToSchemaNumExplorations(get(store).schemaId, -1);
+    }
     return undefined;
   });
   return promise;
