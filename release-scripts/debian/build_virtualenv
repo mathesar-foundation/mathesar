@@ -36,37 +36,6 @@ PACKAGE_BUILD_DIR="$(pwd)/debian/mathesar"
 VIRTUALENV_DIR="${PACKAGE_BUILD_DIR}${DH_VIRTUALENV_INSTALL_ROOT}/mathesar"
 TARGET_PYTHON="${VIRTUALENV_DIR}/bin/python"
 
-
-# build the config file
-"${TARGET_PYTHON}" "${VIRTUALENV_DIR}/bin/generate_config" \
-        --config-dir="/etc/mathesar" \
-        --data-dir="/var/lib/mathesar" |
-    perl -pe '
-# tweak the paths to the tls certs and signing keys
-/^tls_.*_path:/ and s/SERVERNAME/homeserver/;
-/^signing_key_path:/ and s/SERVERNAME/homeserver/;
-
-# tweak the pid file location
-/^pid_file:/ and s#:.*#: "/var/run/mathesar.pid"#;
-
-# tweak the path to the log config
-/^log_config:/ and s/SERVERNAME\.log\.config/log.yaml/;
-
-# tweak the path to the media store
-/^media_store_path:/ and s#/media_store#/media#;
-
-# remove the server_name setting, which is set in a separate file
-/^server_name:/ and $_ = "#\n# This is set in /etc/mathesar/conf.d/server_name.yaml for Debian installations.\n# $_";
-
-# remove the report_stats setting, which is set in a separate file
-/^# report_stats:/ and $_ = "";
-
-' > "${PACKAGE_BUILD_DIR}/etc/mathesar/homeserver.yaml"
-
-# build the log config file
-"${TARGET_PYTHON}" "${VIRTUALENV_DIR}/bin/generate_log_config" \
-        --output-file="${PACKAGE_BUILD_DIR}/etc/mathesar/log.yaml"
-
 # add a dependency on the right version of python to substvars.
 PYPKG=$(basename "$SNAKE")
 echo "mathesar:pydepends=$PYPKG" >> debian/mathesar.substvars
