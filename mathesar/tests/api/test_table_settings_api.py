@@ -121,7 +121,6 @@ def test_update_table_settings(client, column_test_table):
 
 
 def test_update_table_settings_string_in_column_order(client, column_test_table):
-    _ = models_base.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
     column_order = ["4", "5", "6"]
     column_order_as_ints = [4, 5, 6]
     data = {
