@@ -59,8 +59,6 @@
   }
 </script>
 
-<svelte:window />
-
 {#key id}
   {#if usesVirtualList}
     <SheetVirtualRows

@@ -1,23 +1,24 @@
 <script lang="ts">
+  import { first } from 'iter-tools';
+
+  import type { TableEntry } from '@mathesar/api/types/tables';
+  import { ContextMenu } from '@mathesar/component-library';
+  import {
+    SheetCell,
+    SheetCellResizer,
+    SheetHeader,
+  } from '@mathesar/components/sheet';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import {
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
   } from '@mathesar/stores/table-data';
-  import {
-    SheetHeader,
-    SheetCell,
-    SheetCellResizer,
-    isColumnSelected,
-  } from '@mathesar/components/sheet';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { saveColumnOrder } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { ContextMenu } from '@mathesar/component-library';
-  import HeaderCell from './header-cell/HeaderCell.svelte';
-  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
   import { Draggable, Droppable } from './drag-and-drop';
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
+  import HeaderCell from './header-cell/HeaderCell.svelte';
+  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -27,17 +28,7 @@
 
   $: columnOrder = columnOrder ?? [];
   $: columnOrderString = columnOrder.map(String);
-
-  $: ({ legacySelection: selection, processedColumns } = $tabularData);
-  $: ({
-    selectedCells,
-    columnsSelectedWhenTheTableIsEmpty,
-    selectionInProgress,
-  } = selection);
-  $: selectedColumnIds = selection.getSelectedUniqueColumnsId(
-    $selectedCells,
-    $columnsSelectedWhenTheTableIsEmpty,
-  );
+  $: ({ selection, processedColumns } = $tabularData);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
   let selectedColumnIdsOrdered: string[] = [];
@@ -55,7 +46,7 @@
     columnOrderString = columnOrderString;
     // Remove selected column IDs and keep their order
     for (const id of columnOrderString) {
-      if (selectedColumnIds.map(String).includes(id)) {
+      if ($selection.columnIds.has(id)) {
         selectedColumnIdsOrdered.push(id);
         if (!locationOfFirstDraggedColumn) {
           locationOfFirstDraggedColumn = columnOrderString.indexOf(id);
@@ -70,9 +61,8 @@
     // Early exit if a column is dropped in the same place.
     // Should only be done for single column if non-continuous selection is allowed.
     if (
-      selectedColumnIds.length > 0 &&
       columnDroppedOn &&
-      selectedColumnIds[0] === columnDroppedOn.id
+      first($selection.columnIds) === String(columnDroppedOn.id)
     ) {
       // Reset drag information
       locationOfFirstDraggedColumn = undefined;
@@ -122,6 +112,7 @@
   </SheetCell>
 
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
+    {@const isSelected = $selection.columnIds.has(String(columnId))}
     <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
       <div>
         <div {...htmlAttributes} {style}>
@@ -129,32 +120,27 @@
             on:dragstart={() => dragColumn()}
             column={processedColumn}
             {selection}
-            selectionInProgress={$selectionInProgress}
           >
             <Droppable
               on:drop={() => dropColumn(processedColumn)}
               on:dragover={(e) => e.preventDefault()}
               {locationOfFirstDraggedColumn}
               columnLocation={columnOrderString.indexOf(columnId.toString())}
-              isSelected={isColumnSelected(
-                $selectedCells,
-                $columnsSelectedWhenTheTableIsEmpty,
-                processedColumn,
-              )}
+              {isSelected}
             >
               <HeaderCell
                 {processedColumn}
-                isSelected={isColumnSelected(
-                  $selectedCells,
-                  $columnsSelectedWhenTheTableIsEmpty,
-                  processedColumn,
-                )}
-                on:mousedown={() =>
-                  selection.onColumnSelectionStart(processedColumn)}
-                on:mouseenter={() =>
-                  selection.onMouseEnterColumnHeaderWhileSelection(
-                    processedColumn,
-                  )}
+                {isSelected}
+                on:mousedown={() => {
+                  // // TODO_3037
+                  // selection.onColumnSelectionStart(processedColumn)
+                }}
+                on:mouseenter={() => {
+                  // // TODO_3037
+                  // selection.onMouseEnterColumnHeaderWhileSelection(
+                  //   processedColumn,
+                  // )
+                }}
               />
             </Droppable>
           </Draggable>

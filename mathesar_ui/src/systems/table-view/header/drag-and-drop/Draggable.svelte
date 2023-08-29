@@ -1,17 +1,19 @@
 <script lang="ts">
-  import type {
-    ProcessedColumn,
-    TabularDataSelection,
-  } from '@mathesar/stores/table-data';
+  import type { Writable } from 'svelte/store';
 
-  export let selection: TabularDataSelection;
-  export let selectionInProgress = true;
+  import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
+
+  export let selection: Writable<SheetSelection>;
   export let column: ProcessedColumn;
 
-  $: draggable =
-    !selectionInProgress &&
-    selection &&
-    selection.isCompleteColumnSelected(column);
+  // // TODO_3037: Verify that we're not losing functionality here by removing
+  // `selectionInProgress` logic
+  //
+  // $: draggable = !selectionInProgress && selection &&
+  //   selection.isCompleteColumnSelected(column);
+
+  $: draggable = $selection.fullySelectedColumnIds.has(String(column.id));
 </script>
 
 <div

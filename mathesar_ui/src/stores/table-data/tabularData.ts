@@ -75,6 +75,11 @@ export class TabularData {
 
   isLoading: Readable<boolean>;
 
+  /**
+   * TODO_3037
+   *
+   * @deprecated
+   */
   legacySelection: TabularDataSelection;
 
   selection: Writable<SheetSelection>;
@@ -147,7 +152,7 @@ export class TabularData {
       },
     );
 
-    // TODO add id of placeholder row to selection
+    // TODO_3037 add id of placeholder row to selection
     this.selection = writable(new SheetSelection());
 
     this.cleanupFunctions.push(

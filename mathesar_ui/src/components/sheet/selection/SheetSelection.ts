@@ -93,6 +93,38 @@ function emptyBasis(): Basis {
   };
 }
 
+function getFullySelectedColumnIds(
+  plane: Plane,
+  basis: Basis,
+): ImmutableSet<string> {
+  if (basis.type === 'dataCells') {
+    // The logic here is: if all rows are selected, then every selected column
+    // FULLY selected. Otherwise, no columns are fully selected.
+    //
+    // THIS LOGIC ASSUMES THAT ALL SELECTIONS ARE RECTANGULAR. The application
+    // enforces this assumption at various levels, but NOT within the Basis data
+    // structure. That is, it's theoretically possible to have basis data which
+    // represents a non-rectangular selection, but such data should be
+    // considered a bug. The logic within this function leverages this
+    // assumption for the purpose of improving performance. If we know that the
+    // selection is rectangular, then we can avoid iterating over all cells in
+    // each selected column to see if the column is fully selected.
+    return basis.rowIds.size < plane.rowIds.length
+      ? new ImmutableSet()
+      : basis.columnIds;
+  }
+  if (basis.type === 'emptyColumns') {
+    return basis.columnIds;
+  }
+  if (basis.type === 'placeholderCell') {
+    return new ImmutableSet();
+  }
+  if (basis.type === 'empty') {
+    return new ImmutableSet();
+  }
+  return assertExhaustive(basis.type);
+}
+
 /**
  * This is an immutable data structure which fully represents the state of a
  * selection selection of cells along with the Plane in which they were
@@ -107,26 +139,36 @@ export default class SheetSelection {
 
   private readonly basis: Basis;
 
+  /** Ids of columns in which _all_ cells are selected */
+  fullySelectedColumnIds: ImmutableSet<string>;
+
   constructor(plane: Plane = new Plane(), basis: Basis = emptyBasis()) {
     this.plane = plane;
     this.basis = basis;
     // TODO validate that basis is valid within plane. For example, remove
     // selected cells from the basis that do not occur within the plane.
+
+    this.fullySelectedColumnIds = getFullySelectedColumnIds(
+      this.plane,
+      this.basis,
+    );
   }
 
-  get activeCellId() {
+  get activeCellId(): string | undefined {
     return this.basis.activeCellId;
   }
 
-  get cellIds() {
+  get cellIds(): ImmutableSet<string> {
     return this.basis.cellIds;
   }
 
-  get rowIds() {
+  /** Ids of rows which are at least _partially_ selected */
+  get rowIds(): ImmutableSet<string> {
     return this.basis.rowIds;
   }
 
-  get columnIds() {
+  /** Ids of columns which are at least _partially_ selected */
+  get columnIds(): ImmutableSet<string> {
     return this.basis.columnIds;
   }
 
