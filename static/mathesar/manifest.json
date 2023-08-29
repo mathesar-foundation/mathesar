@@ -1,0 +1,60 @@
+{
+  "src/main-legacy.ts": {
+    "file": "assets/main-legacy.4f55bd7f.js",
+    "src": "src/main-legacy.ts",
+    "isEntry": true,
+    "dynamicImports": [
+      "src/i18n/ja/index-legacy.ts",
+      "src/i18n/en/index-legacy.ts"
+    ]
+  },
+  "src/i18n/ja/index-legacy.ts": {
+    "file": "assets/index-legacy.e3ac4bf2.js",
+    "src": "src/i18n/ja/index-legacy.ts",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/i18n/en/index-legacy.ts",
+      "src/main-legacy.ts"
+    ]
+  },
+  "src/i18n/en/index-legacy.ts": {
+    "file": "assets/index-legacy.817da01b.js",
+    "src": "src/i18n/en/index-legacy.ts",
+    "isDynamicEntry": true
+  },
+  "vite/legacy-polyfills-legacy": {
+    "file": "assets/polyfills-legacy.eb2c465d.js",
+    "src": "vite/legacy-polyfills-legacy",
+    "isEntry": true
+  },
+  "src/main.ts": {
+    "file": "assets/main.595128f8.js",
+    "src": "src/main.ts",
+    "isEntry": true,
+    "dynamicImports": [
+      "src/i18n/ja/index.ts",
+      "src/i18n/en/index.ts"
+    ],
+    "css": [
+      "assets/main.959b1b64.css"
+    ]
+  },
+  "src/i18n/ja/index.ts": {
+    "file": "assets/index.00558365.js",
+    "src": "src/i18n/ja/index.ts",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/i18n/en/index.ts",
+      "src/main.ts"
+    ]
+  },
+  "src/i18n/en/index.ts": {
+    "file": "assets/index.bb6ef97e.js",
+    "src": "src/i18n/en/index.ts",
+    "isDynamicEntry": true
+  },
+  "src/main.css": {
+    "file": "assets/main.959b1b64.css",
+    "src": "src/main.css"
+  }
+}

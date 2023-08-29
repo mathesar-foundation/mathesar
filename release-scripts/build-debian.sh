@@ -7,12 +7,14 @@ set -ex
 # Get the codename from distro env
 DIST='ubuntu:jammy'
 
-sudo rm -r build
+sudo rm -f -r build
 # we get a read-only copy of the source: make a writeable copy
-mkdir build
+mkdir -p build
 cp ../requirements.txt build/requirements.txt
 cp ../pyproject.toml build/pyproject.toml
 cp -r ../mathesar build/mathesar/
+cp -r ../static build/static/
+cp -r ../demo build/demo/
 cp -r ../config build/config/
 cp -r ../db build/db
 cp -r ../media build/media
