@@ -1,0 +1,12 @@
+[Unit]
+Description=gunicorn daemon
+After=network.target network-online.target
+Requires=network-online.target
+
+[Service]
+Type=notify
+RuntimeDirectory=gunicorn
+ExecStart=/opt/venvs/mathesar/bin/gunicorn config.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
