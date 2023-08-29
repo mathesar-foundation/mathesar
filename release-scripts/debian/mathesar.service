@@ -5,6 +5,8 @@ Requires=network-online.target
 
 [Service]
 Type=notify
+User=mathesar
+EnvironmentFile=/etc/mathesar/.env
 RuntimeDirectory=gunicorn
 ExecStart=/opt/venvs/mathesar/bin/gunicorn config.wsgi:application
 
