@@ -243,7 +243,7 @@ Args:
 */
 SELECT array_agg(
   CASE
-    WHEN rel_id=0 THEN quote_ident(col::text)
+    WHEN rel_id=0 THEN quote_ident(col #>> '{}')
     WHEN jsonb_typeof(col)='number' THEN msar.get_column_name(rel_id, col::integer)
     WHEN jsonb_typeof(col)='string' THEN msar.get_column_name(rel_id, col #>> '{}')
   END
@@ -1016,8 +1016,8 @@ Get a JSON array of column definitions from given columns for creation of an ext
 See the msar.process_col_def_jsonb for a description of the JSON.
 
 Args:
-  tab_id: The OID of the table containing the column whose definition we want.
-  col_ids: The attnum of the column whose definitions we want.
+  tab_id: The OID of the table containing the columns whose definitions we want.
+  col_ids: The attnum of the columns whose definitions we want.
 */
 
 SELECT jsonb_agg(
@@ -1697,6 +1697,37 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_extracted_con_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
+Get a JSON array of constraint definitions from given columns for creation of an extracted table.
+
+See the msar.process_con_def_jsonb for a description of the JSON.
+
+Args:
+  tab_id: The OID of the table containing the constraints whose definitions we want.
+  col_ids: The attnum of columns with the constraints whose definitions we want.
+*/
+
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'type', contype,
+    'columns', ARRAY[attname],
+    'deferrable', condeferrable,
+    'fkey_relation_id', confrelid::integer,
+    'fkey_columns', confkey,
+    'fkey_update_action', confupdtype,
+    'fkey_delete_action', confdeltype,
+    'fkey_match_type', confmatchtype
+  )
+)
+FROM pg_constraint
+  JOIN unnest(col_ids) AS columns_to_copy(col_id) ON pg_constraint.conkey[1]=columns_to_copy.col_id
+  JOIN pg_attribute
+    ON pg_attribute.attnum=columns_to_copy.col_id AND pg_attribute.attrelid=pg_constraint.conrelid
+WHERE pg_constraint.conrelid=tab_id AND (pg_constraint.contype='f' OR pg_constraint.contype='u');
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- MATHESAR DROP TABLE FUNCTIONS
@@ -1849,7 +1880,11 @@ WITH col_cte AS (
   SELECT string_agg(__msar.build_con_def_text(con), ', ') AS table_constraints
   FROM unnest(con_defs) as con
 )
-SELECT __msar.exec_ddl('CREATE TABLE %s (%s) %s', tab_name, table_columns, table_constraints)
+SELECT __msar.exec_ddl(
+  'CREATE TABLE %s (%s)',
+  tab_name,
+  concat_ws(', ', table_columns, table_constraints)
+)
 FROM col_cte, con_cte;
 $$ LANGUAGE SQL;
 
@@ -1878,8 +1913,8 @@ DECLARE
   constraint_defs __msar.con_def[];
 BEGIN
   fq_table_name := format('%s.%s', __msar.get_schema_name(sch_oid), quote_ident(tab_name));
-  column_defs := msar.process_col_def_jsonb(null, col_defs, false, true);
-  constraint_defs := msar.process_con_def_jsonb(null, con_defs);
+  column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
+  constraint_defs := msar.process_con_def_jsonb(0, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
@@ -2324,6 +2359,7 @@ The extraction takes a set of columns from the table, and creates a new table fr
 */
 DECLARE
   extracted_col_defs CONSTANT jsonb := msar.get_extracted_col_def_jsonb(tab_id, col_ids);
+  extracted_con_defs CONSTANT jsonb := msar.get_extracted_con_def_jsonb(tab_id, col_ids);
   fkey_name CONSTANT text := msar.build_unique_fkey_column_name(tab_id, fk_col_name, new_tab_name);
   extracted_table_id integer;
   fkey_attnum integer;
@@ -2333,7 +2369,7 @@ BEGIN
     msar.get_relation_namespace_oid(tab_id),
     new_tab_name,
     extracted_col_defs,
-    null,
+    extracted_con_defs,
     format('Extracted from %s', __msar.get_relation_name(tab_id))
   );
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
