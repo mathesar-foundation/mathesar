@@ -28,16 +28,16 @@ class LiveDemoModeMiddleware:
         if created:
             create_demo_database(
                 db_name,
-                settings.DATABASES["default"]["USER"],
-                settings.DATABASES["default"]["PASSWORD"],
-                settings.DATABASES["default"]["HOST"],
-                settings.DATABASES["default"]["NAME"],
-                settings.DATABASES["default"]["PORT"],
+                database["USER"],
+                database["PASSWORD"],
+                database["HOST"],
+                database["NAME"],
+                database["PORT"],
                 settings.MATHESAR_DEMO_TEMPLATE
             )
             append_db_and_arxiv_schema_to_log(db_name, ARXIV)
             reset_reflection(db_name=db_name)
-            engine = create_mathesar_engine(created)
+            engine = create_mathesar_engine(database)
             customize_settings(engine)
             load_custom_explorations(engine)
             engine.dispose()

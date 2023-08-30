@@ -28,10 +28,10 @@ def _setup_demo_template_db():
     root_engine.dispose()
     install_mathesar(
         name=template_db_name,
-        db_username=settings.DATABASES["default"]["USER"],
-        db_password=settings.DATABASES["default"]["PASSWORD"],
-        db_host=settings.DATABASES["default"]["HOST"],
-        db_port=settings.DATABASES["default"]["PORT"],
+        db_username=db["USER"],
+        db_password=db["PASSWORD"],
+        db_host=db["HOST"],
+        db_port=db["PORT"],
         skip_confirm=True
     )
     user_engine = create_mathesar_engine(template_db_name)
