@@ -20,20 +20,29 @@ def _setup_demo_template_db():
     print("Initializing demo template database...")
 
     template_db_name = settings.MATHESAR_DEMO_TEMPLATE
-    db = Database.current_objects.get(name=settings.DATABASES["default"]["NAME"])
-    root_engine = create_mathesar_engine(db)
+    django_model = Database.current_objects.get(name=settings.DATABASES["default"]["NAME"])
+    root_engine = create_mathesar_engine(django_model)
     with root_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
         conn.execute(text(f"DROP DATABASE IF EXISTS {template_db_name} WITH (FORCE)"))
     root_engine.dispose()
+    db_model, _ = Database.current_objects.get_or_create(
+        name=template_db_name,
+        defaults={
+            'db_username': django_model.db_username,
+            'db_password': django_model.db_password,
+            'db_host': django_model.db_host,
+            'db_port': django_model.db_port
+        }
+    )
     install_mathesar(
         name=template_db_name,
-        db_username=db["USER"],
-        db_password=db["PASSWORD"],
-        db_host=db["HOST"],
-        db_port=db["PORT"],
+        db_username=db_model.db_username,
+        db_password=db_model.db_password,
+        db_host=db_model.db_host,
+        db_port=db_model.db_port,
         skip_confirm=True
     )
-    user_engine = create_mathesar_engine(template_db_name)
+    user_engine = create_mathesar_engine(db_model)
     load_datasets(user_engine)
     user_engine.dispose()
