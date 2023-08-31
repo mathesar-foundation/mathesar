@@ -7,8 +7,7 @@ Requires=network-online.target
 Type=notify
 User=mathesar
 EnvironmentFile=/etc/mathesar/.env
-RuntimeDirectory=gunicorn
-ExecStart=/opt/venvs/mathesar/bin/gunicorn config.wsgi:application
+ExecStart=/opt/venvs/mathesar/bin/python -m mathesar.start
 
 [Install]
 WantedBy=multi-user.target
