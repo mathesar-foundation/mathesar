@@ -163,8 +163,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Media files (uploaded by the user)
-
-MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+DEFAULT_MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+MEDIA_ROOT = decouple_config('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 

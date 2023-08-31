@@ -7,9 +7,7 @@ ignore_names = ["go_to_patents_data_table", "go_to_all_types_table", "go_to_tabl
 min_confidence = 90
 [tool.setuptools.package-data]
 "*" = ["*.sql", "*.json", "*.html", "*.js", "*.css", "*.svg"]
-static = ["*."]
 [tool.setuptools.packages.find]
 where = ["."]  # list of folders that contain the packages (["."] by default)
 include = ["db*", "media*", "config*", "mathesar*", "demo*", "static*"]  # package names should match these glob patterns (["*"] by default)
 exclude = []  # exclude packages matching these glob patterns (empty by default)
-namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
