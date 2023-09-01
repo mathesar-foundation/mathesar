@@ -1,24 +1,25 @@
 <script lang="ts">
+  import { ContextMenu } from '@mathesar/component-library';
+  import { SheetCell, SheetRow } from '@mathesar/components/sheet';
+  import { rowHeightPx } from '@mathesar/geometry';
   import {
+    ID_ROW_CONTROL_COLUMN,
     getCellKey,
+    getRowKey,
     getTabularDataStoreFromContext,
+    isGroupHeaderRow,
+    isHelpTextRow,
     isNewRecordRow,
     isPlaceholderRow,
     rowHasRecord,
-    isGroupHeaderRow,
-    isHelpTextRow,
-    getRowKey,
-    ID_ROW_CONTROL_COLUMN,
     type Row,
   } from '@mathesar/stores/table-data';
-  import { SheetRow, SheetCell } from '@mathesar/components/sheet';
-  import { rowHeightPx } from '@mathesar/geometry';
-  import { ContextMenu } from '@mathesar/component-library';
-  import NewRecordMessage from './NewRecordMessage.svelte';
+  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
   import GroupHeader from './GroupHeader.svelte';
+  import NewRecordMessage from './NewRecordMessage.svelte';
   import RowCell from './RowCell.svelte';
-  import RowControl from './RowControl.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
+  import RowControl from './RowControl.svelte';
 
   export let row: Row;
   export let style: { [key: string]: string | number };
@@ -41,7 +42,7 @@
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
-  $: isSelected = $selection.rowIds.has(row.identifier);
+  $: isSelected = $selection.rowIds.has(getRowSelectionId(row));
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;

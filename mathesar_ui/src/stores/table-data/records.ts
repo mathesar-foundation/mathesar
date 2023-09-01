@@ -26,11 +26,10 @@ import {
   States,
   deleteAPI,
   getAPI,
+  getQueryStringFromParams,
   patchAPI,
   postAPI,
-  getQueryStringFromParams,
 } from '@mathesar/api/utils/requestUtils';
-import Series from '@mathesar/components/sheet/selection/Series';
 import type Pagination from '@mathesar/utils/Pagination';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
@@ -175,13 +174,16 @@ export function filterRecordRows(rows: Row[]): RecordRow[] {
 export function rowHasSavedRecord(row: Row): row is RecordRow {
   return rowHasRecord(row) && Object.entries(row.record).length > 0;
 }
-
 export interface TableRecordsData {
   state: States;
   error?: string;
   savedRecordRowsWithGroupHeaders: Row[];
   totalCount: number;
   grouping?: RecordGrouping;
+}
+
+export function getRowSelectionId(row: Row): string {
+  return row.identifier;
 }
 
 export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
@@ -300,7 +302,8 @@ export class RecordsData {
 
   error: Writable<string | undefined>;
 
-  selectableRowIds: Readable<Series<string>>;
+  /** Keys are row ids, values are records */
+  selectableRowsMap: Readable<Map<string, Record<string, unknown>>>;
 
   private promise: CancellablePromise<ApiRecordsResponse> | undefined;
 
@@ -357,13 +360,12 @@ export class RecordsData {
     this.url = `/api/db/v0/tables/${this.tableId}/records/`;
     void this.fetch();
 
-    this.selectableRowIds = derived(
+    this.selectableRowsMap = derived(
       [this.savedRecords, this.newRecords],
-      ([savedRecords, newRecords]) =>
-        new Series([
-          ...savedRecords.map((r) => r.identifier),
-          ...newRecords.map((r) => r.identifier),
-        ]),
+      ([savedRecords, newRecords]) => {
+        const records = [...savedRecords, ...newRecords];
+        return new Map(records.map((r) => [getRowSelectionId(r), r.record]));
+      },
     );
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions

@@ -33,6 +33,7 @@
     type RecordRow,
     type RecordsData,
   } from '@mathesar/stores/table-data';
+  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import CellErrors from './CellErrors.svelte';
@@ -51,7 +52,7 @@
 
   const userProfile = getUserProfileStoreFromContext();
 
-  $: cellId = makeCellId(row.identifier, String(processedColumn.id));
+  $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
   $: database = $currentDatabase;
   $: schema = $currentSchema;
   $: canEditTableRecords = !!$userProfile?.hasPermission(

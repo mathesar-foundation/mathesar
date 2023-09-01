@@ -1,5 +1,5 @@
-import { get, writable } from 'svelte/store';
-import type { Writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { ApiMultiError } from '@mathesar/api/utils/errors';
 import { ImmutableMap, CancellablePromise } from '@mathesar-component-library';
@@ -29,6 +29,10 @@ import {
 export interface QueryRow {
   record: QueryResultRecord;
   rowIndex: number;
+}
+
+function getRowSelectionId(row: QueryRow): string {
+  return String(row.rowIndex);
 }
 
 export interface QueryRowsData {
@@ -62,6 +66,9 @@ export default class QueryRunner {
   processedColumns: Writable<ProcessedQueryOutputColumnMap> = writable(
     new ImmutableMap(),
   );
+
+  /** Keys are row ids, values are records */
+  selectableRowsMap: Readable<Map<string, Record<string, unknown>>>;
 
   selection: QuerySheetSelection;
 
@@ -100,6 +107,10 @@ export default class QueryRunner {
     this.shareConsumer = shareConsumer;
     this.speculateProcessedColumns();
     void this.run();
+    this.selectableRowsMap = derived(
+      this.rowsData,
+      ({ rows }) => new Map(rows.map((r) => [getRowSelectionId(r), r.record])),
+    );
     this.selection = new LegacySheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
       getColumnOrder: () =>

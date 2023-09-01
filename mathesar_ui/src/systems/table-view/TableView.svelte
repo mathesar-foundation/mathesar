@@ -2,6 +2,7 @@
   import { get } from 'svelte/store';
 
   import { ImmutableMap } from '@mathesar-component-library';
+  import type { TableEntry } from '@mathesar/api/types/tables';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
@@ -11,12 +12,16 @@
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
-    type TabularDataSelection,
+    type ProcessedColumn,
   } from '@mathesar/stores/table-data';
+  import {
+    getRowSelectionId,
+    type RecordRow,
+  } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
   import { orderProcessedColumns } from '@mathesar/utils/tables';
-  import type { TableEntry } from '@mathesar/api/types/tables';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
@@ -40,24 +45,18 @@
   $: usesVirtualList = context !== 'widget';
   $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
-  $: ({
-    processedColumns,
-    display,
-    isLoading,
-    legacySelection: selection,
-    recordsData,
-  } = $tabularData);
+  $: ({ processedColumns, display, isLoading, selection, recordsData } =
+    $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
-    selection,
-    toast,
-    getRows: () => [
-      ...get(recordsData.savedRecords),
-      ...get(recordsData.newRecords),
-    ],
-    getColumnsMap: () => get(processedColumns),
-    getRecordSummaries: () => get(recordsData.recordSummaries),
+    getCopyingContext: () => ({
+      rowsMap: get(recordsData.selectableRowsMap),
+      columnsMap: stringifyMapKeys(get(processedColumns)),
+      recordSummaries: get(recordsData.recordSummaries),
+      selectedRowIds: get(selection).rowIds,
+      selectedColumnIds: get(selection).columnIds,
+    }),
+    showToastInfo: toast.info,
   });
-  $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
   $: ({ settings } = table);
@@ -90,32 +89,37 @@
   ]);
   $: showTableInspector = $isTableInspectorVisible && supportsTableInspector;
 
-  function selectAndActivateFirstCellOnTableLoad(
-    _isLoading: boolean,
-    _selection: TabularDataSelection,
-    _context: Context,
-  ) {
-    // We only activate the first cell on the page, not in the widget. Doing so
-    // on the widget causes the cell to focus and the page to scroll down to
-    // bring that element into view.
-    if (_context !== 'widget' && !_isLoading) {
-      _selection.selectAndActivateFirstCellIfExists();
-    }
-  }
-
   function checkAndReinstateFocusOnActiveCell(e: Event) {
-    const target = e.target as HTMLElement;
-    if (!target.closest('[data-sheet-element="cell"')) {
-      if ($activeCell) {
-        selection.focusCell(
-          { rowIndex: $activeCell.rowIndex },
-          { id: Number($activeCell.columnId) },
-        );
-      }
-    }
+    // // TODO_3037 Figure out what is actually broken without this code.
+    // //Better document why we need id.
+    //
+    // const target = e.target as HTMLElement;
+    // if (!target.closest('[data-sheet-element="cell"')) {
+    //   if ($activeCell) {
+    //     selection.focusCell(
+    //       // TODO make sure to use getRowSelectionId instead of rowIndex
+    //       { rowIndex: $activeCell.rowIndex },
+    //       { id: Number($activeCell.columnId) },
+    //     );
+    //   }
+    // }
   }
 
-  $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection, context);
+  // function selectAndActivateFirstCellOnTableLoad(
+  //   _isLoading: boolean,
+  //   _selection: TabularDataSelection,
+  //   _context: Context,
+  // ) {
+  //   // We only activate the first cell on the page, not in the widget. Doing so
+  //   // on the widget causes the cell to focus and the page to scroll down to
+  //   // bring that element into view.
+  //   if (_context !== 'widget' && !_isLoading) {
+  //     _selection.selectAndActivateFirstCellIfExists();
+  //   }
+  // }
+
+  // // TODO_3037 Figure out what is actually broken without this code.
+  // $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection, context);
 </script>
 
 <div class="table-view">

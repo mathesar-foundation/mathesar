@@ -143,12 +143,12 @@ export class TabularData {
     );
 
     const plane = derived(
-      [this.recordsData.selectableRowIds, this.orderedProcessedColumns],
-      ([selectableRowIds, orderedProcessedColumns]) => {
-        const columnIds = new Series(
-          [...orderedProcessedColumns.values()].map((c) => String(c.id)),
-        );
-        return new Plane(selectableRowIds, columnIds);
+      [this.recordsData.selectableRowsMap, this.orderedProcessedColumns],
+      ([selectableRowsMap, orderedProcessedColumns]) => {
+        const rowIds = new Series([...selectableRowsMap.keys()]);
+        const columns = [...orderedProcessedColumns.values()];
+        const columnIds = new Series(columns.map((c) => String(c.id)));
+        return new Plane(rowIds, columnIds);
       },
     );
 

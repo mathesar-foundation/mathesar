@@ -1,16 +1,16 @@
 <script lang="ts">
   import { get } from 'svelte/store';
 
-  import { ImmutableMap } from '@mathesar-component-library';
+  import { ImmutableMap, ImmutableSet } from '@mathesar-component-library';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import {
-    isColumnSelected,
     Sheet,
     SheetCell,
     SheetHeader,
     SheetRow,
     SheetVirtualRows,
+    isColumnSelected,
   } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
@@ -34,6 +34,7 @@
     query,
     processedColumns,
     rowsData,
+    selectableRowsMap,
     pagination,
     runState,
     selection,
@@ -41,11 +42,16 @@
   } = queryHandler);
   $: ({ initial_columns } = $query);
   $: clipboardHandler = new SheetClipboardHandler({
-    selection,
-    toast,
-    getRows: () => get(rowsData).rows,
-    getColumnsMap: () => get(processedColumns),
-    getRecordSummaries: () => new ImmutableMap(),
+    getCopyingContext: () => ({
+      rowsMap: get(selectableRowsMap),
+      columnsMap: get(processedColumns),
+      recordSummaries: new ImmutableMap(),
+      // TODO_3037
+      selectedRowIds: new ImmutableSet(),
+      // TODO_3037
+      selectedColumnIds: new ImmutableSet(),
+    }),
+    showToastInfo: toast.info,
   });
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: recordRunState = $runState?.state;

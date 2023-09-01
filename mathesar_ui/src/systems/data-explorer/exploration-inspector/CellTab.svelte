@@ -10,6 +10,7 @@
     const cell = $activeCell;
     if (cell) {
       const rows = queryHandler.getRows();
+      // TODO_3037 change rowIndex to use getRowSelectionId
       if (rows[cell.rowIndex]) {
         return rows[cell.rowIndex].record[cell.columnId];
       }
