@@ -114,13 +114,15 @@ def create_datafile(data):
         )
     else:
         max_level = data.get('max_level', 0)
+        sheet_name = data.get('sheet_name', '0')
         datafile = DataFile(
             file=raw_file,
             base_name=base_name,
             type=type,
             created_from=created_from,
             header=header,
-            max_level=max_level
+            max_level=max_level,
+            sheet_name=sheet_name
         )
     datafile.save()
     raw_file.close()
