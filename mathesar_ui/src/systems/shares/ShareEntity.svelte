@@ -169,10 +169,10 @@
       {#if share && share.enabled}
         <InputGroup>
           <TextInput
-            class="custom-input"
             bind:element={linkInput}
             readonly
             value={shareLink}
+            style="background: var(--slate-50);"
           />
           <Button appearance="secondary" on:click={copyLink}>
             <Icon {...iconCopyMajor} />
@@ -236,9 +236,6 @@
       .share-control-options {
         display: flex;
         justify-content: space-between;
-      }
-      .custom-input {
-        background: var(--slate-50);
       }
     }
   }
