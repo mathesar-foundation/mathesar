@@ -22,6 +22,7 @@
   export let element: $$Props['element'] = undefined;
 
   export let hasError = false;
+  export let readOnly = $$restProps.readonly;
 
   // Id for the input
   export let id: $$Props['id'] = undefined;
@@ -43,6 +44,7 @@
   type="text"
   class={['input-element', 'text-input', classes].join(' ')}
   class:has-error={hasError}
+  class:read-only={readOnly}
   bind:value
   {id}
   on:input
