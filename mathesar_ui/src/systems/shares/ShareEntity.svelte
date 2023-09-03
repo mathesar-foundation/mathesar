@@ -168,7 +168,7 @@
     {:else if loadRequestStatus.state === 'success'}
       {#if share && share.enabled}
         <InputGroup>
-          <TextInput bind:element={linkInput} readonly value={shareLink} />
+          <TextInput class="custom-input" bind:element={linkInput} readonly value={shareLink} />
           <Button appearance="secondary" on:click={copyLink}>
             <Icon {...iconCopyMajor} />
           </Button>
@@ -232,6 +232,10 @@
         display: flex;
         justify-content: space-between;
       }
+      .custom-input {
+        background: var(--slate-50);
+      }
     }
+    
   }
 </style>
