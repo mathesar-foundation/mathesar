@@ -1,0 +1,18 @@
+name: Create static assets
+on:
+  release:
+    types: [published, edited]
+jobs:
+  static-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch @${{github.ref_name}}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{github.ref_name}}
+      - name: Create artifact
+        run: zip -r mathesar-v${{github.ref_name}}.zip . -x '*.git*'
+      - name: Upload artifact to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: mathesar-v${{github.ref_name}}.zip
