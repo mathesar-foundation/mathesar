@@ -1,6 +1,6 @@
 Source: mathesar
 Section: contrib/python
-Priority: extra
+Priority: optional
 Maintainer: Mathesar Team <hello@mathesar.org>
 # keep this list in sync with the build dependencies in docker/Dockerfile-dhvirtualenv.
 Build-Depends:
