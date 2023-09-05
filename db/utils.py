@@ -38,7 +38,7 @@ class OrderByIds:
     A mixin for ordering based on ids; useful at least for type enums in testing.
     """
 
-    id = ''
+    id = None
 
     def __ge__(self, other):
         if self._ordering_supported(other):
