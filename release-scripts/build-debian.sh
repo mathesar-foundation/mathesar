@@ -4,9 +4,6 @@
 
 set -ex
 
-# Get the codename from distro env
-DIST='ubuntu:jammy'
-
 sudo rm -f -r build
 mkdir -p build
 cp ../requirements.txt build/requirements.txt
