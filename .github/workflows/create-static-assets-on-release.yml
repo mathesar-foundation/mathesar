@@ -10,8 +10,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{github.ref_name}}
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
       - name: Run collectstatic
-        run: python manage.py collectstatic
+        run: |
+          pip install -r requirements.txt
+          python manage.py collectstatic --noinput
       - name: Create artifact
         run: zip -r mathesar-v${{github.ref_name}}.zip . -x '*.git*'
       - name: Upload artifact to release
