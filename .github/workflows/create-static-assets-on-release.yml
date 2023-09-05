@@ -11,18 +11,15 @@ jobs:
         with:
           ref: ${{github.ref_name}}
 
-
       - name: Setup python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-
       - name: Download requirements
         run: |
           pip install -r requirements.txt
           cp .env.example .env
-
 
       - name: Run collectstatic
         run: python manage.py collectstatic --noinput
@@ -30,10 +27,8 @@ jobs:
           MODE: PRODUCTION
           DEBUG: False
 
-
       - name: Create artifact
         run: zip -r mathesar-v${{github.ref_name}}.zip . -x '*.git*'
-
 
       - name: Upload artifact to release
         uses: softprops/action-gh-release@v1
