@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# The script to build the Debian package, as ran inside the Docker image.
+# The script to build the Debian package
 
 set -ex
 
@@ -8,7 +8,6 @@ set -ex
 DIST='ubuntu:jammy'
 
 sudo rm -f -r build
-# we get a read-only copy of the source: make a writeable copy
 mkdir -p build
 cp ../requirements.txt build/requirements.txt
 cp ../pyproject.toml build/pyproject.toml
