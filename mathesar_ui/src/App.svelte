@@ -5,13 +5,13 @@
   import RootRoute from './routes/RootRoute.svelte';
   import { setLocale } from './i18n/i18n-svelte';
   import ErrorBox from './components/message-boxes/ErrorBox.svelte';
-  import { loadTranslationsIntoMemory } from './i18n/i18n-load';
+  import { loadTranslations } from './i18n/i18n-load';
 
   let isTranslationsLoaded = false;
   const checkTranslationsAvailableInterval = setInterval(() => {
     const { translations } = window;
     if (translations) {
-      loadTranslationsIntoMemory(
+      loadTranslations(
         translations.lang,
         JSON.parse(translations.translationStrings),
       );
