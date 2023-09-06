@@ -12,13 +12,27 @@
     iconSortDescending,
   } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
+
+  const userProfile = getUserProfileStoreFromContext();
 
   export let processedColumn: ProcessedColumn;
+
+  $: canViewLinkedEntities = !!$userProfile?.hasPermission(
+    { database: $currentDatabase, schema: $currentSchema },
+    'canViewLinkedEntities',
+  );
+
+  $: columnAllowsFiltering = processedColumn.linkFk
+    ? canViewLinkedEntities
+    : true;
 
   const imperativeFilterController = getImperativeFilterControllerFromContext();
   const tabularData = getTabularDataStoreFromContext();
@@ -69,13 +83,15 @@
   }
 </script>
 
-<ButtonMenuItem icon={iconAddFilter} on:click={addFilter}>
-  {#if filterCount > 0}
-    Add Filter
-  {:else}
-    Filter Column
-  {/if}
-</ButtonMenuItem>
+{#if columnAllowsFiltering}
+  <ButtonMenuItem icon={iconAddFilter} on:click={addFilter}>
+    {#if filterCount > 0}
+      Add Filter
+    {:else}
+      Filter Column
+    {/if}
+  </ButtonMenuItem>
+{/if}
 {#if filterCount > 0}
   <ButtonMenuItem icon={iconRemoveFilter} on:click={clearFilters}>
     Remove {labeledCount(filterCount, 'filters', {

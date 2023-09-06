@@ -12,6 +12,7 @@
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { ShareConsumer } from '@mathesar/utils/shares';
   import { setNewImperativeFilterControllerInContext } from './ImperativeFilterController';
 
   const metaSerializationQueryKey = 'q';
@@ -24,6 +25,7 @@
   setNewImperativeFilterControllerInContext();
 
   export let table: TableEntry;
+  export let shareConsumer: ShareConsumer | undefined = undefined;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: ({ query } = $router);
@@ -33,8 +35,11 @@
     abstractTypesMap,
     meta,
     table,
+    shareConsumer,
   });
   $: tabularDataStore.set(tabularData);
+  let context: 'shared-consumer-page' | 'page' = 'page';
+  $: context = shareConsumer ? 'shared-consumer-page' : 'page';
 
   function handleMetaSerializationChange(s: string) {
     router.location.query.set(metaSerializationQueryKey, s);
@@ -47,8 +52,8 @@
 
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
-    <ActionsPane {table} />
-    <TableView {table} />
+    <ActionsPane {table} {context} />
+    <TableView {table} {context} />
   </div>
 </LayoutWithHeader>
 

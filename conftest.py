@@ -54,7 +54,7 @@ def create_db(request, SES_engine_cache):
     A factory for Postgres mathesar-installed databases. A fixture made of this method tears down
     created dbs when leaving scope.
 
-    This method is used to create two fixtures with different scopes, that's why it's not a fixture
+    This method is used to create fixtures with different scopes, that's why it's not a fixture
     itself.
     """
     engine_cache = SES_engine_cache
@@ -261,6 +261,8 @@ ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
 LIBRARY_SQL = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_CHECKOUTS_SQL = os.path.join(RESOURCES, "library_add_checkouts.sql")
 FRAUDULENT_PAYMENTS_SQL = os.path.join(RESOURCES, "fraudulent_payments.sql")
+PLAYER_PROFILES_SQL = os.path.join(RESOURCES, "player_profiles.sql")
+MARATHON_ATHLETES_SQL = os.path.join(RESOURCES, "marathon_athletes.sql")
 
 
 @pytest.fixture
@@ -348,4 +350,38 @@ def payments_db_table(engine_with_fraudulent_payment):
     engine, schema = engine_with_fraudulent_payment
     metadata = MetaData(bind=engine)
     table = Table("Payments", metadata, schema=schema, autoload_with=engine)
+    return table
+
+
+@pytest.fixture
+def engine_with_player_profiles(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(PLAYER_PROFILES_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+
+
+@pytest.fixture
+def players_db_table(engine_with_player_profiles):
+    engine, schema = engine_with_player_profiles
+    metadata = MetaData(bind=engine)
+    table = Table("Players", metadata, schema=schema, autoload_with=engine)
+    return table
+
+
+@pytest.fixture
+def engine_with_marathon_athletes(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(MARATHON_ATHLETES_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+
+
+@pytest.fixture
+def athletes_db_table(engine_with_marathon_athletes):
+    engine, schema = engine_with_marathon_athletes
+    metadata = MetaData(bind=engine)
+    table = Table("Marathon", metadata, schema=schema, autoload_with=engine)
     return table

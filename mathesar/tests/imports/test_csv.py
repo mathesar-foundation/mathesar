@@ -10,7 +10,7 @@ from mathesar.imports.csv import get_sv_dialect, get_sv_reader
 from db.schemas.operations.create import create_schema
 from db.schemas.utils import get_schema_oid_from_name
 from db.constants import COLUMN_NAME_TEMPLATE
-from db.tables.operations.create import DuplicateTable
+from psycopg.errors import DuplicateTable
 
 TEST_SCHEMA = "import_csv_schema"
 
