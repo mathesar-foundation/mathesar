@@ -51,15 +51,9 @@ def create_db_table_from_excel_data_file(data_file, name, schema, comment=None):
     db_name = schema.database.name
     engine = create_mathesar_engine(db_name)
     header_row = 0 if data_file.header else None
-    try:
-        dataframe = remove_empty_rows_and_columns_from_dataframe(
-            pandas.read_excel(data_file.file.path, data_file.sheet_name, header=header_row)
-        )
-    except ValueError:
-        # If sheet number has been passed as a parameter instead of sheet name.
-        dataframe = remove_empty_rows_and_columns_from_dataframe(
-            pandas.read_excel(data_file.file.path, int(data_file.sheet_name), header=header_row)
-        )
+    dataframe = remove_empty_rows_and_columns_from_dataframe(
+        pandas.read_excel(data_file.file.path, data_file.sheet_index, header=header_row)
+    )
     column_names = process_column_names(dataframe.columns)
     try:
         table = insert_records_from_dataframe(name, schema, column_names, engine, comment, dataframe)

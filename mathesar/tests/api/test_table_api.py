@@ -242,7 +242,6 @@ def _create_table(client, data_files, table_name, schema, import_target_table, d
 
     response = client.post('/api/db/v0/tables/', body)
     response_table = response.json()
-    print('\n\n', response_table, '\n\n')
     table = Table.objects.get(id=response_table['id'])
 
     if data_files is not None:
@@ -2095,28 +2094,23 @@ def test_create_table_using_null_id_excel_data_file(client, null_id_excel_data_f
     )
 
 
-def _create_excel_datafile_using_sheet_name_param(filepath, sheet_name):
+def _create_excel_datafile_using_sheet_index_param(filepath, sheet_index):
     with open(filepath, "rb") as file:
         data_file = DataFile.objects.create(
             file=File(file),
             created_from='file',
             base_name='multiple_sheets',
             type='excel',
-            sheet_name=sheet_name
+            sheet_index=sheet_index
         )
     return data_file
 
 
 def test_create_table_with_multiple_sheets_excel_file(client, multiple_sheets_excel_filepath, schema):
     column_names = ['Name', 'Age', 'Email']
-    sheet_names = ['Red-Team', 'Blue-Team', 'Green-Team']
-    test_datafile_objects_with_sheet_name = [
-        _create_excel_datafile_using_sheet_name_param(multiple_sheets_excel_filepath, sheet_name)
-        for sheet_name in sheet_names
-    ]
-    test_datafile_objects_with_sheet_number = [
-        _create_excel_datafile_using_sheet_name_param(multiple_sheets_excel_filepath, str(sheet_number))
-        for sheet_number in range(3)
+    test_datafile_objects_with_sheet_index = [
+        _create_excel_datafile_using_sheet_index_param(multiple_sheets_excel_filepath, sheet_index)
+        for sheet_index in range(3)
     ]
     expected_first_row_data = [
         (1, 'Jim', '25', 'jim@example.com'),
@@ -2124,15 +2118,8 @@ def test_create_table_with_multiple_sheets_excel_file(client, multiple_sheets_ex
         (1, 'Jake', '25', 'jake@example.com'),
     ]
 
-    for index, datafile in enumerate(test_datafile_objects_with_sheet_name):
+    for index, datafile in enumerate(test_datafile_objects_with_sheet_index):
         table_name = f'Table {index}'
-        check_create_table_response(
-            client, table_name, table_name, datafile, schema, expected_first_row_data[index],
-            column_names, import_target_table=None
-        )
-
-    for index, datafile in enumerate(test_datafile_objects_with_sheet_number):
-        table_name = f'Table {index + 3}'
         check_create_table_response(
             client, table_name, table_name, datafile, schema, expected_first_row_data[index],
             column_names, import_target_table=None
