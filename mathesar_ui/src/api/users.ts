@@ -12,7 +12,7 @@ export interface UnsavedUser {
   email: string | null;
   username: string;
   password: string;
-  preferred_language: string;
+  display_language: string;
 }
 
 export type UserRole = 'viewer' | 'editor' | 'manager';

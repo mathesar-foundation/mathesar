@@ -22,10 +22,10 @@
   {% comment %} Making it async to start the execution as soon as its downloaded without making it wait for the HTML to be parsed {% endcomment %}
   <script type="module"  async>
   var isDevelopmentMode = {{ development_mode|yesno:"true,false" }}
-    var src = isDevelopmentMode ? "{{ client_dev_url }}/src/i18n/{{ preferred_language }}/index.ts" : "{% static manifest_data.module_translations_file %}"
+    var src = isDevelopmentMode ? "{{ client_dev_url }}/src/i18n/{{ display_language }}/index.ts" : "{% static manifest_data.module_translations_file %}"
     import(src).then(translations => {
       window.translations = {
-        lang: "{{ preferred_language }}",
+        lang: "{{ display_language }}",
         translationStrings: JSON.stringify(translations.default)
       }
     })

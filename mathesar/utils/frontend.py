@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.cache import cache
 
 
-def get_manifest_data(preferred_language):
+def get_manifest_data(display_language):
     # We don't need the manifest data for local development.
     if settings.MATHESAR_MODE == 'DEVELOPMENT':
         return {}
@@ -18,7 +18,7 @@ def get_manifest_data(preferred_language):
     with open(settings.MATHESAR_MANIFEST_LOCATION, 'r') as manifest_file:
         raw_data = json.loads(manifest_file.read())
 
-    translations_file_path = get_translations_file_path(preferred_language)
+    translations_file_path = get_translations_file_path(display_language)
 
     module_data = raw_data['src/main.ts']
     manifest_data['module_css'] = [filename for filename in module_data['css']]
@@ -37,8 +37,8 @@ def get_manifest_data(preferred_language):
     return manifest_data
 
 
-def get_translations_file_path(preferred_language):
+def get_translations_file_path(display_language):
     return {
-        "module": f'src/i18n/{preferred_language}/index.ts',
-        "legacy": f'src/i18n/{preferred_language}/index-legacy.ts'
+        "module": f'src/i18n/{display_language}/index.ts',
+        "legacy": f'src/i18n/{display_language}/index-legacy.ts'
     }
