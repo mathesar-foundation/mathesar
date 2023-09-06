@@ -152,13 +152,14 @@
     />
   {/if}
 
-  <UserFormInput
+  <!-- Commenting this for now to avoid releasing any half baked changes to develop branch -->
+  <!-- <UserFormInput
     label="Display Language *"
     field={displayLanguage}
     input={{
       component: SelectDisplayLanguage,
     }}
-  />
+  /> -->
 
   <UserFormInput
     label="Role *"
