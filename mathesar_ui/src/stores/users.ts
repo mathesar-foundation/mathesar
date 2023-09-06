@@ -17,6 +17,7 @@ import {
   rolesAllowOperation,
   type AccessOperation,
 } from '@mathesar/utils/permissions';
+import { baseLocale } from '@mathesar/i18n/i18n-util';
 
 export class UserModel {
   readonly id: User['id'];
@@ -176,7 +177,7 @@ export class AnonymousViewerUserModel extends UserModel {
       username: 'Anonymous',
       full_name: 'Anonymous',
       email: null,
-      display_language: 'en',
+      display_language: baseLocale,
     });
   }
 
