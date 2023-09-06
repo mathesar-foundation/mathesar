@@ -4,6 +4,7 @@ import logging
 from django.conf import settings
 
 from demo.db_namer import get_name
+from demo.utils import set_live_demo_db_name
 from demo.install.arxiv_skeleton import append_db_and_arxiv_schema_to_log
 from demo.install.base import ARXIV, create_demo_database
 from demo.install.custom_settings import customize_settings
@@ -42,9 +43,7 @@ class LiveDemoModeMiddleware:
             engine.dispose()
 
         logger.debug(f"Using database {db_name} for sessionid {sessionid}")
-        params = request.GET.copy()
-        params.update({'database': db_name})
-        request.GET = params
+        request = set_live_demo_db_name(request, db_name)
 
         response = self.get_response(request)
         return response

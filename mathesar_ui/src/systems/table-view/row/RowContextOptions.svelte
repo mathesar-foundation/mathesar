@@ -30,6 +30,10 @@
     { database, schema },
     'canEditTableRecords',
   );
+  $: canViewLinkedEntities = !!$userProfile?.hasPermission(
+    { database, schema },
+    'canViewLinkedEntities',
+  );
 
   async function handleDeleteRecords() {
     if (rowHasRecord(row)) {
@@ -48,12 +52,14 @@
   }
 </script>
 
-<LinkMenuItem
-  href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
-  icon={iconExternalLink}
->
-  Go to Record Page
-</LinkMenuItem>
+{#if canViewLinkedEntities}
+  <LinkMenuItem
+    href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
+    icon={iconExternalLink}
+  >
+    Go to Record Page
+  </LinkMenuItem>
+{/if}
 {#if canEditTableRecords}
   <ButtonMenuItem on:click={handleDeleteRecords} icon={iconDeleteMajor}>
     Delete Record

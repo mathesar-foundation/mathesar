@@ -19,6 +19,7 @@
   export let usesVirtualList = false;
   export let restrictWidthToRowWidth = false;
   export let hasBorder = false;
+  export let hasPaddingRight = false;
   export let clipboardHandler: ClipboardHandler | undefined = undefined;
 
   export let getColumnIdentifier: (
@@ -28,7 +29,7 @@
   export let scrollOffset = 0;
 
   export let horizontalScrollOffset = 0;
-  export let paddingRight = 100;
+  export let paddingRight = hasPaddingRight ? 100 : 0;
 
   export let columnWidths: ImmutableMap<SheetColumnIdentifierKey, number> =
     new ImmutableMap();

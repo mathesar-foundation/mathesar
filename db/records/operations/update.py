@@ -13,9 +13,9 @@ def update_record(table, engine, id_value, record_data):
                 table.update().where(primary_key_column == id_value).values(record_data)
             )
         except DataError as e:
-            if type(e.orig) == DatetimeFieldOverflow:
+            if type(e.orig) is DatetimeFieldOverflow:
                 raise InvalidDate
-            elif type(e.orig) == InvalidDatetimeFormat:
+            elif type(e.orig) is InvalidDatetimeFormat:
                 raise InvalidDateFormat
             else:
                 raise e
