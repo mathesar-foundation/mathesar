@@ -17,6 +17,7 @@ import {
   rolesAllowOperation,
   type AccessOperation,
 } from '@mathesar/utils/permissions';
+import { baseLocale } from '@mathesar/i18n/i18n-util';
 
 export class UserModel {
   readonly id: User['id'];
@@ -29,7 +30,7 @@ export class UserModel {
 
   readonly username: User['username'];
 
-  readonly preferredLanguage: User['preferred_language'];
+  readonly displayLanguage: User['display_language'];
 
   private databaseRoles: Map<DatabaseRole['database'], DatabaseRole>;
 
@@ -47,7 +48,7 @@ export class UserModel {
     this.fullName = userDetails.full_name;
     this.email = userDetails.email;
     this.username = userDetails.username;
-    this.preferredLanguage = userDetails.preferred_language;
+    this.displayLanguage = userDetails.display_language;
   }
 
   hasPermission(
@@ -122,7 +123,7 @@ export class UserModel {
       schema_roles: [...this.schemaRoles.values()],
       full_name: this.fullName,
       email: this.email,
-      preferred_language: this.preferredLanguage,
+      display_language: this.displayLanguage,
     };
   }
 
@@ -163,6 +164,25 @@ export class UserModel {
         (entry) => entry.schema !== schemaRole.schema,
       ),
     });
+  }
+}
+
+export class AnonymousViewerUserModel extends UserModel {
+  constructor() {
+    super({
+      id: 0,
+      is_superuser: false,
+      database_roles: [],
+      schema_roles: [],
+      username: 'Anonymous',
+      full_name: 'Anonymous',
+      email: null,
+      display_language: baseLocale,
+    });
+  }
+
+  hasPermission() {
+    return false;
   }
 }
 

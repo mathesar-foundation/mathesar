@@ -13,6 +13,7 @@
   export let radioLabelKey: string | undefined = undefined;
   export let getRadioLabel: LabelGetter<Option> | undefined = undefined;
   export let disabled = false;
+  export let boxed = false;
 
   /**
    * By default, options will be compared by equality. If you're using objects as
@@ -36,6 +37,7 @@
   {label}
   {ariaLabel}
   {disabled}
+  {boxed}
   let:option
   let:disabled
   on:change
@@ -52,4 +54,5 @@
     }}
   />
   <slot slot="label" />
+  <slot slot="extra" name="extra" />
 </FieldsetGroup>

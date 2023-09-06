@@ -9,9 +9,6 @@ from db.types.base import PostgresType, MathesarCustomType
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.tests.api.test_table_api import check_columns_response
-from mathesar.api.exceptions.database_exceptions import (
-    exceptions as database_api_exceptions
-)
 
 
 def test_column_list(column_test_table, client):
@@ -99,12 +96,12 @@ def test_column_list(column_test_table, client):
 
 
 list_client_with_different_roles = [
-    ('superuser_client_factory', 8, 8),
-    ('db_manager_client_factory', 8, 8),
-    ('db_editor_client_factory', 8, 8),
-    ('schema_manager_client_factory', 8, 0),
-    ('schema_viewer_client_factory', 8, 0),
-    ('db_viewer_schema_manager_client_factory', 8, 8)
+    ('superuser_client_factory', 8, 200, 8),
+    ('db_manager_client_factory', 8, 200, 8),
+    ('db_editor_client_factory', 8, 200, 8),
+    ('schema_manager_client_factory', 8, 403, 0),
+    ('schema_viewer_client_factory', 8, 403, 0),
+    ('db_viewer_schema_manager_client_factory', 8, 200, 8)
 ]
 
 write_client_with_different_roles = [
@@ -117,8 +114,15 @@ write_client_with_different_roles = [
 ]
 
 
-@pytest.mark.parametrize('client_name,expected_count,different_schema_expected_count', list_client_with_different_roles)
-def test_column_list_based_on_permissions(create_patents_table, request, client_name, expected_count, different_schema_expected_count):
+@pytest.mark.parametrize('client_name,expected_count,different_schema_status_code,different_schema_expected_count', list_client_with_different_roles)
+def test_column_list_based_on_permissions(
+    create_patents_table,
+    request,
+    client_name,
+    expected_count,
+    different_schema_status_code,
+    different_schema_expected_count
+):
     table_name = 'NASA Column List 1'
     table = create_patents_table(table_name)
     different_schema_table = create_patents_table(table_name, schema_name="Different Schema")
@@ -127,8 +131,10 @@ def test_column_list_based_on_permissions(create_patents_table, request, client_
     response_data = response.json()
     assert response_data['count'] == expected_count
     response = client.get(f"/api/db/v0/tables/{different_schema_table.id}/columns/")
-    response_data = response.json()
-    assert response_data['count'] == different_schema_expected_count
+    assert response.status_code == different_schema_status_code
+    if different_schema_status_code == 200:
+        response_data = response.json()
+        assert response_data['count'] == different_schema_expected_count
 
 
 @pytest.mark.parametrize(
@@ -162,22 +168,6 @@ def test_column_create(table_fixture, client, request):
     assert actual_new_col["name"] == name
     assert actual_new_col["type"] == db_type.id
     assert actual_new_col["default"] is None
-
-
-def test_column_create_with_long_column_name(column_test_table, client):
-    very_long_string = ''.join(map(str, range(50)))
-    name = 'very_long_identifier_' + very_long_string
-    db_type = PostgresType.NUMERIC
-    data = {
-        "name": name,
-        "type": db_type.id,
-    }
-    response = client.post(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/",
-        data=data,
-    )
-    assert response.status_code == 400
-    assert response.json()[0]['code'] == database_api_exceptions.IdentifierTooLong.error_code
 
 
 @pytest.mark.parametrize('client_name, expected_status_code', write_client_with_different_roles)

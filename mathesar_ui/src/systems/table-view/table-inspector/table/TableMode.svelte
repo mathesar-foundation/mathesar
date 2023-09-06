@@ -26,19 +26,17 @@
 </script>
 
 <div class="table-mode-container">
-  {#if canExecuteDDL}
-    <Collapsible isOpen triggerAppearance="plain">
-      <CollapsibleHeader
-        slot="header"
-        title="Properties"
-        isDbLevelConfiguration
-      />
-      <div slot="content" class="content-container">
-        <TableName />
-        <TableDescription />
-      </div>
-    </Collapsible>
-  {/if}
+  <Collapsible isOpen triggerAppearance="plain">
+    <CollapsibleHeader
+      slot="header"
+      title="Properties"
+      isDbLevelConfiguration
+    />
+    <div slot="content" class="content-container">
+      <TableName disabled={!canExecuteDDL} />
+      <TableDescription disabled={!canExecuteDDL} />
+    </div>
+  </Collapsible>
 
   <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title="Links" isDbLevelConfiguration />
