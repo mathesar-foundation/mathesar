@@ -1370,7 +1370,6 @@ Args:
 */
 DECLARE
   col_create_defs __msar.col_def[];
-  col_create_def record;
 BEGIN
   col_create_defs := msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
