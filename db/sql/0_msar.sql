@@ -1375,14 +1375,11 @@ BEGIN
   col_create_defs := msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
 
-  FOREACH col_create_def IN ARRAY col_create_defs
-  LOOP
-    PERFORM __msar.comment_on_column(
-      tab_id,
-      col_create_def.name_,
-      col_create_def.description
-    );
-  END LOOP;
+  PERFORM __msar.comment_on_column(
+    tab_id,
+    col_create_def.name_,
+    col_create_def.description
+  ) FROM unnest(col_create_defs) AS col_create_def;
 
   RETURN array_agg(attnum)
     FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
