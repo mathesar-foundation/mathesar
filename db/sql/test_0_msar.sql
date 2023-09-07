@@ -191,7 +191,7 @@ BEGIN
   RETURN NEXT is(
     msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
     ARRAY[
-      ('"Column 1"', 'text', null, null, false, '\'Some comment\'')
+      ('"Column 1"', 'text', null, null, false, '''Some comment''')
     ]::__msar.col_def[],
     'Comments should be sanitized'
   );
