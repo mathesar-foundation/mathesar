@@ -27,9 +27,6 @@ case $(dpkg-architecture -q DEB_HOST_ARCH) in
         ;;
 esac
 
-
-# Use --no-deps to only install pinned versions in requirements.txt,
-# and to avoid https://github.com/pypa/pip/issues/9644
 dh_virtualenv
 
 PACKAGE_BUILD_DIR="$(pwd)/debian/mathesar"
