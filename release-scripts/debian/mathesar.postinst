@@ -25,7 +25,7 @@ EOF
     if ! getent passwd $USER >/dev/null; then
       adduser --quiet --system --group --no-create-home --home /var/lib/mathesar $USER
     fi
-    for DIR in /var/lib/mathesar /var/log/mathesar /etc/mathesar; do
+    for DIR in /var/lib/mathesar /var/log/mathesar ; do
       if ! dpkg-statoverride --list --quiet $DIR >/dev/null; then
         dpkg-statoverride --force-statoverride-add --quiet --update --add $USER "$(id -gn $USER)" 0755 $DIR
       fi
