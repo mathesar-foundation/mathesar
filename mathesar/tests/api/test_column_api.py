@@ -818,32 +818,29 @@ def test_list_columns_with_unknown_types(table_with_unknown_types, client):
     assert was_col2_found
 
 
-@pytest.mark.parametrize(
-    'expected_description',
-    [
-        None,
+def test_column_description_set_and_unset(column_test_table, client):
+    expected_descriptions = [
         'Some comment',
+        None,
     ]
-)
-def test_column_description_when_patching(column_test_table, client, expected_description):
     table = column_test_table
     column = table.columns.first()
     assert column is not None
-    if expected_description is not None:
+    for expected_description in expected_descriptions:
         data = dict(description=expected_description)
         response = client.patch(
             f"/api/db/v0/tables/{table.id}/columns/{column.id}/",
             data=data
         )
-        response_data = response.json()
+        response_json = response.json()
         assert response.status_code == 200
-    response = client.get(
-        f"/api/db/v0/tables/{table.id}/columns/{column.id}/",
-    )
-    response_data = response.json()
-    assert response.status_code == 200
-    actual_description = response_data.get('description')
-    assert actual_description == expected_description
+        response = client.get(
+            f"/api/db/v0/tables/{table.id}/columns/{column.id}/",
+        )
+        response_json = response.json()
+        assert response.status_code == 200
+        actual_description = response_json.get('description')
+        assert actual_description == expected_description
 
 
 @pytest.mark.parametrize(
