@@ -127,6 +127,20 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+__msar.get_fully_qualified_object_name(sch_name text, obj_name text) RETURNS text AS $$/*
+Return the fully-qualified name for a given database object (e.g., table).
+
+Args:
+  sch_name: The schema of the object, quoted.
+  obj_name: The name of the object, unqualified and quoted.
+*/
+BEGIN
+  RETURN format('%s.%s', sch_name, obj_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_fully_qualified_object_name(sch_name text, obj_name text) RETURNS text AS $$/*
 Return the fully-qualified, properly quoted, name for a given database object (e.g., table).
 
@@ -135,7 +149,7 @@ Args:
   obj_name: The name of the object, unqualified and unquoted.
 */
 BEGIN
-  RETURN format('%s.%s', quote_ident(sch_name), quote_ident(obj_name));
+  RETURN __msar.get_fully_qualified_object_name(quote_ident(sch_name), quote_ident(obj_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -2233,7 +2247,11 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_column(tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_column(
+  tab_name text,
+  col_name text,
+  comment_ text
+) RETURNS text AS $$/*
 Change the description of a column, returning command executed.
 
 Args:
@@ -2266,7 +2284,7 @@ Args:
   comment_: The new comment.
 */
 SELECT __msar.comment_on_column(
-  msar.get_fully_qualified_object_name(sch_name, tab_name),
+  __msar.get_fully_qualified_object_name(sch_name, tab_name),
   col_name,
   comment_
 );
@@ -2274,7 +2292,11 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_column(tab_id oid, col_name text, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_column(
+  tab_id oid,
+  col_name text,
+  comment_ text
+) RETURNS text AS $$/*
 Change the description of a column, returning command executed.
 
 Args:
@@ -2291,7 +2313,11 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_column(tab_id oid, col_id integer, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_column(
+  tab_id oid,
+  col_id integer,
+  comment_ text
+) RETURNS text AS $$/*
 Change the description of a column, returning command executed.
 
 Args:
