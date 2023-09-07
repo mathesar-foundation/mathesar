@@ -72,7 +72,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     !!! warning "Customize your password"
         Be sure to change the password `1234` in the command above to something more secure and private. Record your custom password somewhere safe. You will need to reference it later.
 
-1. Next, we have to create a database for storing Mathesar metadata. You either need to be a `SUPERUSER` or `OWNER` of the database. In this guide, we will be setting the user to be `OWNER` of the database as it is slightly restrictive compared to a  `SUPERUSER`.
+1. Next, we have to create a database for storing Mathesar metadata. Your PostgreSQL user will either need to be a `SUPERUSER` or `OWNER` of the database. In this guide, we will be setting the user to be `OWNER` of the database as it is slightly restrictive compared to a `SUPERUSER`.
 
     ```postgresql
     CREATE DATABASE mathesar_django OWNER mathesar;
