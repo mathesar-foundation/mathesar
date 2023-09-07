@@ -13,7 +13,6 @@ cp -r ../mathesar build/mathesar/
 cp -r ../demo build/demo/
 cp -r ../config build/config/
 cp -r ../db build/db
-cp -r ../media build/media
 cp -r debian build/debian
 cd build
 

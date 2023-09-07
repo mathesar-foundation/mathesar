@@ -2,7 +2,6 @@ Source: mathesar
 Section: contrib/python
 Priority: optional
 Maintainer: Mathesar Team <hello@mathesar.org>
-# keep this list in sync with the build dependencies in docker/Dockerfile-dhvirtualenv.
 Build-Depends:
  debhelper-compat (= 12),
  dh-virtualenv (>= 1.1),
