@@ -7,7 +7,7 @@ USER="mathesar"
 case "$1" in
   configure|reconfigure)
     # generate config files with defaults if they don't exist
-    mkdir -p '$DATADIRECTORY'
+    mkdir -p "$DATADIRECTORY"
     mkdir -p "/etc/mathesar/"
     if [ ! -e "$CONFIGFILE" ]; then
         secret_key=$(base64 /dev/urandom | head -c50)iu
@@ -22,19 +22,12 @@ MEDIA_ROOT='$DATADIRECTORY/.media'
 DEBUG=true
 EOF
     fi
-
     if ! getent passwd $USER >/dev/null; then
       adduser --quiet --system --group --no-create-home --home /var/lib/mathesar $USER
     fi
-
-    for DIR in /var/lib/mathesar /var/log/mathesar; do
+    for DIR in /var/lib/mathesar /var/log/mathesar /etc/mathesar; do
       if ! dpkg-statoverride --list --quiet $DIR >/dev/null; then
         dpkg-statoverride --force-statoverride-add --quiet --update --add $USER "$(id -gn $USER)" 0755 $DIR
-      fi
-    done
-    for DIR in /etc/mathesar; do
-      if ! dpkg-statoverride --list --quiet $DIR >/dev/null; then
-        dpkg-statoverride --force-statoverride-add --quiet --update --add $USER "$(id -gn $USER)" 0777 $DIR
       fi
     done
     ;;
