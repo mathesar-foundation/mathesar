@@ -64,6 +64,7 @@ CREATE SCHEMA IF NOT EXISTS msar;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+
 CREATE OR REPLACE FUNCTION
 __msar.exec_ddl(command text) RETURNS text AS $$/*
 Execute the given command, returning the command executed.
@@ -2248,20 +2249,25 @@ __msar.comment_on_column(
   col_name text,
   comment_ text
 ) RETURNS text AS $$/*
-Change the description of a column, returning command executed.
+Change the description of a column, returning command executed. If comment_ is NULL, column's
+comment is removed.
 
 Args:
   tab_name: The name of the table containg the column whose comment we will change.
   col_name: The name of the column whose comment we'll change
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
-SELECT __msar.exec_ddl(
+DECLARE
+  comment_or_null text := COALESCE(comment_, 'NULL');
+BEGIN
+RETURN __msar.exec_ddl(
   'COMMENT ON COLUMN %s.%s IS %s',
   tab_name,
   col_name,
-  comment_
+  comment_or_null
 );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -2284,7 +2290,7 @@ SELECT __msar.comment_on_column(
   col_name,
   comment_
 );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
@@ -2305,7 +2311,7 @@ SELECT __msar.comment_on_column(
   col_name,
   comment_
 );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
@@ -2326,7 +2332,7 @@ SELECT __msar.comment_on_column(
   msar.get_column_name(tab_id, col_id),
   comment_
 );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 ----------------------------------------------------------------------------------------------------
