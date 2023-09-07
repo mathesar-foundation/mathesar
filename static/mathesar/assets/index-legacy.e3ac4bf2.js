@@ -1,0 +1,1 @@
+System.register(["./index-legacy.817da01b.js","./main-legacy.4f55bd7f.js"],(function(e,t){"use strict";var s,a;return{setters:[e=>{s=e.default},e=>{a=e.e}],execute:function(){e("default",a(s,{}))}}}));
