@@ -114,9 +114,7 @@ def create_datafile(data):
         )
     else:
         max_level = data.get('max_level', 0)
-        sheet_index = data.get('sheet_index', 1)
-        # Pandas indexes sheets from 0 and not 1.
-        sheet_index = sheet_index - 1
+        sheet_index = data.get('sheet_index', 0)
         datafile = DataFile(
             file=raw_file,
             base_name=base_name,
