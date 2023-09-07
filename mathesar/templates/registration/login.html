@@ -1,17 +1,19 @@
 {% extends 'mathesar/login_base.html' %}
+{% load i18n %}
+{% translate "Logging In..." as logging_in_loader_text %}
 
-{% block h1 %}Log in to Mathesar{% endblock %}
+{% block h1 %}{% translate "Log in to Mathesar" %}{% endblock %}
 
 {% block box_content %}
   <form
     method="post"
-    onsubmit="showLoadingStatus('Logging In...');"
+    onsubmit="showLoadingStatus({{ logging_in_loader_text }});"
   >
     {% csrf_token %}
     <div class="labeled-input layout-stacked">
       <label for="id_username" class="label-component">
         <span class="label-content">
-          <span class="label">Username</span>
+          <span class="label">{% translate "username"|title %}</span>
           <span class="input">
             <input type="text" name="username"
             class="input-element{% if form.username.errors %} has-error{% endif %}"
@@ -32,7 +34,7 @@
     <div class="labeled-input layout-stacked">
       <label for="id_password" class="label-component">
         <span class="label-content">
-          <span class="label">Password</span>
+          <span class="label">{% translate "password"|title %}</span>
           <span class="input">
             <input type="password" name="password"
             class="input-element{% if form.password.errors %} has-error{% endif %}"
@@ -49,7 +51,7 @@
       </label>
     </div>
     {% if form.non_field_errors %}
-      <div class="error-message">
+      <div class="message-box error-message">
         <div class="icon">&#9888;</div>
         <div>
           {% for error in form.non_field_errors %}
@@ -60,7 +62,7 @@
     {% endif %}
     <div class="footer">
       <button class="btn btn-primary submit-button" type="submit">
-        Log In
+        {% translate "log in"|title %}
       </button>
     </div>
   </form>
