@@ -191,7 +191,8 @@ def _process_column_alter_dict(column_data, column_attnum=None):
         "column_default_dict": {"is_dynamic": <bool>, "value": <any>}
         "nullable": <bool>,
         "name": <str>,
-        "delete": <bool>
+        "delete": <bool>,
+        "description": <str>
     }
 
     Output form:
@@ -200,7 +201,7 @@ def _process_column_alter_dict(column_data, column_attnum=None):
         "name": <str>,
         "not_null": <bool>,
         "default": <any>,
-        "delete": <bool>
+        "delete": <bool>,
         "description": <str>
     }
 
