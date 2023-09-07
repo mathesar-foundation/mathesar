@@ -1587,7 +1587,8 @@ DECLARE
       "attnum": 2,
       "name": "nullab numeric",
       "not_null": false,
-      "type": {"name": "numeric", "options": {"precision": 8, "scale": 4}}
+      "type": {"name": "numeric", "options": {"precision": 8, "scale": 4}},
+      "description": "This is a comment!"
     },
     {"attnum": 3, "name": "newcol2"},
     {"attnum": 4, "delete": true},
@@ -1607,8 +1608,45 @@ BEGIN
   RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(5,3)');
   RETURN NEXT col_not_null('col_alters', 'col_opts');
   RETURN NEXT col_not_null('col_alters', 'timecol');
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'This is a comment!');
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 3), NULL);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_comment_on_column() RETURNS SETOF TEXT AS $$
+DECLARE
+  change1 jsonb := $j$[
+    {
+      "attnum": 2,
+      "description": "abc1"
+    },
+    {"attnum": 3, "name": "newcol2"}
+  ]$j$;
+  change2 jsonb := $j$[
+    {
+      "attnum": 2,
+      "description": "abc2"
+    }
+  ]$j$;
+  change3 jsonb := $j$[
+    {
+      "attnum": 2,
+      "name": "newcol4",
+      "description": null
+    },
+    {"attnum": 3, "name": "newcol3"}
+  ]$j$;
+BEGIN
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), NULL);
+  PERFORM msar.alter_columns('col_alters'::regclass::oid, change1);
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'abc1');
+  PERFORM msar.alter_columns('col_alters'::regclass::oid, change2);
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'abc2');
+  PERFORM msar.alter_columns('col_alters'::regclass::oid, change3);
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), NULL);
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION setup_roster() RETURNS SETOF TEXT AS $$

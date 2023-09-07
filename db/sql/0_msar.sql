@@ -113,6 +113,15 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+CREATE OR REPLACE FUNCTION jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
+Wraps the `?` jsonb operator for improved readability.
+*/
+  BEGIN
+    RETURN data ? key;
+  END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
 Return the name for a given schema, quoted as appropriate.
 
@@ -1375,11 +1384,14 @@ BEGIN
   col_create_defs := msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
 
-  PERFORM __msar.comment_on_column(
+  PERFORM
+  __msar.comment_on_column(
     tab_id,
     col_create_def.name_,
     col_create_def.description
-  ) FROM unnest(col_create_defs) AS col_create_def;
+  )
+  FROM unnest(col_create_defs) AS col_create_def
+  WHERE col_create_def.description IS NOT NULL;
 
   RETURN array_agg(attnum)
     FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
@@ -2212,6 +2224,7 @@ DECLARE
 BEGIN
   -- Get the string specifying all non-name-change alterations to perform.
   col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
+
   -- Perform the non-name-change alterations
   IF col_alter_str IS NOT NULL THEN
     PERFORM __msar.exec_ddl(
@@ -2220,16 +2233,18 @@ BEGIN
       msar.process_col_alter_jsonb(tab_id, col_alters)
     );
   END IF;
+
   -- Here, we perform all description-changing alterations.
-  FOR r in SELECT attnum, description
-    FROM jsonb_to_recordset(col_alters) AS x(attnum integer, description text)
-  LOOP
-    PERFORM __msar.comment_on_column(
-      tab_id := tab_id,
-      col_id := r.attnum,
-      comment_ := quote_literal(r.description)
-    );
-  END LOOP;
+  PERFORM __msar.comment_on_column(
+    tab_id := tab_id,
+    col_id := (col_alter->>'attnum')::integer,
+    comment_ := quote_literal(col_alter->>'description')
+  )
+  FROM (
+    SELECT jsonb_array_elements(col_alters) AS col_alter
+  ) subquery
+  WHERE jsonb_key_exists(col_alter, 'description');
+
   -- Here, we perform all name-changing alterations.
   FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
   LOOP

@@ -220,16 +220,20 @@ def _process_column_alter_dict(column_data, column_attnum=None):
     column_delete = column_data.get("delete")
     column_not_null = not column_nullable if column_nullable is not None else None
     column_name = (column_data.get(NAME) or '').strip() or None
-    column_description = (column_data.get(DESCRIPTION) or '').strip() or None
     raw_col_alter_def = {
         "attnum": column_attnum or column_data.get("attnum"),
         "type": new_type,
         "not_null": column_not_null,
         "name": column_name,
         "delete": column_delete,
-        "description": column_description,
     }
     col_alter_def = {k: v for k, v in raw_col_alter_def.items() if v is not None}
+    # NOTE DESCRIPTION is set separately, because it shouldn't be removed if its
+    # value is None (that signals that the description should be removed in the
+    # db).
+    if DESCRIPTION in column_data:
+        column_description = column_data.get(DESCRIPTION)
+        col_alter_def[DESCRIPTION] = column_description
     default_dict = column_data.get(DEFAULT_DICT, {})
     if default_dict is not None and DEFAULT_KEY in default_dict:
         default_value = column_data.get(DEFAULT_DICT, {}).get(DEFAULT_KEY)
