@@ -2210,7 +2210,8 @@ BEGIN
     );
   END IF;
   -- Here, we perform all description-changing alterations.
-  FOR r in SELECT attnum, description FROM jsonb_to_recordset(col_alters) AS x(attnum integer, description text)
+  FOR r in SELECT attnum, description
+    FROM jsonb_to_recordset(col_alters) AS x(attnum integer, description text)
   LOOP
     PERFORM __msar.comment_on_column(
       tab_id := tab_id,
@@ -2228,7 +2229,8 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- Comment on column --------------------------------------------------------------------------------
+-- Comment on column -------------------------------------------------------------------------------
+
 
 CREATE OR REPLACE FUNCTION
 __msar.comment_on_column(tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
@@ -2247,8 +2249,14 @@ SELECT __msar.exec_ddl(
 );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
+
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_column(sch_name text, tab_name text, col_name text, comment_ text) RETURNS text AS $$/*
+__msar.comment_on_column(
+  sch_name text,
+  tab_name text,
+  col_name text,
+  comment_ text
+) RETURNS text AS $$/*
 Change the description of a column, returning command executed.
 
 Args:
@@ -2263,6 +2271,7 @@ SELECT __msar.comment_on_column(
   comment_
 );
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 CREATE OR REPLACE FUNCTION
 __msar.comment_on_column(tab_id oid, col_name text, comment_ text) RETURNS text AS $$/*
