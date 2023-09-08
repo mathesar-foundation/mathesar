@@ -19,7 +19,6 @@ DJANGO_DATABASE_URL=postgres://mathesar:mathesar@localhost:5432/mathesar_django
 MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@localhost:5432/mathesar)
 ALLOWED_HOSTS='.localhost, 127.0.0.1'
 MEDIA_ROOT='$DATADIRECTORY/.media'
-DEBUG=true
 EOF
     fi
     if ! getent passwd $USER >/dev/null; then
