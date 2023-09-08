@@ -400,7 +400,7 @@ class ExclusionViolationAPIException(MathesarAPIException):
     def __init__(
             self,
             exception,
-            message=None,
+            message="This column does not violate an exclusion constraint, so an exclusion constraint cannot be set",
             field=None,
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR

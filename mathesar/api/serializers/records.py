@@ -1,4 +1,4 @@
-from psycopg2.errors import NotNullViolation, UniqueViolation, CheckViolation
+from psycopg2.errors import NotNullViolation, UniqueViolation, CheckViolation, ExclusionViolation
 from rest_framework import serializers
 from rest_framework import status
 from sqlalchemy.exc import IntegrityError
@@ -53,6 +53,12 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
+            elif type(e.orig) == ExclusionViolation:
+                raise database_api_exceptions.ExclusionViolationAPIException(
+                    e,
+                    message="The requested update violates a exclusion constraint",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         return record
@@ -79,6 +85,12 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
                 raise database_api_exceptions.CheckViolationAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
+                )
+            elif type(e.orig) == ExclusionViolation:
+                raise database_api_exceptions.ExclusionViolationAPIException(
+                    e,
+                    message="The requested update violates a exclusion constraint",
+                    status_code=status.HTTP_400_BAD_REQUEST,
                 )
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
