@@ -113,7 +113,7 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
+CREATE OR REPLACE FUNCTION __msar.jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
 Wraps the `?` jsonb operator for improved readability.
 */
   BEGIN
@@ -2220,7 +2220,8 @@ query.
 */
 DECLARE
   r RECORD;
-  col_alter_str text;
+  col_alter_str TEXT;
+  description_alter RECORD;
 BEGIN
   -- Get the string specifying all non-name-change alterations to perform.
   col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
@@ -2235,15 +2236,19 @@ BEGIN
   END IF;
 
   -- Here, we perform all description-changing alterations.
-  PERFORM __msar.comment_on_column(
-    tab_id := tab_id,
-    col_id := (col_alter->>'attnum')::integer,
-    comment_ := quote_literal(col_alter->>'description')
-  )
-  FROM (
-    SELECT jsonb_array_elements(col_alters) AS col_alter
-  ) subquery
-  WHERE jsonb_key_exists(col_alter, 'description');
+  FOR description_alter IN 
+    SELECT
+      (col_alter->>'attnum')::integer AS col_id,
+      quote_literal(col_alter->>'description') AS comment_
+    FROM jsonb_array_elements(col_alters) AS col_alter
+    WHERE __msar.jsonb_key_exists(col_alter, 'description')
+  LOOP
+    PERFORM __msar.comment_on_column(
+      tab_id := tab_id,
+      col_id := description_alter.col_id,
+      comment_ := description_alter.comment_
+    );
+  END LOOP;
 
   -- Here, we perform all name-changing alterations.
   FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
