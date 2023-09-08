@@ -25,5 +25,6 @@ Provides: mathesar
 Pre-Depends: dpkg (>= 1.16.1)
 Depends:
  debconf,
+ python3-distutils,
  ${shlibs:Depends}
 Description: Web application providing an intuitive user experience to databases.
