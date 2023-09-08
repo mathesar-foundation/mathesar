@@ -2291,7 +2291,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_column(
+msar.comment_on_column(
   sch_name text,
   tab_name text,
   col_name text,
@@ -2306,9 +2306,9 @@ Args:
   comment_: The new comment.
 */
 SELECT __msar.comment_on_column(
-  __msar.get_fully_qualified_object_name(sch_name, tab_name),
-  col_name,
-  comment_
+  msar.get_fully_qualified_object_name(sch_name, tab_name),
+  quote_ident(col_name),
+  quote_literal(comment_)
 );
 $$ LANGUAGE SQL;
 
@@ -2351,6 +2351,27 @@ SELECT __msar.comment_on_column(
   __msar.get_relation_name(tab_id),
   msar.get_column_name(tab_id, col_id),
   comment_
+);
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.comment_on_column(
+  tab_id oid,
+  col_id integer,
+  comment_ text
+) RETURNS text AS $$/*
+Change the description of a column, returning command executed.
+
+Args:
+  tab_id: The OID of the table containg the column whose comment we will change.
+  col_id: The ATTNUM of the column whose comment we will change.
+  comment_: The new comment.
+*/
+SELECT __msar.comment_on_column(
+  __msar.get_relation_name(tab_id),
+  msar.get_column_name(tab_id, col_id),
+  quote_literal(comment_)
 );
 $$ LANGUAGE SQL;
 
