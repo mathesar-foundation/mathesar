@@ -1,24 +1,15 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import type { CommonData } from '@mathesar/utils/preloadData';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databases } from '@mathesar/stores/databases';
-  import { setReleasesStoreInContext } from '@mathesar/stores/releases';
-  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
   import { getDatabasePageUrl } from './urls';
 
-  export let commonData: CommonData;
-
-  $: userProfileStore = setUserProfileStoreInContext(commonData.user);
+  const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
-  $: if (userProfile.isSuperUser) {
-    // Toggle these lines to test with a mock tag name
-    // setReleasesStoreInContext('1.75.0');
-    setReleasesStoreInContext(commonData.current_release_tag_name);
-  }
 
   $: firstDatabase = $databases.data?.[0];
 </script>
@@ -35,7 +26,7 @@
   <UserProfileRoute />
 </Route>
 
-{#if userProfile.isSuperUser}
+{#if userProfile?.isSuperUser}
   <Route path="/administration/*" firstmatch>
     <AdminRoute />
   </Route>
