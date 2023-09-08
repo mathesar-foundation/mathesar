@@ -143,6 +143,27 @@ See our [Live demo mode](./demo/README.md) guide for more information on enablin
     docker exec -it mathesar_db psql -U mathesar
     ```
 
+
+## Building Debian package
+
+- On a Debian machine, install the following dependencies
+    
+    ```
+    sudo apt install debhelper-compat dh-virtualenv libsystemd-dev libpq-dev libicu-dev pkg-config lsb-release python3-dev python3 python3-setuptools python3-pip python3-venv tar
+    ```
+
+- Assuming you have already have set up the Mathesar environment and can run Mathesar, run the collectstatic command
+
+  ```
+    python manage.py collectstatic 
+   ```
+  
+- From the mathesar directory, run the build script to generate the debian package
+  
+    ```
+    cd release-scripts && source build-debian.sh
+    ```
+ 
 ## Troubleshooting
 
 ### Permissions within Windows
