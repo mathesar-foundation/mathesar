@@ -19,7 +19,6 @@ override_dh_auto_configure:
 # gains are only marginal
 override_dh_dwz:
 
-override_dh_strip_nondeterminism:
 # dh_shlibdeps calls dpkg-shlibdeps, which finds all the binary files
 # (executables and shared libs) in the package, and looks for the shared
 # libraries that they depend on. It then adds a dependency on the package that
