@@ -19,7 +19,7 @@ RUN set -ex; \
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
 ENV PGDATA /var/lib/postgresql/mathesar
-VOLUME /etc/postgres/15/mathesar
+VOLUME /etc/postgres/
 VOLUME /var/lib/postgresql/mathesar
 
 
@@ -28,20 +28,7 @@ VOLUME /var/lib/postgresql/mathesar
 # in-progress transactions are aborted, allowing PostgreSQL to stop cleanly and
 # flush tables to disk, which is the best compromise available to avoid data
 # corruption.
-#
-# Users who know their applications do not keep open long-lived idle connections
-# may way to use a value of SIGTERM instead, which corresponds to "Smart
-# Shutdown mode" in which any existing sessions are allowed to finish and the
-# server stops when all sessions are terminated.
-#
-# See https://www.postgresql.org/docs/12/server-shutdown.html for more details
-# about available PostgreSQL server shutdown signals.
-#
-# See also https://www.postgresql.org/docs/12/server-start.html for further
-# justification of this as the default value, namely that the example (and
-# shipped) systemd service files use the "Fast Shutdown mode" for service
-# termination.
-#
+
 STOPSIGNAL SIGINT
 
 EXPOSE 5432
