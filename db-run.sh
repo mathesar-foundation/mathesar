@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -e
 
 # Loads various settings that are used elsewhere in the script
 # This should be called before any other functions
