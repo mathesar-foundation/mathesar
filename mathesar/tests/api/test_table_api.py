@@ -2092,3 +2092,35 @@ def test_create_table_using_null_id_excel_data_file(client, null_id_excel_data_f
         client, table_name, expt_name, null_id_excel_data_file, schema, first_row,
         column_names, import_target_table=None
     )
+
+
+def _create_excel_datafile_using_sheet_index_param(filepath, sheet_index):
+    with open(filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='multiple_sheets',
+            type='excel',
+            sheet_index=sheet_index
+        )
+    return data_file
+
+
+def test_create_table_with_multiple_sheets_excel_file(client, multiple_sheets_excel_filepath, schema):
+    column_names = ['Name', 'Age', 'Email']
+    test_datafile_objects_with_sheet_index = [
+        _create_excel_datafile_using_sheet_index_param(multiple_sheets_excel_filepath, sheet_index)
+        for sheet_index in range(3)
+    ]
+    expected_first_row_data = [
+        (1, 'Jim', '25', 'jim@example.com'),
+        (1, 'John', '25', 'john@example.com'),
+        (1, 'Jake', '25', 'jake@example.com'),
+    ]
+
+    for index, datafile in enumerate(test_datafile_objects_with_sheet_index):
+        table_name = f'Table {index}'
+        check_create_table_response(
+            client, table_name, table_name, datafile, schema, expected_first_row_data[index],
+            column_names, import_target_table=None
+        )
