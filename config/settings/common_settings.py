@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
-from decouple import Csv, config as decouple_config
+from decouple import Csv, UndefinedValueError, config as decouple_config
 from dj_database_url import parse as db_url
 
 
@@ -94,11 +94,20 @@ DATABASES = {
     db_key: db_url(url_string)
     for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
-DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
+try:
+    DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
+except UndefinedValueError:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+
+print(DATABASES)
 
 for db_key, db_dict in DATABASES.items():
-    # Engine can be '.postgresql' or '.postgresql_psycopg2'
-    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
+    # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s),
+    # however for the internal 'default' db 'sqlite3' can be used.
+    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql') and db_key != 'default':
         raise ValueError(
             f"{db_key} is not a PostgreSQL database. "
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
