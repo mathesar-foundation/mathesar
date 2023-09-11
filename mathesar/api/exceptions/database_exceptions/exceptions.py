@@ -498,6 +498,22 @@ class UnsupportedJSONFormat(MathesarAPIException):
         super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
+class UnsupportedFileFormat(MathesarAPIException):
+    error_code = ErrorCodes.UnsupportedFileFormat.value
+
+    def __init__(
+            self,
+            exception=None,
+            message='This file format is not supported.',
+            field=None,
+            details=None,
+            status_code=status.HTTP_400_BAD_REQUEST
+    ):
+        if exception is None:
+            exception = Exception(message)
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
 class DynamicDefaultModificationError(Exception):
     def __init__(self, column=None):
         self.column = column

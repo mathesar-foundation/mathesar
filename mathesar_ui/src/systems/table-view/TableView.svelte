@@ -127,6 +127,7 @@
           restrictWidthToRowWidth={!usesVirtualList}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
+          hasPaddingRight
         >
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
