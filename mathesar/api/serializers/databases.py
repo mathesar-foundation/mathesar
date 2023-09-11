@@ -7,11 +7,6 @@ from mathesar.models.base import Database
 
 
 class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
-    name = serializers.CharField()
-    db_username = serializers.CharField()
-    db_password = serializers.CharField()
-    db_host = serializers.CharField()
-    db_port = serializers.IntegerField()
     supported_types_url = serializers.SerializerMethodField()
 
     class Meta:

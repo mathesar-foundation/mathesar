@@ -12,9 +12,9 @@ def create_mathesar_engine(db_model):
 
 def _get_credentials_for_db_model(db_model):
     return dict(
-        username=db_model.db_username,
-        password=db_model.db_password,
-        hostname=db_model.db_host,
+        username=db_model.username,
+        password=db_model.password,
+        hostname=db_model.host,
         database=db_model.name,
-        port=db_model.db_port,
+        port=db_model.port,
     )

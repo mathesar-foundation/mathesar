@@ -101,10 +101,10 @@ def create_dj_db(request):
         add_db_to_dj_settings(db_name)
         database_model = Database.current_objects.create(
             name=db_name,
-            db_username='mathesar',
-            db_password='mathesar',
-            db_host='mathesar_dev_db',
-            db_port=5432
+            username='mathesar',
+            password='mathesar',
+            host='mathesar_dev_db',
+            port=5432
         )
         return database_model
     yield _create_and_add
@@ -129,10 +129,10 @@ def test_db_model(request, test_db_name, django_db_blocker):
     with django_db_blocker.unblock():
         database_model = Database.current_objects.create(
             name=test_db_name,
-            db_username='mathesar',
-            db_password='mathesar',
-            db_host='mathesar_dev_db',
-            db_port=5432
+            username='mathesar',
+            password='mathesar',
+            host='mathesar_dev_db',
+            port=5432
         )
     yield database_model
     database_model.delete()

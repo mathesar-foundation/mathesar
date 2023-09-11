@@ -27,20 +27,20 @@ class LiveDemoModeMiddleware:
         database, created = Database.current_objects.get_or_create(
             name=db_name,
             defaults={
-                'db_username': settings.DATABASES['default']['USER'],
-                'db_password': settings.DATABASES['default']['PASSWORD'],
-                'db_host': settings.DATABASES['default']['HOST'],
-                'db_port': settings.DATABASES['default']['PORT']
+                'username': settings.DATABASES['default']['USER'],
+                'password': settings.DATABASES['default']['PASSWORD'],
+                'host': settings.DATABASES['default']['HOST'],
+                'port': settings.DATABASES['default']['PORT']
             }
         )
         if created:
             create_demo_database(
                 db_name,
-                database.db_username,
-                database.db_password,
-                database.db_host,
+                database.username,
+                database.password,
+                database.host,
                 settings.DATABASES['default']['NAME'],
-                database.db_port,
+                database.port,
                 settings.MATHESAR_DEMO_TEMPLATE
             )
             append_db_and_arxiv_schema_to_log(db_name, ARXIV)

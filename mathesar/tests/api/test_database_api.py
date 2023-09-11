@@ -51,10 +51,10 @@ def db_dj_model(test_db_name):
     db = Database.objects.get_or_create(
         name=test_db_name,
         defaults={
-            'db_username': 'mathesar',
-            'db_password': 'mathesar',
-            'db_host': 'mathesar_dev_db',
-            'db_port': 5432
+            'username': 'mathesar',
+            'password': 'mathesar',
+            'host': 'mathesar_dev_db',
+            'port': 5432
         }
     )[0]
     reflect_db_objects(get_empty_metadata())

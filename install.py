@@ -38,10 +38,10 @@ def main():
             install_on_db_with_key(credentials, skip_confirm)
             Database.objects.create(
                 name=credentials["NAME"],
-                db_username=credentials["USER"],
-                db_password=credentials["PASSWORD"],
-                db_host=credentials["HOST"],
-                db_port=credentials["PORT"],
+                username=credentials["USER"],
+                password=credentials["PASSWORD"],
+                host=credentials["HOST"],
+                port=credentials["PORT"],
                 editable=False
             ).save()
         except IntegrityError as e:
@@ -51,11 +51,11 @@ def main():
 
 def install_on_db_with_key(credentials, skip_confirm):
     return install.install_mathesar(
-        name=credentials["NAME"],
-        db_username=credentials["USER"],
-        db_password=credentials["PASSWORD"],
-        db_host=credentials["HOST"],
-        db_port=credentials["PORT"],
+        database_name=credentials["NAME"],
+        hostname=credentials["HOST"],
+        username=credentials["USER"],
+        password=credentials["PASSWORD"],
+        port=credentials["PORT"],
         skip_confirm=skip_confirm
     )
 

@@ -7,43 +7,43 @@ from db.types import install as types_install
 
 
 def install_mathesar(
-        name, db_username, db_password, db_host, db_port, skip_confirm
+        database_name, username, password, hostname, port, skip_confirm
 ):
     """Create database and install Mathesar on it."""
     user_db_engine = engine.create_future_engine(
-        db_username, db_password, db_host, name, db_port,
+        username, password, hostname, database_name, port,
         connect_args={"connect_timeout": 10}
     )
     try:
         user_db_engine.connect()
-        print(f"Installing Mathesar on preexisting PostgreSQL database {name} at host {db_host}...")
+        print(f"Installing Mathesar on preexisting PostgreSQL database {database_name} at host {hostname}...")
         sql_install.install(user_db_engine)
         types_install.install_mathesar_on_database(user_db_engine)
         user_db_engine.dispose()
     except OperationalError:
         database_created = _create_database(
-            name,
-            db_username,
-            db_password,
-            db_host,
-            db_port,
+            database_name=database_name,
+            hostname=hostname,
+            username=username,
+            password=password,
+            port=port,
             skip_confirm=skip_confirm
         )
         if database_created:
-            print(f"Installing Mathesar on PostgreSQL database {name} at host {db_host}...")
+            print(f"Installing Mathesar on PostgreSQL database {database_name} at host {hostname}...")
             sql_install.install(user_db_engine)
             types_install.install_mathesar_on_database(user_db_engine)
             user_db_engine.dispose()
         else:
-            print(f"Skipping installing on DB with key {name}.")
+            print(f"Skipping installing on DB with key {database_name}.")
 
 
-def _create_database(name, db_username, db_password, db_host, db_port, skip_confirm=True):
+def _create_database(database_name, hostname, username, password, port, skip_confirm=True):
     if skip_confirm is True:
         create_database = "y"
     else:
         create_database = input(
-            f"Create a new Database called {name}? (y/n) > "
+            f"Create a new Database called {database_name}? (y/n) > "
         )
     if create_database.lower() in ["y", "yes"]:
         # We need to connect to an existing database inorder to create a new Database.
@@ -51,15 +51,15 @@ def _create_database(name, db_username, db_password, db_host, db_port, skip_conf
         # TODO Throw correct error when the default postgres database does not exists(which is very rare but still possible)
         root_database = "postgres"
         root_db_engine = engine.create_future_engine(
-            db_username, db_password, db_host, root_database, db_port,
+            username, password, hostname, root_database, port,
             connect_args={"connect_timeout": 10}
         )
         with root_db_engine.connect() as conn:
             conn.execution_options(isolation_level="AUTOCOMMIT")
-            conn.execute(text(f'CREATE DATABASE "{name}"'))
+            conn.execute(text(f'CREATE DATABASE "{database_name}"'))
         root_db_engine.dispose()
-        print(f"Created DB is {name}.")
+        print(f"Created DB is {database_name}.")
         return True
     else:
-        print(f"Database {name} not created!")
+        print(f"Database {database_name} not created!")
         return False

@@ -111,10 +111,10 @@ _engine_cache = {}
 
 class Database(ReflectionManagerMixin, BaseModel):
     name = models.CharField(max_length=128, unique=True)
-    db_username = EncryptedCharField(max_length=255)
-    db_password = EncryptedCharField(max_length=255)
-    db_host = models.CharField(max_length=255)
-    db_port = models.IntegerField()
+    username = EncryptedCharField(max_length=255)
+    password = EncryptedCharField(max_length=255)
+    host = models.CharField(max_length=255)
+    port = models.IntegerField()
     editable = models.BooleanField(default=True)
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?

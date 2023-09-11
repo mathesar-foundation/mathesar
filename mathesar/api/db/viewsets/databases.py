@@ -40,7 +40,14 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         credentials = serializer.validated_data
         if is_valid_pg_creds(credentials):
             Database.objects.create(**credentials).save()
-            install_mathesar(**credentials, skip_confirm=True)
+            install_mathesar(
+                database_name=credentials["NAME"],
+                hostname=credentials["HOST"],
+                username=credentials["USER"],
+                password=credentials["PASSWORD"],
+                port=credentials["PORT"],
+                skip_confirm=True
+            )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
@@ -51,7 +58,14 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             credentials = serializer.validated_data
             if is_valid_pg_creds(credentials):
                 serializer.save()
-                install_mathesar(**credentials, skip_confirm=True)
+                install_mathesar(
+                    database_name=credentials["NAME"],
+                    hostname=credentials["HOST"],
+                    username=credentials["USER"],
+                    password=credentials["PASSWORD"],
+                    port=credentials["PORT"],
+                    skip_confirm=True
+                )
             return Response(serializer.data)
         raise EditingDBCredentialsNotAllowed()
 
