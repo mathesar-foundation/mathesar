@@ -3,7 +3,7 @@
   import type QueryRunner from '../QueryRunner';
 
   export let queryHandler: QueryRunner;
-  $: ({ selection, processedColumns } = queryHandler);
+  $: ({ legacySelection: selection, processedColumns } = queryHandler);
   $: ({ activeCell } = selection);
 
   $: selectedCellValue = (() => {

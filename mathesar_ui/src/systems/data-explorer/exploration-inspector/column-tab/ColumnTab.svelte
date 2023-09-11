@@ -14,7 +14,11 @@
 
   $: queryManager =
     queryHandler instanceof QueryManager ? queryHandler : undefined;
-  $: ({ selection, columnsMetaData, processedColumns } = queryHandler);
+  $: ({
+    legacySelection: selection,
+    columnsMetaData,
+    processedColumns,
+  } = queryHandler);
   $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: selectedColumns = (() => {
     const ids = selection.getSelectedUniqueColumnsId(

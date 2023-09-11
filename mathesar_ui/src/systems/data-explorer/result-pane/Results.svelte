@@ -37,7 +37,7 @@
     selectableRowsMap,
     pagination,
     runState,
-    selection,
+    legacySelection: selection,
     inspector,
   } = queryHandler);
   $: ({ initial_columns } = $query);

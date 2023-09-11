@@ -64,7 +64,7 @@ export class TabularData {
 
   table: TableEntry;
 
-  cleanupFunctions: (() => void)[] = [];
+  private cleanupFunctions: (() => void)[] = [];
 
   shareConsumer?: ShareConsumer;
 

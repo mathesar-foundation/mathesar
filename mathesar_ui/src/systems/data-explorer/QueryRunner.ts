@@ -1,29 +1,33 @@
-import { derived, get, writable } from 'svelte/store';
 import type { Readable, Writable } from 'svelte/store';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-import { ApiMultiError } from '@mathesar/api/utils/errors';
-import { ImmutableMap, CancellablePromise } from '@mathesar-component-library';
-import Pagination from '@mathesar/utils/Pagination';
+import { derived, get, writable } from 'svelte/store';
+
+import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 import type {
-  QueryResultRecord,
-  QueryRunResponse,
-  QueryResultsResponse,
   QueryColumnMetaData,
+  QueryResultRecord,
+  QueryResultsResponse,
+  QueryRunResponse,
 } from '@mathesar/api/types/queries';
-import { runQuery, fetchQueryResults } from '@mathesar/stores/queries';
+import { ApiMultiError } from '@mathesar/api/utils/errors';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { LegacySheetSelection } from '@mathesar/components/sheet';
+import Plane from '@mathesar/components/sheet/selection/Plane';
+import Series from '@mathesar/components/sheet/selection/Series';
+import SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { fetchQueryResults, runQuery } from '@mathesar/stores/queries';
+import Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
-import type QueryModel from './QueryModel';
 import QueryInspector from './QueryInspector';
+import type QueryModel from './QueryModel';
 import {
-  processColumnMetaData,
   getProcessedOutputColumns,
+  processColumnMetaData,
   speculateColumnMetaData,
-  type ProcessedQueryOutputColumn,
-  type ProcessedQueryResultColumnMap,
-  type ProcessedQueryOutputColumnMap,
   type InputColumnsStoreSubstance,
+  type ProcessedQueryOutputColumn,
+  type ProcessedQueryOutputColumnMap,
+  type ProcessedQueryResultColumnMap,
 } from './utils';
 
 export interface QueryRow {
@@ -40,6 +44,7 @@ export interface QueryRowsData {
   rows: QueryRow[];
 }
 
+/** @deprecated TODO_3037 remove */
 export type QuerySheetSelection = LegacySheetSelection<
   QueryRow,
   ProcessedQueryOutputColumn
@@ -70,7 +75,10 @@ export default class QueryRunner {
   /** Keys are row ids, values are records */
   selectableRowsMap: Readable<Map<string, Record<string, unknown>>>;
 
-  selection: QuerySheetSelection;
+  /** @deprecated TODO_3037 remove */
+  legacySelection: QuerySheetSelection;
+
+  selection: Writable<SheetSelection>;
 
   inspector: QueryInspector;
 
@@ -83,6 +91,8 @@ export default class QueryRunner {
   private onRunWithIdCallback?: (results: QueryResultsResponse) => unknown;
 
   private shareConsumer?: ShareConsumer;
+
+  private cleanupFunctions: (() => void)[] = [];
 
   constructor({
     query,
@@ -111,7 +121,8 @@ export default class QueryRunner {
       this.rowsData,
       ({ rows }) => new Map(rows.map((r) => [getRowSelectionId(r), r.record])),
     );
-    this.selection = new LegacySheetSelection({
+
+    this.legacySelection = new LegacySheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
       getColumnOrder: () =>
         [...get(this.processedColumns).values()].map((column) => column.id),
@@ -125,6 +136,27 @@ export default class QueryRunner {
         return Math.min(pageSize, totalCount - offset, rowLength) - 1;
       },
     });
+
+    const plane = derived(
+      [this.rowsData, this.processedColumns],
+      ([{ rows }, columnsMap]) => {
+        const rowIds = new Series(rows.map(getRowSelectionId));
+        const columns = [...columnsMap.values()];
+        const columnIds = new Series(columns.map((c) => String(c.id)));
+        return new Plane(rowIds, columnIds);
+      },
+    );
+
+    this.selection = writable(new SheetSelection());
+
+    this.cleanupFunctions.push(
+      plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
+    );
+
+    this.cleanupFunctions.push(
+      plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
+    );
+
     this.inspector = new QueryInspector(this.query);
   }
 
@@ -237,7 +269,7 @@ export default class QueryRunner {
   async setPagination(pagination: Pagination): Promise<void> {
     this.pagination.set(pagination);
     await this.run();
-    this.selection.activateFirstCellInSelectedColumn();
+    this.legacySelection.activateFirstCellInSelectedColumn();
   }
 
   protected resetPagination(): void {
@@ -262,30 +294,31 @@ export default class QueryRunner {
   protected async resetPaginationAndRun(): Promise<void> {
     this.resetPagination();
     await this.run();
-    this.selection.activateFirstCellInSelectedColumn();
+    this.legacySelection.activateFirstCellInSelectedColumn();
   }
 
   selectColumn(alias: QueryColumnMetaData['alias']): void {
     const processedColumn = get(this.processedColumns).get(alias);
     if (!processedColumn) {
-      this.selection.resetSelection();
-      this.selection.selectAndActivateFirstCellIfExists();
+      this.legacySelection.resetSelection();
+      this.legacySelection.selectAndActivateFirstCellIfExists();
       this.inspector.selectCellTab();
       return;
     }
 
-    const isSelected = this.selection.toggleColumnSelection(processedColumn);
+    const isSelected =
+      this.legacySelection.toggleColumnSelection(processedColumn);
     if (isSelected) {
       this.inspector.selectColumnTab();
       return;
     }
 
-    this.selection.activateFirstCellInSelectedColumn();
+    this.legacySelection.activateFirstCellInSelectedColumn();
     this.inspector.selectCellTab();
   }
 
   clearSelection(): void {
-    this.selection.resetSelection();
+    this.legacySelection.resetSelection();
   }
 
   getRows(): QueryRow[] {
@@ -297,7 +330,8 @@ export default class QueryRunner {
   }
 
   destroy(): void {
-    this.selection.destroy();
+    this.legacySelection.destroy();
     this.runPromise?.cancel();
+    this.cleanupFunctions.forEach((fn) => fn());
   }
 }
