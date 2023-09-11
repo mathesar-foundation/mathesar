@@ -45,7 +45,7 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             serializer = DatabaseSerializer(db_object, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data)
         raise EditingDBCredentialsNotAllowed()
 
     def destroy(self, request, pk=None):
