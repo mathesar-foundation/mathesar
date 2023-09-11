@@ -12,7 +12,6 @@
   import type {
     ColumnsDataStore,
     RecordsData,
-    TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
@@ -20,7 +19,6 @@
 
   export let selectedRowIndices: number[];
   export let recordsData: RecordsData;
-  export let selection: TabularDataSelection;
   export let columnsDataStore: ColumnsDataStore;
   export let canEditTableRecords: boolean;
 
@@ -38,7 +36,8 @@
         toast.success({
           title: `${confirmationTitle} deleted successfully!`,
         });
-        selection.resetSelection();
+        // // TODO_3037 verify that selection behaves okay after deleting records
+        // selection.resetSelection();
       },
     });
   }

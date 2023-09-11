@@ -26,14 +26,8 @@
 
   export let context: 'page' | 'widget' | 'shared-consumer-page' = 'page';
 
-  $: ({
-    recordsData,
-    meta,
-    isLoading,
-    columnsDataStore,
-    constraintsDataStore,
-    legacySelection: selection,
-  } = $tabularData);
+  $: ({ recordsData, meta, isLoading, columnsDataStore, constraintsDataStore } =
+    $tabularData);
   $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
@@ -76,7 +70,8 @@
         appearance="primary"
         on:click={() => {
           recordsData.addEmptyRecord();
-          selection.selectAndActivateFirstDataEntryCellInLastRow();
+          // // TODO_3037
+          // selection.selectAndActivateFirstDataEntryCellInLastRow();
         }}
       >
         <Icon {...iconAddNew} />

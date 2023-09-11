@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Collapsible } from '@mathesar-component-library';
-  import { getSelectedRowIndex } from '@mathesar/components/sheet';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
@@ -14,42 +13,41 @@
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
-  $: ({ legacySelection: selection, recordsData } = $tabularData);
-  $: ({ selectedCells } = selection);
-  $: selectedRowIndices = $selectedCells
-    .valuesArray()
-    .map((cell) => getSelectedRowIndex(cell));
-  $: uniquelySelectedRowIndices = Array.from(new Set(selectedRowIndices));
-
+  $: ({ selection, recordsData } = $tabularData);
   $: canEditTableRecords = !!$userProfile?.hasPermission(
     { database, schema },
     'canEditTableRecords',
   );
+  $: selectedRowCount = $selection.rowIds.size;
+
+  // TODO_3037 Need to calculate selectedRowIndices. This might be a deeper
+  // problem. Seems like we might need access to the row index here instead of
+  // the row identifier.
+  $: selectedRowIndices = [];
 </script>
 
 <div class="column-mode-container">
-  {#if uniquelySelectedRowIndices.length}
-    {#if uniquelySelectedRowIndices.length > 1}
+  {#if selectedRowCount > 0}
+    {#if selectedRowCount > 1}
       <span class="records-selected-count">
-        {labeledCount(uniquelySelectedRowIndices, 'records')} selected
+        {labeledCount(selectedRowCount, 'records')} selected
       </span>
     {/if}
     <Collapsible isOpen triggerAppearance="plain">
       <CollapsibleHeader slot="header" title="Actions" />
       <div slot="content" class="content-container">
         <RowActions
-          selectedRowIndices={uniquelySelectedRowIndices}
+          {selectedRowIndices}
           {recordsData}
-          {selection}
           columnsDataStore={$tabularData.columnsDataStore}
           {canEditTableRecords}
         />
       </div>
     </Collapsible>
   {:else}
-    <span class="no-records-selected"
-      >Select one or more cells to view associated record properties.</span
-    >
+    <span class="no-records-selected">
+      Select one or more cells to view associated record properties.
+    </span>
   {/if}
 </div>
 

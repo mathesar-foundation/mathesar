@@ -21,18 +21,17 @@
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
-  $: ({ processedColumns, legacySelection: selection } = $tabularData);
-  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
+  $: ({ processedColumns, selection } = $tabularData);
+  // TODO_3037 verify that table inspector shows selected columns
   $: selectedColumns = (() => {
-    const ids = selection.getSelectedUniqueColumnsId(
-      $selectedCells,
-      $columnsSelectedWhenTheTableIsEmpty,
-    );
+    const ids = $selection.columnIds;
     const columns = [];
     for (const id of ids) {
-      const c = $processedColumns.get(id);
-      if (c !== undefined) {
-        columns.push(c);
+      // TODO_3037 add code comments explaining why this is necessary
+      const parsedId = parseInt(id, 10);
+      const column = $processedColumns.get(parsedId);
+      if (column !== undefined) {
+        columns.push(column);
       }
     }
     return columns;

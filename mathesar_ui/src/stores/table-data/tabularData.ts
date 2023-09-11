@@ -62,7 +62,7 @@ export class TabularData {
 
   columnsDataStore: ColumnsDataStore;
 
-  /** TODO eliminate `processedColumns` in favor of `orderedProcessedColumns` */
+  /** TODO_3037 eliminate `processedColumns` in favor of `orderedProcessedColumns` */
   processedColumns: ProcessedColumnsStore;
 
   orderedProcessedColumns: ProcessedColumnsStore;
