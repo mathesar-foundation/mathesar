@@ -48,7 +48,6 @@ def remove_empty_rows_and_columns_from_dataframe(df):
 
 
 def create_db_table_from_excel_data_file(data_file, name, schema, comment=None):
-
     db_model = schema.database
     engine = create_mathesar_engine(db_model)
     header_row = 0 if data_file.header else None

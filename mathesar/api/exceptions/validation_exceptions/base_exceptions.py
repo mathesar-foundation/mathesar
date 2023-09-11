@@ -18,4 +18,4 @@ class MathesarValidationException(ValidationError):
             details=None
     ):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
-        self.detail = [exception_detail]
+        self.detail = exception_detail
