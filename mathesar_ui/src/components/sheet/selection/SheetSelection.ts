@@ -1,4 +1,4 @@
-import { first } from 'iter-tools';
+import { execPipe, filter, first, map } from 'iter-tools';
 
 import { ImmutableSet } from '@mathesar/component-library';
 import { assertExhaustive } from '@mathesar/utils/typeUtils';
@@ -98,30 +98,61 @@ function getFullySelectedColumnIds(
   basis: Basis,
 ): ImmutableSet<string> {
   if (basis.type === 'dataCells') {
-    // The logic here is: if all rows are selected, then every selected column
-    // FULLY selected. Otherwise, no columns are fully selected.
-    //
-    // THIS LOGIC ASSUMES THAT ALL SELECTIONS ARE RECTANGULAR. The application
-    // enforces this assumption at various levels, but NOT within the Basis data
-    // structure. That is, it's theoretically possible to have basis data which
-    // represents a non-rectangular selection, but such data should be
-    // considered a bug. The logic within this function leverages this
-    // assumption for the purpose of improving performance. If we know that the
-    // selection is rectangular, then we can avoid iterating over all cells in
-    // each selected column to see if the column is fully selected.
-    return basis.rowIds.size < plane.rowIds.length
-      ? new ImmutableSet()
-      : basis.columnIds;
+    // The logic within this branch is somewhat complex because:
+    // - We want to suppor non-rectangular selections.
+    // - For performance, we want to avoid iterating over all the selected
+    //   cells.
+
+    const selctedRowCount = basis.rowIds.size;
+    const availableRowCount = plane.rowIds.length;
+    if (selctedRowCount < availableRowCount) {
+      // Performance heuristic. If the number of selected rows is less than the
+      // total number of rows, we can assume that no column exist in which all
+      // rows are selected.
+      return new ImmutableSet();
+    }
+
+    const selectedColumnCount = basis.columnIds.size;
+    const selectedCellCount = basis.cellIds.size;
+    const avgCellsSelectedPerColumn = selectedCellCount / selectedColumnCount;
+    if (avgCellsSelectedPerColumn === availableRowCount) {
+      // Performance heuristic. We know that no column can have more cells
+      // selected than the number of rows. Thus, if the average number of cells
+      // selected per column is equal to the number of rows, then we know that
+      // all selected columns are fully selected.
+      return basis.columnIds;
+    }
+
+    // This is the worst-case scenario, performance-wise, which is why we try to
+    // return early before hitting this branch. This case will only happen when
+    // we have a mix of fully selected columns and partially selected columns.
+    // This case should be rare because most selections are rectangular.
+    const countSelectedCellsPerColumn = new Map<string, number>();
+    for (const cellId of basis.cellIds) {
+      const { columnId } = parseCellId(cellId);
+      const count = countSelectedCellsPerColumn.get(columnId) ?? 0;
+      countSelectedCellsPerColumn.set(columnId, count + 1);
+    }
+    const fullySelectedColumnIds = execPipe(
+      countSelectedCellsPerColumn,
+      filter(([, count]) => count === availableRowCount),
+      map(([id]) => id),
+    );
+    return new ImmutableSet(fullySelectedColumnIds);
   }
+
   if (basis.type === 'emptyColumns') {
     return basis.columnIds;
   }
+
   if (basis.type === 'placeholderCell') {
     return new ImmutableSet();
   }
+
   if (basis.type === 'empty') {
     return new ImmutableSet();
   }
+
   return assertExhaustive(basis.type);
 }
 
@@ -139,7 +170,7 @@ export default class SheetSelection {
 
   private readonly basis: Basis;
 
-  /** Ids of columns in which _all_ cells are selected */
+  /** Ids of columns in which _all_ data cells are selected */
   fullySelectedColumnIds: ImmutableSet<string>;
 
   constructor(plane: Plane = new Plane(), basis: Basis = emptyBasis()) {
