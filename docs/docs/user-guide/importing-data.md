@@ -1,6 +1,6 @@
 # Importing data into Mathesar
 
-Mathesar allows importing data in CSV and JSON format. It also attempts to automatically infer the data type of the columns.
+Mathesar allows importing data in CSV, JSON and Excel format. It also attempts to automatically infer the data type of the columns.
 
 ## Importing CSV data {:#csv}
 
@@ -60,3 +60,21 @@ The JSON data must be structured in one of the following ways:
     ```
 
 Our goal is to support whatever [`pandas.json_normalize`](https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html) supports.
+
+## Importing Excel data {:#excel}
+
+The Excel file must have data structured in form of a table.
+
+### Header rows
+
+By default, Mathesar will use the first row of Excel data to name the columns.
+
+If you un-check **"Use first row as header"**, then Mathesar will generate default names for the columns which you can edit later.
+
+### Sheet index
+
+By default, Mathesar will try to find data from the first sheet of the file.
+
+If you provide **"sheet index"**, then Mathesar will look for the data into that sheet.
+
+Our goal is to support whatever [`pandas.read_excel`](https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html) supports.
