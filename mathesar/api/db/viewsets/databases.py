@@ -15,9 +15,7 @@ from db.functions.operations.check_support import get_supported_db_functions
 from mathesar.api.serializers.functions import DBFunctionSerializer
 from db.types.base import get_available_known_db_types
 from db.types.install import uninstall_mathesar_from_database
-from db.install import install_mathesar
 from mathesar.api.serializers.db_types import DBTypeSerializer
-from mathesar.api.utils import is_valid_pg_creds
 from mathesar.api.exceptions.validation_exceptions.exceptions import EditingDBCredentialsNotAllowed
 
 
@@ -38,16 +36,7 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         serializer = DatabaseSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         credentials = serializer.validated_data
-        if is_valid_pg_creds(credentials):
-            Database.objects.create(**credentials).save()
-            install_mathesar(
-                database_name=credentials["NAME"],
-                hostname=credentials["HOST"],
-                username=credentials["USER"],
-                password=credentials["PASSWORD"],
-                port=credentials["PORT"],
-                skip_confirm=True
-            )
+        Database.objects.create(**credentials).save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
@@ -55,18 +44,8 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         if db_object.editable:
             serializer = DatabaseSerializer(db_object, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
-            credentials = serializer.validated_data
-            if is_valid_pg_creds(credentials):
-                serializer.save()
-                install_mathesar(
-                    database_name=credentials["NAME"],
-                    hostname=credentials["HOST"],
-                    username=credentials["USER"],
-                    password=credentials["PASSWORD"],
-                    port=credentials["PORT"],
-                    skip_confirm=True
-                )
-            return Response(serializer.data)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         raise EditingDBCredentialsNotAllowed()
 
     def destroy(self, request, pk=None):

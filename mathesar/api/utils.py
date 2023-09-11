@@ -165,10 +165,10 @@ def is_valid_uuid_v4(value):
 
 def is_valid_pg_creds(credentials):
     dbname = credentials["name"]
-    user = credentials["db_username"]
-    password = credentials["db_password"]
-    host = credentials["db_host"]
-    port = credentials["db_port"]
+    user = credentials["username"]
+    password = credentials["password"]
+    host = credentials["host"]
+    port = credentials["port"]
     conn_str = f'dbname={dbname} user={user} password={password} host={host} port={port}'
     try:
         with psycopg.connect(conn_str):
