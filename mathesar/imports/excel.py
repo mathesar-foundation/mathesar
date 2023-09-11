@@ -48,10 +48,12 @@ def remove_empty_rows_and_columns_from_dataframe(df):
 
 
 def create_db_table_from_excel_data_file(data_file, name, schema, comment=None):
+
     db_model = schema.database
     engine = create_mathesar_engine(db_model)
+    header_row = 0 if data_file.header else None
     dataframe = remove_empty_rows_and_columns_from_dataframe(
-        pandas.read_excel(data_file.file.path)
+        pandas.read_excel(data_file.file.path, data_file.sheet_index, header=header_row)
     )
     column_names = process_column_names(dataframe.columns)
     try:

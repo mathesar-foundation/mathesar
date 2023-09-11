@@ -277,6 +277,11 @@ def null_id_table_excel_filepath():
     return 'mathesar/tests/data/excel_parsing/null_id_table.xlsx'
 
 
+@pytest.fixture(scope='session')
+def multiple_sheets_excel_filepath():
+    return 'mathesar/tests/data/excel_parsing/multiple_sheets.xlsx'
+
+
 @pytest.fixture
 def db_table_to_dj_table(engine, create_schema):
     """
