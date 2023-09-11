@@ -1,19 +1,6 @@
-import { map } from 'iter-tools';
-
-import { cartesianProduct } from '@mathesar/utils/iterUtils';
-import { makeCellId, parseCellId } from '../cellIds';
+import { makeCellId, makeCells, parseCellId } from '../cellIds';
 import { Direction, getColumnOffset, getRowOffset } from './Direction';
 import Series from './Series';
-
-function makeCells(
-  rowIds: Iterable<string>,
-  columnIds: Iterable<string>,
-): Iterable<string> {
-  return map(
-    ([rowId, columnId]) => makeCellId(rowId, columnId),
-    cartesianProduct(rowIds, columnIds),
-  );
-}
 
 /**
  * This describes the different kinds of cells that can be adjacent to a given

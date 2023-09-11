@@ -48,11 +48,7 @@
 
   export let controller: ExtractColumnsModalController;
 
-  $: ({
-    processedColumns,
-    constraintsDataStore,
-    legacySelection: selection,
-  } = $tabularData);
+  $: ({ processedColumns, constraintsDataStore, selection } = $tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: availableProcessedColumns = [...$processedColumns.values()];
   $: ({ targetType, columns, isOpen } = controller);
@@ -110,7 +106,9 @@
       // unmounting this component.
       return;
     }
-    selection.intersectSelectedRowsWithGivenColumns(_columns);
+    // TODO_3037 test to verify that selected columns are updated
+    const columnIds = _columns.map((c) => String(c.id));
+    selection.update((s) => s.ofRowColumnIntersection(s.rowIds, columnIds));
   }
   $: handleColumnsChange($columns);
 
@@ -193,7 +191,7 @@
         // will need to modify this logic when we position the new column where
         // the old columns were.
         const newFkColumn = allColumns.slice(-1)[0];
-        selection.toggleColumnSelection(newFkColumn);
+        selection.update((s) => s.ofOneColumn(String(newFkColumn.id)));
         await tick();
         scrollBasedOnSelection();
       }

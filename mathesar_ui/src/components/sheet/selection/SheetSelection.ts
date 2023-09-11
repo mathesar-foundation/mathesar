@@ -2,7 +2,7 @@ import { execPipe, filter, first, map } from 'iter-tools';
 
 import { ImmutableSet } from '@mathesar/component-library';
 import { assertExhaustive } from '@mathesar/utils/typeUtils';
-import { parseCellId } from '../cellIds';
+import { makeCells, parseCellId } from '../cellIds';
 import { Direction, getColumnOffset } from './Direction';
 import Plane from './Plane';
 
@@ -261,6 +261,17 @@ export default class SheetSelection {
   }
 
   /**
+   * @returns a new selection of all data cells in the intersection of the
+   * provided rows and columns.
+   */
+  ofRowColumnIntersection(
+    rowIds: Iterable<string>,
+    columnIds: Iterable<string>,
+  ): SheetSelection {
+    return this.withBasis(basisFromDataCells(makeCells(rowIds, columnIds)));
+  }
+
+  /**
    * @returns a new selection formed by the rectangle between the provided
    * cells, inclusive.
    *
@@ -289,6 +300,14 @@ export default class SheetSelection {
         ? basisFromPlaceholderCell
         : basisFromOneDataCell;
     return this.withBasis(makeBasis(cellId));
+  }
+
+  ofOneRow(rowId: string): SheetSelection {
+    return this.ofRowRange(rowId, rowId);
+  }
+
+  ofOneColumn(columnId: string): SheetSelection {
+    return this.ofColumnRange(columnId, columnId);
   }
 
   /**

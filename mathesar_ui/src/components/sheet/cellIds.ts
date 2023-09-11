@@ -1,3 +1,7 @@
+import { map } from 'iter-tools';
+
+import { cartesianProduct } from '@mathesar/utils/iterUtils';
+
 const CELL_ID_DELIMITER = '-';
 
 /**
@@ -21,4 +25,14 @@ export function parseCellId(cellId: string): {
   const rowId = cellId.slice(0, delimiterIndex);
   const columnId = cellId.slice(delimiterIndex + 1);
   return { rowId, columnId };
+}
+
+export function makeCells(
+  rowIds: Iterable<string>,
+  columnIds: Iterable<string>,
+): Iterable<string> {
+  return map(
+    ([rowId, columnId]) => makeCellId(rowId, columnId),
+    cartesianProduct(rowIds, columnIds),
+  );
 }

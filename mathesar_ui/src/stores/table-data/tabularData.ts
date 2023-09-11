@@ -1,34 +1,24 @@
 import { getContext, setContext } from 'svelte';
-import {
-  derived,
-  get,
-  writable,
-  type Readable,
-  type Writable,
-} from 'svelte/store';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import { States } from '@mathesar/api/utils/requestUtils';
-import { LegacySheetSelection } from '@mathesar/components/sheet';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { getColumnOrder, orderProcessedColumns } from '@mathesar/utils/tables';
 import type { ShareConsumer } from '@mathesar/utils/shares';
+import { orderProcessedColumns } from '@mathesar/utils/tables';
 import { ColumnsDataStore } from './columns';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
 import { Display } from './display';
 import { Meta } from './meta';
-import type {
-  ProcessedColumn,
-  ProcessedColumnsStore,
-} from './processedColumns';
+import type { ProcessedColumnsStore } from './processedColumns';
 import { processColumn } from './processedColumns';
-import type { RecordRow, TableRecordsData } from './records';
+import type { TableRecordsData } from './records';
 import { RecordsData } from './records';
 
 export interface TabularDataProps {
@@ -50,11 +40,6 @@ export interface TabularDataProps {
   >[0]['hasEnhancedPrimaryKeyCell'];
 }
 
-export type TabularDataSelection = LegacySheetSelection<
-  RecordRow,
-  ProcessedColumn
->;
-
 export class TabularData {
   id: DBObjectEntry['id'];
 
@@ -74,13 +59,6 @@ export class TabularData {
   display: Display;
 
   isLoading: Readable<boolean>;
-
-  /**
-   * TODO_3037
-   *
-   * @deprecated
-   */
-  legacySelection: TabularDataSelection;
 
   selection: Writable<SheetSelection>;
 
@@ -158,29 +136,6 @@ export class TabularData {
     this.cleanupFunctions.push(
       plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
     );
-
-    this.legacySelection = new LegacySheetSelection({
-      getColumns: () => [...get(this.processedColumns).values()],
-      getColumnOrder: () =>
-        getColumnOrder([...get(this.processedColumns).values()], this.table),
-      getRows: () => this.recordsData.getRecordRows(),
-      getMaxSelectionRowIndex: () => {
-        const totalCount = get(this.recordsData.totalCount) ?? 0;
-        const savedRecords = get(this.recordsData.savedRecords);
-        const newRecords = get(this.recordsData.newRecords);
-        const pagination = get(this.meta.pagination);
-        const { offset } = pagination;
-        const pageSize = pagination.size;
-        /**
-         * We are not subtracting 1 from the below maxRowIndex calculation
-         * inorder to account for the add-new-record placeholder row
-         */
-        return (
-          Math.min(pageSize, totalCount - offset, savedRecords.length) +
-          newRecords.length
-        );
-      },
-    });
 
     this.isLoading = derived(
       [
@@ -268,7 +223,6 @@ export class TabularData {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
-    this.legacySelection.destroy();
     this.cleanupFunctions.forEach((f) => f());
   }
 }
