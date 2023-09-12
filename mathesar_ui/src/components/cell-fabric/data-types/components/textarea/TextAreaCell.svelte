@@ -7,7 +7,7 @@
   type $$Props = TextAreaCellProps;
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
+  export let isSelected: $$Props['isSelected'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -33,7 +33,7 @@
 <SteppedInputCell
   bind:value
   {isActive}
-  {isSelectedInRange}
+  {isSelected}
   {disabled}
   {searchValue}
   {isIndependentOfSheet}

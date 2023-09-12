@@ -68,7 +68,7 @@
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
   $: isActive = $selection.activeCellId === cellId;
-  $: isSelectedInRange = $selection.cellIds.has(cellId);
+  $: isSelected = $selection.cellIds.has(cellId);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -128,7 +128,7 @@
     class:is-active={isActive}
     class:is-processing={isProcessing}
     class:is-pk={column.primary_key}
-    class:is-selected={isSelectedInRange}
+    class:is-selected={isSelected}
     {...htmlAttributes}
     {style}
   >
@@ -146,7 +146,7 @@
     <CellFabric
       columnFabric={processedColumn}
       {isActive}
-      {isSelectedInRange}
+      {isSelected}
       {value}
       {isProcessing}
       {canViewLinkedEntities}

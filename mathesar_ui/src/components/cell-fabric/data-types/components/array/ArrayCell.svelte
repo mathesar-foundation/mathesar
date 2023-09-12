@@ -12,7 +12,7 @@
   const dispatch = createEventDispatcher();
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
+  export let isSelected: $$Props['isSelected'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
@@ -44,7 +44,7 @@
 
 <CellWrapper
   {isActive}
-  {isSelectedInRange}
+  {isSelected}
   {disabled}
   {isIndependentOfSheet}
   on:mouseenter

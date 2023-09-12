@@ -13,7 +13,7 @@ export type CellValueFormatter<T> = (
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
   isActive: boolean;
-  isSelectedInRange: boolean;
+  isSelected: boolean;
   disabled: boolean;
   searchValue?: unknown;
   isProcessing: boolean;

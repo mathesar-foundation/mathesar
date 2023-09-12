@@ -50,7 +50,7 @@
     {#if row || recordRunState === 'processing'}
       <CellFabric
         {isActive}
-        isSelectedInRange={$selection.cellIds.has(cellId ?? '')}
+        isSelected={$selection.cellIds.has(cellId ?? '')}
         columnFabric={column}
         value={row?.record[column.id]}
         showAsSkeleton={recordRunState === 'processing'}

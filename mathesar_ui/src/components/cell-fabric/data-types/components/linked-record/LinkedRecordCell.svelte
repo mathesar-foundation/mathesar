@@ -20,7 +20,7 @@
   const recordSelector = getRecordSelectorFromContext();
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
+  export let isSelected: $$Props['isSelected'];
   export let value: $$Props['value'] = undefined;
   export let searchValue: $$Props['searchValue'] = undefined;
   export let recordSummary: $$Props['recordSummary'] = undefined;
@@ -88,7 +88,7 @@
 
 <CellWrapper
   {isActive}
-  {isSelectedInRange}
+  {isSelected}
   {disabled}
   {isIndependentOfSheet}
   on:mouseenter
