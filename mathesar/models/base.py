@@ -7,7 +7,6 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
-from django.contrib.postgres.fields import ArrayField
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -126,7 +125,6 @@ class Database(ReflectionManagerMixin, BaseModel):
             engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
         else:
-            print(self.name)
             engine = create_mathesar_engine(db_name=db_name)
             _engine_cache[db_name] = engine
         return engine

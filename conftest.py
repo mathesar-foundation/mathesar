@@ -236,13 +236,13 @@ def create_db_schema(SES_engine_cache):
 # TODO consider fixing this seeming duplication
 # either way, both depend on Django configuration. can that be resolved?
 def _create_engine(db_name):
-    # dj_connection_settings = dj_connection.settings_dict
+    dj_connection_settings = dj_connection.settings_dict
     engine = sa_create_engine(
         _get_connection_string(
-            username='mathesar',  # dj_connection_settings["USER"],
-            password='mathesar',  # dj_connection_settings["PASSWORD"],
-            hostname='mathesar_dev_db',  # dj_connection_settings["HOST"],
-            database=db_name  # db_name,
+            username=dj_connection_settings["USER"],
+            password=dj_connection_settings["PASSWORD"],
+            hostname=dj_connection_settings["HOST"],
+            database=db_name
         ),
         future=True,
         # Setting a fixed timezone makes the timezone aware test cases predictable.
