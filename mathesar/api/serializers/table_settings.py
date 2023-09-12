@@ -40,7 +40,8 @@ class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.Hyperlinked
             instance.save()
         return instance
 
-    # def to_internal_value(self, data):
-    #     if isinstance(data.get('column_order', None), list):
-    #         
-    #     return super().to_internal_value(data)
+    def to_internal_value(self, data):
+        column_order = data.get('column_order', None)
+        if isinstance(column_order, list):
+            data['column_order'] = list(map(int, column_order))
+        return super().to_internal_value(data)

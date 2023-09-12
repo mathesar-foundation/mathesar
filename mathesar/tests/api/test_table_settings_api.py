@@ -132,4 +132,4 @@ def test_update_table_settings_string_in_column_order(client, column_test_table)
     )
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data['column_order'] != column_order_as_ints
+    assert response_data['column_order'] == column_order_as_ints
