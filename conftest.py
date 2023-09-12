@@ -242,7 +242,7 @@ def _create_engine(db_name):
             username=dj_connection_settings["USER"],
             password=dj_connection_settings["PASSWORD"],
             hostname=dj_connection_settings["HOST"],
-            database=db_name
+            database=db_name,
         ),
         future=True,
         # Setting a fixed timezone makes the timezone aware test cases predictable.
