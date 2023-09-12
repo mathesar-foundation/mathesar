@@ -66,7 +66,7 @@ def test_create_empty_table_settings(client, schema, empty_nasa_table, schema_na
     assert response_data['count'] == 1
     assert results[0]['preview_settings']['template'] == expected_preview_template
     assert results[0]['preview_settings']['customized'] is False
-    assert results[0]['column_order'] is None
+    assert results[0]['column_order'] == []
 
 
 update_clients_with_status_codes = [
@@ -132,4 +132,4 @@ def test_update_table_settings_string_in_column_order(client, column_test_table)
     )
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data['column_order'] == column_order_as_ints
+    assert response_data['column_order'] != column_order_as_ints

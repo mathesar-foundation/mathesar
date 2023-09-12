@@ -126,6 +126,7 @@ class Database(ReflectionManagerMixin, BaseModel):
             engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
         else:
+            print(self.name)
             engine = create_mathesar_engine(db_name=db_name)
             _engine_cache[db_name] = engine
         return engine
@@ -884,7 +885,7 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = JSONField(null=True, default=list)
+    column_order = JSONField(null=True, default=list, validators=[])
 
 
 def _create_table_settings(tables):

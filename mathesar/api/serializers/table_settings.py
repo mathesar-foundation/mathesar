@@ -39,3 +39,8 @@ class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.Hyperlinked
             instance.column_order = column_order_data
             instance.save()
         return instance
+
+    # def to_internal_value(self, data):
+    #     if isinstance(data.get('column_order', None), list):
+    #         
+    #     return super().to_internal_value(data)
