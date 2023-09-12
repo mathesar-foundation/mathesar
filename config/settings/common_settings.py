@@ -94,6 +94,7 @@ DATABASES = {
     db_key: db_url(url_string)
     for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
+
 try:
     DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
 except UndefinedValueError:
@@ -101,8 +102,6 @@ except UndefinedValueError:
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-
-print(DATABASES)
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s),
