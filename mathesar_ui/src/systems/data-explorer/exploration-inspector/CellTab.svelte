@@ -1,48 +1,33 @@
 <script lang="ts">
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import type QueryRunner from '../QueryRunner';
+  import { parseCellId } from '@mathesar/components/sheet/cellIds';
+  import QueryRunner, { getRowSelectionId } from '../QueryRunner';
 
   export let queryHandler: QueryRunner;
-  $: ({ legacySelection: selection, processedColumns } = queryHandler);
-  $: ({ activeCell } = selection);
 
-  $: selectedCellValue = (() => {
-    const cell = $activeCell;
-    if (cell) {
-      const rows = queryHandler.getRows();
-      // TODO_3037 change rowIndex to use getRowSelectionId
-      if (rows[cell.rowIndex]) {
-        return rows[cell.rowIndex].record[cell.columnId];
-      }
-    }
-    return undefined;
-  })();
-  $: processedQueryColumn = (() => {
-    const cell = $activeCell;
-    if (cell) {
-      const processedColumn = $processedColumns.get(String(cell.columnId));
-      if (processedColumn) {
-        return processedColumn;
-      }
-    }
-    return undefined;
-  })();
+  $: ({ selection, processedColumns, rowsData } = queryHandler);
+  $: ({ rows } = $rowsData);
+  $: ({ activeCellId } = $selection);
+  $: cell = activeCellId ? parseCellId(activeCellId) : undefined;
+  $: columnId = cell?.columnId ?? '';
+  // TODO: Usage of `find` is not ideal for perf here. Would be nice to store
+  // rows in a map for faster lookup.
+  $: row = rows.find((r) => getRowSelectionId(r) === cell?.rowId);
+  $: cellValue = row?.record[columnId];
+  $: column = $processedColumns.get(columnId);
 </script>
 
-<div
-  class="section-content"
-  class:has-content={selectedCellValue !== undefined}
->
-  {#if selectedCellValue !== undefined}
+<div class="section-content" class:has-content={cellValue !== undefined}>
+  {#if cellValue !== undefined}
     <section class="cell-content">
       <header>Content</header>
       <div class="content">
-        {#if processedQueryColumn}
+        {#if column}
           <CellFabric
             isIndependentOfSheet={true}
             disabled={true}
-            columnFabric={processedQueryColumn}
-            value={selectedCellValue}
+            columnFabric={column}
+            value={cellValue}
           />
         {/if}
       </div>

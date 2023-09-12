@@ -35,7 +35,7 @@ export interface QueryRow {
   rowIndex: number;
 }
 
-function getRowSelectionId(row: QueryRow): string {
+export function getRowSelectionId(row: QueryRow): string {
   return String(row.rowIndex);
 }
 
@@ -319,10 +319,6 @@ export default class QueryRunner {
 
   clearSelection(): void {
     this.legacySelection.resetSelection();
-  }
-
-  getRows(): QueryRow[] {
-    return get(this.rowsData).rows;
   }
 
   getQueryModel(): QueryModel {
