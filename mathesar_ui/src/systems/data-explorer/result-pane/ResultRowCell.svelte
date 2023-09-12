@@ -1,47 +1,27 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import type { Writable } from 'svelte/store';
+
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
     SheetCell,
-    isCellActive,
     scrollBasedOnActiveCell,
-    isCellSelected,
   } from '@mathesar/components/sheet';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import type { QueryRow, QuerySheetSelection } from '../QueryRunner';
-  import type { ProcessedQueryOutputColumn } from '../utils';
+  import { makeCellId } from '@mathesar/components/sheet/cellIds';
+  import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import type QueryInspector from '../QueryInspector';
+  import { getRowSelectionId, type QueryRow } from '../QueryRunner';
+  import type { ProcessedQueryOutputColumn } from '../utils';
 
-  export let processedQueryColumn: ProcessedQueryOutputColumn;
+  export let column: ProcessedQueryOutputColumn;
   export let row: QueryRow | undefined;
   export let recordRunState: RequestStatus['state'] | undefined;
-  export let selection: QuerySheetSelection;
+  export let selection: Writable<SheetSelection>;
   export let inspector: QueryInspector;
 
-  $: ({ activeCell, selectedCells } = selection);
-  $: isActive =
-    $activeCell && row && isCellActive($activeCell, row, processedQueryColumn);
-
-  /**
-   * The name indicates that this boolean is only true when more than one cell
-   * is selected. However, because of the bug that [the active cell and selected
-   * cells do not remain in sync when using keyboard][1] this boolean is
-   * sometimes true even when multiple cells are selected. This is to
-   * differentiate between different active and selected cell using blue
-   * background styling for selected cell and blue border styling for active
-   * cell.
-   *
-   * The above bug can be fixed when following two conditions are met
-   *
-   * - We are working on keyboard accessability of the application.
-   * - `selectedCells` and `activeCell` are merged in a single store.
-   *
-   * [1]: https://github.com/centerofci/mathesar/issues/1534
-   */
-  $: isSelectedInRange =
-    row &&
-    isCellSelected($selectedCells, row, processedQueryColumn) &&
-    $selectedCells.size > 1;
+  $: cellId = row && makeCellId(getRowSelectionId(row), column.id);
+  $: isActive = cellId === $selection.activeCellId;
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -54,48 +34,48 @@
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
     const { originalEvent } = event.detail;
-    const type = selection.handleKeyEventsOnActiveCell(originalEvent);
-    if (type) {
-      originalEvent.stopPropagation();
-      originalEvent.preventDefault();
+    // // TODO_3037
+    // const type = selection.handleKeyEventsOnActiveCell(originalEvent);
+    // if (type) {
+    //   originalEvent.stopPropagation();
+    //   originalEvent.preventDefault();
 
-      await checkTypeAndScroll(type);
-    }
+    //   await checkTypeAndScroll(type);
+    // }
   }
 </script>
 
-<SheetCell
-  columnIdentifierKey={processedQueryColumn.id}
-  let:htmlAttributes
-  let:style
->
+<SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
   <div {...htmlAttributes} {style} class="cell" class:is-active={isActive}>
     {#if row || recordRunState === 'processing'}
       <CellFabric
         {isActive}
-        {isSelectedInRange}
-        columnFabric={processedQueryColumn}
-        value={row?.record[processedQueryColumn.id]}
+        isSelectedInRange={$selection.cellIds.has(cellId ?? '')}
+        columnFabric={column}
+        value={row?.record[column.id]}
         showAsSkeleton={recordRunState === 'processing'}
         disabled={true}
         on:movementKeyDown={moveThroughCells}
         on:activate={() => {
-          if (row) {
-            selection.activateCell(row, processedQueryColumn);
-            inspector.selectCellTab();
-          }
+          // // TODO_3037
+          // if (row) {
+          //   selection.activateCell(row, processedQueryColumn);
+          //   inspector.selectCellTab();
+          // }
         }}
         on:onSelectionStart={() => {
-          if (row) {
-            selection.onStartSelection(row, processedQueryColumn);
-          }
+          // // TODO_3037
+          // if (row) {
+          //   selection.onStartSelection(row, processedQueryColumn);
+          // }
         }}
         on:onMouseEnterCellWhileSelection={() => {
-          if (row) {
-            // This enables the click + drag to
-            // select multiple cells
-            selection.onMouseEnterCellWhileSelection(row, processedQueryColumn);
-          }
+          // // TODO_3037
+          // if (row) {
+          //   // This enables the click + drag to
+          //   // select multiple cells
+          //   selection.onMouseEnterCellWhileSelection(row, processedQueryColumn);
+          // }
         }}
       />
     {/if}

@@ -10,7 +10,6 @@
     SheetHeader,
     SheetRow,
     SheetVirtualRows,
-    isColumnSelected,
   } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
@@ -37,7 +36,7 @@
     selectableRowsMap,
     pagination,
     runState,
-    legacySelection: selection,
+    selection,
     inspector,
   } = queryHandler);
   $: ({ initial_columns } = $query);
@@ -53,7 +52,7 @@
     }),
     showToastInfo: toast.info,
   });
-  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
+  $: ({ columnIds } = $selection);
   $: recordRunState = $runState?.state;
   $: errors = $runState?.state === 'failure' ? $runState.errors : undefined;
   $: columnList = [...$processedColumns.values()];
@@ -102,11 +101,7 @@
           <ResultHeaderCell
             {processedQueryColumn}
             queryRunner={queryHandler}
-            isSelected={isColumnSelected(
-              $selectedCells,
-              $columnsSelectedWhenTheTableIsEmpty,
-              processedQueryColumn,
-            )}
+            isSelected={columnIds.has(processedQueryColumn.id)}
           />
         {/each}
       </SheetHeader>
@@ -139,8 +134,8 @@
 
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
                   <ResultRowCell
-                    {processedQueryColumn}
                     row={rows[item.index]}
+                    column={processedQueryColumn}
                     {recordRunState}
                     {selection}
                     {inspector}
