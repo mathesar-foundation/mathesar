@@ -50,7 +50,6 @@
     void queryManager.update((q) =>
       q.withoutInitialColumns(selectedColumnAliases),
     );
-    queryManager.clearSelection();
   }
 </script>
 

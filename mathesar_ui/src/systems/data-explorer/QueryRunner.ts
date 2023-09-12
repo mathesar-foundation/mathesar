@@ -10,7 +10,6 @@ import type {
 } from '@mathesar/api/types/queries';
 import { ApiMultiError } from '@mathesar/api/utils/errors';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-import { LegacySheetSelection } from '@mathesar/components/sheet';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
@@ -25,7 +24,6 @@ import {
   processColumnMetaData,
   speculateColumnMetaData,
   type InputColumnsStoreSubstance,
-  type ProcessedQueryOutputColumn,
   type ProcessedQueryOutputColumnMap,
   type ProcessedQueryResultColumnMap,
 } from './utils';
@@ -43,12 +41,6 @@ export interface QueryRowsData {
   totalCount: number;
   rows: QueryRow[];
 }
-
-/** @deprecated TODO_3037 remove */
-export type QuerySheetSelection = LegacySheetSelection<
-  QueryRow,
-  ProcessedQueryOutputColumn
->;
 
 type QueryRunMode = 'queryId' | 'queryObject';
 
@@ -74,9 +66,6 @@ export default class QueryRunner {
 
   /** Keys are row ids, values are records */
   selectableRowsMap: Readable<Map<string, Record<string, unknown>>>;
-
-  /** @deprecated TODO_3037 remove */
-  legacySelection: QuerySheetSelection;
 
   selection: Writable<SheetSelection>;
 
@@ -122,21 +111,6 @@ export default class QueryRunner {
       ({ rows }) => new Map(rows.map((r) => [getRowSelectionId(r), r.record])),
     );
 
-    this.legacySelection = new LegacySheetSelection({
-      getColumns: () => [...get(this.processedColumns).values()],
-      getColumnOrder: () =>
-        [...get(this.processedColumns).values()].map((column) => column.id),
-      getRows: () => get(this.rowsData).rows,
-      getMaxSelectionRowIndex: () => {
-        const rowLength = get(this.rowsData).rows.length;
-        const totalCount = get(this.rowsData).totalCount ?? 0;
-        const pagination = get(this.pagination);
-        const { offset } = pagination;
-        const pageSize = pagination.size;
-        return Math.min(pageSize, totalCount - offset, rowLength) - 1;
-      },
-    });
-
     const plane = derived(
       [this.rowsData, this.processedColumns],
       ([{ rows }, columnsMap]) => {
@@ -148,10 +122,6 @@ export default class QueryRunner {
     );
 
     this.selection = writable(new SheetSelection());
-
-    this.cleanupFunctions.push(
-      plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
-    );
 
     this.cleanupFunctions.push(
       plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
@@ -269,7 +239,6 @@ export default class QueryRunner {
   async setPagination(pagination: Pagination): Promise<void> {
     this.pagination.set(pagination);
     await this.run();
-    this.legacySelection.activateFirstCellInSelectedColumn();
   }
 
   protected resetPagination(): void {
@@ -283,7 +252,6 @@ export default class QueryRunner {
   }
 
   protected resetResults(): void {
-    this.clearSelection();
     this.runPromise?.cancel();
     this.resetPagination();
     this.rowsData.set({ totalCount: 0, rows: [] });
@@ -294,31 +262,15 @@ export default class QueryRunner {
   protected async resetPaginationAndRun(): Promise<void> {
     this.resetPagination();
     await this.run();
-    this.legacySelection.activateFirstCellInSelectedColumn();
   }
 
   selectColumn(alias: QueryColumnMetaData['alias']): void {
     const processedColumn = get(this.processedColumns).get(alias);
     if (!processedColumn) {
-      this.legacySelection.resetSelection();
-      this.legacySelection.selectAndActivateFirstCellIfExists();
-      this.inspector.selectCellTab();
       return;
     }
-
-    const isSelected =
-      this.legacySelection.toggleColumnSelection(processedColumn);
-    if (isSelected) {
-      this.inspector.selectColumnTab();
-      return;
-    }
-
-    this.legacySelection.activateFirstCellInSelectedColumn();
-    this.inspector.selectCellTab();
-  }
-
-  clearSelection(): void {
-    this.legacySelection.resetSelection();
+    this.selection.update((s) => s.ofOneColumn(processedColumn.id));
+    this.inspector.selectColumnTab();
   }
 
   getQueryModel(): QueryModel {
@@ -326,7 +278,6 @@ export default class QueryRunner {
   }
 
   destroy(): void {
-    this.legacySelection.destroy();
     this.runPromise?.cancel();
     this.cleanupFunctions.forEach((fn) => fn());
   }
