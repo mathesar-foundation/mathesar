@@ -75,6 +75,6 @@ If you un-check **"Use first row as header"**, then Mathesar will generate defau
 
 By default, Mathesar will try to find data from the first sheet of the file.
 
-If you provide **"sheet index"**, then Mathesar will look for the data into that sheet.
+If you provide **"sheet index"**, then Mathesar will look for the data in that sheet.
 
 Our goal is to support whatever [`pandas.read_excel`](https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html) supports.
