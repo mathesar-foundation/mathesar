@@ -133,7 +133,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('column_order', models.JSONField(default=list, null=True)),
+                ('column_order', models.JSONField(default=None, null=True)),
                 ('preview_settings', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='mathesar.previewcolumnsettings')),
                 ('table', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='settings', to='mathesar.table')),
             ],
