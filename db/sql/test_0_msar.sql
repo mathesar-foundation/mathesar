@@ -182,7 +182,7 @@ BEGIN
   RETURN NEXT is(
     msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
     ARRAY[
-      ('id', 'integer', true, null, true, null),
+      ('id', 'integer', true, null, true, 'Mathesar default ID column'),
       ('"Column 1"', 'text', null, null, false, null),
       ('"Column 2"', 'text', null, null, false, null)
     ]::__msar.col_def[],
@@ -1627,7 +1627,7 @@ BEGIN
   RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(5,3)');
   RETURN NEXT col_not_null('col_alters', 'col_opts');
   RETURN NEXT col_not_null('col_alters', 'timecol');
-  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!!');
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!');
   RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), NULL);
 END;
 $f$ LANGUAGE plpgsql;
