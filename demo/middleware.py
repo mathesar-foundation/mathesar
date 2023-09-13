@@ -27,6 +27,7 @@ class LiveDemoModeMiddleware:
         database, created = Database.current_objects.get_or_create(
             name=db_name,
             defaults={
+                'db_name': db_name,
                 'username': settings.DATABASES['default']['USER'],
                 'password': settings.DATABASES['default']['PASSWORD'],
                 'host': settings.DATABASES['default']['HOST'],

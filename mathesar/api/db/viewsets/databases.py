@@ -36,7 +36,14 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         serializer = DatabaseSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         credentials = serializer.validated_data
-        Database.objects.create(**credentials).save()
+        Database.objects.create(
+            name=credentials['name'],
+            db_name=credentials['db_name'],
+            username=credentials['username'],
+            password=credentials['password'],
+            host=credentials['host'],
+            port=credentials['port']
+        ).save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):

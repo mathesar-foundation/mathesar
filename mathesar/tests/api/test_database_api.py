@@ -51,6 +51,7 @@ def db_dj_model(test_db_name):
     db = Database.objects.get_or_create(
         name=test_db_name,
         defaults={
+            'db_name': test_db_name,
             'username': 'mathesar',
             'password': 'mathesar',
             'host': 'mathesar_dev_db',

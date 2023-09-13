@@ -29,6 +29,7 @@ def _setup_demo_template_db():
     db_model, _ = Database.current_objects.get_or_create(
         name=template_db_name,
         defaults={
+            'db_name': template_db_name,
             'username': django_model.username,
             'password': django_model.password,
             'host': django_model.host,

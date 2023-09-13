@@ -111,6 +111,7 @@ _engine_cache = {}
 
 class Database(ReflectionManagerMixin, BaseModel):
     name = models.CharField(max_length=128, unique=True)
+    db_name = models.CharField(max_length=128, unique=True)
     username = EncryptedCharField(max_length=255)
     password = EncryptedCharField(max_length=255)
     host = models.CharField(max_length=255)

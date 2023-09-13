@@ -13,7 +13,7 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
 
     class Meta:
         model = Database
-        fields = ['id', 'name', 'deleted', 'editable', 'supported_types_url', 'username', 'password', 'host', 'port']
+        fields = ['id', 'name', 'db_name', 'deleted', 'editable', 'supported_types_url', 'username', 'password', 'host', 'port']
         read_only_fields = ['id', 'deleted', 'supported_types_url', 'editable']
 
     def get_supported_types_url(self, obj):
@@ -30,7 +30,7 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
             for attr, value in credentials.items():
                 setattr(db_model, attr, value)
             credentials = {
-                'name': db_model.name,
+                'db_name': db_model.db_name,
                 'host': db_model.host,
                 'username': db_model.username,
                 'password': db_model.password,
@@ -38,7 +38,7 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
             }
         if is_valid_pg_creds(credentials):
             install_mathesar(
-                database_name=credentials["name"],
+                database_name=credentials["db_name"],
                 hostname=credentials["host"],
                 username=credentials["username"],
                 password=credentials["password"],
