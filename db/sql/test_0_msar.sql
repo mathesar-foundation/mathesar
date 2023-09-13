@@ -244,13 +244,16 @@ $f$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_add_columns_comment() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_name = 'tcol';
-  description = 'Some comment';
-  col_create_arr jsonb := format('[{"name": "%s", "description": "%s"}]', col_name, description);
+  description = 'Some; comment with a semicolon';
   tab_id := 'add_col_testable'::regclass::oid;
+  col_id integer;
+  col_create_arr jsonb;
 BEGIN
+  col_create_arr jsonb := format('[{"name": "%s", "description": "%s"}]', col_name, description);
   PERFORM msar.add_columns(tab_id, col_create_arr);
+  col_id := msar.get_attnum(tab_id, col_name);
   RETURN NEXT is(
-    msar.col_description(tab_id, msar.get_attnum(tab_id, col_name)),
+    msar.col_description(tab_id, col_id),
     description
   )
 END;
@@ -1598,13 +1601,14 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_alter_columns_combo() RETURNS SETOF TEXT AS $f$
 DECLARE
+  description := 
   col_alters_jsonb jsonb := $j$[
     {
       "attnum": 2,
       "name": "nullab numeric",
       "not_null": false,
       "type": {"name": "numeric", "options": {"precision": 8, "scale": 4}},
-      "description": "This is a comment!"
+      "description": "This is; a comment with a semicolon!"
     },
     {"attnum": 3, "name": "newcol2"},
     {"attnum": 4, "delete": true},
@@ -1624,7 +1628,7 @@ BEGIN
   RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(5,3)');
   RETURN NEXT col_not_null('col_alters', 'col_opts');
   RETURN NEXT col_not_null('col_alters', 'timecol');
-  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'This is a comment!');
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!!');
   RETURN NEXT is(col_description('col_alters'::regclass::oid, 3), NULL);
 END;
 $f$ LANGUAGE plpgsql;
@@ -1647,7 +1651,12 @@ DECLARE
       "attnum": 2,
       "description": "change2col2description"
     }
+    {
+      "attnum": 3,
+      "description": "change2col3description"
+    }
   ]$j$;
+  -- Below change should not affect the description.
   change3 jsonb := $j$[
     {
       "attnum": 2,
@@ -1677,8 +1686,10 @@ BEGIN
   RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'change2col2description');
   PERFORM msar.alter_columns('col_alters'::regclass::oid, change3);
   RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'change2col2description');
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 3), 'change2col3description');
   PERFORM msar.alter_columns('col_alters'::regclass::oid, change4);
   RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), NULL);
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 3), 'change2col3description');
 END;
 $$ LANGUAGE plpgsql;
 
