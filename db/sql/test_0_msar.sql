@@ -241,6 +241,22 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_columns_comment() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_name = 'tcol';
+  description = 'Some comment';
+  col_create_arr jsonb := format('[{"name": "%s", "description": "%s"}]', col_name, description);
+  tab_id := 'add_col_testable'::regclass::oid;
+BEGIN
+  PERFORM msar.add_columns(tab_id, col_create_arr);
+  RETURN NEXT is(
+    msar.col_description(tab_id, msar.get_attnum(tab_id, col_name)),
+    description
+  )
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_columns_multi_default_name() RETURNS SETOF TEXT AS $f$
 /*
 This tests the default settings. When not given, the defautl column should be nullable and have no
@@ -1619,31 +1635,49 @@ DECLARE
   change1 jsonb := $j$[
     {
       "attnum": 2,
-      "description": "abc1"
+      "description": "change1col2description"
     },
-    {"attnum": 3, "name": "newcol2"}
+    {
+      "attnum": 3,
+      "name": "change1col3name"
+    }
   ]$j$;
   change2 jsonb := $j$[
     {
       "attnum": 2,
-      "description": "abc2"
+      "description": "change2col2description"
     }
   ]$j$;
   change3 jsonb := $j$[
     {
       "attnum": 2,
-      "name": "newcol4",
+      "name": "change3col2name",
+    },
+    {
+      "attnum": 3,
+      "name": "change3col3name"
+    }
+  ]$j$;
+  change4 jsonb := $j$[
+    {
+      "attnum": 2,
+      "name": "change4col2name",
       "description": null
     },
-    {"attnum": 3, "name": "newcol3"}
+    {
+      "attnum": 3,
+      "name": "change4col3name"
+    }
   ]$j$;
 BEGIN
   RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), NULL);
   PERFORM msar.alter_columns('col_alters'::regclass::oid, change1);
-  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'abc1');
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'change1col2description');
   PERFORM msar.alter_columns('col_alters'::regclass::oid, change2);
-  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'abc2');
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'change2col2description');
   PERFORM msar.alter_columns('col_alters'::regclass::oid, change3);
+  RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), 'change2col2description');
+  PERFORM msar.alter_columns('col_alters'::regclass::oid, change4);
   RETURN NEXT is(col_description('col_alters'::regclass::oid, 2), NULL);
 END;
 $$ LANGUAGE plpgsql;
