@@ -113,6 +113,15 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+CREATE OR REPLACE FUNCTION msar.col_description(tab_id oid, col_id integer) RETURNS text AS $$/*
+Transparent wrapper for col_description. Putting it in the `msar` namespace helps route all DB calls
+from Python through a single Python module.
+*/
+  BEGIN
+    RETURN col_description(tab_id, col_id);
+  END
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION __msar.jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
 Wraps the `?` jsonb operator for improved readability.
 */
@@ -982,7 +991,7 @@ SELECT array_agg(
     CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END,
     -- We don't set a duplicate column as a primary key, since that would cause an error.
     false,
-    col_description(tab_id, pg_columns.attnum)
+    msar.col_description(tab_id, pg_columns.attnum)
   )::__msar.col_def
 )
 FROM pg_attribute AS pg_columns
