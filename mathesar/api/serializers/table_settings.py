@@ -16,6 +16,7 @@ class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerial
 
 class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     preview_settings = PreviewColumnSerializer()
+    column_order = serializers.ListField(child=serializers.IntegerField())
 
     class Meta:
         model = TableSettings
@@ -39,9 +40,3 @@ class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.Hyperlinked
             instance.column_order = column_order_data
             instance.save()
         return instance
-
-    def to_internal_value(self, data):
-        column_order = data.get('column_order', None)
-        if isinstance(column_order, list):
-            data['column_order'] = list(map(int, column_order))
-        return super().to_internal_value(data)
