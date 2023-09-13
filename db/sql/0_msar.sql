@@ -1330,7 +1330,7 @@ WITH attnum_cte AS (
     -- We don't allow setting the primary key column manually
     false,
     -- Set the description for the column
-    COALESCE(quote_literal(col_def_obj ->> 'description'), NULL)
+    quote_literal(col_def_obj ->> 'description')
   )::__msar.col_def AS col_defs
   FROM attnum_cte, jsonb_array_elements(col_defs) AS col_def_obj
   WHERE col_def_obj ->> 'name' IS NULL OR col_def_obj ->> 'name' <> 'id'
@@ -1339,9 +1339,9 @@ SELECT array_cat(
   CASE
     WHEN create_id THEN
       -- The below tuple defines a default 'id' column for Mathesar.  It has name id, type integer,
-      -- it's not null, it uses the 'identity' functionality to generate default values, doesn't
-      -- have a comment.
-      ARRAY[('id', 'integer', true, null, true, NULL)]::__msar.col_def[]
+      -- it's not null, it uses the 'identity' functionality to generate default values, has
+      -- a default comment.
+      ARRAY[('id', 'integer', true, null, true, 'Mathesar default ID column')]::__msar.col_def[]
   END,
   array_agg(col_defs)
 )
