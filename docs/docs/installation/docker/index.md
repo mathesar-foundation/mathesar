@@ -24,8 +24,11 @@ You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
 #### Database for Mathesar's internal usage
 You'll need to:
 
-- Create a PostgreSQL database for Mathesar's internal usage.
-- Create a database user for Mathesar to use. The user should be a `SUPERUSER`, [see PostgreSQL docs for more information](https://www.postgresql.org/docs/13/sql-createrole.html).
+- Create or have a PostgreSQL user for Mathesar to use.
+- Create a PostgreSQL database for Mathesar's internal usage owned by that database user. (See the PostgreSQL [docs](https://www.postgresql.org/docs/13/ddl-priv.html) for more information.)
+    
+    Alternatively, you can make the user a `SUPERUSER` which will give the user access to all the databases. (See the see PostgreSQL [docs](https://www.postgresql.org/docs/13/sql-createrole.html) for more information.)
+
 - Ensure that this database can accept network connections from the machine you're installing Mathesar on.
 - Have the following information for this database handy before installation:
     - Database hostname
@@ -40,11 +43,11 @@ Have the following information for all databases you'd like to connect to Mathes
 - Database hostname
 - Database port
 - Database name
-- Database username (should be a `SUPERUSER`, see above)
+- Database username (should be `SUPERUSER` or `OWNER` of the database, see above)
 - Database password
 
-!!! warning "Database creation"
-    Whenever the Docker container is started, we will attempt to create any databases in this list that don't already exist. So you don't need to ensure that they are created before installation.
+!!! info "Databases are automatically created"
+    You don't need to create these databases before installation. Whenever the Docker container is started, Mathesar will attempt to create any specified databases that don't already exist, so long as the user has [`CREATEDB` privilege](https://www.postgresql.org/docs/13/sql-createrole.html).
 
 ## Installation Steps
 

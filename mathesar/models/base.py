@@ -870,6 +870,7 @@ class DataFile(BaseModel):
     base_name = models.CharField(max_length=100)
     header = models.BooleanField(default=True)
     max_level = models.IntegerField(default=0, blank=True)
+    sheet_index = models.IntegerField(default=0)
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
