@@ -1,6 +1,5 @@
 import warnings
 
-import psycopg
 from sqlalchemy import and_, asc, cast, select, text, exists, Identity
 
 from db.columns.exceptions import DynamicDefaultWarning
@@ -10,10 +9,9 @@ from db.utils import execute_statement, get_pg_catalog_table
 
 
 def get_column_description(oid, attnum, engine):
-    conn_str = str(engine.url)
-    with psycopg.connect(conn_str) as conn:
-        row = conn.execute(f"SELECT col_description({oid}, {attnum})").fetchone()
-        description = row[0]
+    cursor = execute_msar_func_with_engine(engine, 'col_description', oid, attnum)
+    row = cursor.fetchone()
+    description = row[0]
     return description
 
 
