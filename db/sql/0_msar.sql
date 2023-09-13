@@ -2352,27 +2352,6 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION
 __msar.comment_on_column(
   tab_id oid,
-  col_name text,
-  comment_ text
-) RETURNS text AS $$/*
-Change the description of a column, returning command executed.
-
-Args:
-  tab_id: The OID of the table containg the column whose comment we will change.
-  col_name: The name of the column whose comment we'll change
-  comment_: The new comment. Any quotes or special characters must be escaped.
-*/
-SELECT __msar.comment_on_column(
-  __msar.get_relation_name(tab_id),
-  col_name,
-  comment_
-);
-$$ LANGUAGE SQL;
-
-
-CREATE OR REPLACE FUNCTION
-__msar.comment_on_column(
-  tab_id oid,
   col_id integer,
   comment_ text
 ) RETURNS text AS $$/*
@@ -2405,8 +2384,8 @@ Args:
   comment_: The new comment.
 */
 SELECT __msar.comment_on_column(
-  __msar.get_relation_name(tab_id),
-  msar.get_column_name(tab_id, col_id),
+  tab_id,
+  col_id,
   quote_literal(comment_)
 );
 $$ LANGUAGE SQL;
