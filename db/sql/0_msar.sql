@@ -1380,16 +1380,17 @@ Args:
 */
 DECLARE
   col_create_defs __msar.col_def[];
+  fq_table_name text := __msar.get_relation_name(tab_id);
 BEGIN
   col_create_defs := msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
-  PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
+  PERFORM __msar.add_columns(fq_table_name, variadic col_create_defs);
 
   PERFORM
   __msar.comment_on_column(
-    tab_id,
-    col_create_def.name_,
-    col_create_def.description
-  )
+      fq_table_name,
+      col_create_def.name_,
+      col_create_def.description
+    )
   FROM unnest(col_create_defs) AS col_create_def
   WHERE col_create_def.description IS NOT NULL;
 
@@ -2274,11 +2275,11 @@ BEGIN
   FOR description_alter IN 
     SELECT
       (col_alter->>'attnum')::integer AS col_id,
-      quote_literal(col_alter->>'description') AS comment_
+      col_alter->>'description' AS comment_
     FROM jsonb_array_elements(col_alters) AS col_alter
     WHERE __msar.jsonb_key_exists(col_alter, 'description')
   LOOP
-    PERFORM __msar.comment_on_column(
+    PERFORM msar.comment_on_column(
       tab_id := tab_id,
       col_id := description_alter.col_id,
       comment_ := description_alter.comment_
