@@ -14,6 +14,7 @@ from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.data_files import DataFileSerializer
 from mathesar.utils.datafiles import create_datafile
 from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiResponse
 
 
 class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
@@ -26,8 +27,11 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     @extend_schema(
         request=DataFileSerializer,
         responses={
-            status.HTTP_200_OK: DataFileSerializer,
-            status.HTTP_405_METHOD_NOT_ALLOWED: 'Custom error response for method not allowed',
+            status.HTTP_200_OK: OpenApiResponse(response=DataFileSerializer),
+            status.HTTP_405_METHOD_NOT_ALLOWED: OpenApiResponse(
+                description='Custom error response for method not allowed',
+                response=DataFileSerializer,
+            )
         },
     )
     def partial_update(self, request, pk=None):
@@ -55,8 +59,11 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     @extend_schema(
         request=DataFileSerializer,
         responses={
-            status.HTTP_201_CREATED: DataFileSerializer,
-            status.HTTP_400_BAD_REQUEST: 'Custom error response for InvalidTableError',
+            status.HTTP_201_CREATED: OpenApiResponse(response=DataFileSerializer),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description='Custom error response for InvalidTableError',
+                response=DataFileSerializer
+            )
         },
     )
     def create(self, request, *args, **kwargs):
