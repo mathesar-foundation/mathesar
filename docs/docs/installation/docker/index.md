@@ -1,53 +1,12 @@
-# Install Mathesar web server via Docker
+# Install Mathesar via Docker
 
 Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/tags): `mathesar/mathesar-prod:latest` hosted on Docker Hub to run Mathesar.
 
-!!! warning "Limitations"
-    This installation procedure is intended for users who want to run a bare-bones version of the Mathesar web server.
 
-    It is assumed you already have a database server and services like a reverse proxy typically needed for running a production setup. If you don't have those, please use the [Docker Compose installation documentation](../docker-compose/index.md).
+- You need [Docker](https://docs.docker.com/get-docker/)
+    - We have tested with Docker v23. Older versions may not work.
+- Permission to run Docker containers
 
-
-## Prerequisites
-
-### Operating System
-You can install Mathesar using this method on Linux, MacOS, and Windows.
-
-### Access
-You should have permission to run Docker containers on the system.
-
-### Software
-You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
-
-### Databases
-
-#### Database for Mathesar's internal usage
-You'll need to:
-
-- Create or have a PostgreSQL user for Mathesar to use.
-- Create a PostgreSQL database for Mathesar's internal usage owned by that database user. (See the PostgreSQL [docs](https://www.postgresql.org/docs/13/ddl-priv.html) for more information.)
-    
-    Alternatively, you can make the user a `SUPERUSER` which will give the user access to all the databases. (See the see PostgreSQL [docs](https://www.postgresql.org/docs/13/sql-createrole.html) for more information.)
-
-- Ensure that this database can accept network connections from the machine you're installing Mathesar on.
-- Have the following information for this database handy before installation:
-    - Database hostname
-    - Database port
-    - Database name
-    - Database username
-    - Database password
-
-#### Databases connected to Mathesar's UI
-Have the following information for all databases you'd like to connect to Mathesar's UI before installation:
-
-- Database hostname
-- Database port
-- Database name
-- Database username (should be `SUPERUSER` or `OWNER` of the database, see above)
-- Database password
-
-!!! info "Databases are automatically created"
-    You don't need to create these databases before installation. Whenever the Docker container is started, Mathesar will attempt to create any specified databases that don't already exist, so long as the user has [`CREATEDB` privilege](https://www.postgresql.org/docs/13/sql-createrole.html).
 
 ## Installation Steps
 
@@ -56,10 +15,6 @@ Have the following information for all databases you'd like to connect to Mathes
     ```bash
     docker run \
       --detach
-      -e DJANGO_DATABASE_URL='<replace with a postgres connection string>' \
-      -e MATHESAR_DATABASES='(<unique_db_key>|<replace with a postgres connection array>)' \
-      -e SECRET_KEY='<replace with a 50 character string>' \
-      -e ALLOWED_HOSTS='.localhost, 127.0.0.1, [::1]' \
       -v static:/code/static \
       -v media:/code/media \
       --name mathesar_service \
@@ -68,14 +23,8 @@ Have the following information for all databases you'd like to connect to Mathes
       mathesar/mathesar-prod:latest
     ```
     
-    The above command creates a Docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
-
-    - Passes configuration options as environment variables to the Docker container. Refer to [Configuring Mathesar web server](../../configuration/env-variables.md#backend) for setting the correct value to these configuration options and for additional configuration options. The configuration options used in the above command are:
-        - `DJANGO_DATABASE_URL`
-        - `DJANGO_DATABASE_KEY`
-        - `MATHESAR_DATABASES`
-        - `SECRET_KEY`
-    - Creates two [named Docker volumes](https://docs.docker.com/storage/volumes/)
+    The above command creates a docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
+    - Creates two [named docker volumes](https://docs.docker.com/storage/volumes/)
         - `static` for storing static assets like CSS, js files
         - `media` for storing user-uploaded media files
     - Sets the container name as `mathesar_service` using the `--name` parameter, runs the container in a detached mode using the `--detach` parameter, and binds the port `8000` to the `localhost`. Refer to [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/#options) for additional configuration options.
@@ -87,9 +36,10 @@ Have the following information for all databases you'd like to connect to Mathes
 
 1. Set up your user account
 
-    Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up.
+    Mathesar is now installed! You can use it by visiting `http://localhost:8000` or the domain you've set up.
 
-    You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
+    You'll be prompted to set up an admin user account and add user database credentials the first time you open Mathesar. Just follow the instructions on screen.
+
 
 ## Upgrading Mathesar {:#upgrade}
 
