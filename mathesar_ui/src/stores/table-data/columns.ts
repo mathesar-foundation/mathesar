@@ -1,5 +1,5 @@
 import { type Readable, derived, writable } from 'svelte/store';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import {
   type CancellablePromise,
   EventHandler,
@@ -15,13 +15,16 @@ import {
   getAPI,
   patchAPI,
   postAPI,
+  addQueryParamsToUrl,
 } from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
+import type { ShareConsumer } from '@mathesar/utils/shares';
 
 function api(url: string) {
   return {
-    get() {
-      return getAPI<PaginatedResponse<Column>>(`${url}?limit=500`);
+    get(queryParams: Record<string, unknown>) {
+      const requestUrl = addQueryParamsToUrl(url, queryParams);
+      return getAPI<PaginatedResponse<Column>>(requestUrl);
     },
     add(columnDetails: Partial<Column>) {
       return postAPI<Partial<Column>>(url, columnDetails);
@@ -42,7 +45,7 @@ export class ColumnsDataStore extends EventHandler<{
   columnPatched: Partial<Column>;
   columnsFetched: Column[];
 }> {
-  private parentId: DBObjectEntry['id'];
+  private tableId: TableEntry['id'];
 
   private promise: CancellablePromise<PaginatedResponse<Column>> | undefined;
 
@@ -59,17 +62,22 @@ export class ColumnsDataStore extends EventHandler<{
 
   pkColumn: Readable<Column | undefined>;
 
+  readonly shareConsumer?: ShareConsumer;
+
   constructor({
-    parentId,
+    tableId,
     hiddenColumns,
+    shareConsumer,
   }: {
-    parentId: number;
+    tableId: TableEntry['id'];
     /** Values are column ids */
     hiddenColumns?: Iterable<number>;
+    shareConsumer?: ShareConsumer;
   }) {
     super();
-    this.parentId = parentId;
-    this.api = api(`/api/db/v0/tables/${this.parentId}/columns/`);
+    this.tableId = tableId;
+    this.shareConsumer = shareConsumer;
+    this.api = api(`/api/db/v0/tables/${this.tableId}/columns/`);
     this.hiddenColumns = new WritableSet(hiddenColumns);
     this.columns = derived(
       [this.fetchedColumns, this.hiddenColumns],
@@ -85,7 +93,10 @@ export class ColumnsDataStore extends EventHandler<{
     try {
       this.fetchStatus.set({ state: 'processing' });
       this.promise?.cancel();
-      this.promise = this.api.get();
+      this.promise = this.api.get({
+        limit: 500,
+        ...this.shareConsumer?.getQueryParams(),
+      });
       const response = await this.promise;
       const columns = response.results;
       this.fetchedColumns.set(columns);

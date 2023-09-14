@@ -41,6 +41,7 @@ export const querySummarizationFunctionIds = [
   'min',
   'mean',
   'peak_time',
+  'peak_month',
 ] as const;
 
 export type QuerySummarizationFunctionId =
@@ -173,14 +174,17 @@ type QueryResultRecords =
   | PaginatedResponse<QueryResultRecord>
   | { count: 0; results: null };
 
-export interface QueryRunResponse {
+export interface QueryResultsResponse {
+  records: QueryResultRecords;
+  output_columns: QueryColumnAlias[];
+  column_metadata: Record<string, QueryColumnMetaData>;
+}
+
+export interface QueryRunResponse extends QueryResultsResponse {
   query: {
     schema: SchemaEntry['id'];
     base_table: QueryInstance['base_table'];
     initial_columns: QueryInstanceInitialColumn[];
     transformations?: QueryInstanceTransformation[];
   };
-  records: QueryResultRecords;
-  output_columns: QueryColumnAlias[];
-  column_metadata: Record<string, QueryColumnMetaData>;
 }
