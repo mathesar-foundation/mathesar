@@ -20,6 +20,8 @@ class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Seria
 
 
 class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
+    default_exclusion_violation_message = "The requested update violates an exclusion constraint"
+
     def update(self, instance, validated_data):
         table = self.context['table']
         try:
@@ -56,7 +58,7 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
             elif type(e.orig) == ExclusionViolation:
                 raise database_api_exceptions.ExclusionViolationAPIException(
                     e,
-                    message="The requested update violates a exclusion constraint",
+                    message=self.default_exclusion_violation_message,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
             else:
@@ -89,7 +91,7 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
             elif type(e.orig) == ExclusionViolation:
                 raise database_api_exceptions.ExclusionViolationAPIException(
                     e,
-                    message="The requested update violates a exclusion constraint",
+                    message=self.default_exclusion_violation_message,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
             else:
