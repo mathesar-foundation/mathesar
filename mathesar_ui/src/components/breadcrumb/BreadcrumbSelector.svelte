@@ -111,6 +111,7 @@
     display: grid;
     grid-template: auto 1fr / 1fr;
     grid-gap: 0.5rem;
+    max-height: calc(100vh - 2rem);
   }
   .results {
     overflow-y: auto;

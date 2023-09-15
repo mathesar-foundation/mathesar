@@ -1,79 +1,46 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
-
-  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
-  import { confirmationController } from '@mathesar/stores/confirmation';
-  import { toast } from '@mathesar/stores/toast';
-  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
-  import {
-    RecordSelectorController,
-    setRecordSelectorControllerInContext,
-  } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import { Spinner } from '@mathesar-component-library';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import AppContext from './AppContext.svelte';
   import RootRoute from './routes/RootRoute.svelte';
-  import { setNewClipboardHandlerStoreInContext } from './stores/clipboard';
-  import { modal } from './stores/modal';
-  import { setReleasesStoreInContext } from './stores/releases';
-  import ModalRecordSelector from './systems/record-selector/ModalRecordSelector.svelte';
+  import { loadLocaleAsync } from './i18n/i18n-load';
+  import { setLocale } from './i18n/i18n-svelte';
+  import type { RequestStatus } from './api/utils/requestUtils';
+  import { getErrorMessage } from './utils/errors';
+  import ErrorBox from './components/message-boxes/ErrorBox.svelte';
+
+  /**
+   * Later the translations file will be loaded
+   * in parallel to the FE's first chunk
+   */
+  let translationLoadStatus: RequestStatus = { state: 'processing' };
+  void (async () => {
+    try {
+      await loadLocaleAsync('en');
+      setLocale('en');
+      translationLoadStatus = { state: 'success' };
+    } catch (exp) {
+      translationLoadStatus = {
+        state: 'failure',
+        errors: [getErrorMessage(exp)],
+      };
+    }
+  })();
 
   const commonData = preloadCommonData();
-  if (commonData?.user) {
-    const userProfile = setUserProfileStoreInContext(commonData.user);
-    if (get(userProfile).isSuperUser) {
-      // Toggle these lines to test with a mock tag name
-      // setReleasesStoreInContext('1.75.0');
-      setReleasesStoreInContext(commonData.current_release_tag_name);
-    }
-  } else {
-    // This should never occur
-    // TODO: Throw an application wide error
-  }
-
-  const clipboardHandlerStore = setNewClipboardHandlerStoreInContext();
-  const recordSelectorModal = modal.spawnModalController();
-  const recordSelectorController = new RecordSelectorController({
-    onOpen: () => recordSelectorModal.open(),
-    onClose: () => recordSelectorModal.close(),
-    nestingLevel: 0,
-  });
-  setRecordSelectorControllerInContext(recordSelectorController);
-
-  $: clipboardHandler = $clipboardHandlerStore;
-
-  // Why are we handling clipboard events here?
-  //
-  // We originally implemented the clipboard handler lower down, in the Sheet
-  // component. That worked for Firefox because when the user pressed Ctrl+C the
-  // focused `.cell-wrapper` div node would emit a copy event. However, in
-  // Chrome and Safari, the focused `.cell-wrapper` div node does _not_ emit
-  // copy events! Perhaps that's because it doesn't contain any selected text?
-  // Instead, the copy event gets emitted from `body` in Chrome/Safari.
-  // Clipboard functionality seems inconsistent in subtle ways across browsers.
-  // Make sure to test in all browsers when making changes!
-  //
-  // On a record page with multiple table widgets, we should be able to copy
-  // cells from each table widget, and we should be able to copy plain text on
-  // the page, outside of the sheet. We also need to support copying from the
-  // Data Explorer.
-
-  function handleCopy(e: ClipboardEvent) {
-    if (clipboardHandler) {
-      clipboardHandler.handleCopy(e);
-      e.preventDefault();
-    }
-  }
 </script>
 
-<svelte:body on:copy={handleCopy} />
-
-<ToastPresenter entries={toast.entries} />
-<Confirmation controller={confirmationController} />
-<ModalRecordSelector
-  {recordSelectorController}
-  modalController={recordSelectorModal}
-/>
-
-<RootRoute />
+{#if translationLoadStatus.state === 'success' && commonData}
+  <AppContext {commonData}>
+    <RootRoute {commonData} />
+  </AppContext>
+{:else if translationLoadStatus.state === 'processing'}
+  <div class="app-loader">
+    <Spinner size="2rem" />
+  </div>
+{:else}
+  <ErrorBox>This state should never occur.</ErrorBox>
+{/if}
 
 <!--
   Supporting aliases in scss within the preprocessor is a bit of work.
@@ -256,5 +223,13 @@
 
   .bold-header {
     font-weight: 500;
+  }
+
+  .app-loader {
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    display: flex;
   }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     DropdownMenu,
     Icon,
@@ -35,6 +35,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
 
+  const commonData = preloadCommonData();
   const userProfile = getUserProfileStoreFromContext();
   const releaseDataStore = getReleaseDataStoreFromContext();
 
@@ -45,6 +46,7 @@
     'canExecuteDDL',
   );
   $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
+  $: isNormalRoutingContext = commonData?.routing_context === 'normal';
 
   let isCreatingNewEmptyTable = false;
 
@@ -53,7 +55,7 @@
       return;
     }
     isCreatingNewEmptyTable = true;
-    const tableInfo = await createTable(schema.id, {});
+    const tableInfo = await createTable(database, schema, {});
     isCreatingNewEmptyTable = false;
     router.goto(getTablePageUrl(database.name, schema.id, tableInfo.id), false);
   }
@@ -64,75 +66,79 @@
     <Breadcrumb />
   </div>
 
-  <div class="right">
-    {#if schema && database}
-      <DropdownMenu
-        triggerAppearance="ghost"
-        size="small"
-        closeOnInnerClick={true}
-        icon={isCreatingNewEmptyTable ? iconLoading : undefined}
-      >
-        <span slot="trigger" class="shortcuts">
-          <span class="icon"><Icon {...iconShortcuts} /></span>
-          <span class="text">Shortcuts</span>
-        </span>
-        {#if canExecuteDDL}
-          <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
-            New Table from Scratch
-          </ButtonMenuItem>
+  {#if isNormalRoutingContext}
+    <div class="right">
+      {#if schema && database}
+        <DropdownMenu
+          triggerAppearance="ghost"
+          size="small"
+          closeOnInnerClick={true}
+          icon={isCreatingNewEmptyTable ? iconLoading : undefined}
+        >
+          <span slot="trigger" class="shortcuts">
+            <span class="icon"><Icon {...iconShortcuts} /></span>
+            <span class="text">Shortcuts</span>
+          </span>
+          {#if canExecuteDDL}
+            <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
+              New Table from Scratch
+            </ButtonMenuItem>
+            <LinkMenuItem
+              icon={iconAddNew}
+              href={getImportPageUrl(database.name, schema.id)}
+            >
+              New Table from Data Import
+            </LinkMenuItem>
+          {/if}
           <LinkMenuItem
-            icon={iconAddNew}
-            href={getImportPageUrl(database.name, schema.id)}
+            icon={iconExploration}
+            href={getDataExplorerPageUrl(database.name, schema.id)}
           >
-            New Table from Data Import
+            Open Data Explorer
           </LinkMenuItem>
-        {/if}
-        <LinkMenuItem
-          icon={iconExploration}
-          href={getDataExplorerPageUrl(database.name, schema.id)}
-        >
-          Open Data Explorer
-        </LinkMenuItem>
-      </DropdownMenu>
-    {/if}
-    <DropdownMenu
-      triggerAppearance="ghost"
-      size="small"
-      closeOnInnerClick={true}
-      menuStyle="--spacing-x: 0.3em;"
-    >
-      <div class="user-switcher" slot="trigger">
-        <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
-      </div>
-      {#if database}
-        <MenuHeading>Database</MenuHeading>
-        <LinkMenuItem
-          icon={iconDatabase}
-          href={getDatabasePageUrl(database.name)}
-        >
-          {database.name}
-        </LinkMenuItem>
-        <MenuDivider />
+        </DropdownMenu>
       {/if}
-      <MenuHeading>Signed in as</MenuHeading>
-      <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
-        {$userProfile?.getDisplayName() ?? 'User profile'}
-      </LinkMenuItem>
-      <MenuDivider />
-      {#if $userProfile?.isSuperUser}
-        <LinkMenuItem
-          icon={iconSettingsMajor}
-          href={ADMIN_URL}
-          hasNotificationDot={upgradable}
+      {#if $userProfile}
+        <DropdownMenu
+          triggerAppearance="ghost"
+          size="small"
+          closeOnInnerClick={true}
+          menuStyle="--spacing-x: 0.3em;"
         >
-          Administration
-        </LinkMenuItem>
+          <div class="user-switcher" slot="trigger">
+            <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
+          </div>
+          {#if database}
+            <MenuHeading>Database</MenuHeading>
+            <LinkMenuItem
+              icon={iconDatabase}
+              href={getDatabasePageUrl(database.name)}
+            >
+              {database.name}
+            </LinkMenuItem>
+            <MenuDivider />
+          {/if}
+          <MenuHeading>Signed in as</MenuHeading>
+          <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
+            {$userProfile.getDisplayName()}
+          </LinkMenuItem>
+          <MenuDivider />
+          {#if $userProfile.isSuperUser}
+            <LinkMenuItem
+              icon={iconSettingsMajor}
+              href={ADMIN_URL}
+              hasNotificationDot={upgradable}
+            >
+              Administration
+            </LinkMenuItem>
+          {/if}
+          <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
+            Log Out
+          </LinkMenuItem>
+        </DropdownMenu>
       {/if}
-      <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
-        Log Out
-      </LinkMenuItem>
-    </DropdownMenu>
-  </div>
+    </div>
+  {/if}
 </header>
 
 <style lang="scss">

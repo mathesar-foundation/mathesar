@@ -1,13 +1,11 @@
-from psycopg2.errors import DuplicateTable, UniqueViolation
+from psycopg.errors import DuplicateTable, UniqueViolation
 from rest_framework import serializers, status
-from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from db.constraints import utils as constraint_utils
 from db.identifiers import is_identifier_too_long
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
-import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ConstraintColumnEmptyAPIException, UnsupportedConstraintAPIException,
     InvalidTableName
@@ -19,10 +17,17 @@ from mathesar.api.serializers.shared_serializers import (
 from mathesar.models.base import Column, Constraint, Table
 
 
-class Table_Filtered_Column_queryset(serializers.PrimaryKeyRelatedField):
+class TableFilteredPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    """
+    Limits the accepted related primary key values to a specific table.
+    For example, if the PrimaryKeyRelatedField is instantiated with a
+    Column queryset, only columns in the "associated table" are
+    accepted. The "associated table" is defined by the context dict's
+    `table_id` value.
+    """
     def get_queryset(self):
         table_id = self.context.get('table_id', None)
-        queryset = super(Table_Filtered_Column_queryset, self).get_queryset()
+        queryset = super(TableFilteredPrimaryKeyRelatedField, self).get_queryset()
         if table_id is None or not queryset:
             return None
         return queryset.filter(table__id=table_id)
@@ -31,7 +36,7 @@ class Table_Filtered_Column_queryset(serializers.PrimaryKeyRelatedField):
 class BaseConstraintSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
     type = serializers.CharField()
-    columns = Table_Filtered_Column_queryset(queryset=Column.current_objects, many=True)
+    columns = TableFilteredPrimaryKeyRelatedField(queryset=Column.current_objects, many=True)
 
     class Meta:
         model = Constraint
@@ -53,23 +58,17 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
             raise UnsupportedConstraintAPIException(constraint_type=constraint_type, field='type')
         try:
             constraint = table.add_constraint(constraint_obj)
-        except ProgrammingError as e:
-            if type(e.orig) == DuplicateTable:
-                raise database_api_exceptions.DuplicateTableAPIException(
-                    e,
-                    message='Relation with the same name already exists',
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                raise base_api_exceptions.MathesarAPIException(e)
-        except IntegrityError as e:
-            if type(e.orig) == UniqueViolation:
-                raise database_api_exceptions.UniqueViolationAPIException(
-                    e,
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                raise base_api_exceptions.MathesarAPIException(e)
+        except DuplicateTable as e:
+            raise database_api_exceptions.DuplicateTableAPIException(
+                e,
+                message='Relation with the same name already exists',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except UniqueViolation as e:
+            raise database_api_exceptions.UniqueViolationAPIException(
+                e,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         return constraint
 
     def validate_name(self, name):

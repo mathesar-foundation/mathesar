@@ -42,7 +42,6 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         reference_table = validated_data['reference_table']
         create_foreign_key_link(
             reference_table.schema._sa_engine,
-            reference_table._sa_table.schema,
             validated_data.get('reference_column_name'),
             reference_table.oid,
             validated_data.get('referent_table').oid,
@@ -88,14 +87,15 @@ class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
     def create(self, validated_data):
         referents = validated_data['referents']
-        referent_tables_oid = [
-            {'referent_table': map_table_obj['referent_table'].oid, 'column_name': map_table_obj['column_name']} for
-            map_table_obj in validated_data['referents']]
+        referents_dict = {
+            'referent_table_oids': [i['referent_table'].oid for i in referents],
+            'column_names': [i['column_name'] for i in referents]
+        }
         create_many_to_many_link(
             referents[0]['referent_table'].schema._sa_engine,
-            referents[0]['referent_table']._sa_table.schema,
+            referents[0]['referent_table'].schema.oid,
             validated_data.get('mapping_table_name'),
-            referent_tables_oid,
+            referents_dict,
         )
         reset_reflection(db_name=referents[0]['referent_table'].schema.database.name)
         return validated_data

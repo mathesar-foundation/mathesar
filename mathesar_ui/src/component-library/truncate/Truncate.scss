@@ -1,6 +1,6 @@
 .truncate {
   overflow: hidden;
-  text-align: left;
+  text-align: inherit;
 }
 .truncate:not(.multiline) {
   display: block;

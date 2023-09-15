@@ -1,10 +1,13 @@
-import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/types/queries';
 import { ImmutableMap } from '@mathesar-component-library';
+import type {
+  QueryInstanceSummarizationTransformation,
+  QuerySummarizationFunctionId,
+} from '@mathesar/api/types/queries';
 
 export interface QuerySummarizationAggregationEntry {
   inputAlias: string;
   outputAlias: string;
-  function: 'distinct_aggregate_to_array' | 'count';
+  function: QuerySummarizationFunctionId;
 }
 
 export interface QuerySummarizationGroupingEntry {

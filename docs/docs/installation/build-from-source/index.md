@@ -1,46 +1,59 @@
 # Install Mathesar from source on Linux
 
-
-!!! warning ""
-    To follow this guide you need to have a good knowledge of Linux server administration, and be familiar with using the command line interface and some common utilities.
-
-
+!!! warning "For experienced Linux sysadmins"
+    To follow this guide you need be experienced with Linux server administration, including the command line interface and some common utilities.
 
 
 ## Requirements
 
-- We've tested this on **Ubuntu**, but we expect it work on other Linux distros too.
-- You'll need **root** privileges.
-- You'll need to install the following system packages before installing Mathesar:
+### System
+We recommend having at least 60 GB disk space and 4 GB of RAM.
 
-    - [Python](https://www.python.org/downloads/) 3.9
+### Operating System
+We've tested this on **Ubuntu**, but we expect that it can be adapted for other Linux distributions as well.
 
-        !!! note "Python version"
-            Python _older_ than 3.9 will not run Mathesar.
+### Access
+You should have **root access** to the machine you're installing Mathesar on.
 
-            Python _newer_ than 3.9 will run Mathesar, but will require some slightly modified installation steps which we have [not yet documented](https://github.com/centerofci/mathesar/issues/2872).
+### Software
+You'll need to install the following system packages before you install Mathesar:
 
-    - [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify with `psql --version`)
+- [Python](https://www.python.org/downloads/) 3.9
 
-    - [NodeJS](https://nodejs.org/en/download) 14 or newer (Verify with `node --version`)
+    !!! note "Python version"
+        Python _older_ than 3.9 will not run Mathesar.
 
-        _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
+        Python _newer_ than 3.9 will run Mathesar, but will require some slightly modified installation steps which we have [not yet documented](https://github.com/centerofci/mathesar/issues/2872).
 
-    - [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
+- [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify with `psql --version`)
 
-    - [git](https://git-scm.com/downloads) (Verify with `git --version`)
+- [NodeJS](https://nodejs.org/en/download) 14 or newer (Verify with `node --version`)
 
-- We recommend having at least 60 GB disk space and 4 GB of RAM.
-- You'll need a domain name or subdomain for your installation.
-    Type your domain name into the box below. Do not include a trailing slash.
+    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
-    <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
+- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 6 or newer (Verify with `npm --version`)
 
-    Then press <kbd>Enter</kbd> to customize this guide with your domain name.
+    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
+
+- [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
+
+- [git](https://git-scm.com/downloads) (Verify with `git --version`)
 
 
+### Domain (optional)
+If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
 
-## Install
+Before you start installation, **ensure that the DNS for your sub-domain or domain is pointing to the machine that you're installing Mathesar on**.
+
+## Customizing this Guide
+Type your domain name into the box below. Do not include a trailing slash.
+
+<input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
+
+Then press <kbd>Enter</kbd> to customize this guide with your domain name.
+
+
+## Installation Steps
 
 ### Set up the database
 
@@ -50,25 +63,25 @@
     sudo -u postgres psql
     ```
 
-1. Mathesar needs a Postgres superuser to function correctly. Let's create a superuser.
+1. Let's create a Postgres user for Mathesar
 
     ```postgresql
-    CREATE USER mathesar WITH SUPERUSER ENCRYPTED PASSWORD '1234';
+    CREATE USER mathesar WITH ENCRYPTED PASSWORD '1234';
     ```
 
     !!! warning "Customize your password"
         Be sure to change the password `1234` in the command above to something more secure and private. Record your custom password somewhere safe. You will need to reference it later.
 
-1. Next, we have to create a database for storing Mathesar metadata.
+1. Next, we have to create a database for storing Mathesar metadata. Your PostgreSQL user will either need to be a `SUPERUSER` or `OWNER` of the database. In this guide, we will be setting the user to be `OWNER` of the database as it is slightly restrictive compared to a `SUPERUSER`.
 
     ```postgresql
-    CREATE DATABASE mathesar_django;
+    CREATE DATABASE mathesar_django OWNER mathesar;
     ```
 
 1. Now we let us create a database for storing your data.
 
     ```postgresql
-    CREATE DATABASE your_db_name;
+    CREATE DATABASE your_db_name OWNER mathesar;
     ```
 
 1. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to exit the `psql` shell.
@@ -116,16 +129,16 @@
 
 ### Set up the environment
 
-1. Clone the git repo into a directory where you will install Mathesar, and `cd` into that directory.
+1. Clone the git repo into the installation directory.
 
     ```sh
     git clone https://github.com/centerofci/mathesar.git .
     ```
 
-1. Switch to the `master` branch to install the latest stable release.
+1. Checkout the tag of the latest stable release, `{{mathesar_version}}`.
 
     ```
-    git checkout master
+    git checkout {{mathesar_version}}
     ```
 
     !!! warning "Important"
@@ -146,6 +159,10 @@
     ```sh
     source ./mathesar-venv/bin/activate
     ```
+
+    !!! warning "Important"
+        You need to activate the environment each time you restart the shell as they don't persist across sessions.
+
 
 ### Install the Mathesar application
 
@@ -186,7 +203,7 @@
           export $(sudo cat .env)
           ```
        
-        !!! info ""
+        !!! warning "Important"
             You need to export the environment variables each time you restart the shell as they don't persist across sessions.
 
 
@@ -207,15 +224,6 @@
     python install.py --skip-confirm | tee /tmp/install.py.log
     ```
 
-1. Create a Mathesar admin/superuser:
-
-    ```sh
-    python manage.py createsuperuser
-    ```
-
-    A prompt will appear to ask for the superuser details. Fill in the details to create a superuser. At least one superuser is necessary for accessing Mathesar.
-    
-    See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
 1. Create a media directory for storing user-uploaded media
 
@@ -233,6 +241,12 @@
     ```sh
     sudo groupadd gunicorn && \
     sudo useradd gunicorn -g gunicorn
+    ```
+
+1. Make the `gunicorn` user the owner of the `.media` directory
+
+    ```sh
+    sudo chown -R gunicorn:gunicorn .media/
     ```
 
 1. Create the Gunicorn systemd service file.
@@ -268,6 +282,12 @@
     sudo systemctl daemon-reload && \
     sudo systemctl start gunicorn.service && \
     sudo systemctl enable gunicorn.service
+    ```
+
+1. Check the logs to verify if Gunicorn is running without any errors
+    
+    ```sh
+    sudo journalctl --priority=notice --unit=gunicorn.service
     ```
 
 ### Set up the Caddy reverse proxy
@@ -351,7 +371,7 @@
     ```
 
 
-1. Reload the systemctl and Start the Caddy socket
+1. Reload the systemctl and start the Caddy socket
 
     ```sh
     sudo systemctl daemon-reload && \
@@ -359,8 +379,16 @@
     sudo systemctl enable caddy.service
     ```
 
-Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
+1. Check the logs to verify if Caddy is running without any errors
+    
+    ```sh
+    sudo journalctl --priority=notice --unit=caddy.service
+    ```
 
+### Set up your user account
+Mathesar is now installed! You can use it by visiting the URL `xDOMAIN_NAMEx`.
+
+You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
 
 ## Administration
 
@@ -430,7 +458,7 @@ Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
     ```
 
 
-### Uninstall
+### Uninstalling Mathesar {:#uninstall}
 
 1. Stop Caddy service
 
@@ -479,29 +507,4 @@ Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
         DROP DATABASE mathesar_django;
         ```
 
-
-1. Remove Mathesar internal schemas.
-
-    **If you connected Mathesar to a database**, the installation process would have created a new schema for Mathesar's use. You can remove this schema from that database as follows:
-
-    1. Connect to the database.
-
-        ```
-        psql -h <DB HOSTNAME> -p <DB PORT> -U <DB_USER> <DB_NAME>
-        ```
-
-    2. Delete the types schema.
-
-        ```postgresql
-        DROP SCHEMA mathesar_types CASCADE;
-        ```
-
-        !!! danger ""
-            Deleting this schema will also delete any database objects that depend on it. This should not be an issue if you don't have any data using Mathesar's custom data types.
-
-    3. Delete the function schemas.
-
-        ```postgresql
-        DROP SCHEMA msar CASCADE;
-        DROP SCHEMA __msar CASCADE;
-        ```
+{% include 'snippets/uninstall-schemas.md' %}

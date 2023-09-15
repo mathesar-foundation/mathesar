@@ -7,10 +7,13 @@ import {
   type Writable,
 } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { States } from '@mathesar/api/utils/requestUtils';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import { SheetSelection } from '@mathesar/components/sheet';
+import { getColumnOrder } from '@mathesar/utils/tables';
+import type { ShareConsumer } from '@mathesar/utils/shares';
 import { Meta } from './meta';
 import { ColumnsDataStore } from './columns';
 import type { RecordRow, TableRecordsData } from './records';
@@ -27,7 +30,9 @@ import { processColumn } from './processedColumns';
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
   abstractTypesMap: AbstractTypesMap;
+  table: TableEntry;
   meta?: Meta;
+  shareConsumer?: ShareConsumer;
   /**
    * Keys are columns ids. Values are cell values.
    *
@@ -62,22 +67,32 @@ export class TabularData {
 
   selection: TabularDataSelection;
 
+  table: TableEntry;
+
+  shareConsumer?: ShareConsumer;
+
   constructor(props: TabularDataProps) {
     const contextualFilters =
       props.contextualFilters ?? new Map<number, string | number>();
     this.id = props.id;
     this.meta = props.meta ?? new Meta();
+    this.shareConsumer = props.shareConsumer;
     this.columnsDataStore = new ColumnsDataStore({
-      parentId: this.id,
+      tableId: this.id,
       hiddenColumns: contextualFilters.keys(),
+      shareConsumer: this.shareConsumer,
     });
-    this.constraintsDataStore = new ConstraintsDataStore(this.id);
-    this.recordsData = new RecordsData(
-      this.id,
-      this.meta,
-      this.columnsDataStore,
+    this.constraintsDataStore = new ConstraintsDataStore({
+      tableId: this.id,
+      shareConsumer: this.shareConsumer,
+    });
+    this.recordsData = new RecordsData({
+      tableId: this.id,
+      meta: this.meta,
+      columnsDataStore: this.columnsDataStore,
       contextualFilters,
-    );
+      shareConsumer: this.shareConsumer,
+    });
     this.display = new Display(
       this.meta,
       this.columnsDataStore,
@@ -102,8 +117,12 @@ export class TabularData {
         ),
     );
 
+    this.table = props.table;
+
     this.selection = new SheetSelection({
       getColumns: () => [...get(this.processedColumns).values()],
+      getColumnOrder: () =>
+        getColumnOrder([...get(this.processedColumns).values()], this.table),
       getRows: () => this.recordsData.getRecordRows(),
       getMaxSelectionRowIndex: () => {
         const totalCount = get(this.recordsData.totalCount) ?? 0;
