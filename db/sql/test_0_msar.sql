@@ -169,8 +169,8 @@ BEGIN
   RETURN NEXT is(
     msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
     ARRAY[
-      ('"Column 1"', 'text', null, null, false),
-      ('"Column 2"', 'text', null, null, false)
+      ('"Column 1"', 'text', null, null, false, null),
+      ('"Column 2"', 'text', null, null, false, null)
     ]::__msar.col_def[],
     'Empty columns should result in defaults'
   );
@@ -182,11 +182,18 @@ BEGIN
   RETURN NEXT is(
     msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
     ARRAY[
-      ('id', 'integer', true, null, true),
-      ('"Column 1"', 'text', null, null, false),
-      ('"Column 2"', 'text', null, null, false)
+      ('id', 'integer', true, null, true, 'Mathesar default ID column'),
+      ('"Column 1"', 'text', null, null, false, null),
+      ('"Column 2"', 'text', null, null, false, null)
     ]::__msar.col_def[],
     'Column definition processing add "id" column'
+  );
+  RETURN NEXT is(
+    msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
+    ARRAY[
+      ('"Column 1"', 'text', null, null, false, '''Some comment''')
+    ]::__msar.col_def[],
+    'Comments should be sanitized'
   );
 END;
 $f$ LANGUAGE plpgsql;
@@ -230,6 +237,25 @@ BEGIN
   RETURN NEXT col_is_null('add_col_testable', 'Column 4');
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'text');
   RETURN NEXT col_hasnt_default('add_col_testable', 'Column 4');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_comment() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_name text := 'tcol';
+  description text := 'Some; comment with a semicolon';
+  tab_id integer := 'add_col_testable'::regclass::oid;
+  col_id integer;
+  col_create_arr jsonb;
+BEGIN
+  col_create_arr := format('[{"name": "%s", "description": "%s"}]', col_name, description);
+  PERFORM msar.add_columns(tab_id, col_create_arr);
+  col_id := msar.get_attnum(tab_id, col_name);
+  RETURN NEXT is(
+    msar.col_description(tab_id, col_id),
+    description
+  );
 END;
 $f$ LANGUAGE plpgsql;
 
@@ -1580,7 +1606,8 @@ DECLARE
       "attnum": 2,
       "name": "nullab numeric",
       "not_null": false,
-      "type": {"name": "numeric", "options": {"precision": 8, "scale": 4}}
+      "type": {"name": "numeric", "options": {"precision": 8, "scale": 4}},
+      "description": "This is; a comment with a semicolon!"
     },
     {"attnum": 3, "name": "newcol2"},
     {"attnum": 4, "delete": true},
@@ -1600,8 +1627,70 @@ BEGIN
   RETURN NEXT col_type_is('col_alters', 'col_opts', 'numeric(5,3)');
   RETURN NEXT col_not_null('col_alters', 'col_opts');
   RETURN NEXT col_not_null('col_alters', 'timecol');
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'This is; a comment with a semicolon!');
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), NULL);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_comment_on_column() RETURNS SETOF TEXT AS $$
+DECLARE
+  change1 jsonb := $j$[
+    {
+      "attnum": 2,
+      "description": "change1col2description"
+    },
+    {
+      "attnum": 3,
+      "name": "change1col3name"
+    }
+  ]$j$;
+  change2 jsonb := $j$[
+    {
+      "attnum": 2,
+      "description": "change2col2description"
+    },
+    {
+      "attnum": 3,
+      "description": "change2col3description"
+    }
+  ]$j$;
+  -- Below change should not affect the description.
+  change3 jsonb := $j$[
+    {
+      "attnum": 2,
+      "name": "change3col2name"
+    },
+    {
+      "attnum": 3,
+      "name": "change3col3name"
+    }
+  ]$j$;
+  change4 jsonb := $j$[
+    {
+      "attnum": 2,
+      "name": "change4col2name",
+      "description": null
+    },
+    {
+      "attnum": 3,
+      "name": "change4col3name"
+    }
+  ]$j$;
+BEGIN
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), NULL);
+  PERFORM msar.alter_columns('col_alters'::regclass::oid, change1);
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change1col2description');
+  PERFORM msar.alter_columns('col_alters'::regclass::oid, change2);
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change2col2description');
+  PERFORM msar.alter_columns('col_alters'::regclass::oid, change3);
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), 'change2col2description');
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), 'change2col3description');
+  PERFORM msar.alter_columns('col_alters'::regclass::oid, change4);
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 2), NULL);
+  RETURN NEXT is(msar.col_description('col_alters'::regclass::oid, 3), 'change2col3description');
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION setup_roster() RETURNS SETOF TEXT AS $$
