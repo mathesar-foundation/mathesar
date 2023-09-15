@@ -5,7 +5,7 @@ from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from psycopg.errors import InvalidTextRepresentation, InvalidParameterValue
 
-from db.columns.defaults import DEFAULT, NAME, NULLABLE, TYPE
+from db.columns.defaults import DEFAULT, NAME, NULLABLE, TYPE, DESCRIPTION
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeOptionError
 from db.connection import execute_msar_func_with_engine
 from db.tables.operations.select import reflect_table_from_oid
@@ -26,12 +26,14 @@ def create_column(engine, table_oid, column_data):
     column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
     default_value = column_data.get(DEFAULT, {}).get('value')
+    column_description = column_data.get(DESCRIPTION)
     col_create_def = [
         {
             "name": column_name,
             "type": {"name": column_type_id, "options": column_type_options},
             "not_null": not column_nullable,
             "default": default_value,
+            "description": column_description,
         }
     ]
     try:

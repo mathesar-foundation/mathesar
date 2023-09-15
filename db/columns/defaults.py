@@ -4,6 +4,7 @@ from db import constants
 
 
 NAME = "name"
+DESCRIPTION = "description"
 NULLABLE = "nullable"
 PRIMARY_KEY = "primary_key"
 TYPE = "sa_type"
