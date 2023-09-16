@@ -1,6 +1,5 @@
 .fieldset-group {
   padding: 0;
-  border: 0;
   --spacing-y-default: 0.5em;
   --spacing-x-default: 1em;
 
@@ -26,5 +25,15 @@
     .option:not(:last-child) {
       margin-right: var(--spacing-x, var(--spacing-x-default));
     }
+  }
+
+  &:not(.boxed) {
+    border: 0;
+  }
+  &.boxed {
+    border: 1px solid var(--slate-300);
+    border-radius: var(--border-radius-m);
+    padding: 1em;
+    padding-top: 0;
   }
 }

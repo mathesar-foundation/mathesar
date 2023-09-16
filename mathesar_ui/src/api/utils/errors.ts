@@ -141,4 +141,11 @@ export function extractDetailedFieldBasedErrors<T extends string = string>(
   };
 }
 
+export function getApiErrorMessages(e: unknown): string[] {
+  if (e instanceof ApiMultiError) {
+    return e.errors.map((err) => getErrorMessage(err));
+  }
+  return [getErrorMessage(e)];
+}
+
 /* eslint-enable max-classes-per-file */

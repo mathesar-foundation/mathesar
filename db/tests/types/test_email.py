@@ -101,7 +101,7 @@ def test_create_email_type_domain_checks_broken_emails(engine_with_schema):
                     f"SELECT '{address_incorrect}'::{email.DB_TYPE};"
                 )
             )
-        assert type(e.orig) == CheckViolation
+        assert type(e.orig) is CheckViolation
 
 
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [

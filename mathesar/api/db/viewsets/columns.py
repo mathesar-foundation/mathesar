@@ -1,18 +1,15 @@
 import warnings
-from psycopg.errors import DuplicateColumn
-from psycopg2.errors import NotNullViolation, StringDataRightTruncation
+from psycopg.errors import DuplicateColumn, InvalidTextRepresentation, NotNullViolation
+from psycopg2.errors import StringDataRightTruncation
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
-from sqlalchemy.exc import ProgrammingError, IntegrityError
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from mathesar.api.db.permissions.columns import ColumnAccessPolicy
-from mathesar.api.exceptions.database_exceptions import (
-    exceptions as database_api_exceptions,
-    base_exceptions as database_base_api_exceptions,
-)
+from mathesar.api.exceptions.database_exceptions import exceptions as database_api_exceptions
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
@@ -29,12 +26,11 @@ from mathesar.models.base import Column
 class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     serializer_class = ColumnSerializer
     pagination_class = DefaultLimitOffsetPagination
+    permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = ColumnAccessPolicy
 
     def get_queryset(self):
-        queryset = self.access_policy.scope_queryset(
-            self.request, Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
-        )
+        queryset = Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
         # Prefetching instead of using select_related because select_related uses joins,
         # and we need a reuse of individual Django object instead of its data
         prefetched_queryset = queryset.prefetch_related('table').prefetch('name')
@@ -112,15 +108,16 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         with warnings.catch_warnings():
             warnings.filterwarnings("error", category=DynamicDefaultWarning)
             try:
-                table.alter_column(column_instance._sa_column.column_attnum, serializer.validated_data)
+                attnum = column_instance._sa_column.column_attnum
+                table.alter_column(attnum, serializer.validated_data)
             except UndefinedFunction as e:
                 raise database_api_exceptions.UndefinedFunctionAPIException(
                     e,
                     message='This type cast is not implemented',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-            except ProgrammingError as e:
-                raise database_base_api_exceptions.ProgrammingAPIException(
+            except InvalidTextRepresentation as e:
+                raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
@@ -160,16 +157,13 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-            except IntegrityError as e:
-                if type(e.orig) == NotNullViolation:
-                    raise database_api_exceptions.NotNullViolationAPIException(
-                        e,
-                        field="nullable",
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        table=table,
-                    )
-                else:
-                    raise base_api_exceptions.MathesarAPIException(e)
+            except NotNullViolation as e:
+                raise database_api_exceptions.NotNullViolationAPIException(
+                    e,
+                    field="nullable",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    table=table,
+                )
             except StringDataRightTruncation as e:
                 raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,

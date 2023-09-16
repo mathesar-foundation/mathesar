@@ -2,16 +2,16 @@ import re
 
 import pytest
 from sqlalchemy import (
-    INTEGER, ForeignKey, VARCHAR, CHAR, NUMERIC, ARRAY, JSON
+    INTEGER, ForeignKey, VARCHAR, CHAR, NUMERIC
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSON
 from sqlalchemy.sql.sqltypes import NullType
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.utils import get_default_mathesar_column_list
 from db.types.custom import email, datetime
-from db.types.base import MathesarCustomType, PostgresType, UnknownDbTypeId
+from db.types.base import MathesarCustomType, PostgresType, UnknownType
 
 
 def init_column(*args, **kwargs):
@@ -188,9 +188,9 @@ def test_MC_type_no_opts(engine):
     [
         (email.Email, MathesarCustomType.EMAIL),
         (NUMERIC(5, 2), PostgresType.NUMERIC),
-        (NullType(), None),
-        (ARRAY(INTEGER), None),
-        (JSON(), None),
+        (NullType(), UnknownType()),
+        (ARRAY(INTEGER), PostgresType._ARRAY),
+        (JSON(), PostgresType.JSON),
     ]
 )
 def test_MC_db_type_no_opts_custom_type(
@@ -198,11 +198,11 @@ def test_MC_db_type_no_opts_custom_type(
 ):
     mc = MathesarColumn('testable_col', sa_type)
     mc.add_engine(engine)
-    if db_type is not None:
-        assert mc.db_type == db_type
-    else:
-        with pytest.raises(UnknownDbTypeId):
-            mc.db_type
+    # Equality comparison here is not enough, because UnknownType instances
+    # are not equal amongst themselves (and they shouldn't be)
+    is_expected_type = mc.db_type == db_type
+    is_type_unknown_as_expected = UnknownType == mc.db_type.__class__ == db_type.__class__
+    assert is_expected_type or is_type_unknown_as_expected
 
 
 def test_MC_type_options_no_opts(engine):
