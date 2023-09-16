@@ -19,6 +19,7 @@ from db.types.base import get_available_known_db_types
 from mathesar.api.serializers.db_types import DBTypeSerializer
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from drf_spectacular.utils import OpenApiResponse
 
 
 class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -45,8 +46,11 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixi
     @extend_schema(
         request=None,
         responses={
-            status.HTTP_200_OK: DBTypeSerializer(many=True),
-            status.HTTP_404_NOT_FOUND: 'Custom error response for resource not found',
+            status.HTTP_200_OK: OpenApiResponse(DBTypeSerializer(many=True)),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=DBTypeSerializer(many=True),
+                description='Custom error response for resource not found',
+            ),
         },
     )
     @action(methods=['get'], detail=True)
