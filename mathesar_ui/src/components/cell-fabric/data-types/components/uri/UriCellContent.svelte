@@ -1,20 +1,22 @@
 <script lang="ts">
   export let isActive = false;
   export let value: string | null | undefined;
+
+  $: htmlPropsForHref =
+    isActive && value ? { href: value, target: '_blank' } : {};
 </script>
 
-{#if isActive}
-  <a href={value ?? ''} target="_blank" class="link">
-    <slot />
-  </a>
-{:else}
-  <span class="content">
-    <slot />
-  </span>
-{/if}
+<!-- svelte-ignore a11y-missing-attribute -->
+<a
+  {...htmlPropsForHref}
+  class:link={isActive}
+  style:pointer-events={isActive ? 'auto' : 'none'}
+>
+  <slot />
+</a>
 
 <style>
-  .content {
+  a {
     text-decoration: underline;
   }
   .link {

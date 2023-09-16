@@ -17,10 +17,17 @@ from mathesar.api.serializers.shared_serializers import (
 from mathesar.models.base import Column, Constraint, Table
 
 
-class Table_Filtered_Column_queryset(serializers.PrimaryKeyRelatedField):
+class TableFilteredPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    """
+    Limits the accepted related primary key values to a specific table.
+    For example, if the PrimaryKeyRelatedField is instantiated with a
+    Column queryset, only columns in the "associated table" are
+    accepted. The "associated table" is defined by the context dict's
+    `table_id` value.
+    """
     def get_queryset(self):
         table_id = self.context.get('table_id', None)
-        queryset = super(Table_Filtered_Column_queryset, self).get_queryset()
+        queryset = super(TableFilteredPrimaryKeyRelatedField, self).get_queryset()
         if table_id is None or not queryset:
             return None
         return queryset.filter(table__id=table_id)
@@ -29,7 +36,7 @@ class Table_Filtered_Column_queryset(serializers.PrimaryKeyRelatedField):
 class BaseConstraintSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
     type = serializers.CharField()
-    columns = Table_Filtered_Column_queryset(queryset=Column.current_objects, many=True)
+    columns = TableFilteredPrimaryKeyRelatedField(queryset=Column.current_objects, many=True)
 
     class Meta:
         model = Constraint

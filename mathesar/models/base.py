@@ -14,6 +14,7 @@ from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
+    get_column_description,
     get_column_attnum_from_names_as_map, get_column_name_from_attnum,
     get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
 )
@@ -476,7 +477,6 @@ class Table(DatabaseObject, Relation):
 
     def update_sa_table(self, update_params):
         result = model_utils.update_sa_table(self, update_params)
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def delete_sa_table(self):
@@ -614,7 +614,7 @@ class Table(DatabaseObject, Relation):
         remainder_column_names = column_names_id_map.keys() - extracted_column_names
 
         # Mutate on Postgres
-        extracted_sa_table, remainder_sa_table, linking_fk_column_attnum = extract_columns_from_table(
+        extracted_table_oid, remainder_table_oid, linking_fk_column_attnum = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
             extracted_table_name,
@@ -622,11 +622,7 @@ class Table(DatabaseObject, Relation):
             self._sa_engine,
             relationship_fk_column_name
         )
-        engine = self._sa_engine
-
         # Replicate mutation on Django, so that Django-layer-specific information is preserved
-        extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
-        remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
         extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
         extracted_table.save()
 
@@ -767,6 +763,10 @@ class Column(ReflectionManagerMixin, BaseModel):
             return name
 
     @property
+    def description(self):
+        return get_column_description(self.table.oid, self.attnum, self._sa_engine)
+
+    @property
     def ui_type(self):
         if self.db_type:
             return get_ui_type_from_db_type(self.db_type)
@@ -875,6 +875,7 @@ class DataFile(BaseModel):
     base_name = models.CharField(max_length=100)
     header = models.BooleanField(default=True)
     max_level = models.IntegerField(default=0, blank=True)
+    sheet_index = models.IntegerField(default=0)
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)

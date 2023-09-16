@@ -9,9 +9,9 @@ from db.tables.operations.drop import drop_table
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
-from mathesar.imports.utils import process_column_names
-from db.constants import ID, ID_ORIGINAL
+from mathesar.imports.utils import get_alternate_column_names, process_column_names
 from psycopg2.errors import IntegrityError, DataError
+from sqlalchemy.exc import IntegrityError as sqlalchemy_integrity_error
 
 from mathesar.state import reset_reflection
 
@@ -64,10 +64,10 @@ def get_column_names_from_json(data_file, max_level):
         return get_flattened_keys(data, max_level)
 
 
-def insert_data_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level):
+def insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level):
     table = create_string_column_table(
         name=name,
-        schema=schema.name,
+        schema_oid=schema.oid,
         column_names=column_names,
         engine=engine,
         comment=comment,
@@ -91,15 +91,12 @@ def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
         get_column_names_from_json(json_filepath, max_level)
     )
     try:
-        table = insert_data_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level)
+        table = insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level)
         update_pk_sequence_to_latest(engine, table)
-    except (IntegrityError, DataError):
+    except (IntegrityError, DataError, sqlalchemy_integrity_error):
         drop_table(name=name, schema=schema.name, engine=engine)
-        column_names_alt = [
-            fieldname if fieldname != ID else ID_ORIGINAL
-            for fieldname in column_names
-        ]
-        table = insert_data_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
+        column_names_alt = get_alternate_column_names(column_names)
+        table = insert_records_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
 
     reset_reflection(db_name=db_name)
     return table

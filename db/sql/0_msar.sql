@@ -35,6 +35,7 @@ Because function signatures are used informationally in command-generated tables
 needs to be conserved. As a compromise between readability and terseness, we use the following
 conventions in variable naming:
 
+attribute  -> att
 schema     -> sch
 table      -> tab
 column     -> col
@@ -62,6 +63,7 @@ CREATE SCHEMA IF NOT EXISTS msar;
 -- Functions in this section are quite general, and are the basis of the others.
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
+
 
 CREATE OR REPLACE FUNCTION
 __msar.exec_ddl(command text) RETURNS text AS $$/*
@@ -111,6 +113,24 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+CREATE OR REPLACE FUNCTION msar.col_description(tab_id oid, col_id integer) RETURNS text AS $$/*
+Transparent wrapper for col_description. Putting it in the `msar` namespace helps route all DB calls
+from Python through a single Python module.
+*/
+  BEGIN
+    RETURN col_description(tab_id, col_id);
+  END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION __msar.jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
+Wraps the `?` jsonb operator for improved readability.
+*/
+  BEGIN
+    RETURN data ? key;
+  END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
 Return the name for a given schema, quoted as appropriate.
 
@@ -126,6 +146,20 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+__msar.get_fully_qualified_object_name(sch_name text, obj_name text) RETURNS text AS $$/*
+Return the fully-qualified name for a given database object (e.g., table).
+
+Args:
+  sch_name: The schema of the object, quoted.
+  obj_name: The name of the object, unqualified and quoted.
+*/
+BEGIN
+  RETURN format('%s.%s', sch_name, obj_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_fully_qualified_object_name(sch_name text, obj_name text) RETURNS text AS $$/*
 Return the fully-qualified, properly quoted, name for a given database object (e.g., table).
 
@@ -134,7 +168,7 @@ Args:
   obj_name: The name of the object, unqualified and unquoted.
 */
 BEGIN
-  RETURN format('%s.%s', quote_ident(sch_name), quote_ident(obj_name));
+  RETURN __msar.get_fully_qualified_object_name(quote_ident(sch_name), quote_ident(obj_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -172,6 +206,19 @@ BEGIN
   RETURN msar.get_fully_qualified_object_name(sch_name, rel_name)::regclass::oid;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_relation_namespace_oid(rel_id oid) RETURNS oid AS $$/*
+Get the OID of the namespace containing the given relation.
+
+Most useful for getting the OID of the schema of a given table.
+
+Args:
+  rel_id: The OID of the relation whose namespace we want to find.
+*/
+SELECT relnamespace FROM pg_class WHERE oid=rel_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 
 CREATE OR REPLACE FUNCTION
@@ -229,13 +276,26 @@ Args:
 */
 SELECT array_agg(
   CASE
-    WHEN rel_id=0 THEN quote_ident(col::text)
+    WHEN rel_id=0 THEN quote_ident(col #>> '{}')
     WHEN jsonb_typeof(col)='number' THEN msar.get_column_name(rel_id, col::integer)
     WHEN jsonb_typeof(col)='string' THEN msar.get_column_name(rel_id, col #>> '{}')
   END
 )
 FROM jsonb_array_elements(columns) AS x(col);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_attnum(rel_id oid, att_name text) RETURNS smallint AS $$/*
+Get the attnum for a given attribute in the relation. Returns null if no such attribute exists.
+
+Usually, this will be used to get the attnum for a column of a table.
+
+Args:
+  rel_id: The relation where we'll look for the attribute.
+  att_name: The name of the attribute, unquoted.
+*/
+SELECT attnum FROM pg_attribute WHERE attrelid=rel_id AND attname=att_name;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -247,9 +307,60 @@ Args:
   col_id:  The attnum of the column in the relation.
 */
 BEGIN
-  RETURN ARRAY[col_attnum::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id;
+  RETURN ARRAY[col_id::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id and contype='p';
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.is_default_possibly_dynamic(tab_id oid, col_id integer) RETURNS boolean AS $$/*
+Determine whether the default value for the given column is an expression or constant.
+
+If the column default is an expression, then we return 'True', since that could be dynamic. If the
+column default is a simple constant, we return 'False'. The check is not very sophisticated, and
+errs on the side of returning 'True'. We simply pull apart the pg_node_tree representation of the
+expression, and check whether the root node is a known function call type. Note that we do *not*
+search any deeper in the tree than the root node. This means we won't notice that some expressions
+are actually constant (or at least static), if they have a function call or operator as their root
+node.
+
+For example, the following would return 'True', even though they're not dynamic:
+  3 + 5
+  mathesar_types.cast_to_integer('8')
+
+Args:
+  tab_id: The OID of the table with the column.
+  col_id: The attnum of the column in the table.
+*/
+SELECT
+  -- This is a typical dynamic default like NOW() or CURRENT_DATE
+  (split_part(substring(adbin, 2), ' ', 1) IN (('SQLVALUEFUNCTION'), ('FUNCEXPR')))
+  OR
+  -- This is an identity column `GENERATED {ALWAYS | DEFAULT} AS IDENTITY`
+  (attidentity <> '')
+  OR
+  -- Other generated columns show up here.
+  (attgenerated <> '')
+FROM pg_attribute LEFT JOIN pg_attrdef ON attrelid=adrelid AND attnum=adnum
+WHERE attrelid=tab_id AND attnum=col_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.is_mathesar_id_column(tab_id oid, col_id integer) RETURNS boolean AS $$/*
+Determine whether the given column is our default Mathesar ID column.
+
+The column in question is always attnum 1, and is created with the string
+
+  id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY
+
+Args:
+  tab_id: The OID of the table whose column we'll check
+  col_id: The attnum of the column in question
+*/
+SELECT col_id=1 AND attname='id' AND atttypid='integer'::regtype::oid AND attidentity <> ''
+FROM pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -354,6 +465,20 @@ SELECT atttypid::regtype
 FROM pg_attribute
 WHERE attname = quote_ident(col_name)
 AND attrelid = msar.get_relation_oid(sch_name, rel_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
+Return true if the given column exists in the table, false otherwise.
+*/
+SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
+Return true if the given schema exists in the current database, false otherwise.
+*/
+SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -807,7 +932,8 @@ CREATE TYPE __msar.col_def AS (
   type_ text, -- The type of the column to create, fully specced with arguments.
   not_null boolean, -- A boolean to describe whether the column is nullable or not.
   default_ text, -- Text SQL giving the default value for the column.
-  identity_ boolean -- A boolean giving whether the column is an identity pkey column.
+  identity_ boolean, -- A boolean giving whether the column is an identity pkey column.
+  description text -- A text that will become a comment for the column
 );
 
 
@@ -848,7 +974,7 @@ Get an array of __msar.col_def from given columns in a table.
 
 Args:
   tab_id: The OID of the table containing the column whose definition we want.
-  col_id: The attnum of the column whose definition we want.
+  col_ids: The attnums of the columns whose definitions we want.
   new_names: The desired names of the column defs. Must be in same order as col_ids, and same
     length.
   copy_defaults: Whether or not we should copy the defaults
@@ -864,7 +990,8 @@ SELECT array_agg(
     -- set the default value for the duplicate column if specified
     CASE WHEN copy_defaults THEN pg_get_expr(adbin, tab_id) END,
     -- We don't set a duplicate column as a primary key, since that would cause an error.
-    false
+    false,
+    msar.col_description(tab_id, pg_columns.attnum)
   )::__msar.col_def
 )
 FROM pg_attribute AS pg_columns
@@ -876,7 +1003,185 @@ WHERE pg_columns.attrelid=tab_id;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.build_unique_column_name_unquoted(tab_id oid, col_name text) RETURNS text AS $$/*
+Get a unique column name based on the given name.
+
+Args:
+  tab_id: The OID of the table where the column name should be unique.
+  col_name: The resulting column name will be equal to or at least based on this.
+
+See the msar.get_fresh_copy_name function for how unique column names are generated.
+*/
+DECLARE
+  col_attnum smallint;
+BEGIN
+  col_attnum := msar.get_attnum(tab_id, col_name);
+  RETURN CASE
+    WHEN col_attnum IS NOT NULL THEN msar.get_fresh_copy_name(tab_id, col_attnum) ELSE col_name
+  END;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unique_fkey_column_name(tab_id oid, fk_col_name text, frel_name text)
+  RETURNS text AS $$/*
+Create a unique name for a foreign key column.
+
+Args:
+  tab_id: The OID of the table where the column name should be unique.
+  fk_col_name: The base name for the foreign key column.
+  frel_name: The name of the referent table. Used for creating fk_col_name if not given.
+
+Note that frel_name will be used to build the foreign key column name if it's not given. The result
+will be of the form: <frel_name>_id. Then, we apply some logic to ensure the result is unique.
+*/
+BEGIN
+  fk_col_name := COALESCE(fk_col_name, format('%s_id', frel_name));
+  RETURN msar.build_unique_column_name_unquoted(tab_id, fk_col_name);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_extracted_col_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
+Get a JSON array of column definitions from given columns for creation of an extracted table.
+
+See the msar.process_col_def_jsonb for a description of the JSON.
+
+Args:
+  tab_id: The OID of the table containing the columns whose definitions we want.
+  col_ids: The attnum of the columns whose definitions we want.
+*/
+
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'name', attname,
+    'type', jsonb_build_object('id', atttypid, 'modifier', atttypmod),
+    'not_null', attnotnull,
+    'default',
+    -- We only copy non-dynamic default expressions to new table to avoid double-use of sequences.
+    -- Sequences are owned by a specific column, and can't be reused without error.
+    CASE WHEN NOT msar.is_default_possibly_dynamic(tab_id, col_id) THEN
+      pg_get_expr(adbin, tab_id)
+    END
+  )
+)
+FROM pg_attribute AS pg_columns
+  JOIN unnest(col_ids) AS columns_to_copy(col_id)
+    ON pg_columns.attnum=columns_to_copy.col_id
+  LEFT JOIN pg_attrdef AS pg_column_defaults
+    ON pg_column_defaults.adnum=pg_columns.attnum AND pg_columns.attrelid=pg_column_defaults.adrelid
+WHERE pg_columns.attrelid=tab_id AND NOT msar.is_pkey_col(tab_id, col_id);
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+
+
 -- Add columns to table ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.prepare_fields_arg(fields text) RETURNS text AS $$/*
+Convert the `fields` argument into an integer for use with the integertypmodin system function.
+
+Args:
+  fields: A string corresponding to the documented options from the doumentation at
+          https://www.postgresql.org/docs/13/datatype-datetime.html
+
+In order to construct the argument for intervaltypmodin, needed for constructing the typmod value
+for INTERVAL types with arguments, we need to apply a transformation to the correct integer. This
+transformation is quite arcane, and is lifted straight from the PostgreSQL C code. Given a non-null
+fields argument, the steps are:
+- Assign each substring of valid `fields` arguments the correct integer (from the Postgres src).
+- Apply a bitshift mapping each integer to the according power of 2.
+- Sum the results to get an integer signifying the fields argument.
+*/
+SELECT COALESCE(
+  sum(1<<code)::text,
+  '32767'  -- 0x7FFF in decimal; This represents no field argument.
+)
+FROM (
+  VALUES
+    ('MONTH', 1),
+    ('YEAR', 2),
+    ('DAY', 3),
+    ('HOUR', 10),
+    ('MINUTE', 11),
+    ('SECOND', 12)
+) AS field_map(field, code)
+WHERE fields ILIKE '%' || field || '%';
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION __msar.build_typmodin_arg(
+  typ_options jsonb, timespan_flag boolean
+) RETURNS cstring[] AS $$/*
+Build an array to be used as the argument for a typmodin function.
+
+Timespans have to be handled slightly differently since they have a tricky `fields` argument that
+requires special processing. See __msar.prepare_fields_arg for more details.
+
+Args:
+  typ_options: JSONB giving options fields as per the description in msar.build_type_text.
+  timespan_flag: true if the associated type is a timespan, false otherwise.
+*/
+SELECT array_remove(
+  ARRAY[
+    typ_options ->> 'length',
+    CASE WHEN timespan_flag THEN __msar.prepare_fields_arg(typ_options ->> 'fields') END,
+    typ_options ->> 'precision',
+    typ_options ->> 'scale'
+  ],
+  null
+)::cstring[]
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.get_formatted_base_type(typ_name text, typ_options jsonb) RETURNS text AS $$ /*
+Build the appropriate type definition string, without Array brackets.
+
+This function uses some PostgreSQL internal functions to do its work. In particular, for any type
+that takes options, This function uses the typmodin (read "type modification input") system
+functions to convert the given options into a typmod integer. The typ_name given is converted into
+the OID of the named type. These two pieces let us call `format_type` to get a canonical string
+representation of the definition of the type, with its options.
+
+Args:
+  typ_name: This should be qualified and quoted as needed.
+  typ_options: These should be in the form described in msar.build_type_text.
+*/
+DECLARE
+  typ_id oid;
+  timespan_flag boolean;
+  typmodin_func text;
+  typmod integer;
+BEGIN
+  -- Here we just get the OID of the type.
+  typ_id := typ_name::regtype::oid;
+  -- This is a lookup of the function name for the typmodin function associated with the type, if
+  -- one exists.
+  typmodin_func := typmodin::text FROM pg_type WHERE oid=typ_id AND typmodin<>0;
+  -- This flag is needed since timespan types need special handling when converting the options into
+  -- the form needed to call the typmodin function.
+  timespan_flag := typcategory='T' FROM pg_type WHERE oid=typ_id;
+  IF (
+    jsonb_typeof(typ_options) = 'null'  -- The caller passed no type options
+    OR typ_options IS NULL -- The caller didn't even pass the type options key
+    OR typ_options='{}'::jsonb  -- The caller passed an empty type options object
+    OR typmodin_func IS NULL  -- The type doesn't actually accept type options
+  ) THEN
+    typmod := NULL;
+  ELSE
+    -- Here, we actually run the typmod function to get the output for use in the format_type call.
+    EXECUTE format(
+      'SELECT %I(%L)',
+      typmodin_func,
+      __msar.build_typmodin_arg(typ_options, timespan_flag)
+    ) INTO typmod;
+  END IF;
+  RETURN format_type(typ_id::integer, typmod::integer);
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -902,27 +1207,54 @@ All fields are optional, and a null value as input returns 'text'
 */
 SELECT COALESCE(
   -- First choice is the type specified by numeric IDs, since they're most reliable.
-  format_type(typ.id, typ.modifier),
+  format_type(
+    (typ_jsonb ->> 'id')::integer,
+    (typ_jsonb ->> 'modifier')::integer
+  ),
   -- Second choice is the type specified by string IDs.
-  COALESCE(
-    msar.get_fully_qualified_object_name(typ.schema, typ.name),
-    typ.name,
-    'text'  -- We fall back to 'text' when input is null or empty.
-  )::regtype::text || COALESCE(  -- This section builds the type options blob.
-    '(' || topts.length || ')',
-    ' ' || topts.fields || ' (' || topts.precision || ')',
-    ' ' || topts.fields,
-    '(' || topts.precision || ', ' || topts.scale || ')',
-    '(' || topts.precision || ')',
-    ''
-  ) || CASE WHEN topts.array_ THEN '[]' ELSE '' END
+  __msar.get_formatted_base_type(
+    COALESCE(
+      msar.get_fully_qualified_object_name(typ_jsonb ->> 'schema', typ_jsonb ->> 'name'),
+      typ_jsonb ->> 'name',
+      'text'  -- We fall back to 'text' when input is null or empty.
+    ),
+    typ_jsonb -> 'options'
+  ) || CASE
+    WHEN (typ_jsonb -> 'options' ->> 'array')::boolean THEN
+      '[]'
+    ELSE ''
+  END
 )
-FROM
-  jsonb_to_record(typ_jsonb)
-    AS typ(id oid, schema text, name text, modifier integer, options jsonb),
-  jsonb_to_record(typ_jsonb -> 'options')
-    AS topts(length integer, precision integer, scale integer, fields text, array_ boolean);
 $$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_type_text_complete(typ_jsonb jsonb, old_type text) RETURNS text AS $$/*
+Build the text name of a type, using the old type as a base if only options are given.
+
+The main use for this is to allow for altering only the options of the type of a column.
+
+Args:
+  typ_jsonb: This is a jsonb denoting the new type.
+  old_type: This is the old type name, with no options.
+
+The typ_jsonb should be in the form:
+{
+  "name": <str> (optional),
+  "options": <obj> (optional)
+}
+
+*/
+SELECT msar.build_type_text(
+  jsonb_strip_nulls(
+    jsonb_build_object(
+      'name', COALESCE(typ_jsonb ->> 'name', old_type),
+      'options', typ_jsonb -> 'options'
+    )
+  )
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 
 CREATE OR REPLACE FUNCTION __msar.build_col_def_text(col __msar.col_def) RETURNS text AS $$/*
@@ -935,7 +1267,9 @@ SELECT format(
   CASE WHEN col.not_null THEN 'NOT NULL' END,
   'DEFAULT ' || col.default_,
   -- This can be used to define our default Mathesar primary key column.
-  CASE WHEN col.identity_ THEN 'GENERATED ALWAYS AS IDENTITY PRIMARY KEY' END
+  -- TODO: We should really consider doing GENERATED *ALWAYS* (rather than BY DEFAULT), but this
+  -- breaks some other assumptions.
+  CASE WHEN col.identity_ THEN 'GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY' END
 );
 $$ LANGUAGE SQL;
 
@@ -967,7 +1301,8 @@ The col_defs should have the form:
       "options": <obj> (optional),
     },
     "not_null": <bool> (optional; default false),
-    "default": <any> (optional)
+    "default": <any> (optional),
+    "description": <str> (optional)
   },
   {
     ...
@@ -1002,7 +1337,9 @@ WITH attnum_cte AS (
         format('%L', col_def_obj ->> 'default')
     END,
     -- We don't allow setting the primary key column manually
-    false
+    false,
+    -- Set the description for the column
+    quote_literal(col_def_obj ->> 'description')
   )::__msar.col_def AS col_defs
   FROM attnum_cte, jsonb_array_elements(col_defs) AS col_def_obj
   WHERE col_def_obj ->> 'name' IS NULL OR col_def_obj ->> 'name' <> 'id'
@@ -1011,8 +1348,9 @@ SELECT array_cat(
   CASE
     WHEN create_id THEN
       -- The below tuple defines a default 'id' column for Mathesar.  It has name id, type integer,
-      -- it's not null, and it uses the 'identity' functionality to generate default values.
-      ARRAY[('id', 'integer', true, null, true)]::__msar.col_def[]
+      -- it's not null, it uses the 'identity' functionality to generate default values, has
+      -- a default comment.
+      ARRAY[('id', 'integer', true, null, true, 'Mathesar default ID column')]::__msar.col_def[]
   END,
   array_agg(col_defs)
 )
@@ -1051,9 +1389,20 @@ Args:
 */
 DECLARE
   col_create_defs __msar.col_def[];
+  fq_table_name text := __msar.get_relation_name(tab_id);
 BEGIN
   col_create_defs := msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
-  PERFORM __msar.add_columns(__msar.get_relation_name(tab_id), variadic col_create_defs);
+  PERFORM __msar.add_columns(fq_table_name, variadic col_create_defs);
+
+  PERFORM
+  __msar.comment_on_column(
+      fq_table_name,
+      col_create_def.name_,
+      col_create_def.description
+    )
+  FROM unnest(col_create_defs) AS col_create_def
+  WHERE col_create_def.description IS NOT NULL;
+
   RETURN array_agg(attnum)
     FROM (SELECT * FROM pg_attribute WHERE attrelid=tab_id) L
     INNER JOIN unnest(col_create_defs) R
@@ -1368,7 +1717,6 @@ DECLARE
   tab_name text;
   col_name text;
   created_col_id smallint;
-  col_not_null boolean;
 BEGIN
   col_defs := msar.get_duplicate_col_defs(
     tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
@@ -1397,6 +1745,37 @@ BEGIN
   RETURN created_col_id;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_extracted_con_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
+Get a JSON array of constraint definitions from given columns for creation of an extracted table.
+
+See the msar.process_con_def_jsonb for a description of the JSON.
+
+Args:
+  tab_id: The OID of the table containing the constraints whose definitions we want.
+  col_ids: The attnum of columns with the constraints whose definitions we want.
+*/
+
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'type', contype,
+    'columns', ARRAY[attname],
+    'deferrable', condeferrable,
+    'fkey_relation_id', confrelid::integer,
+    'fkey_columns', confkey,
+    'fkey_update_action', confupdtype,
+    'fkey_delete_action', confdeltype,
+    'fkey_match_type', confmatchtype
+  )
+)
+FROM pg_constraint
+  JOIN unnest(col_ids) AS columns_to_copy(col_id) ON pg_constraint.conkey[1]=columns_to_copy.col_id
+  JOIN pg_attribute
+    ON pg_attribute.attnum=columns_to_copy.col_id AND pg_attribute.attrelid=pg_constraint.conrelid
+WHERE pg_constraint.conrelid=tab_id AND (pg_constraint.contype='f' OR pg_constraint.contype='u');
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -1551,7 +1930,11 @@ WITH col_cte AS (
   SELECT string_agg(__msar.build_con_def_text(con), ', ') AS table_constraints
   FROM unnest(con_defs) as con
 )
-SELECT __msar.exec_ddl('CREATE TABLE %s (%s) %s', tab_name, table_columns, table_constraints)
+SELECT __msar.exec_ddl(
+  'CREATE TABLE %s (%s)',
+  tab_name,
+  concat_ws(', ', table_columns, table_constraints)
+)
 FROM col_cte, con_cte;
 $$ LANGUAGE SQL;
 
@@ -1580,14 +1963,441 @@ DECLARE
   constraint_defs __msar.con_def[];
 BEGIN
   fq_table_name := format('%s.%s', __msar.get_schema_name(sch_oid), quote_ident(tab_name));
-  column_defs := msar.process_col_def_jsonb(null, col_defs, false, true);
-  constraint_defs := msar.process_con_def_jsonb(null, con_defs);
+  column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
+  constraint_defs := msar.process_con_def_jsonb(0, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
   RETURN created_table_id;
 END;
 $$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- COLUMN ALTERATION FUNCTIONS
+--
+-- Functions in this section should be related to altering columns' names, types, and constraints.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+-- Rename columns ----------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.rename_column(tab_name text, old_col_name text, new_col_name text) RETURNS text AS $$/*
+Change a column name, returning the command executed
+
+Args:
+  tab_name: The qualified, quoted name of the table where we'll change a column name
+  old_col_name: The quoted name of the column to change.
+  new_col_name: The quoted new name for the column.
+*/
+DECLARE
+  cmd_template text;
+BEGIN
+  cmd_template := 'ALTER TABLE %s RENAME COLUMN %s TO %s';
+  IF old_col_name <> new_col_name THEN
+    RETURN __msar.exec_ddl(cmd_template, tab_name, old_col_name, new_col_name);
+  ELSE
+    RETURN null;
+  END IF;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.rename_column(tab_id oid, col_id integer, new_col_name text) RETURNS smallint AS $$/*
+Change a column name, returning the command executed
+
+Args:
+  tab_id: The OID of the table whose column we're renaming
+  col_id: The ID of the column to rename
+  new_col_name: The unquoted new name for the column.
+*/
+BEGIN
+  PERFORM __msar.rename_column(
+    tab_name => __msar.get_relation_name(tab_id),
+    old_col_name => msar.get_column_name(tab_id, col_id),
+    new_col_name => quote_ident(new_col_name)
+  );
+  RETURN col_id;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION __msar.build_cast_expr(val text, type_ text) RETURNS text AS $$/*
+Build an expression for casting a column in Mathesar, returning the text of that expression.
+
+We fall back silently to default casting behavior if the mathesar_types namespace is missing.
+However, we do throw an error in cases where the schema exists, but the type casting function
+doesn't. This is assumed to be an error the user should know about.
+
+Args:
+  val: This is quite general, and isn't sanitized in any way. It can be either a literal or a column
+       identifier, since we want to be able to produce a casting expression in either case.
+  type_: This type name string must cast properly to a regtype.
+*/
+SELECT CASE
+  WHEN msar.schema_exists('mathesar_types') THEN
+    msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
+  ELSE
+    val || '::' || type_::regtype::text
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_drop_default_expr(tab_id oid, col_id integer, new_type text, new_default jsonb)
+  RETURNS TEXT AS $$/*
+Build an expression for dropping a column's default, returning the text of that expression.
+
+This function is private, and not general: It builds an expression in the context of the
+msar.process_col_alter_jsonb function and should not otherwise be called independently, since it has
+logic specific to that context. In that setting, we drop the default for the specified column if the
+caller specifies that we're setting a new_default of NULL, or if we're changing the type of the
+column.
+
+Args:
+  tab_id: The OID of the table where the column with the default to be dropped lives.
+  col_id: The attnum of the column with the undesired default.
+  new_type: This gives the function context letting it know whether to drop the default or not. If
+            we are setting a new type for the column, we will always drop the default first.
+  new_default: This also gives us context letting us know whether to drop the default. By setting
+               the 'new_default' to (jsonb) null, the caller specifies that we should drop the
+               column's default.
+*/
+SELECT CASE WHEN new_type IS NOT NULL OR jsonb_typeof(new_default)='null' THEN
+  'ALTER COLUMN ' || msar.get_column_name(tab_id, col_id) || ' DROP DEFAULT'
+ END;
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_retype_expr(tab_id oid, col_id integer, new_type text) RETURNS text AS $$/*
+Build an expression to change a column's type, returning the text of that expression.
+
+Note that this function wraps the type alteration in a cast expression. If we have the custom
+mathesar_types cast functions available, we prefer those to the default PostgreSQL casting behavior.
+
+Args:
+  tab_id: The OID of the table containing the column whose type we'll alter.
+  col_id: The attnum of the column whose type we'll alter.
+  new_type: The target type to which we'll alter the column.
+*/
+SELECT 'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || ' TYPE '
+  || new_type
+  || ' USING '
+  || __msar.build_cast_expr(msar.get_column_name(tab_id, col_id), new_type);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION __msar.build_col_default_expr(
+  tab_id oid,
+  col_id integer,
+  old_default text,
+  new_default jsonb,
+  new_type text
+) RETURNS text AS $$/*
+Build an expression to set a column's default value, returning the text of that expression.
+
+This function is private, and not general. The expression it builds is in the context of the calling
+msar.process_col_alter_jsonb function. In particular, this function can also reset the original
+default after a column type alteration, but cast to the new type of the column. We also avoid
+setting a new default in cases where the new default argument is (sql) NULL, or a JSONB null.
+
+Args:
+  tab_id: The OID of the table containing the column whose default we'll alter.
+  col_id: The attnum of the column whose default we'll alter.
+  old_default: The current default. In some cases in the context of the caller, we want to reset the
+               original default, but cast to a new type.
+  new_default: The new desired default. It's left as JSONB since we are using JSONB 'null' values to
+               represent 'drop the column default'.
+  new_type: The target type to which we'll cast the new default.
+*/
+DECLARE
+  default_expr text;
+  raw_default_expr text;
+BEGIN
+  -- In this case, we assume the intent is to clear out the original default.
+  IF jsonb_typeof(new_default)='null' THEN
+    default_expr := null;
+  -- We get the root JSONB value as text if it exists.
+  ELSEIF new_default #>> '{}' IS NOT NULL THEN
+    default_expr := format('%L', new_default #>> '{}');  -- sanitize since this could be user input.
+  -- At this point, we know we're not setting a new default, or dropping the old one.
+  -- So, we check whether the original default is potentially dynamic, and whether we need to cast
+  -- it to a new type.
+  ELSEIF msar.is_default_possibly_dynamic(tab_id, col_id) AND new_type IS NOT NULL THEN
+    -- We add casting the possibly dynamic expression to the new type as part of the default
+    -- expression in this case.
+    default_expr := __msar.build_cast_expr(old_default, new_type);
+  ELSEIF old_default IS NOT NULL AND new_type IS NOT NULL THEN
+    -- If we arrive here, then we know the old_default is a constant value, and we want to cast the
+    -- old default value to the new type *before* setting it as the new default. This avoids
+    -- building up nested cast functions in the default expression.
+    -- The first step is to execute the cast expression, putting the result into a new variable.
+    EXECUTE format('SELECT %s', __msar.build_cast_expr(old_default, new_type))
+      INTO raw_default_expr;
+    -- Then we format that new variable's value as a literal.
+    default_expr := format('%L', raw_default_expr);
+  END IF;
+  RETURN
+    format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id)) || default_expr;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_not_null_expr(tab_id oid, col_id integer, not_null boolean) RETURNS text AS $$/*
+Build an expression to alter a column's NOT NULL setting, returning the text of that expression.
+
+Args:
+  tab_id: The OID of the table containing the column whose nullability we'll alter.
+  col_id: The attnum of the column whose nullability we'll alter.
+  not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
+*/
+SELECT 'ALTER COLUMN '
+  || msar.get_column_name(tab_id, col_id)
+  || CASE WHEN not_null THEN ' SET ' ELSE ' DROP ' END
+  || 'NOT NULL';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.build_col_drop_text(tab_id oid, col_id integer, col_delete boolean) RETURNS text AS $$/*
+Build an expression to drop a column from a table, returning the text of that expression.
+
+Args:
+  tab_id: The OID of the table containing the column whose nullability we'll alter.
+  col_id: The attnum of the column whose nullability we'll alter.
+  col_delete: If true, we drop the column. If false or null, we do nothing.
+*/
+SELECT CASE WHEN col_delete THEN 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id) END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.process_col_alter_jsonb(tab_id oid, col_alters jsonb) RETURNS text AS $$/*
+Turn a JSONB array representing a set of desired column alterations into a text expression.
+
+Args:
+  tab_id The OID of the table whose columns we'll alter.
+  col_alters: a JSONB array defining the list of column alterations.
+
+The col_alters JSONB should have the form:
+[
+  {
+    "attnum": <int>,
+    "type": <obj> (optional),
+    "default": <any> (optional),
+    "not_null": <bool> (optional),
+    "delete": <bool> (optional),
+    "name": <str> (optional),
+  },
+  {
+    ...
+  },
+  ...
+]
+
+Notes on the col_alters JSONB
+- For more info about the type object, see the msar.build_type_text function.
+- The "name" key isn't used in this function; it's included here for completeness.
+- A possible 'gotcha' is the "default" key.
+  - If omitted, no change to the default for the given column will occur, other than to cast it to
+    the new type if a type change is specified.
+  - If, on the other hand, the "default" key is set to an explicit value of null, then we will
+    interpret that as a directive to set the column's default to NULL, i.e., we'll drop the current
+    default setting.
+- If the column is a default mathesar ID column, we will silently skip it so it won't be altered.
+*/
+WITH prepped_alters AS (
+  SELECT
+    tab_id,
+    (col_alter_obj ->> 'attnum')::integer AS col_id,
+    msar.build_type_text_complete(col_alter_obj -> 'type', format_type(atttypid, null)) AS new_type,
+    -- We get the old default expression from a catalog table before modifying anything, so we can
+    -- reset it properly if we alter the column type.
+    pg_get_expr(adbin, tab_id) old_default,
+    col_alter_obj -> 'default' AS new_default,
+    (col_alter_obj -> 'not_null')::boolean AS not_null,
+    (col_alter_obj -> 'delete')::boolean AS delete_
+  FROM
+    (SELECT tab_id) as arg,
+    jsonb_array_elements(col_alters) as t(col_alter_obj)
+    INNER JOIN pg_attribute ON (t.col_alter_obj ->> 'attnum')::smallint=attnum AND tab_id=attrelid
+    LEFT JOIN pg_attrdef ON (t.col_alter_obj ->> 'attnum')::smallint=adnum AND tab_id=adrelid
+  WHERE NOT msar.is_mathesar_id_column(tab_id, (t.col_alter_obj ->> 'attnum')::integer)
+)
+SELECT string_agg(
+  nullif(
+    concat_ws(
+      ', ',
+      __msar.build_col_drop_default_expr(tab_id, col_id, new_type, new_default),
+      __msar.build_col_retype_expr(tab_id, col_id, new_type),
+      __msar.build_col_default_expr(tab_id, col_id, old_default, new_default, new_type),
+      __msar.build_col_not_null_expr(tab_id, col_id, not_null),
+      __msar.build_col_drop_text(tab_id, col_id, delete_)
+    ),
+    ''
+  ),
+  ', '
+)
+FROM prepped_alters;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.alter_columns(tab_id oid, col_alters jsonb) RETURNS integer[] AS $$/*
+Alter columns of the given table in bulk, returning the IDs of the columns so altered.
+
+Args:
+  tab_id: The OID of the table whose columns we'll alter.
+  col_alters: a JSONB describing the alterations to make.
+
+For the specification of the col_alters JSONB, see the msar.process_col_alter_jsonb function.
+
+Note that all alterations except renaming are done in bulk, and then all name changes are done one
+at a time afterwards. This is because the SQL design specifies at most one name-changing clause per
+query.
+*/
+DECLARE
+  r RECORD;
+  col_alter_str TEXT;
+  description_alter RECORD;
+BEGIN
+  -- Get the string specifying all non-name-change alterations to perform.
+  col_alter_str := msar.process_col_alter_jsonb(tab_id, col_alters);
+
+  -- Perform the non-name-change alterations
+  IF col_alter_str IS NOT NULL THEN
+    PERFORM __msar.exec_ddl(
+      'ALTER TABLE %s %s',
+      __msar.get_relation_name(tab_id),
+      msar.process_col_alter_jsonb(tab_id, col_alters)
+    );
+  END IF;
+
+  -- Here, we perform all description-changing alterations.
+  FOR description_alter IN 
+    SELECT
+      (col_alter->>'attnum')::integer AS col_id,
+      col_alter->>'description' AS comment_
+    FROM jsonb_array_elements(col_alters) AS col_alter
+    WHERE __msar.jsonb_key_exists(col_alter, 'description')
+  LOOP
+    PERFORM msar.comment_on_column(
+      tab_id := tab_id,
+      col_id := description_alter.col_id,
+      comment_ := description_alter.comment_
+    );
+  END LOOP;
+
+  -- Here, we perform all name-changing alterations.
+  FOR r in SELECT attnum, name FROM jsonb_to_recordset(col_alters) AS x(attnum integer, name text)
+  LOOP
+    PERFORM msar.rename_column(tab_id, r.attnum, r.name);
+  END LOOP;
+  RETURN array_agg(x.attnum) FROM jsonb_to_recordset(col_alters) AS x(attnum integer);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+-- Comment on column -------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+__msar.comment_on_column(
+  tab_name text,
+  col_name text,
+  comment_ text
+) RETURNS text AS $$/*
+Change the description of a column, returning command executed. If comment_ is NULL, column's
+comment is removed.
+
+Args:
+  tab_name: The name of the table containg the column whose comment we will change.
+  col_name: The name of the column whose comment we'll change
+  comment_: The new comment. Any quotes or special characters must be escaped.
+*/
+DECLARE
+  comment_or_null text := COALESCE(comment_, 'NULL');
+BEGIN
+RETURN __msar.exec_ddl(
+  'COMMENT ON COLUMN %s.%s IS %s',
+  tab_name,
+  col_name,
+  comment_or_null
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.comment_on_column(
+  sch_name text,
+  tab_name text,
+  col_name text,
+  comment_ text
+) RETURNS text AS $$/*
+Change the description of a column, returning command executed.
+
+Args:
+  sch_name: The schema of the table whose column's comment we will change.
+  tab_name: The name of the table whose column's comment we will change.
+  col_name: The name of the column whose comment we will change.
+  comment_: The new comment.
+*/
+SELECT __msar.comment_on_column(
+  msar.get_fully_qualified_object_name(sch_name, tab_name),
+  quote_ident(col_name),
+  quote_literal(comment_)
+);
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.comment_on_column(
+  tab_id oid,
+  col_id integer,
+  comment_ text
+) RETURNS text AS $$/*
+Change the description of a column, returning command executed.
+
+Args:
+  tab_id: The OID of the table containg the column whose comment we will change.
+  col_id: The ATTNUM of the column whose comment we will change.
+  comment_: The new comment.
+*/
+SELECT __msar.comment_on_column(
+  __msar.get_relation_name(tab_id),
+  msar.get_column_name(tab_id, col_id),
+  comment_
+);
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.comment_on_column(
+  tab_id oid,
+  col_id integer,
+  comment_ text
+) RETURNS text AS $$/*
+Change the description of a column, returning command executed.
+
+Args:
+  tab_id: The OID of the table containg the column whose comment we will change.
+  col_id: The ATTNUM of the column whose comment we will change.
+  comment_: The new comment.
+*/
+SELECT __msar.comment_on_column(
+  tab_id,
+  col_id,
+  quote_literal(comment_)
+);
+$$ LANGUAGE SQL;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -1603,8 +2413,8 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION
 msar.create_many_to_one_link(
-  from_rel_id oid,
-  to_rel_id oid,
+  frel_id oid,
+  rel_id oid,
   col_name text,
   unique_link boolean DEFAULT false
 ) RETURNS smallint AS $$/* 
@@ -1612,9 +2422,9 @@ Create a many-to-one or a one-to-one link between tables, returning the attnum o
 column, returning the attnum of the added column.
 
 Args:
-  from_rel_id: The OID of the referent table.
-  to_rel_id: The OID of the referrer table.
-  col_name: Name of the new column to be created in the referrer table, unqoted. 
+  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
+  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
+  col_name: Name of the new column to be created in the referrer table, unquoted.
   unique_link: Whether to make the link one-to-one instead of many-to-one.
 */
 DECLARE
@@ -1623,21 +2433,21 @@ DECLARE
   added_col_ids smallint[];
   con_defs jsonb;
 BEGIN
-  pk_col_id := msar.get_pk_column(from_rel_id);
+  pk_col_id := msar.get_pk_column(frel_id);
   col_defs := jsonb_build_array(
     jsonb_build_object(
       'name', col_name,
-      'type', jsonb_build_object('name', msar.get_column_type(from_rel_id, pk_col_id))
+      'type', jsonb_build_object('name', msar.get_column_type(frel_id, pk_col_id))
     )
   );
-  added_col_ids := msar.add_columns(to_rel_id , col_defs , false);
+  added_col_ids := msar.add_columns(rel_id , col_defs , false);
   con_defs := jsonb_build_array(
     jsonb_build_object(
       'name', null,
       'type', 'f',
       'columns', added_col_ids,
       'deferrable', false,
-      'fkey_relation_id', from_rel_id::integer,
+      'fkey_relation_id', frel_id::integer,
       'fkey_columns', jsonb_build_array(pk_col_id)
     )
   );
@@ -1649,7 +2459,7 @@ BEGIN
         'columns', added_col_ids)
     ) || con_defs;
   END IF;
-  PERFORM msar.add_constraints(to_rel_id , con_defs);
+  PERFORM msar.add_constraints(rel_id , con_defs);
   RETURN added_col_ids[1];
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -1682,3 +2492,85 @@ BEGIN
   RETURN added_table_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- TABLE SPLITTING FUNCTIONS
+--
+-- Functions to extract columns from a table
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.extract_columns_from_table(
+  tab_id oid, col_ids integer[], new_tab_name text, fk_col_name text
+) RETURNS jsonb AS $f$/*
+Extract columns from a table to create a new table, linked by a foreign key.
+
+Args:
+  tab_id: The OID of the table whose columns we'll extract
+  col_ids: An array of the attnums of the columns to extract
+  new_tab_name: The name of the new table to be made from the extracted columns, unquoted
+  fk_col_name: The name to give the new foreign key column in the remainder table (optional)
+
+The extraction takes a set of columns from the table, and creates a new table from the set of
+*distinct* tuples those columns comprise. We also add a new foreign key column to the original
+ (remainder) table that links it to the new extracted table so they can be easily rejoined. The
+ extracted columns are removed from the remainder table.
+*/
+DECLARE
+  extracted_col_defs CONSTANT jsonb := msar.get_extracted_col_def_jsonb(tab_id, col_ids);
+  extracted_con_defs CONSTANT jsonb := msar.get_extracted_con_def_jsonb(tab_id, col_ids);
+  fkey_name CONSTANT text := msar.build_unique_fkey_column_name(tab_id, fk_col_name, new_tab_name);
+  extracted_table_id integer;
+  fkey_attnum integer;
+BEGIN
+  -- Begin by creating a new table with column definitions matching the extracted columns.
+  extracted_table_id := msar.add_mathesar_table(
+    msar.get_relation_namespace_oid(tab_id),
+    new_tab_name,
+    extracted_col_defs,
+    extracted_con_defs,
+    format('Extracted from %s', __msar.get_relation_name(tab_id))
+  );
+  -- Create a new fkey column and foreign key linking the original table to the extracted one.
+  fkey_attnum := msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
+  -- Insert the data from the original table's columns into the extracted columns, and add
+  -- appropriate fkey values to the new fkey column in the original table to give the proper
+  -- mapping.
+  PERFORM __msar.exec_ddl($t$
+    WITH fkey_cte AS (
+      SELECT id, %1$s, dense_rank() OVER (ORDER BY %1$s) AS __msar_tmp_id
+      FROM %2$s
+    ), ins_cte AS (
+      INSERT INTO %3$s (%1$s)
+      SELECT DISTINCT %1$s FROM fkey_cte ORDER BY %1$s
+    )
+    UPDATE %2$s SET %4$I=__msar_tmp_id FROM fkey_cte WHERE
+    %2$s.id=fkey_cte.id
+    $t$,
+    -- %1$s  This is a comma separated string of the extracted column names
+    string_agg(quote_ident(col_def ->> 'name'), ', '),
+    -- %2$s  This is the name of the original (remainder) table
+    __msar.get_relation_name(tab_id),
+    -- %3$s  This is the new extracted table name
+    __msar.get_relation_name(extracted_table_id),
+    -- %4$I  This is the name of the fkey column in the remainder table.
+    fkey_name
+  ) FROM jsonb_array_elements(extracted_col_defs) AS col_def;
+  -- Drop the original versions of the extracted columns from the original table.
+  PERFORM msar.drop_columns(tab_id, variadic col_ids);
+  -- In case the user wanted to give a name to the fkey column matching one of the extracted
+  -- columns, perform that operation now (since the original will now be dropped from the original
+  -- table)
+  IF fk_col_name IS NOT NULL AND fk_col_name IN (
+    SELECT col_def ->> 'name'
+    FROM jsonb_array_elements(extracted_col_defs) AS col_def
+  ) THEN
+    PERFORM msar.rename_column(tab_id, fkey_attnum, fk_col_name);
+  END IF;
+  RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
+END;
+$f$ LANGUAGE plpgsql;
