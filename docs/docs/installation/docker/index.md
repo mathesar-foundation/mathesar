@@ -14,7 +14,7 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
 
     ```bash
     docker run \
-      --detach
+      --detach \
       -v static:/code/static \
       -v media:/code/media \
       --name mathesar_service \
@@ -22,7 +22,9 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
       --restart unless-stopped \
       mathesar/mathesar-prod:latest
     ```
-    
+    !!! info
+         If you are setting up Mathesar for production, please look at [Setting up for production](#examples)
+
     The above command creates a docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
     - Creates two [named docker volumes](https://docs.docker.com/storage/volumes/)
         - `static` for storing static assets like CSS, js files
@@ -87,3 +89,31 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
     ```
 
 {% include 'snippets/uninstall-schemas.md' %}
+
+
+## Example use cases
+
+### Setting up for production
+
+
+### Running behind a reverse proxy or load balancer
+
+- Set up remote database
+- Allowed host
+
+
+## Example Configurations  {:#examples}
+
+### Using a domain name
+
+
+### Using a remote database as the internal database
+
+
+### Using a custom secret key
+
+
+
+## Common errors
+
+400 Bad request 
