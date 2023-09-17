@@ -1,13 +1,10 @@
 <script lang="ts">
   import { Route } from 'tinro';
   import type { CommonData } from '@mathesar/utils/preloadData';
-  import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import RouteObserver from '@mathesar/components/routing/RouteObserver.svelte';
   import AuthenticatedRoutes from './AuthenticatedRoutes.svelte';
   import AnonymousAccessRoutes from './AnonymousAccessRoutes.svelte';
-
-  setBreadcrumbItemsInContext([]);
 
   export let commonData: CommonData;
 </script>
@@ -35,7 +32,7 @@
 {:else}
   <Route path="/*" firstmatch>
     {#if commonData.is_authenticated}
-      <AuthenticatedRoutes {commonData} />
+      <AuthenticatedRoutes />
     {/if}
 
     <Route path="/shares/*">
