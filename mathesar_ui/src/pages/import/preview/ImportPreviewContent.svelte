@@ -3,6 +3,7 @@
 
   import {
     CancelOrProceedButtonPair,
+    NumberInput,
     Spinner,
   } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
@@ -43,7 +44,9 @@
     finalizeColumns,
     getSkeletonRecords,
     makeDeleteTableRequest,
+    makeMaxLevelUpdateRequest,
     makeHeaderUpdateRequest,
+    makeSheetIndexUpdateRequest,
     processColumns,
   } from './importPreviewPageUtils';
 
@@ -54,6 +57,8 @@
   const previewRequest = new AsyncStore(generateTablePreview);
   const typeSuggestionsRequest = new AsyncStore(getTypeSuggestionsForTable);
   const headerUpdate = makeHeaderUpdateRequest();
+  const maxLevelUpdate = makeMaxLevelUpdateRequest();
+  const sheetIndexUpdate = makeSheetIndexUpdateRequest();
   const cancelationRequest = makeDeleteTableRequest();
 
   export let database: Database;
@@ -128,6 +133,36 @@
     }
   }
 
+  async function updateMaxLevel() {
+    previewRequest.reset();
+    const response = await maxLevelUpdate.run({
+      database,
+      dataFile,
+      max_level: dataFile.max_level,
+      schema,
+      table,
+      customizedTableName: $customizedTableName,
+    });
+    if (response.resolvedValue) {
+      reload({ table: response.resolvedValue });
+    }
+  }
+
+  async function updateSheetIndex() {
+    previewRequest.reset();
+    const response = await sheetIndexUpdate.run({
+      database,
+      dataFile,
+      sheet_index: dataFile.sheet_index,
+      schema,
+      table,
+      customizedTableName: $customizedTableName,
+    });
+    if (response.resolvedValue) {
+      reload({ table: response.resolvedValue });
+    }
+  }
+
   async function toggleInference() {
     previewRequest.reset();
     reload({ useColumnTypeInference: !useColumnTypeInference });
@@ -166,11 +201,28 @@
 <ImportPreviewLayout>
   <Field field={customizedTableName} label="Table Name" />
   <FieldLayout>
-    <ColumnNamingStrategyInput
+    {#if dataFile.type == 'json'}
+      <NumberInput
+        bind:value={dataFile.max_level}
+        on:artificialChange={updateMaxLevel}
+        disabled={formInputsAreDisabled}
+      />
+    {:else}
+      <ColumnNamingStrategyInput
       value={dataFile.header}
       on:change={toggleHeader}
       disabled={formInputsAreDisabled}
-    />
+      />
+    {/if}
+  </FieldLayout>
+  <FieldLayout>
+    {#if dataFile.type == 'excel'}
+      <NumberInput
+        bind:value={dataFile.sheet_index}
+        on:artificialChange={updateSheetIndex}
+        disabled={formInputsAreDisabled}
+      />
+    {/if}
   </FieldLayout>
   <FieldLayout>
     <ColumnTypeInferenceInput

@@ -29,15 +29,21 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         serializer.is_valid(raise_exception=True)
 
         data_file = self.get_object()
-        if serializer.validated_data.get('header') is not None:
+        is_valid_update = (serializer.validated_data.get('header') is not None) or \
+            (serializer.validated_data.get('max_level') is not None) or \
+            (serializer.validated_data.get('sheet_index') is not None)
+
+        if is_valid_update:
             data_file.header = serializer.validated_data['header']
+            data_file.max_level = serializer.validated_data['max_level']
+            data_file.sheet_index = serializer.validated_data['sheet_index']
             data_file.save()
             serializer = DataFileSerializer(data_file, context={'request': request})
             return Response(serializer.data)
         else:
             exception_body = base_api_exceptions.ErrorBody(
                 code=ErrorCodes.MethodNotAllowed.value,
-                message='Method "PATCH" allowed only for header.'
+                message='Method "PATCH" allowed only for header, max_level and sheet_index.'
             )
             raise base_api_exceptions.GenericAPIException(
                 [exception_body],

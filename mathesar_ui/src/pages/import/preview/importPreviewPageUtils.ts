@@ -53,14 +53,18 @@ export function makeHeaderUpdateRequest() {
     database: Database;
     schema: SchemaEntry;
     table: Pick<TableEntry, 'id'>;
-    dataFile: Pick<DataFile, 'id'>;
+    dataFile: Pick<DataFile, 'id' | 'max_level' | 'sheet_index'>;
     firstRowIsHeader: boolean;
     customizedTableName: string;
   }
   async function updateHeader(p: Props) {
     await Promise.all([
       deleteTable(p.database, p.schema, p.table.id),
-      dataFilesApi.update(p.dataFile.id, { header: p.firstRowIsHeader }),
+      dataFilesApi.update(p.dataFile.id, {
+        header: p.firstRowIsHeader,
+        max_level: p.dataFile.max_level,
+        sheet_index: p.dataFile.sheet_index
+      }),
     ]);
     return createTable(p.database, p.schema, {
       name: p.customizedTableName,
@@ -68,6 +72,58 @@ export function makeHeaderUpdateRequest() {
     });
   }
   return new AsyncStore(updateHeader);
+}
+
+export function makeMaxLevelUpdateRequest() {
+  interface Props {
+    database: Database;
+    schema: SchemaEntry;
+    table: Pick<TableEntry, 'id'>;
+    dataFile: Pick<DataFile, 'id' | 'header' | 'sheet_index'>;
+    max_level: number;
+    customizedTableName: string;
+  }
+  async function updateMaxLevel(p: Props) {
+    await Promise.all([
+      deleteTable(p.database, p.schema, p.table.id),
+      dataFilesApi.update(p.dataFile.id, {
+        header: p.dataFile.header,
+        max_level: p.max_level,
+        sheet_index: p.dataFile.sheet_index
+      }),
+    ]);
+    return createTable(p.database, p.schema, {
+      name: p.customizedTableName,
+      dataFiles: [p.dataFile.id],
+    });
+  }
+  return new AsyncStore(updateMaxLevel);
+}
+
+export function makeSheetIndexUpdateRequest() {
+  interface Props {
+    database: Database;
+    schema: SchemaEntry;
+    table: Pick<TableEntry, 'id'>;
+    dataFile: Pick<DataFile, 'id' | 'header' | 'max_level'>;
+    sheet_index: number;
+    customizedTableName: string;
+  }
+  async function updateSheetIndex(p: Props) {
+    await Promise.all([
+      deleteTable(p.database, p.schema, p.table.id),
+      dataFilesApi.update(p.dataFile.id, {
+        header: p.dataFile.header,
+        max_level: p.dataFile.max_level,
+        sheet_index: p.sheet_index
+      }),
+    ]);
+    return createTable(p.database, p.schema, {
+      name: p.customizedTableName,
+      dataFiles: [p.dataFile.id],
+    });
+  }
+  return new AsyncStore(updateSheetIndex);
 }
 
 export function makeDeleteTableRequest() {

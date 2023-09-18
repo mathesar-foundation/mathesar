@@ -30,7 +30,7 @@ function addViaUpload(
   return uploadFile(ENDPOINT, formData, completionCallback);
 }
 
-function update(id: number, properties: { header: boolean }) {
+function update(id: number, properties: { header: boolean, max_level: number, sheet_index: number }) {
   return patchAPI(`${ENDPOINT}${id}/`, properties);
 }
 

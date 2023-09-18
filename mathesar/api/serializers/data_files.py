@@ -21,7 +21,7 @@ class DataFileSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
     class Meta:
         model = DataFile
         fields = [
-            'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter',
+            'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter', 'type',
             'escapechar', 'quotechar', 'paste', 'url', 'created_from', 'max_level', 'sheet_index'
         ]
         extra_kwargs = {
@@ -32,7 +32,7 @@ class DataFileSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         }
         # We only currently support importing to a new table, so setting a table via API is invalid.
         # User should be set automatically, not submitted via the API.
-        read_only_fields = ['user', 'table_imported_to', 'created_from']
+        read_only_fields = ['user', 'table_imported_to', 'created_from', 'type']
         write_only_fields = ['paste', 'url']
 
     def save(self, **kwargs):
