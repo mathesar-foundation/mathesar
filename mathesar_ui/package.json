@@ -2,7 +2,6 @@
   "name": "mathesar_ui",
   "version": "0.0.0",
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
     "dev": "vite",
     "format": "prettier --write .",
     "check-format": "prettier --check .",

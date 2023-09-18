@@ -210,7 +210,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Install the frontend dependencies
 
     ```sh
-    npm install --prefix mathesar_ui
+    npm ci --prefix mathesar_ui
     ```
       
 1. Compile the Mathesar Frontend App
@@ -436,7 +436,7 @@ You'll be prompted to set up an admin user account the first time you open Mathe
 1. Install the frontend dependencies
 
     ```sh
-    npm install --prefix mathesar_ui
+    npm ci --prefix mathesar_ui
     ```
       
 1. Build the Mathesar frontend app
