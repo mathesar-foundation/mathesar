@@ -151,12 +151,22 @@ See our [Live demo mode](./demo/README.md) guide for more information on enablin
     ```
     sudo apt install debhelper-compat dh-virtualenv libsystemd-dev libpq-dev libicu-dev pkg-config lsb-release python3-dev python3 python3-setuptools python3-pip python3-venv tar
     ```
+- Setup Mathesar build environment.
+   This step is useful only when testing locally is needed for building static files and for collecting them. We won't have a need for this step while using the build service as it will be using the source code from release assets which will contain these static files
 
-- Assuming you have already have set up the Mathesar environment and can run Mathesar, run the collectstatic command
 
-  ```
-    python manage.py collectstatic 
-   ```
+- Install Python and Nodejs preferably on a Linux machine
+- Run the following commands to set up the environment
+
+    ```
+    python3 -m venv ./mathesar-venv
+    source ./mathesar-venv/bin/activate
+    pip install -r requirements.txt
+    sudo npm install -g npm-force-resolutions
+    cd mathesar_ui && npm install --unsafe-perm && npm run build
+    cd ..
+    python manage.py collectstatic
+    ```
   
 - From the mathesar directory, run the build script to generate the debian package
   
