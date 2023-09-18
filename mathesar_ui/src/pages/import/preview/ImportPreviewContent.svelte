@@ -209,9 +209,9 @@
       />
     {:else}
       <ColumnNamingStrategyInput
-      value={dataFile.header}
-      on:change={toggleHeader}
-      disabled={formInputsAreDisabled}
+        value={dataFile.header}
+        on:change={toggleHeader}
+        disabled={formInputsAreDisabled}
       />
     {/if}
   </FieldLayout>

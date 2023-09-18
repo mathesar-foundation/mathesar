@@ -63,7 +63,7 @@ export function makeHeaderUpdateRequest() {
       dataFilesApi.update(p.dataFile.id, {
         header: p.firstRowIsHeader,
         max_level: p.dataFile.max_level,
-        sheet_index: p.dataFile.sheet_index
+        sheet_index: p.dataFile.sheet_index,
       }),
     ]);
     return createTable(p.database, p.schema, {
@@ -89,7 +89,7 @@ export function makeMaxLevelUpdateRequest() {
       dataFilesApi.update(p.dataFile.id, {
         header: p.dataFile.header,
         max_level: p.max_level,
-        sheet_index: p.dataFile.sheet_index
+        sheet_index: p.dataFile.sheet_index,
       }),
     ]);
     return createTable(p.database, p.schema, {
@@ -115,7 +115,7 @@ export function makeSheetIndexUpdateRequest() {
       dataFilesApi.update(p.dataFile.id, {
         header: p.dataFile.header,
         max_level: p.dataFile.max_level,
-        sheet_index: p.sheet_index
+        sheet_index: p.sheet_index,
       }),
     ]);
     return createTable(p.database, p.schema, {
