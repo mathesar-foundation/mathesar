@@ -22,8 +22,6 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
       --restart unless-stopped \
       mathesar/mathesar-prod:latest
     ```
-    !!! info
-         If you are setting up Mathesar for production, please look at [Setting up for production](#examples)
 
     The above command creates a docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
     - Creates two [named docker volumes](https://docs.docker.com/storage/volumes/)
@@ -36,12 +34,65 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
     docker logs -f mathesar_service
     ```
 
+!!! warning
+If you are testing Mathesar on a local machine, you can go to the next step for setting up Mathesar. But if you are hosting on a server or looking for a production setup, please take a look at [additional configurations](#configuration) before setting up Mathesar.
+
 1. Set up your user account
 
     Mathesar is now installed! You can use it by visiting `http://localhost:8000` or the domain you've set up.
 
     You'll be prompted to set up an admin user account and add user database credentials the first time you open Mathesar. Just follow the instructions on screen.
 
+
+## Configuring Mathesar {:#configuration}
+
+### Using a domain name {:#domain-name}
+
+If you are accessing Mathesar using a domain name, you need to add it to the list of domains Mathesar can accept requests from
+
+    ```bash
+    docker run \
+       -e ALLOWED_HOSTS='mathesar.example.com' \
+       # OTHER ARGS HERE
+       mathesar/mathesar-prod:latest
+    ```
+
+### Hosting on default port 80
+The command used in the Quickstart section will run Mathesar on port 8000, so you will have to access it on http://<domain-name>:8000.
+
+If you wish to access Mathesar by visiting http://<domain-name>
+    ```bash
+    docker run \
+      -p 80:8000 \
+       # OTHER ARGS HERE
+      mathesar/mathesar-prod:latest
+    ```
+
+### Using a remote Postgres server for the internal database
+
+!!! info
+    Highly recommended to use this setup for stateless deployments when scaling horizontally, because by default, the data is stored in the same server on which Mathesar is running. This data will be lost if the server id deleted.
+The docker image contains a Postgres server which is used by default. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL]() environment variable.
+
+    ```bash
+    docker run \
+       -e DJANGO_DATABASE='postgres://user:password@hostname:port/database_name' \
+       # OTHER ARGS HERE
+       mathesar/mathesar-prod:latest
+    ```
+
+### Using a custom secret key
+
+   By default, the docker image uses a default secret key. The default key should only be used when testing and is not recommended when exposing Mathesar to the outside world. 
+   - Generate your key
+   - Pass the key as an environment variable to the docker image
+
+    ```bash
+    docker run \
+       -e SECRET_KEY='<replace with a 50 character string>' \
+       # OTHER ARGS HERE
+       mathesar/mathesar-prod:latest
+    ```
 
 ## Upgrading Mathesar {:#upgrade}
 
@@ -91,29 +142,8 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
 {% include 'snippets/uninstall-schemas.md' %}
 
 
-## Example use cases
+## Troubleshooting
 
-### Setting up for production
+### 400 Bad request 
 
-
-### Running behind a reverse proxy or load balancer
-
-- Set up remote database
-- Allowed host
-
-
-## Example Configurations  {:#examples}
-
-### Using a domain name
-
-
-### Using a remote database as the internal database
-
-
-### Using a custom secret key
-
-
-
-## Common errors
-
-400 Bad request 
+If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name is not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration)
