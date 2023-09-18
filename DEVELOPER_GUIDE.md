@@ -8,7 +8,7 @@ Mathesar is built using:
 - [Python](https://www.python.org/) for the backend
 - [Django](https://www.djangoproject.com/) for the web application
 - [SQLAlchemy](https://www.sqlalchemy.org/) to talk to the database
-- [Django REST Framework](https://www.django-rest-framework.org/) for the API 
+- [Django REST Framework](https://www.django-rest-framework.org/) for the API
 - [Svelte](https://svelte.dev/) and [TypeScript](https://www.typescriptlang.org/) for the frontend
 
 ## Local development setup
@@ -20,26 +20,27 @@ Mathesar is built using:
 1. Clone the repository and `cd` into it.
 
 1. Copy the .env file by running the following command in the repository's root directory:
-    ```
-    cp .env.example .env
-    ```
+
+   ```
+   cp .env.example .env
+   ```
 
 1. From the repository's root directory, run:
 
-    ```
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
-    ```
+   ```
+   docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
+   ```
 
-    > **Note:** You may need to run docker `sudo` depending on how you have it installed.
+   > **Note:** You may need to run docker `sudo` depending on how you have it installed.
 
-    You should now have a web server and database server running.
+   You should now have a web server and database server running.
 
 1. Login at http://localhost:8000/ with the following credentials:
 
-    - username: `admin`
-    - password: `password`
+   - username: `admin`
+   - password: `password`
 
-1. Keep Docker running while making your code changes. The app will update automatically with your new code.
+1. Keep Docker running while making your code changes. The app will update automatically with your new code. Please refer to our [Troubleshooting guide](./TROUBLESHOOTING.md) if you are experiencing any issues.
 
 ## Contribution guidelines
 
@@ -66,23 +67,23 @@ We use [pytest](https://docs.pytest.org) for our backend tests.
 
 - Run all python backend tests:
 
-    ```
-    docker exec mathesar_service_dev pytest mathesar/ db/
-    ```
+  ```
+  docker exec mathesar_service_dev pytest mathesar/ db/
+  ```
 
 - Run a specific python test, by name:
 
-    ```
-    docker exec mathesar_service_dev pytest -k "test_name"
-    ```
-    
+  ```
+  docker exec mathesar_service_dev pytest -k "test_name"
+  ```
+
 - See the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html), or run pytest with the `--help` flag to learn about more options for running tests.
 
 - Run all SQL tests:
 
-    ```
-    docker exec mathesar_dev_db /bin/bash sql/run_tests.sh
-    ```
+  ```
+  docker exec mathesar_dev_db /bin/bash sql/run_tests.sh
+  ```
 
 ## Front end development
 
@@ -99,15 +100,15 @@ To lint the front end and back end code at the same time, run the `lint.sh` scri
 
 - By default, the script lints both Python and Node.js (if changes are staged), but this can be overridden with the `-p` and `-n` flags respectively.
 
-    ```
-    ./lint.sh -p false
-    ```
+  ```
+  ./lint.sh -p false
+  ```
 
 - You may wish to symlink the script as a pre-commit hook to lint your changes before committing.
 
-    ```
-    ln -s ../../lint.sh .git/hooks/pre-commit
-    ```
+  ```
+  ln -s ../../lint.sh .git/hooks/pre-commit
+  ```
 
 ## Usage with preexisting databases
 
@@ -121,33 +122,31 @@ Sometimes you may need to rebuild your Docker images after pulling new code chan
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service --force-recreate --build dev-service
 ```
 
-
 ## Demo mode
 
 Mathesar can be run in "demo mode" to meet the specific needs of our [live demo site](https://demo.mathesar.org).
 
 See our [Live demo mode](./demo/README.md) guide for more information on enabling live demo mode locally
 
-
 ## Opening a shell in the container
 
 - If you need to do some work within the container you can open a bash shell via:
 
-    ```
-    docker exec -it mathesar_service_dev bash
-    ```
+  ```
+  docker exec -it mathesar_service_dev bash
+  ```
 
 - To open a PostgreSQL [psql](https://www.postgresql.org/docs/current/app-psql.html) terminal for the data in Mathesar:
 
-    ```
-    docker exec -it mathesar_db psql -U mathesar
-    ```
+  ```
+  docker exec -it mathesar_db psql -U mathesar
+  ```
 
 ## Troubleshooting
 
 ### Permissions within Windows
 
-- Running Script in powershell is disabled by default in windows , you have to change permission to run scripts  [Official Docs ](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.2) 
+- Running Script in powershell is disabled by default in windows , you have to change permission to run scripts [Official Docs ](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.2)
 
 ### Fixing line endings on Windows
 
@@ -161,7 +160,6 @@ sudo find . -type f -exec dos2unix {} \;
 
 These commands install the `dos2unix` utility, which converts text files from the DOS/Microsoft Windows format (with CRLF line endings) to the Unix/Linux format (with LF line endings). Next, the find utility is used to locate all files (-type f) in the current directory (.) and its subdirectories, and the dos2unix command is then executed on each of them (-exec dos2unix ;).
 
-
 ### Live reloading front end code on Windows
 
 Hot module replacement for front end code does not work when the project is present on a windows filesystem and WSL is used to run docker. [Read more](./mathesar_ui/README.md#live-reloading-on-windows).
@@ -174,9 +172,9 @@ If you you see the following error after attempting to start Docker, then the po
 
 1. First stop Postgres on your host machine.
 
-    ```
-    sudo service postgresql stop
-    ```
+   ```
+   sudo service postgresql stop
+   ```
 
 1. Then try starting Mathesar via Docker again.
 
@@ -185,8 +183,10 @@ Note that you'll need to manually start your Postgres server on your host machin
 ### Invalid function definition SQL errors
 
 Upon starting Mathesar, you may notice errors similar to:
+
 ```
 mathesar_service_dev  | psycopg.errors.InvalidFunctionDefinition: cannot change name of input parameter "tab_id"
 mathesar_service_dev  | HINT:  Use DROP FUNCTION msar.drop_table(oid,boolean,boolean) first.
 ```
+
 In this case, it's probable that a function parameter name was changed in the `develop` branch at some point. To fix this, you must drop the `msar` and `__msar` schemas from the PostgreSQL database you're using for development using either `psql` or a different client. After doing this, simply stop and start Mathesar using the appropriate `docker compose` commands.
