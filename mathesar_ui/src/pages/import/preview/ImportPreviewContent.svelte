@@ -201,7 +201,7 @@
 <ImportPreviewLayout>
   <Field field={customizedTableName} label="Table Name" />
   <FieldLayout>
-    {#if dataFile.type == 'json'}
+    {#if dataFile.type === 'json'}
       <NumberInput
         bind:value={dataFile.max_level}
         on:artificialChange={updateMaxLevel}
@@ -216,7 +216,7 @@
     {/if}
   </FieldLayout>
   <FieldLayout>
-    {#if dataFile.type == 'excel'}
+    {#if dataFile.type === 'excel'}
       <NumberInput
         bind:value={dataFile.sheet_index}
         on:artificialChange={updateSheetIndex}
