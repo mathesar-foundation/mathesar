@@ -121,6 +121,63 @@ Sometimes you may need to rebuild your Docker images after pulling new code chan
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service --force-recreate --build dev-service
 ```
 
+## Dealing with Translations (only for maintainers)
+
+Whenever a raw string which gets rendered on the UI is added or edited in the codebase, it needs to be translated in all of the languages that mathesar supports. We are using [Transifex](https://transifex.com) as an interface to get those strings translated from a human/machine translator.
+Once the strings on the transifex are translated, they need to be pulled back into the codebase.
+
+**Pre-requisites**
+
+1. This requires GNU's gettext to be installed in the docker
+   ```
+   docker exec -it mathesar_service_dev /bin/bash
+   apt update
+   apt install gettext
+   ```
+2. This also require TRANSIFEX_TOKEN which can be found in 1password.
+
+### How to push strings to transifex to get them translated?
+
+**If those strings are in the backend codebase(ex: django templates)**
+
+_Needs to be run from the root directory_
+
+```
+docker exec -it mathesar_service_dev /bin/bash
+./generate-and-push-be-translations.sh
+```
+
+**If those strings are in the frontend codebase(i.e. inside the mathesar_ui directory)**
+
+_Needs to be run from the mathesar_ui directory_
+
+```
+docker exec -it mathesar_service_dev /bin/bash
+cd mathesar_ui
+npm run i18n:upload-source-strings
+```
+
+### How to pull strings from transifex into the codebase?
+
+**Downloading backend translations from transifex**
+
+_Needs to be run from the root directory_
+
+```
+docker exec -it mathesar_service_dev /bin/bash
+./pull-and-import-be-translations.sh
+```
+
+**Downloading frontend translations from transifex**
+
+_Needs to be run from the mathesar_ui directory_
+
+```
+docker exec -it mathesar_service_dev /bin/bash
+cd mathesar_ui
+npm run i18n:download-translations
+```
+
 
 ## Demo mode
 
