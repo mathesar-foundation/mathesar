@@ -418,15 +418,18 @@ BEGIN
     '42704',
     'type "taxt" does not exist'
   );
-  RETURN NEXT throws_ok(
-    format(
-      'SELECT msar.add_columns(tab_id => %s, col_defs => ''%s'');',
-      'add_col_testable'::regclass::oid,
-      '[{"type": {"name": "numeric", "options": {"scale": 23, "precision": 3}}}]'::jsonb
-    ),
-    '22023',
-    'NUMERIC scale 23 must be between 0 and precision 3'
-  );
+  RETURN NEXT CASE WHEN pg_version_num() < 150000
+    THEN throws_ok(
+      format(
+        'SELECT msar.add_columns(tab_id => %s, col_defs => ''%s'');',
+        'add_col_testable'::regclass::oid,
+        '[{"type": {"name": "numeric", "options": {"scale": 23, "precision": 3}}}]'::jsonb
+      ),
+      '22023',
+      'NUMERIC scale 23 must be between 0 and precision 3'
+    )
+    ELSE skip('Numeric scale can be negative or greater than precision as of v15')
+  END;
 END;
 $f$ LANGUAGE plpgsql;
 

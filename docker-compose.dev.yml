@@ -10,7 +10,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.devdb
+      args:
+        PG_VERSION: ${PG_VERSION-13}
     environment:
+      - PG_VERSION=${PG_VERSION-13}
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
