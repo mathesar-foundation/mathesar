@@ -36,7 +36,7 @@
      * it as a default exported module. Otherwise vite converts the
      * default export to named exports internally for the sake of optimization.
      */
-    loadLocaleAsync('en');
+    void loadLocaleAsync('en');
   }
 
   const commonData = preloadCommonData();
