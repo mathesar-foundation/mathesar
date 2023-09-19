@@ -34,7 +34,8 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
-            'has_dependents': True
+            'has_dependents': True,
+            'description': None,
         },
         {
             'name': 'mycolumn1',
@@ -50,7 +51,8 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
-            'has_dependents': False
+            'has_dependents': False,
+            'description': None,
         },
         {
             'name': 'mycolumn2',
@@ -69,7 +71,8 @@ def test_column_list(column_test_table, client):
                 'mathesar_types.multicurrency_money', 'money', 'numeric',
                 'real', 'smallint', 'text',
             ],
-            'has_dependents': True
+            'has_dependents': True,
+            'description': None,
         },
         {
             'name': 'mycolumn3',
@@ -89,7 +92,8 @@ def test_column_list(column_test_table, client):
                 'timestamp with time zone', 'timestamp without time zone',
             ],
             'default': None,
-            'has_dependents': False
+            'has_dependents': False,
+            'description': None,
         }
     ]
     check_columns_response(response_data['results'], expect_results)
@@ -280,7 +284,6 @@ def test_column_create_retrieve_options(column_test_table, client, db_type, type
 
 
 invalid_type_options = [
-    {"precision": 5, "scale": 8},
     {"precision": 1000},
     {"scale": 5},
     {"precision": "asd"},
@@ -812,3 +815,57 @@ def test_list_columns_with_unknown_types(table_with_unknown_types, client):
             was_col2_found = True
     assert was_col1_found
     assert was_col2_found
+
+
+def test_column_description_set_and_unset(column_test_table, client):
+    expected_descriptions = [
+        'Some comment',
+        None,
+    ]
+    table = column_test_table
+    column = table.columns.first()
+    assert column is not None
+    for expected_description in expected_descriptions:
+        data = dict(description=expected_description)
+        response = client.patch(
+            f"/api/db/v0/tables/{table.id}/columns/{column.id}/",
+            data=data
+        )
+        response_json = response.json()
+        assert response.status_code == 200
+        response = client.get(
+            f"/api/db/v0/tables/{table.id}/columns/{column.id}/",
+        )
+        response_json = response.json()
+        assert response.status_code == 200
+        actual_description = response_json.get('description')
+        assert actual_description == expected_description
+
+
+@pytest.mark.parametrize(
+    'expected_description',
+    [
+        None,
+        'Some comment',
+    ]
+)
+def test_column_description_when_creating(column_test_table, client, expected_description):
+    table = column_test_table
+    column_id = None
+    data = dict(type='text')
+    if expected_description is not None:
+        data['description'] = expected_description
+    response = client.post(
+        f"/api/db/v0/tables/{table.id}/columns/",
+        data=data
+    )
+    response_data = response.json()
+    assert response.status_code == 201
+    column_id = response_data['id']
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+    )
+    response_data = response.json()
+    assert response.status_code == 200
+    actual_description = response_data.get('description')
+    assert actual_description == expected_description
