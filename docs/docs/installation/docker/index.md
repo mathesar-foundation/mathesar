@@ -49,7 +49,7 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
 
 ### Using a domain name {:#domain-name}
 
-If you are accessing Mathesar using a domain name, you need to add it to the list of domains Mathesar can accept requests from
+If you are accessing Mathesar using a domain name, you need to add it to the list of domains Mathesar can accept requests from. This can be accomplished by setting the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) environment variable
     ```bash
       docker run \
        -e ALLOWED_HOSTS='mathesar.example.com' \
@@ -71,7 +71,7 @@ The command used in the Quickstart section will run Mathesar on port 8000, so yo
 
 !!! info
     Highly recommended to use this setup for stateless deployments when scaling horizontally, because by default, the data is stored in the same server on which Mathesar is running. This data will be lost if the server is deleted.
-The docker image contains a Postgres server which is used by default. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL]() environment variable.
+The docker image contains a Postgres server which is used by default. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL](../../configuration/env-variables.md#dj_db) environment variable.
     ```bash
      docker run \
        -e DJANGO_DATABASE='postgres://user:password@hostname:port/database_name' \
@@ -82,11 +82,12 @@ The docker image contains a Postgres server which is used by default. If you wan
 ### Using a custom secret key
 
    By default, the docker image uses a default secret key. The default key should only be used when testing and is not recommended when exposing Mathesar to the outside world. 
-   - Generate your key
+
+   - Refer to the [SECRET_KEY](../../configuration/env-variables.md#secret_key) for information on how to get your own secret key
    - Pass the key as an environment variable to the docker image
     ```bash
      docker run \
-       -e SECRET_KEY='<replace with a 50 character string>' \
+       -e SECRET_KEY='<replace with a random 50 character string>' \
        # OTHER ARGS HERE
        mathesar/mathesar-prod:latest
     ```
@@ -143,4 +144,4 @@ The docker image contains a Postgres server which is used by default. If you wan
 
 ### 400 Bad request 
 
-If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration), m
+If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration),
