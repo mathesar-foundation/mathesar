@@ -15,9 +15,9 @@
    * 2. And then make it available for the entry(App.svelte)
    *    file to load them into memory.
    * the index.html loads it as using a script tag and attach it
-   * to the window's global object which is being read here
+   * to the window object which is being read here
    */
-  try {
+  void (async () => {
     const { translations } = window.mathesar || {};
     if (translations) {
       loadTranslations(
@@ -26,18 +26,19 @@
       );
       setLocale(translations.lang);
       isTranslationsLoaded = true;
+    } else {
+      /**
+       * !!! CAUTION: DO NOT REMOVE THIS !!!
+       * Reason: Apart from loading the `en` translations as default
+       * when there are translations on the window object,
+       * this also tells the vite bundler to bundle
+       * it as a default exported module. Otherwise vite converts the
+       * default export to named exports internally for the sake of optimization.
+       */
+      await loadLocaleAsync('en');
+      isTranslationsLoaded = true;
     }
-  } catch {
-    /**
-     * !!! CAUTION: DO NOT REMOVE THIS !!!
-     * Reason: Apart from loading the `en` translations as default
-     * when something fails while reading the window's global
-     * object, this also tells the vite bundler to bundle
-     * it as a default exported module. Otherwise vite converts the
-     * default export to named exports internally for the sake of optimization.
-     */
-    void loadLocaleAsync('en');
-  }
+  })();
 
   const commonData = preloadCommonData();
 </script>
