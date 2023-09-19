@@ -5,11 +5,20 @@
   import RootRoute from './routes/RootRoute.svelte';
   import { setLocale } from './i18n/i18n-svelte';
   import ErrorBox from './components/message-boxes/ErrorBox.svelte';
-  import { loadTranslations } from './i18n/i18n-load';
+  import { loadLocaleAsync, loadTranslations } from './i18n/i18n-load';
 
   let isTranslationsLoaded = false;
-  const checkTranslationsAvailableInterval = setInterval(() => {
-    const { translations } = window;
+  /**
+   * Why translations are being read from window object?
+   * In order to -
+   * 1. Load the translations file in parallel to the first FE chunk.
+   * 2. And then make it available for the entry(App.svelte)
+   *    file to load them into memory.
+   * the index.html loads it as using a script tag and attach it
+   * to the window's global object which is being read here
+   */
+  try {
+    const { translations } = window.mathesar || {};
     if (translations) {
       loadTranslations(
         translations.lang,
@@ -17,9 +26,18 @@
       );
       setLocale(translations.lang);
       isTranslationsLoaded = true;
-      clearInterval(checkTranslationsAvailableInterval);
     }
-  }, 100);
+  } catch {
+    /**
+     * !!! CAUTION: DO NOT REMOVE THIS !!!
+     * Reason: Apart from loading the `en` translations as default
+     * when something fails while reading the window's global
+     * object, this also tells the vite bundler to bundle
+     * it as a default exported module. Otherwise vite converts the
+     * default export to named exports internally for the sake of optimization.
+     */
+    loadLocaleAsync('en');
+  }
 
   const commonData = preloadCommonData();
 </script>

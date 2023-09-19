@@ -38,17 +38,13 @@ def get_i18n_settings(manifest_data, development_mode):
 
     if development_mode is True:
         module_translations_file_path = f'{client_dev_url}/src/i18n/{preferred_language}/index.ts'
-        legacy_translations_file_path = ""
     else:
         try:
             module_translations_file_path = static(manifest_data[preferred_language]["file"])
-            legacy_translations_file_path = static(manifest_data[f"{preferred_language}-legacy"]["file"])
         except KeyError:
             module_translations_file_path = static(manifest_data[default_language]["file"])
-            legacy_translations_file_path = static(manifest_data[f"{default_language}-legacy"]["file"])
 
     return {
         'module_translations_file_path': module_translations_file_path,
-        'legacy_translations_file_path': legacy_translations_file_path,
         'preferred_language': preferred_language
     }
