@@ -27,7 +27,6 @@ def get_manifest_data():
 
     for locale, _ in settings.LANGUAGES or []:
         manifest_data[locale] = raw_data[f'src/i18n/{locale}/index.ts']
-        manifest_data[f"{locale}-legacy"] = raw_data[f'src/i18n/{locale}/index-legacy.ts']
 
     # Cache data for 1 hour
     cache.set('manifest_data', manifest_data, 60 * 60)
