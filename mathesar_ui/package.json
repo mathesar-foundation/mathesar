@@ -69,7 +69,6 @@
     "dayjs": "^1.11.5",
     "fast-diff": "^1.2.0",
     "flatpickr": "^4.6.13",
-    "i": "^0.3.7",
     "iter-tools": "^7.4.0",
     "js-cookie": "^3.0.1",
     "node-fetch": "^3.3.2",

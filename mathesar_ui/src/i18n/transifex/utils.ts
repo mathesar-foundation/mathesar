@@ -7,7 +7,7 @@ export async function promptTransifexToken(): Promise<string> {
   });
   return new Promise<string>((resolve) => {
     rl.question(
-      "API token not found. Please provide it. If you don't have an API token, you can generate one in https://app.transifex.com/user/settings/api/",
+      "API token not found. Please provide it. If you don't have an API token, you can generate one in https://app.transifex.com/user/settings/api/\n",
       resolve,
     );
   }).finally(() => {
