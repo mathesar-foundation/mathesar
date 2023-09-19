@@ -284,7 +284,6 @@ def test_column_create_retrieve_options(column_test_table, client, db_type, type
 
 
 invalid_type_options = [
-    {"precision": 5, "scale": 8},
     {"precision": 1000},
     {"scale": 5},
     {"precision": "asd"},

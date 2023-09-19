@@ -14,6 +14,9 @@ jobs:
     # We only want to run on external PRs, since internal PRs are covered by "push"
     # This prevents this from running twice on internal PRs
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    strategy:
+      matrix:
+        pg-version: [13, 14, 15]
     steps:
       - uses: actions/checkout@v2
 
@@ -27,6 +30,8 @@ jobs:
 
       - name: Build the test DB
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d dev-db
+        env:
+          PG_VERSION: ${{ matrix.pg-version }}
 
       - name: Run tests with pg_prove
         run: docker exec mathesar_dev_db /bin/bash /sql/run_tests.sh
