@@ -210,12 +210,6 @@ If you want to add or remove packages, or basically run any npm action, **always
    root@c273da65c52d:/code/mathesar_ui# npm uninstall <package>
    ```
 
-1. Before committing the `package-lock.json` file, run `npm install --unsafe-perm` in the container.
-
-   ```bash
-   root@c273da65c52d:/code/mathesar_ui# npm install --unsafe-perm
-   ```
-
 ## Fixing npm audit failures
 
 Fixing npm audit failures is restricted only to [maintainers](https://wiki.mathesar.org/en/team). If you are facing this, please notify the maintainers on our [Matrix channels](https://wiki.mathesar.org/en/community), or raise an issue on GitHub.

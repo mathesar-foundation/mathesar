@@ -27,6 +27,6 @@ COPY requirements* ./
 RUN pip install --no-cache-dir -r ${PYTHON_REQUIREMENTS} --force-reinstall sqlalchemy-filters
 COPY . .
 
-RUN cd mathesar_ui && npm ci --unsafe-perm && npm run build
+RUN cd mathesar_ui && npm ci && npm run build
 EXPOSE 8000 3000 6006
 ENTRYPOINT ["./run.sh"]
