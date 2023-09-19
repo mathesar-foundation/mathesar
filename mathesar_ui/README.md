@@ -161,22 +161,6 @@ We use [Vitest](https://vitest.dev/) to run our unit tests, and we use [Testing 
 - The `src/component-library` directory contains general-purpose components which will eventually be spun off into its own package, separate from Mathesar.
 - See the [Components README](./src/component-library/README.md) for more details.
 
-### Storybook
-
-We use [Storybook](https://storybook.js.org/) to develop and document our components.
-
-- **Start** Storybook in dev mode with:
-
-  ```bash
-  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run storybook
-  ```
-
-- **Build** Storybook with:
-
-  ```bash
-  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run build-storybook
-  ```
-
 ## Live reloading on Windows
 
 - Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
