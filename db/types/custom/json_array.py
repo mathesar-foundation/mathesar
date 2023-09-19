@@ -4,14 +4,16 @@ from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.compiler import compiles
 
 from db.types.base import MathesarCustomType
+from db.types.custom.underlying_type import HasUnderlyingType
 from db.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 
 
-class MathesarJsonArray(TypeDecorator):
+class MathesarJsonArray(TypeDecorator, HasUnderlyingType):
     impl = SA_JSONB
     cache_ok = True
+    underlying_type = impl
 
     def get_col_spec(self, **_):
         return DB_TYPE.upper()

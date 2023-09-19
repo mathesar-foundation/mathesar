@@ -29,6 +29,7 @@
   export let isProcessing = false;
   export let isIndependentOfSheet = false;
   export let showTruncationPopover = false;
+  export let canViewLinkedEntities = true;
 
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
@@ -64,6 +65,7 @@
     {searchValue}
     {isProcessing}
     {showTruncationPopover}
+    {canViewLinkedEntities}
     bind:value
     on:movementKeyDown
     on:activate

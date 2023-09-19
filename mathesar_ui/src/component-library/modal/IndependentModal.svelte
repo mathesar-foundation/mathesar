@@ -9,6 +9,7 @@
 
   const dispatch = createEventDispatcher();
 
+  export let modalId: number | string | undefined = undefined;
   export let isOpen = false;
   export let title: string | undefined = undefined;
   export let size: ModalWidth = 'regular';
@@ -48,7 +49,7 @@
 <svelte:window on:keydown={handleKeydown} />
 
 {#if isOpen}
-  <div class="modal" use:portal>
+  <div class="modal" data-modal-id={modalId} use:portal>
     {#if hasOverlay}
       <div
         class="overlay"

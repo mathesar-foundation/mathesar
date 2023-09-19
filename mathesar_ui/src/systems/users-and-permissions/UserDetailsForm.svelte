@@ -23,10 +23,10 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { locale, setLocale } from '@mathesar/i18n/i18n-svelte';
   import { loadLocaleAsync } from '@mathesar/i18n/i18n-load';
-  import type { Locales } from '@mathesar/i18n/i18n-types';
+  import { baseLocale } from '@mathesar/i18n/i18n-util';
   import SelectUserType from './SelectUserType.svelte';
   import UserFormInput from './UserFormInput.svelte';
-  import SelectPreferredLanguage from './SelectPreferredLanguage.svelte';
+  import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -45,7 +45,7 @@
     ),
   ]);
   $: email = optionalField(user?.email ?? '', [isEmail()]);
-  $: preferredLanguage = requiredField(user?.preferred_language ?? '');
+  $: displayLanguage = requiredField(user?.display_language ?? baseLocale);
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
@@ -54,7 +54,7 @@
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = { fullName, username, email, userType, preferredLanguage };
+    const fields = { fullName, username, email, userType, displayLanguage };
     return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
@@ -66,7 +66,7 @@
       username: formValues.username,
       email: formValues.email,
       is_superuser: formValues.userType === 'admin',
-      preferred_language: formValues.preferredLanguage,
+      display_language: formValues.displayLanguage,
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
@@ -84,7 +84,7 @@
         userProfileStore.update((details) => details.with(request));
       }
 
-      const updatedLocale = request.preferred_language as Locales;
+      const updatedLocale = request.display_language;
       if ($locale !== updatedLocale) {
         await loadLocaleAsync(updatedLocale);
         setLocale(updatedLocale);
@@ -152,13 +152,14 @@
     />
   {/if}
 
-  <UserFormInput
-    label="Preferred Language *"
-    field={preferredLanguage}
+  <!-- Commenting this for now to avoid releasing any half baked changes to develop branch -->
+  <!-- <UserFormInput
+    label="Display Language *"
+    field={displayLanguage}
     input={{
-      component: SelectPreferredLanguage,
+      component: SelectDisplayLanguage,
     }}
-  />
+  /> -->
 
   <UserFormInput
     label="Role *"

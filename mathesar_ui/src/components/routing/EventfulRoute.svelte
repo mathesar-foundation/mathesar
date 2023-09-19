@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import Observer from './Observer.svelte';
+  import RouteObserver from './RouteObserver.svelte';
 
   export let path: string;
   export let firstmatch = false;
 </script>
 
 <Route {path} {firstmatch} let:meta>
-  <Observer {meta} on:load on:unload />
+  <RouteObserver {meta} on:load on:unload />
   <slot {meta} />
 </Route>

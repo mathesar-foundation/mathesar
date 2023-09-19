@@ -194,6 +194,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': '',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'PREPROCESSING_HOOKS': ['config.settings.openapi.custom_preprocessing_hook'],
     'POSTPROCESSING_HOOKS': [
         'config.settings.openapi.remove_url_prefix_hook',
     ],
@@ -255,7 +256,7 @@ LANGUAGES = [
     ('en', gettext_lazy('English')),
     ('ja', gettext_lazy('Japanese')),
 ]
-LANGUAGE_COOKIE_NAME = 'user_preferred_language'
+LANGUAGE_COOKIE_NAME = 'display_language'
 LOCALE_PATHS = [
     'translations'
 ]

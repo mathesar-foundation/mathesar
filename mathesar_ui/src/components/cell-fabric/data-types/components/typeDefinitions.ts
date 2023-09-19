@@ -19,6 +19,7 @@ export interface CellTypeProps<Value> {
   isProcessing: boolean;
   isIndependentOfSheet: boolean;
   showTruncationPopover: boolean;
+  canViewLinkedEntities: boolean;
 }
 
 // Primary key
