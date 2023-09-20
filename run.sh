@@ -11,6 +11,6 @@ if [[ -z "${DJANGO_DATABASE_URL}" ]]; then
   fi
 fi
 
-python install.py --skip-confirm
+python -m mathesar.install --skip-confirm
 # Start the Django server on port 8000.
 gunicorn config.wsgi -b 0.0.0.0:8000 && fg
