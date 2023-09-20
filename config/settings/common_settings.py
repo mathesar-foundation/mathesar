@@ -113,7 +113,7 @@ if TEST:
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = decouple_config('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^bw-iz&n7ldqv%94mjaecl+b9=4")
+SECRET_KEY = decouple_config('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple_config('DEBUG', default=False, cast=bool)
