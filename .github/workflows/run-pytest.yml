@@ -33,7 +33,7 @@ jobs:
         run: sudo chown -R 1000:1000 .
 
       - name: Build the stack
-        run: docker build -t mathesar_service_test --build-arg PYTHON_REQUIREMENTS=requirements-dev.txt .
+        run: docker build -t mathesar_service_test --build-arg PG_MAJOR=${{ matrix.pg-version }} --build-arg PYTHON_REQUIREMENTS=requirements-dev.txt .
         env:
           PG_MAJOR: ${{ matrix.pg-version }}
       - name: Run docker container
