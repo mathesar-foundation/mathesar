@@ -10,7 +10,7 @@ RUN set -ex; \
     echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/pgdg.list; \
     apt-get update -y; \
      apt-get install -y --no-install-recommends \
-        postgresql-15 postgresql-client-15 postgresql-contrib-15 \
+        postgresql-$PG_MAJOR postgresql-client-$PG_MAJOR postgresql-contrib-$PG_MAJOR \
     ; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \

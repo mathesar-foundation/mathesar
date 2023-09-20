@@ -14,11 +14,11 @@ docker_setup_env() {
 docker_setup_env
 # only run initialization on an empty data directory
 if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
-  pg_createcluster -d "$PGDATA" -p 5432 -u "postgres" 15 mathesar
+  pg_createcluster -d "$PGDATA" -p 5432 -u "postgres" "$PG_MAJOR" mathesar
   # Create a temporary postgres server for setting password to the postgres user and for creating the default database
-  pg_ctlcluster 15 mathesar start
+  pg_ctlcluster "$PG_MAJOR" mathesar start
   sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'mathesar';"
   sudo -u postgres psql -c "CREATE DATABASE mathesar_django;"
-  pg_ctlcluster 15 mathesar stop
+  pg_ctlcluster "$PG_MAJOR" mathesar stop
 fi
-pg_ctlcluster 15 mathesar start
+pg_ctlcluster "$PG_MAJOR" mathesar start

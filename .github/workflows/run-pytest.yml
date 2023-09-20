@@ -33,9 +33,11 @@ jobs:
         run: sudo chown -R 1000:1000 .
 
       - name: Build the stack
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d test-service
+        run: docker build -t mathesar_service_test --build-arg PYTHON_REQUIREMENTS=requirements-dev.txt .
         env:
-          PG_VERSION: ${{ matrix.pg-version }}
+          PG_MAJOR: ${{ matrix.pg-version }}
+      - name: Run docker container
+        run: docker run --name mathesar_service_test
 
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
