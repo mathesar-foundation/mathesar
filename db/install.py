@@ -48,7 +48,7 @@ def _create_database(database_name, hostname, username, password, port, skip_con
         )
     if create_database.lower() in ["y", "yes"]:
         # We need to connect to an existing database inorder to create a new Database.
-        # So we use the default template Database `postgres` that comes with postgres.
+        # So we use the default Database `postgres` that comes with postgres.
         # TODO Throw correct error when the default postgres database does not exists(which is very rare but still possible)
         root_database = "postgres"
         root_db_engine = engine.create_future_engine(
