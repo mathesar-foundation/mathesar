@@ -451,8 +451,1191 @@ paths:
               schema:
                 $ref: '#/components/schemas/Schema'
           description: ''
+  /api/db/v0/tables/:
+    get:
+      operationId: tables_list
+      parameters:
+      - in: query
+        name: created_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created_before
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: database
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: import_verified
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - in: query
+        name: not_imported
+        schema:
+          type: boolean
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: schema
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      - in: query
+        name: updated_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: updated_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: updated_before
+        schema:
+          type: string
+          format: date-time
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTableList'
+          description: ''
+    post:
+      operationId: tables_create
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Table'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Table'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Table'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/:
+    get:
+      operationId: tables_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+    patch:
+      operationId: tables_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTable'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTable'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTable'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+    delete:
+      operationId: tables_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/db/v0/tables/{id}/dependents/:
+    get:
+      operationId: tables_dependents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/existing_import/:
+    post:
+      operationId: tables_existing_import_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Table'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Table'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Table'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/joinable_tables/:
+    get:
+      operationId: tables_joinable_tables_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/map_imported_columns/:
+    post:
+      operationId: tables_map_imported_columns_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Table'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Table'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Table'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/move_columns/:
+    post:
+      operationId: tables_move_columns_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Table'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Table'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Table'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/previews/:
+    post:
+      operationId: tables_previews_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Table'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Table'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Table'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/split_table/:
+    post:
+      operationId: tables_split_table_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Table'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Table'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Table'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/type_suggestions/:
+    get:
+      operationId: tables_type_suggestions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{id}/ui_dependents/:
+    get:
+      operationId: tables_ui_dependents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+          description: ''
+  /api/db/v0/tables/{table_pk}/columns/:
+    get:
+      operationId: tables_columns_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedColumnList'
+          description: ''
+    post:
+      operationId: tables_columns_create
+      parameters:
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Column'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Column'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Column'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+          description: ''
+  /api/db/v0/tables/{table_pk}/columns/{id}/:
+    get:
+      operationId: tables_columns_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+          description: ''
+    put:
+      operationId: tables_columns_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Column'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Column'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Column'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+          description: ''
+    patch:
+      operationId: tables_columns_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedColumn'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedColumn'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedColumn'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+          description: ''
+    delete:
+      operationId: tables_columns_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/db/v0/tables/{table_pk}/columns/{id}/dependents/:
+    get:
+      operationId: tables_columns_dependents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+          description: ''
+  /api/db/v0/tables/{table_pk}/constraints/:
+    get:
+      operationId: tables_constraints_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConstraintList'
+          description: ''
+    post:
+      operationId: tables_constraints_create
+      parameters:
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Constraint'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Constraint'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Constraint'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Constraint'
+          description: ''
+  /api/db/v0/tables/{table_pk}/constraints/{id}/:
+    get:
+      operationId: tables_constraints_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Constraint'
+          description: ''
+    delete:
+      operationId: tables_constraints_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/db/v0/tables/{table_pk}/records/:
+    get:
+      operationId: tables_records_retrieve
+      parameters:
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: tables_records_create
+      parameters:
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          description: No response body
+  /api/db/v0/tables/{table_pk}/records/{id}/:
+    get:
+      operationId: tables_records_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: tables_records_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: tables_records_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this table.
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/db/v0/tables/{table_pk}/settings/:
+    get:
+      operationId: tables_settings_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTableSettingsList'
+          description: ''
+    post:
+      operationId: tables_settings_create
+      parameters:
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableSettings'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TableSettings'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TableSettings'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableSettings'
+          description: ''
+  /api/db/v0/tables/{table_pk}/settings/{id}/:
+    get:
+      operationId: tables_settings_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableSettings'
+          description: ''
+    put:
+      operationId: tables_settings_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableSettings'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TableSettings'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TableSettings'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableSettings'
+          description: ''
+    patch:
+      operationId: tables_settings_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTableSettings'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTableSettings'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTableSettings'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableSettings'
+          description: ''
+    delete:
+      operationId: tables_settings_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: table_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - tables
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
 components:
   schemas:
+    Column:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+        type_options:
+          allOf:
+          - $ref: '#/components/schemas/TypeOption'
+          nullable: true
+        nullable:
+          type: boolean
+          default: true
+        primary_key:
+          type: boolean
+          default: false
+        source_column:
+          type: integer
+          writeOnly: true
+        copy_source_data:
+          type: boolean
+          writeOnly: true
+          default: true
+        copy_source_constraints:
+          type: boolean
+          writeOnly: true
+          default: true
+        valid_target_types:
+          type: string
+          readOnly: true
+        default:
+          allOf:
+          - $ref: '#/components/schemas/ColumnDefault'
+          nullable: true
+        has_dependents:
+          type: string
+          readOnly: true
+      required:
+      - has_dependents
+      - valid_target_types
+    ColumnDefault:
+      type: object
+      properties:
+        value:
+          type: string
+        is_dynamic:
+          type: boolean
+          readOnly: true
+      required:
+      - is_dynamic
+      - value
+    Constraint:
+      type: object
+      description: |-
+        This serializer mixin is helpful in serializing polymorphic models,
+        by switching to correct serializer based on the mapping field value.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        oid:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        table:
+          type: integer
+      required:
+      - created_at
+      - id
+      - oid
+      - table
+      - updated_at
     DataFile:
       type: object
       properties:
@@ -525,6 +1708,46 @@ components:
       - id
       - name
       - supported_types_url
+    PaginatedColumnList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Column'
+    PaginatedConstraintList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Constraint'
     PaginatedDataFileList:
       type: object
       properties:
@@ -585,6 +1808,86 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Schema'
+    PaginatedTableList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Table'
+    PaginatedTableSettingsList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableSettings'
+    PatchedColumn:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+        type_options:
+          allOf:
+          - $ref: '#/components/schemas/TypeOption'
+          nullable: true
+        nullable:
+          type: boolean
+          default: true
+        primary_key:
+          type: boolean
+          default: false
+        source_column:
+          type: integer
+          writeOnly: true
+        copy_source_data:
+          type: boolean
+          writeOnly: true
+          default: true
+        copy_source_constraints:
+          type: boolean
+          writeOnly: true
+          default: true
+        valid_target_types:
+          type: string
+          readOnly: true
+        default:
+          allOf:
+          - $ref: '#/components/schemas/ColumnDefault'
+          nullable: true
+        has_dependents:
+          type: string
+          readOnly: true
     PatchedDataFile:
       type: object
       properties:
@@ -654,6 +1957,95 @@ components:
         num_queries:
           type: string
           readOnly: true
+    PatchedTable:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          default: ''
+        import_target:
+          type: integer
+          nullable: true
+        schema:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        import_verified:
+          type: boolean
+          nullable: true
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleColumn'
+        records_url:
+          type: string
+          readOnly: true
+        constraints_url:
+          type: string
+          readOnly: true
+        columns_url:
+          type: string
+          readOnly: true
+        joinable_tables_url:
+          type: string
+          readOnly: true
+        type_suggestions_url:
+          type: string
+          readOnly: true
+        previews_url:
+          type: string
+          readOnly: true
+        data_files:
+          type: array
+          items:
+            type: integer
+        has_dependents:
+          type: string
+          readOnly: true
+        dependents_url:
+          type: string
+          readOnly: true
+        settings:
+          allOf:
+          - $ref: '#/components/schemas/TableSettings'
+          readOnly: true
+        description:
+          type: string
+          nullable: true
+    PatchedTableSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        preview_settings:
+          $ref: '#/components/schemas/PreviewColumn'
+        column_order:
+          type: array
+          items:
+            type: integer
+            maximum: 2147483647
+            minimum: -2147483648
+          nullable: true
+    PreviewColumn:
+      type: object
+      properties:
+        customized:
+          type: boolean
+          default: true
+        template:
+          type: string
+      required:
+      - template
     Schema:
       type: object
       properties:
@@ -683,6 +2075,129 @@ components:
       - name
       - num_queries
       - num_tables
+    SimpleColumn:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+        type_options:
+          allOf:
+          - $ref: '#/components/schemas/TypeOption'
+          nullable: true
+      required:
+      - name
+      - type
+    Table:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          default: ''
+        import_target:
+          type: integer
+          nullable: true
+        schema:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        import_verified:
+          type: boolean
+          nullable: true
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleColumn'
+        records_url:
+          type: string
+          readOnly: true
+        constraints_url:
+          type: string
+          readOnly: true
+        columns_url:
+          type: string
+          readOnly: true
+        joinable_tables_url:
+          type: string
+          readOnly: true
+        type_suggestions_url:
+          type: string
+          readOnly: true
+        previews_url:
+          type: string
+          readOnly: true
+        data_files:
+          type: array
+          items:
+            type: integer
+        has_dependents:
+          type: string
+          readOnly: true
+        dependents_url:
+          type: string
+          readOnly: true
+        settings:
+          allOf:
+          - $ref: '#/components/schemas/TableSettings'
+          readOnly: true
+        description:
+          type: string
+          nullable: true
+      required:
+      - columns_url
+      - constraints_url
+      - created_at
+      - dependents_url
+      - has_dependents
+      - id
+      - joinable_tables_url
+      - previews_url
+      - records_url
+      - schema
+      - settings
+      - type_suggestions_url
+      - updated_at
+    TableSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        preview_settings:
+          $ref: '#/components/schemas/PreviewColumn'
+        column_order:
+          type: array
+          items:
+            type: integer
+            maximum: 2147483647
+            minimum: -2147483648
+          nullable: true
+      required:
+      - id
+      - preview_settings
+    TypeOption:
+      type: object
+      properties:
+        length:
+          type: integer
+        precision:
+          type: integer
+        scale:
+          type: integer
+        fields:
+          type: string
   securitySchemes:
     cookieAuth:
       type: apiKey
