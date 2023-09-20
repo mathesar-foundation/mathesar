@@ -95,11 +95,13 @@ DATABASES = {
     db_key: db_url(url_string)
     for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
-DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
+
+DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url, default='sqlite:///db.sqlite3')
 
 for db_key, db_dict in DATABASES.items():
-    # Engine can be '.postgresql' or '.postgresql_psycopg2'
-    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
+    # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s),
+    # however for the internal 'default' db 'sqlite3' can be used.
+    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql') and db_key != 'default':
         raise ValueError(
             f"{db_key} is not a PostgreSQL database. "
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
@@ -164,8 +166,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Media files (uploaded by the user)
-
-MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+DEFAULT_MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+MEDIA_ROOT = decouple_config('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
