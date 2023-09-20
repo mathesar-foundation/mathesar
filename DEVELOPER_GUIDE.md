@@ -39,7 +39,7 @@ Mathesar is built using:
     - username: `admin`
     - password: `password`
 
-1. Keep Docker running while making your code changes. The app will update automatically with your new code.
+1. Keep Docker running while making your code changes. The app will update automatically with your new code. Please refer to our [Troubleshooting guide](#troubleshooting) if you are experiencing any issues.
 
 ## Contribution guidelines
 

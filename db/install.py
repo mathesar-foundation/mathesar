@@ -1,5 +1,6 @@
+from psycopg.errors import InsufficientPrivilege
 from sqlalchemy import text
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from db import engine
 from db.sql import install as sql_install
@@ -54,12 +55,20 @@ def _create_database(database_name, hostname, username, password, port, skip_con
             username, password, hostname, root_database, port,
             connect_args={"connect_timeout": 10}
         )
-        with root_db_engine.connect() as conn:
-            conn.execution_options(isolation_level="AUTOCOMMIT")
-            conn.execute(text(f'CREATE DATABASE "{database_name}"'))
-        root_db_engine.dispose()
-        print(f"Created DB is {database_name}.")
-        return True
+        try:
+            with root_db_engine.connect() as conn:
+                conn.execution_options(isolation_level="AUTOCOMMIT")
+                conn.execute(text(f'CREATE DATABASE "{database_name}"'))
+            root_db_engine.dispose()
+            print(f"Created DB is {database_name}.")
+            return True
+        except ProgrammingError as e:
+            if isinstance(e.orig, InsufficientPrivilege):
+                print(f"Database {database_name} could not be created due to Insufficient Privilege")
+                return False
+        except Exception:
+            print(f"Database {database_name} could not be created!")
+            return False
     else:
         print(f"Database {database_name} not created!")
         return False

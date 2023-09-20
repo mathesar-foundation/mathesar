@@ -26,8 +26,6 @@ You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
     ```bash
     docker run \
       --detach \
-      -e SECRET_KEY='<replace with a random 50 character string>' \
-      -e ALLOWED_HOSTS='.localhost, 127.0.0.1, [::1]' \
       -v static:/code/static \
       -v media:/code/media \
       -v postgresql_config:/etc/postgresql/ \
