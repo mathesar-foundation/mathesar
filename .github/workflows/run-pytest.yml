@@ -37,7 +37,7 @@ jobs:
         env:
           PG_MAJOR: ${{ matrix.pg-version }}
       - name: Run docker container
-        run: docker run - d --name mathesar_service_test mathesar_service_test
+        run: docker run -d --name mathesar_service_test mathesar_service_test
 
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
