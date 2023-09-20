@@ -106,7 +106,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 1rem;
   }
   .overlay {
     position: absolute;
