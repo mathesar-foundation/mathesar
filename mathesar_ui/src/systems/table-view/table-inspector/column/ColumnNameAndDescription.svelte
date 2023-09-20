@@ -34,9 +34,21 @@
       toast.error(`Unable to rename column. ${getErrorMessage(error)}`);
     }
   }
+
+  async function handleColumnDescriptionChange(
+    description: string,
+  ): Promise<void> {
+    try {
+      await columnsDataStore.updateDescription(column.id, description ?? null);
+    } catch (error) {
+      toast.error(
+        `Unable to update column description. ${getErrorMessage(error)}`,
+      );
+    }
+  }
 </script>
 
-<div class="rename-column-property-container">
+<div class="column-property column-name">
   <span>Name</span>
   <EditableTextWithActions
     initialValue={column.column.name}
@@ -46,8 +58,18 @@
   />
 </div>
 
+<div class="column-property column-description">
+  <span>Description</span>
+  <EditableTextWithActions
+    initialValue={column.column.description ?? ''}
+    onSubmit={handleColumnDescriptionChange}
+    isLongText
+    disabled={!canExecuteDDL}
+  />
+</div>
+
 <style lang="scss">
-  .rename-column-property-container {
+  .column-property {
     display: flex;
     flex-direction: column;
 
