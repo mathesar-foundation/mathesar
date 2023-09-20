@@ -3,7 +3,7 @@ ARG PYTHON_REQUIREMENTS=requirements.txt
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
 
-ENV PG_MAJOR 15
+ENV PG_MAJOR=15
 RUN set -eux; \
 	apt-get update; apt-get install -y --no-install-recommends locales; rm -rf /var/lib/apt/lists/*; \
 	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
