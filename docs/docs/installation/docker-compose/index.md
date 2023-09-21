@@ -1,7 +1,7 @@
 # Install Mathesar via Docker Compose (Deprecated)
 
 !!! warning
-This guide is deprecated as of version 0.1.4. If you are already using this installation guide, you don't have to make any changes, however, if you are doing a fresh installation, please look at [Docker installation](../docker/index.md) as it provides a straightforward Mathesar setup without any additional addons.
+This guide is not recommended anymore. If you are already using this installation guide, you don't have to make any changes, however, if you are doing a fresh installation, please look at [Docker installation](../docker/index.md) as it provides a straightforward Mathesar setup without any additional addons.
 
 
 
