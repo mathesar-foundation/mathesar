@@ -1,4 +1,9 @@
-# Install Mathesar via Docker Compose
+# Install Mathesar via Docker Compose (Deprecated)
+
+!!! warning
+This guide is deprecated in favor of [Docker installation]() as of version 0.1.4.
+
+
 
 ## Prerequisites
 
