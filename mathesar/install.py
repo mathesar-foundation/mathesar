@@ -46,7 +46,13 @@ def main(skip_static_collection=False):
                 editable=False
             ).save()
         except IntegrityError as e:
-            if e.args[0].startswith('duplicate key value violates unique constraint'):
+            print(e.args)
+            if e.args[0].startswith(
+                (
+                    'duplicate key value violates unique constraint',
+                    'UNIQUE constraint failed: mathesar_database.name'
+                )
+            ):
                 db_model = Database.current_objects.get(name=database_key)
                 db_model.db_name = credentials["NAME"]
                 db_model.username = credentials["USER"]
