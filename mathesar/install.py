@@ -13,7 +13,7 @@ from db import install
 from django.db.utils import IntegrityError
 
 
-def main():
+def main(skip_static_collection=False):
     # skip_confirm is temporarily enabled by default as we don't have any use
     # for interactive prompts with docker only deployments
     skip_confirm = True
@@ -27,7 +27,7 @@ def main():
     from mathesar.models.base import Database
     debug_mode = decouple_config('DEBUG', default=False, cast=bool)
     #
-    if not debug_mode:
+    if not debug_mode and not skip_static_collection:
         management.call_command('collectstatic', '--noinput', '--clear')
     print("------------Setting up User Databases------------")
     django_db_key = decouple_config('DJANGO_DATABASE_KEY', default="default")
