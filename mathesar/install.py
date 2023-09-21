@@ -13,7 +13,7 @@ from db import install
 from django.db.utils import IntegrityError
 
 
-def main():
+def main(skip_static_collection=False):
     # skip_confirm is temporarily enabled by default as we don't have any use
     # for interactive prompts with docker only deployments
     skip_confirm = True
@@ -27,7 +27,7 @@ def main():
     from mathesar.models.base import Database
     debug_mode = decouple_config('DEBUG', default=False, cast=bool)
     #
-    if not debug_mode:
+    if not debug_mode and not skip_static_collection:
         management.call_command('collectstatic', '--noinput', '--clear')
     print("------------Setting up User Databases------------")
     django_db_key = decouple_config('DJANGO_DATABASE_KEY', default="default")
@@ -46,7 +46,12 @@ def main():
                 editable=False
             ).save()
         except IntegrityError as e:
-            if e.args[0].startswith('duplicate key value violates unique constraint'):
+            if e.args[0].startswith(
+                (
+                    'duplicate key value violates unique constraint',
+                    'UNIQUE constraint failed: mathesar_database.name'
+                )
+            ):
                 db_model = Database.current_objects.get(name=database_key)
                 db_model.db_name = credentials["NAME"]
                 db_model.username = credentials["USER"]
