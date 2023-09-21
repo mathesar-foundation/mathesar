@@ -527,6 +527,13 @@ class Table(DatabaseObject, Relation):
     def bulk_delete_records(self, id_values):
         return bulk_delete_records(self._sa_table, self.schema._sa_engine, id_values)
 
+    def bulk_paste_records(self, inserts, updates):
+        return bulk_paste_records(
+            table_oid=self.oid,
+            updates=updates,
+            inserts=inserts
+        )
+
     def add_constraint(self, constraint_obj):
         # The max here has the effect of filtering for the largest OID, which is
         # the most newly-created constraint. Other methods (e.g., trying to get

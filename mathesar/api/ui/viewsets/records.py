@@ -33,3 +33,10 @@ class RecordViewSet(AccessViewSetMixin, viewsets.GenericViewSet):
                 )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['post'], detail=False)
+    def paste(self, request, table_pk=None):
+        table = get_table_or_404(table_pk)
+        updates = request.data.get("updates")
+        inserts = request.data.get("inserts")
+        table.bulk_paste_records(updates, inserts)

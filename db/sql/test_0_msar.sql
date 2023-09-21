@@ -2054,3 +2054,61 @@ BEGIN
   RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 6), true);
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- msar.bulk_paste_records ------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION setup_bulk_paste_records() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE for_bulk_paste (id serial primary key, col1 integer);
+  INSERT INTO for_bulk_paste (col1) VALUES
+    (2),
+    (3),
+    (1);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_bulk_paste_records() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid := 'for_bulk_paste'::regclass::oid;
+  updates jsonb;
+  inserts jsonb;
+BEGIN
+  updates := '[
+    {
+      "changes": {"col1": 1},
+      "conditionals": {"id": 1}
+    },
+    {
+      "changes": {"col1": 2},
+      "conditionals": {"id": 2}
+    },
+    {
+      "changes": {"col1": 3},
+      "conditionals": {"id": 3}
+    }
+  ]';
+  inserts := '[
+    {
+      "col1": 4
+    }
+  ]';
+  msar.bulk_paste_records(
+    tab_id := tab_id,
+    updates := updates;
+    inserts := inserts
+  );
+  RETURN NEXT is(
+    ARRAY(
+      SELECT col1
+      FROM for_bulk_paste
+      ORDER BY id
+    ),
+    -- TODO incorrect test, doesn't account for inserts
+    ARRAY[ 1, 2, 3 ]
+    --ARRAY[ 1, 2, 3, 4 ]
+  );
+END;
+$$ LANGUAGE plpgsql;

@@ -2574,3 +2574,126 @@ BEGIN
   RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- RECORD UPDATING FUNCTIONS
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.bulk_paste_records(
+  uq_table_name text,
+  updates jsonb,
+  inserts jsonb
+)
+RETURNS void
+AS $$/*
+*/
+DECLARE
+  update jsonb;
+  q_table_name text := quote_ident(uq_table_name);
+BEGIN
+  FOR update IN SELECT * FROM jsonb_object_keys(updates)
+  LOOP
+    DECLARE
+      changes jsonb := update->'changes';
+      conditionals jsonb := update->'conditionals';
+    BEGIN
+      -- TODO consider raising notice with the string statement executed
+      -- TODO or, consider assembling a string of all statements executed, and raising that
+      PERFORM __msar.update_single_record(
+        q_table_name := q_table_name,
+        changes := changes,
+        conditionals := conditionals
+      );
+    END;
+  END LOOP;
+  -- TODO do the same for inserts
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.update_single_record(
+  tab_id oid,
+  changes jsonb,
+  conditionals jsonb
+)
+RETURNS text AS $$/*
+*/
+DECLARE
+  string_update_statement text := __msar.generate_update_statement(
+    q_table_name := q_table_name,
+    changes := changes,
+    conditionals := conditionals
+  );
+  affected_row_count bigint;
+BEGIN
+  EXECUTE string_update_statement;
+  -- https://www.postgresql.org/docs/13/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
+  GET DIAGNOSTICS affected_row_count = ROW_COUNT;
+  IF affected_row_count <> 1 THEN
+    RAISE EXCEPTION
+    'Single record update must affect a single record, '
+    'no less, no more. Provided conditionals: '
+    '%',
+    conditionals;
+  END IF;
+  RETURN string_update_statement;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.generate_update_statement(
+  q_table_name text,
+  changes jsonb,
+  conditionals jsonb
+)
+RETURNS text AS $$/*
+*/
+DECLARE
+  update_statement text := 'UPDATE ' || q_table_name || ' SET ';
+  set_clause text := '';
+  where_clause text := '';
+  uq_col_name text;
+BEGIN
+  -- Iterate through the `changes` JSON object's keys and values
+  -- and build up the set_clause
+  FOR uq_col_name IN SELECT * FROM jsonb_object_keys(changes)
+  LOOP
+    DECLARE
+      col_name text := quote_ident(uq_col_name);
+      value text := quote_literal(changes->>col_name);
+    BEGIN
+      set_clause := set_clause || col_name || ' = ' || value || ', ';
+    END;
+  END LOOP;
+
+  -- Remove the trailing comma and space from the SET clause
+  set_clause := rtrim(set_clause, ', ');
+
+  -- Iterate through the `conditionals` JSON object's keys and values
+  -- and build up the where_clause
+  FOR uq_col_name IN SELECT * FROM jsonb_object_keys(conditionals)
+  LOOP
+    DECLARE
+      col_name text := quote_ident(uq_col_name);
+      value text := quote_literal(conditionals->>col_name);
+    BEGIN
+      where_clause := where_clause || col_name || ' = ' || value || ', ';
+    END;
+  END LOOP;
+
+  -- Remove the trailing comma and space from the WHERE clause
+  where_clause := rtrim(where_clause, ', ');
+
+  -- Construct the final UPDATE statement
+  update_statement := update_statement || set_clause || ' WHERE ' || where_clause;
+
+  RETURN update_statement;
+END;
+$$ LANGUAGE plpgsql;
