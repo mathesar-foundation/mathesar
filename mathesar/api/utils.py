@@ -176,6 +176,5 @@ def is_valid_pg_creds(credentials):
     except psycopg.errors.OperationalError as e:
         raise BadDBCredentials(
             exception=e,
-            detail=e.args[0],
             status_code=status.HTTP_400_BAD_REQUEST
         )

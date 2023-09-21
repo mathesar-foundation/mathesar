@@ -124,9 +124,9 @@ class BadDBCredentials(MathesarAPIException):
     def __init__(
             self,
             exception,
-            message="Bad credentials for connecting to the requested database.",
             field=None,
             detail=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
+        message = f"Bad credentials for connecting to the requested database. The reported error is {exception.args[0]}"
         super().__init__(exception, self.error_code, message, field, detail, status_code)
