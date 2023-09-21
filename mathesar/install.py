@@ -46,7 +46,6 @@ def main(skip_static_collection=False):
                 editable=False
             ).save()
         except IntegrityError as e:
-            print(e.args)
             if e.args[0].startswith(
                 (
                     'duplicate key value violates unique constraint',
