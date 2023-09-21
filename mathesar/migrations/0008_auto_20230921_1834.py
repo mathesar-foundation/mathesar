@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='database',
             name='password',
-            field=encrypted_fields.fields.EncryptedCharField(default='foo', max_length=255),
+            field=encrypted_fields.fields.EncryptedCharField(default='mathesar', max_length=255),
             preserve_default=False,
         ),
         migrations.AddField(
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='database',
             name='username',
-            field=encrypted_fields.fields.EncryptedCharField(default='foo', max_length=255),
+            field=encrypted_fields.fields.EncryptedCharField(default='mathesar', max_length=255),
             preserve_default=False,
         ),
     ]
