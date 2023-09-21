@@ -164,7 +164,7 @@ def is_valid_uuid_v4(value):
 
 
 def is_valid_pg_creds(credentials):
-    dbname = credentials["name"]
+    dbname = credentials["db_name"]
     user = credentials["username"]
     password = credentials["password"]
     host = credentials["host"]
