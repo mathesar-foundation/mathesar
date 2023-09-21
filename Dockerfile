@@ -23,7 +23,7 @@ ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
 ENV PGDATA /var/lib/postgresql/mathesar
 VOLUME /etc/postgres/
-VOLUME /var/lib/postgresql/mathesar
+VOLUME /var/lib/postgresql/
 
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL

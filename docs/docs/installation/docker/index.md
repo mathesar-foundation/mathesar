@@ -29,7 +29,7 @@ You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
       -v static:/code/static \
       -v media:/code/media \
       -v postgresql_config:/etc/postgresql/ \
-      -v postgresql_data:/var/lib/postgresql/data \
+      -v postgresql_data:/var/lib/postgresql/ \
       --name mathesar_service \
       -p 8000:8000 \
       --restart unless-stopped \
