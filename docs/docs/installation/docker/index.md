@@ -6,7 +6,18 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
     - We have tested with Docker v23. Older versions may not work.
 - You need permission to run Docker containers.
 
+## Prerequisites
 
+### Operating System
+You can install Mathesar using this method on Linux, MacOS, and Windows.
+
+### Access
+You should have permission to run Docker containers on the system.
+
+### Software
+You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
+
+                      
 ## Installation Steps
 
 1. Run the Mathesar Docker Image
@@ -16,17 +27,21 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
       --detach \
       -v static:/code/static \
       -v media:/code/media \
+      -v postgresql_config:/etc/postgresql/ \
+      -v postgresql_data:/var/lib/postgresql/ \
       --name mathesar_service \
       -p 8000:8000 \
       --restart unless-stopped \
       mathesar/mathesar-prod:latest
     ```
 
-    The above command creates a docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
+    The above command creates a Docker container containing the Mathesar server running on the `localhost` and listening on port `8000`. It also:
 
-    - Creates two [named docker volumes](https://docs.docker.com/storage/volumes/)
+    - Creates four [named Docker volumes](https://docs.docker.com/storage/volumes/)
         - `static` for storing static assets like CSS, js files
         - `media` for storing user-uploaded media files
+        - `postgresql_data` for storing database related files
+        - `postgresql_config` for storing database config related files
     - Sets the container name as `mathesar_service` using the `--name` parameter, runs the container in a detached mode using the `--detach` parameter, and binds the port `8000` to the `localhost`. Refer to [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/#options) for additional configuration options.
 
 1. Verify if the Mathesar server is running successfully:
