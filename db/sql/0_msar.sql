@@ -2585,7 +2585,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION
 msar.bulk_paste_records(
-  uq_table_name text,
+  tab_id oid,
   updates jsonb,
   inserts jsonb
 )
@@ -2594,9 +2594,8 @@ AS $$/*
 */
 DECLARE
   update jsonb;
-  q_table_name text := quote_ident(uq_table_name);
 BEGIN
-  FOR update IN SELECT * FROM jsonb_object_keys(updates)
+  FOR update IN SELECT * FROM jsonb_array_elements(updates)
   LOOP
     DECLARE
       changes jsonb := update->'changes';
@@ -2605,7 +2604,7 @@ BEGIN
       -- TODO consider raising notice with the string statement executed
       -- TODO or, consider assembling a string of all statements executed, and raising that
       PERFORM __msar.update_single_record(
-        q_table_name := q_table_name,
+        tab_id := tab_id,
         changes := changes,
         conditionals := conditionals
       );
@@ -2625,13 +2624,15 @@ __msar.update_single_record(
 RETURNS text AS $$/*
 */
 DECLARE
-  string_update_statement text := __msar.generate_update_statement(
+  q_table_name text := __msar.get_relation_name(tab_id);
+  string_update_statement text;
+  affected_row_count bigint;
+BEGIN
+  string_update_statement := __msar.generate_update_statement(
     q_table_name := q_table_name,
     changes := changes,
     conditionals := conditionals
   );
-  affected_row_count bigint;
-BEGIN
   EXECUTE string_update_statement;
   -- https://www.postgresql.org/docs/13/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
   GET DIAGNOSTICS affected_row_count = ROW_COUNT;

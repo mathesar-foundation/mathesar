@@ -2095,9 +2095,9 @@ BEGIN
       "col1": 4
     }
   ]';
-  msar.bulk_paste_records(
+  PERFORM msar.bulk_paste_records(
     tab_id := tab_id,
-    updates := updates;
+    updates := updates,
     inserts := inserts
   );
   RETURN NEXT is(
