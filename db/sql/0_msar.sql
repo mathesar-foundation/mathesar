@@ -2668,9 +2668,11 @@ BEGIN
   LOOP
     DECLARE
       col_name text := quote_ident(uq_col_name);
-      value text := quote_literal(changes->>col_name);
+      value text := quote_literal(changes->>uq_col_name);
     BEGIN
-      set_clause := set_clause || col_name || ' = ' || value || ', ';
+      -- NOTE the use of CONCAT instead of ||, this is because CONCAT doesn't reduce its whole
+      -- output to NULL if any of its arguments are NULL; was useful for debugging.
+      set_clause := CONCAT(set_clause, col_name, ' = ', value, ', ');
     END;
   END LOOP;
 
@@ -2683,9 +2685,9 @@ BEGIN
   LOOP
     DECLARE
       col_name text := quote_ident(uq_col_name);
-      value text := quote_literal(conditionals->>col_name);
+      value text := quote_literal(conditionals->>uq_col_name);
     BEGIN
-      where_clause := where_clause || col_name || ' = ' || value || ', ';
+      where_clause := CONCAT(where_clause, col_name, ' = ', value, ', ');
     END;
   END LOOP;
 
@@ -2693,7 +2695,7 @@ BEGIN
   where_clause := rtrim(where_clause, ', ');
 
   -- Construct the final UPDATE statement
-  update_statement := update_statement || set_clause || ' WHERE ' || where_clause;
+  update_statement := CONCAT(update_statement, set_clause, ' WHERE ', where_clause);
 
   RETURN update_statement;
 END;

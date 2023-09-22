@@ -2112,3 +2112,19 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_generate_update_statement() RETURNS SETOF TEXT AS $$
+DECLARE
+  update_statement_string text := __msar.generate_update_statement(
+    q_table_name := '"Patents"."NASA Record Put"',
+    changes      := '{"Status": "0"}',
+    conditionals := '{"id": 1}'
+  );
+BEGIN
+  RETURN NEXT is(
+    update_statement_string,
+    'UPDATE "Patents"."NASA Record Put" SET "Status" = ''0'' WHERE id = ''1'''
+  );
+END;
+$$ LANGUAGE plpgsql;

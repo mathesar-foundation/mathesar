@@ -1432,3 +1432,53 @@ def test_record_patch_unique_violation(create_patents_table, client):
         f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'
     ).json()
     assert actual_constraint_details['name'] == 'NASA unique record PATCH_pkey'
+
+
+def test_record_paste(create_patents_table, client):
+    table_name = 'NASA Record Put'
+    table = create_patents_table(table_name)
+    records = table.get_records()
+    record_0_id = records[0]['id']
+    record_1_id = records[1]['id']
+
+    updates = [
+        dict(
+            changes=dict(
+                Status='0',
+            ),
+            conditionals=dict(
+                id=record_0_id,
+            ),
+        ),
+        dict(
+            changes=dict(
+                Status='1',
+            ),
+            conditionals=dict(
+                id=record_1_id,
+            ),
+        ),
+    ]
+    inserts = [
+    ]
+    data = dict(
+        updates=updates,
+        inserts=inserts,
+    )
+    breakpoint()
+    response = client.post(f'/api/ui/v0/tables/{table.id}/records/paste/', data=data)
+    #response_json = response.json()
+    assert response.status_code == 200
+    records_new = table.get_records()
+    found_record_0 = False
+    found_record_1 = False
+    for record_new in records_new:
+        if record_new['id'] == record_0_id:
+            assert record_new['Status'] == '0'
+            found_record_0 = True
+        elif record_new['id'] == record_1_id:
+            assert record_new['Status'] == '1'
+            found_record_1 = True
+        else:
+            assert record_new in records
+    assert found_record_0 and found_record_1

@@ -29,6 +29,7 @@ from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
 from db.records.operations.select import get_records
 from db.records.operations.update import update_record
+from db.records.operations.paste import bulk_paste_records
 from db.schemas.operations.drop import drop_schema
 from db.schemas.operations.select import get_schema_description
 from db.schemas import utils as schema_utils
@@ -527,11 +528,12 @@ class Table(DatabaseObject, Relation):
     def bulk_delete_records(self, id_values):
         return bulk_delete_records(self._sa_table, self.schema._sa_engine, id_values)
 
-    def bulk_paste_records(self, inserts, updates):
+    def bulk_paste_records(self, updates, inserts):
         return bulk_paste_records(
             table_oid=self.oid,
             updates=updates,
-            inserts=inserts
+            inserts=inserts,
+            engine=self._sa_engine
         )
 
     def add_constraint(self, constraint_obj):

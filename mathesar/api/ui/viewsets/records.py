@@ -31,7 +31,6 @@ class RecordViewSet(AccessViewSetMixin, viewsets.GenericViewSet):
                     status_code=status.HTTP_400_BAD_REQUEST,
                     referent_table=table,
                 )
-
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['post'], detail=False)
@@ -39,4 +38,9 @@ class RecordViewSet(AccessViewSetMixin, viewsets.GenericViewSet):
         table = get_table_or_404(table_pk)
         updates = request.data.get("updates")
         inserts = request.data.get("inserts")
-        table.bulk_paste_records(updates, inserts)
+        table.bulk_paste_records(updates=updates, inserts=inserts)
+        #import logging
+        #logger = logging.getLogger('paste viewset')
+        #logger.debug(f'updates: {updates}')
+        #logger.debug(f'inserts: {inserts}')
+        return Response(status=status.HTTP_200_OK)
