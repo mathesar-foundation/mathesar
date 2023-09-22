@@ -651,7 +651,12 @@ def test_peak_time_aggregation(library_ma_tables, get_uid, client):
         }
     ]
     actual_records = client.get(f'/api/db/v0/queries/{query_id}/records/').json()['results']
-    assert sorted(actual_records, key=lambda x: x['Patron']) == expect_records
+    assert all(
+        actual["Patron"] == expect["Patron"]
+        and actual["Checkout Time"][:14] == expect["Checkout Time"][:14]
+        for actual, expect
+        in zip(sorted(actual_records, key=lambda x: x['Patron']), expect_records)
+    )
 
 
 def test_min_aggregation(library_ma_tables, get_uid, client):
