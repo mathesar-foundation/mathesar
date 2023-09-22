@@ -1,8 +1,9 @@
 from sqlalchemy import text
 import psycopg
+import json
 
 
-def execute_msar_func_with_engine(engine, func_name, *args):
+def execute_msar_func_with_engine(engine, func_name, *parameters):
     """
     Execute an msar function using an SQLAlchemy engine.
 
@@ -14,15 +15,15 @@ def execute_msar_func_with_engine(engine, func_name, *args):
         *args: The list of parameters to pass
     """
     conn_str = str(engine.url)
+    statement, parameters = _get_parametrized_statement_and_parameters(
+        func_name, parameters
+    )
     with psycopg.connect(conn_str) as conn:
         # Returns a cursor
-        return conn.execute(
-            f"SELECT msar.{func_name}({','.join(['%s']*len(args))})",
-            args
-        )
+        return conn.execute(statement, parameters)
 
 
-def execute_msar_func_with_psycopg2_conn(conn, func_name, *args):
+def execute_msar_func_with_psycopg2_conn(conn, func_name, *parameters):
     """
     Execute an msar function using an SQLAlchemy engine.
 
@@ -33,11 +34,34 @@ def execute_msar_func_with_psycopg2_conn(conn, func_name, *args):
         func_name: The unqualified msar function name (danger; not sanitized)
         *args: The list of parameters to pass
     """
-    args_str = ", ".join([str(arg) for arg in args])
-    args_str = f"{args_str}"
-    stmt = text(f"SELECT msar.{func_name}({args_str})")
+    statement, parameters = _get_parametrized_statement_and_parameters(
+        func_name, parameters
+    )
     # Returns a cursor
-    return conn.execute(stmt)
+    return conn.execute(statement, parameters)
+
+
+#TODO document
+def _get_parametrized_statement_and_parameters(func_name, parameters):
+    parameter_placeholders = ','.join(
+        ['%s'] * len(parameters)
+    )
+    statement = f"SELECT msar.{func_name}({parameter_placeholders})"
+    adapted_parameters = _adapt_parameters(parameters)
+    return statement, adapted_parameters
+
+
+def _adapt_parameters(args):
+    """
+    Processes parameters, serializing dicts and lists into JSON strings.
+    """
+    return [
+        json.dumps(arg)
+        if type(arg) is dict or type(arg) is list
+        else arg
+        for arg
+        in args
+    ]
 
 
 def load_file_with_engine(engine, file_handle):
