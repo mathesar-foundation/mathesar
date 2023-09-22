@@ -1,8 +1,13 @@
 <script lang="ts">
   import { active } from 'tinro';
   import { Menu, MenuItemContents } from '@mathesar-component-library';
-  import { iconSettingsMajor, iconMultipleUsers } from '@mathesar/icons';
   import {
+    iconSettingsMajor,
+    iconMultipleUsers,
+    iconDatabase,
+  } from '@mathesar/icons';
+  import {
+    ADD_DATABASE_CONNECTION_URL,
     ADMIN_UPDATE_PAGE_URL,
     ADMIN_USERS_PAGE_URL,
   } from '@mathesar/routes/urls';
@@ -35,6 +40,16 @@
       use:active
     >
       <MenuItemContents icon={iconMultipleUsers}>Users</MenuItemContents>
+    </a>
+    <a
+      role="menuitem"
+      href={ADD_DATABASE_CONNECTION_URL}
+      class="menu-item menu-item-link"
+      use:active
+    >
+      <MenuItemContents icon={iconDatabase}>
+        Add Database Connection
+      </MenuItemContents>
     </a>
   </Menu>
 </div>

@@ -1,0 +1,178 @@
+<script lang="ts">
+  import { PasswordInput, TextInput } from '@mathesar/component-library';
+  import databaseConnectionApi from '@mathesar/api/databaseConnection';
+  import {
+    FormSubmit,
+    makeForm,
+    requiredField,
+  } from '@mathesar/components/form';
+  import { databases } from '@mathesar/stores/databases';
+  import UserFormInput from '@mathesar/systems/users-and-permissions/UserFormInput.svelte';
+  import type { Database } from '@mathesar/AppTypes';
+  import { createEventDispatcher } from 'svelte';
+  import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+
+  const dispatch = createEventDispatcher<{
+    create: Database;
+    update: undefined;
+  }>();
+
+  let _databaseName: string | undefined = undefined;
+  export { _databaseName as databaseName };
+
+  $: database = $databases.data?.find((db) => db.name === _databaseName);
+  $: isNewConnection = !database;
+
+  $: connectionName = requiredField(database?.name ?? '');
+  $: databaseName = requiredField(database?.db_name ?? '');
+  $: username = requiredField('');
+  $: host = requiredField(database?.host ?? '');
+  $: port = requiredField(database?.port ?? '5432', [
+    (value) =>
+      Number(value) === Number(value)
+        ? { type: 'valid' }
+        : { type: 'invalid', errorMsg: 'Port should be a valid number' },
+  ]);
+  $: password = requiredField('');
+
+  $: formFields = {
+    connectionName,
+    databaseName,
+    username,
+    host,
+    port,
+    password,
+  };
+  $: form = makeForm(formFields);
+
+  async function addNewDatabaseConnection() {
+    console.log('addNewDatabaseConnection');
+    const formValues = $form.values;
+    return await databaseConnectionApi.add({
+      name: formValues.connectionName,
+      db_name: formValues.databaseName,
+      username: formValues.username,
+      host: formValues.host,
+      port: formValues.port,
+      password: formValues.password,
+    });
+  }
+
+  async function saveConnectionDetails() {
+    console.log('saveConnectionDetails', isNewConnection);
+    if (isNewConnection) {
+      const database = await addNewDatabaseConnection();
+      dispatch('create', database);
+    }
+  }
+
+  function getErrorMessages(e: unknown) {
+    type FieldKey = keyof typeof formFields;
+    const { commonErrors, fieldSpecificErrors } =
+      extractDetailedFieldBasedErrors<FieldKey>(e, {
+        name: 'connectionName',
+        db_name: 'databaseName',
+      });
+    for (const [fieldKey, errors] of fieldSpecificErrors) {
+      const field = form.fields[fieldKey];
+      if (field) {
+        field.serverErrors.set(errors);
+      } else {
+        /**
+         * Incase an error occurs when the server returned field
+         * is not part of the form.
+         * Ideally this should never happen.
+         */
+        commonErrors.push(...errors);
+      }
+    }
+    return commonErrors;
+  }
+</script>
+
+<div class="db-connection-form">
+  <UserFormInput
+    label="Connection Name *"
+    field={connectionName}
+    input={{ component: TextInput }}
+    help="Used for internal identification."
+  />
+
+  <UserFormInput
+    label="Database Name *"
+    field={databaseName}
+    input={{ component: TextInput }}
+  />
+
+  <UserFormInput
+    bypassRow
+    label="Host *"
+    field={host}
+    input={{ component: TextInput }}
+  />
+
+  <UserFormInput
+    bypassRow
+    label="Port *"
+    field={port}
+    input={{ component: TextInput }}
+  />
+
+  <!-- TODO: Add link in help -->
+  <UserFormInput
+    label="Username *"
+    field={username}
+    input={{ component: TextInput }}
+    help="The user will need to have SUPERUSER or DB OWNER privileges on the database. Why is this needed?."
+  />
+
+  <UserFormInput
+    label="Password *"
+    field={password}
+    input={{
+      component: PasswordInput,
+      props: { autocomplete: isNewConnection ? 'new-password' : 'off' },
+    }}
+  />
+</div>
+<div class="footer">
+  {#if isNewConnection}
+    <!-- TODO: Add link -->
+    <WarningBox>
+      Every PostgreSQL database includes the "public" schema. This protected
+      schema can be read by anybody who accesses the database. They will all be
+      namespaced into Mathesar-specific schemas for safety and organization.
+    </WarningBox>
+  {/if}
+  <FormSubmit
+    {form}
+    catchErrors
+    onProceed={saveConnectionDetails}
+    proceedButton={{
+      label: isNewConnection ? 'Add Connection' : 'Update Connection',
+    }}
+    cancelButton={{ label: 'Discard Changes' }}
+    {getErrorMessages}
+    initiallyHidden={!!database}
+    hasCancelButton={!!database}
+  />
+</div>
+
+<style lang="scss">
+  .db-connection-form {
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr;
+  }
+  :global(.right:not(.db-connection-form > .right)) {
+    grid-column: 2/5;
+  }
+  :global(.db-connection-form > .right, .db-connection-form > .left) {
+    margin-bottom: var(--size-large);
+    margin-top: var(--size-large);
+  }
+  .footer {
+    margin-top: var(--size-base);
+    --form-submit-margin: var(--size-base) 0 0 0;
+  }
+</style>

@@ -288,6 +288,21 @@ def schemas(request, db_name):
     })
 
 
+@login_required
+def add_database_connection(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
+
+
+@login_required
+def edit_database_connection(request, db_name):
+    database = get_current_database(request, db_name)
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request, database, None)
+    })
+
+
 def shared_table(request, slug):
     shared_table_link = SharedTable.get_by_slug(slug) if is_valid_uuid_v4(slug) else None
     table = shared_table_link.table if shared_table_link else None

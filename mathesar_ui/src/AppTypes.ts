@@ -5,6 +5,11 @@ export interface Database {
   name: string;
   deleted: boolean;
   supported_types: string[];
+  db_name: string;
+  editable: boolean;
+  username: string;
+  host: string;
+  port: string;
 }
 
 export interface DBObjectEntry {

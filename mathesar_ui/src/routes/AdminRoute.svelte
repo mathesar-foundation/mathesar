@@ -8,8 +8,13 @@
   import SoftwareUpdate from '@mathesar/pages/admin-update/SoftwareUpdatePage.svelte';
   import AdminNavigation from '@mathesar/pages/admin-users/AdminNavigation.svelte';
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
-  import { ADMIN_UPDATE_PAGE_URL, ADMIN_URL } from './urls';
+  import {
+    ADMIN_UPDATE_PAGE_URL,
+    ADMIN_URL,
+    DATABASE_CONNECTION_SLUG,
+  } from './urls';
   import UsersRoute from './UsersRoute.svelte';
+  import DatabaseConnectionRoute from './DatabaseConnectionRoute.svelte';
 </script>
 
 <AppendBreadcrumb
@@ -52,6 +57,10 @@
 
     <Route path="/users/*" firstmatch>
       <UsersRoute />
+    </Route>
+
+    <Route path={`/${DATABASE_CONNECTION_SLUG}/*`} firstmatch>
+      <DatabaseConnectionRoute />
     </Route>
   </PageLayoutWithSidebar>
 </LayoutWithHeader>

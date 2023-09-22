@@ -115,6 +115,13 @@ export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const LOGOUT_URL = '/auth/logout/';
 
+export const DATABASE_CONNECTION_SLUG = 'db-connection';
+export const ADD_DATABASE_CONNECTION_URL = `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/add/`;
+
+export function getDatabaseConnectionEditUrl(databaseName: string) {
+  return `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/edit/${databaseName}/`;
+}
+
 export function getEditUsersPageUrl(userId: number) {
   return `${ADMIN_USERS_PAGE_URL}${userId}/`;
 }

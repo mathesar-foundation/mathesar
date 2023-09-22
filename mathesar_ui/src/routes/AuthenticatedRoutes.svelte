@@ -33,5 +33,5 @@
 {/if}
 
 <Route path="/db/:databaseName/*" let:meta firstmatch>
-  <DatabaseRoute databaseName={meta.params.databaseName} />
+  <DatabaseRoute databaseName={decodeURIComponent(meta.params.databaseName)} />
 </Route>

@@ -48,5 +48,12 @@
     justify-content: end;
     margin-right: var(--size-large);
     padding-top: var(--size-ultra-small);
+    margin-left: var(--size-large);
+  }
+
+  .help {
+    color: var(--slate-500);
+    margin-top: var(--size-extreme-small);
+    font-size: var(--size-small);
   }
 </style>
