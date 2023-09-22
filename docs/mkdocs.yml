@@ -22,11 +22,11 @@ nav:
       - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
   - Using Mathesar:
-      - Glossary: user-guide/glossary.md
       - Introduction: user-guide/index.md
       - Importing data: user-guide/importing-data.md
       - Syncing database changes: user-guide/syncing-db.md
       - Users & access levels: user-guide/users.md
+      - Glossary: user-guide/glossary.md
 
 plugins:
   - search:
