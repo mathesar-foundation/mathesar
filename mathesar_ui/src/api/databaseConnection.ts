@@ -1,5 +1,5 @@
 import type { Database } from '@mathesar/AppTypes';
-import { patchAPI, postAPI } from './utils/requestUtils';
+import { deleteAPI, patchAPI, postAPI } from './utils/requestUtils';
 
 export interface NewConnection {
   name: string;
@@ -20,7 +20,13 @@ function update(databaseId: number, updates: ConnectionUpdates) {
   return patchAPI<Database>(`/api/db/v0/databases/${databaseId}/`, updates);
 }
 
+function deleteConnection(databaseId: number, removeMathesarSchemas = false) {
+  const param = removeMathesarSchemas ? '?del_msar_schemas=True' : '';
+  return deleteAPI(`/api/db/v0/databases/${databaseId}/${param}`);
+}
+
 export default {
   add,
   update,
+  delete: deleteConnection,
 };

@@ -16,6 +16,7 @@
     iconRefresh,
     iconMoreActions,
     iconEdit,
+    iconDeleteMajor,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -36,9 +37,13 @@
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import ConnectionError from './ConnectionError.svelte';
+  import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
+  import { reloadDatabases } from '@mathesar/stores/databases';
+  import { router } from 'tinro';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
+  const deleteConnectionModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -114,6 +119,11 @@
       isReflectionRunning = false;
     }
   }
+
+  async function handleSuccessfulDeleteConnection() {
+    await reloadDatabases();
+    router.goto('/');
+  }
 </script>
 
 <AppSecondaryHeader
@@ -163,12 +173,21 @@
               </Help>
             </div>
           </ButtonMenuItem>
-          <LinkMenuItem
-            icon={iconEdit}
-            href={getDatabaseConnectionEditUrl(database.name)}
-          >
-            Edit Database Connection
-          </LinkMenuItem>
+          {#if database.editable && userProfile?.isSuperUser}
+            <LinkMenuItem
+              icon={iconEdit}
+              href={getDatabaseConnectionEditUrl(database.name)}
+            >
+              Edit Database Connection
+            </LinkMenuItem>
+            <!-- TODO: Check the conditions here -->
+            <ButtonMenuItem
+              icon={iconDeleteMajor}
+              on:click={() => deleteConnectionModal.open()}
+            >
+              Delete Connection
+            </ButtonMenuItem>
+          {/if}
         </DropdownMenu>
       </div>
     {/if}
@@ -228,6 +247,11 @@
 />
 
 <DbAccessControlModal controller={accessControlModal} {database} />
+<DeleteDatabaseConnectionConfirmationModal
+  controller={deleteConnectionModal}
+  {database}
+  on:success={handleSuccessfulDeleteConnection}
+/>
 
 <style lang="scss">
   .schema-list-wrapper {
