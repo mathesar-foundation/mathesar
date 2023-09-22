@@ -22,7 +22,7 @@ RUN set -ex; \
 ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 
 ENV PGDATA /var/lib/postgresql/mathesar
-VOLUME /etc/postgres/
+VOLUME /etc/postgresql/
 VOLUME /var/lib/postgresql/
 
 
