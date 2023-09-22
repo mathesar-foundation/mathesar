@@ -19,10 +19,10 @@
     update: undefined;
   }>();
 
-  let _databaseName: string | undefined = undefined;
-  export { _databaseName as databaseName };
+  let databaseNameProp: string | undefined = undefined;
+  export { databaseNameProp as databaseName };
 
-  $: database = $databases.data?.find((db) => db.name === _databaseName);
+  $: database = $databases.data?.find((db) => db.name === databaseNameProp);
   $: isNewConnection = !database;
 
   $: connectionName = requiredField(database?.name ?? '');
@@ -31,7 +31,7 @@
   $: host = requiredField(database?.host ?? '');
   $: port = requiredField(database?.port ?? '5432', [
     (value) =>
-      Number(value) === Number(value)
+      !Number.isNaN(+value)
         ? { type: 'valid' }
         : { type: 'invalid', errorMsg: 'Port should be a valid number' },
   ]);
@@ -54,7 +54,7 @@
 
   async function addNewDatabaseConnection() {
     const formValues = $form.values;
-    return await databaseConnectionApi.add({
+    return databaseConnectionApi.add({
       name: formValues.connectionName,
       db_name: formValues.databaseName,
       username: formValues.username,
@@ -67,7 +67,7 @@
   async function updateDatabaseConnection() {
     const formValues = $form.values;
     if (database) {
-      return await databaseConnectionApi.update(database?.id, {
+      return databaseConnectionApi.update(database?.id, {
         db_name: formValues.databaseName,
         username: formValues.username,
         host: formValues.host,
@@ -82,8 +82,8 @@
 
   async function saveConnectionDetails() {
     if (isNewConnection) {
-      const database = await addNewDatabaseConnection();
-      dispatch('create', database);
+      const newDatabase = await addNewDatabaseConnection();
+      dispatch('create', newDatabase);
     } else {
       await updateDatabaseConnection();
       form.reset();

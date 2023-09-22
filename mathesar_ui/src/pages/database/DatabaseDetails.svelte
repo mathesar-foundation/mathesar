@@ -30,16 +30,16 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
+  import { reloadDatabases } from '@mathesar/stores/databases';
+  import { router } from 'tinro';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
-  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import ConnectionError from './ConnectionError.svelte';
   import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
-  import { reloadDatabases } from '@mathesar/stores/databases';
-  import { router } from 'tinro';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();

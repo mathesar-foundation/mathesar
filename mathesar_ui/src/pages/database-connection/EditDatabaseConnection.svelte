@@ -1,13 +1,13 @@
 <script lang="ts">
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { Icon } from '@mathesar/component-library';
-  import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
   import { iconDatabase, iconEdit } from '@mathesar/icons';
-  import FormBox from '../admin-users/FormBox.svelte';
   import { toast } from '@mathesar/stores/toast';
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import { reflectApi } from '@mathesar/api/reflect';
+  import FormBox from '../admin-users/FormBox.svelte';
+  import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
 
   export let databaseName: string;
 

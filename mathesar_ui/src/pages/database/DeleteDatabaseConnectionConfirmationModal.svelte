@@ -19,7 +19,7 @@
   export let controller: ModalController;
   export let database: Database;
 
-  let removeMathesarSchemas: boolean = false;
+  let removeMathesarSchemas = false;
 
   let disconnectStatus: RequestStatus | undefined;
 
