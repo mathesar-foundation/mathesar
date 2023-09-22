@@ -15,6 +15,7 @@
     iconManageAccess,
     iconRefresh,
     iconMoreActions,
+    iconEdit,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -32,6 +33,9 @@
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
+  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
+  import ConnectionError from './ConnectionError.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
@@ -159,6 +163,12 @@
               </Help>
             </div>
           </ButtonMenuItem>
+          <LinkMenuItem
+            icon={iconEdit}
+            href={getDatabaseConnectionEditUrl(database.name)}
+          >
+            Edit Database Connection
+          </LinkMenuItem>
         </DropdownMenu>
       </div>
     {/if}
@@ -169,41 +179,46 @@
   <div class="schema-list-title-container">
     <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
   </div>
-  <EntityContainerWithFilterBar
-    searchPlaceholder="Search Schemas"
-    bind:searchQuery={filterQuery}
-    on:clear={handleClearFilterQuery}
-  >
-    <svelte:fragment slot="action">
-      {#if canExecuteDDL}
-        <Button on:click={addSchema} appearance="primary">
-          <Icon {...iconAddNew} />
-          <span>Create Schema</span>
-        </Button>
-      {/if}
-    </svelte:fragment>
-    <p slot="resultInfo">
-      {labeledCount(displayList, 'results')}
-      for all schemas matching
-      <strong>{filterQuery}</strong>
-    </p>
-    <ul class="schema-list" slot="content">
-      {#each displayList as schema (schema.id)}
-        <li class="schema-list-item">
-          <SchemaRow
-            {database}
-            {schema}
-            canExecuteDDL={userProfile?.hasPermission(
-              { database, schema },
-              'canExecuteDDL',
-            )}
-            on:edit={() => editSchema(schema)}
-            on:delete={() => deleteSchema(schema)}
-          />
-        </li>
-      {/each}
-    </ul>
-  </EntityContainerWithFilterBar>
+  <!-- TODO: Update this condition once the API starts throwing error -->
+  {#if schemasMap.size === 0}
+    <ConnectionError databaseName={database.name} />
+  {:else}
+    <EntityContainerWithFilterBar
+      searchPlaceholder="Search Schemas"
+      bind:searchQuery={filterQuery}
+      on:clear={handleClearFilterQuery}
+    >
+      <svelte:fragment slot="action">
+        {#if canExecuteDDL}
+          <Button on:click={addSchema} appearance="primary">
+            <Icon {...iconAddNew} />
+            <span>Create Schema</span>
+          </Button>
+        {/if}
+      </svelte:fragment>
+      <p slot="resultInfo">
+        {labeledCount(displayList, 'results')}
+        for all schemas matching
+        <strong>{filterQuery}</strong>
+      </p>
+      <ul class="schema-list" slot="content">
+        {#each displayList as schema (schema.id)}
+          <li class="schema-list-item">
+            <SchemaRow
+              {database}
+              {schema}
+              canExecuteDDL={userProfile?.hasPermission(
+                { database, schema },
+                'canExecuteDDL',
+              )}
+              on:edit={() => editSchema(schema)}
+              on:delete={() => deleteSchema(schema)}
+            />
+          </li>
+        {/each}
+      </ul>
+    </EntityContainerWithFilterBar>
+  {/if}
 </div>
 
 <AddEditSchemaModal

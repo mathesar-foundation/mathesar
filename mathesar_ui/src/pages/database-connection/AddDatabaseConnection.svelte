@@ -11,10 +11,14 @@
   import { toast } from '@mathesar/stores/toast';
   import type { Database } from '@mathesar/AppTypes';
   import { router } from 'tinro';
+  import { reloadDatabases } from '@mathesar/stores/databases';
+  import { reflectApi } from '@mathesar/api/reflect';
 
-  function handleSuccess(event: CustomEvent<Database>) {
+  async function handleSuccess(event: CustomEvent<Database>) {
     const database = event.detail;
     toast.success(`${database.name} connected successfully!`);
+    await reflectApi.reflect();
+    await reloadDatabases();
     router.goto(getDatabasePageUrl(database.name));
   }
 </script>

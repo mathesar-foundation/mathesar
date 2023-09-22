@@ -48,7 +48,7 @@
       use:active
     >
       <MenuItemContents icon={iconDatabase}>
-        Add Database Connection
+        Database Connection
       </MenuItemContents>
     </a>
   </Menu>

@@ -4,6 +4,7 @@
   import {
     FormSubmit,
     makeForm,
+    optionalField,
     requiredField,
   } from '@mathesar/components/form';
   import { databases } from '@mathesar/stores/databases';
@@ -26,7 +27,7 @@
 
   $: connectionName = requiredField(database?.name ?? '');
   $: databaseName = requiredField(database?.db_name ?? '');
-  $: username = requiredField('');
+  $: username = requiredField(database?.username ?? '');
   $: host = requiredField(database?.host ?? '');
   $: port = requiredField(database?.port ?? '5432', [
     (value) =>
@@ -34,7 +35,11 @@
         ? { type: 'valid' }
         : { type: 'invalid', errorMsg: 'Port should be a valid number' },
   ]);
-  $: password = requiredField('');
+
+  // There will be no prefill value even in the case of editing
+  $: password = isNewConnection ? requiredField('') : optionalField('');
+  $: hasPasswordChangedStore = password.hasChanges;
+  $: hasPasswordChanged = $hasPasswordChangedStore;
 
   $: formFields = {
     connectionName,
@@ -45,9 +50,9 @@
     password,
   };
   $: form = makeForm(formFields);
+  $: ({ isSubmitting } = form);
 
   async function addNewDatabaseConnection() {
-    console.log('addNewDatabaseConnection');
     const formValues = $form.values;
     return await databaseConnectionApi.add({
       name: formValues.connectionName,
@@ -59,11 +64,30 @@
     });
   }
 
+  async function updateDatabaseConnection() {
+    const formValues = $form.values;
+    if (database) {
+      return await databaseConnectionApi.update(database?.id, {
+        db_name: formValues.databaseName,
+        username: formValues.username,
+        host: formValues.host,
+        port: formValues.port,
+        ...(hasPasswordChanged ? { password: formValues.password } : undefined),
+      });
+    }
+    throw new Error(
+      '[updateDatabaseConnection] called but no database found to edit.',
+    );
+  }
+
   async function saveConnectionDetails() {
-    console.log('saveConnectionDetails', isNewConnection);
     if (isNewConnection) {
       const database = await addNewDatabaseConnection();
       dispatch('create', database);
+    } else {
+      await updateDatabaseConnection();
+      form.reset();
+      dispatch('update');
     }
   }
 
@@ -95,7 +119,10 @@
   <UserFormInput
     label="Connection Name *"
     field={connectionName}
-    input={{ component: TextInput }}
+    input={{
+      component: TextInput,
+      props: { disabled: !isNewConnection || $isSubmitting },
+    }}
     help="Used for internal identification."
   />
 
@@ -128,11 +155,11 @@
   />
 
   <UserFormInput
-    label="Password *"
+    label={isNewConnection ? 'Password *' : 'Password'}
     field={password}
     input={{
       component: PasswordInput,
-      props: { autocomplete: isNewConnection ? 'new-password' : 'off' },
+      props: { autocomplete: 'new-password' },
     }}
   />
 </div>
