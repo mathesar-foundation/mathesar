@@ -56,7 +56,7 @@ You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
 
     Mathesar is now installed! You can use it by visiting `http://localhost:8000` or the domain you've set up.
 
-    You'll be prompted to set up an admin user account and add user database credentials the first time you open Mathesar. Just follow the instructions on screen.
+    The first time you open Mathesar, follow the instructions on screen to set up an admin user account and connect to a user database.
 
 
 ## Configuring Mathesar {:#configuration}
@@ -74,7 +74,7 @@ docker run \
 
 ### Hosting on default port 80
 
-The command used in the Quickstart section will run Mathesar on port 8000, so you will have to access it on `http://<domain-name>:8000`. If you wish to access Mathesar without adding any port suffix like `http://<domain-name>`, you need to bind it to port 80
+The command used in the quick start section will run Mathesar on port 8000, so you will have to access it on `http://<domain-name>:8000`. If you wish to access Mathesar without adding any port suffix like `http://<domain-name>`, you need to bind it to port 80
 
 ```bash
 docker run \
@@ -163,4 +163,4 @@ docker run \
 
 ### 400 Bad request 
 
-If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration),
+If you are getting `400 (Bad request)` when visiting Mathesar using a domain name or an IP address, it might be happening due to the domain name not being correctly whitelisted. Follow the instructions for [accessing using a domain name](#domain-name).
