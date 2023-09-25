@@ -151,7 +151,7 @@ class Database(ReflectionManagerMixin, BaseModel):
 
 
 @receiver(post_save, sender=Database)
-def reset_model_reflection(sender, instance, **kwargs):
+def reset_model_reflection(sender, instance, **kwargs): # noqa
     reset_reflection(db_name=instance.name)
 
 
