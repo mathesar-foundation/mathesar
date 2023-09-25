@@ -7,8 +7,6 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from encrypted_fields.fields import EncryptedCharField
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -149,10 +147,13 @@ class Database(ReflectionManagerMixin, BaseModel):
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
 
-
-@receiver(post_save, sender=Database)
-def reset_model_reflection(sender, instance, **kwargs): # noqa
-    reset_reflection(db_name=instance.name)
+    def save(self, **kwargs):
+        db_name = self.name
+        # invalidate cached engine as db credentials might get changed.
+        if _engine_cache.get(db_name):
+            _engine_cache[db_name].dispose()
+            del _engine_cache[db_name]
+        return super().save()
 
 
 class Schema(DatabaseObject):
