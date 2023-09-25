@@ -56,6 +56,7 @@ def sync_databases_status(databases):
     """Update status and check health for current Database Model instances."""
     for db in databases:
         try:
+            models._engine_cache = {}
             db._sa_engine.connect()
             db._sa_engine.dispose()
             _set_db_is_deleted(db, False)

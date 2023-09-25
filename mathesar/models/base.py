@@ -7,6 +7,8 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from encrypted_fields.fields import EncryptedCharField
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -111,7 +113,7 @@ _engine_cache = {}
 
 class Database(ReflectionManagerMixin, BaseModel):
     name = models.CharField(max_length=128, unique=True)
-    db_name = models.CharField(max_length=128, unique=True)
+    db_name = models.CharField(max_length=128)
     username = EncryptedCharField(max_length=255)
     password = EncryptedCharField(max_length=255)
     host = models.CharField(max_length=255)
@@ -146,6 +148,11 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
+
+
+@receiver(post_save, sender=Database)
+def reset_model_reflection(sender, instance, **kwargs):
+    reset_reflection(db_name=instance.name)
 
 
 class Schema(DatabaseObject):

@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='database',
             name='db_name',
-            field=models.CharField(default='', max_length=128, unique=True),
+            field=models.CharField(default='', max_length=128),
             preserve_default=False,
         ),
         migrations.AddField(
