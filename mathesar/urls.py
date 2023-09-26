@@ -53,6 +53,7 @@ urlpatterns = [
     path('administration/users/', views.admin_home, name='admin_users_home'),
     path('administration/users/<user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
+    path('administration/db-connection/', views.list_database_connection, name='list_database_connection'),
     path('administration/db-connection/add/', views.add_database_connection, name='add_database_connection'),
     path('administration/db-connection/edit/<db_name>/', views.edit_database_connection, name='edit_database_connection'),
     path('shares/tables/<slug>/', views.shared_table, name='shared_table'),

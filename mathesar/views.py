@@ -289,6 +289,13 @@ def schemas(request, db_name):
 
 
 @login_required
+def list_database_connection(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
+
+
+@login_required
 def add_database_connection(request):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)

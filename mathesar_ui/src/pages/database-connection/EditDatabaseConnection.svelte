@@ -1,7 +1,6 @@
 <script lang="ts">
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { Icon } from '@mathesar/component-library';
-  import { iconDatabase, iconEdit } from '@mathesar/icons';
+  import { iconEdit } from '@mathesar/icons';
   import { toast } from '@mathesar/stores/toast';
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
@@ -27,7 +26,7 @@
   }}
 />
 
-<h1><Icon {...iconDatabase} /> Edit Database Connection</h1>
+<h1>Edit Database Connection</h1>
 
 <FormBox>
   <DatabaseConnectionForm {databaseName} on:update={handleSuccess} />

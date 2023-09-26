@@ -1,9 +1,8 @@
 <script lang="ts">
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { Icon } from '@mathesar/component-library';
-  import { iconDatabase } from '@mathesar/icons';
+  import { iconAddNew } from '@mathesar/icons';
   import {
-    ADD_DATABASE_CONNECTION_URL,
+    DATABASE_CONNECTION_ADD_URL,
     getDatabasePageUrl,
   } from '@mathesar/routes/urls';
   import { toast } from '@mathesar/stores/toast';
@@ -26,13 +25,13 @@
 <AppendBreadcrumb
   item={{
     type: 'simple',
-    href: ADD_DATABASE_CONNECTION_URL,
+    href: DATABASE_CONNECTION_ADD_URL,
     label: 'Add Database Connection',
-    icon: iconDatabase,
+    icon: iconAddNew,
   }}
 />
 
-<h1><Icon {...iconDatabase} /> Add Database Connection</h1>
+<h1>Add Database Connection</h1>
 
 <FormBox>
   <DatabaseConnectionForm on:create={handleSuccess} />
