@@ -2,12 +2,6 @@
 
 Use our [Debian package](https://hub.docker.com/r/mathesar/mathesar-prod/tags): `mathesar` hosted to run Mathesar.
 
-- You need [Docker](https://docs.docker.com/get-docker/).
-    - We have tested with Docker v23. Older versions may not work.
-- You need permission to run Docker containers.``3223657e82qreery`11tuuiw`
-
-## Prerequisites
-
 ### Operating System
 You can install Mathesar using this method on the following Debian versions
 
@@ -20,11 +14,29 @@ You should have permission to install a debian package
  
 ## Installation Steps
 
+1. Download the deb file
+    === "Debian 11"
+        ```
+        wget mathesar_0_1_3_x64_bullseye.deb
+        ```
+
+    === "Debian 12"
+        ```
+        wget mathesar_0_1_3_x64_bookworm.deb
+        ```
+
+
 1. Run the Mathesar Docker Image
 
-    ```bash
-    sudo apt install mathesar
-    ```
+        === "Debian 11"
+            ```
+            sudo apt install ./mathesar_0_1_3_x64_bullseye.deb
+            ```
+
+        === "Debian 12"
+            ```
+            sudo apt install ./mathesar_0_1_3_x64_bookworm.deb
+            ```
 
     The above command starts a [systemd service] running on the Mathesar server on `localhost` and listening on port `8000`. 
 
@@ -47,98 +59,119 @@ You should have permission to install a debian package
 
 ### Using a domain name {:#domain-name}
 
-If you are accessing Mathesar using a domain name, you need to add it to the list of domains Mathesar can accept requests from. This can be accomplished by setting the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) environment variable
+If you are accessing Mathesar using a domain name, you need to add it to the list of domains Mathesar can accept requests from. This can be accomplished by setting the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) environment variable in the config file
 
-```bash
-docker run \
-  -e ALLOWED_HOSTS='mathesar.example.com' \
-  # OTHER ARGS HERE
-  mathesar/mathesar-prod:latest
-```
+    1. Edit the config file
+
+        ```sh
+        sudo nano /etc/mathesar/.env
+        ```
+
+
+    2. Set the domain name to the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) config variable in config file:
+
+    !!! example
+        Your `.env` file should look something like this
+        
+        ``` bash
+        ALLOWED_HOSTS='<DOMAIN_NAME_HERE>'
+        # Other env variables
+        ```
+
 
 ### Hosting on default port 80
 
-The command used in the Quickstart section will run Mathesar on port 8000, so you will have to access it on `http://<domain-name>:8000`. If you wish to access Mathesar without adding any port suffix like `http://<domain-name>`, you need to bind it to port 80
+Mathesar service runs on port 8000, so you will have to access it on `http://<domain-name>:8000`. If you wish to access Mathesar without adding any port suffix like `http://<domain-name>`, you need to have a reverse proxy like Nginx or Caddy listen on port 80 and redirect traffic to port 8000. 
 
-```bash
-docker run \
-  -p 80:8000 \
-  # OTHER ARGS HERE
-  mathesar/mathesar-prod:latest
-```
+!!! info
+    Although we recommend using a reverse proxy to redirect traffic to port 8000, for testing purpose you can use the following command to redirect traffic without any additional software.
+    ```
+    sudo socat tcp-listen:80,reuseaddr,fork tcp:localhost:8000
+    ```
+
 
 ### Using a remote Postgres server for the internal database
 
 !!! info
     We strongly recommend using this setup for stateless deployments when scaling horizontally, because by default the data is stored in the same server on which Mathesar is running. This data will be lost if the server is deleted.
 
-The docker image contains a Postgres server which is used by default. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL](../../configuration/env-variables.md#dj_db) environment variable.
+By default the internal data is stored in a SQLite database. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL](../../configuration/env-variables.md#dj_db) environment variable.
 
-```bash
-docker run \
-  -e DJANGO_DATABASE='postgres://user:password@hostname:port/database_name' \
-  # OTHER ARGS HERE
-  mathesar/mathesar-prod:latest
-```
+
+    1. Edit the config file
+
+        ```sh
+        sudo nano /etc/mathesar/.env
+        ```
+
+
+    2. Set the domain name to the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) config variable in config file:
+
+    !!! example
+        Your `.env` file should look something like this
+        
+        ``` bash
+        DJANGO_DATABASE='postgres://user:password@hostname:port/database_name'
+        # Other env variables
+        ```
 
 ### Using a custom secret key
 
-By default, the docker image uses a default secret key. The default key should only be used when testing and is not recommended when exposing Mathesar to the outside world. 
+!!! info
+     If scaling horizontally, you need to make sure the [SECRET_KEY](../../configuration/env-variables.md#secret_key) is same across all the instances. Setting your own custom key which is same across all the machines instead of the randomly generated default is useful in such cases.
 
-- Refer to the [SECRET_KEY](../../configuration/env-variables.md#secret_key) for information on how to get your own secret key.
-- Pass the key as an environment variable to the docker image.
+    1. Edit the config file
 
-```bash
-docker run \
-  -e SECRET_KEY='<replace with a random 50 character string>' \
-  # OTHER ARGS HERE
-  mathesar/mathesar-prod:latest
-```
+        ```sh
+        sudo nano /etc/mathesar/.env
+        ```
+
+
+    2. Set the value of the [SECRET_KEY](../../configuration/env-variables.md#secret_key) to your own custom key:
+
+    !!! example
+        Your `.env` file should look something like this
+        
+        ``` bash
+        SECRET_KEY='<replace with a random 50 character string>
+        # Other env variables
+        ```
 
 ## Upgrading Mathesar {:#upgrade}
 
-1. Stop your existing Mathesar container:
+1. Download the updated deb file:
+    === "Debian 11"
+        ```
+        wget mathesar_0_1_3_x64_bullseye.deb
+        ```
 
-    ```bash
-    docker stop mathesar_service
-    ```
+    === "Debian 12"
+        ```
+        wget mathesar_0_1_3_x64_bookworm.deb
+        ```
 
-1. Remove the old Mathesar Image
-    ```bash
-    docker rm mathesar_service
-    ```
 
-1. Bump the image version in the `docker run` command you usually use to run your
-   Mathesar and start up a brand-new container:
+1. Use apt install:
 
-    ```bash
-    docker run \
-      -d \
-      --name mathesar_service \
-      # YOUR STANDARD ARGS HERE
-      mathesar/mathesar-prod:latest
-    ```
+    === "Debian 11"
+        ```
+        sudo apt install ./mathesar_0_1_3_x64_bullseye.deb
+        ```
+
+    === "Debian 12"
+        ```
+        sudo apt install ./mathesar_0_1_3_x64_bookworm.deb
+        ```
+
 
 ## Uninstalling Mathesar {:#uninstall}
 
-1. Remove the Mathesar container.
+1. Use apt remove:
 
     ```bash
-    docker rm -v mathesar_service
+    sudo apt remove mathesar
     ```
 
-1. Remove the Mathesar Image
-
-    ```bash
-    docker rmi mathesar_service
-    ```
-
-1. Remove volumes related to Mathesar
-
-    ```bash
-    docker volume rm static &&
-    docker volume rm media
-    ```
 
 {% include 'snippets/uninstall-schemas.md' %}
 
