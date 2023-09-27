@@ -111,7 +111,7 @@ _engine_cache = {}
 
 class Database(ReflectionManagerMixin, BaseModel):
     name = models.CharField(max_length=128, unique=True)
-    db_name = models.CharField(max_length=128, unique=True)
+    db_name = models.CharField(max_length=128)
     username = EncryptedCharField(max_length=255)
     password = EncryptedCharField(max_length=255)
     host = models.CharField(max_length=255)
@@ -146,6 +146,14 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
+
+    def save(self, **kwargs):
+        db_name = self.name
+        # invalidate cached engine as db credentials might get changed.
+        if _engine_cache.get(db_name):
+            _engine_cache[db_name].dispose()
+            del _engine_cache[db_name]
+        return super().save()
 
 
 class Schema(DatabaseObject):
