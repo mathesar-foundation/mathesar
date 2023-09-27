@@ -8,7 +8,7 @@
     requiredField,
   } from '@mathesar/components/form';
   import { databases } from '@mathesar/stores/databases';
-  import UserFormInput from '@mathesar/systems/users-and-permissions/UserFormInput.svelte';
+  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
   import type { Database } from '@mathesar/AppTypes';
   import { createEventDispatcher } from 'svelte';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
@@ -116,7 +116,7 @@
 </script>
 
 <div class="db-connection-form">
-  <UserFormInput
+  <GridFormInput
     label="Connection Name *"
     field={connectionName}
     input={{
@@ -126,20 +126,20 @@
     help="Used for internal identification."
   />
 
-  <UserFormInput
+  <GridFormInput
     label="Database Name *"
     field={databaseName}
     input={{ component: TextInput }}
   />
 
-  <UserFormInput
+  <GridFormInput
     bypassRow
     label="Host *"
     field={host}
     input={{ component: TextInput }}
   />
 
-  <UserFormInput
+  <GridFormInput
     bypassRow
     label="Port *"
     field={port}
@@ -147,14 +147,14 @@
   />
 
   <!-- TODO: Add link in help -->
-  <UserFormInput
+  <GridFormInput
     label="Username *"
     field={username}
     input={{ component: TextInput }}
     help="The user will need to have SUPERUSER or DB OWNER privileges on the database. Why is this needed?."
   />
 
-  <UserFormInput
+  <GridFormInput
     label={isNewConnection ? 'Password *' : 'Password'}
     field={password}
     input={{

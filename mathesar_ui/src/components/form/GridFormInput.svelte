@@ -1,4 +1,6 @@
 <script lang="ts">
+  import GridFormInputRow from './GridFormInputRow.svelte';
+
   import type { SvelteComponent } from 'svelte';
   import {
     Label,
@@ -7,7 +9,6 @@
   } from '@mathesar-component-library';
   import { Field, type FieldStore } from '@mathesar/components/form';
   import type { ComponentWithProps } from '@mathesar-component-library/types';
-  import UserFormInputRow from './UserFormInputRow.svelte';
 
   const labelController = new LabelController();
   $: setLabelControllerInContext(labelController);
@@ -22,7 +23,7 @@
   export let bypassRow = false;
 </script>
 
-<UserFormInputRow bypass={bypassRow}>
+<GridFormInputRow bypass={bypassRow}>
   <div class="left cell">
     <Label controller={labelController}>
       {label}
@@ -39,7 +40,7 @@
       </div>
     {/if}
   </div>
-</UserFormInputRow>
+</GridFormInputRow>
 
 <style lang="scss">
   .left {

@@ -22,7 +22,7 @@
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import SelectUserType from './SelectUserType.svelte';
-  import UserFormInput from './UserFormInput.svelte';
+  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -112,15 +112,15 @@
 </script>
 
 <div class="user-details-form">
-  <UserFormInput
+  <GridFormInput
     label="Display Name"
     field={fullName}
     input={{ component: TextInput }}
   />
 
-  <UserFormInput label="Email" field={email} input={{ component: TextInput }} />
+  <GridFormInput label="Email" field={email} input={{ component: TextInput }} />
 
-  <UserFormInput
+  <GridFormInput
     label="Username *"
     field={username}
     input={{
@@ -130,7 +130,7 @@
   />
 
   {#if isNewUser}
-    <UserFormInput
+    <GridFormInput
       label="Password *"
       field={password}
       input={{
@@ -140,7 +140,7 @@
     />
   {/if}
 
-  <UserFormInput
+  <GridFormInput
     label="Role *"
     field={userType}
     input={{
