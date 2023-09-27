@@ -102,6 +102,7 @@ export interface TimeStampDisplayOptions extends Record<string, unknown> {
 export interface BaseColumn {
   id: number;
   name: string;
+  description: string | null;
   type: DbType;
   index: number;
   nullable: boolean;
