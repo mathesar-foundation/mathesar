@@ -15,6 +15,9 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         model = Database
         fields = ['id', 'name', 'db_name', 'deleted', 'editable', 'supported_types_url', 'username', 'password', 'host', 'port']
         read_only_fields = ['id', 'deleted', 'supported_types_url', 'editable']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
     def get_supported_types_url(self, obj):
         if isinstance(obj, Database) and not self.partial:
