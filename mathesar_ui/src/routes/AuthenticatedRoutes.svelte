@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databases } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import NoDatabaseFound from '@mathesar/pages/database/NoDatabaseFound.svelte';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
@@ -18,7 +18,7 @@
   <Route path="/" redirect={getDatabasePageUrl(firstDatabase.name)} />
 {:else}
   <Route path="/">
-    <ErrorPage>No databases found</ErrorPage>
+    <NoDatabaseFound />
   </Route>
 {/if}
 
