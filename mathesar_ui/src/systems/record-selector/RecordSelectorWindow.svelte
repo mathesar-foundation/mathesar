@@ -10,7 +10,6 @@
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
-  import { modal } from '@mathesar/stores/modal';
 
   const verbMap = new Map<RecordSelectorPurpose, string>([
     ['dataEntry', 'Pick'],
