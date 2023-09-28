@@ -96,17 +96,16 @@
   .window-positioner {
     width: 100%;
     flex: 1 0 max-content;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     overflow: hidden;
-    padding: 1rem;
 
     .root-record-selector,
     :global(.nested-record-selector) {
       position: relative;
-      z-index: 2;
       max-height: 100%;
       display: flex;
       flex-direction: column;

@@ -10,6 +10,7 @@
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
+  import { modal } from '@mathesar/stores/modal';
 
   const verbMap = new Map<RecordSelectorPurpose, string>([
     ['dataEntry', 'Pick'],
@@ -28,7 +29,7 @@
   export let windowPositionerElement: HTMLElement;
 
   let contentHeight = 0;
-
+  let newModalOpen = false;
   $: nestedController = new RecordSelectorController({
     nestingLevel: controller.nestingLevel + 1,
   });
@@ -56,9 +57,43 @@
       controller.cancel();
     }
   }
+
+  function isElementInsideParent(
+    childElement: HTMLElement | null,
+    parentElement: HTMLElement | null,
+  ): boolean {
+    let currentNode = childElement;
+
+    while (currentNode !== null) {
+      if (currentNode === parentElement) {
+        return true; // Found the parent element
+      }
+      currentNode = currentNode.parentNode as HTMLElement | null;
+    }
+
+    return false; // Parent element not found in the hierarchy
+  }
+
+  function handleOverlayClose(event: MouseEvent) {
+    if ($nestedSelectorIsOpen) return;
+
+    if (!newModalOpen) {
+      newModalOpen = true;
+      return;
+    }
+
+    let currentModal = windowPositionerElement.lastChild as HTMLElement;
+    let currentWindow = currentModal.firstChild?.firstChild as HTMLElement;
+    let isElementInside = isElementInsideParent(
+      event.target as HTMLElement | null,
+      currentWindow,
+    );
+
+    if (!isElementInside) controller.cancel();
+  }
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window on:keydown={handleKeydown} on:click={handleOverlayClose} />
 
 {#if tabularData}
   <div class="record-selector-window" style="margin-bottom: {marginBottom};">
@@ -106,6 +141,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding: 1rem;
   }
   .overlay {
     position: absolute;
