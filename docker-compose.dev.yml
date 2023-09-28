@@ -27,6 +27,7 @@ services:
       file: docker-compose.yml
       service: service
     environment:
+      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
@@ -60,6 +61,7 @@ services:
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
+      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
     entrypoint: dockerize -wait tcp://mathesar_dev_db:5432 -timeout 30s ./dev-run.sh
     volumes:
