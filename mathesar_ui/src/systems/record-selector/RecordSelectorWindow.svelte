@@ -81,9 +81,9 @@
       return;
     }
 
-    let currentModal = windowPositionerElement.lastChild as HTMLElement;
-    let currentWindow = currentModal.firstChild?.firstChild as HTMLElement;
-    let isElementInside = isElementInsideParent(
+    const currentModal = windowPositionerElement.lastChild as HTMLElement;
+    const currentWindow = currentModal.firstChild?.firstChild as HTMLElement;
+    const isElementInside = isElementInsideParent(
       event.target as HTMLElement | null,
       currentWindow,
     );
