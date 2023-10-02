@@ -20,24 +20,24 @@
   let filterQuery = '';
 
   $: isPreloaded = $databases.preload;
-  $: connections = $databases.data;
-  $: connectionsStatus = $databases.state;
-  $: connectionsError = $databases.error;
+  $: allDatabases = $databases.data;
+  $: databasesLoadStatus = $databases.state;
+  $: databasesLoadError = $databases.error;
 
-  function filterConnections(_connections: Database[], query: string) {
-    function isMatch(connection: Database, q: string) {
-      if (!isSuccessfullyConnectedDatabase(connection)) {
-        return connection.name.toLowerCase().includes(q);
+  function filterDatabase(_databases: Database[], query: string) {
+    function isMatch(database: Database, q: string) {
+      if (!isSuccessfullyConnectedDatabase(database)) {
+        return database.name.toLowerCase().includes(q);
       }
       return (
-        connection.name.toLowerCase().includes(q) ||
-        connection.db_name.toLowerCase().includes(q)
+        database.name.toLowerCase().includes(q) ||
+        database.db_name.toLowerCase().includes(q)
       );
     }
-    return _connections.filter((connection) => {
+    return _databases.filter((database) => {
       if (query) {
         const sanitizedQuery = query.trim().toLowerCase();
-        return isMatch(connection, sanitizedQuery);
+        return isMatch(database, sanitizedQuery);
       }
       return true;
     });
@@ -47,9 +47,9 @@
     filterQuery = '';
   }
 
-  $: filteredConnections = filterConnections(connections ?? [], filterQuery);
-  $: filteredConnectionsCountText = filteredConnections.length
-    ? `(${filteredConnections.length})`
+  $: filteredDatabases = filterDatabase(allDatabases ?? [], filterQuery);
+  $: filteredDatabasesCountText = filteredDatabases.length
+    ? `(${filteredDatabases.length})`
     : '';
 </script>
 
@@ -66,12 +66,12 @@
   }}
 />
 
-<h1>Database Connections {filteredConnectionsCountText}</h1>
+<h1>Database Connections {filteredDatabasesCountText}</h1>
 
 <section class="connections-list-container">
-  {#if connectionsStatus === States.Loading && !isPreloaded}
+  {#if databasesLoadStatus === States.Loading && !isPreloaded}
     <DatabaseConnectionSkeleton />
-  {:else if connectionsStatus === States.Done || isPreloaded}
+  {:else if databasesLoadStatus === States.Done || isPreloaded}
     <EntityContainerWithFilterBar
       searchPlaceholder="Search Database Connections"
       bind:searchQuery={filterQuery}
@@ -85,25 +85,25 @@
       </slot>
       <slot slot="resultInfo">
         <p>
-          {labeledCount(filteredConnections, 'results')}
+          {labeledCount(filteredDatabases, 'results')}
           for all database connections matching <strong>{filterQuery}</strong>
         </p>
       </slot>
       <slot slot="content">
-        {#if filteredConnections.length}
+        {#if filteredDatabases.length}
           <div class="connection-list">
-            {#each filteredConnections as connection (connection.id)}
+            {#each filteredDatabases as connection (connection.id)}
               <DatabaseConnectionItem database={connection} />
             {/each}
           </div>
-        {:else if connections.length === 0}
+        {:else if allDatabases.length === 0}
           <p class="no-connections-found-text">No database connection found</p>
         {/if}
       </slot>
     </EntityContainerWithFilterBar>
-  {:else if connectionsStatus === States.Error}
+  {:else if databasesLoadStatus === States.Error}
     <ErrorBox>
-      <p>Error: {connectionsError}</p>
+      <p>Error: {databasesLoadError}</p>
     </ErrorBox>
   {/if}
 </section>
