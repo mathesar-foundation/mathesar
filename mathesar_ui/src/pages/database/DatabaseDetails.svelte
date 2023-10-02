@@ -181,7 +181,6 @@
             >
               Edit Database Connection
             </LinkMenuItem>
-            <!-- TODO: Check the conditions here -->
             <ButtonMenuItem
               icon={iconDeleteMajor}
               on:click={() => deleteConnectionModal.open()}
