@@ -7,7 +7,10 @@
     iconUploadFile,
   } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { dataFilesApi } from '@mathesar/api/dataFiles';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
@@ -33,7 +36,7 @@
   import DataFileInput from './DataFileInput.svelte';
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
 
   interface UploadMethod {

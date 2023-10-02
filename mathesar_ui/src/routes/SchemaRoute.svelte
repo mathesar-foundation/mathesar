@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { Route } from 'tinro';
 
-  import type { Database } from '@mathesar/AppTypes';
+  import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
@@ -16,7 +16,7 @@
 
   const userProfile = getUserProfileStoreFromContext();
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schemaId: number;
 
   $: $currentSchemaId = schemaId;

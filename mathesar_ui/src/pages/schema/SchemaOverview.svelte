@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { AnchorButton } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import OverviewHeader from './OverviewHeader.svelte';
@@ -21,7 +24,7 @@
   export let canExecuteDDL: boolean;
   export let canEditMetadata: boolean;
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
 
   $: hasTables = tablesMap.size > 0;

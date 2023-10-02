@@ -1,7 +1,10 @@
 <!-- TODO: Shouldn't this be inside the schema page instead? -->
 <script lang="ts">
   import type { ModalController } from '@mathesar-component-library';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import {
     schemas,
     createSchema,
@@ -12,7 +15,7 @@
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { toast } from '@mathesar/stores/toast';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let controller: ModalController;
   export let schema: SchemaEntry | undefined = undefined;
 

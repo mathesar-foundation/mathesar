@@ -1,5 +1,8 @@
 <script lang="ts">
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { queries } from '@mathesar/stores/queries';
   import {
     tables as tablesStore,
@@ -27,7 +30,7 @@
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import SchemaAccessControlModal from './SchemaAccessControlModal.svelte';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
   export let section: string;
 

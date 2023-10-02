@@ -1,12 +1,15 @@
 <script lang="ts">
   import type { QueryInstance } from '@mathesar/api/types/queries';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { iconExploration } from '@mathesar/icons';
   import ExplorationItem from './ExplorationItem.svelte';
   import EmptyEntity from './EmptyEntity.svelte';
 
   export let explorations: QueryInstance[];
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
   export let bordered = true;
 </script>

@@ -21,8 +21,8 @@
   } from '@mathesar/components/form';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import SelectUserType from './SelectUserType.svelte';
   import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
+  import SelectUserType from './SelectUserType.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();

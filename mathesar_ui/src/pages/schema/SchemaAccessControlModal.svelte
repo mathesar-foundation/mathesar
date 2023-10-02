@@ -3,7 +3,10 @@
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import {
     setUsersStoreInContext,
@@ -15,7 +18,7 @@
   import type { ObjectRoleMap } from '@mathesar/utils/permissions';
 
   export let controller: ModalController;
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
 
   const usersStore = setUsersStoreInContext();

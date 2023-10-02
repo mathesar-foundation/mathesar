@@ -6,7 +6,10 @@
   } from '@mathesar/stores/tables';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import { queries as queriesStore } from '@mathesar/stores/queries';
   import type { QueryInstance } from '@mathesar/api/types/queries';
@@ -18,7 +21,7 @@
     BreadcrumbSelectorEntryForTable,
   } from './breadcrumbTypes';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
 
   function makeTableBreadcrumbSelectorItem(

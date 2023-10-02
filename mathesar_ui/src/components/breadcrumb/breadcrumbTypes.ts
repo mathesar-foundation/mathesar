@@ -1,6 +1,10 @@
 import type { QueryInstance } from '@mathesar/api/types/queries';
 import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import type {
+  SuccessfullyConnectedDatabase,
+  Database,
+  SchemaEntry,
+} from '@mathesar/AppTypes';
 import type {
   ComponentAndProps,
   IconProps,
@@ -13,13 +17,13 @@ export interface BreadcrumbItemDatabase {
 
 export interface BreadcrumbItemSchema {
   type: 'schema';
-  database: Database;
+  database: SuccessfullyConnectedDatabase;
   schema: SchemaEntry;
 }
 
 export interface BreadcrumbItemTable {
   type: 'table';
-  database: Database;
+  database: SuccessfullyConnectedDatabase;
   schema: SchemaEntry;
   table: TableEntry;
 }
@@ -33,7 +37,7 @@ export interface BreadcrumbItemSimple {
 
 export interface BreadcrumbItemRecord {
   type: 'record';
-  database: Database;
+  database: SuccessfullyConnectedDatabase;
   schema: SchemaEntry;
   table: TableEntry;
   record: {
@@ -44,7 +48,7 @@ export interface BreadcrumbItemRecord {
 
 export interface BreadcrumbItemExploration {
   type: 'exploration';
-  database: Database;
+  database: SuccessfullyConnectedDatabase;
   schema: SchemaEntry;
   query: Pick<QueryInstance, 'id' | 'name'>;
 }

@@ -2,10 +2,13 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import RecordStore from '@mathesar/pages/record/RecordStore';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
   export let table: TableEntry;
   export let recordPk: string;

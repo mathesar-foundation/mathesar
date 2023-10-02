@@ -1,5 +1,8 @@
 <script lang="ts">
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { iconSchema } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import {
@@ -9,7 +12,7 @@
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
 
   function makeBreadcrumbSelectorItem(
     schemaEntry: SchemaEntry,

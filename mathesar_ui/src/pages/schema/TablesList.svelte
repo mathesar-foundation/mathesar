@@ -1,12 +1,15 @@
 <script lang="ts">
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';
 
   export let tables: TableEntry[];
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
   export let canExecuteDDL: boolean;
 </script>

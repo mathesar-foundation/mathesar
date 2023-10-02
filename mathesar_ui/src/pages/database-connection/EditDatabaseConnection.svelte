@@ -4,7 +4,6 @@
   import { toast } from '@mathesar/stores/toast';
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
-  import { reflectApi } from '@mathesar/api/reflect';
   import FormBox from '../admin-users/FormBox.svelte';
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
 
@@ -12,7 +11,6 @@
 
   async function handleSuccess() {
     toast.success(`${databaseName} updated successfully!`);
-    await reflectApi.reflect();
     await reloadDatabases();
   }
 </script>

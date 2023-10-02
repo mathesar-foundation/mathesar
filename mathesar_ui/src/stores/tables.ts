@@ -28,7 +28,11 @@ import type {
   SplitTableRequest,
   SplitTableResponse,
 } from '@mathesar/api/types/tables/split_table';
-import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/AppTypes';
+import type {
+  DBObjectEntry,
+  SuccessfullyConnectedDatabase,
+  SchemaEntry,
+} from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
 import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 import {
@@ -189,7 +193,7 @@ function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
 }
 
 export function deleteTable(
-  database: Database,
+  database: SuccessfullyConnectedDatabase,
   schema: SchemaEntry,
   tableId: TableEntry['id'],
 ): CancellablePromise<TableEntry> {
@@ -236,7 +240,7 @@ export function updateTableMetaData(
 }
 
 export function createTable(
-  database: Database,
+  database: SuccessfullyConnectedDatabase,
   schema: SchemaEntry,
   tableArgs: {
     name?: string;

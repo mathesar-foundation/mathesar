@@ -3,6 +3,7 @@
   import { Icon } from '@mathesar/component-library';
   import { iconNotEditable, iconEdit } from '@mathesar/icons';
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
 
   export let database: Database;
 
@@ -27,7 +28,9 @@
     </span>
   {/if}
   <p class="connection-name">{database.name}</p>
-  <p class="db-name">{database.db_name}</p>
+  {#if isSuccessfullyConnectedDatabase(database)}
+    <p class="db-name">{database.db_name}</p>
+  {/if}
 </svelte:element>
 
 <style lang="scss">

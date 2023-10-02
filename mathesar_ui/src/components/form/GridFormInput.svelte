@@ -1,6 +1,5 @@
 <script lang="ts">
-  import GridFormInputRow from './GridFormInputRow.svelte';
-
+  
   import type { SvelteComponent } from 'svelte';
   import {
     Label,
@@ -9,6 +8,7 @@
   } from '@mathesar-component-library';
   import { Field, type FieldStore } from '@mathesar/components/form';
   import type { ComponentWithProps } from '@mathesar-component-library/types';
+  import GridFormInputRow from './GridFormInputRow.svelte';
 
   const labelController = new LabelController();
   $: setLabelControllerInContext(labelController);

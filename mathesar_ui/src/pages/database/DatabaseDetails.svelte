@@ -34,6 +34,7 @@
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import { router } from 'tinro';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
@@ -198,8 +199,7 @@
   <div class="schema-list-title-container">
     <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
   </div>
-  <!-- TODO: Update this condition once the API starts throwing error -->
-  {#if schemasMap.size === 0}
+  {#if !isSuccessfullyConnectedDatabase(database)}
     <ConnectionError databaseName={database.name} />
   {:else}
     <EntityContainerWithFilterBar
@@ -240,18 +240,20 @@
   {/if}
 </div>
 
-<AddEditSchemaModal
-  controller={addEditModal}
-  {database}
-  schema={targetSchema}
-/>
+{#if !('error' in database)}
+  <AddEditSchemaModal
+    controller={addEditModal}
+    {database}
+    schema={targetSchema}
+  />
 
-<DbAccessControlModal controller={accessControlModal} {database} />
-<DeleteDatabaseConnectionConfirmationModal
-  controller={deleteConnectionModal}
-  {database}
-  on:success={handleSuccessfulDeleteConnection}
-/>
+  <DbAccessControlModal controller={accessControlModal} {database} />
+  <DeleteDatabaseConnectionConfirmationModal
+    controller={deleteConnectionModal}
+    {database}
+    on:success={handleSuccessfulDeleteConnection}
+  />
+{/if}
 
 <style lang="scss">
   .schema-list-wrapper {

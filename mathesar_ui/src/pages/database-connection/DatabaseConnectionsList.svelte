@@ -12,6 +12,7 @@
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { AnchorButton, Icon } from '@mathesar/component-library';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
   import DatabaseConnectionSkeleton from './DatabaseConnectionSkeleton.svelte';
   import { makeSimplePageTitle } from '../pageTitleUtils';
   import DatabaseConnectionItem from './DatabaseConnectionItem.svelte';
@@ -25,6 +26,9 @@
 
   function filterConnections(_connections: Database[], query: string) {
     function isMatch(connection: Database, q: string) {
+      if (!isSuccessfullyConnectedDatabase(connection)) {
+        return connection.name.toLowerCase().includes(q);
+      }
       return (
         connection.name.toLowerCase().includes(q) ||
         connection.db_name.toLowerCase().includes(q)
@@ -35,7 +39,7 @@
         const sanitizedQuery = query.trim().toLowerCase();
         return isMatch(connection, sanitizedQuery);
       }
-        return true;
+      return true;
     });
   }
 

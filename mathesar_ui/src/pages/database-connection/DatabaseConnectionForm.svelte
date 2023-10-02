@@ -9,13 +9,14 @@
   } from '@mathesar/components/form';
   import { databases } from '@mathesar/stores/databases';
   import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
-  import type { Database } from '@mathesar/AppTypes';
+  import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
   import { createEventDispatcher } from 'svelte';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
 
   const dispatch = createEventDispatcher<{
-    create: Database;
+    create: SuccessfullyConnectedDatabase;
     update: undefined;
   }>();
 
@@ -25,11 +26,30 @@
   $: database = $databases.data?.find((db) => db.name === databaseNameProp);
   $: isNewConnection = !database;
 
-  $: connectionName = requiredField(database?.name ?? '');
-  $: databaseName = requiredField(database?.db_name ?? '');
-  $: username = requiredField(database?.username ?? '');
-  $: host = requiredField(database?.host ?? '');
-  $: port = requiredField(database?.port ?? '5432', [
+  function getInitialValue<T>(
+    key: keyof Pick<
+      SuccessfullyConnectedDatabase,
+      'name' | 'db_name' | 'username' | 'host' | 'port'
+    >,
+    defaultValue: T,
+  ) {
+    if (database) {
+      if (key === 'name') {
+        return database.name;
+      }
+      if (isSuccessfullyConnectedDatabase(database)) {
+        return database[key];
+      }
+      return defaultValue;
+    }
+    return defaultValue;
+  }
+
+  $: connectionName = requiredField(getInitialValue('name', ''));
+  $: databaseName = requiredField(getInitialValue('db_name', ''));
+  $: username = requiredField(getInitialValue('username', ''));
+  $: host = requiredField(getInitialValue('host', ''));
+  $: port = requiredField(getInitialValue('port', '5432'), [
     (value) =>
       !Number.isNaN(+value)
         ? { type: 'valid' }

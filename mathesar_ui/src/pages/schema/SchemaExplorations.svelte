@@ -1,6 +1,9 @@
 <script lang="ts">
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import AnchorButton from '@mathesar/component-library/anchorButton/AnchorButton.svelte';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { labeledCount } from '@mathesar/utils/languageUtils';
@@ -8,7 +11,7 @@
   import ExplorationsList from './ExplorationsList.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
   export let explorationsMap: Map<number, QueryInstance>;
   export let hasTablesToExplore: boolean;

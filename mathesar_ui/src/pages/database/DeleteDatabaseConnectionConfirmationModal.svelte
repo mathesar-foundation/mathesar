@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Database } from '@mathesar/AppTypes';
+  import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
   import databaseConnection from '@mathesar/api/databaseConnection';
   import { getApiErrorMessages } from '@mathesar/api/utils/errors';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
@@ -17,7 +17,7 @@
   const dispatch = createEventDispatcher<{ success: undefined }>();
 
   export let controller: ModalController;
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
 
   let removeMathesarSchemas = false;
 

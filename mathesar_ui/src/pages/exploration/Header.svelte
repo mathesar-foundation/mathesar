@@ -1,5 +1,8 @@
 <script lang="ts">
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { Button, Icon } from '@mathesar-component-library';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
@@ -7,7 +10,7 @@
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import ShareExplorationDropdown from './ShareExplorationDropdown.svelte';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
   export let query: QueryInstance;
   export let isInspectorOpen = true;

@@ -1,7 +1,8 @@
 import type {
-  Database,
+  SuccessfullyConnectedDatabase,
   SchemaResponse,
   AbstractTypeResponse,
+  Database,
 } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { QueryInstance } from '@mathesar/api/types/queries';
@@ -43,3 +44,7 @@ export function preloadRouteData<T>(routeName: string): T | undefined {
 export function preloadCommonData(): CommonData | undefined {
   return getData('#common-data');
 }
+
+export const isSuccessfullyConnectedDatabase = (
+  database: Database,
+): database is SuccessfullyConnectedDatabase => !('error' in database);

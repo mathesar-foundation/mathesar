@@ -1,7 +1,10 @@
 <script lang="ts">
   import { router } from 'tinro';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
@@ -19,7 +22,7 @@
 
   const userProfile = getUserProfileStoreFromContext();
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
   export let query: QueryInstance;
   export let shareConsumer: ShareConsumer | undefined = undefined;

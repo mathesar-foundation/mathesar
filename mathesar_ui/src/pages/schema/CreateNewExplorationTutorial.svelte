@@ -1,10 +1,13 @@
 <script lang="ts">
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import { AnchorButton } from '@mathesar/component-library';
   import Tutorial from '@mathesar/component-library/tutorial/Tutorial.svelte';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
 </script>
 

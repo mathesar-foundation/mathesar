@@ -80,6 +80,7 @@ def get_database_list(request):
     failed_db_data = []
     for db in permission_restricted_failed_db_qs:
         failed_db_data.append({
+            'id': db.id,
             'name': db.name,
             'editable': db.editable,
             'error': 'Error connecting to the database'

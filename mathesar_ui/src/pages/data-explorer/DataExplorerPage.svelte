@@ -1,6 +1,9 @@
 <script lang="ts">
   import { router } from 'tinro';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type {
+    SuccessfullyConnectedDatabase,
+    SchemaEntry,
+  } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { DataExplorer } from '@mathesar/systems/data-explorer';
   import type { QueryManager } from '@mathesar/systems/data-explorer/types';
@@ -13,7 +16,7 @@
 
   const userProfile = getUserProfileStoreFromContext();
 
-  export let database: Database;
+  export let database: SuccessfullyConnectedDatabase;
   export let schema: SchemaEntry;
   export let queryManager: QueryManager;
 
