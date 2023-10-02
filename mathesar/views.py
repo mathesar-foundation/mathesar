@@ -301,7 +301,6 @@ def schema_home(request, db_name, schema_id, **kwargs):
 @login_required
 def schemas(request, db_name):
     database = get_current_database(request, db_name)
-    reset_reflection(db_name=database.name)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, None)
     })
