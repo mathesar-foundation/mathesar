@@ -25,7 +25,7 @@
       <span class="help">
         <Help>
           To add or remove databases, visit the
-          <a href={DATABASE_CONNECTION_ADD_URL}> Add Database Configuration </a>
+          <a href={DATABASE_CONNECTION_ADD_URL}> Add Database Connection </a>
           section of mathesar.
         </Help>
       </span>
