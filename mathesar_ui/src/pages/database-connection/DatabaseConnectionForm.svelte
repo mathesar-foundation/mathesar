@@ -26,30 +26,11 @@
   $: database = $databases.data?.find((db) => db.name === databaseNameProp);
   $: isNewConnection = !database;
 
-  function getInitialValue<T>(
-    key: keyof Pick<
-      SuccessfullyConnectedDatabase,
-      'name' | 'db_name' | 'username' | 'host' | 'port'
-    >,
-    defaultValue: T,
-  ) {
-    if (database) {
-      if (key === 'name') {
-        return database.name;
-      }
-      if (isSuccessfullyConnectedDatabase(database)) {
-        return database[key];
-      }
-      return defaultValue;
-    }
-    return defaultValue;
-  }
-
-  $: connectionName = requiredField(getInitialValue('name', ''));
-  $: databaseName = requiredField(getInitialValue('db_name', ''));
-  $: username = requiredField(getInitialValue('username', ''));
-  $: host = requiredField(getInitialValue('host', ''));
-  $: port = requiredField(getInitialValue('port', '5432'), [
+  $: connectionName = requiredField(database?.name ?? '');
+  $: databaseName = requiredField(database?.db_name ?? '');
+  $: username = requiredField(database?.username ?? '');
+  $: host = requiredField(database?.host ?? '');
+  $: port = requiredField(database?.port ?? '', [
     (value) =>
       !Number.isNaN(+value)
         ? { type: 'valid' }

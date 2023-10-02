@@ -2,16 +2,23 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconEdit } from '@mathesar/icons';
   import { toast } from '@mathesar/stores/toast';
-  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
+  import {
+    getDatabaseConnectionEditUrl,
+    getDatabasePageUrl,
+  } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import FormBox from '../admin-users/FormBox.svelte';
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
+  import { reflectApi } from '@mathesar/api/reflect';
+  import { router } from 'tinro';
 
   export let databaseName: string;
 
   async function handleSuccess() {
     toast.success(`${databaseName} updated successfully!`);
+    await reflectApi.reflect();
     await reloadDatabases();
+    router.goto(getDatabasePageUrl(databaseName));
   }
 </script>
 
