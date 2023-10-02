@@ -7,10 +7,10 @@
     getDatabasePageUrl,
   } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
-  import FormBox from '../admin-users/FormBox.svelte';
-  import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
   import { reflectApi } from '@mathesar/api/reflect';
   import { router } from 'tinro';
+  import FormBox from '../admin-users/FormBox.svelte';
+  import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
 
   export let databaseName: string;
 

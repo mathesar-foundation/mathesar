@@ -9,9 +9,9 @@
   import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
   import { router } from 'tinro';
   import { reloadDatabases } from '@mathesar/stores/databases';
+  import { reflectApi } from '@mathesar/api/reflect';
   import FormBox from '../admin-users/FormBox.svelte';
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
-  import { reflectApi } from '@mathesar/api/reflect';
 
   async function handleSuccess(
     event: CustomEvent<SuccessfullyConnectedDatabase>,

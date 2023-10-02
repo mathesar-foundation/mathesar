@@ -13,7 +13,6 @@
   import { createEventDispatcher } from 'svelte';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
 
   const dispatch = createEventDispatcher<{
     create: SuccessfullyConnectedDatabase;
