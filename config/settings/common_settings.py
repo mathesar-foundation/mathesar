@@ -229,7 +229,10 @@ FRIENDLY_ERRORS = {
 MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
 MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
-MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
+MATHESAR_CLIENT_DEV_URL = decouple_config(
+    'MATHESAR_CLIENT_DEV_URL',
+    default='http://localhost:3000'
+)
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
