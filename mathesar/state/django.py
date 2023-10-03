@@ -76,7 +76,7 @@ def _set_db_is_deleted(db, deleted):
 
 # TODO pass in a cached engine instead of creating a new one
 def reflect_schemas_from_database(database):
-    engine = create_mathesar_engine(database.name)
+    engine = create_mathesar_engine(database)
     db_schema_oids = {
         schema['oid'] for schema in get_mathesar_schemas_with_oids(engine)
     }
@@ -181,7 +181,7 @@ def _delete_stale_columns(attnum_tuples, tables):
 
 # TODO pass in a cached engine instead of creating a new one
 def reflect_constraints_from_database(database):
-    engine = create_mathesar_engine(database.name)
+    engine = create_mathesar_engine(database)
     db_constraints = get_constraints_with_oids(engine)
     map_of_table_oid_to_constraint_oids = defaultdict(list)
     for db_constraint in db_constraints:
@@ -221,7 +221,7 @@ def _delete_stale_dj_constraints(known_db_constraints, database):
 
 # TODO pass in a cached engine instead of creating a new one
 def reflect_new_table_constraints(table):
-    engine = create_mathesar_engine(table.schema.database.name)
+    engine = create_mathesar_engine(table.schema.database)
     db_constraints = get_constraints_with_oids(engine, table_oid=table.oid)
     constraints = [
         models.Constraint.current_objects.get_or_create(

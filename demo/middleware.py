@@ -24,20 +24,29 @@ class LiveDemoModeMiddleware:
     def __call__(self, request):
         sessionid = request.COOKIES.get('sessionid', None)
         db_name = get_name(str(sessionid))
-        database, created = Database.current_objects.get_or_create(name=db_name)
+        database, created = Database.current_objects.get_or_create(
+            name=db_name,
+            defaults={
+                'db_name': db_name,
+                'username': settings.DATABASES['default']['USER'],
+                'password': settings.DATABASES['default']['PASSWORD'],
+                'host': settings.DATABASES['default']['HOST'],
+                'port': settings.DATABASES['default']['PORT']
+            }
+        )
         if created:
             create_demo_database(
                 db_name,
-                settings.DATABASES["default"]["USER"],
-                settings.DATABASES["default"]["PASSWORD"],
-                settings.DATABASES["default"]["HOST"],
-                settings.DATABASES["default"]["NAME"],
-                settings.DATABASES["default"]["PORT"],
+                database.username,
+                database.password,
+                database.host,
+                settings.DATABASES['default']['NAME'],
+                database.port,
                 settings.MATHESAR_DEMO_TEMPLATE
             )
             append_db_and_arxiv_schema_to_log(db_name, ARXIV)
             reset_reflection(db_name=db_name)
-            engine = create_mathesar_engine(db_name)
+            engine = create_mathesar_engine(database)
             customize_settings(engine)
             load_custom_explorations(engine)
             engine.dispose()

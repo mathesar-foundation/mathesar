@@ -49,30 +49,42 @@ def _get_permissible_db_queryset(request):
     manipulate how we define whether we're in demo mode and which db is a
     user's demo db.
     """
-    dbs_qs = Database.objects.filter(deleted=False)
-    permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
-    schemas_qs = Schema.objects.all()
-    permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
-    dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=False)
-    permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
-    permitted_dbs_qs = permitted_dbs_qs.distinct()
-    if get_is_live_demo_mode():
-        live_demo_db_name = get_live_demo_db_name(request)
-        if live_demo_db_name:
-            permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
+    for deleted in (True, False):
+        dbs_qs = Database.objects.filter(deleted=deleted)
+        permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
+        schemas_qs = Schema.objects.all()
+        permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
+        dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=deleted)
+        permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
+        permitted_dbs_qs = permitted_dbs_qs.distinct()
+        if get_is_live_demo_mode():
+            live_demo_db_name = get_live_demo_db_name(request)
+            if live_demo_db_name:
+                permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
+            else:
+                raise Exception('This should never happen')
+        if deleted:
+            failed_permitted_dbs_qs = permitted_dbs_qs
         else:
-            raise Exception('This should never happen')
-    return permitted_dbs_qs
+            successful_permitted_dbs_qs = permitted_dbs_qs
+    return successful_permitted_dbs_qs, failed_permitted_dbs_qs
 
 
 def get_database_list(request):
-    permission_restricted_db_qs = _get_permissible_db_queryset(request)
+    permission_restricted_db_qs, permission_restricted_failed_db_qs = _get_permissible_db_queryset(request)
     database_serializer = DatabaseSerializer(
         permission_restricted_db_qs,
         many=True,
         context={'request': request}
     )
-    return database_serializer.data
+    failed_db_data = []
+    for db in permission_restricted_failed_db_qs:
+        failed_db_data.append({
+            'name': db.name,
+            'editable': db.editable,
+            'error': 'Error connecting to the database'
+        })
+    return database_serializer.data + failed_db_data
 
 
 def get_table_list(request, schema):
@@ -151,7 +163,8 @@ def get_common_data(request, database=None, schema=None):
 
 def get_current_database(request, db_name):
     """Get database from passed name, with fall back behavior."""
-    permitted_databases = _get_permissible_db_queryset(request)
+    successful_dbs, failed_dbs = _get_permissible_db_queryset(request)
+    permitted_databases = successful_dbs | failed_dbs
     if db_name is not None:
         current_database = get_object_or_404(permitted_databases, name=db_name)
     else:
