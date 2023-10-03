@@ -2093,6 +2093,9 @@ BEGIN
   inserts := '[
     {
       "col1": 4
+    },
+    {
+      "col1": 5
     }
   ]';
   PERFORM msar.bulk_paste_records(
@@ -2106,10 +2109,73 @@ BEGIN
       FROM for_bulk_paste
       ORDER BY id
     ),
-    -- TODO incorrect test, doesn't account for inserts
-    ARRAY[ 1, 2, 3 ]
-    --ARRAY[ 1, 2, 3, 4 ]
+    ARRAY[ 1, 2, 3, 4, 5 ]
   );
+  updates := '[
+    {
+      "changes": {"col1": 1},
+      "conditionals": {"id": 6}
+    }
+  ]';
+  inserts := '[
+  ]';
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.bulk_paste_records(
+        tab_id := %L,
+        updates := %L,
+        inserts := %L
+      );',
+      tab_id,
+      updates,
+      inserts
+    ),
+    'P0001',
+    'Single record update must affect a single record, no less, no more. Provided conditionals: {"id": 6}'
+  );
+  updates := '[
+  ]';
+  inserts := '[
+    {
+      "id": 7, "col1": 2
+    }
+  ]';
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.bulk_paste_records(
+        tab_id := %L,
+        updates := %L,
+        inserts := %L
+      );',
+      tab_id,
+      updates,
+      inserts
+    ),
+    '23505',
+    'paste shouldn''t affect serial or identity columns'
+  );
+  --updates := '[
+  --  {
+  --    "changes": {"col1": 1, "id": 2},
+  --    "conditionals": {"id": 1}
+  --  },
+  --]';
+  --inserts := '[
+  --]';
+  --PERFORM msar.bulk_paste_records(
+  --  tab_id := tab_id,
+  --  updates := updates,
+  --  inserts := inserts
+  --);
+  ---- TODO should throw error about bad update
+  --RETURN NEXT is(
+  --  ARRAY(
+  --    SELECT col1
+  --    FROM for_bulk_paste
+  --    ORDER BY id
+  --  ),
+  --  ARRAY[ 1, 2, 3, 4, 5 ]
+  --);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2125,6 +2191,21 @@ BEGIN
   RETURN NEXT is(
     update_statement_string,
     'UPDATE "Patents"."NASA Record Put" SET "Status" = ''0'' WHERE id = ''1'''
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_generate_insert_statement() RETURNS SETOF TEXT AS $$
+DECLARE
+  insert_statement_string text := __msar.generate_insert_statement(
+    q_table_name := '"Patents"."NASA Record Put"',
+    data := '{"Center": "XYZ", "Status": "0"}'
+  );
+BEGIN
+  RETURN NEXT is(
+    insert_statement_string,
+    'INSERT INTO "Patents"."NASA Record Put" ("Center", "Status") VALUES (''XYZ'', ''0'')'
   );
 END;
 $$ LANGUAGE plpgsql;
