@@ -183,7 +183,6 @@ docs/_build/
 
 # UI
 node_modules/
-storybook-static/
 
 # Client Build files
 mathesar/static/mathesar/

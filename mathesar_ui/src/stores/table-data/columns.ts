@@ -123,6 +123,24 @@ export class ColumnsDataStore extends EventHandler<{
     await this.dispatch('columnRenamed', id);
   }
 
+  async updateDescription(
+    id: Column['id'],
+    description: string | null,
+  ): Promise<void> {
+    await this.api.update(id, { description });
+    this.fetchedColumns.update((columns) =>
+      columns.map((column) => {
+        if (column.id === id) {
+          return {
+            ...column,
+            description,
+          };
+        }
+        return column;
+      }),
+    );
+  }
+
   async setNullabilityOfColumn(
     column: Column,
     nullable: boolean,
