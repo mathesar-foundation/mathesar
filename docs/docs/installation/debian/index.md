@@ -6,7 +6,8 @@ Use our [Debian package](https://hub.docker.com/r/mathesar/mathesar-prod/tags): 
 You can install Mathesar using this method on the following Debian versions
 
 - Bullseye
-- Bookworm
+
+We will be adding support for other versions of Debian in our future release
 
 ### Access
 You should have permission to install a debian package
@@ -93,9 +94,9 @@ Mathesar service runs on port 8000, so you will have to access it on `http://<do
 ### Using a remote Postgres server for the internal database
 
 !!! info
-    We strongly recommend using this setup for stateless deployments when scaling horizontally, because by default the data is stored in the same server on which Mathesar is running. This data will be lost if the server is deleted.
+    We strongly recommend using this setup for stateless deployments when scaling horizontally, because by default, the data is stored in the same server on which Mathesar is running. This data will be lost if the server is deleted.
 
-By default the internal data is stored in a SQLite database. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL](../../configuration/env-variables.md#dj_db) environment variable.
+By default, the internal data is stored in a SQLite database. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL](../../configuration/env-variables.md#dj_db) environment variable.
 
 
     1. Edit the config file
@@ -180,4 +181,4 @@ By default the internal data is stored in a SQLite database. If you want Mathesa
 
 ### 400 Bad request 
 
-If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration),
+If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration).
