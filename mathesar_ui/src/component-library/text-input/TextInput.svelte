@@ -15,14 +15,13 @@
   export let value: $$Props['value'] = '';
 
   // Additional classes
-  let classes = '';
+  let classes: $$Props['class'] = '';
   export { classes as class };
 
   // Underlying DOM element for direct access
   export let element: $$Props['element'] = undefined;
 
-  export let hasError = false;
-  export let readOnly = $$restProps.readonly;
+  export let hasError: $$Props['hasError'] = false;
 
   // Id for the input
   export let id: $$Props['id'] = undefined;
@@ -36,7 +35,6 @@
 
 <BaseInput {...$$restProps} bind:id />
 
-<!-- TODO: Why do we have two base classes input-element & text-input -->
 <input
   bind:this={element}
   {...$$restProps}
@@ -44,7 +42,7 @@
   type="text"
   class={['input-element', 'text-input', classes].join(' ')}
   class:has-error={hasError}
-  class:read-only={readOnly}
+  class:read-only={$$restProps.readonly}
   bind:value
   {id}
   on:input
