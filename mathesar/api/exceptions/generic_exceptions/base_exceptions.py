@@ -116,3 +116,17 @@ class NetworkException(MathesarAPIException):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE
     ):
         super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class BadDBCredentials(MathesarAPIException):
+    error_code = ErrorCodes.BadDBCredentials.value
+
+    def __init__(
+            self,
+            exception,
+            field=None,
+            detail=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        message = f"Bad credentials for connecting to the requested database. The reported error is {exception.args[0]}"
+        super().__init__(exception, self.error_code, message, field, detail, status_code)

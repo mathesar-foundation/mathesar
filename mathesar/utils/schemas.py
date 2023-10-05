@@ -8,17 +8,16 @@ from mathesar.models.base import Schema, Database
 
 
 def create_schema_and_object(name, database, comment=None):
-    engine = create_mathesar_engine(database)
-
-    all_schemas = get_mathesar_schemas(engine)
-    if name in all_schemas:
-        raise ValidationError({"name": f"Schema name {name} is not unique"})
-
     try:
         database_model = Database.objects.get(name=database)
     except ObjectDoesNotExist:
         raise ValidationError({"database": f"Database '{database}' not found"})
 
+    engine = create_mathesar_engine(database_model)
+
+    all_schemas = get_mathesar_schemas(engine)
+    if name in all_schemas:
+        raise ValidationError({"name": f"Schema name {name} is not unique"})
     create_schema(name, engine, comment=comment)
     schema_oid = get_schema_oid_from_name(name, engine)
 
