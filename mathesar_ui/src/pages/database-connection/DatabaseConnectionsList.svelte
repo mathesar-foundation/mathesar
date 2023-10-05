@@ -91,9 +91,12 @@
       </slot>
       <slot slot="content">
         {#if filteredDatabases.length}
-          <div class="connection-list">
-            {#each filteredDatabases as connection (connection.id)}
-              <DatabaseConnectionItem database={connection} />
+          <div class="connections-list">
+            {#each filteredDatabases as db, index (db.id)}
+              {#if index !== 0}
+                <hr />
+              {/if}
+              <DatabaseConnectionItem database={db} />
             {/each}
           </div>
         {:else if allDatabases.length === 0}
@@ -109,12 +112,23 @@
 </section>
 
 <style lang="scss">
-  .connection-list {
+  .connections-list-container {
     display: flex;
     flex-direction: column;
 
     > :global(* + *) {
       margin-top: 1rem;
+    }
+  }
+
+  .connections-list {
+    border-radius: var(--border-radius-m);
+    border: 1px solid var(--slate-200);
+    hr {
+      border: 0;
+      border-top: 1px solid var(--slate-200);
+      display: block;
+      margin: 0 var(--size-xx-small);
     }
   }
 </style>

@@ -27,26 +27,20 @@
       <Icon {...iconEdit} />
     </span>
   {/if}
-  <p class="connection-name">{database.name}</p>
-  {#if isSuccessfullyConnectedDatabase(database)}
-    <p class="db-name">{database.db_name}</p>
-  {/if}
+  <div class="connection-details">
+    <p class="connection-name">{database.name}</p>
+    {#if isSuccessfullyConnectedDatabase(database)}
+      <p class="db-name">{database.db_name}</p>
+    {/if}
+  </div>
 </svelte:element>
 
 <style lang="scss">
   .connection-item {
-    border-radius: var(--border-radius-m);
-    border: 1px solid var(--slate-200);
-
     position: relative;
     display: flex;
-    flex-direction: column;
 
     padding: var(--size-base);
-
-    > :global(* + *) {
-      margin-top: var(--size-xx-small);
-    }
 
     &:not([aria-disabled='true']) {
       cursor: pointer;
@@ -58,6 +52,15 @@
     &:focus:not([aria-disabled='true']) {
       background: var(--slate-100);
     }
+
+    .connection-details {
+      display: flex;
+      flex-direction: column;
+
+      > :global(* + *) {
+        margin-top: var(--size-xx-small);
+      }
+    }
   }
 
   .floating-icon {
@@ -66,12 +69,9 @@
     right: var(--size-base);
   }
 
-  .connection-name {
-    font-size: var(--text-size-large);
-  }
-
   .db-name {
     color: var(--slate-500);
+    font-size: var(--text-size-small);
   }
 
   p {
