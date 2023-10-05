@@ -7,7 +7,7 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { currentDBName, databases } from '@mathesar/stores/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import SchemaRoute from './SchemaRoute.svelte';
 
   export let databaseName: string;

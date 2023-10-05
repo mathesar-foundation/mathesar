@@ -44,7 +44,3 @@ export function preloadRouteData<T>(routeName: string): T | undefined {
 export function preloadCommonData(): CommonData | undefined {
   return getData('#common-data');
 }
-
-export const isSuccessfullyConnectedDatabase = (
-  database: Database,
-): database is SuccessfullyConnectedDatabase => !('error' in database);

@@ -3,7 +3,7 @@
   import { Icon } from '@mathesar/component-library';
   import { iconNotEditable, iconEdit } from '@mathesar/icons';
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
 
   export let database: Database;
 

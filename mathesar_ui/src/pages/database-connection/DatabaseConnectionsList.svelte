@@ -12,7 +12,7 @@
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { AnchorButton, Icon } from '@mathesar/component-library';
   import { labeledCount } from '@mathesar/utils/languageUtils';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import DatabaseConnectionSkeleton from './DatabaseConnectionSkeleton.svelte';
   import { makeSimplePageTitle } from '../pageTitleUtils';
   import DatabaseConnectionItem from './DatabaseConnectionItem.svelte';
