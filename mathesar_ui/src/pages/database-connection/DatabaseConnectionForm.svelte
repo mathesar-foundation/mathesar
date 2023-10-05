@@ -10,14 +10,13 @@
   import { databases } from '@mathesar/stores/databases';
   import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
   import type { Database } from '@mathesar/AppTypes';
-  import { createEventDispatcher } from 'svelte';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
 
   let databaseNameProp: string | undefined = undefined;
   export { databaseNameProp as databaseName };
-  export let onCreate: ((database: Database) => Promise<void>) | undefined =
+  export let onCreate: ((db: Database) => Promise<void>) | undefined =
     undefined;
   export let onUpdate: (() => Promise<void>) | undefined = undefined;
 

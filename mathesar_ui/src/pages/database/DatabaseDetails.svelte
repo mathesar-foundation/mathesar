@@ -34,13 +34,13 @@
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import { router } from 'tinro';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
   import ConnectionError from './ConnectionError.svelte';
   import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();

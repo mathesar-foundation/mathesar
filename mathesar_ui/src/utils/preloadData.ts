@@ -2,7 +2,6 @@ import type {
   SchemaResponse,
   AbstractTypeResponse,
   Database,
-  SuccessfullyConnectedDatabase,
 } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { QueryInstance } from '@mathesar/api/types/queries';
