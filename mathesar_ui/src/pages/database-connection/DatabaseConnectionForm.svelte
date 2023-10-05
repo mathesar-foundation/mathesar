@@ -188,12 +188,12 @@
   />
 </div>
 
-<style lang="scss">
+<style>
   .db-connection-form {
     display: grid;
     grid-template-columns: auto 1fr auto 1fr;
   }
-  :global(.right:not(.db-connection-form > .right)) {
+  :global(.db-connection-form .right:not(.db-connection-form > .right)) {
     grid-column: 2/5;
   }
   :global(.db-connection-form > .right, .db-connection-form > .left) {
