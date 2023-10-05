@@ -150,8 +150,12 @@
     label="Username *"
     field={username}
     input={{ component: TextInput }}
-    help="The user will need to have SUPERUSER or DB OWNER privileges on the database. Why is this needed?."
-  />
+  >
+    <slot slot="help">
+      The user will need to have SUPERUSER or DB OWNER privileges on the
+      database. <DocsLink path="/">Why is this needed?</DocsLink>.
+    </slot>
+  </GridFormInput>
 
   <GridFormInput
     label={isNewConnection ? 'Password *' : 'Password'}

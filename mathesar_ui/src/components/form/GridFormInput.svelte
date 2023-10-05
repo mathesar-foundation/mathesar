@@ -33,9 +33,14 @@
     <div class="input">
       <Field {field} {input} />
     </div>
-    {#if help}
+    {#if $$slots.help || help}
       <div class="help">
-        {help}
+        {#if $$slots.help}
+          <slot name="help" />
+        {/if}
+        {#if help}
+          {help}
+        {/if}
       </div>
     {/if}
   </div>

@@ -12,6 +12,7 @@
     ModalController,
     iconLoading,
   } from '@mathesar/component-library';
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher<{ success: undefined }>();
@@ -54,10 +55,17 @@
     Mathesar's custom data types.
   </p>
 
-  <p>Learn more about the implications of deleting the Mathesar schema.</p>
+  <p>
+    <!-- TODO: Add correct link -->
+    <DocsLink path="/">Learn more</DocsLink> about the implications of deleting the
+    Mathesar schema.
+  </p>
 
   <div class="footer">
-    <Button on:click={handleClose}>Cancel</Button>
+    <Button
+      on:click={handleClose}
+      disabled={disconnectStatus?.state === 'processing'}>Cancel</Button
+    >
     <Button appearance="primary" on:click={handleDisconnect}>
       {#if disconnectStatus?.state === 'processing'}
         <Icon {...iconLoading} />
