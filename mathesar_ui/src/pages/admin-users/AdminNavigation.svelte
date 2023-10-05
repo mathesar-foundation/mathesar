@@ -47,9 +47,9 @@
       class="menu-item menu-item-link"
       use:active
     >
-      <MenuItemContents icon={iconDatabase}
-        >Database Connection</MenuItemContents
-      >
+      <MenuItemContents icon={iconDatabase}>
+        Database Connection
+      </MenuItemContents>
     </a>
   </Menu>
 </div>
