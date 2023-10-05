@@ -9,12 +9,12 @@
   import { databases, reloadDatabases } from '@mathesar/stores/databases';
   import { reflectApi } from '@mathesar/api/reflect';
   import { router } from 'tinro';
-  import FormBox from '../admin-users/FormBox.svelte';
-  import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
-  import DeleteDatabaseConnectionConfirmationModal from '../database/DeleteDatabaseConnectionConfirmationModal.svelte';
   import { modal } from '@mathesar/stores/modal';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import { Icon } from '@mathesar/component-library';
+  import FormBox from '../admin-users/FormBox.svelte';
+  import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
+  import DeleteDatabaseConnectionConfirmationModal from '../database/DeleteDatabaseConnectionConfirmationModal.svelte';
 
   export let databaseName: string;
 
