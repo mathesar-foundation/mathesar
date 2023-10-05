@@ -7,7 +7,6 @@
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { currentDBName, databases } from '@mathesar/stores/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import SchemaRoute from './SchemaRoute.svelte';
 
   export let databaseName: string;
@@ -29,11 +28,9 @@
     <DatabasePage {database} />
   </Route>
 
-  {#if isSuccessfullyConnectedDatabase(database)}
-    <Route path="/:schemaId/*" let:meta firstmatch>
-      <SchemaRoute {database} schemaId={parseInt(meta.params.schemaId, 10)} />
-    </Route>
-  {/if}
+  <Route path="/:schemaId/*" let:meta firstmatch>
+    <SchemaRoute {database} schemaId={parseInt(meta.params.schemaId, 10)} />
+  </Route>
 {:else}
   <ErrorPage>
     Database with name <Identifier>{databaseName}</Identifier> is not found.
