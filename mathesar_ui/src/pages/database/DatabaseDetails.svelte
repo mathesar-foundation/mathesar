@@ -185,7 +185,7 @@
               icon={iconDeleteMajor}
               on:click={() => deleteConnectionModal.open()}
             >
-              Delete Connection
+              Disconnect Database
             </ButtonMenuItem>
           {/if}
         </DropdownMenu>
@@ -199,7 +199,7 @@
     <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
   </div>
   {#if !isSuccessfullyConnectedDatabase(database)}
-    <ConnectionError databaseName={database.name} />
+    <ConnectionError {database} />
   {:else}
     <EntityContainerWithFilterBar
       searchPlaceholder="Search Schemas"

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { DatabaseWithConnectionError } from '@mathesar/AppTypes';
   import { States } from '@mathesar/api/utils/requestUtils';
   import { Button, Icon, iconLoading } from '@mathesar/component-library';
   import AnchorButton from '@mathesar/component-library/anchorButton/AnchorButton.svelte';
@@ -7,20 +8,20 @@
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { refetchSchemasForDB, schemas } from '@mathesar/stores/schemas';
 
-  export let databaseName: string;
+  export let database: DatabaseWithConnectionError;
 
   $: ({ state } = $schemas);
 
   async function handleRetry() {
-    void refetchSchemasForDB(databaseName);
+    void refetchSchemasForDB(database.name);
   }
 </script>
 
 <ErrorBox fullWidth>
-  <p>Error connecting to the database</p>
+  <p>{database.error}</p>
   <div class="action-buttons">
     <AnchorButton
-      href={getDatabaseConnectionEditUrl(databaseName)}
+      href={getDatabaseConnectionEditUrl(database.name)}
       appearance="secondary"
     >
       <Icon {...iconEdit} />

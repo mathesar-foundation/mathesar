@@ -12,7 +12,6 @@
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { AnchorButton, Icon } from '@mathesar/component-library';
   import { labeledCount } from '@mathesar/utils/languageUtils';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import DatabaseConnectionSkeleton from './DatabaseConnectionSkeleton.svelte';
   import { makeSimplePageTitle } from '../pageTitleUtils';
   import DatabaseConnectionItem from './DatabaseConnectionItem.svelte';
@@ -24,9 +23,6 @@
   $: databasesLoadError = $databases.error;
 
   function isMatch(database: Database, q: string) {
-    if (!isSuccessfullyConnectedDatabase(database)) {
-      return database.name.toLowerCase().includes(q);
-    }
     return (
       database.name.toLowerCase().includes(q) ||
       database.db_name.toLowerCase().includes(q)
