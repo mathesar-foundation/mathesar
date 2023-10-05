@@ -13,12 +13,17 @@
   import FormBox from '../admin-users/FormBox.svelte';
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
 
-  async function handleSuccess(event: CustomEvent<Database>) {
-    const database = event.detail;
+  async function handleSuccess(database: Database) {
     toast.success(`${database.name} connected successfully!`);
-    await reflectApi.reflect();
-    await reloadDatabases();
-    router.goto(getDatabasePageUrl(database.name));
+
+    try {
+      await reflectApi.reflect();
+      await reloadDatabases();
+    } catch (e) {
+      toast.fromError(e);
+    } finally {
+      router.goto(getDatabasePageUrl(database.name));
+    }
   }
 </script>
 
@@ -34,5 +39,5 @@
 <h1>Add Database Connection</h1>
 
 <FormBox>
-  <DatabaseConnectionForm on:create={handleSuccess} />
+  <DatabaseConnectionForm onCreate={handleSuccess} />
 </FormBox>

@@ -11,14 +11,26 @@
   import { router } from 'tinro';
   import FormBox from '../admin-users/FormBox.svelte';
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
+  import { getApiErrorMessages } from '@mathesar/api/utils/errors';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 
   export let databaseName: string;
 
+  let syncRequests: RequestStatus | undefined;
+
   async function handleSuccess() {
     toast.success(`${databaseName} updated successfully!`);
-    await reflectApi.reflect();
-    await reloadDatabases();
-    router.goto(getDatabasePageUrl(databaseName));
+
+    try {
+      syncRequests = { state: 'processing' };
+      await reflectApi.reflect();
+      await reloadDatabases();
+    } catch (e) {
+      syncRequests = { state: 'failure', errors: getApiErrorMessages(e) };
+      toast.fromError(e);
+    } finally {
+      router.goto(getDatabasePageUrl(databaseName));
+    }
   }
 </script>
 
@@ -34,5 +46,9 @@
 <h1>Edit Database Connection</h1>
 
 <FormBox>
-  <DatabaseConnectionForm {databaseName} on:update={handleSuccess} />
+  <DatabaseConnectionForm
+    isLoading={syncRequests?.state === 'processing'}
+    {databaseName}
+    on:update={handleSuccess}
+  />
 </FormBox>

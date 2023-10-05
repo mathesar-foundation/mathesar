@@ -13,14 +13,13 @@
   import { createEventDispatcher } from 'svelte';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-
-  const dispatch = createEventDispatcher<{
-    create: Database;
-    update: undefined;
-  }>();
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
 
   let databaseNameProp: string | undefined = undefined;
   export { databaseNameProp as databaseName };
+  export let onCreate: ((database: Database) => Promise<void>) | undefined =
+    undefined;
+  export let onUpdate: (() => Promise<void>) | undefined = undefined;
 
   $: database = $databases.data?.find((db) => db.name === databaseNameProp);
   $: isNewConnection = !database;
@@ -29,7 +28,7 @@
   $: databaseName = requiredField(database?.db_name ?? '');
   $: username = requiredField(database?.username ?? '');
   $: host = requiredField(database?.host ?? '');
-  $: port = requiredField(database?.port ?? '', [
+  $: port = requiredField(database?.port ?? '5432', [
     (value) =>
       !Number.isNaN(+value)
         ? { type: 'valid' }
@@ -83,11 +82,11 @@
   async function saveConnectionDetails() {
     if (isNewConnection) {
       const newDatabase = await addNewDatabaseConnection();
-      dispatch('create', newDatabase);
+      await onCreate?.(newDatabase);
     } else {
       await updateDatabaseConnection();
       form.reset();
-      dispatch('update');
+      await onUpdate?.();
     }
   }
 
@@ -167,9 +166,9 @@
   {#if isNewConnection}
     <!-- TODO: Add link -->
     <WarningBox>
-      Every PostgreSQL database includes the "public" schema. This protected
-      schema can be read by anybody who accesses the database. They will all be
-      namespaced into Mathesar-specific schemas for safety and organization.
+      For Mathesar to function properly, we will add a number of functions and
+      types to this database. They will all be namespaced into
+      <DocsLink path="/">Mathesar-specific schemas</DocsLink> for safety and organization.
     </WarningBox>
   {/if}
   <FormSubmit
