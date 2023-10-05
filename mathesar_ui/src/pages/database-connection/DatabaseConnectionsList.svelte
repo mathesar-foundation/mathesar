@@ -24,16 +24,17 @@
   $: databasesLoadStatus = $databases.state;
   $: databasesLoadError = $databases.error;
 
-  function filterDatabase(_databases: Database[], query: string) {
-    function isMatch(database: Database, q: string) {
-      if (!isSuccessfullyConnectedDatabase(database)) {
-        return database.name.toLowerCase().includes(q);
-      }
-      return (
-        database.name.toLowerCase().includes(q) ||
-        database.db_name.toLowerCase().includes(q)
-      );
+  function isMatch(database: Database, q: string) {
+    if (!isSuccessfullyConnectedDatabase(database)) {
+      return database.name.toLowerCase().includes(q);
     }
+    return (
+      database.name.toLowerCase().includes(q) ||
+      database.db_name.toLowerCase().includes(q)
+    );
+  }
+
+  function filterDatabase(_databases: Database[], query: string) {
     return _databases.filter((database) => {
       if (query) {
         const sanitizedQuery = query.trim().toLowerCase();
