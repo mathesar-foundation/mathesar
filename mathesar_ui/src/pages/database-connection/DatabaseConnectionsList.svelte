@@ -19,7 +19,6 @@
 
   let filterQuery = '';
 
-  $: isPreloaded = $databases.preload;
   $: allDatabases = $databases.data;
   $: databasesLoadStatus = $databases.state;
   $: databasesLoadError = $databases.error;
@@ -70,9 +69,9 @@
 <h1>Database Connections {filteredDatabasesCountText}</h1>
 
 <section class="connections-list-container">
-  {#if databasesLoadStatus === States.Loading && !isPreloaded}
+  {#if databasesLoadStatus === States.Loading}
     <DatabaseConnectionSkeleton />
-  {:else if databasesLoadStatus === States.Done || isPreloaded}
+  {:else if databasesLoadStatus === States.Done}
     <EntityContainerWithFilterBar
       searchPlaceholder="Search Database Connections"
       bind:searchQuery={filterQuery}
