@@ -2,10 +2,7 @@
   import { router } from 'tinro';
 
   import { Spinner } from '@mathesar-component-library';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { dataFilesApi } from '@mathesar/api/dataFiles';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
@@ -19,7 +16,7 @@
   const tableFetch = new AsyncStore(getTableFromStoreOrApi);
   const dataFileFetch = new AsyncStore(dataFilesApi.get);
 
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
   export let tableId: number;
   export let useColumnTypeInference = false;

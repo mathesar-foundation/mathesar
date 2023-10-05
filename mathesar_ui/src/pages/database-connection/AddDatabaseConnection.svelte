@@ -6,16 +6,14 @@
     getDatabasePageUrl,
   } from '@mathesar/routes/urls';
   import { toast } from '@mathesar/stores/toast';
-  import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
+  import type { Database } from '@mathesar/AppTypes';
   import { router } from 'tinro';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import { reflectApi } from '@mathesar/api/reflect';
   import FormBox from '../admin-users/FormBox.svelte';
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
 
-  async function handleSuccess(
-    event: CustomEvent<SuccessfullyConnectedDatabase>,
-  ) {
+  async function handleSuccess(event: CustomEvent<Database>) {
     const database = event.detail;
     toast.success(`${database.name} connected successfully!`);
     await reflectApi.reflect();

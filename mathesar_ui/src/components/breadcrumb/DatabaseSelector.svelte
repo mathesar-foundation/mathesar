@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
+  import type { Database } from '@mathesar/AppTypes';
   import { iconDatabase } from '@mathesar/icons';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import {
@@ -10,7 +10,7 @@
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
   function makeBreadcrumbSelectorItem(
-    dbEntry: SuccessfullyConnectedDatabase,
+    dbEntry: Database,
   ): BreadcrumbSelectorEntry {
     return {
       type: 'simple',
@@ -23,7 +23,7 @@
     };
   }
 
-  $: databases = [...$dbStore.successfulConnections.values()];
+  $: databases = [...$dbStore.data.values()];
 </script>
 
 <BreadcrumbSelector

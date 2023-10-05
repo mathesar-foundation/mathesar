@@ -9,13 +9,13 @@
   } from '@mathesar/components/form';
   import { databases } from '@mathesar/stores/databases';
   import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
-  import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
+  import type { Database } from '@mathesar/AppTypes';
   import { createEventDispatcher } from 'svelte';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
 
   const dispatch = createEventDispatcher<{
-    create: SuccessfullyConnectedDatabase;
+    create: Database;
     update: undefined;
   }>();
 

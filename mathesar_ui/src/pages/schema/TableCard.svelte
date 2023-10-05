@@ -6,10 +6,7 @@
     Truncate,
   } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
@@ -36,7 +33,7 @@
   const editTableModalController = modal.spawnModalController();
 
   export let table: TableEntry;
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
   export let canExecuteDDL: boolean;
 

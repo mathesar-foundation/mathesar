@@ -1,9 +1,6 @@
 <script lang="ts">
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import TablesList from './TablesList.svelte';
@@ -12,7 +9,7 @@
 
   export let tablesMap: Map<number, TableEntry>;
 
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
   export let canExecuteDDL: boolean;
 

@@ -11,11 +11,7 @@ import {
 } from '@mathesar/api/utils/requestUtils';
 import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
 
-import type {
-  SuccessfullyConnectedDatabase,
-  SchemaEntry,
-  SchemaResponse,
-} from '@mathesar/AppTypes';
+import type { Database, SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 import { currentDBName } from './databases';
@@ -32,11 +28,11 @@ export interface DBSchemaStoreData {
 }
 
 const dbSchemaStoreMap: Map<
-  SuccessfullyConnectedDatabase['name'],
+  Database['name'],
   Writable<DBSchemaStoreData>
 > = new Map();
 const dbSchemasRequestMap: Map<
-  SuccessfullyConnectedDatabase['name'],
+  Database['name'],
   CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
 > = new Map();
 
@@ -47,7 +43,7 @@ function findStoreBySchemaId(id: SchemaEntry['id']) {
 }
 
 function setDBSchemaStore(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
   schemas: SchemaResponse[],
 ): Writable<DBSchemaStoreData> {
   const schemaMap: DBSchemaStoreData['data'] = new Map();
@@ -71,7 +67,7 @@ function setDBSchemaStore(
 }
 
 function updateSchemaInDBSchemaStore(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
   schema: SchemaResponse,
 ) {
   const store = dbSchemaStoreMap.get(database);
@@ -87,7 +83,7 @@ function updateSchemaInDBSchemaStore(
 }
 
 function removeSchemaInDBSchemaStore(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
   schemaId: SchemaEntry['id'],
 ) {
   const store = dbSchemaStoreMap.get(database);
@@ -103,7 +99,7 @@ function removeSchemaInDBSchemaStore(
 }
 
 export function addCountToSchemaNumTables(
-  database: SuccessfullyConnectedDatabase,
+  database: Database,
   schema: SchemaEntry,
   count: number,
 ) {
@@ -144,7 +140,7 @@ export function addCountToSchemaNumExplorations(
 }
 
 export async function refetchSchemasForDB(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
 ): Promise<DBSchemaStoreData | undefined> {
   const store = dbSchemaStoreMap.get(database);
   if (!store) {
@@ -181,7 +177,7 @@ export async function refetchSchemasForDB(
 }
 
 export async function refetchSchema(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
   schemaId: SchemaEntry['id'],
 ): Promise<SchemaResponse | undefined> {
   const store = dbSchemaStoreMap.get(database);
@@ -207,7 +203,7 @@ export async function refetchSchema(
 let preload = true;
 
 export function getSchemasStoreForDB(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
 ): Writable<DBSchemaStoreData> {
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
@@ -229,7 +225,7 @@ export function getSchemasStoreForDB(
 }
 
 export function getSchemaInfo(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
   schemaId: SchemaEntry['id'],
 ): SchemaEntry | undefined {
   const store = dbSchemaStoreMap.get(database);
@@ -240,7 +236,7 @@ export function getSchemaInfo(
 }
 
 export async function createSchema(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
   schemaName: SchemaEntry['name'],
   schemaDescription: SchemaEntry['description'],
 ): Promise<SchemaResponse> {
@@ -254,7 +250,7 @@ export async function createSchema(
 }
 
 export async function updateSchema(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
   schema: SchemaEntry,
 ): Promise<SchemaResponse> {
   const url = `/api/db/v0/schemas/${schema.id}/`;
@@ -267,7 +263,7 @@ export async function updateSchema(
 }
 
 export async function deleteSchema(
-  database: SuccessfullyConnectedDatabase['name'],
+  database: Database['name'],
   schemaId: SchemaEntry['id'],
 ): Promise<void> {
   await deleteAPI(`/api/db/v0/schemas/${schemaId}/`);

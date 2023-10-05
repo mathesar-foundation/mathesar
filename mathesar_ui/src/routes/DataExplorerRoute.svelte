@@ -1,9 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import {
     QueryManager,
     QueryModel,
@@ -24,7 +21,7 @@
   import { iconEdit, iconExploration } from '@mathesar/icons';
   import { readable, type Readable } from 'svelte/store';
 
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
   export let queryId: number | undefined;
 

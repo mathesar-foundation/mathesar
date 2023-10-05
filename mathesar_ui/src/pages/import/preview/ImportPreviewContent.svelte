@@ -5,10 +5,7 @@
     CancelOrProceedButtonPair,
     Spinner,
   } from '@mathesar-component-library';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { columnsApi } from '@mathesar/api/columns';
   import type { DataFile } from '@mathesar/api/types/dataFiles';
   import type { TableEntry } from '@mathesar/api/types/tables';
@@ -59,7 +56,7 @@
   const headerUpdate = makeHeaderUpdateRequest();
   const cancelationRequest = makeDeleteTableRequest();
 
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
   export let table: TableEntry;
   export let dataFile: DataFile;

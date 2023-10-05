@@ -4,7 +4,7 @@ import { currentDatabase } from '@mathesar/stores/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
+import type { Database } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type {
   AbstractTypesMap,
@@ -17,16 +17,16 @@ import { constructAbstractTypeMapFromResponse } from './abstractTypeCategories';
 const commonData = preloadCommonData();
 
 const databasesToAbstractTypesStoreMap: Map<
-  SuccessfullyConnectedDatabase['id'],
+  Database['id'],
   Writable<AbstractTypesSubstance>
 > = new Map();
 const abstractTypesRequestMap: Map<
-  SuccessfullyConnectedDatabase['id'],
+  Database['id'],
   CancellablePromise<AbstractTypeResponse[]>
 > = new Map();
 
 export async function refetchTypesForDb(
-  databaseId: SuccessfullyConnectedDatabase['id'],
+  databaseId: Database['id'],
 ): Promise<AbstractTypesMap | undefined> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
@@ -75,7 +75,7 @@ export async function refetchTypesForDb(
 let preload = true;
 
 function getTypesForDatabase(
-  database: SuccessfullyConnectedDatabase,
+  database: Database,
 ): Writable<AbstractTypesSubstance> {
   let store = databasesToAbstractTypesStoreMap.get(database.id);
   if (!store) {
