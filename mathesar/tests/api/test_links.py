@@ -1,6 +1,4 @@
 import pytest
-from sqlalchemy import Column, Integer, MetaData, String
-from sqlalchemy import Table as SATable
 
 from db.constraints.utils import ConstraintType
 from db.tables.operations.select import get_oid_from_table
@@ -8,27 +6,6 @@ from db.tables.utils import get_primary_key_column
 
 from mathesar.models.base import Constraint, Table
 from mathesar.api.exceptions.error_codes import ErrorCodes
-
-
-@pytest.fixture
-def column_test_table(patent_schema):
-    engine = patent_schema._sa_engine
-    column_list_in = [
-        Column("mycolumn0", Integer, primary_key=True),
-        Column("mycolumn1", Integer, nullable=False),
-        Column("mycolumn2", Integer, server_default="5"),
-        Column("mycolumn3", String),
-    ]
-    db_table = SATable(
-        "anewtable",
-        MetaData(bind=engine),
-        *column_list_in,
-        schema=patent_schema.name
-    )
-    db_table.create()
-    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
-    return table
 
 
 write_clients_with_status_code = [

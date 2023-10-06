@@ -1101,6 +1101,7 @@ def test_table_get_with_reflect_new(client, table_for_reflection):
     response = client.get('/api/db/v0/tables/')
     # The table number should only change after the GET request
     response_data = response.json()
+    assert response.status_code == 200
     actual_created = [
         table for table in response_data['results'] if table['name'] == table_name
     ]

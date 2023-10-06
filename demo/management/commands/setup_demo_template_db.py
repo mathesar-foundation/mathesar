@@ -21,7 +21,8 @@ def _setup_demo_template_db():
 
     template_db_name = settings.MATHESAR_DEMO_TEMPLATE
     django_model = Database.current_objects.get(name=settings.DATABASES["default"]["NAME"])
-    root_engine = create_mathesar_engine(django_model)
+    # TODO cache this engine
+    root_engine = create_mathesar_engine(django_model.credentials)
     with root_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
         conn.execute(text(f"DROP DATABASE IF EXISTS {template_db_name} WITH (FORCE)"))
@@ -44,6 +45,6 @@ def _setup_demo_template_db():
         port=db_model.port,
         skip_confirm=True
     )
-    user_engine = create_mathesar_engine(db_model)
+    user_engine = db_model._sa_engine
     load_datasets(user_engine)
     user_engine.dispose()

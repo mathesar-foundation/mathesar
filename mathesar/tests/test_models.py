@@ -52,14 +52,14 @@ def test_schema_name_handles_missing(monkeypatch, test_db_model):
 
 @pytest.mark.parametrize("model", [Database, Schema, Table])
 def test_model_queryset_reflects_db_objects(model):
-    with patch('mathesar.state.base.reflect_db_objects') as mock_reflect:
+    with patch('mathesar.models.base.make_sure_initial_reflection_happened') as mock_reflect:
         model.objects.all()
     mock_reflect.assert_called()
 
 
 @pytest.mark.parametrize("model", [Database, Schema, Table])
 def test_model_current_queryset_does_not_reflects_db_objects(model):
-    with patch('mathesar.state.base.reflect_db_objects') as mock_reflect:
+    with patch('mathesar.models.base.make_sure_initial_reflection_happened') as mock_reflect:
         model.current_objects.all()
     mock_reflect.assert_not_called()
 

@@ -3,7 +3,7 @@ from io import TextIOWrapper
 import clevercsv as csv
 
 from db.tables.operations.alter import update_pk_sequence_to_latest
-from mathesar.database.base import create_mathesar_engine
+from mathesar.state import get_cached_engine
 from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.drop import drop_table
@@ -144,7 +144,7 @@ def insert_records_from_csv_data_file(name, schema, column_names, engine, commen
 
 def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
     db_model = schema.database
-    engine = create_mathesar_engine(db_model)
+    engine = get_cached_engine(db_model.credentials)
     sv_filename = data_file.file.path
     header = data_file.header
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,

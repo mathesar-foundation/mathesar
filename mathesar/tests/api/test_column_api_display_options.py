@@ -10,6 +10,7 @@ from db.types.custom.money import MathesarMoney
 from db.metadata import get_empty_metadata
 
 from mathesar.models.base import Table, Column
+from mathesar.state import reset_reflection
 
 
 @pytest.fixture
@@ -395,6 +396,7 @@ def test_column_invalid_display_options_type_on_reflection(
     )
     with engine.begin() as conn:
         alter_column_type(table.oid, column_attnum, engine, conn, PostgresType.BOOLEAN)
+    reset_reflection(db_name=engine.url.database)
     column_id = column.id
     response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
@@ -415,6 +417,7 @@ def test_column_alter_same_type_display_options(
     )
     with engine.begin() as conn:
         alter_column_type(table.oid, column_attnum, engine, conn, PostgresType.NUMERIC)
+    reset_reflection(db_name=engine.url.database)
     column_id = column.id
     response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",

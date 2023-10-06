@@ -45,30 +45,37 @@ def drop_all_stale_databases(force=False, max_days=3, *args, **kwargs):
     ]
     stale_databases = Database.objects.filter(created_at__lt=now() - timedelta(days=max_days))
     deleted_databases = []
+    root_db_credentials = DbCredentials(
+        username=settings.DATABASES["default"]["USER"],
+        password=settings.DATABASES["default"]["PASSWORD"],
+        hostname=settings.DATABASES["default"]["HOST"],
+        db_name=settings.DATABASES["default"]["NAME"]
+        port=settings.DATABASES["default"]["PORT"],
+    )
     for database in stale_databases:
-        if database.name not in excluded_databases and database.deleted is False:
+        if database.name not in excluded_databases:
+            # Difference between user db and root db is only the db_name
+            user_db_credentials = root_db_credentials._replace(
+                db_name=database.name,
+            )
             dropped = drop_mathesar_database(
-                database.name,
-                username=settings.DATABASES["default"]["USER"],
-                password=settings.DATABASES["default"]["PASSWORD"],
-                hostname=settings.DATABASES["default"]["HOST"],
-                root_database=settings.DATABASES["default"]["NAME"],
-                port=settings.DATABASES["default"]["PORT"],
+                user_db_credentials=user_db_credentials,
+                root_db_credentials=root_db_credentials,
                 force=force
             )
             if dropped:
                 deleted_databases.append(database.name)
                 database.delete()
+                # TODO BUG reflect_db_objects should never be called directly,
+                # it's public only because it's called by a higher-level module.
                 reflect_db_objects(get_empty_metadata(), db_name=database.name)
     return deleted_databases
 
 
 def drop_mathesar_database(
-        user_database, username, password, hostname, root_database, port, force=False
+    user_db_credentials, root_db_credentials, force=False
 ):
-    user_db_engine = engine.create_future_engine(
-        username, password, hostname, user_database, port
-    )
+    user_db_engine = engine.create_future_engine(user_db_credentials)
     try:
         user_db_engine.connect()
     except OperationalError:
@@ -78,11 +85,14 @@ def drop_mathesar_database(
     else:
         try:
             root_db_engine = engine.create_future_engine(
-                username, password, hostname, root_database, port,
+                root_db_credentials
             )
             with root_db_engine.connect() as conn:
                 conn.execution_options(isolation_level="AUTOCOMMIT")
-                delete_stmt = f"DROP DATABASE {user_database} {'WITH (FORCE)' if force else ''}"
+                delete_stmt = f"""
+                    DROP DATABASE {user_db_credentials.db_name}
+                    {'WITH (FORCE)' if force else ''}
+                """
                 conn.execute(text(delete_stmt))
                 # This database is not created using a config file,
                 # so their objects can be safety deleted

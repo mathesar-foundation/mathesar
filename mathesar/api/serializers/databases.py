@@ -13,8 +13,8 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
 
     class Meta:
         model = Database
-        fields = ['id', 'name', 'db_name', 'deleted', 'editable', 'supported_types_url', 'username', 'password', 'host', 'port']
-        read_only_fields = ['id', 'deleted', 'supported_types_url', 'editable']
+        fields = ['id', 'name', 'db_name', 'editable', 'supported_types_url', 'username', 'password', 'host', 'port']
+        read_only_fields = ['id', 'supported_types_url', 'editable']
         extra_kwargs = {
             'password': {'write_only': True}
         }

@@ -3,7 +3,6 @@ import type { TreeItem } from '@mathesar-component-library/types';
 export interface Database {
   id: number;
   name: string;
-  deleted: boolean;
   supported_types: string[];
 }
 

@@ -5,7 +5,6 @@ from functools import reduce
 import operator
 from django.core.cache import cache as dj_cache
 from django.db.models import Prefetch, Q
-from sqlalchemy.exc import OperationalError
 
 from db.columns.operations.select import get_column_attnums_from_tables
 from db.constraints.operations.select import get_constraints_with_oids
@@ -15,7 +14,6 @@ from db.tables.operations.select import get_table_oids_from_schemas
 from mathesar.models import base as models
 from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
-from mathesar.database.base import create_mathesar_engine
 
 
 logger = logging.getLogger(__name__)
@@ -32,51 +30,33 @@ def clear_dj_cache():
 
 
 def reflect_db_objects(metadata, db_name=None):
+    """
+    NOTE, silently ignores databases that are not connectable.
+    """
     databases = models.Database.current_objects.all()
     if db_name is not None:
         databases = databases.filter(name=db_name)
-    sync_databases_status(databases)
-    for database in databases:
-        if database.deleted is False:
-            reflect_schemas_from_database(database)
-            schemas = models.Schema.current_objects.filter(database=database).prefetch_related(
-                Prefetch('database', queryset=databases)
-            )
-            reflect_tables_from_schemas(schemas, metadata=metadata)
-            tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related(
-                Prefetch('schema', queryset=schemas)
-            )
-            reflect_columns_from_tables(tables, metadata=metadata)
-            reflect_constraints_from_database(database)
-        else:
-            models.Schema.current_objects.filter(database=database).delete()
+    connectable_databases = tuple(
+        filter(
+            lambda db: db.is_connectable(),
+            databases
+        )
+    )
+    for database in connectable_databases:
+        reflect_schemas_from_database(database)
+        schemas = models.Schema.current_objects.filter(database=database).prefetch_related(
+            Prefetch('database', queryset=databases)
+        )
+        reflect_tables_from_schemas(schemas, metadata=metadata)
+        tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related(
+            Prefetch('schema', queryset=schemas)
+        )
+        reflect_columns_from_tables(tables, metadata=metadata)
+        reflect_constraints_from_database(database)
 
 
-def sync_databases_status(databases):
-    """Update status and check health for current Database Model instances."""
-    for db in databases:
-        try:
-            db._sa_engine.connect()
-            db._sa_engine.dispose()
-            _set_db_is_deleted(db, False)
-        except (OperationalError, KeyError):
-            _set_db_is_deleted(db, True)
-
-
-def _set_db_is_deleted(db, deleted):
-    """
-    Assures that a Django Database model's `deleted` field is equal to the `deleted`
-    parameter, updating if necessary. Takes care to `save()` only when an update has been performed,
-    to save on the noteworthy performance cost.
-    """
-    if db.deleted is not deleted:
-        db.deleted = deleted
-        db.save()
-
-
-# TODO pass in a cached engine instead of creating a new one
 def reflect_schemas_from_database(database):
-    engine = create_mathesar_engine(database)
+    engine = database._sa_engine
     db_schema_oids = {
         schema['oid'] for schema in get_mathesar_schemas_with_oids(engine)
     }
@@ -90,7 +70,6 @@ def reflect_schemas_from_database(database):
         if schema.database == database and schema.oid not in db_schema_oids:
             # Deleting Schemas are a rare occasion, not worth deleting in bulk
             schema.delete()
-    engine.dispose()
 
 
 def reflect_tables_from_schemas(schemas, metadata):
@@ -179,9 +158,8 @@ def _delete_stale_columns(attnum_tuples, tables):
     models.Column.objects.filter(stale_columns_query).delete()
 
 
-# TODO pass in a cached engine instead of creating a new one
 def reflect_constraints_from_database(database):
-    engine = create_mathesar_engine(database)
+    engine = database._sa_engine
     db_constraints = get_constraints_with_oids(engine)
     map_of_table_oid_to_constraint_oids = defaultdict(list)
     for db_constraint in db_constraints:
@@ -199,7 +177,6 @@ def reflect_constraints_from_database(database):
             constraint_objs_to_create.append(constraint_obj)
     models.Constraint.current_objects.bulk_create(constraint_objs_to_create, ignore_conflicts=True)
     _delete_stale_dj_constraints(db_constraints, database)
-    engine.dispose()
 
 
 def _delete_stale_dj_constraints(known_db_constraints, database):
@@ -219,9 +196,8 @@ def _delete_stale_dj_constraints(known_db_constraints, database):
     stale_dj_constraints.delete()
 
 
-# TODO pass in a cached engine instead of creating a new one
 def reflect_new_table_constraints(table):
-    engine = create_mathesar_engine(table.schema.database)
+    engine = table.schema.database._sa_engine
     db_constraints = get_constraints_with_oids(engine, table_oid=table.oid)
     constraints = [
         models.Constraint.current_objects.get_or_create(
@@ -230,5 +206,4 @@ def reflect_new_table_constraints(table):
         )
         for db_constraint in db_constraints
     ]
-    engine.dispose()
     return constraints

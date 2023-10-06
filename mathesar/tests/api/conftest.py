@@ -2,7 +2,7 @@ from pathlib import Path
 
 from django.core.files import File
 import pytest
-from sqlalchemy import Column, INTEGER, VARCHAR, MetaData, BOOLEAN, TIMESTAMP, text
+from sqlalchemy import Column, INTEGER, VARCHAR, BOOLEAN, TIMESTAMP, text
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.select import get_column_attnum_from_name
@@ -10,8 +10,7 @@ from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType
 from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
-from db.metadata import get_empty_metadata
-from mathesar.state import reset_reflection
+from mathesar.state import get_cached_metadata, reset_reflection
 
 
 @pytest.fixture
@@ -213,6 +212,7 @@ def table_for_reflection(engine):
                 f' (id INTEGER, name VARCHAR);'
             )
         )
+    reset_reflection(engine.url.database)
     yield schema_name, table_name, engine
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA {schema_name} CASCADE;'))
@@ -221,28 +221,25 @@ def table_for_reflection(engine):
 @pytest.fixture
 def column_test_table(patent_schema):
     engine = patent_schema._sa_engine
+    reset_reflection(engine.url.database)
     column_list_in = [
         Column("mycolumn0", INTEGER, primary_key=True),
         Column("mycolumn1", INTEGER, nullable=False),
         Column("mycolumn2", INTEGER, server_default="5"),
         Column("mycolumn3", VARCHAR),
     ]
+    metadata = get_cached_metadata()
     db_table = SATable(
         "anewtable",
-        MetaData(bind=engine),
+        metadata,
         *column_list_in,
         schema=patent_schema.name
     )
-    db_table.create()
+    db_table.create(engine)
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
-    metadata = get_empty_metadata()
-    for sa_column in column_list_in:
-        attnum = get_column_attnum_from_name(db_table_oid, sa_column.name, engine, metadata=metadata)
-        ServiceLayerColumn.current_objects.get_or_create(
-            table=table,
-            attnum=attnum,
-        )
+    metadata = get_cached_metadata()
+    reset_reflection(engine.url.database)
     return table
 
 
@@ -265,18 +262,21 @@ def column_test_table_with_service_layer_options(patent_schema):
                         {},
                         {},
                         {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
+    metadata = get_cached_metadata()
     db_table = SATable(
         "anewtable",
-        MetaData(bind=engine),
+        metadata,
         *column_list_in,
         schema=patent_schema.name
     )
-    db_table.create()
+    db_table.create(engine)
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
-        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine, metadata=get_empty_metadata())
+        attnum = get_column_attnum_from_name(
+            db_table_oid, column_data[0].name, engine, metadata=metadata
+        )
         display_options = column_data[1].get('display_options', None)
         first_column = ServiceLayerColumn.current_objects.get_or_create(
             table=table,
@@ -284,12 +284,13 @@ def column_test_table_with_service_layer_options(patent_schema):
             display_options=display_options,
         )[0]
         service_columns.append(first_column)
+    reset_reflection(engine.url.database)
     return table, service_columns
 
 
 @pytest.fixture
-def library_ma_tables(db_table_to_dj_table, library_db_tables):
-    reset_reflection()
+def library_ma_tables(db_table_to_dj_table, library_db_tables, engine):
+    reset_reflection(engine.url.database)
     return {
         table_name: db_table_to_dj_table(db_table)
         for table_name, db_table
@@ -298,20 +299,20 @@ def library_ma_tables(db_table_to_dj_table, library_db_tables):
 
 
 @pytest.fixture
-def payments_ma_table(db_table_to_dj_table, payments_db_table):
-    reset_reflection()
+def payments_ma_table(db_table_to_dj_table, payments_db_table, engine):
+    reset_reflection(engine.url.database)
     return db_table_to_dj_table(payments_db_table)
 
 
 @pytest.fixture
-def players_ma_table(db_table_to_dj_table, players_db_table):
-    reset_reflection()
+def players_ma_table(db_table_to_dj_table, players_db_table, engine):
+    reset_reflection(engine.url.database)
     return db_table_to_dj_table(players_db_table)
 
 
 @pytest.fixture
-def athletes_ma_table(db_table_to_dj_table, athletes_db_table):
-    reset_reflection()
+def athletes_ma_table(db_table_to_dj_table, athletes_db_table, engine):
+    reset_reflection(engine.url.database)
     return db_table_to_dj_table(athletes_db_table)
 
 

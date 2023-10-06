@@ -8,6 +8,7 @@ def make_sure_initial_reflection_happened():
         reset_reflection()
 
 
+# TODO BUG db_name is not enough to identify a database; use full credentials
 def reset_reflection(db_name=None):
     """
     Resets our reflection of what's on Postgres databases. Reset meaning that information is
@@ -31,6 +32,9 @@ def _trigger_django_model_reflection(db_name):
     reflect_db_objects(metadata=get_cached_metadata(), db_name=db_name)
 
 
+# TODO BUG should be scoped to a database, we might reflect one database, set
+# this to true, but actually another db might not be reflected; leftover from
+# when we only supported global reflection.
 def set_initial_reflection_happened(has_it_happened=True):
     """
     Many, probably most, of our state-dependent routines presume that reflection has occured. Since

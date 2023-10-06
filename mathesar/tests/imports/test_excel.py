@@ -6,6 +6,7 @@ from mathesar.models.base import DataFile, Schema
 from mathesar.imports.base import create_table_from_data_file
 from db.schemas.utils import get_schema_oid_from_name
 from psycopg.errors import DuplicateTable
+from mathesar.state import reset_reflection
 
 
 @pytest.fixture
@@ -28,6 +29,7 @@ def check_excel_upload(table, table_name, schema, num_records, row, cols):
 def test_excel_upload(data_file, engine_with_schema):
     engine, schema_name = engine_with_schema
     schema_oid = get_schema_oid_from_name(schema_name, engine)
+    reset_reflection(engine.url.database)
     schema = Schema.objects.get(oid=schema_oid)
     table_name = "NASA 1"
     table = create_table_from_data_file(data_file, table_name, schema)
@@ -61,6 +63,7 @@ def test_excel_upload_with_duplicate_table_name(data_file, engine_with_schema):
     table_name = "NASA 2"
 
     engine, schema_name = engine_with_schema
+    reset_reflection(engine.url.database)
     schema_oid = get_schema_oid_from_name(schema_name, engine)
     schema = Schema.objects.get(oid=schema_oid)
     table = create_table_from_data_file(data_file, table_name, schema)
@@ -75,6 +78,7 @@ def test_excel_upload_with_duplicate_table_name(data_file, engine_with_schema):
 
 def test_excel_upload_table_imported_to(data_file, engine_with_schema):
     engine, schema_name = engine_with_schema
+    reset_reflection(engine.url.database)
     schema_oid = get_schema_oid_from_name(schema_name, engine)
     schema = Schema.objects.get(oid=schema_oid)
     table = create_table_from_data_file(data_file, "NASA", schema)

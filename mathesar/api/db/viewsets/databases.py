@@ -14,7 +14,6 @@ from mathesar.api.serializers.databases import DatabaseSerializer
 from db.functions.operations.check_support import get_supported_db_functions
 from mathesar.api.serializers.functions import DBFunctionSerializer
 from db.types.base import get_available_known_db_types
-from db.types.install import uninstall_mathesar_from_database
 from mathesar.api.serializers.db_types import DBTypeSerializer
 from mathesar.api.exceptions.validation_exceptions.exceptions import EditingDBCredentialsNotAllowed
 
@@ -56,11 +55,11 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         raise EditingDBCredentialsNotAllowed()
 
     def destroy(self, request, pk=None):
+        should_uninstall = request.query_params.get('del_msar_schemas')
         db_object = self.get_object()
-        if request.query_params.get('del_msar_schemas'):
-            engine = db_object._sa_engine
-            uninstall_mathesar_from_database(engine)
-        db_object.delete()
+        db_object.delete(
+            should_uninstall=should_uninstall
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)

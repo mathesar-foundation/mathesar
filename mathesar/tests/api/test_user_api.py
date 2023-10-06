@@ -3,6 +3,7 @@ from django.db import transaction
 from db.schemas.utils import get_schema_oid_from_name
 from mathesar.models.base import Database, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
+from mathesar.state import reset_reflection
 
 
 def test_user_list(client):
@@ -591,6 +592,9 @@ def test_schema_role_create_with_multiple_database(
     for schema_name, db_name in schema_params:
         engine = MOD_engine_cache(db_name)
         create_db_schema(schema_name, engine)
+
+    for db_name in dbs_to_create:
+        reset_reflection()
 
     schemas = {
         schema_param: Schema.objects.get(

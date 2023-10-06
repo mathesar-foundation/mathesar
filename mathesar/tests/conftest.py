@@ -96,6 +96,8 @@ def create_dj_db(request):
         conftest.create_db
     )
 
+    created_dbs = []
+
     def _create_and_add(db_name):
         create_db(db_name)
         add_db_to_dj_settings(db_name)
@@ -107,8 +109,11 @@ def create_dj_db(request):
             host='mathesar_dev_db',
             port=5432
         )
+        created_dbs.append(database_model)
         return database_model
     yield _create_and_add
+    for database_model in created_dbs:
+        database_model.delete()
 
 
 # defines:
@@ -120,22 +125,22 @@ create_scoped_fixtures(globals(), create_dj_db)
 
 
 @pytest.fixture(scope="function", autouse=True)
-def test_db_model(request, test_db_name, django_db_blocker):
+def test_db_model(request, test_db_name):
     add_db_to_dj_settings = get_fixture_value(
         request,
         mathesar.tests.conftest.add_db_to_dj_settings
     )
 
     add_db_to_dj_settings(test_db_name)
-    with django_db_blocker.unblock():
-        database_model = Database.current_objects.create(
-            name=test_db_name,
-            db_name=test_db_name,
-            username='mathesar',
-            password='mathesar',
-            host='mathesar_dev_db',
-            port=5432
-        )
+    database_model = Database.current_objects.create(
+        name=test_db_name,
+        db_name=test_db_name,
+        username='mathesar',
+        password='mathesar',
+        host='mathesar_dev_db',
+        port=5432
+    )
+    assert database_model.is_connectable()
     yield database_model
     database_model.delete()
 
@@ -314,6 +319,7 @@ def empty_nasa_table(patent_schema, engine_with_schema):
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    reset_reflection(engine.url.database)
 
     yield table
 
@@ -354,9 +360,12 @@ def create_mathesar_table(create_db_schema):
         # We use a fixture for schema creation, so that it gets cleaned up.
         create_db_schema(schema_name, engine, schema_mustnt_exist=False)
         schema_oid = get_schema_oid_from_name(schema_name, engine)
-        return actual_create_mathesar_table(
+        output = actual_create_mathesar_table(
             engine=engine, table_name=table_name, schema_oid=schema_oid, columns=columns,
         )
+        db_name = engine.url.database
+        reset_reflection(db_name=db_name)
+        return output
     yield _create_mathesar_table
 
 

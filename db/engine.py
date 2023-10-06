@@ -1,16 +1,15 @@
 import copy
 
 from sqlalchemy import create_engine as sa_create_engine
-from sqlalchemy.engine import URL
 
 from db.types.custom.base import CUSTOM_DB_TYPE_TO_SA_CLASS
 
 
 def create_future_engine_with_custom_types(
-        username, password, hostname, database, port, *args, **kwargs
+    credentials, *args, **kwargs
 ):
     engine = create_future_engine(
-        username, password, hostname, database, port, *args, **kwargs
+        credentials, *args, **kwargs
     )
     # We need to add our custom types to any engine created for SQLALchemy use
     # so that they can be used for reflection
@@ -20,16 +19,9 @@ def create_future_engine_with_custom_types(
 
 # TODO would an engine without ischema names updated ever be used? make it private if not
 def create_future_engine(
-        username, password, hostname, database, port, *args, **kwargs
+    credentials, *args, **kwargs
 ):
-    conn_url = URL.create(
-        "postgresql",
-        username=username,
-        password=password,
-        host=hostname,
-        database=database,
-        port=port,
-    )
+    conn_url = credentials.to_sa_url()
     kwargs.update(future=True)
     return create_engine(conn_url, *args, **kwargs)
 

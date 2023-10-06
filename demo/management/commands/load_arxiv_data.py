@@ -30,7 +30,7 @@ def update_our_arxiv_dbs():
         return
     for db_name, schema_name in db_schema_pairs:
         db = Database.current_objects.get(name=db_name)
-        engine = create_mathesar_engine(db)
+        engine = db._sa_engine
         update_arxiv_schema(engine, schema_name, papers)
         engine.dispose()
 

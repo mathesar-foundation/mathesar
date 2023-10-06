@@ -1,14 +1,17 @@
 import pytest
 from mathesar.models.query import UIQuery
+from mathesar.state import reset_reflection
 
 
 @pytest.fixture
-def academics_ma_tables(db_table_to_dj_table, academics_db_tables):
-    return {
+def academics_ma_tables(db_table_to_dj_table, academics_db_tables, engine):
+    table_name_to_dj_table = {
         table_name: db_table_to_dj_table(db_table)
         for table_name, db_table
         in academics_db_tables.items()
     }
+    reset_reflection(engine.url.database)
+    return table_name_to_dj_table
 
 
 @pytest.fixture

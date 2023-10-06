@@ -33,16 +33,24 @@ def main(skip_static_collection=False):
     django_db_key = decouple_config('DJANGO_DATABASE_KEY', default="default")
     user_databases = [key for key in settings.DATABASES if key != django_db_key]
     for database_key in user_databases:
-        credentials = settings.DATABASES[database_key]
+        raw_credentials = settings.DATABASES[database_key]
+        from db.credentials import DbCredentials
+        credentials = DbCredentials(
+            username=raw_credentials["USER"],
+            password=raw_credentials["PASSWORD"],
+            hostname=raw_credentials["HOST"],
+            db_name=raw_credentials["NAME"],
+            port=raw_credentials["PORT"],
+        )
         try:
             install_on_db_with_key(credentials, skip_confirm)
             Database.current_objects.create(
                 name=database_key,
-                db_name=credentials["NAME"],
-                username=credentials["USER"],
-                password=credentials["PASSWORD"],
-                host=credentials["HOST"],
-                port=credentials["PORT"],
+                db_name=credentials.db_name,
+                username=credentials.username,
+                password=credentials.password,
+                host=credentials.hostname,
+                port=credentials.port,
                 editable=False
             ).save()
         except IntegrityError as e:
@@ -53,11 +61,11 @@ def main(skip_static_collection=False):
                 )
             ):
                 db_model = Database.current_objects.get(name=database_key)
-                db_model.db_name = credentials["NAME"]
-                db_model.username = credentials["USER"]
-                db_model.password = credentials["PASSWORD"]
-                db_model.host = credentials["HOST"]
-                db_model.port = credentials["PORT"]
+                db_model.db_name = credentials.db_name
+                db_model.username = credentials.username
+                db_model.password = credentials.password
+                db_model.host = credentials.hostname
+                db_model.port = credentials.port
                 db_model.editable = False
                 db_model.save()
             else:
@@ -66,11 +74,7 @@ def main(skip_static_collection=False):
 
 def install_on_db_with_key(credentials, skip_confirm):
     return install.install_mathesar(
-        database_name=credentials["NAME"],
-        hostname=credentials["HOST"],
-        username=credentials["USER"],
-        password=credentials["PASSWORD"],
-        port=credentials["PORT"],
+        credentials,
         skip_confirm=skip_confirm
     )
 
