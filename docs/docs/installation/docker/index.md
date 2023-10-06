@@ -9,12 +9,15 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
 ## Prerequisites
 
 ### Operating System
+
 You can install Mathesar using this method on Linux, MacOS, and Windows.
 
 ### Access
+
 You should have permission to run Docker containers on the system.
 
 ### Software
+
 You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
 
                       
@@ -124,15 +127,16 @@ docker run \
     docker rm mathesar_service
     ```
 
-1. Bump the image version in the `docker run` command you usually use to run your
-   Mathesar and start up a brand-new container:
+1. Bump the image version in the `docker run` command you usually use to run your Mathesar and start up a brand-new container:
+
+   <!-- TODO: improve language and version number -->
 
     ```bash
     docker run \
       -d \
       --name mathesar_service \
       # YOUR STANDARD ARGS HERE
-      mathesar/mathesar-prod:latest
+      mathesar/mathesar-prod:0.1.5
     ```
 
 ## Uninstalling Mathesar {:#uninstall}

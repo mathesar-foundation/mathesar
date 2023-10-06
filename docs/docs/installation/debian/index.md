@@ -2,49 +2,51 @@
 
 Use our [Debian package](https://hub.docker.com/r/mathesar/mathesar-prod/tags): `mathesar` hosted to run Mathesar.
 
+## Prerequisites
+
 ### Operating System
+
+<!-- TODO: clean up language  -->
+
 You can install Mathesar using this method on the following Debian versions
 
-- Bullseye
+- Debian 11 (Bullseye)
 
 We will be adding support for other versions of Debian in our future release
 
 ### Access
+
 You should have permission to install a debian package
-                     
- 
+
+
 ## Installation Steps
 
-1. Download the deb file
-    === "Debian 11"
-        ```
-        wget mathesar_0_1_3_x64_bullseye.deb
-        ```
+<!-- TODO: remove mmukesh95, improve formatting of code block -->
 
-    === "Debian 12"
-        ```
-        wget mathesar_0_1_3_x64_bookworm.deb
-        ```
+1. Add keys to apt repository.
 
+    ```
+    echo 'deb http://download.opensuse.org/repositories/home:/mmukesh95:/mathesar/Debian_11/ /' | sudo tee /etc/apt/sources.list.d/home:mmukesh95:mathesar.list
+    curl -fsSL https://download.opensuse.org/repositories/home:mmukesh95:mathesar/Debian_11/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_mmukesh95_mathesar.gpg > /dev/null
+    ```
 
-1. Run the Mathesar Docker Image
+1. Install Mathesar package.
 
-        === "Debian 11"
-            ```
-            sudo apt install ./mathesar_0_1_3_x64_bullseye.deb
-            ```
+    ```
+    sudo apt install mathesar
+    ```
 
-        === "Debian 12"
-            ```
-            sudo apt install ./mathesar_0_1_3_x64_bookworm.deb
-            ```
+    The above command starts a systemd service running on the Mathesar server on `localhost` and listening on port `8000`.
 
-    The above command starts a [systemd service] running on the Mathesar server on `localhost` and listening on port `8000`. 
+    <!-- TODO Add hyperlink explaining what "systemd service" is -->
 
 1. Verify if the Mathesar server is running successfully:
+
     ```bash
     sudo systemctl status mathesar
     ```
+
+    <!-- TODO lift this out of a warning and into an actual step -->
 
     !!! warning
         If you are testing Mathesar on a local machine, you can go to the next step for setting up Mathesar. But if you are hosting on a server or looking for a production setup, please take a look at [additional configurations](#configuration) before setting up Mathesar.
@@ -62,14 +64,14 @@ You should have permission to install a debian package
 
 If you are accessing Mathesar using a domain name, you need to add it to the list of domains Mathesar can accept requests from. This can be accomplished by setting the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) environment variable in the config file
 
-    1. Edit the config file
+1. Edit the config file
 
-        ```sh
-        sudo nano /etc/mathesar/.env
-        ```
+    ```sh
+    sudo nano /etc/mathesar/.env
+    ```
 
 
-    2. Set the domain name to the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) config variable in config file:
+1. Set the domain name to the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) config variable in config file:
 
     !!! example
         Your `.env` file should look something like this
@@ -99,22 +101,22 @@ Mathesar service runs on port 8000, so you will have to access it on `http://<do
 By default, the internal data is stored in a SQLite database. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL](../../configuration/env-variables.md#dj_db) environment variable.
 
 
-    1. Edit the config file
+1. Edit the config file
 
-        ```sh
-        sudo nano /etc/mathesar/.env
-        ```
+    ```sh
+    sudo nano /etc/mathesar/.env
+    ```
 
 
-    2. Set the domain name to the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) config variable in config file:
+2. Set the domain name to the [ALLOWED_HOSTS](../../configuration/env-variables.md#allowed_hosts) config variable in config file:
 
-    !!! example
-        Your `.env` file should look something like this
-        
-        ``` bash
-        DJANGO_DATABASE='postgres://user:password@hostname:port/database_name'
-        # Other env variables
-        ```
+!!! example
+    Your `.env` file should look something like this
+    
+    ``` bash
+    DJANGO_DATABASE='postgres://user:password@hostname:port/database_name'
+    # Other env variables
+    ```
 
 ### Using a custom secret key
 
@@ -130,44 +132,24 @@ By default, the internal data is stored in a SQLite database. If you want Mathes
 
     2. Set the value of the [SECRET_KEY](../../configuration/env-variables.md#secret_key) to your own custom key:
 
-    !!! example
-        Your `.env` file should look something like this
-        
-        ``` bash
-        SECRET_KEY='<replace with a random 50 character string>
-        # Other env variables
-        ```
+        !!! example
+            Your `.env` file should look something like this
+            
+            ``` bash
+            SECRET_KEY='<replace with a random 50 character string>
+            # Other env variables
+            ```
 
 ## Upgrading Mathesar {:#upgrade}
 
-1. Download the updated deb file:
-    === "Debian 11"
-        ```
-        wget mathesar_0_1_3_x64_bullseye.deb
-        ```
-
-    === "Debian 12"
-        ```
-        wget mathesar_0_1_3_x64_bookworm.deb
-        ```
-
-
-1. Use apt install:
-
-    === "Debian 11"
-        ```
-        sudo apt install ./mathesar_0_1_3_x64_bullseye.deb
-        ```
-
-    === "Debian 12"
-        ```
-        sudo apt install ./mathesar_0_1_3_x64_bookworm.deb
-        ```
-
+```
+sudo apt update
+sudo apt upgrade mathesar
+```
 
 ## Uninstalling Mathesar {:#uninstall}
 
-1. Use apt remove:
+1. Remove the Mathesar package.
 
     ```bash
     sudo apt remove mathesar
@@ -181,4 +163,4 @@ By default, the internal data is stored in a SQLite database. If you want Mathes
 
 ### 400 Bad request 
 
-If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration).
+If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration).a

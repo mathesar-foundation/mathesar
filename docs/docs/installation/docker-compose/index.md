@@ -35,7 +35,12 @@ This guide is not recommended anymore. If you are already using this installatio
 
 1. Set up the database
     - To use the [default database server](../../configuration/customize-docker-compose#default-db) bundled with Mathesar, no additional steps are necessary. The database service will start along with the Mathesar web server.
+
+    <!-- TODO: remove this bullet point because it refers to a deleted page -->
+
     - Alternatively, you can [disable the default database server](../../configuration/customize-docker-compose.md#disable-db-service) if you plan on using an [existing database server](../../configuration/connect-to-existing-db.md).
+
+    <!-- TODO: remove this bullet point because it refers to a deleted page -->
 
 1. Set up the web server.
 
@@ -46,6 +51,8 @@ This guide is not recommended anymore. If you are already using this installatio
 
         !!! example
             If you are using the [default database container](../../configuration/customize-docker-compose#default-db), your `.env` file should look something like this
+
+            <!-- TODO: remove this bullet point because it refers to a deleted page -->
             
             ``` bash
             ALLOWED_HOSTS='<your_domain_name>'
