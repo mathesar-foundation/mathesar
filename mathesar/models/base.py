@@ -2,6 +2,7 @@ from functools import reduce
 
 from bidict import bidict
 
+from sqlalchemy.exc import OperationalError
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
@@ -43,13 +44,19 @@ from db.tables.operations.select import (
 from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 from db.tables.utils import get_primary_key_column
+from db.credentials import DbCredentials
 
 from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.utils.prefetch import PrefetchManager, Prefetcher
-from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
-from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
+from mathesar.state import (
+    make_sure_initial_reflection_happened,
+    get_cached_metadata,
+    reset_reflection,
+    get_cached_engine,
+    dispose_cached_engine
+)
 from mathesar.state.cached_property import cached_property
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 
@@ -78,6 +85,9 @@ class ReflectionManagerMixin(models.Model):
     # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
+    # TODO now that DatabaseObjectManager doesn't trigger reflection all the time,
+    # do we still need two managers?
+    # TODO make names descriptive; I (Dom) always forget which manager is which.
     current_objects = models.Manager()
     objects = DatabaseObjectManager()
 
@@ -104,11 +114,6 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
         return f'<{self.__class__.__name__}: {self.oid}>'
 
 
-# TODO: Replace with a proper form of caching
-# See: https://github.com/centerofci/mathesar/issues/280
-_engine_cache = {}
-
-
 class Database(ReflectionManagerMixin, BaseModel):
     name = models.CharField(max_length=128, unique=True)
     db_name = models.CharField(max_length=128)
@@ -120,21 +125,22 @@ class Database(ReflectionManagerMixin, BaseModel):
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()
-    deleted = models.BooleanField(blank=True, default=False)
 
+    # TODO db_name used to refer to Django `name` field and actual Postgres db name
+    # TODO when it's the Django `name`, use dj_name (or just name) instead
     @property
     def _sa_engine(self):
-        global _engine_cache
-        # We're caching this since the engine is used frequently.
-        db_name = self.name
-        was_cached = db_name in _engine_cache
-        if was_cached:
-            engine = _engine_cache.get(db_name)
-            model_utils.ensure_cached_engine_ready(engine)
-        else:
-            engine = create_mathesar_engine(self)
-            _engine_cache[db_name] = engine
-        return engine
+        return get_cached_engine(self.credentials)
+
+    @property
+    def credentials(self):
+        return DbCredentials(
+            username=self.username,
+            password=self.password,
+            hostname=self.host,
+            db_name=self.db_name,
+            port=self.port
+        )
 
     @property
     def supported_ui_types(self):
@@ -147,13 +153,43 @@ class Database(ReflectionManagerMixin, BaseModel):
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
 
-    def save(self, **kwargs):
-        db_name = self.name
-        # invalidate cached engine as db credentials might get changed.
-        if _engine_cache.get(db_name):
-            _engine_cache[db_name].dispose()
-            del _engine_cache[db_name]
-        return super().save()
+    def delete(self, *args, should_uninstall=False, **kwargs):
+        if should_uninstall:
+            self._uninstall_mathesar()
+        self._dispose_cached_engine()
+        return super().delete(*args, **kwargs)
+
+    def _uninstall_mathesar(self):
+        engine = self._sa_engine
+        uninstall_mathesar_from_database(engine)
+
+    def reset_reflection(self):
+        reset_reflection(db_name=self.name)
+
+    # TODO doing .connect() might not be enough, should also do `SELECT 1`
+    def is_connectable(self):
+        """
+        Returns true if connection to the database doesn't throw an exception.
+        """
+        try:
+            self._sa_engine.connect()
+            # TODO disposing and reinstatiating engines all the time is
+            # expensive; we do it here, likely to keep the number engines down
+            # in demo mode, where we somtimes have extreme numbers of databases
+            # (and thus engines); there should be better ways to manage the
+            # connection count in demo mode.
+            # NOTE this has two uses,
+            # 1. not creating long lasting engines that are not needed
+            # 2. and killing long lasting engines that are not needed
+            # Unfortunately, it also kills engines that are needed.
+            # Should be a better way to solve this.
+            self._dispose_cached_engine()
+            return True
+        except (OperationalError, KeyError):
+            return False
+
+    def _dispose_cached_engine(self):
+        dispose_cached_engine(self.credentials)
 
 
 class Schema(DatabaseObject):

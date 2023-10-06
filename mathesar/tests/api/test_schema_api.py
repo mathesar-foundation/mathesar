@@ -6,6 +6,7 @@ from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
 from mathesar.models.base import Schema
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.users import DatabaseRole
+from mathesar.state import reset_reflection
 
 
 def check_schema_response(
@@ -507,6 +508,7 @@ def test_schema_get_with_reflect_new(client, engine):
     schema_name = 'a_new_schema'
     with engine.begin() as conn:
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
+    reset_reflection(engine.url.database)
     response = client.get('/api/db/v0/schemas/')
     # The schema number should only change after the GET request
     response_data = response.json()
@@ -521,6 +523,7 @@ def test_schema_get_with_reflect_new(client, engine):
 def test_schema_get_with_reflect_change(client, engine, create_db_schema):
     schema_name = 'a_new_schema'
     create_db_schema(schema_name, engine)
+    reset_reflection(engine.url.database)
     response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [
@@ -531,7 +534,7 @@ def test_schema_get_with_reflect_change(client, engine, create_db_schema):
     new_schema_name = 'even_newer_schema'
     with engine.begin() as conn:
         conn.execute(text(f'ALTER SCHEMA {schema_name} RENAME TO {new_schema_name};'))
-    cache.clear()
+    reset_reflection(engine.url.database)
     response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [
@@ -550,7 +553,6 @@ def test_schema_get_with_reflect_change(client, engine, create_db_schema):
 def test_schema_create_duplicate(client, FUN_create_dj_db):
     db_name = "tmp_db1"
     FUN_create_dj_db(db_name)
-
     data = {
         'name': 'Test Duplication Schema',
         'database': db_name
@@ -564,7 +566,7 @@ def test_schema_create_duplicate(client, FUN_create_dj_db):
 def test_schema_get_with_reflect_delete(client, engine, create_db_schema):
     schema_name = 'a_new_schema'
     create_db_schema(schema_name, engine)
-
+    reset_reflection(engine.url.database)
     response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [
@@ -573,7 +575,7 @@ def test_schema_get_with_reflect_delete(client, engine, create_db_schema):
     assert len(orig_created) == 1
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA {schema_name};'))
-    cache.clear()
+    reset_reflection(engine.url.database)
     response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [

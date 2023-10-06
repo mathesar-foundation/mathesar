@@ -2,6 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from mathesar.models.base import Table, Schema, Database
+from mathesar.state import reset_reflection
 
 
 @pytest.fixture(autouse=True)
@@ -24,14 +25,14 @@ def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
     for schema_name in test_schemas:
         create_db_schema(schema_name, engine)
         create_db_schema("multi_db_" + schema_name, multi_db_engine)
-
+    reset_reflection()
     response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
+    assert response.status_code == 200
     response_schemas = [
         s['name'] for s in response_data['results'] if s['name'] != 'public'
     ]
 
-    assert response.status_code == 200
     assert len(response_schemas) == 4
 
     expected_schemas = test_schemas + ["multi_db_" + s for s in test_schemas]

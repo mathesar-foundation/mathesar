@@ -42,7 +42,7 @@ urlpatterns = [
     path('api/db/v0/', include(db_table_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
     path('api/ui/v0/', include(ui_table_router.urls)),
-    path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),
+    path('api/ui/v0/reflect/', views.reflect, name='reflect'),
     path('auth/password_reset_confirm', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('auth/login/', superuser_exist(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
     path('auth/create_superuser/', superuser_must_not_exist(SuperuserFormView.as_view()), name='superuser_create'),

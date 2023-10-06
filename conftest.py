@@ -7,10 +7,11 @@ import os
 from django.db import connection as dj_connection
 
 from sqlalchemy import MetaData, text, Table
-from sqlalchemy.exc import OperationalError
-from sqlalchemy_utils import database_exists, create_database, drop_database
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
-from db.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
+from db.credentials import DbCredentials
+from db.metadata import get_empty_metadata
+from db.engine import add_custom_types_to_ischema_names, create_future_engine
 from db.types import install
 from db.sql import install as sql_install
 from db.schemas.operations.drop import drop_schema as drop_sa_schema
@@ -67,24 +68,22 @@ def create_db(request, SES_engine_cache):
 
     def __create_db(db_name):
         engine = engine_cache(db_name)
-        if database_exists(engine.url):
+        if _database_exists(engine):
             logger.debug(f'dropping preexisting {db_name}')
-            drop_database(engine.url)
+            _drop_database(engine, engine_cache)
         logger.debug(f'creating {db_name}')
-        create_database(engine.url)
+        _create_database(engine, engine_cache)
         created_dbs.add(db_name)
-        # Our default testing database has our types and functions preinstalled.
         sql_install.install(engine)
         install.install_mathesar_on_database(engine)
-        engine.dispose()
         return db_name
     yield __create_db
     logger.debug('about to clean up')
     for db_name in created_dbs:
         engine = engine_cache(db_name)
-        if database_exists(engine.url):
+        if _database_exists(engine):
             logger.debug(f'dropping {db_name}')
-            drop_database(engine.url)
+            _drop_database(engine, engine_cache)
         else:
             logger.debug(f'{db_name} already gone')
     logger.debug('exit')
@@ -142,11 +141,21 @@ def test_db_name(worker_id, SES_create_db):
     A dynamic, yet non-random, db_name is used so that subsequent runs would automatically clean up
     test databases that we failed to tear down.
     """
+    db_name = f"mathesar_db_test_{worker_id}"
     create_db = SES_create_db
-    default_test_db_name = "mathesar_db_test"
-    db_name = f"{default_test_db_name}_{worker_id}"
     create_db(db_name)
     yield db_name
+
+
+@pytest.fixture(autouse=True)
+def test_db_resurrector(SES_create_db, engine, test_db_name):
+    """
+    If test_db gets dropped during a previous test, this will recreate it during setup.
+    """
+    db_name = engine.url.database
+    if not _database_exists(engine):
+        create_db = SES_create_db
+        create_db(db_name)
 
 
 @pytest.fixture(scope="session")
@@ -232,19 +241,17 @@ def create_db_schema(SES_engine_cache):
     logger.debug('exit')
 
 
-# Seems to be roughly equivalent to mathesar/database/base.py::create_mathesar_engine
-# TODO consider fixing this seeming duplication
-# either way, both depend on Django configuration. can that be resolved?
 def _create_engine(db_name):
     dj_connection_settings = dj_connection.settings_dict
-    engine = sa_create_engine(
-        _get_connection_string(
-            username=dj_connection_settings["USER"],
-            password=dj_connection_settings["PASSWORD"],
-            hostname=dj_connection_settings["HOST"],
-            database=db_name,
-        ),
-        future=True,
+    credentials = DbCredentials(
+        username=dj_connection_settings["USER"],
+        password=dj_connection_settings["PASSWORD"],
+        hostname=dj_connection_settings["HOST"],
+        db_name=db_name,
+        port=5432
+    )
+    engine = create_future_engine(
+        credentials,
         # Setting a fixed timezone makes the timezone aware test cases predictable.
         connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
     )
@@ -319,7 +326,7 @@ def library_db_tables(engine_with_library):
             autoload_with=engine,
         )
     engine, schema = engine_with_library
-    metadata = MetaData(bind=engine)
+    metadata = get_empty_metadata()
     table_names = {
         "Authors",
         "Checkouts",
@@ -385,3 +392,48 @@ def athletes_db_table(engine_with_marathon_athletes):
     metadata = MetaData(bind=engine)
     table = Table("Marathon", metadata, schema=schema, autoload_with=engine)
     return table
+
+
+def _database_exists(engine):
+    try:
+        with engine.connect().execution_options(
+            isolation_level="AUTOCOMMIT"
+        ) as conn:
+            conn.execute(text("SELECT 1"))
+            conn.commit()
+        return True
+    except (ProgrammingError, OperationalError):
+        return False
+
+
+def _drop_database(engine, engine_cache):
+    db_name = engine.url.database
+    root_engine = engine_cache('postgres')
+    # Have to kill connections to db before dropping it
+    disconnect_query = f"""
+        SELECT pg_terminate_backend(pg_stat_activity.pid)
+        FROM pg_stat_activity
+        WHERE pg_stat_activity.datname = '{db_name}'
+        AND pid <> pg_backend_pid();
+    """
+    with root_engine.connect().execution_options(
+        isolation_level="AUTOCOMMIT"
+    ) as conn:
+        conn.execute(text(disconnect_query))
+        conn.execute(text(f'DROP DATABASE "{db_name}"'))
+    # If dispose not called, later this engine struggles to reconnect
+    engine.dispose()
+    #REMOVE
+    assert not _database_exists(engine)
+
+
+def _create_database(engine, engine_cache):
+    db_name = engine.url.database
+    root_engine = engine_cache('postgres')
+    with root_engine.connect().execution_options(
+        isolation_level="AUTOCOMMIT"
+    ) as conn:
+        conn.execute(text(f'CREATE DATABASE "{db_name}"'))
+        conn.commit()
+    #REMOVE
+    assert _database_exists(engine)

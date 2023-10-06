@@ -5,70 +5,71 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from db import engine
 from db.sql import install as sql_install
 from db.types import install as types_install
+from db.credentials import DbCredentials
 
 
 def install_mathesar(
-        database_name, username, password, hostname, port, skip_confirm
+    credentials, skip_confirm
 ):
     """Create database and install Mathesar on it."""
+    db_name = credentials.db_name
+    hostname = credentials.hostname
     user_db_engine = engine.create_future_engine(
-        username, password, hostname, database_name, port,
+        credentials,
         connect_args={"connect_timeout": 10}
     )
     try:
         user_db_engine.connect()
-        print(f"Installing Mathesar on preexisting PostgreSQL database {database_name} at host {hostname}...")
+        print(f"Installing Mathesar on preexisting PostgreSQL database {db_name} at host {hostname}...")
         sql_install.install(user_db_engine)
         types_install.install_mathesar_on_database(user_db_engine)
-        user_db_engine.dispose()
     except OperationalError:
         database_created = _create_database(
-            database_name=database_name,
-            hostname=hostname,
-            username=username,
-            password=password,
-            port=port,
+            credentials,
             skip_confirm=skip_confirm
         )
         if database_created:
-            print(f"Installing Mathesar on PostgreSQL database {database_name} at host {hostname}...")
+            print(f"Installing Mathesar on PostgreSQL database {db_name} at host {hostname}...")
             sql_install.install(user_db_engine)
             types_install.install_mathesar_on_database(user_db_engine)
-            user_db_engine.dispose()
         else:
-            print(f"Skipping installing on DB with key {database_name}.")
+            print(f"Skipping installing on DB with key {db_name}.")
+    finally:
+        user_db_engine.dispose()
 
 
-def _create_database(database_name, hostname, username, password, port, skip_confirm=True):
+def _create_database(credentials, skip_confirm=True):
+    db_name = credentials.db_name
     if skip_confirm is True:
         create_database = "y"
     else:
         create_database = input(
-            f"Create a new Database called {database_name}? (y/n) > "
+            f"Create a new Database called {db_name}? (y/n) > "
         )
     if create_database.lower() in ["y", "yes"]:
         # We need to connect to an existing database inorder to create a new Database.
         # So we use the default database `postgres` that comes with postgres.
         # TODO Throw correct error when the default postgres database does not exists(which is very rare but still possible)
-        root_database = "postgres"
+        root_credentials = credentials.get_root()
         root_db_engine = engine.create_future_engine(
-            username, password, hostname, root_database, port,
+            root_credentials,
             connect_args={"connect_timeout": 10}
         )
         try:
             with root_db_engine.connect() as conn:
                 conn.execution_options(isolation_level="AUTOCOMMIT")
-                conn.execute(text(f'CREATE DATABASE "{database_name}"'))
-            root_db_engine.dispose()
-            print(f"Created DB is {database_name}.")
+                conn.execute(text(f'CREATE DATABASE "{db_name}"'))
+            print(f"Created DB is {db_name}.")
             return True
         except ProgrammingError as e:
             if isinstance(e.orig, InsufficientPrivilege):
-                print(f"Database {database_name} could not be created due to Insufficient Privilege")
+                print(f"Database {db_name} could not be created due to Insufficient Privilege")
                 return False
         except Exception:
-            print(f"Database {database_name} could not be created!")
+            print(f"Database {db_name} could not be created!")
             return False
+        finally:
+            root_db_engine.dispose()
     else:
-        print(f"Database {database_name} not created!")
+        print(f"Database {db_name} not created!")
         return False

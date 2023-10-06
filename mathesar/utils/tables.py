@@ -2,7 +2,7 @@ from sqlalchemy import MetaData
 
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.infer_types import infer_table_column_types
-from mathesar.database.base import create_mathesar_engine
+from mathesar.state import get_cached_engine
 from mathesar.imports.base import create_table_from_data_file
 from mathesar.models.base import Table
 from mathesar.state.django import reflect_columns_from_tables
@@ -76,7 +76,7 @@ def create_empty_table(name, schema, comment=None):
     :param schema: the parsed and validated schema model
     :return: the newly created blank table
     """
-    engine = create_mathesar_engine(schema.database)
+    engine = get_cached_engine(schema.database.credentials)
     db_table_oid = create_mathesar_table(engine, name, schema.oid, comment=comment)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table

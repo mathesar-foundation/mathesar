@@ -2,7 +2,7 @@ import json
 from json.decoder import JSONDecodeError
 
 from db.tables.operations.alter import update_pk_sequence_to_latest
-from mathesar.database.base import create_mathesar_engine
+from mathesar.state import get_cached_engine
 from db.records.operations.insert import insert_records_from_json
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.drop import drop_table
@@ -84,7 +84,7 @@ def insert_records_from_json_data_file(name, schema, column_names, engine, comme
 
 def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
     db_model = schema.database
-    engine = create_mathesar_engine(db_model)
+    engine = get_cached_engine(db_model.credentials)
     json_filepath = data_file.file.path
     max_level = data_file.max_level
     column_names = process_column_names(

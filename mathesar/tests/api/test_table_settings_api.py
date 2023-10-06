@@ -1,9 +1,10 @@
 import pytest
-from sqlalchemy import Column, Integer, MetaData
+from sqlalchemy import Column, Integer
 from sqlalchemy import Table as SATable
 
 from db.tables.operations.select import get_oid_from_table
 from mathesar.models import base as models_base
+from mathesar.state import get_cached_metadata, reset_reflection
 
 
 @pytest.fixture
@@ -17,20 +18,22 @@ def schema(create_schema, schema_name):
 
 
 @pytest.fixture
-def column_test_table(patent_schema, engine):
+def column_test_table2(patent_schema, engine):
     column_list_in = [
         Column("mycolumn0", Integer, primary_key=True),
         Column("mycolumn1", Integer, nullable=False),
     ]
+    metadata = get_cached_metadata()
     db_table = SATable(
         "anewtable",
-        MetaData(bind=engine),
+        metadata,
         *column_list_in,
-        schema=patent_schema.name
+        schema=patent_schema.name,
     )
-    db_table.create()
+    db_table.create(engine)
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = models_base.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    reset_reflection(engine.url.database)
     return table
 
 
@@ -98,10 +101,11 @@ def test_update_table_settings_permission(create_patents_table, request, client_
     assert response.status_code == expected_status_code
 
 
-def test_update_table_settings(client, column_test_table):
-    columns = models_base.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
+def test_update_table_settings(client, column_test_table2):
+    columns = models_base.Column.objects.filter(table=column_test_table2).values_list('id', flat=True)
     preview_template = ','.join(f'{{{ column }}}' for column in columns)
-    settings_id = column_test_table.settings.id
+    assert preview_template is not ''
+    settings_id = column_test_table2.settings.id
     column_order = [4, 5, 6]
     data = {
         "preview_settings": {
@@ -110,7 +114,7 @@ def test_update_table_settings(client, column_test_table):
         "column_order": column_order
     }
     response = client.patch(
-        f"/api/db/v0/tables/{column_test_table.id}/settings/{settings_id}/",
+        f"/api/db/v0/tables/{column_test_table2.id}/settings/{settings_id}/",
         data=data,
     )
     assert response.status_code == 200
@@ -120,14 +124,14 @@ def test_update_table_settings(client, column_test_table):
     assert response_data['column_order'] == column_order
 
 
-def test_update_table_settings_string_in_column_order(client, column_test_table):
+def test_update_table_settings_string_in_column_order(client, column_test_table2):
     column_order = ["4", "5", "6"]
     column_order_as_ints = [4, 5, 6]
     data = {
         "column_order": column_order
     }
     response = client.patch(
-        f"/api/db/v0/tables/{column_test_table.id}/settings/{column_test_table.settings.id}/",
+        f"/api/db/v0/tables/{column_test_table2.id}/settings/{column_test_table2.settings.id}/",
         data=data,
     )
     assert response.status_code == 200

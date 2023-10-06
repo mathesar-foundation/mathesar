@@ -15,7 +15,6 @@ export interface DatabaseWithConnectionError extends BaseDatabase {
 }
 
 export interface SuccessfullyConnectedDatabase extends BaseDatabase {
-  deleted: boolean;
   supported_types: string[];
 }
 

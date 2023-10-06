@@ -20,7 +20,7 @@ class DatabaseFilter(PropertyFilterSet):
 
     class Meta:
         model = Database
-        fields = ['deleted']
+        fields = []
 
 
 class DataFileFilter(PropertyFilterSet):

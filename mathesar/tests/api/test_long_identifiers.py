@@ -11,6 +11,7 @@ from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
 from mathesar.models.base import DataFile
+from mathesar.state import reset_reflection
 
 from mathesar.tests.api.test_table_api import check_create_table_response, get_expected_name
 
@@ -45,11 +46,12 @@ def dj_model_of_preexisting_db(worker_id, FUN_create_dj_db, FUN_engine_cache):
     with engine.connect() as con:
         statement = text(f"""
             CREATE TABLE public.persons (
-                {max_length_identifier} INT PRIMARY KEY
+                "{max_length_identifier}" INT PRIMARY KEY
             );
         """)
         con.execute(statement)
         con.commit()
+    reset_reflection(db_name=db_model.db_name)
     return db_model
 
 

@@ -51,17 +51,23 @@ def create_demo_database(
         user_db, username, password, hostname, root_db, port, template_db
 ):
     """Create database, install Mathesar on it, add demo data."""
-    user_db_engine = create_future_engine(
-        username, password, hostname, user_db, port
+    user_db_credentials = DbCredentials(
+        username=username,
+        password=password,
+        hostname=hostname,
+        db_name=user_db,
+        port=port
     )
+    root_db_credentials = user_db_credentials._replace(
+        db_name=root_db,
+    )
+    user_db_engine = create_future_engine(user_db_credentials)
     try:
         user_db_engine.connect()
         user_db_engine.dispose()
         print(f"Database {user_db} already exists! Skipping...")
     except OperationalError:
-        root_db_engine = create_future_engine(
-            username, password, hostname, root_db, port,
-        )
+        root_db_engine = create_future_engine(root_db_credentials)
         with root_db_engine.connect() as conn:
             conn.execution_options(isolation_level="AUTOCOMMIT")
             conn.execute(text(f"CREATE DATABASE {user_db} TEMPLATE {template_db};"))
