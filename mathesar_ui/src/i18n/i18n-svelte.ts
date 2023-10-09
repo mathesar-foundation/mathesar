@@ -5,7 +5,7 @@ import type {
   TranslationFunctions,
   Translations,
 } from './i18n-types';
-import { loadedFormatters, loadedLocales } from './i18n-util';
+import { loadedFormatters, loadedLocales } from './i18n-store';
 
 const { locale, LL, setLocale } = initI18nSvelte<
   Locales,

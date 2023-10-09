@@ -1,6 +1,6 @@
 import { initFormatters } from './formatters';
 import type { Locales, Translations } from './i18n-types';
-import { loadedFormatters, loadedLocales } from './i18n-util';
+import { loadedFormatters, loadedLocales } from './i18n-store';
 
 const localeTranslationLoaders = {
   ja: () => import('./ja/index.js'),
