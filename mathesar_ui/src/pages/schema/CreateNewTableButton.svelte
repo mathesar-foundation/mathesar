@@ -2,10 +2,7 @@
   import { router } from 'tinro';
   import { createTable } from '@mathesar/stores/tables';
   import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import {
     DropdownMenu,
     Spinner,
@@ -15,7 +12,7 @@
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
 
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
 
   let isCreatingNewTable = false;

@@ -1,7 +1,4 @@
-import type {
-  SuccessfullyConnectedDatabase,
-  SchemaEntry,
-} from '@mathesar/AppTypes';
+import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import { dataFilesApi } from '@mathesar/api/dataFiles';
 import type { DataFile } from '@mathesar/api/types/dataFiles';
 import type {
@@ -53,7 +50,7 @@ export function processColumns(
 
 export function makeHeaderUpdateRequest() {
   interface Props {
-    database: SuccessfullyConnectedDatabase;
+    database: Database;
     schema: SchemaEntry;
     table: Pick<TableEntry, 'id'>;
     dataFile: Pick<DataFile, 'id'>;
@@ -75,7 +72,7 @@ export function makeHeaderUpdateRequest() {
 
 export function makeDeleteTableRequest() {
   interface Props {
-    database: SuccessfullyConnectedDatabase;
+    database: Database;
     schema: SchemaEntry;
     table: Pick<TableEntry, 'id'>;
   }

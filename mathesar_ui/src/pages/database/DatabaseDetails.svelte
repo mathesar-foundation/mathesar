@@ -34,7 +34,7 @@
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import { router } from 'tinro';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
@@ -185,7 +185,7 @@
               icon={iconDeleteMajor}
               on:click={() => deleteConnectionModal.open()}
             >
-              Delete Connection
+              Disconnect Database
             </ButtonMenuItem>
           {/if}
         </DropdownMenu>
@@ -199,7 +199,7 @@
     <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
   </div>
   {#if !isSuccessfullyConnectedDatabase(database)}
-    <ConnectionError databaseName={database.name} />
+    <ConnectionError {database} />
   {:else}
     <EntityContainerWithFilterBar
       searchPlaceholder="Search Schemas"

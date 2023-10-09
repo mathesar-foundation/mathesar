@@ -12,28 +12,24 @@
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { AnchorButton, Icon } from '@mathesar/component-library';
   import { labeledCount } from '@mathesar/utils/languageUtils';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/preloadData';
   import DatabaseConnectionSkeleton from './DatabaseConnectionSkeleton.svelte';
   import { makeSimplePageTitle } from '../pageTitleUtils';
   import DatabaseConnectionItem from './DatabaseConnectionItem.svelte';
 
   let filterQuery = '';
 
-  $: isPreloaded = $databases.preload;
   $: allDatabases = $databases.data;
   $: databasesLoadStatus = $databases.state;
   $: databasesLoadError = $databases.error;
 
+  function isMatch(database: Database, q: string) {
+    return (
+      database.name.toLowerCase().includes(q) ||
+      database.db_name.toLowerCase().includes(q)
+    );
+  }
+
   function filterDatabase(_databases: Database[], query: string) {
-    function isMatch(database: Database, q: string) {
-      if (!isSuccessfullyConnectedDatabase(database)) {
-        return database.name.toLowerCase().includes(q);
-      }
-      return (
-        database.name.toLowerCase().includes(q) ||
-        database.db_name.toLowerCase().includes(q)
-      );
-    }
     return _databases.filter((database) => {
       if (query) {
         const sanitizedQuery = query.trim().toLowerCase();
@@ -69,9 +65,9 @@
 <h1>Database Connections {filteredDatabasesCountText}</h1>
 
 <section class="connections-list-container">
-  {#if databasesLoadStatus === States.Loading && !isPreloaded}
+  {#if databasesLoadStatus === States.Loading}
     <DatabaseConnectionSkeleton />
-  {:else if databasesLoadStatus === States.Done || isPreloaded}
+  {:else if databasesLoadStatus === States.Done}
     <EntityContainerWithFilterBar
       searchPlaceholder="Search Database Connections"
       bind:searchQuery={filterQuery}
@@ -91,9 +87,12 @@
       </slot>
       <slot slot="content">
         {#if filteredDatabases.length}
-          <div class="connection-list">
-            {#each filteredDatabases as connection (connection.id)}
-              <DatabaseConnectionItem database={connection} />
+          <div class="connections-list">
+            {#each filteredDatabases as db, index (db.id)}
+              {#if index !== 0}
+                <hr />
+              {/if}
+              <DatabaseConnectionItem database={db} />
             {/each}
           </div>
         {:else if allDatabases.length === 0}
@@ -109,12 +108,23 @@
 </section>
 
 <style lang="scss">
-  .connection-list {
+  .connections-list-container {
     display: flex;
     flex-direction: column;
 
     > :global(* + *) {
       margin-top: 1rem;
+    }
+  }
+
+  .connections-list {
+    border-radius: var(--border-radius-m);
+    border: 1px solid var(--slate-200);
+    hr {
+      border: 0;
+      border-top: 1px solid var(--slate-200);
+      display: block;
+      margin: 0 var(--size-xx-small);
     }
   }
 </style>

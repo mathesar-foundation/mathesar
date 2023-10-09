@@ -1,7 +1,4 @@
-import type {
-  SuccessfullyConnectedDatabase,
-  SchemaEntry,
-} from '@mathesar/AppTypes';
+import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import {
   deleteAPI,
   getAPI,
@@ -21,7 +18,7 @@ export type UserRole = 'viewer' | 'editor' | 'manager';
 
 export interface DatabaseRole {
   id: number;
-  database: SuccessfullyConnectedDatabase['id'];
+  database: Database['id'];
   role: UserRole;
 }
 
@@ -76,7 +73,7 @@ function resetPassword(userId: User['id'], password: string) {
 
 function addDatabaseRole(
   userId: User['id'],
-  databaseId: SuccessfullyConnectedDatabase['id'],
+  databaseId: Database['id'],
   role: UserRole,
 ) {
   return postAPI<DatabaseRole>('/api/ui/v0/database_roles/', {

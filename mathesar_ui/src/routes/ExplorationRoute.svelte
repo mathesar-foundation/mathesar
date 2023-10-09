@@ -1,14 +1,11 @@
 <script lang="ts">
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
   import { queries } from '@mathesar/stores/queries';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
 
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
   export let queryId: number;
 

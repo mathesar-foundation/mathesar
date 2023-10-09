@@ -12,10 +12,7 @@ import userApi, {
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
-import type {
-  SuccessfullyConnectedDatabase,
-  SchemaEntry,
-} from '@mathesar/AppTypes';
+import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import {
   rolesAllowOperation,
   type AccessOperation,
@@ -52,7 +49,7 @@ export class UserModel {
 
   hasPermission(
     dbObject: {
-      database?: Pick<SuccessfullyConnectedDatabase, 'id'>;
+      database?: Pick<Database, 'id'>;
       schema?: Pick<SchemaEntry, 'id'>;
     },
     operation: AccessOperation,
@@ -82,7 +79,7 @@ export class UserModel {
     return rolesAllowOperation(operation, roles);
   }
 
-  getRoleForDb(database: Pick<SuccessfullyConnectedDatabase, 'id'>) {
+  getRoleForDb(database: Pick<Database, 'id'>) {
     return this.databaseRoles.get(database.id);
   }
 
@@ -90,11 +87,11 @@ export class UserModel {
     return this.schemaRoles.get(schema.id);
   }
 
-  hasDirectDbAccess(database: Pick<SuccessfullyConnectedDatabase, 'id'>) {
+  hasDirectDbAccess(database: Pick<Database, 'id'>) {
     return this.databaseRoles.has(database.id);
   }
 
-  hasDbAccess(database: Pick<SuccessfullyConnectedDatabase, 'id'>) {
+  hasDbAccess(database: Pick<Database, 'id'>) {
     return this.hasDirectDbAccess(database) || this.isSuperUser;
   }
 
@@ -103,7 +100,7 @@ export class UserModel {
   }
 
   hasSchemaAccess(
-    database: Pick<SuccessfullyConnectedDatabase, 'id'>,
+    database: Pick<Database, 'id'>,
     schema: Pick<SchemaEntry, 'id'>,
   ) {
     return this.hasDbAccess(database) || this.hasDirectSchemaAccess(schema);
@@ -258,7 +255,7 @@ class WritableUsersStore {
 
   async addDatabaseRoleForUser(
     userId: number,
-    database: Pick<SuccessfullyConnectedDatabase, 'id'>,
+    database: Pick<Database, 'id'>,
     role: UserRole,
   ) {
     const dbRole = await userApi.addDatabaseRole(userId, database.id, role);
@@ -275,7 +272,7 @@ class WritableUsersStore {
 
   async removeDatabaseAccessForUser(
     userId: number,
-    database: Pick<SuccessfullyConnectedDatabase, 'id'>,
+    database: Pick<Database, 'id'>,
   ) {
     const user = get(this.users).find((entry) => entry.id === userId);
     const dbRole = user?.getRoleForDb(database);
@@ -330,15 +327,13 @@ class WritableUsersStore {
     }
   }
 
-  getUsersWithAccessToDb(database: Pick<SuccessfullyConnectedDatabase, 'id'>) {
+  getUsersWithAccessToDb(database: Pick<Database, 'id'>) {
     return derived(this.users, ($users) =>
       $users.filter((user) => user.hasDbAccess(database)),
     );
   }
 
-  getUsersWithoutAccessToDb(
-    database: Pick<SuccessfullyConnectedDatabase, 'id'>,
-  ) {
+  getUsersWithoutAccessToDb(database: Pick<Database, 'id'>) {
     return derived(this.users, ($users) =>
       $users.filter((user) => !user.hasDbAccess(database)),
     );
@@ -361,7 +356,7 @@ class WritableUsersStore {
   }
 
   getUsersWithAccessToSchema(
-    database: Pick<SuccessfullyConnectedDatabase, 'id'>,
+    database: Pick<Database, 'id'>,
     schema: Pick<SchemaEntry, 'id'>,
   ) {
     return derived(this.users, ($users) =>

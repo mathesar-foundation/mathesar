@@ -9,18 +9,16 @@
   } from '@mathesar/components/form';
   import { databases } from '@mathesar/stores/databases';
   import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
-  import type { SuccessfullyConnectedDatabase } from '@mathesar/AppTypes';
-  import { createEventDispatcher } from 'svelte';
+  import type { Database } from '@mathesar/AppTypes';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-
-  const dispatch = createEventDispatcher<{
-    create: SuccessfullyConnectedDatabase;
-    update: undefined;
-  }>();
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
 
   let databaseNameProp: string | undefined = undefined;
   export { databaseNameProp as databaseName };
+  export let onCreate: ((db: Database) => Promise<void>) | undefined =
+    undefined;
+  export let onUpdate: (() => Promise<void>) | undefined = undefined;
 
   $: database = $databases.data?.find((db) => db.name === databaseNameProp);
   $: isNewConnection = !database;
@@ -29,7 +27,7 @@
   $: databaseName = requiredField(database?.db_name ?? '');
   $: username = requiredField(database?.username ?? '');
   $: host = requiredField(database?.host ?? '');
-  $: port = requiredField(database?.port ?? '', [
+  $: port = requiredField(database?.port ?? '5432', [
     (value) =>
       !Number.isNaN(+value)
         ? { type: 'valid' }
@@ -83,11 +81,11 @@
   async function saveConnectionDetails() {
     if (isNewConnection) {
       const newDatabase = await addNewDatabaseConnection();
-      dispatch('create', newDatabase);
+      await onCreate?.(newDatabase);
     } else {
       await updateDatabaseConnection();
       form.reset();
-      dispatch('update');
+      await onUpdate?.();
     }
   }
 
@@ -151,8 +149,12 @@
     label="Username *"
     field={username}
     input={{ component: TextInput }}
-    help="The user will need to have SUPERUSER or DB OWNER privileges on the database. Why is this needed?."
-  />
+  >
+    <slot slot="help">
+      The user will need to have SUPERUSER or DB OWNER privileges on the
+      database. <DocsLink path="/">Why is this needed?</DocsLink>.
+    </slot>
+  </GridFormInput>
 
   <GridFormInput
     label={isNewConnection ? 'Password *' : 'Password'}
@@ -167,9 +169,9 @@
   {#if isNewConnection}
     <!-- TODO: Add link -->
     <WarningBox>
-      Every PostgreSQL database includes the "public" schema. This protected
-      schema can be read by anybody who accesses the database. They will all be
-      namespaced into Mathesar-specific schemas for safety and organization.
+      For Mathesar to function properly, we will add a number of functions and
+      types to this database. They will all be namespaced into
+      <DocsLink path="/">Mathesar-specific schemas</DocsLink> for safety and organization.
     </WarningBox>
   {/if}
   <FormSubmit
@@ -186,12 +188,12 @@
   />
 </div>
 
-<style lang="scss">
+<style>
   .db-connection-form {
     display: grid;
     grid-template-columns: auto 1fr auto 1fr;
   }
-  :global(.right:not(.db-connection-form > .right)) {
+  :global(.db-connection-form .right:not(.db-connection-form > .right)) {
     grid-column: 2/5;
   }
   :global(.db-connection-form > .right, .db-connection-form > .left) {

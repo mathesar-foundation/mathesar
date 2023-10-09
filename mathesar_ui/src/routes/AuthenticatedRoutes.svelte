@@ -11,7 +11,7 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
 
-  $: firstDatabase = $databases.successfulConnections?.[0];
+  $: firstDatabase = $databases.data?.[0];
 </script>
 
 {#if firstDatabase}

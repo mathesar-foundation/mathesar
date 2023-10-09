@@ -5,13 +5,10 @@
   import { iconExploration } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { tables as tablesStore } from '@mathesar/stores/tables';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 
   export let exploration: QueryInstance;
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
 
   $: baseTable = $tablesStore.data.get(exploration.base_table);

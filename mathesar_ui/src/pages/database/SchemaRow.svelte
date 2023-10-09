@@ -2,10 +2,7 @@
   import { createEventDispatcher } from 'svelte';
 
   import { ButtonMenuItem, Icon } from '@mathesar-component-library';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
@@ -21,7 +18,7 @@
 
   const dispatch = createEventDispatcher();
 
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
   export let canExecuteDDL = true;
 

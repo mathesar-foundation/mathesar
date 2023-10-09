@@ -2,13 +2,10 @@
   import { router } from 'tinro';
   import { createTable } from '@mathesar/stores/tables';
   import { getTablePageUrl } from '@mathesar/routes/urls';
-  import type {
-    SuccessfullyConnectedDatabase,
-    SchemaEntry,
-  } from '@mathesar/AppTypes';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { Button, Spinner } from '@mathesar-component-library';
 
-  export let database: SuccessfullyConnectedDatabase;
+  export let database: Database;
   export let schema: SchemaEntry;
 
   let classes = '';
