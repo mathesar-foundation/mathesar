@@ -1,4 +1,5 @@
-import type { BaseTranslation } from '../i18n-types.js';
+import type { BaseTranslation, Translations } from '../i18n-types.js';
+import { addTranslationsToGlobalObject } from '../i18n-util.js';
 
 const en: BaseTranslation = {
   general: {
@@ -32,3 +33,5 @@ const en: BaseTranslation = {
 };
 
 export default en;
+
+addTranslationsToGlobalObject('en', en as Translations);

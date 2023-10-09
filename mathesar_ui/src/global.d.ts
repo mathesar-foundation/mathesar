@@ -7,9 +7,9 @@ declare module '*.mdx' {
 }
 
 interface Window {
-  mathesar:
+  Mathesar:
     | {
-        translations: { lang: Locales; translationStrings: string } | undefined;
+        translations: Record<Locales, Translations> | undefined;
       }
     | undefined;
 }

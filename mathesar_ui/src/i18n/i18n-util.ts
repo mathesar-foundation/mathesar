@@ -12,3 +12,17 @@ export const loadedFormatters: Record<Locales, Formatters> = {} as Record<
 >;
 
 export const extendDictionary = initExtendDictionary<Translations>();
+
+export function addTranslationsToGlobalObject(
+  locale: Locales,
+  translations: Translations,
+) {
+  if (typeof window === 'undefined') return;
+  window.Mathesar = {
+    ...window.Mathesar,
+    translations: {
+      ...window.Mathesar?.translations,
+      [locale]: translations,
+    },
+  };
+}

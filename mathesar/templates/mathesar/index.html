@@ -19,15 +19,7 @@
     {% endfor %}
   {% endif %}
 
-  <script type="module">
-    import("{{ module_translations_file_path }}").then(translations => {
-      window.mathesar = window.mathesar || {};
-      window.mathesar.translations = {
-        lang: "{{ preferred_language }}",
-        translationStrings: JSON.stringify(translations.default)
-      };
-    })
-  </script>
+  <script type="module" src="{{ module_translations_file_path }}"></script>
 
   {% if development_mode %}
     <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
@@ -62,6 +54,15 @@
       nomodule
       src="{% static manifest_data.legacy_polyfill_js %}"
     ></script>
+    <script
+      nomodule
+      id="vite-legacy-translations-slot"
+      data-src="{{ legacy_translations_file_path }}"
+    >
+      System.import(
+        document.getElementById("vite-legacy-translations-slot").getAttribute("data-src")
+      );
+    </script>
     <script
       nomodule
       id="vite-legacy-js-slot"
