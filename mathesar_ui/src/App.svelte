@@ -14,27 +14,18 @@
    * 1. Load the translations file in parallel to the first FE chunk.
    * 2. And then make it available for the entry(App.svelte)
    *    file to load them into memory.
-   * the index.html loads it as using a script tag and attach it
-   * to the window object which is being read here
+   *
+   * The index.html loads it as using a script tag
+   * Each translations file on load, attaches the translations
+   * to the window object
    */
   void (async () => {
-    const { translations } = window.mathesar || {};
-    if (translations) {
-      loadTranslations(
-        translations.lang,
-        JSON.parse(translations.translationStrings),
-      );
-      setLocale(translations.lang);
+    const { translations, displayLanguage } = window.Mathesar || {};
+    if (translations && displayLanguage) {
+      loadTranslations(displayLanguage, translations[displayLanguage]);
+      setLocale(displayLanguage);
       isTranslationsLoaded = true;
     } else {
-      /**
-       * !!! CAUTION: DO NOT REMOVE THIS !!!
-       * Reason: Apart from loading the `en` translations as default
-       * when there are translations on the window object,
-       * this also tells the vite bundler to bundle
-       * it as a default exported module. Otherwise vite converts the
-       * default export to named exports internally for the sake of optimization.
-       */
       await loadLocaleAsync('en');
       isTranslationsLoaded = true;
     }

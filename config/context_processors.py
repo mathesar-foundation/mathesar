@@ -31,24 +31,24 @@ def get_i18n_settings(manifest_data, development_mode):
     but will be taken from users model
     and cookies later on
     """
-    preferred_language = 'en'
-    default_language = 'en'
+    display_language = 'en'
+    fallback_language = 'en'
 
     client_dev_url = settings.MATHESAR_CLIENT_DEV_URL
 
     if development_mode is True:
-        module_translations_file_path = f'{client_dev_url}/src/i18n/{preferred_language}/index.ts'
-        legacy_translations_file_path = f'{client_dev_url}/src/i18n/{preferred_language}/index.ts'
+        module_translations_file_path = f'{client_dev_url}/src/i18n/{display_language}/index.ts'
+        legacy_translations_file_path = f'{client_dev_url}/src/i18n/{display_language}/index.ts'
     else:
         try:
-            module_translations_file_path = static(manifest_data[preferred_language]["file"])
-            legacy_translations_file_path = static(manifest_data[f"{preferred_language}-legacy"]["file"])
+            module_translations_file_path = static(manifest_data[display_language]["file"])
+            legacy_translations_file_path = static(manifest_data[f"{display_language}-legacy"]["file"])
         except KeyError:
-            module_translations_file_path = static(manifest_data[default_language]["file"])
-            legacy_translations_file_path = static(manifest_data[f"{default_language}-legacy"]["file"])
+            module_translations_file_path = static(manifest_data[fallback_language]["file"])
+            legacy_translations_file_path = static(manifest_data[f"{fallback_language}-legacy"]["file"])
 
     return {
         'module_translations_file_path': module_translations_file_path,
         'legacy_translations_file_path': legacy_translations_file_path,
-        'preferred_language': preferred_language
+        'display_language': display_language
     }
