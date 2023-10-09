@@ -1,5 +1,5 @@
-import type { BaseTranslation, Translations } from '../i18n-types.js';
-import { addTranslationsToGlobalObject } from '../i18n-util.js';
+import type { BaseTranslation, Translations } from '../i18n-types';
+import { addTranslationsToGlobalObject } from '../i18n-util';
 
 const en: BaseTranslation = {
   general: {

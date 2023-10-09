@@ -1,5 +1,5 @@
-import en from '../en/index.js';
-import type { Translation } from '../i18n-types.js';
+import en from '../en/index';
+import type { Translation } from '../i18n-types';
 import {
   addTranslationsToGlobalObject,
   extendDictionary,

@@ -1,5 +1,5 @@
 import { initExtendDictionary } from 'typesafe-i18n/utils';
-import type { Formatters, Locales, Translations } from './i18n-types.js';
+import type { Formatters, Locales, Translations } from './i18n-types';
 
 export const loadedLocales: Record<Locales, Translations> = {} as Record<
   Locales,
