@@ -46,8 +46,7 @@
     if (result) {
       if (LinkedFkid !== undefined && LinkedFkid !== null) {
         value = result.record[LinkedFkid];
-      }
-      else {
+      } else {
         value = result.recordId;
       }
       setRecordSummary(String(result.recordId), result.recordSummary);
