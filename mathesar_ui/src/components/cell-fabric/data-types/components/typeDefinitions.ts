@@ -46,7 +46,7 @@ export interface LinkedRecordCellExternalProps {
 export interface LinkedRecordCellProps
   extends CellTypeProps<ForeignKeyCellValue>,
     LinkedRecordCellExternalProps {
-  columnFabric?: ProcessedColumn;
+  columnFabric: ProcessedColumn;
   recordSummary?: string;
   setRecordSummary?: (recordId: string, recordSummary: string) => void;
 }

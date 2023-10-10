@@ -42,10 +42,9 @@
     }
     event?.stopPropagation();
     const result = await recordSelector.acquireUserInput({ tableId });
-    const linkFk = columnFabric!.linkFk;
-    const LinkedFkid = linkFk!.referent_columns[0];
+    const LinkedFkid = columnFabric.linkFk?.referent_columns[0];
     if (result) {
-      value = result.record[LinkedFkid];
+      value = result.record[LinkedFkid!];
       setRecordSummary(String(result.recordId), result.recordSummary);
       dispatch('update', { value });
     }
