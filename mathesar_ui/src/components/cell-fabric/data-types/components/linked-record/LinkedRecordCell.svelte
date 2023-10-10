@@ -44,7 +44,7 @@
     const result = await recordSelector.acquireUserInput({ tableId });
     const LinkedFkid = columnFabric.linkFk?.referent_columns[0];
     if (result) {
-      if (LinkedFkid !== undefined && LinkedFkid !== null){
+      if (LinkedFkid !== undefined && LinkedFkid !== null) {
         value = result.record[LinkedFkid];
       }
       else {
