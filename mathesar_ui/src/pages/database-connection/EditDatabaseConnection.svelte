@@ -3,6 +3,7 @@
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import { toast } from '@mathesar/stores/toast';
   import {
+    DATABASE_CONNECTION_LIST_URL,
     getDatabaseConnectionEditUrl,
     getDatabasePageUrl,
   } from '@mathesar/routes/urls';
@@ -12,7 +13,7 @@
   import { modal } from '@mathesar/stores/modal';
   import Button from '@mathesar/component-library/button/Button.svelte';
   import { Icon } from '@mathesar/component-library';
-  import FormBox from '../admin-users/FormBox.svelte';
+  import FormBox from '@mathesar/components/form/FormBox.svelte';
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
   import DeleteDatabaseConnectionConfirmationModal from '../database/DeleteDatabaseConnectionConfirmationModal.svelte';
 
@@ -37,7 +38,7 @@
 
   async function handleSuccessfulDeleteConnection() {
     await reloadDatabases();
-    router.goto('/');
+    router.goto(DATABASE_CONNECTION_LIST_URL);
   }
 </script>
 

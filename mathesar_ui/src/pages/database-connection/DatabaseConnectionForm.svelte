@@ -150,9 +150,10 @@
     field={username}
     input={{ component: TextInput }}
   >
+    <!-- TODO: Add link -->
     <slot slot="help">
-      The user will need to have SUPERUSER or DB OWNER privileges on the
-      database. <DocsLink path="/">Why is this needed?</DocsLink>.
+      The user will need to have CONNECT and CREATE privileges on the database.
+      <DocsLink path="/">Why is this needed?</DocsLink>.
     </slot>
   </GridFormInput>
 

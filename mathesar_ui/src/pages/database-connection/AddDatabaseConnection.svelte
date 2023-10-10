@@ -10,7 +10,7 @@
   import { router } from 'tinro';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import { reflectApi } from '@mathesar/api/reflect';
-  import FormBox from '../admin-users/FormBox.svelte';
+  import FormBox from '@mathesar/components/form/FormBox.svelte';
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
 
   async function handleSuccess(database: Database) {
