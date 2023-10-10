@@ -3,6 +3,7 @@ import type {
   NumberFormatterOptions,
   SelectProps,
 } from '@mathesar-component-library/types';
+import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 
@@ -36,7 +37,7 @@ export interface PrimaryKeyCellProps
 
 // Foreign key
 
-export type ForeignKeyCellValue = string | number | null;
+export type ForeignKeyCellValue = string | number | boolean | null;
 
 export interface LinkedRecordCellExternalProps {
   tableId: DBObjectEntry['id'];
@@ -45,6 +46,7 @@ export interface LinkedRecordCellExternalProps {
 export interface LinkedRecordCellProps
   extends CellTypeProps<ForeignKeyCellValue>,
     LinkedRecordCellExternalProps {
+  columnFabric?: ProcessedColumn;
   recordSummary?: string;
   setRecordSummary?: (recordId: string, recordSummary: string) => void;
 }

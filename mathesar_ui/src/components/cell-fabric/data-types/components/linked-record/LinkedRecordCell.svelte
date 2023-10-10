@@ -20,6 +20,7 @@
   const recordSelector = getRecordSelectorFromContext();
 
   export let isActive: $$Props['isActive'];
+  export let columnFabric: $$Props['columnFabric'];
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -41,8 +42,10 @@
     }
     event?.stopPropagation();
     const result = await recordSelector.acquireUserInput({ tableId });
+    const linkFk = columnFabric!.linkFk;
+    const LinkedFkid = linkFk!.referent_columns[0];
     if (result) {
-      value = result.recordId;
+      value = result.record[LinkedFkid];
       setRecordSummary(String(result.recordId), result.recordSummary);
       dispatch('update', { value });
     }
