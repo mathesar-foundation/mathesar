@@ -139,6 +139,10 @@ class ConstraintSerializer(
         'foreignkey': ForeignKeyConstraintSerializer,
         'primary': BaseConstraintSerializer,
         'unique': BaseConstraintSerializer,
+        # Even though 'check' & 'exclude' constraints are currently unsupported it's added here
+        # so that the app doesn't break in case these constraints are already present.
+        'check': BaseConstraintSerializer,
+        'exclude': BaseConstraintSerializer
     }
 
     def get_mapping_field(self, data):
