@@ -8,6 +8,7 @@ from sqlalchemy.exc import OperationalError
 
 from db import engine
 from db.metadata import get_empty_metadata
+from db.credentials import DbCredentials
 from mathesar.models.base import Database
 from mathesar.state.django import reflect_db_objects
 
@@ -49,7 +50,7 @@ def drop_all_stale_databases(force=False, max_days=3, *args, **kwargs):
         username=settings.DATABASES["default"]["USER"],
         password=settings.DATABASES["default"]["PASSWORD"],
         hostname=settings.DATABASES["default"]["HOST"],
-        db_name=settings.DATABASES["default"]["NAME"]
+        db_name=settings.DATABASES["default"]["NAME"],
         port=settings.DATABASES["default"]["PORT"],
     )
     for database in stale_databases:

@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from db.engine import create_future_engine
+from db.credentials import DbCredentials
 
 from mathesar.models.base import Table, Schema
 
