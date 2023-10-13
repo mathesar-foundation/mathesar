@@ -155,7 +155,7 @@ def test_db_resurrector(SES_create_db, engine, test_db_name):
 
     The reason to have this is that sometimes test_db gets dropped
     during a test, but most tests presume that this db is always available. As
-    of time of writing, that's only happening in `test_database_api.py.
+    of time of writing, that's only happening in `test_database_api.py`.
     """
     db_name = engine.url.database
     if not _database_exists(engine):
@@ -400,6 +400,13 @@ def athletes_db_table(engine_with_marathon_athletes):
 
 
 def _database_exists(engine):
+    """
+    Returns true if database is connectable and executing a rudimentary query
+    succeeds.
+
+    Clone of analogous function in sqlalchemy_utils, but doesn't spawn new
+    engines.
+    """
     try:
         with engine.connect().execution_options(
             isolation_level="AUTOCOMMIT"
@@ -412,6 +419,14 @@ def _database_exists(engine):
 
 
 def _drop_database(engine, engine_cache):
+    """
+    Drops given database identified by `engine`.
+
+    `engine_cache` used to prevent spawning redundant "root" engines.
+
+    Clone of analogous function in sqlalchemy_utils, but doesn't spawn new
+    engines.
+    """
     db_name = engine.url.database
     root_engine = engine_cache('postgres')
     # Have to kill connections to db before dropping it
@@ -431,6 +446,14 @@ def _drop_database(engine, engine_cache):
 
 
 def _create_database(engine, engine_cache):
+    """
+    Creates given database identified by `engine`.
+
+    `engine_cache` used to prevent spawning redundant "root" engines.
+
+    Clone of analogous function in sqlalchemy_utils, but doesn't spawn new
+    engines.
+    """
     db_name = engine.url.database
     root_engine = engine_cache('postgres')
     with root_engine.connect().execution_options(

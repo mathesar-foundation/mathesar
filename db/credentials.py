@@ -2,6 +2,11 @@ from collections import namedtuple
 from sqlalchemy.engine import URL
 
 
+# Encapsulates information necessary to perform and uniquely identify a
+# connection to a Postgres database. More practical than passing that
+# information around as 5 separate parameters.
+#
+# Usable as a cache key when caching database-specific things (like SA engines).
 DbCredentials = namedtuple(
     'DbCredentials',
     [
@@ -15,6 +20,9 @@ DbCredentials = namedtuple(
 
 
 def _to_sa_url(credentials):
+    """
+    Converts DbCredentials into SA's URL.
+    """
     return URL.create(
         "postgresql",
         username=credentials.username,

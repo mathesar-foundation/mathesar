@@ -5,7 +5,6 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from db import engine
 from db.sql import install as sql_install
 from db.types import install as types_install
-from db.credentials import DbCredentials
 
 
 def install_mathesar(
