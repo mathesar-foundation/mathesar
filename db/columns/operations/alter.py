@@ -4,7 +4,7 @@ from psycopg.errors import (
     SyntaxError
 )
 from db import connection as db_conn
-from db.columns.defaults import NAME, NULLABLE
+from db.columns.defaults import NAME, NULLABLE, DESCRIPTION
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 
 
@@ -25,7 +25,8 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
         "type_options": <dict>,
         "column_default_dict": {"is_dynamic": <bool>, "value": <any>}
         "nullable": <str>,
-        "name": <str>
+        "name": <str>,
+        "description": <str>
     }
     """
     column_alter_def = _process_column_alter_dict(column_data, column_attnum)
@@ -52,8 +53,12 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
                 engine, 'get_column_name', table_oid, column_attnum
             ).fetchone()[0]
             raise InvalidTypeError(column_db_name, requested_type)
-        except SyntaxError:
-            raise InvalidTypeOptionError
+        except SyntaxError as e:
+            # TODO this except catch is too broad; syntax errors can be caused
+            # by many things, especially programmer errors during development.
+            # find a way to be more selective about what we call an invalid
+            # type option error.
+            raise InvalidTypeOptionError(e)
     else:
         db_conn.execute_msar_func_with_psycopg2_conn(
             connection, 'alter_columns',
@@ -186,7 +191,8 @@ def _process_column_alter_dict(column_data, column_attnum=None):
         "column_default_dict": {"is_dynamic": <bool>, "value": <any>}
         "nullable": <bool>,
         "name": <str>,
-        "delete": <bool>
+        "delete": <bool>,
+        "description": <str>
     }
 
     Output form:
@@ -195,7 +201,8 @@ def _process_column_alter_dict(column_data, column_attnum=None):
         "name": <str>,
         "not_null": <bool>,
         "default": <any>,
-        "delete": <bool>
+        "delete": <bool>,
+        "description": <str>
     }
 
     Note that keys with empty values will be dropped, unless the given "default"
@@ -218,9 +225,15 @@ def _process_column_alter_dict(column_data, column_attnum=None):
         "type": new_type,
         "not_null": column_not_null,
         "name": column_name,
-        "delete": column_delete
+        "delete": column_delete,
     }
     col_alter_def = {k: v for k, v in raw_col_alter_def.items() if v is not None}
+    # NOTE DESCRIPTION is set separately, because it shouldn't be removed if its
+    # value is None (that signals that the description should be removed in the
+    # db).
+    if DESCRIPTION in column_data:
+        column_description = column_data.get(DESCRIPTION)
+        col_alter_def[DESCRIPTION] = column_description
     default_dict = column_data.get(DEFAULT_DICT, {})
     if default_dict is not None and DEFAULT_KEY in default_dict:
         default_value = column_data.get(DEFAULT_DICT, {}).get(DEFAULT_KEY)
