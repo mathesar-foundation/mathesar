@@ -1,4 +1,3 @@
-from django.core.cache import cache
 import pytest
 from sqlalchemy import text
 
@@ -65,10 +64,13 @@ def test_schema_list(request, patent_schema, create_schema, MOD_engine_cache, cl
     )
 
 
-@pytest.mark.skip("Faulty DB handling assumptions; invalid")
-def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engine_cache):
-    schema_params = [("schema_1", "database_1"), ("schema_2", "database_2"),
-                     ("schema_3", "database_3"), ("schema_1", "database_3")]
+def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engine_cache, uid):
+    schema_params = [
+        ("schema_1", "database_1" + uid),
+        ("schema_2", "database_2" + uid),
+        ("schema_3", "database_3" + uid),
+        ("schema_1", "database_3" + uid)
+    ]
 
     dbs_to_create = set(param[1] for param in schema_params)
 
@@ -78,8 +80,7 @@ def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engi
     for schema_name, db_name in schema_params:
         engine = MOD_engine_cache(db_name)
         create_db_schema(schema_name, engine)
-
-    cache.clear()
+        reset_reflection(db_name)
 
     schemas = {
         schema_param: Schema.objects.get(
@@ -93,7 +94,7 @@ def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engi
 
     names = ["schema_1", "schema_3"]
     names_query = ",".join(names)
-    databases = ["database_2", "database_3"]
+    databases = ["database_2" + uid, "database_3" + uid]
     database_query = ",".join(databases)
     query = f"name={names_query}&database={database_query}"
 
@@ -266,8 +267,8 @@ def test_schema_sort_by_id(create_schema, client, MOD_engine_cache):
         )
 
 
-def test_schema_create_by_superuser(client, FUN_create_dj_db, MOD_engine_cache):
-    db_name = "some_db1"
+def test_schema_create_by_superuser(client, FUN_create_dj_db, MOD_engine_cache, uid):
+    db_name = uid
     FUN_create_dj_db(db_name)
 
     schema_count_before = Schema.objects.count()
@@ -294,8 +295,8 @@ def test_schema_create_by_superuser(client, FUN_create_dj_db, MOD_engine_cache):
     )
 
 
-def test_schema_create_by_superuser_too_long_name(client, FUN_create_dj_db):
-    db_name = "some_db1"
+def test_schema_create_by_superuser_too_long_name(client, FUN_create_dj_db, uid):
+    db_name = uid
     FUN_create_dj_db(db_name)
     schema_count_before = Schema.objects.count()
     very_long_string = ''.join(map(str, range(50)))
@@ -311,8 +312,8 @@ def test_schema_create_by_superuser_too_long_name(client, FUN_create_dj_db):
     assert schema_count_after == schema_count_before
 
 
-def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, get_uid):
-    db_name = get_uid()
+def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, uid):
+    db_name = uid
     role = "manager"
     database = FUN_create_dj_db(db_name)
 
@@ -329,8 +330,8 @@ def test_schema_create_by_db_manager(client_bob, user_bob, FUN_create_dj_db, get
     assert response.status_code == 201
 
 
-def test_schema_create_by_db_editor(client_bob, user_bob, FUN_create_dj_db, get_uid):
-    db_name = get_uid()
+def test_schema_create_by_db_editor(client_bob, user_bob, FUN_create_dj_db, uid):
+    db_name = uid
     role = "editor"
     database = FUN_create_dj_db(db_name)
     DatabaseRole.objects.create(database=database, user=user_bob, role=role)
@@ -363,9 +364,8 @@ def test_schema_create_multiple_existing_roles(client_bob, user_bob, FUN_create_
     assert response.status_code == 201
 
 
-@pytest.mark.skip("Faulty DB handling assumptions; invalid")
-def test_schema_create_description(client, FUN_create_dj_db, MOD_engine_cache):
-    db_name = "some_db2"
+def test_schema_create_description(client, FUN_create_dj_db, MOD_engine_cache, uid):
+    db_name = "some_db2" + uid
     FUN_create_dj_db(db_name)
 
     schema_count_before = Schema.objects.count()
@@ -549,9 +549,8 @@ def test_schema_get_with_reflect_change(client, engine, create_db_schema):
     assert orig_id == modified_id
 
 
-@pytest.mark.skip("Faulty DB handling assumptions; invalid")
-def test_schema_create_duplicate(client, FUN_create_dj_db):
-    db_name = "tmp_db1"
+def test_schema_create_duplicate(client, FUN_create_dj_db, uid):
+    db_name = "tmp_db1" + uid
     FUN_create_dj_db(db_name)
     data = {
         'name': 'Test Duplication Schema',
