@@ -154,12 +154,10 @@ class ConstraintSerializer(
         return constraint_type
 
     def create(self, validated_data):
-        print('yo')
         serializer = self.get_serializer_class(self.get_mapping_field(validated_data))
         return serializer.create(validated_data)
 
     def run_validation(self, data):
-        print('rv')
         if referent_table := data.get('referent_table', None):
             referent_table_name = Table.current_objects.get(id=referent_table).name
             if any(
