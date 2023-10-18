@@ -26,8 +26,8 @@ You should have permission to install a debian package
 1. Add keys to apt repository.
 
     ```
-    echo 'deb http://download.opensuse.org/repositories/home:/mmukesh95:/mathesar/Debian_11/ /' | sudo tee /etc/apt/sources.list.d/home:mmukesh95:mathesar.list
-    curl -fsSL https://download.opensuse.org/repositories/home:mmukesh95:mathesar/Debian_11/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_mmukesh95_mathesar.gpg > /dev/null
+    echo 'deb http://download.opensuse.org/repositories/mathesar/Debian_11/ /' | sudo tee /etc/apt/sources.list.d/mathesar.list
+    curl -fsSL https://download.opensuse.org/repositories/mathesar/Debian_11/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/mathesar.gpg > /dev/null
     ```
 
 1. Install Mathesar package.
@@ -36,9 +36,8 @@ You should have permission to install a debian package
     sudo apt install mathesar
     ```
 
-    The above command starts a systemd service running on the Mathesar server on `localhost` and listening on port `8000`.
+    The above command starts a [systemd service](https://systemd.io/) running on the Mathesar server on `localhost` and listening on port `8000`.
 
-    <!-- TODO Add hyperlink explaining what "systemd service" is -->
 
 1. Verify if the Mathesar server is running successfully:
 

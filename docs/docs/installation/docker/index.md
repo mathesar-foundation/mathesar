@@ -136,7 +136,7 @@ docker run \
       -d \
       --name mathesar_service \
       # YOUR STANDARD ARGS HERE
-      mathesar/mathesar-prod:0.1.5
+      mathesar/mathesar-prod:0.1.4
     ```
 
 ## Uninstalling Mathesar {:#uninstall}
