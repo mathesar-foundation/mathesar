@@ -47,4 +47,4 @@ def _get_root(credentials):
     return credentials._replace(db_name="postgres")
 
 
-DbCredentials._get_root = _get_root
+DbCredentials.get_root = _get_root
