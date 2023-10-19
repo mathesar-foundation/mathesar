@@ -8,6 +8,9 @@ You can create a new PostgreSQL database while setting up Mathesar or use our UI
 
 A live demo of Mathesar is [available here](https://demo.mathesar.org/).
 
+<!-- TODO: Add the advantage of reading the concept page -->
+More about how Mathesar works is covered in the [Concepts page](./user-guide/concepts.md). 
+
 ## Installing Mathesar
 You can self-host Mathesar by following one of the guides below:
 

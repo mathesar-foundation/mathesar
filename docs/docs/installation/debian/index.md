@@ -21,7 +21,7 @@ You should have permission to install a debian package
 
 ## Installation Steps
 
-<!-- TODO: remove mmukesh95, improve formatting of code block -->
+<!-- TODO: replace with correct repo URL once assiged by OpenSuse, improve formatting of code block -->
 
 1. Add keys to apt repository.
 
@@ -162,4 +162,4 @@ sudo apt upgrade mathesar
 
 ### 400 Bad request 
 
-If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration).a
+If you are getting `400 (Bad request)` when visting Mathesar using a domain name or an IP address, it might be happening due to the domain name not whitelisted correctly. Please follow the instructions for [accessing using a domain name](#configuration).
