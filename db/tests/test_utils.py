@@ -36,8 +36,9 @@ def install_fixture(FUN_engine_cache, SES_engine_cache, get_uid, root_credential
 
 def test_install(install_fixture):  # noqa: F841
     """
-    Tests that the instralling fixture doesn't panic. As of time of writing,
-    our tests use a different set of routines for setting up a database (would
-    be nice to fix that), so need this test to have full(-er?) coverage.
+    Tests that the instralling fixture (db.install.install_mathesar) doesn't
+    panic. As of time of writing, our tests use a different set of routines for
+    setting up a database (would be nice to fix that), so need this test to
+    have full(-er?) coverage.
     """
     pass

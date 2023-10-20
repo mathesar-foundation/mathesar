@@ -241,22 +241,6 @@ def create_db_schema(SES_engine_cache):
     logger.debug('exit')
 
 
-def _get_root_credentials():
-    dj_connection_settings = dj_connection.settings_dict
-    return DbCredentials(
-        username=dj_connection_settings["USER"],
-        password=dj_connection_settings["PASSWORD"],
-        hostname=dj_connection_settings["HOST"],
-        db_name='postgres',
-        port=dj_connection_settings["PORT"],
-    )
-
-
-@pytest.fixture
-def root_credentials():
-    return _get_root_credentials()
-
-
 def _create_engine(db_name):
     dj_connection_settings = dj_connection.settings_dict
     credentials = DbCredentials(
@@ -264,7 +248,7 @@ def _create_engine(db_name):
         password=dj_connection_settings["PASSWORD"],
         hostname=dj_connection_settings["HOST"],
         db_name=db_name,
-        port=dj_connection_settings["PORT"],
+        port=5432
     )
     engine = create_future_engine(
         credentials,
