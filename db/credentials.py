@@ -7,6 +7,10 @@ from sqlalchemy.engine import URL
 # information around as 5 separate parameters.
 #
 # Usable as a cache key when caching database-specific things (like SA engines).
+#
+# Notice how custom class methods are defined. Whether they're static or not
+# has to be inferred, though if a method's docstring doesn't mention it,
+# they're probably meant to be instance methods.
 DbCredentials = namedtuple(
     'DbCredentials',
     [
@@ -48,3 +52,23 @@ def _get_root(credentials):
 
 
 DbCredentials.get_root = _get_root
+
+
+def _from_engine(engine):
+    """
+    Creates DbCredentials from SA Engine's URL.
+
+    Static method. Probably shouldn't ever be used in production. Can be useful
+    in testing.
+    """
+    url = engine.url
+    return DbCredentials(
+        username=url.username,
+        password=url.password,
+        hostname=url.host,
+        db_name=url.database,
+        port=url.port,
+    )
+
+
+DbCredentials.from_engine = _from_engine

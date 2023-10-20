@@ -5,6 +5,7 @@ from db.columns.utils import get_enriched_column_table
 from db.metadata import get_empty_metadata
 from db.install import install_mathesar
 from conftest import _drop_database
+from db.credentials import DbCredentials
 
 
 def test_get_enriched_column_table(engine):
@@ -24,12 +25,12 @@ def test_get_enriched_column_table_no_engine():
 @pytest.fixture
 def install_fixture(FUN_engine_cache, SES_engine_cache, get_uid, root_credentials):
     db_name = get_uid()
-    credentials = root_credentials._replace(db_name=db_name)
+    engine = FUN_engine_cache(db_name)
+    credentials = DbCredentials.from_engine(engine)
     # Will create a db
     # Note, does not use cached engines, may leak
     install_mathesar(credentials)
     yield
-    engine = FUN_engine_cache(db_name)
     _drop_database(engine, SES_engine_cache)
 
 

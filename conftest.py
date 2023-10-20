@@ -258,8 +258,14 @@ def root_credentials():
 
 
 def _create_engine(db_name):
-    # Use root_credentials, but with a different db_name
-    credentials = _get_root_credentials()._replace(db_name=db_name)
+    dj_connection_settings = dj_connection.settings_dict
+    credentials = DbCredentials(
+        username=dj_connection_settings["USER"],
+        password=dj_connection_settings["PASSWORD"],
+        hostname=dj_connection_settings["HOST"],
+        db_name=db_name,
+        port=dj_connection_settings["PORT"],
+    )
     engine = create_future_engine(
         credentials,
         # Setting a fixed timezone makes the timezone aware test cases predictable.
