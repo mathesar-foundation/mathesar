@@ -25,6 +25,7 @@ from fixtures.utils import create_scoped_fixtures
 # some point: better to index using DbCredentials
 def engine_cache(request):
     db_names_to_engines = {}
+
     def _get(db_name):
         engine = db_names_to_engines.get(db_name)
         if engine is None:
