@@ -23,7 +23,7 @@ def test_get_enriched_column_table_no_engine():
 
 
 @pytest.fixture
-def install_fixture(FUN_engine_cache, SES_engine_cache, get_uid, root_credentials):
+def install_fixture(FUN_engine_cache, SES_engine_cache, get_uid):
     db_name = get_uid()
     engine = FUN_engine_cache(db_name)
     credentials = DbCredentials.from_engine(engine)
