@@ -33,7 +33,7 @@ def install_fixture(FUN_engine_cache, SES_engine_cache, get_uid, root_credential
     _drop_database(engine, SES_engine_cache)
 
 
-def test_install(install_fixture):
+def test_install(install_fixture):  # noqa: F841
     """
     Tests that the instralling fixture doesn't panic. As of time of writing,
     our tests use a different set of routines for setting up a database (would
