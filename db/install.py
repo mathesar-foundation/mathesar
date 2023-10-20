@@ -7,14 +7,20 @@ from db.sql import install as sql_install
 from db.types import install as types_install
 
 
+# TODO would be nice to use this in conftest.py to setup our tests, but it's a
+# bit too complicated for that: as of writing, it might create a db, has logic
+# for interactive user input, etc.; if someone's interested in splitting this
+# up, would be nice!
 def install_mathesar(
-    credentials, skip_confirm
+    credentials, skip_confirm=True
 ):
     """Create database and install Mathesar on it."""
     db_name = credentials.db_name
     hostname = credentials.hostname
     user_db_engine = engine.create_future_engine(
         credentials,
+        # TODO explain why a custom timeout is needed; this keeps this method
+        # from being compatible with cached engines, used in tests, etc.
         connect_args={"connect_timeout": 10}
     )
     try:
