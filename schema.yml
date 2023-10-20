@@ -200,6 +200,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedDatabaseList'
           description: ''
+    post:
+      operationId: databases_create
+      tags:
+      - databases
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Database'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Database'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Database'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
   /api/db/v0/databases/{id}/:
     get:
       operationId: databases_retrieve
@@ -222,6 +248,88 @@ paths:
               schema:
                 $ref: '#/components/schemas/Database'
           description: ''
+    put:
+      operationId: databases_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - databases
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Database'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Database'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Database'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+    patch:
+      operationId: databases_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - databases
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabase'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabase'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabase'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+    delete:
+      operationId: databases_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - databases
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/db/v0/databases/{id}/functions/:
     get:
       operationId: databases_functions_retrieve
@@ -265,6 +373,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Database'
+          description: ''
+  /api/db/v0/links/:
+    post:
+      operationId: links_create
+      tags:
+      - links
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinksMapping'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LinksMapping'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LinksMapping'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinksMapping'
           description: ''
   /api/db/v0/schemas/:
     get:
@@ -1593,6 +1728,9 @@ components:
         has_dependents:
           type: string
           readOnly: true
+        description:
+          type: string
+          nullable: true
       required:
       - has_dependents
       - valid_target_types
@@ -1683,6 +1821,10 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        sheet_index:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
       required:
       - created_from
       - id
@@ -1696,18 +1838,54 @@ components:
           readOnly: true
         name:
           type: string
-          readOnly: true
+          maxLength: 128
+        db_name:
+          type: string
+          maxLength: 128
         deleted:
+          type: boolean
+          readOnly: true
+        editable:
           type: boolean
           readOnly: true
         supported_types_url:
           type: string
           readOnly: true
+        username:
+          type: string
+          maxLength: 255
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 255
+        host:
+          type: string
+          maxLength: 255
+        port:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
       required:
+      - db_name
       - deleted
+      - editable
+      - host
       - id
       - name
+      - password
+      - port
       - supported_types_url
+      - username
+    LinksMapping:
+      type: object
+      description: |-
+        This serializer mixin is helpful in serializing polymorphic models,
+        by switching to correct serializer based on the mapping field value.
+      properties:
+        link_type:
+          type: string
+      required:
+      - link_type
     PaginatedColumnList:
       type: object
       properties:
@@ -1888,6 +2066,9 @@ components:
         has_dependents:
           type: string
           readOnly: true
+        description:
+          type: string
+          nullable: true
     PatchedDataFile:
       type: object
       properties:
@@ -1932,6 +2113,45 @@ components:
             * `URL` - Url
           readOnly: true
         max_level:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        sheet_index:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+    PatchedDatabase:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        db_name:
+          type: string
+          maxLength: 128
+        deleted:
+          type: boolean
+          readOnly: true
+        editable:
+          type: boolean
+          readOnly: true
+        supported_types_url:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          maxLength: 255
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 255
+        host:
+          type: string
+          maxLength: 255
+        port:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
@@ -2033,9 +2253,6 @@ components:
           type: array
           items:
             type: integer
-            maximum: 2147483647
-            minimum: -2147483648
-          nullable: true
     PreviewColumn:
       type: object
       properties:
@@ -2181,10 +2398,8 @@ components:
           type: array
           items:
             type: integer
-            maximum: 2147483647
-            minimum: -2147483648
-          nullable: true
       required:
+      - column_order
       - id
       - preview_settings
     TypeOption:
