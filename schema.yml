@@ -401,6 +401,300 @@ paths:
               schema:
                 $ref: '#/components/schemas/LinksMapping'
           description: ''
+  /api/db/v0/queries/:
+    get:
+      operationId: queries_list
+      parameters:
+      - in: query
+        name: database
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - queries
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQueryList'
+          description: ''
+    post:
+      operationId: queries_create
+      tags:
+      - queries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Query'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+  /api/db/v0/queries/{id}/:
+    get:
+      operationId: queries_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - queries
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+    put:
+      operationId: queries_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - queries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Query'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+    patch:
+      operationId: queries_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - queries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedQuery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedQuery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedQuery'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+    delete:
+      operationId: queries_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - queries
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/db/v0/queries/{id}/columns/:
+    get:
+      operationId: queries_columns_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - queries
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+  /api/db/v0/queries/{id}/records/:
+    get:
+      operationId: queries_records_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - queries
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+  /api/db/v0/queries/{id}/results/:
+    get:
+      operationId: queries_results_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - queries
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+  /api/db/v0/queries/run/:
+    post:
+      operationId: queries_run_create
+      tags:
+      - queries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Query'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
   /api/db/v0/schemas/:
     get:
       operationId: schemas_list
@@ -1966,6 +2260,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Database'
+    PaginatedQueryList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Query'
     PaginatedSchemaList:
       type: object
       properties:
@@ -2155,6 +2469,55 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+    PatchedQuery:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        schema:
+          type: string
+          readOnly: true
+        base_table:
+          type: integer
+        results_url:
+          type: string
+          readOnly: true
+        records_url:
+          type: string
+          readOnly: true
+        columns_url:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          nullable: true
+        initial_columns:
+          type: object
+          additionalProperties: {}
+        transformations:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        display_options:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        display_names:
+          type: object
+          additionalProperties: {}
+          nullable: true
     PatchedSchema:
       type: object
       properties:
@@ -2263,6 +2626,66 @@ components:
           type: string
       required:
       - template
+    Query:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        schema:
+          type: string
+          readOnly: true
+        base_table:
+          type: integer
+        results_url:
+          type: string
+          readOnly: true
+        records_url:
+          type: string
+          readOnly: true
+        columns_url:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          nullable: true
+        initial_columns:
+          type: object
+          additionalProperties: {}
+        transformations:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        display_options:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        display_names:
+          type: object
+          additionalProperties: {}
+          nullable: true
+      required:
+      - base_table
+      - columns_url
+      - created_at
+      - id
+      - initial_columns
+      - name
+      - records_url
+      - results_url
+      - schema
+      - updated_at
     Schema:
       type: object
       properties:
