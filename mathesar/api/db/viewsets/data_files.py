@@ -4,7 +4,6 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveMode
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser,JSONParser
 
-
 from mathesar.api.dj_filters import DataFileFilter
 import mathesar.api.exceptions.data_import_exceptions.exceptions
 import mathesar.api.exceptions.database_exceptions.exceptions
