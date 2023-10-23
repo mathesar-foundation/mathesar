@@ -123,19 +123,18 @@ create_scoped_fixtures(globals(), create_dj_db)
 
 @pytest.fixture(scope="function", autouse=True)
 def test_db_model(request, test_db_name):
+    db_name = test_db_name
     add_db_to_dj_settings = get_fixture_value(
         request,
         mathesar.tests.conftest.add_db_to_dj_settings
     )
 
-    add_db_to_dj_settings(test_db_name)
-    database_model = Database.current_objects.create(
-        name=test_db_name,
-        db_name=test_db_name,
-        username='mathesar',
-        password='mathesar',
-        host='mathesar_dev_db',
-        port=5432
+    add_db_to_dj_settings(db_name)
+    default_credentials = get_default_credentials_from_dj_settings()
+    credentials = default_credentials.set_db_name(db_name)
+    database_model = Database.create_from_credentials(
+        credentials=credentials,
+        name=db_name,
     )
     assert database_model.is_connectable()
     yield database_model
