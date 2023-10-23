@@ -21,25 +21,20 @@ from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 from fixtures.utils import create_scoped_fixtures
 
 
+# TODO BUG engine cache uses db_names to key databases: might cause problems at
+# some point: better to index using DbCredentials
 def engine_cache(request):
-    import logging
-    logger = logging.getLogger(f'engine_cache-{request.scope}')
-    logger.debug('enter')
     db_names_to_engines = {}
 
     def _get(db_name):
         engine = db_names_to_engines.get(db_name)
-        logger.debug(f'getting engine for {db_name}')
         if engine is None:
-            logger.debug(f'creating engine for {db_name}')
             engine = _create_engine(db_name)
             db_names_to_engines[db_name] = engine
         return engine
     yield _get
     for db_name, engine in db_names_to_engines.items():
-        logger.debug(f'cleaning up engine for {db_name}')
         engine.dispose()
-    logger.debug('exit')
 
 
 # defines:
