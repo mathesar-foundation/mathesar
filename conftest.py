@@ -4,12 +4,11 @@ import string
 import os
 
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
-from django.db import connection as dj_connection
+from mathesar.install import get_default_credentials_from_dj_settings
 
 from sqlalchemy import MetaData, text, Table
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
-from db.credentials import DbCredentials
 from db.metadata import get_empty_metadata
 from db.engine import add_custom_types_to_ischema_names, create_future_engine
 from db.types import install
@@ -55,33 +54,22 @@ def create_db(request, SES_engine_cache):
     """
     engine_cache = SES_engine_cache
 
-    import logging
-    logger = logging.getLogger(f'create_db-{request.scope}')
-    logger.debug('enter')
-
     created_dbs = set()
 
     def __create_db(db_name):
         engine = engine_cache(db_name)
         if _database_exists(engine):
-            logger.debug(f'dropping preexisting {db_name}')
             _drop_database(engine, engine_cache)
-        logger.debug(f'creating {db_name}')
         _create_database(engine, engine_cache)
         created_dbs.add(db_name)
         sql_install.install(engine)
         install.install_mathesar_on_database(engine)
         return db_name
     yield __create_db
-    logger.debug('about to clean up')
     for db_name in created_dbs:
         engine = engine_cache(db_name)
         if _database_exists(engine):
-            logger.debug(f'dropping {db_name}')
             _drop_database(engine, engine_cache)
-        else:
-            logger.debug(f'{db_name} already gone')
-    logger.debug('exit')
 
 
 # defines:
@@ -242,14 +230,8 @@ def create_db_schema(SES_engine_cache):
 
 
 def _create_engine(db_name):
-    dj_connection_settings = dj_connection.settings_dict
-    credentials = DbCredentials(
-        username=dj_connection_settings["USER"],
-        password=dj_connection_settings["PASSWORD"],
-        hostname=dj_connection_settings["HOST"],
-        db_name=db_name,
-        port=5432
-    )
+    default_credentials = get_default_credentials_from_dj_settings()
+    credentials = default_credentials.set_db_name(db_name)
     engine = create_future_engine(
         credentials,
         # Setting a fixed timezone makes the timezone aware test cases predictable.

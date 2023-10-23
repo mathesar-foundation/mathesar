@@ -2,7 +2,6 @@
 This inherits the fixtures in the root conftest.py
 """
 import pytest
-import logging
 import responses
 from copy import deepcopy
 
@@ -19,17 +18,20 @@ from db.tables.operations.create import create_mathesar_table as actual_create_m
 from db.columns.operations.select import get_column_attnum_from_name
 from db.schemas.utils import get_schema_oid_from_name
 
-import mathesar.tests.conftest
 from mathesar.imports.base import create_table_from_data_file
 from mathesar.models.base import Schema, Table, Database, DataFile
 from mathesar.models.base import Column as mathesar_model_column
 from mathesar.models.users import DatabaseRole, SchemaRole, User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
-import conftest
 from mathesar.state import reset_reflection
 from mathesar.state.base import set_initial_reflection_happened
 from db.metadata import get_empty_metadata
+
+from mathesar.install import get_default_credentials_from_dj_settings
+
+import conftest
+import mathesar.tests.conftest
 
 
 @pytest.fixture
@@ -63,12 +65,9 @@ def reflection_fixture():
     accessed. During teardown, eagerly resets reflection; unfortunately that currently causes
     redundant reflective calls to Postgres.
     """
-    logger = logging.getLogger('mark_reflection_as_not_having_happened')
-    logger.debug('setup')
     set_initial_reflection_happened(False)
     yield
     reset_reflection()
-    logger.debug('teardown')
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -101,13 +100,11 @@ def create_dj_db(request):
     def _create_and_add(db_name):
         create_db(db_name)
         add_db_to_dj_settings(db_name)
-        database_model = Database.current_objects.create(
+        default_credentials = get_default_credentials_from_dj_settings()
+        credentials = default_credentials.set_db_name(db_name)
+        database_model = Database.create_from_credentials(
+            credentials=credentials,
             name=db_name,
-            db_name=db_name,
-            username='mathesar',
-            password='mathesar',
-            host='mathesar_dev_db',
-            port=5432
         )
         created_dbs.append(database_model)
         return database_model

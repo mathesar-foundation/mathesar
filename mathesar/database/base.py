@@ -2,7 +2,7 @@ from db import engine
 
 
 # TODO get rid of this; not doing it now because want to minimize changes in
-# demo namespace.
+# demo namespace (because they're hard to test).
 def create_mathesar_engine(credentials):
     """
     Create an SQLAlchemy engine using passed credentials.

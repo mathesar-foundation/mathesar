@@ -23,6 +23,21 @@ DbCredentials = namedtuple(
 )
 
 
+def _set_db_name(credentials, db_name):
+    """
+    Returns new DbCredentials instance with a different db_name.
+
+    Often we need to access a database that has the same access credentials
+    as another database, only its db_name is different. This method mainly
+    serves as documentation and intent vehicle on top of the somewhat vague
+    `NamedTuple._replace`.
+    """
+    return credentials._replace(db_name=db_name)
+
+
+DbCredentials.set_db_name = _set_db_name
+
+
 def _to_sa_url(credentials):
     """
     Converts DbCredentials into SA's URL.
@@ -48,7 +63,7 @@ def _get_root(credentials):
     database object itself, which can't be done while connected to the database
     that we're manipulating.
     """
-    return credentials._replace(db_name="postgres")
+    return credentials.set_db_name("postgres")
 
 
 DbCredentials.get_root = _get_root

@@ -11,6 +11,7 @@ from decouple import config as decouple_config
 from django.conf import settings
 from db import install
 from django.db.utils import IntegrityError
+from db.credentials import DbCredentials
 
 
 def main(skip_static_collection=False):
@@ -33,15 +34,7 @@ def main(skip_static_collection=False):
     django_db_key = decouple_config('DJANGO_DATABASE_KEY', default="default")
     user_databases = [key for key in settings.DATABASES if key != django_db_key]
     for database_key in user_databases:
-        raw_credentials = settings.DATABASES[database_key]
-        from db.credentials import DbCredentials
-        credentials = DbCredentials(
-            username=raw_credentials["USER"],
-            password=raw_credentials["PASSWORD"],
-            hostname=raw_credentials["HOST"],
-            db_name=raw_credentials["NAME"],
-            port=raw_credentials["PORT"],
-        )
+        credentials = _get_credentials_from_dj_settings(database_key)
         try:
             install_on_db_with_key(credentials, skip_confirm)
             Database.current_objects.create(
@@ -77,6 +70,38 @@ def install_on_db_with_key(credentials, skip_confirm):
         credentials,
         skip_confirm=skip_confirm
     )
+
+
+def get_default_credentials_from_dj_settings():
+    """
+    Returns credentials for "default" Django db.
+
+    The DATABASES construct inside Django settings must always have a database
+    under the key "default". We use the credentials of this database as a
+    reference when creating the credentials for another database on the same
+    Postgres cluster (install). As of writing, we only do this in testing.
+    Basically, this is a way to know what the username, password, hostname,
+    etc. are for our development Postgres cluster.
+    """
+    return _get_credentials_from_dj_settings('default')
+
+
+def _get_credentials_from_dj_settings(database_key):
+    """
+    Returns credentials for Django db under given key.
+
+    Relevant django docs:
+    https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-DATABASES
+    """
+    raw_credentials = settings.DATABASES[database_key]
+    credentials = DbCredentials(
+        username=raw_credentials["USER"],
+        password=raw_credentials["PASSWORD"],
+        hostname=raw_credentials["HOST"],
+        db_name=raw_credentials["NAME"],
+        port=raw_credentials["PORT"],
+    )
+    return credentials
 
 
 if __name__ == "__main__":

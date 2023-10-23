@@ -127,6 +127,23 @@ class Database(ReflectionManagerMixin, BaseModel):
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()
 
+    @staticmethod
+    def create_from_credentials(credentials, name):
+        """
+        Creates and returns an instance of Database.
+
+        Like Database.objects.create, but takes DbCredentials as input.
+        """
+        database = Database.objects.create(
+            name=name,
+            db_name=credentials.db_name,
+            username=credentials.username,
+            password=credentials.password,
+            host=credentials.hostname,
+            port=credentials.port,
+        )
+        return database
+
     # TODO db_name used to refer to Django `name` field and actual Postgres db name
     # TODO when it's the Django `name`, use dj_name (or just name) instead
     @property
