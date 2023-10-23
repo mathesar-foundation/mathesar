@@ -118,6 +118,7 @@ def uid(get_uid):
     return get_uid()
 
 
+# TODO passing around db_name alone is not enough; need DbCredentials instead
 @pytest.fixture(scope="session", autouse=True)
 def test_db_name(worker_id, SES_create_db):
     """
