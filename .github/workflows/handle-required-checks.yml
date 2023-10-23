@@ -2,21 +2,25 @@
 ## This handles the cases where they don't run because no Python or JS file has been changed.
 ## See https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
 name: handle-required-checks
-on:
-  push:
-    paths-ignore:
-      - 'mathesar_ui/**'
-      - '**.py'
-  pull_request:
-    paths-ignore:
-      - 'mathesar_ui/**'
-      - '**.py'
+on: [push, pull_request]
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - run: 'echo "No lint required"'
   tests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No tests required"'
+  tests (13):
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No tests required"'
+  tests (14):
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No tests required"'
+  tests (15):
     runs-on: ubuntu-latest
     steps:
       - run: 'echo "No tests required"'
