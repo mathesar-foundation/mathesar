@@ -163,6 +163,7 @@ def is_valid_uuid_v4(value):
         return False
 
 
+# TODO Database.is_connectable already does this
 def is_valid_pg_creds(credentials):
     dbname = credentials["db_name"]
     user = credentials["username"]

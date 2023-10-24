@@ -11,6 +11,7 @@ from db.types import install as types_install
 # bit too complicated for that: as of writing, it might create a db, has logic
 # for interactive user input, etc.; if someone's interested in splitting this
 # up, would be nice!
+# TODO figure out if this is safe to call when mathesar was already installed
 def install_mathesar(
     credentials, skip_confirm=True
 ):

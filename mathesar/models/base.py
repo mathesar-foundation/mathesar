@@ -185,6 +185,8 @@ class Database(ReflectionManagerMixin, BaseModel):
         reset_reflection(db_name=self.name)
 
     # TODO doing .connect() might not be enough, should also do `SELECT 1`
+    # TODO consider using psycopg instead of SA's Engine, might be slower, but
+    # cleanup should be more robust (less likely to leak connections)
     def is_connectable(self):
         """
         Returns true if connection to the database doesn't throw an exception.

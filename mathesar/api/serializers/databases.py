@@ -6,6 +6,7 @@ from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models.base import Database
 from mathesar.api.utils import is_valid_pg_creds
 from db.install import install_mathesar
+from db.credentials import DbCredentials
 
 
 class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
@@ -27,28 +28,39 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         else:
             return None
 
-    def validate(self, credentials):
+    def validate(self, data):
         if self.partial:
             db_model = self.instance
-            for attr, value in credentials.items():
+            for attr, value in data.items():
                 setattr(db_model, attr, value)
-            credentials = {
+            #TODO switch to using DbCredentials
+            data = {
                 'db_name': db_model.db_name,
                 'host': db_model.host,
                 'username': db_model.username,
                 'password': db_model.password,
                 'port': db_model.port
             }
-        if is_valid_pg_creds(credentials):
+        # TODO consider using Database.is_connectable instead.
+        # TODO raise exception here in case of being unable to connect:
+        # currently the exception is raised inside is_valid_pg_creds.
+        if is_valid_pg_creds(data):
+            credentials = DbCredentials(
+                username=data["username"],
+                password=data["password"],
+                hostname=data["host"],
+                port=data["port"],
+                db_name=data["db_name"],
+            )
+            # TODO why are we installing mathesar during deserialization
+            # validation? stop doing that, use the viewset for that instead.
+            # TODO this can get called on a db where mathesar was already
+            # installed, is that safe?
             install_mathesar(
-                database_name=credentials["db_name"],
-                hostname=credentials["host"],
-                username=credentials["username"],
-                password=credentials["password"],
-                port=credentials["port"],
+                credentials,
                 skip_confirm=True
             )
-        return super().validate(credentials)
+        return super().validate(data)
 
 
 class TypeSerializer(MathesarErrorMessageMixin, serializers.Serializer):
