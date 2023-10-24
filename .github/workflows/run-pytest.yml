@@ -30,6 +30,7 @@ jobs:
       matrix:
         pg-version: [13, 14, 15]
     steps:
+      - uses: actions/checkout@v2
       - name: Copy env file
         if: needs.python_filechanges.outputs.any_changed == 'true'
         run: cp .env.example .env
