@@ -42,10 +42,10 @@
     }
     event?.stopPropagation();
     const result = await recordSelector.acquireUserInput({ tableId });
-    const LinkedFkCellValue = columnFabric.linkFk?.referent_columns[0];
+    const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
     if (result) {
-      if (LinkedFkCellValue !== undefined && LinkedFkCellValue !== null) {
-        value = result.record[LinkedFkCellValue];
+      if (linkedFkColumnId) {
+        value = result.record[linkedFkColumnId];
       } else {
         value = result.recordId;
       }

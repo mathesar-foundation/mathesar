@@ -2,10 +2,29 @@ import type {
   FormattedInputProps,
   NumberFormatterOptions,
   SelectProps,
+  ComponentAndProps,
 } from '@mathesar-component-library/types';
-import type { ProcessedColumn } from '@mathesar/stores/table-data/processedColumns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
+import type { Column } from '@mathesar/api/types/tables/columns';
+import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
+
+export type CellColumnLike = Pick<
+  Column,
+  'type' | 'type_options' | 'display_options'
+>;
+
+export interface CellColumnFabric {
+  id: string | number;
+  column: CellColumnLike;
+  /**
+   * Present when the column has one single-column FK constraint. In the
+   * unlikely (but theoretically possible) scenario that this column has more
+   * than one FK constraint, the first FK constraint is referenced.
+   */
+  linkFk?: FkConstraint;
+  cellComponentAndProps: ComponentAndProps;
+}
 
 export type CellValueFormatter<T> = (
   value: T | null | undefined,
@@ -46,7 +65,7 @@ export interface LinkedRecordCellExternalProps {
 export interface LinkedRecordCellProps
   extends CellTypeProps<ForeignKeyCellValue>,
     LinkedRecordCellExternalProps {
-  columnFabric: ProcessedColumn;
+  columnFabric: CellColumnFabric;
   recordSummary?: string;
   setRecordSummary?: (recordId: string, recordSummary: string) => void;
 }
