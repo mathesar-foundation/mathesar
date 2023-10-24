@@ -37,16 +37,14 @@ jobs:
 
       - name: Build the stack
         if: steps.changed_files.outputs.any_changed == 'true'
-        run: docker build -t mathesar_service_test --build-arg BUILD_PG_MAJOR=${{ matrix.pg-version }} --build-arg PYTHON_REQUIREMENTS=requirements-dev.txt .
+        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d test-service
         env:
           PG_MAJOR: ${{ matrix.pg-version }}
-      - name: Run docker container
-        if: steps.changed_files.outputs.any_changed == 'true'
-        run: docker run -d --name mathesar_service_test mathesar_service_test
-      # Override setup.cfg docker-compose db service credentials with in built docker postgres server
+
       - name: Run tests with pytest
         if: steps.changed_files.outputs.any_changed == 'true'
-        run: docker exec -e DJANGO_DATABASE_URL="postgres://postgres:mathesar@localhost:5432/mathesar_django" -e MATHESAR_DATABASES="(mathesar_db_test|postgres://postgres:mathesar@localhost:5432/mathesar_db_test)" mathesar_service_test ./run_pytest.sh
+        run: docker exec mathesar_service_test ./run_pytest.sh
+
   tests:
     runs-on: ubuntu-latest
     needs: python_tests
