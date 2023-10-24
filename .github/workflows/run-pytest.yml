@@ -5,17 +5,7 @@
 # queue.
 
 name: Run Python tests
-on: 
-  pull_request:
-    paths:
-      - '*.py'
-      - 'mathesar/**'
-      - 'db/**'
-  merge_group:
-    paths:
-      - '*.py'
-      - 'mathesar/**'
-      - 'db/**'
+on:  [pull_request, merge_group]
 jobs:
   tests:
     runs-on: ubuntu-latest
