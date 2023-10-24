@@ -8,7 +8,3 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: 'echo "No lint required"'
-  tests:
-    runs-on: ubuntu-latest
-    steps:
-      - run: 'echo "No tests required"'
