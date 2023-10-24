@@ -1,6 +1,5 @@
 **/node_modules
 **/dist
-**/storybook-static
 **/.vscode
 **/npm-debug.log
 **/Dockerfile

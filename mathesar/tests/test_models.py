@@ -78,5 +78,5 @@ def test_database_engine_cache_stability(FUN_create_dj_db, iteration, uid):
     del iteration  # An unused parameter
     some_db_name = uid
     FUN_create_dj_db(some_db_name)
-    db_model, _ = Database.objects.get_or_create(name=some_db_name)
+    db_model = Database.objects.get(name=some_db_name)
     attempt_dumb_query(db_model._sa_engine)
