@@ -1679,7 +1679,7 @@ def test_table_extract_columns_retain_original_table(create_patents_table, clien
     response_data = current_table_response.json()
     extracted_table_id = response_data['extracted_table']
     extracted_table = Table.objects.get(id=extracted_table_id)
-    assert extract_table_name == extracted_table.name + 'a'
+    assert extract_table_name == extracted_table.name
     remainder_table_id = response_data['remainder_table']
     remainder_table = Table.objects.get(id=remainder_table_id)
     assert Table.objects.filter(id=table.id).count() == 1
