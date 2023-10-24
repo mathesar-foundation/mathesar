@@ -37,4 +37,4 @@ jobs:
         run: docker exec -e DJANGO_DATABASE_URL="postgres://postgres:mathesar@localhost:5432/mathesar_django" -e MATHESAR_DATABASES="(mathesar_db_test|postgres://postgres:mathesar@localhost:5432/mathesar_db_test)" mathesar_service_test ./run_pytest.sh
   tests:
     needs: python_tests
-    if: ${{ success() }}
+    if: ${{ !failure() }}
