@@ -1,23 +1,24 @@
+# Since we're using both the "require pull request" and "require merge queue"
+# requirements for develop and master branches, there's no reason to run tests
+# on every push. Instead, we're using the recommended "merge_group" formulation
+# that runs status checks and reports them whenever a PR is added to the merge
+# queue.
+
 name: Run Python tests
 on: 
-  push:
-    paths:
-      - '*.py'
-      - 'mathesar/**'
-      - 'db/**'
   pull_request:
     paths:
       - '*.py'
       - 'mathesar/**'
       - 'db/**'
-
-
+  merge_group:
+    paths:
+      - '*.py'
+      - 'mathesar/**'
+      - 'db/**'
 jobs:
   tests:
     runs-on: ubuntu-latest
-    # We only want to run on external PRs, since internal PRs are covered by "push"
-    # This prevents this from running twice on internal PRs
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
         pg-version: [13, 14, 15]
