@@ -143,7 +143,7 @@
       inputData: buildInputData(record),
       transitiveData: $recordSummaries,
     });
-    submitResult({ recordId, recordSummary });
+    submitResult({ recordId, recordSummary, record });
   }
 
   function submitSelection() {
