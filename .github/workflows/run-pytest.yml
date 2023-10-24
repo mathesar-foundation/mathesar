@@ -7,8 +7,11 @@
 name: Run Python tests
 on:  [pull_request, merge_group]
 jobs:
-  tests:
+  python_tests:
     runs-on: ubuntu-latest
+    # Using this construct means we'll skip to "success". This avoids the
+    # unrecommended path filtering in this required job.
+    if: ${{ -n hashFiles('*.py', 'mathesar/**', 'db/**') }}
     strategy:
       matrix:
         pg-version: [13, 14, 15]
