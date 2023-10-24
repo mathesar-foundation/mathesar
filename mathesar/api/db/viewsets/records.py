@@ -148,7 +148,7 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
         primary_key_column_name = None
         try:
             primary_key_column_name = table.primary_key_column_name
-        except Exception as e:
+        except Exception:
             raise generic_api_exceptions.MethodNotAllowedAPIException(
                 MethodNotAllowed,
                 error_code=ErrorCodes.MethodNotAllowed.value,
