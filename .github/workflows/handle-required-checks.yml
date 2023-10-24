@@ -4,6 +4,10 @@
 name: handle-required-checks
 on: [pull_request, merge_group]
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No tests required"'
   lint:
     runs-on: ubuntu-latest
     steps:
