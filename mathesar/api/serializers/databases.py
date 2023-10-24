@@ -33,7 +33,7 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
             db_model = self.instance
             for attr, value in data.items():
                 setattr(db_model, attr, value)
-            #TODO switch to using DbCredentials
+            # TODO switch to using DbCredentials
             data = {
                 'db_name': db_model.db_name,
                 'host': db_model.host,

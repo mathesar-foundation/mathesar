@@ -5,7 +5,6 @@ from django.core.management import BaseCommand
 
 from db.install import install_mathesar
 from demo.install.datasets import load_datasets
-from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Database
 
 
