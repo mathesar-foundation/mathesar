@@ -78,6 +78,7 @@ jobs:
   sql_tests:
     name: Run SQL tests
     runs-on: ubuntu-latest
+    needs: sql_tests_required_check
     if: needs.sql_tests_required_check.outputs.any_changed == 'true'
     strategy:
       matrix:
