@@ -463,7 +463,7 @@ BEGIN
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 2::smallint, 'col1 supercopy', true, true
   );
-  RETURN NEXT col_type_is('copy_coltest', 'col1 supercopy', 'character vrying');
+  RETURN NEXT col_type_is('copy_coltest', 'col1 supercopy', 'character varying');
   RETURN NEXT col_is_null('copy_coltest', 'col1 supercopy');
   RETURN NEXT col_is_unique('copy_coltest', ARRAY['col1', 'col2']);
   RETURN NEXT col_is_unique('copy_coltest', ARRAY['col1 supercopy', 'col2']);
