@@ -52,18 +52,6 @@ jobs:
         with:
           files: '**.sql'
 
-  vulture:
-    runs-on: ubuntu-latest
-    name: Find unused code
-    if: needs.python_lint_required_check.outputs.any_changed == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-      - name: Install Vulture
-        run: pip3 install vulture
-      - name: Run Vulture
-        run: vulture .
-
   python_tests:
     name: Run Python tests
     runs-on: ubuntu-latest
@@ -111,7 +99,7 @@ jobs:
   python_lint:
     name: Run Python linter
     runs-on: ubuntu-latest
-    needs: flake8_required_check
+    needs: python_lint_required_check
     if: needs.python_lint_required_check.outputs.any_changed == 'true'
     steps:
       - uses: actions/checkout@v4
@@ -124,6 +112,19 @@ jobs:
           plugins: flake8-no-types
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  vulture:
+    name: Find unused code
+    runs-on: ubuntu-latest
+    needs: python_lint_required_check
+    if: needs.python_lint_required_check.outputs.any_changed == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+      - name: Install Vulture
+        run: pip3 install vulture
+      - name: Run Vulture
+        run: vulture .
 
   tests:
     runs-on: ubuntu-latest
