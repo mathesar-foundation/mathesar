@@ -4,7 +4,7 @@
 # that runs status checks and reports them whenever a PR is added to the merge
 # queue.
 
-name: Run Python tests
+name: Backend tests and linting
 on:  [pull_request, merge_group]
 jobs:
   pytest_required_check:
@@ -20,10 +20,9 @@ jobs:
         uses: tj-actions/changed-files@v39
         with:
           files: |
-            *.abcde
-#            *.py
-#            mathesar/**
-#            db/**
+            *.py
+            mathesar/**
+            db/**
 
   flake8_required_check:
     runs-on: ubuntu-latest
@@ -38,6 +37,20 @@ jobs:
         uses: tj-actions/changed-files@v39
         with:
           files: '**.py'
+
+  sql_tests_required_check:
+    runs-on: ubuntu-latest
+    # Here, we capture whether any files have changed to indicate we need to run
+    # python tests
+    outputs:
+      any_changed: ${{ steps.changed_files.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v39
+        with:
+          files: '**.sql'
 
   python_tests:
     name: Run Python tests
@@ -58,9 +71,28 @@ jobs:
       - name: Build the stack
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d test-service
         env:
-          PG_MAJOR: ${{ matrix.pg-version }}
+          PG_VERSION: ${{ matrix.pg-version }}
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
+
+  sql_tests:
+    runs-on: ubuntu-latest
+    if: needs.sql_tests_required_check.outputs.any_changed == 'true'
+    strategy:
+      matrix:
+        pg-version: [13, 14, 15]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy env file
+        run: cp .env.example .env
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+      - name: Build the test DB
+        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d dev-db
+        env:
+          PG_VERSION: ${{ matrix.pg-version }}
+      - name: Run tests with pg_prove
+        run: docker exec mathesar_dev_db /bin/bash /sql/run_tests.sh
 
   python_lint:
     name: Run Python linter
@@ -81,10 +113,10 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
-    needs: python_tests
+    needs: python_tests, sql_tests
     steps:
       - name: Report success
-        run: echo "Python tests succeeded or skipped!"
+        run: echo "Backend tests succeeded or skipped!"
 
   lint:
     runs-on: ubuntu-latest
