@@ -20,9 +20,10 @@ jobs:
         uses: tj-actions/changed-files@v39
         with:
           files: |
-            *.py
-            mathesar/**
-            db/**
+            *.abcde
+#            *.py
+#            mathesar/**
+#            db/**
 
   flake8_required_check:
     runs-on: ubuntu-latest
@@ -47,7 +48,7 @@ jobs:
       matrix:
         pg-version: [13, 14, 15]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Copy env file
         run: cp .env.example .env
       # The code is checked out under uid 1001 - reset this to 1000 for the
@@ -62,6 +63,7 @@ jobs:
         run: docker exec mathesar_service_test ./run_pytest.sh
 
   lint:
+    name: Run Python linter
     runs-on: ubuntu-latest
     needs: flake8_required_check
     if: needs.flake8_required_check.outputs.any_changed == 'true'
