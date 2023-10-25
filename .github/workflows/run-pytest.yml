@@ -26,26 +26,23 @@ jobs:
   python_tests:
     runs-on: ubuntu-latest
     needs: python_filechanges
+    if: needs.python_filechanges.outputs.any_changed == 'true'
     strategy:
       matrix:
         pg-version: [13, 14, 15]
     steps:
       - uses: actions/checkout@v2
       - name: Copy env file
-        if: needs.python_filechanges.outputs.any_changed == 'true'
         run: cp .env.example .env
       # The code is checked out under uid 1001 - reset this to 1000 for the
       # container to run tests successfully
       - name: Fix permissions
-        if: needs.python_filechanges.outputs.any_changed == 'true'
         run: sudo chown -R 1000:1000 .
       - name: Build the stack
-        if: needs.python_filechanges.outputs.any_changed == 'true'
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d test-service
         env:
           PG_MAJOR: ${{ matrix.pg-version }}
       - name: Run tests with pytest
-        if: needs.python_filechanges.outputs.any_changed == 'true'
         run: docker exec mathesar_service_test ./run_pytest.sh
   tests:
     runs-on: ubuntu-latest
