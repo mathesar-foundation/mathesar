@@ -5,21 +5,31 @@
   import RootRoute from './routes/RootRoute.svelte';
   import { setLocale } from './i18n/i18n-svelte';
   import ErrorBox from './components/message-boxes/ErrorBox.svelte';
-  import { loadTranslations } from './i18n/i18n-load';
+  import { loadLocaleAsync, loadTranslations } from './i18n/i18n-load';
 
   let isTranslationsLoaded = false;
-  const checkTranslationsAvailableInterval = setInterval(() => {
-    const { translations } = window;
-    if (translations) {
-      loadTranslations(
-        translations.lang,
-        JSON.parse(translations.translationStrings),
-      );
-      setLocale(translations.lang);
+  /**
+   * Why translations are being read from window object?
+   * In order to -
+   * 1. Load the translations file in parallel to the first FE chunk.
+   * 2. And then make it available for the entry(App.svelte)
+   *    file to load them into memory.
+   *
+   * The index.html loads it as using a script tag
+   * Each translations file on load, attaches the translations
+   * to the window object
+   */
+  void (async () => {
+    const { translations, displayLanguage } = window.Mathesar || {};
+    if (translations && displayLanguage) {
+      loadTranslations(displayLanguage, translations[displayLanguage]);
+      setLocale(displayLanguage);
       isTranslationsLoaded = true;
-      clearInterval(checkTranslationsAvailableInterval);
+    } else {
+      await loadLocaleAsync('en');
+      isTranslationsLoaded = true;
     }
-  }, 100);
+  })();
 
   const commonData = preloadCommonData();
 </script>

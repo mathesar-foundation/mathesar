@@ -76,7 +76,7 @@ def create_empty_table(name, schema, comment=None):
     :param schema: the parsed and validated schema model
     :return: the newly created blank table
     """
-    engine = create_mathesar_engine(schema.database.name)
+    engine = create_mathesar_engine(schema.database)
     db_table_oid = create_mathesar_table(engine, name, schema.oid, comment=comment)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table
