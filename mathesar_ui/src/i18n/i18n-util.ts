@@ -1,7 +1,8 @@
 import { initExtendDictionary } from 'typesafe-i18n/utils';
-import type { Locales, Translations } from './i18n-types';
+import type { BaseLocale, Locales, Translations } from './i18n-types';
 
 export const extendDictionary = initExtendDictionary<Translations>();
+export const baseLocale: BaseLocale = 'en';
 
 export function addTranslationsToGlobalObject(
   locale: Locales,

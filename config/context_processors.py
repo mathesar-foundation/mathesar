@@ -25,6 +25,17 @@ def frontend_settings(request):
     return frontend_settings
 
 
+def get_display_language_from_request(request):
+    # https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#how-django-discovers-language-preference
+    # This automatically fallbacks to en because of https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-LANGUAGE_CODE
+    lang_from_locale_middleware = request.LANGUAGE_CODE
+
+    if request.user.is_authenticated:
+        return request.user.display_language or lang_from_locale_middleware
+    else:
+        return lang_from_locale_middleware
+
+
 def get_i18n_settings(manifest_data, development_mode):
     """
     Hard coding this for now

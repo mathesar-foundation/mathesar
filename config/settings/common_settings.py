@@ -51,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -260,4 +261,5 @@ LANGUAGES = [
     ('en', gettext_lazy('English')),
     ('ja', gettext_lazy('Japanese')),
 ]
+LANGUAGE_COOKIE_NAME = 'display_language'
 SALT_KEY = SECRET_KEY

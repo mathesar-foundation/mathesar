@@ -18,6 +18,7 @@ export interface CommonData {
   user: User;
   live_demo_mode: boolean;
   current_release_tag_name: string;
+  supported_languages: Record<string, string>;
   is_authenticated: boolean;
   routing_context: 'normal' | 'anonymous';
 }

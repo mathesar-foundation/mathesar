@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import status
@@ -157,6 +158,7 @@ def get_common_data(request, database=None, schema=None):
         'databases': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
+        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
         'routing_context': 'normal',
     }
 
