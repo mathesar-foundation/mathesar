@@ -62,7 +62,7 @@ jobs:
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
 
-  lint:
+  python_lint:
     name: Run Python linter
     runs-on: ubuntu-latest
     needs: flake8_required_check
@@ -85,3 +85,10 @@ jobs:
     steps:
       - name: Report success
         run: echo "Python tests succeeded or skipped!"
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: python_lint
+    steps:
+      - name: Report success
+        run: echo "Python linter succeeded or skipped!"

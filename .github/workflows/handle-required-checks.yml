@@ -1,3 +1,0 @@
-## "lint" and "tests" are required checks, but they run conditionally.
-## This handles the cases where they don't run because no Python or JS file has been changed.
-## See https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
