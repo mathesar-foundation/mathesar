@@ -1,5 +1,4 @@
 import warnings
-from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer
 from psycopg.errors import DuplicateColumn, InvalidTextRepresentation, NotNullViolation
 from psycopg2.errors import StringDataRightTruncation
 from rest_access_policy import AccessViewSetMixin
@@ -10,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from drf_spectacular.utils import PolymorphicProxySerializer
 from drf_spectacular.utils import extend_schema
+from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer
 
 from mathesar.api.db.permissions.columns import ColumnAccessPolicy
 from mathesar.api.exceptions.database_exceptions import exceptions as database_api_exceptions
