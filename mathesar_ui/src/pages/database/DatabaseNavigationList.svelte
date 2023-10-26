@@ -6,12 +6,14 @@
     Help,
   } from '@mathesar-component-library';
   import { databases } from '@mathesar/stores/databases';
-  import { getDatabasePageUrl } from '@mathesar/routes/urls';
+  import {
+    DATABASE_CONNECTION_ADD_URL,
+    getDatabasePageUrl,
+  } from '@mathesar/routes/urls';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
-  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import type { Database } from '@mathesar/AppTypes';
 
-  export let database: Database;
+  export let database: Database | undefined = undefined;
 </script>
 
 <div class="database-list">
@@ -22,21 +24,21 @@
       <span class="title">All Databases ({$databases.data.length})</span>
       <span class="help">
         <Help>
-          To add or remove databases, modify the
-          <DocsLink path="/configuration/env-variables/#mathesar_databases">
-            <code>MATHESAR_DATABASES</code> variable
-          </DocsLink>
-          in your configuration file and restart Mathesar.
+          To add or remove databases, visit the
+          <a href={DATABASE_CONNECTION_ADD_URL}> Add Database Connection </a>
+          section of mathesar.
         </Help>
       </span>
     </MenuHeading>
     {#each $databases.data as db (db.name)}
       <LinkMenuItem
         href={getDatabasePageUrl(db.name)}
-        class={database.id === db.id ? 'active' : ''}
+        class={database?.id === db.id ? 'active' : ''}
       >
         <DatabaseName database={db} iconHasBox />
       </LinkMenuItem>
+    {:else}
+      <span class="no-databases-found">No Databases Found</span>
     {/each}
   </Menu>
 </div>
@@ -58,5 +60,9 @@
   }
   .help {
     margin-left: auto;
+  }
+  .no-databases-found {
+    padding: 0.2em 0.5em;
+    color: var(--slate-500);
   }
 </style>

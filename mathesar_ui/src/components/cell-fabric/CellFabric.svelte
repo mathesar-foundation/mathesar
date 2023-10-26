@@ -55,6 +55,7 @@
   <svelte:component
     this={component}
     {...props}
+    {columnFabric}
     {isActive}
     {isSelectedInRange}
     {disabled}

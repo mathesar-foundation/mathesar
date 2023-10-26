@@ -40,6 +40,7 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
             'is_superuser',
             'database_roles',
             'schema_roles',
+            'display_language'
         ]
         extra_kwargs = {
             'password': {'write_only': True},
