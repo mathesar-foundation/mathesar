@@ -117,7 +117,7 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             component_name='ColumnDisplayOptions',
             serializers=[
                 DisplayOptionsMappingSerializer,
-                ],
+            ],
             resource_type_field_name='type',
         )
     )
