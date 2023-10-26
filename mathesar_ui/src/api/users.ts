@@ -8,13 +8,13 @@ import {
   type PaginatedResponse,
 } from './utils/requestUtils';
 
-export interface UnsavedUser
-{
+export interface UnsavedUser {
   full_name: string | null;
   email: string | null;
   username: string;
   password: string;
-  display_language: Locales;}
+  display_language: Locales;
+}
 
 export type UserRole = 'viewer' | 'editor' | 'manager';
 
