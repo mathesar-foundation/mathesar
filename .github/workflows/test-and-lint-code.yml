@@ -251,6 +251,7 @@ jobs:
       - run: npm run typecheck
 
   front_end_audit:
+    name: Audit front end code
     runs-on: ubuntu-latest
     needs: front_end_checks_required
     if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
@@ -284,6 +285,7 @@ jobs:
         continue-on-error: true
 
   front_end_tests:
+    name: Run front end tests
     runs-on: ubuntu-latest
     needs: front_end_checks_required
     if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
