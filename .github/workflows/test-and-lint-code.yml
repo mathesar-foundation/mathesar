@@ -310,3 +310,20 @@ jobs:
           restore-keys: ${{ runner.os }}-node-
       - run: npm ci --no-audit --prefer-offline
       - run: npm test
+
+################################################################################
+##                       REQUIRED TEST/LINT COLLECTORS                        ##
+## Jobs in this section collect outputs from matrix-strategy testing jobs,    ##
+## since these are otherwise impossible to capture for branch protection      ##
+## purposes. At the moment, they only need to have each required check as a   ##
+## dependency. Required checks should skip themselves if no relevant files    ##
+## have changed.                                                              ##
+##                                                                            ##
+################################################################################
+
+  matrix_tests:
+    runs-on: ubuntu-latest
+    needs: [python_tests, sql_tests]
+    steps:
+      - name: Report success
+        run: echo "All tests succeeded or skipped!"
