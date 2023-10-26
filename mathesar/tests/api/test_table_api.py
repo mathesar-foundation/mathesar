@@ -2083,7 +2083,6 @@ def test_create_table_using_duplicate_id_excel_data_file(client, duplicate_id_ex
 
 
 def test_create_table_using_null_id_excel_data_file(client, null_id_excel_data_file, schema):
-    # silly comment
     table_name = 'null_id'
     expt_name = get_expected_name(table_name, data_file=null_id_excel_data_file)
     first_row = (1, '1.0', 'John', '25')
