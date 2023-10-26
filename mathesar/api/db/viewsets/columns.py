@@ -1,4 +1,5 @@
 import warnings
+from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer
 from psycopg.errors import DuplicateColumn, InvalidTextRepresentation, NotNullViolation
 from psycopg2.errors import StringDataRightTruncation
 from rest_access_policy import AccessViewSetMixin
@@ -7,6 +8,8 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from drf_spectacular.utils import PolymorphicProxySerializer
+from drf_spectacular.utils import extend_schema
 
 from mathesar.api.db.permissions.columns import ColumnAccessPolicy
 from mathesar.api.exceptions.database_exceptions import exceptions as database_api_exceptions
@@ -36,6 +39,15 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         prefetched_queryset = queryset.prefetch_related('table').prefetch('name')
         return prefetched_queryset
 
+    @extend_schema(
+    request=PolymorphicProxySerializer(
+        component_name='ColumnDisplayOptions',
+        serializers=[
+            DisplayOptionsMappingSerializer,
+        ],
+        resource_type_field_name='type',
+    )
+    )
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
         # We only support adding a single column through the API.
@@ -100,6 +112,15 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         out_serializer = ColumnSerializer(dj_column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+    request=PolymorphicProxySerializer(
+        component_name='ColumnDisplayOptions',
+        serializers=[
+            DisplayOptionsMappingSerializer,
+        ],
+        resource_type_field_name='type',
+    )
+    )
     def partial_update(self, request, pk=None, table_pk=None):
         column_instance = self.get_object()
         table = column_instance.table
