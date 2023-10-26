@@ -40,13 +40,13 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return prefetched_queryset
 
     @extend_schema(
-    request=PolymorphicProxySerializer(
-        component_name='ColumnDisplayOptions',
-        serializers=[
-            DisplayOptionsMappingSerializer,
-        ],
-        resource_type_field_name='type',
-    )
+        request=PolymorphicProxySerializer(
+            component_name='ColumnDisplayOptions',
+            serializers=[
+                DisplayOptionsMappingSerializer,
+            ],
+            resource_type_field_name='type',
+        )
     )
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
@@ -113,13 +113,13 @@ class ColumnViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
-    request=PolymorphicProxySerializer(
-        component_name='ColumnDisplayOptions',
-        serializers=[
-            DisplayOptionsMappingSerializer,
-        ],
-        resource_type_field_name='type',
-    )
+        request=PolymorphicProxySerializer(
+            component_name='ColumnDisplayOptions',
+            serializers=[
+                DisplayOptionsMappingSerializer,
+                ],
+            resource_type_field_name='type',
+        )
     )
     def partial_update(self, request, pk=None, table_pk=None):
         column_instance = self.get_object()
