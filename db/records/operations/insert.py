@@ -1,4 +1,5 @@
 import json
+import pandas
 import tempfile
 
 from psycopg2 import sql
@@ -6,6 +7,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch, UniqueViolation, ExclusionViolation
 from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
 from db.columns.base import MathesarColumn
+from db.constants import ID, ID_ORIGINAL
 from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
 from sqlalchemy import select
@@ -32,17 +34,76 @@ def insert_record_or_records(table, engine, record_data):
     return None
 
 
-def insert_records_from_json(table, engine, json_filepath):
+def get_records_from_dataframe(df):
+    """
+    We convert the dataframe to JSON using to_json() method and then to a Python object.
+    This method replaces 'NaN' values in the dataframe with 'None' values in Python
+    object. The reason behind not using df.to_dict() method is beacuse it stringifies
+    'NaN' values rather than converting them to a 'None' value.
+    We pass 'records' as the orientation parameter because we want each record to contain
+    data of a single row and not of a single column (which is the default behaviour).
+    """
+    return json.loads(df.to_json(orient='records'))
+
+
+def insert_records_from_json(table, engine, json_filepath, column_names, max_level):
+    """
+    Normalizes JSON data and inserts it into a table.
+
+    Args:
+        table: Table. The table to insert JSON data into.
+        engine: MockConnection. The SQLAlchemy engine.
+        json_filepath: str. The path to the stored JSON data file.
+        column_names: List[str]. List of column names.
+        max_level: int. The depth upto which JSON dict should be flattened.
+
+    Algorithm:
+        1.  We convert JSON data into Python object using json.load().
+        2.  We normalize data into a pandas dataframe using pandas.json_normalize() method.
+            The method takes column names as meta. We provide all possible keys as column
+            names, hence it adds missing keys to JSON objects and marks their values as NaN.
+        3.  We get records from the dataframe using the method get_records_from_dataframe().
+        4.  The processed data is now a list of dict objects. Each dict has same keys, that are
+            the column names of the table. We loop through each dict object, and if any value is
+            a dict or a list, we stringify them before inserting them into the table. This way,
+            our type inference logic kicks in later on converting them into
+            'MathesarCustomType.MATHESAR_JSON_OBJECT' and 'MathesarCustomType.MATHESAR_JSON_ARRAY'
+            respectively.
+        5.  We pass data (a list of dicts) to 'insert_record_or_records()' method which inserts
+            them into the table.
+    """
+
     with open(json_filepath, 'r') as json_file:
         data = json.load(json_file)
-    for i, row in enumerate(data):
-        data[i] = {
+
+    """
+    data: JSON object. The data we want to normalize.
+    max_level: int. Max number of levels(depth of dict) to normalize.
+        Normalizing a dict involes flattening it and if max_level is None,
+        pandas normalizes all levels. Default max_level is kept 0.
+    meta: Fields to use as metadata for each record in resulting table. Without meta,
+        the method chooses keys from the first JSON object it encounters as column names.
+        We provide column names as meta, because we want all possible keys as columns in
+        our table and not just the keys from the first JSON object.
+    """
+    df = pandas.json_normalize(data, max_level=max_level, meta=column_names)
+    records = get_records_from_dataframe(df)
+
+    for i, row in enumerate(records):
+        if ID in row and ID_ORIGINAL in column_names:
+            row[ID_ORIGINAL] = row.pop("id")
+        records[i] = {
             k: json.dumps(v)
             if (isinstance(v, dict) or isinstance(v, list))
             else v
             for k, v in row.items()
         }
-    insert_record_or_records(table, engine, data)
+    insert_record_or_records(table, engine, records)
+
+
+def insert_records_from_excel(table, engine, dataframe):
+    records = get_records_from_dataframe(dataframe)
+    insert_record_or_records(table, engine, records)
 
 
 def insert_records_from_csv(table, engine, csv_filepath, column_names, header, delimiter=None, escape=None, quote=None, encoding=None):
@@ -115,22 +176,22 @@ def insert_from_select(from_table, target_table, engine, col_mappings=None):
         try:
             result = conn.execute(ins)
         except IntegrityError as e:
-            if type(e.orig) == NotNullViolation:
+            if type(e.orig) is NotNullViolation:
                 raise NotNullError
-            elif type(e.orig) == ForeignKeyViolation:
+            elif type(e.orig) is ForeignKeyViolation:
                 raise ForeignKeyError
-            elif type(e.orig) == UniqueViolation:
+            elif type(e.orig) is UniqueViolation:
                 # ToDo: Try to differentiate between the types of unique violations
                 # Scenario 1: Adding a duplicate value into a column with uniqueness constraint in the target table.
                 # Scenario 2: Adding a non existing value twice in a column with uniqueness constraint in the target table.
                 # Both the scenarios currently result in the same exception being thrown.
                 raise UniqueValueError
-            elif type(e.orig) == ExclusionViolation:
+            elif type(e.orig) is ExclusionViolation:
                 raise ExclusionError
             else:
                 raise e
         except ProgrammingError as e:
-            if type(e.orig) == DatatypeMismatch:
+            if type(e.orig) is DatatypeMismatch:
                 raise TypeMismatchError
             else:
                 raise e

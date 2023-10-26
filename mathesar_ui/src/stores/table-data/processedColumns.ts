@@ -1,10 +1,7 @@
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { Column } from '@mathesar/api/types/tables/columns';
-import type {
-  Constraint,
-  FkConstraint,
-} from '@mathesar/api/types/tables/constraints';
+import type { Constraint } from '@mathesar/api/types/tables/constraints';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
@@ -39,12 +36,6 @@ export interface ProcessedColumn extends CellColumnFabric {
   exclusiveConstraints: Constraint[];
   /** Constraints whose columns include this column and other columns too */
   sharedConstraints: Constraint[];
-  /**
-   * Present when this column has one single-column FK constraint. In the
-   * unlikely (but theoretically possible) scenario that this column has more
-   * than one FK constraint, the first FK constraint is used.
-   */
-  linkFk: FkConstraint | undefined;
   abstractType: AbstractType;
   initialInputValue: unknown;
   inputComponentAndProps: ComponentAndProps;
@@ -57,7 +48,8 @@ export interface ProcessedColumn extends CellColumnFabric {
 }
 
 /** Maps column ids to processed columns */
-export type ProcessedColumnsStore = Readable<Map<number, ProcessedColumn>>;
+export type ProcessedColumns = Map<number, ProcessedColumn>;
+export type ProcessedColumnsStore = Readable<ProcessedColumns>;
 
 export function processColumn({
   tableId,

@@ -23,6 +23,10 @@
     background: var(--slate-100);
   }
 
+  &.read-only {
+    background: var(--slate-50);
+  }
+
   &.has-error {
     border-color: var(--red-500);
     background: var(--red-100);

@@ -149,10 +149,14 @@ class ColumnSerializer(SimpleColumnSerializer):
             'valid_target_types',
             'default',
             'has_dependents',
+            'description',
         )
         model_fields = (DISPLAY_OPTIONS_KEY,)
 
     name = serializers.CharField(required=False, allow_blank=True)
+    description = serializers.CharField(
+        required=False, allow_blank=True, default=None, allow_null=True
+    )
 
     # From scratch fields
     type = serializers.CharField(required=False)

@@ -63,25 +63,25 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo -u postgres psql
     ```
 
-1. Mathesar needs a Postgres superuser to function correctly. Let's create a superuser.
+1. Let's create a Postgres user for Mathesar
 
     ```postgresql
-    CREATE USER mathesar WITH SUPERUSER ENCRYPTED PASSWORD '1234';
+    CREATE USER mathesar WITH ENCRYPTED PASSWORD '1234';
     ```
 
     !!! warning "Customize your password"
         Be sure to change the password `1234` in the command above to something more secure and private. Record your custom password somewhere safe. You will need to reference it later.
 
-1. Next, we have to create a database for storing Mathesar metadata.
+1. Next, we have to create a database for storing Mathesar metadata. Your PostgreSQL user will either need to be a `SUPERUSER` or `OWNER` of the database. In this guide, we will be setting the user to be `OWNER` of the database as it is slightly restrictive compared to a `SUPERUSER`.
 
     ```postgresql
-    CREATE DATABASE mathesar_django;
+    CREATE DATABASE mathesar_django OWNER mathesar;
     ```
 
 1. Now we let us create a database for storing your data.
 
     ```postgresql
-    CREATE DATABASE your_db_name;
+    CREATE DATABASE your_db_name OWNER mathesar;
     ```
 
 1. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to exit the `psql` shell.
@@ -210,7 +210,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Install the frontend dependencies
 
     ```sh
-    npm install --prefix mathesar_ui
+    npm ci --prefix mathesar_ui
     ```
       
 1. Compile the Mathesar Frontend App
@@ -221,18 +221,9 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Install Mathesar functions on the database:
 
     ```sh
-    python install.py --skip-confirm | tee /tmp/install.py.log
+    python mathesar/install.py --skip-confirm | tee /tmp/install.py.log
     ```
 
-1. Create a Mathesar admin/superuser:
-
-    ```sh
-    python manage.py createsuperuser
-    ```
-
-    A prompt will appear to ask for the superuser details. Fill in the details to create a superuser. At least one superuser is necessary for accessing Mathesar.
-    
-    See the Django docs for more information on the [`createsuperuser` command](https://docs.djangoproject.com/en/4.2/ref/django-admin/#createsuperuser)
 
 1. Create a media directory for storing user-uploaded media
 
@@ -250,6 +241,12 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     ```sh
     sudo groupadd gunicorn && \
     sudo useradd gunicorn -g gunicorn
+    ```
+
+1. Make the `gunicorn` user the owner of the `.media` directory
+
+    ```sh
+    sudo chown -R gunicorn:gunicorn .media/
     ```
 
 1. Create the Gunicorn systemd service file.
@@ -388,9 +385,10 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     sudo journalctl --priority=notice --unit=caddy.service
     ```
 
+### Set up your user account
+Mathesar is now installed! You can use it by visiting the URL `xDOMAIN_NAMEx`.
 
-Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
-
+You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
 
 ## Administration
 
@@ -438,7 +436,7 @@ Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
 1. Install the frontend dependencies
 
     ```sh
-    npm install --prefix mathesar_ui
+    npm ci --prefix mathesar_ui
     ```
       
 1. Build the Mathesar frontend app
@@ -450,7 +448,7 @@ Now you can start using the Mathesar app by visiting the URL `xDOMAIN_NAMEx`
 1. Update Mathesar functions on the database:
 
     ```sh
-    python install.py --skip-confirm >> /tmp/install.py.log
+    python mathesar/install.py --skip-confirm >> /tmp/install.py.log
     ```
 
 1. Restart the gunicorn server

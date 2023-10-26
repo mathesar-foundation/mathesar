@@ -224,7 +224,7 @@ def test_uri_type_domain_rejects_malformed_uris(engine_with_schema, test_str):
     with pytest.raises(IntegrityError) as e:
         with engine.begin() as conn:
             conn.execute(text(f"SELECT '{test_str}'::{uri.DB_TYPE}"))
-        assert type(e.orig) == CheckViolation
+        assert type(e.orig) is CheckViolation
 
 
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [

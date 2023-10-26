@@ -18,9 +18,15 @@ export type AccessOperation =
   | 'canEditTableRecords'
   | 'canEditMetadata'
   | 'canExecuteDDL'
-  | 'canEditPermissions';
+  | 'canEditPermissions'
+  | 'canViewLinkedEntities';
+
+const operationsForViewer: Set<AccessOperation> = new Set([
+  'canViewLinkedEntities',
+]);
 
 const operationsForEditor: Set<AccessOperation> = new Set([
+  ...operationsForViewer,
   'canEditTableRecords',
   'canEditMetadata',
 ]);
@@ -35,7 +41,7 @@ export function roleAllowsOperation(
     case 'editor':
       return operationsForEditor.has(operation);
     case 'viewer':
-      return false;
+      return operationsForViewer.has(operation);
     default:
       throw new MissingExhaustiveConditionError(userRole);
   }

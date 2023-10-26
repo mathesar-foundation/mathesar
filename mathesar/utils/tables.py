@@ -1,7 +1,6 @@
 from sqlalchemy import MetaData
 
 from db.tables.operations.create import create_mathesar_table
-from db.tables.operations.select import get_oid_from_table
 from db.tables.operations.infer_types import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.base import create_table_from_data_file
@@ -77,9 +76,8 @@ def create_empty_table(name, schema, comment=None):
     :param schema: the parsed and validated schema model
     :return: the newly created blank table
     """
-    engine = create_mathesar_engine(schema.database.name)
-    db_table = create_mathesar_table(name, schema.name, [], engine, comment=comment)
-    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
+    engine = create_mathesar_engine(schema.database)
+    db_table_oid = create_mathesar_table(engine, name, schema.oid, comment=comment)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table
     table, _ = Table.current_objects.get_or_create(oid=db_table_oid, schema=schema)

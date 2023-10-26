@@ -3,7 +3,7 @@ const typescript = require('typescript');
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  ignorePatterns: ['node_modules', 'dist', 'index.html', 'storybook-static'],
+  ignorePatterns: ['node_modules', 'dist', 'index.html'],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
@@ -21,6 +21,7 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': ['warn', { allow: ['error'] }],
+    'no-continue': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/ban-ts-comment': [
       'error',

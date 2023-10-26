@@ -4,9 +4,11 @@
 {% block title %}Home{% endblock %}
 
 {% block styles %}
-  {% if not development_mode %} {% for css_file in manifest_data.module_css %}
-    <link rel="stylesheet" href="{% static css_file %}" />
-  {% endfor %} {% endif %}
+  {% if not development_mode %} 
+    {% for css_file in manifest_data.module_css %}
+      <link rel="stylesheet" href="{% static css_file %}" />
+    {% endfor %} 
+  {% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -16,6 +18,8 @@
         {{ value|json_script:key }}
     {% endfor %}
   {% endif %}
+
+  <script type="module" src="{{ module_translations_file_path }}"></script>
 
   {% if development_mode %}
     <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
@@ -52,12 +56,22 @@
     ></script>
     <script
       nomodule
-      id="vite-legacy-entry"
+      id="vite-legacy-translations-slot"
+      data-src="{{ legacy_translations_file_path }}"
+    >
+      System.import(
+        document.getElementById("vite-legacy-translations-slot").getAttribute("data-src")
+      );
+    </script>
+    <script
+      nomodule
+      id="vite-legacy-js-slot"
       data-src="{% static manifest_data.legacy_js %}"
     >
       System.import(
-        document.getElementById("vite-legacy-entry").getAttribute("data-src")
+        document.getElementById("vite-legacy-js-slot").getAttribute("data-src")
       );
     </script>
+    
   {% endif %}
 {% endblock %}

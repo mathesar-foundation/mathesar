@@ -390,8 +390,11 @@ def test_column_invalid_display_options_type_on_reflection(
     table, columns = column_test_table_with_service_layer_options
     column_index = 2
     column = columns[column_index]
+    column_attnum = get_column_attnum_from_name(
+        table.oid, column.name, engine, get_empty_metadata()
+    )
     with engine.begin() as conn:
-        alter_column_type(table.oid, column.name, engine, conn, PostgresType.BOOLEAN)
+        alter_column_type(table.oid, column_attnum, engine, conn, PostgresType.BOOLEAN)
     column_id = column.id
     response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
@@ -407,8 +410,11 @@ def test_column_alter_same_type_display_options(
     column_index = 2
     column = columns[column_index]
     pre_alter_display_options = column.display_options
+    column_attnum = get_column_attnum_from_name(
+        table.oid, column.name, engine, get_empty_metadata()
+    )
     with engine.begin() as conn:
-        alter_column_type(table.oid, column.name, engine, conn, PostgresType.NUMERIC)
+        alter_column_type(table.oid, column_attnum, engine, conn, PostgresType.NUMERIC)
     column_id = column.id
     response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",

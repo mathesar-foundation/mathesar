@@ -101,7 +101,7 @@
         {#if activeTab?.id === 'column-selection'}
           <div class="help-text">
             Select the columns that will be used for the exploration. Columns
-            are limited to those from the base table and it's linked tables.
+            are limited to those from the base table and its linked tables.
           </div>
           <ColumnSelectionPane
             {queryManager}

@@ -1,4 +1,5 @@
 import json
+from importlib import resources as impresources
 
 from thefuzz import fuzz
 
@@ -7,6 +8,8 @@ from db.types import base
 from db.types.base import get_qualified_name
 from db.types.custom.money import get_first_money_array_with_symbol
 from db.metadata import get_empty_metadata
+
+from mathesar import data
 
 MATHESAR_MONEY = get_qualified_name(base.MathesarCustomType.MATHESAR_MONEY.value)
 
@@ -19,30 +22,35 @@ def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
     if money_array is None:
         return None
     else:
-        with open("currency_info.json", 'r') as currency_file:
-            currency_dict = json.loads(currency_file.read())
-            greatest_currency_similarity_score = 10  # Threshold score
-            selected_currency_details = None
-            for currency_code, currency_details in currency_dict.items():
-                currency_similarity_score = fuzz.ratio(currency_details['currency_symbol'], money_array[3])
-                if currency_similarity_score == 100:
-                    selected_currency_details = currency_details
-                    break
-                elif currency_similarity_score > greatest_currency_similarity_score:
-                    greatest_currency_similarity_score = currency_similarity_score
-                    selected_currency_details = currency_details
-            if selected_currency_details is not None:
-                return {
-                    'currency_symbol': selected_currency_details['currency_symbol'],
-                    'symbol_location': 'after-minus',
-                    'number_format': 'english',
-                }
-            else:
-                return {
-                    'currency_symbol': money_array[3],
-                    'symbol_location': 'after-minus',
-                    'number_format': 'english',
-                }
+        try:
+            inp_file = (impresources.files(data) / 'currency_info.json')
+            with inp_file.open("rb") as f:  # or "rt" as text file with universal newlines
+                currency_dict = json.load(f)
+        except AttributeError:
+            # if Python < PY3.9, fall back to the method deprecated in PY3.11.
+            currency_dict = json.load(impresources.open_text(data, 'currency_info.json'))
+        greatest_currency_similarity_score = 10  # Threshold score
+        selected_currency_details = None
+        for currency_code, currency_details in currency_dict.items():
+            currency_similarity_score = fuzz.ratio(currency_details['currency_symbol'], money_array[3])
+            if currency_similarity_score == 100:
+                selected_currency_details = currency_details
+                break
+            elif currency_similarity_score > greatest_currency_similarity_score:
+                greatest_currency_similarity_score = currency_similarity_score
+                selected_currency_details = currency_details
+        if selected_currency_details is not None:
+            return {
+                'currency_symbol': selected_currency_details['currency_symbol'],
+                'symbol_location': 'after-minus',
+                'number_format': 'english',
+            }
+        else:
+            return {
+                'currency_symbol': money_array[3],
+                'symbol_location': 'after-minus',
+                'number_format': 'english',
+            }
 
 
 def infer_table_column_display_options(table, col_name_type_dict):

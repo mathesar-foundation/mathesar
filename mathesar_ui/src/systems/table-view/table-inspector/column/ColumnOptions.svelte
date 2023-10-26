@@ -124,7 +124,7 @@
 
 <style lang="scss">
   .column-options {
-    padding: 1rem 0;
+    padding: 0.5rem 0;
     display: flex;
     flex-direction: column;
 

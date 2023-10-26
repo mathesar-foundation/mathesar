@@ -309,11 +309,14 @@ class NotNullViolationAPIException(MathesarAPIException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             table=None
     ):
-        exception_diagnostics = exception.orig.diag
+        try:
+            exception_diagnostics = exception.orig.diag
+        except Exception:
+            exception_diagnostics = exception.diag
         message_str = message if message is not None else exception_diagnostics.message_primary
         column_attnum = get_column_attnum_from_name(
             table.oid,
-            exception.orig.diag.column_name,
+            exception_diagnostics.column_name,
             table.schema._sa_engine,
             metadata=get_cached_metadata(),
         )
@@ -454,6 +457,54 @@ class IdentifierTooLong(MathesarAPIException):
             self,
             exception=None,
             message="Identifier is longer than Postgres' limit of 63 bytes.",
+            field=None,
+            details=None,
+            status_code=status.HTTP_400_BAD_REQUEST
+    ):
+        if exception is None:
+            exception = Exception(message)
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class InvalidJSONFormat(MathesarAPIException):
+    error_code = ErrorCodes.InvalidJSONFormat.value
+
+    def __init__(
+            self,
+            exception=None,
+            message='Invalid JSON file.',
+            field=None,
+            details=None,
+            status_code=status.HTTP_400_BAD_REQUEST
+    ):
+        if exception is None:
+            exception = Exception(message)
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class UnsupportedJSONFormat(MathesarAPIException):
+    error_code = ErrorCodes.UnsupportedJSONFormat.value
+
+    def __init__(
+            self,
+            exception=None,
+            message='This JSON format is not supported.',
+            field=None,
+            details=None,
+            status_code=status.HTTP_400_BAD_REQUEST
+    ):
+        if exception is None:
+            exception = Exception(message)
+        super().__init__(exception, self.error_code, message, field, details, status_code)
+
+
+class UnsupportedFileFormat(MathesarAPIException):
+    error_code = ErrorCodes.UnsupportedFileFormat.value
+
+    def __init__(
+            self,
+            exception=None,
+            message='This file format is not supported.',
             field=None,
             details=None,
             status_code=status.HTTP_400_BAD_REQUEST

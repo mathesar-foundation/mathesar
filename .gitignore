@@ -183,7 +183,6 @@ docs/_build/
 
 # UI
 node_modules/
-storybook-static/
 
 # Client Build files
 mathesar/static/mathesar/
@@ -193,3 +192,6 @@ test-results/
 
 # core dumps generated sometimes when something goes wrong with Playwright
 core
+
+# non tracked settings
+config/settings/local.py

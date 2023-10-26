@@ -33,6 +33,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 - [Self-hosting](#self-hosting)
 - [Our motivation](#our-motivation)
 - [Contributing](#contributing)
+- [Bugs and troubleshooting](#bugs-and-troubleshooting)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -105,6 +106,9 @@ We want to make existing database functionality more accessible, for users of al
 
 ## Contributing
 We actively encourage contribution! Get started by reading our [Contributor Guide](./CONTRIBUTING.md).
+
+## Bugs and troubleshooting
+If you run into problems, refer to our [troubleshooting guide](./TROUBLESHOOTING.md).
 
 ## License
 Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).

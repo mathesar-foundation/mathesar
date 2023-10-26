@@ -7,17 +7,17 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
-from django.contrib.postgres.fields import ArrayField
-
+from encrypted_fields.fields import EncryptedCharField
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
+    get_column_description,
     get_column_attnum_from_names_as_map, get_column_name_from_attnum,
     get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
 )
-from db.constraints.operations.create import create_constraint
+from db.constraints.operations.create import add_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_record_from_oid
 from db.constraints import utils as constraint_utils
@@ -110,10 +110,16 @@ _engine_cache = {}
 
 
 class Database(ReflectionManagerMixin, BaseModel):
+    name = models.CharField(max_length=128, unique=True)
+    db_name = models.CharField(max_length=128)
+    username = EncryptedCharField(max_length=255)
+    password = EncryptedCharField(max_length=255)
+    host = models.CharField(max_length=255)
+    port = models.IntegerField()
+    editable = models.BooleanField(default=True)
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()
-    name = models.CharField(max_length=128, unique=True)
     deleted = models.BooleanField(blank=True, default=False)
 
     @property
@@ -126,7 +132,7 @@ class Database(ReflectionManagerMixin, BaseModel):
             engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
         else:
-            engine = create_mathesar_engine(db_name=db_name)
+            engine = create_mathesar_engine(self)
             _engine_cache[db_name] = engine
         return engine
 
@@ -140,6 +146,14 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
+
+    def save(self, **kwargs):
+        db_name = self.name
+        # invalidate cached engine as db credentials might get changed.
+        if _engine_cache.get(db_name):
+            _engine_cache[db_name].dispose()
+            del _engine_cache[db_name]
+        return super().save()
 
 
 class Schema(DatabaseObject):
@@ -476,7 +490,6 @@ class Table(DatabaseObject, Relation):
 
     def update_sa_table(self, update_params):
         result = model_utils.update_sa_table(self, update_params)
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def delete_sa_table(self):
@@ -532,11 +545,7 @@ class Table(DatabaseObject, Relation):
         # the most newly-created constraint. Other methods (e.g., trying to get
         # a constraint by name when it wasn't set here) are even less robust.
         constraint_oid = max(
-            create_constraint(
-                self._sa_table.schema,
-                self.schema._sa_engine,
-                constraint_obj
-            )
+            add_constraint(constraint_obj, engine=self._sa_engine)
         )
         result = Constraint.current_objects.create(oid=constraint_oid, table=self)
         reset_reflection(db_name=self.schema.database.name)
@@ -618,7 +627,7 @@ class Table(DatabaseObject, Relation):
         remainder_column_names = column_names_id_map.keys() - extracted_column_names
 
         # Mutate on Postgres
-        extracted_sa_table, remainder_sa_table, linking_fk_column_attnum = extract_columns_from_table(
+        extracted_table_oid, remainder_table_oid, linking_fk_column_attnum = extract_columns_from_table(
             self.oid,
             columns_attnum_to_extract,
             extracted_table_name,
@@ -626,11 +635,7 @@ class Table(DatabaseObject, Relation):
             self._sa_engine,
             relationship_fk_column_name
         )
-        engine = self._sa_engine
-
         # Replicate mutation on Django, so that Django-layer-specific information is preserved
-        extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
-        remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
         extracted_table = Table(oid=extracted_table_oid, schema=self.schema)
         extracted_table.save()
 
@@ -771,6 +776,10 @@ class Column(ReflectionManagerMixin, BaseModel):
             return name
 
     @property
+    def description(self):
+        return get_column_description(self.table.oid, self.attnum, self._sa_engine)
+
+    @property
     def ui_type(self):
         if self.db_type:
             return get_ui_type_from_db_type(self.db_type)
@@ -878,6 +887,8 @@ class DataFile(BaseModel):
 
     base_name = models.CharField(max_length=100)
     header = models.BooleanField(default=True)
+    max_level = models.IntegerField(default=0, blank=True)
+    sheet_index = models.IntegerField(default=0)
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
@@ -904,7 +915,7 @@ def _create_column_settings(columns):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = ArrayField(models.IntegerField(), null=True, default=None)
+    column_order = JSONField(null=True, default=None)
 
 
 def _create_table_settings(tables):

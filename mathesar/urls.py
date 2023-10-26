@@ -5,7 +5,9 @@ from rest_framework_nested import routers
 from mathesar import views
 from mathesar.api.db import viewsets as db_viewsets
 from mathesar.api.ui import viewsets as ui_viewsets
+from mathesar.users.decorators import superuser_exist, superuser_must_not_exist
 from mathesar.users.password_reset import MathesarPasswordResetConfirmView
+from mathesar.users.superuser_create import SuperuserFormView
 
 db_router = routers.DefaultRouter()
 db_router.register(r'tables', db_viewsets.TableViewSet, basename='table')
@@ -34,6 +36,10 @@ ui_router.register(r'schema_roles', ui_viewsets.SchemaRoleViewSet, basename='sch
 ui_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
 ui_table_router.register(r'records', ui_viewsets.RecordViewSet, basename='table-record')
 
+# Shares
+ui_router.register(r'tables/(?P<table_pk>[^/.]+)/shares', ui_viewsets.SharedTableViewSet, basename='shared-table')
+ui_router.register(r'queries/(?P<query_pk>[^/.]+)/shares', ui_viewsets.SharedQueryViewSet, basename='shared-query')
+
 urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
@@ -42,7 +48,8 @@ urlpatterns = [
     path('api/ui/v0/', include(ui_table_router.urls)),
     path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),
     path('auth/password_reset_confirm', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('auth/login/', LoginView.as_view(redirect_authenticated_user=True), name='login'),
+    path('auth/login/', superuser_exist(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
+    path('auth/create_superuser/', superuser_must_not_exist(SuperuserFormView.as_view()), name='superuser_create'),
     path('auth/', include('django.contrib.auth.urls')),
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
@@ -50,8 +57,14 @@ urlpatterns = [
     path('administration/users/', views.admin_home, name='admin_users_home'),
     path('administration/users/<user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
+    path('administration/db-connection/', views.list_database_connection, name='list_database_connection'),
+    path('administration/db-connection/add/', views.add_database_connection, name='add_database_connection'),
+    path('administration/db-connection/edit/<db_name>/', views.edit_database_connection, name='edit_database_connection'),
+    path('shares/tables/<slug>/', views.shared_table, name='shared_table'),
+    path('shares/explorations/<slug>/', views.shared_query, name='shared_query'),
     path('db/', views.home, name='db_home'),
     path('db/<db_name>/', views.schemas, name='schemas'),
+    path('i18n/', include('django.conf.urls.i18n')),
     re_path(
         r'^db/(?P<db_name>\w+)/(?P<schema_id>\w+)/',
         views.schema_home,

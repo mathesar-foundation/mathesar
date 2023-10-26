@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { rowHeightPx } from '@mathesar/geometry';
   import { getSheetContext } from './utils';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
@@ -23,6 +24,7 @@
       {itemCount}
       {paddingBottom}
       {itemSize}
+      estimatedItemSize={rowHeightPx}
       {itemKey}
       let:items
       let:api

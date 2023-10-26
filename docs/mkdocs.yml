@@ -4,7 +4,7 @@ repo_url: https://github.com/centerofci/mathesar/
 repo_name: centerofci/mathesar
 
 nav:
-  - Introduction: 
+  - Introduction:
       - Welcome: index.md
   - Installation:
       - Install with Docker Compose: installation/docker-compose/index.md
@@ -13,7 +13,7 @@ nav:
       - Appendix to guided script:
           - Under the hood: installation/guided-install/under-the-hood.md
           - Troubleshooting: installation/guided-install/troubleshooting.md
-      - Install UI-only Docker image: installation/docker/index.md
+      - Install using Docker image: installation/docker/index.md
   - Configuration:
       - Environment variables: configuration/env-variables.md
       - Connect to an existing database server: configuration/connect-to-existing-db.md
@@ -23,30 +23,32 @@ nav:
       - Uninstall Mathesar: administration/uninstall.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
+      - Importing data: user-guide/importing-data.md
       - Syncing database changes: user-guide/syncing-db.md
       - Users & access levels: user-guide/users.md
+      - Glossary: user-guide/glossary.md
 
 plugins:
   - search:
       lang: en
   - redirects:
       redirect_maps:
-          'installation-dc/administration.md': 'installation/guided-install/index.md#start-stop'
-          'installation-dc/ansible-setup.md': 'installation/docker-compose/index.md'
-          'installation-dc/quickstart.md': 'installation/guided-install/index.md'
-          'installation-dc/troubleshooting.md': 'installation/guided-install/troubleshooting.md'
-          'installation-dc/under-the-hood.md': 'installation/guided-install/under-the-hood.md'
-          'installation-dc/uninstall.md': 'installation/guided-install/index.md#uninstall'
-          'product/intro.md': 'user-guide/index.md'
-          'product/syncing-db.md': 'user-guide/syncing-db.md'
-          'product/users.md': 'user-guide/users.md'
-          'install/index.md': 'index.md'
-          'install/guided-install/index.md': 'installation/guided-install/index.md'
-          'install/docker-compose/index.md': 'installation/docker-compose/index.md'
-          'install/docker-compose/under-the-hood.md': 'installation/guided-install/under-the-hood.md'
-          'install/docker-compose/troubleshooting.md': 'installation/guided-install/troubleshooting.md'
-          'install/docker/index.md': 'installation/docker/index.md'
-          'install/build-from-source/index.md': 'installation/build-from-source/index.md'
+        "installation-dc/administration.md": "installation/guided-install/index.md#start-stop"
+        "installation-dc/ansible-setup.md": "installation/docker-compose/index.md"
+        "installation-dc/quickstart.md": "installation/guided-install/index.md"
+        "installation-dc/troubleshooting.md": "installation/guided-install/troubleshooting.md"
+        "installation-dc/under-the-hood.md": "installation/guided-install/under-the-hood.md"
+        "installation-dc/uninstall.md": "installation/guided-install/index.md#uninstall"
+        "product/intro.md": "user-guide/index.md"
+        "product/syncing-db.md": "user-guide/syncing-db.md"
+        "product/users.md": "user-guide/users.md"
+        "install/index.md": "index.md"
+        "install/guided-install/index.md": "installation/guided-install/index.md"
+        "install/docker-compose/index.md": "installation/docker-compose/index.md"
+        "install/docker-compose/under-the-hood.md": "installation/guided-install/under-the-hood.md"
+        "install/docker-compose/troubleshooting.md": "installation/guided-install/troubleshooting.md"
+        "install/docker/index.md": "installation/docker/index.md"
+        "install/build-from-source/index.md": "installation/build-from-source/index.md"
   - macros
   - placeholder
 
@@ -55,19 +57,19 @@ theme:
   logo: assets/images/logo.svg
   favicon: assets/images/favicon.ico
   features:
-      - content.code.copy
-      - navigation.sections
-      - navigation.expand
+    - content.code.copy
+    - navigation.sections
+    - navigation.expand
   font:
     text: Nunito Sans
     code: Fira Code
   icon:
     repo: fontawesome/brands/github
-  palette: 
+  palette:
     # Palette toggle for light mode
     - scheme: default
       toggle:
-        icon: material/brightness-7 
+        icon: material/brightness-7
         name: Switch to dark mode
     # Palette toggle for dark mode
     - scheme: slate
@@ -100,4 +102,4 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.1.2
+  mathesar_version: 0.1.3

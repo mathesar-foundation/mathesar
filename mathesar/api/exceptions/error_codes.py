@@ -9,6 +9,7 @@ class ErrorCodes(Enum):
     NotFound = 4005
     TableNotFound = 4041
     RecordNotFound = 4042
+    QueryNotFound = 4061
     UnknownError = 4999
     # Generic Errors
     ProgrammingError = 4101
@@ -38,8 +39,10 @@ class ErrorCodes(Enum):
     UniqueImportViolation = 4303
 
     # Validation Error
+    BadDBCredentials = 4428
     ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
+    EditingNotAllowed = 4429
     MappingsNotFound = 4417
     MultipleDataFiles = 4400
     MoneyDisplayOptionConflict = 4407
@@ -63,3 +66,6 @@ class ErrorCodes(Enum):
     DuplicateUIQueryInSchema = 4422
     IdentifierTooLong = 4423
     DynamicDefaultAlterationToStaticDefault = 4424
+    InvalidJSONFormat = 4425
+    UnsupportedJSONFormat = 4426
+    UnsupportedFileFormat = 4427

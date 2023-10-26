@@ -16,7 +16,7 @@ There is one catch when running in containers. Your IDEs will not be able to per
 
 Options:
 
-- Run `npm install` locally (or copy the `node_modules` folder from the container to your host file system). This will not be used for anything except for helping the IDEs provide intellisense.
+- Run `npm ci` locally (or copy the `node_modules` folder from the container to your host file system). This will not be used for anything except for helping the IDEs provide intellisense.
 
   If you choose this approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before committing.
 
@@ -29,7 +29,7 @@ Options:
 If you don't want to use Docker, you can run the front end locally.
 
 1. `cd mathesar_ui`
-1. `npm install`
+1. `npm ci`
 1. `npm run dev`
 
    This will start a vite server at port 3000. The vite client and main files are referenced by our server rendered html files. Refer [backend integration in vite docs](https://vitejs.dev/guide/backend-integration.html).
@@ -161,22 +161,6 @@ We use [Vitest](https://vitest.dev/) to run our unit tests, and we use [Testing 
 - The `src/component-library` directory contains general-purpose components which will eventually be spun off into its own package, separate from Mathesar.
 - See the [Components README](./src/component-library/README.md) for more details.
 
-### Storybook
-
-We use [Storybook](https://storybook.js.org/) to develop and document our components.
-
-- **Start** Storybook in dev mode with:
-
-  ```bash
-  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run storybook
-  ```
-
-- **Build** Storybook with:
-
-  ```bash
-  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run build-storybook
-  ```
-
 ## Live reloading on Windows
 
 - Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
@@ -205,24 +189,10 @@ If you want to add or remove packages, or basically run any npm action, **always
    Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
    README.md   node_modules   package.json       src
 
-   root@c273da65c52d:/code/mathesar_ui$ npm install <package>
+   root@c273da65c52d:/code/mathesar_ui# npm install <package>
 
-   root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
+   root@c273da65c52d:/code/mathesar_ui# npm uninstall <package>
    ```
-
-1. Before committing the `package-lock.json` file, run `npm install --unsafe-perm` in the container.
-
-   ```bash
-   root@c273da65c52d:/code/mathesar_ui$ npm install --unsafe-perm
-   ```
-
-   Reason:
-
-   - We force resolutions of certain packages which have vulnerabilities, using the [`npm-force-resolutions` package](https://www.npmjs.com/package/npm-force-resolutions).
-   - These resolutions are mentioned in the package.json file. They are only to be used when nested dependencies have severe vulnerabilities but our direct dependencies do not use the vulnerability free versions. Extra care should be taken here to make sure the direct dependencies do not break.
-   - This needs to run during the `preinstall` lifecycle.
-   - After every package action (add/remove), the `npm install` command needs to be run additionally to enforce these resolutions.
-   - Since our node instance runs as root in the container, the [`--unsafe-perm` flag](https://docs.npmjs.com/cli/v6/using-npm/config#unsafe-perm) needs to be specified.
 
 ## Fixing npm audit failures
 

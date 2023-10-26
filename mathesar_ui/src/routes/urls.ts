@@ -30,12 +30,37 @@ export function getImportPageUrl(
   return `${getSchemaPageUrl(databaseName, schemaId)}import/`;
 }
 
+interface ImportPreviewPageQueryParams {
+  useColumnTypeInference: boolean;
+}
+
+const TYPE_INFERENCE_QUERY_PARAM = 'inference';
+
+function serializeImportPreviewPageQueryParams(
+  p: ImportPreviewPageQueryParams,
+): string {
+  return new URLSearchParams({
+    [TYPE_INFERENCE_QUERY_PARAM]: JSON.stringify(p.useColumnTypeInference),
+  }).toString();
+}
+
+export function getImportPreviewPageQueryParams(
+  queryParams: Record<string, unknown>,
+): ImportPreviewPageQueryParams {
+  return {
+    useColumnTypeInference: queryParams[TYPE_INFERENCE_QUERY_PARAM] === 'true',
+  };
+}
+
 export function getImportPreviewPageUrl(
   databaseName: string,
   schemaId: number,
   previewTableId: number,
+  options: ImportPreviewPageQueryParams,
 ): string {
-  return `${getImportPageUrl(databaseName, schemaId)}${previewTableId}/`;
+  const importPageUrl = getImportPageUrl(databaseName, schemaId);
+  const q = serializeImportPreviewPageQueryParams(options);
+  return `${importPageUrl}${previewTableId}/?${q}`;
 }
 
 export function getDataExplorerPageUrl(
@@ -90,6 +115,22 @@ export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const LOGOUT_URL = '/auth/logout/';
 
+export const DATABASE_CONNECTION_SLUG = 'db-connection';
+export const DATABASE_CONNECTION_LIST_URL = `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/`;
+export const DATABASE_CONNECTION_ADD_URL = `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/add/`;
+
+export function getDatabaseConnectionEditUrl(databaseName: string) {
+  return `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/edit/${databaseName}/`;
+}
+
 export function getEditUsersPageUrl(userId: number) {
   return `${ADMIN_USERS_PAGE_URL}${userId}/`;
+}
+
+export function getSharedTablePageUrl(slug: string): string {
+  return `/shares/tables/${slug}/`;
+}
+
+export function getSharedExplorationPageUrl(slug: string): string {
+  return `/shares/explorations/${slug}/`;
 }

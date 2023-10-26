@@ -99,7 +99,14 @@ def create_dj_db(request):
     def _create_and_add(db_name):
         create_db(db_name)
         add_db_to_dj_settings(db_name)
-        database_model = Database.current_objects.create(name=db_name)
+        database_model = Database.current_objects.create(
+            name=db_name,
+            db_name=db_name,
+            username='mathesar',
+            password='mathesar',
+            host='mathesar_dev_db',
+            port=5432
+        )
         return database_model
     yield _create_and_add
 
@@ -121,7 +128,14 @@ def test_db_model(request, test_db_name, django_db_blocker):
 
     add_db_to_dj_settings(test_db_name)
     with django_db_blocker.unblock():
-        database_model = Database.current_objects.create(name=test_db_name)
+        database_model = Database.current_objects.create(
+            name=test_db_name,
+            db_name=test_db_name,
+            username='mathesar',
+            password='mathesar',
+            host='mathesar_dev_db',
+            port=5432
+        )
     yield database_model
     database_model.delete()
 
@@ -186,6 +200,11 @@ def patents_json_filepath():
 
 
 @pytest.fixture(scope='session')
+def patents_excel_filepath():
+    return 'mathesar/tests/data/patents.xlsx'
+
+
+@pytest.fixture(scope='session')
 def table_with_id_col_filepath():
     return 'mathesar/tests/data/table_with_id_col.csv'
 
@@ -228,6 +247,41 @@ def col_headers_empty_csv_filepath():
 @pytest.fixture(scope='session')
 def non_unicode_csv_filepath():
     return 'mathesar/tests/data/non_unicode_files/utf_16_le.csv'
+
+
+@pytest.fixture(scope='session')
+def duplicate_id_table_csv_filepath():
+    return 'mathesar/tests/data/csv_parsing/duplicate_id_table.csv'
+
+
+@pytest.fixture(scope='session')
+def null_id_table_csv_filepath():
+    return 'mathesar/tests/data/csv_parsing/null_id_table.csv'
+
+
+@pytest.fixture(scope='session')
+def duplicate_id_table_json_filepath():
+    return 'mathesar/tests/data/json_parsing/duplicate_id_table.json'
+
+
+@pytest.fixture(scope='session')
+def null_id_table_json_filepath():
+    return 'mathesar/tests/data/json_parsing/null_id_table.json'
+
+
+@pytest.fixture(scope='session')
+def duplicate_id_table_excel_filepath():
+    return 'mathesar/tests/data/excel_parsing/duplicate_id_table.xlsx'
+
+
+@pytest.fixture(scope='session')
+def null_id_table_excel_filepath():
+    return 'mathesar/tests/data/excel_parsing/null_id_table.xlsx'
+
+
+@pytest.fixture(scope='session')
+def multiple_sheets_excel_filepath():
+    return 'mathesar/tests/data/excel_parsing/multiple_sheets.xlsx'
 
 
 @pytest.fixture
@@ -299,9 +353,9 @@ def create_mathesar_table(create_db_schema):
     ):
         # We use a fixture for schema creation, so that it gets cleaned up.
         create_db_schema(schema_name, engine, schema_mustnt_exist=False)
+        schema_oid = get_schema_oid_from_name(schema_name, engine)
         return actual_create_mathesar_table(
-            name=table_name, schema=schema_name, columns=columns,
-            engine=engine, metadata=metadata
+            engine=engine, table_name=table_name, schema_oid=schema_oid, columns=columns,
         )
     yield _create_mathesar_table
 
@@ -319,6 +373,11 @@ def create_patents_table(patents_csv_filepath, patent_schema, create_table):
         )
 
     return _create_table
+
+
+@pytest.fixture
+def patents_table(create_patents_table, uid):
+    return create_patents_table(f"table_patents_{uid}")
 
 
 # TODO rename to create_ma_table_from_csv
@@ -340,13 +399,7 @@ def _get_datafile_for_path(path):
 @pytest.fixture
 def create_column():
     def _create_column(table, column_data):
-        column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(
-            table.oid,
-            [column.name],
-            table.schema._sa_engine,
-            metadata=get_empty_metadata()
-        )
+        attnum = table.add_column(column_data)[0]
         column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
         return column[0]
     return _create_column
@@ -411,6 +464,12 @@ def user_bob():
 def client(admin_user):
     client = APIClient()
     client.login(username='admin', password='password')
+    return client
+
+
+@pytest.fixture
+def anonymous_client():
+    client = APIClient()
     return client
 
 
@@ -535,5 +594,13 @@ def superuser_client_factory(client):
      to the same behaviour as other role based client factories
     """
     def _client(schema):
+        return client
+    return _client
+
+
+@pytest.fixture
+def anonymous_client_factory():
+    def _client(schema):
+        client = APIClient()
         return client
     return _client
