@@ -177,7 +177,8 @@ jobs:
 ##                                                                            ##
 ################################################################################
 
-  format:
+  front_end_format:
+    name: Check front end code format
     runs-on: ubuntu-latest
     needs: front_end_checks_required
     if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
@@ -227,6 +228,7 @@ jobs:
       - run: npm run lint
 
   front_end_typecheck:
+    name: Check front end types
     runs-on: ubuntu-latest
     needs: front_end_checks_required
     if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
