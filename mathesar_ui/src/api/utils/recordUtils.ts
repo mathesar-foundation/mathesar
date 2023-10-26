@@ -15,7 +15,7 @@ type ColumnErrors = ImmutableMap<number, string[]>;
  * about which column(s) caused the error, and sometimes we just get a generic
  * top-level error message. Because the API schema supports sending multiple
  * errors in one response, we use a data structure here that can handle both
- * situations at the same time. diff
+ * situations at the same time.
  */
 export interface DetailedRecordsErrors {
   columnErrors: ColumnErrors;

@@ -14,7 +14,7 @@ test('getMostImportantRequestStatusState', () => {
       { state: 'success' },
       { state: 'failure', errors: ['foo'] },
     ]),
-  ).toBe('failure');
+  ).toBe('failue');
 
   expect(getMostImportantRequestStatusState([{ state: 'success' }])).toBe(
     'success',
