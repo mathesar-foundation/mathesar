@@ -7,7 +7,7 @@
   } from '@mathesar-component-library';
   import { Field, type FieldStore } from '@mathesar/components/form';
   import type { ComponentWithProps } from '@mathesar-component-library/types';
-  import UserFormInputRow from './UserFormInputRow.svelte';
+  import GridFormInputRow from './GridFormInputRow.svelte';
 
   const labelController = new LabelController();
   $: setLabelControllerInContext(labelController);
@@ -22,7 +22,7 @@
   export let bypassRow = false;
 </script>
 
-<UserFormInputRow bypass={bypassRow}>
+<GridFormInputRow bypass={bypassRow}>
   <div class="left cell">
     <Label controller={labelController}>
       {label}
@@ -33,13 +33,18 @@
     <div class="input">
       <Field {field} {input} />
     </div>
-    {#if help}
+    {#if $$slots.help || help}
       <div class="help">
-        {help}
+        {#if $$slots.help}
+          <slot name="help" />
+        {/if}
+        {#if help}
+          {help}
+        {/if}
       </div>
     {/if}
   </div>
-</UserFormInputRow>
+</GridFormInputRow>
 
 <style lang="scss">
   .left {
@@ -48,5 +53,12 @@
     justify-content: end;
     margin-right: var(--size-large);
     padding-top: var(--size-ultra-small);
+    margin-left: var(--size-large);
+  }
+
+  .help {
+    color: var(--slate-500);
+    margin-top: var(--size-extreme-small);
+    font-size: var(--size-small);
   }
 </style>

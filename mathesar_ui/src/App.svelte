@@ -3,38 +3,42 @@
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import AppContext from './AppContext.svelte';
   import RootRoute from './routes/RootRoute.svelte';
-  import { loadLocaleAsync } from './i18n/i18n-load';
   import { setLocale } from './i18n/i18n-svelte';
-  import type { RequestStatus } from './api/utils/requestUtils';
-  import { getErrorMessage } from './utils/errors';
   import ErrorBox from './components/message-boxes/ErrorBox.svelte';
+  import { loadLocaleAsync, loadTranslations } from './i18n/i18n-load';
 
+  let isTranslationsLoaded = false;
   /**
-   * Later the translations file will be loaded
-   * in parallel to the FE's first chunk
+   * Why translations are being read from window object?
+   * In order to -
+   * 1. Load the translations file in parallel to the first FE chunk.
+   * 2. And then make it available for the entry(App.svelte)
+   *    file to load them into memory.
+   *
+   * The index.html loads it as using a script tag
+   * Each translations file on load, attaches the translations
+   * to the window object
    */
-  let translationLoadStatus: RequestStatus = { state: 'processing' };
   void (async () => {
-    try {
+    const { translations, displayLanguage } = window.Mathesar || {};
+    if (translations && displayLanguage) {
+      loadTranslations(displayLanguage, translations[displayLanguage]);
+      setLocale(displayLanguage);
+      isTranslationsLoaded = true;
+    } else {
       await loadLocaleAsync('en');
-      setLocale('en');
-      translationLoadStatus = { state: 'success' };
-    } catch (exp) {
-      translationLoadStatus = {
-        state: 'failure',
-        errors: [getErrorMessage(exp)],
-      };
+      isTranslationsLoaded = true;
     }
   })();
 
   const commonData = preloadCommonData();
 </script>
 
-{#if translationLoadStatus.state === 'success' && commonData}
+{#if isTranslationsLoaded && commonData}
   <AppContext {commonData}>
     <RootRoute {commonData} />
   </AppContext>
-{:else if translationLoadStatus.state === 'processing'}
+{:else if !isTranslationsLoaded}
   <div class="app-loader">
     <Spinner size="2rem" />
   </div>
