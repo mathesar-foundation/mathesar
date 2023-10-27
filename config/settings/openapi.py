@@ -6,7 +6,8 @@ def custom_preprocessing_hook(endpoints):
         "/api/db/v0/tables/",
         "/api/db/v0/links/",
         "/api/db/v0/queries/",
-        "/api/ui/v0/databases/"
+        "/api/ui/v0/databases/",
+        "/api/ui/v0/users/"
     ]
     filtered = [(path, path_regex, method, callback) for path, path_regex, method, callback in endpoints if any(path.startswith(prefix) for prefix in prefixes)]
     return filtered
