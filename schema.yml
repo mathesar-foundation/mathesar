@@ -1980,6 +1980,170 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/ui/v0/database_roles/:
+    get:
+      operationId: database_roles_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDatabaseRoleList'
+          description: ''
+    post:
+      operationId: database_roles_create
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseRole'
+          description: ''
+  /api/ui/v0/database_roles/{id}/:
+    get:
+      operationId: database_roles_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database role.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseRole'
+          description: ''
+    put:
+      operationId: database_roles_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database role.
+        required: true
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseRole'
+          description: ''
+    patch:
+      operationId: database_roles_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database role.
+        required: true
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabaseRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabaseRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabaseRole'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseRole'
+          description: ''
+    delete:
+      operationId: database_roles_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database role.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/ui/v0/databases/:
     get:
       operationId: databases_list_2
@@ -2513,6 +2677,31 @@ components:
       - port
       - supported_types_url
       - username
+    DatabaseRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        database:
+          type: integer
+        role:
+          enum:
+          - manager
+          - editor
+          - viewer
+          type: string
+          description: |-
+            * `manager` - Manager
+            * `editor` - Editor
+            * `viewer` - Viewer
+      required:
+      - database
+      - id
+      - role
+      - user
     LinksMapping:
       type: object
       description: |-
@@ -2647,6 +2836,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Database'
+    PaginatedDatabaseRoleList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatabaseRole'
     PaginatedQueryList:
       type: object
       properties:
@@ -2876,6 +3085,26 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+    PatchedDatabaseRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        database:
+          type: integer
+        role:
+          enum:
+          - manager
+          - editor
+          - viewer
+          type: string
+          description: |-
+            * `manager` - Manager
+            * `editor` - Editor
+            * `viewer` - Viewer
     PatchedQuery:
       type: object
       properties:
