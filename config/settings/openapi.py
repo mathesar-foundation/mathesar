@@ -1,9 +1,14 @@
 def custom_preprocessing_hook(endpoints):
-    filtered = []
-    for (path, path_regex, method, callback) in endpoints:
-        # Remove all but DRF API endpoints
-        if path.startswith("/api/db/v0/databases/") or path.startswith("/api/db/v0/data_files/") or path.startswith("/api/db/v0/schemas/") or path.startswith("/api/db/v0/tables/") or path.startswith("/api/db/v0/links/") or path.startswith("/api/db/v0/queries/"):
-            filtered.append((path, path_regex, method, callback))
+    prefixes = [
+        "/api/db/v0/databases/",
+        "/api/db/v0/data_files/",
+        "/api/db/v0/schemas/",
+        "/api/db/v0/tables/",
+        "/api/db/v0/links/",
+        "/api/db/v0/queries/",
+        "/api/ui/v0/databases/"
+    ]
+    filtered = [(path, path_regex, method, callback) for path, path_regex, method, callback in endpoints if any(path.startswith(prefix) for prefix in prefixes)]
     return filtered
 
 
