@@ -58,7 +58,7 @@ paths:
         explode: false
         style: form
       tags:
-      - data_files
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -72,7 +72,7 @@ paths:
     post:
       operationId: data_files_create
       tags:
-      - data_files
+      - db
       requestBody:
         content:
           application/json:
@@ -105,7 +105,7 @@ paths:
         description: A unique integer value identifying this data file.
         required: true
       tags:
-      - data_files
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -126,7 +126,7 @@ paths:
         description: A unique integer value identifying this data file.
         required: true
       tags:
-      - data_files
+      - db
       requestBody:
         content:
           application/json:
@@ -189,7 +189,7 @@ paths:
         explode: false
         style: form
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -203,7 +203,7 @@ paths:
     post:
       operationId: databases_create
       tags:
-      - databases
+      - db
       requestBody:
         content:
           application/json:
@@ -237,7 +237,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -258,7 +258,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       requestBody:
         content:
           application/json:
@@ -291,7 +291,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       requestBody:
         content:
           application/json:
@@ -323,7 +323,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -341,7 +341,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -363,7 +363,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -378,7 +378,7 @@ paths:
     post:
       operationId: links_create
       tags:
-      - links
+      - db
       requestBody:
         content:
           application/json:
@@ -456,7 +456,7 @@ paths:
         explode: false
         style: form
       tags:
-      - queries
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -471,7 +471,7 @@ paths:
     post:
       operationId: queries_create
       tags:
-      - queries
+      - db
       requestBody:
         content:
           application/json:
@@ -505,7 +505,7 @@ paths:
         description: A unique integer value identifying this ui query.
         required: true
       tags:
-      - queries
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -527,7 +527,7 @@ paths:
         description: A unique integer value identifying this ui query.
         required: true
       tags:
-      - queries
+      - db
       requestBody:
         content:
           application/json:
@@ -560,7 +560,7 @@ paths:
         description: A unique integer value identifying this ui query.
         required: true
       tags:
-      - queries
+      - db
       requestBody:
         content:
           application/json:
@@ -592,7 +592,7 @@ paths:
         description: A unique integer value identifying this ui query.
         required: true
       tags:
-      - queries
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -610,7 +610,7 @@ paths:
         description: A unique integer value identifying this ui query.
         required: true
       tags:
-      - queries
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -633,7 +633,7 @@ paths:
         description: A unique integer value identifying this ui query.
         required: true
       tags:
-      - queries
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -656,7 +656,7 @@ paths:
         description: A unique integer value identifying this ui query.
         required: true
       tags:
-      - queries
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -672,7 +672,7 @@ paths:
     post:
       operationId: queries_run_create
       tags:
-      - queries
+      - db
       requestBody:
         content:
           application/json:
@@ -750,7 +750,7 @@ paths:
         explode: false
         style: form
       tags:
-      - schemas
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -764,7 +764,7 @@ paths:
     post:
       operationId: schemas_create
       tags:
-      - schemas
+      - db
       requestBody:
         content:
           application/json:
@@ -798,7 +798,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - schemas
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -819,7 +819,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - schemas
+      - db
       requestBody:
         content:
           application/json:
@@ -851,7 +851,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - schemas
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -869,7 +869,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - schemas
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -977,7 +977,7 @@ paths:
           type: string
           format: date-time
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -992,7 +992,7 @@ paths:
     post:
       operationId: tables_create
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1026,7 +1026,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1048,7 +1048,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1080,7 +1080,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1098,7 +1098,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1121,7 +1121,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1155,7 +1155,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1178,7 +1178,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1212,7 +1212,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1246,7 +1246,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1280,7 +1280,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1314,7 +1314,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1337,7 +1337,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1377,7 +1377,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1398,7 +1398,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1435,7 +1435,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1461,7 +1461,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1497,7 +1497,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1533,7 +1533,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1555,7 +1555,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1595,7 +1595,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1616,7 +1616,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1654,7 +1654,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1680,7 +1680,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1697,7 +1697,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1714,7 +1714,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1737,7 +1737,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1760,7 +1760,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1782,7 +1782,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1817,7 +1817,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1837,7 +1837,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1875,7 +1875,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1900,7 +1900,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1937,7 +1937,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1973,13 +1973,131 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /api/ui/v0/databases/:
+    get:
+      operationId: databases_list_2
+      parameters:
+      - in: query
+        name: deleted
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDatabaseList'
+          description: ''
+  /api/ui/v0/databases/{id}/:
+    get:
+      operationId: databases_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/ui/v0/databases/{id}/filters/:
+    get:
+      operationId: databases_filters_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/ui/v0/databases/{id}/types/:
+    get:
+      operationId: databases_types_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
 components:
   schemas:
     Column:
