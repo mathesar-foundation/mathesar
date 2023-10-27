@@ -183,7 +183,6 @@ docs/_build/
 
 # UI
 node_modules/
-storybook-static/
 
 # Client Build files
 # We need the static/mathesar/ folder for "Create static assets" action

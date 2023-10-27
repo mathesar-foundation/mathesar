@@ -8,6 +8,7 @@ from django.core.management import BaseCommand
 
 from demo.install.arxiv_skeleton import get_arxiv_db_and_schema_log_path
 from mathesar.database.base import create_mathesar_engine
+from mathesar.models.base import Database
 
 
 class Command(BaseCommand):
@@ -28,7 +29,8 @@ def update_our_arxiv_dbs():
         logging.error(e, exc_info=True)
         return
     for db_name, schema_name in db_schema_pairs:
-        engine = create_mathesar_engine(db_name)
+        db = Database.current_objects.get(name=db_name)
+        engine = create_mathesar_engine(db)
         update_arxiv_schema(engine, schema_name, papers)
         engine.dispose()
 

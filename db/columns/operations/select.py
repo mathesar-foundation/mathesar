@@ -8,6 +8,13 @@ from db.tables.operations.select import reflect_table_from_oid
 from db.utils import execute_statement, get_pg_catalog_table
 
 
+def get_column_description(oid, attnum, engine):
+    cursor = execute_msar_func_with_engine(engine, 'col_description', oid, attnum)
+    row = cursor.fetchone()
+    description = row[0]
+    return description
+
+
 def get_column_attnum_from_names_as_map(table_oid, column_names, engine, metadata, connection_to_use=None):
     statement = _get_columns_attnum_from_names(table_oid, column_names, engine, metadata=metadata)
     attnums_tuple = execute_statement(engine, statement, connection_to_use).fetchall()

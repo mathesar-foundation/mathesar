@@ -143,8 +143,8 @@ def insert_records_from_csv_data_file(name, schema, column_names, engine, commen
 
 
 def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
-    db_name = schema.database.name
-    engine = create_mathesar_engine(db_name)
+    db_model = schema.database
+    engine = create_mathesar_engine(db_model)
     sv_filename = data_file.file.path
     header = data_file.header
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
@@ -159,5 +159,5 @@ def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
         drop_table(name=name, schema=schema.name, engine=engine)
         column_names_alt = get_alternate_column_names(column_names)
         table = insert_records_from_csv_data_file(name, schema, column_names_alt, engine, comment, data_file)
-    reset_reflection(db_name=db_name)
+    reset_reflection(db_name=db_model.name)
     return table
