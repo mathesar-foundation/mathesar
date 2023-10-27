@@ -4,8 +4,8 @@ import type {
   Locales,
   TranslationFunctions,
   Translations,
-} from './i18n-types.js';
-import { loadedFormatters, loadedLocales } from './i18n-util.js';
+} from './i18n-types';
+import { loadedFormatters, loadedLocales } from './i18n-store';
 
 const { locale, LL, setLocale } = initI18nSvelte<
   Locales,
