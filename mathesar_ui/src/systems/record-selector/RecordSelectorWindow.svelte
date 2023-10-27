@@ -28,7 +28,7 @@
   export let windowPositionerElement: HTMLElement;
 
   let contentHeight = 0;
-  let newModalOpen = false;
+
   $: nestedController = new RecordSelectorController({
     nestingLevel: controller.nestingLevel + 1,
   });
@@ -73,13 +73,8 @@
     return false; // Parent element not found in the hierarchy
   }
 
-  function handleOverlayClose(event: MouseEvent) {
+  function onWindowClick(event: MouseEvent) {
     if ($nestedSelectorIsOpen) return;
-
-    if (!newModalOpen) {
-      newModalOpen = true;
-      return;
-    }
 
     const currentModal = windowPositionerElement.lastChild as HTMLElement;
     const currentWindow = currentModal.firstChild?.firstChild as HTMLElement;
@@ -92,7 +87,7 @@
   }
 </script>
 
-<svelte:window on:keydown={handleKeydown} on:click={handleOverlayClose} />
+<svelte:window on:keydown={handleKeydown} on:click|capture={onWindowClick} />
 
 {#if tabularData}
   <div class="record-selector-window" style="margin-bottom: {marginBottom};">
