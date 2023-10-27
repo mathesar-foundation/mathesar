@@ -1,11 +1,27 @@
 import type { TreeItem } from '@mathesar-component-library/types';
 
-export interface Database {
+interface BaseDatabase {
   id: number;
   name: string;
+  editable: boolean;
+  username: string;
+  host: string;
+  port: string;
+  db_name: string;
+}
+
+export interface DatabaseWithConnectionError extends BaseDatabase {
+  error: string;
+}
+
+export interface SuccessfullyConnectedDatabase extends BaseDatabase {
   deleted: boolean;
   supported_types: string[];
 }
+
+export type Database =
+  | SuccessfullyConnectedDatabase
+  | DatabaseWithConnectionError;
 
 export interface DBObjectEntry {
   id: number;

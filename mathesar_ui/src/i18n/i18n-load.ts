@@ -1,6 +1,6 @@
-import { initFormatters } from './formatters.js';
-import type { Locales, Translations } from './i18n-types.js';
-import { loadedFormatters, loadedLocales } from './i18n-util.js';
+import { initFormatters } from './formatters';
+import type { Locales, Translations } from './i18n-types';
+import { loadedFormatters, loadedLocales } from './i18n-store';
 
 const localeTranslationLoaders = {
   ja: () => import('./ja/index.js'),
@@ -28,5 +28,10 @@ export function loadFormatters(locale: Locales): void {
 
 export async function loadLocaleAsync(locale: Locales): Promise<void> {
   updateTranslationsDictionary(locale, await importLocaleAsync(locale));
+  loadFormatters(locale);
+}
+
+export function loadTranslations(locale: Locales, translations: Translations) {
+  updateTranslationsDictionary(locale, translations);
   loadFormatters(locale);
 }

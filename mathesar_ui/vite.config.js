@@ -38,7 +38,11 @@ export default defineConfig({
   build: {
     manifest: true,
     rollupOptions: {
-      input: './src/main.ts',
+      input: {
+        main: './src/main.ts',
+        en: './src/i18n/en/index.ts',
+        ja: './src/i18n/ja/index.ts',
+      },
     },
     outDir: '../mathesar/static/mathesar/',
     emptyOutDir: true,
