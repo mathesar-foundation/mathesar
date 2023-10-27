@@ -99,13 +99,14 @@ def create_dj_db(request):
     def _create_and_add(db_name):
         create_db(db_name)
         add_db_to_dj_settings(db_name)
+        credentials = settings.DATABASES.get(db_name)
         database_model = Database.current_objects.create(
             name=db_name,
             db_name=db_name,
-            username='mathesar',
-            password='mathesar',
-            host='mathesar_dev_db',
-            port=5432
+            username=credentials['USER'],
+            password=credentials['PASSWORD'],
+            host=credentials['HOST'],
+            port=credentials['PORT']
         )
         return database_model
     yield _create_and_add
@@ -128,13 +129,14 @@ def test_db_model(request, test_db_name, django_db_blocker):
 
     add_db_to_dj_settings(test_db_name)
     with django_db_blocker.unblock():
+        credentials = settings.DATABASES.get(test_db_name)
         database_model = Database.current_objects.create(
             name=test_db_name,
             db_name=test_db_name,
-            username='mathesar',
-            password='mathesar',
-            host='mathesar_dev_db',
-            port=5432
+            username=credentials['USER'],
+            password=credentials['PASSWORD'],
+            host=credentials['HOST'],
+            port=credentials['PORT']
         )
     yield database_model
     database_model.delete()
