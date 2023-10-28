@@ -8,6 +8,7 @@ from mathesar.api.ui import viewsets as ui_viewsets
 from mathesar.users.decorators import superuser_exist, superuser_must_not_exist
 from mathesar.users.password_reset import MathesarPasswordResetConfirmView
 from mathesar.users.superuser_create import SuperuserFormView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 db_router = routers.DefaultRouter()
 db_router.register(r'tables', db_viewsets.TableViewSet, basename='table')
@@ -66,4 +67,12 @@ urlpatterns = [
         views.schema_home,
         name='schema_home'
     ),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path(
+        'api/docs/',
+        SpectacularSwaggerView.as_view(
+            template_name='swagger-ui/swagger-ui.html', url_name='schema'
+        ),
+        name='swagger-ui',
+    )
 ]
