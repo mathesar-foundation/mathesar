@@ -88,6 +88,22 @@ class NotFoundAPIException(MathesarAPIException):
         self.status_code = status_code
 
 
+class MethodNotAllowedAPIException(MathesarAPIException):
+
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.MethodNotAllowed.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_405_METHOD_NOT_ALLOWED
+    ):
+        exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
+        self.detail = [exception_detail]
+        self.status_code = status_code
+
+
 class ValueAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
 
