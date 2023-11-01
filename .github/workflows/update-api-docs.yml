@@ -1,7 +1,7 @@
 name: Generate API documentation
 
 on:
-  push_request:
+  push:
     branches:
       - develop
 
