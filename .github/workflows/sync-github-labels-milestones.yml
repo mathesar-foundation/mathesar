@@ -19,7 +19,6 @@ jobs:
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-internal-crm -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-private-notes -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-scripts -d
-    - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-update-companion -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-website -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-wiki -d
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-ansible -s open
@@ -28,6 +27,5 @@ jobs:
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-internal-crm -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-private-notes -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-scripts -s open
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-update-companion -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-website -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-wiki -s open
