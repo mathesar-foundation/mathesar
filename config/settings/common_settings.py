@@ -15,6 +15,7 @@ from pathlib import Path
 
 from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
+from django.utils.translation import gettext_lazy
 
 
 # We use a 'tuple' with pipes as delimiters as decople naively splits the global
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -257,4 +259,10 @@ DRF_ACCESS_POLICY = {
 # List of Template names that contains additional script tags to be added to the base template
 BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
 
+# i18n
+LANGUAGES = [
+    ('en', gettext_lazy('English')),
+    ('ja', gettext_lazy('Japanese')),
+]
+LANGUAGE_COOKIE_NAME = 'display_language'
 SALT_KEY = SECRET_KEY
