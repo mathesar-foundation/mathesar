@@ -19,7 +19,7 @@ jobs:
         run: cp .env.example .env
 
       - name: Build Docker image
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
+        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --detach dev-service
 
       - name: Generate API documentation
         run: docker exec -d mathesar_service_dev ./manage.py spectacular --color --file schema.yml
