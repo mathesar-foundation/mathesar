@@ -23,7 +23,7 @@ jobs:
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
 
       - name: Generate API documentation
-        run: docker exec -it mathesar_service_dev ./manage.py spectacular --color --file schema.yml
+        run: docker exec -d mathesar_service_dev ./manage.py spectacular --color --file schema.yml
 
       - name: Check if schema file has changed
         run: git diff --quiet schema.yml || exit 0
