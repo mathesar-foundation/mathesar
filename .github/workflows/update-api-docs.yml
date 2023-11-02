@@ -23,7 +23,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Build Docker image
+      - name: Start Docker Compose
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --detach dev-service
 
       - name: Generate API documentation
