@@ -29,4 +29,4 @@ jobs:
         run: git add schema.yml && git commit -m "Add schema file"
 
       - name: Push changes to remote branch
-        run: git push origin ${{ github.head_ref }}
+        run: git push origin develop
