@@ -1,7 +1,7 @@
 name: Generate API documentation
 
 on:
-  push:
+  pull_request:
     branches:
       - develop
 
@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Build Docker image
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
@@ -29,4 +31,4 @@ jobs:
         run: git add schema.yml && git commit -m "Add schema file"
 
       - name: Push changes to remote branch
-        run: git push origin develop
+        run: git push origin ${{ github.head_ref }}
