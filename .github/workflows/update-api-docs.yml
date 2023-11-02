@@ -10,11 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set Git identity
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -22,6 +17,11 @@ jobs:
 
       - name: Copy .env.example file to .env file
         run: cp .env.example .env
+
+      - name: Set Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Build Docker image
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --detach dev-service
