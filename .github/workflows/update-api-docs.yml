@@ -30,10 +30,13 @@ jobs:
         run: docker exec -d mathesar_service_dev ./manage.py spectacular --color --file schema.yml
 
       - name: Check if schema file has changed
-        run: git diff --quiet schema.yml || exit 0
+        id: check-schema-file
+        run: git diff --quiet schema.yml
 
       - name: Commit schema file
+        if: steps.check-schema-file.outputs.status == 1
         run: git add schema.yml && git commit -m "Updated schema file"
 
       - name: Push changes to remote branch
+        if: steps.check-schema-file.outputs.status == 1
         run: git push origin ${{ github.head_ref }}
