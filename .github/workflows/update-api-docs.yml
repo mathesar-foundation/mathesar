@@ -15,9 +15,8 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Set MATHESAR_DATABASES environment variable
-        run: |
-          echo "export MATHESAR_DATABASES=postgresql://localhost:5432/mathesar" >> $GITHUB_ENV
+      - name: Copy .env.example file to .env file
+        run: cp .env.example .env
 
       - name: Build Docker image
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service
