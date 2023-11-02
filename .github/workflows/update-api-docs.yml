@@ -27,7 +27,7 @@ jobs:
         with:
           image: mathesar/mathesar-dev:latest
           run: ./manage.py spectacular --color --file schema.yml
-          shell: python
+        shell: python
 
       - name: Check if schema file has changed
         run: git diff --quiet schema.yml || exit 0
