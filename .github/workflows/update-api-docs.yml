@@ -28,7 +28,7 @@ jobs:
         run: git diff --quiet schema.yml || exit 0
 
       - name: Commit schema file
-        run: git add schema.yml && git commit -m "Add schema file"
+        run: git add schema.yml && git commit -m "Updated schema file"
 
       - name: Push changes to remote branch
         run: git push origin ${{ github.head_ref }}
