@@ -15,6 +15,8 @@
     iconManageAccess,
     iconRefresh,
     iconMoreActions,
+    iconEdit,
+    iconDeleteMajor,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -28,13 +30,21 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
+  import { reloadDatabases } from '@mathesar/stores/databases';
+  import { router } from 'tinro';
+  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
+  import ConnectionError from './ConnectionError.svelte';
+  import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
+  const deleteConnectionModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -110,6 +120,11 @@
       isReflectionRunning = false;
     }
   }
+
+  async function handleSuccessfulDeleteConnection() {
+    await reloadDatabases();
+    router.goto('/');
+  }
 </script>
 
 <AppSecondaryHeader
@@ -159,6 +174,20 @@
               </Help>
             </div>
           </ButtonMenuItem>
+          {#if database.editable && userProfile?.isSuperUser}
+            <LinkMenuItem
+              icon={iconEdit}
+              href={getDatabaseConnectionEditUrl(database.name)}
+            >
+              Edit Database Connection
+            </LinkMenuItem>
+            <ButtonMenuItem
+              icon={iconDeleteMajor}
+              on:click={() => deleteConnectionModal.open()}
+            >
+              Disconnect Database
+            </ButtonMenuItem>
+          {/if}
         </DropdownMenu>
       </div>
     {/if}
@@ -169,50 +198,61 @@
   <div class="schema-list-title-container">
     <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
   </div>
-  <EntityContainerWithFilterBar
-    searchPlaceholder="Search Schemas"
-    bind:searchQuery={filterQuery}
-    on:clear={handleClearFilterQuery}
-  >
-    <svelte:fragment slot="action">
-      {#if canExecuteDDL}
-        <Button on:click={addSchema} appearance="primary">
-          <Icon {...iconAddNew} />
-          <span>Create Schema</span>
-        </Button>
-      {/if}
-    </svelte:fragment>
-    <p slot="resultInfo">
-      {labeledCount(displayList, 'results')}
-      for all schemas matching
-      <strong>{filterQuery}</strong>
-    </p>
-    <ul class="schema-list" slot="content">
-      {#each displayList as schema (schema.id)}
-        <li class="schema-list-item">
-          <SchemaRow
-            {database}
-            {schema}
-            canExecuteDDL={userProfile?.hasPermission(
-              { database, schema },
-              'canExecuteDDL',
-            )}
-            on:edit={() => editSchema(schema)}
-            on:delete={() => deleteSchema(schema)}
-          />
-        </li>
-      {/each}
-    </ul>
-  </EntityContainerWithFilterBar>
+  {#if !isSuccessfullyConnectedDatabase(database)}
+    <ConnectionError {database} />
+  {:else}
+    <EntityContainerWithFilterBar
+      searchPlaceholder="Search Schemas"
+      bind:searchQuery={filterQuery}
+      on:clear={handleClearFilterQuery}
+    >
+      <svelte:fragment slot="action">
+        {#if canExecuteDDL}
+          <Button on:click={addSchema} appearance="primary">
+            <Icon {...iconAddNew} />
+            <span>Create Schema</span>
+          </Button>
+        {/if}
+      </svelte:fragment>
+      <p slot="resultInfo">
+        {labeledCount(displayList, 'results')}
+        for all schemas matching
+        <strong>{filterQuery}</strong>
+      </p>
+      <ul class="schema-list" slot="content">
+        {#each displayList as schema (schema.id)}
+          <li class="schema-list-item">
+            <SchemaRow
+              {database}
+              {schema}
+              canExecuteDDL={userProfile?.hasPermission(
+                { database, schema },
+                'canExecuteDDL',
+              )}
+              on:edit={() => editSchema(schema)}
+              on:delete={() => deleteSchema(schema)}
+            />
+          </li>
+        {/each}
+      </ul>
+    </EntityContainerWithFilterBar>
+  {/if}
 </div>
 
-<AddEditSchemaModal
-  controller={addEditModal}
-  {database}
-  schema={targetSchema}
-/>
+{#if !('error' in database)}
+  <AddEditSchemaModal
+    controller={addEditModal}
+    {database}
+    schema={targetSchema}
+  />
 
-<DbAccessControlModal controller={accessControlModal} {database} />
+  <DbAccessControlModal controller={accessControlModal} {database} />
+  <DeleteDatabaseConnectionConfirmationModal
+    controller={deleteConnectionModal}
+    {database}
+    on:success={handleSuccessfulDeleteConnection}
+  />
+{/if}
 
 <style lang="scss">
   .schema-list-wrapper {

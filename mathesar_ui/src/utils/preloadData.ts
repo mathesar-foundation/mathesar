@@ -1,7 +1,7 @@
 import type {
-  Database,
   SchemaResponse,
   AbstractTypeResponse,
+  Database,
 } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { QueryInstance } from '@mathesar/api/types/queries';

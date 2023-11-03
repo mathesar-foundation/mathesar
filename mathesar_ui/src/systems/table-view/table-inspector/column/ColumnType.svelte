@@ -35,7 +35,7 @@
       return 'The data type of the primary key column is restricted and cannot be changed.';
     }
     if (column.linkFk) {
-      return 'The data type of the foreign key column is restricted to the data type of the primary key column and cannot be changed.';
+      return 'The data type of this column must match the referenced column and cannot be changed.';
     }
     return '';
   })();

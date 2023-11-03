@@ -96,11 +96,13 @@ DATABASES = {
     db_key: db_url(url_string)
     for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
-DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
+
+DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url, default='sqlite:///db.sqlite3')
 
 for db_key, db_dict in DATABASES.items():
-    # Engine can be '.postgresql' or '.postgresql_psycopg2'
-    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
+    # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s),
+    # however for the internal 'default' db 'sqlite3' can be used.
+    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql') and db_key != 'default':
         raise ValueError(
             f"{db_key} is not a PostgreSQL database. "
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
@@ -115,12 +117,12 @@ if TEST:
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = decouple_config('SECRET_KEY')
+SECRET_KEY = decouple_config('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple_config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = decouple_config('ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = decouple_config('ALLOWED_HOSTS', cast=Csv(), default=".localhost, 127.0.0.1, [::1]")
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -165,8 +167,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Media files (uploaded by the user)
-
-MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+DEFAULT_MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+MEDIA_ROOT = decouple_config('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
@@ -229,7 +231,10 @@ FRIENDLY_ERRORS = {
 MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
 MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
-MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
+MATHESAR_CLIENT_DEV_URL = decouple_config(
+    'MATHESAR_CLIENT_DEV_URL',
+    default='http://localhost:3000'
+)
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
@@ -260,3 +265,4 @@ LANGUAGE_COOKIE_NAME = 'display_language'
 LOCALE_PATHS = [
     'translations'
 ]
+SALT_KEY = SECRET_KEY

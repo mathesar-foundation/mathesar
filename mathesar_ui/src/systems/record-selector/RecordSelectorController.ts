@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 
 import type { Column } from '@mathesar/api/types/tables/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { Result as ApiRecord } from '@mathesar/api/types/tables/records';
 import type { RecordSelectorPurpose } from './recordSelectorUtils';
 
 interface RecordSelectorControllerProps {
@@ -16,6 +17,7 @@ type FkCellValue = string | number;
 export interface RecordSelectorResult {
   recordId: FkCellValue;
   recordSummary: string;
+  record: ApiRecord;
 }
 
 export class RecordSelectorController {

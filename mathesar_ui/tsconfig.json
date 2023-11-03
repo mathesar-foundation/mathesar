@@ -34,5 +34,6 @@
     "**.cjs",
     "**/*.cjs",
     "**.config.js"
-  ]
+  ],
+  "exclude": ["src/**/*.stories.svelte"]
 }

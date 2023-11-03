@@ -19,17 +19,7 @@
     {% endfor %}
   {% endif %}
 
-  {% comment %} Making it async to start the execution as soon as its downloaded without making it wait for the HTML to be parsed {% endcomment %}
-  <script type="module"  async>
-  var isDevelopmentMode = {{ development_mode|yesno:"true,false" }}
-    var src = isDevelopmentMode ? "{{ client_dev_url }}/src/i18n/{{ display_language }}/index.ts" : "{% static manifest_data.module_translations_file %}"
-    import(src).then(translations => {
-      window.translations = {
-        lang: "{{ display_language }}",
-        translationStrings: JSON.stringify(translations.default)
-      }
-    })
-  </script>
+  <script type="module" src="{{ module_translations_file_path }}"></script>
 
   {% if development_mode %}
     <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
@@ -66,9 +56,8 @@
     ></script>
     <script
       nomodule
-      async
       id="vite-legacy-translations-slot"
-      data-src="{% static manifest_data.legacy_translations_file %}"
+      data-src="{{ legacy_translations_file_path }}"
     >
       System.import(
         document.getElementById("vite-legacy-translations-slot").getAttribute("data-src")

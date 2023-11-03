@@ -21,11 +21,11 @@
   } from '@mathesar/components/form';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
   import { locale, setLocale } from '@mathesar/i18n/i18n-svelte';
   import { loadLocaleAsync } from '@mathesar/i18n/i18n-load';
   import { baseLocale } from '@mathesar/i18n/i18n-util';
   import SelectUserType from './SelectUserType.svelte';
-  import UserFormInput from './UserFormInput.svelte';
   import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
@@ -124,15 +124,15 @@
 </script>
 
 <div class="user-details-form">
-  <UserFormInput
+  <GridFormInput
     label="Display Name"
     field={fullName}
     input={{ component: TextInput }}
   />
 
-  <UserFormInput label="Email" field={email} input={{ component: TextInput }} />
+  <GridFormInput label="Email" field={email} input={{ component: TextInput }} />
 
-  <UserFormInput
+  <GridFormInput
     label="Username *"
     field={username}
     input={{
@@ -142,7 +142,7 @@
   />
 
   {#if isNewUser}
-    <UserFormInput
+    <GridFormInput
       label="Password *"
       field={password}
       input={{
@@ -153,7 +153,7 @@
   {/if}
 
   <!-- Commenting this for now to avoid releasing any half baked changes to develop branch -->
-  <!-- <UserFormInput
+  <!-- <GridFormInput
     label="Display Language *"
     field={displayLanguage}
     input={{
@@ -161,7 +161,7 @@
     }}
   /> -->
 
-  <UserFormInput
+  <GridFormInput
     label="Role *"
     field={userType}
     input={{

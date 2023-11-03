@@ -99,7 +99,15 @@ def create_dj_db(request):
     def _create_and_add(db_name):
         create_db(db_name)
         add_db_to_dj_settings(db_name)
-        database_model = Database.current_objects.create(name=db_name)
+        credentials = settings.DATABASES.get(db_name)
+        database_model = Database.current_objects.create(
+            name=db_name,
+            db_name=db_name,
+            username=credentials['USER'],
+            password=credentials['PASSWORD'],
+            host=credentials['HOST'],
+            port=credentials['PORT']
+        )
         return database_model
     yield _create_and_add
 
@@ -121,7 +129,15 @@ def test_db_model(request, test_db_name, django_db_blocker):
 
     add_db_to_dj_settings(test_db_name)
     with django_db_blocker.unblock():
-        database_model = Database.current_objects.create(name=test_db_name)
+        credentials = settings.DATABASES.get(test_db_name)
+        database_model = Database.current_objects.create(
+            name=test_db_name,
+            db_name=test_db_name,
+            username=credentials['USER'],
+            password=credentials['PASSWORD'],
+            host=credentials['HOST'],
+            port=credentials['PORT']
+        )
     yield database_model
     database_model.delete()
 
@@ -263,6 +279,11 @@ def duplicate_id_table_excel_filepath():
 @pytest.fixture(scope='session')
 def null_id_table_excel_filepath():
     return 'mathesar/tests/data/excel_parsing/null_id_table.xlsx'
+
+
+@pytest.fixture(scope='session')
+def multiple_sheets_excel_filepath():
+    return 'mathesar/tests/data/excel_parsing/multiple_sheets.xlsx'
 
 
 @pytest.fixture
