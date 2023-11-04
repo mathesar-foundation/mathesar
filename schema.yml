@@ -58,7 +58,7 @@ paths:
         explode: false
         style: form
       tags:
-      - data_files
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -72,7 +72,7 @@ paths:
     post:
       operationId: data_files_create
       tags:
-      - data_files
+      - db
       requestBody:
         content:
           application/json:
@@ -105,7 +105,7 @@ paths:
         description: A unique integer value identifying this data file.
         required: true
       tags:
-      - data_files
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -126,7 +126,7 @@ paths:
         description: A unique integer value identifying this data file.
         required: true
       tags:
-      - data_files
+      - db
       requestBody:
         content:
           application/json:
@@ -189,7 +189,7 @@ paths:
         explode: false
         style: form
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -199,6 +199,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedDatabaseList'
+          description: ''
+    post:
+      operationId: databases_create
+      tags:
+      - db
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Database'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Database'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Database'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
           description: ''
   /api/db/v0/databases/{id}/:
     get:
@@ -211,7 +237,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -222,6 +248,88 @@ paths:
               schema:
                 $ref: '#/components/schemas/Database'
           description: ''
+    put:
+      operationId: databases_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - db
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Database'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Database'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Database'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+    patch:
+      operationId: databases_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - db
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabase'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabase'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabase'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+    delete:
+      operationId: databases_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - db
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/db/v0/databases/{id}/functions/:
     get:
       operationId: databases_functions_retrieve
@@ -233,7 +341,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -255,7 +363,7 @@ paths:
         description: A unique integer value identifying this database.
         required: true
       tags:
-      - databases
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -265,6 +373,327 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Database'
+          description: ''
+  /api/db/v0/links/:
+    post:
+      operationId: links_create
+      tags:
+      - db
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinksMapping'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LinksMapping'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LinksMapping'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinksMapping'
+          description: ''
+  /api/db/v0/queries/:
+    get:
+      operationId: queries_list
+      parameters:
+      - in: query
+        name: database
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: array
+          items:
+            type: string
+        description: Multiple values may be separated by commas.
+        explode: false
+        style: form
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - db
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQueryList'
+          description: ''
+    post:
+      operationId: queries_create
+      tags:
+      - db
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Query'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+  /api/db/v0/queries/{id}/:
+    get:
+      operationId: queries_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - db
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+    put:
+      operationId: queries_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - db
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Query'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+    patch:
+      operationId: queries_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - db
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedQuery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedQuery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedQuery'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+    delete:
+      operationId: queries_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - db
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/db/v0/queries/{id}/columns/:
+    get:
+      operationId: queries_columns_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - db
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+  /api/db/v0/queries/{id}/records/:
+    get:
+      operationId: queries_records_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - db
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+  /api/db/v0/queries/{id}/results/:
+    get:
+      operationId: queries_results_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ui query.
+        required: true
+      tags:
+      - db
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+          description: ''
+  /api/db/v0/queries/run/:
+    post:
+      operationId: queries_run_create
+      tags:
+      - db
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Query'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Query'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
           description: ''
   /api/db/v0/schemas/:
     get:
@@ -321,7 +750,7 @@ paths:
         explode: false
         style: form
       tags:
-      - schemas
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -335,7 +764,7 @@ paths:
     post:
       operationId: schemas_create
       tags:
-      - schemas
+      - db
       requestBody:
         content:
           application/json:
@@ -369,7 +798,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - schemas
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -390,7 +819,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - schemas
+      - db
       requestBody:
         content:
           application/json:
@@ -422,7 +851,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - schemas
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -440,7 +869,7 @@ paths:
         description: A unique integer value identifying this schema.
         required: true
       tags:
-      - schemas
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -548,7 +977,7 @@ paths:
           type: string
           format: date-time
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -563,7 +992,7 @@ paths:
     post:
       operationId: tables_create
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -597,7 +1026,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -619,7 +1048,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -651,7 +1080,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -669,7 +1098,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -692,7 +1121,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -726,7 +1155,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -749,7 +1178,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -783,7 +1212,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -817,7 +1246,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -851,7 +1280,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -885,7 +1314,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -908,7 +1337,7 @@ paths:
         description: A unique integer value identifying this table.
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -948,7 +1377,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -969,7 +1398,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1006,7 +1435,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1032,7 +1461,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1068,7 +1497,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1104,7 +1533,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1126,7 +1555,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1166,7 +1595,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1187,7 +1616,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1225,7 +1654,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1251,7 +1680,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1268,7 +1697,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1285,7 +1714,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1308,7 +1737,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1331,7 +1760,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1353,7 +1782,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1388,7 +1817,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1408,7 +1837,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1446,7 +1875,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -1471,7 +1900,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1508,7 +1937,7 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       requestBody:
         content:
           application/json:
@@ -1544,13 +1973,520 @@ paths:
           type: string
         required: true
       tags:
-      - tables
+      - db
       security:
       - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /api/ui/v0/database_roles/:
+    get:
+      operationId: database_roles_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDatabaseRoleList'
+          description: ''
+    post:
+      operationId: database_roles_create
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseRole'
+          description: ''
+  /api/ui/v0/database_roles/{id}/:
+    get:
+      operationId: database_roles_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database role.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseRole'
+          description: ''
+    put:
+      operationId: database_roles_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database role.
+        required: true
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DatabaseRole'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseRole'
+          description: ''
+    patch:
+      operationId: database_roles_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database role.
+        required: true
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabaseRole'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabaseRole'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDatabaseRole'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseRole'
+          description: ''
+    delete:
+      operationId: database_roles_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database role.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/ui/v0/databases/:
+    get:
+      operationId: databases_list_2
+      parameters:
+      - in: query
+        name: deleted
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: sort_by
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -id
+            - -name
+            - id
+            - name
+        description: |-
+          Sort By
+
+          * `id` - Id
+          * `-id` - Id (descending)
+          * `name` - Name
+          * `-name` - Name (descending)
+        explode: false
+        style: form
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDatabaseList'
+          description: ''
+  /api/ui/v0/databases/{id}/:
+    get:
+      operationId: databases_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/ui/v0/databases/{id}/filters/:
+    get:
+      operationId: databases_filters_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/ui/v0/databases/{id}/types/:
+    get:
+      operationId: databases_types_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this database.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+          description: ''
+  /api/ui/v0/users/:
+    get:
+      operationId: users_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: users_create
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/ui/v0/users/{id}/:
+    get:
+      operationId: users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - ui
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/ui/v0/users/{id}/password_reset/:
+    post:
+      operationId: users_password_reset_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/ui/v0/users/password_change/:
+    post:
+      operationId: users_password_change_create
+      tags:
+      - ui
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
 components:
   schemas:
     Column:
@@ -1593,6 +2529,9 @@ components:
         has_dependents:
           type: string
           readOnly: true
+        description:
+          type: string
+          nullable: true
       required:
       - has_dependents
       - valid_target_types
@@ -1683,6 +2622,10 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        sheet_index:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
       required:
       - created_from
       - id
@@ -1696,18 +2639,123 @@ components:
           readOnly: true
         name:
           type: string
-          readOnly: true
+          maxLength: 128
+        db_name:
+          type: string
+          maxLength: 128
         deleted:
+          type: boolean
+          readOnly: true
+        editable:
           type: boolean
           readOnly: true
         supported_types_url:
           type: string
           readOnly: true
+        username:
+          type: string
+          maxLength: 255
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 255
+        host:
+          type: string
+          maxLength: 255
+        port:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
       required:
+      - db_name
       - deleted
+      - editable
+      - host
       - id
       - name
+      - password
+      - port
       - supported_types_url
+      - username
+    DatabaseRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        database:
+          type: integer
+        role:
+          enum:
+          - manager
+          - editor
+          - viewer
+          type: string
+          description: |-
+            * `manager` - Manager
+            * `editor` - Editor
+            * `viewer` - Viewer
+      required:
+      - database
+      - id
+      - role
+      - user
+    LinksMapping:
+      type: object
+      description: |-
+        This serializer mixin is helpful in serializing polymorphic models,
+        by switching to correct serializer based on the mapping field value.
+      properties:
+        link_type:
+          type: string
+      required:
+      - link_type
+    NestedDatabaseRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        database:
+          type: integer
+        role:
+          enum:
+          - manager
+          - editor
+          - viewer
+          type: string
+          description: |-
+            * `manager` - Manager
+            * `editor` - Editor
+            * `viewer` - Viewer
+      required:
+      - database
+      - id
+      - role
+    NestedSchemaRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        schema:
+          type: integer
+        role:
+          enum:
+          - manager
+          - editor
+          - viewer
+          type: string
+          description: |-
+            * `manager` - Manager
+            * `editor` - Editor
+            * `viewer` - Viewer
+      required:
+      - id
+      - role
+      - schema
     PaginatedColumnList:
       type: object
       properties:
@@ -1788,6 +2836,46 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Database'
+    PaginatedDatabaseRoleList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatabaseRole'
+    PaginatedQueryList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Query'
     PaginatedSchemaList:
       type: object
       properties:
@@ -1848,6 +2936,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TableSettings'
+    PaginatedUserList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
     PatchedColumn:
       type: object
       properties:
@@ -1888,6 +2996,9 @@ components:
         has_dependents:
           type: string
           readOnly: true
+        description:
+          type: string
+          nullable: true
     PatchedDataFile:
       type: object
       properties:
@@ -1935,6 +3046,114 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        sheet_index:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+    PatchedDatabase:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        db_name:
+          type: string
+          maxLength: 128
+        deleted:
+          type: boolean
+          readOnly: true
+        editable:
+          type: boolean
+          readOnly: true
+        supported_types_url:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          maxLength: 255
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 255
+        host:
+          type: string
+          maxLength: 255
+        port:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+    PatchedDatabaseRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        database:
+          type: integer
+        role:
+          enum:
+          - manager
+          - editor
+          - viewer
+          type: string
+          description: |-
+            * `manager` - Manager
+            * `editor` - Editor
+            * `viewer` - Viewer
+    PatchedQuery:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        schema:
+          type: string
+          readOnly: true
+        base_table:
+          type: integer
+        results_url:
+          type: string
+          readOnly: true
+        records_url:
+          type: string
+          readOnly: true
+        columns_url:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          nullable: true
+        initial_columns:
+          type: object
+          additionalProperties: {}
+        transformations:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        display_options:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        display_names:
+          type: object
+          additionalProperties: {}
+          nullable: true
     PatchedSchema:
       type: object
       properties:
@@ -2033,9 +3252,46 @@ components:
           type: array
           items:
             type: integer
-            maximum: 2147483647
-            minimum: -2147483648
+    PatchedUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
           nullable: true
+          maxLength: 255
+        short_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        database_roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedDatabaseRole'
+        schema_roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedSchemaRole'
+        display_language:
+          type: string
+          maxLength: 30
     PreviewColumn:
       type: object
       properties:
@@ -2046,6 +3302,66 @@ components:
           type: string
       required:
       - template
+    Query:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        schema:
+          type: string
+          readOnly: true
+        base_table:
+          type: integer
+        results_url:
+          type: string
+          readOnly: true
+        records_url:
+          type: string
+          readOnly: true
+        columns_url:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          nullable: true
+        initial_columns:
+          type: object
+          additionalProperties: {}
+        transformations:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        display_options:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        display_names:
+          type: object
+          additionalProperties: {}
+          nullable: true
+      required:
+      - base_table
+      - columns_url
+      - created_at
+      - id
+      - initial_columns
+      - name
+      - records_url
+      - results_url
+      - schema
+      - updated_at
     Schema:
       type: object
       properties:
@@ -2181,10 +3497,8 @@ components:
           type: array
           items:
             type: integer
-            maximum: 2147483647
-            minimum: -2147483648
-          nullable: true
       required:
+      - column_order
       - id
       - preview_settings
     TypeOption:
@@ -2198,6 +3512,50 @@ components:
           type: integer
         fields:
           type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        full_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        short_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        database_roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedDatabaseRole'
+        schema_roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedSchemaRole'
+        display_language:
+          type: string
+          maxLength: 30
+      required:
+      - id
+      - password
+      - username
   securitySchemes:
     cookieAuth:
       type: apiKey

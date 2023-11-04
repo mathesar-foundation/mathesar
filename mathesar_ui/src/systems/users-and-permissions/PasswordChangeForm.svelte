@@ -15,8 +15,8 @@
   import userApi, { type User } from '@mathesar/api/users';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import UserFormInput from './UserFormInput.svelte';
-  import UserFormInputRow from './UserFormInputRow.svelte';
+  import GridFormInputRow from '@mathesar/components/form/GridFormInputRow.svelte';
+  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -90,8 +90,8 @@
   <div class="password-inputs">
     {#if showChangePasswordForm}
       {#if isUserUpdatingTheirOwnPassword}
-        <UserFormInputRow>
-          <UserFormInput
+        <GridFormInputRow>
+          <GridFormInput
             label="Old Password *"
             field={oldPassword}
             input={{ component: PasswordInput }}
@@ -100,11 +100,11 @@
 
           <div />
           <div />
-        </UserFormInputRow>
+        </GridFormInputRow>
       {/if}
 
-      <UserFormInputRow>
-        <UserFormInput
+      <GridFormInputRow>
+        <GridFormInput
           label="New Password *"
           field={password}
           input={{
@@ -114,7 +114,7 @@
           bypassRow
         />
 
-        <UserFormInput
+        <GridFormInput
           label="Confirm Password *"
           field={confirmPassword}
           input={{
@@ -123,10 +123,10 @@
           }}
           bypassRow
         />
-      </UserFormInputRow>
+      </GridFormInputRow>
     {:else}
-      <UserFormInputRow>
-        <UserFormInput
+      <GridFormInputRow>
+        <GridFormInput
           label="Password"
           field={passwordPlaceholder}
           input={{ component: PasswordInput, props: { disabled: true } }}
@@ -143,7 +143,7 @@
             Change Password
           </Button>
         </div>
-      </UserFormInputRow>
+      </GridFormInputRow>
     {/if}
   </div>
 
