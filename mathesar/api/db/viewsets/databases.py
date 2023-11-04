@@ -1,8 +1,7 @@
 from django_filters import rest_framework as filters
 from rest_access_policy import AccessViewSetMixin
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
@@ -14,15 +13,16 @@ from mathesar.api.serializers.databases import DatabaseSerializer
 
 from db.functions.operations.check_support import get_supported_db_functions
 from mathesar.api.serializers.functions import DBFunctionSerializer
-
 from db.types.base import get_available_known_db_types
+from db.types.install import uninstall_mathesar_from_database
 from mathesar.api.serializers.db_types import DBTypeSerializer
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from drf_spectacular.utils import OpenApiResponse
+from mathesar.api.exceptions.validation_exceptions.exceptions import EditingDBCredentialsNotAllowed
 
 
-class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -34,6 +34,37 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixi
             self.request,
             Database.objects.all().order_by('-created_at')
         )
+
+    def create(self, request):
+        serializer = DatabaseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        credentials = serializer.validated_data
+        Database.objects.create(
+            name=credentials['name'],
+            db_name=credentials['db_name'],
+            username=credentials['username'],
+            password=credentials['password'],
+            host=credentials['host'],
+            port=credentials['port']
+        ).save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, pk=None):
+        db_object = self.get_object()
+        if db_object.editable:
+            serializer = DatabaseSerializer(db_object, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        raise EditingDBCredentialsNotAllowed()
+
+    def destroy(self, request, pk=None):
+        db_object = self.get_object()
+        if request.query_params.get('del_msar_schemas'):
+            engine = db_object._sa_engine
+            uninstall_mathesar_from_database(engine)
+        db_object.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
     def functions(self, request, pk=None):

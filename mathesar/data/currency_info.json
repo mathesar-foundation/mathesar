@@ -1,0 +1,7933 @@
+{
+  "aa_DJ.ISO8859-1": {
+    "int_curr_symbol": "DJF ",
+    "currency_symbol": "Fdj",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "aa_ER": {
+    "int_curr_symbol": "ERN ",
+    "currency_symbol": "Nfk",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "aa_ET": {
+    "int_curr_symbol": "ETB ",
+    "currency_symbol": "Br",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "af_ZA.ISO8859-1": {
+    "int_curr_symbol": "ZAR ",
+    "currency_symbol": "R",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "agr_PE": {
+    "int_curr_symbol": "PEN ",
+    "currency_symbol": "S/",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ak_GH": {
+    "int_curr_symbol": "GHS ",
+    "currency_symbol": "GH\u20b5",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "am_ET": {
+    "int_curr_symbol": "ETB ",
+    "currency_symbol": "Br",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_US.ISO8859-1": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "an_ES.ISO8859-15": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "anp_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_AE.ISO8859-6": {
+    "int_curr_symbol": "AED ",
+    "currency_symbol": "\u062f.\u0625.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_BH.ISO8859-6": {
+    "int_curr_symbol": "BHD ",
+    "currency_symbol": "\u062f.\u0628.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_DZ.ISO8859-6": {
+    "int_curr_symbol": "DZD ",
+    "currency_symbol": "\u062f.\u062c.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_EG.ISO8859-6": {
+    "int_curr_symbol": "EGP ",
+    "currency_symbol": "\u062c.\u0645.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_IQ.ISO8859-6": {
+    "int_curr_symbol": "IQD ",
+    "currency_symbol": "\u062f.\u0639.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_JO.ISO8859-6": {
+    "int_curr_symbol": "JOD ",
+    "currency_symbol": "\u062f.\u0623.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_KW.ISO8859-6": {
+    "int_curr_symbol": "KWD ",
+    "currency_symbol": "\u062f.\u0643.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_LB.ISO8859-6": {
+    "int_curr_symbol": "LBP ",
+    "currency_symbol": "\u0644.\u0644.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_LY.ISO8859-6": {
+    "int_curr_symbol": "LYD ",
+    "currency_symbol": "\u062f.\u0644.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_MA.ISO8859-6": {
+    "int_curr_symbol": "MAD ",
+    "currency_symbol": "\u062f.\u0645.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_OM.ISO8859-6": {
+    "int_curr_symbol": "OMR ",
+    "currency_symbol": "\u0631.\u0639.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_QA.ISO8859-6": {
+    "int_curr_symbol": "QAR ",
+    "currency_symbol": "\u0631.\u0642.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_SA.ISO8859-6": {
+    "int_curr_symbol": "SAR ",
+    "currency_symbol": "\u0631.\u0633",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "",
+    "mon_grouping": [],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "ar_SD.ISO8859-6": {
+    "int_curr_symbol": "SDG ",
+    "currency_symbol": "\u062c.\u0633.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_SS": {
+    "int_curr_symbol": "SSP ",
+    "currency_symbol": "\u00a3",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_SY.ISO8859-6": {
+    "int_curr_symbol": "SYP ",
+    "currency_symbol": "\u0644.\u0633.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_TN.ISO8859-6": {
+    "int_curr_symbol": "TND ",
+    "currency_symbol": "\u062f.\u062a.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ar_YE.ISO8859-6": {
+    "int_curr_symbol": "YER ",
+    "currency_symbol": "\u0631.\u064a.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "as_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "ast_ES.ISO8859-15": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ayc_PE": {
+    "int_curr_symbol": "PEN ",
+    "currency_symbol": "S/",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "az_IR": {
+    "int_curr_symbol": "IRR ",
+    "currency_symbol": "\u0631\u06cc\u0627\u0644",
+    "mon_decimal_point": "\u066b",
+    "mon_thousands_sep": "\u066c",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "be_BY": {
+    "int_curr_symbol": "BYR ",
+    "currency_symbol": "\u0440\u0443\u0431",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "be_BY.UTF-8@latin": {
+    "int_curr_symbol": "BYR ",
+    "currency_symbol": "Rub",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "bem_ZM": {
+    "int_curr_symbol": "ZMW ",
+    "currency_symbol": "K",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ber_DZ": {
+    "int_curr_symbol": "DZD ",
+    "currency_symbol": "\u062f.\u062c.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ber_MA": {
+    "int_curr_symbol": "MAD ",
+    "currency_symbol": "\u2d37.\u2d4e.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "bg_BG": {
+    "int_curr_symbol": "BGN ",
+    "currency_symbol": "\u043b\u0432.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "bhb_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "bho_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "bho_NP": {
+    "int_curr_symbol": "NPR ",
+    "currency_symbol": "\u0930\u0942",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "bi_VU": {
+    "int_curr_symbol": "VUV ",
+    "currency_symbol": "VT",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "bn_BD": {
+    "int_curr_symbol": "BDT ",
+    "currency_symbol": "\u09f3",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "bn_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "bo_CN": {
+    "int_curr_symbol": "CNY ",
+    "currency_symbol": "\uffe5",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "bo_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "nb_NO.ISO8859-1": {
+    "int_curr_symbol": "NOK ",
+    "currency_symbol": "kr",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "br_FR.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "brx_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "bs_BA.ISO8859-2": {
+    "int_curr_symbol": "BAM ",
+    "currency_symbol": "KM",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "byn_ER": {
+    "int_curr_symbol": "ERN ",
+    "currency_symbol": "Nfk",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "C": {
+    "int_curr_symbol": "",
+    "currency_symbol": "",
+    "mon_decimal_point": "",
+    "mon_thousands_sep": "",
+    "mon_grouping": [],
+    "positive_sign": "",
+    "negative_sign": "",
+    "int_frac_digits": 127,
+    "frac_digits": 127,
+    "p_cs_precedes": 127,
+    "p_sep_by_space": 127,
+    "n_cs_precedes": 127,
+    "n_sep_by_space": 127,
+    "p_sign_posn": 127,
+    "n_sign_posn": 127,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "fr_CA.ISO8859-1": {
+    "int_curr_symbol": "CAD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "en_US": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ca_ES.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ca_ES.UTF-8@valencia": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ce_RU": {
+    "int_curr_symbol": "RUB ",
+    "currency_symbol": "\u20bd",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "zh_CN.eucCN": {
+    "int_curr_symbol": "CNY ",
+    "currency_symbol": "\uffe5",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "zh_TW.eucTW": {
+    "int_curr_symbol": "TWD ",
+    "currency_symbol": "NT$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "chr_US": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ckb_IQ": {
+    "int_curr_symbol": "IQD ",
+    "currency_symbol": "\u062f.\u0639",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "+",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "cmn_TW": {
+    "int_curr_symbol": "TWD ",
+    "currency_symbol": "NT$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      4,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      4,
+      0
+    ]
+  },
+  "crh_UA": {
+    "int_curr_symbol": "UAH ",
+    "currency_symbol": "\u20b4",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "hr_HR.ISO8859-2": {
+    "int_curr_symbol": "HRK ",
+    "currency_symbol": "kn",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "cs_CZ.ISO8859-2": {
+    "int_curr_symbol": "CZK ",
+    "currency_symbol": "K\u010d",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "csb_PL": {
+    "int_curr_symbol": "PLN ",
+    "currency_symbol": "z\u0142",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "cv_RU": {
+    "int_curr_symbol": "RUB ",
+    "currency_symbol": "\u20bd",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "da_DK.ISO8859-1": {
+    "int_curr_symbol": "DKK ",
+    "currency_symbol": "kr.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 2,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "de_DE.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "de_AT.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "de_BE.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "de_CH.ISO8859-1": {
+    "int_curr_symbol": "CHF ",
+    "currency_symbol": "CHF",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "'",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": "'",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "de_IT.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "de_LI": {
+    "int_curr_symbol": "CHF ",
+    "currency_symbol": "CHF",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u2019",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": "\u2019",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "de_LU.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "doi_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "nl_NL.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 1,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "nl_BE.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 1,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "dv_MV": {
+    "int_curr_symbol": "MVR ",
+    "currency_symbol": "\u0783.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 2,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "dz_BT": {
+    "int_curr_symbol": "BTN ",
+    "currency_symbol": "Nu.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 3,
+    "frac_digits": 3,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "et_EE.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "el_GR.ISO8859-7": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": []
+  },
+  "el_CY.ISO8859-7": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": []
+  },
+  "en_AG": {
+    "int_curr_symbol": "XCD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_AU.ISO8859-1": {
+    "int_curr_symbol": "AUD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_BW.ISO8859-1": {
+    "int_curr_symbol": "BWP ",
+    "currency_symbol": "P",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_CA.ISO8859-1": {
+    "int_curr_symbol": "CAD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_DK.ISO8859-1": {
+    "int_curr_symbol": "DKK ",
+    "currency_symbol": "kr.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 2,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_GB.ISO8859-1": {
+    "int_curr_symbol": "GBP ",
+    "currency_symbol": "\u00a3",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_HK.ISO8859-1": {
+    "int_curr_symbol": "HKD ",
+    "currency_symbol": "HK$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "en_IE.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_IL": {
+    "int_curr_symbol": "ILS ",
+    "currency_symbol": "\u20aa",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 2,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_NG": {
+    "int_curr_symbol": "NGN ",
+    "currency_symbol": "\u20a6",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_NZ.ISO8859-1": {
+    "int_curr_symbol": "NZD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_PH.ISO8859-1": {
+    "int_curr_symbol": "PHP ",
+    "currency_symbol": "PHP",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "en_SC": {
+    "int_curr_symbol": "SCR ",
+    "currency_symbol": "SR",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_SG.ISO8859-1": {
+    "int_curr_symbol": "SGD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "en_US.ISO8859-15": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_ZA.ISO8859-1": {
+    "int_curr_symbol": "ZAR ",
+    "currency_symbol": "R",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_ZM": {
+    "int_curr_symbol": "ZMW ",
+    "currency_symbol": "K",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "en_ZW.ISO8859-1": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "eo": {
+    "int_curr_symbol": "XDR ",
+    "currency_symbol": "\u00a4",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "eo_US": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_ES.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_AR.ISO8859-1": {
+    "int_curr_symbol": "ARS ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_BO.ISO8859-1": {
+    "int_curr_symbol": "BOB ",
+    "currency_symbol": "Bs",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_CL.ISO8859-1": {
+    "int_curr_symbol": "CLP ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_CO.ISO8859-1": {
+    "int_curr_symbol": "COP ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_CR.ISO8859-1": {
+    "int_curr_symbol": "CRC ",
+    "currency_symbol": "C=",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_CU": {
+    "int_curr_symbol": "CUP ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": []
+  },
+  "es_DO.ISO8859-1": {
+    "int_curr_symbol": "DOP ",
+    "currency_symbol": "RD$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_EC.ISO8859-1": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_GT.ISO8859-1": {
+    "int_curr_symbol": "GTQ ",
+    "currency_symbol": "Q",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_HN.ISO8859-1": {
+    "int_curr_symbol": "HNL ",
+    "currency_symbol": "L",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_MX.ISO8859-1": {
+    "int_curr_symbol": "MXN ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": " ",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_NI.ISO8859-1": {
+    "int_curr_symbol": "NIO ",
+    "currency_symbol": "C$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_PA.ISO8859-1": {
+    "int_curr_symbol": "PAB ",
+    "currency_symbol": "B/.",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_PE.ISO8859-1": {
+    "int_curr_symbol": "PEN ",
+    "currency_symbol": "S/",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_PR.ISO8859-1": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_PY.ISO8859-1": {
+    "int_curr_symbol": "PYG ",
+    "currency_symbol": "Gs.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_SV.ISO8859-1": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_US.ISO8859-1": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_UY.ISO8859-1": {
+    "int_curr_symbol": "UYU ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "es_VE.ISO8859-1": {
+    "int_curr_symbol": "VEF ",
+    "currency_symbol": "Bs.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "et_EE.ISO8859-15": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "eu_ES.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "eu_FR.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "fa_IR": {
+    "int_curr_symbol": "IRR ",
+    "currency_symbol": "\u0631\u06cc\u0627\u0644",
+    "mon_decimal_point": "\u066b",
+    "mon_thousands_sep": "\u066c",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ff_SN": {
+    "int_curr_symbol": "XOF ",
+    "currency_symbol": "CFA",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "fil_PH": {
+    "int_curr_symbol": "PHP ",
+    "currency_symbol": "\u20b1",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "fi_FI.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "fo_FO.ISO8859-1": {
+    "int_curr_symbol": "DKK ",
+    "currency_symbol": "kr.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 2,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "fr_FR.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "fr_BE.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "fr_CH.ISO8859-1": {
+    "int_curr_symbol": "CHF ",
+    "currency_symbol": "CHF",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "'",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": "'",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "fr_LU.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "fur_IT": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "fy_DE": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "fy_NL": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 1,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ga_IE.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "gl_ES.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "gez_ER": {
+    "int_curr_symbol": "ERN ",
+    "currency_symbol": "Nfk",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "gez_ET": {
+    "int_curr_symbol": "ETB ",
+    "currency_symbol": "Br",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "gu_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "gv_GB.ISO8859-1": {
+    "int_curr_symbol": "GBP ",
+    "currency_symbol": "\u00a3",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ha_NG": {
+    "int_curr_symbol": "NGN ",
+    "currency_symbol": "\u20a6",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "hak_TW": {
+    "int_curr_symbol": "TWD ",
+    "currency_symbol": "NT$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      4,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      4,
+      0
+    ]
+  },
+  "he_IL.ISO8859-8": {
+    "int_curr_symbol": "ILS ",
+    "currency_symbol": "ILS",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 2,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "hif_FJ": {
+    "int_curr_symbol": "FJD ",
+    "currency_symbol": "FJ$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "hne_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "hsb_DE.ISO8859-2": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ht_HT": {
+    "int_curr_symbol": "HTG ",
+    "currency_symbol": "g",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "hu_HU.ISO8859-2": {
+    "int_curr_symbol": "HUF ",
+    "currency_symbol": "Ft",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "hy_AM": {
+    "int_curr_symbol": "AMD ",
+    "currency_symbol": "\u058f",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ia_FR": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "is_IS.ISO8859-1": {
+    "int_curr_symbol": "ISK ",
+    "currency_symbol": "kr",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "id_ID.ISO8859-1": {
+    "int_curr_symbol": "IDR ",
+    "currency_symbol": "Rp",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ig_NG": {
+    "int_curr_symbol": "NGN ",
+    "currency_symbol": "\u20a6",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ik_CA": {
+    "int_curr_symbol": "CAD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "it_IT.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "it_CH.ISO8859-1": {
+    "int_curr_symbol": "CHF ",
+    "currency_symbol": "CHF",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "'",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": "'",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ja_JP.eucJP": {
+    "int_curr_symbol": "JPY ",
+    "currency_symbol": "\uffe5",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ka_GE.GEORGIAN-PS": {
+    "int_curr_symbol": "GEL ",
+    "currency_symbol": "GEL",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "kab_DZ": {
+    "int_curr_symbol": "DZD ",
+    "currency_symbol": "DA",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "kl_GL.ISO8859-1": {
+    "int_curr_symbol": "DKK ",
+    "currency_symbol": "kr.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 2,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "km_KH": {
+    "int_curr_symbol": "KHR ",
+    "currency_symbol": "\u17db",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "kn_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ko_KR.eucKR": {
+    "int_curr_symbol": "KRW ",
+    "currency_symbol": "KRW",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "kok_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ks_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ks_IN.UTF-8@devanagari": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ku_TR.ISO8859-9": {
+    "int_curr_symbol": "TRY ",
+    "currency_symbol": "TL",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "kw_GB.ISO8859-1": {
+    "int_curr_symbol": "GBP ",
+    "currency_symbol": "\u00a3",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ky_KG": {
+    "int_curr_symbol": "KGS ",
+    "currency_symbol": "\u0441\u043e\u043c",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "lb_LU": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "lg_UG.ISO8859-10": {
+    "int_curr_symbol": "UGX ",
+    "currency_symbol": "USh",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "li_BE": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 1,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "li_NL": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 1,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "lij_IT": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "lt_LT.ISO8859-13": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ln_CD": {
+    "int_curr_symbol": "CDF ",
+    "currency_symbol": "FC",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "lv_LV.ISO8859-13": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "lzh_TW": {
+    "int_curr_symbol": "TWD ",
+    "currency_symbol": "NT$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      4,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      4,
+      0
+    ]
+  },
+  "mag_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "mai_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "mai_NP": {
+    "int_curr_symbol": "NPR ",
+    "currency_symbol": "\u0930\u0942",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "mfe_MU": {
+    "int_curr_symbol": "MUR ",
+    "currency_symbol": "\u20a8",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "mg_MG.ISO8859-15": {
+    "int_curr_symbol": "MGA ",
+    "currency_symbol": "Ar",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "mhr_RU": {
+    "int_curr_symbol": "RUB ",
+    "currency_symbol": "\u20bd",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "miq_NI": {
+    "int_curr_symbol": "NIO ",
+    "currency_symbol": "C$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "mjw_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "mk_MK.ISO8859-5": {
+    "int_curr_symbol": "MKD ",
+    "currency_symbol": "\u0434\u0435\u043d",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ml_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "mn_MN": {
+    "int_curr_symbol": "MNT ",
+    "currency_symbol": "\u20ae",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "mni_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "mr_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ms_MY.ISO8859-1": {
+    "int_curr_symbol": "MYR ",
+    "currency_symbol": "RM",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "mt_MT.ISO8859-3": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "my_MM": {
+    "int_curr_symbol": "MMK ",
+    "currency_symbol": "K",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "nan_TW": {
+    "int_curr_symbol": "TWD ",
+    "currency_symbol": "NT$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      4,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      4,
+      0
+    ]
+  },
+  "nds_DE": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "nds_NL": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 1,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ne_NP": {
+    "int_curr_symbol": "NPR ",
+    "currency_symbol": "\u0930\u0942",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "nhn_MX": {
+    "int_curr_symbol": "MXN ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": " ",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "niu_NU": {
+    "int_curr_symbol": "NZD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "niu_NZ": {
+    "int_curr_symbol": "NZD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "nl_AW": {
+    "int_curr_symbol": "AWG ",
+    "currency_symbol": "Afl.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 1,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "nn_NO.ISO8859-1": {
+    "int_curr_symbol": "NOK ",
+    "currency_symbol": "kr",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 3,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "oc_FR.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "om_ET": {
+    "int_curr_symbol": "ETB ",
+    "currency_symbol": "Br",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "om_KE.ISO8859-1": {
+    "int_curr_symbol": "KES ",
+    "currency_symbol": "Ksh",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "or_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "os_RU": {
+    "int_curr_symbol": "RUB ",
+    "currency_symbol": "\u20bd",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "pa_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "pa_PK": {
+    "int_curr_symbol": "PKR ",
+    "currency_symbol": "Rs",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 2,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "pap_AW": {
+    "int_curr_symbol": "AWG ",
+    "currency_symbol": "\u0192",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "pap_CW": {
+    "int_curr_symbol": "ANG ",
+    "currency_symbol": "\u0192",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 2,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "pl_PL.ISO8859-2": {
+    "int_curr_symbol": "PLN ",
+    "currency_symbol": "z\u0142",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "pt_PT.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "pt_BR.ISO8859-1": {
+    "int_curr_symbol": "BRL ",
+    "currency_symbol": "R$",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ps_AF": {
+    "int_curr_symbol": "AFN ",
+    "currency_symbol": "\u060b",
+    "mon_decimal_point": "\u066b",
+    "mon_thousands_sep": "\u066c",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": "\u066b",
+    "thousands_sep": "\u066c",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "quz_PE": {
+    "int_curr_symbol": "PEN ",
+    "currency_symbol": "S/",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "raj_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ro_RO.ISO8859-2": {
+    "int_curr_symbol": "RON ",
+    "currency_symbol": "Lei",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ru_RU": {
+    "int_curr_symbol": "RUB ",
+    "currency_symbol": "\u20bd",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ru_UA.KOI8-U": {
+    "int_curr_symbol": "UAH ",
+    "currency_symbol": "\u0433\u0440\u043d",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ru_RU.KOI8-R": {
+    "int_curr_symbol": "RUB ",
+    "currency_symbol": "\u0440\u0443\u0431",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sa_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "sat_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "sc_IT": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sd_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "sd_IN.UTF-8@devanagari": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "sd_PK": {
+    "int_curr_symbol": "PKR ",
+    "currency_symbol": "\u20a8",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "se_NO": {
+    "int_curr_symbol": "NOK ",
+    "currency_symbol": "kr",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sr_RS.UTF-8@latin": {
+    "int_curr_symbol": "RSD ",
+    "currency_symbol": "din",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "sgs_LT": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "shn_MM": {
+    "int_curr_symbol": "MMK ",
+    "currency_symbol": "Ks",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "shs_CA": {
+    "int_curr_symbol": "CAD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "si_LK": {
+    "int_curr_symbol": "LKR ",
+    "currency_symbol": "\u0dbb\u0dd4",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "sid_ET": {
+    "int_curr_symbol": "ETB ",
+    "currency_symbol": "Br",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sk_SK.ISO8859-2": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sl_SI.ISO8859-2": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": []
+  },
+  "sm_WS": {
+    "int_curr_symbol": "WST ",
+    "currency_symbol": "WS$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "so_DJ.ISO8859-1": {
+    "int_curr_symbol": "DJF ",
+    "currency_symbol": "Fdj",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "so_ET": {
+    "int_curr_symbol": "ETB ",
+    "currency_symbol": "Br",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "so_KE.ISO8859-1": {
+    "int_curr_symbol": "KES ",
+    "currency_symbol": "Ksh",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "so_SO.ISO8859-1": {
+    "int_curr_symbol": "SOS ",
+    "currency_symbol": "S",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sq_MK": {
+    "int_curr_symbol": "MKD ",
+    "currency_symbol": "den",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "sr_RS": {
+    "int_curr_symbol": "RSD ",
+    "currency_symbol": "\u0434\u0438\u043d",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "sr_ME": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "\u20ac",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "st_ZA.ISO8859-1": {
+    "int_curr_symbol": "ZAR ",
+    "currency_symbol": "R",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sv_SE.ISO8859-1": {
+    "int_curr_symbol": "SEK ",
+    "currency_symbol": "kr",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sv_FI.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sw_KE": {
+    "int_curr_symbol": "KES ",
+    "currency_symbol": "Ksh",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "sw_TZ": {
+    "int_curr_symbol": "TZS ",
+    "currency_symbol": "TSh",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "szl_PL": {
+    "int_curr_symbol": "PLN ",
+    "currency_symbol": "z\u0142",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ta_LK": {
+    "int_curr_symbol": "LKR ",
+    "currency_symbol": "\u0dbb\u0dd4",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "tcy_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "te_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      2,
+      0
+    ]
+  },
+  "th_TH": {
+    "int_curr_symbol": "THB ",
+    "currency_symbol": "\u0e3f",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 2,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 2,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "the_NP": {
+    "int_curr_symbol": "NPR ",
+    "currency_symbol": "\u0930\u0942",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "ti_ER": {
+    "int_curr_symbol": "ERN ",
+    "currency_symbol": "Nfk",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "ti_ET": {
+    "int_curr_symbol": "ETB ",
+    "currency_symbol": "Br",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "tig_ER": {
+    "int_curr_symbol": "ERN ",
+    "currency_symbol": "Nfk",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 0,
+    "frac_digits": 0,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "tk_TM": {
+    "int_curr_symbol": "TMM ",
+    "currency_symbol": "MANAT",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "tl_PH.ISO8859-1": {
+    "int_curr_symbol": "PHP ",
+    "currency_symbol": "PHP",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "to_TO": {
+    "int_curr_symbol": "TOP ",
+    "currency_symbol": "T$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "tpi_PG": {
+    "int_curr_symbol": "PGK ",
+    "currency_symbol": "K",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "tr_TR.ISO8859-9": {
+    "int_curr_symbol": "TRY ",
+    "currency_symbol": "TL",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "tr_CY.ISO8859-9": {
+    "int_curr_symbol": "TRY ",
+    "currency_symbol": "TL",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "tt_RU.UTF-8@iqtelif": {
+    "int_curr_symbol": "RUB ",
+    "currency_symbol": "\u20bd",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ug_CN": {
+    "int_curr_symbol": "CNY ",
+    "currency_symbol": "\uffe5",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "uk_UA.KOI8-U": {
+    "int_curr_symbol": "UAH ",
+    "currency_symbol": "\u0433\u0440\u043d.",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u00a0",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 2,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "\u00a0",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "unm_US": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": "\u202f",
+    "grouping": [
+      2,
+      2,
+      2,
+      3,
+      0
+    ]
+  },
+  "ur_IN": {
+    "int_curr_symbol": "INR ",
+    "currency_symbol": "\u20b9",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      2,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "uz_UZ": {
+    "int_curr_symbol": "UZS ",
+    "currency_symbol": "so\u02bbm",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "ve_ZA": {
+    "int_curr_symbol": "ZAR ",
+    "currency_symbol": "R",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "wa_BE.ISO8859-1": {
+    "int_curr_symbol": "EUR ",
+    "currency_symbol": "EUR",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": ".",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": ".",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "wae_CH": {
+    "int_curr_symbol": "CHF ",
+    "currency_symbol": "CHF",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": "\u2019",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": "\u2019",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "wal_ET": {
+    "int_curr_symbol": "ETB ",
+    "currency_symbol": "Br",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "wo_SN": {
+    "int_curr_symbol": "XOF ",
+    "currency_symbol": "CFA",
+    "mon_decimal_point": ",",
+    "mon_thousands_sep": "\u202f",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 0,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 0,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ",",
+    "thousands_sep": "",
+    "grouping": []
+  },
+  "xh_ZA.ISO8859-1": {
+    "int_curr_symbol": "ZAR ",
+    "currency_symbol": "R",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "yi_US": {
+    "int_curr_symbol": "USD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 1,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 1,
+    "p_sign_posn": 2,
+    "n_sign_posn": 2,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "yo_NG": {
+    "int_curr_symbol": "NGN ",
+    "currency_symbol": "\u20a6",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "yue_HK": {
+    "int_curr_symbol": "HKD ",
+    "currency_symbol": "HK$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "yuw_PG": {
+    "int_curr_symbol": "PGK ",
+    "currency_symbol": "K",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  },
+  "zh_CN": {
+    "int_curr_symbol": "CNY ",
+    "currency_symbol": "\uffe5",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 4,
+    "n_sign_posn": 4,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "zh_TW": {
+    "int_curr_symbol": "TWD ",
+    "currency_symbol": "NT$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "zh_HK.big5hkscs": {
+    "int_curr_symbol": "HKD ",
+    "currency_symbol": "HK$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "zh_SG": {
+    "int_curr_symbol": "SGD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "zh_SG.GBK": {
+    "int_curr_symbol": "SGD ",
+    "currency_symbol": "$",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 0,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      0
+    ]
+  },
+  "zu_ZA.ISO8859-1": {
+    "int_curr_symbol": "ZAR ",
+    "currency_symbol": "R",
+    "mon_decimal_point": ".",
+    "mon_thousands_sep": ",",
+    "mon_grouping": [
+      3,
+      3,
+      0
+    ],
+    "positive_sign": "",
+    "negative_sign": "-",
+    "int_frac_digits": 2,
+    "frac_digits": 2,
+    "p_cs_precedes": 1,
+    "p_sep_by_space": 0,
+    "n_cs_precedes": 1,
+    "n_sep_by_space": 0,
+    "p_sign_posn": 1,
+    "n_sign_posn": 1,
+    "decimal_point": ".",
+    "thousands_sep": ",",
+    "grouping": [
+      3,
+      3,
+      0
+    ]
+  }
+}

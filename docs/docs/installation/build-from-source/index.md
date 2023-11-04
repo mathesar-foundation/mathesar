@@ -210,7 +210,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Install the frontend dependencies
 
     ```sh
-    npm install --prefix mathesar_ui
+    npm ci --prefix mathesar_ui
     ```
       
 1. Compile the Mathesar Frontend App
@@ -221,7 +221,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Install Mathesar functions on the database:
 
     ```sh
-    python install.py --skip-confirm | tee /tmp/install.py.log
+    python -m mathesar.install --skip-confirm | tee /tmp/install.py.log
     ```
 
 
@@ -436,7 +436,7 @@ You'll be prompted to set up an admin user account the first time you open Mathe
 1. Install the frontend dependencies
 
     ```sh
-    npm install --prefix mathesar_ui
+    npm ci --prefix mathesar_ui
     ```
       
 1. Build the Mathesar frontend app
@@ -448,7 +448,7 @@ You'll be prompted to set up an admin user account the first time you open Mathe
 1. Update Mathesar functions on the database:
 
     ```sh
-    python install.py --skip-confirm >> /tmp/install.py.log
+    python -m mathesar.install --skip-confirm >> /tmp/install.py.log
     ```
 
 1. Restart the gunicorn server

@@ -23,7 +23,7 @@ export interface DatabaseStoreData {
 
 export const databases = writable<DatabaseStoreData>({
   preload: true,
-  state: States.Loading,
+  state: States.Done,
   data: commonData?.databases ?? [],
 });
 

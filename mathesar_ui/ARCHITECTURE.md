@@ -129,14 +129,13 @@ src
 	component-library
 		<component-name>
 			__meta__
-				This contains the storybook stories for this component
+				This contains component playbook stories, and tests for this component
 
 			ComponentName.svelte
 			ComponentName.scss
 ```
 
-1. Run the storybook: https://github.com/centerofci/mathesar/tree/develop/mathesar_ui#storybook
-2. See the [Components README](./src/component-library/README.md) for more details.
+See the [Components README](./src/component-library/README.md) for more details.
 
 ## Form library
 

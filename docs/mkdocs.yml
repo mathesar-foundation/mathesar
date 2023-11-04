@@ -13,7 +13,7 @@ nav:
       - Appendix to guided script:
           - Under the hood: installation/guided-install/under-the-hood.md
           - Troubleshooting: installation/guided-install/troubleshooting.md
-      - Install UI-only Docker image: installation/docker/index.md
+      - Install using Docker image: installation/docker/index.md
   - Configuration:
       - Environment variables: configuration/env-variables.md
       - Connect to an existing database server: configuration/connect-to-existing-db.md
@@ -26,6 +26,7 @@ nav:
       - Importing data: user-guide/importing-data.md
       - Syncing database changes: user-guide/syncing-db.md
       - Users & access levels: user-guide/users.md
+      - Glossary: user-guide/glossary.md
 
 plugins:
   - search:

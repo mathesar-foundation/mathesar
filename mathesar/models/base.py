@@ -7,8 +7,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
-from django.contrib.postgres.fields import ArrayField
-
+from encrypted_fields.fields import EncryptedCharField
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
@@ -111,10 +110,16 @@ _engine_cache = {}
 
 
 class Database(ReflectionManagerMixin, BaseModel):
+    name = models.CharField(max_length=128, unique=True)
+    db_name = models.CharField(max_length=128)
+    username = EncryptedCharField(max_length=255)
+    password = EncryptedCharField(max_length=255)
+    host = models.CharField(max_length=255)
+    port = models.IntegerField()
+    editable = models.BooleanField(default=True)
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()
-    name = models.CharField(max_length=128, unique=True)
     deleted = models.BooleanField(blank=True, default=False)
 
     @property
@@ -127,7 +132,7 @@ class Database(ReflectionManagerMixin, BaseModel):
             engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
         else:
-            engine = create_mathesar_engine(db_name=db_name)
+            engine = create_mathesar_engine(self)
             _engine_cache[db_name] = engine
         return engine
 
@@ -141,6 +146,14 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
+
+    def save(self, **kwargs):
+        db_name = self.name
+        # invalidate cached engine as db credentials might get changed.
+        if _engine_cache.get(db_name):
+            _engine_cache[db_name].dispose()
+            del _engine_cache[db_name]
+        return super().save()
 
 
 class Schema(DatabaseObject):
@@ -889,7 +902,7 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = ArrayField(models.IntegerField(), null=True, default=None)
+    column_order = JSONField(null=True, default=None)
 
 
 def _create_table_settings(tables):
