@@ -3,17 +3,13 @@ This file describes UI data types and how they map to DB-layer database types (s
 of db.types.base.DatabaseType).
 """
 from enum import Enum
-from collections.abc import Collection
 from db.types.base import (
-    DatabaseType, PostgresType, MathesarCustomType
+    PostgresType, MathesarCustomType
 )
 from db.types.hintsets import db_types_hinted
 
 
 class UIType(Enum):
-    id: str  # noqa: NT001
-    display_name: str  # noqa: NT001
-    db_types: Collection[DatabaseType]  # noqa: NT001
 
     BOOLEAN = (
         'boolean',

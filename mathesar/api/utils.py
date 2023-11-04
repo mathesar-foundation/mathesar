@@ -1,5 +1,6 @@
 from uuid import UUID
 from rest_framework.exceptions import NotFound
+from rest_framework import status
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api_exceptions
 import re
 
@@ -8,6 +9,8 @@ from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Table
 from mathesar.models.query import UIQuery
 from mathesar.utils.preview import column_alias_from_preview_template
+from mathesar.api.exceptions.generic_exceptions.base_exceptions import BadDBCredentials
+import psycopg
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
@@ -158,3 +161,20 @@ def is_valid_uuid_v4(value):
         return True
     except ValueError:
         return False
+
+
+def is_valid_pg_creds(credentials):
+    dbname = credentials["db_name"]
+    user = credentials["username"]
+    password = credentials["password"]
+    host = credentials["host"]
+    port = credentials["port"]
+    conn_str = f'dbname={dbname} user={user} password={password} host={host} port={port}'
+    try:
+        with psycopg.connect(conn_str):
+            return True
+    except psycopg.errors.OperationalError as e:
+        raise BadDBCredentials(
+            exception=e,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )

@@ -1,44 +1,20 @@
-from django.conf import settings
-
-from demo.utils import get_is_live_demo_mode
-
 from db import engine
 
-DEFAULT_DB = 'default'
 
-
-def create_mathesar_engine(db_name):
+def create_mathesar_engine(db_model):
     """Create an SQLAlchemy engine using stored credentials."""
     import logging
     logger = logging.getLogger('create_mathesar_engine')
     logger.debug('enter')
-    try:
-        credentials = _get_credentials_for_db_name_in_settings(db_name)
-    except KeyError:
-        if get_is_live_demo_mode():
-            credentials = _get_credentials_for_db_name_not_in_settings(db_name)
-        else:
-            raise
+    credentials = _get_credentials_for_db_model(db_model)
     return engine.create_future_engine_with_custom_types(**credentials)
 
 
-def _get_credentials_for_db_name_in_settings(db_name):
-    settings_entry = settings.DATABASES[db_name]
+def _get_credentials_for_db_model(db_model):
     return dict(
-        username=settings_entry["USER"],
-        password=settings_entry["PASSWORD"],
-        hostname=settings_entry["HOST"],
-        database=settings_entry["NAME"],
-        port=settings_entry["PORT"],
-    )
-
-
-def _get_credentials_for_db_name_not_in_settings(db_name):
-    settings_entry = settings.DATABASES[DEFAULT_DB]
-    return dict(
-        username=settings_entry["USER"],
-        password=settings_entry["PASSWORD"],
-        hostname=settings_entry["HOST"],
-        database=db_name,
-        port=settings_entry["PORT"],
+        username=db_model.username,
+        password=db_model.password,
+        hostname=db_model.host,
+        database=db_model.db_name,
+        port=db_model.port,
     )
