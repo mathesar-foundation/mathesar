@@ -3,7 +3,7 @@ const typescript = require('typescript');
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  ignorePatterns: ['node_modules', 'dist', 'index.html', 'storybook-static'],
+  ignorePatterns: ['node_modules', 'dist', 'index.html'],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],

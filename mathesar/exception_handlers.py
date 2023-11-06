@@ -31,6 +31,8 @@ exception_map = {
 
 
 def standardize_error_response(data):
+    if isinstance(data, dict):
+        data = [data]
     for index, error in enumerate(data):
         if 'code' in error:
             if error['code'] is not None and str(error['code']) != 'None':
@@ -92,6 +94,8 @@ def mathesar_exception_handler(exc, context):
 
 
 def is_pretty(data):
+    if isinstance(data, dict):
+        data = [data]
     if not isinstance(data, list):
         return False
     else:

@@ -7,7 +7,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import RenameColumn from './RenameColumn.svelte';
+  import ColumnNameAndDescription from './ColumnNameAndDescription.svelte';
   import ColumnActions from './ColumnActions.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
@@ -62,33 +62,35 @@
       </span>
     {/if}
     {#if column}
-      <Collapsible isOpen triggerAppearance="plain">
-        <CollapsibleHeader
-          slot="header"
-          title="Properties"
-          isDbLevelConfiguration
-        />
-        <div slot="content" class="content-container">
-          <RenameColumn
-            {column}
-            columnsDataStore={$tabularData.columnsDataStore}
-            {canExecuteDDL}
+      {#key column}
+        <Collapsible isOpen triggerAppearance="plain">
+          <CollapsibleHeader
+            slot="header"
+            title="Properties"
+            isDbLevelConfiguration
           />
-          {#if column.column.primary_key}
-            <ColumnTypeSpecifierTag {column} type="primaryKey" />
-          {:else}
-            {#if !!column.linkFk}
-              <ColumnTypeSpecifierTag {column} type="foreignKey" />
-            {/if}
-            <ColumnOptions
+          <div slot="content" class="content-container column-properties">
+            <ColumnNameAndDescription
               {column}
               columnsDataStore={$tabularData.columnsDataStore}
-              constraintsDataStore={$tabularData.constraintsDataStore}
               {canExecuteDDL}
             />
-          {/if}
-        </div>
-      </Collapsible>
+            {#if column.column.primary_key}
+              <ColumnTypeSpecifierTag {column} type="primaryKey" />
+            {:else}
+              {#if !!column.linkFk}
+                <ColumnTypeSpecifierTag {column} type="foreignKey" />
+              {/if}
+              <ColumnOptions
+                {column}
+                columnsDataStore={$tabularData.columnsDataStore}
+                constraintsDataStore={$tabularData.constraintsDataStore}
+                {canExecuteDDL}
+              />
+            {/if}
+          </div>
+        </Collapsible>
+      {/key}
     {/if}
 
     {#if column}
@@ -173,6 +175,12 @@
 
     > :global(* + *) {
       margin-top: 0.5rem;
+    }
+
+    &.column-properties {
+      > :global(* + *) {
+        margin-top: 1rem;
+      }
     }
   }
 

@@ -48,8 +48,8 @@ def remove_empty_rows_and_columns_from_dataframe(df):
 
 
 def create_db_table_from_excel_data_file(data_file, name, schema, comment=None):
-    db_name = schema.database.name
-    engine = create_mathesar_engine(db_name)
+    db_model = schema.database
+    engine = create_mathesar_engine(db_model)
     header_row = 0 if data_file.header else None
     dataframe = remove_empty_rows_and_columns_from_dataframe(
         pandas.read_excel(data_file.file.path, data_file.sheet_index, header=header_row)
@@ -63,5 +63,5 @@ def create_db_table_from_excel_data_file(data_file, name, schema, comment=None):
         column_names_alt = get_alternate_column_names(column_names)
         table = insert_records_from_dataframe(name, schema, column_names_alt, engine, comment, dataframe)
 
-    reset_reflection(db_name=db_name)
+    reset_reflection(db_name=db_model.name)
     return table
