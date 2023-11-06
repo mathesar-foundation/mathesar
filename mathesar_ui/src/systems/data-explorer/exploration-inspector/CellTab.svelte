@@ -61,7 +61,7 @@
         font-weight: 500;
       }
       .content {
-        word-wrap: anywhere;
+        white-space: pre-wrap;
         border: 1px solid var(--slate-300);
         padding: var(--size-xx-small);
         border-radius: var(--border-radius-m);
