@@ -154,7 +154,7 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'is_authenticated': not request.user.is_anonymous,
         'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
-        'internal_database': get_internal_db_meta(), 
+        'internal_database': get_internal_db_meta(),
     }
 
 
