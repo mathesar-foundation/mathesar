@@ -1,4 +1,13 @@
 <script lang="ts">
+  /**
+   * @file
+   *
+   * NOTICE: There is some code duplication between this file and
+   * `CellMode.svelte` used for the table view. It might be good to resolve this
+   * duplication at some point. In the mean time, be mindful of propagating
+   * changes to both files as necessary.
+   */
+
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import type QueryRunner from '../QueryRunner';
 

@@ -1,4 +1,13 @@
 <script lang="ts">
+  /**
+   * @file
+   *
+   * NOTICE: There is some code duplication between this file and
+   * `CellTab.svelte` used for the data explorer. It might be good to resolve
+   * this duplication at some point. In the mean time, be mindful of propagating
+   * changes to both files as necessary.
+   */
+
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
 
