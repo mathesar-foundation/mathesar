@@ -1,4 +1,5 @@
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import type { Locales } from '@mathesar/i18n/i18n-types';
 import {
   deleteAPI,
   getAPI,
@@ -12,6 +13,7 @@ export interface UnsavedUser {
   email: string | null;
   username: string;
   password: string;
+  display_language: Locales;
 }
 
 export type UserRole = 'viewer' | 'editor' | 'manager';
