@@ -6,6 +6,7 @@
 
   $: ({ selection, recordsData, processedColumns } = $tabularData);
   $: ({ activeCell } = selection);
+  $: ({ recordSummaries } = recordsData);
   $: cell = $activeCell;
   $: selectedCellValue = (() => {
     if (cell) {
@@ -25,6 +26,9 @@
     }
     return undefined;
   })();
+  $: recordSummary =
+    column &&
+    $recordSummaries.get(String(column.id))?.get(String(selectedCellValue));
 </script>
 
 <div class="section-content">
@@ -38,6 +42,7 @@
             disabled={true}
             columnFabric={column}
             value={selectedCellValue}
+            {recordSummary}
           />
         {/if}
       </div>
