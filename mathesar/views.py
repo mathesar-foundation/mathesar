@@ -88,7 +88,6 @@ def get_database_list(request):
             'host': db.host,
             'name': db.name,
             'db_name': db.db_name,
-            'editable': db.editable,
             'error': 'Error connecting to the database'
         })
     return database_serializer.data + failed_db_data
