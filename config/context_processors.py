@@ -48,8 +48,8 @@ def get_i18n_settings(manifest_data, development_mode):
     client_dev_url = settings.MATHESAR_CLIENT_DEV_URL
 
     if development_mode is True:
-        module_translations_file_path = f'{client_dev_url}/src/i18n/{display_language}/index.ts'
-        legacy_translations_file_path = f'{client_dev_url}/src/i18n/{display_language}/index.ts'
+        module_translations_file_path = f'{client_dev_url}/src/i18n/languages/{display_language}/index.ts'
+        legacy_translations_file_path = f'{client_dev_url}/src/i18n/languages/{display_language}/index.ts'
     else:
         try:
             module_translations_file_path = static(manifest_data[display_language]["file"])
