@@ -1,3 +1,4 @@
+from config.settings.common_settings import DATABASES
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -87,7 +88,6 @@ def get_database_list(request):
             'host': db.host,
             'name': db.name,
             'db_name': db.db_name,
-            'editable': db.editable,
             'error': 'Error connecting to the database'
         })
     return database_serializer.data + failed_db_data
@@ -153,7 +153,21 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'is_authenticated': not request.user.is_anonymous,
         'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
+        'internal_database': get_internal_db_meta(),
     }
+
+
+def get_internal_db_meta():
+    internal_db = DATABASES['default']
+    if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
+        return {
+            'type': 'postgres',
+            'user': internal_db['USER'],
+            'host': internal_db['HOST'],
+            'port': internal_db['PORT'],
+            'database': internal_db['NAME']
+        }
+    return {'type': 'sqlite'}
 
 
 def get_common_data(request, database=None, schema=None):
