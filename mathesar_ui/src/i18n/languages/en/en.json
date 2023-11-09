@@ -12,7 +12,7 @@
   "many_to_one_link_description": "Multiple [baseTable] records can link to the same [targetTable] record.",
   "no_file_uploaded": "No file uploaded",
   "no_matches": "No matches for [searchValue]",
-  "number_of_matches": "{count, plural, one {{count} match} other {{count} matches}} for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}",
+  "number_of_matches": "{count, plural, one {{count} match for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}} other {{count} matches for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}}}",
   "one_to_many": "One to Many",
   "one_to_many_link_desc": "One [baseTable] record can be linked from multiple [targetTable] records.",
   "processing_data": "Processing Data",
