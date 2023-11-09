@@ -1,0 +1,21 @@
+{
+  "copy_and_paste_text": "テキストのコピーと貼り付け",
+  "create_a_table_by_importing": "データをインポートしてテーブルを作成する",
+  "data_source": "情報元",
+  "import": "輸入",
+  "large_data_takes_time_warning": "大きなデータセットの処理には数分かかる場合があります。インポートの進行中は、このページを離れたり、ブラウザのタブを閉じたりしないでください。",
+  "linking_table": "リンクテーブル",
+  "many_to_many": "多対多",
+  "many_to_many_link_description": "複数の [baseTable] レコードと [targetTable] レコードは、新しい [mappingTable] を通じて相互にリンクできます。",
+  "many_to_many_self_referential_link_description": "複数の [baseTable] レコードは、新しい [mapping] を通じて相互にリンクできます。",
+  "many_to_one": "多対一",
+  "many_to_one_link_description": "Multiple [baseTable] records can link to the same [targetTable] record.",
+  "no_file_uploaded": "No file uploaded",
+  "no_matches": "No matches for [searchValue]",
+  "number_of_matches": "{count, plural, one {{count} match for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}} other {{count} matches for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}}}",
+  "one_to_many": "One to Many",
+  "one_to_many_link_desc": "One [baseTable] record can be linked from multiple [targetTable] records.",
+  "processing_data": "Processing Data",
+  "provide_url_to_file": "Provide a URL to the file",
+  "upload_a_file": "Upload a file"
+}
