@@ -44,17 +44,17 @@
   const uploadMethods: UploadMethod[] = [
     {
       key: 'file',
-      label: $_('importUploadPage.uploadAFile'),
+      label: $_('upload_a_file'),
       icon: iconUploadFile,
     },
     {
       key: 'url',
-      label: $_('importUploadPage.provideUrlToFile'),
+      label: $_('provide_url_to_file'),
       icon: iconUrl,
     },
     {
       key: 'clipboard',
-      label: $_('importUploadPage.copyAndPasteText'),
+      label: $_('copy_and_paste_text'),
       icon: iconPaste,
     },
   ];
@@ -89,7 +89,7 @@
   async function getDataFileId() {
     if ($uploadMethod.key === 'file') {
       if ($fileUploadId === undefined) {
-        throw new Error($_('general.noFileUploaded'));
+        throw new Error($_('no_file_uploaded'));
       }
       return $fileUploadId;
     }
@@ -127,7 +127,7 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($_('general.import'))}</title>
+  <title>{makeSimplePageTitle($_('import'))}</title>
 </svelte:head>
 
 <LayoutWithHeader
@@ -138,16 +138,16 @@
     '--layout-background-color': 'var(--sand-200)',
   }}
 >
-  <h1>{$_('importUploadPage.createATableByImporting')}</h1>
+  <h1>{$_('create_a_table_by_importing')}</h1>
 
   <div class="import-file-view">
     {#if status?.state === 'processing'}
-      <h2>{$_('general.processingData')}</h2>
+      <h2>{$_('processing_data')}</h2>
       <div class="processing-spinner">
         <Spinner />
       </div>
       <WarningBox>
-        {$_('importUploadPage.largeDataTakesTimeWarning')}
+        {$_('large_data_takes_time_warning')}
       </WarningBox>
     {:else if status?.state === 'failure'}
       <ErrorBox>
@@ -164,7 +164,7 @@
           bind:value={$uploadMethod}
           options={uploadMethods}
           isInline
-          label={$_('general.dataSource')}
+          label={$_('data_source')}
           getRadioLabel={(opt) => ({
             component: NameWithIcon,
             props: { name: opt.label, icon: opt.icon },

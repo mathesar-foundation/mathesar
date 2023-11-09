@@ -1,25 +1,19 @@
 {
-  "general": {
-    "dataSource": "Data Source",
-    "import": "Import",
-    "linkingTable": "Linking Table",
-    "manyToMany": "Many to Many",
-    "manyToOne": "Many to One",
-    "noFileUploaded": "No file uploaded",
-    "oneToMany": "One to Many",
-    "processingData": "Processing Data"
-  },
-  "importUploadPage": {
-    "uploadAFile": "Upload a file",
-    "provideUrlToFile": "Provide a URL to the file",
-    "copyAndPasteText": "Copy and Paste Text",
-    "createATableByImporting": "Create a table by importing your data",
-    "largeDataTakesTimeWarning": "Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress."
-  },
-  "linkTypeOptions": {
-    "oneToManyDescription": "One [baseTable] record can be linked from multiple [targetTable] records.",
-    "manyToOneDescription": "Multiple [baseTable] records can link to the same [targetTable] record.",
-    "manyToManyDescription": "Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]",
-    "manyToManySelfReferential": "Multiple [baseTable] records can link to each other through a new [mapping]"
-  }
+  "data_source": "Data Source",
+  "import": "Import",
+  "linking_table": "Linking Table",
+  "many_to_many": "Many to Many",
+  "many_to_one": "Many to One",
+  "no_file_uploaded": "No file uploaded",
+  "one_to_many": "One to Many",
+  "processing_data": "Processing Data",
+  "upload_a_file": "Upload a file",
+  "provide_url_to_file": "Provide a URL to the file",
+  "copy_and_paste_text": "Copy and Paste Text",
+  "create_a_table_by_importing": "Create a table by importing your data",
+  "large_data_takes_time_warning": "Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress.",
+  "one_to_many_link_desc": "One [baseTable] record can be linked from multiple [targetTable] records.",
+  "many_to_one_link_desc": "Multiple [baseTable] records can link to the same [targetTable] record.",
+  "many_to_many_link_desc": "Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]",
+  "many_to_many_self_referential_link_desc": "Multiple [baseTable] records can link to each other through a new [mapping]"
 }
