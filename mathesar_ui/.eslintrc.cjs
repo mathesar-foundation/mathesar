@@ -128,7 +128,7 @@ module.exports = {
       },
     },
     {
-      files: ['*.json'],
+      files: ['src/**/*.json'],
       rules: {
         'sort-keys': 'error',
         'quote-props': 'off',
