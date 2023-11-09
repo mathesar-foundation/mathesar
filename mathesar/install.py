@@ -42,8 +42,7 @@ def main(skip_static_collection=False):
                 username=credentials["USER"],
                 password=credentials["PASSWORD"],
                 host=credentials["HOST"],
-                port=credentials["PORT"],
-                editable=False
+                port=credentials["PORT"]
             ).save()
         except IntegrityError as e:
             if e.args[0].startswith(
@@ -58,7 +57,6 @@ def main(skip_static_collection=False):
                 db_model.password = credentials["PASSWORD"]
                 db_model.host = credentials["HOST"]
                 db_model.port = credentials["PORT"]
-                db_model.editable = False
                 db_model.save()
             else:
                 raise e

@@ -181,14 +181,3 @@ class EditingPublicSchemaIsDisallowed(MathesarValidationException):
             field=None,
     ):
         super().__init__(None, self.error_code, message, field)
-
-
-class EditingDBCredentialsNotAllowed(MathesarValidationException):
-    error_code = ErrorCodes.EditingNotAllowed.value
-
-    def __init__(
-            self,
-            message="Cannot edit the DB credentials created from .env",
-            field=None
-    ):
-        super().__init__(None, self.error_code, message, field)
