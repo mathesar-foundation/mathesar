@@ -1,9 +1,9 @@
-import en from './en.json';
+import enDict from './dict.json';
 import { type LangObject, addTranslationsToGlobalWindowObject } from '../utils';
 
 const lang: LangObject = {
   language: 'en',
-  dictionary: en,
+  dictionary: enDict,
 };
 
 addTranslationsToGlobalWindowObject(lang);
