@@ -7,7 +7,7 @@ module.exports = {
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
-    extraFileExtensions: ['.svelte', '.cjs'],
+    extraFileExtensions: ['.svelte', '.cjs', '.json'],
   },
   plugins: ['svelte3', '@typescript-eslint'],
   extends: [
@@ -125,6 +125,17 @@ module.exports = {
           'error',
           { accessibility: 'no-public' },
         ],
+      },
+    },
+    {
+      files: ['*.json'],
+      rules: {
+        'sort-keys': 'error',
+        'quote-props': 'off',
+        '@typescript-eslint/quotes': 'off',
+        '@typescript-eslint/no-unused-expressions': 'off',
+        '@typescript-eslint/semi': 'off',
+        '@typescript-eslint/comma-dangle': 'off',
       },
     },
   ],

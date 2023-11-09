@@ -57,7 +57,7 @@
           {/if}
         </RichText>
       {:else if linkType === 'manyToOne'}
-        <RichText text={$_('many_to_one_link_desc')} let:slotName>
+        <RichText text={$_('many_to_one_link_description')} let:slotName>
           {#if slotName === 'baseTable'}
             <Pill table={base} which="base" />
           {:else if slotName === 'targetTable'}
@@ -67,7 +67,7 @@
       {:else if linkType === 'manyToMany'}
         {#if isSelfReferential}
           <RichText
-            text={$_('many_to_many_self_referential_link_desc')}
+            text={$_('many_to_many_self_referential_link_description')}
             let:slotName
           >
             {#if slotName === 'baseTable'}
@@ -77,7 +77,7 @@
             {/if}
           </RichText>
         {:else}
-          <RichText text={$_('many_to_many_link_desc')} let:slotName>
+          <RichText text={$_('many_to_many_link_description')} let:slotName>
             {#if slotName === 'baseTable'}
               <Pill table={base} which="base" />
             {:else if slotName === 'targetTable'}
