@@ -23,7 +23,7 @@ class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         if isinstance(obj, Database) and not self.partial:
             # Only get records if we are serializing an existing table
             request = self.context['request']
-            return request.build_absolute_uri(reverse('database-types', kwargs={'pk': obj.pk}))
+            return request.build_absolute_uri(reverse('connection-types', kwargs={'pk': obj.pk}))
         else:
             return None
 
