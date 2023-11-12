@@ -3,7 +3,7 @@ import pytest
 from copy import deepcopy
 from unittest.mock import patch
 
-from db.constraints.base import ForeignKeyConstraint, UniqueConstraint, ExclusionViolation
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
@@ -1452,7 +1452,6 @@ def test_record_post_unique_violation(create_patents_table, client):
 def test_record_patch_unique_violation(create_patents_table, client):
     table_name = 'NASA unique record PATCH'
     table = create_patents_table(table_name)
-    print(f'table {table.get_column_name_id_bidirectional_map()}')
     id_column_id = table.get_column_name_id_bidirectional_map()['id']
     data = {str(id_column_id): 1}
     response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}/', data=data)
