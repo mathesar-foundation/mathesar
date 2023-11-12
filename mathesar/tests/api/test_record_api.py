@@ -3,7 +3,7 @@ import pytest
 from copy import deepcopy
 from unittest.mock import patch
 
-from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint, ExclusionViolation
 from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
@@ -1420,6 +1420,7 @@ def test_record_post_unique_violation(create_patents_table, client):
 def test_record_patch_unique_violation(create_patents_table, client):
     table_name = 'NASA unique record PATCH'
     table = create_patents_table(table_name)
+    print(f'table {table.get_column_name_id_bidirectional_map()}')
     id_column_id = table.get_column_name_id_bidirectional_map()['id']
     data = {str(id_column_id): 1}
     response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}/', data=data)
@@ -1432,3 +1433,33 @@ def test_record_patch_unique_violation(create_patents_table, client):
         f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'
     ).json()
     assert actual_constraint_details['name'] == 'NASA unique record PATCH_pkey'
+
+
+def test_record_patch_exclusion_violation(room_reservations_table, client):
+    table_name = 'ROOM exclusion record PATCH'
+    table = room_reservations_table(table_name)
+    id_column_id = table.get_column_name_id_bidirectional_map()['id']
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    # table.add_constraint(
+    #     ExclusionViolation(
+    #     what parameters should i pass ?
+    #     )
+    # )
+    data = {
+        str(columns_name_id_map['room_number']): '1',
+    }
+    client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}', data={
+        str(columns_name_id_map['room_number']): '1',
+        str(columns_name_id_map['check_in_date']): '11/10/2023',
+        str(columns_name_id_map['check_out_date']): '11/11/2023',
+    })
+    actual_exception = response.json()[0]
+    assert actual_exception['code'] == ErrorCodes.ExclusionViolation.value
+    assert actual_exception['message'] == 'The requested update violates an exclusion constraint'
+    assert actual_exception['detail']['constraint_columns'] == [id_column_id]
+    constraint_id = actual_exception['detail']['constraint']
+    actual_constraint_details = client.get(
+        f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'
+    ).json()
+    assert actual_constraint_details['name'] == "ROOM exclusion record PATCH_pkey"

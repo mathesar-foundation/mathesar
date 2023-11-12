@@ -284,6 +284,11 @@ def multiple_sheets_excel_filepath():
     return 'mathesar/tests/data/excel_parsing/multiple_sheets.xlsx'
 
 
+@pytest.fixture(scope='session')
+def room_reservations_filepath():
+    return 'mathesar/tests/data/room_reservations.csv'
+
+
 @pytest.fixture
 def db_table_to_dj_table(engine, create_schema):
     """
@@ -327,6 +332,12 @@ def patent_schema(create_schema):
     yield create_schema(PATENT_SCHEMA)
 
 
+@pytest.fixture
+def reservations_schema(create_schema):
+    RESERVATIONS_SCHEMA = 'Reservations'
+    yield create_schema(RESERVATIONS_SCHEMA)
+
+
 # TODO rename to create_ma_schema
 @pytest.fixture
 def create_schema(test_db_model, create_db_schema):
@@ -358,6 +369,21 @@ def create_mathesar_table(create_db_schema):
             engine=engine, table_name=table_name, schema_oid=schema_oid, columns=columns,
         )
     yield _create_mathesar_table
+
+
+@pytest.fixture
+def room_reservations_table(room_reservations_filepath, reservations_schema, create_table):
+    schema_name = reservations_schema.name
+    csv_filepath = room_reservations_filepath
+
+    def _create_table(table_name, schema_name=schema_name):
+        return create_table(
+            table_name=table_name,
+            schema_name=schema_name,
+            csv_filepath=csv_filepath,
+        )
+
+    return _create_table
 
 
 @pytest.fixture

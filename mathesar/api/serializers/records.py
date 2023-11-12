@@ -56,6 +56,7 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
             elif type(e.orig) is ExclusionViolation:
                 raise database_api_exceptions.ExclusionViolationAPIException(
                     e,
+                    table=table,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
             else:
@@ -88,6 +89,7 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
             elif type(e.orig) is ExclusionViolation:
                 raise database_api_exceptions.ExclusionViolationAPIException(
                     e,
+                    table=table,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
             else:
