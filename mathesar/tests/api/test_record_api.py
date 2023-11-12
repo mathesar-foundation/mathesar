@@ -1055,6 +1055,38 @@ def test_record_create(create_patents_table, client):
             assert data[column_name] == record_data[column_id_str]
 
 
+def test_record_create_without_primary_key(create_patents_table, client):
+    table_name = 'NASA Record Create Without PK'
+    table = create_patents_table(table_name)
+    column_test_table = table
+    num_columns = len(column_test_table.sa_columns)
+    col_one_name = column_test_table.sa_columns[0].name
+    column = column_test_table.get_columns_by_name(['id'])[0]
+    response = client.delete(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/"
+    )
+    assert response.status_code == 204
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+    )
+    new_data = new_columns_response.json()
+    assert col_one_name not in [col["name"] for col in new_data["results"]]
+    assert new_data["count"] == num_columns - 1
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    data = {
+        columns_name_id_map['Center']: 'NASA Example Space Center',
+        columns_name_id_map['Status']: 'Application',
+        columns_name_id_map['Case Number']: 'ESC-0000',
+        columns_name_id_map['Patent Number']: '01234',
+        columns_name_id_map['Application SN']: '01/000,001',
+        columns_name_id_map['Title']: 'Example Patent Name',
+        columns_name_id_map['Patent Expiration Date']: ''
+    }
+    response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
+    assert response.status_code == 405
+    assert response.json()[0]['message'] == "You cannot insert into tables without a primary key"
+
+
 @pytest.mark.parametrize('client_name, expected_status_code', update_client_with_status_code)
 def test_record_partial_update_based_on_permission(create_patents_table, request, client_name, expected_status_code):
     table_name = 'NASA Record Patch'

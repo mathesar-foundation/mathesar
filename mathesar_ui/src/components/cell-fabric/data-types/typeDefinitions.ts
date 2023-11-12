@@ -1,6 +1,10 @@
-import type { Column } from '@mathesar/api/types/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { CellValueFormatter } from './components/typeDefinitions';
+import type {
+  CellValueFormatter,
+  CellColumnLike as CellColumnLikeInner,
+} from './components/typeDefinitions';
+
+export type CellColumnLike = CellColumnLikeInner;
 
 // The types here are frontend types and are
 // different from db types.
@@ -19,11 +23,6 @@ export type SimpleCellDataTypes =
 export type CompoundCellDataTypes = 'array';
 
 export type CellDataType = SimpleCellDataTypes | CompoundCellDataTypes;
-
-export type CellColumnLike = Pick<
-  Column,
-  'type' | 'type_options' | 'display_options'
->;
 
 export interface CellComponentFactory {
   initialInputValue?: unknown;

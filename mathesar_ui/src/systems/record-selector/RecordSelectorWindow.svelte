@@ -56,9 +56,38 @@
       controller.cancel();
     }
   }
+
+  function isElementInsideParent(
+    childElement: HTMLElement | null,
+    parentElement: HTMLElement | null,
+  ): boolean {
+    let currentNode = childElement;
+
+    while (currentNode !== null) {
+      if (currentNode === parentElement) {
+        return true; // Found the parent element
+      }
+      currentNode = currentNode.parentNode as HTMLElement | null;
+    }
+
+    return false; // Parent element not found in the hierarchy
+  }
+
+  function onWindowClick(event: MouseEvent) {
+    if ($nestedSelectorIsOpen) return;
+
+    const currentModal = windowPositionerElement.lastChild as HTMLElement;
+    const currentWindow = currentModal.firstChild?.firstChild as HTMLElement;
+    const isElementInside = isElementInsideParent(
+      event.target as HTMLElement | null,
+      currentWindow,
+    );
+
+    if (!isElementInside) controller.cancel();
+  }
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window on:keydown={handleKeydown} on:click|capture={onWindowClick} />
 
 {#if tabularData}
   <div class="record-selector-window" style="margin-bottom: {marginBottom};">

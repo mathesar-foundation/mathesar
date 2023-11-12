@@ -96,7 +96,7 @@
         template,
         transitiveData: buildRecordSummariesForSheet(previewData),
       });
-      submitResult({ recordId, recordSummary });
+      submitResult({ recordId, recordSummary, record });
     } catch (err) {
       toast.error(getErrorMessage(err));
       // TODO set errors in tabularData to appear within cells

@@ -1,3 +1,5 @@
+from config.settings.common_settings import DATABASES
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import status
@@ -80,8 +82,12 @@ def get_database_list(request):
     failed_db_data = []
     for db in permission_restricted_failed_db_qs:
         failed_db_data.append({
+            'id': db.id,
+            'username': db.username,
+            'port': db.port,
+            'host': db.host,
             'name': db.name,
-            'editable': db.editable,
+            'db_name': db.db_name,
             'error': 'Error connecting to the database'
         })
     return database_serializer.data + failed_db_data
@@ -147,7 +153,21 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'is_authenticated': not request.user.is_anonymous,
         'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
+        'internal_database': get_internal_db_meta(),
     }
+
+
+def get_internal_db_meta():
+    internal_db = DATABASES['default']
+    if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
+        return {
+            'type': 'postgres',
+            'user': internal_db['USER'],
+            'host': internal_db['HOST'],
+            'port': internal_db['PORT'],
+            'database': internal_db['NAME']
+        }
+    return {'type': 'sqlite'}
 
 
 def get_common_data(request, database=None, schema=None):
@@ -157,6 +177,7 @@ def get_common_data(request, database=None, schema=None):
         'databases': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
+        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
         'routing_context': 'normal',
     }
 
@@ -295,6 +316,28 @@ def schema_home(request, db_name, schema_id, **kwargs):
 
 @login_required
 def schemas(request, db_name):
+    database = get_current_database(request, db_name)
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request, database, None)
+    })
+
+
+@login_required
+def list_database_connection(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
+
+
+@login_required
+def add_database_connection(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
+
+
+@login_required
+def edit_database_connection(request, db_name):
     database = get_current_database(request, db_name)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, None)
