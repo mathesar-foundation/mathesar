@@ -92,7 +92,7 @@ def test_database_reflection_delete_table(db_dj_model):
 
 def check_database(database, response_database):
     assert database.id == response_database['id']
-    assert database.name == response_database['name']
+    assert database.name == response_database['nickname']
     assert database.deleted == response_database['deleted']
     assert 'supported_types_url' in response_database
     assert '/api/ui/v0/connections/' in response_database['supported_types_url']

@@ -36,7 +36,7 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         credentials = serializer.validated_data
         Database.objects.create(
-            name=credentials['name'],
+            name=credentials['nickname'],
             db_name=credentials['db_name'],
             username=credentials['username'],
             password=credentials['password'],
