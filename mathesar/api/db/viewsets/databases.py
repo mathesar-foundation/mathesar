@@ -18,7 +18,7 @@ from db.types.install import uninstall_mathesar_from_database
 from mathesar.api.serializers.db_types import DBTypeSerializer
 
 
-class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class ConnectionViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
