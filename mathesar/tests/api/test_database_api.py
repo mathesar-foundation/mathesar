@@ -93,7 +93,6 @@ def test_database_reflection_delete_table(db_dj_model):
 def check_database(database, response_database):
     assert database.id == response_database['id']
     assert database.name == response_database['nickname']
-    assert database.deleted == response_database['deleted']
     assert 'supported_types_url' in response_database
     assert '/api/ui/v0/connections/' in response_database['supported_types_url']
     assert response_database['supported_types_url'].endswith('/types/')
@@ -132,6 +131,8 @@ def test_database_list_permissions(FUN_create_dj_db, get_uid, client, client_bob
 
 
 def test_database_list_deleted(client, db_dj_model):
+    # Note that there is no longer a distinction between "deleted" and undeleted
+    # connections in the API.
     _remove_db(db_dj_model.name)
     cache.clear()
     response = client.get('/api/db/v0/connections/')

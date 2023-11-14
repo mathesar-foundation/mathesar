@@ -14,8 +14,8 @@ class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerialize
 
     class Meta:
         model = Database
-        fields = ['id', 'nickname', 'db_name', 'deleted', 'supported_types_url', 'username', 'password', 'host', 'port']
-        read_only_fields = ['id', 'deleted', 'supported_types_url']
+        fields = ['id', 'nickname', 'db_name', 'supported_types_url', 'username', 'password', 'host', 'port']
+        read_only_fields = ['id', 'supported_types_url']
         extra_kwargs = {
             'password': {'write_only': True}
         }
