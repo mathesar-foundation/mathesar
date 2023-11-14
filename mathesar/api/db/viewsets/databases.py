@@ -9,7 +9,7 @@ from mathesar.models.base import Database
 from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
-from mathesar.api.serializers.databases import DatabaseSerializer
+from mathesar.api.serializers.databases import ConnectionSerializer
 
 from db.functions.operations.check_support import get_supported_db_functions
 from mathesar.api.serializers.functions import DBFunctionSerializer
@@ -19,7 +19,7 @@ from mathesar.api.serializers.db_types import DBTypeSerializer
 
 
 class ConnectionViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
-    serializer_class = DatabaseSerializer
+    serializer_class = ConnectionSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DatabaseFilter
@@ -32,7 +32,7 @@ class ConnectionViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         )
 
     def create(self, request):
-        serializer = DatabaseSerializer(data=request.data)
+        serializer = ConnectionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         credentials = serializer.validated_data
         Database.objects.create(
@@ -47,7 +47,7 @@ class ConnectionViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
     def partial_update(self, request, pk=None):
         db_object = self.get_object()
-        serializer = DatabaseSerializer(db_object, data=request.data, partial=True)
+        serializer = ConnectionSerializer(db_object, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

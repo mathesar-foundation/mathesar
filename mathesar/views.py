@@ -12,7 +12,7 @@ from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.query import QueryAccessPolicy
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.db.permissions.table import TableAccessPolicy
-from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
+from mathesar.api.serializers.databases import ConnectionSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
@@ -74,7 +74,7 @@ def _get_permissible_db_queryset(request):
 
 def get_database_list(request):
     permission_restricted_db_qs, permission_restricted_failed_db_qs = _get_permissible_db_queryset(request)
-    database_serializer = DatabaseSerializer(
+    database_serializer = ConnectionSerializer(
         permission_restricted_db_qs,
         many=True,
         context={'request': request}
@@ -86,7 +86,7 @@ def get_database_list(request):
             'username': db.username,
             'port': db.port,
             'host': db.host,
-            'name': db.name,
+            'nickname': db.name,
             'db_name': db.db_name,
             'error': 'Error connecting to the database'
         })
@@ -233,7 +233,7 @@ def get_common_data_for_shared_entity(request, schema=None):
         many=True,
         context={'request': request}
     ).data
-    serialized_databases = DatabaseSerializer(
+    serialized_databases = ConnectionSerializer(
         databases,
         many=True,
         context={'request': request}

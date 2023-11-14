@@ -9,14 +9,14 @@ from mathesar.models.base import Database
 from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
-from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
+from mathesar.api.serializers.databases import ConnectionSerializer, TypeSerializer
 from mathesar.api.serializers.filters import FilterSerializer
 
 from mathesar.filters.base import get_available_filters
 
 
 class ConnectionViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    serializer_class = DatabaseSerializer
+    serializer_class = ConnectionSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DatabaseFilter

@@ -8,7 +8,7 @@ from mathesar.api.utils import is_valid_pg_creds
 from db.install import install_mathesar
 
 
-class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
+class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     supported_types_url = serializers.SerializerMethodField()
     nickname = serializers.CharField(source='name')
 
