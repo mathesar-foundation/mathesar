@@ -87,7 +87,7 @@ def get_database_list(request):
             'port': db.port,
             'host': db.host,
             'nickname': db.name,
-            'db_name': db.db_name,
+            'database': db.db_name,
             'error': 'Error connecting to the database'
         })
     return database_serializer.data + failed_db_data
@@ -142,10 +142,10 @@ def get_user_data(request):
 
 def get_base_data_all_routes(request, database=None, schema=None):
     return {
-        'current_db': database.name if database else None,
+        'current_db_connection': database.name if database else None,
         'current_schema': schema.id if schema else None,
         'schemas': [],
-        'databases': [],
+        'connections': [],
         'tables': [],
         'queries': [],
         'abstract_types': get_ui_type_list(request, database),
@@ -153,11 +153,11 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'is_authenticated': not request.user.is_anonymous,
         'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
-        'internal_database': get_internal_db_meta(),
+        'internal_db_connection': _get_internal_db_meta(),
     }
 
 
-def get_internal_db_meta():
+def _get_internal_db_meta():
     internal_db = DATABASES['default']
     if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
         return {
