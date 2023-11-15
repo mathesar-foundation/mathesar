@@ -57,7 +57,7 @@
       : undefined;
 
   function clear() {
-    value = undefined;
+    value = null;
     dispatch('artificialChange', undefined);
     dispatch('artificialInput', undefined);
     // If the value is cleared via a button, the focus may shift to that button.
