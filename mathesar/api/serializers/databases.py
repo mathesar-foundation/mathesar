@@ -11,10 +11,11 @@ from db.install import install_mathesar
 class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     supported_types_url = serializers.SerializerMethodField()
     nickname = serializers.CharField(source='name')
+    database = serializers.CharField(source='db_name')
 
     class Meta:
         model = Database
-        fields = ['id', 'nickname', 'db_name', 'supported_types_url', 'username', 'password', 'host', 'port']
+        fields = ['id', 'nickname', 'database', 'supported_types_url', 'username', 'password', 'host', 'port']
         read_only_fields = ['id', 'supported_types_url']
         extra_kwargs = {
             'password': {'write_only': True}
@@ -27,29 +28,6 @@ class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerialize
             return request.build_absolute_uri(reverse('connection-types', kwargs={'pk': obj.pk}))
         else:
             return None
-
-    def validate(self, credentials):
-        if self.partial:
-            db_model = self.instance
-            for attr, value in credentials.items():
-                setattr(db_model, attr, value)
-            credentials = {
-                'db_name': db_model.db_name,
-                'host': db_model.host,
-                'username': db_model.username,
-                'password': db_model.password,
-                'port': db_model.port
-            }
-        if is_valid_pg_creds(credentials):
-            install_mathesar(
-                database_name=credentials["db_name"],
-                hostname=credentials["host"],
-                username=credentials["username"],
-                password=credentials["password"],
-                port=credentials["port"],
-                skip_confirm=True
-            )
-        return super().validate(credentials)
 
 
 class TypeSerializer(MathesarErrorMessageMixin, serializers.Serializer):

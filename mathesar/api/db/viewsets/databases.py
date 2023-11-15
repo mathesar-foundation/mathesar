@@ -31,27 +31,6 @@ class ConnectionViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             Database.objects.all().order_by('-created_at')
         )
 
-    def create(self, request):
-        serializer = ConnectionSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        credentials = serializer.validated_data
-        Database.objects.create(
-            name=credentials['nickname'],
-            db_name=credentials['db_name'],
-            username=credentials['username'],
-            password=credentials['password'],
-            host=credentials['host'],
-            port=credentials['port']
-        ).save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def partial_update(self, request, pk=None):
-        db_object = self.get_object()
-        serializer = ConnectionSerializer(db_object, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
     def destroy(self, request, pk=None):
         db_object = self.get_object()
         if request.query_params.get('del_msar_schemas'):
