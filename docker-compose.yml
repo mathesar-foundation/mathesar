@@ -47,8 +47,6 @@ services:
     container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
     environment:
-      - MODE=${MODE-PRODUCTION}
-      - DEBUG=${DEBUG-False}
       - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
@@ -76,22 +74,6 @@ services:
     # Do not make any changes to this port
     expose:
       - "8000"
-  # A webserver responsible for
-  # receiving upgrade requests and upgrading the Mathesar App docker image.
-  #  It upgrades the docker image only when a http request is sent to it
-  # For more information refer https://containrrr.dev/watchtower/http-api-mode/
-  watchtower:
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --http-api-update --label-enable --debug
-    environment:
-      - WATCHTOWER_HTTP_API_TOKEN=mytoken
-    labels:
-      - "com.centurylinklabs.watchtower.enable=false"
-    # Watchtower HTTP API is exposed to other containers, but not the host.
-    expose:
-      - "8080"
 volumes:
   postgresql_data:
   media:
