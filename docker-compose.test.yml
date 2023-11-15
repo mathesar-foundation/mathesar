@@ -1,0 +1,63 @@
+version: "3.9"
+# Please refer the documentation located at https://docs.mathesar.org/installation/docker-compose/ for the setting up Mathesar using this docker-compose.yml.
+
+x-initial_config: &initial_config
+  # Required
+  SECRET_KEY: ${SECRET_KEY:?}
+  # ALLOWED_HOST: $${ALLOWED_HOST:['*']}
+  POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
+  POSTGRES_USER: ${POSTGRES_USER:-mathesar}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+  DJANGO_SETTINGS_MODULE: config.settings.production
+  # this should be removed once connections stuff is merged
+  MATHESAR_DATABASES: ${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
+services:
+  db:
+    image: postgres:13
+    container_name: mathesar_db
+    environment: *initial_config
+    expose:
+      - "5432"
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
+      interval: 5s
+      timeout: 1s
+      retries: 30
+      start_period: 5s
+  # A gunicorn WSGI HTTP Server that
+  # runs the Mathesar App.
+  # It depends on the `db` service
+  # and will start the `db` service automatically before starting itself.
+  service:
+    container_name: mathesar_service
+    image: mathesar/mathesar-prod:latest
+    environment: *initial_config
+      # - SECRET_KEY=${SECRET_KEY:?}
+      # - ALLOWED_HOSTS=*
+      # - DJANGO_DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@mathesar_db:5432/${POSTGRES_DB}
+      # - DJANGO_SETTINGS_MODULE=config.settings.production
+      # - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
+    entrypoint: ./run.sh
+    volumes:
+      - static:/code/static
+      - media:/code/media
+    depends_on:
+      # Comment the below field to disable starting the database service automatically
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: curl -f http://localhost:8000
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    # On prod, the HTTP port is exposed to other containers, but not the host to prevent any unnecessary conflicts with external services.
+    # Do not make any changes to this port
+    ports:
+      - "8000:8000"
+volumes:
+  postgresql_data:
+  media:
+  static:
