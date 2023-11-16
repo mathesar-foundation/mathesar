@@ -1,18 +1,15 @@
 version: "3.9"
-# Please refer the documentation located at https://docs.mathesar.org/installation/docker-compose/ for the setting up Mathesar using this docker-compose.yml.
 
 x-initial_config: &initial_config
   # Required
   SECRET_KEY: ${SECRET_KEY:?}
-  # ALLOWED_HOST: $${ALLOWED_HOST:['*']}
+  ALLOWED_HOST: ${ALLOWED_HOST:-*}
   POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
   POSTGRES_USER: ${POSTGRES_USER:-mathesar}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
-  DJANGO_SETTINGS_MODULE: config.settings.production
-  # this should be removed once connections stuff is merged
-  MATHESAR_DATABASES: ${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
+
 services:
-  db:
+  pgdb:
     image: postgres:13
     container_name: mathesar_db
     environment: *initial_config
@@ -30,22 +27,23 @@ services:
   # runs the Mathesar App.
   # It depends on the `db` service
   # and will start the `db` service automatically before starting itself.
-  service:
+  mathesar_app:
     container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
-    environment: *initial_config
-      # - SECRET_KEY=${SECRET_KEY:?}
-      # - ALLOWED_HOSTS=*
-      # - DJANGO_DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@mathesar_db:5432/${POSTGRES_DB}
-      # - DJANGO_SETTINGS_MODULE=config.settings.production
-      # - MATHESAR_DATABASES=${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
+    environment: 
+      <<: *initial_config
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      # MATHESAR_DATABASES should be removed once connections stuff is merged
+      MATHESAR_DATABASES: ${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
     entrypoint: ./run.sh
     volumes:
+      # DONT FORGET TO REMOVE THIS CODE DIRECTORY!
+      - .:/code/
       - static:/code/static
       - media:/code/media
     depends_on:
       # Comment the below field to disable starting the database service automatically
-      db:
+      pgdb:
         condition: service_healthy
     healthcheck:
       test: curl -f http://localhost:8000

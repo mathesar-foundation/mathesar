@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
-# Start the database
-if [[ -z "${DJANGO_DATABASE_URL}" ]]; then
-  echo "Starting inbuilt database"
-  ./db-run.sh
-  export DJANGO_DATABASE_URL='postgres://postgres:mathesar@localhost:5432/mathesar_django'
-  if [[ -z "${MATHESAR_DATABASES}" ]]; then
-    export MATHESAR_DATABASES='(mathesar_tables|postgresql://postgres:mathesar@localhost:5432/mathesar)'
-  fi
-fi
+# # Start the database
+# if [[ -z "${DJANGO_DATABASE_URL}" ]]; then
+#   echo "Starting inbuilt database"
+#   ./db-run.sh
+#   export DJANGO_DATABASE_URL='postgres://postgres:mathesar@localhost:5432/mathesar_django'
+#   if [[ -z "${MATHESAR_DATABASES}" ]]; then
+#     export MATHESAR_DATABASES='(mathesar_tables|postgresql://postgres:mathesar@localhost:5432/mathesar)'
+#   fi
+# fi
+
+# don't know if this is necessary, I was facing some issues when I was mounting the recent develop code.
+pip install -r requirements.txt
 
 python -m mathesar.install --skip-confirm
 # Start the Django server on port 8000.

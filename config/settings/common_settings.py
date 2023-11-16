@@ -97,7 +97,16 @@ DATABASES = {
     for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
 
-DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url, default='sqlite:///db.sqlite3')
+# POSTGRES_DB, POSTGRES_USER & POSTGRES_PASSWORD are required env variables for forming a pg connection string for the django database
+# lack of any one of these will result in the internal django database to be sqlite.
+POSTGRES_DB = decouple_config('POSTGRES_DB')
+POSTGRES_USER = decouple_config('POSTGRES_USER')
+POSTGRES_PASSWORD = decouple_config('POSTGRES_PASSWORD')
+
+if POSTGRES_DB and POSTGRES_USER and POSTGRES_PASSWORD:
+    DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@mathesar_db:5432/{POSTGRES_DB}')
+else:
+    DATABASES['default'] = db_url('sqlite:///db.sqlite3')
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s),

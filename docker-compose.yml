@@ -47,7 +47,6 @@ services:
     container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
     environment:
-      - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.production}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       - SECRET_KEY=${SECRET_KEY}

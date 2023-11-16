@@ -58,7 +58,6 @@ services:
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
-      - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
