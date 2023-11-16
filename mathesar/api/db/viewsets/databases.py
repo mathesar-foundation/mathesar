@@ -16,7 +16,6 @@ from mathesar.api.serializers.functions import DBFunctionSerializer
 from db.types.base import get_available_known_db_types
 from db.types.install import uninstall_mathesar_from_database
 from mathesar.api.serializers.db_types import DBTypeSerializer
-from mathesar.api.exceptions.validation_exceptions.exceptions import EditingDBCredentialsNotAllowed
 
 
 class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
@@ -48,12 +47,10 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
     def partial_update(self, request, pk=None):
         db_object = self.get_object()
-        if db_object.editable:
-            serializer = DatabaseSerializer(db_object, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-        raise EditingDBCredentialsNotAllowed()
+        serializer = DatabaseSerializer(db_object, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     def destroy(self, request, pk=None):
         db_object = self.get_object()
