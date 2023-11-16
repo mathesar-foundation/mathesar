@@ -39,16 +39,16 @@ def get_schema_list(request, database):
 
 def _get_permissible_db_queryset(request):
     """
-    Returns the queryset for databases a user is permitted to access.
+    Returns the queryset for connections a user is permitted to access.
 
-    Note, databases that a user is permitted to access is the union of those
-    permitted by DatabaseAccessPolicy and those containing Schemas permitted
-    by SchemaAccessPolicy.
+    Note, connections that a user is permitted to access is the union of those
+    permitted by DatabaseAccessPolicy and those containing Schemas permitted by
+    SchemaAccessPolicy.
 
-    Note, the live demo mode is an exception where the user is only permitted
-    to access the database generated for him. We treat that as a subset of the
-    databases the user can normally access, just in case someone finds a way to
-    manipulate how we define whether we're in demo mode and which db is a
+    Note, the live demo mode is an exception where the user is only permitted to
+    access the database generated for him. We treat that as a subset of the
+    connections the user can normally access, just in case someone finds a way
+    to manipulate how we define whether we're in demo mode and which db is a
     user's demo db.
     """
     for deleted in (True, False):
@@ -174,7 +174,7 @@ def get_common_data(request, database=None, schema=None):
     return {
         **get_base_data_all_routes(request, database, schema),
         'schemas': get_schema_list(request, database),
-        'databases': get_database_list(request),
+        'connections': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
