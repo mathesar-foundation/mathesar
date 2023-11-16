@@ -4,8 +4,6 @@ from rest_framework import serializers
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models.base import Database
-from mathesar.api.utils import is_valid_pg_creds
-from db.install import install_mathesar
 
 
 class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
