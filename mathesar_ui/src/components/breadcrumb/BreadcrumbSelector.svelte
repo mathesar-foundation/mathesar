@@ -7,7 +7,8 @@
   } from '@mathesar/component-library';
   import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { iconExpandRight } from '@mathesar/icons';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { _ } from 'svelte-i18n';
+  import { RichText } from '@mathesar/components/rich-text';
   import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
   import type { BreadcrumbSelectorData } from './breadcrumbTypes';
   import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
@@ -71,10 +72,21 @@
               {#if filterString?.length === 0}
                 {categoryName}
               {:else}
-                {labeledCount(entries, 'matches')}
-                for
-                <b>{filterString}</b>
-                {processedData.size > 1 ? `in ${categoryName}` : ''}
+                <RichText
+                  text={$_('number_of_matches', {
+                    values: {
+                      count: entries.length,
+                      categoryCount: processedData.size > 1 ? 1 : 0,
+                    },
+                  })}
+                  let:slotName
+                >
+                  {#if slotName === 'searchValue'}
+                    <b>{filterString}</b>
+                  {:else if slotName === 'categoryName'}
+                    {categoryName}
+                  {/if}
+                </RichText>
               {/if}
             </div>
             <ul class="items">
@@ -92,7 +104,11 @@
         {:else}
           {#if filterString.length > 0}
             <div class="section-name">
-              No matches for <b>{filterString}</b>
+              <RichText text={$_('no_matches')} let:slotName>
+                {#if slotName === 'searchValue'}
+                  <b>{filterString}</b>
+                {/if}
+              </RichText>
             </div>
           {/if}
         {/each}
