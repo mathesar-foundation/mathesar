@@ -1,15 +1,66 @@
 version: "3.9"
+#------------------------------
+# Mathesar's docker compose file
+#------------------------------
 
+
+
+#------------------------------------------------
+# REQUIRED CONFIG:
+#------------------------------------------------
 x-initial_config: &initial_config
-  # Required
-  SECRET_KEY: ${SECRET_KEY:?}
-  ALLOWED_HOST: ${ALLOWED_HOST:-*}
-  POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
-  POSTGRES_USER: ${POSTGRES_USER:-mathesar}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+  SECRET_KEY: ${SECRET_KEY:?}                       #(Required) Replace '?' with your Django SECRET_KEY, you can generate one here: https://djecrety.ir/
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}                #(Optional) Replace '*' with custom domain(s) e.g. '.yourdomain.com, 127.0.0.1' to restrict the access of web-service to certain domain(s)
+  POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}      #(Optional) Replace 'mathesar_django' with any custom name for the internal database managed by mathesar web-service
+  POSTGRES_USER: ${POSTGRES_USER:-mathesar}         #(Optional) Replace 'mathesar' with any custom username for the aforementioned database
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar} #(Optional) Replace 'mathesar' with any custom password for the aforementioned database
+#------------------------------------------------
+
+
+
+#-------------------------------------------------#
+# HOW TO RUN THIS FILE:                           #
+#-------------------------------------------------#
+# $: sudo docker compose -f docker-compose.yml up #
+#-------------------------------------------------#
+
+
+
+#------------------------------------------------
+# ADDITIONAL INFO:
+#------------------------------------------------
+# 
+# SECRET_KEY:
+#     Default: N/A
+#     Info: A unique secret key required to be set by user for Django's security protection features.
+#           You can read more about it here: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
+#     Example: a_very_insercure_secret_key1*zobb123)k(_d1%wubkv6#
+# 
+# ALLOWED_HOSTS:
+#     Default: * (i.e. all domains allowed)
+#     Info: Allows users to restrict the domains(s) to which the Django web server can serve to.
+#           You can read more about it here: https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts
+#     Example: .localhost, 127.0.0.1, www.example.com, .yourdomain.com
+#
+# POSTGRES_DB:
+#     Default: mathesar_django
+#     Info: Specifies a name for the database that will be used for internal bookkeeping by Mathesar.
+#     Example: zeus
+#
+# POSTGRES_USER:
+#     Default: mathesar
+#     Info: Specifies creation of a user with superuser privileges and a database with the same name.
+#     Example: athena
+#
+# POSTGRES_PASSWORD:
+#     Default: mathesar
+#     Info: Specifies the superuser password and is required to be set for the PostgreSQL docker image.
+#     Example: apollo
+#------------------------------------------------
+
 
 services:
-  pgdb:
+  db:
     image: postgres:13
     container_name: mathesar_db
     environment: *initial_config
@@ -18,16 +69,14 @@ services:
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 5s
       timeout: 1s
       retries: 30
       start_period: 5s
-  # A gunicorn WSGI HTTP Server that
-  # runs the Mathesar App.
-  # It depends on the `db` service
-  # and will start the `db` service automatically before starting itself.
-  mathesar_app:
+  
+  # TODO: Add caddy.
+  service:
     container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
     environment: 
@@ -37,13 +86,12 @@ services:
       MATHESAR_DATABASES: ${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
     entrypoint: ./run.sh
     volumes:
-      # DONT FORGET TO REMOVE THIS CODE DIRECTORY!
+      # TODO: DON'T FORGET TO REMOVE THIS CODE DIRECTORY!
       - .:/code/
       - static:/code/static
       - media:/code/media
     depends_on:
-      # Comment the below field to disable starting the database service automatically
-      pgdb:
+      db:
         condition: service_healthy
     healthcheck:
       test: curl -f http://localhost:8000
@@ -51,8 +99,7 @@ services:
       timeout: 5s
       retries: 30
       start_period: 5s
-    # On prod, the HTTP port is exposed to other containers, but not the host to prevent any unnecessary conflicts with external services.
-    # Do not make any changes to this port
+    # TODO: Turn to expose again after adding caddy.
     ports:
       - "8000:8000"
 volumes:
