@@ -39,6 +39,7 @@
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
+  let isTableCardFocused = false;
 
   $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
   $: tablePageUrl = isTableImportConfirmationNeeded
@@ -79,14 +80,21 @@
 
 <div
   class="table-card"
+  class:focus={isTableCardFocused}
   class:hovering-menu-trigger={isHoveringMenuTrigger}
   class:hovering-bottom-button={isHoveringBottomButton}
   class:unconfirmed-import={isTableImportConfirmationNeeded}
 >
-  <a class="link passthrough" href={tablePageUrl} aria-label={table.name}>
+  <a class="link passthrough" href={tablePageUrl} aria-label={table.name} 
+  on:focusin={() => {
+    isTableCardFocused = true;
+  }}
+  on:focusout={() => {
+    isTableCardFocused = false;
+  }}
+  >
     <div class="top">
       <div class="top-content"><TableName {table} /></div>
-      <div class="fake-button" />
     </div>
     <div class="description">
       {#if description}
@@ -171,6 +179,11 @@
     --padding: 1rem;
     --bottom-height: 2.5rem;
   }
+  .table-card.focus {
+    outline: 2px solid var(--slate-300);
+    outline-offset: 1px;
+    border-radius: var(--border-radius-l);
+  }
   .table-card.unconfirmed-import {
     color: var(--color-text-muted);
   }
@@ -195,7 +208,7 @@
     flex: 1 1 auto;
     overflow: hidden;
     font-size: var(--text-size-large);
-    height: var(--menu-trigger-size);
+    height: calc(var(--menu-trigger-size) + 1rem);
     display: flex;
     align-items: center;
     padding: 0 var(--padding);
@@ -206,18 +219,11 @@
   }
 
   /** Menu button =========================================================== */
-  .fake-button {
-    flex: 0 0 auto;
-    width: var(--menu-trigger-size);
-    height: var(--menu-trigger-size);
-  }
-  .hovering-menu-trigger .fake-button {
-    background: var(--slate-100);
-  }
   .menu-container {
     position: absolute;
     top: 0;
     right: 0;
+    margin: 5px;
     width: var(--menu-trigger-size);
     height: var(--menu-trigger-size);
     z-index: 1;
@@ -252,6 +258,13 @@
     z-index: 1;
     cursor: pointer;
   }
+  .bottom-button:focus {
+    outline: 2px solid var(--slate-300);
+    outline-offset: 1px;
+    border-bottom-left-radius: var(--border-radius-l);
+    border-bottom-right-radius: var(--border-radius-l);
+  }
+  
   .hovering-bottom-button .bottom-button {
     color: inherit;
   }

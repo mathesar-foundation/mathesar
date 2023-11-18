@@ -42,6 +42,12 @@
     color: var(--white);
 
     &:not(:disabled) {
+      &.focus,
+      &:focus {
+        outline: 2px solid var(--slate-300);
+        outline-offset: 1px;
+      }
+
       &:hover,
       &.hover {
         background: var(--brand-600);
@@ -62,6 +68,12 @@
     color: var(--slate-800);
 
     &:not(:disabled) {
+      &.focus,
+      &:focus {
+        outline: 2px solid var(--slate-300);
+        outline-offset: 1px;
+      }
+
       &:hover,
       &.hover {
         background: var(--slate-200);

@@ -1,5 +1,8 @@
 button.dropdown.trigger {
   position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 
   > .label {
     display: inline-flex;
@@ -11,7 +14,6 @@ button.dropdown.trigger {
     box-sizing: content-box;
     line-height: 1.2;
     min-height: 1.2em;
-    flex-grow: 1;
     > *:not(:last-child) {
       margin-right: 0.25rem;
     }
@@ -21,6 +23,14 @@ button.dropdown.trigger {
     display: flex;
     align-items: center;
     padding: 0 0.1rem;
+  }
+  &:focus {
+    outline: 2px solid var(--slate-300);
+    outline-offset: 1px;
+    border-radius: var(--border-radius-s);
+  }
+  &:hover {
+    background: var(--slate-100);
   }
 }
 

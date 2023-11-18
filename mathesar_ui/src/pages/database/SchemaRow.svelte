@@ -125,7 +125,8 @@
     box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
   }
   .schema-row.focus {
-    outline: 1px solid var(--slate-300);
+    outline: 2px solid var(--slate-300);
+    outline-offset: 1px;
   }
 
   .schema-row.is-locked {
