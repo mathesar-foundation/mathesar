@@ -1,6 +1,6 @@
 # Contributor Guide
 
-Mathesar's development happens on [GitHub](https://github.com/centerofci/mathesar). We welcome contributions of all kinds!
+Mathesar's development happens on [GitHub](https://github.com/mathesar-foundation/mathesar). We welcome contributions of all kinds!
 
 ## Joining the Community
 
@@ -12,10 +12,10 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/en/
 
     Make sure to **do this before moving on**. If you need help, ask in [Matrix](https://wiki.mathesar.org/en/community/matrix), taking care to form *specific* questions that people can answer asynchronously.
 
-1. **Find an [issue](https://github.com/centerofci/mathesar/issues) to work on.**
+1. **Find an [issue](https://github.com/mathesar-foundation/mathesar/issues) to work on.**
 
-    - ✅ Our easiest issues are labeled [good first issue](https://github.com/centerofci/mathesar/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee+label%3A%22good+first+issue%22) and are a great place to start. However keep in mind that we're not always entirely sure of the necessary steps to solve a problem when we open an issue. 
-    - ✅ Slightly more challenging issues are still labeled [help wanted](https://github.com/centerofci/mathesar/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee+label%3A%22help+wanted%22). These can be a good place to start if you have some experience coding but are not yet familiar with our codebase.
+    - ✅ Our easiest issues are labeled [good first issue](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee+label%3A%22good+first+issue%22) and are a great place to start. However keep in mind that we're not always entirely sure of the necessary steps to solve a problem when we open an issue. 
+    - ✅ Slightly more challenging issues are still labeled [help wanted](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee+label%3A%22help+wanted%22). These can be a good place to start if you have some experience coding but are not yet familiar with our codebase.
     - ❌ Issues are not appropriate if they meet any of the following criteria:
         - already assigned to someone
         - labeled with a `restricted: ...` label

@@ -3,38 +3,23 @@
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import AppContext from './AppContext.svelte';
   import RootRoute from './routes/RootRoute.svelte';
-  import { loadLocaleAsync } from './i18n/i18n-load';
-  import { setLocale } from './i18n/i18n-svelte';
-  import type { RequestStatus } from './api/utils/requestUtils';
-  import { getErrorMessage } from './utils/errors';
+  import { initI18n } from './i18n';
   import ErrorBox from './components/message-boxes/ErrorBox.svelte';
 
-  /**
-   * Later the translations file will be loaded
-   * in parallel to the FE's first chunk
-   */
-  let translationLoadStatus: RequestStatus = { state: 'processing' };
-  void (async () => {
-    try {
-      await loadLocaleAsync('en');
-      setLocale('en');
-      translationLoadStatus = { state: 'success' };
-    } catch (exp) {
-      translationLoadStatus = {
-        state: 'failure',
-        errors: [getErrorMessage(exp)],
-      };
-    }
-  })();
-
   const commonData = preloadCommonData();
+
+  let isTranslationsLoaded = false;
+  void (async () => {
+    await initI18n(commonData?.user.display_language ?? 'en');
+    isTranslationsLoaded = true;
+  })();
 </script>
 
-{#if translationLoadStatus.state === 'success' && commonData}
+{#if isTranslationsLoaded && commonData}
   <AppContext {commonData}>
     <RootRoute {commonData} />
   </AppContext>
-{:else if translationLoadStatus.state === 'processing'}
+{:else if !isTranslationsLoaded}
   <div class="app-loader">
     <Spinner size="2rem" />
   </div>

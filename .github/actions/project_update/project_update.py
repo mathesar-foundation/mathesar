@@ -8,7 +8,7 @@ import requests
 
 GITHUB_TOKEN = os.environ['MATHESAR_ORG_GITHUB_TOKEN']
 
-GITHUB_ORG = 'centerofci'
+GITHUB_ORG = 'mathesar-foundation'
 MATHESAR_PROJECT_NUMBER = 1
 
 

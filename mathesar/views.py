@@ -1,3 +1,5 @@
+from config.settings.common_settings import DATABASES
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import status
@@ -49,30 +51,46 @@ def _get_permissible_db_queryset(request):
     manipulate how we define whether we're in demo mode and which db is a
     user's demo db.
     """
-    dbs_qs = Database.objects.filter(deleted=False)
-    permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
-    schemas_qs = Schema.objects.all()
-    permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
-    dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=False)
-    permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
-    permitted_dbs_qs = permitted_dbs_qs.distinct()
-    if get_is_live_demo_mode():
-        live_demo_db_name = get_live_demo_db_name(request)
-        if live_demo_db_name:
-            permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
+    for deleted in (True, False):
+        dbs_qs = Database.objects.filter(deleted=deleted)
+        permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
+        schemas_qs = Schema.objects.all()
+        permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
+        dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=deleted)
+        permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
+        permitted_dbs_qs = permitted_dbs_qs.distinct()
+        if get_is_live_demo_mode():
+            live_demo_db_name = get_live_demo_db_name(request)
+            if live_demo_db_name:
+                permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
+            else:
+                raise Exception('This should never happen')
+        if deleted:
+            failed_permitted_dbs_qs = permitted_dbs_qs
         else:
-            raise Exception('This should never happen')
-    return permitted_dbs_qs
+            successful_permitted_dbs_qs = permitted_dbs_qs
+    return successful_permitted_dbs_qs, failed_permitted_dbs_qs
 
 
 def get_database_list(request):
-    permission_restricted_db_qs = _get_permissible_db_queryset(request)
+    permission_restricted_db_qs, permission_restricted_failed_db_qs = _get_permissible_db_queryset(request)
     database_serializer = DatabaseSerializer(
         permission_restricted_db_qs,
         many=True,
         context={'request': request}
     )
-    return database_serializer.data
+    failed_db_data = []
+    for db in permission_restricted_failed_db_qs:
+        failed_db_data.append({
+            'id': db.id,
+            'username': db.username,
+            'port': db.port,
+            'host': db.host,
+            'name': db.name,
+            'db_name': db.db_name,
+            'error': 'Error connecting to the database'
+        })
+    return database_serializer.data + failed_db_data
 
 
 def get_table_list(request, schema):
@@ -135,7 +153,21 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'is_authenticated': not request.user.is_anonymous,
         'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
+        'internal_database': get_internal_db_meta(),
     }
+
+
+def get_internal_db_meta():
+    internal_db = DATABASES['default']
+    if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
+        return {
+            'type': 'postgres',
+            'user': internal_db['USER'],
+            'host': internal_db['HOST'],
+            'port': internal_db['PORT'],
+            'database': internal_db['NAME']
+        }
+    return {'type': 'sqlite'}
 
 
 def get_common_data(request, database=None, schema=None):
@@ -145,13 +177,15 @@ def get_common_data(request, database=None, schema=None):
         'databases': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
+        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
         'routing_context': 'normal',
     }
 
 
 def get_current_database(request, db_name):
     """Get database from passed name, with fall back behavior."""
-    permitted_databases = _get_permissible_db_queryset(request)
+    successful_dbs, failed_dbs = _get_permissible_db_queryset(request)
+    permitted_databases = successful_dbs | failed_dbs
     if db_name is not None:
         current_database = get_object_or_404(permitted_databases, name=db_name)
     else:
@@ -282,6 +316,28 @@ def schema_home(request, db_name, schema_id, **kwargs):
 
 @login_required
 def schemas(request, db_name):
+    database = get_current_database(request, db_name)
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request, database, None)
+    })
+
+
+@login_required
+def list_database_connection(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
+
+
+@login_required
+def add_database_connection(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
+
+
+@login_required
+def edit_database_connection(request, db_name):
     database = get_current_database(request, db_name)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, None)

@@ -29,6 +29,8 @@ export class UserModel {
 
   readonly username: User['username'];
 
+  readonly displayLanguage: User['display_language'];
+
   private databaseRoles: Map<DatabaseRole['database'], DatabaseRole>;
 
   private schemaRoles: Map<SchemaRole['schema'], SchemaRole>;
@@ -45,6 +47,7 @@ export class UserModel {
     this.fullName = userDetails.full_name;
     this.email = userDetails.email;
     this.username = userDetails.username;
+    this.displayLanguage = userDetails.display_language;
   }
 
   hasPermission(
@@ -119,6 +122,7 @@ export class UserModel {
       schema_roles: [...this.schemaRoles.values()],
       full_name: this.fullName,
       email: this.email,
+      display_language: this.displayLanguage,
     };
   }
 
@@ -172,6 +176,7 @@ export class AnonymousViewerUserModel extends UserModel {
       username: 'Anonymous',
       full_name: 'Anonymous',
       email: null,
+      display_language: 'en',
     });
   }
 

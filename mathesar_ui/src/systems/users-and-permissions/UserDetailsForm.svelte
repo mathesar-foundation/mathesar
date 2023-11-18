@@ -21,8 +21,10 @@
   } from '@mathesar/components/form';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
+  import { setLanguage } from '@mathesar/i18n';
   import SelectUserType from './SelectUserType.svelte';
-  import UserFormInput from './UserFormInput.svelte';
+  // import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -41,6 +43,7 @@
     ),
   ]);
   $: email = optionalField(user?.email ?? '', [isEmail()]);
+  $: displayLanguage = requiredField(user?.display_language ?? 'en');
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
@@ -49,7 +52,7 @@
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = { fullName, username, email, userType };
+    const fields = { fullName, username, email, userType, displayLanguage };
     return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
@@ -61,6 +64,7 @@
       username: formValues.username,
       email: formValues.email,
       is_superuser: formValues.userType === 'admin',
+      display_language: formValues.displayLanguage,
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
@@ -77,6 +81,9 @@
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
       }
+
+      const updatedLocale = request.display_language;
+      await setLanguage(updatedLocale);
       dispatch('update');
       return;
     }
@@ -112,15 +119,15 @@
 </script>
 
 <div class="user-details-form">
-  <UserFormInput
+  <GridFormInput
     label="Display Name"
     field={fullName}
     input={{ component: TextInput }}
   />
 
-  <UserFormInput label="Email" field={email} input={{ component: TextInput }} />
+  <GridFormInput label="Email" field={email} input={{ component: TextInput }} />
 
-  <UserFormInput
+  <GridFormInput
     label="Username *"
     field={username}
     input={{
@@ -130,7 +137,7 @@
   />
 
   {#if isNewUser}
-    <UserFormInput
+    <GridFormInput
       label="Password *"
       field={password}
       input={{
@@ -140,7 +147,16 @@
     />
   {/if}
 
-  <UserFormInput
+  <!-- Commenting this for now to avoid releasing any half baked changes to develop branch -->
+  <!-- <GridFormInput
+    label="Display Language *"
+    field={displayLanguage}
+    input={{
+      component: SelectDisplayLanguage,
+    }}
+  /> -->
+
+  <GridFormInput
     label="Role *"
     field={userType}
     input={{

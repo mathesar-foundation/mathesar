@@ -139,6 +139,10 @@ class ConstraintSerializer(
         'foreignkey': ForeignKeyConstraintSerializer,
         'primary': BaseConstraintSerializer,
         'unique': BaseConstraintSerializer,
+        # Even though 'check' & 'exclude' constraints are currently unsupported it's added here
+        # so that the app doesn't break in case these constraints are already present.
+        'check': BaseConstraintSerializer,
+        'exclude': BaseConstraintSerializer
     }
 
     def get_mapping_field(self, data):
@@ -165,7 +169,7 @@ class ConstraintSerializer(
                     field='referent_table'
                 )
         constraint_type = data.get('type', None)
-        if constraint_type not in self.serializers_mapping.keys():
+        if constraint_type not in ('foreignkey', 'primary', 'unique'):
             raise UnsupportedConstraintAPIException(constraint_type=constraint_type)
         columns = data.get('columns', None)
         if columns == []:

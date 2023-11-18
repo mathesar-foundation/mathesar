@@ -5,7 +5,7 @@ This page contains all available environment variables supported by Mathesar. Se
 
 ## Backend configuration {: #backend}
 
-### `SECRET_KEY`
+### `SECRET_KEY` {: #secret_key}
 
 - **Description**: A unique random string used by Django for cryptographic signing ([see Django docs](https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-SECRET_KEY)).
 - **Format**: A 50 character string
@@ -28,7 +28,7 @@ This page contains all available environment variables supported by Mathesar. Se
         - `https://mathesar.example.com` - contains HTTPS protocol
         - `localhost/, 35.188.184.125` - contains trailing slash after `localhost`
 
-### `DJANGO_DATABASE_URL`
+### `DJANGO_DATABASE_URL` {: #dj_db}
 
 - **Description**: A Postgres connection string of the database used for **Mathesar's internal usage**. 
 - **Format**:`postgres://user:password@hostname:port/database_name`
