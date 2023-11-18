@@ -85,13 +85,16 @@
   class:hovering-bottom-button={isHoveringBottomButton}
   class:unconfirmed-import={isTableImportConfirmationNeeded}
 >
-  <a class="link passthrough" href={tablePageUrl} aria-label={table.name} 
-  on:focusin={() => {
-    isTableCardFocused = true;
-  }}
-  on:focusout={() => {
-    isTableCardFocused = false;
-  }}
+  <a
+    class="link passthrough"
+    href={tablePageUrl}
+    aria-label={table.name}
+    on:focusin={() => {
+      isTableCardFocused = true;
+    }}
+    on:focusout={() => {
+      isTableCardFocused = false;
+    }}
   >
     <div class="top">
       <div class="top-content"><TableName {table} /></div>
@@ -264,7 +267,7 @@
     border-bottom-left-radius: var(--border-radius-l);
     border-bottom-right-radius: var(--border-radius-l);
   }
-  
+
   .hovering-bottom-button .bottom-button {
     color: inherit;
   }
