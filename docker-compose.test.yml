@@ -10,7 +10,7 @@ version: "3.9"
 #------------------------------------------------
 x-initial_config: &initial_config
   SECRET_KEY: ${SECRET_KEY:?}                       #(Required) Replace '?' with your Django SECRET_KEY, you can generate one here: https://djecrety.ir/
-  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}                #(Optional) Replace '*' with custom domain(s) e.g. '.yourdomain.com, 127.0.0.1' to restrict the access of web-service to certain domain(s)
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost}                #(Optional) Replace '*' with custom domain(s) e.g. '.yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar. 
   POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}      #(Optional) Replace 'mathesar_django' with any custom name for the internal database managed by mathesar web-service
   POSTGRES_USER: ${POSTGRES_USER:-mathesar}         #(Optional) Replace 'mathesar' with any custom username for the aforementioned database
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar} #(Optional) Replace 'mathesar' with any custom password for the aforementioned database
@@ -34,11 +34,11 @@ x-initial_config: &initial_config
 #     Default: N/A
 #     Info: A unique secret key required to be set by user for Django's security protection features.
 #           You can read more about it here: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
-#     Example: a_very_insercure_secret_key1*zobb123)k(_d1%wubkv6#
+#     Example: a_very_insecure_secret_key1*zobb123)k(_d1%wubkv6#
 # 
 # ALLOWED_HOSTS:
 #     Default: * (i.e. all domains allowed)
-#     Info: Allows users to restrict the domains(s) to which the Django web server can serve to.
+#     Info: Specifies the domains that can access Mathesar.
 #           You can read more about it here: https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts
 #     Example: .localhost, 127.0.0.1, www.example.com, .yourdomain.com
 #
@@ -75,6 +75,36 @@ services:
       retries: 30
       start_period: 5s
   
+  # caddy-reverse-proxy:
+  #   image: mathesar/mathesar-caddy:latest
+  #   environment:
+  #    <<: *initial_config
+  #    # DOMAIN_NAME: 
+  #   # caddy container is exposed to the other containers, and the host.
+  #   ports:
+  #     - "${HTTP_PORT-80}:80"
+  #     - "${HTTPS_PORT-443}:443"
+  #   volumes:
+  #     - $PWD/Caddyfile:/etc/caddy/Caddyfile
+  #     - media:/mathesar/media
+  #     - static:/mathesar/static
+  #     - caddy_data:/data
+  #     - caddy_config:/config
+  caddy-reverse-proxy:
+    image: mathesar/mathesar-caddy:latest
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME-http://localhost, asdf.localhost}
+    # caddy container is exposed to the other containers, and the host.
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - media:/mathesar/media
+      - static:/mathesar/static
+      - caddy_data:/data
+      - caddy_config:/config
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
   # TODO: Add caddy.
   service:
     container_name: mathesar_service
@@ -100,9 +130,11 @@ services:
       retries: 30
       start_period: 5s
     # TODO: Turn to expose again after adding caddy.
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
 volumes:
   postgresql_data:
   media:
   static:
+  caddy_data:
+  caddy_config:
