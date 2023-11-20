@@ -50,6 +50,48 @@
 
   $: formatter = new StringifiedNumberFormatter($$restProps);
   $: inputmode = getInputMode($$restProps);
+
+  // Flag to toggle between regular and scientific notation
+  let useScientificNotation = false;
+
+  // Event handler to toggle between scientific notation and regular notation
+  function toggleScientificNotation() {
+    useScientificNotation = !useScientificNotation;
+    // Update the input element value accordingly
+    element.value = formatInput(inputValue);
+  }
+
+  // Event handler to handle user input
+  function handleInput(event) {
+    const inputValue = event.target.value;
+    if (isValidInput(inputValue)) {
+      // Handle valid input
+      element.value = formatInput(inputValue);
+    } else {
+      // Handle invalid input or show an error message
+    }
+  }
+
+  // Format the input based on the notation mode
+  function formatInput(inputValue) {
+    if (useScientificNotation && isScientificNotation(inputValue)) {
+      // Format as scientific notation
+      return inputValue;
+    } else {
+      // Format as regular decimal notation
+      return parseFloat(inputValue).toString();
+    }
+  }
+
+  // Helper function to check for scientific notation
+  function isScientificNotation(inputValue) {
+    return inputValue.match(/[eE][-+]?\d+/);
+  }
+
+  // Helper function to validate input
+  function isValidInput(inputValue) {
+    return inputValue.match(/^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$/);
+  }
 </script>
 
 <FormattedInput
@@ -63,4 +105,6 @@
   on:keydown
   on:artificialInput
   on:artificialChange
+  on:toggleScientificNotation
+  on:input={handleInput}
 />

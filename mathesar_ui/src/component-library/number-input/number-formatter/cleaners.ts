@@ -41,7 +41,10 @@ export function convertCommasToDots(input: string): string {
 export function factoryToRemoveInvalidCharacters(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    | 'allowNegative'
+    | 'decimalSeparator'
+    | 'allowFloat'
+    | 'allowScientificNotation'
   >,
 ): Cleaner {
   const validCharacterPatterns = [
@@ -51,12 +54,18 @@ export function factoryToRemoveInvalidCharacters(
     ...(opts.allowNegative ? [escapeRegex('-')] : []),
     // Allow decimal separator, only if permitted.
     ...(opts.allowFloat ? [escapeRegex(opts.decimalSeparator)] : []),
+    // Allow 'e' or 'E' for scientific notation.
+    ...(opts.allowScientificNotation ? [escapeRegex('eE')] : []),
   ];
   const invalidCharacterPattern = new RegExp(
     `[^${validCharacterPatterns.join('')}]`,
     'g',
   );
-  return (input: string) => input.replace(invalidCharacterPattern, '');
+  return (input: string) =>
+    // Handle scientific notation format like "1.23e-5" and "1.23e+5"
+    input
+      .replace(/(\d+(\.\d*)?)[eE]([+-]?\d+)/, '$1e$3')
+      .replace(invalidCharacterPattern, '');
 }
 
 export function factoryToRemoveExtraneousDecimalSeparators(
@@ -147,7 +156,10 @@ function cleanInSequence(cleaners: Cleaner[]): Cleaner {
 export function factoryToSimplify(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    | 'allowNegative'
+    | 'decimalSeparator'
+    | 'allowFloat'
+    | 'allowScientificNotation'
   >,
 ): (input: string) => string {
   return cleanInSequence([
@@ -174,7 +186,10 @@ export function factoryToSimplify(
 export function factoryToNormalize(
   opts: Pick<
     DerivedOptions,
-    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+    | 'allowNegative'
+    | 'decimalSeparator'
+    | 'allowFloat'
+    | 'allowScientificNotation'
   >,
 ): (input: string) => string {
   return cleanInSequence([

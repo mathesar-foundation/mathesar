@@ -83,6 +83,7 @@ export function formatToNormalizedForm(value: number | bigint): string {
       minimumFractionDigits: 0,
       maximumFractionDigits: 20,
       forceTrailingDecimal: false,
+      allowScientificNotation: true, // Enable scientific notation support
     }),
   )(value);
 }

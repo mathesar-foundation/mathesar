@@ -7,7 +7,7 @@ export * from './number-formatter/types';
 export interface NumberInputProps
   extends Partial<NumberFormatterOptions>,
     SimplifiedTextInputProps {
-  value?: number;
+  value?: number | string | null; // Allow both number and string values
   element?: HTMLInputElement;
 }
 

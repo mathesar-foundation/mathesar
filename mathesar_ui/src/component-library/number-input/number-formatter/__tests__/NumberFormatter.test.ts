@@ -7,7 +7,11 @@ function getFormatter(partialOpts: Partial<Options> = {}): NumberFormatter {
    * don't have any unexpected behavior when running the tests across different
    * machines which might be configured with different locales.
    */
-  const defaultsForTestRunning = { locale: 'en-US', useGrouping: true };
+  const defaultsForTestRunning = {
+    locale: 'en-US',
+    useGrouping: true,
+    allowScientificNotation: false,
+  };
   const opts = { ...defaultsForTestRunning, ...partialOpts };
   return new NumberFormatter(opts);
 }
@@ -19,6 +23,7 @@ describe('parse and re-parse', () => {
     string,
     boolean,
     boolean,
+    boolean,
     number | undefined,
     number | undefined,
     string,
@@ -26,81 +31,82 @@ describe('parse and re-parse', () => {
     number | null
   ][] = [
   // locale | allowFloat
-  //        |      | allowNegative
-  //        |      |      | minimumFractionDigits
-  //        |      |      |  | maximumFractionDigits
-  //        |      |      |  |  | input        | intermediateDisplay
-  //        |      |      |  |  |              |                | value
-    ['en-US', true , true , u, u, ''           , ''             , null       ],
-    ['en-US', true , true , u, u, ','          , ''             , null       ],
-    ['en-US', true , true , u, u, 'a'          , ''             , null       ],
-    ['en-US', true , true , u, u, 'abc'        , ''             , null       ],
-    ['en-US', true , true , u, u, 'NaN'        , ''             , null       ],
-    ['en-US', true , true , u, u, 'Infinity'   , ''             , null       ],
-    ['en-US', true , true , u, u, ' '          , ''             , null       ],
-    ['en-US', true , true , u, u, '-'          , '-'            , null       ], // see 4
-    ['en-US', true , false, u, u, '-'          , ''             , null       ],
-    ['en-US', true , true , u, u, '-a'         , '-'            , null       ],
-    ['en-US', true , true , u, u, 'a-'         , '-'            , null       ],
-    ['en-US', true , true , u, u, '-0'         , '-0'           , -0         ],
-    ['en-US', true , true , u, u, '-.'         , '-0.'          , -0         ],
-    ['en-US', true , true , u, u, '-0.'        , '-0.'          , -0         ],
-    ['en-US', true , true , u, u, '-0.0'       , '-0.0'         , -0         ],
-    ['en-US', true , true , u, u, '-0.0a'      , '-0.0'         , -0         ],
-    ['en-US', true , true , u, u, '-0.0a0'     , '-0.00'        , -0         ],
-    ['en-US', true , true , u, u, '-0.0a1'     , '-0.01'        , -0.01      ],
-    ['en-US', true , true , u, u, '0'          , '0'            , 0          ],
-    ['en-US', true , true , u, u, '0.'         , '0.'           , 0          ],
-    ['en-US', false, true , u, u, '0.'         , '0'            , 0          ],
-    ['en-US', true , true , u, u, '.-'         , '0.'           , 0          ],
-    ['en-US', true , true , u, u, '0.0'        , '0.0'          , 0          ],
-    ['en-US', true , true , u, u, '.00000'     , '0.00000'      , 0          ], // See 2
-    ['en-US', true , true , u, u, '.'          , '0.'           , 0          ],
-    ['en-US', true , true , u, u, '.0'         , '0.0'          , 0          ],
-    ['en-US', true , true , u, u, '-.1'        , '-0.1'         , -0.1       ],
-    ['en-US', true , true , u, u, '.1'         , '0.1'          , 0.1        ],
-    ['en-US', true , true , u, u, '.1.'        , '0.1'          , 0.1        ],
-    ['en-US', true , true , u, u, '.1.2'       , '0.12'         , 0.12       ],
-    ['en-US', true , true , u, u, '1.2'        , '1.2'          , 1.2        ],
-    ['en-US', true , true , u, u, '1.2.'       , '1.2'          , 1.2        ],
-    ['en-US', true , true , u, u, '1..2'       , '1.2'          , 1.2        ],
-    ['en-US', true , true , u, u, '1.2.3'      , '1.23'         , 1.23       ],
-    ['en-US', true , true , u, u, '-1'         , '-1'           , -1         ],
-    ['en-US', true , true , u, u, '-a1'        , '-1'           , -1         ],
-    ['en-US', true , true , u, u, '-1-'        , '-1'           , -1         ],
-    ['en-US', true , true , u, u, '--1'        , '-1'           , -1         ],
-    ['en-US', true , true , u, u, '\u20121'    , '-1'           , -1         ], // See 3
-    ['en-US', true , true , u, u, '1'          , '1'            , 1          ],
-    ['en-US', true , true , u, u, '1,'         , '1'            , 1          ],
-    ['en-US', true , true , u, u, '+1'         , '1'            , 1          ],
-    ['en-US', true , true , u, u, ' 1 '        , '1'            , 1          ],
-    ['en-US', true , true , u, u, 'a1a'        , '1'            , 1          ],
-    ['en-US', true , true , u, u, '1-'         , '1'            , 1          ],
-    ['en-US', true , true , u, u, '12345'      , '12,345'       , 12345      ],
-    ['en-US', true , true , u, u, '12,345'     , '12,345'       , 12345      ],
-    ['en-US', true , true , u, u, '1,2345'     , '12,345'       , 12345      ],
-    ['en-US', true , true , u, u, '1234567.89' , '1,234,567.89' , 1234567.89 ],
-    ['en-US', true , true , u, u, '.123456789' , '0.123456789'  , 0.123456789],
-    ['en-US', true , true , u, u, '-1-2-'      , '-12'          , -12        ],
-    ['en-US', true , true , u, u, '1e2'        , '12'           , 12         ], // See 1
-    ['en-US', true , true , u, u, '1,,2'       , '12'           , 12         ],
-    ['en-US', true , true , u, u, '1-2'        , '12'           , 12         ],
-    ['en-US', true , true , u, u, '12-'        , '12'           , 12         ],
-    ['en-US', true , true , u, u, '1-2-'       , '12'           , 12         ],
-    ['de-DE', true , true , u, u, '2..3'       , '23'           , 23         ],
-    ['de-DE', true , true , u, u, '2,,3'       , '2,3'          , 2.3        ],
-    ['de-DE', true , true , u, u, '1.2.3.4'    , '1.234'        , 1234       ],
-    ['de-DE', true , true , u, u, '1,2,3,4'    , '1,234'        , 1.234      ],
-    ['li'   , true , true , u, u, '-1'         , '-1'           , -1         ], // See 5
-    ['en-US', true , true , 2, 2, '1'          , '1'            , 1          ],
-    ['en-US', true , true , 2, 2, '1.2'        , '1.2'          , 1.2        ],
-    ['en-US', true , true , 2, 2, '1.229'      , '1.23'         , 1.23       ],
-    ['en-US', true , true , 2, 2, '-1.229'     , '-1.23'        , -1.23      ],
-    ['en-US', true , true , u, 2, '1.229'      , '1.23'         , 1.23       ],
-    ['en-US', true , true , u, 2, '1.00'       , '1.00'         , 1          ],
-    ['en-US', true , true , 2, u, '1'          , '1'            , 1          ],
-    ['en-US', true , true , 2, u, '1.0'        , '1.0'          , 1          ],
-    ['en-US', true , true , 2, u, '1.229'      , '1.229'        , 1.229      ],
+  //        |       | allowNegative
+  //        |       |      |allowScientificNotation
+  //        |       |      |      | minimumFractionDigits
+  //        |       |      |      |  | maximumFractionDigits
+  //        |       |      |      |  |  | input        | intermediateDisplay
+  //        |       |      |      |  |  |              |                | value
+    ['en-US', true , true , false, u, u, ''           , ''             , null       ],
+    ['en-US', true , true , false, u, u, ','          , ''             , null       ],
+    ['en-US', true , true , false, u, u, 'a'          , ''             , null       ],
+    ['en-US', true , true , false, u, u, 'abc'        , ''             , null       ],
+    ['en-US', true , true , false, u, u, 'NaN'        , ''             , null       ],
+    ['en-US', true , true , false, u, u, 'Infinity'   , ''             , null       ],
+    ['en-US', true , true , false, u, u, ' '          , ''             , null       ],
+    ['en-US', true , true , false, u, u, '-'          , '-'            , null       ], // see 4
+    ['en-US', true , false, false, u, u, '-'          , ''             , null       ],
+    ['en-US', true , true , false, u, u, '-a'         , '-'            , null       ],
+    ['en-US', true , true , false, u, u, 'a-'         , '-'            , null       ],
+    ['en-US', true , true , false, u, u, '-0'         , '-0'           , -0         ],
+    ['en-US', true , true , false, u, u, '-.'         , '-0.'          , -0         ],
+    ['en-US', true , true , false, u, u, '-0.'        , '-0.'          , -0         ],
+    ['en-US', true , true , false, u, u, '-0.0'       , '-0.0'         , -0         ],
+    ['en-US', true , true , false, u, u, '-0.0a'      , '-0.0'         , -0         ],
+    ['en-US', true , true , false, u, u, '-0.0a0'     , '-0.00'        , -0         ],
+    ['en-US', true , true , false, u, u, '-0.0a1'     , '-0.01'        , -0.01      ],
+    ['en-US', true , true , false, u, u, '0'          , '0'            , 0          ],
+    ['en-US', true , true , false, u, u, '0.'         , '0.'           , 0          ],
+    ['en-US', false, true , false, u, u, '0.'         , '0'            , 0          ],
+    ['en-US', true , true , false, u, u, '.-'         , '0.'           , 0          ],
+    ['en-US', true , true , false, u, u, '0.0'        , '0.0'          , 0          ],
+    ['en-US', true , true , false, u, u, '.00000'     , '0.00000'      , 0          ], // See 2
+    ['en-US', true , true , false, u, u, '.'          , '0.'           , 0          ],
+    ['en-US', true , true , false, u, u, '.0'         , '0.0'          , 0          ],
+    ['en-US', true , true , false, u, u, '-.1'        , '-0.1'         , -0.1       ],
+    ['en-US', true , true , false, u, u, '.1'         , '0.1'          , 0.1        ],
+    ['en-US', true , true , false, u, u, '.1.'        , '0.1'          , 0.1        ],
+    ['en-US', true , true , false, u, u, '.1.2'       , '0.12'         , 0.12       ],
+    ['en-US', true , true , false, u, u, '1.2'        , '1.2'          , 1.2        ],
+    ['en-US', true , true , false, u, u, '1.2.'       , '1.2'          , 1.2        ],
+    ['en-US', true , true , false, u, u, '1..2'       , '1.2'          , 1.2        ],
+    ['en-US', true , true , false, u, u, '1.2.3'      , '1.23'         , 1.23       ],
+    ['en-US', true , true , false, u, u, '-1'         , '-1'           , -1         ],
+    ['en-US', true , true , false, u, u, '-a1'        , '-1'           , -1         ],
+    ['en-US', true , true , false, u, u, '-1-'        , '-1'           , -1         ],
+    ['en-US', true , true , false, u, u, '--1'        , '-1'           , -1         ],
+    ['en-US', true , true , false, u, u, '\u20121'    , '-1'           , -1         ], // See 3
+    ['en-US', true , true , false, u, u, '1'          , '1'            , 1          ],
+    ['en-US', true , true , false, u, u, '1,'         , '1'            , 1          ],
+    ['en-US', true , true , false, u, u, '+1'         , '1'            , 1          ],
+    ['en-US', true , true , false, u, u, ' 1 '        , '1'            , 1          ],
+    ['en-US', true , true , false, u, u, 'a1a'        , '1'            , 1          ],
+    ['en-US', true , true , false, u, u, '1-'         , '1'            , 1          ],
+    ['en-US', true , true , false, u, u, '12345'      , '12,345'       , 12345      ],
+    ['en-US', true , true , false, u, u, '12,345'     , '12,345'       , 12345      ],
+    ['en-US', true , true , false, u, u, '1,2345'     , '12,345'       , 12345      ],
+    ['en-US', true , true , false, u, u, '1234567.89' , '1,234,567.89' , 1234567.89 ],
+    ['en-US', true , true , false, u, u, '.123456789' , '0.123456789'  , 0.123456789],
+    ['en-US', true , true , false, u, u, '-1-2-'      , '-12'          , -12        ],
+    ['en-US', true , true , false, u, u, '1e2'        , '12'           , 12         ], // See 1
+    ['en-US', true , true , false, u, u, '1,,2'       , '12'           , 12         ],
+    ['en-US', true , true , false, u, u, '1-2'        , '12'           , 12         ],
+    ['en-US', true , true , false, u, u, '12-'        , '12'           , 12         ],
+    ['en-US', true , true , false, u, u, '1-2-'       , '12'           , 12         ],
+    ['de-DE', true , true , false, u, u, '2..3'       , '23'           , 23         ],
+    ['de-DE', true , true , false, u, u, '2,,3'       , '2,3'          , 2.3        ],
+    ['de-DE', true , true , false, u, u, '1.2.3.4'    , '1.234'        , 1234       ],
+    ['de-DE', true , true , false, u, u, '1,2,3,4'    , '1,234'        , 1.234      ],
+    ['li'   , true , true , false, u, u, '-1'         , '-1'           , -1         ], // See 5
+    ['en-US', true , true , false, 2, 2, '1'          , '1'            , 1          ],
+    ['en-US', true , true , false, 2, 2, '1.2'        , '1.2'          , 1.2        ],
+    ['en-US', true , true , false, 2, 2, '1.229'      , '1.23'         , 1.23       ],
+    ['en-US', true , true , false, 2, 2, '-1.229'     , '-1.23'        , -1.23      ],
+    ['en-US', true , true , false, u, 2, '1.229'      , '1.23'         , 1.23       ],
+    ['en-US', true , true , false, u, 2, '1.00'       , '1.00'         , 1          ],
+    ['en-US', true , true , false, 2, u, '1'          , '1'            , 1          ],
+    ['en-US', true , true , false, 2, u, '1.0'        , '1.0'          , 1          ],
+    ['en-US', true , true , false, 2, u, '1.229'      , '1.229'        , 1.229      ],
 
     // 1. Entering numbers in scientific notation is not yet supported. We could
     //    add this in the future.
@@ -121,6 +127,7 @@ describe('parse and re-parse', () => {
       locale,
       allowFloat,
       allowNegative,
+      allowScientificNotation,
       minimumFractionDigits,
       maximumFractionDigits,
       input,
@@ -131,6 +138,7 @@ describe('parse and re-parse', () => {
         locale,
         allowFloat,
         allowNegative,
+        allowScientificNotation,
         minimumFractionDigits,
         maximumFractionDigits,
       });

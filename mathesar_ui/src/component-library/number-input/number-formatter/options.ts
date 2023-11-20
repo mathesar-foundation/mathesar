@@ -18,6 +18,7 @@ export interface Options {
   minimumFractionDigits: number;
   maximumFractionDigits: number;
   forceTrailingDecimal: boolean;
+  allowScientificNotation: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export const defaultOptions: Options = {
   minimumFractionDigits: 0,
   maximumFractionDigits: 20,
   forceTrailingDecimal: false,
+  allowScientificNotation: true,
 };
 
 export interface DerivedOptions extends Options {
