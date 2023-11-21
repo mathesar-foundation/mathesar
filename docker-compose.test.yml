@@ -12,7 +12,7 @@ version: "3.9"
 #------------------------------------------------
 
 #------------------------------------------------
-# REQUIRED CONFIG:
+# CONFIG:
 #------------------------------------------------
 x-initial_config: &initial_config
   SECRET_KEY: ${SECRET_KEY:?}                       #(Required) Replace '?' with your Django SECRET_KEY, you can generate one here: https://djecrety.ir/
