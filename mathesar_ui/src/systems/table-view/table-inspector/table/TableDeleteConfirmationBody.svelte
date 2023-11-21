@@ -12,12 +12,10 @@
 </script>
 
 <div class="table-delete-confirmation-body">
-  <div class="non-selectable">
-    <p>
+  <p class="non-selectable">
     To confirm the deletion of the <strong>{tableName}</strong> table, please enter
     the table name into the input field below.
-    </p>
-  </div>
+  </p>
   <TextInput autofocus bind:value />
   <WarningBox>
     Warning: This action is permanent and once deleted, the table cannot be
