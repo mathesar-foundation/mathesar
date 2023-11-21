@@ -12,10 +12,12 @@
 </script>
 
 <div class="table-delete-confirmation-body">
-  <p>
+  <div class="non-selectable">
+    <p>
     To confirm the deletion of the <strong>{tableName}</strong> table, please enter
     the table name into the input field below.
-  </p>
+    </p>
+  </div>
   <TextInput autofocus bind:value />
   <WarningBox>
     Warning: This action is permanent and once deleted, the table cannot be
@@ -34,5 +36,14 @@
     > :global(* + *) {
       margin-top: 1rem;
     }
+  }
+
+  .non-selectable {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by most browsers */
   }
 </style>
