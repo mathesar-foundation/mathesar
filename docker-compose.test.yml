@@ -3,14 +3,20 @@ version: "3.9"
 # Mathesar's docker compose file
 #------------------------------
 
-
+#------------------------------------------------
+# PREREQUISITES:
+#------------------------------------------------
+# OS: Linux, Mac, Windows(WSL).
+# Docker v23+ ($: docker version)
+# Docker Compose v2.10+ ($: docker compose version)
+#------------------------------------------------
 
 #------------------------------------------------
 # REQUIRED CONFIG:
 #------------------------------------------------
 x-initial_config: &initial_config
   SECRET_KEY: ${SECRET_KEY:?}                       #(Required) Replace '?' with your Django SECRET_KEY, you can generate one here: https://djecrety.ir/
-  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost}                #(Optional) Replace '*' with custom domain(s) e.g. '.yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar. 
+  DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}     #(Optional) Replace 'localhost' with custom domain(s) e.g. 'yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar over http or https.
   POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}      #(Optional) Replace 'mathesar_django' with any custom name for the internal database managed by mathesar web-service
   POSTGRES_USER: ${POSTGRES_USER:-mathesar}         #(Optional) Replace 'mathesar' with any custom username for the aforementioned database
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar} #(Optional) Replace 'mathesar' with any custom password for the aforementioned database
@@ -27,20 +33,21 @@ x-initial_config: &initial_config
 
 
 #------------------------------------------------
-# ADDITIONAL INFO:
+# ADDITIONAL INFO ABOUT ENVIRONMENT VARIABLES:
 #------------------------------------------------
 # 
 # SECRET_KEY:
 #     Default: N/A
-#     Info: A unique secret key required to be set by user for Django's security protection features.
+#     Info: A unique secret key required to be set by the user for Django's security protection features.
 #           You can read more about it here: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
 #     Example: a_very_insecure_secret_key1*zobb123)k(_d1%wubkv6#
 # 
-# ALLOWED_HOSTS:
-#     Default: * (i.e. all domains allowed)
-#     Info: Specifies the domains that can access Mathesar.
-#           You can read more about it here: https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts
-#     Example: .localhost, 127.0.0.1, www.example.com, .yourdomain.com
+# DOMAIN_NAME:
+#     Default: http://localhost
+#     Info: Specifies the domains that can access Mathesar over http(port 80) or https(port 443), also automatically creating SSL certificates for the same.  
+#           If you want to host an instance of Mathesar over the internet or over your local network, add those domains here.
+#     Note: https over localhost is not neccessary yet possible
+#     Example: yourdomain.com, *.subdomain.com, 127.0.0.1
 #
 # POSTGRES_DB:
 #     Default: mathesar_django
@@ -59,67 +66,33 @@ x-initial_config: &initial_config
 #------------------------------------------------
 
 
+
 services:
-  db:
-    image: postgres:13
-    container_name: mathesar_db
-    environment: *initial_config
-    expose:
-      - "5432"
-    volumes:
-      - postgresql_data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
-      interval: 5s
-      timeout: 1s
-      retries: 30
-      start_period: 5s
-  
-  # caddy-reverse-proxy:
-  #   image: mathesar/mathesar-caddy:latest
-  #   environment:
-  #    <<: *initial_config
-  #    # DOMAIN_NAME: 
-  #   # caddy container is exposed to the other containers, and the host.
-  #   ports:
-  #     - "${HTTP_PORT-80}:80"
-  #     - "${HTTPS_PORT-443}:443"
-  #   volumes:
-  #     - $PWD/Caddyfile:/etc/caddy/Caddyfile
-  #     - media:/mathesar/media
-  #     - static:/mathesar/static
-  #     - caddy_data:/data
-  #     - caddy_config:/config
-  caddy-reverse-proxy:
-    image: mathesar/mathesar-caddy:latest
-    environment:
-      - DOMAIN_NAME=${DOMAIN_NAME-http://localhost, asdf.localhost}
-    # caddy container is exposed to the other containers, and the host.
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - media:/mathesar/media
-      - static:/mathesar/static
-      - caddy_data:/data
-      - caddy_config:/config
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-  # TODO: Add caddy.
+
+##################################################
+# Mathesar web service
+# 
+# About:
+# Volumes info: 
+#
+##################################################
   service:
     container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
     environment: 
       <<: *initial_config
       DJANGO_SETTINGS_MODULE: config.settings.production
+      # Setting ALLOWED_HOSTS to * (allow all hosts) by default here as we are relying on caddy to manage access to the domains that could access mathesar
+      # If you do not want to use caddy add the domain(s) that you would've used for DOMAIN_NAME env here.
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
       # MATHESAR_DATABASES should be removed once connections stuff is merged
       MATHESAR_DATABASES: ${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
     entrypoint: ./run.sh
     volumes:
-      # TODO: DON'T FORGET TO REMOVE THIS CODE DIRECTORY!
-      - .:/code/
-      - static:/code/static
-      - media:/code/media
+      # TODO: DON'T FORGET TO REMOVE THIS CONFIG DIRECTORY!
+      - ./config/settings:/code/config/settings
+      - ./msar/static:/code/static
+      - ./msar/media:/code/media
     depends_on:
       db:
         condition: service_healthy
@@ -129,12 +102,56 @@ services:
       timeout: 5s
       retries: 30
       start_period: 5s
-    # TODO: Turn to expose again after adding caddy.
+    # If using caddy, expose the internal port 8000 only to other containers and not the docker host. 
     expose:
       - "8000"
-volumes:
-  postgresql_data:
-  media:
-  static:
-  caddy_data:
-  caddy_config:
+    # Uncomment the following if not using caddy
+    # ports:
+    #   - ${HOST_PORT:-8000}:8000
+
+
+##################################################
+# PostgreSQL
+#
+#
+#
+##################################################
+
+  db:
+    image: postgres:13
+    container_name: mathesar_db
+    environment: *initial_config
+    expose:
+      - "5432"
+    volumes:
+      - ./msar/pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 1s
+      retries: 30
+      start_period: 5s
+
+
+
+##################################################
+# Caddy
+#
+#
+#
+##################################################
+  caddy-reverse-proxy:
+    image: mathesar/mathesar-caddy:latest
+    environment:
+     <<: *initial_config
+    # caddy container is exposed to the other containers, and the host.
+    # SHOULD WE BE HARD CODING THIS OR NOT?
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # TODO: REMOVE CADDYFILE MOUNT
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./msar/media:/code/media
+      - ./msar/static:/code/static
+      - ./msar/caddy:/data
