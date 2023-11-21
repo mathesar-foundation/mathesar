@@ -2574,3 +2574,287 @@ BEGIN
   RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- RECORD UPDATING FUNCTIONS
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.bulk_paste_records(
+  tab_id oid,
+  updates jsonb,
+  inserts jsonb
+)
+RETURNS void
+AS $$/*
+*/
+DECLARE
+  update jsonb;
+  insert jsonb;
+BEGIN
+  FOR update IN SELECT * FROM jsonb_array_elements(updates)
+  LOOP
+    DECLARE
+      changes jsonb := update->'changes';
+      conditionals jsonb := update->'conditionals';
+    BEGIN
+      -- TODO consider raising notice with the string statement executed
+      -- TODO or, consider assembling a string of all statements executed, and raising that
+      PERFORM __msar.update_single_record(
+        tab_id := tab_id,
+        changes := changes,
+        conditionals := conditionals
+      );
+    END;
+  END LOOP;
+  FOR insert IN SELECT * FROM jsonb_array_elements(inserts)
+  LOOP
+    BEGIN
+      PERFORM __msar.insert_single_record(
+        tab_id := tab_id,
+        data := insert
+      );
+    END;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.update_single_record(
+  tab_id oid,
+  changes jsonb,
+  conditionals jsonb
+)
+RETURNS text AS $$/*
+*/
+DECLARE
+  q_table_name text := __msar.get_relation_name(tab_id);
+  string_update_statement text;
+  affected_row_count bigint;
+BEGIN
+  string_update_statement := __msar.generate_update_statement(
+    q_table_name := q_table_name,
+    changes := changes,
+    conditionals := conditionals
+  );
+  EXECUTE string_update_statement;
+  -- https://www.postgresql.org/docs/13/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
+  GET DIAGNOSTICS affected_row_count = ROW_COUNT;
+  IF affected_row_count <> 1 THEN
+    RAISE EXCEPTION
+    'Single record update must affect a single record, '
+    'no less, no more. Provided conditionals: '
+    '%',
+    conditionals;
+  END IF;
+  RETURN string_update_statement;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.generate_update_statement(
+  q_table_name text,
+  changes jsonb,
+  conditionals jsonb
+)
+RETURNS text AS $$/*
+*/
+DECLARE
+  update_statement text := 'UPDATE ' || q_table_name || ' SET ';
+  set_clause text := '';
+  where_clause text := '';
+  uq_col_name text;
+BEGIN
+  -- Iterate through the `changes` JSON object's keys and values
+  -- and build up the set_clause
+  FOR uq_col_name IN SELECT * FROM jsonb_object_keys(changes)
+  LOOP
+    DECLARE
+      col_name text := quote_ident(uq_col_name);
+      value text := quote_literal(changes->>uq_col_name);
+    BEGIN
+      -- NOTE the use of CONCAT instead of ||, this is because CONCAT doesn't reduce its whole
+      -- output to NULL if any of its arguments are NULL; useful for debugging.
+      set_clause := CONCAT(set_clause, col_name, ' = ', value, ', ');
+    END;
+  END LOOP;
+
+  -- Remove the trailing comma and space from the SET clause
+  set_clause := rtrim(set_clause, ', ');
+
+  -- Iterate through the `conditionals` JSON object's keys and values
+  -- and build up the where_clause
+  FOR uq_col_name IN SELECT * FROM jsonb_object_keys(conditionals)
+  LOOP
+    DECLARE
+      col_name text := quote_ident(uq_col_name);
+      value text := quote_literal(conditionals->>uq_col_name);
+    BEGIN
+      where_clause := CONCAT(where_clause, col_name, ' = ', value, ', ');
+    END;
+  END LOOP;
+
+  -- Remove the trailing comma and space from the WHERE clause
+  where_clause := rtrim(where_clause, ', ');
+
+  -- Construct the final UPDATE statement
+  update_statement := CONCAT(update_statement, set_clause, ' WHERE ', where_clause);
+
+  RETURN update_statement;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.insert_single_record(
+  tab_id oid,
+  data jsonb
+)
+RETURNS text AS $$/*
+*/
+DECLARE
+  q_table_name text := __msar.get_relation_name(tab_id);
+  string_insert_statement text;
+  affected_col_names text[];
+BEGIN
+  -- Parse json into an insert statement string and an array of columns affects
+  SELECT __msar.generate_insert_statement(
+    q_table_name := q_table_name,
+    data := data
+  )
+  INTO string_insert_statement, affected_col_names;
+
+  -- TODO table name has to be routed into below routines
+  -- mapping over arrays will be useful: https://stackoverflow.com/a/8584506
+  -- probably amounts to using unnest, array_agg, and SELECT INTO
+  PERFORM forbid_setting_serial_or_identity(affected_col_names);
+
+  EXECUTE string_insert_statement;
+  RETURN string_insert_statement;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION forbid_setting_serial_or_identity(
+  affected_col_names text[]
+) RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF __msar.any_element_satisfies_predicate(
+    affected_col_names,
+    __msar.is_serial_or_identity
+  ) THEN
+    RAISE EXCEPTION
+    'These functions do not handle setting the values of serial or identity '
+    'columns. '
+    'These are the affected columns and some of them are serial or idenity: '
+    '%',
+    affected_col_names;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION any_element_satisfies_predicate(
+  input_array anyarray,
+  predicate_function anyelement => boolean
+) RETURNS boolean
+LANGUAGE plpgsql
+AS $$
+DECLARE
+element anyelement;
+BEGIN
+  -- Iterate through the array elements
+  FOREACH element IN ARRAY input_array
+  LOOP
+    -- Check if the element satisfies the predicate
+    IF predicate_function(element) THEN
+      RETURN true;
+    END IF;
+  END LOOP;
+
+  -- If no element satisfies the predicate, return false
+  RETURN false;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.generate_insert_statement(
+  q_table_name text,
+  data jsonb
+)
+RETURNS text AS $$/*
+*/
+DECLARE
+  insert_statement text;
+  into_clause text := '';
+  values_clause text := '';
+  uq_col_name text;
+BEGIN
+  -- Iterate through the `data` JSON object's keys and values
+  -- and build up the into_clause and values_clause
+  FOR uq_col_name IN SELECT * FROM jsonb_object_keys(data)
+  LOOP
+    DECLARE
+      col_name text := quote_ident(uq_col_name);
+      value text := quote_literal(data->>uq_col_name);
+    BEGIN
+      -- NOTE the use of CONCAT instead of ||, this is because CONCAT doesn't reduce its whole
+      -- output to NULL if any of its arguments are NULL; useful for debugging.
+      into_clause := CONCAT(into_clause, col_name, ', ');
+      values_clause := CONCAT(values_clause, value, ', ');
+    END;
+  END LOOP;
+
+  -- Remove the trailing comma and space from the INTO clause, and wrap in parantheses
+  into_clause := rtrim(into_clause, ', ');
+  into_clause := CONCAT('(', into_clause, ')');
+
+  -- Remove the trailing comma and space from the VALUES clause, and wrap in parantheses
+  values_clause := rtrim(values_clause, ', ');
+  values_clause := CONCAT('(', values_clause, ')');
+
+  -- Construct the final INSERT statement
+  insert_statement := CONCAT(
+    'INSERT INTO ',
+    q_table_name,
+    ' ',
+    into_clause,
+    ' VALUES ',
+    values_clause
+  );
+
+  RETURN insert_statement;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __msar.is_serial_or_identity(
+    uq_tab_name text,
+    uq_col_name text
+) RETURNS boolean AS $$
+DECLARE
+    col_default text;
+BEGIN
+    -- Retrieve the column's default value from information_schema.columns
+    SELECT c.column_default
+    INTO col_default
+    FROM information_schema.columns c
+    WHERE c.table_name = uq.tab_name
+      AND c.column_name = uq.col_name;
+
+    -- Check if the column's default value indicates it's a serial or identity column
+    RETURN (
+        col_default LIKE 'nextval(%'
+        OR col_default LIKE 'generated % as identity'
+    );
+END;
+$$ LANGUAGE plpgsql;

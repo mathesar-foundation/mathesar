@@ -18,7 +18,7 @@ class RecordAccessPolicy(AccessPolicy):
             'condition_expression': 'is_atleast_viewer_nested_table_resource'
         },
         {
-            'action': ['destroy', 'update', 'partial_update', 'create', 'delete'],
+            'action': ['destroy', 'update', 'partial_update', 'create', 'delete', 'paste'],
             'principal': 'authenticated',
             'effect': 'allow',
             'condition_expression': 'is_atleast_editor_nested_table_resource'
