@@ -121,6 +121,56 @@ Sometimes you may need to rebuild your Docker images after pulling new code chan
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service --force-recreate --build dev-service
 ```
 
+## Translations
+
+> **Note:** We're currently not open to external contributions with regards to translations.
+
+We use [Transifex](https://app.transifex.com/mathesar/mathesar/dashboard/) for managing our translation process.
+- The Transifex cli tool is required. It can be installed by running:
+  ```
+  curl -o- https://raw.githubusercontent.com/transifex/cli/master/install.sh | bash
+  ```
+- It can be installed in your host machine or on the docker container.
+- You'll need to be a member of the Mathesar organization in Transifex, inorder to work with translations. Please reach out to us for information on how to join. 
+- Our repo contains two separate translation sections, one for the Django side of the frontend, and the other for the Svelte/TypeScript side of the frontend.
+- The Django translation files are `.po` files, which can be found here: `/translations/<lang>/LC_MESSAGES/django.po`
+- The Svelte/TypeScript translation files are `.json` files, which can be found here: `/mathesar_ui/src/i18n/languages/<lang>/dict.json`
+
+### For Maintainers
+
+> **Note:** Only push and pull translations during a release, for the release branch. Do not do it for other branches since this will override the existing resources within Transifex.
+
+#### Pushing translations to Transifex
+1. Prepare the translation files:
+    - Django 
+      - Generate Django translations by running the following command:
+        ```
+        docker exec mathesar_service_dev python manage.py makemessages -l en -i "mathesar_ui" -i "docs"
+        ```
+      - This will generate an updated `django.po` file for the source langauge `en`.
+      - Only generate the .po file for English. Do not update other languages using `makemessages`. They will be pulled from Transifex when the translation process is complete.
+      - Commit and push the changes to the `django.po` file to our repo.
+    - Svelte/Typescript
+      - Ensure that the source `/en/dict.json` file contains new translation strings, if any.
+      - Do not update other translation files. They will be pulled from Transifex when the translation process is complete.
+1. Push the updated source files, by running:
+    ```
+    TX_TOKEN=<transifex_api_token> tx push -s
+    ```
+
+#### Pulling translations from Transifex
+1. Run the following command to pull translations from Transifex:
+    ```
+    TX_TOKEN=<transifex_api_token> tx pull -f
+    ```
+1. Compile the django messages by running the following command, and test the app locally with different languages.
+    ```
+    docker exec mathesar_service_dev python manage.py compilemessages
+    ```
+1. Commit and push the changes to our repo.
+
+### For Translators
+- We're currently working on a workflow for translators. This section will be updated once we have a clear set of instructions to follow.
 
 ## Demo mode
 
