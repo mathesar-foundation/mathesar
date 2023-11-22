@@ -59,7 +59,8 @@
   $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
   $: isTablesLoading = $tablesStore.state === States.Loading;
-  $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
+  $: explorationsRequestState = $queries.requestStatus.state;
+  $: explorationsRequestErrors = $queries.requestStatus.errors;
 
   $: tabs = [
     {
@@ -154,11 +155,12 @@
           {canExecuteDDL}
           {canEditMetadata}
           {isTablesLoading}
-          {isExplorationsLoading}
           {tablesMap}
           {explorationsMap}
           {database}
           {schema}
+          {explorationsRequestState}
+          {explorationsRequestErrors}
         />
       </div>
     {:else if activeTab?.id === 'tables'}
@@ -171,7 +173,7 @@
       </div>
     {:else if activeTab?.id === 'explorations'}
       <div class="tab-container">
-        {#if isExplorationsLoading}
+        {#if explorationsRequestState == 'processing'}
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations

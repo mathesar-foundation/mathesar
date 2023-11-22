@@ -12,11 +12,14 @@
   import CreateNewTableButton from './CreateNewTableButton.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
   export let isTablesLoading = false;
-  export let isExplorationsLoading = false;
+
+  export let explorationsRequestState: RequestStatus['state'];
+  export let explorationsRequestErrors: string[];
 
   export let canExecuteDDL: boolean;
   export let canEditMetadata: boolean;
@@ -28,6 +31,7 @@
   $: hasExplorations = explorationsMap.size > 0;
   $: showTableCreationTutorial = !hasTables && canExecuteDDL;
   $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
+  $: isExplorationsLoading = explorationsRequestState == 'processing';
 
   // Viewers can explore, they cannot save explorations
   $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
@@ -60,6 +64,8 @@
       <OverviewHeader title="Saved Explorations" />
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
+      {:else if explorationsRequestState == 'failure'}
+        <div>{explorationsRequestErrors[0]}</div>
       {:else if showExplorationTutorial}
         <CreateNewExplorationTutorial {database} {schema} />
       {:else}
