@@ -17,13 +17,12 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { iconRefresh } from '@mathesar/icons';
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';
+  import type { RequireExactlyOne } from 'type-fest';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
-  export let isTablesLoading = false;
-
-  export let explorationsRequestState: RequestStatus['state'];
-  export let explorationsRequestErrors: string[];
+  export let tablesRequestStatus: RequestStatus;
+  export let explorationsRequestStatus: RequestStatus;
 
   export let canExecuteDDL: boolean;
   export let canEditMetadata: boolean;
@@ -35,7 +34,7 @@
   $: hasExplorations = explorationsMap.size > 0;
   $: showTableCreationTutorial = !hasTables && canExecuteDDL;
   $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
-  $: isExplorationsLoading = explorationsRequestState == 'processing';
+  $: isExplorationsLoading = explorationsRequestStatus.state == 'processing';
 
   // Viewers can explore, they cannot save explorations
   $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
@@ -50,7 +49,7 @@
         {/if}
       </svelte:fragment>
     </OverviewHeader>
-    {#if isTablesLoading}
+    {#if tablesRequestStatus.state === 'processing'}
       <TableSkeleton numTables={schema.num_tables} />
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
@@ -68,9 +67,9 @@
       <OverviewHeader title="Saved Explorations" />
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
-      {:else if explorationsRequestState == 'failure'}
+      {:else if explorationsRequestStatus.state == 'failure'}
         <ErrorBox>
-          <div>{explorationsRequestErrors[0]}</div>
+          <div>{explorationsRequestStatus.errors[0]}</div>
           <div>
             <Button
               on:click={() => {

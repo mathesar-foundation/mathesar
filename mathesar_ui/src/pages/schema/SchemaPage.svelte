@@ -16,7 +16,6 @@
     getSchemaPageTablesSectionUrl,
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
-  import { States } from '@mathesar/api/utils/requestUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { logEvent } from '@mathesar/utils/telemetry';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
@@ -58,9 +57,8 @@
 
   $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
-  $: isTablesLoading = $tablesStore.state === States.Loading;
-  $: explorationsRequestState = $queries.requestStatus.state;
-  $: explorationsRequestErrors = $queries.requestStatus.errors;
+  $: tablesRequestStatus = $tablesStore.requestStatus;
+  $: explorationsRequestStatus = $queries.requestStatus;
 
   $: tabs = [
     {
@@ -154,18 +152,17 @@
         <SchemaOverview
           {canExecuteDDL}
           {canEditMetadata}
-          {isTablesLoading}
+          {tablesRequestStatus}
           {tablesMap}
           {explorationsMap}
           {database}
           {schema}
-          {explorationsRequestState}
-          {explorationsRequestErrors}
+          {explorationsRequestStatus}
         />
       </div>
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
-        {#if isTablesLoading}
+        {#if tablesRequestStatus.state === 'processing'}
           <TableSkeleton numTables={schema.num_tables} />
         {:else}
           <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
@@ -173,7 +170,7 @@
       </div>
     {:else if activeTab?.id === 'explorations'}
       <div class="tab-container">
-        {#if explorationsRequestState == 'processing'}
+        {#if explorationsRequestStatus.state == 'processing'}
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations
