@@ -1,5 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
+  import { _ } from 'svelte-i18n';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
   import { iconDeleteMajor, iconEditUser } from '@mathesar/icons';
   import {
@@ -65,7 +66,7 @@
     />
     <h1>
       <Icon {...iconEditUser} />
-      Edit User: <strong>{userModel.username}</strong>
+      {$_('edit_user')}: <strong>{userModel.username}</strong>
     </h1>
     <FormBox>
       <UserDetailsForm user={userModel.getUser()} on:update={onUserUpdate} />

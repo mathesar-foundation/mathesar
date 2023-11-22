@@ -2,6 +2,7 @@
   "copy_and_paste_text": "Copy and Paste Text",
   "create_a_table_by_importing": "Create a table by importing your data",
   "data_source": "Data Source",
+  "edit_user": "Edit User",
   "import": "Import",
   "large_data_takes_time_warning": "Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress.",
   "linking_table": "Linking Table",
