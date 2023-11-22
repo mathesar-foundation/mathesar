@@ -53,7 +53,7 @@
       <TableSkeleton numTables={schema.num_tables} />
     {:else if tablesRequestStatus.state == 'failure'}
       <ErrorBox>
-        <div>{tablesRequestStatus.errors[0]}</div>
+        <p>{tablesRequestStatus.errors[0]}</p>
         <div>
           <Button
             on:click={() => {
@@ -90,7 +90,7 @@
         <ExplorationSkeleton />
       {:else if explorationsRequestStatus.state == 'failure'}
         <ErrorBox>
-          <div>{explorationsRequestStatus.errors[0]}</div>
+          <p>{explorationsRequestStatus.errors[0]}</p>
           <div>
             <Button
               on:click={() => {
