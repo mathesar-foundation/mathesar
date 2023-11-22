@@ -4,6 +4,8 @@
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { AnchorButton, Button, Icon } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
@@ -12,12 +14,9 @@
   import CreateNewTableButton from './CreateNewTableButton.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { iconRefresh } from '@mathesar/icons';
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';
-  import type { RequireExactlyOne } from 'type-fest';
   import { refetchTablesForSchema } from '@mathesar/stores/tables';
 
   export let tablesMap: Map<number, TableEntry>;

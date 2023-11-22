@@ -170,7 +170,7 @@
       </div>
     {:else if activeTab?.id === 'explorations'}
       <div class="tab-container">
-        {#if explorationsRequestStatus.state == 'processing'}
+        {#if explorationsRequestStatus.state === 'processing'}
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations
