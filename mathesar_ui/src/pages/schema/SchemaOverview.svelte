@@ -18,6 +18,7 @@
   import { iconRefresh } from '@mathesar/icons';
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';
   import type { RequireExactlyOne } from 'type-fest';
+  import { refetchTablesForSchema } from '@mathesar/stores/tables';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
@@ -58,7 +59,7 @@
           <Button
             on:click={() => {
               if ($currentSchemaId) {
-                void refetchQueriesForSchema($currentSchemaId);
+                void refetchTablesForSchema($currentSchemaId);
               }
             }}
           >
