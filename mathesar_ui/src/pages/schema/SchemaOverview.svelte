@@ -2,7 +2,7 @@
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton } from '@mathesar-component-library';
+  import { AnchorButton, Button, Icon } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
@@ -13,6 +13,10 @@
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { iconRefresh } from '@mathesar/icons';
+  import { refetchQueriesForSchema } from '@mathesar/stores/queries';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
@@ -65,7 +69,26 @@
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
       {:else if explorationsRequestState == 'failure'}
-        <div>{explorationsRequestErrors[0]}</div>
+        <ErrorBox>
+          <div>{explorationsRequestErrors[0]}</div>
+          <div>
+            <Button
+              on:click={() => {
+                if ($currentSchemaId) {
+                  void refetchQueriesForSchema($currentSchemaId);
+                }
+              }}
+            >
+              <Icon {...iconRefresh} />
+              <span>Retry</span>
+            </Button>
+            <a href="../">
+              <Button>
+                <span>Go to Database</span>
+              </Button>
+            </a>
+          </div>
+        </ErrorBox>
       {:else if showExplorationTutorial}
         <CreateNewExplorationTutorial {database} {schema} />
       {:else}
