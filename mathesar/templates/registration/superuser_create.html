@@ -224,7 +224,7 @@
       function showLoadingStatus(newText) {
           const loginButton = document.querySelector('form button[type="submit"]');
           loginButton.disabled = true;
-          loginButton.innerText = newText ?? 'Loading...';
+          loginButton.innerText = newText ?? '{% translate "Loading..." %}';
       }
   </script>
 {% endblock %}

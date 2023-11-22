@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-22 07:32+0000\n"
+"POT-Creation-Date: 2023-11-22 10:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -122,6 +122,10 @@ msgstr ""
 msgid ""
 "Important: You will need this password to log in. Please store it in a "
 "secure location."
+msgstr ""
+
+#: mathesar/templates/registration/superuser_create.html:227
+msgid "Loading..."
 msgstr ""
 
 #: mathesar/templates/users/password_reset_confirmation.html:4
