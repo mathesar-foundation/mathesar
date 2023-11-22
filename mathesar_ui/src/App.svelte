@@ -3,35 +3,16 @@
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import AppContext from './AppContext.svelte';
   import RootRoute from './routes/RootRoute.svelte';
-  import { setLocale } from './i18n/i18n-svelte';
+  import { initI18n } from './i18n';
   import ErrorBox from './components/message-boxes/ErrorBox.svelte';
-  import { loadLocaleAsync, loadTranslations } from './i18n/i18n-load';
-
-  let isTranslationsLoaded = false;
-  /**
-   * Why translations are being read from window object?
-   * In order to -
-   * 1. Load the translations file in parallel to the first FE chunk.
-   * 2. And then make it available for the entry(App.svelte)
-   *    file to load them into memory.
-   *
-   * The index.html loads it as using a script tag
-   * Each translations file on load, attaches the translations
-   * to the window object
-   */
-  void (async () => {
-    const { translations, displayLanguage } = window.Mathesar || {};
-    if (translations && displayLanguage) {
-      loadTranslations(displayLanguage, translations[displayLanguage]);
-      setLocale(displayLanguage);
-      isTranslationsLoaded = true;
-    } else {
-      await loadLocaleAsync('en');
-      isTranslationsLoaded = true;
-    }
-  })();
 
   const commonData = preloadCommonData();
+
+  let isTranslationsLoaded = false;
+  void (async () => {
+    await initI18n(commonData?.user.display_language ?? 'en');
+    isTranslationsLoaded = true;
+  })();
 </script>
 
 {#if isTranslationsLoaded && commonData}
