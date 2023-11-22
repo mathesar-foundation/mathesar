@@ -51,6 +51,27 @@
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
       <TableSkeleton numTables={schema.num_tables} />
+    {:else if tablesRequestStatus.state == 'failure'}
+      <ErrorBox>
+        <div>{tablesRequestStatus.errors[0]}</div>
+        <div>
+          <Button
+            on:click={() => {
+              if ($currentSchemaId) {
+                void refetchQueriesForSchema($currentSchemaId);
+              }
+            }}
+          >
+            <Icon {...iconRefresh} />
+            <span>Retry</span>
+          </Button>
+          <a href="../">
+            <Button>
+              <span>Go to Database</span>
+            </Button>
+          </a>
+        </div>
+      </ErrorBox>
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
