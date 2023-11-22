@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-22 07:17+0000\n"
+"POT-Creation-Date: 2023-11-22 07:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,11 +22,11 @@ msgid "Japanese"
 msgstr ""
 
 #: mathesar/templates/mathesar/login_base.html:4
-msgid "login"
+msgid "Login"
 msgstr ""
 
 #: mathesar/templates/mathesar/login_base.html:118
-msgid "unsupported screen size"
+msgid "Unsupported Screen Size"
 msgstr ""
 
 #: mathesar/templates/mathesar/login_base.html:120
@@ -47,7 +47,7 @@ msgid ""
 msgstr ""
 
 #: mathesar/templates/mathesar/login_base.html:132
-msgid "live demo mode"
+msgid "Live Demo Mode"
 msgstr ""
 
 #: mathesar/templates/mathesar/login_base.html:135
@@ -61,13 +61,13 @@ msgstr ""
 #: mathesar/templates/mathesar/login_base.html:140
 #: mathesar/templates/registration/login.html:16
 #: mathesar/templates/registration/superuser_create.html:119
-msgid "username"
+msgid "Username"
 msgstr ""
 
 #: mathesar/templates/mathesar/login_base.html:141
 #: mathesar/templates/registration/login.html:37
 #: mathesar/templates/registration/superuser_create.html:144
-msgid "password"
+msgid "Password"
 msgstr ""
 
 #: mathesar/templates/mathesar/login_base.html:145
@@ -83,7 +83,7 @@ msgid "Log in to Mathesar"
 msgstr ""
 
 #: mathesar/templates/registration/login.html:65
-msgid "log in"
+msgid "Log In"
 msgstr ""
 
 #: mathesar/templates/registration/superuser_create.html:3
@@ -115,7 +115,7 @@ msgid ""
 msgstr ""
 
 #: mathesar/templates/registration/superuser_create.html:173
-msgid "confirm password"
+msgid "Confirm Password"
 msgstr ""
 
 #: mathesar/templates/registration/superuser_create.html:210
@@ -125,7 +125,7 @@ msgid ""
 msgstr ""
 
 #: mathesar/templates/users/password_reset_confirmation.html:4
-msgid "update your password"
+msgid "Update Your Password"
 msgstr ""
 
 #: mathesar/templates/users/password_reset_confirmation.html:8
@@ -135,15 +135,15 @@ msgid ""
 msgstr ""
 
 #: mathesar/templates/users/password_reset_confirmation.html:14
-msgid "new password"
+msgid "New Password"
 msgstr ""
 
 #: mathesar/templates/users/password_reset_confirmation.html:41
-msgid "confirm"
+msgid "Confirm"
 msgstr ""
 
 #: mathesar/templates/users/password_reset_confirmation.html:67
-msgid "update password"
+msgid "Update Password"
 msgstr ""
 
 #: mathesar/templates/users/password_reset_confirmation.html:71
