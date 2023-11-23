@@ -43,7 +43,7 @@ export async function refetchTypesForDb(
     abstractTypesRequestMap.get(databaseId)?.cancel();
 
     const typesRequest = getAPI<AbstractTypeResponse[]>(
-      `/api/ui/v0/databases/${databaseId}/types/`,
+      `/api/ui/v0/connections/${databaseId}/types/`,
     );
     abstractTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;

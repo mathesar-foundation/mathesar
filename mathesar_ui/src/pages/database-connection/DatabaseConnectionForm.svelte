@@ -1,6 +1,5 @@
 <script lang="ts">
   import { PasswordInput, TextInput } from '@mathesar/component-library';
-  import databaseConnectionApi from '@mathesar/api/databaseConnection';
   import {
     FormSubmit,
     makeForm,
@@ -36,8 +35,8 @@
 
   // There will be no prefill value even in the case of editing
   $: password = isNewConnection ? requiredField('') : optionalField('');
-  $: hasPasswordChangedStore = password.hasChanges;
-  $: hasPasswordChanged = $hasPasswordChangedStore;
+  // $: hasPasswordChangedStore = password.hasChanges;
+  // $: hasPasswordChanged = $hasPasswordChangedStore;
 
   $: formFields = {
     connectionName,
@@ -50,38 +49,38 @@
   $: form = makeForm(formFields);
   $: ({ isSubmitting } = form);
 
-  async function addNewDatabaseConnection() {
-    const formValues = $form.values;
-    return databaseConnectionApi.add({
-      name: formValues.connectionName,
-      db_name: formValues.databaseName,
-      username: formValues.username,
-      host: formValues.host,
-      port: formValues.port,
-      password: formValues.password,
-    });
-  }
+  // async function addNewDatabaseConnection() {
+  //   const formValues = $form.values;
+  //   return databaseConnectionApi.add({
+  //     name: formValues.connectionName,
+  //     db_name: formValues.databaseName,
+  //     username: formValues.username,
+  //     host: formValues.host,
+  //     port: formValues.port,
+  //     password: formValues.password,
+  //   });
+  // }
 
   async function updateDatabaseConnection() {
-    const formValues = $form.values;
-    if (database) {
-      return databaseConnectionApi.update(database?.id, {
-        db_name: formValues.databaseName,
-        username: formValues.username,
-        host: formValues.host,
-        port: formValues.port,
-        ...(hasPasswordChanged ? { password: formValues.password } : undefined),
-      });
-    }
-    throw new Error(
-      '[updateDatabaseConnection] called but no database found to edit.',
-    );
+    // const formValues = $form.values;
+    // if (database) {
+    //   return databaseConnectionApi.update(database?.id, {
+    //     db_name: formValues.databaseName,
+    //     username: formValues.username,
+    //     host: formValues.host,
+    //     port: formValues.port,
+    //     ...(hasPasswordChanged ? { password: formValues.password } : undefined),
+    //   });
+    // }
+    // throw new Error(
+    //   '[updateDatabaseConnection] called but no database found to edit.',
+    // );
   }
 
   async function saveConnectionDetails() {
     if (isNewConnection) {
-      const newDatabase = await addNewDatabaseConnection();
-      await onCreate?.(newDatabase);
+      // const newDatabase = await addNewDatabaseConnection();
+      // await onCreate?.(newDatabase);
     } else {
       await updateDatabaseConnection();
       form.reset();
