@@ -44,7 +44,11 @@
     return {
       type: 'simple',
       label: queryInstance.name,
-      href: getExplorationPageUrl(database.nickname, schema.id, queryInstance.id),
+      href: getExplorationPageUrl(
+        database.nickname,
+        schema.id,
+        queryInstance.id,
+      ),
       icon: iconTable,
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.

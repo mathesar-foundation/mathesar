@@ -28,7 +28,9 @@
 
   function gotoExplorationPage() {
     if ($query.id) {
-      router.goto(getExplorationPageUrl(database.nickname, schema.id, $query.id));
+      router.goto(
+        getExplorationPageUrl(database.nickname, schema.id, $query.id),
+      );
     }
   }
 </script>

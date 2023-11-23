@@ -43,7 +43,9 @@
 {:else if item.type === 'schema'}
   <SchemaSelector database={item.database} />
   <div class="breadcrumb-item truncate">
-    <BreadcrumbLink href={getSchemaPageUrl(item.database.nickname, item.schema.id)}>
+    <BreadcrumbLink
+      href={getSchemaPageUrl(item.database.nickname, item.schema.id)}
+    >
       <SchemaName schema={item.schema} />
     </BreadcrumbLink>
   </div>
@@ -51,7 +53,11 @@
   <EntitySelector database={item.database} schema={item.schema} />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
-      href={getLinkForTableItem(item.database.nickname, item.schema.id, item.table)}
+      href={getLinkForTableItem(
+        item.database.nickname,
+        item.schema.id,
+        item.table,
+      )}
     >
       <TableName table={item.table} />
     </BreadcrumbLink>
