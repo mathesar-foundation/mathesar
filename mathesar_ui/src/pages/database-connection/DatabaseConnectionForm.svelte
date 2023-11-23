@@ -23,7 +23,7 @@
   $: isNewConnection = !database;
 
   $: connectionName = requiredField(database?.nickname ?? '');
-  $: databaseName = requiredField(database?.db_name ?? '');
+  $: databaseName = requiredField(database?.database ?? '');
   $: username = requiredField(database?.username ?? '');
   $: host = requiredField(database?.host ?? '');
   $: port = requiredField(database?.port ?? 5432, [

@@ -16,7 +16,7 @@
   </span>
   <div class="connection-details">
     <p class="connection-name">{database.nickname}</p>
-    <p class="db-name">{database.db_name}</p>
+    <p class="db-name">{database.database}</p>
   </div>
 </a>
 

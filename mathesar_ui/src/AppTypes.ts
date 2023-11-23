@@ -7,7 +7,6 @@ export interface Database {
   host: string;
   port: number;
   nickname: string;
-  db_name: string;
 }
 
 export interface DBObjectEntry {
