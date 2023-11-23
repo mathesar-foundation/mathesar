@@ -80,7 +80,7 @@
   async function saveConnectionDetails() {
     if (isNewConnection) {
       // const newDatabase = await addNewDatabaseConnection();
-      // await onCreate?.(newDatabase);
+      database && (await onCreate?.(database)); // Remove this line
     } else {
       await updateDatabaseConnection();
       form.reset();

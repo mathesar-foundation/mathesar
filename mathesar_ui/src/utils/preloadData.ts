@@ -14,7 +14,7 @@ export interface CommonData {
   queries: QueryInstance[];
   current_db_connection: string;
   internal_db_connection: {
-    database: Database['name'];
+    database: Database['database'];
     host: Database['host'];
     port: Database['port'];
     type: string;

@@ -2,11 +2,11 @@ import type { TreeItem } from '@mathesar-component-library/types';
 
 export interface Database {
   id: number;
+  nickname: string;
   database: string;
   username: string;
   host: string;
   port: number;
-  nickname: string;
 }
 
 export interface DBObjectEntry {

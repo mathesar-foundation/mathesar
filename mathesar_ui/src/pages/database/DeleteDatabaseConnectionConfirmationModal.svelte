@@ -30,6 +30,8 @@
   async function handleDisconnect() {
     disconnectStatus = { state: 'processing' };
     try {
+      // eslint-disable-next-line no-console
+      console.log(`Implement delete for ${database.id}`);
       // await databaseConnection.delete(database.id, removeMathesarSchemas);
       disconnectStatus = { state: 'success' };
       dispatch('success');
