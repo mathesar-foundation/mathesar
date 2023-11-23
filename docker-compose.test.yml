@@ -3,6 +3,7 @@ version: "3.9"
 # Mathesar's docker compose file
 #------------------------------
 
+
 #------------------------------------------------
 # PREREQUISITES:
 #------------------------------------------------
@@ -10,6 +11,7 @@ version: "3.9"
 # Docker v23+ ($: docker version)
 # Docker Compose v2.10+ ($: docker compose version)
 #------------------------------------------------
+
 
 #------------------------------------------------
 # CONFIG:
@@ -23,7 +25,6 @@ x-initial_config: &initial_config
 #------------------------------------------------
 
 
-
 #-------------------------------------------------#
 # HOW TO RUN THIS FILE:                           #
 #-------------------------------------------------#
@@ -31,22 +32,20 @@ x-initial_config: &initial_config
 #-------------------------------------------------#
 
 
-
 #------------------------------------------------
 # ADDITIONAL INFO ABOUT ENVIRONMENT VARIABLES:
 #------------------------------------------------
-# 
+#
 # SECRET_KEY:
 #     Default: N/A
 #     Info: A unique secret key required to be set by the user for Django's security protection features.
 #           You can read more about it here: https://docs.djangoproject.com/en/4.2/ref/settings/#secret-key
 #     Example: a_very_insecure_secret_key1*zobb123)k(_d1%wubkv6#
-# 
+#
 # DOMAIN_NAME:
 #     Default: http://localhost
 #     Info: Specifies the domains that can access Mathesar over http(port 80) or https(port 443), also automatically creating SSL certificates for the same.  
 #           If you want to host an instance of Mathesar over the internet or over your local network, add those domains here.
-#     Note: https over localhost is not neccessary yet possible
 #     Example: yourdomain.com, *.subdomain.com, 127.0.0.1
 #
 # POSTGRES_DB:
@@ -66,16 +65,33 @@ x-initial_config: &initial_config
 #------------------------------------------------
 
 
+#------------------------------------------------
+# INFO ABOUT VOLUMES 
+#------------------------------------------------
+#
+# Volumes are the way containers persist essential data.
+#
+# Running this compose file will automatically create a volume named "msar" with the following file structure.
+# 
+# msar
+# ├── caddy/  (stores TLS certificates, private keys, and other necessary information for Caddy)
+# ├── media/  (stores user uploaded datafiles(.csv/.tsv) to Mathesar)
+# ├── pgdata/ (stores user's PostgreSQL data)
+# └── static/ (stores static files for Mathesar)
+#------------------------------------------------
+
 
 services:
+
 
 ##################################################
 # Mathesar web service
 # 
 # About:
-# Volumes info: 
+# 
 #
 ##################################################
+
   service:
     container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
@@ -133,18 +149,17 @@ services:
       start_period: 5s
 
 
-
 ##################################################
 # Caddy
 #
 #
 #
 ##################################################
+
   caddy-reverse-proxy:
     image: mathesar/mathesar-caddy:latest
     environment:
      <<: *initial_config
-    # caddy container is exposed to the other containers, and the host.
     # SHOULD WE BE HARD CODING THIS OR NOT?
     ports:
       - "80:80"
