@@ -24,7 +24,7 @@
 
   function isMatch(database: Database, q: string) {
     return (
-      database.name.toLowerCase().includes(q) ||
+      database.nickname.toLowerCase().includes(q) ||
       database.db_name.toLowerCase().includes(q)
     );
   }

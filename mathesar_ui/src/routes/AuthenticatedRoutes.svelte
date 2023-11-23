@@ -15,7 +15,7 @@
 </script>
 
 {#if firstDatabase}
-  <Route path="/" redirect={getDatabasePageUrl(firstDatabase.name)} />
+  <Route path="/" redirect={getDatabasePageUrl(firstDatabase.nickname)} />
 {:else}
   <Route path="/">
     <NoDatabaseFound />

@@ -19,10 +19,10 @@
     undefined;
   export let onUpdate: (() => Promise<void>) | undefined = undefined;
 
-  $: database = $databases.data?.find((db) => db.name === databaseNameProp);
+  $: database = $databases.data?.find((db) => db.nickname === databaseNameProp);
   $: isNewConnection = !database;
 
-  $: connectionName = requiredField(database?.name ?? '');
+  $: connectionName = requiredField(database?.nickname ?? '');
   $: databaseName = requiredField(database?.db_name ?? '');
   $: username = requiredField(database?.username ?? '');
   $: host = requiredField(database?.host ?? '');

@@ -9,13 +9,13 @@
 
 <a
   class="connection-item passthrough"
-  href={getDatabaseConnectionEditUrl(database.name)}
+  href={getDatabaseConnectionEditUrl(database.nickname)}
 >
   <span class="floating-icon">
     <Icon {...iconEdit} />
   </span>
   <div class="connection-details">
-    <p class="connection-name">{database.name}</p>
+    <p class="connection-name">{database.nickname}</p>
     <p class="db-name">{database.db_name}</p>
   </div>
 </a>

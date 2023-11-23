@@ -9,7 +9,7 @@
   export let database: Database;
 </script>
 
-<svelte:head><title>{makeSimplePageTitle(database.name)}</title></svelte:head>
+<svelte:head><title>{makeSimplePageTitle(database.nickname)}</title></svelte:head>
 
 <LayoutWithHeader
   restrictWidth={true}

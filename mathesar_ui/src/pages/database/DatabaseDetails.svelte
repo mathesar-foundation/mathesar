@@ -92,7 +92,7 @@
       identifierName: schema.name,
       body: deleteSchemaConfirmationBody,
       onProceed: async () => {
-        await deleteSchemaAPI(database.name, schema.id);
+        await deleteSchemaAPI(database.nickname, schema.id);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesInSchemaTablesStore(schema.id);
       },
@@ -127,7 +127,7 @@
 
 <AppSecondaryHeader
   pageTitleAndMetaProps={{
-    name: database.name,
+    name: database.nickname,
     type: 'database',
     icon: iconDatabase,
   }}
@@ -175,7 +175,7 @@
           {#if userProfile?.isSuperUser}
             <LinkMenuItem
               icon={iconEdit}
-              href={getDatabaseConnectionEditUrl(database.name)}
+              href={getDatabaseConnectionEditUrl(database.nickname)}
             >
               Edit Database Connection
             </LinkMenuItem>

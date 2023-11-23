@@ -27,7 +27,7 @@
       {#if canEditMetadata}
         <a
           class="btn btn-primary"
-          href={getExplorationEditorPageUrl(database.name, schema.id, query.id)}
+          href={getExplorationEditorPageUrl(database.nickname, schema.id, query.id)}
         >
           <span>Edit in Data Explorer</span>
         </a>

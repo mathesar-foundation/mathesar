@@ -7,4 +7,4 @@
   export let iconHasBox = false;
 </script>
 
-<NameWithIcon icon={iconDatabase} {iconHasBox}>{database.name}</NameWithIcon>
+<NameWithIcon icon={iconDatabase} {iconHasBox}>{database.nickname}</NameWithIcon>
