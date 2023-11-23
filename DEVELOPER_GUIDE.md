@@ -121,56 +121,73 @@ Sometimes you may need to rebuild your Docker images after pulling new code chan
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev-service --force-recreate --build dev-service
 ```
 
-## Translations
+## Internationalization
+Our repo contains two separate i18n flows, one for the Django side of the frontend, and the other for the Svelte/TypeScript side of the frontend.
 
-> **Note:** We're currently not open to external contributions with regards to translations.
+### Django i18n
+- We use the i18n features provided by Django. Refer the [Django docs](https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#internationalization-in-template-code) on how to translate strings.
+- After making changes to your code, generate the `.po` message file by running the following command:
+    ```
+    docker exec mathesar_service_dev python manage.py makemessages -l en -i "mathesar_ui" -i "docs"
+    ```
+- This will generate an updated `django.po` file for the source langauge `en`, which is present here: `/translations/en/LC_MESSAGES/django.po`.
+- Only generate the `.po` file for English. Do not update other languages using `makemessages`. They will be pulled from our translation service provider when the translation process is complete.
+- Commit and push the changes to the `django.po` file.
 
-We use [Transifex](https://app.transifex.com/mathesar/mathesar/dashboard/) for managing our translation process.
+#### Compiling Django message files
+- This step is relevant only for the release process, and needs to be run before making a build.
+- Django uses gettext, which require the `.po` files to be compiled into a more efficient form before using in production.
+- Compile the django messages by running the following command:
+    ```
+    docker exec mathesar_service_dev python manage.py compilemessages
+    ```
+- This will produce files with `.mo` extension for each of the `.po` files.
+- Test the app locally with different languages.
+
+### Svelte i18n
+- We use [svelte-i18n](https://github.com/kaisermann/svelte-i18n), which internally uses [format-js](https://formatjs.io/) for handling i18n.
+- The source translation file is here: `/mathesar_ui/src/i18n/languages/en/dict.json`.
+- The format of the `.json` file is [JSON with ICU Plurals](https://help.transifex.com/en/articles/6220806-json-with-icu-plurals), which is a subset of the [ICU format](https://unicode-org.github.io/icu/userguide/icu/i18n.html).
+- After making changes to your code, ensure that the source `/en/dict.json` file contains new translation strings, if any.
+- Do not update other translation files. They will be pulled from our translation service provider when the translation process is complete.
+
+## Translation process
+- We use [Transifex](https://app.transifex.com/mathesar/mathesar/dashboard/) for managing our translation process.
+- You'll need to be a member of the Mathesar organization in Transifex, inorder to work with translations. Please reach out to us for information on how to join. 
+
+### For Translators
+- We're currently working on a workflow for translators. This section will be updated once we have a clear set of instructions to follow.
+
+### For Maintainers
+
+#### Automation
+- We have automated sync between Transifex and the `develop` branch, via the GitHub integration feature provided by Transifex.
+- The configuration for it is specified in the `.tx/integration.yml` file, and within the Transifex admin panel.
+- Refer [Transfiex documentation](https://help.transifex.com/en/articles/6265125-github-installation-and-configuration) for more information.
+
+#### Manually pushing and pulling translations
+- If you'd like to manually push or pull translations, follow the instructions in this section.
+- > **Warning**: Only push and pull translations on the `develop` branch. Do not do it for other branches since this will overwrite the existing resources within Transifex.
+
+**Pre-requisites**
 - The Transifex cli tool is required. It can be installed by running:
   ```
   curl -o- https://raw.githubusercontent.com/transifex/cli/master/install.sh | bash
   ```
 - It can be installed in your host machine or on the docker container.
-- You'll need to be a member of the Mathesar organization in Transifex, inorder to work with translations. Please reach out to us for information on how to join. 
-- Our repo contains two separate translation sections, one for the Django side of the frontend, and the other for the Svelte/TypeScript side of the frontend.
-- The Django translation files are `.po` files, which can be found here: `/translations/<lang>/LC_MESSAGES/django.po`
-- The Svelte/TypeScript translation files are `.json` files, which can be found here: `/mathesar_ui/src/i18n/languages/<lang>/dict.json`
 
-### For Maintainers
-
-> **Note:** Only push and pull translations during a release, for the release branch. Do not do it for other branches since this will override the existing resources within Transifex.
-
-#### Pushing translations to Transifex
-1. Prepare the translation files:
-    - Django 
-      - Generate Django translations by running the following command:
-        ```
-        docker exec mathesar_service_dev python manage.py makemessages -l en -i "mathesar_ui" -i "docs"
-        ```
-      - This will generate an updated `django.po` file for the source langauge `en`.
-      - Only generate the .po file for English. Do not update other languages using `makemessages`. They will be pulled from Transifex when the translation process is complete.
-      - Commit and push the changes to the `django.po` file to our repo.
-    - Svelte/Typescript
-      - Ensure that the source `/en/dict.json` file contains new translation strings, if any.
-      - Do not update other translation files. They will be pulled from Transifex when the translation process is complete.
-1. Push the updated source files, by running:
+**Pushing translations to Transifex**
+- Push the updated source translation files by running:
     ```
     TX_TOKEN=<transifex_api_token> tx push -s
     ```
 
-#### Pulling translations from Transifex
+**Pulling translations from Transifex**
 1. Run the following command to pull translations from Transifex:
     ```
     TX_TOKEN=<transifex_api_token> tx pull -f
     ```
-1. Compile the django messages by running the following command, and test the app locally with different languages.
-    ```
-    docker exec mathesar_service_dev python manage.py compilemessages
-    ```
 1. Commit and push the changes to our repo.
-
-### For Translators
-- We're currently working on a workflow for translators. This section will be updated once we have a clear set of instructions to follow.
 
 ## Demo mode
 
