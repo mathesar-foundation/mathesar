@@ -8,11 +8,18 @@ import type { QueryInstance } from '@mathesar/api/types/queries';
 import type { User } from '@mathesar/api/users';
 
 export interface CommonData {
-  databases: Database[];
+  connections: Database[];
   schemas: SchemaResponse[];
   tables: TableEntry[];
   queries: QueryInstance[];
-  current_db: string;
+  current_db_connection: string;
+  internal_db_connection: {
+    database: Database['name'];
+    host: Database['host'];
+    port: Database['port'];
+    type: string;
+    user: string;
+  };
   current_schema: number | null;
   abstract_types: AbstractTypeResponse[];
   user: User;

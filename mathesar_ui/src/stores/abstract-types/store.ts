@@ -85,7 +85,7 @@ function getTypesForDatabase(
     });
     databasesToAbstractTypesStoreMap.set(database.id, store);
 
-    if (preload && commonData?.current_db === database.name) {
+    if (preload && commonData?.current_db_connection === database.name) {
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,

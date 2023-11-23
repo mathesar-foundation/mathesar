@@ -27,7 +27,7 @@
   $: databaseName = requiredField(database?.db_name ?? '');
   $: username = requiredField(database?.username ?? '');
   $: host = requiredField(database?.host ?? '');
-  $: port = requiredField(database?.port ?? '5432', [
+  $: port = requiredField(database?.port ?? 5432, [
     (value) =>
       !Number.isNaN(+value)
         ? { type: 'valid' }

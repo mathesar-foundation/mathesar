@@ -212,7 +212,7 @@ export function getSchemasStoreForDB(
       data: new Map(),
     });
     dbSchemaStoreMap.set(database, store);
-    if (preload && commonData?.current_db === database) {
+    if (preload && commonData?.current_db_connection === database) {
       store = setDBSchemaStore(database, commonData?.schemas || []);
     } else {
       void refetchSchemasForDB(database);

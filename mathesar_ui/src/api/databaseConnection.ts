@@ -6,7 +6,7 @@ export interface NewConnection {
   db_name: string;
   username: string;
   host: string;
-  port: string;
+  port: number;
   password: string;
 }
 
