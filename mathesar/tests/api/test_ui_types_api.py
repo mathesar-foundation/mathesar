@@ -8,7 +8,7 @@ from mathesar.models.users import DatabaseRole
 def test_type_list(client, test_db_name):
     database = Database.objects.get(name=test_db_name)
 
-    response = client.get(f'/api/ui/v0/databases/{database.id}/types/')
+    response = client.get(f'/api/ui/v0/connections/{database.id}/types/')
     response_data = response.json()
     assert response.status_code == 200
     assert len(response_data) == len(database.supported_ui_types)
@@ -24,12 +24,12 @@ def test_type_list(client, test_db_name):
 def test_type_list_permissions(FUN_create_dj_db, get_uid, client_bob, client_alice, user_bob, user_alice):
     database = FUN_create_dj_db(get_uid())
     DatabaseRole.objects.create(user=user_bob, database=database, role='viewer')
-    response = client_bob.get(f'/api/ui/v0/databases/{database.id}/types/')
+    response = client_bob.get(f'/api/ui/v0/connections/{database.id}/types/')
     response_data = response.json()
     assert response.status_code == 200
     assert len(response_data) == len(database.supported_ui_types)
 
-    response = client_alice.get(f'/api/ui/v0/databases/{database.id}/types/')
+    response = client_alice.get(f'/api/ui/v0/connections/{database.id}/types/')
     assert response.status_code == 404
 
 
@@ -64,7 +64,7 @@ def test_database_types_installed(client, test_db_name):
     ]
     default_database = Database.objects.get(name=test_db_name)
 
-    response = client.get(f'/api/ui/v0/databases/{default_database.id}/types/')
+    response = client.get(f'/api/ui/v0/connections/{default_database.id}/types/')
     assert response.status_code == 200
     actual_custom_types = response.json()
 
