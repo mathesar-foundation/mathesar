@@ -74,14 +74,6 @@
     font-size: var(--size-large);
     background: var(--white);
   }
-  h2 hr {
-    margin: 0;
-    position: absolute;
-    bottom: 0;
-    left: 1em;
-    right: 1em;
-    border: solid var(--slate-200) 1px;
-  }
   .widgets {
     padding: var(--size-small);
 

@@ -10,9 +10,8 @@ import type { CancellablePromise } from '@mathesar-component-library';
 
 const commonData = preloadCommonData();
 
-export const currentDBName: Writable<Database['name'] | undefined> = writable(
-  commonData?.current_db ?? undefined,
-);
+export const currentDBName: Writable<Database['nickname'] | undefined> =
+  writable(commonData?.current_db_connection ?? undefined);
 
 export interface DatabaseStoreData {
   preload?: boolean;
@@ -24,7 +23,7 @@ export interface DatabaseStoreData {
 export const databases = writable<DatabaseStoreData>({
   preload: true,
   state: States.Done,
-  data: commonData?.databases ?? [],
+  data: commonData?.connections ?? [],
 });
 
 export const currentDatabase = derived(
@@ -35,7 +34,7 @@ export const currentDatabase = derived(
     if (!_databases?.length) {
       return undefined;
     }
-    return _databases?.find((database) => database.name === _currentDBName);
+    return _databases?.find((database) => database.nickname === _currentDBName);
   },
 );
 
