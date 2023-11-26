@@ -19,7 +19,7 @@
     .filter((column) => !$sorting.has(column.id))
     .map((entry) => entry.id);
 
-  let sortEntries;
+  let sortEntries: [number, SortDirection][];
   $: {
     sortEntries = [...$sorting];
   }
@@ -58,10 +58,6 @@
     sortEntries[j] = t;
     sortEntries = [...sortEntries];
   }
-  function arraysEqual(a1: any[], a2: any[]) {
-    /* WARNING: arrays must not contain {objects} or behavior may be undefined */
-    return JSON.stringify(a1) === JSON.stringify(a2);
-  }
 
   function handleSortPointerMove(event: PointerEvent) {
     if (isDragging) {
@@ -95,14 +91,14 @@
       }
     }
   }
-  function handleSortPointerUp(event: PointerEvent) {
+  function handleSortPointerUp() {
     if (isDragging) {
       isDragging = false;
 
       // Do not update if sortentries are unchanged
-      if (!arraysEqual(sortEntries, [...$sorting])) {
+      if (JSON.stringify(sortEntries) !== JSON.stringify([...$sorting])) {
         // Update the new sort order in sorting store
-        sorting.update((s: Sorting) => new Sorting(sortEntries));
+        sorting.update(() => new Sorting(sortEntries));
       }
 
       // Detach the pointer move and up events

@@ -48,20 +48,6 @@
       margin-top: 1rem;
     }
 
-    .content {
-      display: flex;
-      flex-direction: column;
-      min-width: 21rem;
-
-      :global(.input-group .select-sort-direction) {
-        width: 9rem;
-        flex-grow: 0;
-      }
-      :global(.select-sort-column) {
-        flex-grow: 1;
-      }
-    }
-
     .header {
       font-weight: bolder;
     }
