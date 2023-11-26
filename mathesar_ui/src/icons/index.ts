@@ -70,6 +70,7 @@ import {
   faShareFromSquare,
   faXmark,
   faExternalLink,
+  faGrip
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -141,6 +142,7 @@ export const iconShare: IconProps = { data: faShareFromSquare };
 export const iconRecreate: IconProps = { data: faRedo };
 export const iconDisable: IconProps = { data: faXmark };
 export const iconOpenLinkInNewTab = { data: faExternalLink };
+export const iconGrip = { data: faGrip };
 
 // THINGS
 //
