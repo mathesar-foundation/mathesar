@@ -70,7 +70,7 @@ import {
   faShareFromSquare,
   faXmark,
   faExternalLink,
-  faGrip
+  faGrip,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
