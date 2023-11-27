@@ -15,7 +15,7 @@
 <AppendBreadcrumb
   item={{
     type: 'simple',
-    href: getImportPageUrl(database.name, schema.id),
+    href: getImportPageUrl(database.nickname, schema.id),
     label: 'Import',
     icon: iconImportData,
   }}

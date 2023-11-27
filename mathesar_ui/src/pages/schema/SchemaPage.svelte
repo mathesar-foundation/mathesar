@@ -65,19 +65,19 @@
     {
       label: 'Overview',
       id: 'overview',
-      href: getSchemaPageUrl(database.name, schema.id),
+      href: getSchemaPageUrl(database.nickname, schema.id),
     },
     {
       label: 'Tables',
       id: 'tables',
       count: tablesMap.size,
-      href: getSchemaPageTablesSectionUrl(database.name, schema.id),
+      href: getSchemaPageTablesSectionUrl(database.nickname, schema.id),
     },
     {
       label: 'Explorations',
       id: 'explorations',
       count: explorationsMap.size,
-      href: getSchemaPageExplorationsSectionUrl(database.name, schema.id),
+      href: getSchemaPageExplorationsSectionUrl(database.nickname, schema.id),
     },
   ] as TabItem[];
 
@@ -94,7 +94,7 @@
   }
 
   logEvent('opened_schema', {
-    database_name: database.name,
+    database_name: database.nickname,
     schema_name: schema.name,
     source: 'schema_page',
   });

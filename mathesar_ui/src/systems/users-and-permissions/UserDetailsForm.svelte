@@ -22,11 +22,9 @@
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
-  import { locale, setLocale } from '@mathesar/i18n/i18n-svelte';
-  import { loadLocaleAsync } from '@mathesar/i18n/i18n-load';
-  import { baseLocale } from '@mathesar/i18n/i18n-util';
+  import { setLanguage } from '@mathesar/i18n';
   import SelectUserType from './SelectUserType.svelte';
-  import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
+  // import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -45,7 +43,7 @@
     ),
   ]);
   $: email = optionalField(user?.email ?? '', [isEmail()]);
-  $: displayLanguage = requiredField(user?.display_language ?? baseLocale);
+  $: displayLanguage = requiredField(user?.display_language ?? 'en');
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
@@ -85,10 +83,7 @@
       }
 
       const updatedLocale = request.display_language;
-      if ($locale !== updatedLocale) {
-        await loadLocaleAsync(updatedLocale);
-        setLocale(updatedLocale);
-      }
+      await setLanguage(updatedLocale);
       dispatch('update');
       return;
     }

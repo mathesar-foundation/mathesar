@@ -25,7 +25,7 @@
   let isHovered = false;
   let isFocused = false;
 
-  $: href = getSchemaPageUrl(database.name, schema.id);
+  $: href = getSchemaPageUrl(database.nickname, schema.id);
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
 </script>
