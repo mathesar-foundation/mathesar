@@ -1,28 +1,28 @@
 version: "3.9"
-#------------------------------
+#-------------------------------
 # Mathesar's docker compose file
-#------------------------------
+#-------------------------------
 
 
-#------------------------------------------------
+#-------------------------------------------------------
 # PREREQUISITES:
-#------------------------------------------------
+#-------------------------------------------------------
 # OS: Linux, Mac, Windows(WSL).
-# Docker v23+ ($: docker version)
-# Docker Compose v2.10+ ($: docker compose version)
-#------------------------------------------------
+# Docker v23+ ($: sudo docker version)
+# Docker Compose v2.10+ ($: sudo docker compose version)
+#-------------------------------------------------------
 
 
-#------------------------------------------------
+#--------------------------------------------------
 # CONFIG:
-#------------------------------------------------
+#--------------------------------------------------
 x-initial_config: &initial_config
   SECRET_KEY: ${SECRET_KEY:?}                       #(Required) Replace '?' with your Django SECRET_KEY, you can generate one here: https://djecrety.ir/
-  DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}     #(Optional) Replace 'localhost' with custom domain(s) e.g. 'yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar over http or https.
+  DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}     #(Optional) Replace 'http://localhost' with custom domain(s) e.g. 'yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar over http or https.
   POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}      #(Optional) Replace 'mathesar_django' with any custom name for the internal database managed by mathesar web-service
   POSTGRES_USER: ${POSTGRES_USER:-mathesar}         #(Optional) Replace 'mathesar' with any custom username for the aforementioned database
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar} #(Optional) Replace 'mathesar' with any custom password for the aforementioned database
-#------------------------------------------------
+#--------------------------------------------------
 
 
 #-------------------------------------------------#
@@ -74,7 +74,7 @@ x-initial_config: &initial_config
 # Running this compose file will automatically create a volume named "msar" with the following file structure.
 # 
 # msar
-# ├── caddy/  (stores TLS certificates, private keys, and other necessary information for Caddy)
+# ├── caddy/  (stores SSL certificates, private keys, and other necessary information for Caddy)
 # ├── media/  (stores user uploaded datafiles(.csv/.tsv) to Mathesar)
 # ├── pgdata/ (stores user's PostgreSQL data)
 # └── static/ (stores static files for Mathesar)
@@ -87,9 +87,10 @@ services:
 ##################################################
 # Mathesar web service
 # 
-# About:
+# - This service provides a web server required to run Mathesar.
+# - It pulls from our official Docker image (https://hub.docker.com/r/mathesar/mathesar-prod) hosted on Docker Hub.
+# - 
 # 
-#
 ##################################################
 
   service:
