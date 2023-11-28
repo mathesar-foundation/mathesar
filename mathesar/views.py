@@ -12,7 +12,7 @@ from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.query import QueryAccessPolicy
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.db.permissions.table import TableAccessPolicy
-from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
+from mathesar.api.serializers.databases import ConnectionSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
@@ -39,16 +39,16 @@ def get_schema_list(request, database):
 
 def _get_permissible_db_queryset(request):
     """
-    Returns the queryset for databases a user is permitted to access.
+    Returns the queryset for connections a user is permitted to access.
 
-    Note, databases that a user is permitted to access is the union of those
-    permitted by DatabaseAccessPolicy and those containing Schemas permitted
-    by SchemaAccessPolicy.
+    Note, connections that a user is permitted to access is the union of those
+    permitted by DatabaseAccessPolicy and those containing Schemas permitted by
+    SchemaAccessPolicy.
 
-    Note, the live demo mode is an exception where the user is only permitted
-    to access the database generated for him. We treat that as a subset of the
-    databases the user can normally access, just in case someone finds a way to
-    manipulate how we define whether we're in demo mode and which db is a
+    Note, the live demo mode is an exception where the user is only permitted to
+    access the database generated for him. We treat that as a subset of the
+    connections the user can normally access, just in case someone finds a way
+    to manipulate how we define whether we're in demo mode and which db is a
     user's demo db.
     """
     for deleted in (True, False):
@@ -74,7 +74,7 @@ def _get_permissible_db_queryset(request):
 
 def get_database_list(request):
     permission_restricted_db_qs, permission_restricted_failed_db_qs = _get_permissible_db_queryset(request)
-    database_serializer = DatabaseSerializer(
+    database_serializer = ConnectionSerializer(
         permission_restricted_db_qs,
         many=True,
         context={'request': request}
@@ -86,8 +86,8 @@ def get_database_list(request):
             'username': db.username,
             'port': db.port,
             'host': db.host,
-            'name': db.name,
-            'db_name': db.db_name,
+            'nickname': db.name,
+            'database': db.db_name,
             'error': 'Error connecting to the database'
         })
     return database_serializer.data + failed_db_data
@@ -142,10 +142,10 @@ def get_user_data(request):
 
 def get_base_data_all_routes(request, database=None, schema=None):
     return {
-        'current_db': database.name if database else None,
+        'current_db_connection': database.name if database else None,
         'current_schema': schema.id if schema else None,
         'schemas': [],
-        'databases': [],
+        'connections': [],
         'tables': [],
         'queries': [],
         'abstract_types': get_ui_type_list(request, database),
@@ -153,11 +153,11 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'is_authenticated': not request.user.is_anonymous,
         'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
-        'internal_database': get_internal_db_meta(),
+        'internal_db_connection': _get_internal_db_meta(),
     }
 
 
-def get_internal_db_meta():
+def _get_internal_db_meta():
     internal_db = DATABASES['default']
     if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
         return {
@@ -174,7 +174,7 @@ def get_common_data(request, database=None, schema=None):
     return {
         **get_base_data_all_routes(request, database, schema),
         'schemas': get_schema_list(request, database),
-        'databases': get_database_list(request),
+        'connections': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
@@ -233,7 +233,7 @@ def get_common_data_for_shared_entity(request, schema=None):
         many=True,
         context={'request': request}
     ).data
-    serialized_databases = DatabaseSerializer(
+    serialized_databases = ConnectionSerializer(
         databases,
         many=True,
         context={'request': request}

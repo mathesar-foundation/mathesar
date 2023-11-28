@@ -22,6 +22,12 @@ services:
     volumes:
       - dev_postgres_data:/var/lib/postgresql/data
       - ./db/sql:/sql/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB-mathesar_django} -U $${POSTGRES_USER-mathesar}"]
+      interval: 5s
+      timeout: 1s
+      retries: 30
+      start_period: 5s
   test-service:
     extends:
       file: docker-compose.yml
@@ -52,9 +58,6 @@ services:
       dockerfile: Dockerfile
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
-    extends:
-      file: docker-compose.yml
-      service: service
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
@@ -66,12 +69,13 @@ services:
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
-    entrypoint: dockerize -wait tcp://mathesar_dev_db:5432 -timeout 30s ./dev-run.sh
+    entrypoint: ./dev-run.sh
     volumes:
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/
     depends_on:
-      - dev-db
+      dev-db:
+        condition: service_healthy
     # On dev, following ports are exposed to other containers, and the host.
     ports:
       - "8000:8000"

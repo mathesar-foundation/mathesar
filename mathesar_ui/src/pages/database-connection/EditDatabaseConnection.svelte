@@ -21,7 +21,7 @@
 
   const deleteConnectionModal = modal.spawnModalController();
 
-  $: database = $databases.data.find((db) => db.name === databaseName);
+  $: database = $databases.data.find((db) => db.nickname === databaseName);
 
   async function handleSuccess() {
     toast.success(`${databaseName} updated successfully!`);

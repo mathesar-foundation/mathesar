@@ -6,11 +6,17 @@ declare module '*.mdx' {
   export default value;
 }
 
+interface LanguageDictionary {
+  [key: string]: LanguageDictionary | string | null;
+}
+
 interface Window {
   Mathesar:
     | {
-        displayLanguage: Locales;
-        translations: Record<Locales, Translations> | undefined;
+        translations: {
+          en?: LanguageDictionary;
+          ja?: LanguageDictionary;
+        };
       }
     | undefined;
 }

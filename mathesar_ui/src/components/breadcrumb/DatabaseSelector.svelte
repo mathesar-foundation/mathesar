@@ -14,11 +14,11 @@
   ): BreadcrumbSelectorEntry {
     return {
       type: 'simple',
-      label: dbEntry.name,
-      href: getDatabasePageUrl(dbEntry.name),
+      label: dbEntry.nickname,
+      href: getDatabasePageUrl(dbEntry.nickname),
       icon: iconDatabase,
       isActive() {
-        return dbEntry.name === $currentDBName;
+        return dbEntry.nickname === $currentDBName;
       },
     };
   }

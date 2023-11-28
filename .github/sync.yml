@@ -1,4 +1,4 @@
-centerofci/mathesar-ansible:
+mathesar-foundation/mathesar-ansible:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
@@ -8,7 +8,7 @@ centerofci/mathesar-ansible:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-data-playground:
+mathesar-foundation/mathesar-data-playground:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
@@ -18,7 +18,7 @@ centerofci/mathesar-data-playground:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-design:
+mathesar-foundation/mathesar-design:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
@@ -28,7 +28,7 @@ centerofci/mathesar-design:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-internal-crm:
+mathesar-foundation/mathesar-internal-crm:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
@@ -38,7 +38,7 @@ centerofci/mathesar-internal-crm:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-private-notes:
+mathesar-foundation/mathesar-private-notes:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
@@ -48,7 +48,7 @@ centerofci/mathesar-private-notes:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-scripts:
+mathesar-foundation/mathesar-scripts:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
@@ -58,7 +58,7 @@ centerofci/mathesar-scripts:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-website:
+mathesar-foundation/mathesar-website:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
@@ -68,7 +68,7 @@ centerofci/mathesar-website:
   - .github/workflows/update-project-on-issue-label.yml
   - .github/workflows/update-project-on-pr-edit.yml
   - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-wiki:
+mathesar-foundation/mathesar-wiki:
   - .github/actions/project_update/
   - .github/workflows/add-to-project.yml
   - .github/workflows/toc.yml
