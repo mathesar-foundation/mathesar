@@ -428,12 +428,7 @@ class ExclusionViolationAPIException(MathesarAPIException):
                     "original_details": exception.orig.diag.message_detail,
                 }
             )
-
-        exception_detail = get_default_exception_detail(
-            exception, self.error_code, message, field, details
-        )._asdict()
-        self.detail = [exception_detail]
-        self.status_code = status_code
+        super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
 class InvalidDateAPIException(MathesarAPIException):
