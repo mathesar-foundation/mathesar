@@ -150,10 +150,10 @@
     input={{ component: TextInput }}
   >
     <!-- TODO: Add link -->
-    <slot slot="help">
+    <svelte:fragment slot="help">
       The user will need to have CONNECT and CREATE privileges on the database.
       <DocsLink path="/">Why is this needed?</DocsLink>.
-    </slot>
+    </svelte:fragment>
   </GridFormInput>
 
   <GridFormInput
