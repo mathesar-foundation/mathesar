@@ -147,7 +147,6 @@ export async function refetchQueriesForSchema(
 
     return get(schemaQueriesStore);
   } catch (err) {
-    console.log('error present');
     store.update((currentData) => ({
       ...currentData,
       requestStatus: {
@@ -174,7 +173,11 @@ export function getQueriesStoreForSchema(
       data: new Map(),
     });
     schemasCacheManager.set(schemaId, store);
-    void refetchQueriesForSchema(schemaId);
+    if (preload && commonData?.current_schema === schemaId) {
+      store = setSchemaQueriesStore(schemaId, commonData?.queries ?? []);
+    } else {
+      void refetchQueriesForSchema(schemaId);
+    }
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
     void refetchQueriesForSchema(schemaId);
