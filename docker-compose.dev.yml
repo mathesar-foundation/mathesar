@@ -61,6 +61,14 @@ services:
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
+    environment:
+      - MODE=${MODE-DEVELOPMENT}
+      - DEBUG=${DEBUG-True}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
+      - SECRET_KEY=${SECRET_KEY}
+      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
+      - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
