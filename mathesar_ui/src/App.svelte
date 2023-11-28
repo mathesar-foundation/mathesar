@@ -151,6 +151,7 @@
   }
 
   hr {
+    margin: 0;
     border: 0;
     border-top: 1px solid var(--slate-200);
     display: block;

@@ -1,8 +1,16 @@
 {
+  "add_database_connection": "Add Database Connection",
+  "connect_with_community_help": "Connect with Mathesar users and contributors in our community chat. Share ideas, get help, and contribute to discussions.",
   "copy_and_paste_text": "Copy and Paste Text",
   "create_a_table_by_importing": "Create a table by importing your data",
   "data_source": "Data Source",
+  "database_connections": "Database Connections",
+  "documentation_and_resources": "Documentation & Resources",
+  "feel_stuck_or_feedback": "Feel stuck or have feedback?",
+  "getting_started": "Getting Started",
+  "getting_started_help": "Read our user guide to get an overview of what you can do with Mathesar, including importing data, syncing databases, and managing users & access levels.",
   "import": "Import",
+  "join_community_chat": "Join Community Chat",
   "large_data_takes_time_warning": "Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress.",
   "linking_table": "Linking Table",
   "many_to_many": "Many to Many",
@@ -10,6 +18,7 @@
   "many_to_many_self_referential_link_description": "Multiple [baseTable] records can link to each other through a new [mapping]",
   "many_to_one": "Many to One",
   "many_to_one_link_description": "Multiple [baseTable] records can link to the same [targetTable] record.",
+  "no_database_connections_yet": "No database connections yet",
   "no_file_uploaded": "No file uploaded",
   "no_matches": "No matches for [searchValue]",
   "number_of_matches": "{count, plural, one {{count} match for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}} other {{count} matches for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}}}",
@@ -17,5 +26,8 @@
   "one_to_many_link_desc": "One [baseTable] record can be linked from multiple [targetTable] records.",
   "processing_data": "Processing Data",
   "provide_url_to_file": "Provide a URL to the file",
-  "upload_a_file": "Upload a file"
+  "setup_connections_help": "Seems you haven't set up any databases. To use Mathesar, you'll need to connect one.",
+  "start_working_with_mathesar": "Start Working with Mathesar",
+  "upload_a_file": "Upload a file",
+  "welcome_to_mathesar_user": "Welcome to Mathesar, {user}!"
 }

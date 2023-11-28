@@ -115,6 +115,7 @@ export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const LOGOUT_URL = '/auth/logout/';
 export const CONNECTIONS_URL = '/connections/';
+export const WELCOME_URL = '/welcome';
 
 export function getEditUsersPageUrl(userId: number) {
   return `${ADMIN_USERS_PAGE_URL}${userId}/`;
@@ -126,4 +127,8 @@ export function getSharedTablePageUrl(slug: string): string {
 
 export function getSharedExplorationPageUrl(slug: string): string {
   return `/shares/explorations/${slug}/`;
+}
+
+export function getDocsLink(path: string): string {
+  return `https://docs.mathesar.org${path}`;
 }
