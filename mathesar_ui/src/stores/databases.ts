@@ -1,11 +1,14 @@
 import { writable, derived } from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import databaseApi from '@mathesar/api/databases';
-import { States } from '@mathesar/api/utils/requestUtils';
 
 import type { Writable } from 'svelte/store';
 import type { Database } from '@mathesar/AppTypes';
-import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
+import type {
+  RequestStatus,
+  PaginatedResponse,
+} from '@mathesar/api/utils/requestUtils';
+import { getApiErrorMessages } from '@mathesar/api/utils/errors';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 const commonData = preloadCommonData();
@@ -15,14 +18,14 @@ export const currentDBName: Writable<Database['nickname'] | undefined> =
 
 export interface DatabaseStoreData {
   preload?: boolean;
-  state: States;
+  requestStatus: RequestStatus;
   data: Database[];
   error?: string;
 }
 
 export const databases = writable<DatabaseStoreData>({
   preload: true,
-  state: States.Done,
+  requestStatus: { state: 'success' },
   data: commonData?.connections ?? [],
 });
 
@@ -45,7 +48,7 @@ export async function reloadDatabases(): Promise<
 > {
   databases.update((currentData) => ({
     ...currentData,
-    state: States.Loading,
+    requestStatus: { state: 'processing' },
   }));
 
   try {
@@ -54,15 +57,14 @@ export async function reloadDatabases(): Promise<
     const response = await databaseRequest;
     const data = response.results || [];
     databases.set({
-      state: States.Done,
+      requestStatus: { state: 'success' },
       data,
     });
     return response;
   } catch (err) {
     databases.set({
       data: [],
-      state: States.Error,
-      error: err instanceof Error ? err.message : undefined,
+      requestStatus: { state: 'failure', errors: getApiErrorMessages(err) },
     });
     return undefined;
   }
