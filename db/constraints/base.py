@@ -64,20 +64,3 @@ class ForeignKeyConstraint(Constraint):
                 }
             ]
         )
-
-
-class ExclusionViolation(Constraint):
-    def __init__(self, name, table_oid):
-        self.name = name
-        self.table_oid = table_oid
-
-    def get_constraint_def_json(self):
-        return json.dumps(
-            [
-                {
-                    'name': self.name,
-                    'type': 'e',
-                    # what properties should i write here to add Exclusion constraints
-                }
-            ],
-        )
