@@ -57,8 +57,8 @@
         <p>{tablesRequestStatus.errors[0]}</p>
         <div>
           <SpinnerButton
-            on:click={() => {
-              void refetchTablesForSchema(schema.id);
+            onClick={async () => {
+              await refetchTablesForSchema(schema.id);
             }}
           >
             <Icon {...iconRefresh} />
@@ -92,8 +92,8 @@
           <p>{explorationsRequestStatus.errors[0]}</p>
           <div>
             <SpinnerButton
-              on:click={() => {
-                void refetchQueriesForSchema(schema.id);
+              onClick={async () => {
+                await refetchQueriesForSchema(schema.id);
               }}
             >
               <Icon {...iconRefresh} />
