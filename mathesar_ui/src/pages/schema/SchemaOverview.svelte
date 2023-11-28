@@ -57,9 +57,7 @@
         <div>
           <Button
             on:click={() => {
-              if ($currentSchemaId) {
-                void refetchTablesForSchema($currentSchemaId);
-              }
+              void refetchTablesForSchema(schema.id);
             }}
           >
             <Icon {...iconRefresh} />
@@ -94,9 +92,7 @@
           <div>
             <Button
               on:click={() => {
-                if ($currentSchemaId) {
-                  void refetchQueriesForSchema($currentSchemaId);
-                }
+                void refetchQueriesForSchema(schema.id);
               }}
             >
               <Icon {...iconRefresh} />
