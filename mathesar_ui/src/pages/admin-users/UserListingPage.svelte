@@ -101,9 +101,6 @@
     border-radius: var(--border-radius-m);
 
     hr {
-      border: 0;
-      border-top: 1px solid var(--slate-200);
-      display: block;
       margin: 0 var(--size-xx-small);
     }
   }
