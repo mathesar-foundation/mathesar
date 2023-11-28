@@ -17,6 +17,7 @@
   .container {
     display: flex;
     flex-direction: column;
+    align-self: stretch;
 
     > :global(* + *) {
       margin-top: 1rem;

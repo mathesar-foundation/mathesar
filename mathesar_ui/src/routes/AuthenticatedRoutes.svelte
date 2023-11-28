@@ -2,11 +2,11 @@
   import { Route } from 'tinro';
   import { databases } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
   import ConnectionsRoute from './ConnectionsRoute.svelte';
-  import { getDatabasePageUrl, CONNECTIONS_URL } from './urls';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -35,6 +35,6 @@
   <DatabaseRoute databaseName={decodeURIComponent(meta.params.databaseName)} />
 </Route>
 
-<Route path="/connections/*" firstmatch>
+<Route path="/connections">
   <ConnectionsRoute />
 </Route>

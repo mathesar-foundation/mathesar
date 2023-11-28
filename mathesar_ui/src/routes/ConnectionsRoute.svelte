@@ -1,11 +1,17 @@
 <script lang="ts">
-  import { Route } from 'tinro';
-  import DatabaseConnectionsList from '@mathesar/pages/connections/DatabaseConnectionsList.svelte';
+  import ConnectionsPage from '@mathesar/pages/connections/ConnectionsPage.svelte';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { iconDatabase } from '@mathesar/icons';
+  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
 </script>
 
-<Route path="/">
-  <!-- <AppendBreadcrumb item={{ type: 'database', database }} /> -->
+<AppendBreadcrumb
+  item={{
+    type: 'simple',
+    href: CONNECTIONS_URL,
+    label: 'Add Database Connection',
+    icon: iconDatabase,
+  }}
+/>
 
-  <DatabaseConnectionsList />
-</Route>
+<ConnectionsPage />
