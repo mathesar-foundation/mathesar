@@ -151,11 +151,7 @@ export function getTablesStoreForSchema(
       data: new Map(),
     });
     schemaTablesStoreMap.set(schemaId, store);
-    if (preload && commonData?.current_schema === schemaId) {
-      store = setSchemaTablesStore(schemaId, commonData?.tables ?? []);
-    } else {
-      void refetchTablesForSchema(schemaId);
-    }
+    void refetchTablesForSchema(schemaId);
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
     void refetchTablesForSchema(schemaId);

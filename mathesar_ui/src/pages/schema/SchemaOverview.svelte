@@ -18,6 +18,7 @@
   import { iconRefresh } from '@mathesar/icons';
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';
   import { refetchTablesForSchema } from '@mathesar/stores/tables';
+  import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
@@ -55,14 +56,14 @@
       <ErrorBox>
         <p>{tablesRequestStatus.errors[0]}</p>
         <div>
-          <Button
+          <SpinnerButton
             on:click={() => {
               void refetchTablesForSchema(schema.id);
             }}
           >
             <Icon {...iconRefresh} />
             <span>Retry</span>
-          </Button>
+          </SpinnerButton>
           <a href="../">
             <Button>
               <span>Go to Database</span>
@@ -90,14 +91,14 @@
         <ErrorBox>
           <p>{explorationsRequestStatus.errors[0]}</p>
           <div>
-            <Button
+            <SpinnerButton
               on:click={() => {
                 void refetchQueriesForSchema(schema.id);
               }}
             >
               <Icon {...iconRefresh} />
               <span>Retry</span>
-            </Button>
+            </SpinnerButton>
             <a href="../">
               <Button>
                 <span>Go to Database</span>
