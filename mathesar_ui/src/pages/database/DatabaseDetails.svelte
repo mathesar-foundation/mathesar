@@ -31,7 +31,6 @@
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import { router } from 'tinro';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
@@ -173,10 +172,7 @@
             </div>
           </ButtonMenuItem>
           {#if userProfile?.isSuperUser}
-            <LinkMenuItem
-              icon={iconEdit}
-              href={getDatabaseConnectionEditUrl(database.nickname)}
-            >
+            <LinkMenuItem icon={iconEdit} href="/">
               Edit Database Connection
             </LinkMenuItem>
             <ButtonMenuItem

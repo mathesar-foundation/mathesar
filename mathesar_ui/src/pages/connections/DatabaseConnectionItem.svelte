@@ -2,15 +2,11 @@
   import type { Database } from '@mathesar/AppTypes';
   import { Icon } from '@mathesar/component-library';
   import { iconEdit } from '@mathesar/icons';
-  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
 
   export let database: Database;
 </script>
 
-<a
-  class="connection-item passthrough"
-  href={getDatabaseConnectionEditUrl(database.nickname)}
->
+<a class="connection-item passthrough" href="/">
   <span class="floating-icon">
     <Icon {...iconEdit} />
   </span>

@@ -2,11 +2,11 @@
   import { Route } from 'tinro';
   import { databases } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import NoDatabaseFound from '@mathesar/pages/database/NoDatabaseFound.svelte';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
-  import { getDatabasePageUrl } from './urls';
+  import ConnectionsRoute from './ConnectionsRoute.svelte';
+  import { getDatabasePageUrl, CONNECTIONS_URL } from './urls';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -14,13 +14,12 @@
   $: firstDatabase = $databases.data?.[0];
 </script>
 
-{#if firstDatabase}
-  <Route path="/" redirect={getDatabasePageUrl(firstDatabase.nickname)} />
-{:else}
-  <Route path="/">
-    <NoDatabaseFound />
-  </Route>
-{/if}
+<Route
+  path="/"
+  redirect={firstDatabase
+    ? getDatabasePageUrl(firstDatabase.nickname)
+    : CONNECTIONS_URL}
+/>
 
 <Route path="/profile">
   <UserProfileRoute />
@@ -34,4 +33,8 @@
 
 <Route path="/db/:databaseName/*" let:meta firstmatch>
   <DatabaseRoute databaseName={decodeURIComponent(meta.params.databaseName)} />
+</Route>
+
+<Route path="/connections/*" firstmatch>
+  <ConnectionsRoute />
 </Route>

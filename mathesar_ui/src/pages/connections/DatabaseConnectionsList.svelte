@@ -2,10 +2,7 @@
   import { databases } from '@mathesar/stores/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconAddNew, iconDatabase } from '@mathesar/icons';
-  import {
-    DATABASE_CONNECTION_ADD_URL,
-    DATABASE_CONNECTION_LIST_URL,
-  } from '@mathesar/routes/urls';
+  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
   import type { Database } from '@mathesar/AppTypes';
   import { States } from '@mathesar/api/utils/requestUtils';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
@@ -56,7 +53,7 @@
 <AppendBreadcrumb
   item={{
     type: 'simple',
-    href: DATABASE_CONNECTION_LIST_URL,
+    href: CONNECTIONS_URL,
     label: 'Add Database Connection',
     icon: iconDatabase,
   }}
@@ -74,7 +71,7 @@
       on:clear={handleClearFilterQuery}
     >
       <slot slot="action">
-        <AnchorButton appearance="primary" href={DATABASE_CONNECTION_ADD_URL}>
+        <AnchorButton appearance="primary" href="/">
           <Icon {...iconAddNew} />
           <span>Add Database Connection</span>
         </AnchorButton>
