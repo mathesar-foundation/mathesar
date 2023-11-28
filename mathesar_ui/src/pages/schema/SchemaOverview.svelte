@@ -6,6 +6,10 @@
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { iconRefresh } from '@mathesar/icons';
+  import { refetchQueriesForSchema } from '@mathesar/stores/queries';
+  import { refetchTablesForSchema } from '@mathesar/stores/tables';
+  import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
@@ -14,11 +18,6 @@
   import CreateNewTableButton from './CreateNewTableButton.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
-  import { iconRefresh } from '@mathesar/icons';
-  import { refetchQueriesForSchema } from '@mathesar/stores/queries';
-  import { refetchTablesForSchema } from '@mathesar/stores/tables';
-  import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
@@ -35,7 +34,7 @@
   $: hasExplorations = explorationsMap.size > 0;
   $: showTableCreationTutorial = !hasTables && canExecuteDDL;
   $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
-  $: isExplorationsLoading = explorationsRequestStatus.state == 'processing';
+  $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
 
   // Viewers can explore, they cannot save explorations
   $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
@@ -52,7 +51,7 @@
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
       <TableSkeleton numTables={schema.num_tables} />
-    {:else if tablesRequestStatus.state == 'failure'}
+    {:else if tablesRequestStatus.state === 'failure'}
       <ErrorBox>
         <p>{tablesRequestStatus.errors[0]}</p>
         <div>
@@ -60,10 +59,9 @@
             onClick={async () => {
               await refetchTablesForSchema(schema.id);
             }}
-          >
-            <Icon {...iconRefresh} />
-            <span>Retry</span>
-          </SpinnerButton>
+            label="Retry"
+            icon={iconRefresh}
+          />
           <a href="../">
             <Button>
               <span>Go to Database</span>
@@ -87,7 +85,7 @@
       <OverviewHeader title="Saved Explorations" />
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
-      {:else if explorationsRequestStatus.state == 'failure'}
+      {:else if explorationsRequestStatus.state === 'failure'}
         <ErrorBox>
           <p>{explorationsRequestStatus.errors[0]}</p>
           <div>
@@ -95,10 +93,9 @@
               onClick={async () => {
                 await refetchQueriesForSchema(schema.id);
               }}
-            >
-              <Icon {...iconRefresh} />
-              <span>Retry</span>
-            </SpinnerButton>
+              label="Retry"
+              icon={iconRefresh}
+            />
             <a href="../">
               <Button>
                 <span>Go to Database</span>
