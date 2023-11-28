@@ -66,8 +66,9 @@
 <svg
   version="1.1"
   viewBox="0 0 {viewBoxWidth} {viewBoxHeight}"
-  width={size}
-  height={size}
+  style:font-size={size}
+  width="1em"
+  height="1em"
   class={faClasses}
   class:fa-spin={spin}
   class:fa-pulse={pulse}
