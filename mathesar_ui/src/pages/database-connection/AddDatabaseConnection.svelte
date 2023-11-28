@@ -14,7 +14,7 @@
   import DatabaseConnectionForm from './DatabaseConnectionForm.svelte';
 
   async function handleSuccess(database: Database) {
-    toast.success(`${database.name} connected successfully!`);
+    toast.success(`${database.nickname} connected successfully!`);
 
     try {
       await reflectApi.reflect();
@@ -22,7 +22,7 @@
     } catch (e) {
       toast.fromError(e);
     } finally {
-      router.goto(getDatabasePageUrl(database.name));
+      router.goto(getDatabasePageUrl(database.nickname));
     }
   }
 </script>

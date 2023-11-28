@@ -28,11 +28,11 @@ export interface DBSchemaStoreData {
 }
 
 const dbSchemaStoreMap: Map<
-  Database['name'],
+  Database['nickname'],
   Writable<DBSchemaStoreData>
 > = new Map();
 const dbSchemasRequestMap: Map<
-  Database['name'],
+  Database['nickname'],
   CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
 > = new Map();
 
@@ -43,7 +43,7 @@ function findStoreBySchemaId(id: SchemaEntry['id']) {
 }
 
 function setDBSchemaStore(
-  database: Database['name'],
+  database: Database['nickname'],
   schemas: SchemaResponse[],
 ): Writable<DBSchemaStoreData> {
   const schemaMap: DBSchemaStoreData['data'] = new Map();
@@ -67,7 +67,7 @@ function setDBSchemaStore(
 }
 
 function updateSchemaInDBSchemaStore(
-  database: Database['name'],
+  database: Database['nickname'],
   schema: SchemaResponse,
 ) {
   const store = dbSchemaStoreMap.get(database);
@@ -83,7 +83,7 @@ function updateSchemaInDBSchemaStore(
 }
 
 function removeSchemaInDBSchemaStore(
-  database: Database['name'],
+  database: Database['nickname'],
   schemaId: SchemaEntry['id'],
 ) {
   const store = dbSchemaStoreMap.get(database);
@@ -103,7 +103,7 @@ export function addCountToSchemaNumTables(
   schema: SchemaEntry,
   count: number,
 ) {
-  const store = dbSchemaStoreMap.get(database.name);
+  const store = dbSchemaStoreMap.get(database.nickname);
   if (store) {
     store.update((value) => {
       const schemaToModify = value.data.get(schema.id);
@@ -140,7 +140,7 @@ export function addCountToSchemaNumExplorations(
 }
 
 export async function refetchSchemasForDB(
-  database: Database['name'],
+  database: Database['nickname'],
 ): Promise<DBSchemaStoreData | undefined> {
   const store = dbSchemaStoreMap.get(database);
   if (!store) {
@@ -177,7 +177,7 @@ export async function refetchSchemasForDB(
 }
 
 export async function refetchSchema(
-  database: Database['name'],
+  database: Database['nickname'],
   schemaId: SchemaEntry['id'],
 ): Promise<SchemaResponse | undefined> {
   const store = dbSchemaStoreMap.get(database);
@@ -203,7 +203,7 @@ export async function refetchSchema(
 let preload = true;
 
 export function getSchemasStoreForDB(
-  database: Database['name'],
+  database: Database['nickname'],
 ): Writable<DBSchemaStoreData> {
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
@@ -212,7 +212,7 @@ export function getSchemasStoreForDB(
       data: new Map(),
     });
     dbSchemaStoreMap.set(database, store);
-    if (preload && commonData?.current_db === database) {
+    if (preload && commonData?.current_db_connection === database) {
       store = setDBSchemaStore(database, commonData?.schemas || []);
     } else {
       void refetchSchemasForDB(database);
@@ -225,7 +225,7 @@ export function getSchemasStoreForDB(
 }
 
 export function getSchemaInfo(
-  database: Database['name'],
+  database: Database['nickname'],
   schemaId: SchemaEntry['id'],
 ): SchemaEntry | undefined {
   const store = dbSchemaStoreMap.get(database);
@@ -236,7 +236,7 @@ export function getSchemaInfo(
 }
 
 export async function createSchema(
-  database: Database['name'],
+  database: Database['nickname'],
   schemaName: SchemaEntry['name'],
   schemaDescription: SchemaEntry['description'],
 ): Promise<SchemaResponse> {
@@ -250,7 +250,7 @@ export async function createSchema(
 }
 
 export async function updateSchema(
-  database: Database['name'],
+  database: Database['nickname'],
   schema: SchemaEntry,
 ): Promise<SchemaResponse> {
   const url = `/api/db/v0/schemas/${schema.id}/`;
@@ -263,7 +263,7 @@ export async function updateSchema(
 }
 
 export async function deleteSchema(
-  database: Database['name'],
+  database: Database['nickname'],
   schemaId: SchemaEntry['id'],
 ): Promise<void> {
   await deleteAPI(`/api/db/v0/schemas/${schemaId}/`);
