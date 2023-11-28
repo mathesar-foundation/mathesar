@@ -60,8 +60,10 @@ services:
       - DEBUG=${DEBUG-True}
       - DJANGO_SUPERUSER_PASSWORD=password
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
-      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
+      - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
+      - POSTGRES_USER=${POSTGRES_USER-mathesar}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
     entrypoint: dockerize -wait tcp://mathesar_dev_db:5432 -timeout 30s ./dev-run.sh
     volumes:
       - .:/code/
