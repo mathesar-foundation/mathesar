@@ -2,7 +2,7 @@
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton, Button, Icon } from '@mathesar-component-library';
+  import { AnchorButton, Button } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
