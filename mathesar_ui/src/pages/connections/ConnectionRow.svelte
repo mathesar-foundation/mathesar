@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { Database } from '@mathesar/AppTypes';
-  import { Icon } from '@mathesar/component-library';
-  import { iconEdit } from '@mathesar/icons';
+  import { Icon, Button } from '@mathesar/component-library';
+  import { iconEdit, iconDeleteMajor } from '@mathesar/icons';
 
   export let connection: Database;
 </script>
@@ -12,8 +13,15 @@
   <span>{connection.username}</span>
   <span>{connection.host}</span>
   <span>{connection.port}</span>
-  <div>
-    <Icon {...iconEdit} />
+  <div class="actions">
+    <Button appearance="secondary">
+      <Icon {...iconEdit} />
+      <span>{$_('edit')}</span>
+    </Button>
+    <Button appearance="outline-primary">
+      <Icon {...iconDeleteMajor} />
+      <span>{$_('delete')}</span>
+    </Button>
   </div>
 </div>
 
@@ -23,6 +31,12 @@
 
     > * {
       padding: var(--size-large);
+      display: flex;
+      align-items: center;
+    }
+
+    .actions > :global(* + *) {
+      margin-left: var(--size-xx-small);
     }
   }
 </style>

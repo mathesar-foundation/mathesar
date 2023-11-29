@@ -1,4 +1,5 @@
 {
+  "actions": "Actions",
   "add_database_connection": "Add Database Connection",
   "connect_with_community_help": "Connect with Mathesar users and contributors in our community chat. Share ideas, get help, and contribute to discussions.",
   "connection_name": "Connection Name",
@@ -9,7 +10,9 @@
   "data_source": "Data Source",
   "database_connections": "Database Connections",
   "database_name": "Database Name",
+  "delete": "Delete",
   "documentation_and_resources": "Documentation & Resources",
+  "edit": "Edit",
   "feel_stuck_or_feedback": "Feel stuck or have feedback?",
   "getting_started": "Getting Started",
   "getting_started_help": "Read our user guide to get an overview of what you can do with Mathesar, including importing data, syncing databases, and managing users & access levels.",

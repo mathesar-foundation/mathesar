@@ -97,7 +97,7 @@
                 <span>{$_('username')}</span>
                 <span>{$_('host')}</span>
                 <span>{$_('port')}</span>
-                <span />
+                <span>{$_('actions')}</span>
               </div>
               {#each filteredConnections as connection (connection.id)}
                 <ConnectionRow {connection} />
