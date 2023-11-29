@@ -1,5 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
+  import { _ } from 'svelte-i18n';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     DropdownMenu,
@@ -12,6 +13,7 @@
   import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
   import {
     iconAddNew,
+    iconConnection,
     iconDatabase,
     iconExploration,
     iconLogout,
@@ -21,6 +23,7 @@
   } from '@mathesar/icons';
   import {
     ADMIN_URL,
+    CONNECTIONS_URL,
     getDatabasePageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
@@ -126,6 +129,9 @@
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
           <MenuDivider />
+          <LinkMenuItem icon={iconConnection} href={CONNECTIONS_URL}>
+            {$_('database_connections')}
+          </LinkMenuItem>
           {#if $userProfile.isSuperUser}
             <LinkMenuItem
               icon={iconSettingsMajor}
