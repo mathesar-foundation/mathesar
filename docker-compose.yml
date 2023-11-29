@@ -16,12 +16,16 @@ version: "3.9"
 #--------------------------------------------------
 # CONFIG:
 #--------------------------------------------------
-x-initial_config: &initial_config
+x-config: &config
   SECRET_KEY: ${SECRET_KEY:?}                       #(Required) Replace '?' with '-' followed by your 50 character long Django SECRET_KEY, you can generate one here: https://djecrety.ir/
-  DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}     #(Optional) Replace 'http://localhost' with custom domain(s) e.g. 'yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar over http or https.
+  DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}     #(Optional) Replace 'http://localhost' with custom domain(s) e.g. 'yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar over http or https
+
+  # Edit these if not using the db service provided below.
   POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}      #(Optional) Replace 'mathesar_django' with any custom name for the internal database managed by mathesar web-service
   POSTGRES_USER: ${POSTGRES_USER:-mathesar}         #(Optional) Replace 'mathesar' with any custom username for the aforementioned database
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar} #(Optional) Replace 'mathesar' with any custom password for the aforementioned database
+  POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}      #(Optional) Replace 'mathesar_db' with the name of the host running postgres
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}             #(Optional) Replace '5432' with the port on which postgres is running
 #--------------------------------------------------
 
 
@@ -68,6 +72,19 @@ x-initial_config: &initial_config
 #     Info: Specifies the superuser password that is required to be set for the
 #           PostgreSQL docker image.
 #     Example: apollo
+#
+# POSTGRES_HOST:
+#     Default: mathesar_db (name of the db service provided below)
+#     Info: Specifies the host name on which portgres listen for connections
+#           from client applications.
+#     Example: kratos
+#
+# POSTGRES_PORT:
+#     Default: 5432
+#     Info: Specifies the port on which portgres listen for connections from
+#           client applications.
+#     Example: 5555
+#
 #------------------------------------------------------------------------------
 
 
@@ -85,6 +102,7 @@ x-initial_config: &initial_config
 # ├── media/  (stores user uploaded datafiles(.csv/.tsv) to Mathesar)
 # ├── pgdata/ (stores user's PostgreSQL data)
 # └── static/ (stores static files for Mathesar)
+#
 #------------------------------------------------------------------------------
 
 
@@ -94,6 +112,7 @@ services:
 #------------------------------------------------------------------------------
 # Mathesar web service
 #------------------------------------------------------------------------------
+#
 # - This service provides a web server required to run Mathesar.
 #
 # - This service pulls from our official Docker image hosted on Docker Hub
@@ -113,7 +132,7 @@ services:
     container_name: mathesar_service
     image: mathesar/mathesar-prod:latest
     environment: 
-      <<: *initial_config
+      <<: *config
       DJANGO_SETTINGS_MODULE: config.settings.production
       # Setting ALLOWED_HOSTS to * (allow all hosts) by default here as we are
       # relying on caddy to manage which domains could access the mathesar web service. 
@@ -150,6 +169,7 @@ services:
 #------------------------------------------------------------------------------
 # PostgreSQL
 #------------------------------------------------------------------------------
+#
 # - This service provides a Postgres database instance for connecting to the
 #   Mathesar web service.
 #
@@ -167,7 +187,7 @@ services:
   db:
     image: postgres:13
     container_name: mathesar_db
-    environment: *initial_config
+    environment: *config
     # Expose the internal port 5432 only to other containers and not 
     # the docker host.
     expose:
@@ -185,6 +205,7 @@ services:
 #------------------------------------------------------------------------------
 # Caddy
 #------------------------------------------------------------------------------
+#
 # - This service acts as a reverse proxy for the Mathesar web server.
 #
 # - This service pulls from our custom Caddy image hosted on Docker Hub
@@ -208,7 +229,7 @@ services:
   caddy-reverse-proxy:
     image: mathesar/mathesar-caddy:latest
     environment:
-     <<: *initial_config
+     <<: *config
     # SHOULD WE BE HARD CODING THESE PORTS?
     ports:
       - "80:80"
