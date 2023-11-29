@@ -106,7 +106,7 @@ POSTGRES_HOST = decouple_config('POSTGRES_HOST')
 POSTGRES_PORT = decouple_config('POSTGRES_PORT')
 
 if POSTGRES_DB and POSTGRES_USER and POSTGRES_PASSWORD and POSTGRES_HOST and POSTGRES_PORT:
-        DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}')
+    DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}')
 else:
     DATABASES['default'] = db_url('sqlite:///db.sqlite3')
 
