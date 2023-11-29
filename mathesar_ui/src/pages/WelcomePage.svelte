@@ -1,9 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { AnchorButton } from '@mathesar-component-library';
+  import { AnchorButton, Icon } from '@mathesar-component-library';
+  import { iconExternalHyperlink } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { getDocsLink } from '@mathesar/routes/urls';
+  import { getDocsLink, getWikiLink } from '@mathesar/routes/urls';
   import { ConnectionsEmptyState } from '@mathesar/systems/connections';
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -47,7 +48,8 @@
               href={getDocsLink('/')}
               target="_blank"
             >
-              {$_('start_working_with_mathesar')}
+              <span>{$_('start_working_with_mathesar')}</span>
+              <Icon {...iconExternalHyperlink} />
             </AnchorButton>
           </div>
         </div>
@@ -59,10 +61,11 @@
           <div class="footer">
             <AnchorButton
               appearance="secondary"
-              href={getDocsLink('/')}
+              href={getWikiLink('/community/')}
               target="_blank"
             >
-              {$_('join_community_chat')}
+              <span>{$_('join_community_chat')}</span>
+              <Icon {...iconExternalHyperlink} />
             </AnchorButton>
           </div>
         </div>

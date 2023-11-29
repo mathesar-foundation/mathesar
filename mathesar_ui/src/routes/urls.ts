@@ -132,3 +132,7 @@ export function getSharedExplorationPageUrl(slug: string): string {
 export function getDocsLink(path: string): string {
   return `https://docs.mathesar.org${path}`;
 }
+
+export function getWikiLink(path: string): string {
+  return `https://wiki.mathesar.org${path}`;
+}
