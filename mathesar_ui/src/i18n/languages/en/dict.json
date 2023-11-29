@@ -21,6 +21,7 @@
   "join_community_chat": "Join Community Chat",
   "large_data_takes_time_warning": "Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress.",
   "linking_table": "Linking Table",
+  "manage_connections": "Manage Connections",
   "many_to_many": "Many to Many",
   "many_to_many_link_description": "Multiple [baseTable] and [targetTable] records can link to each other through a new [mappingTable]",
   "many_to_many_self_referential_link_description": "Multiple [baseTable] records can link to each other through a new [mapping]",

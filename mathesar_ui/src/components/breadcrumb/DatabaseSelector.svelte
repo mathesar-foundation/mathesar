@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { Database } from '@mathesar/AppTypes';
-  import { iconDatabase } from '@mathesar/icons';
-  import { getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { iconDatabase, iconConnection } from '@mathesar/icons';
+  import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
   import {
     currentDBName,
     databases as dbStore,
@@ -29,4 +30,14 @@
 <BreadcrumbSelector
   data={new Map([['Databases', databases.map(makeBreadcrumbSelectorItem)]])}
   triggerLabel="Choose a Database"
+  persistentLinks={[
+    {
+      type: 'simple',
+      label: $_('manage_connections'),
+      href: CONNECTIONS_URL,
+      icon: iconConnection,
+      // TODO: Handle active states for persistent links
+      isActive: () => false,
+    },
+  ]}
 />

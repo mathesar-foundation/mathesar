@@ -4,10 +4,11 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
   import WelcomePage from '@mathesar/pages/WelcomePage.svelte';
+  import ConnectionsPage from '@mathesar/pages/connections/ConnectionsPage.svelte';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
-  import ConnectionsRoute from './ConnectionsRoute.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -46,5 +47,6 @@
 </Route>
 
 <Route path="/connections">
-  <ConnectionsRoute />
+  <AppendBreadcrumb item={{ type: 'connectionList' }} />
+  <ConnectionsPage />
 </Route>
