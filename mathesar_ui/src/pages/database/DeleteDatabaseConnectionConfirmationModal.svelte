@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Database } from '@mathesar/AppTypes';
-  import databaseConnection from '@mathesar/api/databaseConnection';
   import { getApiErrorMessages } from '@mathesar/api/utils/errors';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import {
@@ -31,7 +30,9 @@
   async function handleDisconnect() {
     disconnectStatus = { state: 'processing' };
     try {
-      await databaseConnection.delete(database.id, removeMathesarSchemas);
+      // eslint-disable-next-line no-console
+      console.log(`Implement delete for ${database.id}`);
+      // await databaseConnection.delete(database.id, removeMathesarSchemas);
       disconnectStatus = { state: 'success' };
       dispatch('success');
       handleClose();

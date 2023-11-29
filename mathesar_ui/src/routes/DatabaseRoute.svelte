@@ -12,7 +12,7 @@
   export let databaseName: string;
 
   $: $currentDBName = databaseName;
-  $: database = $databases.data?.find((db) => db.name === databaseName);
+  $: database = $databases.data?.find((db) => db.nickname === databaseName);
 
   function handleUnmount() {
     $currentDBName = undefined;

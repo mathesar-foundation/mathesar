@@ -34,12 +34,10 @@
   import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
   import { reloadDatabases } from '@mathesar/stores/databases';
   import { router } from 'tinro';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
-  import ConnectionError from './ConnectionError.svelte';
   import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
 
   const addEditModal = modal.spawnModalController();
@@ -94,7 +92,7 @@
       identifierName: schema.name,
       body: deleteSchemaConfirmationBody,
       onProceed: async () => {
-        await deleteSchemaAPI(database.name, schema.id);
+        await deleteSchemaAPI(database.nickname, schema.id);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesInSchemaTablesStore(schema.id);
       },
@@ -129,7 +127,7 @@
 
 <AppSecondaryHeader
   pageTitleAndMetaProps={{
-    name: database.name,
+    name: database.nickname,
     type: 'database',
     icon: iconDatabase,
   }}
@@ -174,10 +172,10 @@
               </Help>
             </div>
           </ButtonMenuItem>
-          {#if database.editable && userProfile?.isSuperUser}
+          {#if userProfile?.isSuperUser}
             <LinkMenuItem
               icon={iconEdit}
-              href={getDatabaseConnectionEditUrl(database.name)}
+              href={getDatabaseConnectionEditUrl(database.nickname)}
             >
               Edit Database Connection
             </LinkMenuItem>
@@ -198,45 +196,41 @@
   <div class="schema-list-title-container">
     <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
   </div>
-  {#if !isSuccessfullyConnectedDatabase(database)}
-    <ConnectionError {database} />
-  {:else}
-    <EntityContainerWithFilterBar
-      searchPlaceholder="Search Schemas"
-      bind:searchQuery={filterQuery}
-      on:clear={handleClearFilterQuery}
-    >
-      <svelte:fragment slot="action">
-        {#if canExecuteDDL}
-          <Button on:click={addSchema} appearance="primary">
-            <Icon {...iconAddNew} />
-            <span>Create Schema</span>
-          </Button>
-        {/if}
-      </svelte:fragment>
-      <p slot="resultInfo">
-        {labeledCount(displayList, 'results')}
-        for all schemas matching
-        <strong>{filterQuery}</strong>
-      </p>
-      <ul class="schema-list" slot="content">
-        {#each displayList as schema (schema.id)}
-          <li class="schema-list-item">
-            <SchemaRow
-              {database}
-              {schema}
-              canExecuteDDL={userProfile?.hasPermission(
-                { database, schema },
-                'canExecuteDDL',
-              )}
-              on:edit={() => editSchema(schema)}
-              on:delete={() => deleteSchema(schema)}
-            />
-          </li>
-        {/each}
-      </ul>
-    </EntityContainerWithFilterBar>
-  {/if}
+  <EntityContainerWithFilterBar
+    searchPlaceholder="Search Schemas"
+    bind:searchQuery={filterQuery}
+    on:clear={handleClearFilterQuery}
+  >
+    <svelte:fragment slot="action">
+      {#if canExecuteDDL}
+        <Button on:click={addSchema} appearance="primary">
+          <Icon {...iconAddNew} />
+          <span>Create Schema</span>
+        </Button>
+      {/if}
+    </svelte:fragment>
+    <p slot="resultInfo">
+      {labeledCount(displayList, 'results')}
+      for all schemas matching
+      <strong>{filterQuery}</strong>
+    </p>
+    <ul class="schema-list" slot="content">
+      {#each displayList as schema (schema.id)}
+        <li class="schema-list-item">
+          <SchemaRow
+            {database}
+            {schema}
+            canExecuteDDL={userProfile?.hasPermission(
+              { database, schema },
+              'canExecuteDDL',
+            )}
+            on:edit={() => editSchema(schema)}
+            on:delete={() => deleteSchema(schema)}
+          />
+        </li>
+      {/each}
+    </ul>
+  </EntityContainerWithFilterBar>
 </div>
 
 {#if !('error' in database)}

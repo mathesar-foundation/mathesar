@@ -43,7 +43,7 @@ export async function refetchTypesForDb(
     abstractTypesRequestMap.get(databaseId)?.cancel();
 
     const typesRequest = getAPI<AbstractTypeResponse[]>(
-      `/api/ui/v0/databases/${databaseId}/types/`,
+      `/api/ui/v0/connections/${databaseId}/types/`,
     );
     abstractTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;
@@ -85,7 +85,7 @@ function getTypesForDatabase(
     });
     databasesToAbstractTypesStoreMap.set(database.id, store);
 
-    if (preload && commonData?.current_db === database.name) {
+    if (preload && commonData?.current_db_connection === database.nickname) {
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,
