@@ -1,15 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    Tutorial,
-    Icon,
-    Button,
-    AnchorButton,
-  } from '@mathesar-component-library';
-  import { iconConnection, iconAddNew } from '@mathesar/icons';
+  import { AnchorButton } from '@mathesar-component-library';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getDocsLink } from '@mathesar/routes/urls';
+  import { ConnectionsEmptyState } from '@mathesar/systems/connections';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -33,25 +28,7 @@
       <div class="header">
         {$_('database_connections')}
       </div>
-      <div class="content" data-identifier="connection-empty-text">
-        <Tutorial>
-          <div slot="body">
-            <div data-identifier="connection-icon">
-              <Icon {...iconConnection} size="var(--size-super-ultra-large)" />
-            </div>
-            <div data-identifier="no-connections-text">
-              {$_('no_database_connections_yet')}
-            </div>
-            <div data-identifier="no-connections-help">
-              {$_('setup_connections_help')}
-            </div>
-          </div>
-          <Button slot="footer" appearance="primary">
-            <Icon {...iconAddNew} />
-            <span>{$_('add_database_connection')}</span>
-          </Button>
-        </Tutorial>
-      </div>
+      <ConnectionsEmptyState />
     </section>
     <hr />
     <section>
@@ -129,22 +106,6 @@
 
     hr {
       margin: var(--size-large) 0;
-    }
-
-    [data-identifier='connection-empty-text'] {
-      text-align: center;
-
-      [data-identifier='connection-icon'] {
-        color: var(--sand-800);
-      }
-      [data-identifier='no-connections-text'] {
-        font-size: var(--size-large);
-        font-weight: 500;
-        margin-top: var(--size-base);
-      }
-      [data-identifier='no-connections-help'] {
-        margin-top: var(--size-super-ultra-small);
-      }
     }
 
     [data-identifier='documentation-links'] {

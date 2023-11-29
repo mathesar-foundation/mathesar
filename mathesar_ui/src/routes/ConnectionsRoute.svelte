@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import ConnectionsPage from '@mathesar/pages/connections/ConnectionsPage.svelte';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconDatabase } from '@mathesar/icons';
+  import { iconConnection } from '@mathesar/icons';
   import { CONNECTIONS_URL } from '@mathesar/routes/urls';
 </script>
 
@@ -9,8 +10,8 @@
   item={{
     type: 'simple',
     href: CONNECTIONS_URL,
-    label: 'Add Database Connection',
-    icon: iconDatabase,
+    label: $_('connections'),
+    icon: iconConnection,
   }}
 />
 

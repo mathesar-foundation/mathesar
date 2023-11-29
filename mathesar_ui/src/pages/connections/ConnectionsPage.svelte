@@ -1,13 +1,15 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+  import { AnchorButton, Icon } from '@mathesar-component-library';
   import { databases } from '@mathesar/stores/databases';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import type { Database } from '@mathesar/AppTypes';
   import Errors from '@mathesar/components/Errors.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import { AnchorButton, Icon } from '@mathesar/component-library';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
-  import { makeSimplePageTitle } from '../pageTitleUtils';
+  import { ConnectionsEmptyState } from '@mathesar/systems/connections';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { RichText } from '@mathesar/components/rich-text';
   import ConnectionRow from './ConnectionRow.svelte';
 
   let filterQuery = '';
@@ -40,7 +42,7 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle('Connections')}</title>
+  <title>{makeSimplePageTitle($_('connections'))}</title>
 </svelte:head>
 
 <LayoutWithHeader
@@ -50,7 +52,7 @@
 >
   <div data-identifier="connections-header">
     <span>
-      Database Connections
+      {$_('database_connections')}
       {#if allConnections.length}({allConnections.length}){/if}
     </span>
   </div>
@@ -59,33 +61,42 @@
     {#if connectionsRequestStatus.state === 'failure'}
       <Errors errors={connectionsRequestStatus.errors} />
     {:else if allConnections.length === 0}
-      No connections found
+      <ConnectionsEmptyState />
     {:else}
       <EntityContainerWithFilterBar
-        searchPlaceholder="Search Database Connections"
+        searchPlaceholder={$_('search_database_connections')}
         bind:searchQuery={filterQuery}
         on:clear={handleClearFilterQuery}
       >
         <svelte:fragment slot="action">
           <AnchorButton appearance="primary" href="/">
             <Icon {...iconAddNew} />
-            <span>Add Database Connection</span>
+            <span>{$_('add_database_connection')}</span>
           </AnchorButton>
         </svelte:fragment>
         <p slot="resultInfo">
-          {labeledCount(filteredConnections, 'results')}
-          for all database connections matching
-          <strong>{filterQuery}</strong>
+          <RichText
+            text={$_('connections_matching_search', {
+              values: {
+                count: filteredConnections.length,
+              },
+            })}
+            let:slotName
+          >
+            {#if slotName === 'searchValue'}
+              <strong>{filterQuery}</strong>
+            {/if}
+          </RichText>
         </p>
         <svelte:fragment slot="content">
           {#if filteredConnections.length}
             <div data-identifier="connections-list-grid">
               <div data-identifier="connections-list-grid-header">
-                <span>Connection Name</span>
-                <span>Database Name</span>
-                <span>Username</span>
-                <span>Host</span>
-                <span>Port</span>
+                <span>{$_('connection_name')}</span>
+                <span>{$_('database_name')}</span>
+                <span>{$_('username')}</span>
+                <span>{$_('host')}</span>
+                <span>{$_('port')}</span>
                 <span />
               </div>
               {#each filteredConnections as connection (connection.id)}
@@ -118,7 +129,7 @@
     display: flex;
     padding: var(--size-x-large);
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: var(--size-x-small);
 
     [data-identifier='connections-list-grid'] {
