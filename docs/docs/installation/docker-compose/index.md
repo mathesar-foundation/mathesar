@@ -1,9 +1,4 @@
-# Install Mathesar via Docker Compose (Deprecated)
-
-!!! warning
-This guide is not recommended anymore. If you are already using this installation guide, you don't have to make any changes, however, if you are doing a fresh installation, please look at [Docker installation](../docker/index.md) as it provides a straightforward Mathesar setup without any additional addons.
-
-
+# Install Mathesar via Docker Compose
 
 ## Prerequisites
 
@@ -11,27 +6,37 @@ This guide is not recommended anymore. If you are already using this installatio
 
 ## Step-by-Step Guide {: #steps}
 
-1. Navigate to a directory where you'd like to store your Mathesar configuration. We recommend `/etc/mathesar`, but it can be any directory.
+1. Download our [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file.
 
     ```
-    sudo mkdir -p /etc/mathesar
-    cd /etc/mathesar
+    sudo wget https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml
     ```
 
-1. Download our [docker-compose.yml](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml), and [.env.example](https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/.env.example) files to the directory you've chosen.
+1. Open the downloaded docker-compose file using your favourite text editor.
+
+1. Set the required environment variable(s) in the **CONFIG** section of the docker compose file.
+    
+    !!! example
+        If you are using the [default database container](../../configuration/customize-docker-compose#default-db), your `.env` file should look something like this
+        <!-- TODO: remove this bullet point because it refers to a deleted page -->
+        
+        ``` bash
+        SECRET_KEY: ${SECRET_KEY:?}
+        DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}
+
+        # Edit these if not using the db service provided below.
+        POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
+        POSTGRES_USER: ${POSTGRES_USER:-mathesar}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+        POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}
+        POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+        ```
+
+1. Run the file using:
 
     ```
-    sudo wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/docker-compose.yml
-    sudo wget https://github.com/centerofci/mathesar/raw/{{mathesar_version}}/.env.example
+    sudo docker compose -f docker-compose.yml up
     ```
-
-1. Rename `.env.example` to `.env`
-
-    ```
-    sudo mv .env.example .env
-    ```
-
-    Your custom `.env` file will be used for setting [configuration variables](../../configuration/env-variables.md).
 
 1. Set up the database
     - To use the [default database server](../../configuration/customize-docker-compose#default-db) bundled with Mathesar, no additional steps are necessary. The database service will start along with the Mathesar web server.
