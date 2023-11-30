@@ -1,6 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import databaseApi from '@mathesar/api/databases';
+import connectionsApi from '@mathesar/api/connections';
 
 import type { Writable } from 'svelte/store';
 import type { Database } from '@mathesar/AppTypes';
@@ -53,7 +53,7 @@ export async function reloadDatabases(): Promise<
 
   try {
     databaseRequest?.cancel();
-    databaseRequest = databaseApi.list();
+    databaseRequest = connectionsApi.list();
     const response = await databaseRequest;
     const data = response.results || [];
     databases.set({
