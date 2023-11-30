@@ -3,16 +3,27 @@
   import { Icon, Button } from '@mathesar-component-library';
   import { iconEdit, iconDeleteMajor } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
-  import { EditConnectionModal } from '@mathesar/systems/connections';
-  import type { ConnectionModel } from '@mathesar/stores/databases';
+  import {
+    EditConnectionModal,
+    DeleteConnectionModal,
+  } from '@mathesar/systems/connections';
+  import type { Connection } from '@mathesar/api/connections';
+  import { getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { iconConnection } from '@mathesar/icons';
 
   const editConnectionModalController = modal.spawnModalController();
+  const deleteConnectionModalController = modal.spawnModalController();
 
-  export let connection: ConnectionModel;
+  export let connection: Connection;
 </script>
 
 <div data-identifier="connection-row" class="grid-row">
-  <span>{connection.nickname}</span>
+  <span>
+    <a href={getDatabasePageUrl(connection.nickname)}>
+      <Icon {...iconConnection} />
+      {connection.nickname}
+    </a>
+  </span>
   <span>{connection.database}</span>
   <span>{connection.username}</span>
   <span>{connection.host}</span>
@@ -25,14 +36,21 @@
       <Icon {...iconEdit} />
       <span>{$_('edit')}</span>
     </Button>
-    <Button appearance="outline-primary">
+    <Button
+      appearance="outline-primary"
+      on:click={() => deleteConnectionModalController.open()}
+    >
       <Icon {...iconDeleteMajor} />
-      <span>{$_('disconnect')}</span>
+      <span>{$_('delete')}</span>
     </Button>
   </div>
 </div>
 
 <EditConnectionModal controller={editConnectionModalController} {connection} />
+<DeleteConnectionModal
+  controller={deleteConnectionModalController}
+  {connection}
+/>
 
 <style lang="scss">
   [data-identifier='connection-row'] {

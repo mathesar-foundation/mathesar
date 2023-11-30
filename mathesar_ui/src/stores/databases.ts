@@ -1,6 +1,12 @@
 /* eslint-disable max-classes-per-file */
 
-import { writable, derived, type Writable, type Readable } from 'svelte/store';
+import {
+  writable,
+  derived,
+  type Writable,
+  type Readable,
+  get,
+} from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import connectionsApi, {
   type Connection,
@@ -11,7 +17,7 @@ import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 const commonData = preloadCommonData();
 
-export class ConnectionModel {
+class ConnectionModel {
   readonly id: Connection['id'];
 
   readonly nickname: Connection['nickname'];
@@ -96,7 +102,7 @@ class ConnectionsStore {
   async updateConnection(
     connectionId: Connection['id'],
     properties: Partial<UpdatableConnectionProperties>,
-  ) {
+  ): Promise<Connection> {
     const updatedConnection = await connectionsApi.update(
       connectionId,
       properties,
@@ -111,6 +117,27 @@ class ConnectionsStore {
       }),
     );
     return newConnectionModel;
+  }
+
+  async deleteConnection(
+    connectionId: Connection['id'],
+    deleteMathesarSchemas = false,
+  ) {
+    const connections = get(this.connections);
+    const connectionToDelete = connections.find(
+      (conn) => conn.id === connectionId,
+    );
+    const otherConnectionsUseSameDb = !!connections.find(
+      (conn) =>
+        conn.id !== connectionId &&
+        conn.database === connectionToDelete?.database,
+    );
+    const mathesarSchemasShouldBeDeleted =
+      !otherConnectionsUseSameDb && deleteMathesarSchemas;
+    await connectionsApi.delete(connectionId, mathesarSchemasShouldBeDeleted);
+    this.connections.update((conns) =>
+      conns.filter((conn) => conn.id !== connectionId),
+    );
   }
 }
 

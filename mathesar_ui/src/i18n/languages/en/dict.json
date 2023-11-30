@@ -1,4 +1,5 @@
 {
+  "action_cannot_be_undone": "This action cannot be undone",
   "actions": "Actions",
   "add_database_connection": "Add Database Connection",
   "change_password": "Change Password",
@@ -6,6 +7,7 @@
   "choose_connection": "Choose a Database Connection",
   "connect_with_community_help": "Connect with Mathesar users and contributors in our community chat. Share ideas, get help, and contribute to discussions.",
   "connection_name": "Connection Name",
+  "connection_deleted_successfully": "The connection has been successfully deleted",
   "connection_updated_successfully": "The connection has been successfully updated",
   "connections": "Connections",
   "connections_matching_search": "{count, plural, one {{count} connection matches [searchValue]} other {{count} connections match [searchValue]}}",
@@ -15,6 +17,11 @@
   "database_connections": "Database Connections",
   "database_name": "Database Name",
   "delete": "Delete",
+  "delete_associated_mathesar_schemas_help": "Delete associated Mathesar schemas (includes all dependent database objects)",
+  "delete_connection": "Delete Connection",
+  "delete_connection_db_delete_info": "If you would like to delete the database too, you will need to do so from outside Mathesar by deleting it directly in PostgreSQL.",
+  "delete_connection_info": "The database will not be deleted and will still be accessible outside Mathesar. You may choose to reconnect to it in the future; however, upon disconnecting you will lose Mathesar-specific metadata such as saved explorations, customized column display options, and customized record summary templates.",
+  "delete_connection_with_name": "Delete [connectionName] Database Connection?",
   "disconnect": "Disconnect",
   "documentation_and_resources": "Documentation & Resources",
   "edit": "Edit",
@@ -26,6 +33,7 @@
   "import": "Import",
   "join_community_chat": "Join Community Chat",
   "large_data_takes_time_warning": "Large data sets can sometimes take several minutes to process. Please do not leave this page or close the browser tab while the import is in progress.",
+  "learn_implications_deleting_mathesar_schemas": "Learn more about the implications of deleting Mathesar schemas.",
   "linking_table": "Linking Table",
   "manage_connections": "Manage Connections",
   "many_to_many": "Many to Many",
@@ -51,6 +59,7 @@
   "upload_a_file": "Upload a file",
   "user_needs_create_connect_privileges": "The user will need to have CONNECT and CREATE privileges.",
   "username": "Username",
+  "using_custom_types": "Using custom types?",
   "welcome_to_mathesar_user": "Welcome to Mathesar, {user}!",
   "why_is_this_needed": "Why is this needed?"
 }

@@ -6,10 +6,8 @@
     TextInput,
     PasswordInput,
   } from '@mathesar-component-library';
-  import {
-    connectionsStore,
-    type ConnectionModel,
-  } from '@mathesar/stores/databases';
+  import { connectionsStore } from '@mathesar/stores/databases';
+  import type { Connection } from '@mathesar/api/connections';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import {
@@ -26,7 +24,7 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let controller: ModalController;
-  export let connection: ConnectionModel;
+  export let connection: Connection;
 
   $: connectionName = requiredField(connection?.nickname ?? '');
   $: databaseName = requiredField(connection?.database ?? '');

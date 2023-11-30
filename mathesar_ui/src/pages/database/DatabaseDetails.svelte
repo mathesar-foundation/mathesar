@@ -31,12 +31,13 @@
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import { DeleteConnectionModal } from '@mathesar/systems/connections';
+  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
   import { router } from 'tinro';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
-  import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
@@ -115,11 +116,6 @@
     } finally {
       isReflectionRunning = false;
     }
-  }
-
-  async function handleSuccessfulDeleteConnection() {
-    // await reloadDatabases();
-    router.goto('/');
   }
 </script>
 
@@ -236,10 +232,10 @@
   />
 
   <DbAccessControlModal controller={accessControlModal} {database} />
-  <DeleteDatabaseConnectionConfirmationModal
+  <DeleteConnectionModal
     controller={deleteConnectionModal}
-    {database}
-    on:success={handleSuccessfulDeleteConnection}
+    connection={database}
+    on:delete={() => router.goto(CONNECTIONS_URL)}
   />
 {/if}
 

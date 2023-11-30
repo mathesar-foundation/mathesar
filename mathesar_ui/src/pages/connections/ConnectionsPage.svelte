@@ -1,10 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { AnchorButton, Icon } from '@mathesar-component-library';
-  import {
-    connectionsStore,
-    type ConnectionModel,
-  } from '@mathesar/stores/databases';
+  import { connectionsStore } from '@mathesar/stores/databases';
+  import type { Connection } from '@mathesar/api/connections';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import Errors from '@mathesar/components/Errors.svelte';
@@ -19,14 +17,14 @@
   $: connections = connectionsStore.connections;
   $: connectionsRequestStatus = connectionsStore.requestStatus;
 
-  function isMatch(connection: ConnectionModel, q: string) {
+  function isMatch(connection: Connection, q: string) {
     return (
       connection.nickname.toLowerCase().includes(q) ||
       connection.database.toLowerCase().includes(q)
     );
   }
 
-  function filterConnections(_connections: ConnectionModel[], query: string) {
+  function filterConnections(_connections: Connection[], query: string) {
     return _connections.filter((connection) => {
       if (query) {
         const sanitizedQuery = query.trim().toLowerCase();

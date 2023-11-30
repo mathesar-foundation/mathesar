@@ -1,5 +1,11 @@
 import type { Database } from '@mathesar/AppTypes';
-import { getAPI, patchAPI, type PaginatedResponse } from './utils/requestUtils';
+import {
+  getAPI,
+  patchAPI,
+  type PaginatedResponse,
+  deleteAPI,
+  addQueryParamsToUrl,
+} from './utils/requestUtils';
 
 export type Connection = Database;
 
@@ -28,7 +34,20 @@ function update(
   );
 }
 
+function deleteConnection(
+  connectionId: Connection['id'],
+  deleteMathesarSchemas = false,
+) {
+  const params = { del_msar_schemas: deleteMathesarSchemas };
+  const url = addQueryParamsToUrl(
+    `/api/db/v0/connections/${connectionId}/`,
+    params,
+  );
+  return deleteAPI(url);
+}
+
 export default {
   list,
   update,
+  delete: deleteConnection,
 };
