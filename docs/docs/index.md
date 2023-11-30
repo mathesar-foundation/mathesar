@@ -13,7 +13,6 @@ See our [conceptual overview](./concepts.md) to learn more about the inner worki
 You can self-host Mathesar by following one of the guides below:
 
 - [Install using Docker image](installation/docker/index.md)
-- [Install using Debian package](installation/debian/index.md)
 
 !!! info "More installation methods coming soon"
     We're working on supporting additional installation methods, and we'd appreciate feedback on which ones to prioritize. Please comment [on this issue](https://github.com/centerofci/mathesar/issues/2509) if you have thoughts.

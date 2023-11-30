@@ -9,7 +9,6 @@ nav:
       - Conceptual Overview: concepts.md
   - Installation:
       - Install using Docker image: installation/docker/index.md
-      - Install using Debian package: installation/debian/index.md
   - Configuration:
       - Environment variables: configuration/env-variables.md
       - Connect to an existing database server: configuration/connect-to-existing-db.md
