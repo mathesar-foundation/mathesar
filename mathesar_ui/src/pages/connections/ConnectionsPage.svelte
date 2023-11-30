@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { AnchorButton, Icon } from '@mathesar-component-library';
+  import { Button, Icon } from '@mathesar-component-library';
   import { connectionsStore } from '@mathesar/stores/databases';
   import type { Connection } from '@mathesar/api/connections';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -75,14 +75,13 @@
         on:clear={handleClearFilterQuery}
       >
         <svelte:fragment slot="action">
-          <AnchorButton
+          <Button
             appearance="primary"
-            href="/"
             on:click={() => addConnectionModalController.open()}
           >
             <Icon {...iconAddNew} />
             <span>{$_('add_database_connection')}</span>
-          </AnchorButton>
+          </Button>
         </svelte:fragment>
 
         <p slot="resultInfo">

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     Help,
@@ -30,8 +31,10 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { DeleteConnectionModal } from '@mathesar/systems/connections';
+  import {
+    EditConnectionModal,
+    DeleteConnectionModal,
+  } from '@mathesar/systems/connections';
   import { CONNECTIONS_URL } from '@mathesar/routes/urls';
   import { router } from 'tinro';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
@@ -41,6 +44,7 @@
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
+  const editConnectionModal = modal.spawnModalController();
   const deleteConnectionModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -167,14 +171,18 @@
             </div>
           </ButtonMenuItem>
           {#if userProfile?.isSuperUser}
-            <LinkMenuItem icon={iconEdit} href="/">
-              Edit Database Connection
-            </LinkMenuItem>
+            <ButtonMenuItem
+              icon={iconEdit}
+              on:click={() => editConnectionModal.open()}
+            >
+              {$_('edit_connection')}
+            </ButtonMenuItem>
             <ButtonMenuItem
               icon={iconDeleteMajor}
+              danger
               on:click={() => deleteConnectionModal.open()}
             >
-              Disconnect Database
+              {$_('delete_connection')}
             </ButtonMenuItem>
           {/if}
         </DropdownMenu>
@@ -224,20 +232,20 @@
   </EntityContainerWithFilterBar>
 </div>
 
-{#if !('error' in database)}
-  <AddEditSchemaModal
-    controller={addEditModal}
-    {database}
-    schema={targetSchema}
-  />
+<AddEditSchemaModal
+  controller={addEditModal}
+  {database}
+  schema={targetSchema}
+/>
 
-  <DbAccessControlModal controller={accessControlModal} {database} />
-  <DeleteConnectionModal
-    controller={deleteConnectionModal}
-    connection={database}
-    on:delete={() => router.goto(CONNECTIONS_URL)}
-  />
-{/if}
+<DbAccessControlModal controller={accessControlModal} {database} />
+
+<EditConnectionModal controller={editConnectionModal} connection={database} />
+<DeleteConnectionModal
+  controller={deleteConnectionModal}
+  connection={database}
+  on:delete={() => router.goto(CONNECTIONS_URL)}
+/>
 
 <style lang="scss">
   .schema-list-wrapper {

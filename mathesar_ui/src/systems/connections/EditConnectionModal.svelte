@@ -69,7 +69,7 @@
 
 <ControlledModal {controller}>
   <svelte:fragment slot="title">
-    <RichText text={$_('edit_connection')} let:slotName>
+    <RichText text={$_('edit_connection_with_name')} let:slotName>
       {#if slotName === 'connectionName'}
         <Identifier>{connection.nickname}</Identifier>
       {/if}
