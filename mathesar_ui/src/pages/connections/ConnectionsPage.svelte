@@ -180,6 +180,10 @@
           text-align: left;
         }
       }
+
+      tbody > :global(tr:not(first-child)) {
+        border-top: 1px solid var(--slate-200);
+      }
     }
   }
 </style>

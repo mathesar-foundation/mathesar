@@ -64,7 +64,7 @@
 <style lang="scss">
   [data-identifier='connection-row'] {
     td {
-      padding: var(--size-large);
+      padding: var(--size-base);
     }
 
     .actions {
