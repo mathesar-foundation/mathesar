@@ -1,6 +1,8 @@
 {
   "actions": "Actions",
   "add_database_connection": "Add Database Connection",
+  "change_password": "Change Password",
+  "change_password_leave_empty_help": "If you want to change your password, enter a new one below. Otherwise, just leave the field blank.",
   "connect_with_community_help": "Connect with Mathesar users and contributors in our community chat. Share ideas, get help, and contribute to discussions.",
   "connection_name": "Connection Name",
   "connections": "Connections",
@@ -13,6 +15,7 @@
   "delete": "Delete",
   "documentation_and_resources": "Documentation & Resources",
   "edit": "Edit",
+  "edit_connection": "Edit Connection: [connectionName]",
   "feel_stuck_or_feedback": "Feel stuck or have feedback?",
   "getting_started": "Getting Started",
   "getting_started_help": "Read our user guide to get an overview of what you can do with Mathesar, including importing data, syncing databases, and managing users & access levels.",
@@ -33,6 +36,8 @@
   "number_of_matches": "{count, plural, one {{count} match for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}} other {{count} matches for [searchValue] {categoryCount, plural, one {in [categoryName]} other{}}}}",
   "one_to_many": "One to Many",
   "one_to_many_link_desc": "One [baseTable] record can be linked from multiple [targetTable] records.",
+  "password": "Password",
+  "password_encryption_help": "This password will be AES encrypted with Mathesar's secret key and stored in Mathesar's internal database.",
   "port": "Port",
   "processing_data": "Processing Data",
   "provide_url_to_file": "Provide a URL to the file",
@@ -41,5 +46,7 @@
   "start_working_with_mathesar": "Start Working with Mathesar",
   "upload_a_file": "Upload a file",
   "username": "Username",
-  "welcome_to_mathesar_user": "Welcome to Mathesar, {user}!"
+  "user_needs_create_connect_privileges": "The user will need to have CONNECT and CREATE privileges.",
+  "welcome_to_mathesar_user": "Welcome to Mathesar, {user}!",
+  "why_is_this_needed": "Why is this needed?"
 }

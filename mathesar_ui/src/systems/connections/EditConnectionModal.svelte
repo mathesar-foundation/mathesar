@@ -1,0 +1,134 @@
+<script lang="ts">
+  import { _ } from 'svelte-i18n';
+  import {
+    ControlledModal,
+    type ModalController,
+    TextInput,
+    PasswordInput,
+  } from '@mathesar-component-library';
+  import type { Database } from '@mathesar/AppTypes';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
+  import {
+    FormSubmit,
+    makeForm,
+    requiredField,
+    isInPortRange,
+    optionalField,
+    Field,
+    FieldLayout,
+  } from '@mathesar/components/form';
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
+
+  export let controller: ModalController;
+  export let connection: Database;
+
+  $: connectionName = requiredField(connection?.nickname ?? '');
+  $: databaseName = requiredField(connection?.database ?? '');
+  $: host = requiredField(connection?.host ?? '');
+  $: port = requiredField(connection?.port ?? 5432, [isInPortRange()]);
+  $: username = requiredField(connection?.username ?? '');
+  $: password = optionalField('');
+
+  $: formFields = {
+    databaseName,
+    host,
+    port,
+    username,
+    password,
+  };
+  $: form = makeForm(formFields);
+
+  async function save() {
+    //
+  }
+</script>
+
+<ControlledModal {controller}>
+  <svelte:fragment slot="title">
+    <RichText text={$_('edit_connection')} let:slotName>
+      {#if slotName === 'connectionName'}
+        <Identifier>{connection.nickname}</Identifier>
+      {/if}
+    </RichText>
+  </svelte:fragment>
+
+  <div>
+    <Field
+      label={$_('connection_name')}
+      field={connectionName}
+      input={{
+        component: TextInput,
+        props: { disabled: true },
+      }}
+      layout="stacked"
+    />
+    <hr />
+    <Field label={$_('database_name')} field={databaseName} layout="stacked" />
+    <FieldLayout>
+      <div data-identifier="host-port-config">
+        <div data-identifier="host-config">
+          <Field label={$_('host')} field={host} layout="stacked" />
+        </div>
+        <div data-identifier="port-config">
+          <Field label={$_('port')} field={port} layout="stacked" />
+        </div>
+      </div>
+    </FieldLayout>
+    <Field label={$_('username')} field={username} layout="stacked" />
+    <div class="help">
+      {$_('user_needs_create_connect_privileges')}
+      <DocsLink path="/">
+        {$_('why_is_this_needed')}
+      </DocsLink>
+    </div>
+    <hr />
+    <FieldLayout>
+      <div>{$_('change_password')}</div>
+      <div class="help">
+        {$_('change_password_leave_empty_help')}
+      </div>
+    </FieldLayout>
+    <Field
+      label={$_('password')}
+      field={password}
+      input={{
+        component: PasswordInput,
+        props: { autocomplete: 'new-password' },
+      }}
+      layout="stacked"
+    />
+    <div class="help">
+      {$_('password_encryption_help')}
+    </div>
+  </div>
+
+  <div slot="footer">
+    <FormSubmit {form} onCancel={form.reset} onProceed={save} />
+  </div>
+</ControlledModal>
+
+<style lang="scss">
+  hr {
+    margin: var(--size-large) 0;
+  }
+
+  .help {
+    font-size: var(--size-small);
+    color: var(--slate-400);
+    margin: var(--size-super-ultra-small) 0;
+  }
+
+  [data-identifier='host-port-config'] {
+    display: flex;
+    gap: var(--size-base);
+
+    > [data-identifier='host-config'] {
+      flex: 1 1 auto;
+    }
+
+    > [data-identifier='port-config'] {
+      flex: 1 1 5rem;
+    }
+  }
+</style>

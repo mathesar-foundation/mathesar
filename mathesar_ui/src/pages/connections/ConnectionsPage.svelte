@@ -136,6 +136,7 @@
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       border: 1px solid var(--slate-200);
+      border-radius: var(--border-radius-m);
 
       [data-identifier='connections-list-grid-header'] {
         display: contents;
