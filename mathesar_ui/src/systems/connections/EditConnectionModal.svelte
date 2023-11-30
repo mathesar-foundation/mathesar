@@ -6,7 +6,10 @@
     TextInput,
     PasswordInput,
   } from '@mathesar-component-library';
-  import type { Database } from '@mathesar/AppTypes';
+  import {
+    connectionsStore,
+    type ConnectionModel,
+  } from '@mathesar/stores/databases';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import {
@@ -19,9 +22,11 @@
     FieldLayout,
   } from '@mathesar/components/form';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
+  import { toast } from '@mathesar/stores/toast';
+  import { getErrorMessage } from '@mathesar/utils/errors';
 
   export let controller: ModalController;
-  export let connection: Database;
+  export let connection: ConnectionModel;
 
   $: connectionName = requiredField(connection?.nickname ?? '');
   $: databaseName = requiredField(connection?.database ?? '');
@@ -40,7 +45,27 @@
   $: form = makeForm(formFields);
 
   async function save() {
-    //
+    const formValues = $form.values;
+    const passwordValue =
+      formValues.password !== '' ? formValues.password : undefined;
+    try {
+      await connectionsStore.updateConnection(connection.id, {
+        database: formValues.databaseName,
+        host: formValues.host,
+        port: formValues.port,
+        username: formValues.username,
+        password: passwordValue,
+      });
+      toast.success($_('connection_updated_successfully'));
+      controller.close();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  }
+
+  function cancel() {
+    form.reset();
+    controller.close();
   }
 </script>
 
@@ -104,7 +129,12 @@
   </div>
 
   <div slot="footer">
-    <FormSubmit {form} onCancel={form.reset} onProceed={save} />
+    <FormSubmit
+      {form}
+      onCancel={cancel}
+      onProceed={save}
+      proceedButton={{ label: $_('update_connection') }}
+    />
   </div>
 </ControlledModal>
 

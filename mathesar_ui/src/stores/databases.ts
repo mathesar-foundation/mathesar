@@ -2,7 +2,10 @@
 
 import { writable, derived, type Writable, type Readable } from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import type { Connection } from '@mathesar/api/connections';
+import connectionsApi, {
+  type Connection,
+  type UpdatableConnectionProperties,
+} from '@mathesar/api/connections';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
@@ -88,6 +91,26 @@ class ConnectionsStore {
 
   clearCurrentConnectionName() {
     this.currentConnectionName.set(undefined);
+  }
+
+  async updateConnection(
+    connectionId: Connection['id'],
+    properties: Partial<UpdatableConnectionProperties>,
+  ) {
+    const updatedConnection = await connectionsApi.update(
+      connectionId,
+      properties,
+    );
+    const newConnectionModel = new ConnectionModel(updatedConnection);
+    this.connections.update((connections) =>
+      connections.map((connection) => {
+        if (connection.id === connectionId) {
+          return newConnectionModel;
+        }
+        return connection;
+      }),
+    );
+    return newConnectionModel;
   }
 }
 

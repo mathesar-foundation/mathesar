@@ -1,14 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { Database } from '@mathesar/AppTypes';
   import { Icon, Button } from '@mathesar-component-library';
   import { iconEdit, iconDeleteMajor } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { EditConnectionModal } from '@mathesar/systems/connections';
+  import type { ConnectionModel } from '@mathesar/stores/databases';
 
   const editConnectionModalController = modal.spawnModalController();
 
-  export let connection: Database;
+  export let connection: ConnectionModel;
 </script>
 
 <div data-identifier="connection-row" class="grid-row">
@@ -27,7 +27,7 @@
     </Button>
     <Button appearance="outline-primary">
       <Icon {...iconDeleteMajor} />
-      <span>{$_('delete')}</span>
+      <span>{$_('disconnect')}</span>
     </Button>
   </div>
 </div>
