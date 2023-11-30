@@ -1,5 +1,6 @@
 import type { TreeItem } from '@mathesar-component-library/types';
 
+/** @deprecated Use Connection interface from '/api/connections' instead */
 export interface Database {
   id: number;
   nickname: string;
