@@ -283,12 +283,17 @@ def reflect_all(_):
 
 @login_required
 def home(request):
-    database = get_current_database(request, None)
-    if database is None:
+    connection_list = get_database_list(request)
+    number_of_connections = len(connection_list)
+    if number_of_connections > 1:
+        return redirect('connections')
+    elif number_of_connections == 1:
+        db = connection_list[0]
+        return redirect('schemas', db_name=db['nickname'])
+    else:
         return render(request, 'mathesar/index.html', {
-            'common_data': get_common_data(request, database)
+            'common_data': get_common_data(request)
         })
-    return redirect('schemas', db_name=database.name)
 
 
 @login_required
