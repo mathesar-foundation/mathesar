@@ -7,10 +7,16 @@
   import { iconAddNew } from '@mathesar/icons';
   import Errors from '@mathesar/components/Errors.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import { ConnectionsEmptyState } from '@mathesar/systems/connections';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { RichText } from '@mathesar/components/rich-text';
+  import { modal } from '@mathesar/stores/modal';
+  import {
+    ConnectionsEmptyState,
+    AddConnectionModal,
+  } from '@mathesar/systems/connections';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import ConnectionRow from './ConnectionRow.svelte';
+
+  const addConnectionModalController = modal.spawnModalController();
 
   let filterQuery = '';
 
@@ -69,11 +75,16 @@
         on:clear={handleClearFilterQuery}
       >
         <svelte:fragment slot="action">
-          <AnchorButton appearance="primary" href="/">
+          <AnchorButton
+            appearance="primary"
+            href="/"
+            on:click={() => addConnectionModalController.open()}
+          >
             <Icon {...iconAddNew} />
             <span>{$_('add_database_connection')}</span>
           </AnchorButton>
         </svelte:fragment>
+
         <p slot="resultInfo">
           <RichText
             text={$_('connections_matching_search', {
@@ -88,6 +99,7 @@
             {/if}
           </RichText>
         </p>
+
         <svelte:fragment slot="content">
           {#if filteredConnections.length}
             <div data-identifier="connections-list-grid">
@@ -109,6 +121,8 @@
     {/if}
   </section>
 </LayoutWithHeader>
+
+<AddConnectionModal controller={addConnectionModalController} />
 
 <style lang="scss">
   [data-identifier='connections-header'] {

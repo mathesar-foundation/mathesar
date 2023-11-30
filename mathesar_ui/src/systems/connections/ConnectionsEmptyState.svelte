@@ -2,6 +2,10 @@
   import { _ } from 'svelte-i18n';
   import { Tutorial, Icon, Button } from '@mathesar-component-library';
   import { iconConnection, iconAddNew } from '@mathesar/icons';
+  import { modal } from '@mathesar/stores/modal';
+  import AddConnectionModal from './AddConnectionModal.svelte';
+
+  const addConnectionModalController = modal.spawnModalController();
 </script>
 
 <div class="content" data-identifier="connection-empty-text">
@@ -17,12 +21,18 @@
         {$_('setup_connections_help')}
       </div>
     </div>
-    <Button slot="footer" appearance="primary">
+    <Button
+      slot="footer"
+      appearance="primary"
+      on:click={() => addConnectionModalController.open()}
+    >
       <Icon {...iconAddNew} />
       <span>{$_('add_database_connection')}</span>
     </Button>
   </Tutorial>
 </div>
+
+<AddConnectionModal controller={addConnectionModalController} />
 
 <style lang="scss">
   [data-identifier='connection-empty-text'] {
