@@ -31,7 +31,6 @@
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { reloadDatabases } from '@mathesar/stores/databases';
   import { router } from 'tinro';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
@@ -119,7 +118,7 @@
   }
 
   async function handleSuccessfulDeleteConnection() {
-    await reloadDatabases();
+    // await reloadDatabases();
     router.goto('/');
   }
 </script>

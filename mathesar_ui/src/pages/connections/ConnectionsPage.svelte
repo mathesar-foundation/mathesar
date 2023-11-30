@@ -1,10 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { AnchorButton, Icon } from '@mathesar-component-library';
-  import { databases } from '@mathesar/stores/databases';
+  import {
+    connectionsStore,
+    type ConnectionModel,
+  } from '@mathesar/stores/databases';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import type { Database } from '@mathesar/AppTypes';
   import Errors from '@mathesar/components/Errors.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { ConnectionsEmptyState } from '@mathesar/systems/connections';
@@ -14,17 +16,17 @@
 
   let filterQuery = '';
 
-  $: allConnections = $databases.data;
-  $: connectionsRequestStatus = $databases.requestStatus;
+  $: connections = connectionsStore.connections;
+  $: connectionsRequestStatus = connectionsStore.requestStatus;
 
-  function isMatch(connection: Database, q: string) {
+  function isMatch(connection: ConnectionModel, q: string) {
     return (
       connection.nickname.toLowerCase().includes(q) ||
       connection.database.toLowerCase().includes(q)
     );
   }
 
-  function filterConnections(_connections: Database[], query: string) {
+  function filterConnections(_connections: ConnectionModel[], query: string) {
     return _connections.filter((connection) => {
       if (query) {
         const sanitizedQuery = query.trim().toLowerCase();
@@ -38,7 +40,7 @@
     filterQuery = '';
   }
 
-  $: filteredConnections = filterConnections(allConnections ?? [], filterQuery);
+  $: filteredConnections = filterConnections($connections ?? [], filterQuery);
 </script>
 
 <svelte:head>
@@ -53,14 +55,14 @@
   <div data-identifier="connections-header">
     <span>
       {$_('database_connections')}
-      {#if allConnections.length}({allConnections.length}){/if}
+      {#if $connections.length}({$connections.length}){/if}
     </span>
   </div>
 
   <section data-identifier="connections-container">
-    {#if connectionsRequestStatus.state === 'failure'}
-      <Errors errors={connectionsRequestStatus.errors} />
-    {:else if allConnections.length === 0}
+    {#if $connectionsRequestStatus.state === 'failure'}
+      <Errors errors={$connectionsRequestStatus.errors} />
+    {:else if $connections.length === 0}
       <ConnectionsEmptyState />
     {:else}
       <EntityContainerWithFilterBar

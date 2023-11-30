@@ -3,6 +3,7 @@
   "add_database_connection": "Add Database Connection",
   "change_password": "Change Password",
   "change_password_leave_empty_help": "If you want to change your password, enter a new one below. Otherwise, just leave the field blank.",
+  "choose_connection": "Choose a Database Connection",
   "connect_with_community_help": "Connect with Mathesar users and contributors in our community chat. Share ideas, get help, and contribute to discussions.",
   "connection_name": "Connection Name",
   "connections": "Connections",
@@ -45,8 +46,8 @@
   "setup_connections_help": "Seems you haven't set up any databases. To use Mathesar, you'll need to connect one.",
   "start_working_with_mathesar": "Start Working with Mathesar",
   "upload_a_file": "Upload a file",
-  "username": "Username",
   "user_needs_create_connect_privileges": "The user will need to have CONNECT and CREATE privileges.",
+  "username": "Username",
   "welcome_to_mathesar_user": "Welcome to Mathesar, {user}!",
   "why_is_this_needed": "Why is this needed?"
 }

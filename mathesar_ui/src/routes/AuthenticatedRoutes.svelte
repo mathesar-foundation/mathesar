@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import { databases } from '@mathesar/stores/databases';
+  import { connectionsStore } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
   import WelcomePage from '@mathesar/pages/WelcomePage.svelte';
@@ -13,8 +13,10 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
 
+  $: ({ connections } = connectionsStore);
+
   $: rootPathRedirectUrl = (() => {
-    const numberOfConnections = $databases.data?.length ?? 0;
+    const numberOfConnections = $connections?.length ?? 0;
     if (numberOfConnections === 0) {
       // There is no redirection when `redirect` is `undefined`.
       return undefined;
@@ -22,7 +24,7 @@
     if (numberOfConnections > 1) {
       return CONNECTIONS_URL;
     }
-    const firstConnection = $databases.data[0];
+    const firstConnection = $connections[0];
     return getDatabasePageUrl(firstConnection.nickname);
   })();
 </script>

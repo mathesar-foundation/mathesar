@@ -1,71 +1,100 @@
-import { writable, derived } from 'svelte/store';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import connectionsApi from '@mathesar/api/connections';
+/* eslint-disable max-classes-per-file */
 
-import type { Writable } from 'svelte/store';
-import type { Database } from '@mathesar/AppTypes';
-import type {
-  RequestStatus,
-  PaginatedResponse,
-} from '@mathesar/api/utils/requestUtils';
-import { getApiErrorMessages } from '@mathesar/api/utils/errors';
-import type { CancellablePromise } from '@mathesar-component-library';
+import { writable, derived, type Writable, type Readable } from 'svelte/store';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
+import type { Connection } from '@mathesar/api/connections';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 const commonData = preloadCommonData();
 
-export const currentDBName: Writable<Database['nickname'] | undefined> =
-  writable(commonData?.current_db_connection ?? undefined);
+export class ConnectionModel {
+  readonly id: Connection['id'];
 
-export interface DatabaseStoreData {
-  preload?: boolean;
-  requestStatus: RequestStatus;
-  data: Database[];
-  error?: string;
-}
+  readonly nickname: Connection['nickname'];
 
-export const databases = writable<DatabaseStoreData>({
-  preload: true,
-  requestStatus: { state: 'success' },
-  data: commonData?.connections ?? [],
-});
+  readonly database: Connection['database'];
 
-export const currentDatabase = derived(
-  [currentDBName, databases],
-  ([_currentDBName, databasesStore]) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const _databases = databasesStore.data;
-    if (!_databases?.length) {
-      return undefined;
-    }
-    return _databases?.find((database) => database.nickname === _currentDBName);
-  },
-);
+  readonly username: Connection['username'];
 
-let databaseRequest: CancellablePromise<PaginatedResponse<Database>>;
+  readonly host: Connection['host'];
 
-export async function reloadDatabases(): Promise<
-  PaginatedResponse<Database> | undefined
-> {
-  databases.update((currentData) => ({
-    ...currentData,
-    requestStatus: { state: 'processing' },
-  }));
+  readonly port: Connection['port'];
 
-  try {
-    databaseRequest?.cancel();
-    databaseRequest = connectionsApi.list();
-    const response = await databaseRequest;
-    const data = response.results || [];
-    databases.set({
-      requestStatus: { state: 'success' },
-      data,
+  constructor(connectionDetails: Connection) {
+    this.id = connectionDetails.id;
+    this.nickname = connectionDetails.nickname;
+    this.database = connectionDetails.database;
+    this.username = connectionDetails.username;
+    this.host = connectionDetails.host;
+    this.port = connectionDetails.port;
+  }
+
+  getConnectionJson(): Connection {
+    return {
+      id: this.id,
+      nickname: this.nickname,
+      database: this.database,
+      username: this.username,
+      host: this.host,
+      port: this.port,
+    };
+  }
+
+  with(connectionDetails: Partial<Connection>): ConnectionModel {
+    return new ConnectionModel({
+      ...this.getConnectionJson(),
+      ...connectionDetails,
     });
-    return response;
-  } catch (err) {
-    databases.set({
-      data: [],
-      requestStatus: { state: 'failure', errors: getApiErrorMessages(err) },
-    });
-    return undefined;
   }
 }
+
+class ConnectionsStore {
+  readonly requestStatus: Writable<RequestStatus> = writable();
+
+  readonly connections = writable<ConnectionModel[]>([]);
+
+  readonly count = writable(0);
+
+  readonly currentConnectionName = writable<
+    Connection['nickname'] | undefined
+  >();
+
+  readonly currentConnection: Readable<ConnectionModel | undefined>;
+
+  constructor() {
+    this.requestStatus.set({ state: 'success' });
+    this.connections.set(
+      commonData?.connections.map(
+        (connection) => new ConnectionModel(connection),
+      ) ?? [],
+    );
+    this.count.set(commonData?.connections.length ?? 0);
+    this.currentConnectionName.set(
+      commonData?.current_db_connection ?? undefined,
+    );
+    this.currentConnection = derived(
+      [this.connections, this.currentConnectionName],
+      ([connections, currentConnectionName]) =>
+        connections.find(
+          (connection) => connection.nickname === currentConnectionName,
+        ),
+    );
+  }
+
+  setCurrentConnectionName(connectionName: Connection['nickname']) {
+    this.currentConnectionName.set(connectionName);
+  }
+
+  clearCurrentConnectionName() {
+    this.currentConnectionName.set(undefined);
+  }
+}
+
+export const connectionsStore: MakeWritablePropertiesReadable<ConnectionsStore> =
+  new ConnectionsStore();
+
+/** @deprecated Use connectionsStore.currentConnection instead */
+export const currentDatabase = connectionsStore.currentConnection;
+
+/* eslint-enable max-classes-per-file */
