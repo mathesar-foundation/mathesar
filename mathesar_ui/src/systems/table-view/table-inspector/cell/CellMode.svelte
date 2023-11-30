@@ -3,54 +3,55 @@
    * @file
    *
    * NOTICE: There is some code duplication between this file and
-   * `CellMode.svelte` used for the table view. It might be good to resolve this
-   * duplication at some point. In the mean time, be mindful of propagating
+   * `CellTab.svelte` used for the data explorer. It might be good to resolve
+   * this duplication at some point. In the mean time, be mindful of propagating
    * changes to both files as necessary.
    */
 
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import type QueryRunner from '../QueryRunner';
 
-  export let queryHandler: QueryRunner;
-  $: ({ selection, processedColumns } = queryHandler);
+  const tabularData = getTabularDataStoreFromContext();
+
+  $: ({ selection, recordsData, processedColumns } = $tabularData);
   $: ({ activeCell } = selection);
-
+  $: ({ recordSummaries } = recordsData);
+  $: cell = $activeCell;
   $: selectedCellValue = (() => {
-    const cell = $activeCell;
     if (cell) {
-      const rows = queryHandler.getRows();
+      const rows = recordsData.getRecordRows();
       if (rows[cell.rowIndex]) {
         return rows[cell.rowIndex].record[cell.columnId];
       }
     }
     return undefined;
   })();
-  $: processedQueryColumn = (() => {
-    const cell = $activeCell;
+  $: column = (() => {
     if (cell) {
-      const processedColumn = $processedColumns.get(String(cell.columnId));
+      const processedColumn = $processedColumns.get(Number(cell.columnId));
       if (processedColumn) {
         return processedColumn;
       }
     }
     return undefined;
   })();
+  $: recordSummary =
+    column &&
+    $recordSummaries.get(String(column.id))?.get(String(selectedCellValue));
 </script>
 
-<div
-  class="section-content"
-  class:has-content={selectedCellValue !== undefined}
->
+<div class="section-content">
   {#if selectedCellValue !== undefined}
     <section class="cell-content">
       <header>Content</header>
       <div class="content">
-        {#if processedQueryColumn}
+        {#if column}
           <CellFabric
             isIndependentOfSheet={true}
             disabled={true}
-            columnFabric={processedQueryColumn}
+            columnFabric={column}
             value={selectedCellValue}
+            {recordSummary}
           />
         {/if}
       </div>
@@ -62,9 +63,7 @@
 
 <style lang="scss">
   .section-content {
-    &.has-content {
-      padding: var(--size-x-small);
-    }
+    padding: var(--size-x-small);
     .cell-content {
       header {
         font-weight: 500;

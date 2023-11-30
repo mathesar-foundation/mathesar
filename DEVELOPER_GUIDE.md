@@ -140,7 +140,7 @@ See our [Live demo mode](./demo/README.md) guide for more information on enablin
 - To open a PostgreSQL [psql](https://www.postgresql.org/docs/current/app-psql.html) terminal for the data in Mathesar:
 
     ```
-    docker exec -it mathesar_db psql -U mathesar
+    docker exec -it mathesar_dev_db psql -U mathesar
     ```
 
 

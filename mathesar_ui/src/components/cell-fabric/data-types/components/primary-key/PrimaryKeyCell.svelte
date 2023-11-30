@@ -59,7 +59,10 @@
   on:keydown={handleKeyDown}
   hasPadding={false}
 >
-  <div class="primary-key-cell">
+  <div
+    class="primary-key-cell"
+    class:is-independent-of-sheet={isIndependentOfSheet}
+  >
     <span class="value" on:mousedown={handleValueMouseDown}>
       {#if value === undefined}
         <Default />
@@ -81,8 +84,10 @@
 </CellWrapper>
 
 <style>
-  .primary-key-cell {
+  .primary-key-cell:not(.is-independent-of-sheet) {
     position: absolute;
+  }
+  .primary-key-cell {
     top: 0;
     left: 0;
     width: 100%;

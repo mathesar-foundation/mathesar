@@ -1,5 +1,4 @@
-from sqlalchemy import case, select
-from sqlalchemy_filters import apply_sort
+from sqlalchemy import case, select, desc
 from db.types import categories
 from db.types.operations.convert import get_db_type_enum_from_class
 
@@ -18,10 +17,7 @@ def get_rank_and_filter_rows_query(relation, parameters_dict, limit=10):
     parameters given in parameters_dict.
     """
     rank_cte = _get_scored_selectable(relation, parameters_dict)
-    filtered_ordered_cte = apply_sort(
-        select(rank_cte).where(rank_cte.columns[SCORE_COL] > 0),
-        {'field': SCORE_COL, 'direction': 'desc'}
-    ).cte()
+    filtered_ordered_cte = select(rank_cte).where(rank_cte.columns[SCORE_COL] > 0).order_by(desc(SCORE_COL)).cte()
     return select(
         *[filtered_ordered_cte.columns[c] for c in [col.name for col in relation.columns]]
     ).limit(limit)
