@@ -9,6 +9,7 @@
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { modal } from '@mathesar/stores/modal';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     ConnectionsEmptyState,
     AddConnectionModal,
@@ -17,6 +18,10 @@
   import ConnectionRow from './ConnectionRow.svelte';
 
   const addConnectionModalController = modal.spawnModalController();
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: userProfile = $userProfileStore;
+  $: isSuperUser = userProfile?.isSuperUser;
 
   let filterQuery = '';
 
@@ -75,13 +80,15 @@
         on:clear={handleClearFilterQuery}
       >
         <svelte:fragment slot="action">
-          <Button
-            appearance="primary"
-            on:click={() => addConnectionModalController.open()}
-          >
-            <Icon {...iconAddNew} />
-            <span>{$_('add_database_connection')}</span>
-          </Button>
+          {#if isSuperUser}
+            <Button
+              appearance="primary"
+              on:click={() => addConnectionModalController.open()}
+            >
+              <Icon {...iconAddNew} />
+              <span>{$_('add_database_connection')}</span>
+            </Button>
+          {/if}
         </svelte:fragment>
 
         <p slot="resultInfo">
@@ -102,17 +109,25 @@
         <svelte:fragment slot="content">
           {#if filteredConnections.length}
             <div data-identifier="connections-list-grid">
-              <div data-identifier="connections-list-grid-header">
-                <span>{$_('connection_name')}</span>
-                <span>{$_('database_name')}</span>
-                <span>{$_('username')}</span>
-                <span>{$_('host')}</span>
-                <span>{$_('port')}</span>
-                <span>{$_('actions')}</span>
-              </div>
-              {#each filteredConnections as connection (connection.id)}
-                <ConnectionRow {connection} />
-              {/each}
+              <table>
+                <thead>
+                  <tr>
+                    <th>{$_('connection_name')}</th>
+                    <th>{$_('database_name')}</th>
+                    <th>{$_('username')}</th>
+                    <th>{$_('host')}</th>
+                    <th>{$_('port')}</th>
+                    {#if isSuperUser}
+                      <th>{$_('actions')}</th>
+                    {/if}
+                  </tr>
+                </thead>
+                <tbody>
+                  {#each filteredConnections as connection (connection.id)}
+                    <ConnectionRow {connection} />
+                  {/each}
+                </tbody>
+              </table>
             </div>
           {/if}
         </svelte:fragment>
@@ -146,19 +161,23 @@
     gap: var(--size-x-small);
 
     [data-identifier='connections-list-grid'] {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
       border: 1px solid var(--slate-200);
       border-radius: var(--border-radius-m);
+      overflow: auto;
 
-      [data-identifier='connections-list-grid-header'] {
-        display: contents;
-        font-weight: 600;
+      table {
+        border-collapse: collapse;
+        min-width: 100%;
+      }
 
-        > * {
+      thead {
+        border-bottom: 1px solid var(--slate-200);
+        background: var(--slate-100);
+
+        th {
+          font-weight: 500;
           padding: var(--size-xx-small) var(--size-large);
-          background: var(--slate-100);
-          border-bottom: 1px solid var(--slate-200);
+          text-align: left;
         }
       }
     }
