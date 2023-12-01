@@ -16,15 +16,19 @@
 
 1. Set the required environment variable(s) in the **CONFIG** section of the docker compose file.
     
-    !!! example
-        If you are using the [default database container](../../configuration/customize-docker-compose#default-db), your `.env` file should look something like this
-        <!-- TODO: remove this bullet point because it refers to a deleted page -->
-        
+    !!! Config       
         ``` bash
+        # This is the only field that is required to be set by the user 
+        # all the other fields are optional but useful for customizing your installation.
         SECRET_KEY: ${SECRET_KEY:?}
+
+        # If you want to host Mathesar over the internet or your local network
+        # replace or append your domain(s) or subdomain(s) with the default localhost domain.
         DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}
 
-        # Edit these if not using the db service provided below.
+        # Edit these if not using the db service provided with the compose file.
+        # This database will be used for storing Mathesar's internal metadata 
+        # but can also be used for storing your data which can be configured using Mathesar's UI.
         POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
         POSTGRES_USER: ${POSTGRES_USER:-mathesar}
         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
@@ -32,84 +36,26 @@
         POSTGRES_PORT: ${POSTGRES_PORT:-5432}
         ```
 
-1. Run the file using:
-
-    ```
-    sudo docker compose -f docker-compose.yml up
-    ```
-
-1. Set up the database
-    - To use the [default database server](../../configuration/customize-docker-compose#default-db) bundled with Mathesar, no additional steps are necessary. The database service will start along with the Mathesar web server.
-
-    <!-- TODO: remove this bullet point because it refers to a deleted page -->
-
-    - Alternatively, you can [disable the default database server](../../configuration/customize-docker-compose.md#disable-db-service) if you plan on using an [existing database server](../../configuration/connect-to-existing-db.md).
-
-    <!-- TODO: remove this bullet point because it refers to a deleted page -->
-
-1. Set up the web server.
-
-    1. Edit your `.env` file, making the following changes:
-
-        - Add the [**Backend Configuration** environment variables](../../configuration/env-variables.md#backend)
-        - Customize the values of the environment variables to suit your needs.
-
-        !!! example
-            If you are using the [default database container](../../configuration/customize-docker-compose#default-db), your `.env` file should look something like this
-
-            <!-- TODO: remove this bullet point because it refers to a deleted page -->
-            
-            ``` bash
-            ALLOWED_HOSTS='<your_domain_name>'
-            SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
-            DJANGO_DATABASE_URL='postgresql://mathesar:mathesar@mathesar_db:5432/mathesar_django'
-            MATHESAR_DATABASES='(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)'
-            ```
-
-    1. Start the Mathesar web server.
-
-        === "Linux"
-            ```
-            sudo docker compose -f docker-compose.yml up service -d
-            ```
-
-        === "MacOS"
-            ```
-            docker compose -f docker-compose.yml up service -d
-            ```
-
-1. Set up the Caddy reverse proxy.
-
-    1. Edit your `.env` file, adding the [**Caddy Reverse Proxy** environment variables](../../configuration/env-variables.md#caddy).
-    
-    1. Start the Caddy reverse proxy
-
-        === "Linux"
-            ```
-            sudo docker compose -f docker-compose.yml up caddy-reverse-proxy -d
-            ```
-
-        === "MacOS"
-            ```
-            docker compose -f docker-compose.yml up caddy-reverse-proxy -d
-            ```
-
-1. (Optional) Start the upgrade server to enable upgrading the docker image using the Mathesar UI.
+1. Run the docker compose file using:
 
     === "Linux"
         ```
-        sudo docker compose -f docker-compose.yml up watchtower -d
+        sudo docker compose -f docker-compose.yml up
         ```
-
     === "MacOS"
         ```
-        docker compose -f docker-compose.yml up watchtower -d
+        docker compose -f docker-compose.yml up
         ```
 
 1. Set up your user account
 
     Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up.
-
     You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
 
+
+## How to host Mathesar over a custom domain with automatic https?
+<!-- TODO -->
+
+## How to connect to an external database?
+<!-- TODO -->
 {% include 'snippets/docker-compose-administration.md' %}
