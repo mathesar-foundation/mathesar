@@ -1,4 +1,3 @@
-from config.settings.common_settings import DATABASES
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -158,7 +157,7 @@ def get_base_data_all_routes(request, database=None, schema=None):
 
 
 def _get_internal_db_meta():
-    internal_db = DATABASES['default']
+    internal_db = settings.DATABASES['default']
     if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
         return {
             'type': 'postgres',
