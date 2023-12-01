@@ -52,6 +52,7 @@ from mathesar.database.types import UIType, get_ui_type_from_db_type
 from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
 from mathesar.state.cached_property import cached_property
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
+from django.contrib.postgres.fields import ArrayField
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -901,7 +902,7 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = ArrayField(models.PositiveIntegerField(), null=True, default=None)
+    column_order = models.PositiveIntegerField(null=True, default=None)
 
 
 def _create_table_settings(tables):
