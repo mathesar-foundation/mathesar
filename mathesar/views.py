@@ -17,6 +17,7 @@ from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.api.ui.serializers.users import UserSerializer
 from mathesar.api.utils import is_valid_uuid_v4
+from mathesar.database.base import get_internal_db_info
 from mathesar.database.types import UIType
 from mathesar.models.base import Database, Schema, Table
 from mathesar.models.query import UIQuery
@@ -157,7 +158,7 @@ def get_base_data_all_routes(request, database=None, schema=None):
 
 
 def _get_internal_db_meta():
-    internal_db = settings.DATABASES['default']
+    internal_db = get_internal_db_info()
     if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
         return {
             'type': 'postgres',

@@ -1,3 +1,4 @@
+from django.conf import settings
 from db import engine
 
 
@@ -18,3 +19,8 @@ def _get_credentials_for_db_model(db_model):
         database=db_model.db_name,
         port=db_model.port,
     )
+
+
+def get_internal_db_info():
+    """Return a dictionary describing the internal DB managed by Django."""
+    return settings.DATABASES['default']
