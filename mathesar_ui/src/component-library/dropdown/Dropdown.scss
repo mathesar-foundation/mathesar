@@ -1,8 +1,5 @@
 button.dropdown.trigger {
   position: relative;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
 
   > .label {
     display: inline-flex;
@@ -28,9 +25,6 @@ button.dropdown.trigger {
     outline: 2px solid var(--slate-300);
     outline-offset: 1px;
     border-radius: var(--border-radius-s);
-  }
-  &:hover {
-    background: var(--slate-100);
   }
 }
 

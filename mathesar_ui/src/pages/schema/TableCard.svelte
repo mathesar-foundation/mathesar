@@ -178,7 +178,7 @@
   .table-card {
     position: relative;
     isolation: isolate;
-    --menu-trigger-size: 3rem;
+    --menu-trigger-size: 4rem;
     --padding: 1rem;
     --bottom-height: 2.5rem;
   }
@@ -211,7 +211,7 @@
     flex: 1 1 auto;
     overflow: hidden;
     font-size: var(--text-size-large);
-    height: calc(var(--menu-trigger-size) + 1rem);
+    height: var(--menu-trigger-size);
     display: flex;
     align-items: center;
     padding: 0 var(--padding);
@@ -226,9 +226,9 @@
     position: absolute;
     top: 0;
     right: 0;
-    margin: 5px;
-    width: var(--menu-trigger-size);
-    height: var(--menu-trigger-size);
+    margin: var(--size-ultra-small);
+    width: cacl(var(--menu-trigger-size) - 1rem);
+    height: cacl(var(--menu-trigger-size) - 1rem);
     z-index: 1;
   }
   .menu-container :global(.dropdown-menu-button) {
@@ -236,9 +236,13 @@
     height: 100%;
     font-size: var(--text-size-large);
     color: var(--slate-500);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
   }
   .menu-container :global(.dropdown-menu-button:hover) {
     color: var(--slate-800);
+    background: var(--slate-100);
   }
 
   /** Bottom button========================================================== */
