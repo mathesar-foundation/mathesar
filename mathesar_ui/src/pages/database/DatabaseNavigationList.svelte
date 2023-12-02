@@ -30,9 +30,9 @@
         </Help>
       </span>
     </MenuHeading>
-    {#each $databases.data as db (db.name)}
+    {#each $databases.data as db (db.nickname)}
       <LinkMenuItem
-        href={getDatabasePageUrl(db.name)}
+        href={getDatabasePageUrl(db.nickname)}
         class={database?.id === db.id ? 'active' : ''}
       >
         <DatabaseName database={db} iconHasBox />
