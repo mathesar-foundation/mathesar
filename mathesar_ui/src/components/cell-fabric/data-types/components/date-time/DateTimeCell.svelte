@@ -9,6 +9,7 @@
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
+  export let searchValue: $$Props['searchValue'] = undefined;
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
   export let type: $$Props['type'];
@@ -17,13 +18,19 @@
   export let timeShow24Hr: $$Props['timeShow24Hr'] = true;
   export let timeEnableSeconds: $$Props['timeEnableSeconds'] = true;
   export let formatForDisplay: $$Props['formatForDisplay'];
+  let formattedValue = value ? formatter.parseAndFormat(value) : value;
+  const formattedSearchValue =
+    typeof searchValue === 'string'
+      ? formatter.parseAndFormat(searchValue)
+      : searchValue;
 </script>
 
 <SteppedInputCell
-  bind:value
+  bind:value={formattedValue}
   {isActive}
   {isSelectedInRange}
   {disabled}
+  searchValue={formattedSearchValue}
   highlightSubstringMatches={false}
   {isIndependentOfSheet}
   {showTruncationPopover}
