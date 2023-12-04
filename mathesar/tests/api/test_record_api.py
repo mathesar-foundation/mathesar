@@ -1,5 +1,6 @@
 import json
 import pytest
+from sqlalchemy import text
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -9,6 +10,7 @@ from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from db.records.operations.sort import BadSortFormat, SortFieldNotFound
 
+from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
@@ -1466,31 +1468,56 @@ def test_record_patch_unique_violation(create_patents_table, client):
     assert actual_constraint_details['name'] == 'NASA unique record PATCH_pkey'
 
 
-def test_record_patch_exclusion_violation(room_reservations_table, client):
-    table_name = 'ROOM exclusion record PATCH'
-    table = room_reservations_table(table_name)
-    id_column_id = table.get_column_name_id_bidirectional_map()['id']
+def test_record_post_exclusion_violation(reservations_table, engine, client):
+    table_name = 'Exclusion test post'
+    table = reservations_table(table_name)
+    room_number_column_id = table.get_column_name_id_bidirectional_map()['room_number']
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
-    # table.add_constraint(
-    #     ExclusionViolation(
-    #     what parameters should i pass ?
-    #     )
-    # )
-    data = {
-        str(columns_name_id_map['room_number']): '1',
-    }
-    client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
-    response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}', data={
-        str(columns_name_id_map['room_number']): '1',
-        str(columns_name_id_map['check_in_date']): '11/10/2023',
-        str(columns_name_id_map['check_out_date']): '11/11/2023',
+    query = text(
+        f"""CREATE EXTENSION IF NOT EXISTS btree_gist;
+        ALTER TABLE "Reservations"."{table_name}" DROP CONSTRAINT IF EXISTS room_overlap;
+        ALTER TABLE "Reservations"."{table_name}"
+        ADD CONSTRAINT room_overlap
+        EXCLUDE USING gist
+        ("room_number" WITH =, TSRANGE("check_in_date", "check_out_date", '[]') WITH &&);"""
+    )
+    with engine.begin() as conn:
+        conn.execute(query)
+    reset_reflection(db_name=table.schema.database.name)
+    response = client.post(f'/api/db/v0/tables/{table.id}/records/', data={
+        str(columns_name_id_map['id']): 3,
+        str(columns_name_id_map['room_number']): 1,
+        str(columns_name_id_map['check_in_date']): '11/12/2023',
+        str(columns_name_id_map['check_out_date']): '11/21/2023',
     })
     actual_exception = response.json()[0]
     assert actual_exception['code'] == ErrorCodes.ExclusionViolation.value
     assert actual_exception['message'] == 'The requested update violates an exclusion constraint'
-    assert actual_exception['detail']['constraint_columns'] == [id_column_id]
-    constraint_id = actual_exception['detail']['constraint']
-    actual_constraint_details = client.get(
-        f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'
-    ).json()
-    assert actual_constraint_details['name'] == "ROOM exclusion record PATCH_pkey"
+    assert actual_exception['detail']['constraint_columns'] == [room_number_column_id]
+
+
+def test_record_patch_exclusion_violation(reservations_table, engine, client):
+    table_name = 'Exclusion test patch'
+    table = reservations_table(table_name)
+    room_number_column_id = table.get_column_name_id_bidirectional_map()['room_number']
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    query = text(
+        f"""CREATE EXTENSION IF NOT EXISTS btree_gist;
+        ALTER TABLE "Reservations"."{table_name}" DROP CONSTRAINT IF EXISTS room_overlap;
+        ALTER TABLE "Reservations"."{table_name}"
+        ADD CONSTRAINT room_overlap
+        EXCLUDE USING gist
+        ("room_number" WITH =, TSRANGE("check_in_date", "check_out_date", '[]') WITH &&);"""
+    )
+    with engine.begin() as conn:
+        conn.execute(query)
+    reset_reflection(db_name=table.schema.database.name)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}/', data={
+        str(columns_name_id_map['room_number']): 1,
+        str(columns_name_id_map['check_in_date']): '11/12/2023',
+        str(columns_name_id_map['check_out_date']): '11/21/2023',
+    })
+    actual_exception = response.json()[0]
+    assert actual_exception['code'] == ErrorCodes.ExclusionViolation.value
+    assert actual_exception['message'] == 'The requested update violates an exclusion constraint'
+    assert actual_exception['detail']['constraint_columns'] == [room_number_column_id]

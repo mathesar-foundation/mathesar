@@ -419,10 +419,8 @@ class ExclusionViolationAPIException(MathesarAPIException):
                     "constraint": constraint.id,
                     "constraint_columns": [c.id for c in constraint.columns],
                 }
-            except TypeError:
-                details = {
-                    "constraint": None,
-                }
+            except Exception:
+                warnings.warn("Could not enrich Exception")
             details.update(
                 {
                     "original_details": exception.orig.diag.message_detail,
