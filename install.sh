@@ -207,7 +207,7 @@ control. Please:
 
 If you can't get things working, please raise an issue at
 
-https://github.com/centerofci/mathesar/issues/
+https://github.com/mathesar-foundation/mathesar/issues/
 " >&2
 
   if [ "${1}" == "late" ]; then
@@ -408,7 +408,7 @@ installation.
 "
 printf "Downloading docker-compose.yml...
 "
-sudo curl -sfL -o docker-compose.yml https://raw.githubusercontent.com/centerofci/mathesar/"${github_tag}"/docker-compose.yml || installation_fail early
+sudo curl -sfL -o docker-compose.yml https://raw.githubusercontent.com/mathesar-foundation/mathesar/"${github_tag}"/docker-compose.yml || installation_fail early
 
 read -r -p "Success!
 

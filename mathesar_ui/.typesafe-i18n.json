@@ -1,8 +1,0 @@
-{
-  "adapter": "svelte",
-  "$schema": "https://unpkg.com/typesafe-i18n@5.25.1/schema/typesafe-i18n.json",
-  "baseLocale": "en",
-  "generateOnlyTypes": true,
-  "runAfterGenerator": "npm run format",
-  "banner": "// The generator does not conform to our eslint rules\n/* eslint-disable eslint-comments/no-unlimited-disable */\n/* eslint eslint-comments/disable-enable-pair: [error, {allowWholeFile: true}] */\n/* eslint-disable */"
-}

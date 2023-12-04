@@ -7,13 +7,18 @@
   } from '@mathesar/component-library';
   import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { iconExpandRight } from '@mathesar/icons';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { _ } from 'svelte-i18n';
+  import { RichText } from '@mathesar/components/rich-text';
   import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
-  import type { BreadcrumbSelectorData } from './breadcrumbTypes';
+  import type {
+    BreadcrumbSelectorData,
+    BreadcrumbSelectorEntry,
+  } from './breadcrumbTypes';
   import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
 
   export let data: BreadcrumbSelectorData;
   export let triggerLabel: string;
+  export let persistentLinks: BreadcrumbSelectorEntry[] = [];
 
   let triggerElement: HTMLButtonElement;
   let isOpen = false;
@@ -71,10 +76,21 @@
               {#if filterString?.length === 0}
                 {categoryName}
               {:else}
-                {labeledCount(entries, 'matches')}
-                for
-                <b>{filterString}</b>
-                {processedData.size > 1 ? `in ${categoryName}` : ''}
+                <RichText
+                  text={$_('number_of_matches', {
+                    values: {
+                      count: entries.length,
+                      categoryCount: processedData.size > 1 ? 1 : 0,
+                    },
+                  })}
+                  let:slotName
+                >
+                  {#if slotName === 'searchValue'}
+                    <b>{filterString}</b>
+                  {:else if slotName === 'categoryName'}
+                    {categoryName}
+                  {/if}
+                </RichText>
               {/if}
             </div>
             <ul class="items">
@@ -92,11 +108,27 @@
         {:else}
           {#if filterString.length > 0}
             <div class="section-name">
-              No matches for <b>{filterString}</b>
+              <RichText text={$_('no_matches')} let:slotName>
+                {#if slotName === 'searchValue'}
+                  <b>{filterString}</b>
+                {/if}
+              </RichText>
             </div>
           {/if}
         {/each}
       </div>
+      {#if persistentLinks.length}
+        <ul class="actions">
+          {#each persistentLinks as entry (entry.href)}
+            <BreadcrumbSelectorRow
+              {entry}
+              closeSelector={() => {
+                isOpen = false;
+              }}
+            />
+          {/each}
+        </ul>
+      {/if}
     </div>
   </AttachableDropdown>
 </div>
@@ -119,10 +151,19 @@
   .section-name {
     margin: 0.25rem 0;
   }
-  .items {
+  .items,
+  .actions {
     list-style: none;
-    padding-left: 0.5rem;
     margin: 0;
+  }
+  .items {
+    padding-left: 0.5rem;
+  }
+  .actions {
+    margin-top: var(--size-super-ultra-small);
+    padding-left: 0;
+    padding-top: var(--size-super-ultra-small);
+    border-top: 1px solid var(--slate-300);
   }
   .entity-switcher .trigger {
     border: 1px solid var(--slate-400);

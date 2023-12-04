@@ -20,7 +20,7 @@
   >
   <AnchorButton
     slot="footer"
-    href={getDataExplorerPageUrl(database.name, schema.id)}
+    href={getDataExplorerPageUrl(database.nickname, schema.id)}
   >
     Open Data Explorer
   </AnchorButton>

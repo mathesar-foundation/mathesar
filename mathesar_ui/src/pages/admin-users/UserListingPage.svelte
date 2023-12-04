@@ -52,19 +52,19 @@
       bind:searchQuery={filterQuery}
       on:clear={handleClearFilterQuery}
     >
-      <slot slot="action">
+      <svelte:fragment slot="action">
         <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
           <Icon {...iconAddNew} />
           <span>Add user</span>
         </AnchorButton>
-      </slot>
-      <slot slot="resultInfo">
+      </svelte:fragment>
+      <svelte:fragment slot="resultInfo">
         <p>
           {labeledCount(filteredUsers, 'results')}
           for all users matching <strong>{filterQuery}</strong>
         </p>
-      </slot>
-      <slot slot="content">
+      </svelte:fragment>
+      <svelte:fragment slot="content">
         {#if filteredUsers.length}
           <div class="users-list">
             {#each filteredUsers as user, index (user.id)}
@@ -77,7 +77,7 @@
         {:else if filteredUsers.length === 0}
           <p class="no-users-found-text">No users found</p>
         {/if}
-      </slot>
+      </svelte:fragment>
     </EntityContainerWithFilterBar>
   {:else if $requestStatus?.state === 'failure'}
     <ErrorBox>
@@ -101,9 +101,6 @@
     border-radius: var(--border-radius-m);
 
     hr {
-      border: 0;
-      border-top: 1px solid var(--slate-200);
-      display: block;
       margin: 0 var(--size-xx-small);
     }
   }

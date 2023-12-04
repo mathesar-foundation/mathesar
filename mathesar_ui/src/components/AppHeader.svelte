@@ -1,5 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
+  import { _ } from 'svelte-i18n';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     DropdownMenu,
@@ -12,6 +13,7 @@
   import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
   import {
     iconAddNew,
+    iconConnection,
     iconDatabase,
     iconExploration,
     iconLogout,
@@ -21,6 +23,7 @@
   } from '@mathesar/icons';
   import {
     ADMIN_URL,
+    CONNECTIONS_URL,
     getDatabasePageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
@@ -57,7 +60,10 @@
     isCreatingNewEmptyTable = true;
     const tableInfo = await createTable(database, schema, {});
     isCreatingNewEmptyTable = false;
-    router.goto(getTablePageUrl(database.name, schema.id, tableInfo.id), false);
+    router.goto(
+      getTablePageUrl(database.nickname, schema.id, tableInfo.id),
+      false,
+    );
   }
 </script>
 
@@ -85,14 +91,14 @@
             </ButtonMenuItem>
             <LinkMenuItem
               icon={iconAddNew}
-              href={getImportPageUrl(database.name, schema.id)}
+              href={getImportPageUrl(database.nickname, schema.id)}
             >
               New Table from Data Import
             </LinkMenuItem>
           {/if}
           <LinkMenuItem
             icon={iconExploration}
-            href={getDataExplorerPageUrl(database.name, schema.id)}
+            href={getDataExplorerPageUrl(database.nickname, schema.id)}
           >
             Open Data Explorer
           </LinkMenuItem>
@@ -112,9 +118,9 @@
             <MenuHeading>Database</MenuHeading>
             <LinkMenuItem
               icon={iconDatabase}
-              href={getDatabasePageUrl(database.name)}
+              href={getDatabasePageUrl(database.nickname)}
             >
-              {database.name}
+              {database.nickname}
             </LinkMenuItem>
             <MenuDivider />
           {/if}
@@ -123,6 +129,9 @@
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
           <MenuDivider />
+          <LinkMenuItem icon={iconConnection} href={CONNECTIONS_URL}>
+            {$_('database_connections')}
+          </LinkMenuItem>
           {#if $userProfile.isSuperUser}
             <LinkMenuItem
               icon={iconSettingsMajor}

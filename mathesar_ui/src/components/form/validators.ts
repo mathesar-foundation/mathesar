@@ -105,6 +105,12 @@ export function isEmail(
   return validIf((v) => !!v.toLowerCase().match(EMAIL_PATTERN), msg);
 }
 
+export function isInPortRange(
+  msg = 'The port is invalid',
+): ValidationFn<number> {
+  return validIf((v) => v <= 65535 && v >= 0, msg);
+}
+
 export function getErrors<T>({
   value,
   isRequired,
