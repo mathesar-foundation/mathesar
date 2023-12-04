@@ -30,13 +30,15 @@ import type {
 } from '@mathesar/api/types/tables/split_table';
 import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
-import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
+import type {
+  PaginatedResponse,
+  RequestStatus,
+} from '@mathesar/api/utils/requestUtils';
 import {
   deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
-  States,
 } from '@mathesar/api/utils/requestUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
@@ -47,9 +49,8 @@ import { currentSchemaId, addCountToSchemaNumTables } from './schemas';
 const commonData = preloadCommonData();
 
 export interface DBTablesStoreData {
-  state: States;
   data: Map<TableEntry['id'], TableEntry>;
-  error?: string;
+  requestStatus: RequestStatus;
 }
 
 const schemaTablesStoreMap: Map<
@@ -77,9 +78,8 @@ function setSchemaTablesStore(
   }
 
   const storeValue: DBTablesStoreData = {
-    state: States.Done,
     data: tables,
-    error: undefined,
+    requestStatus: { state: 'success' },
   };
 
   let store = schemaTablesStoreMap.get(schemaId);
@@ -110,7 +110,7 @@ export async function refetchTablesForSchema(
   try {
     store.update((currentData) => ({
       ...currentData,
-      state: States.Loading,
+      requestStatus: { state: 'processing' },
     }));
 
     schemaTablesRequestMap.get(schemaId)?.cancel();
@@ -128,8 +128,12 @@ export async function refetchTablesForSchema(
   } catch (err) {
     store.update((currentData) => ({
       ...currentData,
-      state: States.Error,
-      error: err instanceof Error ? err.message : 'Error in fetching schemas',
+      requestStatus: {
+        state: 'failure',
+        errors: [
+          err instanceof Error ? err.message : 'Error in fetching schemas',
+        ],
+      },
     }));
     return undefined;
   }
@@ -143,7 +147,7 @@ export function getTablesStoreForSchema(
   let store = schemaTablesStoreMap.get(schemaId);
   if (!store) {
     store = writable({
-      state: States.Loading,
+      requestStatus: { state: 'processing' },
       data: new Map(),
     });
     schemaTablesStoreMap.set(schemaId, store);
@@ -153,7 +157,7 @@ export function getTablesStoreForSchema(
       void refetchTablesForSchema(schemaId);
     }
     preload = false;
-  } else if (get(store).error) {
+  } else if (get(store).requestStatus.state === 'failure') {
     void refetchTablesForSchema(schemaId);
   }
   return store;
@@ -416,8 +420,8 @@ export const tables: Readable<DBTablesStoreData> = derived(
 
     if (!$currentSchemaId) {
       set({
-        state: States.Done,
         data: new Map(),
+        requestStatus: { state: 'success' },
       });
     } else {
       const store = getTablesStoreForSchema($currentSchemaId);
