@@ -4,9 +4,11 @@
 </script>
 
 <div class={['tutorial', classes].join(' ')}>
-  <div class="title-and-meta">
-    <div class="title"><slot name="title" /></div>
-  </div>
+  {#if $$slots.title}
+    <div class="title-and-meta">
+      <div class="title"><slot name="title" /></div>
+    </div>
+  {/if}
   {#if $$slots.body}
     <div class="body"><slot name="body" /></div>
   {/if}

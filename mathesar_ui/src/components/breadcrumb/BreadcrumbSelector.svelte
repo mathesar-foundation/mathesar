@@ -10,11 +10,15 @@
   import { _ } from 'svelte-i18n';
   import { RichText } from '@mathesar/components/rich-text';
   import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
-  import type { BreadcrumbSelectorData } from './breadcrumbTypes';
+  import type {
+    BreadcrumbSelectorData,
+    BreadcrumbSelectorEntry,
+  } from './breadcrumbTypes';
   import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
 
   export let data: BreadcrumbSelectorData;
   export let triggerLabel: string;
+  export let persistentLinks: BreadcrumbSelectorEntry[] = [];
 
   let triggerElement: HTMLButtonElement;
   let isOpen = false;
@@ -113,6 +117,18 @@
           {/if}
         {/each}
       </div>
+      {#if persistentLinks.length}
+        <ul class="actions">
+          {#each persistentLinks as entry (entry.href)}
+            <BreadcrumbSelectorRow
+              {entry}
+              closeSelector={() => {
+                isOpen = false;
+              }}
+            />
+          {/each}
+        </ul>
+      {/if}
     </div>
   </AttachableDropdown>
 </div>
@@ -135,10 +151,19 @@
   .section-name {
     margin: 0.25rem 0;
   }
-  .items {
+  .items,
+  .actions {
     list-style: none;
-    padding-left: 0.5rem;
     margin: 0;
+  }
+  .items {
+    padding-left: 0.5rem;
+  }
+  .actions {
+    margin-top: var(--size-super-ultra-small);
+    padding-left: 0;
+    padding-top: var(--size-super-ultra-small);
+    border-top: 1px solid var(--slate-300);
   }
   .entity-switcher .trigger {
     border: 1px solid var(--slate-400);
