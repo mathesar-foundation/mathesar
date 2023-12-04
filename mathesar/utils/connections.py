@@ -19,6 +19,16 @@ def copy_connection_from_preexisting(
     )
 
 
+def create_connection_from_scratch(
+        user, password, host, port, nickname, db_name, sample_data
+):
+    db_model = Database(username=user, password=password, host=host, port=port)
+    root_db = db_name
+    return _save_and_install(
+        db_model, db_name, root_db, nickname, False, sample_data
+    )
+
+
 def _save_and_install(
         db_model, db_name, root_db, nickname, create_db, sample_data
 ):

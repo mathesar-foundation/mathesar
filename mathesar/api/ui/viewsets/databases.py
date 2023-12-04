@@ -14,7 +14,9 @@ from mathesar.api.serializers.databases import ConnectionSerializer, TypeSeriali
 from mathesar.api.serializers.filters import FilterSerializer
 
 from mathesar.filters.base import get_available_filters
-from mathesar.utils.connections import copy_connection_from_preexisting
+from mathesar.utils.connections import (
+    copy_connection_from_preexisting, create_connection_from_scratch
+)
 
 
 class ConnectionViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -53,6 +55,23 @@ class ConnectionViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
             request.data['database_name'],
             request.data.get('create_database', False),
             request.data.get('sample_data', [])
+        )
+        serializer = ConnectionSerializer(
+            created_connection, context={'request': request}, many=False
+        )
+        return Response(serializer.data)
+
+    @action(methods=['post'], detail=False, serializer_class=serializers.Serializer)
+    def create_from_scratch(self, request):
+        credentials = request.data['credentials']
+        created_connection = create_connection_from_scratch(
+            credentials['user'],
+            credentials['password'],
+            credentials['host'],
+            credentials['port'],
+            request.data['nickname'],
+            request.data['database_name'],
+            request.data['sample_data']
         )
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
