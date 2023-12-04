@@ -10,6 +10,7 @@ def copy_connection_from_preexisting(
         db_model = Database.create_from_settings_key('default')
     elif connection['connection_type'] == 'user_database':
         db_model = Database.current_objects.get(id=connection['id'])
+        db_model.id = None
     else:
         raise KeyError
     root_db = db_model.db_name
