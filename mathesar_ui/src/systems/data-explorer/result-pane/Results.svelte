@@ -122,10 +122,10 @@
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
                   isStatic
                   isControlCell
-                  let:htmlAttributes
+                  let:htmlAttributes={sheetCellHtmlAttributes}
                   let:style
                 >
-                  <div {...htmlAttributes} {style}>
+                  <div {...sheetCellHtmlAttributes} {style}>
                     <CellBackground color="var(--cell-bg-color-header)" />
                     {$pagination.offset + item.index + 1}
                   </div>

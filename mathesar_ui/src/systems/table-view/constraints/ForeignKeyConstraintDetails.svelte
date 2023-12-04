@@ -43,12 +43,12 @@
         {#await getReferentColumns(constraint)}
           <Spinner />
         {:then referentColumns}
-          {#each referentColumns as referentColumn, index (referentColumn.id)}
+          {#each referentColumns as referentColumn (referentColumn.id)}
             <span class="entity-name-container">
               <ColumnName column={referentColumn} />
             </span>
           {/each}
-        {:catch error}
+        {:catch}
           <Icon {...iconError} />
         {/await}
       </div>

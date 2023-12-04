@@ -90,11 +90,11 @@
       isStatic
       isControlCell
       let:htmlAttributes={cellHtmlAttr}
-      let:style
+      let:style={sheetCellStyle}
     >
       <div
         {...cellHtmlAttr}
-        {style}
+        style={sheetCellStyle}
         on:mousedown={handleRowMouseDown}
         on:mouseenter={handleRowMouseEnter}
       >

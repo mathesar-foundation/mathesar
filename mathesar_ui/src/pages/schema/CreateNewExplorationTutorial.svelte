@@ -12,12 +12,12 @@
   <span slot="title"
     >It's time to use your tables. Create your first exploration.</span
   >
-  <span slot="body"
-    >Explorations let you query your data to uncover trends and insights. They
+  <span slot="body">
+    Explorations let you query your data to uncover trends and insights. They
     may be stored and run anytime to see the latest data. Explorations make
     great reports. You might, for example, create an exploration that shows your
-    monthly spending.</span
-  >
+    monthly spending.
+  </span>
   <AnchorButton
     slot="footer"
     href={getDataExplorerPageUrl(database.nickname, schema.id)}
