@@ -2,29 +2,28 @@
 from mathesar.models.base import Database
 from db import install
 
-def create_connection_from_internal_db_connection(
-        database, nickname, create_db=False, sample_data=None
-):
-    """
-    Create a new connection based on the credentials of the internal DB user.
 
-    Args:
-        database:    name of the DB we'll connect to. Must be different from the
-                     name of the internal DB.
-        nickname:    nickname to give the DB for display to users
-        create_db:   whether we should create the target DB if it doesn't
-                     already exist.
-        sample_data: list naming any sample data sets we should include.
-    """
-    db_model = Database.create_from_settings_key('default')
-    db_model.name = nickname
-    if database != db_model.db_name:
-        root_db = db_model.db_name
-        db_model.db_name = database
+def copy_connection_from_preexisting(
+        connection, nickname, db_name, create_db, sample_data
+):
+    if connection['connection_type'] == 'internal_database':
+        db_model = Database.create_from_settings_key('default')
+    elif connection['connection_type'] == 'user_database':
+        db_model = Database.current_objects.get(id=connection['id'])
     else:
-        raise AssertionError(
-            "Mathesar can't be installed in the internal DB namespace"
-        )
+        raise KeyError
+    root_db = db_model.db_name
+    return _save_and_install(
+        db_model, db_name, root_db, nickname, create_db, sample_data
+    )
+
+
+def _save_and_install(
+        db_model, db_name, root_db, nickname, create_db, sample_data
+):
+    db_model.name = nickname
+    db_model.db_name = db_name
+    _validate_db_model(db_model)
     db_model.save()
     install.install_mathesar(
         database_name=db_model.db_name,
@@ -36,3 +35,18 @@ def create_connection_from_internal_db_connection(
         create_db=create_db,
         root_db=root_db,
     )
+#    return Database.current_objects.get(name=db_model.name)
+    return db_model
+
+
+def _validate_db_model(db_model):
+    internal_db_model = Database.create_from_settings_key('default')
+    if (
+            internal_db_model is not None
+            and db_model.host == internal_db_model.host
+            and db_model.port == internal_db_model.port
+            and db_model.db_name == internal_db_model.db_name
+    ):
+        raise Exception(
+            "Mathesar can't be installed in the internal DB namespace"
+        )

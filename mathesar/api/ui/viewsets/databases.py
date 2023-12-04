@@ -1,4 +1,5 @@
 from django_filters import rest_framework as filters
+from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -13,6 +14,7 @@ from mathesar.api.serializers.databases import ConnectionSerializer, TypeSeriali
 from mathesar.api.serializers.filters import FilterSerializer
 
 from mathesar.filters.base import get_available_filters
+from mathesar.utils.connections import copy_connection_from_preexisting
 
 
 class ConnectionViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -41,4 +43,18 @@ class ConnectionViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
         engine = database._sa_engine
         available_filters = get_available_filters(engine)
         serializer = FilterSerializer(available_filters, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['post'], detail=False, serializer_class=serializers.Serializer)
+    def create_from_known_connection(self, request):
+        created_connection = copy_connection_from_preexisting(
+            request.data['credentials']['connection'],
+            request.data['nickname'],
+            request.data['database_name'],
+            request.data.get('create_database', False),
+            request.data.get('sample_data', [])
+        )
+        serializer = ConnectionSerializer(
+            created_connection, context={'request': request}, many=False
+        )
         return Response(serializer.data)
