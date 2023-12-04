@@ -124,9 +124,7 @@ docker run \
     ```
 
 1. Bump the image version in the `docker run` command you usually use to run your Mathesar and start up a brand-new container:
-
-   <!-- TODO: improve language and version number -->
-
+    <!-- TODO: improve language and version number -->
     ```bash
     docker run \
       -d \
