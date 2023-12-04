@@ -10,6 +10,8 @@ nav:
   - Installation:
       - Install using Docker image: installation/docker/index.md
       - Install using Docker Compose: installation/docker-compose/index.md
+      - (Deprecated) Install with guided script: installation/guided-install/index.md
+      - (Deprecated) Install from scratch: installation/build-from-source/index.md
   - Configuration:
       - Environment variables: configuration/env-variables.md
       - Connect to an existing database server: configuration/connect-to-existing-db.md
@@ -44,7 +46,6 @@ plugins:
         "install/docker-compose/troubleshooting.md": "installation/guided-install/troubleshooting.md"
         "install/docker/index.md": "installation/docker/index.md"
         "install/build-from-source/index.md": "installation/build-from-source/index.md"
-        "installation/build-from-source/index.md": "index.md"
   - macros
   - placeholder
 
