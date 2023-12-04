@@ -20,8 +20,7 @@ The upgrade instructions vary depending on the [installation method](../index.md
 ## Upgrading deprecated Mathesar installations
 
 
-### Installed from guided install or docker compose
-
+### Installed from guided install
 <!-- TODO -->
 
 

@@ -95,7 +95,7 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 
     **Ensure that the DNS for your sub-domain or domain is pointing to the public IP address of the machine that you're installing Mathesar on**.
 
-    Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](http://localhost:9000/configuration/env-variables/#domain_name) environment variable, in the **CONFIG** section of the docker-compose file.
+    Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](../../configuration/env-variables/#domain_name) environment variable, in the **CONFIG** section of the docker-compose file.
     !!! example
         ```yaml
         DOMAIN_NAME: ${DOMAIN_NAME:-yourdomain.org, yoursubdomain.example.org}

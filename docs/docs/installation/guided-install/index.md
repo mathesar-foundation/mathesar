@@ -1,5 +1,8 @@
 # Guided installation
 
+!!! warning "Deprecated"
+    The following installation method is deprecated and is no longer supported by Mathesar. We encourage you to use supported methods like [Docker](../docker/index.md) or [Docker Compose](../docker-compose/index.md) to install Mathesar. If you are currently using this installation method follow these [instructions](../../administration/upgrade.md#installed-from-guided-install) to upgrade.
+
 Our install script guides you through a series of prompts to install Mathesar. The script sets up Mathesar using Docker Compose [under the hood](./under-the-hood.md).
 
 !!! warning "Limitations"

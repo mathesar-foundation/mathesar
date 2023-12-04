@@ -1,4 +1,7 @@
-# Install Mathesar from source on Linux
+#(Deprecated) Install Mathesar from source on Linux
+
+!!! warning "Deprecated"
+    The following installation method is deprecated and is no longer supported by Mathesar. We encourage you to use supported methods like [Docker](../docker/index.md) or [Docker Compose](../docker-compose/index.md) to install Mathesar. If you are currently using this installation method follow these [instructions](../../administration/upgrade.md#installed-from-source) to upgrade.
 
 !!! warning "For experienced Linux sysadmins"
     To follow this guide you need be experienced with Linux server administration, including the command line interface and some common utilities.
