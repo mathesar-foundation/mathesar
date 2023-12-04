@@ -30,7 +30,7 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-promise": "^6.0.1",
-    "eslint-plugin-svelte3": "^4.0.0",
+    "eslint-plugin-svelte": "^2.35.1",
     "jsdom": "^20.0.0",
     "postcss": "^8.4.16",
     "prettier": "^2.7.1",
@@ -57,7 +57,7 @@
     "js-cookie": "^3.0.1",
     "papaparse": "^5.4.1",
     "perfect-scrollbar": "^1.5.5",
-    "tinro": "^0.6.12",
-    "svelte-i18n": "^4.0.0"
+    "svelte-i18n": "^4.0.0",
+    "tinro": "^0.6.12"
   }
 }
