@@ -12,34 +12,37 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Additional information**: You can generate a secret key using [this tool](https://djecrety.ir/) if needed.
 
 
-### `ALLOWED_HOSTS`
+## Database configuration {: #db}
+<!-- TODO -->
+### `POSTGRES_DB`
 
-- **Description**: A list of hostnames that Mathesar will be accessible at ([see Django docs](https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts)). 
-    - Hostnames should not contain the protocol (e.g. `http`) or trailing slashes. 
-    - You can use `localhost` in this list.
-- **Format**: Comma separated string of hostnames
+- **Description**:
+- **Format**:
+- **Additional information**:
 
-    !!! success "Valid values"
-        - `mathesar.example.com, localhost`
-        - `.localhost, mathesar.example.com, 35.188.184.125`
+### `POSTGRES_USER`
 
-    !!! failure "Invalid values"
-        - `http://mathesar.example.com/` - contains HTTP protocol and a trailing slash
-        - `https://mathesar.example.com` - contains HTTPS protocol
-        - `localhost/, 35.188.184.125` - contains trailing slash after `localhost`
+- **Description**:
+- **Format**:
+- **Additional information**:
 
-### `DJANGO_DATABASE_URL` {: #dj_db}
+### `POSTGRES_PASSWORD`
 
-- **Description**: A Postgres connection string of the database used for **Mathesar's internal usage**. 
-- **Format**:`postgres://user:password@hostname:port/database_name`
-    - The connection string above will connect to a database with username `user`, password `password`, hostname `mathesar_db`, port `5432`, and database name `mathesar_django`.
+- **Description**:
+- **Format**:
+- **Additional information**:
 
-### `MATHESAR_DATABASES` 
+### `POSTGRES_HOST`
 
-- **Description**: Names and connection information for databases managed by Mathesar. These databases will be accessible through the UI.
-- **Format**:`(unique_id|connection_string),(unique_id|connection_string),...` 
-    - e.g. `(db1|postgresql://u:p@example.com:5432/db1),(db2|postgresql://u:p@example.com:5432/db2)`
-    - This would set Mathesar to connect to two databases, `db1` and `db2` which are both accessed via the same user `u`, password `p`, hostname `example.com`, and port `5432`.
+- **Description**:
+- **Format**:
+- **Additional information**:
+
+### `POSTGRES_PORT`
+
+- **Description**:
+- **Format**:
+- **Additional information**:
 
 
 ## Caddy reverse proxy configuration {: #caddy}

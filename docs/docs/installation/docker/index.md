@@ -12,10 +12,6 @@ Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/
 
 You can install Mathesar using this method on Linux, MacOS, and Windows.
 
-### Access
-
-You should have permission to run Docker containers on the system.
-
 ### Software
 
 You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
