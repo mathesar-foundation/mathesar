@@ -9,8 +9,8 @@
     LinkMenuItem,
     MenuDivider,
     MenuHeading,
+    ButtonMenuItem,
   } from '@mathesar-component-library';
-  import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
   import {
     iconAddNew,
     iconConnection,
@@ -83,24 +83,24 @@
         >
           <span slot="trigger" class="shortcuts">
             <span class="icon"><Icon {...iconShortcuts} /></span>
-            <span class="text">Shortcuts</span>
+            <span class="text">{$_('shortcuts')}</span>
           </span>
           {#if canExecuteDDL}
             <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
-              New Table from Scratch
+              {$_('new_table_from_scratch')}
             </ButtonMenuItem>
             <LinkMenuItem
               icon={iconAddNew}
               href={getImportPageUrl(database.nickname, schema.id)}
             >
-              New Table from Data Import
+              {$_('new_table_from_data_import')}
             </LinkMenuItem>
           {/if}
           <LinkMenuItem
             icon={iconExploration}
             href={getDataExplorerPageUrl(database.nickname, schema.id)}
           >
-            Open Data Explorer
+            {$_('open_data_explorer')}
           </LinkMenuItem>
         </DropdownMenu>
       {/if}
@@ -115,7 +115,7 @@
             <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
           </div>
           {#if database}
-            <MenuHeading>Database</MenuHeading>
+            <MenuHeading>{$_('database')}</MenuHeading>
             <LinkMenuItem
               icon={iconDatabase}
               href={getDatabasePageUrl(database.nickname)}
@@ -124,7 +124,7 @@
             </LinkMenuItem>
             <MenuDivider />
           {/if}
-          <MenuHeading>Signed in as</MenuHeading>
+          <MenuHeading>{$_('signed_in_as')}</MenuHeading>
           <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
@@ -138,11 +138,11 @@
               href={ADMIN_URL}
               hasNotificationDot={upgradable}
             >
-              Administration
+              {$_('administration')}
             </LinkMenuItem>
           {/if}
           <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
-            Log Out
+            {$_('log_out')}
           </LinkMenuItem>
         </DropdownMenu>
       {/if}

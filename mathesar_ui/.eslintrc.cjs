@@ -102,6 +102,7 @@ module.exports = {
             attributes: {
               '/.+/': ['label', 'triggerLabel', 'aria-label', 'title'],
             },
+            ignoreText: ['DEFAULT'],
           },
         ],
       },
