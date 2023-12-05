@@ -75,12 +75,11 @@
             <div class="section-name">
               {#if filterString?.length === 0}
                 {categoryName}
-              {:else}
+              {:else if processedData.size > 1}
                 <RichText
-                  text={$_('number_of_matches', {
+                  text={$_('number_of_matches_in_category', {
                     values: {
                       count: entries.length,
-                      categoryCount: processedData.size > 1 ? 1 : 0,
                     },
                   })}
                   let:slotName
@@ -89,6 +88,19 @@
                     <b>{filterString}</b>
                   {:else if slotName === 'categoryName'}
                     {categoryName}
+                  {/if}
+                </RichText>
+              {:else}
+                <RichText
+                  text={$_('number_of_matches', {
+                    values: {
+                      count: entries.length,
+                    },
+                  })}
+                  let:slotName
+                >
+                  {#if slotName === 'searchValue'}
+                    <b>{filterString}</b>
                   {/if}
                 </RichText>
               {/if}

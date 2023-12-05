@@ -1,5 +1,6 @@
 <script lang="ts">
   import { meta } from 'tinro';
+  import { _ } from 'svelte-i18n';
   import {
     currentTableId,
     tables as tablesStore,
@@ -67,12 +68,12 @@
   $: queries = [...$queriesStore.data.values()];
 
   $: selectorData = new Map<string, BreadcrumbSelectorEntry[]>([
-    ['Tables', tables.map(makeTableBreadcrumbSelectorItem)],
-    ['Explorations', queries.map(makeQueryBreadcrumbSelectorItem)],
+    [$_('tables'), tables.map(makeTableBreadcrumbSelectorItem)],
+    [$_('explorations'), queries.map(makeQueryBreadcrumbSelectorItem)],
   ]);
 </script>
 
 <BreadcrumbSelector
   data={selectorData}
-  triggerLabel="Choose a Table or Exploration"
+  triggerLabel={$_('choose_table_or_exploration')}
 />

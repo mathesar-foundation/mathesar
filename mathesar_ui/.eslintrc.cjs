@@ -100,7 +100,7 @@ module.exports = {
           'error',
           {
             attributes: {
-              '/.+/': ['label'],
+              '/.+/': ['label', 'triggerLabel'],
             },
           },
         ],
