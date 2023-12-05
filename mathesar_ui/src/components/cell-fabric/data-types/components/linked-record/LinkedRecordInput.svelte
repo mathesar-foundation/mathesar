@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, getContext, onMount, tick } from 'svelte';
+  import { _ } from 'svelte-i18n';
 
   // TODO remove dependency cycle
   // eslint-disable-next-line import/no-cycle
@@ -175,8 +176,8 @@
       on:click={launchRecordSelector}
       role="button"
       tabindex="-1"
-      aria-label="Pick a record"
-      title="Pick a record"
+      aria-label={$_('pick_record')}
+      title={$_('pick_record')}
     >
       <Icon {...iconExpandDown} />
     </span>
