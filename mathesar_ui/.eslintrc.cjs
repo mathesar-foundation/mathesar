@@ -91,6 +91,22 @@ module.exports = {
       },
     },
     {
+      // Temporary block, will be merged with the base svelte override
+      // when the entire app is translated
+      files: ['src/components/**/*.svelte'],
+      extends: ['plugin:@intlify/svelte/recommended'],
+      rules: {
+        '@intlify/svelte/no-raw-text': [
+          'error',
+          {
+            attributes: {
+              '/.+/': ['label'],
+            },
+          },
+        ],
+      },
+    },
+    {
       files: ['*.cjs', '*.config.js'],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',

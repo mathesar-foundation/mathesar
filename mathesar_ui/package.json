@@ -12,6 +12,7 @@
     "extract-i18n": "svelte-i18n extract 'src/**/*{.svelte, .ts}' -c './svelte.config.cjs'"
   },
   "devDependencies": {
+    "@intlify/eslint-plugin-svelte": "^0.1.1",
     "@sveltejs/vite-plugin-svelte": "^1.0.8",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/svelte": "^3.2.1",
