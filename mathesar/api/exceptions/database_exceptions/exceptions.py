@@ -400,11 +400,32 @@ class ExclusionViolationAPIException(MathesarAPIException):
     def __init__(
             self,
             exception,
-            message=None,
+            message="The requested update violates an exclusion constraint",
             field=None,
             details=None,
+            table=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
+        if details is None and table is not None:
+            details = {}
+            try:
+                constraint_oid = get_constraint_oid_by_name_and_table_oid(
+                    exception.orig.diag.constraint_name,
+                    table.oid,
+                    table._sa_engine
+                )
+                constraint = Constraint.objects.get(table=table, oid=constraint_oid)
+                details = {
+                    "constraint": constraint.id,
+                    "constraint_columns": [c.id for c in constraint.columns],
+                }
+            except Exception:
+                warnings.warn("Could not enrich Exception")
+            details.update(
+                {
+                    "original_details": exception.orig.diag.message_detail,
+                }
+            )
         super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
