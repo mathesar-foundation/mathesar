@@ -150,6 +150,13 @@
     font-weight: 500;
   }
 
+  hr {
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--slate-200);
+    display: block;
+  }
+
   a {
     color: inherit;
   }

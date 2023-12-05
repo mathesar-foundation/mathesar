@@ -6,6 +6,10 @@ import type {
   IconProps,
 } from '@mathesar/component-library/types';
 
+export interface BreadcrumbItemConnectionList {
+  type: 'connectionList';
+}
+
 export interface BreadcrumbItemDatabase {
   type: 'database';
   database: Database;
@@ -50,6 +54,7 @@ export interface BreadcrumbItemExploration {
 }
 
 export type BreadcrumbItem =
+  | BreadcrumbItemConnectionList
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
   | BreadcrumbItemTable

@@ -8,13 +8,14 @@ import {
   patchAPI,
   postAPI,
   States,
+  type PaginatedResponse,
 } from '@mathesar/api/utils/requestUtils';
-import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
+import type { Connection } from '@mathesar/api/connections';
 
-import type { Database, SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
+import type { SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 
-import { currentDBName } from './databases';
+import { connectionsStore } from './databases';
 
 const commonData = preloadCommonData();
 
@@ -28,11 +29,11 @@ export interface DBSchemaStoreData {
 }
 
 const dbSchemaStoreMap: Map<
-  Database['nickname'],
+  Connection['nickname'],
   Writable<DBSchemaStoreData>
 > = new Map();
 const dbSchemasRequestMap: Map<
-  Database['nickname'],
+  Connection['nickname'],
   CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
 > = new Map();
 
@@ -43,7 +44,7 @@ function findStoreBySchemaId(id: SchemaEntry['id']) {
 }
 
 function setDBSchemaStore(
-  database: Database['nickname'],
+  database: Connection['nickname'],
   schemas: SchemaResponse[],
 ): Writable<DBSchemaStoreData> {
   const schemaMap: DBSchemaStoreData['data'] = new Map();
@@ -67,7 +68,7 @@ function setDBSchemaStore(
 }
 
 function updateSchemaInDBSchemaStore(
-  database: Database['nickname'],
+  database: Connection['nickname'],
   schema: SchemaResponse,
 ) {
   const store = dbSchemaStoreMap.get(database);
@@ -83,7 +84,7 @@ function updateSchemaInDBSchemaStore(
 }
 
 function removeSchemaInDBSchemaStore(
-  database: Database['nickname'],
+  database: Connection['nickname'],
   schemaId: SchemaEntry['id'],
 ) {
   const store = dbSchemaStoreMap.get(database);
@@ -99,7 +100,7 @@ function removeSchemaInDBSchemaStore(
 }
 
 export function addCountToSchemaNumTables(
-  database: Database,
+  database: Connection,
   schema: SchemaEntry,
   count: number,
 ) {
@@ -140,7 +141,7 @@ export function addCountToSchemaNumExplorations(
 }
 
 export async function refetchSchemasForDB(
-  database: Database['nickname'],
+  database: Connection['nickname'],
 ): Promise<DBSchemaStoreData | undefined> {
   const store = dbSchemaStoreMap.get(database);
   if (!store) {
@@ -177,7 +178,7 @@ export async function refetchSchemasForDB(
 }
 
 export async function refetchSchema(
-  database: Database['nickname'],
+  database: Connection['nickname'],
   schemaId: SchemaEntry['id'],
 ): Promise<SchemaResponse | undefined> {
   const store = dbSchemaStoreMap.get(database);
@@ -203,7 +204,7 @@ export async function refetchSchema(
 let preload = true;
 
 export function getSchemasStoreForDB(
-  database: Database['nickname'],
+  database: Connection['nickname'],
 ): Writable<DBSchemaStoreData> {
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
@@ -225,7 +226,7 @@ export function getSchemasStoreForDB(
 }
 
 export function getSchemaInfo(
-  database: Database['nickname'],
+  database: Connection['nickname'],
   schemaId: SchemaEntry['id'],
 ): SchemaEntry | undefined {
   const store = dbSchemaStoreMap.get(database);
@@ -236,7 +237,7 @@ export function getSchemaInfo(
 }
 
 export async function createSchema(
-  database: Database['nickname'],
+  database: Connection['nickname'],
   schemaName: SchemaEntry['name'],
   schemaDescription: SchemaEntry['description'],
 ): Promise<SchemaResponse> {
@@ -250,7 +251,7 @@ export async function createSchema(
 }
 
 export async function updateSchema(
-  database: Database['nickname'],
+  database: Connection['nickname'],
   schema: SchemaEntry,
 ): Promise<SchemaResponse> {
   const url = `/api/db/v0/schemas/${schema.id}/`;
@@ -263,7 +264,7 @@ export async function updateSchema(
 }
 
 export async function deleteSchema(
-  database: Database['nickname'],
+  database: Connection['nickname'],
   schemaId: SchemaEntry['id'],
 ): Promise<void> {
   await deleteAPI(`/api/db/v0/schemas/${schemaId}/`);
@@ -271,17 +272,17 @@ export async function deleteSchema(
 }
 
 export const schemas: Readable<DBSchemaStoreData> = derived(
-  currentDBName,
-  ($currentDBName, set) => {
+  connectionsStore.currentConnectionName,
+  ($currentConnectionName, set) => {
     let unsubscribe: Unsubscriber;
 
-    if (!$currentDBName) {
+    if (!$currentConnectionName) {
       set({
         state: States.Done,
         data: new Map(),
       });
     } else {
-      const store = getSchemasStoreForDB($currentDBName);
+      const store = getSchemasStoreForDB($currentConnectionName);
       unsubscribe = store.subscribe((dbSchemasData) => {
         set(dbSchemasData);
       });

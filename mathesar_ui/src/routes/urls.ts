@@ -114,14 +114,8 @@ export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
 export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const LOGOUT_URL = '/auth/logout/';
-
-export const DATABASE_CONNECTION_SLUG = 'db-connection';
-export const DATABASE_CONNECTION_LIST_URL = `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/`;
-export const DATABASE_CONNECTION_ADD_URL = `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/add/`;
-
-export function getDatabaseConnectionEditUrl(databaseName: string) {
-  return `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/edit/${databaseName}/`;
-}
+export const CONNECTIONS_URL = '/connections/';
+export const WELCOME_URL = '/welcome';
 
 export function getEditUsersPageUrl(userId: number) {
   return `${ADMIN_USERS_PAGE_URL}${userId}/`;
@@ -133,4 +127,12 @@ export function getSharedTablePageUrl(slug: string): string {
 
 export function getSharedExplorationPageUrl(slug: string): string {
   return `/shares/explorations/${slug}/`;
+}
+
+export function getDocsLink(path: string): string {
+  return `https://docs.mathesar.org${path}`;
+}
+
+export function getWikiLink(path: string): string {
+  return `https://wiki.mathesar.org${path}`;
 }

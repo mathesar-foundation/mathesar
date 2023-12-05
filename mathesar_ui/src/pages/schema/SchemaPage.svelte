@@ -131,13 +131,13 @@
       {/if}
     </div>
 
-    <slot slot="bottom">
+    <svelte:fragment slot="bottom">
       {#if schema.description}
         <span class="description">
           {schema.description}
         </span>
       {/if}
-    </slot>
+    </svelte:fragment>
   </AppSecondaryHeader>
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
