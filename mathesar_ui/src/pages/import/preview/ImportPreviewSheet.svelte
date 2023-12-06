@@ -52,10 +52,10 @@
           {#each columns as column (column)}
             <SheetCell
               columnIdentifierKey={column.id}
-              let:htmlAttributes
+              let:htmlAttributes={sheetCellHtmlAttributes}
               let:style
             >
-              <div {...htmlAttributes} {style}>
+              <div {...sheetCellHtmlAttributes} {style}>
                 <CellFabric
                   columnFabric={column}
                   value={record[column.column.name]}

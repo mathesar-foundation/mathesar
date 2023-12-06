@@ -1,8 +1,8 @@
-<!-- 
+<!--
   TODO: Implement the loader while renaming
   when implementing rename functionality
   using table inspector
- -->
+-->
 <script lang="ts">
   import { Icon } from '@mathesar-component-library';
   import {
