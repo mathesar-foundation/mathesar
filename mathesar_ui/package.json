@@ -12,6 +12,7 @@
     "extract-i18n": "svelte-i18n extract 'src/**/*{.svelte, .ts}' -c './svelte.config.cjs'"
   },
   "devDependencies": {
+    "@intlify/eslint-plugin-svelte": "^0.1.1",
     "@sveltejs/vite-plugin-svelte": "^1.0.8",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/svelte": "^3.2.1",
@@ -33,8 +34,9 @@
     "eslint-plugin-svelte": "^2.35.1",
     "jsdom": "^20.0.0",
     "postcss": "^8.4.16",
-    "prettier": "^2.7.1",
-    "prettier-plugin-svelte": "^2.7.0",
+    "prettier": "^3.1.0",
+    "prettier-plugin-sort-json": "^3.1.0",
+    "prettier-plugin-svelte": "^3.1.2",
     "sass": "^1.55.0",
     "svelte": "^3.50.1",
     "svelte-check": "^2.9.0",

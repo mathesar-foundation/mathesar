@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
+  import { _ } from 'svelte-i18n';
   import {
     Icon,
     iconExpandDown,
@@ -123,8 +123,8 @@
       <button
         class="dropdown-button passthrough"
         on:click={launchRecordSelector}
-        aria-label="Pick a record"
-        title="Pick a record"
+        aria-label={$_('pick_record')}
+        title={$_('pick_record')}
       >
         <Icon {...iconExpandDown} />
       </button>

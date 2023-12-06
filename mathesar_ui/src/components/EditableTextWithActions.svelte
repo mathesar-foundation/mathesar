@@ -4,6 +4,7 @@
   Enables inline editing with support for "Save" & "Cancel" actions.
 -->
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     CancelOrProceedButtonPair,
     TextInput,
@@ -77,7 +78,7 @@
         onCancel={handleCancel}
         isProcessing={isSubmitting}
         canProceed={canSave}
-        proceedButton={{ label: 'Save' }}
+        proceedButton={{ label: $_('save') }}
         size="small"
       />
     </div>

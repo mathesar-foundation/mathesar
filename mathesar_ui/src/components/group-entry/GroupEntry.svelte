@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     Icon,
@@ -93,7 +94,7 @@
   ) {
     return (preprocId: string) =>
       preprocId === undefined
-        ? 'Value'
+        ? $_('value')
         : _columns
             .get(_columnIdentifier)
             ?.preprocFunctions.find((entry) => entry.id === preprocId)?.name ??
@@ -130,7 +131,7 @@
       bind:value={preprocFunctionIdentifier}
       autoSelect="none"
       getLabel={(entry) =>
-        entry === undefined ? 'Value' : getPreprocLabel(entry)}
+        entry === undefined ? $_('value') : getPreprocLabel(entry)}
       on:change={update}
     />
   {/if}
