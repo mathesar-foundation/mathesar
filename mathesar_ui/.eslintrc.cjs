@@ -100,9 +100,15 @@ module.exports = {
           'error',
           {
             attributes: {
-              '/.+/': ['label', 'triggerLabel', 'aria-label', 'title'],
+              '/.+/': [
+                'label',
+                'triggerLabel',
+                'aria-label',
+                'title',
+                'placeholder',
+              ],
             },
-            ignoreText: ['DEFAULT'],
+            ignoreText: ['DEFAULT', 'Mathesar.org', 'NULL', '*'],
           },
         ],
       },
