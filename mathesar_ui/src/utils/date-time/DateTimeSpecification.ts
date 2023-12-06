@@ -168,10 +168,10 @@ export default class DateTimeSpecification {
       ...timestamp,
       ...combine(timestamp, ['[AD]', '[BC]'], (a, b) => `${a} ${b}`),
     ];
-    const timestampWithTZ = combine(date, timeWithTZ, (a, b) => `${a} ${b}`);
+    const timestampWithTZ = combine(date, timeWithTZ, (a, b) => `${a}T${b}`);
     const timestampWithTZFull = [
       ...timestampWithTZ,
-      ...combine(timestampWithTZ, ['[AD]', '[BC]'], (a, b) => `${a} ${b}`),
+      ...combine(timestampWithTZ, ['[AD]', '[BC]'], (a, b) => `${a}T${b}`),
     ];
 
     switch (this.type) {

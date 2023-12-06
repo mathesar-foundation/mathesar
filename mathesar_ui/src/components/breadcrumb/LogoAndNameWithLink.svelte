@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import Logo from '../Logo.svelte';
 
   export let hasResponsiveAbridgement = false;
@@ -11,7 +12,7 @@
   class:has-responsive-abridgement={hasResponsiveAbridgement}
 >
   <Logo />
-  <div class="mathesar">Mathesar</div>
+  <div class="mathesar">{$_('mathesar')}</div>
 </a>
 
 <style>

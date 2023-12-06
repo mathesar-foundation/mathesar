@@ -59,8 +59,8 @@
 <style lang="scss">
   .control {
     /**
-    * To avoid text selection while 
-    * while dragging through rows for 
+    * To avoid text selection while
+    * while dragging through rows for
     * multi-row selection
     */
     user-select: none;

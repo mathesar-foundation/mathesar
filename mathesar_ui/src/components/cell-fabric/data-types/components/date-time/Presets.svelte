@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { Button, dayjs } from '@mathesar-component-library';
   import type {
     DateTimeCellExternalProps,
@@ -14,13 +15,13 @@
   export let isRelative = false;
 
   const allPresets = {
-    now: { label: 'Now', absoluteDate: dayjs().format(formattingString) },
+    now: { label: $_('now'), absoluteDate: dayjs().format(formattingString) },
     today: {
-      label: 'Today',
+      label: $_('today'),
       absoluteDate: dayjs().startOf('day').format(formattingString),
     },
     yesterday: {
-      label: 'Yesterday',
+      label: $_('yesterday'),
       absoluteDate: dayjs()
         .startOf('day')
         .subtract(1, 'day')
@@ -58,7 +59,9 @@
           {allPresets[preset].absoluteDate}
         </span>
         <span class="tag-label absolute-date">
-          ({allPresets[preset].label})
+          {$_('wrap_in_brackets', {
+            values: { value: allPresets[preset].label },
+          })}
         </span>
       {/if}
     </Button>

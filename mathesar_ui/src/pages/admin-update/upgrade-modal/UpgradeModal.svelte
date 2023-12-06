@@ -7,7 +7,7 @@
   import type { Release } from '@mathesar/stores/releases';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import databaseApi from '@mathesar/api/databases';
+  import connectionsApi from '@mathesar/api/connections';
   import UpgradeConfirm from './UpgradeConfirm.svelte';
   import UpgradeError from './UpgradeError.svelte';
   import UpgradeProcessing from './UpgradeProcessing.svelte';
@@ -45,7 +45,7 @@
 
   async function reloadOnServerAvailability(): Promise<void> {
     try {
-      await databaseApi.list();
+      await connectionsApi.list();
       window.location.reload();
     } catch {
       reloadTimeout = window.setTimeout(() => {

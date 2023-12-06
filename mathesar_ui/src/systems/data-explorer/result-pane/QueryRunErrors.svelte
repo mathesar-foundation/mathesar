@@ -18,7 +18,7 @@
 
   function deleteMissingColumns(column_id: number) {
     if (queryManager) {
-      queryManager.update((q) => q.withoutColumnsById([column_id]));
+      void queryManager.update((q) => q.withoutColumnsById([column_id]));
     }
   }
 </script>
@@ -88,7 +88,7 @@
                   <a
                     class="btn btn-secondary"
                     href={getExplorationEditorPageUrl(
-                      $currentDatabase.name,
+                      $currentDatabase.nickname,
                       $currentSchema.id,
                       $query.id,
                     )}

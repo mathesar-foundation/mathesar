@@ -28,6 +28,7 @@ import {
   faLock,
   faPalette,
   faPencilAlt,
+  faPlug,
   faPlus,
   faProjectDiagram,
   faQuestion,
@@ -148,6 +149,7 @@ export const iconGrip = { data: faGrip };
 //
 // (These names should all be nouns)
 
+export const iconConnection: IconProps = { data: faPlug };
 export const iconConstraint: IconProps = { data: faKey };
 export const iconConstraintUnique: IconProps = { data: faSnowflake };
 export const iconDatabase: IconProps = { data: faDatabase };

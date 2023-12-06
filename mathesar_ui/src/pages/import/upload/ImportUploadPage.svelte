@@ -113,7 +113,7 @@
         dataFiles: [dataFileId],
       });
       const previewPage = getImportPreviewPageUrl(
-        database.name,
+        database.nickname,
         schema.id,
         table.id,
         { useColumnTypeInference: $useColumnTypeInference },

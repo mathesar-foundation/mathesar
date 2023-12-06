@@ -1,32 +1,42 @@
 <script lang="ts">
-  import type { Database } from '@mathesar/AppTypes';
-  import { iconDatabase } from '@mathesar/icons';
-  import { getDatabasePageUrl } from '@mathesar/routes/urls';
-  import {
-    currentDBName,
-    databases as dbStore,
-  } from '@mathesar/stores/databases';
+  import { _ } from 'svelte-i18n';
+  import type { Connection } from '@mathesar/api/connections';
+  import { iconDatabase, iconConnection } from '@mathesar/icons';
+  import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
+  import { connectionsStore } from '@mathesar/stores/databases';
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
+  const { connections, currentConnectionName } = connectionsStore;
+
   function makeBreadcrumbSelectorItem(
-    dbEntry: Database,
+    connectionEntry: Connection,
   ): BreadcrumbSelectorEntry {
     return {
       type: 'simple',
-      label: dbEntry.name,
-      href: getDatabasePageUrl(dbEntry.name),
+      label: connectionEntry.nickname,
+      href: getDatabasePageUrl(connectionEntry.nickname),
       icon: iconDatabase,
       isActive() {
-        return dbEntry.name === $currentDBName;
+        return connectionEntry.nickname === $currentConnectionName;
       },
     };
   }
-
-  $: databases = [...$dbStore.data.values()];
 </script>
 
 <BreadcrumbSelector
-  data={new Map([['Databases', databases.map(makeBreadcrumbSelectorItem)]])}
-  triggerLabel="Choose a Database"
+  data={new Map([
+    [$_('connections'), $connections.map(makeBreadcrumbSelectorItem)],
+  ])}
+  triggerLabel={$_('choose_connection')}
+  persistentLinks={[
+    {
+      type: 'simple',
+      label: $_('manage_connections'),
+      href: CONNECTIONS_URL,
+      icon: iconConnection,
+      // TODO: Handle active states for persistent links
+      isActive: () => false,
+    },
+  ]}
 />
