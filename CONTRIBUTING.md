@@ -1,5 +1,7 @@
 # Contributor Guide
 
+This guide explains Mathesar's collaboration workflow and processes. Also see our [Developer Guide](./DEVELOPER_GUIDE.md) to learn how to work with Mathesar's code.
+
 Mathesar's development happens on [GitHub](https://github.com/mathesar-foundation/mathesar). We welcome contributions of all kinds!
 
 ## Joining the Community
