@@ -24,19 +24,21 @@
   The documenation can be found [anchorComponent](here).
   ```
 
+  The argument 'here' would be translated, and passed to the 'anchorComponent' slot.
+
   ## Step 2
 
   Render the component with condition children that match the slot names. For
   example:
 
   ```svelte
-  <RichText text={$_(sometext)} let:slotName let:slotArg>
+  <RichText text={$_(sometext)} let:slotName let:translatedArg>
     {#if slotName === 'tableName'}
       <TableName {table} />
     {:else if slotName === 'schemaName'}
       <SchemaName {schema} />
-    {:else if slotName === 'anchorComponent' && slotArg}
-      <AnchorComponent label={slotArg}/>
+    {:else if slotName === 'anchorComponent' && translatedArg}
+      <AnchorComponent label={translatedArg}/>
     {/if}
   </RichText>
   ```
@@ -52,7 +54,7 @@
   {#if token.type === 'text'}
     {token.content}
   {:else if token.type === 'slot'}
-    <slot slotName={token.name} slotArg={token.arg} />
+    <slot slotName={token.name} translatedArg={token.arg} />
   {:else}
     {assertExhaustive(token)}
   {/if}
