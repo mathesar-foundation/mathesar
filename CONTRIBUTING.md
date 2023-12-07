@@ -1,5 +1,7 @@
 # Contributor Guide
 
+This guide explains Mathesar's collaboration workflow and processes. Also see our [Developer Guide](./DEVELOPER_GUIDE.md) to learn how to work with Mathesar's code.
+
 Mathesar's development happens on [GitHub](https://github.com/mathesar-foundation/mathesar). We welcome contributions of all kinds!
 
 ## Joining the Community
@@ -14,15 +16,12 @@ We highly recommend joining our [Matrix community](https://wiki.mathesar.org/en/
 
 1. **Find an [issue](https://github.com/mathesar-foundation/mathesar/issues) to work on.**
 
-    - ✅ Our easiest issues are labeled [good first issue](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee+label%3A%22good+first+issue%22) and are a great place to start. However keep in mind that we're not always entirely sure of the necessary steps to solve a problem when we open an issue. 
-    - ✅ Slightly more challenging issues are still labeled [help wanted](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee+label%3A%22help+wanted%22). These can be a good place to start if you have some experience coding but are not yet familiar with our codebase.
-    - ❌ Issues are not appropriate if they meet any of the following criteria:
-        - already assigned to someone
-        - labeled with a `restricted: ...` label
-        - labeled with any `status: ...` label other than `status: ready`
-    - ⚠️ Some issues fall into a middle ground, not being labeled "help wanted" or "restricted". These tickets are more challenging and are only appropriate for community contributors who are familiar with our codebase.
+    - ✅ All issues open to community contribution are labeled [help wanted](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee+label%3A%22help+wanted%22). Look through these to find a task.
+    - ✅ Additionally, the easiest of those issues are labeled [good first issue](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aopen+is%3Aissue+no%3Aassignee+label%3A%22good+first+issue%22). However keep in mind that we're not always entirely sure of the necessary steps to solve a problem when we open an issue, so there could be larger challenges lurking within some of that work.
+    - ❌ If an issue is _not_ labeled "help wanted", then it is not open to community contribution. One of the Mathesar maintainers will work on it instead.
+    - ❌ Issues already assigned to other users are also not open to contribution.
 
-    If you want to work on something for which there is no GitHub issue open yet, create an issue and propose your change there. A Mathesar [team member](https://wiki.mathesar.org/en/team) will evaluate your issue and decide whether we'll accept a pull request for the issue.
+    If you want to work on something for which there is no GitHub issue open yet, [create an issue](https://github.com/mathesar-foundation/mathesar/issues/new/choose) and propose your change there. A Mathesar [team member](https://wiki.mathesar.org/en/team) will evaluate your issue and decide whether we'll accept a pull request for the issue.
 
 1. ***(Optionally)* Claim the issue.**
 
