@@ -1,4 +1,5 @@
 from django_filters import rest_framework as filters
+from rest_access_policy import AccessViewSetMixin
 from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -19,7 +20,11 @@ from mathesar.utils.connections import (
 )
 
 
-class ConnectionViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class ConnectionViewSet(
+        AccessViewSetMixin,
+        ListModelMixin, RetrieveModelMixin,
+        viewsets.GenericViewSet,
+):
     serializer_class = ConnectionSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)

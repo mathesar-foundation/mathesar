@@ -46,7 +46,6 @@ def _save_and_install(
         create_db=create_db,
         root_db=root_db,
     )
-#    return Database.current_objects.get(name=db_model.name)
     return db_model
 
 
