@@ -16,17 +16,27 @@
 
   Slot names can only contain letters, numbers and underscores.
 
+  You can pass an argument to the slot, by encapsulating the argument within
+  normal brackets immediately after the slot.
+  For example:
+
+  ```
+  The documenation can be found [anchorComponent](here).
+  ```
+
   ## Step 2
 
   Render the component with condition children that match the slot names. For
   example:
 
   ```svelte
-  <RichText text={$LL.text()} let:slotName>
+  <RichText text={$_(sometext)} let:slotName let:slotArg>
     {#if slotName === 'tableName'}
       <TableName {table} />
     {:else if slotName === 'schemaName'}
       <SchemaName {schema} />
+    {:else if slotName === 'anchorComponent' && slotArg}
+      <AnchorComponent label={slotArg}/>
     {/if}
   </RichText>
   ```
@@ -42,7 +52,7 @@
   {#if token.type === 'text'}
     {token.content}
   {:else if token.type === 'slot'}
-    <slot slotName={token.name} />
+    <slot slotName={token.name} slotArg={token.arg} />
   {:else}
     {assertExhaustive(token)}
   {/if}
