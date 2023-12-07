@@ -1,9 +1,9 @@
-<!-- 
+<!--
   @component
 
   Use this component to render translated strings that contain components or
   html tags. This enables the translations of such strings while maintaining the
-  context for the translator using the slot names. 
+  context for the translator using the slot names.
 
   ## Step 1
 
@@ -30,7 +30,7 @@
     {/if}
   </RichText>
   ```
- -->
+-->
 <script lang="ts">
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import { parse } from './richTextUtils';

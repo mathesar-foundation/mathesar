@@ -1,3 +1,5 @@
+from config.settings.common_settings import DATABASES
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import status
@@ -10,7 +12,7 @@ from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.query import QueryAccessPolicy
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.db.permissions.table import TableAccessPolicy
-from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
+from mathesar.api.serializers.databases import ConnectionSerializer, TypeSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
@@ -37,42 +39,58 @@ def get_schema_list(request, database):
 
 def _get_permissible_db_queryset(request):
     """
-    Returns the queryset for databases a user is permitted to access.
+    Returns the queryset for connections a user is permitted to access.
 
-    Note, databases that a user is permitted to access is the union of those
-    permitted by DatabaseAccessPolicy and those containing Schemas permitted
-    by SchemaAccessPolicy.
+    Note, connections that a user is permitted to access is the union of those
+    permitted by DatabaseAccessPolicy and those containing Schemas permitted by
+    SchemaAccessPolicy.
 
-    Note, the live demo mode is an exception where the user is only permitted
-    to access the database generated for him. We treat that as a subset of the
-    databases the user can normally access, just in case someone finds a way to
-    manipulate how we define whether we're in demo mode and which db is a
+    Note, the live demo mode is an exception where the user is only permitted to
+    access the database generated for him. We treat that as a subset of the
+    connections the user can normally access, just in case someone finds a way
+    to manipulate how we define whether we're in demo mode and which db is a
     user's demo db.
     """
-    dbs_qs = Database.objects.filter(deleted=False)
-    permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
-    schemas_qs = Schema.objects.all()
-    permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
-    dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=False)
-    permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
-    permitted_dbs_qs = permitted_dbs_qs.distinct()
-    if get_is_live_demo_mode():
-        live_demo_db_name = get_live_demo_db_name(request)
-        if live_demo_db_name:
-            permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
+    for deleted in (True, False):
+        dbs_qs = Database.objects.filter(deleted=deleted)
+        permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
+        schemas_qs = Schema.objects.all()
+        permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
+        dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=deleted)
+        permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
+        permitted_dbs_qs = permitted_dbs_qs.distinct()
+        if get_is_live_demo_mode():
+            live_demo_db_name = get_live_demo_db_name(request)
+            if live_demo_db_name:
+                permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
+            else:
+                raise Exception('This should never happen')
+        if deleted:
+            failed_permitted_dbs_qs = permitted_dbs_qs
         else:
-            raise Exception('This should never happen')
-    return permitted_dbs_qs
+            successful_permitted_dbs_qs = permitted_dbs_qs
+    return successful_permitted_dbs_qs, failed_permitted_dbs_qs
 
 
 def get_database_list(request):
-    permission_restricted_db_qs = _get_permissible_db_queryset(request)
-    database_serializer = DatabaseSerializer(
+    permission_restricted_db_qs, permission_restricted_failed_db_qs = _get_permissible_db_queryset(request)
+    database_serializer = ConnectionSerializer(
         permission_restricted_db_qs,
         many=True,
         context={'request': request}
     )
-    return database_serializer.data
+    failed_db_data = []
+    for db in permission_restricted_failed_db_qs:
+        failed_db_data.append({
+            'id': db.id,
+            'username': db.username,
+            'port': db.port,
+            'host': db.host,
+            'nickname': db.name,
+            'database': db.db_name,
+            'error': 'Error connecting to the database'
+        })
+    return database_serializer.data + failed_db_data
 
 
 def get_table_list(request, schema):
@@ -124,10 +142,10 @@ def get_user_data(request):
 
 def get_base_data_all_routes(request, database=None, schema=None):
     return {
-        'current_db': database.name if database else None,
+        'current_db_connection': database.name if database else None,
         'current_schema': schema.id if schema else None,
         'schemas': [],
-        'databases': [],
+        'connections': [],
         'tables': [],
         'queries': [],
         'abstract_types': get_ui_type_list(request, database),
@@ -135,23 +153,39 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'is_authenticated': not request.user.is_anonymous,
         'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
+        'internal_db_connection': _get_internal_db_meta(),
     }
+
+
+def _get_internal_db_meta():
+    internal_db = DATABASES['default']
+    if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
+        return {
+            'type': 'postgres',
+            'user': internal_db['USER'],
+            'host': internal_db['HOST'],
+            'port': internal_db['PORT'],
+            'database': internal_db['NAME']
+        }
+    return {'type': 'sqlite'}
 
 
 def get_common_data(request, database=None, schema=None):
     return {
         **get_base_data_all_routes(request, database, schema),
         'schemas': get_schema_list(request, database),
-        'databases': get_database_list(request),
+        'connections': get_database_list(request),
         'tables': get_table_list(request, schema),
         'queries': get_queries_list(request, schema),
+        'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
         'routing_context': 'normal',
     }
 
 
 def get_current_database(request, db_name):
     """Get database from passed name, with fall back behavior."""
-    permitted_databases = _get_permissible_db_queryset(request)
+    successful_dbs, failed_dbs = _get_permissible_db_queryset(request)
+    permitted_databases = successful_dbs | failed_dbs
     if db_name is not None:
         current_database = get_object_or_404(permitted_databases, name=db_name)
     else:
@@ -199,7 +233,7 @@ def get_common_data_for_shared_entity(request, schema=None):
         many=True,
         context={'request': request}
     ).data
-    serialized_databases = DatabaseSerializer(
+    serialized_databases = ConnectionSerializer(
         databases,
         many=True,
         context={'request': request}
@@ -249,12 +283,24 @@ def reflect_all(_):
 
 @login_required
 def home(request):
-    database = get_current_database(request, None)
-    if database is None:
+    connection_list = get_database_list(request)
+    number_of_connections = len(connection_list)
+    if number_of_connections > 1:
+        return redirect('connections')
+    elif number_of_connections == 1:
+        db = connection_list[0]
+        return redirect('schemas', db_name=db['nickname'])
+    else:
         return render(request, 'mathesar/index.html', {
-            'common_data': get_common_data(request, database)
+            'common_data': get_common_data(request)
         })
-    return redirect('schemas', db_name=database.name)
+
+
+@login_required
+def connections(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
 
 
 @login_required

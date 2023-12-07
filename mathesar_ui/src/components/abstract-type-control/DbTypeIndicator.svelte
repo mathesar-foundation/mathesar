@@ -1,11 +1,17 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { DbType } from '@mathesar/AppTypes';
+  import { RichText } from '@mathesar/components/rich-text';
 
   export let type: DbType | undefined;
 </script>
 
 <div>
-  Database type <span>{type ?? 'UNKNOWN'}</span>
+  <RichText text={$_('database_type_displayer')} let:slotName>
+    {#if slotName === 'format'}
+      <span>{type ?? 'UNKNOWN'}</span>
+    {/if}
+  </RichText>
 </div>
 
 <style lang="scss">

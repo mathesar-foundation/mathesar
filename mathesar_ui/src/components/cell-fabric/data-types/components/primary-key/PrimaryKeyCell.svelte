@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
-  import { Icon } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { Icon } from '@mathesar-component-library';
   import CellWrapper from '@mathesar/components/cell-fabric/data-types/components/CellWrapper.svelte';
   import type { PrimaryKeyCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import Default from '@mathesar/components/Default.svelte';
@@ -59,7 +59,10 @@
   on:keydown={handleKeyDown}
   hasPadding={false}
 >
-  <div class="primary-key-cell">
+  <div
+    class="primary-key-cell"
+    class:is-independent-of-sheet={isIndependentOfSheet}
+  >
     <span class="value" on:mousedown={handleValueMouseDown}>
       {#if value === undefined}
         <Default />
@@ -71,7 +74,7 @@
       <a
         {href}
         class="link"
-        title="Go To Record {value}"
+        title={$_('go_to_record_with_value', { values: { value } })}
         on:contextmenu={handleContextMenu}
       >
         <Icon {...iconLinkToRecordPage} />
@@ -81,8 +84,10 @@
 </CellWrapper>
 
 <style>
-  .primary-key-cell {
+  .primary-key-cell:not(.is-independent-of-sheet) {
     position: absolute;
+  }
+  .primary-key-cell {
     top: 0;
     left: 0;
     width: 100%;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
+  import { _ } from 'svelte-i18n';
   import {
     Icon,
     iconExpandDown,
@@ -20,6 +20,7 @@
   const recordSelector = getRecordSelectorFromContext();
 
   export let isActive: $$Props['isActive'];
+  export let columnFabric: $$Props['columnFabric'];
   export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -41,8 +42,13 @@
     }
     event?.stopPropagation();
     const result = await recordSelector.acquireUserInput({ tableId });
+    const linkedFkColumnId = columnFabric.linkFk?.referent_columns[0];
     if (result) {
-      value = result.recordId;
+      if (linkedFkColumnId) {
+        value = result.record[linkedFkColumnId];
+      } else {
+        value = result.recordId;
+      }
       setRecordSummary(String(result.recordId), result.recordSummary);
       dispatch('update', { value });
     }
@@ -117,8 +123,8 @@
       <button
         class="dropdown-button passthrough"
         on:click={launchRecordSelector}
-        aria-label="Pick a record"
-        title="Pick a record"
+        aria-label={$_('pick_record')}
+        title={$_('pick_record')}
       >
         <Icon {...iconExpandDown} />
       </button>

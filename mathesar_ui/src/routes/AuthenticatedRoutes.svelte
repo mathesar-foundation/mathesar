@@ -1,26 +1,38 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import { databases } from '@mathesar/stores/databases';
+  import { connectionsStore } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
+  import WelcomePage from '@mathesar/pages/WelcomePage.svelte';
+  import ConnectionsPage from '@mathesar/pages/connections/ConnectionsPage.svelte';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
   import AdminRoute from './AdminRoute.svelte';
-  import { getDatabasePageUrl } from './urls';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
 
-  $: firstDatabase = $databases.data?.[0];
+  $: ({ connections } = connectionsStore);
+
+  $: rootPathRedirectUrl = (() => {
+    const numberOfConnections = $connections?.length ?? 0;
+    if (numberOfConnections === 0) {
+      // There is no redirection when `redirect` is `undefined`.
+      return undefined;
+    }
+    if (numberOfConnections > 1) {
+      return CONNECTIONS_URL;
+    }
+    const firstConnection = $connections[0];
+    return getDatabasePageUrl(firstConnection.nickname);
+  })();
 </script>
 
-{#if firstDatabase}
-  <Route path="/" redirect={getDatabasePageUrl(firstDatabase.name)} />
-{:else}
-  <Route path="/">
-    <ErrorPage>No databases found</ErrorPage>
-  </Route>
-{/if}
+<Route path="/" redirect={rootPathRedirectUrl}>
+  <!-- This page is rendered only when there are no existing connections -->
+  <WelcomePage />
+</Route>
 
 <Route path="/profile">
   <UserProfileRoute />
@@ -33,5 +45,10 @@
 {/if}
 
 <Route path="/db/:databaseName/*" let:meta firstmatch>
-  <DatabaseRoute databaseName={meta.params.databaseName} />
+  <DatabaseRoute databaseName={decodeURIComponent(meta.params.databaseName)} />
+</Route>
+
+<Route path="/connections">
+  <AppendBreadcrumb item={{ type: 'connectionList' }} />
+  <ConnectionsPage />
 </Route>

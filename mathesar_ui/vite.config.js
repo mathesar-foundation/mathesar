@@ -38,7 +38,11 @@ export default defineConfig({
   build: {
     manifest: true,
     rollupOptions: {
-      input: './src/main.ts',
+      input: {
+        main: './src/main.ts',
+        en: './src/i18n/languages/en/index.ts',
+        ja: './src/i18n/languages/ja/index.ts',
+      },
     },
     outDir: '../mathesar/static/mathesar/',
     emptyOutDir: true,
@@ -48,5 +52,6 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     testTimeout: 30000,
+    setupFiles: ['vitest-setup.config.ts'],
   },
 });

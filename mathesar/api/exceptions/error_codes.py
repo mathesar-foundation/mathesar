@@ -39,6 +39,7 @@ class ErrorCodes(Enum):
     UniqueImportViolation = 4303
 
     # Validation Error
+    BadDBCredentials = 4428
     ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
     MappingsNotFound = 4417

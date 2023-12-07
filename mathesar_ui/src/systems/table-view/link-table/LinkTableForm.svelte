@@ -60,13 +60,6 @@
   $: allTables = [...$tablesDataStore.data.values()];
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
-  $: targetColumnsStore = target
-    ? new ColumnsDataStore({ tableId: target.id })
-    : undefined;
-  $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
-  $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
-  $: targetColumnsAreLoading =
-    $targetColumnsFetchStatus?.state === 'processing';
 
   // ===========================================================================
   // Fields
@@ -80,6 +73,13 @@
       : ['manyToOne', 'oneToMany', 'manyToMany'])();
   $: linkType = requiredField<LinkType>('manyToOne');
   $: $targetTable, linkType.reset();
+  $: targetColumnsStore = target
+    ? new ColumnsDataStore({ tableId: target.id })
+    : undefined;
+  $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
+  $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
+  $: targetColumnsAreLoading =
+    $targetColumnsFetchStatus?.state === 'processing';
   $: columnNameInBase = requiredField(
     getSuggestedFkColumnName(target, $baseColumns),
     [columnNameIsAvailable($baseColumns)],

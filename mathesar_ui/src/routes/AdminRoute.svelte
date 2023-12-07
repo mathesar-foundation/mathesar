@@ -26,6 +26,7 @@
 <LayoutWithHeader
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
+    '--PageLayoutWithSidebar__sidebar-width': '15rem',
   }}
   restrictWidth
 >

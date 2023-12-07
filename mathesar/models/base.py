@@ -7,13 +7,13 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
-from django.contrib.postgres.fields import ArrayField
-
+from encrypted_fields.fields import EncryptedCharField
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
+    get_column_description,
     get_column_attnum_from_names_as_map, get_column_name_from_attnum,
     get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
 )
@@ -110,10 +110,15 @@ _engine_cache = {}
 
 
 class Database(ReflectionManagerMixin, BaseModel):
+    name = models.CharField(max_length=128, unique=True)
+    db_name = models.CharField(max_length=128)
+    username = EncryptedCharField(max_length=255)
+    password = EncryptedCharField(max_length=255)
+    host = models.CharField(max_length=255)
+    port = models.IntegerField()
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()
-    name = models.CharField(max_length=128, unique=True)
     deleted = models.BooleanField(blank=True, default=False)
 
     @property
@@ -126,7 +131,7 @@ class Database(ReflectionManagerMixin, BaseModel):
             engine = _engine_cache.get(db_name)
             model_utils.ensure_cached_engine_ready(engine)
         else:
-            engine = create_mathesar_engine(db_name=db_name)
+            engine = create_mathesar_engine(self)
             _engine_cache[db_name] = engine
         return engine
 
@@ -140,6 +145,14 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
+
+    def save(self, **kwargs):
+        db_name = self.name
+        # invalidate cached engine as db credentials might get changed.
+        if _engine_cache.get(db_name):
+            _engine_cache[db_name].dispose()
+            del _engine_cache[db_name]
+        return super().save()
 
 
 class Schema(DatabaseObject):
@@ -476,7 +489,6 @@ class Table(DatabaseObject, Relation):
 
     def update_sa_table(self, update_params):
         result = model_utils.update_sa_table(self, update_params)
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def delete_sa_table(self):
@@ -763,6 +775,10 @@ class Column(ReflectionManagerMixin, BaseModel):
             return name
 
     @property
+    def description(self):
+        return get_column_description(self.table.oid, self.attnum, self._sa_engine)
+
+    @property
     def ui_type(self):
         if self.db_type:
             return get_ui_type_from_db_type(self.db_type)
@@ -885,7 +901,7 @@ class PreviewColumnSettings(BaseModel):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = ArrayField(models.IntegerField(), null=True, default=None)
+    column_order = JSONField(null=True, default=None)
 
 
 def _create_table_settings(tables):

@@ -39,7 +39,7 @@
 
 <ControlledModal {controller} closeOn={['button', 'esc', 'overlay']}>
   <svelte:fragment slot="title">
-    Manage <Identifier>{database.name}</Identifier> Database Access
+    Manage <Identifier>{database.nickname}</Identifier> Database Access
   </svelte:fragment>
 
   {#if $requestStatus?.state === 'success'}

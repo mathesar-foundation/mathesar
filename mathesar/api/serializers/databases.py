@@ -6,19 +6,24 @@ from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models.base import Database
 
 
-class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
+class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     supported_types_url = serializers.SerializerMethodField()
+    nickname = serializers.CharField(source='name')
+    database = serializers.CharField(source='db_name')
 
     class Meta:
         model = Database
-        fields = ['id', 'name', 'deleted', 'supported_types_url']
-        read_only_fields = ['id', 'name', 'deleted', 'supported_types_url']
+        fields = ['id', 'nickname', 'database', 'supported_types_url', 'username', 'password', 'host', 'port']
+        read_only_fields = ['id', 'supported_types_url']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
     def get_supported_types_url(self, obj):
-        if isinstance(obj, Database):
+        if isinstance(obj, Database) and not self.partial:
             # Only get records if we are serializing an existing table
             request = self.context['request']
-            return request.build_absolute_uri(reverse('database-types', kwargs={'pk': obj.pk}))
+            return request.build_absolute_uri(reverse('connection-types', kwargs={'pk': obj.pk}))
         else:
             return None
 

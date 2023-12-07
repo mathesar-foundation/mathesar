@@ -88,6 +88,22 @@ class NotFoundAPIException(MathesarAPIException):
         self.status_code = status_code
 
 
+class MethodNotAllowedAPIException(MathesarAPIException):
+
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.MethodNotAllowed.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_405_METHOD_NOT_ALLOWED
+    ):
+        exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
+        self.detail = [exception_detail]
+        self.status_code = status_code
+
+
 class ValueAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
 
@@ -116,3 +132,17 @@ class NetworkException(MathesarAPIException):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE
     ):
         super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class BadDBCredentials(MathesarAPIException):
+    error_code = ErrorCodes.BadDBCredentials.value
+
+    def __init__(
+            self,
+            exception,
+            field=None,
+            detail=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        message = f"Bad credentials for connecting to the requested database. The reported error is {exception.args[0]}"
+        super().__init__(exception, self.error_code, message, field, detail, status_code)

@@ -1,8 +1,8 @@
 from db.types.custom import email, money, multicurrency, uri, json_array, json_object
 from db.types.base import SCHEMA
 from db.schemas.operations.create import create_schema
-from db.schemas.operations.drop import drop_schema
 from db.types.operations.cast import install_all_casts
+import psycopg
 
 
 def create_type_schema(engine):
@@ -22,8 +22,6 @@ def install_mathesar_on_database(engine):
 
 
 def uninstall_mathesar_from_database(engine):
-    _cascade_type_schema(engine)
-
-
-def _cascade_type_schema(engine):
-    drop_schema(SCHEMA, engine, cascade=True)
+    conn_str = str(engine.url)
+    with psycopg.connect(conn_str) as conn:
+        conn.execute(f"DROP SCHEMA IF EXISTS __msar, msar, {SCHEMA} CASCADE")

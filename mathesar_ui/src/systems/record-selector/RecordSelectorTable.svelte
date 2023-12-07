@@ -143,7 +143,7 @@
       inputData: buildInputData(record),
       transitiveData: $recordSummaries,
     });
-    submitResult({ recordId, recordSummary });
+    submitResult({ recordId, recordSummary, record });
   }
 
   function submitSelection() {
@@ -233,7 +233,7 @@
             {overflowDetails}
           />
           {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-            {@const column = processedColumn.column}
+            {@const { column } = processedColumn}
             <RecordSelectorColumnHeaderCell
               hasNestedSelectorOpen={column === $columnWithNestedSelectorOpen}
               {overflowDetails}

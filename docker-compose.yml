@@ -2,7 +2,7 @@ version: "3.9"
 # Please refer the documentation located at https://docs.mathesar.org/installation/docker-compose/ for the setting up Mathesar using this docker-compose.yml.
 services:
   db:
-    image: postgres:13
+    image: postgres:${PG_VERSION-13}
     container_name: mathesar_db
     environment:
     # These environment variables are used to create a database and superuser when the `db` service starts.

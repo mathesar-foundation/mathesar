@@ -1,5 +1,7 @@
 # Developer Guide
 
+This guide explains how to work with Mathesar's code. Be sure to also see our [Contributor Guide](./CONTRIBUTING.md) to learn about our collaboration workflow.
+
 ## Stack
 
 Mathesar is built using:
@@ -39,7 +41,7 @@ Mathesar is built using:
     - username: `admin`
     - password: `password`
 
-1. Keep Docker running while making your code changes. The app will update automatically with your new code.
+1. Keep Docker running while making your code changes. The app will update automatically with your new code. Please refer to our [Troubleshooting guide](#troubleshooting) if you are experiencing any issues.
 
 ## Contribution guidelines
 
@@ -140,9 +142,40 @@ See our [Live demo mode](./demo/README.md) guide for more information on enablin
 - To open a PostgreSQL [psql](https://www.postgresql.org/docs/current/app-psql.html) terminal for the data in Mathesar:
 
     ```
-    docker exec -it mathesar_db psql -U mathesar
+    docker exec -it mathesar_dev_db psql -U mathesar
     ```
 
+
+## Building Debian package
+
+- On a Debian machine, install the following dependencies
+    
+    ```
+    sudo apt install debhelper-compat dh-virtualenv libsystemd-dev libpq-dev libicu-dev pkg-config lsb-release python3-dev python3 python3-setuptools python3-pip python3-venv tar
+    ```
+- Setup Mathesar build environment.
+   This step is useful only when testing locally is needed for building static files and for collecting them. We won't have a need for this step while using the build service as it will be using the source code from release assets which will contain these static files
+
+
+- Install Python and Nodejs preferably on a Linux machine
+- Run the following commands to set up the environment
+
+    ```
+    python3 -m venv ./mathesar-venv
+    source ./mathesar-venv/bin/activate
+    pip install -r requirements.txt
+    sudo npm install -g npm-force-resolutions
+    cd mathesar_ui && npm install --unsafe-perm && npm run build
+    cd ..
+    python manage.py collectstatic
+    ```
+  
+- From the mathesar directory, run the build script to generate the debian package
+  
+    ```
+    cd release-scripts && source build-debian.sh
+    ```
+ 
 ## Troubleshooting
 
 ### Permissions within Windows
