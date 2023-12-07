@@ -32,21 +32,27 @@
   }
 
   function updateSortEntry(
-    oldColumnId: number,
+    columnId: number,
     newColumnId: number,
-    sortDirection: SortDirection,
+    newSortDirection: SortDirection,
   ) {
-    sorting.update((s) => {
-      let newSort = s;
-      if (oldColumnId !== newColumnId) {
-        /**
-         * This check will ensure that the order of the sorters are not changed
-         * when the user changes the SortDirection of the top sorters
-         */
-        newSort = newSort.without(oldColumnId);
-      }
-      return newSort.with(newColumnId, sortDirection);
-    });
+    // This logic may seem a bit complex for a simple update, but it's necessary
+    // to preserve the order of the sort entries in the store. We need to ensure
+    // that if the user changes the column or sort direction within a sort
+    // entry, then the position of that entry is preserved among all entries.
+    // This is tricky because the entries have no unique identifier. We map over
+    // all entries in order to build a new sorting object with the same order of
+    // entries.
+    sorting.update(
+      (oldSorting) =>
+        new Sorting(
+          [...oldSorting].map(([oldColumnId, oldDirection]) =>
+            oldColumnId === columnId
+              ? [newColumnId, newSortDirection]
+              : [oldColumnId, oldDirection],
+          ),
+        ),
+    );
   }
 </script>
 
