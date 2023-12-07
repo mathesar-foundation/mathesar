@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     LabeledInput,
     MultiSelect,
@@ -23,8 +24,8 @@
 
   type NamingStrategy = 'auto' | 'manual';
   const namingStrategyLabelMap = new Map<NamingStrategy, string>([
-    ['auto', 'Automatically'],
-    ['manual', 'Manually'],
+    ['auto', $_('automatically')],
+    ['manual', $_('manually')],
   ]);
   const namingStrategies = [...namingStrategyLabelMap.keys()];
 
@@ -49,10 +50,10 @@
       return [];
     }
     if (!_constraintName?.trim()) {
-      return ['Name cannot be empty'];
+      return [$_('constraint_name_cannot_be_empty')];
     }
     if (_existingConstraintNames.has(_constraintName?.trim())) {
-      return ['A constraint with that name already exists'];
+      return [$_('constraint_name_already_exists')];
     }
     return [];
   }
@@ -108,8 +109,9 @@
       init();
       onClose?.();
     } catch (error) {
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      toast.error(`Unable to add constraint. ${error.message as string}`);
+      toast.error(
+        `${$_('unable_to_add_constraint')} ${error.message as string}`,
+      );
     }
   }
 
@@ -119,10 +121,10 @@
 </script>
 
 <div class="add-new-unique-constraint">
-  <span>New Unique Constraint</span>
+  <span>{$_('new_unique_constraint')}</span>
   <Form>
     <FormField>
-      <LabeledInput label="Columns" layout="stacked">
+      <LabeledInput label={$_('columns')} layout="stacked">
         <MultiSelect
           bind:values={constraintColumns}
           options={columnsInTable}
@@ -150,13 +152,14 @@
         on:change={handleNamingStrategyChange}
         getRadioLabel={(s) => namingStrategyLabelMap.get(s) ?? ''}
       >
-        Set Constraint Name <ConstraintNameHelp />
+        {$_('set_constraint_name')}
+        <ConstraintNameHelp />
       </RadioGroup>
     </FormField>
 
     {#if namingStrategy === 'manual'}
       <FormField errors={nameValidationErrors}>
-        <LabeledInput label="Constraint Name" layout="stacked">
+        <LabeledInput label={$_('constraint_name')} layout="stacked">
           <TextInput
             bind:value={constraintName}
             hasError={nameValidationErrors.length > 0}
@@ -169,7 +172,7 @@
   <CancelOrProceedButtonPair
     onProceed={handleSave}
     onCancel={handleCancel}
-    proceedButton={{ label: 'Add' }}
+    proceedButton={{ label: $_('add') }}
     {canProceed}
     size="small"
   />

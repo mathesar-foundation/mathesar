@@ -7,7 +7,7 @@
    * this duplication at some point. In the mean time, be mindful of propagating
    * changes to both files as necessary.
    */
-
+  import { _ } from 'svelte-i18n';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
 
@@ -43,7 +43,7 @@
 <div class="section-content">
   {#if selectedCellValue !== undefined}
     <section class="cell-content">
-      <header>Content</header>
+      <header>{$_('content')}</header>
       <div class="content">
         {#if column}
           <CellFabric
@@ -57,7 +57,7 @@
       </div>
     </section>
   {:else}
-    Select a cell to view it's properties.
+    {$_('select_cell_view_properties')}
   {/if}
 </div>
 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
   import { Icon, Button } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
@@ -50,7 +51,7 @@
 </script>
 
 <div class="sorters">
-  <div class="header">Sort</div>
+  <div class="header">{$_('sort')}</div>
   <div class="content">
     {#each [...$sorting] as [columnId, sortDirection], index (columnId)}
       <SortEntry
@@ -71,14 +72,14 @@
           )}
       />
     {:else}
-      <span>No sorting condition has been added</span>
+      <span>{$_('no_sorting_condition_added')}</span>
     {/each}
   </div>
   {#if availableColumnIds.length > 0}
     <div class="footer">
       <Button appearance="secondary" on:click={addSortColumn}>
         <Icon {...iconAddNew} />
-        <span>Add new sort condition</span>
+        <span>{$_('add_new_sort_condition')}</span>
       </Button>
     </div>
   {/if}

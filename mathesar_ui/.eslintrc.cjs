@@ -106,6 +106,7 @@ module.exports = {
                 'aria-label',
                 'title',
                 'placeholder',
+                'ariaLabel',
               ],
             },
             ignoreText: ['DEFAULT', 'Mathesar.org', 'NULL', '*', '+', ':'],

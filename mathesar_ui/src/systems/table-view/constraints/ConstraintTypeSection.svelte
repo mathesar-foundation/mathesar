@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
   import { Button, Collapsible, Help, Icon } from '@mathesar/component-library';
   import type { Constraint } from '@mathesar/stores/table-data';
@@ -31,19 +32,17 @@
   let isAddingNewConstraint = false;
 
   const helpMap: Record<ConstraintType, string> = {
-    primary:
-      'A primary key constraint uniquely identifies each record in a table.',
-    foreignkey: 'A foreign key constraint links records in two tables.',
-    unique:
-      'A unique constraint ensures that each record in a column is unique.',
+    primary: $_('primary_key_help'),
+    foreignkey: $_('foreign_key_help'),
+    unique: $_('unique_key_help'),
     check: '',
     exclude: '',
   };
 
   const titleMap: Record<ConstraintType, string> = {
-    primary: 'Primary Keys',
-    foreignkey: 'Foreign Keys',
-    unique: 'Unique',
+    primary: $_('primary_keys'),
+    foreignkey: $_('foreign_keys'),
+    unique: $_('unique'),
     check: '',
     exclude: '',
   };
@@ -58,9 +57,9 @@
 
   function handleDrop(constraint: Constraint) {
     void confirmDelete({
-      identifierType: 'Constraint',
+      identifierType: $_('constraint'),
       identifierName: constraint.name,
-      body: ['Are you sure you want to proceed?'],
+      body: [$_('are_you_sure_to_proceed')],
       onProceed: () => constraintsDataStore.remove(constraint.id),
     });
   }
@@ -81,7 +80,7 @@
     </span>
     {#if canAdd}
       <Button appearance="plain-primary" size="small" on:click={addConstraint}>
-        Add
+        {$_('add')}
       </Button>
     {/if}
   </span>
@@ -120,7 +119,11 @@
     </Collapsible>
   {:else}
     {#if !isAddingNewConstraint}
-      <span class="null">No {titleMap[constraintType]} Constraints</span>
+      <span class="null">
+        {$_('no_type_constraints', {
+          values: { constraintType: titleMap[constraintType] },
+        })}
+      </span>
     {/if}
   {/each}
 </div>

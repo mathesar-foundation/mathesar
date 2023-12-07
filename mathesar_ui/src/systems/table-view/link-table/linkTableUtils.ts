@@ -1,3 +1,5 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import { invalidIf } from '@mathesar/components/form';
 import { getAvailableName } from '@mathesar/utils/db';
@@ -6,8 +8,7 @@ export type LinkType = 'manyToOne' | 'oneToMany' | 'manyToMany';
 
 export const columnNameIsNotId = invalidIf(
   (columnName: string) => columnName === 'id',
-  'The name "id" is reserved for the primary key column that will be ' +
-    'created when creating the table.',
+  get(_)('id_is_reserved_column'),
 );
 
 export function suggestMappingTableName(

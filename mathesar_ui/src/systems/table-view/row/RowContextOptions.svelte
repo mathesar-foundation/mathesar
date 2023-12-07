@@ -1,9 +1,10 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ButtonMenuItem,
     iconExternalLink,
     LinkMenuItem,
-  } from '@mathesar/component-library';
+  } from '@mathesar-component-library';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -39,13 +40,13 @@
     if (rowHasRecord(row)) {
       const selectedRowIndices = [Number(row.rowIndex)];
       void confirmDelete({
-        identifierType: 'Record',
+        identifierType: $_('record'),
         body: getRecordDeleteMessage(selectedRowIndices),
         onProceed: () => recordsData.deleteSelected(selectedRowIndices),
         onError: (e) => toast.fromError(e),
         onSuccess: () =>
           toast.success({
-            title: 'Record deleted successfully!',
+            title: $_('record_deleted_successfully'),
           }),
       });
     }
@@ -57,11 +58,11 @@
     href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
     icon={iconExternalLink}
   >
-    Go to Record Page
+    {$_('go_to_record_page')}
   </LinkMenuItem>
 {/if}
 {#if canEditTableRecords}
   <ButtonMenuItem on:click={handleDeleteRecords} icon={iconDeleteMajor}>
-    Delete Record
+    {$_('delete_record')}
   </ButtonMenuItem>
 {/if}

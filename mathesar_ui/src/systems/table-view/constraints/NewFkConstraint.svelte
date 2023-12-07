@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ensureReadable,
     RadioGroup,
@@ -17,6 +18,7 @@
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     getTabularDataStoreFromContext,
@@ -31,8 +33,8 @@
 
   type NamingStrategy = 'auto' | 'manual';
   const namingStrategyLabelMap = new Map<NamingStrategy, string>([
-    ['auto', 'Automatically'],
-    ['manual', 'Manually'],
+    ['auto', $_('automatically')],
+    ['manual', $_('manually')],
   ]);
   const namingStrategies = [...namingStrategyLabelMap.keys()];
 
@@ -115,7 +117,7 @@
 </script>
 
 <div class="add-new-fk-constraint">
-  <span class="title">New Foreign Key Constraint</span>
+  <span class="title">{$_('new_foreign_key_constraint')}</span>
 
   <Field
     field={baseColumn}
@@ -124,14 +126,14 @@
       props: { columns: baseTableColumns },
     }}
     layout="stacked"
-    label="Column in this table which references the target table"
+    label={$_('column_references_target_table')}
   />
 
   <Field
     field={targetTable}
     input={{ component: SelectTable, props: { autoSelect: 'clear', tables } }}
     layout="stacked"
-    label="Target Table"
+    label={$_('target_table')}
   />
 
   {#if $targetTable}
@@ -147,9 +149,11 @@
         layout="stacked"
       >
         <span slot="label">
-          Target Column in
-          <TableName table={$targetTable} bold truncate={false} />
-          Table
+          <RichText text={$_('target_column_in_table')} let:slotName>
+            {#if slotName === 'tableName'}
+              <TableName table={$targetTable} bold truncate={false} />
+            {/if}
+          </RichText>
         </span>
       </Field>
     {/if}
@@ -163,12 +167,17 @@
       on:change={handleNamingStrategyChange}
       getRadioLabel={(s) => namingStrategyLabelMap.get(s) ?? ''}
     >
-      Set Constraint Name <ConstraintNameHelp />
+      {$_('set_constraint_name')}
+      <ConstraintNameHelp />
     </RadioGroup>
   </FieldLayout>
 
   {#if $namingStrategy === 'manual'}
-    <Field field={constraintName} layout="stacked" label="Constraint Name" />
+    <Field
+      field={constraintName}
+      layout="stacked"
+      label={$_('constraint_name')}
+    />
   {/if}
 
   <FormSubmit
@@ -177,7 +186,7 @@
     onProceed={handleSave}
     onCancel={onClose}
     size="small"
-    proceedButton={{ label: 'Add' }}
+    proceedButton={{ label: $_('add') }}
   />
 </div>
 
