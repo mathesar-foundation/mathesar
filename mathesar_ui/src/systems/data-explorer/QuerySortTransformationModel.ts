@@ -1,3 +1,5 @@
+import { _ } from 'svelte-i18n';
+import { get } from 'svelte/store';
 import type { QueryInstanceSortTransformation } from '@mathesar/api/types/queries';
 import type { SortDirection } from '@mathesar/components/sort-entry/utils';
 
@@ -11,7 +13,7 @@ export default class QuerySortTransformationModel
 {
   type = 'order' as const;
 
-  name = 'Sort' as const;
+  name = get(_)('sort');
 
   columnIdentifier;
 

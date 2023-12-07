@@ -5,15 +5,16 @@ import {
   type Readable,
   type Writable,
 } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 import type { Tab } from '@mathesar-component-library/types';
 import type QueryModel from './QueryModel';
 
 const generalTabs: Tab[] = [
-  { id: 'inspect-column', label: 'Column' },
-  { id: 'inspect-cell', label: 'Cell' },
+  { id: 'inspect-column', label: get(_)('column') },
+  { id: 'inspect-cell', label: get(_)('cell') },
 ];
 const tabsWhenQueryIsSaved: Tab[] = [
-  { id: 'inspect-exploration', label: 'Exploration' },
+  { id: 'inspect-exploration', label: get(_)('exploration') },
   ...generalTabs,
 ];
 

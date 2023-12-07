@@ -232,14 +232,3 @@ export function labeledCount(
   const label = pluralize(count, word, casing);
   return [countText, label].filter(Boolean).join(' ');
 }
-
-export function numberOfTimes(countable: Countable, casing?: Casing): string {
-  const count = getCount(countable);
-  if (count === 1) {
-    return 'once';
-  }
-  if (count === 2) {
-    return 'twice';
-  }
-  return labeledCount(countable, 'times', { casing });
-}

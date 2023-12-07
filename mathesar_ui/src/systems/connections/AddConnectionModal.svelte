@@ -7,4 +7,5 @@
   export let controller: ModalController;
 </script>
 
+<!-- eslint-disable-next-line @intlify/svelte/no-raw-text -->
 <ControlledModal {controller}>Yet to implement</ControlledModal>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type QueryRunner from '../QueryRunner';
   import type QueryManager from '../QueryManager';
   import Results from './Results.svelte';
@@ -9,7 +10,7 @@
 
 <section data-identifier="result">
   <header>
-    <span class="title">Result</span>
+    <span class="title">{$_('result')}</span>
     <div class="actions">
       <QueryRefreshButton queryRunner={queryHandler} />
     </div>
