@@ -22,7 +22,7 @@
     const tableInfo = await createTable(database, schema, {});
     isCreatingNewTable = false;
     router.goto(
-      getTablePageUrl(database.nickname, schema.id, tableInfo.id),
+      getTablePageUrl(database.id, schema.id, tableInfo.id),
       false,
     );
   }
@@ -44,7 +44,7 @@
   </div>
   <ButtonMenuItem on:click={handleCreateEmptyTable}>From Scratch</ButtonMenuItem
   >
-  <LinkMenuItem href={getImportPageUrl(database.nickname, schema.id)}>
+  <LinkMenuItem href={getImportPageUrl(database.id, schema.id)}>
     From Data Import
   </LinkMenuItem>
 </DropdownMenu>

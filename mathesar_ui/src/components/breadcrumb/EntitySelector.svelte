@@ -29,7 +29,7 @@
       type: 'table',
       table,
       label: table.name,
-      href: getLinkForTableItem(database.nickname, schema.id, table),
+      href: getLinkForTableItem(database.id, schema.id, table),
       icon: iconTable,
       isActive() {
         return table.id === $currentTableId;
@@ -46,7 +46,7 @@
       type: 'simple',
       label: queryInstance.name,
       href: getExplorationPageUrl(
-        database.nickname,
+        database.id,
         schema.id,
         queryInstance.id,
       ),
@@ -54,7 +54,7 @@
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
         const entryhref = getExplorationPageUrl(
-          database.nickname,
+          database.id,
           schema.id,
           queryInstance.id,
         );

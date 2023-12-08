@@ -44,7 +44,7 @@
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
-    <AnchorButton href={getDataExplorerPageUrl(database.nickname, schema.id)}>
+    <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
       Open Data Explorer
     </AnchorButton>
   </svelte:fragment>

@@ -38,7 +38,7 @@
 {:else if item.type === 'database'}
   <DatabaseSelector />
   <div class="breadcrumb-item truncate">
-    <BreadcrumbLink href={getDatabasePageUrl(item.database.nickname)}>
+    <BreadcrumbLink href={getDatabasePageUrl(item.database.id)}>
       <DatabaseName database={item.database} />
     </BreadcrumbLink>
   </div>
@@ -46,7 +46,7 @@
   <SchemaSelector database={item.database} />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
-      href={getSchemaPageUrl(item.database.nickname, item.schema.id)}
+      href={getSchemaPageUrl(item.database.id, item.schema.id)}
     >
       <SchemaName schema={item.schema} />
     </BreadcrumbLink>
@@ -56,7 +56,7 @@
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
       href={getLinkForTableItem(
-        item.database.nickname,
+        item.database.id,
         item.schema.id,
         item.table,
       )}
@@ -69,7 +69,7 @@
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
       href={getRecordPageUrl(
-        item.database.nickname,
+        item.database.id,
         item.schema.id,
         item.table.id,
         item.record.pk,
@@ -85,7 +85,7 @@
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
       href={getExplorationPageUrl(
-        item.database.nickname,
+        item.database.id,
         item.schema.id,
         item.query.id,
       )}

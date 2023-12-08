@@ -95,7 +95,7 @@
       identifierName: schema.name,
       body: deleteSchemaConfirmationBody,
       onProceed: async () => {
-        await deleteSchemaAPI(database.nickname, schema.id);
+        await deleteSchemaAPI(database.id, schema.id);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesInSchemaTablesStore(schema.id);
       },

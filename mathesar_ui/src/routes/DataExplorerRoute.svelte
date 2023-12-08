@@ -39,7 +39,7 @@
       onSave: async (instance) => {
         try {
           const url = getExplorationEditorPageUrl(
-            database.nickname,
+            database.id,
             schema.id,
             instance.id,
           );
@@ -133,7 +133,7 @@
       item={{
         type: 'simple',
         href: getExplorationEditorPageUrl(
-          database.nickname,
+          database.id,
           schema.id,
           $query.id,
         ),
@@ -146,7 +146,7 @@
       item={{
         type: 'simple',
         href: getExplorationEditorPageUrl(
-          database.nickname,
+          database.id,
           schema.id,
           $query.id,
         ),
@@ -159,7 +159,7 @@
   <AppendBreadcrumb
     item={{
       type: 'simple',
-      href: getDataExplorerPageUrl(database.nickname, schema.id),
+      href: getDataExplorerPageUrl(database.id, schema.id),
       label: 'Data Explorer',
       icon: iconExploration,
     }}

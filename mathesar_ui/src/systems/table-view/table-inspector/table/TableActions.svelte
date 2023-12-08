@@ -31,7 +31,7 @@
   $: explorationPageUrl =
     $currentDatabase && $currentSchema
       ? createDataExplorerUrlToExploreATable(
-          $currentDatabase?.nickname,
+          $currentDatabase?.id,
           $currentSchema.id,
           {
             id: $tabularData.id,
@@ -44,7 +44,7 @@
       return undefined;
     }
     return constructDataExplorerUrlToSummarizeFromGroup(
-      $currentDatabase.nickname,
+      $currentDatabase.id,
       $currentSchema.id,
       {
         baseTable: { id, name: $currentTable.name },
@@ -70,7 +70,7 @@
         const schema = $currentSchema;
         if (database && schema) {
           await deleteTable(database, schema, $tabularData.id);
-          router.goto(getSchemaPageUrl(database.nickname, schema.id), true);
+          router.goto(getSchemaPageUrl(database.id, schema.id), true);
         }
       },
     });

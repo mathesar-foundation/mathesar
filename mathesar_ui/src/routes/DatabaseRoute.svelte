@@ -2,21 +2,22 @@
   import { onMount } from 'svelte';
   import { Route } from 'tinro';
 
+  import type { Connection } from '@mathesar/api/connections';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
-  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import { connectionsStore } from '@mathesar/stores/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
+  import { connectionsStore } from '@mathesar/stores/databases';
   import SchemaRoute from './SchemaRoute.svelte';
 
-  export let databaseName: string;
+  export let connectionId: Connection['id'];
 
-  $: connectionsStore.setCurrentConnectionName(databaseName);
+  $: connectionsStore.setCurrentConnectionId(connectionId);
   $: ({ connections } = connectionsStore);
-  $: connection = $connections?.find((conn) => conn.nickname === databaseName);
+  $: connection = $connections?.find((c) => c.id === connectionId);
 
   function handleUnmount() {
-    connectionsStore.clearCurrentConnectionName();
+    connectionsStore.clearCurrentConnectionId();
   }
 
   onMount(() => handleUnmount);
@@ -37,6 +38,6 @@
   </Route>
 {:else}
   <ErrorPage>
-    Database with name <Identifier>{databaseName}</Identifier> is not found.
+    Database with name <Identifier>{connectionId}</Identifier> is not found.
   </ErrorPage>
 {/if}

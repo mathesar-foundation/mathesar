@@ -28,7 +28,7 @@
         <a
           class="btn btn-primary"
           href={getExplorationEditorPageUrl(
-            database.nickname,
+            database.id,
             schema.id,
             query.id,
           )}

@@ -123,7 +123,7 @@
         </span>
         <div>
           <AnchorButton
-            href={getDataExplorerPageUrl(database.nickname, schema.id)}
+            href={getDataExplorerPageUrl(database.id, schema.id)}
           >
             Open Data Explorer
           </AnchorButton>

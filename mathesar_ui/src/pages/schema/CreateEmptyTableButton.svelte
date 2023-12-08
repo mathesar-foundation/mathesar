@@ -18,7 +18,7 @@
     const tableInfo = await createTable(database, schema, {});
     isCreatingNewTable = false;
     router.goto(
-      getTablePageUrl(database.nickname, schema.id, tableInfo.id),
+      getTablePageUrl(database.id, schema.id, tableInfo.id),
       false,
     );
   }
