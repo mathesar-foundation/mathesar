@@ -17,7 +17,6 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import { getRecordDeleteMessage } from '@mathesar/pages/record/recordHelp';
 
   export let row: RecordRow;
   export let recordPk: string;
@@ -41,7 +40,10 @@
       const selectedRowIndices = [Number(row.rowIndex)];
       void confirmDelete({
         identifierType: $_('record'),
-        body: getRecordDeleteMessage(selectedRowIndices),
+        body: [
+          $_('deleted_records_cannot_be_recovered', { values: { count: 1 } }),
+          $_('are_you_sure_to_proceed'),
+        ],
         onProceed: () => recordsData.deleteSelected(selectedRowIndices),
         onError: (e) => toast.fromError(e),
         onSuccess: () =>
@@ -63,6 +65,6 @@
 {/if}
 {#if canEditTableRecords}
   <ButtonMenuItem on:click={handleDeleteRecords} icon={iconDeleteMajor}>
-    {$_('delete_record')}
+    {$_('delete_records', { values: { count: 1 } })}
   </ButtonMenuItem>
 {/if}
