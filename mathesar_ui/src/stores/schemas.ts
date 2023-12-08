@@ -10,6 +10,7 @@ import {
   States,
   type PaginatedResponse,
 } from '@mathesar/api/utils/requestUtils';
+import schemasApi from '@mathesar/api/schemas';
 import type { Connection } from '@mathesar/api/connections';
 
 import type { SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
@@ -157,9 +158,7 @@ export async function refetchSchemasForDB(
 
     dbSchemasRequestMap.get(database)?.cancel();
 
-    const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(
-      `/api/db/v0/schemas/?database=${database}&limit=500`,
-    );
+    const schemaRequest = schemasApi.list(database);
     dbSchemasRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
     const schemas = response?.results || [];
@@ -187,9 +186,8 @@ export async function refetchSchema(
     return undefined;
   }
 
-  const url = `/api/db/v0/schemas/${schemaId}/`;
   try {
-    const schemaRequest = getAPI<SchemaResponse>(url);
+    const schemaRequest = schemasApi.get(schemaId);
     const response = await schemaRequest;
     if (!response) {
       return undefined;
@@ -237,16 +235,16 @@ export function getSchemaInfo(
 }
 
 export async function createSchema(
-  database: Connection['nickname'],
+  databaseName: Connection['nickname'],
   schemaName: SchemaEntry['name'],
-  schemaDescription: SchemaEntry['description'],
+  description: SchemaEntry['description'],
 ): Promise<SchemaResponse> {
-  const response = await postAPI<SchemaResponse>('/api/db/v0/schemas/', {
+  const response = await schemasApi.add({
     name: schemaName,
-    description: schemaDescription,
-    database,
+    description,
+    databaseName,
   });
-  updateSchemaInDBSchemaStore(database, response);
+  updateSchemaInDBSchemaStore(databaseName, response);
   return response;
 }
 
@@ -254,11 +252,7 @@ export async function updateSchema(
   database: Connection['nickname'],
   schema: SchemaEntry,
 ): Promise<SchemaResponse> {
-  const url = `/api/db/v0/schemas/${schema.id}/`;
-  const response = await patchAPI<SchemaResponse>(url, {
-    name: schema.name,
-    description: schema.description,
-  });
+  const response = await schemasApi.update(schema);
   updateSchemaInDBSchemaStore(database, response);
   return response;
 }
@@ -267,7 +261,7 @@ export async function deleteSchema(
   database: Connection['nickname'],
   schemaId: SchemaEntry['id'],
 ): Promise<void> {
-  await deleteAPI(`/api/db/v0/schemas/${schemaId}/`);
+  await schemasApi.delete(schemaId);
   removeSchemaInDBSchemaStore(database, schemaId);
 }
 
