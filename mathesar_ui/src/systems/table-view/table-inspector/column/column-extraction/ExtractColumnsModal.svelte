@@ -216,9 +216,13 @@
 <ControlledModal {controller} on:close={form.reset}>
   <span slot="title">
     {#if $targetType === 'existingTable'}
-      {$_('move_columns_to_linked_table')}
+      {$_('move_columns_to_linked_table', {
+        values: { count: $columns.length },
+      })}
     {:else}
-      {$_('extract_columns_to_new_table')}
+      {$_('extract_columns_to_new_table', {
+        values: { count: $columns.length },
+      })}
     {/if}
   </span>
 
