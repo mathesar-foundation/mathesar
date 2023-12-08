@@ -6,10 +6,12 @@ import { getAvailableName } from '@mathesar/utils/db';
 
 export type LinkType = 'manyToOne' | 'oneToMany' | 'manyToMany';
 
-export const columnNameIsNotId = invalidIf(
-  (columnName: string) => columnName === 'id',
-  get(_)('id_is_reserved_column'),
-);
+export function columnNameIsNotId() {
+  return invalidIf(
+    (columnName: string) => columnName === 'id',
+    get(_)('id_is_reserved_column'),
+  );
+}
 
 export function suggestMappingTableName(
   baseTable: Pick<TableEntry, 'name'>,
