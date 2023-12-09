@@ -1,4 +1,4 @@
-from psycopg2.errors import ForeignKeyViolation, InvalidDatetimeFormat
+from psycopg2.errors import ForeignKeyViolation, InvalidDatetimeFormat, DatetimeFieldOverflow
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, MethodNotAllowed
@@ -78,6 +78,8 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                 search=name_converted_search,
                 duplicate_only=serializer.validated_data['duplicate_only']
             )
+        # except Exception as e:
+        #     print("Error Message: ", e)
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(
                 e,
@@ -103,7 +105,7 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except DataError as e:
-            if isinstance(e.orig, InvalidDatetimeFormat):
+            if isinstance(e.orig, (InvalidDatetimeFormat, DatetimeFieldOverflow)):
                 raise database_api_exceptions.InvalidDateFormatAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
