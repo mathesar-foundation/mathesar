@@ -78,8 +78,6 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                 search=name_converted_search,
                 duplicate_only=serializer.validated_data['duplicate_only']
             )
-        # except Exception as e:
-        #     print("Error Message: ", e)
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(
                 e,
