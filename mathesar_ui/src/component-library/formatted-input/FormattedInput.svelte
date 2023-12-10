@@ -54,10 +54,15 @@
   export { parentValue as value };
   export let onParseError: Required<$$Props>['onParseError'] = () => {};
   export let element: $$Props['element'] = undefined;
+  export let allowPartialParse = false;
 
   let childText = '';
   let parseResult: ParseResult<T> | undefined;
   let formattedValue: string | undefined;
+  let hasError = false;
+  $: {
+    if (childText === '') hasError = false;
+  }
 
   /**
    * The value most recently submitted via the artificialChange event.
@@ -85,6 +90,7 @@
 
   async function handleChildBeforeInput(event: InputEvent) {
     event.preventDefault();
+    hasError = false;
     const { value: userInput, cursorPosition } =
       getOutcomeOfBeforeInputEvent(event);
 
@@ -102,7 +108,11 @@
       if (!element) return;
       scrollCaretIntoView(element);
     } catch (error) {
+      hasError = true;
       onParseError({ userInput, error });
+      if (allowPartialParse) {
+        childText = userInput;
+      }
     }
   }
 
@@ -114,12 +124,16 @@
   }
 
   function handleBlur() {
-    childText = formattedValue ?? '';
+    if (formattedValue) {
+      childText = formattedValue;
+      hasError = false;
+    }
   }
 </script>
 
 <TextInput
   value={childText}
+  {hasError}
   {...$$restProps}
   bind:element
   on:beforeinput={handleChildBeforeInput}

@@ -83,6 +83,7 @@
   bind:value
   {formatter}
   placeholder={formattingString}
+  allowPartialParse={true}
   bind:element
   on:focus={open}
   on:focus

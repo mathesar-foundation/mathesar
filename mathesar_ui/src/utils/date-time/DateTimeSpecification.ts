@@ -209,6 +209,31 @@ export default class DateTimeSpecification {
     return dateObject.toISOString();
   }
 
+  getAdditionalFormattingStrings(): string[] {
+    return [
+      'MM/DD/YYYY',
+      'DD-MM-YYYY',
+      'YYYY/MM/DD',
+      'MMM DD, YYYY',
+      'DD MMM YYYY',
+      'MMMM DD, YYYY',
+      'YY/MM/DD',
+      'YY-MM-DD HH:mm:ss',
+      'MMMM D, YYYY h:mm A',
+      'MM.DD.YYYY',
+      'YYYY.MM.DD',
+      'DD.MM.YYYY',
+      'D MMMM YYYY',
+      'MMM D, YYYY h:mm A',
+      'YY.MM.DD',
+      'MM/DD/YYYY HH:mm:ss',
+      'YYMMDD',
+      'D/M/YYYY',
+      'MMMM D YYYY',
+      'DD/MM/YYYY HH:mm:ss',
+    ];
+  }
+
   hasSecondsInTime(): boolean {
     if (this.type === 'date') {
       return false;
