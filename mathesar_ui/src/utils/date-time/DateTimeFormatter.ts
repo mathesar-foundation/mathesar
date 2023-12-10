@@ -32,10 +32,13 @@ export default class DateTimeFormatter implements InputFormatter<string> {
   }
 
   parse(userInputOrServerResponse: string): ParseResult<string> {
-    if (userInputOrServerResponse === '') {
+    if (
+      userInputOrServerResponse === '' ||
+      userInputOrServerResponse === 'null'
+    ) {
       return {
-        value: '',
-        intermediateDisplay: '',
+        value: null,
+        intermediateDisplay: 'null',
       };
     }
     const formattingOptions = [
