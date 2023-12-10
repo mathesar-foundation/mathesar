@@ -38,7 +38,7 @@ export default class DateTimeFormatter implements InputFormatter<string> {
     ) {
       return {
         value: null,
-        intermediateDisplay: 'null',
+        intermediateDisplay: userInputOrServerResponse,
       };
     }
     const formattingOptions = [
