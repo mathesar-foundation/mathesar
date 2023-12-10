@@ -28,7 +28,7 @@
 
   function handleDeleteColumn(c: ProcessedColumn) {
     void confirmDelete({
-      identifierType: 'column',
+      identifierType: $_('column'),
       identifierName: c.column.name,
       body: [
         $_('all_objects_related_to_column_affected'),

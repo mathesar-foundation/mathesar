@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { TabContainer } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { TabContainer } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { ComponentType } from 'svelte';
   import ColumnMode from './column/ColumnMode.svelte';
@@ -11,22 +12,22 @@
   type TabItem = { label: string; id: number; component: ComponentType };
   const tabs: TabItem[] = [
     {
-      label: 'Table',
+      label: $_('table'),
       component: TableMode,
       id: 1,
     },
     {
-      label: 'Column',
+      label: $_('column'),
       component: ColumnMode,
       id: 2,
     },
     {
-      label: 'Record',
+      label: $_('record'),
       component: RecordMode,
       id: 3,
     },
     {
-      label: 'Cell',
+      label: $_('cell'),
       component: CellMode,
       id: 4,
     },
@@ -73,8 +74,10 @@
 <style lang="scss">
   .table-inspector {
     height: 100%;
-    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
-      0px 3px 1px -2px rgba(0, 0, 0, 0.12), 0px 1px 5px 0px rgba(0, 0, 0, 0.2);
+    box-shadow:
+      0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+      0px 3px 1px -2px rgba(0, 0, 0, 0.12),
+      0px 1px 5px 0px rgba(0, 0, 0, 0.2);
     position: relative;
     background-color: var(--sand-100);
     isolation: isolate;
