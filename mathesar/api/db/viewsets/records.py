@@ -108,6 +108,11 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
+            else:
+                raise database_api_exceptions.RaiseExceptionAPIException(
+                    e,
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
         serializer = RecordSerializer(
             records,
