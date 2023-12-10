@@ -101,7 +101,7 @@
           new Set(['id', singularBaseTableName]),
         )
       : getSuggestedFkColumnName(base);
-    return requiredField(initial, [columnNameIsNotId]);
+    return requiredField(initial, [columnNameIsNotId()]);
   })();
   $: columnNameMappingToTarget = (() => {
     const initial = isSelfReferential
@@ -110,7 +110,7 @@
           new Set(['id', singularBaseTableName]),
         )
       : getSuggestedFkColumnName(target);
-    return requiredField(initial, [columnNameIsNotId]);
+    return requiredField(initial, [columnNameIsNotId()]);
   })();
 
   // ===========================================================================

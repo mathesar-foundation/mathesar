@@ -18,6 +18,7 @@
   import { getAvailableName } from '@mathesar/utils/db';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
@@ -110,7 +111,7 @@
       onClose?.();
     } catch (error) {
       toast.error(
-        `${$_('unable_to_add_constraint')} ${error.message as string}`,
+        `${$_('unable_to_add_constraint')} ${getErrorMessage(error)}`,
       );
     }
   }

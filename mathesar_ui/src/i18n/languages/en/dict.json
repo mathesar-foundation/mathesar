@@ -75,6 +75,8 @@
   "constraint_name": "Constraint Name",
   "constraint_name_already_exists": "A constraint with that name already exists",
   "constraint_name_cannot_be_empty": "Constraint name cannot be empty",
+  "constraint_name_unique_help": "At the database level, each constraint must have a unique name across all the constraints, tables, views, and indexes within the schema.",
+  "constraint_name_unique_mathesar_relevance_help": "In Mathesar however, the name of the constraint will likely never be relevant, &mdash; so we recommend allowing Mathesar to automatically generate constraint names when adding new constraints.",
   "constraints": "Constraints",
   "constraints_info_help": "Constraints are used to define relationships between records in different tables or to ensure that records in a column are unique. Constraints can be applied to a single column or a combination of columns.",
   "constraints_info_help_mini": "Constraints are rules that apply to the data in a column to ensure that it is valid.",
