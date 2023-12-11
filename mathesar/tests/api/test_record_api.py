@@ -323,7 +323,7 @@ def test_record_search(create_patents_table, client):
 
 
 def test_record_search_invalid_date(create_patents_table, client):
-    table_name = 'NASA Record Invalid'
+    table_name = 'NASA Record Invalid Date'
     table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
