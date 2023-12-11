@@ -21,13 +21,10 @@
     scrollBasedOnActiveCell,
     SheetCell,
   } from '@mathesar/components/sheet';
-  import { iconSetToNull, iconRecord, iconTable } from '@mathesar/icons';
+  import { iconSetToNull, iconRecord } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import {
-    storeToGetRecordPageUrl,
-    storeToGetTablePageUrl,
-  } from '@mathesar/stores/storeBasedUrls';
+  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     rowHasNewRecord,
     type CellKey,
@@ -101,7 +98,6 @@
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key && canEditTableRecords;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
-  $: getTablePageUrl = $storeToGetTablePageUrl;
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
