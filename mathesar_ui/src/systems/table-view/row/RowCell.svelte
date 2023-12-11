@@ -21,7 +21,7 @@
     scrollBasedOnActiveCell,
     SheetCell,
   } from '@mathesar/components/sheet';
-  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import { iconSetToNull, iconRecord } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -206,8 +206,8 @@
           </ButtonMenuItem>
         {/if}
         {#if showLinkedRecordHyperLink && linkedRecordHref}
-          <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-            Go To Linked Record
+          <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
+            Open {value}
           </LinkMenuItem>
         {/if}
         <MenuDivider />
