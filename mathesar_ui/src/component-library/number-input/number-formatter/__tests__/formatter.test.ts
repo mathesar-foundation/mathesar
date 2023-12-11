@@ -8,26 +8,27 @@ test.each(
   //        | allowFloat
   //        |      | allowNegative
   //        |      |      | useGrouping
-  //        |      |      |      | forceTrailingDecimal
-  //        |      |      |      |      | minimumFractionDigits
-  //        |      |      |      |      |   | maximumFractionDigits
-  //        |      |      |      |      |   |   | input      | output
-    ['en-US', true,  true,  true,  false, 0, 20, 1,           '1'            ],
-    ['en-US', true,  true,  true,  false, 0, 20, 0,           '0'            ],
-    ['en-US', true,  true,  true,  false, 0, 20, -0,          '-0'           ], // See 1
-    ['en-US', true,  true,  true,  false, 0, 20, -1,          '-1'           ],
-    ['en-US', true,  true,  true,  false, 0, 20, 1.1,         '1.1'          ],
-    ['en-US', true,  true,  true,  false, 0, 20, 0.1,         '0.1'          ],
-    ['en-US', true,  true,  true,  false, 0, 20, -0.1,        '-0.1'         ],
-    ['en-US', true,  true,  true,  false, 0, 20, 1.0,         '1'            ],
-    ['en-US', true,  true,  true,  false, 0, 20, 1234,        '1,234'        ],
-    ['en-US', true,  true,  true,  false, 0, 20, 0.123456789, '0.123456789'  ],
-    ['en-US', true,  true,  true,  false, 0, 20, 1234567.89,  '1,234,567.89' ],
-    ['en-US', true,  true,  false, false, 0, 20, 1234567.89,  '1234567.89'   ],
-    ['de-DE', true,  true,  true,  false, 0, 20, 1234567.89,  '1.234.567,89' ],
-    ['en-US', true,  true,  true,  false, 5, 20, 1.1,         '1.10000'      ],
-    ['en-US', true,  true,  true,  false, 2, 2 , 1.1,         '1.10'         ],
-    ['en-US', true,  true,  true,  false, 2, 2 , 1.559,       '1.56'         ],
+      //
+  //        |      |      |      |      forceTrailingDecimal
+  //        |      |      |      |              | minimumFractionDigits
+  //        |      |      |      |              |   | maximumFractionDigits
+  //        |      |      |      |              |   |   | input      | output
+    ['en-US', true,  true,  true,  false,  false, 0, 20, 1,           '1'            ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, 0,           '0'            ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, -0,          '-0'           ], // See 1
+    ['en-US', true,  true,  true,  false,  false, 0, 20, -1,          '-1'           ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, 1.1,         '1.1'          ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, 0.1,         '0.1'          ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, -0.1,        '-0.1'         ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, 1.0,         '1'            ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, 1234,        '1,234'        ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, 0.123456789, '0.123456789'  ],
+    ['en-US', true,  true,  true,  false,  false, 0, 20, 1234567.89,  '1,234,567.89' ],
+    ['en-US', true,  true,  false, false,  false, 0, 20, 1234567.89,  '1234567.89'   ],
+    ['de-DE', true,  true,  true,  false,  false, 0, 20, 1234567.89,  '1.234.567,89' ],
+    ['en-US', true,  true,  true,  false,  false, 5, 20, 1.1,         '1.10000'      ],
+    ['en-US', true,  true,  true,  false,  false, 2, 2 , 1.1,         '1.10'         ],
+    ['en-US', true,  true,  true,  false,  false, 2, 2 , 1.559,       '1.56'         ],
   ],
   // 1. Edge case. Intl.NumberFormat accepts `signDisplay: negative` to format
   //    negative zero without a sign, but it's an experimental feature and we
@@ -41,6 +42,7 @@ test.each(
     allowFloat,
     allowNegative,
     useGrouping,
+    allowScientificNotation,
     forceTrailingDecimal,
     minimumFractionDigits,
     maximumFractionDigits,
@@ -52,6 +54,7 @@ test.each(
       allowFloat,
       allowNegative,
       useGrouping,
+        allowScientificNotation,
       forceTrailingDecimal,
       minimumFractionDigits,
       maximumFractionDigits,
@@ -73,14 +76,14 @@ test('format, errors', () => {
   };
 
   const formatInteger = makeFormatter(
-    getDerivedOptions({ ...defaultOptions, allowFloat: false }),
+    getDerivedOptions({ ...defaultOptions, allowFloat: false, allowScientificNotation: false }),
   );
   expect(() => {
     formatInteger(1.2);
   }).toThrow();
 
   const formatPositive = makeFormatter(
-    getDerivedOptions({ ...defaultOptions, allowNegative: false }),
+    getDerivedOptions({ ...defaultOptions, allowNegative: false, allowScientificNotation: false }),
   );
   expect(() => {
     formatPositive(-1);
