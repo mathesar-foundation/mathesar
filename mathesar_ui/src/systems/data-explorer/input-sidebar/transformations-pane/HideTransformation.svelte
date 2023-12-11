@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { MultiSelect, LabeledInput } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type QueryHideTransformationModel from '../../QueryHideTransformationModel';
@@ -17,7 +18,7 @@
   }
 </script>
 
-<LabeledInput label="Select Columns to Hide" layout="stacked">
+<LabeledInput label={$_('select_columns_to_hide')} layout="stacked">
   <MultiSelect
     values={model.columnAliases}
     options={[...columns.values()].map((entry) => entry.column.alias)}

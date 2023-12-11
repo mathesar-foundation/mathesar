@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ensureReadable,
     portalToWindowFooter,
@@ -18,6 +19,7 @@
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { iconTableLink } from '@mathesar/icons';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
@@ -99,7 +101,7 @@
           new Set(['id', singularBaseTableName]),
         )
       : getSuggestedFkColumnName(base);
-    return requiredField(initial, [columnNameIsNotId]);
+    return requiredField(initial, [columnNameIsNotId()]);
   })();
   $: columnNameMappingToTarget = (() => {
     const initial = isSelfReferential
@@ -108,7 +110,7 @@
           new Set(['id', singularBaseTableName]),
         )
       : getSuggestedFkColumnName(target);
-    return requiredField(initial, [columnNameIsNotId]);
+    return requiredField(initial, [columnNameIsNotId()]);
   })();
 
   // ===========================================================================
@@ -144,7 +146,7 @@
           comboInvalidIf(
             [columnNameMappingToBase, columnNameMappingToTarget],
             ([a, b]) => a === b,
-            'The two columns cannot have the same name.',
+            $_('two_columns_cannot_have_same_name'),
           ),
         ],
       );
@@ -219,8 +221,7 @@
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
-      Links are stored in the database as foreign key constraints, which you may
-      add to existing columns via the "Advanced" section of the table inspector.
+      {$_('links_info')}
     </InfoBox>
   </FieldLayout>
 
@@ -232,7 +233,11 @@
     }}
   >
     <span slot="label">
-      Link <Pill table={base} which="base" /> to
+      <RichText text={$_('link_table_to')} let:slotName>
+        {#if slotName === 'tablePill'}
+          <Pill table={base} which="base" />
+        {/if}
+      </RichText>
     </span>
   </Field>
 
@@ -258,21 +263,33 @@
           <NewColumn {base} {target} field={columnNameInBase} />
         {:else if $linkType === 'manyToMany'}
           {#if isSelfReferential}
-            <p>We'll create a new table.</p>
-            <Field field={mappingTableName} label="Table Name" />
+            <p>{$_('we_will_create_a_new_table')}</p>
+            <Field field={mappingTableName} label={$_('table_name')} />
             {#if $mappingTableName}
               <p>
-                We'll add two columns in
-                <Pill table={{ name: $mappingTableName }} which="mapping" />,
-                each linking to
-                <Pill table={target} which="target" />.
+                <RichText
+                  text={$_('we_will_add_two_columns_in_x_to_y')}
+                  let:slotName
+                >
+                  {#if slotName === 'mappingTable'}
+                    <Pill table={{ name: $mappingTableName }} which="mapping" />
+                  {:else if slotName === 'targetTable'}
+                    <Pill table={target} which="target" />
+                  {/if}
+                </RichText>
               </p>
-              <Field field={columnNameMappingToBase} label="Column 1 Name" />
-              <Field field={columnNameMappingToTarget} label="Column 2 Name" />
+              <Field
+                field={columnNameMappingToBase}
+                label={$_('column_number_name', { values: { number: 1 } })}
+              />
+              <Field
+                field={columnNameMappingToTarget}
+                label={$_('column_number_name', { values: { number: 2 } })}
+              />
             {/if}
           {:else}
-            <p>We'll create a new table.</p>
-            <Field field={mappingTableName} label="Table Name" />
+            <p>{$_('we_will_create_a_new_table')}</p>
+            <Field field={mappingTableName} label={$_('table_name')} />
             {#if $mappingTableName}
               <NewColumn
                 base={{ name: $mappingTableName }}
@@ -303,7 +320,7 @@
     catchErrors
     {canProceed}
     onCancel={close}
-    proceedButton={{ label: 'Create Link', icon: iconTableLink }}
+    proceedButton={{ label: $_('create_link'), icon: iconTableLink }}
     onProceed={handleSave}
   />
 </div>

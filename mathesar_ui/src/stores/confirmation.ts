@@ -1,3 +1,5 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 import type { ConfirmationProps } from '@mathesar-component-library';
 import { makeConfirm } from '@mathesar-component-library';
 import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
@@ -15,36 +17,42 @@ interface ConfirmDeleteProps extends Partial<ConfirmationProps> {
   /** e.g. the name of the table, column, etc */
   identifierName?: string;
   /** the "thing" you're deleting, e.g. 'column', 'table', 'tables', '3 rows' etc. */
-  identifierType?: string;
+  identifierType: string;
 }
 
 export function confirmDelete(
   props: ConfirmDeleteProps,
 ): ReturnType<typeof confirm> {
   const type = props.identifierType;
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  const deletePhrase = `Delete${type ? ' ' : ''}${type}`;
 
   function getTitle() {
-    const post = '?';
     if (props.identifierName) {
       return {
         component: PhraseContainingIdentifier,
         props: {
-          pre: `${deletePhrase} `,
           identifier: props.identifierName,
-          post,
+          wrappingString: get(_)('delete_item_question_with_identifier', {
+            values: { item: type },
+          }),
         },
       };
     }
-    return `${deletePhrase}${post}`;
+    return get(_)('delete_item_question', { values: { item: type } });
   }
 
   return confirm({
     title: getTitle(),
-    body: 'Are you sure you want to proceed?',
-    proceedButton: { label: deletePhrase, icon: iconDeleteMajor },
-    onError: (e) => toast.error(`Unable to ${deletePhrase}. ${e.message}`),
+    body: get(_)('are_you_sure_to_proceed'),
+    proceedButton: {
+      label: get(_)('delete_item', { values: { item: type } }),
+      icon: iconDeleteMajor,
+    },
+    onError: (e) =>
+      toast.error(
+        `${get(_)('unable_to_delete_item', { values: { item: type } })} ${
+          e.message
+        }`,
+      ),
     ...props,
   });
 }

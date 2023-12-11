@@ -59,9 +59,7 @@
           {allPresets[preset].absoluteDate}
         </span>
         <span class="tag-label absolute-date">
-          {$_('wrap_in_brackets', {
-            values: { value: allPresets[preset].label },
-          })}
+          ({allPresets[preset].label})
         </span>
       {/if}
     </Button>

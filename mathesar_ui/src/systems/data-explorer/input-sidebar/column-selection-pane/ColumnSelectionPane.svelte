@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import SelectableColumnTree from './SelectableColumnTree.svelte';
   import SelectableColumn from './SelectableColumn.svelte';
   import type QueryManager from '../../QueryManager';
@@ -21,7 +22,7 @@
 
 <div data-identifier="column-selection-list">
   <section>
-    <header>From Base table</header>
+    <header>{$_('from_base_table')}</header>
     <div class="content">
       {#each [...baseTableColumns] as [columnId, column] (columnId)}
         <SelectableColumn
@@ -34,18 +35,17 @@
   </section>
   {#if !hasInitialColumns && (hasLinksFromBaseTable || hasLinksToBaseTable)}
     <section>
-      <header>From linked tables</header>
+      <header>{$_('from_linked_tables')}</header>
       <div class="content">
         <div class="help-text">
-          At least one column from the base table is required to add columns
-          from linked tables.
+          {$_('one_column_from_base_is_required')}
         </div>
       </div>
     </section>
   {:else}
     {#if hasLinksFromBaseTable}
       <section>
-        <header>Linked from Base table</header>
+        <header>{$_('linked_from_base_table')}</header>
         <div class="content">
           <SelectableColumnTree
             columnsWithLinks={baseTableColumnsWithLinks}
@@ -58,7 +58,7 @@
     {/if}
     {#if hasLinksToBaseTable}
       <section>
-        <header>Linked to Base table</header>
+        <header>{$_('linked_to_base_table')}</header>
         <div class="content" data-identifier="referenced-by-tables">
           {#if hasInitialColumns}
             <!--table.id is not unique here. Same table can be present multiple times-->

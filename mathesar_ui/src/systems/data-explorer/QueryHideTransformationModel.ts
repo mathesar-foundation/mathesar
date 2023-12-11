@@ -1,3 +1,5 @@
+import { _ } from 'svelte-i18n';
+import { get } from 'svelte/store';
 import type { QueryInstanceHideTransformation } from '@mathesar/api/types/queries';
 
 export interface QueryHideTransformationEntry {
@@ -9,7 +11,7 @@ export default class QueryHideTransformationModel
 {
   type = 'hide' as const;
 
-  name = 'Hide Columns' as const;
+  name = get(_)('hide_columns');
 
   columnAliases: string[];
 

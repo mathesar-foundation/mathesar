@@ -93,7 +93,7 @@ module.exports = {
     {
       // Temporary block, will be merged with the base svelte override
       // when the entire app is translated
-      files: ['src/components/**/*.svelte'],
+      files: ['src/components/**/*.svelte', 'src/systems/**/*.svelte'],
       extends: ['plugin:@intlify/svelte/recommended'],
       rules: {
         '@intlify/svelte/no-raw-text': [
@@ -106,9 +106,19 @@ module.exports = {
                 'aria-label',
                 'title',
                 'placeholder',
+                'ariaLabel',
               ],
             },
-            ignoreText: ['DEFAULT', 'Mathesar.org', 'NULL', '*'],
+            ignoreText: [
+              'DEFAULT',
+              'Mathesar.org',
+              'NULL',
+              '*',
+              '+',
+              ':',
+              '(',
+              ')',
+            ],
           },
         ],
       },
