@@ -37,10 +37,10 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
-  import Identifier from '@mathesar/components/Identifier.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
