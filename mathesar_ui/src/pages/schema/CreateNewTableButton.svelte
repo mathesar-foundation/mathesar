@@ -1,5 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
+  import { _ } from 'svelte-i18n';
   import { createTable } from '@mathesar/stores/tables';
   import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
@@ -32,7 +33,7 @@
   showArrow={true}
   triggerAppearance="primary"
   closeOnInnerClick={true}
-  label="New Table"
+  label={$_('new_table')}
 >
   <div slot="trigger">
     {#if isCreatingNewTable}
@@ -40,11 +41,12 @@
     {:else}
       <Icon {...iconAddNew} />
     {/if}
-    <span>New Table</span>
+    <span>{$_('new_table')}</span>
   </div>
-  <ButtonMenuItem on:click={handleCreateEmptyTable}>From Scratch</ButtonMenuItem
-  >
+  <ButtonMenuItem on:click={handleCreateEmptyTable}>
+    {$_('from_scratch')}
+  </ButtonMenuItem>
   <LinkMenuItem href={getImportPageUrl(database.nickname, schema.id)}>
-    From Data Import
+    {$_('from_data_import')}
   </LinkMenuItem>
 </DropdownMenu>

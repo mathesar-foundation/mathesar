@@ -111,6 +111,7 @@ module.exports = {
                 'title',
                 'placeholder',
                 'ariaLabel',
+                'searchPlaceholder',
               ],
             },
             ignoreText: [
