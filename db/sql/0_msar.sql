@@ -484,6 +484,36 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
+-- ROLE MANIPULATION FUNCTIONS
+--
+-- Functions in this section should always involve creating, granting, or revoking privileges or
+-- roles
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+-- Create mathesar user ----------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.create_basic_mathesar_user(username text, password_ text, database_ text) RETURNS TEXT AS $$/*
+*/
+DECLARE
+  cmd_template text;
+BEGIN
+  PERFORM __msar.exec_ddl('CREATE USER %I WITH PASSWORD %L', username, password_);
+  RETURN __msar.exec_ddl(
+    'GRANT CREATE, CONNECT, TEMP ON DATABASE %I TO %I',
+    database_,
+    username
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- ALTER SCHEMA FUNCTIONS
 --
 -- Functions in this section should always involve 'ALTER SCHEMA'.
