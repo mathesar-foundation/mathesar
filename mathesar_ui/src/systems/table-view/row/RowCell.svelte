@@ -21,10 +21,13 @@
     scrollBasedOnActiveCell,
     SheetCell,
   } from '@mathesar/components/sheet';
-  import { iconSetToNull, iconRecord } from '@mathesar/icons';
+  import { iconSetToNull, iconRecord, iconTable } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import {
+    storeToGetRecordPageUrl,
+    storeToGetTablePageUrl,
+  } from '@mathesar/stores/storeBasedUrls';
   import {
     rowHasNewRecord,
     type CellKey,
@@ -37,6 +40,7 @@
   import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -97,10 +101,15 @@
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key && canEditTableRecords;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
+  $: getTablePageUrl = $storeToGetTablePageUrl;
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
+  $: linkedTableName = linkFk ? linkFk.name : undefined;
+  $: linkedTableHref = linkFk
+    ? getTablePageUrl({ tableId: linkFk.referent_table })
+    : undefined;
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -207,7 +216,12 @@
         {/if}
         {#if showLinkedRecordHyperLink && linkedRecordHref}
           <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
-            Open {value}
+            Open <Identifier>{value}</Identifier>
+          </LinkMenuItem>
+        {/if}
+        {#if linkedTableHref && linkedTableName}
+          <LinkMenuItem icon={iconTable} href={linkedTableHref}>
+            Open <Identifier>{linkedTableName}</Identifier> Table
           </LinkMenuItem>
         {/if}
         <MenuDivider />
