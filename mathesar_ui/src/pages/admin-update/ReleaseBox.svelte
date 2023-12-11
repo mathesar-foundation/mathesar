@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Button, Icon } from '@mathesar-component-library';
   import Logo from '@mathesar/components/Logo.svelte';
   import {
@@ -33,15 +34,15 @@
   <div class="type">
     {#if type === 'available-upgrade'}
       <Icon {...iconUpgradeAvailable} />
-      New Version Available
+      {$_('new_version_available')}
     {:else if type === 'currently-installed-and-latest'}
       <Icon {...iconCurrentlyInstalledVersion} />
-      You are running the latest version
+      {$_('running_latest_version')}
     {:else if type === 'current'}
       <Icon {...iconCurrentlyInstalledVersion} />
-      Currently Installed
+      {$_('currently_installed')}
     {:else if type === 'latest'}
-      Latest Available Version (not installed)
+      {$_('latest_availabe_version_not_installed')}
     {:else}
       {assertExhaustive(type)}
     {/if}
@@ -49,21 +50,26 @@
   <div class="details">
     <div class="left">
       <div class="logo"><Logo /></div>
-      <div class="name">Mathesar</div>
+      <div class="name">{$_('mathesar')}</div>
       <div class="version">{release.tagName}</div>
     </div>
     <div class="right">
-      <div class="date">Released {dateString}</div>
+      <div class="date">
+        {$_('released_date', {
+          values: { date: dateString },
+        })}
+      </div>
       <a href={release.notesUrl} class="notes" target="_blank">
-        Release Notes <Icon {...iconExternalHyperlink} />
+        {$_('release_notes')}
+        <Icon {...iconExternalHyperlink} />
       </a>
     </div>
   </div>
   {#if type === 'available-upgrade'}
     <div class="update-action">
-      <div class="message">We can install this new version for you</div>
+      <div class="message">{$_('we_can_install_new_version')}</div>
       <Button appearance="secondary" on:click={() => modalController.open()}>
-        Upgrade...
+        {$_('upgrade')}...
       </Button>
     </div>
   {/if}

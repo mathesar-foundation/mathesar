@@ -93,7 +93,11 @@ module.exports = {
     {
       // Temporary block, will be merged with the base svelte override
       // when the entire app is translated
-      files: ['src/components/**/*.svelte', 'src/systems/**/*.svelte'],
+      files: [
+        'src/components/**/*.svelte',
+        'src/systems/**/*.svelte',
+        'src/pages/**/*.svelte',
+      ],
       extends: ['plugin:@intlify/svelte/recommended'],
       rules: {
         '@intlify/svelte/no-raw-text': [
@@ -118,6 +122,8 @@ module.exports = {
               ':',
               '(',
               ')',
+              '.',
+              '...',
             ],
           },
         ],
