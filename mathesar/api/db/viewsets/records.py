@@ -108,7 +108,7 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
-            elif (e.orig, DatetimeFieldOverflow):
+            elif isinstance(e.orig, DatetimeFieldOverflow):
                 raise database_api_exceptions.InvalidDateAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
