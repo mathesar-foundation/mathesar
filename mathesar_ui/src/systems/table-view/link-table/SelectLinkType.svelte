@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
@@ -17,7 +18,8 @@
 <FieldLayout>
   <fieldset>
     <legend>
-      Type of Link to <Pill table={target} which="target" />:
+      {$_('type_of_link_to')}
+      <Pill table={target} which="target" />:
     </legend>
     <div class="options">
       {#each linkTypes as linkType (linkType)}

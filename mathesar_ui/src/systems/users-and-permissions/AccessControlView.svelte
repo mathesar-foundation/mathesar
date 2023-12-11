@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     LabeledInput,
     Select,
@@ -72,14 +73,14 @@
       }}
     >
       <Icon {...iconAddNew} />
-      <span>Add</span>
+      <span>{$_('add')}</span>
     </Button>
   {/if}
 
   {#if showAddForm}
     <div class="add-user">
       <div class="add-user-form">
-        <LabeledInput label="User" layout="stacked">
+        <LabeledInput label={$_('user')} layout="stacked">
           <Select
             autoSelect="none"
             options={usersAllowedToBeAdded}
@@ -90,17 +91,17 @@
             {#if option}
               {option.username}
             {:else}
-              <span class="placeholder">Select User</span>
+              <span class="placeholder">{$_('select_user')}</span>
             {/if}
-            <div class="no-users" slot="empty">No users found</div>
+            <div class="no-users" slot="empty">{$_('no_users_found')}</div>
           </Select>
         </LabeledInput>
-        <LabeledInput label="Permission" layout="stacked">
+        <LabeledInput label={$_('permission')} layout="stacked">
           <Select
             options={roles}
             bind:value={role}
             getLabel={(option) =>
-              option ? getDisplayNameForRole(option) : 'Select Permission'}
+              option ? getDisplayNameForRole(option) : $_('select_permission')}
             disabled={isRequestInProcess}
           />
         </LabeledInput>
@@ -109,7 +110,7 @@
             disabled={!user || isRequestInProcess}
             onClick={addAccess}
             icon={iconAddNew}
-            label="Add"
+            label={$_('add')}
             appearance="secondary"
           />
         </div>
@@ -123,11 +124,10 @@
 </div>
 <div class="users-with-access">
   <div class="header">
-    <span>Users with access</span>
+    <span>{$_('users_with_access')}</span>
     {#if accessControlObject === 'schema'}
       <Help>
-        If a user has different access levels on the database and the schema,
-        the access level of schema will take precedence.
+        {$_('access_level_precedence_help')}
       </Help>
     {/if}
   </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { TabContainer, Spinner } from '@mathesar-component-library';
   import { getAvailableName } from '@mathesar/utils/db';
   import { confirm } from '@mathesar/stores/confirmation';
@@ -17,8 +18,8 @@
   $: ({ inputColumnsFetchState } = $state);
 
   const tabs = [
-    { id: 'column-selection', label: 'Select Columns' },
-    { id: 'transform-results', label: 'Transform Results' },
+    { id: 'column-selection', label: $_('select_columns') },
+    { id: 'transform-results', label: $_('transform_results') },
   ];
   let activeTab = tabs[0];
 
@@ -37,23 +38,20 @@
         title: {
           component: PhraseContainingIdentifier,
           props: {
-            pre: 'Summarize the ',
             identifier: column.name,
-            post: ' column?',
+            wrappingString: $_('summarize_column_with_identifier'),
           },
         },
         body: [
-          `By default, Mathesar shows only one related record per row when adding a
-                column with multiple related records. We recommend adding a summarization
-                step if you'd like to see related records as a list instead.`,
-          'You can manually configure a summarization later via the "Transform Results" pane.',
+          $_('summarize_column_recommendation'),
+          $_('summarize_column_configure'),
         ],
         proceedButton: {
-          label: 'Yes, summarize as a list',
+          label: $_('yes_summarize_as_list'),
           icon: undefined,
         },
         cancelButton: {
-          label: 'No, continue without summarizing',
+          label: $_('no_continue_without_summarization'),
           icon: undefined,
         },
       });
@@ -84,7 +82,7 @@
 </script>
 
 <aside class="input-sidebar">
-  <header>Build your Exploration</header>
+  <header>{$_('build_your_exploration')}</header>
   <section class="input-pane">
     <TabContainer
       {tabs}
@@ -100,8 +98,7 @@
       {:else if inputColumnsFetchState?.state === 'success'}
         {#if activeTab?.id === 'column-selection'}
           <div class="help-text">
-            Select the columns that will be used for the exploration. Columns
-            are limited to those from the base table and its linked tables.
+            {$_('select_columns_for_exploration_help')}
           </div>
           <ColumnSelectionPane
             {queryManager}
@@ -110,15 +107,13 @@
           />
         {:else if activeTab?.id === 'transform-results'}
           <div class="help-text">
-            Transformations can be used to summarize data, filter data, and
-            more. Note that transformations are applied in the order they are
-            listed.
+            {$_('transform_results_help')}
           </div>
           <TransformationsPane {queryManager} />
         {/if}
       {:else if inputColumnsFetchState?.state === 'failure'}
         <ErrorBox>
-          Failed to fetch column information:
+          {$_('failed_to_fetch_column_information')}
           {inputColumnsFetchState?.errors.join(';')}
         </ErrorBox>
       {/if}

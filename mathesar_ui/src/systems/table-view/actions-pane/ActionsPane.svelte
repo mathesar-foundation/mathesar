@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Button, Icon } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
@@ -67,10 +68,10 @@
         disabled={$isLoading}
         on:click={toggleTableInspector}
         active={$isTableInspectorVisible}
-        aria-label="Inspector"
+        aria-label={$_('inspector')}
       >
         <Icon {...iconInspector} />
-        <span class="responsive-button-label">Inspector</span>
+        <span class="responsive-button-label">{$_('inspector')}</span>
       </Button>
     {/if}
   </div>

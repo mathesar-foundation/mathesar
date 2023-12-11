@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import EditTableHOC from '@mathesar/components/EditTableHOC.svelte';
   import { tables } from '@mathesar/stores/tables';
@@ -15,7 +16,7 @@
   tableId={$tabularData.id}
 >
   <div class="rename-table-property-container">
-    <span class="label">Name</span>
+    <span class="label">{$_('name')}</span>
     <EditableTextWithActions
       initialValue={$tables.data.get($tabularData.id)?.name ?? ''}
       onSubmit={(name) => onUpdate({ name })}

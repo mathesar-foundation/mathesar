@@ -1,5 +1,6 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 import type { CancellablePromise } from '@mathesar-component-library';
 import { getAPI } from '@mathesar/api/utils/requestUtils';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
@@ -168,7 +169,7 @@ export default class QueryManager extends QueryRunner {
       const error =
         err instanceof Error
           ? err.message
-          : 'There was an error fetching joinable links';
+          : get(_)('error_fetching_joinable_links');
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'failure', errors: [error] },
@@ -338,9 +339,7 @@ export default class QueryManager extends QueryRunner {
       return this.getQueryModel();
     } catch (err) {
       const errors =
-        err instanceof Error
-          ? [err.message]
-          : ['An error occurred while trying to save the query'];
+        err instanceof Error ? [err.message] : [get(_)('error_saving_query')];
       this.state.update((_state) => ({
         ..._state,
         saveState: {

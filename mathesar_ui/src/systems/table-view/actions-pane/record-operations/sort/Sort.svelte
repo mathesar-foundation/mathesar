@@ -1,14 +1,18 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
-
-  import { Button, Icon } from '@mathesar-component-library';
+  import { _ } from 'svelte-i18n';
+  import { Icon, Button } from '@mathesar-component-library';
   import SortEntry from '@mathesar/components/sort-entry/SortEntry.svelte';
   import type { SortDirection } from '@mathesar/components/sort-entry/utils';
-  import { sortableContainer, sortableItem, sortableTrigger } from '@mathesar/components/sortable/sortable';
+  import {
+    sortableContainer,
+    sortableItem,
+    sortableTrigger,
+  } from '@mathesar/components/sortable/sortable';
   import { iconAddNew, iconGrip } from '@mathesar/icons';
   import {
-      Sorting,
-      getTabularDataStoreFromContext,
+    Sorting,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
 
@@ -57,13 +61,13 @@
 </script>
 
 <div class="sorters">
-  <div class="header">Sort</div>
+  <div class="header">{$_('sort')}</div>
 
   <div
     class="content"
     use:sortableContainer={{
       getItems: () => [...$sorting],
-      onSort: (newEntries) => sorting.set(new Sorting(newEntries))
+      onSort: (newEntries) => sorting.set(new Sorting(newEntries)),
     }}
   >
     {#each [...$sorting] as [columnId, sortDirection] (columnId)}
@@ -87,14 +91,14 @@
         />
       </div>
     {:else}
-      <span>No sorting condition has been added</span>
+      <span>{$_('no_sorting_condition_added')}</span>
     {/each}
   </div>
   {#if availableColumnIds.length > 0}
     <div class="footer">
       <Button appearance="secondary" on:click={addSortColumn}>
         <Icon {...iconAddNew} />
-        <span>Add new sort condition</span>
+        <span>{$_('add_new_sort_condition')}</span>
       </Button>
     </div>
   {/if}
