@@ -106,10 +106,6 @@
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
-  $: linkedTableName = linkFk ? linkFk.name : undefined;
-  $: linkedTableHref = linkFk
-    ? getTablePageUrl({ tableId: linkFk.referent_table })
-    : undefined;
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -217,11 +213,6 @@
         {#if showLinkedRecordHyperLink && linkedRecordHref}
           <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
             Open <Identifier>{value}</Identifier>
-          </LinkMenuItem>
-        {/if}
-        {#if linkedTableHref && linkedTableName}
-          <LinkMenuItem icon={iconTable} href={linkedTableHref}>
-            Open <Identifier>{linkedTableName}</Identifier> Table
           </LinkMenuItem>
         {/if}
         <MenuDivider />
