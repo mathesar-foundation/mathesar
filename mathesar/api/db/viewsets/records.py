@@ -103,15 +103,20 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except DataError as e:
-            if isinstance(e.orig, (InvalidDatetimeFormat, DatetimeFieldOverflow)):
+            if isinstance(e.orig, InvalidDatetimeFormat):
                 raise database_api_exceptions.InvalidDateFormatAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
-            else:
-                raise database_api_exceptions.RaiseExceptionAPIException(
+            elif (e.orig, DatetimeFieldOverflow):
+                raise database_api_exceptions.InvalidDateAPIException(
                     e,
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                raise database_api_exceptions.MathesarAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST
                 )
 
         serializer = RecordSerializer(
