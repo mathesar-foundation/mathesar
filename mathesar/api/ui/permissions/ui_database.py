@@ -22,6 +22,7 @@ class UIDatabaseAccessPolicy(AccessPolicy):
                 'create', 'partial_update', 'destroy',
                 'create_from_known_connection',
                 'create_from_scratch',
+                'create_with_new_user',
             ],
             'principal': 'authenticated',
             'effect': 'allow',
