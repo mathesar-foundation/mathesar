@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     FileUpload as FileUploadComponent,
@@ -97,7 +97,9 @@
 
 {#if request}
   <div class="button">
-    <Button on:click={cancel}>Cancel upload</Button>
+    <Button on:click={cancel}>
+      {$_('cancel_upload')}
+    </Button>
   </div>
 {/if}
 
