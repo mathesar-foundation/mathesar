@@ -10,6 +10,7 @@
     iconRemoveFilter,
     iconSortAscending,
     iconSortDescending,
+    iconTable,
   } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -17,9 +18,12 @@
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -52,6 +56,13 @@
   );
 
   $: hasGrouping = $grouping.hasColumn(columnId);
+
+  $: linkFk = processedColumn.linkFk;
+  $: getTablePageUrl = $storeToGetTablePageUrl;
+  $: linkedTableName = linkFk ? linkFk.name : undefined;
+  $: linkedTableHref = linkFk
+    ? getTablePageUrl({ tableId: linkFk.referent_table })
+    : undefined;
 
   function addFilter() {
     void imperativeFilterController?.beginAddingNewFilteringEntry(columnId);
@@ -135,4 +146,10 @@
   <ButtonMenuItem icon={iconGrouping} on:click={addGrouping}>
     Group by Column
   </ButtonMenuItem>
+{/if}
+
+{#if linkedTableHref && linkedTableName}
+  <LinkMenuItem icon={iconTable} href={linkedTableHref}>
+    Open <Identifier>{linkedTableName}</Identifier> Table
+  </LinkMenuItem>
 {/if}
