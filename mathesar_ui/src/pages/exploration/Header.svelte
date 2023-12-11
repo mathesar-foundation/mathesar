@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { Button, Icon } from '@mathesar-component-library';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
@@ -33,7 +34,7 @@
             query.id,
           )}
         >
-          <span>Edit in Data Explorer</span>
+          <span>{$_('edit_in_data_explorer')}</span>
         </a>
       {/if}
       <ShareExplorationDropdown id={query.id} />
@@ -45,7 +46,7 @@
       }}
     >
       <Icon {...iconInspector} />
-      <span>Inspector</span>
+      <span>{$_('inspector')}</span>
     </Button>
   </svelte:fragment>
 </EntityPageHeader>

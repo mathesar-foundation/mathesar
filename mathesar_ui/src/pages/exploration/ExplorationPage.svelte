@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -54,7 +54,7 @@
 </script>
 
 <svelte:head>
-  <title>{query.name} | {schema.name} | Mathesar</title>
+  <title>{query.name} | {schema.name} | {$_('mathesar')}</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
