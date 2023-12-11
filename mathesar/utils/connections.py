@@ -1,6 +1,6 @@
 """Utilities to help with creating and managing connections in Mathesar."""
 from mathesar.models.base import Database
-from db import install
+from db import install, connection as dbconn
 
 
 def copy_connection_from_preexisting(
@@ -27,6 +27,25 @@ def create_connection_from_scratch(
     return _save_and_install(
         db_model, db_name, root_db, nickname, False, sample_data
     )
+
+
+def create_connection_with_new_user(
+        connection, user, password, nickname, db_name, create_db, sample_data
+):
+    db_model = copy_connection_from_preexisting(
+        connection, nickname, db_name, create_db, sample_data
+    )
+    engine = db_model._sa_engine
+    db_model.username = user
+    db_model.password = password
+    dbconn.execute_msar_func_with_engine(
+        engine,
+        'create_basic_mathesar_user',
+        db_model.username,
+        db_model.password,
+        db_model.db_name
+    )
+    return db_model
 
 
 def _save_and_install(
