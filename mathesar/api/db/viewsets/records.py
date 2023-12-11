@@ -1,4 +1,4 @@
-from psycopg2.errors import ForeignKeyViolation, InvalidDatetimeFormat
+from psycopg2.errors import ForeignKeyViolation, InvalidDatetimeFormat, DatetimeFieldOverflow
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, MethodNotAllowed
@@ -107,6 +107,16 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                 raise database_api_exceptions.InvalidDateFormatAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
+                )
+            elif isinstance(e.orig, DatetimeFieldOverflow):
+                raise database_api_exceptions.InvalidDateAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                raise database_api_exceptions.MathesarAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST
                 )
 
         serializer = RecordSerializer(

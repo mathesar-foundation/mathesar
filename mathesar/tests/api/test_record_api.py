@@ -322,6 +322,51 @@ def test_record_search(create_patents_table, client):
     assert len(response_data['results']) == 1
 
 
+def test_record_search_invalid_date(create_patents_table, client):
+    table_name = 'NASA Record Invalid Date'
+    table = create_patents_table(table_name)
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
+    column_attnum = table.columns.get(id=column_id_with_date_type).attnum
+    table.alter_column(column_attnum, {'type': 'date'})
+    search_columns = [
+        {'field': columns_name_id_map['Patent Expiration Date'], 'literal': '99/99/9999'},
+    ]
+
+    json_search_fuzzy = json.dumps(search_columns)
+
+    response = client.get(
+        f'/api/db/v0/tables/{table.id}/records/?search_fuzzy={json_search_fuzzy}'
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.InvalidDateError.value
+    assert response_data[0]['message'] == 'Invalid date'
+
+
+def test_record_search_invalid_date_format(create_patents_table, client):
+    table_name = 'NASA Record Invalid Date Format'
+    table = create_patents_table(table_name)
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
+    column_attnum = table.columns.get(id=column_id_with_date_type).attnum
+    table.alter_column(column_attnum, {'type': 'date'})
+    search_columns = [
+        {'field': columns_name_id_map['Patent Expiration Date'], 'literal': '12/31'},
+    ]
+
+    json_search_fuzzy = json.dumps(search_columns)
+
+    response = client.get(
+        f'/api/db/v0/tables/{table.id}/records/?search_fuzzy={json_search_fuzzy}'
+    )
+    response_data = response.json()
+
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.InvalidDateFormatError.value
+    assert response_data[0]['message'] == 'Invalid date format'
+
+
 grouping_params = [
     (
         'NASA Record List Group Single',
