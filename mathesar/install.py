@@ -10,7 +10,6 @@ from django.core import management
 from decouple import config as decouple_config
 from django.conf import settings
 from db import install
-from django.db.utils import IntegrityError
 
 
 def main(skip_static_collection=False):
