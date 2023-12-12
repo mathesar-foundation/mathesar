@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Tutorial } from '@mathesar-component-library';
   import { queries } from '@mathesar/stores/queries';
   import ActionsPane from './ActionsPane.svelte';
@@ -33,18 +34,16 @@
         <div class="tutorial-holder">
           <Tutorial>
             <span slot="title">
-              Create and Share Explorations of Your Data
+              {$_('create_share_explorations_of_your_data')}
             </span>
             <span slot="body">
-              Use Data Explorer to analyze and share your data. Explorations are
-              based on tables in your schema, to get started choose a table and
-              start adding columns and transformations.
+              {$_('create_exploration_empty_state_help')}
             </span>
           </Tutorial>
         </div>
       {/if}
       <div class="help-text">
-        Get started by selecting a table and adding columns
+        {$_('get_started_by_adding_table_and_columns')}
       </div>
     </div>
   {:else}
@@ -52,7 +51,7 @@
       <WithInputSidebar {queryManager} {linkCollapsibleOpenState}>
         {#if hasNoColumns}
           <div class="help-text">
-            Get started by adding columns from the left
+            {$_('get_started_by_adding_columns_from_left')}
           </div>
         {:else}
           <WithExplorationInspector

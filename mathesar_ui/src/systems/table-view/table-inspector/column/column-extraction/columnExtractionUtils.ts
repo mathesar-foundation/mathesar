@@ -1,3 +1,5 @@
+import { _ } from 'svelte-i18n';
+import { get } from 'svelte/store';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
@@ -62,7 +64,9 @@ export function validateTableIsNotLinkedViaSelectedColumn(
     linkedTable.columns.some((c) => c.id === selectedColumn.id),
   );
   const msg = (c: string, t: string) =>
-    `Cannot move linking column "${c}" to its linked table "${t}".`;
+    get(_)('cannot_move_linked_column_to_linked_table', {
+      values: { columnName: c, tableName: t },
+    });
   return offendingColumn
     ? invalid(msg(offendingColumn.column.name, linkedTable.table.name))
     : valid();

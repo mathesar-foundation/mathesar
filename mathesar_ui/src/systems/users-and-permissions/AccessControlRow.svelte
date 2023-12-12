@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     Chip,
     Icon,
@@ -56,10 +57,10 @@
   ): string {
     const status: string[] = [];
     if (isRoleInherited(aclObject)) {
-      status.push('Inherited');
+      status.push($_('inherited'));
     }
     if (isOverridden) {
-      status.push('Overridden');
+      status.push($_('overridden'));
     }
     return status.length > 0 ? `(${status.join(', ')})` : '';
   }
@@ -68,34 +69,53 @@
     aclObject: AccessControlObject,
     isOverridden: boolean,
   ): string {
-    const comparedAclObject = aclObject === 'database' ? 'schema' : 'database';
+    const aclObjectLabel =
+      aclObject === 'database' ? $_('database') : $_('schema');
+    const comparedAclObjectLabel =
+      aclObject === 'database' ? $_('schema') : $_('database');
     const isInherited = isRoleInherited(aclObject);
     if (isInherited && isOverridden) {
-      return `This access level is inherited from the ${aclObject} permissions
-        and is overridden by the ${comparedAclObject} permissions.`;
+      return $_('access_level_inheritance_is_overridden_help', {
+        values: {
+          aclObject: aclObjectLabel,
+          comparedAclObject: comparedAclObjectLabel,
+        },
+      });
     }
     if (isInherited) {
-      return `This access level is inherited from the ${aclObject} permissions.`;
+      return $_('access_level_inheritance_help', {
+        values: {
+          aclObject: aclObjectLabel,
+        },
+      });
     }
     if (isOverridden) {
-      return `This access level is overridden by the ${comparedAclObject} permissions.`;
+      return $_('access_level_is_overridden_help', {
+        values: {
+          comparedAclObject: comparedAclObjectLabel,
+        },
+      });
     }
-    return `This access level overrides the ${comparedAclObject} permissions.`;
+    return $_('access_level_overrides_help', {
+      values: {
+        comparedAclObject: comparedAclObjectLabel,
+      },
+    });
   }
 
   function getDisabledDeleteHelpText(
     level: 'admin' | AccessControlObject,
   ): string {
     if (level === 'admin') {
-      return 'Individual permissions cannot be modified for users with Admin access.';
+      return $_('individual_permissions_admin_modify_warning');
     }
     if (isUserEditingTheirOwnAccess) {
-      return 'You cannot modify your own access levels. Please contact an administrator.';
+      return $_('cannot_modify_own_access_warning');
     }
     if (isRoleInherited(level)) {
-      return 'This access level is inherited and cannot be removed from this panel.';
+      return $_('inherited_access_level_cannot_remove_warning');
     }
-    return 'This access level cannot be removed.';
+    return $_('access_level_cannot_remove_warning');
   }
 </script>
 
@@ -128,7 +148,7 @@
       >
         <div>
           {#if level === 'admin'}
-            Admin Access
+            {$_('admin_access')}
           {:else}
             {getDescriptionForRole(role)}
           {/if}
@@ -148,7 +168,7 @@
         <Chip background="var(--slate-200)" display="inline-flex">
           {#if level === 'admin'}
             <Icon {...iconUser} size="0.8em" />
-            <span>Admin</span>
+            <span>{$_('admin')}</span>
           {:else}
             {#if level === 'database'}
               <Icon {...iconDatabase} size="0.8em" />

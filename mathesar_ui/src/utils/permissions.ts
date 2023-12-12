@@ -1,3 +1,5 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 import type { UserRole } from '@mathesar/api/users';
 import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 
@@ -57,11 +59,11 @@ export function rolesAllowOperation(
 export function getDisplayNameForRole(userRole: UserRole): string {
   switch (userRole) {
     case 'manager':
-      return 'Manager';
+      return get(_)('manager');
     case 'editor':
-      return 'Editor';
+      return get(_)('editor');
     case 'viewer':
-      return 'Viewer';
+      return get(_)('viewer');
     default:
       throw new MissingExhaustiveConditionError(userRole);
   }
@@ -70,11 +72,11 @@ export function getDisplayNameForRole(userRole: UserRole): string {
 export function getDescriptionForRole(userRole: UserRole): string {
   switch (userRole) {
     case 'manager':
-      return 'Manager Access';
+      return get(_)('manager_access');
     case 'editor':
-      return 'Editor Access';
+      return get(_)('editor_access');
     case 'viewer':
-      return 'Read-Only Access';
+      return get(_)('readonly_access');
     default:
       throw new MissingExhaustiveConditionError(userRole);
   }

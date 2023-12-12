@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     Collapsible,
     Icon,
@@ -36,7 +37,7 @@
         </span>
         <span class="fk-column">
           <Truncate>
-            via {column.name}
+            {$_('via_column', { values: { columnName: column.name } })}
           </Truncate>
         </span>
       </Button>

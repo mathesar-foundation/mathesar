@@ -1,9 +1,8 @@
 <script lang="ts">
   import { onMount, type ComponentProps } from 'svelte';
   import type { Writable } from 'svelte/store';
-
-  import { Dropdown, Icon } from '@mathesar-component-library';
-  import BadgeCount from '@mathesar/component-library/badge-count/BadgeCount.svelte';
+  import { _ } from 'svelte-i18n';
+  import { Dropdown, Icon, BadgeCount } from '@mathesar-component-library';
   import { iconFiltering } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
   import {
@@ -43,12 +42,13 @@
   showArrow={false}
   triggerAppearance="secondary"
   {...$$restProps}
-  ariaLabel="Filter"
+  ariaLabel={$_('filter')}
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconFiltering} size="0.8em" />
     <span class="responsive-button-label">
-      Filter <BadgeCount value={$filtering.entries.length} />
+      {$_('filter')}
+      <BadgeCount value={$filtering.entries.length} />
     </span>
   </svelte:fragment>
   <Filter

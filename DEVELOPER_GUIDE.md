@@ -1,5 +1,7 @@
 # Developer Guide
 
+This guide explains how to work with Mathesar's code. Be sure to also see our [Contributor Guide](./CONTRIBUTING.md) to learn about our collaboration workflow.
+
 ## Stack
 
 Mathesar is built using:

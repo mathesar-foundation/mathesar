@@ -45,7 +45,7 @@ export const querySummarizationFunctionIds = [
 ] as const;
 
 export type QuerySummarizationFunctionId =
-  typeof querySummarizationFunctionIds[number];
+  (typeof querySummarizationFunctionIds)[number];
 
 export interface QueryInstanceSummarizationTransformation {
   type: 'summarize';
