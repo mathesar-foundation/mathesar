@@ -42,6 +42,7 @@
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
   import SchemaListSkeleton from './SchemaListSkeleton.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
@@ -216,9 +217,6 @@
       <strong>{filterQuery}</strong>
     </p>
     <ul class="schema-list" slot="content">
-      {#if schemasRequestStatus.state === 'processing'}
-        <SchemaListSkeleton />
-      {/if}
       {#if schemasRequestStatus.state === 'success'}
         {#each displayList as schema (schema.id)}
           <li class="schema-list-item">
@@ -234,6 +232,14 @@
             />
           </li>
         {/each}
+      {:else if schemasRequestStatus.state === 'processing'}
+        <SchemaListSkeleton />
+      {:else if schemasRequestStatus.state === 'failure'}
+        <ErrorBox fullWidth>
+          {#each schemasRequestStatus.errors as error (error)}
+            <p>{error}</p>
+          {/each}
+        </ErrorBox>
       {/if}
     </ul>
   </EntityContainerWithFilterBar>
