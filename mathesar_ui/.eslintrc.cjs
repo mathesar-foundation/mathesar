@@ -97,6 +97,7 @@ module.exports = {
         'src/components/**/*.svelte',
         'src/systems/**/*.svelte',
         'src/pages/**/*.svelte',
+        'src/routes/**/*.svelte',
       ],
       extends: ['plugin:@intlify/svelte/recommended'],
       rules: {

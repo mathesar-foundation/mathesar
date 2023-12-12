@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Route } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { connectionsStore } from '@mathesar/stores/databases';
@@ -37,6 +38,10 @@
   </Route>
 {:else}
   <ErrorPage>
-    Database with name <Identifier>{databaseName}</Identifier> is not found.
+    <RichText text={$_('database_not_found')} let:slotName>
+      {#if slotName === 'databaseName'}
+        <Identifier>{databaseName}</Identifier>
+      {/if}
+    </RichText>
   </ErrorPage>
 {/if}

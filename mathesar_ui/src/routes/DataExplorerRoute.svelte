@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import {
@@ -137,7 +138,7 @@
           schema.id,
           $query.id,
         ),
-        label: 'Edit',
+        label: $_('edit'),
         icon: iconEdit,
       }}
     />
@@ -150,7 +151,7 @@
           schema.id,
           $query.id,
         ),
-        label: 'Data Explorer',
+        label: $_('data_explorer'),
         icon: iconExploration,
       }}
     />
@@ -160,7 +161,7 @@
     item={{
       type: 'simple',
       href: getDataExplorerPageUrl(database.nickname, schema.id),
-      label: 'Data Explorer',
+      label: $_('data_explorer'),
       icon: iconExploration,
     }}
   />
@@ -171,5 +172,5 @@
 {#if queryManager}
   <DataExplorerPage {queryManager} {database} {schema} />
 {:else if is404}
-  <ErrorPage>Exploration not found.</ErrorPage>
+  <ErrorPage>{$_('exploration_not_found')}</ErrorPage>
 {/if}
