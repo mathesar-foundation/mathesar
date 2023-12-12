@@ -8,9 +8,9 @@ import {
 } from './utils/requestUtils';
 import type { Connection } from './connections';
 
-function list(databaseName: Connection['nickname']) {
+function list(connectionId: Connection['id']) {
   return getAPI<PaginatedResponse<SchemaResponse>>(
-    `/api/db/v0/schemas/?database=${databaseName}&limit=500`,
+    `/api/db/v0/schemas/?connection_id=${connectionId}&limit=500`,
   );
 }
 
@@ -21,12 +21,12 @@ function get(schemaId: SchemaEntry['id']) {
 function add(props: {
   name: SchemaEntry['name'];
   description: SchemaEntry['description'];
-  databaseName: Connection['nickname'];
+  connectionId: Connection['id'];
 }) {
   return postAPI<SchemaResponse>('/api/db/v0/schemas/', {
     name: props.name,
     description: props.description,
-    database: props.databaseName,
+    connection_id: props.connectionId,
   });
 }
 

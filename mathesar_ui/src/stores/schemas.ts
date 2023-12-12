@@ -156,8 +156,7 @@ async function refetchSchemasForDB(
 
     dbSchemasRequestMap.get(connectionId)?.cancel();
 
-    const databaseName = ''; // TODO_3333
-    const schemaRequest = schemasApi.list(databaseName);
+    const schemaRequest = schemasApi.list(connectionId);
     dbSchemasRequestMap.set(connectionId, schemaRequest);
     const response = await schemaRequest;
     const schemas = response?.results || [];
@@ -238,11 +237,10 @@ export async function createSchema(
   schemaName: SchemaEntry['name'],
   description: SchemaEntry['description'],
 ): Promise<SchemaResponse> {
-  const databaseName = ''; // TODO_3333
   const response = await schemasApi.add({
     name: schemaName,
     description,
-    databaseName,
+    connectionId,
   });
   updateSchemaInDBSchemaStore(connectionId, response);
   return response;
