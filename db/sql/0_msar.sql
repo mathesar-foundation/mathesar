@@ -496,15 +496,18 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.create_basic_mathesar_user(username text, password_ text, database_ text) RETURNS TEXT AS $$/*
+msar.create_basic_mathesar_user(username text, password_ text) RETURNS TEXT AS $$/*
 */
-DECLARE
-  cmd_template text;
 BEGIN
   PERFORM __msar.exec_ddl('CREATE USER %I WITH PASSWORD %L', username, password_);
-  RETURN __msar.exec_ddl(
+  PERFORM __msar.exec_ddl(
     'GRANT CREATE, CONNECT, TEMP ON DATABASE %I TO %I',
-    database_,
+    current_database()::text,
+    username
+  );
+  RETURN __msar.exec_ddl(
+    'GRANT USAGE ON SCHEMA %I, %I, %I TO %I',
+    'mathesar_types', '__msar', 'msar',
     username
   );
 END;

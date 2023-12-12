@@ -1,6 +1,8 @@
 """Utilities to help with creating and managing connections in Mathesar."""
 from mathesar.models.base import Database
 from db import install, connection as dbconn
+from mathesar.state import reset_reflection
+from demo.install.datasets import load_library_dataset, load_movies_dataset
 
 
 def copy_connection_from_preexisting(
@@ -33,18 +35,19 @@ def create_connection_with_new_user(
         connection, user, password, nickname, db_name, create_db, sample_data
 ):
     db_model = copy_connection_from_preexisting(
-        connection, nickname, db_name, create_db, sample_data
+        connection, nickname, db_name, create_db, []
     )
     engine = db_model._sa_engine
     db_model.username = user
     db_model.password = password
+    db_model.save()
     dbconn.execute_msar_func_with_engine(
         engine,
         'create_basic_mathesar_user',
         db_model.username,
-        db_model.password,
-        db_model.db_name
+        db_model.password
     )
+    _load_sample_data(db_model._sa_engine, sample_data)
     return db_model
 
 
@@ -65,7 +68,18 @@ def _save_and_install(
         create_db=create_db,
         root_db=root_db,
     )
+    _load_sample_data(db_model._sa_engine, sample_data)
     return db_model
+
+
+def _load_sample_data(engine, sample_data):
+    DATASET_MAP = {
+        'library_management': load_library_dataset,
+        'movie_collection': load_movies_dataset,
+    }
+    for key in sample_data:
+        DATASET_MAP[key](engine, safe_mode=True)
+    reset_reflection()
 
 
 def _validate_db_model(db_model):
