@@ -1,11 +1,11 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Collapsible } from '@mathesar-component-library';
   import { getSelectedRowIndex } from '@mathesar/components/sheet';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import RowActions from './RowActions.svelte';
 
@@ -31,11 +31,15 @@
   {#if uniquelySelectedRowIndices.length}
     {#if uniquelySelectedRowIndices.length > 1}
       <span class="records-selected-count">
-        {labeledCount(uniquelySelectedRowIndices, 'records')} selected
+        {$_('multiple_records_selected', {
+          values: {
+            count: uniquelySelectedRowIndices.length,
+          },
+        })}
       </span>
     {/if}
     <Collapsible isOpen triggerAppearance="plain">
-      <CollapsibleHeader slot="header" title="Actions" />
+      <CollapsibleHeader slot="header" title={$_('actions')} />
       <div slot="content" class="content-container">
         <RowActions
           selectedRowIndices={uniquelySelectedRowIndices}
@@ -47,9 +51,9 @@
       </div>
     </Collapsible>
   {:else}
-    <span class="no-records-selected"
-      >Select one or more cells to view associated record properties.</span
-    >
+    <span class="no-records-selected">
+      {$_('select_cells_view_record_props')}
+    </span>
   {/if}
 </div>
 

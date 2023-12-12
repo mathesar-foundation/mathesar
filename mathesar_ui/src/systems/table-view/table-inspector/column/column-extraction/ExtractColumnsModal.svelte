@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { get } from 'svelte/store';
-
+  import { _ } from 'svelte-i18n';
   import { ControlledModal } from '@mathesar-component-library';
   import {
     comboValidator,
@@ -14,12 +14,12 @@
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import { scrollBasedOnSelection } from '@mathesar/components/sheet';
+  import TableName from '@mathesar/components/TableName.svelte';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import {
-    currentTable,
     getTableFromStoreOrApi,
     moveColumns,
     splitTable,
@@ -31,24 +31,27 @@
     columnNameIsAvailable,
     getSuggestedFkColumnName,
   } from '@mathesar/utils/columnUtils';
-  import { pluralize } from '@mathesar/utils/languageUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { RichText } from '@mathesar/components/rich-text';
   import type { LinkedTable } from './columnExtractionTypes';
   import {
     getLinkedTables,
     validateTableIsNotLinkedViaSelectedColumn,
   } from './columnExtractionUtils';
-  import CurrentTable from './CurrentTable.svelte';
   import type { ExtractColumnsModalController } from './ExtractColumnsModalController';
   import SelectLinkedTable from './SelectLinkedTable.svelte';
   import SuccessToastContent from './SuccessToastContent.svelte';
-  import TargetTable from './TargetTable.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let controller: ExtractColumnsModalController;
 
-  $: ({ processedColumns, constraintsDataStore, selection } = $tabularData);
+  $: ({
+    processedColumns,
+    constraintsDataStore,
+    selection,
+    table: currentTable,
+  } = $tabularData);
   $: ({ constraints } = $constraintsDataStore);
   $: availableProcessedColumns = [...$processedColumns.values()];
   $: ({ targetType, columns, isOpen } = controller);
@@ -74,15 +77,25 @@
         ]);
   $: proceedButtonLabel =
     $targetType === 'existingTable'
-      ? 'Move Columns'
-      : 'Create Table and Move Columns';
+      ? $_('move_columns')
+      : $_('create_table_move_columns');
   $: linkedTables = getLinkedTables({
     constraints,
     columns: $processedColumns,
     tables: $tablesDataStore.data,
   });
-  $: action = $targetType === 'newTable' ? 'extract' : 'move';
-  $: actionTitleCase = $targetType === 'newTable' ? 'Extract' : 'Move';
+  $: selectedColumnsHelpText = (() => {
+    if ($targetType === 'existingTable') {
+      if (targetTableName) {
+        return $_('select_columns_move_into_table');
+      }
+      return $_('select_columns_move');
+    }
+    if (targetTableName) {
+      return $_('select_columns_extract_into_table');
+    }
+    return $_('select_columns_extract');
+  })();
 
   function suggestNewFkColumnName(
     newTableName: string,
@@ -125,7 +138,7 @@
       if ($targetType === 'existingTable') {
         const targetTableId = $linkedTable?.table.id;
         if (!targetTableId) {
-          throw new Error('No target table selected');
+          throw new Error($_('no_target_table_selected'));
         }
         await moveColumns($tabularData.id, extractedColumnIds, targetTableId);
         const fkColumns = $linkedTable?.columns ?? [];
@@ -156,10 +169,9 @@
       }
       if ($targetType === 'newTable') {
         toast.success({
-          title: `A new table ${newTableName} has been created with the extracted ${pluralize(
-            extractedColumns,
-            'columns',
-          )}`,
+          title: $_('new_table_created_with_extracted_column', {
+            values: { count: extractedColumns.length, newTableName },
+          }),
           contentComponent: SuccessToastContent,
           contentComponentProps: {
             newFkColumnName: constFkColumnName,
@@ -169,11 +181,13 @@
         const columnNames = extractedColumns.map(
           (processedColumn) => processedColumn.column.name,
         );
-        const message = `${
-          columnNames.length > 1
-            ? `Columns ${columnNames.join(',')} have`
-            : `Column ${columnNames[0]} has`
-        } been moved to table '${$linkedTable?.table.name}'`;
+        const message = $_('columns_moved_to_table', {
+          values: {
+            count: columnNames.length,
+            columnNames: columnNames.join(','),
+            tableName: $linkedTable?.table.name ?? '',
+          },
+        });
         toast.success(message);
       }
       controller.close();
@@ -202,24 +216,34 @@
 <ControlledModal {controller} on:close={form.reset}>
   <span slot="title">
     {#if $targetType === 'existingTable'}
-      Move Columns To Linked Table
+      {$_('move_columns_to_linked_table', {
+        values: { count: $columns.length },
+      })}
     {:else}
-      Extract Columns Into a New Table
+      {$_('extract_columns_to_new_table', {
+        values: { count: $columns.length },
+      })}
     {/if}
   </span>
 
   {#if $targetType === 'newTable'}
-    <Field field={tableName} label="Name of New Table" layout="stacked">
+    <Field field={tableName} label={$_('name_of_new_table')} layout="stacked">
       <span slot="help">
-        The new table that will be linked to
-        <CurrentTable table={$currentTable} />
+        <RichText
+          text={$_('new_table_that_will_be_linked_to_table')}
+          let:slotName
+        >
+          {#if slotName === 'tableName'}
+            <TableName table={currentTable} truncate={false} bold />
+          {/if}
+        </RichText>
       </span>
     </Field>
   {:else}
     <Field
       field={linkedTable}
       input={{ component: SelectLinkedTable, props: { linkedTables } }}
-      label="Linked Table"
+      label={$_('linked_table')}
       layout="stacked"
     />
   {/if}
@@ -230,32 +254,53 @@
       component: SelectProcessedColumns,
       props: { options: availableProcessedColumns },
     }}
-    label={`Columns to ${actionTitleCase}`}
+    label={$targetType === 'newTable'
+      ? $_('columns_to_extract')
+      : $_('columns_to_move')}
     layout="stacked"
   >
     <span slot="help">
-      Select the columns you want to {action}
-      {#if targetTableName}
-        into
-        <TargetTable name={targetTableName} />
-      {/if}
+      <RichText text={selectedColumnsHelpText} let:slotName>
+        {#if slotName === 'targetTableName'}
+          <TableName table={{ name: targetTableName }} truncate={false} bold />
+        {/if}
+      </RichText>
     </span>
   </Field>
 
   <FieldLayout>
     <OutcomeBox>
       <p>
-        The {pluralize($columns, 'columns')} above will be removed from
-        <CurrentTable table={$currentTable} />
-        and added to
-        <TargetTable name={targetTableName} />
+        <RichText
+          text={targetTableName
+            ? $_('columns_removed_from_table_added_to_target', {
+                values: { count: $columns.length },
+              })
+            : $_('columns_removed_from_table_added_to_new_table', {
+                values: { count: $columns.length },
+              })}
+          let:slotName
+        >
+          {#if slotName === 'tableName'}
+            <TableName table={currentTable} truncate={false} bold />
+          {:else if slotName === 'targetTableName' && targetTableName}
+            <TableName
+              table={{ name: targetTableName }}
+              truncate={false}
+              bold
+            />
+          {/if}
+        </RichText>
       </p>
       {#if $targetType === 'newTable'}
         <p>
-          A new column will be added to
-          <CurrentTable table={$currentTable} />
+          <RichText text={$_('new_column_added_to_table')} let:slotName>
+            {#if slotName === 'tableName'}
+              <TableName table={currentTable} truncate={false} bold />
+            {/if}
+          </RichText>
         </p>
-        <Field field={newFkColumnName} label="Column Name" />
+        <Field field={newFkColumnName} label={$_('column_name')} />
       {/if}
     </OutcomeBox>
   </FieldLayout>

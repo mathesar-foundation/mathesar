@@ -1,11 +1,5 @@
 import { assertExhaustive } from './typeUtils';
 
-const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
-
-export function getArticleForWord(word: string): string {
-  return vowels.has(word[0]?.toLowerCase()) ? 'an' : 'a';
-}
-
 export function makeSingular(word: string): string {
   return word.length > 1 ? word.replace(/s$/i, '') : word;
 }
@@ -231,15 +225,4 @@ export function labeledCount(
   const countText = getCountText(count, countWhenZero, countWhenSingular);
   const label = pluralize(count, word, casing);
   return [countText, label].filter(Boolean).join(' ');
-}
-
-export function numberOfTimes(countable: Countable, casing?: Casing): string {
-  const count = getCount(countable);
-  if (count === 1) {
-    return 'once';
-  }
-  if (count === 2) {
-    return 'twice';
-  }
-  return labeledCount(countable, 'times', { casing });
 }

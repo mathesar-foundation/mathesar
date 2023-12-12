@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Dropdown, Icon, Spinner } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
@@ -36,7 +37,7 @@
   closeOnInnerClick={false}
   triggerAppearance="secondary"
   showArrow={false}
-  ariaLabel="New Column"
+  ariaLabel={$_('new_column')}
   on:close={form.reset}
   disabled={$isSubmitting}
 >
@@ -48,17 +49,17 @@
     {/if}
   </svelte:fragment>
   <div slot="content" class="new-column-dropdown" let:close>
-    <Field field={columnName} label="Column Name" layout="stacked" />
+    <Field field={columnName} label={$_('column_name')} layout="stacked" />
     <Field
       field={columnType}
       input={{ component: ColumnTypeSelector }}
-      label="Select Type"
+      label={$_('select_type')}
       layout="stacked"
     />
     <div class="submit">
       <FormSubmit
         {form}
-        proceedButton={{ label: 'Add' }}
+        proceedButton={{ label: $_('add') }}
         onProceed={() => addColumn(close)}
         onCancel={close}
         catchErrors

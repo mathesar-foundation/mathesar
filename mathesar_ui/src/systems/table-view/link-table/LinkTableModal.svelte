@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ControlledModal,
     type ModalController,
@@ -10,7 +11,7 @@
 </script>
 
 {#if $currentTable}
-  <ControlledModal {controller} size="large" title="Create Link">
+  <ControlledModal {controller} size="large" title={$_('create_link')}>
     <LinkTableForm base={$currentTable} close={() => controller.close()} />
   </ControlledModal>
 {/if}

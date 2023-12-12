@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { RadioGroup } from '@mathesar-component-library';
+  import { _ } from 'svelte-i18n';
+  import { RadioGroup, Spinner } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
-  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import {
     FormSubmit,
     makeForm,
@@ -12,6 +12,7 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
@@ -72,7 +73,7 @@
     try {
       await saveRecordSummaryTemplate(table, $form.values);
     } catch (e) {
-      toast.error(`Unable to save. ${getErrorMessage(e)}`);
+      toast.error(`${$_('unable_to_save_changes')} ${getErrorMessage(e)}`);
     }
   }
 </script>
@@ -82,24 +83,26 @@
     <Spinner />
   {:else}
     {#if previewRecordSummary}
-      <div class="heading">Preview</div>
+      <div class="heading">{$_('preview')}</div>
       <div class="content">
         <div class="help">
-          Shows how links to
-          <Identifier>{table.name}</Identifier>
-          records will appear.
+          <RichText text={$_('record_summary_help')} let:slotName>
+            {#if slotName === 'tableName'}
+              <Identifier>{table.name}</Identifier>
+            {/if}
+          </RichText>
         </div>
         <LinkedRecord recordSummary={previewRecordSummary} />
       </div>
     {/if}
 
     {#if canEditMetadata}
-      <div class="heading">Template</div>
+      <div class="heading">{$_('template')}</div>
       <div class="content">
         <RadioGroup
           options={[false, true]}
-          getRadioLabel={(v) => (v ? 'Custom' : 'Default')}
-          ariaLabel="Template type"
+          getRadioLabel={(v) => (v ? $_('custom') : $_('default'))}
+          ariaLabel={$_('template_type')}
           isInline
           bind:value={$customized}
           disabled={$customizedDisabled}
@@ -115,16 +118,21 @@
             <InfoBox>
               <div class="nonconformant-columns">
                 <p>
-                  Because some column names contain curly braces, the following
-                  numerical values are used in place of column names within the
-                  above template:
+                  {$_('record_summary_non_conformant_columns_help')}:
                 </p>
                 <ul>
                   {#each nonconformantColumns as column}
                     <li>
-                      <Identifier>{column.id}</Identifier>
-                      references the column
-                      <Identifier>{column.name}</Identifier>.
+                      <RichText
+                        text={$_('column_id_references_column_name')}
+                        let:slotName
+                      >
+                        {#if slotName === 'columnId'}
+                          <Identifier>{column.id}</Identifier>
+                        {:else if slotName === 'columnName'}
+                          <Identifier>{column.name}</Identifier>
+                        {/if}
+                      </RichText>
                     </li>
                   {/each}
                 </ul>
@@ -137,7 +145,7 @@
           {form}
           onProceed={save}
           onCancel={form.reset}
-          proceedButton={{ label: 'Save' }}
+          proceedButton={{ label: $_('save') }}
           initiallyHidden
           size="small"
         />
@@ -145,7 +153,7 @@
     {/if}
 
     {#if showNullState}
-      <span class="null-text">No record summary available.</span>
+      <span class="null-text">{$_('no_record_summary_available')}</span>
     {/if}
   {/if}
 </div>

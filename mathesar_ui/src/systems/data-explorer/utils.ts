@@ -418,9 +418,8 @@ export function speculateColumnMetaData({
     summarizationTransformsWithoutMetaData.forEach((transform) => {
       [...transform.groups.values()].forEach((group) => {
         if (!updatedColumnsMetaData.has(group.outputAlias)) {
-          const inputColumn = updatedColumnsMetaData.get(
-            group.inputAlias,
-          )?.column;
+          const inputColumn = updatedColumnsMetaData.get(group.inputAlias)
+            ?.column;
           updatedColumnsMetaData = updatedColumnsMetaData.with(
             group.outputAlias,
             processColumn(

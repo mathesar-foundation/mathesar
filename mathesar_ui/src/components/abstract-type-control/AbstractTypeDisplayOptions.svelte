@@ -17,14 +17,11 @@
   export let displayFormValues: Readable<FormValues>;
   export let disabled = false;
 
-  let displayFormHasError = false;
-
   const validationContext = getValidationContext();
   validationContext.addValidator('AbstractTypeConfigValidator', () => {
     let isValid = true;
     if (displayForm) {
       const isDisplayFormValid = displayForm.getValidationResult().isValid;
-      displayFormHasError = !isDisplayFormValid;
       isValid = isValid && isDisplayFormValid;
     }
     return isValid;

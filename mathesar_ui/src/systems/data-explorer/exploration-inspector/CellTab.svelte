@@ -7,7 +7,7 @@
    * duplication at some point. In the mean time, be mindful of propagating
    * changes to both files as necessary.
    */
-
+  import { _ } from 'svelte-i18n';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import type QueryRunner from '../QueryRunner';
 
@@ -43,7 +43,7 @@
 >
   {#if selectedCellValue !== undefined}
     <section class="cell-content">
-      <header>Content</header>
+      <header>{$_('content')}</header>
       <div class="content">
         {#if processedQueryColumn}
           <CellFabric
@@ -56,7 +56,7 @@
       </div>
     </section>
   {:else}
-    Select a cell to view it's properties.
+    {$_('select_cell_view_properties')}
   {/if}
 </div>
 

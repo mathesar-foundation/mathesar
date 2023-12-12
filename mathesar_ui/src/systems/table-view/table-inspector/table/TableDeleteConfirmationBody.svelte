@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { TextInput } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { TextInput } from '@mathesar-component-library';
+  import { RichText } from '@mathesar/components/rich-text';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { confirmationController } from '@mathesar/stores/confirmation';
 
@@ -7,19 +9,21 @@
 
   let value = '';
 
-  let { canProceed } = confirmationController;
+  const { canProceed } = confirmationController;
   $: $canProceed = value.trim().toLowerCase() === tableName.toLowerCase();
 </script>
 
 <div class="table-delete-confirmation-body">
   <p>
-    To confirm the deletion of the <strong>{tableName}</strong> table, please enter
-    the table name into the input field below.
+    <RichText text={$_('confirm_delete_table')} let:slotName>
+      {#if slotName === 'tableName'}
+        <strong>{tableName}</strong>
+      {/if}
+    </RichText>
   </p>
   <TextInput autofocus bind:value />
   <WarningBox>
-    Warning: This action is permanent and once deleted, the table cannot be
-    recovered.
+    {$_('table_delete_permanent_warning')}
   </WarningBox>
 </div>
 

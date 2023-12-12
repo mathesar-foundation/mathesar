@@ -1,5 +1,6 @@
 import json
 import pytest
+from sqlalchemy import text
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -9,6 +10,7 @@ from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from db.records.operations.sort import BadSortFormat, SortFieldNotFound
 
+from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
@@ -318,6 +320,51 @@ def test_record_search(create_patents_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1
     assert len(response_data['results']) == 1
+
+
+def test_record_search_invalid_date(create_patents_table, client):
+    table_name = 'NASA Record Invalid Date'
+    table = create_patents_table(table_name)
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
+    column_attnum = table.columns.get(id=column_id_with_date_type).attnum
+    table.alter_column(column_attnum, {'type': 'date'})
+    search_columns = [
+        {'field': columns_name_id_map['Patent Expiration Date'], 'literal': '99/99/9999'},
+    ]
+
+    json_search_fuzzy = json.dumps(search_columns)
+
+    response = client.get(
+        f'/api/db/v0/tables/{table.id}/records/?search_fuzzy={json_search_fuzzy}'
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.InvalidDateError.value
+    assert response_data[0]['message'] == 'Invalid date'
+
+
+def test_record_search_invalid_date_format(create_patents_table, client):
+    table_name = 'NASA Record Invalid Date Format'
+    table = create_patents_table(table_name)
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_id_with_date_type = table.get_column_name_id_bidirectional_map()['Patent Expiration Date']
+    column_attnum = table.columns.get(id=column_id_with_date_type).attnum
+    table.alter_column(column_attnum, {'type': 'date'})
+    search_columns = [
+        {'field': columns_name_id_map['Patent Expiration Date'], 'literal': '12/31'},
+    ]
+
+    json_search_fuzzy = json.dumps(search_columns)
+
+    response = client.get(
+        f'/api/db/v0/tables/{table.id}/records/?search_fuzzy={json_search_fuzzy}'
+    )
+    response_data = response.json()
+
+    assert response.status_code == 400
+    assert response_data[0]['code'] == ErrorCodes.InvalidDateFormatError.value
+    assert response_data[0]['message'] == 'Invalid date format'
 
 
 grouping_params = [
@@ -1464,3 +1511,58 @@ def test_record_patch_unique_violation(create_patents_table, client):
         f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/'
     ).json()
     assert actual_constraint_details['name'] == 'NASA unique record PATCH_pkey'
+
+
+def test_record_post_exclusion_violation(reservations_table, engine, client):
+    table_name = 'Exclusion test post'
+    table = reservations_table(table_name)
+    room_number_column_id = table.get_column_name_id_bidirectional_map()['room_number']
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    query = text(
+        f"""CREATE EXTENSION IF NOT EXISTS btree_gist;
+        ALTER TABLE "Reservations"."{table_name}" DROP CONSTRAINT IF EXISTS room_overlap;
+        ALTER TABLE "Reservations"."{table_name}"
+        ADD CONSTRAINT room_overlap
+        EXCLUDE USING gist
+        ("room_number" WITH =, TSRANGE("check_in_date", "check_out_date", '[]') WITH &&);"""
+    )
+    with engine.begin() as conn:
+        conn.execute(query)
+    reset_reflection(db_name=table.schema.database.name)
+    response = client.post(f'/api/db/v0/tables/{table.id}/records/', data={
+        str(columns_name_id_map['id']): 3,
+        str(columns_name_id_map['room_number']): 1,
+        str(columns_name_id_map['check_in_date']): '11/12/2023',
+        str(columns_name_id_map['check_out_date']): '11/21/2023',
+    })
+    actual_exception = response.json()[0]
+    assert actual_exception['code'] == ErrorCodes.ExclusionViolation.value
+    assert actual_exception['message'] == 'The requested update violates an exclusion constraint'
+    assert actual_exception['detail']['constraint_columns'] == [room_number_column_id]
+
+
+def test_record_patch_exclusion_violation(reservations_table, engine, client):
+    table_name = 'Exclusion test patch'
+    table = reservations_table(table_name)
+    room_number_column_id = table.get_column_name_id_bidirectional_map()['room_number']
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    query = text(
+        f"""CREATE EXTENSION IF NOT EXISTS btree_gist;
+        ALTER TABLE "Reservations"."{table_name}" DROP CONSTRAINT IF EXISTS room_overlap;
+        ALTER TABLE "Reservations"."{table_name}"
+        ADD CONSTRAINT room_overlap
+        EXCLUDE USING gist
+        ("room_number" WITH =, TSRANGE("check_in_date", "check_out_date", '[]') WITH &&);"""
+    )
+    with engine.begin() as conn:
+        conn.execute(query)
+    reset_reflection(db_name=table.schema.database.name)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}/', data={
+        str(columns_name_id_map['room_number']): 1,
+        str(columns_name_id_map['check_in_date']): '11/12/2023',
+        str(columns_name_id_map['check_out_date']): '11/21/2023',
+    })
+    actual_exception = response.json()[0]
+    assert actual_exception['code'] == ErrorCodes.ExclusionViolation.value
+    assert actual_exception['message'] == 'The requested update violates an exclusion constraint'
+    assert actual_exception['detail']['constraint_columns'] == [room_number_column_id]

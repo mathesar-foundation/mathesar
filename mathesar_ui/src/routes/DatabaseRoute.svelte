@@ -5,31 +5,35 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import { currentDBName, databases } from '@mathesar/stores/databases';
+  import { connectionsStore } from '@mathesar/stores/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import SchemaRoute from './SchemaRoute.svelte';
 
   export let databaseName: string;
 
-  $: $currentDBName = databaseName;
-  $: database = $databases.data?.find((db) => db.nickname === databaseName);
+  $: connectionsStore.setCurrentConnectionName(databaseName);
+  $: ({ connections } = connectionsStore);
+  $: connection = $connections?.find((conn) => conn.nickname === databaseName);
 
   function handleUnmount() {
-    $currentDBName = undefined;
+    connectionsStore.clearCurrentConnectionName();
   }
 
   onMount(() => handleUnmount);
 </script>
 
-{#if database}
-  <AppendBreadcrumb item={{ type: 'database', database }} />
+{#if connection}
+  <AppendBreadcrumb item={{ type: 'database', database: connection }} />
 
   <Route path="/">
-    <DatabasePage {database} />
+    <DatabasePage database={connection} />
   </Route>
 
   <Route path="/:schemaId/*" let:meta firstmatch>
-    <SchemaRoute {database} schemaId={parseInt(meta.params.schemaId, 10)} />
+    <SchemaRoute
+      database={connection}
+      schemaId={parseInt(meta.params.schemaId, 10)}
+    />
   </Route>
 {:else}
   <ErrorPage>
