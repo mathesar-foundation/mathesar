@@ -1,8 +1,11 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import { CancelOrProceedButtonPair } from '@mathesar/component-library';
-  import LabeledInput from '@mathesar/component-library/labeled-input/LabeledInput.svelte';
-  import Radio from '@mathesar/component-library/radio/Radio.svelte';
+  import {
+    CancelOrProceedButtonPair,
+    LabeledInput,
+    Radio,
+  } from '@mathesar-component-library';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import {
     getTabularDataStoreFromContext,
@@ -57,7 +60,7 @@
       const message =
         err instanceof Error
           ? err.message
-          : 'Unable to change column display options.';
+          : $_('unable_to_change_display_options');
       toast.error(message);
       typeChangeState = { state: 'failure', errors: [message] };
     }
@@ -87,11 +90,11 @@
 
 <div class="default-value-container">
   <LabeledInput layout="inline-input-first">
-    <span slot="label"> No Default Value </span>
+    <span slot="label">{$_('no_default_value')}</span>
     <Radio checked={isDefaultNull} on:change={toggleNoDefault} />
   </LabeledInput>
   <LabeledInput layout="inline-input-first">
-    <span slot="label"> Custom default </span>
+    <span slot="label">{$_('custom_default')}</span>
     <Radio checked={!isDefaultNull} on:change={toggleNoDefault} />
   </LabeledInput>
   {#if !isDefaultNull}
@@ -108,7 +111,7 @@
       onProceed={save}
       onCancel={handleCancel}
       isProcessing={typeChangeState?.state === 'processing'}
-      proceedButton={{ label: 'Save' }}
+      proceedButton={{ label: $_('save') }}
       size="small"
     />
   {/if}

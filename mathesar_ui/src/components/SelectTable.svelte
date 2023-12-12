@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Select } from '@mathesar-component-library';
   import type { SelectProps } from '@mathesar-component-library/types';
   import type { TableEntry } from '@mathesar/api/types/tables';
@@ -28,7 +29,7 @@
     <TableName table={option} />
   {:else if !prependBlank}
     <span class="placeholder">
-      <TableName table={{ name: 'Select Table' }} />
+      <TableName table={{ name: $_('select_table') }} />
     </span>
   {/if}
 </Select>
