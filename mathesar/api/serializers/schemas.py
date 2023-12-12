@@ -1,4 +1,4 @@
-from rest_access_policy import PermittedSlugRelatedField
+from rest_access_policy import PermittedPkRelatedField
 from rest_framework import serializers
 
 from db.identifiers import is_identifier_too_long
@@ -15,11 +15,10 @@ from mathesar.api.exceptions.database_exceptions import (
 class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     name = serializers.CharField()
     # Restrict access to databases with create access.
-    # Unlike PermittedPkRelatedField this field uses a slug instead of an id
     # Refer https://rsinger86.github.io/drf-access-policy/policy_reuse/
-    database = PermittedSlugRelatedField(
+    connection_id = PermittedPkRelatedField(
+        source='database',
         access_policy=DatabaseAccessPolicy,
-        slug_field='name',
         queryset=Database.current_objects.all()
     )
     description = serializers.CharField(
@@ -31,7 +30,7 @@ class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSe
     class Meta:
         model = Schema
         fields = [
-            'id', 'name', 'database', 'has_dependents', 'description',
+            'id', 'name', 'connection_id', 'has_dependents', 'description',
             'num_tables', 'num_queries'
         ]
 
