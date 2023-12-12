@@ -14,7 +14,7 @@ def copy_connection_from_preexisting(
         db_model = Database.current_objects.get(id=connection['id'])
         db_model.id = None
     else:
-        raise KeyError
+        raise KeyError("connection")
     root_db = db_model.db_name
     return _save_and_install(
         db_model, db_name, root_db, nickname, create_db, sample_data
@@ -82,6 +82,11 @@ def _load_sample_data(engine, sample_data):
     reset_reflection()
 
 
+class BadInstallationTarget(Exception):
+    """Raise when an attempt is made to install on a disallowed target"""
+    pass
+
+
 def _validate_db_model(db_model):
     internal_db_model = Database.create_from_settings_key('default')
     if (
@@ -90,6 +95,6 @@ def _validate_db_model(db_model):
             and db_model.port == internal_db_model.port
             and db_model.db_name == internal_db_model.db_name
     ):
-        raise Exception(
+        raise BadInstallationTarget(
             "Mathesar can't be installed in the internal DB namespace"
         )

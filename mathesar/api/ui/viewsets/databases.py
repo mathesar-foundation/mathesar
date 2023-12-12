@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from mathesar.api.ui.permissions.ui_database import UIDatabaseAccessPolicy
 from mathesar.models.base import Database
 from mathesar.api.dj_filters import DatabaseFilter
+from mathesar.api.exceptions.validation_exceptions.exceptions import DictHasBadKeys
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
 from mathesar.api.serializers.databases import ConnectionSerializer, TypeSerializer
@@ -55,13 +56,19 @@ class ConnectionViewSet(
 
     @action(methods=['post'], detail=False, serializer_class=serializers.Serializer)
     def create_from_known_connection(self, request):
-        created_connection = copy_connection_from_preexisting(
-            request.data['credentials']['connection'],
-            request.data['nickname'],
-            request.data['database_name'],
-            request.data.get('create_database', False),
-            request.data.get('sample_data', []),
-        )
+        try:
+            created_connection = copy_connection_from_preexisting(
+                request.data['credentials']['connection'],
+                request.data['nickname'],
+                request.data['database_name'],
+                request.data.get('create_database', False),
+                request.data.get('sample_data', []),
+            )
+        except KeyError as e:
+            raise DictHasBadKeys(
+                message="Required key missing",
+                field=e.args[0]
+            )
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )
@@ -69,16 +76,22 @@ class ConnectionViewSet(
 
     @action(methods=['post'], detail=False, serializer_class=serializers.Serializer)
     def create_from_scratch(self, request):
-        credentials = request.data['credentials']
-        created_connection = create_connection_from_scratch(
-            credentials['user'],
-            credentials['password'],
-            credentials['host'],
-            credentials['port'],
-            request.data['nickname'],
-            request.data['database_name'],
-            request.data.get('sample_data', []),
-        )
+        try:
+            credentials = request.data['credentials']
+            created_connection = create_connection_from_scratch(
+                credentials['user'],
+                credentials['password'],
+                credentials['host'],
+                credentials['port'],
+                request.data['nickname'],
+                request.data['database_name'],
+                request.data.get('sample_data', []),
+            )
+        except KeyError as e:
+            raise DictHasBadKeys(
+                message="Required key missing",
+                field=e.args[0]
+            )
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )
@@ -86,16 +99,22 @@ class ConnectionViewSet(
 
     @action(methods=['post'], detail=False, serializer_class=serializers.Serializer)
     def create_with_new_user(self, request):
-        credentials = request.data['credentials']
-        created_connection = create_connection_with_new_user(
-            credentials['create_user_via'],
-            credentials['user'],
-            credentials['password'],
-            request.data['nickname'],
-            request.data['database_name'],
-            request.data.get('create_database', False),
-            request.data.get('sample_data', []),
-        )
+        try:
+            credentials = request.data['credentials']
+            created_connection = create_connection_with_new_user(
+                credentials['create_user_via'],
+                credentials['user'],
+                credentials['password'],
+                request.data['nickname'],
+                request.data['database_name'],
+                request.data.get('create_database', False),
+                request.data.get('sample_data', []),
+            )
+        except KeyError as e:
+            raise DictHasBadKeys(
+                message="Required key missing",
+                field=e.args[0]
+            )
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )
