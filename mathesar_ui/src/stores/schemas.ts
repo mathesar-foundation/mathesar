@@ -23,7 +23,7 @@ export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
   writable(commonData?.current_schema ?? undefined);
 
 export interface DBSchemaStoreData {
-  requestStatus:RequestStatus;
+  requestStatus: RequestStatus;
   data: Map<SchemaEntry['id'], SchemaEntry>;
 }
 
@@ -51,7 +51,7 @@ function setDBSchemaStore(
     schemaMap.set(schema.id, schema);
   });
   const storeValue: DBSchemaStoreData = {
-    requestStatus:{state:"success"},
+    requestStatus: { state: 'success' },
     data: schemaMap,
   };
 
@@ -150,7 +150,7 @@ export async function refetchSchemasForDB(
   try {
     store.update((currentData) => ({
       ...currentData,
-      requestStatus: {state:"processing"},
+      requestStatus: { state: 'processing' },
     }));
 
     dbSchemasRequestMap.get(database)?.cancel();
@@ -168,7 +168,12 @@ export async function refetchSchemasForDB(
   } catch (err) {
     store.update((currentData) => ({
       ...currentData,
-      requestStatus: {state:"failure",errors:[err instanceof Error ? err.message : 'Error in fetching schemas',]}
+      requestStatus: {
+        state: 'failure',
+        errors: [
+          err instanceof Error ? err.message : 'Error in fetching schemas',
+        ],
+      },
     }));
     return undefined;
   }
@@ -206,7 +211,7 @@ export function getSchemasStoreForDB(
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
     store = writable({
-      requestStatus:{state:"processing"},
+      requestStatus: { state: 'processing' },
       data: new Map(),
     });
     dbSchemaStoreMap.set(database, store);
@@ -216,7 +221,7 @@ export function getSchemasStoreForDB(
       void refetchSchemasForDB(database);
     }
     preload = false;
-  } else if (get(store).requestStatus.state === "failure") {
+  } else if (get(store).requestStatus.state === 'failure') {
     void refetchSchemasForDB(database);
   }
   return store;
@@ -275,7 +280,7 @@ export const schemas: Readable<DBSchemaStoreData> = derived(
 
     if (!$currentConnectionName) {
       set({
-        requestStatus:{state:"success"},
+        requestStatus: { state: 'success' },
         data: new Map(),
       });
     } else {
