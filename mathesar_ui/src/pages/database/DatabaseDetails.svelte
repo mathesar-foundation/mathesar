@@ -41,6 +41,7 @@
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
+  import SchemaListSkeleton from './SchemaListSkeleton.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
@@ -53,6 +54,7 @@
   export let database: Database;
 
   $: schemasMap = $schemasStore.data;
+  $: schemasRequestStatus = $schemasStore.requestStatus;
 
   $: canExecuteDDL = userProfile?.hasPermission({ database }, 'canExecuteDDL');
   $: canEditPermissions = userProfile?.hasPermission(
@@ -214,20 +216,25 @@
       <strong>{filterQuery}</strong>
     </p>
     <ul class="schema-list" slot="content">
-      {#each displayList as schema (schema.id)}
-        <li class="schema-list-item">
-          <SchemaRow
-            {database}
-            {schema}
-            canExecuteDDL={userProfile?.hasPermission(
-              { database, schema },
-              'canExecuteDDL',
-            )}
-            on:edit={() => editSchema(schema)}
-            on:delete={() => deleteSchema(schema)}
-          />
-        </li>
-      {/each}
+      {#if schemasRequestStatus.state === 'processing'}
+        <SchemaListSkeleton />
+      {/if}
+      {#if schemasRequestStatus.state === 'success'}
+        {#each displayList as schema (schema.id)}
+          <li class="schema-list-item">
+            <SchemaRow
+              {database}
+              {schema}
+              canExecuteDDL={userProfile?.hasPermission(
+                { database, schema },
+                'canExecuteDDL',
+              )}
+              on:edit={() => editSchema(schema)}
+              on:delete={() => deleteSchema(schema)}
+            />
+          </li>
+        {/each}
+      {/if}
     </ul>
   </EntityContainerWithFilterBar>
 </div>
