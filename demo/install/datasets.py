@@ -27,6 +27,11 @@ def load_library_dataset(engine, safe_mode=False):
     """
     Load the library dataset into a "Library Management" schema.
 
+    Args:
+        engine: an SQLAlchemy engine defining the connection to load data into.
+        safe_mode: When True, we will throw an error if the "Library Management"
+                   schema already exists instead of dropping it.
+
     Uses given engine to define database to load into.
     Destructive, and will knock out any previous "Library Management"
     schema in the given database.
@@ -44,7 +49,15 @@ def load_library_dataset(engine, safe_mode=False):
 
 
 def load_movies_dataset(engine, safe_mode=False):
-    """Load the movie demo data set."""
+    """
+    Load the movie demo data set.
+
+    Args:
+        engine: an SQLAlchemy engine defining the connection to load data into.
+        safe_mode: When True, we will throw an error if the "Movie Collection"
+                   schema already exists instead of dropping it.
+    """
+
     drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MOVIE_COLLECTION}" CASCADE;""")
     create_schema_query = text(f"""CREATE SCHEMA "{MOVIE_COLLECTION}";""")
     set_search_path = text(f"""SET search_path="{MOVIE_COLLECTION}";""")
