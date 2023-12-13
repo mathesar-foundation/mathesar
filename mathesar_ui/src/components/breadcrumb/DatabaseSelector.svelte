@@ -7,19 +7,17 @@
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
-  const { connections, currentConnectionName } = connectionsStore;
+  const { connections, currentConnectionId } = connectionsStore;
 
   function makeBreadcrumbSelectorItem(
-    connectionEntry: Connection,
+    connection: Connection,
   ): BreadcrumbSelectorEntry {
     return {
       type: 'simple',
-      label: connectionEntry.nickname,
-      href: getDatabasePageUrl(connectionEntry.nickname),
+      label: connection.nickname,
+      href: getDatabasePageUrl(connection.id),
       icon: iconDatabase,
-      isActive() {
-        return connectionEntry.nickname === $currentConnectionName;
-      },
+      isActive: () => connection.id === $currentConnectionId,
     };
   }
 </script>

@@ -60,10 +60,7 @@
     isCreatingNewEmptyTable = true;
     const tableInfo = await createTable(database, schema, {});
     isCreatingNewEmptyTable = false;
-    router.goto(
-      getTablePageUrl(database.nickname, schema.id, tableInfo.id),
-      false,
-    );
+    router.goto(getTablePageUrl(database.id, schema.id, tableInfo.id), false);
   }
 </script>
 
@@ -91,14 +88,14 @@
             </ButtonMenuItem>
             <LinkMenuItem
               icon={iconAddNew}
-              href={getImportPageUrl(database.nickname, schema.id)}
+              href={getImportPageUrl(database.id, schema.id)}
             >
               {$_('new_table_from_data_import')}
             </LinkMenuItem>
           {/if}
           <LinkMenuItem
             icon={iconExploration}
-            href={getDataExplorerPageUrl(database.nickname, schema.id)}
+            href={getDataExplorerPageUrl(database.id, schema.id)}
           >
             {$_('open_data_explorer')}
           </LinkMenuItem>
@@ -118,7 +115,7 @@
             <MenuHeading>{$_('database')}</MenuHeading>
             <LinkMenuItem
               icon={iconDatabase}
-              href={getDatabasePageUrl(database.nickname)}
+              href={getDatabasePageUrl(database.id)}
             >
               {database.nickname}
             </LinkMenuItem>

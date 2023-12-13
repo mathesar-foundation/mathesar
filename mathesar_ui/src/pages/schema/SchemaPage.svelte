@@ -64,19 +64,19 @@
     {
       label: 'Overview',
       id: 'overview',
-      href: getSchemaPageUrl(database.nickname, schema.id),
+      href: getSchemaPageUrl(database.id, schema.id),
     },
     {
       label: 'Tables',
       id: 'tables',
       count: tablesMap.size,
-      href: getSchemaPageTablesSectionUrl(database.nickname, schema.id),
+      href: getSchemaPageTablesSectionUrl(database.id, schema.id),
     },
     {
       label: 'Explorations',
       id: 'explorations',
       count: explorationsMap.size,
-      href: getSchemaPageExplorationsSectionUrl(database.nickname, schema.id),
+      href: getSchemaPageExplorationsSectionUrl(database.id, schema.id),
     },
   ] as TabItem[];
 
