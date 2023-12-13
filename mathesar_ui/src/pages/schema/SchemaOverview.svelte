@@ -122,9 +122,7 @@
           Explorations let you query your data to uncover trends and insights.
         </span>
         <div>
-          <AnchorButton
-            href={getDataExplorerPageUrl(database.id, schema.id)}
-          >
+          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
             Open Data Explorer
           </AnchorButton>
         </div>
