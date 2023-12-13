@@ -899,10 +899,18 @@ class PreviewColumnSettings(BaseModel):
     template = models.CharField(max_length=255)
 
 
+def validate_column_order(value):
+    """
+    Custom validator to ensure that all elements in the list are positive integers.
+    """
+    if not all(isinstance(item, int) and item > 0 for item in value):
+        raise ValidationError("All elements of column order must be positive integers.")
+
+
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = column_order = ArrayField(models.PositiveIntegerField(), null=True, default=None)
+    column_order = column_order = ArrayField(models.PositiveIntegerField(), null=True, default=None, validators=[validate_column_order])
 
 
 def _create_table_settings(tables):
