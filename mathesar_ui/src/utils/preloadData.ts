@@ -9,7 +9,7 @@ export interface CommonData {
   schemas: SchemaResponse[];
   tables: TableEntry[];
   queries: QueryInstance[];
-  current_db_connection: string;
+  current_connection: Connection['id'] | null;
   internal_db_connection: {
     database: Connection['database'];
     host: Connection['host'];

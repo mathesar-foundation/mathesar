@@ -22,7 +22,7 @@
       <CreateEmptyTableButton class="padding-zero" {database} {schema}>
         <span>From Scratch</span>
       </CreateEmptyTableButton>
-      <AnchorButton href={getImportPageUrl(database.nickname, schema.id)}>
+      <AnchorButton href={getImportPageUrl(database.id, schema.id)}>
         Import from a File
       </AnchorButton>
     </div>
