@@ -154,6 +154,7 @@ class UnsupportedInstallationDatabase(MathesarValidationException):
     def __init__(
             self,
             message=None,
+            field=None,
     ):
         if message is None:
             message = "Installing on the internal database isn't allowed."
