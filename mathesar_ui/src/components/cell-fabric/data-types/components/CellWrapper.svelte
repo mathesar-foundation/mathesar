@@ -158,7 +158,9 @@
 
     &.is-edit-mode {
       padding: 0px;
-      box-shadow: 0 0 0 3px var(--sky-700), 0 0 8px #000000 !important;
+      box-shadow:
+        0 0 0 3px var(--sky-700),
+        0 0 8px #000000 !important;
     }
 
     &.truncate {
