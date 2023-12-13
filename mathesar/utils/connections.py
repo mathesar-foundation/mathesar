@@ -14,7 +14,7 @@ def copy_connection_from_preexisting(
         db_model = Database.current_objects.get(id=connection['id'])
         db_model.id = None
     else:
-        raise KeyError("connection")
+        raise KeyError("connection_type")
     root_db = db_model.db_name
     return _save_and_install(
         db_model, db_name, root_db, nickname, create_db, sample_data

@@ -9,7 +9,9 @@ from rest_framework.response import Response
 from mathesar.api.ui.permissions.ui_database import UIDatabaseAccessPolicy
 from mathesar.models.base import Database
 from mathesar.api.dj_filters import DatabaseFilter
-from mathesar.api.exceptions.validation_exceptions.exceptions import DictHasBadKeys
+from mathesar.api.exceptions.validation_exceptions.exceptions import (
+    DictHasBadKeys, UnsupportedInstallationDatabase
+)
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
 from mathesar.api.serializers.databases import ConnectionSerializer, TypeSerializer
@@ -18,7 +20,7 @@ from mathesar.api.serializers.filters import FilterSerializer
 from mathesar.filters.base import get_available_filters
 from mathesar.utils.connections import (
     copy_connection_from_preexisting, create_connection_from_scratch,
-    create_connection_with_new_user
+    create_connection_with_new_user, BadInstallationTarget
 )
 
 
@@ -66,9 +68,10 @@ class ConnectionViewSet(
             )
         except KeyError as e:
             raise DictHasBadKeys(
-                message="Required key missing",
                 field=e.args[0]
             )
+        except BadInstallationTarget:
+            raise UnsupportedInstallationDatabase()
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )
@@ -92,6 +95,8 @@ class ConnectionViewSet(
                 message="Required key missing",
                 field=e.args[0]
             )
+        except BadInstallationTarget:
+            raise UnsupportedInstallationDatabase()
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )
@@ -115,6 +120,8 @@ class ConnectionViewSet(
                 message="Required key missing",
                 field=e.args[0]
             )
+        except BadInstallationTarget:
+            raise UnsupportedInstallationDatabase()
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )

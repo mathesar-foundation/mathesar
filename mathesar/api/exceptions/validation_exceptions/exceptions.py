@@ -148,6 +148,18 @@ class DictHasBadKeys(MathesarValidationException):
         super().__init__(None, self.error_code, message, field, None)
 
 
+class UnsupportedInstallationDatabase(MathesarValidationException):
+    error_code = ErrorCodes.UnsupportedInstallationDatabase.value
+
+    def __init__(
+            self,
+            message=None,
+    ):
+        if message is None:
+            message = "Installing on the internal database isn't allowed."
+        super().__init__(None, self.error_code, message, field, None)
+
+
 class InvalidTableName(MathesarValidationException):
     error_code = ErrorCodes.InvalidTableName.value
 
