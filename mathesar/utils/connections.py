@@ -1,8 +1,14 @@
 """Utilities to help with creating and managing connections in Mathesar."""
+from psycopg2.errors import DuplicateSchema
 from mathesar.models.base import Database
 from db import install, connection as dbconn
 from mathesar.state import reset_reflection
 from demo.install.datasets import load_library_dataset, load_movies_dataset
+
+
+class BadInstallationTarget(Exception):
+    """Raise when an attempt is made to install on a disallowed target"""
+    pass
 
 
 def copy_connection_from_preexisting(
@@ -78,13 +84,13 @@ def _load_sample_data(engine, sample_data):
         'movie_collection': load_movies_dataset,
     }
     for key in sample_data:
-        DATASET_MAP[key](engine, safe_mode=True)
+        try:
+            DATASET_MAP[key](engine, safe_mode=True)
+        except DuplicateSchema:
+            # We swallow this error, since otherwise we'll raise an error on the
+            # front end even though installation generally succeeded.
+            continue
     reset_reflection()
-
-
-class BadInstallationTarget(Exception):
-    """Raise when an attempt is made to install on a disallowed target"""
-    pass
 
 
 def _validate_db_model(db_model):
