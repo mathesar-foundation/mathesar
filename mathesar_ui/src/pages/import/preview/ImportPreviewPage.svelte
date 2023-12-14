@@ -22,7 +22,7 @@
   export let useColumnTypeInference = false;
 
   function redirectToTablePage() {
-    router.goto(getTablePageUrl(database.name, schema.id, tableId));
+    router.goto(getTablePageUrl(database.id, schema.id, tableId));
   }
 
   $: void (async () => {

@@ -2,10 +2,12 @@
   import { Skeleton } from '@mathesar/component-library';
 
   export let numTables = 9;
+
+  $: skeletons = Array.from({ length: numTables }, (x, i) => i);
 </script>
 
 <div class="table-skeleton-container">
-  {#each Array(numTables) as _, index (index)}
+  {#each skeletons as _ (_)}
     <div class="table-skeleton">
       <Skeleton loading={true} />
     </div>

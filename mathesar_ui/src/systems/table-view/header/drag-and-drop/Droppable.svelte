@@ -10,6 +10,8 @@
   $: draggedOverRight = columnLocationDifference < 0;
   $: draggedOverLeft = columnLocationDifference > 0;
 
+  let isDraggedOverCounter = 0;
+
   // Needs to be a counter because dragEnter and dragLeave are fired for child elements
   function dragEnter(e: DragEvent) {
     e.preventDefault();
@@ -20,16 +22,9 @@
     isDraggedOverCounter -= 1;
   }
 
-  function shouldReset(
-    locationOfFirstDraggedColumnParam: number | undefined,
-  ): number {
-    if (locationOfFirstDraggedColumnParam === undefined) {
-      return 0;
-    }
-    return isDraggedOverCounter;
+  $: if (locationOfFirstDraggedColumn === undefined) {
+    isDraggedOverCounter = 0;
   }
-
-  $: isDraggedOverCounter = shouldReset(locationOfFirstDraggedColumn);
 </script>
 
 <div

@@ -105,7 +105,7 @@
   }) {
     const tableId = props.table?.id ?? table.id;
     router.goto(
-      getImportPreviewPageUrl(database.name, schema.id, tableId, {
+      getImportPreviewPageUrl(database.id, schema.id, tableId, {
         useColumnTypeInference:
           props.useColumnTypeInference ?? useColumnTypeInference,
       }),
@@ -143,7 +143,7 @@
   async function cancel() {
     const response = await cancelationRequest.run({ database, schema, table });
     if (response.isOk) {
-      router.goto(getSchemaPageUrl(database.name, schema.id), true);
+      router.goto(getSchemaPageUrl(database.id, schema.id), true);
     } else {
       toast.fromError(response.error);
     }
@@ -156,7 +156,7 @@
         import_verified: true,
         columns: finalizeColumns(columns, columnPropertiesMap),
       });
-      router.goto(getTablePageUrl(database.name, schema.id, table.id), true);
+      router.goto(getTablePageUrl(database.id, schema.id, table.id), true);
     } catch (err) {
       toast.fromError(err);
     }

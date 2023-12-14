@@ -3,7 +3,7 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import { _ } from 'svelte-i18n';
   import { RichText } from '@mathesar/components/rich-text';
   import Diagram from './diagram/Diagram.svelte';
   import Pill from './LinkTablePill.svelte';
@@ -18,13 +18,13 @@
   $: checked = linkType === $field;
   $: label = (() => {
     if (linkType === 'oneToMany') {
-      return $LL.general.oneToMany();
+      return $_('one_to_many');
     }
     if (linkType === 'manyToOne') {
-      return $LL.general.manyToOne();
+      return $_('many_to_one');
     }
     if (linkType === 'manyToMany') {
-      return $LL.general.manyToMany();
+      return $_('many_to_many');
     }
     return assertExhaustive(linkType);
   })();
@@ -49,10 +49,7 @@
     </span>
     <span class="description">
       {#if linkType === 'oneToMany'}
-        <RichText
-          text={$LL.linkTypeOptions.oneToManyDescription()}
-          let:slotName
-        >
+        <RichText text={$_('one_to_many_link_desc')} let:slotName>
           {#if slotName === 'baseTable'}
             <Pill table={base} which="base" />
           {:else if slotName === 'targetTable'}
@@ -60,10 +57,7 @@
           {/if}
         </RichText>
       {:else if linkType === 'manyToOne'}
-        <RichText
-          text={$LL.linkTypeOptions.manyToOneDescription()}
-          let:slotName
-        >
+        <RichText text={$_('many_to_one_link_description')} let:slotName>
           {#if slotName === 'baseTable'}
             <Pill table={base} which="base" />
           {:else if slotName === 'targetTable'}
@@ -73,32 +67,23 @@
       {:else if linkType === 'manyToMany'}
         {#if isSelfReferential}
           <RichText
-            text={$LL.linkTypeOptions.manyToManySelfReferential()}
+            text={$_('many_to_many_self_referential_link_description')}
             let:slotName
           >
             {#if slotName === 'baseTable'}
               <Pill table={base} which="base" />
             {:else if slotName === 'mappingTable'}
-              <Pill
-                table={{ name: $LL.general.linkingTable() }}
-                which="mapping"
-              />
+              <Pill table={{ name: $_('linking_table') }} which="mapping" />
             {/if}
           </RichText>
         {:else}
-          <RichText
-            text={$LL.linkTypeOptions.manyToManyDescription()}
-            let:slotName
-          >
+          <RichText text={$_('many_to_many_link_description')} let:slotName>
             {#if slotName === 'baseTable'}
               <Pill table={base} which="base" />
             {:else if slotName === 'targetTable'}
               <Pill table={target} which="target" />
             {:else if slotName === 'mappingTable'}
-              <Pill
-                table={{ name: $LL.general.linkingTable() }}
-                which="mapping"
-              />
+              <Pill table={{ name: $_('linking_table') }} which="mapping" />
             {/if}
           </RichText>
         {/if}

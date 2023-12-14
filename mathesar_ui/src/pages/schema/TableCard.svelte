@@ -42,12 +42,12 @@
 
   $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
   $: tablePageUrl = isTableImportConfirmationNeeded
-    ? getImportPreviewPageUrl(database.name, schema.id, table.id, {
+    ? getImportPreviewPageUrl(database.id, schema.id, table.id, {
         useColumnTypeInference: true,
       })
-    : getTablePageUrl(database.name, schema.id, table.id);
+    : getTablePageUrl(database.id, schema.id, table.id);
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
-    database.name,
+    database.id,
     schema.id,
     table,
   );

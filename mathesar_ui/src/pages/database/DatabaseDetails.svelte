@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     Help,
@@ -30,20 +31,20 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
-  import { reloadDatabases } from '@mathesar/stores/databases';
+  import {
+    EditConnectionModal,
+    DeleteConnectionModal,
+  } from '@mathesar/systems/connections';
+  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
   import { router } from 'tinro';
-  import { isSuccessfullyConnectedDatabase } from '@mathesar/utils/database';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
-  import ConnectionError from './ConnectionError.svelte';
-  import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
+  const editConnectionModal = modal.spawnModalController();
   const deleteConnectionModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -94,7 +95,7 @@
       identifierName: schema.name,
       body: deleteSchemaConfirmationBody,
       onProceed: async () => {
-        await deleteSchemaAPI(database.name, schema.id);
+        await deleteSchemaAPI(database.id, schema.id);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesInSchemaTablesStore(schema.id);
       },
@@ -120,16 +121,11 @@
       isReflectionRunning = false;
     }
   }
-
-  async function handleSuccessfulDeleteConnection() {
-    await reloadDatabases();
-    router.goto('/');
-  }
 </script>
 
 <AppSecondaryHeader
   pageTitleAndMetaProps={{
-    name: database.name,
+    name: database.nickname,
     type: 'database',
     icon: iconDatabase,
   }}
@@ -174,18 +170,19 @@
               </Help>
             </div>
           </ButtonMenuItem>
-          {#if database.editable && userProfile?.isSuperUser}
-            <LinkMenuItem
+          {#if userProfile?.isSuperUser}
+            <ButtonMenuItem
               icon={iconEdit}
-              href={getDatabaseConnectionEditUrl(database.name)}
+              on:click={() => editConnectionModal.open()}
             >
-              Edit Database Connection
-            </LinkMenuItem>
+              {$_('edit_connection')}
+            </ButtonMenuItem>
             <ButtonMenuItem
               icon={iconDeleteMajor}
+              danger
               on:click={() => deleteConnectionModal.open()}
             >
-              Disconnect Database
+              {$_('delete_connection')}
             </ButtonMenuItem>
           {/if}
         </DropdownMenu>
@@ -198,61 +195,57 @@
   <div class="schema-list-title-container">
     <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
   </div>
-  {#if !isSuccessfullyConnectedDatabase(database)}
-    <ConnectionError {database} />
-  {:else}
-    <EntityContainerWithFilterBar
-      searchPlaceholder="Search Schemas"
-      bind:searchQuery={filterQuery}
-      on:clear={handleClearFilterQuery}
-    >
-      <svelte:fragment slot="action">
-        {#if canExecuteDDL}
-          <Button on:click={addSchema} appearance="primary">
-            <Icon {...iconAddNew} />
-            <span>Create Schema</span>
-          </Button>
-        {/if}
-      </svelte:fragment>
-      <p slot="resultInfo">
-        {labeledCount(displayList, 'results')}
-        for all schemas matching
-        <strong>{filterQuery}</strong>
-      </p>
-      <ul class="schema-list" slot="content">
-        {#each displayList as schema (schema.id)}
-          <li class="schema-list-item">
-            <SchemaRow
-              {database}
-              {schema}
-              canExecuteDDL={userProfile?.hasPermission(
-                { database, schema },
-                'canExecuteDDL',
-              )}
-              on:edit={() => editSchema(schema)}
-              on:delete={() => deleteSchema(schema)}
-            />
-          </li>
-        {/each}
-      </ul>
-    </EntityContainerWithFilterBar>
-  {/if}
+  <EntityContainerWithFilterBar
+    searchPlaceholder="Search Schemas"
+    bind:searchQuery={filterQuery}
+    on:clear={handleClearFilterQuery}
+  >
+    <svelte:fragment slot="action">
+      {#if canExecuteDDL}
+        <Button on:click={addSchema} appearance="primary">
+          <Icon {...iconAddNew} />
+          <span>Create Schema</span>
+        </Button>
+      {/if}
+    </svelte:fragment>
+    <p slot="resultInfo">
+      {labeledCount(displayList, 'results')}
+      for all schemas matching
+      <strong>{filterQuery}</strong>
+    </p>
+    <ul class="schema-list" slot="content">
+      {#each displayList as schema (schema.id)}
+        <li class="schema-list-item">
+          <SchemaRow
+            {database}
+            {schema}
+            canExecuteDDL={userProfile?.hasPermission(
+              { database, schema },
+              'canExecuteDDL',
+            )}
+            on:edit={() => editSchema(schema)}
+            on:delete={() => deleteSchema(schema)}
+          />
+        </li>
+      {/each}
+    </ul>
+  </EntityContainerWithFilterBar>
 </div>
 
-{#if !('error' in database)}
-  <AddEditSchemaModal
-    controller={addEditModal}
-    {database}
-    schema={targetSchema}
-  />
+<AddEditSchemaModal
+  controller={addEditModal}
+  {database}
+  schema={targetSchema}
+/>
 
-  <DbAccessControlModal controller={accessControlModal} {database} />
-  <DeleteDatabaseConnectionConfirmationModal
-    controller={deleteConnectionModal}
-    {database}
-    on:success={handleSuccessfulDeleteConnection}
-  />
-{/if}
+<DbAccessControlModal controller={accessControlModal} {database} />
+
+<EditConnectionModal controller={editConnectionModal} connection={database} />
+<DeleteConnectionModal
+  controller={deleteConnectionModal}
+  connection={database}
+  on:delete={() => router.goto(CONNECTIONS_URL)}
+/>
 
 <style lang="scss">
   .schema-list-wrapper {

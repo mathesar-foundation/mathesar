@@ -1,5 +1,7 @@
 # Developer Guide
 
+This guide explains how to work with Mathesar's code. Be sure to also see our [Contributor Guide](./CONTRIBUTING.md) to learn about our collaboration workflow.
+
 ## Stack
 
 Mathesar is built using:
@@ -140,7 +142,7 @@ See our [Live demo mode](./demo/README.md) guide for more information on enablin
 - To open a PostgreSQL [psql](https://www.postgresql.org/docs/current/app-psql.html) terminal for the data in Mathesar:
 
     ```
-    docker exec -it mathesar_db psql -U mathesar
+    docker exec -it mathesar_dev_db psql -U mathesar
     ```
 
 

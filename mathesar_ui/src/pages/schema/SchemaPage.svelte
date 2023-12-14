@@ -16,7 +16,6 @@
     getSchemaPageTablesSectionUrl,
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
-  import { States } from '@mathesar/api/utils/requestUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { logEvent } from '@mathesar/utils/telemetry';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
@@ -58,26 +57,26 @@
 
   $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
-  $: isTablesLoading = $tablesStore.state === States.Loading;
-  $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
+  $: tablesRequestStatus = $tablesStore.requestStatus;
+  $: explorationsRequestStatus = $queries.requestStatus;
 
   $: tabs = [
     {
       label: 'Overview',
       id: 'overview',
-      href: getSchemaPageUrl(database.name, schema.id),
+      href: getSchemaPageUrl(database.id, schema.id),
     },
     {
       label: 'Tables',
       id: 'tables',
       count: tablesMap.size,
-      href: getSchemaPageTablesSectionUrl(database.name, schema.id),
+      href: getSchemaPageTablesSectionUrl(database.id, schema.id),
     },
     {
       label: 'Explorations',
       id: 'explorations',
       count: explorationsMap.size,
-      href: getSchemaPageExplorationsSectionUrl(database.name, schema.id),
+      href: getSchemaPageExplorationsSectionUrl(database.id, schema.id),
     },
   ] as TabItem[];
 
@@ -94,7 +93,7 @@
   }
 
   logEvent('opened_schema', {
-    database_name: database.name,
+    database_name: database.nickname,
     schema_name: schema.name,
     source: 'schema_page',
   });
@@ -132,13 +131,13 @@
       {/if}
     </div>
 
-    <slot slot="bottom">
+    <svelte:fragment slot="bottom">
       {#if schema.description}
         <span class="description">
           {schema.description}
         </span>
       {/if}
-    </slot>
+    </svelte:fragment>
   </AppSecondaryHeader>
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
@@ -153,17 +152,17 @@
         <SchemaOverview
           {canExecuteDDL}
           {canEditMetadata}
-          {isTablesLoading}
-          {isExplorationsLoading}
+          {tablesRequestStatus}
           {tablesMap}
           {explorationsMap}
           {database}
           {schema}
+          {explorationsRequestStatus}
         />
       </div>
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
-        {#if isTablesLoading}
+        {#if tablesRequestStatus.state === 'processing'}
           <TableSkeleton numTables={schema.num_tables} />
         {:else}
           <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
@@ -171,7 +170,7 @@
       </div>
     {:else if activeTab?.id === 'explorations'}
       <div class="tab-container">
-        {#if isExplorationsLoading}
+        {#if explorationsRequestStatus.state === 'processing'}
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations

@@ -13,7 +13,7 @@ import type { abstractTypeCategory } from './constants';
 
 type AbstractTypeCategoryKeys = keyof typeof abstractTypeCategory;
 export type AbstractTypeCategoryIdentifier =
-  typeof abstractTypeCategory[AbstractTypeCategoryKeys];
+  (typeof abstractTypeCategory)[AbstractTypeCategoryKeys];
 
 export interface AbstractTypeResponse {
   name: string;

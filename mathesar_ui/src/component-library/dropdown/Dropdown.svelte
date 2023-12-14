@@ -91,7 +91,7 @@
   on:close={close}
   on:open
   on:close
-  let:close
+  let:close={innerClose}
 >
-  <slot name="content" {close} />
+  <slot name="content" close={innerClose} />
 </AttachableDropdown>

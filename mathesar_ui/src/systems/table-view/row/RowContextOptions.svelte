@@ -1,9 +1,10 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ButtonMenuItem,
     iconExternalLink,
     LinkMenuItem,
-  } from '@mathesar/component-library';
+  } from '@mathesar-component-library';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -16,7 +17,6 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import { getRecordDeleteMessage } from '@mathesar/pages/record/recordHelp';
 
   export let row: RecordRow;
   export let recordPk: string;
@@ -39,13 +39,16 @@
     if (rowHasRecord(row)) {
       const selectedRowIndices = [Number(row.rowIndex)];
       void confirmDelete({
-        identifierType: 'Record',
-        body: getRecordDeleteMessage(selectedRowIndices),
+        identifierType: $_('record'),
+        body: [
+          $_('deleted_records_cannot_be_recovered', { values: { count: 1 } }),
+          $_('are_you_sure_to_proceed'),
+        ],
         onProceed: () => recordsData.deleteSelected(selectedRowIndices),
         onError: (e) => toast.fromError(e),
         onSuccess: () =>
           toast.success({
-            title: 'Record deleted successfully!',
+            title: $_('record_deleted_successfully'),
           }),
       });
     }
@@ -57,11 +60,11 @@
     href={$storeToGetRecordPageUrl({ recordId: recordPk }) || ''}
     icon={iconExternalLink}
   >
-    Go to Record Page
+    {$_('go_to_record_page')}
   </LinkMenuItem>
 {/if}
 {#if canEditTableRecords}
   <ButtonMenuItem on:click={handleDeleteRecords} icon={iconDeleteMajor}>
-    Delete Record
+    {$_('delete_records', { values: { count: 1 } })}
   </ButtonMenuItem>
 {/if}

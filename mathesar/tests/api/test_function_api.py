@@ -3,7 +3,7 @@ from mathesar.models.users import DatabaseRole
 
 def test_function_list_well_formed(client, test_db_model):
     database_id = test_db_model.id
-    response = client.get(f'/api/db/v0/databases/{database_id}/functions/')
+    response = client.get(f'/api/db/v0/connections/{database_id}/functions/')
     assert response.status_code == 200
     json_db_functions = response.json()
     assert isinstance(json_db_functions, list)
@@ -17,8 +17,8 @@ def test_function_list_well_formed(client, test_db_model):
 def test_function_list_permissions(FUN_create_dj_db, get_uid, client_bob, client_alice, user_bob, user_alice):
     database = FUN_create_dj_db(get_uid())
     DatabaseRole.objects.create(user=user_bob, database=database, role='viewer')
-    response = client_bob.get(f'/api/db/v0/databases/{database.id}/functions/')
+    response = client_bob.get(f'/api/db/v0/connections/{database.id}/functions/')
     assert response.status_code == 200
 
-    response = client_alice.get(f'/api/db/v0/databases/{database.id}/functions/')
+    response = client_alice.get(f'/api/db/v0/connections/{database.id}/functions/')
     assert response.status_code == 404

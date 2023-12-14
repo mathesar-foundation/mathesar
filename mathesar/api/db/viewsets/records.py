@@ -1,7 +1,7 @@
-from psycopg2.errors import ForeignKeyViolation, InvalidDatetimeFormat
+from psycopg2.errors import ForeignKeyViolation, InvalidDatetimeFormat, DatetimeFieldOverflow
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, MethodNotAllowed
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -108,6 +108,16 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
+            elif isinstance(e.orig, DatetimeFieldOverflow):
+                raise database_api_exceptions.InvalidDateAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                raise database_api_exceptions.MathesarAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
 
         serializer = RecordSerializer(
             records,
@@ -145,17 +155,26 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
+        primary_key_column_name = None
+        try:
+            primary_key_column_name = table.primary_key_column_name
+        except AssertionError:
+            raise generic_api_exceptions.MethodNotAllowedAPIException(
+                MethodNotAllowed,
+                error_code=ErrorCodes.MethodNotAllowed.value,
+                message="You cannot insert into tables without a primary key"
+            )
         serializer = RecordSerializer(data=request.data, context=self.get_serializer_context(table))
         serializer.is_valid(raise_exception=True)
         serializer.save()
         # TODO refactor to use serializer for more DRY response logic
         column_name_id_map = table.get_column_name_id_bidirectional_map()
-        table_pk_column_id = column_name_id_map[table.primary_key_column_name]
+        table_pk_column_id = column_name_id_map[primary_key_column_name]
         pk_value = serializer.data[table_pk_column_id]
         paginator = TableLimitOffsetPagination()
         record_filters = {
             "equal": [
-                {"column_name": [table.primary_key_column_name]},
+                {"column_name": [primary_key_column_name]},
                 {"literal": [pk_value]}
             ]
         }

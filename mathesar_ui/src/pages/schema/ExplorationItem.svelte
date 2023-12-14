@@ -16,7 +16,7 @@
 
 <a
   class="link-container"
-  href={getExplorationPageUrl(database.name, schema.id, exploration.id)}
+  href={getExplorationPageUrl(database.id, schema.id, exploration.id)}
 >
   <div class="container">
     <div class="horizontal-container name-and-icon">
