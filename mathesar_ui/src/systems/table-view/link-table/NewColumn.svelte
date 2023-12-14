@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import { Spinner } from '@mathesar-component-library';
   import { Field, type FieldStore } from '@mathesar/components/form';
+  import { RichText } from '@mathesar/components/rich-text';
   import type { ComponentProps } from 'svelte';
   import Pill from './LinkTablePill.svelte';
 
@@ -18,10 +20,13 @@
 </script>
 
 <p>
-  We'll add a column in
-  <Pill table={base} which={baseWhich} />
-  which links to
-  <Pill table={target} which={targetWhich} />.
+  <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
+    {#if slotName === 'baseTable'}
+      <Pill table={base} which={baseWhich} />
+    {:else if slotName === 'targetTable'}
+      <Pill table={target} which={targetWhich} />
+    {/if}
+  </RichText>
 </p>
 {#if targetColumnsAreLoading}
   <!--

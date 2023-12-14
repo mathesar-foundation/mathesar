@@ -49,7 +49,7 @@
   $: createQueryRunner(query, $currentDbAbstractTypes.data);
 
   function gotoSchemaPage() {
-    router.goto(getSchemaPageUrl(database.nickname, schema.id));
+    router.goto(getSchemaPageUrl(database.id, schema.id));
   }
 </script>
 

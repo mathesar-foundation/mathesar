@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { Button, Badge, Tooltip } from '@mathesar-component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { numberOfTimes } from '@mathesar/utils/languageUtils';
   import type { ColumnWithLink } from '../../utils';
 
   const dispatch = createEventDispatcher();
@@ -26,14 +26,16 @@
       />
     </div>
     <span class="add">
-      <span class="text">Add</span>
+      <span class="text">{$_('add')}</span>
       {#if usageCount > 0}
         <Tooltip>
           <Badge slot="trigger">
             {usageCount}
           </Badge>
           <svelte:fragment slot="content">
-            This column has been added {numberOfTimes(usageCount)}
+            {$_('column_added_number_of_times', {
+              values: { count: usageCount },
+            })}
           </svelte:fragment>
         </Tooltip>
       {/if}

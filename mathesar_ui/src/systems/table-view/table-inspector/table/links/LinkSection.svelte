@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Icon } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { Icon } from '@mathesar-component-library';
   import {
     iconLinksFromOtherTables,
     iconLinksInThisTable,
@@ -25,9 +26,9 @@
   $: title = (() => {
     switch (type) {
       case 'in_this_table':
-        return 'In this table';
+        return $_('in_this_table');
       case 'from_other_tables':
-        return 'From other tables';
+        return $_('from_other_tables');
       default:
         throw new MissingExhaustiveConditionError(type);
     }

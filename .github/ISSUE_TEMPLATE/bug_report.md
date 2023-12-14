@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Report an issue with Mathesar
-labels: "type: bug, status: triage"
+labels: "type: bug, needs: triage"
 ---
 
 ## Description

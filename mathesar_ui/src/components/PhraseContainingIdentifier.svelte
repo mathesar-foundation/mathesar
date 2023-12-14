@@ -1,10 +1,13 @@
 <script lang="ts">
   import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
 
   export let identifier: string;
-  export let pre: string | undefined = undefined;
-  export let post: string | undefined = undefined;
+  export let wrappingString = '';
 </script>
 
-{#if pre}<span>{pre}</span>{/if}<Identifier>{identifier}</Identifier
->{#if post}<span>{post}</span>{/if}
+<RichText text={wrappingString} let:slotName>
+  {#if slotName === 'identifier'}
+    <Identifier>{identifier}</Identifier>
+  {/if}
+</RichText>

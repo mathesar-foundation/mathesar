@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Icon } from '@mathesar/component-library';
-  import Button from '@mathesar/component-library/button/Button.svelte';
+  import { _ } from 'svelte-i18n';
+  import { Icon, Button } from '@mathesar-component-library';
   import { iconAddNew } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import LinkTableModal from '@mathesar/systems/table-view/link-table/LinkTableModal.svelte';
@@ -23,13 +23,13 @@
     <LinkSection type="from_other_tables" links={linksFromOtherTables} />
   {/if}
   {#if showNullState}
-    <span class="null-text">This table does not link to any other tables</span>
+    <span class="null-text">{$_('table_does_not_link')}</span>
   {/if}
   {#if canExecuteDDL}
     <div>
       <Button on:click={() => linkTableModal.open()} appearance="secondary">
         <Icon {...iconAddNew} />
-        <span>Create Link</span>
+        <span>{$_('create_link')}</span>
       </Button>
       <LinkTableModal controller={linkTableModal} />
     </div>

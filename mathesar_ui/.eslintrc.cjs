@@ -1,15 +1,18 @@
-const typescript = require('typescript');
-
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  ignorePatterns: ['node_modules', 'dist', 'index.html'],
+  ignorePatterns: [
+    'node_modules',
+    'dist',
+    'index.html',
+    'src/**/*.stories.svelte',
+  ],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
-    extraFileExtensions: ['.svelte', '.cjs', '.json'],
+    extraFileExtensions: ['.svelte', '.json'],
   },
-  plugins: ['svelte3', '@typescript-eslint'],
+  plugins: ['@typescript-eslint'],
   extends: [
     'airbnb-base',
     'airbnb-typescript/base',
@@ -17,6 +20,8 @@ module.exports = {
     'plugin:promise/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:svelte/recommended',
+    'plugin:svelte/prettier',
   ],
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
@@ -43,7 +48,10 @@ module.exports = {
   overrides: [
     {
       files: ['*.svelte'],
-      processor: 'svelte3/svelte3',
+      parser: 'svelte-eslint-parser',
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+      },
       rules: {
         'import/first': 'off',
         'import/no-duplicates': 'off',
@@ -76,6 +84,43 @@ module.exports = {
         '@typescript-eslint/no-unsafe-argument': 'off',
         'no-sequences': 'off',
         '@typescript-eslint/no-unused-expressions': 'off',
+        '@typescript-eslint/no-unused-vars': [
+          'warn',
+          { varsIgnorePattern: '^\\$\\$(Props|Events|Slots)$' },
+        ],
+      },
+    },
+    {
+      // Temporary block, will be merged with the base svelte override
+      // when the entire app is translated
+      files: ['src/components/**/*.svelte', 'src/systems/**/*.svelte'],
+      extends: ['plugin:@intlify/svelte/recommended'],
+      rules: {
+        '@intlify/svelte/no-raw-text': [
+          'error',
+          {
+            attributes: {
+              '/.+/': [
+                'label',
+                'triggerLabel',
+                'aria-label',
+                'title',
+                'placeholder',
+                'ariaLabel',
+              ],
+            },
+            ignoreText: [
+              'DEFAULT',
+              'Mathesar.org',
+              'NULL',
+              '*',
+              '+',
+              ':',
+              '(',
+              ')',
+            ],
+          },
+        ],
       },
     },
     {
@@ -146,10 +191,9 @@ module.exports = {
   },
   globals: {
     vi: true,
+    $$Generic: 'readonly',
   },
   settings: {
-    'svelte3/typescript': () => typescript,
-    'svelte3/ignore-styles': ({ lang }) => lang === 'scss',
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],

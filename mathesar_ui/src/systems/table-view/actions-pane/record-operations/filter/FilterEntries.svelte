@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { InputGroupText, Select } from '@mathesar-component-library';
   import {
     filterCombinations,
@@ -40,7 +41,7 @@
     recordSummaryStore={recordSummaries}
   >
     {#if index === 0}
-      <InputGroupText>where</InputGroupText>
+      <InputGroupText>{$_('where')}</InputGroupText>
     {:else if index === 1}
       <Select
         options={filterCombinations}

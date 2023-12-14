@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     getPaginationPageCount,
     Button,
@@ -9,7 +10,6 @@
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import RefreshButton from '@mathesar/components/RefreshButton.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import { labeledCount, pluralize } from '@mathesar/utils/languageUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
@@ -75,23 +75,32 @@
         size="medium"
         appearance="primary"
         on:click={() => {
-          recordsData.addEmptyRecord();
+          void recordsData.addEmptyRecord();
           selection.selectAndActivateFirstDataEntryCellInLastRow();
         }}
       >
         <Icon {...iconAddNew} />
-        <span>New Record</span>
+        <span>{$_('new_record')}</span>
       </Button>
     {/if}
     <div class="record-count">
       {#if pageCount > 0 && $totalCount}
-        Showing {leftBound} to {max}
+        {$_('showing_n_to_m_of_total_records', {
+          values: {
+            leftBound,
+            rightBound: max,
+            totalCount: $totalCount,
+          },
+        })}
         {#if $newRecords.length > 0}
-          (+ {$newRecords.length} new {pluralize($newRecords, 'records')})
+          ({$_('count_new_records', {
+            values: {
+              count: $newRecords.length,
+            },
+          })})
         {/if}
-        of {labeledCount($totalCount, 'records')}
       {:else if recordState !== States.Loading}
-        No records found
+        {$_('no_records_found')}
       {/if}
     </div>
   </div>

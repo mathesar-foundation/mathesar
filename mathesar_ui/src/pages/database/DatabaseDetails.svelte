@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     Help,
@@ -30,18 +31,20 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
-  import { reloadDatabases } from '@mathesar/stores/databases';
+  import {
+    EditConnectionModal,
+    DeleteConnectionModal,
+  } from '@mathesar/systems/connections';
+  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
   import { router } from 'tinro';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
   import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
-  import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
+  const editConnectionModal = modal.spawnModalController();
   const deleteConnectionModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -92,7 +95,7 @@
       identifierName: schema.name,
       body: deleteSchemaConfirmationBody,
       onProceed: async () => {
-        await deleteSchemaAPI(database.nickname, schema.id);
+        await deleteSchemaAPI(database.id, schema.id);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesInSchemaTablesStore(schema.id);
       },
@@ -117,11 +120,6 @@
     } finally {
       isReflectionRunning = false;
     }
-  }
-
-  async function handleSuccessfulDeleteConnection() {
-    await reloadDatabases();
-    router.goto('/');
   }
 </script>
 
@@ -173,17 +171,18 @@
             </div>
           </ButtonMenuItem>
           {#if userProfile?.isSuperUser}
-            <LinkMenuItem
+            <ButtonMenuItem
               icon={iconEdit}
-              href={getDatabaseConnectionEditUrl(database.nickname)}
+              on:click={() => editConnectionModal.open()}
             >
-              Edit Database Connection
-            </LinkMenuItem>
+              {$_('edit_connection')}
+            </ButtonMenuItem>
             <ButtonMenuItem
               icon={iconDeleteMajor}
+              danger
               on:click={() => deleteConnectionModal.open()}
             >
-              Disconnect Database
+              {$_('delete_connection')}
             </ButtonMenuItem>
           {/if}
         </DropdownMenu>
@@ -233,20 +232,20 @@
   </EntityContainerWithFilterBar>
 </div>
 
-{#if !('error' in database)}
-  <AddEditSchemaModal
-    controller={addEditModal}
-    {database}
-    schema={targetSchema}
-  />
+<AddEditSchemaModal
+  controller={addEditModal}
+  {database}
+  schema={targetSchema}
+/>
 
-  <DbAccessControlModal controller={accessControlModal} {database} />
-  <DeleteDatabaseConnectionConfirmationModal
-    controller={deleteConnectionModal}
-    {database}
-    on:success={handleSuccessfulDeleteConnection}
-  />
-{/if}
+<DbAccessControlModal controller={accessControlModal} {database} />
+
+<EditConnectionModal controller={editConnectionModal} connection={database} />
+<DeleteConnectionModal
+  controller={deleteConnectionModal}
+  connection={database}
+  on:delete={() => router.goto(CONNECTIONS_URL)}
+/>
 
 <style lang="scss">
   .schema-list-wrapper {

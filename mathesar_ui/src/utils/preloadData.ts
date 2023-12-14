@@ -1,22 +1,19 @@
-import type {
-  SchemaResponse,
-  AbstractTypeResponse,
-  Database,
-} from '@mathesar/AppTypes';
+import type { SchemaResponse, AbstractTypeResponse } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { QueryInstance } from '@mathesar/api/types/queries';
+import type { Connection } from '@mathesar/api/connections';
 import type { User } from '@mathesar/api/users';
 
 export interface CommonData {
-  connections: Database[];
+  connections: Connection[];
   schemas: SchemaResponse[];
   tables: TableEntry[];
   queries: QueryInstance[];
-  current_db_connection: string;
+  current_connection: Connection['id'] | null;
   internal_db_connection: {
-    database: Database['database'];
-    host: Database['host'];
-    port: Database['port'];
+    database: Connection['database'];
+    host: Connection['host'];
+    port: Connection['port'];
     type: string;
     user: string;
   };

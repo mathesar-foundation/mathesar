@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconSchema } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
@@ -17,7 +18,7 @@
     return {
       type: 'simple',
       label: schemaEntry.name,
-      href: getSchemaPageUrl(database.nickname, schemaEntry.id),
+      href: getSchemaPageUrl(database.id, schemaEntry.id),
       icon: iconSchema,
       isActive() {
         return schemaEntry.id === $currentSchemaId;
@@ -29,6 +30,6 @@
 </script>
 
 <BreadcrumbSelector
-  data={new Map([['Schemas', schemas.map(makeBreadcrumbSelectorItem)]])}
-  triggerLabel="Choose a Schema"
+  data={new Map([[$_('schemas'), schemas.map(makeBreadcrumbSelectorItem)]])}
+  triggerLabel={$_('choose_schema')}
 />

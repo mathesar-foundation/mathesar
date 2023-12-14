@@ -31,7 +31,7 @@
 
   export let usesVirtualList = false;
 
-  $: ({ id, display, columnsDataStore, selection } = $tabularData);
+  $: ({ id, display, columnsDataStore } = $tabularData);
   $: ({ displayableRecords } = display);
   $: ({ pkColumn } = columnsDataStore);
 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
+  import { _ } from 'svelte-i18n';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     DropdownMenu,
@@ -8,10 +9,11 @@
     LinkMenuItem,
     MenuDivider,
     MenuHeading,
+    ButtonMenuItem,
   } from '@mathesar-component-library';
-  import ButtonMenuItem from '@mathesar/component-library/menu/ButtonMenuItem.svelte';
   import {
     iconAddNew,
+    iconConnection,
     iconDatabase,
     iconExploration,
     iconLogout,
@@ -21,6 +23,7 @@
   } from '@mathesar/icons';
   import {
     ADMIN_URL,
+    CONNECTIONS_URL,
     getDatabasePageUrl,
     getDataExplorerPageUrl,
     getImportPageUrl,
@@ -57,10 +60,7 @@
     isCreatingNewEmptyTable = true;
     const tableInfo = await createTable(database, schema, {});
     isCreatingNewEmptyTable = false;
-    router.goto(
-      getTablePageUrl(database.nickname, schema.id, tableInfo.id),
-      false,
-    );
+    router.goto(getTablePageUrl(database.id, schema.id, tableInfo.id), false);
   }
 </script>
 
@@ -80,24 +80,24 @@
         >
           <span slot="trigger" class="shortcuts">
             <span class="icon"><Icon {...iconShortcuts} /></span>
-            <span class="text">Shortcuts</span>
+            <span class="text">{$_('shortcuts')}</span>
           </span>
           {#if canExecuteDDL}
             <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
-              New Table from Scratch
+              {$_('new_table_from_scratch')}
             </ButtonMenuItem>
             <LinkMenuItem
               icon={iconAddNew}
-              href={getImportPageUrl(database.nickname, schema.id)}
+              href={getImportPageUrl(database.id, schema.id)}
             >
-              New Table from Data Import
+              {$_('new_table_from_data_import')}
             </LinkMenuItem>
           {/if}
           <LinkMenuItem
             icon={iconExploration}
-            href={getDataExplorerPageUrl(database.nickname, schema.id)}
+            href={getDataExplorerPageUrl(database.id, schema.id)}
           >
-            Open Data Explorer
+            {$_('open_data_explorer')}
           </LinkMenuItem>
         </DropdownMenu>
       {/if}
@@ -112,31 +112,34 @@
             <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
           </div>
           {#if database}
-            <MenuHeading>Database</MenuHeading>
+            <MenuHeading>{$_('database')}</MenuHeading>
             <LinkMenuItem
               icon={iconDatabase}
-              href={getDatabasePageUrl(database.nickname)}
+              href={getDatabasePageUrl(database.id)}
             >
               {database.nickname}
             </LinkMenuItem>
             <MenuDivider />
           {/if}
-          <MenuHeading>Signed in as</MenuHeading>
+          <MenuHeading>{$_('signed_in_as')}</MenuHeading>
           <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
           <MenuDivider />
+          <LinkMenuItem icon={iconConnection} href={CONNECTIONS_URL}>
+            {$_('database_connections')}
+          </LinkMenuItem>
           {#if $userProfile.isSuperUser}
             <LinkMenuItem
               icon={iconSettingsMajor}
               href={ADMIN_URL}
               hasNotificationDot={upgradable}
             >
-              Administration
+              {$_('administration')}
             </LinkMenuItem>
           {/if}
           <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
-            Log Out
+            {$_('log_out')}
           </LinkMenuItem>
         </DropdownMenu>
       {/if}
