@@ -189,7 +189,6 @@ def get_current_database(request, connection_id):
     if connection_id is not None:
         current_database = get_object_or_404(permitted_databases, id=connection_id)
     else:
-        # TODO: refactor connection names to ids
         request_database_name = get_live_demo_db_name(request)
         try:
             if request_database_name is not None:
