@@ -156,10 +156,7 @@
         import_verified: true,
         columns: finalizeColumns(columns, columnPropertiesMap),
       });
-      router.goto(
-        getTablePageUrl(database.id, schema.id, table.id),
-        true,
-      );
+      router.goto(getTablePageUrl(database.id, schema.id, table.id), true);
     } catch (err) {
       toast.fromError(err);
     }

@@ -68,7 +68,9 @@
   .errors {
     background: var(--red-100);
     border: solid 0.1em var(--red-200);
-    box-shadow: #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    box-shadow:
+      #000 0 0 0 0,
+      rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
       rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
       rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
     border-radius: 0.4em;

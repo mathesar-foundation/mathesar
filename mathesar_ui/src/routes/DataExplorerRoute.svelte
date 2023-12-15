@@ -132,11 +132,7 @@
     <AppendBreadcrumb
       item={{
         type: 'simple',
-        href: getExplorationEditorPageUrl(
-          database.id,
-          schema.id,
-          $query.id,
-        ),
+        href: getExplorationEditorPageUrl(database.id, schema.id, $query.id),
         label: 'Edit',
         icon: iconEdit,
       }}
@@ -145,11 +141,7 @@
     <AppendBreadcrumb
       item={{
         type: 'simple',
-        href: getExplorationEditorPageUrl(
-          database.id,
-          schema.id,
-          $query.id,
-        ),
+        href: getExplorationEditorPageUrl(database.id, schema.id, $query.id),
         label: 'Data Explorer',
         icon: iconExploration,
       }}
