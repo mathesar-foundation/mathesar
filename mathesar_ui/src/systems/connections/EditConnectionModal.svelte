@@ -28,10 +28,10 @@
 
   $: ({ connections } = connectionsStore);
   $: otherNicknames = new Set(
-    $connections.filter((c) => c.id !== connection.id).map((c) => c.nickname)
+    $connections.filter((c) => c.id !== connection.id).map((c) => c.nickname),
   );
   $: connectionName = requiredField(connection.nickname, [
-    uniqueWith(otherNicknames)
+    uniqueWith(otherNicknames),
   ]);
   $: databaseName = requiredField(connection.database);
   $: host = requiredField(connection.host);
