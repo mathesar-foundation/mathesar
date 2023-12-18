@@ -72,12 +72,12 @@ class ConnectionsStore {
   constructor() {
     this.requestStatus.set({ state: 'success' });
     this.connections.set(
-      commonData?.connections.map(
+      commonData.connections.map(
         (connection) => new ConnectionModel(connection),
       ) ?? [],
     );
-    this.count.set(commonData?.connections.length ?? 0);
-    this.currentConnectionId.set(commonData?.current_connection ?? undefined);
+    this.count.set(commonData.connections.length ?? 0);
+    this.currentConnectionId.set(commonData.current_connection ?? undefined);
     this.currentConnection = derived(
       [this.connections, this.currentConnectionId],
       ([connections, currentConnectionId]) =>

@@ -17,7 +17,7 @@ import { connectionsStore } from './databases';
 const commonData = preloadCommonData();
 
 export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
-  writable(commonData?.current_schema ?? undefined);
+  writable(commonData.current_schema ?? undefined);
 
 export interface DBSchemaStoreData {
   state: States;
@@ -209,8 +209,8 @@ function getSchemasStoreForDB(
       data: new Map(),
     });
     dbSchemaStoreMap.set(connectionId, store);
-    if (preload && commonData?.current_connection === connectionId) {
-      store = setDBSchemaStore(connectionId, commonData?.schemas || []);
+    if (preload && commonData.current_connection === connectionId) {
+      store = setDBSchemaStore(connectionId, commonData.schemas ?? []);
     } else {
       void refetchSchemasForDB(connectionId);
     }
