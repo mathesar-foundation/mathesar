@@ -1,17 +1,17 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Spinner } from '@mathesar-component-library';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
 </script>
 
 <WarningBox>
   <p>
-    A Mathesar upgrade is currently in progress. It is important that you do not
-    navigate away from this page until the upgrade is complete.
+    {$_('upgrade_in_progress_do_not_navigate')}
   </p>
 </WarningBox>
 <div class="upgrading">
   <div class="spinner"><Spinner /></div>
-  <div>Upgrading...</div>
+  <div>{$_('upgrading')}...</div>
 </div>
 
 <style>

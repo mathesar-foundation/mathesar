@@ -1,17 +1,17 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { SchemaEntry } from '@mathesar/AppTypes';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
 
   export let schema: SchemaEntry;
 </script>
 
 <div class="container">
   <p class="constituent">
-    {labeledCount(schema.num_tables, 'tables')}
+    {$_('count_tables', { values: { count: schema.num_tables } })}
   </p>
   <span class="divider" />
   <p class="constituent">
-    {labeledCount(schema.num_queries, 'explorations')}
+    {$_('count_explorations', { values: { count: schema.num_queries } })}
   </p>
 </div>
 

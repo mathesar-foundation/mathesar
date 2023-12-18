@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton, Tutorial } from '@mathesar/component-library';
+  import { AnchorButton, Tutorial } from '@mathesar-component-library';
   import { getImportPageUrl } from '@mathesar/routes/urls';
   import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
 
@@ -9,21 +10,18 @@
 </script>
 
 <Tutorial>
-  <span slot="title">You've created a new schema, now add tables to it.</span>
+  <span slot="title">{$_('add_tables_to_new_schema')}</span>
   <span slot="body">
-    Tables store your data. It's good to have one table per entity. An entity is
-    a thing you wish to keep data about. For example, in your personal financial
-    schema, you may have a table for your bank accounts and another for your
-    transactions. You can have as many tables as you wish.
+    {$_('what_is_a_table')}
   </span>
   <div class="new-table-tutorial-footer" slot="footer">
-    <span>How do you want to create your table?</span>
+    <span>{$_('how_do_you_want_to_create_table')}</span>
     <div class="new-table-tutorial-actions">
       <CreateEmptyTableButton class="padding-zero" {database} {schema}>
-        <span>From Scratch</span>
+        <span>{$_('from_scratch')}</span>
       </CreateEmptyTableButton>
       <AnchorButton href={getImportPageUrl(database.id, schema.id)}>
-        Import from a File
+        {$_('import_from_file')}
       </AnchorButton>
     </div>
   </div>

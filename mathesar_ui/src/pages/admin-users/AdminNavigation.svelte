@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { active } from 'tinro';
   import { Menu, MenuItemContents } from '@mathesar-component-library';
   import { iconSettingsMajor, iconMultipleUsers } from '@mathesar/icons';
@@ -25,7 +26,7 @@
         icon={iconSettingsMajor}
         hasNotificationDot={upgradable}
       >
-        Update
+        {$_('update')}
       </MenuItemContents>
     </a>
     <a
@@ -34,7 +35,9 @@
       class="menu-item menu-item-link"
       use:active
     >
-      <MenuItemContents icon={iconMultipleUsers}>Users</MenuItemContents>
+      <MenuItemContents icon={iconMultipleUsers}>
+        {$_('users')}
+      </MenuItemContents>
     </a>
   </Menu>
 </div>

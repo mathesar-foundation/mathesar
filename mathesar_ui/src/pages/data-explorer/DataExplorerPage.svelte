@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -34,7 +35,7 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($query.name ?? 'Data Explorer')}</title>
+  <title>{makeSimplePageTitle($query.name ?? $_('data_explorer'))}</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>
