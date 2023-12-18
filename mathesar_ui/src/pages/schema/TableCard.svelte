@@ -228,8 +228,6 @@
     top: 0;
     right: 0;
     margin: var(--size-ultra-small);
-    width: cacl(var(--menu-trigger-size) - 1rem);
-    height: cacl(var(--menu-trigger-size) - 1rem);
     z-index: 1;
   }
   .menu-container :global(.dropdown-menu-button) {
