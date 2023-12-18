@@ -24,14 +24,12 @@
     false;
 
   function gotoSchemaPage() {
-    router.goto(getSchemaPageUrl(database.nickname, schema.id));
+    router.goto(getSchemaPageUrl(database.id, schema.id));
   }
 
   function gotoExplorationPage() {
     if ($query.id) {
-      router.goto(
-        getExplorationPageUrl(database.nickname, schema.id, $query.id),
-      );
+      router.goto(getExplorationPageUrl(database.id, schema.id, $query.id));
     }
   }
 </script>

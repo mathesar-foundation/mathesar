@@ -123,9 +123,7 @@
           {$_('what_is_an_exploration_mini')}
         </span>
         <div>
-          <AnchorButton
-            href={getDataExplorerPageUrl(database.nickname, schema.id)}
-          >
+          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
             {$_('open_data_explorer')}
           </AnchorButton>
         </div>

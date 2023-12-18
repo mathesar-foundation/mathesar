@@ -1,4 +1,3 @@
-import type { Database } from '@mathesar/AppTypes';
 import {
   getAPI,
   patchAPI,
@@ -7,16 +6,20 @@ import {
   addQueryParamsToUrl,
 } from './utils/requestUtils';
 
-export type Connection = Database;
+export interface Connection {
+  id: number;
+  nickname: string;
+  database: string;
+  username: string;
+  host: string;
+  port: number;
+}
 
 interface ConnectionWithPassword extends Connection {
   password: string;
 }
 
-export type UpdatableConnectionProperties = Omit<
-  ConnectionWithPassword,
-  'id' | 'nickname'
->;
+export type UpdatableConnectionProperties = Omit<ConnectionWithPassword, 'id'>;
 
 function list() {
   return getAPI<PaginatedResponse<Connection>>(

@@ -18,7 +18,7 @@
     return {
       type: 'simple',
       label: schemaEntry.name,
-      href: getSchemaPageUrl(database.nickname, schemaEntry.id),
+      href: getSchemaPageUrl(database.id, schemaEntry.id),
       icon: iconSchema,
       isActive() {
         return schemaEntry.id === $currentSchemaId;

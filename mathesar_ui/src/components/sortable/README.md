@@ -29,7 +29,9 @@ This is a set of Svelte actions which make it easy to add drag-and-drop sorting 
 <div
   use:sortableContainer={{
     getItems: () => items,
-    onSort: (newItems) => { items = newItems; }
+    onSort: (newItems) => {
+      items = newItems;
+    },
   }}
 >
   {#each items as item}

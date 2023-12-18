@@ -7,17 +7,18 @@
   import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { connectionsStore } from '@mathesar/stores/databases';
+  import type { Connection } from '@mathesar/api/connections';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import SchemaRoute from './SchemaRoute.svelte';
 
-  export let databaseName: string;
+  export let connectionId: Connection['id'];
 
-  $: connectionsStore.setCurrentConnectionName(databaseName);
+  $: connectionsStore.setCurrentConnectionId(connectionId);
   $: ({ connections } = connectionsStore);
-  $: connection = $connections?.find((conn) => conn.nickname === databaseName);
+  $: connection = $connections?.find((c) => c.id === connectionId);
 
   function handleUnmount() {
-    connectionsStore.clearCurrentConnectionName();
+    connectionsStore.clearCurrentConnectionId();
   }
 
   onMount(() => handleUnmount);
@@ -39,8 +40,8 @@
 {:else}
   <ErrorPage>
     <RichText text={$_('database_not_found')} let:slotName>
-      {#if slotName === 'databaseName'}
-        <Identifier>{databaseName}</Identifier>
+      {#if slotName === 'connectionId'}
+        <Identifier>{connectionId}</Identifier>
       {/if}
     </RichText>
   </ErrorPage>

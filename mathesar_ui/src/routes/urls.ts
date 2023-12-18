@@ -1,33 +1,33 @@
-export function getDatabasePageUrl(databaseName: string): string {
-  return `/db/${databaseName}/`;
+export function getDatabasePageUrl(connectionId: number): string {
+  return `/db/${connectionId}/`;
 }
 
 export function getSchemaPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getDatabasePageUrl(databaseName)}${schemaId}/`;
+  return `${getDatabasePageUrl(connectionId)}${schemaId}/`;
 }
 
 export function getSchemaPageTablesSectionUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(databaseName, schemaId)}tables/`;
+  return `${getSchemaPageUrl(connectionId, schemaId)}tables/`;
 }
 
 export function getSchemaPageExplorationsSectionUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(databaseName, schemaId)}explorations/`;
+  return `${getSchemaPageUrl(connectionId, schemaId)}explorations/`;
 }
 
 export function getImportPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(databaseName, schemaId)}import/`;
+  return `${getSchemaPageUrl(connectionId, schemaId)}import/`;
 }
 
 interface ImportPreviewPageQueryParams {
@@ -53,57 +53,57 @@ export function getImportPreviewPageQueryParams(
 }
 
 export function getImportPreviewPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   previewTableId: number,
   options: ImportPreviewPageQueryParams,
 ): string {
-  const importPageUrl = getImportPageUrl(databaseName, schemaId);
+  const importPageUrl = getImportPageUrl(connectionId, schemaId);
   const q = serializeImportPreviewPageQueryParams(options);
   return `${importPageUrl}${previewTableId}/?${q}`;
 }
 
 export function getDataExplorerPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(databaseName, schemaId)}data-explorer/`;
+  return `${getSchemaPageUrl(connectionId, schemaId)}data-explorer/`;
 }
 
 export function getExplorationPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   queryId: number,
 ): string {
   return `${getSchemaPageExplorationsSectionUrl(
-    databaseName,
+    connectionId,
     schemaId,
   )}${queryId}/`;
 }
 
 export function getExplorationEditorPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   queryId: number,
 ): string {
-  return `${getExplorationPageUrl(databaseName, schemaId, queryId)}edit/`;
+  return `${getExplorationPageUrl(connectionId, schemaId, queryId)}edit/`;
 }
 
 export function getTablePageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   tableId: number,
 ): string {
-  return `${getSchemaPageTablesSectionUrl(databaseName, schemaId)}${tableId}/`;
+  return `${getSchemaPageTablesSectionUrl(connectionId, schemaId)}${tableId}/`;
 }
 
 export function getRecordPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   tableId: number,
   recordId: unknown,
 ): string {
-  return `${getTablePageUrl(databaseName, schemaId, tableId)}${String(
+  return `${getTablePageUrl(connectionId, schemaId, tableId)}${String(
     recordId,
   )}`;
 }

@@ -24,15 +24,18 @@ class SchemaViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin,
 
     def get_queryset(self):
         qs = Schema.objects.all().order_by('-created_at')
+        connection_id = self.request.query_params.get('connection_id')
+        if connection_id:
+            qs = qs.filter(database=connection_id)
         return self.access_policy.scope_viewset_queryset(self.request, qs)
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        database_name = serializer.validated_data['database'].name
+        connection_id = serializer.validated_data['database'].id
         schema = create_schema_and_object(
             serializer.validated_data['name'],
-            database_name,
+            connection_id,
             comment=serializer.validated_data.get('description')
         )
         serializer = SchemaSerializer(schema, context={'request': request})

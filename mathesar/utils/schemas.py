@@ -7,11 +7,12 @@ from mathesar.database.base import create_mathesar_engine
 from mathesar.models.base import Schema, Database
 
 
-def create_schema_and_object(name, database, comment=None):
+def create_schema_and_object(name, connection_id, comment=None):
     try:
-        database_model = Database.objects.get(name=database)
+        database_model = Database.objects.get(id=connection_id)
+        database_name = database_model.name
     except ObjectDoesNotExist:
-        raise ValidationError({"database": f"Database '{database}' not found"})
+        raise ValidationError({"database": f"Database '{database_name}' not found"})
 
     engine = create_mathesar_engine(database_model)
 

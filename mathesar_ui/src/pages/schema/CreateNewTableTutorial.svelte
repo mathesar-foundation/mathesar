@@ -20,7 +20,7 @@
       <CreateEmptyTableButton class="padding-zero" {database} {schema}>
         <span>{$_('from_scratch')}</span>
       </CreateEmptyTableButton>
-      <AnchorButton href={getImportPageUrl(database.nickname, schema.id)}>
+      <AnchorButton href={getImportPageUrl(database.id, schema.id)}>
         {$_('import_from_file')}
       </AnchorButton>
     </div>

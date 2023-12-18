@@ -17,7 +17,7 @@
   </span>
   <AnchorButton
     slot="footer"
-    href={getDataExplorerPageUrl(database.nickname, schema.id)}
+    href={getDataExplorerPageUrl(database.id, schema.id)}
   >
     {$_('open_data_explorer')}
   </AnchorButton>

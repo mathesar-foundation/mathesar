@@ -86,7 +86,7 @@
                   <a
                     class="btn btn-secondary"
                     href={getExplorationEditorPageUrl(
-                      $currentDatabase.nickname,
+                      $currentDatabase.id,
                       $currentSchema.id,
                       $query.id,
                     )}

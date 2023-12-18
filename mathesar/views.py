@@ -142,7 +142,7 @@ def get_user_data(request):
 
 def get_base_data_all_routes(request, database=None, schema=None):
     return {
-        'current_db_connection': database.name if database else None,
+        'current_connection': database.id if database else None,
         'current_schema': schema.id if schema else None,
         'schemas': [],
         'connections': [],
@@ -182,12 +182,12 @@ def get_common_data(request, database=None, schema=None):
     }
 
 
-def get_current_database(request, db_name):
+def get_current_database(request, connection_id):
     """Get database from passed name, with fall back behavior."""
     successful_dbs, failed_dbs = _get_permissible_db_queryset(request)
     permitted_databases = successful_dbs | failed_dbs
-    if db_name is not None:
-        current_database = get_object_or_404(permitted_databases, name=db_name)
+    if connection_id is not None:
+        current_database = get_object_or_404(permitted_databases, id=connection_id)
     else:
         request_database_name = get_live_demo_db_name(request)
         try:
@@ -289,7 +289,7 @@ def home(request):
         return redirect('connections')
     elif number_of_connections == 1:
         db = connection_list[0]
-        return redirect('schemas', db_name=db['nickname'])
+        return redirect('schemas', connection_id=db['id'])
     else:
         return render(request, 'mathesar/index.html', {
             'common_data': get_common_data(request)
@@ -318,8 +318,8 @@ def admin_home(request, **kwargs):
 
 
 @login_required
-def schema_home(request, db_name, schema_id, **kwargs):
-    database = get_current_database(request, db_name)
+def schema_home(request, connection_id, schema_id, **kwargs):
+    database = get_current_database(request, connection_id)
     schema = get_current_schema(request, schema_id, database)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, schema)
@@ -327,8 +327,8 @@ def schema_home(request, db_name, schema_id, **kwargs):
 
 
 @login_required
-def schemas(request, db_name):
-    database = get_current_database(request, db_name)
+def schemas(request, connection_id):
+    database = get_current_database(request, connection_id)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, None)
     })

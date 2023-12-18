@@ -65,19 +65,19 @@
     {
       label: $_('overview'),
       id: 'overview',
-      href: getSchemaPageUrl(database.nickname, schema.id),
+      href: getSchemaPageUrl(database.id, schema.id),
     },
     {
       label: $_('tables'),
       id: 'tables',
       count: tablesMap.size,
-      href: getSchemaPageTablesSectionUrl(database.nickname, schema.id),
+      href: getSchemaPageTablesSectionUrl(database.id, schema.id),
     },
     {
       label: $_('explorations'),
       id: 'explorations',
       count: explorationsMap.size,
-      href: getSchemaPageExplorationsSectionUrl(database.nickname, schema.id),
+      href: getSchemaPageExplorationsSectionUrl(database.id, schema.id),
     },
   ] as TabItem[];
 
