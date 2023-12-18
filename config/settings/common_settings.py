@@ -275,5 +275,8 @@ LANGUAGES = [
     ('en', gettext_lazy('English')),
     ('ja', gettext_lazy('Japanese')),
 ]
+LOCALE_PATHS = [
+    'translations'
+]
 LANGUAGE_COOKIE_NAME = 'display_language'
 SALT_KEY = SECRET_KEY
