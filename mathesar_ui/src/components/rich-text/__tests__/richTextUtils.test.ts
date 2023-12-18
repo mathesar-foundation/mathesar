@@ -19,8 +19,20 @@ describe('RichText', () => {
     ['[bar]foo[baz]', [slot('bar'), text('foo'), slot('baz')]],
     ['foo [bar] baz', [text('foo '), slot('bar'), text(' baz')]],
     ['foo[bar][baz]bat', [text('foo'), slot('bar'), slot('baz'), text('bat')]],
+    ['[foo](bar)', [slot('foo', 'bar')]],
+    ['foo[bar](baz)', [text('foo'), slot('bar', 'baz')]],
+    [
+      'foo[bar](baz)[foo_1][bar_1]\\(baz_1)foo_2',
+      [
+        text('foo'),
+        slot('bar', 'baz'),
+        slot('foo_1'),
+        slot('bar_1'),
+        text('\\(baz_1)foo_2'),
+      ],
+    ],
   ];
-  test.each(cases)('parse %#', (input, output) => {
+  test.each(cases)('parse %# %s', (input, output) => {
     expect(parse(input)).toEqual(output);
   });
 

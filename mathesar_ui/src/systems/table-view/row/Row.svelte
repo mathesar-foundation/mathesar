@@ -90,11 +90,11 @@
       isStatic
       isControlCell
       let:htmlAttributes={cellHtmlAttr}
-      let:style
+      let:style={sheetCellStyle}
     >
       <div
         {...cellHtmlAttr}
-        {style}
+        style={sheetCellStyle}
         on:mousedown={handleRowMouseDown}
         on:mouseenter={handleRowMouseEnter}
       >
@@ -159,10 +159,12 @@
     &.is-add-placeholder {
       cursor: pointer;
 
-      :global([data-sheet-element='cell']:not(.is-active)
-          .cell-fabric
-          .cell-wrapper
-          > *) {
+      :global(
+          [data-sheet-element='cell']:not(.is-active)
+            .cell-fabric
+            .cell-wrapper
+            > *
+        ) {
         visibility: hidden;
       }
     }

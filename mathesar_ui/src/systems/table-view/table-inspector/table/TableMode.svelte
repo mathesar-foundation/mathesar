@@ -1,4 +1,5 @@
 <script>
+  import { _ } from 'svelte-i18n';
   import { Collapsible } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
@@ -29,7 +30,7 @@
   <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader
       slot="header"
-      title="Properties"
+      title={$_('properties')}
       isDbLevelConfiguration
     />
     <div slot="content" class="content-container">
@@ -39,28 +40,32 @@
   </Collapsible>
 
   <Collapsible isOpen triggerAppearance="plain">
-    <CollapsibleHeader slot="header" title="Links" isDbLevelConfiguration />
+    <CollapsibleHeader
+      slot="header"
+      title={$_('links')}
+      isDbLevelConfiguration
+    />
     <div slot="content" class="content-container">
       <TableLinks {canExecuteDDL} />
     </div>
   </Collapsible>
 
   <Collapsible triggerAppearance="plain">
-    <CollapsibleHeader slot="header" title="Record Summary" />
+    <CollapsibleHeader slot="header" title={$_('record_summary')} />
     <div slot="content" class="content-container">
       <RecordSummaryConfig table={$currentTable} tabularData={$tabularData} />
     </div>
   </Collapsible>
 
   <Collapsible isOpen triggerAppearance="plain">
-    <CollapsibleHeader slot="header" title="Actions" />
+    <CollapsibleHeader slot="header" title={$_('actions')} />
     <div slot="content" class="content-container">
       <TableActions {canExecuteDDL} />
     </div>
   </Collapsible>
 
   <Collapsible triggerAppearance="plain">
-    <CollapsibleHeader slot="header" title="Advanced" />
+    <CollapsibleHeader slot="header" title={$_('advanced')} />
     <div slot="content" class="content-container">
       <AdvancedActions />
     </div>

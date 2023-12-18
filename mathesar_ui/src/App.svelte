@@ -4,18 +4,17 @@
   import AppContext from './AppContext.svelte';
   import RootRoute from './routes/RootRoute.svelte';
   import { initI18n } from './i18n';
-  import ErrorBox from './components/message-boxes/ErrorBox.svelte';
 
   const commonData = preloadCommonData();
 
   let isTranslationsLoaded = false;
   void (async () => {
-    await initI18n(commonData?.user.display_language ?? 'en');
+    await initI18n(commonData.user.display_language ?? 'en');
     isTranslationsLoaded = true;
   })();
 </script>
 
-{#if isTranslationsLoaded && commonData}
+{#if isTranslationsLoaded}
   <AppContext {commonData}>
     <RootRoute {commonData} />
   </AppContext>
@@ -23,8 +22,6 @@
   <div class="app-loader">
     <Spinner size="2rem" />
   </div>
-{:else}
-  <ErrorBox>This state should never occur.</ErrorBox>
 {/if}
 
 <!--
@@ -148,6 +145,13 @@
     margin: 0 0 1rem 0;
     font-size: var(--size-xx-large);
     font-weight: 500;
+  }
+
+  hr {
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--slate-200);
+    display: block;
   }
 
   a {

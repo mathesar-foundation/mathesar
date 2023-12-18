@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Constraint } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
@@ -30,12 +31,12 @@
 
 <div class="constraint-details">
   <div>
-    <span>Constraint Name:</span>
+    <span>{$_('constraint_name')}:</span>
     <span>{constraint.name}</span>
   </div>
   {#if referentTable}
     <div class="target">
-      <span>Target:</span>
+      <span>{$_('target')}:</span>
       <div class="target-details">
         <span class="entity-name-container">
           <TableName table={referentTable} />
@@ -43,12 +44,12 @@
         {#await getReferentColumns(constraint)}
           <Spinner />
         {:then referentColumns}
-          {#each referentColumns as referentColumn, index (referentColumn.id)}
+          {#each referentColumns as referentColumn (referentColumn.id)}
             <span class="entity-name-container">
               <ColumnName column={referentColumn} />
             </span>
           {/each}
-        {:catch error}
+        {:catch}
           <Icon {...iconError} />
         {/await}
       </div>

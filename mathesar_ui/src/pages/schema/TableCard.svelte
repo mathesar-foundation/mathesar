@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ButtonMenuItem,
     DropdownMenu,
@@ -43,12 +44,12 @@
 
   $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
   $: tablePageUrl = isTableImportConfirmationNeeded
-    ? getImportPreviewPageUrl(database.nickname, schema.id, table.id, {
+    ? getImportPreviewPageUrl(database.id, schema.id, table.id, {
         useColumnTypeInference: true,
       })
-    : getTablePageUrl(database.nickname, schema.id, table.id);
+    : getTablePageUrl(database.id, schema.id, table.id);
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
-    database.nickname,
+    database.id,
     schema.id,
     table,
   );
@@ -56,7 +57,7 @@
 
   function handleDeleteTable() {
     void confirmDelete({
-      identifierType: 'Table',
+      identifierType: $_('table'),
       body: {
         component: TableDeleteConfirmationBody,
         props: {
@@ -111,7 +112,7 @@
     </div>
     <div class="bottom">
       {#if isTableImportConfirmationNeeded}
-        Needs Import Confirmation
+        {$_('needs_import_confirmation')}
       {/if}
     </div>
   </a>
@@ -136,11 +137,11 @@
     >
       {#if !isTableImportConfirmationNeeded}
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
-          Explore Table
+          {$_('explore_table')}
         </LinkMenuItem>
         {#if canExecuteDDL}
           <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-            Edit Table
+            {$_('edit_table')}
           </ButtonMenuItem>
         {/if}
       {/if}
@@ -150,7 +151,7 @@
           danger
           icon={iconDeleteMajor}
         >
-          Delete Table
+          {$_('delete_table')}
         </ButtonMenuItem>
       {/if}
     </DropdownMenu>
@@ -167,7 +168,7 @@
       on:click={handleFindRecord}
     >
       <Icon {...iconSelectRecord} />
-      <span class="label">Find a Record</span>
+      <span class="label">{$_('find_record')}</span>
     </button>
   {/if}
 </div>

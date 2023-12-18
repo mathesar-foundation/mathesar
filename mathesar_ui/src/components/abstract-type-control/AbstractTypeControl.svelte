@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import {
     createValidationContext,
     CancelOrProceedButtonPair,
@@ -76,7 +77,7 @@
       typeChangeState = { state: 'success' };
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Unable to change column type';
+        err instanceof Error ? err.message : $_('unable_to_change_column_type');
       toast.error(errorMessage);
       typeChangeState = { state: 'failure', errors: [errorMessage] };
     }
@@ -112,8 +113,7 @@
     {#if showWarnings}
       <WarningBox>
         <span class="warning-alert">
-          Data loss can result from changing the data type of a column. This
-          action cannot be undone.
+          {$_('data_loss_warning_alert')}
         </span>
       </WarningBox>
     {/if}
@@ -122,7 +122,7 @@
       onCancel={cancel}
       isProcessing={typeChangeState?.state === 'processing'}
       canProceed={!isSaveDisabled}
-      proceedButton={{ label: 'Save' }}
+      proceedButton={{ label: $_('save') }}
       size="small"
     />
   </div>

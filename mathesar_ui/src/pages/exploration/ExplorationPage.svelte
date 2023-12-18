@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -49,12 +49,12 @@
   $: createQueryRunner(query, $currentDbAbstractTypes.data);
 
   function gotoSchemaPage() {
-    router.goto(getSchemaPageUrl(database.nickname, schema.id));
+    router.goto(getSchemaPageUrl(database.id, schema.id));
   }
 </script>
 
 <svelte:head>
-  <title>{query.name} | {schema.name} | Mathesar</title>
+  <title>{query.name} | {schema.name} | {$_('mathesar')}</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>

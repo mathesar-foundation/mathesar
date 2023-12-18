@@ -25,8 +25,7 @@ test('renders icon with size prop as height and width', () => {
 
   const icon = getByRole('presentation');
   expect(icon).toBeInTheDocument();
-  expect(icon).toHaveAttribute('width', '20px');
-  expect(icon).toHaveAttribute('height', '20px');
+  expect(icon).toHaveAttribute('style', 'font-size: 20px;');
 });
 
 test('renders icon based on passed props', () => {

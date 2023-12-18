@@ -25,6 +25,7 @@
     optionToCompare: Option | undefined,
     selectedOption: Option | undefined,
   ) => boolean = (a, b) => a === b;
+
   export let disabled = false;
 
   function handleChange(option: Option, checked: boolean) {
@@ -42,7 +43,7 @@
   {label}
   {disabled}
   let:option
-  let:disabled
+  let:disabled={innerDisabled}
   on:change
   labelKey={checkboxLabelKey}
   getLabel={getCheckboxLabel}
@@ -50,7 +51,7 @@
   <Checkbox
     on:change={({ detail: checked }) => handleChange(option, checked)}
     checked={values.some((o) => valuesAreEqual(o, option))}
-    {disabled}
+    disabled={innerDisabled}
   />
   <slot slot="label" />
 </FieldsetGroup>

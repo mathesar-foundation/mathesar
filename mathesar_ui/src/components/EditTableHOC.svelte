@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     refetchTablesForSchema,
@@ -20,10 +21,10 @@
 
   function getNameValidationErrors(name: string): string[] {
     if (!name.trim()) {
-      return ['Name cannot be empty.'];
+      return [$_('table_name_cannot_be_empty')];
     }
     if (schemaContainsTableName(name)) {
-      return ['A table with that name already exists.'];
+      return [$_('table_with_name_already_exists')];
     }
     return [];
   }

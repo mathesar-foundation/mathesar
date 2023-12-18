@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
+  import { _ } from 'svelte-i18n';
   import { ButtonMenuItem, Icon } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
@@ -25,7 +25,7 @@
   let isHovered = false;
   let isFocused = false;
 
-  $: href = getSchemaPageUrl(database.nickname, schema.id);
+  $: href = getSchemaPageUrl(database.id, schema.id);
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
 </script>
@@ -51,7 +51,7 @@
           menuStyle="--spacing-y:0.8em;"
         >
           <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}>
-            Edit Schema
+            {$_('edit_schema')}
           </ButtonMenuItem>
           <MenuDivider />
           <ButtonMenuItem
@@ -59,7 +59,7 @@
             on:click={() => dispatch('delete')}
             icon={iconDeleteMajor}
           >
-            Delete Schema
+            {$_('delete_schema')}
           </ButtonMenuItem>
         </DropdownMenu>
       </div>
@@ -76,8 +76,7 @@
 
   {#if isDefault}
     <InfoBox>
-      Every PostgreSQL database includes the "public" schema. This protected
-      schema can be read by anybody who accesses the database.
+      {$_('public_schema_info')}
     </InfoBox>
   {/if}
 

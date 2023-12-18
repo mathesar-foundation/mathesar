@@ -11,7 +11,7 @@ from django.core.cache import cache
 from django.conf import settings
 from rest_framework.test import APIClient
 
-from sqlalchemy import Column, MetaData, Integer
+from sqlalchemy import Column, MetaData, Integer, Date
 from sqlalchemy import Table as SATable
 
 from db.tables.operations.select import get_oid_from_table
@@ -30,6 +30,7 @@ import conftest
 from mathesar.state import reset_reflection
 from mathesar.state.base import set_initial_reflection_happened
 from db.metadata import get_empty_metadata
+from db.tests.columns.utils import create_test_table
 
 
 @pytest.fixture
@@ -329,6 +330,12 @@ def patent_schema(create_schema):
     yield create_schema(PATENT_SCHEMA)
 
 
+@pytest.fixture
+def reservations_schema(create_schema):
+    RESERVATIONS_SCHEMA = 'Reservations'
+    yield create_schema(RESERVATIONS_SCHEMA)
+
+
 # TODO rename to create_ma_schema
 @pytest.fixture
 def create_schema(test_db_model, create_db_schema):
@@ -360,6 +367,30 @@ def create_mathesar_table(create_db_schema):
             engine=engine, table_name=table_name, schema_oid=schema_oid, columns=columns,
         )
     yield _create_mathesar_table
+
+
+@pytest.fixture
+def reservations_table(engine, reservations_schema):
+    schema_name = reservations_schema.name
+
+    def _create_test_table(table_name, schema_name=schema_name):
+        table_name = table_name or 'Exclusion Check'
+        schema_name = reservations_schema.name
+        cols = [
+            Column('id', Integer, primary_key=True),
+            Column('room_number', Integer),
+            Column('check_in_date', Date),
+            Column('check_out_date', Date)
+        ]
+        insert_data = [
+            (1, 1, '11/10/2023', '11/15/2023'),
+            (2, 1, '11/16/2023', '11/20/2023')
+        ]
+        sa_table = create_test_table(table_name, cols, insert_data, schema_name, engine)
+        table_oid = get_oid_from_table(sa_table.name, schema_name, engine)
+        table = Table.current_objects.create(oid=table_oid, schema=reservations_schema)
+        return table
+    return _create_test_table
 
 
 @pytest.fixture
