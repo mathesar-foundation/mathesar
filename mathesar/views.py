@@ -289,7 +289,7 @@ def home(request):
         return redirect('connections')
     elif number_of_connections == 1:
         db = connection_list[0]
-        return redirect('schemas', db_name=db['nickname'])
+        return redirect('schemas', connection_id=db['id'])
     else:
         return render(request, 'mathesar/index.html', {
             'common_data': get_common_data(request)
