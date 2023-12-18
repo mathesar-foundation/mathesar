@@ -123,7 +123,7 @@
   "database": "Database",
   "database_connections": "Database Connections",
   "database_name": "Database Name",
-  "database_not_found": "Database with name [databaseName] is not found.",
+  "database_not_found": "Database with id [connectionId] is not found.",
   "database_type_displayer": "Database type [databaseType]",
   "days": "Days",
   "default": "Default",
