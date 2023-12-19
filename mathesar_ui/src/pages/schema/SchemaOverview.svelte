@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
@@ -42,7 +43,7 @@
 
 <div class="container">
   <div class="vertical-container tables">
-    <OverviewHeader title="Tables">
+    <OverviewHeader title={$_('tables')}>
       <svelte:fragment slot="action">
         {#if canExecuteDDL}
           <CreateNewTableButton {database} {schema} />
@@ -59,12 +60,12 @@
             onClick={async () => {
               await refetchTablesForSchema(schema.id);
             }}
-            label="Retry"
+            label={$_('retry')}
             icon={iconRefresh}
           />
           <a href="../">
             <Button>
-              <span>Go to Database</span>
+              <span>{$_('go_to_database')}</span>
             </Button>
           </a>
         </div>
@@ -82,7 +83,7 @@
   </div>
   <div class="vertical-container explorations">
     <div class="vertical-container">
-      <OverviewHeader title="Saved Explorations" />
+      <OverviewHeader title={$_('saved_explorations')} />
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
       {:else if explorationsRequestStatus.state === 'failure'}
@@ -93,12 +94,12 @@
               onClick={async () => {
                 await refetchQueriesForSchema(schema.id);
               }}
-              label="Retry"
+              label={$_('retry')}
               icon={iconRefresh}
             />
             <a href="../">
               <Button>
-                <span>Go to Database</span>
+                <span>{$_('go_to_database')}</span>
               </Button>
             </a>
           </div>
@@ -117,13 +118,13 @@
 
     {#if canExplore}
       <div class="vertical-container">
-        <OverviewHeader title="Explore your Data" />
+        <OverviewHeader title={$_('explore_your_data')} />
         <span>
-          Explorations let you query your data to uncover trends and insights.
+          {$_('what_is_an_exploration_mini')}
         </span>
         <div>
           <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
-            Open Data Explorer
+            {$_('open_data_explorer')}
           </AnchorButton>
         </div>
       </div>

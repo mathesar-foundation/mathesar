@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
 </script>
@@ -15,7 +16,7 @@
   <div class="import-preview-content">
     <div class="page-content" class:has-preview={$$slots.preview}>
       <InsetPageLayout>
-        <h1 slot="header">Finish setting up your table</h1>
+        <h1 slot="header">{$_('finish_setting_up_table')}</h1>
         <slot />
       </InsetPageLayout>
 

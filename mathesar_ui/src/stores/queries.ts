@@ -173,8 +173,8 @@ export function getQueriesStoreForSchema(
       data: new Map(),
     });
     schemasCacheManager.set(schemaId, store);
-    if (preload && commonData?.current_schema === schemaId) {
-      store = setSchemaQueriesStore(schemaId, commonData?.queries ?? []);
+    if (preload && commonData.current_schema === schemaId) {
+      store = setSchemaQueriesStore(schemaId, commonData.queries ?? []);
     } else {
       void refetchQueriesForSchema(schemaId);
     }

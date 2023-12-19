@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
   import { iconDeleteMajor, iconEditUser } from '@mathesar/icons';
@@ -17,6 +18,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { UserModel } from '@mathesar/stores/users';
   import FormBox from '@mathesar/components/form/FormBox.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
   const usersStore = getUsersStoreFromContext();
@@ -46,13 +48,13 @@
 </script>
 
 {#await userDetailsPromise}
-  Fetching user details
+  {$_('fetching_user_details')}
 {:then userModel}
   {#if userModel === undefined}
     {#if $requestStatus?.state === 'failure'}
       {$requestStatus.errors}
     {:else}
-      User not found
+      <ErrorBox>{$_('user_not_found')}</ErrorBox>
     {/if}
   {:else}
     <AppendBreadcrumb
@@ -65,7 +67,7 @@
     />
     <h1>
       <Icon {...iconEditUser} />
-      Edit User: <strong>{userModel.username}</strong>
+      {$_('edit_user')}: <strong>{userModel.username}</strong>
     </h1>
     <FormBox>
       <UserDetailsForm user={userModel.getUser()} on:update={onUserUpdate} />
@@ -79,12 +81,12 @@
           confirm={() =>
             confirmDelete({
               identifierName: userModel.username,
-              identifierType: 'user',
+              identifierType: $_('user'),
             })}
           onClick={() => deleteUser(userModel)}
           icon={iconDeleteMajor}
           danger
-          label="Delete User"
+          label={$_('delete_user')}
           appearance="default"
         />
       </FormBox>

@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { QueryInstance } from '@mathesar/api/types/queries';
-  import Icon from '@mathesar/component-library/icon/Icon.svelte';
+  import { Icon } from '@mathesar-component-library';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
@@ -25,7 +26,7 @@
     </div>
     {#if baseTable}
       <div class="horizontal-container">
-        <span class="meta">Based on</span>
+        <span class="meta">{$_('based_on')}</span>
         <div class="horizontal-container">
           <TableName table={baseTable} />
         </div>
