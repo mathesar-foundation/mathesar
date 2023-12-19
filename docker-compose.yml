@@ -17,15 +17,29 @@ version: "3.9"
 # CONFIG:
 #--------------------------------------------------
 x-config: &config
-  SECRET_KEY: ${SECRET_KEY:?}                       #(Required) Replace '?' with '-' followed by your 50 character long Django SECRET_KEY, you can generate one here: https://djecrety.ir/
-  DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}     #(Optional) Replace 'http://localhost' with custom domain(s) e.g. 'yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar over http or https
+  # (Required) Replace '?' with '-' followed by your 50 character long Django
+  # SECRET_KEY, you can generate one here: https://djecrety.ir/
+  SECRET_KEY: ${SECRET_KEY:?}
+  # (Optional) Replace 'http://localhost' with custom domain(s) e.g.
+  # 'yourdomain.com, 127.0.0.1' to manage the host(s) that can access Mathesar
+  # over http or https
+  DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}
 
-  # Edit these if not using the db service provided below.
-  POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}      #(Optional) Replace 'mathesar_django' with any custom name for the internal database managed by mathesar web-service
-  POSTGRES_USER: ${POSTGRES_USER:-mathesar}         #(Optional) Replace 'mathesar' with any custom username for the aforementioned database
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar} #(Optional) Replace 'mathesar' with any custom password for the aforementioned database
-  POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}      #(Optional) Replace 'mathesar_db' with the name of the host running postgres
-  POSTGRES_PORT: ${POSTGRES_PORT:-5432}             #(Optional) Replace '5432' with the port on which postgres is running
+  # Edit these if not using the db service provided below, or if you want to use
+  # a custom database user.
+  # (Optional) Replace 'mathesar_django' with any custom name for the internal
+  # database managed by mathesar web-service
+  POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
+  # (Optional) Replace 'mathesar' with any custom username for the
+  # aforementioned database
+  POSTGRES_USER: ${POSTGRES_USER:-mathesar}
+  # (Optional) Replace 'mathesar' with any custom password for the
+  # aforementioned database
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+  # (Optional) Replace 'mathesar_db' with the name of the host running postgres
+  POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}
+  # (Optional) Replace '5432' with the port on which postgres is running
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
 #--------------------------------------------------
 
 
@@ -135,9 +149,9 @@ services:
       <<: *config
       DJANGO_SETTINGS_MODULE: config.settings.production
       # Setting ALLOWED_HOSTS to * (allow all hosts) by default here as we are
-      # relying on caddy to manage which domains could access the mathesar web service. 
-      # If you do not want to use caddy add the domain(s) that you would've used 
-      # for DOMAIN_NAME env in ALLOWED_HOSTS.
+      # relying on caddy to manage which domains could access the mathesar web
+      # service.  If you do not want to use caddy add the domain(s) that you
+      # would've used  for DOMAIN_NAME env in ALLOWED_HOSTS.
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
       # MATHESAR_DATABASES should be removed once connections stuff is merged
       MATHESAR_DATABASES: ${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
@@ -157,8 +171,8 @@ services:
       timeout: 5s
       retries: 30
       start_period: 5s
-    # If using caddy, expose the internal port 8000 only to other containers and not
-    # the docker host. 
+    # If using caddy, expose the internal port 8000 only to other containers and
+    # not the docker host.
     expose:
       - "8000"
     # Uncomment the following if not using caddy
@@ -215,14 +229,16 @@ services:
 #   configuration for Mathesar.
 #
 # - This service routes the requests to backend and the web frontend of Mathesar
-#   while also serving essential staic files and user uploaded datafiles(.csv/.tsv)
+#   while also serving essential staic files and user uploaded
+#   datafiles(.csv/.tsv)
 #
 # - This service also provides SSL certificates automatically for any
 #   custom domain(s) listed in DOMAIN_NAME that you might want to use to access
 #   Mathesar.
 #
 # - This service maps the default port for http(80) and https(443) of the host
-#   system to that of docker's for allowing access to Mathesar over http or https.
+#   system to that of docker's for allowing access to Mathesar over http or
+#   https.
 #
 #------------------------------------------------------------------------------
 
