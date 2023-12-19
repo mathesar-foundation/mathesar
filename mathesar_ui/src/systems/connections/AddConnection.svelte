@@ -84,7 +84,8 @@
     movie_collection: $_('sample_data_movies_help'),
   };
 
-  export let onExit: () => void;
+  export let onCancel: () => void;
+  export let onSuccess: (c: Connection) => void;
 
   $: availableConnectionsToReuse = $generalConnections;
   $: defaultConnectionToReuse =
@@ -254,8 +255,8 @@
 
   async function saveConnectionDetails() {
     try {
-      await create();
-      onExit();
+      const connection = await create();
+      onSuccess(connection);
       toast.success($_('connection_added_successfully'));
     } catch (e) {
       toast.fromError(e);
@@ -415,7 +416,7 @@
     <FormSubmit
       {form}
       catchErrors
-      onCancel={() => onExit()}
+      {onCancel}
       onProceed={saveConnectionDetails}
       proceedButton={{ label: $_('add_connection') }}
       cancelButton={{ label: $_('cancel') }}
