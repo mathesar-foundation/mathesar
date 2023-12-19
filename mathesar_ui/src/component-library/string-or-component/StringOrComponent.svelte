@@ -1,3 +1,10 @@
+<!--
+  @component
+
+  @deprecated in favor of `StringOrComponentTyped` which uses
+  `ComponentWithProps` for better type safety in comparing a component to its
+  props.
+-->
 <script lang="ts">
   import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
   import {
