@@ -8,6 +8,9 @@ import {
 } from '@mathesar-component-library';
 import connectionsApi, {
   type Connection,
+  type CreateFromKnownConnectionProps,
+  type CreateFromScratchProps,
+  type CreateWithNewUserProps,
   type UpdatableConnectionProperties,
 } from '@mathesar/api/connections';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -64,6 +67,28 @@ class ConnectionsStore {
       [this.connections, this.currentConnectionId],
       ([connections, id]) => defined(id, (v) => connections.get(v)),
     );
+  }
+
+  private addConnection(connection: Connection) {
+    this.unsortedConnections.set(connection.id, connection);
+  }
+
+  async createFromKnownConnection(props: CreateFromKnownConnectionProps) {
+    const connection = await connectionsApi.createFromKnownConnection(props);
+    this.addConnection(connection);
+    return connection;
+  }
+
+  async createFromScratch(props: CreateFromScratchProps) {
+    const connection = await connectionsApi.createFromScratch(props);
+    this.addConnection(connection);
+    return connection;
+  }
+
+  async createWithNewUser(props: CreateWithNewUserProps) {
+    const connection = await connectionsApi.createWithNewUser(props);
+    this.addConnection(connection);
+    return connection;
   }
 
   setCurrentConnectionId(connectionId: Connection['id']) {
