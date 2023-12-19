@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { DropdownMenu, ButtonMenuItem } from '@mathesar-component-library';
   import type { Writable } from 'svelte/store';
   import {
@@ -46,7 +47,7 @@
 </script>
 
 <div class="groups" class:grouped={$grouping.entries.length > 0}>
-  <header>Group records by</header>
+  <header>{$_('group_records_by')}</header>
   <div class="content">
     {#each $grouping.entries as groupEntry, index (index)}
       <GroupEntryComponent
@@ -63,12 +64,12 @@
           index < $grouping.entries.length - 1}
       />
     {:else}
-      <span class="muted">No grouping condition has been added</span>
+      <span class="muted">{$_('no_grouping_condition_added')}</span>
     {/each}
   </div>
   <footer>
     <DropdownMenu
-      label="Add New Grouping"
+      label={$_('add_new_grouping')}
       disabled={availableColumns.length === 0}
       triggerAppearance="secondary"
     >

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
-  import { Icon } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { Icon } from '@mathesar-component-library';
   import CellWrapper from '@mathesar/components/cell-fabric/data-types/components/CellWrapper.svelte';
   import type { PrimaryKeyCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import Default from '@mathesar/components/Default.svelte';
@@ -74,7 +74,7 @@
       <a
         {href}
         class="link"
-        title="Go To Record {value}"
+        title={$_('go_to_record_with_value', { values: { value } })}
         on:contextmenu={handleContextMenu}
       >
         <Icon {...iconLinkToRecordPage} />

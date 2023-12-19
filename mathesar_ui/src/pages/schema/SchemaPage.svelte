@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { queries } from '@mathesar/stores/queries';
   import {
@@ -16,7 +17,6 @@
     getSchemaPageTablesSectionUrl,
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
-  import { States } from '@mathesar/api/utils/requestUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { logEvent } from '@mathesar/utils/telemetry';
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
@@ -58,26 +58,26 @@
 
   $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
-  $: isTablesLoading = $tablesStore.state === States.Loading;
-  $: isExplorationsLoading = $queries.requestStatus.state === 'processing';
+  $: tablesRequestStatus = $tablesStore.requestStatus;
+  $: explorationsRequestStatus = $queries.requestStatus;
 
   $: tabs = [
     {
-      label: 'Overview',
+      label: $_('overview'),
       id: 'overview',
-      href: getSchemaPageUrl(database.nickname, schema.id),
+      href: getSchemaPageUrl(database.id, schema.id),
     },
     {
-      label: 'Tables',
+      label: $_('tables'),
       id: 'tables',
       count: tablesMap.size,
-      href: getSchemaPageTablesSectionUrl(database.nickname, schema.id),
+      href: getSchemaPageTablesSectionUrl(database.id, schema.id),
     },
     {
-      label: 'Explorations',
+      label: $_('explorations'),
       id: 'explorations',
       count: explorationsMap.size,
-      href: getSchemaPageExplorationsSectionUrl(database.nickname, schema.id),
+      href: getSchemaPageExplorationsSectionUrl(database.id, schema.id),
     },
   ] as TabItem[];
 
@@ -121,24 +121,24 @@
       {#if !isDefault && canExecuteDDL}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
-          <span>Edit Schema</span>
+          <span>{$_('edit_schema')}</span>
         </Button>
       {/if}
       {#if canEditPermissions}
         <Button on:click={manageAccess} appearance="secondary">
           <Icon {...iconManageAccess} />
-          <span>Manage Access</span>
+          <span>{$_('manage_access')}</span>
         </Button>
       {/if}
     </div>
 
-    <slot slot="bottom">
+    <svelte:fragment slot="bottom">
       {#if schema.description}
         <span class="description">
           {schema.description}
         </span>
       {/if}
-    </slot>
+    </svelte:fragment>
   </AppSecondaryHeader>
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
@@ -153,17 +153,17 @@
         <SchemaOverview
           {canExecuteDDL}
           {canEditMetadata}
-          {isTablesLoading}
-          {isExplorationsLoading}
+          {tablesRequestStatus}
           {tablesMap}
           {explorationsMap}
           {database}
           {schema}
+          {explorationsRequestStatus}
         />
       </div>
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
-        {#if isTablesLoading}
+        {#if tablesRequestStatus.state === 'processing'}
           <TableSkeleton numTables={schema.num_tables} />
         {:else}
           <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
@@ -171,7 +171,7 @@
       </div>
     {:else if activeTab?.id === 'explorations'}
       <div class="tab-container">
-        {#if isExplorationsLoading}
+        {#if explorationsRequestStatus.state === 'processing'}
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations

@@ -1,9 +1,16 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton } from '@mathesar-component-library';
+  import { AnchorButton, Button } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { iconRefresh } from '@mathesar/icons';
+  import { refetchQueriesForSchema } from '@mathesar/stores/queries';
+  import { refetchTablesForSchema } from '@mathesar/stores/tables';
+  import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import OverviewHeader from './OverviewHeader.svelte';
   import TablesList from './TablesList.svelte';
   import ExplorationsList from './ExplorationsList.svelte';
@@ -15,8 +22,8 @@
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;
-  export let isTablesLoading = false;
-  export let isExplorationsLoading = false;
+  export let tablesRequestStatus: RequestStatus;
+  export let explorationsRequestStatus: RequestStatus;
 
   export let canExecuteDDL: boolean;
   export let canEditMetadata: boolean;
@@ -28,6 +35,7 @@
   $: hasExplorations = explorationsMap.size > 0;
   $: showTableCreationTutorial = !hasTables && canExecuteDDL;
   $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
+  $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
 
   // Viewers can explore, they cannot save explorations
   $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
@@ -35,15 +43,33 @@
 
 <div class="container">
   <div class="vertical-container tables">
-    <OverviewHeader title="Tables">
+    <OverviewHeader title={$_('tables')}>
       <svelte:fragment slot="action">
         {#if canExecuteDDL}
           <CreateNewTableButton {database} {schema} />
         {/if}
       </svelte:fragment>
     </OverviewHeader>
-    {#if isTablesLoading}
+    {#if tablesRequestStatus.state === 'processing'}
       <TableSkeleton numTables={schema.num_tables} />
+    {:else if tablesRequestStatus.state === 'failure'}
+      <ErrorBox>
+        <p>{tablesRequestStatus.errors[0]}</p>
+        <div>
+          <SpinnerButton
+            onClick={async () => {
+              await refetchTablesForSchema(schema.id);
+            }}
+            label={$_('retry')}
+            icon={iconRefresh}
+          />
+          <a href="../">
+            <Button>
+              <span>{$_('go_to_database')}</span>
+            </Button>
+          </a>
+        </div>
+      </ErrorBox>
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
@@ -57,9 +83,27 @@
   </div>
   <div class="vertical-container explorations">
     <div class="vertical-container">
-      <OverviewHeader title="Saved Explorations" />
+      <OverviewHeader title={$_('saved_explorations')} />
       {#if isExplorationsLoading}
         <ExplorationSkeleton />
+      {:else if explorationsRequestStatus.state === 'failure'}
+        <ErrorBox>
+          <p>{explorationsRequestStatus.errors[0]}</p>
+          <div>
+            <SpinnerButton
+              onClick={async () => {
+                await refetchQueriesForSchema(schema.id);
+              }}
+              label={$_('retry')}
+              icon={iconRefresh}
+            />
+            <a href="../">
+              <Button>
+                <span>{$_('go_to_database')}</span>
+              </Button>
+            </a>
+          </div>
+        </ErrorBox>
       {:else if showExplorationTutorial}
         <CreateNewExplorationTutorial {database} {schema} />
       {:else}
@@ -74,15 +118,13 @@
 
     {#if canExplore}
       <div class="vertical-container">
-        <OverviewHeader title="Explore your Data" />
+        <OverviewHeader title={$_('explore_your_data')} />
         <span>
-          Explorations let you query your data to uncover trends and insights.
+          {$_('what_is_an_exploration_mini')}
         </span>
         <div>
-          <AnchorButton
-            href={getDataExplorerPageUrl(database.nickname, schema.id)}
-          >
-            Open Data Explorer
+          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
+            {$_('open_data_explorer')}
           </AnchorButton>
         </div>
       </div>

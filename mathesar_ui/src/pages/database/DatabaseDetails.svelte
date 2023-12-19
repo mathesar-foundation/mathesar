@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     Help,
@@ -28,20 +29,21 @@
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
-  import { getDatabaseConnectionEditUrl } from '@mathesar/routes/urls';
-  import { reloadDatabases } from '@mathesar/stores/databases';
+  import {
+    EditConnectionModal,
+    DeleteConnectionModal,
+  } from '@mathesar/systems/connections';
+  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
+  import { RichText } from '@mathesar/components/rich-text';
   import { router } from 'tinro';
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
-  import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
-  import DeleteDatabaseConnectionConfirmationModal from './DeleteDatabaseConnectionConfirmationModal.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();
+  const editConnectionModal = modal.spawnModalController();
   const deleteConnectionModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -88,11 +90,11 @@
 
   function deleteSchema(schema: SchemaEntry) {
     void confirmDelete({
-      identifierType: 'Schema',
+      identifierType: $_('schema'),
       identifierName: schema.name,
-      body: deleteSchemaConfirmationBody,
+      body: [$_('schema_delete_warning'), $_('are_you_sure_to_proceed')],
       onProceed: async () => {
-        await deleteSchemaAPI(database.nickname, schema.id);
+        await deleteSchemaAPI(database.id, schema.id);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesInSchemaTablesStore(schema.id);
       },
@@ -118,11 +120,6 @@
       isReflectionRunning = false;
     }
   }
-
-  async function handleSuccessfulDeleteConnection() {
-    await reloadDatabases();
-    router.goto('/');
-  }
 </script>
 
 <AppSecondaryHeader
@@ -138,7 +135,7 @@
         {#if canEditPermissions}
           <Button on:click={manageAccess} appearance="secondary">
             <Icon {...iconManageAccess} />
-            <span>Manage Access</span>
+            <span>{$_('manage_access')}</span>
           </Button>
         {/if}
         <DropdownMenu
@@ -156,34 +153,30 @@
             on:click={reflect}
           >
             <div class="reflect">
-              Sync External Changes
+              {$_('sync_external_changes')}
               <Help>
                 <p>
-                  If you make structural changes to the database outside
-                  Mathesar (e.g. using another tool to add a schema, table, or
-                  column), those changes will not be reflected in Mathesar until
-                  you manually sync them with this button.
+                  {$_('sync_external_changes_structure_help')}
                 </p>
                 <p>
-                  External changes to data (e.g. adding or editing
-                  <em>rows</em>) will be automatically reflected without
-                  clicking this button.
+                  {$_('sync_external_changes_data_help')}
                 </p>
               </Help>
             </div>
           </ButtonMenuItem>
           {#if userProfile?.isSuperUser}
-            <LinkMenuItem
+            <ButtonMenuItem
               icon={iconEdit}
-              href={getDatabaseConnectionEditUrl(database.nickname)}
+              on:click={() => editConnectionModal.open()}
             >
-              Edit Database Connection
-            </LinkMenuItem>
+              {$_('edit_connection')}
+            </ButtonMenuItem>
             <ButtonMenuItem
               icon={iconDeleteMajor}
+              danger
               on:click={() => deleteConnectionModal.open()}
             >
-              Disconnect Database
+              {$_('delete_connection')}
             </ButtonMenuItem>
           {/if}
         </DropdownMenu>
@@ -194,10 +187,10 @@
 
 <div class="schema-list-wrapper">
   <div class="schema-list-title-container">
-    <h2 class="schema-list-title">Schemas ({schemasMap.size})</h2>
+    <h2 class="schema-list-title">{$_('schemas')} ({schemasMap.size})</h2>
   </div>
   <EntityContainerWithFilterBar
-    searchPlaceholder="Search Schemas"
+    searchPlaceholder={$_('search_schemas')}
     bind:searchQuery={filterQuery}
     on:clear={handleClearFilterQuery}
   >
@@ -205,14 +198,21 @@
       {#if canExecuteDDL}
         <Button on:click={addSchema} appearance="primary">
           <Icon {...iconAddNew} />
-          <span>Create Schema</span>
+          <span>{$_('create_schema')}</span>
         </Button>
       {/if}
     </svelte:fragment>
     <p slot="resultInfo">
-      {labeledCount(displayList, 'results')}
-      for all schemas matching
-      <strong>{filterQuery}</strong>
+      <RichText
+        text={$_('schemas_matching_search', {
+          values: { count: displayList.length },
+        })}
+        let:slotName
+      >
+        {#if slotName === 'searchValue'}
+          <strong>{filterQuery}</strong>
+        {/if}
+      </RichText>
     </p>
     <ul class="schema-list" slot="content">
       {#each displayList as schema (schema.id)}
@@ -233,20 +233,20 @@
   </EntityContainerWithFilterBar>
 </div>
 
-{#if !('error' in database)}
-  <AddEditSchemaModal
-    controller={addEditModal}
-    {database}
-    schema={targetSchema}
-  />
+<AddEditSchemaModal
+  controller={addEditModal}
+  {database}
+  schema={targetSchema}
+/>
 
-  <DbAccessControlModal controller={accessControlModal} {database} />
-  <DeleteDatabaseConnectionConfirmationModal
-    controller={deleteConnectionModal}
-    {database}
-    on:success={handleSuccessfulDeleteConnection}
-  />
-{/if}
+<DbAccessControlModal controller={accessControlModal} {database} />
+
+<EditConnectionModal controller={editConnectionModal} connection={database} />
+<DeleteConnectionModal
+  controller={deleteConnectionModal}
+  connection={database}
+  on:delete={() => router.goto(CONNECTIONS_URL)}
+/>
 
 <style lang="scss">
   .schema-list-wrapper {

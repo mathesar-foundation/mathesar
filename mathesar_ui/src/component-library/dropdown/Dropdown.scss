@@ -22,6 +22,11 @@ button.dropdown.trigger {
     align-items: center;
     padding: 0 0.1rem;
   }
+  &:focus {
+    outline: 2px solid var(--slate-300);
+    outline-offset: 1px;
+    border-radius: var(--border-radius-s);
+  }
 }
 
 .dropdown.content {
@@ -40,8 +45,10 @@ button.dropdown.trigger {
   overflow: auto;
 
   &[data-popper-placement='top-start'] {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px -10px 15px -3px,
-      rgba(0, 0, 0, 0.05) 0px -4px 2px -2px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    box-shadow:
+      rgba(0, 0, 0, 0.1) 0px -10px 15px -3px,
+      rgba(0, 0, 0, 0.05) 0px -4px 2px -2px,
+      rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
       #000 0 0 0 0;
   }
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
-
+  import { _ } from 'svelte-i18n';
   import { RadioGroup } from '@mathesar/component-library';
   import LabelInferenceTrue from './LabelInferenceTrue.svelte';
   import LabelInferenceFalse from './LabelInferenceFalse.svelte';
@@ -16,7 +16,7 @@
   on:change
   boxed
   options={[true, false]}
-  label="Column Data Types"
+  label={$_('column_data_types')}
   getRadioLabel={(v) =>
     v ? { component: LabelInferenceTrue } : { component: LabelInferenceFalse }}
   {...$$restProps}

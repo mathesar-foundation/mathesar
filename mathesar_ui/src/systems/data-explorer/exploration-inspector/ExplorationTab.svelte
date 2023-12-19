@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import {
     Collapsible,
     LabeledInput,
@@ -76,7 +77,7 @@
       query.set(updatedQuery);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Unable to save Exploration.';
+        err instanceof Error ? err.message : $_('unable_to_save_exploration');
       toast.error(message);
     }
   }
@@ -96,14 +97,14 @@
 </script>
 
 <Collapsible isOpen triggerAppearance="plain">
-  <span slot="header">Properties</span>
+  <span slot="header">{$_('properties')}</span>
   <div slot="content" class="section-content">
     <Form>
       <FormField>
-        <LabeledInput label="Name" layout="stacked">
+        <LabeledInput label={$_('name')} layout="stacked">
           <TextInput
             value={name}
-            aria-label="name"
+            aria-label={$_('name')}
             on:change={handleNameChange}
             on:input={setHasChangesToTrue}
             disabled={!canEditMetadata}
@@ -111,10 +112,10 @@
         </LabeledInput>
       </FormField>
       <FormField>
-        <LabeledInput label="Description" layout="stacked">
+        <LabeledInput label={$_('description')} layout="stacked">
           <TextArea
             value={description}
-            aria-label="description"
+            aria-label={$_('description')}
             on:change={handleDescriptionChange}
             on:input={setHasChangesToTrue}
             disabled={!canEditMetadata}
@@ -126,7 +127,7 @@
         <FormField>
           <CancelOrProceedButtonPair
             cancelButton={{ icon: undefined }}
-            proceedButton={{ icon: undefined, label: 'Save' }}
+            proceedButton={{ icon: undefined, label: $_('save') }}
             onCancel={handleCancel}
             onProceed={handleSave}
           />
@@ -138,7 +139,7 @@
 
 {#if canEditMetadata}
   <Collapsible isOpen triggerAppearance="plain">
-    <span slot="header">Actions</span>
+    <span slot="header">{$_('actions')}</span>
     <div slot="content" class="section-content actions">
       <Button
         class="delete-button"
@@ -146,7 +147,7 @@
         on:click={handleDeleteExploration}
       >
         <Icon {...iconDeleteMajor} />
-        <span>Delete Exploration</span>
+        <span>{$_('delete_exploration')}</span>
       </Button>
     </div>
   </Collapsible>

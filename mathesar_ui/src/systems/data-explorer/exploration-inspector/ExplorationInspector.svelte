@@ -72,10 +72,12 @@
         background-color: var(--sand-400);
       }
     }
-    :global(.collapsible
-        > .collapsible-header
-        > button.btn
-        .collapsible-header-title) {
+    :global(
+        .collapsible
+          > .collapsible-header
+          > button.btn
+          .collapsible-header-title
+      ) {
       font-weight: 590;
     }
     :global(.collapsible .section-content.actions .delete-button) {

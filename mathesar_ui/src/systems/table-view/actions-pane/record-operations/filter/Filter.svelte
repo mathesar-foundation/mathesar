@@ -2,7 +2,7 @@
   import { takeLast } from 'iter-tools';
   import { onMount, tick } from 'svelte';
   import { writable, type Writable } from 'svelte/store';
-
+  import { _ } from 'svelte-i18n';
   import { Button, Icon } from '@mathesar-component-library';
   import type { FilterCombination } from '@mathesar/api/types/tables/records';
   import type { LinkedRecordInputElement } from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordUtils';
@@ -114,7 +114,7 @@
 </script>
 
 <div class="filters" class:filtered={filterCount} bind:this={element}>
-  <div class="header">Filter records</div>
+  <div class="header">{$_('filter_records')}</div>
   <div class="content">
     {#if filterCount}
       <FilterEntries
@@ -127,7 +127,7 @@
         on:updateCombination={(e) => setCombination(e.detail)}
       />
     {:else}
-      <span class="muted">No filters have been added</span>
+      <span class="muted">{$_('no_filters_added')}</span>
     {/if}
   </div>
   {#if processedColumns.size}
@@ -141,7 +141,7 @@
         }}
       >
         <Icon {...iconAddNew} />
-        <span>Add New Filter</span>
+        <span>{$_('add_new_filter')}</span>
       </Button>
     </div>
   {/if}

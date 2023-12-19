@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     CancelOrProceedButtonPair,
     portalToWindowFooter,
@@ -16,7 +17,7 @@
 <div use:portalToWindowFooter>
   <CancelOrProceedButtonPair
     onCancel={onClose}
-    proceedButton={{ label: 'Retry', icon: iconRefresh }}
+    proceedButton={{ label: $_('retry'), icon: iconRefresh }}
     onProceed={onRetry}
   />
 </div>

@@ -27,7 +27,7 @@
       estimatedItemSize={rowHeightPx}
       {itemKey}
       let:items
-      let:api
+      let:api={virtualListApi}
       on:scroll={(e) => {
         api.setScrollOffset(e.detail);
       }}
@@ -35,7 +35,7 @@
         api.setHorizontalScrollOffset(e.detail);
       }}
     >
-      <slot {items} {api} />
+      <slot {items} api={virtualListApi} />
     </VirtualList>
   </Resizer>
 </div>

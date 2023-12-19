@@ -150,8 +150,8 @@ type GetFieldsObj<F> = F extends Form<infer FieldsObj> ? FieldsObj : never;
 type FilledFieldValue<F> = F extends RequiredField<infer T>
   ? Filled<T>
   : F extends FieldStore<infer T>
-  ? T
-  : never;
+    ? T
+    : never;
 
 type FilledFieldValues<FieldsObj extends GenericFieldsObj> = {
   [K in keyof FieldsObj]: FilledFieldValue<FieldsObj[K]>;
