@@ -1,7 +1,7 @@
+from django.db.utils import IntegrityError
 from django_filters import rest_framework as filters
 from rest_access_policy import AccessViewSetMixin
-from rest_framework import serializers
-from rest_framework import viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
@@ -12,6 +12,7 @@ from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     DictHasBadKeys, UnsupportedInstallationDatabase
 )
+from mathesar.api.exceptions.database_exceptions.base_exceptions import IntegrityAPIException
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
 from mathesar.api.serializers.databases import ConnectionSerializer, TypeSerializer
@@ -72,6 +73,8 @@ class ConnectionViewSet(
             )
         except BadInstallationTarget:
             raise UnsupportedInstallationDatabase()
+        except IntegrityError as e:
+            raise IntegrityAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )
@@ -97,6 +100,8 @@ class ConnectionViewSet(
             )
         except BadInstallationTarget:
             raise UnsupportedInstallationDatabase()
+        except IntegrityError as e:
+            raise IntegrityAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )
@@ -122,6 +127,8 @@ class ConnectionViewSet(
             )
         except BadInstallationTarget:
             raise UnsupportedInstallationDatabase()
+        except IntegrityError as e:
+            raise IntegrityAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = ConnectionSerializer(
             created_connection, context={'request': request}, many=False
         )
