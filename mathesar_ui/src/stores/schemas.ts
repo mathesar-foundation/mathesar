@@ -4,7 +4,7 @@ import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type {
   PaginatedResponse,
-  RequestStatus
+  RequestStatus,
 } from '@mathesar/api/utils/requestUtils';
 import schemasApi from '@mathesar/api/schemas';
 import type { Connection } from '@mathesar/api/connections';
@@ -218,7 +218,7 @@ function getSchemasStoreForDB(
     }
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
-    void refetchSchemasForDB(connectionId)
+    void refetchSchemasForDB(connectionId);
   }
   return store;
 }
