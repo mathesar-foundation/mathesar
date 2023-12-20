@@ -17,15 +17,20 @@ from demo.install.base import (
 
 def load_datasets(engine):
     """Load some SQL files with demo data to DB targeted by `engine`."""
-    _load_library_dataset(engine)
-    _load_movies_dataset(engine)
+    load_library_dataset(engine)
+    load_movies_dataset(engine)
     _load_devcon_dataset(engine)
     _load_arxiv_data_skeleton(engine)
 
 
-def _load_library_dataset(engine):
+def load_library_dataset(engine, safe_mode=False):
     """
     Load the library dataset into a "Library Management" schema.
+
+    Args:
+        engine: an SQLAlchemy engine defining the connection to load data into.
+        safe_mode: When True, we will throw an error if the "Library Management"
+                   schema already exists instead of dropping it.
 
     Uses given engine to define database to load into.
     Destructive, and will knock out any previous "Library Management"
@@ -35,19 +40,30 @@ def _load_library_dataset(engine):
     create_schema_query = text(f"""CREATE SCHEMA "{LIBRARY_MANAGEMENT}";""")
     set_search_path = text(f"""SET search_path="{LIBRARY_MANAGEMENT}";""")
     with engine.begin() as conn, open(LIBRARY_ONE) as f1, open(LIBRARY_TWO) as f2:
-        conn.execute(drop_schema_query)
+        if safe_mode is False:
+            conn.execute(drop_schema_query)
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
         conn.execute(text(f1.read()))
         conn.execute(text(f2.read()))
 
 
-def _load_movies_dataset(engine):
+def load_movies_dataset(engine, safe_mode=False):
+    """
+    Load the movie demo data set.
+
+    Args:
+        engine: an SQLAlchemy engine defining the connection to load data into.
+        safe_mode: When True, we will throw an error if the "Movie Collection"
+                   schema already exists instead of dropping it.
+    """
+
     drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MOVIE_COLLECTION}" CASCADE;""")
     create_schema_query = text(f"""CREATE SCHEMA "{MOVIE_COLLECTION}";""")
     set_search_path = text(f"""SET search_path="{MOVIE_COLLECTION}";""")
     with engine.begin() as conn, bz2.open(MOVIES_SQL_BZ2, 'rt') as f:
-        conn.execute(drop_schema_query)
+        if safe_mode is False:
+            conn.execute(drop_schema_query)
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
         conn.execute(text(f.read()))
