@@ -9,6 +9,7 @@ import django
 from django.core import management
 from decouple import config as decouple_config
 from django.conf import settings
+from django.db.utils import IntegrityError
 from db import install
 
 
@@ -31,7 +32,10 @@ def main(skip_static_collection=False):
     django_db_key = decouple_config('DJANGO_DATABASE_KEY', default="default")
     user_databases = [key for key in settings.DATABASES if key != django_db_key]
     for database_key in user_databases:
-        install_on_db_with_key(database_key, skip_confirm)
+        try:
+            install_on_db_with_key(database_key, skip_confirm)
+        except IntegrityError:
+            continue
 
 
 def install_on_db_with_key(database_key, skip_confirm):
