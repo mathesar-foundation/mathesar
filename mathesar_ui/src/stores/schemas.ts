@@ -2,14 +2,9 @@ import { writable, derived, get } from 'svelte/store';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import {
-  deleteAPI,
-  getAPI,
-  patchAPI,
-  postAPI
-  States,
-  type PaginatedResponse,
-  type RequestStatus,
+import type {
+  PaginatedResponse,
+  RequestStatus
 } from '@mathesar/api/utils/requestUtils';
 import schemasApi from '@mathesar/api/schemas';
 import type { Connection } from '@mathesar/api/connections';
