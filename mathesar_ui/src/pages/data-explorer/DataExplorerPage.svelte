@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -23,20 +24,18 @@
     false;
 
   function gotoSchemaPage() {
-    router.goto(getSchemaPageUrl(database.nickname, schema.id));
+    router.goto(getSchemaPageUrl(database.id, schema.id));
   }
 
   function gotoExplorationPage() {
     if ($query.id) {
-      router.goto(
-        getExplorationPageUrl(database.nickname, schema.id, $query.id),
-      );
+      router.goto(getExplorationPageUrl(database.id, schema.id, $query.id));
     }
   }
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($query.name ?? 'Data Explorer')}</title>
+  <title>{makeSimplePageTitle($query.name ?? $_('data_explorer'))}</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>

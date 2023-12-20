@@ -9,7 +9,7 @@ export interface CommonData {
   schemas: SchemaResponse[];
   tables: TableEntry[];
   queries: QueryInstance[];
-  current_db_connection: string;
+  current_connection: Connection['id'] | null;
   internal_db_connection: {
     database: Connection['database'];
     host: Connection['host'];
@@ -45,6 +45,10 @@ export function preloadRouteData<T>(routeName: string): T | undefined {
   return getData<T>(`#${routeName}`);
 }
 
-export function preloadCommonData(): CommonData | undefined {
-  return getData('#common-data');
+export function preloadCommonData(): CommonData {
+  const commonData = getData<CommonData>('#common-data');
+  if (!commonData) {
+    throw new Error('commonData is undefined. This state should never occur');
+  }
+  return commonData;
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
   import { iconMultipleUsers } from '@mathesar/icons';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
@@ -15,7 +16,7 @@
   item={{
     type: 'simple',
     href: ADMIN_USERS_PAGE_URL,
-    label: 'Users',
+    label: $_('users'),
     icon: iconMultipleUsers,
   }}
 />

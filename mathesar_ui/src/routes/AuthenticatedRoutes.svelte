@@ -25,7 +25,7 @@
       return CONNECTIONS_URL;
     }
     const firstConnection = $connections[0];
-    return getDatabasePageUrl(firstConnection.nickname);
+    return getDatabasePageUrl(firstConnection.id);
   })();
 </script>
 
@@ -44,8 +44,8 @@
   </Route>
 {/if}
 
-<Route path="/db/:databaseName/*" let:meta firstmatch>
-  <DatabaseRoute databaseName={decodeURIComponent(meta.params.databaseName)} />
+<Route path="/db/:connectionId/*" let:meta firstmatch>
+  <DatabaseRoute connectionId={parseInt(meta.params.connectionId, 10)} />
 </Route>
 
 <Route path="/connections">

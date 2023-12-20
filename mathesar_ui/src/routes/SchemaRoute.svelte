@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
-
   import type { Database } from '@mathesar/AppTypes';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
@@ -97,5 +97,5 @@
     <SchemaPage {database} {schema} section={path} />
   </MultiPathRoute>
 {:else}
-  <ErrorPage>Schema not found.</ErrorPage>
+  <ErrorPage>{$_('schema_not_found')}</ErrorPage>
 {/if}

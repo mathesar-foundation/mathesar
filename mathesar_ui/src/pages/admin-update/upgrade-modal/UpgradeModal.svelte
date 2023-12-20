@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ControlledModal,
     type ModalController,
@@ -28,11 +29,11 @@
   let state: State = getInitialState();
   let reloadTimeout: number | undefined;
 
-  $: version = `Mathesar ${release.tagName}`;
+  $: version = `${$_('mathesar')} ${release.tagName}`;
   $: titleMap = ((): Record<Status, string> => ({
-    confirm: `Upgrade to ${version}`,
-    processing: `Upgrading to ${version}`,
-    error: 'Error Upgrading',
+    confirm: $_('upgrade_to_version', { values: { version } }),
+    processing: $_('upgrading_to_version', { values: { version } }),
+    error: $_('error_upgrading'),
   }))();
   $: title = titleMap[state.status];
 

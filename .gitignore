@@ -195,3 +195,6 @@ core
 
 # non tracked settings
 config/settings/local.py
+
+# Transifex binary
+tx

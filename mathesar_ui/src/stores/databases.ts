@@ -65,38 +65,32 @@ class ConnectionsStore {
 
   readonly count = writable(0);
 
-  readonly currentConnectionName = writable<
-    Connection['nickname'] | undefined
-  >();
+  readonly currentConnectionId = writable<Connection['id'] | undefined>();
 
   readonly currentConnection: Readable<ConnectionModel | undefined>;
 
   constructor() {
     this.requestStatus.set({ state: 'success' });
     this.connections.set(
-      commonData?.connections.map(
+      commonData.connections.map(
         (connection) => new ConnectionModel(connection),
       ) ?? [],
     );
-    this.count.set(commonData?.connections.length ?? 0);
-    this.currentConnectionName.set(
-      commonData?.current_db_connection ?? undefined,
-    );
+    this.count.set(commonData.connections.length ?? 0);
+    this.currentConnectionId.set(commonData.current_connection ?? undefined);
     this.currentConnection = derived(
-      [this.connections, this.currentConnectionName],
-      ([connections, currentConnectionName]) =>
-        connections.find(
-          (connection) => connection.nickname === currentConnectionName,
-        ),
+      [this.connections, this.currentConnectionId],
+      ([connections, currentConnectionId]) =>
+        connections.find((c) => c.id === currentConnectionId),
     );
   }
 
-  setCurrentConnectionName(connectionName: Connection['nickname']) {
-    this.currentConnectionName.set(connectionName);
+  setCurrentConnectionId(connectionId: Connection['id']) {
+    this.currentConnectionId.set(connectionId);
   }
 
-  clearCurrentConnectionName() {
-    this.currentConnectionName.set(undefined);
+  clearCurrentConnectionId() {
+    this.currentConnectionId.set(undefined);
   }
 
   async updateConnection(

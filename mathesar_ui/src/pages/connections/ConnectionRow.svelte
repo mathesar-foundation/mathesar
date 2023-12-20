@@ -24,7 +24,7 @@
 
 <tr data-identifier="connection-row" class="grid-row">
   <td>
-    <a href={getDatabasePageUrl(connection.nickname)}>
+    <a href={getDatabasePageUrl(connection.id)}>
       <Icon {...iconConnection} />
       {connection.nickname}
     </a>

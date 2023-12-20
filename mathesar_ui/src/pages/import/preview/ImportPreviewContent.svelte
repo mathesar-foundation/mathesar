@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import {
     CancelOrProceedButtonPair,
     Spinner,
@@ -69,7 +69,7 @@
     .filter((t) => t.id !== table.id)
     .map((t) => t.name);
   $: customizedTableName = requiredField(table.name, [
-    uniqueWith(otherTableNames, 'A table with this name already exists.'),
+    uniqueWith(otherTableNames, $_('table_name_already_exists')),
   ]);
   $: form = makeForm({ customizedTableName });
   $: records = $previewRequest.resolvedValue?.records ?? getSkeletonRecords();
@@ -105,7 +105,7 @@
   }) {
     const tableId = props.table?.id ?? table.id;
     router.goto(
-      getImportPreviewPageUrl(database.nickname, schema.id, tableId, {
+      getImportPreviewPageUrl(database.id, schema.id, tableId, {
         useColumnTypeInference:
           props.useColumnTypeInference ?? useColumnTypeInference,
       }),
@@ -143,7 +143,7 @@
   async function cancel() {
     const response = await cancelationRequest.run({ database, schema, table });
     if (response.isOk) {
-      router.goto(getSchemaPageUrl(database.nickname, schema.id), true);
+      router.goto(getSchemaPageUrl(database.id, schema.id), true);
     } else {
       toast.fromError(response.error);
     }
@@ -156,10 +156,7 @@
         import_verified: true,
         columns: finalizeColumns(columns, columnPropertiesMap),
       });
-      router.goto(
-        getTablePageUrl(database.nickname, schema.id, table.id),
-        true,
-      );
+      router.goto(getTablePageUrl(database.id, schema.id, table.id), true);
     } catch (err) {
       toast.fromError(err);
     }
@@ -167,7 +164,7 @@
 </script>
 
 <ImportPreviewLayout>
-  <Field field={customizedTableName} label="Table Name" />
+  <Field field={customizedTableName} label={$_('table_name')} />
   <FieldLayout>
     <ColumnNamingStrategyInput
       value={dataFile.header}
@@ -184,12 +181,14 @@
   </FieldLayout>
   <FieldLayout>
     <InfoBox>
-      You can customize column names and types within the preview below.
+      {$_('customize_names_types_preview')}
     </InfoBox>
   </FieldLayout>
 
   <svelte:fragment slot="preview">
-    <h2 class="large-bold-header preview-header">Table Preview</h2>
+    <h2 class="large-bold-header preview-header">
+      {$_('table_preview')}
+    </h2>
     <div class="preview-content">
       {#if $columnsFetch.error}
         <ErrorInfo
@@ -223,7 +222,11 @@
         </div>
         {#if records.length === TRUNCATION_LIMIT}
           <div class="truncation-alert">
-            (Preview is truncated at {TRUNCATION_LIMIT} rows.)
+            ({$_('preview_truncated_at_limit', {
+              values: {
+                limit: TRUNCATION_LIMIT,
+              },
+            })})
           </div>
         {/if}
       {/if}
@@ -232,13 +235,13 @@
 
   <svelte:fragment slot="footer">
     {#if $cancelationRequest.isLoading}
-      Cleaning up... <Spinner />
+      {$_('cleaning_up')}... <Spinner />
     {:else}
       <CancelOrProceedButtonPair
         onCancel={cancel}
         onProceed={finishImport}
         cancelButton={{ icon: iconDeleteMajor }}
-        proceedButton={{ label: 'Confirm & create table' }}
+        proceedButton={{ label: $_('confirm_and_create_table') }}
         {canProceed}
       />
     {/if}
