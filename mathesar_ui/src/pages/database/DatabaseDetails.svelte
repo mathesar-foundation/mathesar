@@ -41,7 +41,6 @@
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaRow from './SchemaRow.svelte';
-  import { deleteSchemaConfirmationBody } from './__help__/databaseHelp';
   import SchemaListSkeleton from './SchemaListSkeleton.svelte';
 
   const addEditModal = modal.spawnModalController();
