@@ -3,7 +3,8 @@ from psycopg2.errors import DuplicateSchema
 from mathesar.models.base import Database
 from db import install, connection as dbconn
 from mathesar.state import reset_reflection
-from demo.install.datasets import load_library_dataset, load_movies_dataset
+from demo.install.library_dataset import load_library_dataset
+from demo.install.movies_dataset import load_movies_dataset
 
 
 class BadInstallationTarget(Exception):
