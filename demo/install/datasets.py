@@ -1,15 +1,14 @@
 """This module contains functions to load datasets for the demo."""
-import bz2
 import logging
 import pickle
 
 from sqlalchemy import text
 
 from demo.install.arxiv_skeleton import setup_and_register_schema_for_receiving_arxiv_data
+from demo.install.library_dataset import load_library_dataset
+from demo.install.movies_dataset import load_movies_dataset
 from demo.management.commands.load_arxiv_data import update_arxiv_schema
 from demo.install.base import (
-    LIBRARY_MANAGEMENT, LIBRARY_ONE, LIBRARY_TWO,
-    MOVIE_COLLECTION, MOVIES_SQL_BZ2,
     MATHESAR_CON, DEVCON_DATASET,
     ARXIV, ARXIV_PAPERS_PICKLE,
 )
@@ -21,52 +20,6 @@ def load_datasets(engine):
     load_movies_dataset(engine)
     _load_devcon_dataset(engine)
     _load_arxiv_data_skeleton(engine)
-
-
-def load_library_dataset(engine, safe_mode=False):
-    """
-    Load the library dataset into a "Library Management" schema.
-
-    Args:
-        engine: an SQLAlchemy engine defining the connection to load data into.
-        safe_mode: When True, we will throw an error if the "Library Management"
-                   schema already exists instead of dropping it.
-
-    Uses given engine to define database to load into.
-    Destructive, and will knock out any previous "Library Management"
-    schema in the given database.
-    """
-    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{LIBRARY_MANAGEMENT}" CASCADE;""")
-    create_schema_query = text(f"""CREATE SCHEMA "{LIBRARY_MANAGEMENT}";""")
-    set_search_path = text(f"""SET search_path="{LIBRARY_MANAGEMENT}";""")
-    with engine.begin() as conn, open(LIBRARY_ONE) as f1, open(LIBRARY_TWO) as f2:
-        if safe_mode is False:
-            conn.execute(drop_schema_query)
-        conn.execute(create_schema_query)
-        conn.execute(set_search_path)
-        conn.execute(text(f1.read()))
-        conn.execute(text(f2.read()))
-
-
-def load_movies_dataset(engine, safe_mode=False):
-    """
-    Load the movie demo data set.
-
-    Args:
-        engine: an SQLAlchemy engine defining the connection to load data into.
-        safe_mode: When True, we will throw an error if the "Movie Collection"
-                   schema already exists instead of dropping it.
-    """
-
-    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MOVIE_COLLECTION}" CASCADE;""")
-    create_schema_query = text(f"""CREATE SCHEMA "{MOVIE_COLLECTION}";""")
-    set_search_path = text(f"""SET search_path="{MOVIE_COLLECTION}";""")
-    with engine.begin() as conn, bz2.open(MOVIES_SQL_BZ2, 'rt') as f:
-        if safe_mode is False:
-            conn.execute(drop_schema_query)
-        conn.execute(create_schema_query)
-        conn.execute(set_search_path)
-        conn.execute(text(f.read()))
 
 
 def _load_devcon_dataset(engine):
