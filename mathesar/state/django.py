@@ -158,6 +158,8 @@ def _create_reflected_columns(attnum_tuples, tables):
         column = models.Column(attnum=attnum, table=table, display_options=None)
         columns.append(column)
     models.Column.current_objects.bulk_create(columns, ignore_conflicts=True)
+    # Calling signals manually because bulk create does not emit any signals
+    models._create_column_settings(models.Column.current_objects.filter(settings__isnull=True))
 
 
 def _delete_stale_columns(attnum_tuples, tables):

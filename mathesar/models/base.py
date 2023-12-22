@@ -920,6 +920,19 @@ class PreviewColumnSettings(BaseModel):
     template = models.CharField(max_length=255)
 
 
+class ColumnSetting(ReflectionManagerMixin, BaseModel):
+    column = models.OneToOneField(Column, on_delete=models.CASCADE, related_name="settings")
+    width = models.IntegerField(null=True, default=20)
+
+
+def _create_column_settings(columns):
+    column_settings = []
+    for column in columns:
+        column_setting = ColumnSetting(column=column)
+        column_settings.append(column_setting)
+    ColumnSetting.current_objects.bulk_create(column_settings)
+
+
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
