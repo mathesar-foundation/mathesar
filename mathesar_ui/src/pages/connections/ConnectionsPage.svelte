@@ -144,7 +144,6 @@
     padding: var(--size-x-large);
     align-items: center;
     border-bottom: 1px solid var(--sand-200);
-    
 
     span {
       flex: 1 0 0;
@@ -160,15 +159,11 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--size-x-small);
-    align-items: center;
-    height: 100vh;
 
     [data-identifier='connections-list-grid'] {
       border: 1px solid var(--slate-200);
       border-radius: var(--border-radius-m);
       overflow: auto;
-      max-width: 1587px;
-      width: 100%;
 
       table {
         border-collapse: collapse;
