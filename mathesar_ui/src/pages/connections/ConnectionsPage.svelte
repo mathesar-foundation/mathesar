@@ -55,97 +55,90 @@
 <svelte:head>
   <title>{makeSimplePageTitle($_('connections'))}</title>
 </svelte:head>
-<div class="container">
-  <LayoutWithHeader
-    cssVariables={{
-      '--page-padding': '0',
-    }}
-  >
-    <div data-identifier="connections-header">
-      <span>
-        {$_('database_connections')}
-        {#if $connections.length}({$connections.length}){/if}
-      </span>
-    </div>
 
-    <section data-identifier="connections-container">
-      {#if $connectionsRequestStatus.state === 'failure'}
-        <Errors errors={$connectionsRequestStatus.errors} />
-      {:else if $connections.length === 0}
-        <ConnectionsEmptyState />
-      {:else}
-        <EntityContainerWithFilterBar
-          searchPlaceholder={$_('search_database_connections')}
-          bind:searchQuery={filterQuery}
-          on:clear={handleClearFilterQuery}
-        >
-          <svelte:fragment slot="action">
-            {#if isSuperUser}
-              <Button
-                appearance="primary"
-                on:click={() => addConnectionModalController.open()}
-              >
-                <Icon {...iconAddNew} />
-                <span>{$_('add_database_connection')}</span>
-              </Button>
-            {/if}
-          </svelte:fragment>
+<LayoutWithHeader
+  cssVariables={{
+    '--page-padding': '0',
+  }}
+>
+  <div data-identifier="connections-header">
+    <span>
+      {$_('database_connections')}
+      {#if $connections.length}({$connections.length}){/if}
+    </span>
+  </div>
 
-          <p slot="resultInfo">
-            <RichText
-              text={$_('connections_matching_search', {
-                values: {
-                  count: filteredConnections.length,
-                },
-              })}
-              let:slotName
+  <section data-identifier="connections-container">
+    {#if $connectionsRequestStatus.state === 'failure'}
+      <Errors errors={$connectionsRequestStatus.errors} />
+    {:else if $connections.length === 0}
+      <ConnectionsEmptyState />
+    {:else}
+      <EntityContainerWithFilterBar
+        searchPlaceholder={$_('search_database_connections')}
+        bind:searchQuery={filterQuery}
+        on:clear={handleClearFilterQuery}
+      >
+        <svelte:fragment slot="action">
+          {#if isSuperUser}
+            <Button
+              appearance="primary"
+              on:click={() => addConnectionModalController.open()}
             >
-              {#if slotName === 'searchValue'}
-                <strong>{filterQuery}</strong>
-              {/if}
-            </RichText>
-          </p>
+              <Icon {...iconAddNew} />
+              <span>{$_('add_database_connection')}</span>
+            </Button>
+          {/if}
+        </svelte:fragment>
 
-          <svelte:fragment slot="content">
-            {#if filteredConnections.length}
-              <div data-identifier="connections-list-grid">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>{$_('connection_name')}</th>
-                      <th>{$_('database_name')}</th>
-                      <th>{$_('username')}</th>
-                      <th>{$_('host')}</th>
-                      <th>{$_('port')}</th>
-                      {#if isSuperUser}
-                        <th>{$_('actions')}</th>
-                      {/if}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {#each filteredConnections as connection (connection.id)}
-                      <ConnectionRow {connection} />
-                    {/each}
-                  </tbody>
-                </table>
-              </div>
+        <p slot="resultInfo">
+          <RichText
+            text={$_('connections_matching_search', {
+              values: {
+                count: filteredConnections.length,
+              },
+            })}
+            let:slotName
+          >
+            {#if slotName === 'searchValue'}
+              <strong>{filterQuery}</strong>
             {/if}
-          </svelte:fragment>
-        </EntityContainerWithFilterBar>
-      {/if}
-    </section>
-  </LayoutWithHeader>
-</div>
+          </RichText>
+        </p>
+
+        <svelte:fragment slot="content">
+          {#if filteredConnections.length}
+            <div data-identifier="connections-list-grid">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{$_('connection_name')}</th>
+                    <th>{$_('database_name')}</th>
+                    <th>{$_('username')}</th>
+                    <th>{$_('host')}</th>
+                    <th>{$_('port')}</th>
+                    {#if isSuperUser}
+                      <th>{$_('actions')}</th>
+                    {/if}
+                  </tr>
+                </thead>
+                <tbody>
+                  {#each filteredConnections as connection (connection.id)}
+                    <ConnectionRow {connection} />
+                  {/each}
+                </tbody>
+              </table>
+            </div>
+          {/if}
+        </svelte:fragment>
+      </EntityContainerWithFilterBar>
+    {/if}
+  </section>
+</LayoutWithHeader>
 
 <AddConnectionModal controller={addConnectionModalController} />
 
 <style lang="scss">
-  .container {
-    max-width: 1200px; /* Set the maximum width as per your design */
-    margin: 0 auto; /* Center the container horizontally */
-    padding: var(--size-large) var(--size-x-large) 0; /* Add padding to the sides if needed */
-  }
-
   [data-identifier='connections-header'] {
     display: flex;
     padding: var(--size-x-large);
