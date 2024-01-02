@@ -5,10 +5,12 @@
   https://docs.mathesar.org
 -->
 <script lang="ts">
+  import { getDocsLink } from '@mathesar/routes/urls';
+
   /** Should begin with a forward slash */
   export let path: string;
 
-  $: href = `https://docs.mathesar.org${path}`;
+  $: href = getDocsLink(path);
 </script>
 
 <a {href} target="_blank">

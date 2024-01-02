@@ -1,15 +1,11 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { active } from 'tinro';
   import { Menu, MenuItemContents } from '@mathesar-component-library';
-  import {
-    iconSettingsMajor,
-    iconMultipleUsers,
-    iconDatabase,
-  } from '@mathesar/icons';
+  import { iconSettingsMajor, iconMultipleUsers } from '@mathesar/icons';
   import {
     ADMIN_UPDATE_PAGE_URL,
     ADMIN_USERS_PAGE_URL,
-    DATABASE_CONNECTION_LIST_URL,
   } from '@mathesar/routes/urls';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
 
@@ -30,7 +26,7 @@
         icon={iconSettingsMajor}
         hasNotificationDot={upgradable}
       >
-        Update
+        {$_('update')}
       </MenuItemContents>
     </a>
     <a
@@ -39,16 +35,8 @@
       class="menu-item menu-item-link"
       use:active
     >
-      <MenuItemContents icon={iconMultipleUsers}>Users</MenuItemContents>
-    </a>
-    <a
-      role="menuitem"
-      href={DATABASE_CONNECTION_LIST_URL}
-      class="menu-item menu-item-link"
-      use:active
-    >
-      <MenuItemContents icon={iconDatabase}>
-        Database Connection
+      <MenuItemContents icon={iconMultipleUsers}>
+        {$_('users')}
       </MenuItemContents>
     </a>
   </Menu>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { createValidationContext } from '@mathesar/component-library';
   import CancelOrProceedButtonPair from '@mathesar/component-library/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
@@ -45,7 +46,7 @@
       const message =
         err instanceof Error
           ? err.message
-          : 'Unable to change column display options.';
+          : $_('unable_to_change_display_opts');
       toast.error(message);
       typeChangeState = { state: 'failure', errors: [message] };
     }
@@ -86,14 +87,14 @@
           onCancel={cancel}
           isProcessing={typeChangeState?.state === 'processing'}
           canProceed={!isSaveDisabled}
-          proceedButton={{ label: 'Save' }}
+          proceedButton={{ label: $_('save') }}
           size="small"
         />
       </div>
     {/if}
   </div>
 {:else}
-  <span>No formatting option for the column data type</span>
+  <span>{$_('no_formatting_option_data_type')}</span>
 {/if}
 
 <style lang="scss">

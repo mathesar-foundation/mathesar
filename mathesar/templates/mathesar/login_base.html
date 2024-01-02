@@ -1,7 +1,7 @@
 {% extends 'mathesar/app_styled_base.html' %}
 {% load i18n static %}
 
-{% block title %}{% translate "login"|title %}{% endblock %}
+{% block title %}{% translate "Login" %}{% endblock %}
 
 {% block page_styles %}
   <style type="text/css">
@@ -115,7 +115,7 @@
   {% if live_demo_mode %}
     <div class="unsupported-device">
       <div class="warning-icon">⚠️</div>
-      <p class="title">{% translate "unsupported screen size"|title %}</p>
+      <p class="title">{% translate "Unsupported Screen Size" %}</p>
       <p>
       {% translate "Mathesar is a spreadsheet-like application with a rich UI that does not yet function well on screens this small. Improved support for mobile devices is on our" %}
         
@@ -129,7 +129,7 @@
     </div>
     <div class="tutorial align-center">
       <div class="header">
-        <strong>{% translate "live demo mode"|title %}</strong>
+        <strong>{% translate "Live Demo Mode" %}</strong>
       </div>
       <div class="body">
       {% translate "Mathesar's live demo is available to anyone to try out." %}
@@ -137,8 +137,8 @@
         {% if live_demo_username and live_demo_password %}
           {% translate "Use the following credentials to login" %}:
           <ul>
-            <li>{% translate "username" %}: <strong>{{live_demo_username}}</strong></li>
-            <li>{% translate "password" %}: <strong>{{live_demo_password}}</strong></li>
+            <li>{% translate "Username" %}: <strong>{{live_demo_username}}</strong></li>
+            <li>{% translate "Password" %}: <strong>{{live_demo_password}}</strong></li>
           </ul>
         {% endif %}
 

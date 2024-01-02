@@ -1,5 +1,6 @@
 <script lang="ts">
   import { meta } from 'tinro';
+  import { _ } from 'svelte-i18n';
   import {
     currentTableId,
     tables as tablesStore,
@@ -28,7 +29,7 @@
       type: 'table',
       table,
       label: table.name,
-      href: getLinkForTableItem(database.nickname, schema.id, table),
+      href: getLinkForTableItem(database.id, schema.id, table),
       icon: iconTable,
       isActive() {
         return table.id === $currentTableId;
@@ -44,16 +45,12 @@
     return {
       type: 'simple',
       label: queryInstance.name,
-      href: getExplorationPageUrl(
-        database.nickname,
-        schema.id,
-        queryInstance.id,
-      ),
+      href: getExplorationPageUrl(database.id, schema.id, queryInstance.id),
       icon: iconTable,
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
         const entryhref = getExplorationPageUrl(
-          database.nickname,
+          database.id,
           schema.id,
           queryInstance.id,
         );
@@ -67,12 +64,12 @@
   $: queries = [...$queriesStore.data.values()];
 
   $: selectorData = new Map<string, BreadcrumbSelectorEntry[]>([
-    ['Tables', tables.map(makeTableBreadcrumbSelectorItem)],
-    ['Explorations', queries.map(makeQueryBreadcrumbSelectorItem)],
+    [$_('tables'), tables.map(makeTableBreadcrumbSelectorItem)],
+    [$_('explorations'), queries.map(makeQueryBreadcrumbSelectorItem)],
   ]);
 </script>
 
 <BreadcrumbSelector
   data={selectorData}
-  triggerLabel="Choose a Table or Exploration"
+  triggerLabel={$_('choose_table_or_exploration')}
 />

@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     Help,
     Icon,
     iconSettings,
-  } from '@mathesar/component-library';
+  } from '@mathesar-component-library';
   import { iconConstraint } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import TableConstraintsModal from '../../constraints/TableConstraintsModal.svelte';
@@ -16,11 +17,8 @@
   <Button on:click={() => constraintsModal.open()}>
     <div class="action-item">
       <div>
-        <Icon {...iconConstraint} /> <span>Constraints</span>
-        <Help
-          >Constraints are rules that apply to the data in a column to ensure
-          that it is valid.</Help
-        >
+        <Icon {...iconConstraint} /> <span>{$_('constraints')}</span>
+        <Help>{$_('constraints_info_help_mini')}</Help>
       </div>
       <Icon {...iconSettings} />
     </div>

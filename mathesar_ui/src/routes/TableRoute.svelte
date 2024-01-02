@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
-
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
@@ -39,5 +39,5 @@
     />
   </Route>
 {:else}
-  <ErrorPage>Table with id {tableId} not found.</ErrorPage>
+  <ErrorPage>{$_('table_not_found')}</ErrorPage>
 {/if}

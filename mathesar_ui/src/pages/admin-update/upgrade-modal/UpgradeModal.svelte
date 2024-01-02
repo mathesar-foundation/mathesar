@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ControlledModal,
     type ModalController,
@@ -7,7 +8,7 @@
   import type { Release } from '@mathesar/stores/releases';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import databaseApi from '@mathesar/api/databases';
+  import connectionsApi from '@mathesar/api/connections';
   import UpgradeConfirm from './UpgradeConfirm.svelte';
   import UpgradeError from './UpgradeError.svelte';
   import UpgradeProcessing from './UpgradeProcessing.svelte';
@@ -28,11 +29,11 @@
   let state: State = getInitialState();
   let reloadTimeout: number | undefined;
 
-  $: version = `Mathesar ${release.tagName}`;
+  $: version = `${$_('mathesar')} ${release.tagName}`;
   $: titleMap = ((): Record<Status, string> => ({
-    confirm: `Upgrade to ${version}`,
-    processing: `Upgrading to ${version}`,
-    error: 'Error Upgrading',
+    confirm: $_('upgrade_to_version', { values: { version } }),
+    processing: $_('upgrading_to_version', { values: { version } }),
+    error: $_('error_upgrading'),
   }))();
   $: title = titleMap[state.status];
 
@@ -45,7 +46,7 @@
 
   async function reloadOnServerAvailability(): Promise<void> {
     try {
-      await databaseApi.list();
+      await connectionsApi.list();
       window.location.reload();
     } catch {
       reloadTimeout = window.setTimeout(() => {

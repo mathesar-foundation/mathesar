@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getContext, tick } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import {
     SpinnerButton,
     Spinner,
@@ -95,13 +96,13 @@
       );
     }
     const confirmationPromise = confirm({
-      title: 'Remove old link and create a new link?',
+      title: $_('remove_old_link_create_new'),
       body: [
-        'Once you regenerate a new link, the old link will no longer work.',
-        'Are you sure you want to proceed?',
+        $_('new_link_wont_work_once_regenerated'),
+        $_('are_you_sure_to_proceed'),
       ],
       proceedButton: {
-        label: 'Regenerate Link',
+        label: $_('regenerate_link'),
         icon: undefined,
       },
     });
@@ -111,7 +112,7 @@
     cleanupDropdown();
     if (isConfirmed) {
       share = await api.regenerate(entityId, share.id);
-      toast.success('The link has been successfully regenerated');
+      toast.success($_('link_successfully_regenerated'));
     }
   }
 
@@ -123,10 +124,10 @@
       );
     }
     const confirmationPromise = confirm({
-      title: 'Disable Link?',
-      body: 'Are you sure you want to proceed?',
+      title: $_('disable_link_question'),
+      body: $_('are_you_sure_to_proceed'),
       proceedButton: {
-        label: 'Disable Link',
+        label: $_('disable_link'),
         icon: undefined,
       },
     });
@@ -149,7 +150,7 @@
         // or restricts permissions to clipboard
         document.execCommand('copy');
       }
-      toast.info('Link copied');
+      toast.info($_('link_copied'));
     }
   }
 </script>
@@ -181,13 +182,13 @@
             appearance="secondary"
             onClick={regenerateLink}
             icon={iconRecreate}
-            label="Regenerate Link"
+            label={$_('regenerate_link')}
           />
           <SpinnerButton
             appearance="secondary"
             onClick={disableLink}
             icon={iconDisable}
-            label="Disable Link"
+            label={$_('disable_link')}
           />
         </div>
       {:else}
@@ -198,7 +199,7 @@
           <SpinnerButton
             onClick={generateOrEnableShare}
             icon={iconAddNew}
-            label="Create Link"
+            label={$_('create_link')}
           />
         </div>
       {/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Route } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconSettingsMajor } from '@mathesar/icons';
@@ -8,20 +8,15 @@
   import SoftwareUpdate from '@mathesar/pages/admin-update/SoftwareUpdatePage.svelte';
   import AdminNavigation from '@mathesar/pages/admin-users/AdminNavigation.svelte';
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
-  import {
-    ADMIN_UPDATE_PAGE_URL,
-    ADMIN_URL,
-    DATABASE_CONNECTION_SLUG,
-  } from './urls';
+  import { ADMIN_UPDATE_PAGE_URL, ADMIN_URL } from './urls';
   import UsersRoute from './UsersRoute.svelte';
-  import DatabaseConnectionRoute from './DatabaseConnectionRoute.svelte';
 </script>
 
 <AppendBreadcrumb
   item={{
     type: 'simple',
     href: ADMIN_URL,
-    label: 'Administration',
+    label: $_('administration'),
     icon: iconSettingsMajor,
   }}
 />
@@ -39,7 +34,7 @@
     slot="secondary-header"
     theme="light"
     pageTitleAndMetaProps={{
-      name: 'Administration',
+      name: $_('administration'),
       icon: iconSettingsMajor,
     }}
   />
@@ -50,7 +45,7 @@
         item={{
           type: 'simple',
           href: ADMIN_UPDATE_PAGE_URL,
-          label: 'Software Update',
+          label: $_('software_update'),
         }}
       />
       <SoftwareUpdate />
@@ -58,10 +53,6 @@
 
     <Route path="/users/*" firstmatch>
       <UsersRoute />
-    </Route>
-
-    <Route path={`/${DATABASE_CONNECTION_SLUG}/*`} firstmatch>
-      <DatabaseConnectionRoute />
     </Route>
   </PageLayoutWithSidebar>
 </LayoutWithHeader>

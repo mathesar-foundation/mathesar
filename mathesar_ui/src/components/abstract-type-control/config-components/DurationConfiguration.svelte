@@ -1,10 +1,12 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
   import { LabeledInput, Select } from '@mathesar-component-library';
   import type { DurationUnit } from '@mathesar/api/types/tables/columns';
   import type { DurationConfig } from '@mathesar/utils/duration/types';
   import type { FormValues } from '@mathesar-component-library/types';
   import { DurationSpecification } from '@mathesar/utils/duration';
+  import { RichText } from '@mathesar/components/rich-text';
 
   interface DurationFormValues extends FormValues, DurationConfig {}
 
@@ -12,11 +14,11 @@
 
   const options: DurationUnit[] = DurationSpecification.getAllUnits();
   const labels: Record<DurationUnit, string> = {
-    d: 'days',
-    h: 'hours',
-    m: 'minutes',
-    s: 'seconds',
-    ms: 'milliseconds',
+    d: $_('days'),
+    h: $_('hours'),
+    m: $_('minutes'),
+    s: $_('seconds'),
+    ms: $_('milliseconds'),
   };
   const getLabel = (opt?: DurationUnit) => (opt && labels[opt]) ?? '';
 
@@ -50,7 +52,7 @@
 </script>
 
 <div class="form-element form-input">
-  <LabeledInput label="Max Time Unit" layout="stacked">
+  <LabeledInput label={$_('max_time_unit')} layout="stacked">
     <Select
       {options}
       value={$store.max}
@@ -61,7 +63,7 @@
 </div>
 
 <div class="form-element form-input">
-  <LabeledInput label="Min Time Unit" layout="stacked">
+  <LabeledInput label={$_('min_time_unit')} layout="stacked">
     <Select
       {options}
       value={$store.min}
@@ -72,7 +74,11 @@
 </div>
 
 <div class="form-element format">
-  Format: <span>{format}</span>
+  <RichText text={$_('format_displayer')} let:slotName>
+    {#if slotName === 'format'}
+      <span>{format}</span>
+    {/if}
+  </RichText>
 </div>
 
 <style lang="scss">
