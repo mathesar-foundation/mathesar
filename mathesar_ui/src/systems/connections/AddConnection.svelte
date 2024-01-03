@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
   import { map } from 'iter-tools';
+  import { _ } from 'svelte-i18n';
 
   import {
     CheckboxGroup,
     NumberInput,
     PasswordInput,
     RadioGroup,
+    defined,
     portalToWindowFooter,
   } from '@mathesar-component-library';
   import {
@@ -20,7 +21,6 @@
   import Select from '@mathesar/component-library/select/Select.svelte';
   import {
     FormSubmit,
-    comboMustBeEqual,
     makeForm,
     requiredField,
     uniqueWith,
@@ -35,7 +35,6 @@
   import { connectionsStore } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
   import { getAvailableName } from '@mathesar/utils/db';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import GeneralConnection from './GeneralConnection.svelte';
   import {
     generalConnections,
@@ -54,16 +53,6 @@
     return s.reuse
       ? $_('reuse_credentials_from_known_connection')
       : $_('enter_new_credentials');
-  }
-
-  interface UserStrategy {
-    /** We want to create a new PostgreSQL user */
-    create: boolean;
-    /** The UI user can modify the strategy */
-    modifiable: boolean;
-  }
-  function getUserStrategyLabel(s: UserStrategy) {
-    return s.create ? $_('create_new_pg_user') : $_('use_existing_pg_user');
   }
 
   type InstallationSchema = SampleDataSchemaIdentifier | 'internal';
@@ -108,92 +97,20 @@
   $: connectionToReuse = requiredField(defaultConnectionToReuse);
   $: host = requiredField('localhost');
   $: port = requiredField(5432);
-  $: existingUserName = requiredField('');
-  $: existingPassword = requiredField('');
-  $: availableBootstrapConnections = $generalConnections.filter(
-    (c) => c.connection.host === $host && c.connection.port === $port,
-  );
-  $: defaultBootstrapConnection = pickDefaultGeneralConnection(
-    availableBootstrapConnections,
-  );
-  $: userStrategy = requiredField<UserStrategy>(
-    defaultBootstrapConnection
-      ? { create: false, modifiable: true }
-      : { create: false, modifiable: false },
-  );
-  $: bootstrapConnection = requiredField(defaultBootstrapConnection);
-  $: newUserName = requiredField('');
-  $: newPassword = requiredField('');
-  $: confirmPassword = requiredField('');
-
-  $: overallStrategy = (() => {
-    if ($credentialsStrategy.reuse) {
-      return 'fromKnownConnection' as const;
-    }
-    if ($userStrategy.create) {
-      return 'withNewUser' as const;
-    }
-    return 'fromScratch' as const;
-  })();
-  $: form = (() => {
-    const commonFields = {
-      databaseName,
-      installationSchemas,
-      connectionNickname,
-    };
-    switch (overallStrategy) {
-      case 'fromKnownConnection':
-        return makeForm({
-          ...commonFields,
-          connectionToReuse,
-          createDatabase,
-        });
-      case 'fromScratch':
-        return makeForm({
-          ...commonFields,
-          host,
-          port,
-          existingUserName,
-          existingPassword,
-        });
-      case 'withNewUser':
-        return makeForm(
-          {
-            ...commonFields,
-            bootstrapConnection,
-            newUserName,
-            newPassword,
-            confirmPassword,
-            createDatabase,
-          },
-          [
-            comboMustBeEqual(
-              [newPassword, confirmPassword],
-              $_('passwords_do_not_match'),
-            ),
-          ],
-        );
-      default:
-        return assertExhaustive(overallStrategy);
-    }
-  })();
-
-  $: canCreateDb = $credentialsStrategy.reuse || $userStrategy.create;
+  $: user = requiredField('');
+  $: password = requiredField('');
+  $: commonFields = { databaseName, installationSchemas, connectionNickname };
+  $: allFields = $credentialsStrategy.reuse
+    ? { ...commonFields, connectionToReuse, createDatabase }
+    : { ...commonFields, host, port, user, password };
+  $: form = makeForm(allFields);
+  $: canCreateDb = $credentialsStrategy.reuse;
   $: databaseNameHelp = canCreateDb
     ? undefined
     : $_('this_database_must_exist_already');
-  $: databaseCreationUser = (() => {
-    switch (overallStrategy) {
-      case 'fromKnownConnection':
-        return $connectionToReuse && getUsername($connectionToReuse);
-      case 'fromScratch':
-        return undefined;
-      case 'withNewUser':
-        return $bootstrapConnection && getUsername($bootstrapConnection);
-      default:
-        return assertExhaustive(overallStrategy);
-    }
-  })();
+  $: databaseCreationUser = $credentialsStrategy.reuse
+    ? defined($connectionToReuse, getUsername)
+    : undefined;
 
   function handleNewDatabaseName(newDatabaseName: string) {
     $connectionNickname = getAvailableName(newDatabaseName, connectionNames);
@@ -208,49 +125,28 @@
       ),
       nickname: $connectionNickname,
     };
-    switch (overallStrategy) {
-      case 'fromKnownConnection': {
-        const connection = $connectionToReuse;
-        if (!connection) {
-          throw new Error('Bug: $connectionToReuse is undefined');
-        }
-        return connectionsStore.createFromKnownConnection({
-          ...commonProps,
-          credentials: {
-            connection: getConnectionReference(connection),
-          },
-          create_database: $createDatabase,
-        });
+    if ($credentialsStrategy.reuse) {
+      const connection = $connectionToReuse;
+      if (!connection) {
+        throw new Error('Bug: $connectionToReuse is undefined');
       }
-      case 'fromScratch': {
-        return connectionsStore.createFromScratch({
-          ...commonProps,
-          credentials: {
-            host: $host,
-            port: String($port),
-            user: $existingUserName,
-            password: $existingPassword,
-          },
-        });
-      }
-      case 'withNewUser': {
-        const connection = $bootstrapConnection;
-        if (!connection) {
-          throw new Error('Bug: $bootstrapConnection is undefined');
-        }
-        return connectionsStore.createWithNewUser({
-          ...commonProps,
-          credentials: {
-            user: $newUserName,
-            password: $newPassword,
-            create_user_via: getConnectionReference(connection),
-          },
-          create_database: $createDatabase,
-        });
-      }
-      default:
-        return assertExhaustive(overallStrategy);
+      return connectionsStore.createFromKnownConnection({
+        ...commonProps,
+        credentials: {
+          connection: getConnectionReference(connection),
+        },
+        create_database: $createDatabase,
+      });
     }
+    return connectionsStore.createFromScratch({
+      ...commonProps,
+      credentials: {
+        host: $host,
+        port: String($port),
+        user: $user,
+        password: $password,
+      },
+    });
   }
 
   async function saveConnectionDetails() {
@@ -308,66 +204,17 @@
         </div>
       </GridFormLabelRow>
 
-      {#if $userStrategy.modifiable}
-        <div>{$_('user_type')}</div>
-        <div>
-          <RadioGroup
-            bind:value={$userStrategy}
-            ariaLabel={$_('user_type')}
-            options={[
-              { create: false, modifiable: true },
-              { create: true, modifiable: true },
-            ]}
-            valuesAreEqual={(a, b) => a?.create === b?.create}
-            getRadioLabel={getUserStrategyLabel}
-          />
-        </div>
-      {/if}
+      <GridFormLabelRow label={$_('user_name')}>
+        <Field field={user} help={$_('existing_pg_user_privileges_help')} />
+      </GridFormLabelRow>
 
-      {#if $userStrategy.create}
-        <GridFormLabelRow label={$_('create_user_via')}>
-          <Select
-            bind:value={$bootstrapConnection}
-            options={availableBootstrapConnections}
-            getLabel={(generalConnection) => ({
-              component: GeneralConnection,
-              props: { generalConnection },
-            })}
-          />
-          <FieldHelp>{$_('bootstrap_connection_help')}</FieldHelp>
-        </GridFormLabelRow>
-
-        <GridFormLabelRow label={$_('new_user_name')}>
-          <Field field={newUserName} help={$_('new_pg_user_privileges_help')} />
-        </GridFormLabelRow>
-
-        <GridFormLabelRow label={$_('new_password')}>
-          <Field field={newPassword} input={{ component: PasswordInput }} />
-        </GridFormLabelRow>
-
-        <GridFormLabelRow label={$_('confirm_password')}>
-          <Field
-            field={confirmPassword}
-            input={{ component: PasswordInput }}
-            help={$_('password_encryption_help_plus_storage')}
-          />
-        </GridFormLabelRow>
-      {:else}
-        <GridFormLabelRow label={$_('user_name')}>
-          <Field
-            field={existingUserName}
-            help={$_('existing_pg_user_privileges_help')}
-          />
-        </GridFormLabelRow>
-
-        <GridFormLabelRow label={$_('password')}>
-          <Field
-            field={existingPassword}
-            input={{ component: PasswordInput }}
-            help={$_('password_encryption_help')}
-          />
-        </GridFormLabelRow>
-      {/if}
+      <GridFormLabelRow label={$_('password')}>
+        <Field
+          field={password}
+          input={{ component: PasswordInput }}
+          help={$_('password_encryption_help')}
+        />
+      </GridFormLabelRow>
     {/if}
 
     <GridFormDivider />
