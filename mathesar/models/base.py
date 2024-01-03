@@ -931,7 +931,15 @@ def validate_column_order(value):
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = JSONField(null=True, default=None, validators=[validate_column_order])
+    column_order = JSONField(null=True, blank=True, default=None, validators=[validate_column_order])
+
+    def save(self, **kwargs):
+        # Cleans the fields before saving by running respective field validator(s)
+        try:
+            self.clean_fields()
+        except ValidationError as e:
+            raise e
+        super().save(**kwargs)
 
 
 def _create_table_settings(tables):
