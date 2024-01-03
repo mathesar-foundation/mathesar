@@ -68,3 +68,4 @@ class ErrorCodes(Enum):
     InvalidJSONFormat = 4425
     UnsupportedJSONFormat = 4426
     UnsupportedFileFormat = 4427
+    UnsupportedInstallationDatabase = 4429

@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import TableName from '@mathesar/components/TableName.svelte';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import type {
     ProcessedQueryResultColumn,
     ProcessedQueryResultColumnMap,
@@ -57,7 +59,7 @@
 
 {#if aggregationColumn}
   <div data-identifier="aggregation-source">
-    <h1>Aggregated from</h1>
+    <h1>{$_('aggregated_from')}</h1>
     <div class="column-info">
       <span class="tag">
         <ColumnName
@@ -74,24 +76,30 @@
 
 {#if source}
   <div data-identifier="column-source">
-    <h1>Source Column</h1>
+    <h1>{$_('source_column')}</h1>
     <div class="column-info">
-      <span class="tag">
-        <ColumnName
-          isLoading={!source.column.name}
-          column={{
-            ...source.column,
-            name: source.column.name ?? '',
-          }}
-        />
-      </span>
-      <span class="from">from</span>
-      <span class="tag">
-        <TableName
-          isLoading={!source.table.name}
-          table={{ name: source.table.name ?? '' }}
-        />
-      </span>
+      <RichText text={$_('column_from_table')} let:slotName let:translatedArg>
+        {#if slotName === 'columnName'}
+          <span class="tag">
+            <ColumnName
+              isLoading={!source.column.name}
+              column={{
+                ...source.column,
+                name: source.column.name ?? '',
+              }}
+            />
+          </span>
+        {:else if slotName === 'fromSlot' && translatedArg}
+          <span class="from">{translatedArg}</span>
+        {:else if slotName === 'tableName'}
+          <span class="tag">
+            <TableName
+              isLoading={!source.table.name}
+              table={{ name: source.table.name ?? '' }}
+            />
+          </span>
+        {/if}
+      </RichText>
     </div>
   </div>
 {/if}

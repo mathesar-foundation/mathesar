@@ -9,6 +9,7 @@
    * if such a need arises in the future.
    */
   import { tick } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import {
     LabeledInput,
     type ModalController,
@@ -21,7 +22,7 @@
   import { toast } from '@mathesar/stores/toast';
   import TextArea from '@mathesar/component-library/text-area/TextArea.svelte';
 
-  export let saveButtonLabel = 'Save';
+  export let saveButtonLabel = $_('save');
   export let controller: ModalController;
   export let getNameValidationErrors: (name: string) => string[];
   export let getInitialName: () => string = () => '';
@@ -89,16 +90,16 @@
     <slot name="helpText" />
 
     <div class="input-container">
-      <LabeledInput label="Name" layout="stacked">
+      <LabeledInput label={$_('name')} layout="stacked">
         <TextInput
           bind:value={name}
           bind:element={inputElement}
-          aria-label="name"
+          aria-label={$_('name')}
           on:input={() => {
             nameHasChanged = true;
           }}
           disabled={isSubmitting}
-          placeholder="Name"
+          placeholder={$_('name')}
           id="name"
         />
         {#if nameHasChanged && nameValidationErrors.length}
@@ -111,12 +112,12 @@
 
     {#if !hideDescription}
       <div class="input-container">
-        <LabeledInput label="Description" layout="stacked">
+        <LabeledInput label={$_('description')} layout="stacked">
           <TextArea
             bind:value={description}
-            aria-label="description"
+            aria-label={$_('description')}
             disabled={isSubmitting}
-            placeholder="Description"
+            placeholder={$_('description')}
           />
         </LabeledInput>
       </div>

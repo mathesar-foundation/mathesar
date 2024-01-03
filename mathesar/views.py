@@ -1,4 +1,3 @@
-from config.settings.common_settings import DATABASES
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -142,7 +141,7 @@ def get_user_data(request):
 
 def get_base_data_all_routes(request, database=None, schema=None):
     return {
-        'current_db_connection': database.name if database else None,
+        'current_connection': database.id if database else None,
         'current_schema': schema.id if schema else None,
         'schemas': [],
         'connections': [],
@@ -158,16 +157,17 @@ def get_base_data_all_routes(request, database=None, schema=None):
 
 
 def _get_internal_db_meta():
-    internal_db = DATABASES['default']
-    if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
+    internal_db = Database.create_from_settings_key('default')
+    if internal_db is not None:
         return {
             'type': 'postgres',
-            'user': internal_db['USER'],
-            'host': internal_db['HOST'],
-            'port': internal_db['PORT'],
-            'database': internal_db['NAME']
+            'user': internal_db.username,
+            'host': internal_db.host,
+            'port': internal_db.port,
+            'database': internal_db.db_name
         }
-    return {'type': 'sqlite'}
+    else:
+        return {'type': 'sqlite'}
 
 
 def get_common_data(request, database=None, schema=None):
@@ -182,12 +182,12 @@ def get_common_data(request, database=None, schema=None):
     }
 
 
-def get_current_database(request, db_name):
+def get_current_database(request, connection_id):
     """Get database from passed name, with fall back behavior."""
     successful_dbs, failed_dbs = _get_permissible_db_queryset(request)
     permitted_databases = successful_dbs | failed_dbs
-    if db_name is not None:
-        current_database = get_object_or_404(permitted_databases, name=db_name)
+    if connection_id is not None:
+        current_database = get_object_or_404(permitted_databases, id=connection_id)
     else:
         request_database_name = get_live_demo_db_name(request)
         try:
@@ -283,12 +283,24 @@ def reflect_all(_):
 
 @login_required
 def home(request):
-    database = get_current_database(request, None)
-    if database is None:
+    connection_list = get_database_list(request)
+    number_of_connections = len(connection_list)
+    if number_of_connections > 1:
+        return redirect('connections')
+    elif number_of_connections == 1:
+        db = connection_list[0]
+        return redirect('schemas', connection_id=db['id'])
+    else:
         return render(request, 'mathesar/index.html', {
-            'common_data': get_common_data(request, database)
+            'common_data': get_common_data(request)
         })
-    return redirect('schemas', db_name=database.name)
+
+
+@login_required
+def connections(request):
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request)
+    })
 
 
 @login_required
@@ -306,8 +318,8 @@ def admin_home(request, **kwargs):
 
 
 @login_required
-def schema_home(request, db_name, schema_id, **kwargs):
-    database = get_current_database(request, db_name)
+def schema_home(request, connection_id, schema_id, **kwargs):
+    database = get_current_database(request, connection_id)
     schema = get_current_schema(request, schema_id, database)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, schema)
@@ -315,30 +327,8 @@ def schema_home(request, db_name, schema_id, **kwargs):
 
 
 @login_required
-def schemas(request, db_name):
-    database = get_current_database(request, db_name)
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request, database, None)
-    })
-
-
-@login_required
-def list_database_connection(request):
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request)
-    })
-
-
-@login_required
-def add_database_connection(request):
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request)
-    })
-
-
-@login_required
-def edit_database_connection(request, db_name):
-    database = get_current_database(request, db_name)
+def schemas(request, connection_id):
+    database = get_current_database(request, connection_id)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, None)
     })

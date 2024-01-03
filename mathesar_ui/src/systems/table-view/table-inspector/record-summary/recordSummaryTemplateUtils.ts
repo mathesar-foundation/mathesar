@@ -1,3 +1,5 @@
+import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 import type { Column } from '@mathesar/api/types/tables/columns';
 import { validIf, type ValidationFn } from '@mathesar/components/form';
 
@@ -23,7 +25,6 @@ export function getColumnsInTemplate(columns: Column[], template: string) {
 export function hasColumnReferences(columns: Column[]): ValidationFn<string> {
   return validIf(
     (template) => getColumnsInTemplate(columns, template).length > 0,
-    'The template must reference at least one column, otherwise the record ' +
-      'summary will be the same for all records.',
+    get(_)('template_refer_atleast_one_column_error'),
   );
 }

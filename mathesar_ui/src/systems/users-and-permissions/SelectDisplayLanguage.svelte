@@ -4,7 +4,7 @@
   import { preloadCommonData } from '@mathesar/utils/preloadData';
 
   const commonData = preloadCommonData();
-  const supportedLanguages = commonData?.supported_languages ?? {};
+  const supportedLanguages = commonData.supported_languages ?? {};
   const locales = Object.keys(supportedLanguages);
 
   export let value: Language | undefined = undefined;

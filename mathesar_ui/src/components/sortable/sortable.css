@@ -1,0 +1,21 @@
+[data-sortable-container] {
+  isolation: isolate;
+}
+
+[data-sortable-container].is-sorting [data-sortable-item]:not(.is-dragging) {
+  transition: transform 0.2s ease-in-out;
+}
+
+[data-sortable-item].is-dragging {
+  position: relative;
+  z-index: 1;
+}
+
+[data-sortable-trigger] {
+  cursor: grab;
+  touch-action: none;
+}
+
+[data-sortable-item].is-dragging [data-sortable-trigger] {
+  cursor: grabbing;
+}

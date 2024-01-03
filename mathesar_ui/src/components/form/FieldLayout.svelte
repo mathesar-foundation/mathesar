@@ -1,4 +1,4 @@
-<span class="field">
+<span class="field" {...$$restProps}>
   <slot />
 </span>
 

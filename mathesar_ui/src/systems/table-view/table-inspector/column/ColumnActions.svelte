@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Button, Icon, iconSettings } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { Button, Icon, iconSettings } from '@mathesar-component-library';
   import {
     iconDeleteMajor,
     iconMoveColumnsToNewLinkedTable,
@@ -11,7 +12,6 @@
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
-  import { pluralize } from '@mathesar/utils/languageUtils';
   import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
   import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 
@@ -24,17 +24,16 @@
 
   $: ({ processedColumns, columnsDataStore } = $tabularData);
   $: column = columns.length === 1 ? columns[0] : undefined;
-  $: columnsWord = pluralize(columns, 'columns', 'title');
   $: canMoveToLinkedTable = [...$processedColumns].some(([, c]) => c.linkFk);
 
   function handleDeleteColumn(c: ProcessedColumn) {
     void confirmDelete({
-      identifierType: 'column',
+      identifierType: $_('column'),
       identifierName: c.column.name,
       body: [
-        'All objects related to this column will be affected.',
-        'This could break existing tables and views.',
-        'Are you sure you want to proceed?',
+        $_('all_objects_related_to_column_affected'),
+        $_('could_break_tables_views'),
+        $_('are_you_sure_to_proceed'),
       ],
       onProceed: () => columnsDataStore.deleteColumn(c.id),
     });
@@ -58,7 +57,11 @@
     <div class="action-item">
       <div>
         <Icon {...iconMoveColumnsToNewLinkedTable} />
-        <span>Extract {columnsWord} Into a New Table</span>
+        <span>
+          {$_('extract_columns_to_new_table', {
+            values: { count: columns.length },
+          })}
+        </span>
       </div>
       <Icon {...iconSettings} />
     </div>
@@ -68,7 +71,11 @@
       <div class="action-item">
         <div>
           <Icon {...iconMoveColumnsToExistingLinkedTable} />
-          <span>Move {columnsWord} to Linked Table</span>
+          <span>
+            {$_('move_columns_to_linked_table', {
+              values: { count: columns.length },
+            })}
+          </span>
         </div>
         <Icon {...iconSettings} />
       </div>
@@ -80,7 +87,9 @@
       on:click={() => column && handleDeleteColumn(column)}
     >
       <Icon {...iconDeleteMajor} />
-      <span>Delete Column</span>
+      <span>
+        {$_('delete_column')}
+      </span>
     </Button>
   {/if}
 </div>

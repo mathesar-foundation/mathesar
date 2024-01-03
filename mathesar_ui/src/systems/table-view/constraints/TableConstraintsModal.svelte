@@ -1,20 +1,19 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ControlledModal,
     type ModalController,
-  } from '@mathesar/component-library';
+  } from '@mathesar-component-library';
   import TableConstraints from './TableConstraints.svelte';
 
   export let controller: ModalController;
 </script>
 
 <ControlledModal {controller}>
-  <span slot="title">Constraints</span>
-  <span class="description"
-    >Constraints are used to define relationships between records in different
-    tables or to ensure that records in a column are unique. Constraints can be
-    applied to a single column or a combination of columns.</span
-  >
+  <span slot="title">{$_('constraints')}</span>
+  <span class="description">
+    {$_('constraints_info_help')}
+  </span>
   <TableConstraints />
 </ControlledModal>
 

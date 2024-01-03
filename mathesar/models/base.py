@@ -146,6 +146,28 @@ class Database(ReflectionManagerMixin, BaseModel):
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
 
+    @classmethod
+    def create_from_settings_key(cls, db_key):
+        """
+        Get an ethereal instance of the model from Django settings.
+
+        This is only supported for Postgres DBs (e.g., it won't work on an
+        SQLite3 internal DB; that returns NoneType)
+
+        Args:
+            db_key: This should be the key of the DB in settings.DATABASES
+        """
+        db_info = settings.DATABASES[db_key]
+        if 'postgres' in db_info['ENGINE']:
+            return cls(
+                name=db_key,
+                db_name=db_info['NAME'],
+                username=db_info['USER'],
+                password=db_info['PASSWORD'],
+                host=db_info['HOST'],
+                port=db_info['PORT'],
+            )
+
     def save(self, **kwargs):
         db_name = self.name
         # invalidate cached engine as db credentials might get changed.

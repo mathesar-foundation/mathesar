@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import type { LinkedTable } from './columnExtractionTypes';
 
   export let linkedTable: LinkedTable;
@@ -13,9 +15,12 @@
     <TableName {table} bold truncate={false} />
   </span>
   <span class="columns">
-    via
-    {#each columns as column}
-      <ProcessedColumnName processedColumn={column} truncate={false} bold />
-    {/each}
+    <RichText text={$_('via_column_component')} let:slotName>
+      {#if slotName === 'columnComponent'}
+        {#each columns as column}
+          <ProcessedColumnName processedColumn={column} truncate={false} bold />
+        {/each}
+      {/if}
+    </RichText>
   </span>
 </span>

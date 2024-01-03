@@ -13,6 +13,12 @@ import {
 } from './mockData';
 import { getLinkFromColumn } from '../utils';
 
+vi.mock('@mathesar/utils/preloadData', () => ({
+  preloadCommonData: () => ({
+    connections: [],
+  }),
+}));
+
 describe('Test getLinkFromColumn', () => {
   test('should generate tree with forward links', () => {
     const forwardLinksFromItem = getLinkFromColumn(

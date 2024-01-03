@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import type {
     ColumnsDataStore,
@@ -18,11 +19,11 @@
       return [];
     }
     if (!newName) {
-      return ['Name cannot be empty.'];
+      return [$_('column_name_cannot_be_empty')];
     }
     const columnNames = $columns.map((c) => c.name);
     if (columnNames.includes(newName)) {
-      return ['A column with that name already exists.'];
+      return [$_('column_name_already_exists')];
     }
     return [];
   }
@@ -31,7 +32,7 @@
     try {
       await columnsDataStore.rename(column.id, newName);
     } catch (error) {
-      toast.error(`Unable to rename column. ${getErrorMessage(error)}`);
+      toast.error(`${$_('unable_to_rename_column')} ${getErrorMessage(error)}`);
     }
   }
 
@@ -42,14 +43,14 @@
       await columnsDataStore.updateDescription(column.id, description ?? null);
     } catch (error) {
       toast.error(
-        `Unable to update column description. ${getErrorMessage(error)}`,
+        `${$_('unable_to_update_column_desc')} ${getErrorMessage(error)}`,
       );
     }
   }
 </script>
 
 <div class="column-property column-name">
-  <span>Name</span>
+  <span>{$_('name')}</span>
   <EditableTextWithActions
     initialValue={column.column.name}
     onSubmit={handleColumnNameChange}
@@ -59,7 +60,7 @@
 </div>
 
 <div class="column-property column-description">
-  <span>Description</span>
+  <span>{$_('description')}</span>
   <EditableTextWithActions
     initialValue={column.column.description ?? ''}
     onSubmit={handleColumnDescriptionChange}

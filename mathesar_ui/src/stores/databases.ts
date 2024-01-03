@@ -1,69 +1,144 @@
-import { writable, derived } from 'svelte/store';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import databaseApi from '@mathesar/api/databases';
-import { States } from '@mathesar/api/utils/requestUtils';
+/* eslint-disable max-classes-per-file */
 
-import type { Writable } from 'svelte/store';
-import type { Database } from '@mathesar/AppTypes';
-import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
-import type { CancellablePromise } from '@mathesar-component-library';
+import {
+  writable,
+  derived,
+  type Writable,
+  type Readable,
+  get,
+} from 'svelte/store';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
+import connectionsApi, {
+  type Connection,
+  type UpdatableConnectionProperties,
+} from '@mathesar/api/connections';
+import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 const commonData = preloadCommonData();
 
-export const currentDBName: Writable<Database['nickname'] | undefined> =
-  writable(commonData?.current_db_connection ?? undefined);
+class ConnectionModel {
+  readonly id: Connection['id'];
 
-export interface DatabaseStoreData {
-  preload?: boolean;
-  state: States;
-  data: Database[];
-  error?: string;
-}
+  readonly nickname: Connection['nickname'];
 
-export const databases = writable<DatabaseStoreData>({
-  preload: true,
-  state: States.Done,
-  data: commonData?.connections ?? [],
-});
+  readonly database: Connection['database'];
 
-export const currentDatabase = derived(
-  [currentDBName, databases],
-  ([_currentDBName, databasesStore]) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const _databases = databasesStore.data;
-    if (!_databases?.length) {
-      return undefined;
-    }
-    return _databases?.find((database) => database.nickname === _currentDBName);
-  },
-);
+  readonly username: Connection['username'];
 
-let databaseRequest: CancellablePromise<PaginatedResponse<Database>>;
+  readonly host: Connection['host'];
 
-export async function reloadDatabases(): Promise<
-  PaginatedResponse<Database> | undefined
-> {
-  databases.update((currentData) => ({
-    ...currentData,
-    state: States.Loading,
-  }));
+  readonly port: Connection['port'];
 
-  try {
-    databaseRequest?.cancel();
-    databaseRequest = databaseApi.list();
-    const response = await databaseRequest;
-    const data = response.results || [];
-    databases.set({
-      state: States.Done,
-      data,
+  constructor(connectionDetails: Connection) {
+    this.id = connectionDetails.id;
+    this.nickname = connectionDetails.nickname;
+    this.database = connectionDetails.database;
+    this.username = connectionDetails.username;
+    this.host = connectionDetails.host;
+    this.port = connectionDetails.port;
+  }
+
+  getConnectionJson(): Connection {
+    return {
+      id: this.id,
+      nickname: this.nickname,
+      database: this.database,
+      username: this.username,
+      host: this.host,
+      port: this.port,
+    };
+  }
+
+  with(connectionDetails: Partial<Connection>): ConnectionModel {
+    return new ConnectionModel({
+      ...this.getConnectionJson(),
+      ...connectionDetails,
     });
-    return response;
-  } catch (err) {
-    databases.set({
-      data: [],
-      state: States.Error,
-      error: err instanceof Error ? err.message : undefined,
-    });
-    return undefined;
   }
 }
+
+class ConnectionsStore {
+  readonly requestStatus: Writable<RequestStatus> = writable();
+
+  readonly connections = writable<ConnectionModel[]>([]);
+
+  readonly count = writable(0);
+
+  readonly currentConnectionId = writable<Connection['id'] | undefined>();
+
+  readonly currentConnection: Readable<ConnectionModel | undefined>;
+
+  constructor() {
+    this.requestStatus.set({ state: 'success' });
+    this.connections.set(
+      commonData.connections.map(
+        (connection) => new ConnectionModel(connection),
+      ) ?? [],
+    );
+    this.count.set(commonData.connections.length ?? 0);
+    this.currentConnectionId.set(commonData.current_connection ?? undefined);
+    this.currentConnection = derived(
+      [this.connections, this.currentConnectionId],
+      ([connections, currentConnectionId]) =>
+        connections.find((c) => c.id === currentConnectionId),
+    );
+  }
+
+  setCurrentConnectionId(connectionId: Connection['id']) {
+    this.currentConnectionId.set(connectionId);
+  }
+
+  clearCurrentConnectionId() {
+    this.currentConnectionId.set(undefined);
+  }
+
+  async updateConnection(
+    connectionId: Connection['id'],
+    properties: Partial<UpdatableConnectionProperties>,
+  ): Promise<Connection> {
+    const updatedConnection = await connectionsApi.update(
+      connectionId,
+      properties,
+    );
+    const newConnectionModel = new ConnectionModel(updatedConnection);
+    this.connections.update((connections) =>
+      connections.map((connection) => {
+        if (connection.id === connectionId) {
+          return newConnectionModel;
+        }
+        return connection;
+      }),
+    );
+    return newConnectionModel;
+  }
+
+  async deleteConnection(
+    connectionId: Connection['id'],
+    deleteMathesarSchemas = false,
+  ) {
+    const connections = get(this.connections);
+    const connectionToDelete = connections.find(
+      (conn) => conn.id === connectionId,
+    );
+    const otherConnectionsUseSameDb = !!connections.find(
+      (conn) =>
+        conn.id !== connectionId &&
+        conn.database === connectionToDelete?.database,
+    );
+    const mathesarSchemasShouldBeDeleted =
+      !otherConnectionsUseSameDb && deleteMathesarSchemas;
+    await connectionsApi.delete(connectionId, mathesarSchemasShouldBeDeleted);
+    this.connections.update((conns) =>
+      conns.filter((conn) => conn.id !== connectionId),
+    );
+  }
+}
+
+export const connectionsStore: MakeWritablePropertiesReadable<ConnectionsStore> =
+  new ConnectionsStore();
+
+/** @deprecated Use connectionsStore.currentConnection instead */
+export const currentDatabase = connectionsStore.currentConnection;
+
+/* eslint-enable max-classes-per-file */

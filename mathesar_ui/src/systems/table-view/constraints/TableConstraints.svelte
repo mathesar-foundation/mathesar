@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Icon, iconLoading } from '@mathesar-component-library';
   import {
     getTabularDataStoreFromContext,
@@ -56,10 +57,10 @@
   {#if shouldShowLoadingSpinner}
     <Icon {...iconLoading} />
   {:else if state === States.Error}
-    <div>Unable to fetch table constraints</div>
+    <div>{$_('unable_to_fetch_table_constraints')}</div>
     <div>{errorMsg}</div>
   {:else if isEmpty}
-    <div>No constraints</div>
+    <div>{$_('no_constraints')}</div>
   {:else}
     <div class="constraints-list">
       <ConstraintTypeSection
