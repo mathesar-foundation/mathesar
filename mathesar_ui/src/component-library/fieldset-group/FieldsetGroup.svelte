@@ -4,8 +4,8 @@
   import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
+  import Render from '@mathesar-component-library-dir/render/Render.svelte';
   import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
-  import StringOrComponentTyped from '@mathesar-component-library-dir/string-or-component/StringOrComponentTyped.svelte';
   import type { ComponentWithProps } from '../types';
 
   type Option = $$Generic;
@@ -44,15 +44,9 @@
       {@const help = getHelp(option)}
       <li class="option" class:has-help={!!help}>
         <LabeledInput layout="inline-input-first">
-          <svelte:fragment slot="label">
-            <StringOrComponent arg={getLabel(option)} />
-          </svelte:fragment>
+          <StringOrComponent slot="label" arg={getLabel(option)} />
           <slot {option} disabled={getDisabled(option) || disabled} />
-          <svelte:fragment slot="help">
-            {#if help}
-              <StringOrComponentTyped arg={help} />
-            {/if}
-          </svelte:fragment>
+          <Render slot="help" arg={help} />
         </LabeledInput>
       </li>
     {/each}
