@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
   import { map } from 'iter-tools';
+  import { _ } from 'svelte-i18n';
 
   import {
     ControlledModal,
+    LabeledInput,
     PasswordInput,
     type ModalController,
   } from '@mathesar-component-library';
   import type { Connection } from '@mathesar/api/connections';
-  import DocsLink from '@mathesar/components/DocsLink.svelte';
+  import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
+  import TextInput from '@mathesar/component-library/text-input/TextInput.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import {
     Field,
@@ -16,10 +18,10 @@
     FormSubmit,
     isInPortRange,
     makeForm,
-    optionalField,
     requiredField,
     uniqueWith,
   } from '@mathesar/components/form';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { connectionsStore } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
@@ -39,28 +41,19 @@
   $: host = requiredField(connection.host);
   $: port = requiredField(connection.port ?? 5432, [isInPortRange()]);
   $: username = requiredField(connection.username);
-  $: password = optionalField('');
+  $: changePassword = requiredField(false);
+  $: password = requiredField('');
   $: form = makeForm({
-    connectionName,
-    databaseName,
-    host,
-    port,
-    username,
-    password,
+    ...{ connectionName, username, changePassword },
+    ...($changePassword ? { password } : {}),
   });
 
   async function save() {
-    const formValues = $form.values;
-    const passwordValue =
-      formValues.password !== '' ? formValues.password : undefined;
     try {
       await connectionsStore.updateConnection(connection.id, {
-        database: formValues.databaseName,
-        host: formValues.host,
-        port: formValues.port,
-        username: formValues.username,
-        password: passwordValue,
-        nickname: formValues.connectionName,
+        nickname: $connectionName,
+        username: $username,
+        ...($changePassword ? { password: $password } : {}),
       });
       toast.success($_('connection_updated_successfully'));
       controller.close();
@@ -68,14 +61,9 @@
       toast.error(getErrorMessage(error));
     }
   }
-
-  function cancel() {
-    form.reset();
-    controller.close();
-  }
 </script>
 
-<ControlledModal {controller}>
+<ControlledModal {controller} on:open={() => form.reset()}>
   <svelte:fragment slot="title">
     <RichText text={$_('edit_connection_with_name')} let:slotName>
       {#if slotName === 'connectionName'}
@@ -91,51 +79,97 @@
       layout="stacked"
     />
     <hr />
-    <Field label={$_('database_name')} field={databaseName} layout="stacked" />
+    <Field
+      label={$_('database_name')}
+      field={databaseName}
+      layout="stacked"
+      input={{ component: TextInput, props: { disabled: true } }}
+    />
     <FieldLayout>
       <div data-identifier="host-port-config">
         <div data-identifier="host-config">
-          <Field label={$_('host')} field={host} layout="stacked" />
+          <Field
+            label={$_('host')}
+            field={host}
+            layout="stacked"
+            input={{ component: TextInput, props: { disabled: true } }}
+          />
         </div>
         <div data-identifier="port-config">
-          <Field label={$_('port')} field={port} layout="stacked" />
+          <Field
+            label={$_('port')}
+            field={port}
+            layout="stacked"
+            input={{ component: TextInput, props: { disabled: true } }}
+          />
         </div>
       </div>
     </FieldLayout>
-    <Field label={$_('username')} field={username} layout="stacked" />
-    <div class="help">
-      {$_('user_needs_create_connect_privileges')}
-      <DocsLink path="/">
-        {$_('why_is_this_needed')}
-      </DocsLink>
-    </div>
-    <hr />
+
     <FieldLayout>
-      <div>{$_('change_password')}</div>
-      <div class="help">
-        {$_('change_password_leave_empty_help')}
+      <div class="disabled-help">
+        <InfoBox>
+          <RichText
+            text={$_('disabled_connection_edit_fields_help')}
+            let:slotName
+            let:translatedArg
+          >
+            {#if slotName === 'issueLink'}
+              <a
+                href="https://github.com/mathesar-foundation/mathesar/issues/3386"
+                target="_blank">{translatedArg}</a
+              >
+            {/if}
+          </RichText>
+        </InfoBox>
       </div>
     </FieldLayout>
+
+    <hr />
+
     <Field
-      label={$_('password')}
-      field={password}
-      input={{
-        component: PasswordInput,
-        props: { autocomplete: 'new-password' },
-      }}
+      label={$_('username')}
+      field={username}
       layout="stacked"
+      help={$_('user_needs_create_connect_privileges')}
     />
-    <div class="help">
-      {$_('password_encryption_help')}
-    </div>
+    <!-- TODO: Add docs link with $_('why_is_this_needed') text. This link needs
+    to be part of the translated string and it needs to point to a specific page
+    or section. -->
+
+    <!--
+      TODO: Use Field instead of FieldLayout/LabeledInput/Checkbox. We can't do
+      this yet because of a compatibility issue between Field and Checkbox.
+    -->
+    <FieldLayout>
+      <LabeledInput label={$_('change_password')} layout="inline-input-first">
+        <Checkbox bind:checked={$changePassword} />
+      </LabeledInput>
+    </FieldLayout>
+
+    {#if $changePassword}
+      <Field
+        label={$_('new_password')}
+        field={password}
+        input={{
+          component: PasswordInput,
+          props: { autocomplete: 'new-password' },
+        }}
+        layout="stacked"
+        help={$_('password_encryption_help')}
+      />
+    {/if}
   </div>
 
   <div slot="footer">
     <FormSubmit
       {form}
-      onCancel={cancel}
-      onProceed={save}
+      canCancel={$form.hasChanges}
+      canProceed={$form.hasChanges}
+      cancelButton={{ label: $_('reset') }}
       proceedButton={{ label: $_('update_connection') }}
+      onCancel={() => form.reset()}
+      onProceed={save}
     />
   </div>
 </ControlledModal>
@@ -145,10 +179,8 @@
     margin: var(--size-large) 0;
   }
 
-  .help {
+  .disabled-help {
     font-size: var(--size-small);
-    color: var(--slate-400);
-    margin: var(--size-super-ultra-small) 0;
   }
 
   [data-identifier='host-port-config'] {
