@@ -21,8 +21,8 @@
         white space.
       -->
       <span class="label">{label ?? ''}<slot name="label" /></span>
-      <span class="help">{help ?? ''}<slot name="help" /></span>
       <span class="input"><slot /></span>
+      <span class="help">{help ?? ''}<slot name="help" /></span>
     </span>
   </Label>
 </div>
