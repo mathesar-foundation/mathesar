@@ -2,9 +2,9 @@ import { writable, derived, get } from 'svelte/store';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import {
-  States,
-  type PaginatedResponse,
+import type {
+  PaginatedResponse,
+  RequestStatus,
 } from '@mathesar/api/utils/requestUtils';
 import schemasApi from '@mathesar/api/schemas';
 import type { Connection } from '@mathesar/api/connections';
@@ -17,12 +17,11 @@ import { connectionsStore } from './databases';
 const commonData = preloadCommonData();
 
 export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
-  writable(commonData?.current_schema ?? undefined);
+  writable(commonData.current_schema ?? undefined);
 
 export interface DBSchemaStoreData {
-  state: States;
+  requestStatus: RequestStatus;
   data: Map<SchemaEntry['id'], SchemaEntry>;
-  error?: string;
 }
 
 const dbSchemaStoreMap: Map<
@@ -49,9 +48,8 @@ function setDBSchemaStore(
     schemaMap.set(schema.id, schema);
   });
   const storeValue: DBSchemaStoreData = {
-    state: States.Done,
+    requestStatus: { state: 'success' },
     data: schemaMap,
-    error: undefined,
   };
 
   let store = dbSchemaStoreMap.get(connectionId);
@@ -151,7 +149,7 @@ async function refetchSchemasForDB(
   try {
     store.update((currentData) => ({
       ...currentData,
-      state: States.Loading,
+      requestStatus: { state: 'processing' },
     }));
 
     dbSchemasRequestMap.get(connectionId)?.cancel();
@@ -167,8 +165,12 @@ async function refetchSchemasForDB(
   } catch (err) {
     store.update((currentData) => ({
       ...currentData,
-      state: States.Error,
-      error: err instanceof Error ? err.message : 'Error in fetching schemas',
+      requestStatus: {
+        state: 'failure',
+        errors: [
+          err instanceof Error ? err.message : 'Error in fetching schemas',
+        ],
+      },
     }));
     return undefined;
   }
@@ -205,17 +207,17 @@ function getSchemasStoreForDB(
   let store = dbSchemaStoreMap.get(connectionId);
   if (!store) {
     store = writable({
-      state: States.Loading,
+      requestStatus: { state: 'processing' },
       data: new Map(),
     });
     dbSchemaStoreMap.set(connectionId, store);
-    if (preload && commonData?.current_connection === connectionId) {
-      store = setDBSchemaStore(connectionId, commonData?.schemas || []);
+    if (preload && commonData.current_connection === connectionId) {
+      store = setDBSchemaStore(connectionId, commonData.schemas ?? []);
     } else {
       void refetchSchemasForDB(connectionId);
     }
     preload = false;
-  } else if (get(store).error) {
+  } else if (get(store).requestStatus.state === 'failure') {
     void refetchSchemasForDB(connectionId);
   }
   return store;
@@ -270,7 +272,7 @@ export const schemas: Readable<DBSchemaStoreData> = derived(
 
     if (!$currentConnectionName) {
       set({
-        state: States.Done,
+        requestStatus: { state: 'success' },
         data: new Map(),
       });
     } else {

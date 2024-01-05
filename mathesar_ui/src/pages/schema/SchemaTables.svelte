@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import TablesList from './TablesList.svelte';
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import CreateNewTableButton from './CreateNewTableButton.svelte';
@@ -34,7 +35,7 @@
 </script>
 
 <EntityContainerWithFilterBar
-  searchPlaceholder="Search Tables"
+  searchPlaceholder={$_('search_tables')}
   bind:searchQuery={tableSearchQuery}
   on:clear={clearQuery}
 >
@@ -45,9 +46,16 @@
   </svelte:fragment>
   <svelte:fragment slot="resultInfo">
     <p>
-      {labeledCount(filteredTables, 'results')}
-      for all tables matching
-      <strong>{tableSearchQuery}</strong>
+      <RichText
+        text={$_('tables_matching_search', {
+          values: { count: filteredTables.length },
+        })}
+        let:slotName
+      >
+        {#if slotName === 'searchValue'}
+          <strong>{tableSearchQuery}</strong>
+        {/if}
+      </RichText>
     </p>
   </svelte:fragment>
   <svelte:fragment slot="content">

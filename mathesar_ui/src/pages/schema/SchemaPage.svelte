@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { queries } from '@mathesar/stores/queries';
   import {
@@ -62,18 +63,18 @@
 
   $: tabs = [
     {
-      label: 'Overview',
+      label: $_('overview'),
       id: 'overview',
       href: getSchemaPageUrl(database.id, schema.id),
     },
     {
-      label: 'Tables',
+      label: $_('tables'),
       id: 'tables',
       count: tablesMap.size,
       href: getSchemaPageTablesSectionUrl(database.id, schema.id),
     },
     {
-      label: 'Explorations',
+      label: $_('explorations'),
       id: 'explorations',
       count: explorationsMap.size,
       href: getSchemaPageExplorationsSectionUrl(database.id, schema.id),
@@ -120,13 +121,13 @@
       {#if !isDefault && canExecuteDDL}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
-          <span>Edit Schema</span>
+          <span>{$_('edit_schema')}</span>
         </Button>
       {/if}
       {#if canEditPermissions}
         <Button on:click={manageAccess} appearance="secondary">
           <Icon {...iconManageAccess} />
-          <span>Manage Access</span>
+          <span>{$_('manage_access')}</span>
         </Button>
       {/if}
     </div>

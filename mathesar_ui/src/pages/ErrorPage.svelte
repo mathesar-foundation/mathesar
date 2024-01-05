@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AnchorButton } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { AnchorButton } from '@mathesar-component-library';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
 
   export let showGoToRoot = true;
@@ -7,12 +8,14 @@
 
 <LayoutWithHeader>
   <div class="error-page-container">
-    <h1>Error</h1>
+    <h1>{$_('error')}</h1>
     <div>
       <slot />
     </div>
     {#if showGoToRoot}
-      <AnchorButton appearance="primary" href="/">Go to homepage</AnchorButton>
+      <AnchorButton appearance="primary" href="/">
+        {$_('go_to_homepage')}
+      </AnchorButton>
     {/if}
   </div>
 </LayoutWithHeader>

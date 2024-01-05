@@ -3,7 +3,6 @@
   import {
     ControlledModal,
     type ModalController,
-    TextInput,
     PasswordInput,
   } from '@mathesar-component-library';
   import { connectionsStore } from '@mathesar/stores/databases';
@@ -18,6 +17,7 @@
     optionalField,
     Field,
     FieldLayout,
+    uniqueWith,
   } from '@mathesar/components/form';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import { toast } from '@mathesar/stores/toast';
@@ -26,21 +26,26 @@
   export let controller: ModalController;
   export let connection: Connection;
 
-  $: connectionName = requiredField(connection?.nickname ?? '');
-  $: databaseName = requiredField(connection?.database ?? '');
-  $: host = requiredField(connection?.host ?? '');
-  $: port = requiredField(connection?.port ?? 5432, [isInPortRange()]);
-  $: username = requiredField(connection?.username ?? '');
+  $: ({ connections } = connectionsStore);
+  $: otherNicknames = new Set(
+    $connections.filter((c) => c.id !== connection.id).map((c) => c.nickname),
+  );
+  $: connectionName = requiredField(connection.nickname, [
+    uniqueWith(otherNicknames),
+  ]);
+  $: databaseName = requiredField(connection.database);
+  $: host = requiredField(connection.host);
+  $: port = requiredField(connection.port ?? 5432, [isInPortRange()]);
+  $: username = requiredField(connection.username);
   $: password = optionalField('');
-
-  $: formFields = {
+  $: form = makeForm({
+    connectionName,
     databaseName,
     host,
     port,
     username,
     password,
-  };
-  $: form = makeForm(formFields);
+  });
 
   async function save() {
     const formValues = $form.values;
@@ -53,6 +58,7 @@
         port: formValues.port,
         username: formValues.username,
         password: passwordValue,
+        nickname: formValues.connectionName,
       });
       toast.success($_('connection_updated_successfully'));
       controller.close();
@@ -80,10 +86,6 @@
     <Field
       label={$_('connection_name')}
       field={connectionName}
-      input={{
-        component: TextInput,
-        props: { disabled: true },
-      }}
       layout="stacked"
     />
     <hr />

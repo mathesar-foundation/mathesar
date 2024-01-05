@@ -22,6 +22,11 @@ button.dropdown.trigger {
     align-items: center;
     padding: 0 0.1rem;
   }
+  &:focus {
+    outline: 2px solid var(--slate-300);
+    outline-offset: 1px;
+    border-radius: var(--border-radius-s);
+  }
 }
 
 .dropdown.content {

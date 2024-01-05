@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import AnchorButton from '@mathesar/component-library/anchorButton/AnchorButton.svelte';
+  import { AnchorButton } from '@mathesar-component-library';
   import type { QueryInstance } from '@mathesar/api/types/queries';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import ExplorationsList from './ExplorationsList.svelte';
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
 
@@ -39,20 +40,27 @@
 </script>
 
 <EntityContainerWithFilterBar
-  searchPlaceholder="Search Explorations"
+  searchPlaceholder={$_('search_explorations')}
   bind:searchQuery={explorationsSearchQuery}
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
     <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
-      Open Data Explorer
+      {$_('open_data_explorer')}
     </AnchorButton>
   </svelte:fragment>
   <svelte:fragment slot="resultInfo">
     <p>
-      {labeledCount(filteredExplorations, 'results')}
-      for all explorations matching
-      <strong>{explorationsSearchQuery}</strong>
+      <RichText
+        text={$_('explorations_matching_search', {
+          values: { count: filteredExplorations.length },
+        })}
+        let:slotName
+      >
+        {#if slotName === 'searchValue'}
+          <strong>{explorationsSearchQuery}</strong>
+        {/if}
+      </RichText>
     </p>
   </svelte:fragment>
   <svelte:fragment slot="content">

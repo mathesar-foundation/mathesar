@@ -19,10 +19,7 @@ interface ConnectionWithPassword extends Connection {
   password: string;
 }
 
-export type UpdatableConnectionProperties = Omit<
-  ConnectionWithPassword,
-  'id' | 'nickname'
->;
+export type UpdatableConnectionProperties = Omit<ConnectionWithPassword, 'id'>;
 
 function list() {
   return getAPI<PaginatedResponse<Connection>>(
