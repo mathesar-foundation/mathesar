@@ -12,37 +12,35 @@ This page contains all available environment variables supported by Mathesar. Se
 - **Additional information**: You can generate a secret key using [this tool](https://djecrety.ir/) if needed.
 
 
-## Database configuration {: #db}
-<!-- TODO -->
+## Internal Database configuration {: #db}
+
+!!!info
+    The database specified in this section will be used to store Mathesar's internal data. Additionally, it can be optionally repurposed via Mathesar's UI to store user data.
+
 ### `POSTGRES_DB`
 
-- **Description**:
-- **Format**:
-- **Additional information**:
+- **Description**: Specifies a name for the database that will be created and used by Mathesar for managing internal data.
+- **Default value**: mathesar_django
 
 ### `POSTGRES_USER`
 
-- **Description**:
-- **Format**:
-- **Additional information**:
+- **Description**: Specifies creation of a user with superuser privileges and a database with the same name.
+- **Default value**: mathesar
 
 ### `POSTGRES_PASSWORD`
 
-- **Description**:
-- **Format**:
-- **Additional information**:
+- **Description**: Specifies the superuser password that is required to be set for the PostgreSQL docker image.
+- **Default value**: mathesar
 
 ### `POSTGRES_HOST`
 
-- **Description**:
-- **Format**:
-- **Additional information**:
+- **Description**: Specifies the host name on which portgres listen for connections from client applications.
+- **Default value**: mathesar_db
 
 ### `POSTGRES_PORT`
 
-- **Description**:
-- **Format**:
-- **Additional information**:
+- **Description**: Specifies the port on which portgres listen for connections from client applications.
+- **Default value**: 5432
 
 
 ## Caddy reverse proxy configuration {: #caddy}
@@ -64,26 +62,3 @@ This page contains all available environment variables supported by Mathesar. Se
     !!! tip "Tip"
         - Set this to `localhost` if you'd like Mathesar to be available only on localhost
         - Set the protocol to `http` if you don't want Caddy to automatically handle setting up SSL, e.g. `http://example.com`
-
-
-### `HTTP_PORT`
-
-- **Description**: Configures the port that Caddy will use when `DOMAIN_NAME` specifies a `http` protocol.
-- **Default value**: `80`
- 
-    !!! tip "Tip"
-        - It is recommended to use the default port `80` as features like automatic SSL rely on it ([see Caddy docs](https://caddyserver.com/docs/automatic-https#acme-challenges)).
-        - You probably want to change it to a different port if one of these is true:
-            - you already have a reverse proxy handling SSL on your system
-            - you are running Mathesar on a non-root system
-
-### `HTTPS_PORT`
-
-- **Description**: Configures the port that Caddy will use when `DOMAIN_NAME` specifies a `https` protocol or does not specify a protocol.
-- **Default value**: `443`
-
-    !!! tip "Tip"
-        - If you want Caddy to handle the SSL certificate it is highly recommended to use the default port `443` as features like automatic SSL, and HTTPS redirection rely on it ([see Caddy docs](https://caddyserver.com/docs/automatic-https#acme-challenges)).
-        - You probably want to change it to a different port if one of these is true:
-            - you already have a reverse proxy handling SSL on your system
-            - you are running Mathesar on a non-root system

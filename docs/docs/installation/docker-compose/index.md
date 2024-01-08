@@ -19,22 +19,38 @@
     
     !!! Config       
         ```yaml
-        # This is the only field that is required to be set by the user 
-        # all the other fields are optional but useful for customizing your installation.
-        SECRET_KEY: ${SECRET_KEY:?}
+        # Customize your Mathesar installation with the following variables, if desired.
 
-        # If you want to host Mathesar over the internet or your local network
-        # replace or append your domain(s) or subdomain(s) with the default localhost domain.
-        DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}
+        x-config: &config
+          # (Required) Replace '?' with '-' followed by a 50 character random string.
+          # You can generate one at https://djecrety.ir/
+          SECRET_KEY: ${SECRET_KEY:?}
 
-        # Edit these if not using the db service provided with the compose file.
-        # This database will be used for storing Mathesar's internal metadata 
-        # but can also be used for storing your data which can be configured using Mathesar's UI.
-        POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
-        POSTGRES_USER: ${POSTGRES_USER:-mathesar}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
-        POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}
-        POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+          # (Optional) Replace 'http://localhost' with custom domain(s) e.g.
+          # 'yourdomain.com, 127.0.0.1' to manage the host(s) at which you want to
+          # access Mathesar over http or https
+          DOMAIN_NAME: ${DOMAIN_NAME:-http://localhost}
+
+          # Edit the POSTGRES_* variables if you are not using the db service provided
+          # below, or if you want to use a custom database user.
+
+          # (Optional) Replace 'mathesar_django' with any custom name for the internal
+          # database managed by mathesar web-service
+          POSTGRES_DB: ${POSTGRES_DB:-mathesar_django}
+
+          # (Optional) Replace 'mathesar' with any custom username for the
+          # aforementioned database
+          POSTGRES_USER: ${POSTGRES_USER:-mathesar}
+
+          # (Optional) Replace 'mathesar' with any custom password for the
+          # aforementioned database
+
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mathesar}
+          # (Optional) Replace 'mathesar_db' with the name of the host running postgres
+          POSTGRES_HOST: ${POSTGRES_HOST:-mathesar_db}
+
+          # (Optional) Replace '5432' with the port on which postgres is running
+          POSTGRES_PORT: ${POSTGRES_PORT:-5432}
         ```
 
 1. Run the docker compose file using:
@@ -93,7 +109,7 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 
     If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
 
-    **Ensure that the DNS for your sub-domain or domain is pointing to the public IP address of the machine that you're installing Mathesar on**.
+    **Ensure that the DNS for your domain or sub-domain is pointing to the public IP address of the machine that you're installing Mathesar on**.
 
     Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](../../configuration/env-variables/#domain_name) environment variable, in the **CONFIG** section of the docker-compose file.
     !!! example
