@@ -1,5 +1,6 @@
 .fieldset-group {
   padding: 0;
+  margin: 0;
   --spacing-y-default: 0.5em;
   --spacing-x-default: 1em;
 
@@ -14,9 +15,14 @@
   &.has-label .options {
     margin-top: 1em;
   }
-  &:not(.inline) .option {
+  &:not(.inline) .option:not(:first-child) {
     margin-top: var(--spacing-y, var(--spacing-y-default));
+  }
+  &:not(.inline) .option:not(:last-child) {
     margin-bottom: var(--spacing-y, var(--spacing-y-default));
+  }
+  &:not(.inline) .option.has-help:not(:last-child) {
+    margin-bottom: calc(2 * var(--spacing-y, var(--spacing-y-default)));
   }
 
   &.inline .options {

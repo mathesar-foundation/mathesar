@@ -50,6 +50,7 @@ class ErrorCodes(Enum):
     URLNotReachableError = 4405
     URLInvalidContentType = 4406
     UnknownDBType = 4408
+    InvalidColumnOrder = 4430
     InvalidDateError = 4413
     InvalidDateFormatError = 4414
     InvalidLinkChoice = 4409

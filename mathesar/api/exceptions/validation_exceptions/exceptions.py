@@ -194,3 +194,14 @@ class EditingPublicSchemaIsDisallowed(MathesarValidationException):
             field=None,
     ):
         super().__init__(None, self.error_code, message, field)
+
+
+class InvalidColumnOrder(MathesarValidationException):
+    error_code = ErrorCodes.InvalidColumnOrder.value
+
+    def __init__(
+            self,
+            message="Invalid column order.",
+            field=None,
+    ):
+        super().__init__(None, self.error_code, message, field, None)
