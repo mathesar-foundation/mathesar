@@ -1,25 +1,27 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { map } from 'iter-tools';
+
   import {
     ControlledModal,
-    type ModalController,
     PasswordInput,
+    type ModalController,
   } from '@mathesar-component-library';
-  import { connectionsStore } from '@mathesar/stores/databases';
   import type { Connection } from '@mathesar/api/connections';
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
   import {
-    FormSubmit,
-    makeForm,
-    requiredField,
-    isInPortRange,
-    optionalField,
     Field,
     FieldLayout,
+    FormSubmit,
+    isInPortRange,
+    makeForm,
+    optionalField,
+    requiredField,
     uniqueWith,
   } from '@mathesar/components/form';
-  import DocsLink from '@mathesar/components/DocsLink.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
+  import { connectionsStore } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
@@ -28,7 +30,7 @@
 
   $: ({ connections } = connectionsStore);
   $: otherNicknames = new Set(
-    $connections.filter((c) => c.id !== connection.id).map((c) => c.nickname),
+    map(([, c]) => c.nickname, $connections.without(connection.id)),
   );
   $: connectionName = requiredField(connection.nickname, [
     uniqueWith(otherNicknames),

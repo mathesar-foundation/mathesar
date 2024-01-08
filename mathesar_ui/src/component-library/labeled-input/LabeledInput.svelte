@@ -15,14 +15,13 @@
 >
   <Label>
     <span class="label-content">
-      <span class="label">
-        {label ?? ''}
-        <slot name="label" />
-      </span>
-      <span class="help">
-        {help ?? ''}
-        <slot name="help" />
-      </span>
+      <!--
+        ⚠️ NOTE: Do not add any white space within `.label` or `.help`. We have
+        CSS that uses the `:empty` pseudo-class which does not work if there is
+        white space.
+      -->
+      <span class="label">{label ?? ''}<slot name="label" /></span>
+      <span class="help">{help ?? ''}<slot name="help" /></span>
       <span class="input"><slot /></span>
     </span>
   </Label>
