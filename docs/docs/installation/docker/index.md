@@ -87,11 +87,15 @@ docker run \
 !!! info
     We strongly recommend using this setup for stateless deployments when scaling horizontally, because by default the data is stored in the same server on which Mathesar is running. This data will be lost if the server is deleted.
 
-The docker image contains a Postgres server which is used by default. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [DJANGO_DATABASE_URL](../../configuration/env-variables.md#dj_db) environment variable.
+The docker image contains a Postgres server which is used by default. If you want Mathesar to use a remote database as its internal database for storing its metadata, you need to set the remote database credentials to the [Internal database environment variables](../../configuration/env-variables.md#db).
 
 ```bash
 docker run \
-  -e DJANGO_DATABASE='postgres://user:password@hostname:port/database_name' \
+  -e POSTGRES_DB=database_name \
+  -e POSTGRES_USER=user \
+  -e POSTGRES_PASSWORD=pass \
+  -e POSTGRES_HOST=hostname \
+  -e POSTGRES_PORT=port \
   # OTHER ARGS HERE
   mathesar/mathesar-prod:latest
 ```

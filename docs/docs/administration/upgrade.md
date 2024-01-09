@@ -29,7 +29,7 @@ The upgrade instructions vary depending on the [installation method](../index.md
 1. Pull the latest version from the repository
 
     ```sh
-    git pull https://github.com/centerofci/mathesar.git
+    git pull https://github.com/mathesar-foundation/mathesar.git
     ```
 
 1. Update Python dependencies

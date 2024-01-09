@@ -6,7 +6,7 @@
     psql -c 'create database mathesar_django;'
     ```
 
-1. Configure the [`DJANGO_DATABASE_URL` environment variable](./env-variables.md#django_database_url) to point to the database you just created.
+1. Configure the [Internal database environment variables](./env-variables.md#db) to point to the database you just created.
 
 
 ## Connect to a database server running on the host {: #localhost-db }
