@@ -2,15 +2,54 @@
 
 The uninstall instructions vary depending on the [installation method](../index.md#installing-mathesar) you chose. Select your installation method below to proceed.
 
-- [Uninstall a **Docker compose** installation of Mathesar](../installation/docker-compose/index.md#uninstall)
-- [Uninstall a **Docker** installation of Mathesar](../installation/docker/index.md#uninstall)
+## Uninstall a Docker installation of Mathesar
 
-## (uninstall, when installed from guided install, or docker compose)
+1. Remove the Mathesar container.
 
-<!-- TODO: add content -->
+    ```bash
+    docker rm -v mathesar_service
+    ```
+
+1. Remove the Mathesar Image
+
+    ```bash
+    docker rmi mathesar_service
+    ```
+
+1. Remove volumes related to Mathesar
+
+    ```bash
+    docker volume rm static &&
+    docker volume rm media
+    ```
+
+{% include 'snippets/uninstall-schemas.md' %}
 
 
-## (uninstall, when installed from source)
+## Uninstall a Guided script or Docker compose installation of Mathesar
+
+1. Remove all Mathesar Docker images and containers.
+
+    === "Linux"
+        ```
+        sudo docker compose -f docker-compose.yml down --rmi all -v
+        ```
+
+    === "MacOS"
+        ```
+        docker compose -f docker-compose.yml down --rmi all -v
+        ```
+
+1. Remove configuration files.
+
+    ```sh
+    sudo rm -rf mathesar
+    ```
+
+{% include 'snippets/uninstall-schemas.md' %}
+
+
+## Uninstall a source built installation of Mathesar
 
 <!-- TODO rename heading, re-organize content, review -->
 
@@ -60,3 +99,5 @@ The uninstall instructions vary depending on the [installation method](../index.
         ```postgresql
         DROP DATABASE mathesar_django;
         ```
+
+{% include 'snippets/uninstall-schemas.md' %}

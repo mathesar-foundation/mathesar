@@ -12,8 +12,9 @@ The upgrade instructions vary depending on the [installation method](../index.md
 
 
 ### Installed from guided install
-<!-- TODO -->
 
+!!! note
+    Upgrading a guided installation of Mathesar follows the same steps that are required to [upgrade a Docker compose installation of Mathesar](../installation/docker-compose/index.md#upgrade).
 
 ### Installed from source
 

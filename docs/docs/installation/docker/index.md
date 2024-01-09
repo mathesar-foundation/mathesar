@@ -127,39 +127,15 @@ docker run \
     docker rm mathesar_service
     ```
 
-1. Bump the image version in the `docker run` command you usually use to run your Mathesar and start up a brand-new container:
+1. Run the `docker run` command you usually use to run your Mathesar and start up a brand-new container:
     <!-- TODO: improve language and version number -->
     ```bash
     docker run \
       -d \
       --name mathesar_service \
       # YOUR STANDARD ARGS HERE
-      mathesar/mathesar-prod:0.1.4
+      mathesar/mathesar-prod:latest
     ```
-
-## Uninstalling Mathesar {:#uninstall}
-
-1. Remove the Mathesar container.
-
-    ```bash
-    docker rm -v mathesar_service
-    ```
-
-1. Remove the Mathesar Image
-
-    ```bash
-    docker rmi mathesar_service
-    ```
-
-1. Remove volumes related to Mathesar
-
-    ```bash
-    docker volume rm static &&
-    docker volume rm media
-    ```
-
-{% include 'snippets/uninstall-schemas.md' %}
-
 
 ## Troubleshooting
 

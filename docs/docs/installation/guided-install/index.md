@@ -42,6 +42,3 @@ If you'd like to know the steps performed by the install script in more detail, 
 !!! note "Connecting to additional databases"
     Once you have successfully installed Mathesar, if you wish to connect an additional database to Mathesar, [instructions are here](../../configuration/connect-to-existing-db.md).
 
-
-
-{% include 'snippets/docker-compose-administration.md' %}
