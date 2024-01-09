@@ -6,7 +6,7 @@ import mathesar.models.base
 
 def column_order_to_jsonb_postgres_fwd(apps, schema_editor):
     if connection.settings_dict['ENGINE'].startswith('django.db.backends.postgresql'):
-        migrations.RunSQL('ALTER TABLE mathesar_tablesettings ALTER column_order TYPE jsonb USING array_to_json(column_order)')
+        schema_editor.execute('ALTER TABLE mathesar_tablesettings ALTER column_order TYPE jsonb USING array_to_json(column_order)')
 
     # Adds validators, converts type on SQLite
     migrations.AlterField(
@@ -18,7 +18,7 @@ def column_order_to_jsonb_postgres_fwd(apps, schema_editor):
 
 def column_order_to_jsonb_postgres_rev(apps, schema_editor):
     if connection.settings_dict['ENGINE'].startswith('django.db.backends.postgresql'):
-        migrations.RunSQL('ALTER TABLE mathesar_tablesettings ALTER column_order TYPE integer[] USING translate(column_order::text, \'[]\', \'{}\')::integer[]')
+        schema_editor.execute('ALTER TABLE mathesar_tablesettings ALTER column_order TYPE integer[] USING translate(column_order::text, \'[]\', \'{}\')::integer[]')
     else:
         # Reverts to the initial state as mentioned in 0001_initial.py for the sake of consistency
         migrations.AlterField(
