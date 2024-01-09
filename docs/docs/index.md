@@ -8,6 +8,21 @@ Try our [live demo](https://demo.mathesar.org/) to play with Mathesar before ins
 
 See our [conceptual overview](./concepts.md) to learn more about the inner workings of Mathesar.
 
+!!! info "Quick Start"
+    To quickly try out Mathesar using our Docker image, run the following command:
+    ```bash
+    docker run \
+      --detach \
+      -v static:/code/static \
+      -v media:/code/media \
+      -v postgresql_config:/etc/postgresql/ \
+      -v postgresql_data:/var/lib/postgresql/ \
+      --name mathesar_service \
+      -p 8000:8000 \
+      --restart unless-stopped \
+      mathesar/mathesar-prod:latest
+    ```
+
 ## Installing Mathesar
 
 You can self-host Mathesar by following one of the guides below:
