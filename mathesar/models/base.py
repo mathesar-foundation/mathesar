@@ -169,6 +169,10 @@ class Database(ReflectionManagerMixin, BaseModel):
             )
 
     def save(self, **kwargs):
+        with self._sa_engine.connect():
+            # confirms the correctness of the credentials before saving them in the model.
+            # raises an OperationalError in case of failure to open a connection.
+            pass
         db_name = self.name
         # invalidate cached engine as db credentials might get changed.
         if _engine_cache.get(db_name):
