@@ -64,7 +64,6 @@ def _save_and_install(
     db_model.name = nickname
     db_model.db_name = db_name
     _validate_db_model(db_model)
-    db_model.save()
     install.install_mathesar(
         database_name=db_model.db_name,
         username=db_model.username,
@@ -75,6 +74,7 @@ def _save_and_install(
         create_db=create_db,
         root_db=root_db,
     )
+    db_model.save()
     _load_sample_data(db_model._sa_engine, sample_data)
     return db_model
 
