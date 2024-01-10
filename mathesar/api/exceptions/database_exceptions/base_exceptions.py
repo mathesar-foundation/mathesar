@@ -45,4 +45,5 @@ class InvalidDBConnection(MathesarAPIException):
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
+        message = exception.args[0]
         super().__init__(exception, error_code, message, field, details, status_code)
