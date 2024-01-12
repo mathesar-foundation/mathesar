@@ -41,15 +41,11 @@ def main(skip_static_collection=False):
 def install_on_db_with_key(database_key, skip_confirm):
     from mathesar.models.base import Database
     db_model = Database.create_from_settings_key(database_key)
+    db_model.save()
     install.install_mathesar(
-        database_name=db_model.db_name,
-        hostname=db_model.host,
-        username=db_model.username,
-        password=db_model.password,
-        port=db_model.port,
+        db_model,
         skip_confirm=skip_confirm
     )
-    db_model.save()
 
 
 if __name__ == "__main__":

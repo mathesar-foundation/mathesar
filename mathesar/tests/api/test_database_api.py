@@ -148,11 +148,7 @@ def test_database_list_deleted(client, db_dj_model):
 def test_delete_dbconn_with_msar_schemas(client, db_dj_model):
     # install mathesar specific schemas
     install_mathesar(
-        db_dj_model.name,
-        db_dj_model.username,
-        db_dj_model.password,
-        db_dj_model.host,
-        db_dj_model.port,
+        db_dj_model,
         True
     )
     engine = db_dj_model._sa_engine

@@ -37,11 +37,7 @@ def _setup_demo_template_db():
         }
     )
     install_mathesar(
-        database_name=template_db_name,
-        hostname=db_model.host,
-        username=db_model.username,
-        password=db_model.password,
-        port=db_model.port,
+        db_model,
         skip_confirm=True
     )
     user_engine = create_mathesar_engine(db_model)
