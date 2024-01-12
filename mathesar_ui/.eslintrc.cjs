@@ -118,6 +118,8 @@ module.exports = {
               'DEFAULT',
               'Mathesar.org',
               'NULL',
+              '@',
+              '/',
               '*',
               '+',
               ':',
