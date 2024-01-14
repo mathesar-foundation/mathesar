@@ -11,8 +11,8 @@ version: "3.9"
 # Please double-check that your docker setup meets the following criteria:
 #
 # OS: Linux, Mac, Windows(WSL).
-# Docker v23+ ($: sudo docker version)
-# Docker Compose v2.10+ ($: sudo docker compose version)
+# Docker v23+  $ docker version
+# Docker Compose v2.10+  $ docker compose version
 #
 #-------------------------------------------------------------------------------
 # HOW TO USE THIS FILE
@@ -20,7 +20,10 @@ version: "3.9"
 # First, make sure you meet the prerequisites, add a secret key below, and then
 # run:
 #
-# $: sudo docker compose -f docker-compose.yml up
+# $ docker compose -f docker-compose.yml up
+#
+# Note: You may need to run Docker commands using sudo, depending on your setup.
+# Running Docker in rootless mode isn't currently supported.
 #
 #-------------------------------------------------------------------------------
 # CONFIG
