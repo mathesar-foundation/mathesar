@@ -12,7 +12,7 @@
 ## Connect to a database server running on the host {: #localhost-db }
 
 !!! info ""
-    This content is related to Mathesar running in Docker related environments. This is applicable for the [Guided installation method](../installation/guided-install/index.md), [Docker Compose installation method](../installation/docker-compose/index.md), and [Docker installation method](../installation/docker/index.md).
+    This content is related to Mathesar running in Docker related environments. This is applicable for the previous Guided installation method, the [Docker Compose installation method](../installation/docker-compose/index.md), and the [Docker installation method](../installation/docker/index.md).
 
 If you're running Mathesar in a Docker related environment, and your database server runs on the host machine, you will not be able to connect to it using `localhost:<db_port>`, since `localhost` would refer to the Docker environment and not to the host.
 
