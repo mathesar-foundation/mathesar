@@ -1,24 +1,24 @@
-#(Deprecated) Install Mathesar from source on Linux
-
-!!! warning "Deprecated"
-    The following installation method is deprecated and is no longer supported by Mathesar. We encourage you to use supported methods like [Docker](../docker/index.md) or [Docker Compose](../docker-compose/index.md) to install Mathesar. If you are currently using this installation method follow these [instructions](../../administration/upgrade.md#installed-from-source) to upgrade.
+# Install Mathesar from source on Linux
 
 !!! warning "For experienced Linux sysadmins"
     To follow this guide you need be experienced with Linux server administration, including the command line interface and some common utilities.
 
-
 ## Requirements
 
 ### System
+
 We recommend having at least 60 GB disk space and 4 GB of RAM.
 
 ### Operating System
+
 We've tested this on **Ubuntu**, but we expect that it can be adapted for other Linux distributions as well.
 
 ### Access
+
 You should have **root access** to the machine you're installing Mathesar on.
 
 ### Software
+
 You'll need to install the following system packages before you install Mathesar:
 
 - [Python](https://www.python.org/downloads/) 3.9
