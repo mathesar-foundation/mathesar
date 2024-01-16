@@ -31,7 +31,7 @@ def install_mathesar(
         sql_install.install(user_db_engine)
         types_install.install_mathesar_on_database(user_db_engine)
         user_db_engine.dispose()
-    except OperationalError:
+    except OperationalError as e:
         if create_db:
             database_created = _create_database(
                 db_name=database_name,
@@ -54,6 +54,7 @@ def install_mathesar(
             user_db_engine.dispose()
         else:
             print(f"Skipping installing on DB with key {database_name}.")
+            raise e
 
 
 def _create_database(
