@@ -168,9 +168,6 @@ class Database(ReflectionManagerMixin, BaseModel):
                 port=db_info['PORT'],
             )
 
-    def get_credentials(self):
-        return self.db_name, self.username, self.password, self.host, self.port
-
     def save(self, **kwargs):
         db_name = self.name
         # invalidate cached engine as db credentials might get changed.

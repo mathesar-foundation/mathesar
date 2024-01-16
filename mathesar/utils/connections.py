@@ -1,5 +1,6 @@
 """Utilities to help with creating and managing connections in Mathesar."""
 from psycopg2.errors import DuplicateSchema
+from sqlalchemy.exc import OperationalError
 from mathesar.models.base import Database
 from db import install, connection as dbconn
 from mathesar.state import reset_reflection
@@ -65,12 +66,20 @@ def _save_and_install(
     db_model.db_name = db_name
     _validate_db_model(db_model)
     db_model.save()
-    install.install_mathesar(
-        db_model,
-        skip_confirm=True,
-        create_db=create_db,
-        root_db=root_db,
-    )
+    try:
+        install.install_mathesar(
+            database_name=db_model.db_name,
+            username=db_model.username,
+            password=db_model.password,
+            hostname=db_model.host,
+            port=db_model.port,
+            skip_confirm=True,
+            create_db=create_db,
+            root_db=root_db,
+        )
+    except OperationalError as e:
+        db_model.delete()
+        raise e
     _load_sample_data(db_model._sa_engine, sample_data)
     return db_model
 

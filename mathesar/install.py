@@ -10,6 +10,7 @@ from django.core import management
 from decouple import config as decouple_config
 from django.conf import settings
 from django.db.utils import IntegrityError
+from sqlalchemy.exc import OperationalError
 from db import install
 
 
@@ -42,10 +43,18 @@ def install_on_db_with_key(database_key, skip_confirm):
     from mathesar.models.base import Database
     db_model = Database.create_from_settings_key(database_key)
     db_model.save()
-    install.install_mathesar(
-        db_model,
-        skip_confirm=skip_confirm
-    )
+    try:
+        install.install_mathesar(
+            database_name=db_model.db_name,
+            hostname=db_model.host,
+            username=db_model.username,
+            password=db_model.password,
+            port=db_model.port,
+            skip_confirm=skip_confirm
+        )
+    except OperationalError as e:
+        db_model.delete()
+        raise e
 
 
 if __name__ == "__main__":

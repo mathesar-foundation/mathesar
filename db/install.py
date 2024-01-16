@@ -8,12 +8,15 @@ from db.types import install as types_install
 
 
 def install_mathesar(
-        db_model,
+        database_name,
+        username,
+        password,
+        hostname,
+        port,
         skip_confirm,
         create_db=True,
         root_db='postgres'
 ):
-    database_name, username, password, hostname, port = db_model.get_credentials()
     """Create database and install Mathesar on it."""
     user_db_engine = engine.create_future_engine(
         username, password, hostname, database_name, port,
@@ -51,7 +54,6 @@ def install_mathesar(
             user_db_engine.dispose()
         else:
             print(f"Skipping installing on DB with key {database_name}.")
-            db_model.delete()
             raise e
 
 
