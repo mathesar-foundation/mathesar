@@ -94,7 +94,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
     db_key: db_url(url_string)
-    for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
+    for db_key, url_string in decouple_config('MATHESAR_DATABASES', default='', cast=Csv(pipe_delim))
 }
 
 # POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST & POSTGRES_PORT are required env variables for forming a pg connection string for the django database
