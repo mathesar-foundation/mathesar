@@ -6,7 +6,7 @@ Mathesar is a self-hostable open source project that provides a spreadsheet-like
 
 ## Try Mathesar
 
-Try our [live demo](https://demo.mathesar.org/) to try out Mathesar online.
+Try our [live demo](https://demo.mathesar.org/) to check out Mathesar online.
 
 If you have [Docker](https://docs.docker.com/get-docker/) installed, you can quickly try out Mathesar locally using the following command:
 ```
@@ -22,12 +22,16 @@ docker run \
     mathesar/mathesar-prod:latest
 ```
 
+!!! info "May require elevated privileges"
+    Depending on your Docker setup, you may need to run the above command using `sudo`, or in a terminal logged in with root privileges.
+
 ## Install Mathesar
 
 You can self-host Mathesar by following one of the guides below:
 
 - [Install using Docker image](installation/docker/index.md)
 - [Install using Docker compose](installation/docker-compose/index.md)
+- [Install from scratch](installation/build-from-source/index.md)
 
 !!! info "More installation methods coming soon"
     We're working on supporting additional installation methods, and we'd appreciate feedback on which ones to prioritize. Please comment [on this issue](https://github.com/centerofci/mathesar/issues/2509) if you have thoughts.
