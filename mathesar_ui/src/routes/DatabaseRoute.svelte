@@ -15,7 +15,7 @@
 
   $: connectionsStore.setCurrentConnectionId(connectionId);
   $: ({ connections } = connectionsStore);
-  $: connection = $connections?.find((c) => c.id === connectionId);
+  $: connection = $connections.get(connectionId);
 
   function handleUnmount() {
     connectionsStore.clearCurrentConnectionId();
