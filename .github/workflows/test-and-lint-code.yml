@@ -96,8 +96,6 @@ jobs:
           files: |
             **.yml
             **.sh
-            *.sh
-            *.yml
             Dockerfile*
 
 ################################################################################
@@ -117,8 +115,7 @@ jobs:
     name: Run Python tests
     runs-on: ubuntu-latest
     needs: python_tests_required
-    if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
-        needs.all_tests_required.outputs.tests_should_run == 'true'
+    if: needs.python_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
         pg-version: [13, 14, 15]
