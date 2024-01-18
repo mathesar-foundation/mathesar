@@ -22,8 +22,10 @@ jobs:
   python_tests_required:
     name: Check for file changes requiring python tests
     runs-on: ubuntu-latest
+    needs: all_tests_required
     outputs:
-      tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
+      tests_should_run: ${{ steps.changed_files.outputs.any_changed || 
+                            needs.all_tests_required.outputs.tests_should_run }}
     steps:
       - uses: actions/checkout@v4
       - name: Get changed files
@@ -38,8 +40,10 @@ jobs:
   python_lint_required:
     name: Check for file changes requiring python linter
     runs-on: ubuntu-latest
+    needs: all_tests_required
     outputs:
-      lint_should_run: ${{ steps.changed_files.outputs.any_changed }}
+      lint_should_run: ${{ steps.changed_files.outputs.any_changed || 
+                           needs.all_tests_required.outputs.tests_should_run }}
     steps:
       - uses: actions/checkout@v4
       - name: Get changed files
@@ -51,8 +55,10 @@ jobs:
   sql_tests_required:
     name: Check for file changes requiring SQL tests
     runs-on: ubuntu-latest
+    needs: all_tests_required
     outputs:
-      tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
+      tests_should_run: ${{ steps.changed_files.outputs.any_changed || 
+                            needs.all_tests_required.outputs.tests_should_run}}
     steps:
       - uses: actions/checkout@v4
       - name: Get changed files
@@ -66,7 +72,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: all_tests_required
     outputs:
-      checks_should_run: ${{ steps.changed_files.outputs.any_changed || needs.all_tests_required.outputs.tests_should_run}}
+      checks_should_run: ${{ steps.changed_files.outputs.any_changed || 
+                             needs.all_tests_required.outputs.tests_should_run}}
     steps:
       - uses: actions/checkout@v4
       - name: Get changed files
@@ -109,7 +116,7 @@ jobs:
   python_tests:
     name: Run Python tests
     runs-on: ubuntu-latest
-    needs: [python_tests_required, all_tests_required]
+    needs: python_tests_required
     if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
         needs.all_tests_required.outputs.tests_should_run == 'true'
     strategy:
@@ -117,8 +124,6 @@ jobs:
         pg-version: [13, 14, 15]
     steps:
       - uses: actions/checkout@v4
-      - name: Echo
-        run: echo "${{ needs.all_tests_required.outputs.tests_should_run }}"
       - name: Copy env file
         run: cp .env.example .env
       # The code is checked out under uid 1001 - reset this to 1000 for the
@@ -135,16 +140,13 @@ jobs:
   sql_tests:
     name: Run SQL tests
     runs-on: ubuntu-latest
-    needs: [sql_tests_required, all_tests_required]
-    if: ${{ needs.all_tests_required.outputs.tests_should_run == 'true' ||
-            needs.sql_tests_required.outputs.tests_should_run == 'true' }}
+    needs: sql_tests_required
+    if: needs.sql_tests_required.outputs.tests_should_run == 'true'
     strategy:
       matrix:
         pg-version: [13, 14, 15]
     steps:
       - uses: actions/checkout@v4
-      - name: Echo
-        run: echo "${{ needs.all_tests_required.outputs.tests_should_run }}"
       - name: Copy env file
         run: cp .env.example .env
       # The code is checked out under uid 1001 - reset this to 1000 for the
@@ -161,9 +163,8 @@ jobs:
   python_lint:
     name: Run Python linter
     runs-on: ubuntu-latest
-    needs: [python_lint_required, all_tests_required]
-    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
-        needs.all_tests_required.outputs.tests_should_run == 'true'
+    needs: python_lint_required
+    if: needs.python_lint_required.outputs.lint_should_run == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -180,8 +181,7 @@ jobs:
     name: Find unused code
     runs-on: ubuntu-latest
     needs: python_lint_required
-    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
-        needs.all_tests_required.outputs.tests_should_run == 'true'
+    if: needs.python_lint_required.outputs.lint_should_run == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -208,8 +208,7 @@ jobs:
     name: Check front end code format
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
-        needs.all_tests_required.outputs.tests_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -234,8 +233,7 @@ jobs:
     name: Run front end linter
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
-        needs.all_tests_required.outputs.tests_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -260,8 +258,7 @@ jobs:
     name: Check front end types
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
-        needs.all_tests_required.outputs.tests_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -286,8 +283,7 @@ jobs:
     name: Audit front end code
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
-        needs.all_tests_required.outputs.tests_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -321,8 +317,7 @@ jobs:
     name: Run front end tests
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
-        needs.all_tests_required.outputs.tests_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
     defaults:
       run:
         working-directory: ./mathesar_ui
