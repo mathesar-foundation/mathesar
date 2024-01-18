@@ -41,8 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: all_tests_required
     outputs:
-      lint_should_run: |
-        ${{ steps.changed_files.outputs.any_changed || needs.all_tests_required.outputs.tests_should_run }}
+      lint_should_run: ${{ steps.changed_files.outputs.any_changed || needs.all_tests_required.outputs.tests_should_run }}
     steps:
       - uses: actions/checkout@v4
       - name: Get changed files
@@ -56,8 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: all_tests_required
     outputs:
-      tests_should_run: ${{ steps.changed_files.outputs.any_changed || 
-                            needs.all_tests_required.outputs.tests_should_run}}
+      tests_should_run: ${{ steps.changed_files.outputs.any_changed || needs.all_tests_required.outputs.tests_should_run}}
     steps:
       - uses: actions/checkout@v4
       - name: Get changed files
@@ -71,8 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: all_tests_required
     outputs:
-      checks_should_run: ${{ steps.changed_files.outputs.any_changed || 
-                             needs.all_tests_required.outputs.tests_should_run}}
+      checks_should_run: ${{ steps.changed_files.outputs.any_changed || needs.all_tests_required.outputs.tests_should_run}}
     steps:
       - uses: actions/checkout@v4
       - name: Get changed files
