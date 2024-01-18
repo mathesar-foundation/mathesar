@@ -58,6 +58,8 @@ jobs:
       tests_should_run: ${{ steps.changed_files.outputs.any_changed || needs.all_tests_required.outputs.tests_should_run}}
     steps:
       - uses: actions/checkout@v4
+      - name: echo
+        run: echo "${{needs.all_tests_required.outputs.tests_should_run}}"
       - name: Get changed files
         id: changed_files
         uses: tj-actions/changed-files@v41
