@@ -160,7 +160,7 @@ jobs:
   python_lint:
     name: Run Python linter
     runs-on: ubuntu-latest
-    needs: python_lint_required
+    needs: [python_lint_required, all_tests_required]
     if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
         needs.all_tests_required.outputs.tests_should_run == 'true'
     steps:
