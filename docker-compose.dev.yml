@@ -80,6 +80,8 @@ services:
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
     entrypoint: ./run.sh
+    depends_on:
+      - dev-db
     ports:
       - "8000:8000"
 volumes:
