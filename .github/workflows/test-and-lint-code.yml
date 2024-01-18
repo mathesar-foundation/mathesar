@@ -147,7 +147,7 @@ jobs:
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
       - name: Build the test DB
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d dev-db
+        run: docker compose -f docker-compose.dev.yml up --build -d dev-db
         env:
           PG_VERSION: ${{ matrix.pg-version }}
       - name: Run tests with pg_prove
