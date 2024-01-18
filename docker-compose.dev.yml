@@ -67,6 +67,7 @@ services:
   test-service:
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
+    build:
       context: .
       dockerfile: Dockerfile
       args:
