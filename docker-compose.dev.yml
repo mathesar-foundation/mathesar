@@ -72,6 +72,7 @@ services:
       dockerfile: Dockerfile
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
+    entrypoint: ./run.sh
     depends_on:
       - dev-db
     ports:
