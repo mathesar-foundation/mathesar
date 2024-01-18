@@ -104,11 +104,11 @@ jobs:
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
       - name: Build the stack
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d test-service
+        run: docker compose -f docker-compose.yml up --build -d service
         env:
           PG_VERSION: ${{ matrix.pg-version }}
       - name: Run tests with pytest
-        run: docker exec mathesar_service_test ./run_pytest.sh
+        run: docker exec mathesar_service ./run_pytest.sh
 
   sql_tests:
     name: Run SQL tests
