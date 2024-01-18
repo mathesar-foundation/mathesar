@@ -842,30 +842,30 @@ def test_column_description_set_and_unset(column_test_table, client):
         assert actual_description == expected_description
 
 
-# @pytest.mark.parametrize(
-#     'expected_description',
-#     [
-#         None,
-#         'Some comment',
-#     ]
-# )
-# def test_column_description_when_creating(column_test_table, client, expected_description):
-#     table = column_test_table
-#     column_id = None
-#     data = dict(type='text')
-#     if expected_description is not None:
-#         data['description'] = expected_description
-#     response = client.post(
-#         f"/api/db/v0/tables/{table.id}/columns/",
-#         data=data
-#     )
-#     response_data = response.json()
-#     assert response.status_code == 201
-#     column_id = response_data['id']
-#     response = client.get(
-#         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
-#     )
-#     response_data = response.json()
-#     assert response.status_code == 200
-#     actual_description = response_data.get('description')
-#     assert actual_description == expected_description
+@pytest.mark.parametrize(
+    'expected_description',
+    [
+        None,
+        'Some comment',
+    ]
+)
+def test_column_description_when_creating(column_test_table, client, expected_description):
+    table = column_test_table
+    column_id = None
+    data = dict(type='text')
+    if expected_description is not None:
+        data['description'] = expected_description
+    response = client.post(
+        f"/api/db/v0/tables/{table.id}/columns/",
+        data=data
+    )
+    response_data = response.json()
+    assert response.status_code == 201
+    column_id = response_data['id']
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+    )
+    response_data = response.json()
+    assert response.status_code == 200
+    actual_description = response_data.get('description')
+    assert actual_description == expected_description

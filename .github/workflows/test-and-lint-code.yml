@@ -107,6 +107,8 @@ jobs:
         run: docker compose -f docker-compose.yml up --build -d service
         env:
           PG_VERSION: ${{ matrix.pg-version }}
+      - name: Install pytest
+        run: docker exec mathesar_service pip3 install -r requirements-dev.txt
       - name: Run tests with pytest
         run: docker exec mathesar_service ./run_pytest.sh
 
