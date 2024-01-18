@@ -113,7 +113,8 @@ jobs:
     name: Run Python tests
     runs-on: ubuntu-latest
     needs: python_tests_required
-    if: needs.python_tests_required.outputs.tests_should_run == 'true'
+    if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     strategy:
       matrix:
         pg-version: [13, 14, 15]
@@ -160,7 +161,8 @@ jobs:
     name: Run Python linter
     runs-on: ubuntu-latest
     needs: python_lint_required
-    if: needs.python_lint_required.outputs.lint_should_run == 'true'
+    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -177,7 +179,8 @@ jobs:
     name: Find unused code
     runs-on: ubuntu-latest
     needs: python_lint_required
-    if: needs.python_lint_required.outputs.lint_should_run == 'true'
+    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -204,7 +207,8 @@ jobs:
     name: Check front end code format
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -229,7 +233,8 @@ jobs:
     name: Run front end linter
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -254,7 +259,8 @@ jobs:
     name: Check front end types
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -279,7 +285,8 @@ jobs:
     name: Audit front end code
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     defaults:
       run:
         working-directory: ./mathesar_ui
@@ -313,7 +320,8 @@ jobs:
     name: Run front end tests
     runs-on: ubuntu-latest
     needs: front_end_checks_required
-    if: needs.front_end_checks_required.outputs.checks_should_run == 'true'
+    if: needs.front_end_checks_required.outputs.checks_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     defaults:
       run:
         working-directory: ./mathesar_ui
