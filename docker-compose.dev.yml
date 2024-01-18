@@ -79,8 +79,9 @@ services:
       dockerfile: Dockerfile
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
+    entrypoint: ./run.sh
     ports:
-      - "8000:8000" 
+      - "8000:8000"
 volumes:
   ui_node_modules:
   dev_postgres_data:
