@@ -64,8 +64,9 @@ jobs:
   front_end_checks_required:
     name: Check for file changes requiring front end checks
     runs-on: ubuntu-latest
+    needs: all_tests_required
     outputs:
-      checks_should_run: ${{ steps.changed_files.outputs.any_changed }}
+      checks_should_run: ${{ steps.changed_files.outputs.any_changed || needs.all_tests_required.outputs.tests_should_run}}
     steps:
       - uses: actions/checkout@v4
       - name: Get changed files
