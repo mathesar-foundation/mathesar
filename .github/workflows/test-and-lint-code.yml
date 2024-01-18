@@ -136,7 +136,8 @@ jobs:
     name: Run SQL tests
     runs-on: ubuntu-latest
     needs: [sql_tests_required, all_tests_required]
-    if: needs.sql_tests_required.outputs.tests_should_run == 'true'
+    if: needs.sql_tests_required.outputs.tests_should_run == 'true' ||
+        needs.all_tests_required.outputs.tests_should_run
     strategy:
       matrix:
         pg-version: [13, 14, 15]
