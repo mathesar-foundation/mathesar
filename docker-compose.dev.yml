@@ -65,7 +65,7 @@ services:
       - "3000:3000"
       - "6006:6006"
   test-service:
-    container_name: mathesar_test_service
+    container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
     environment:
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
