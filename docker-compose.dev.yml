@@ -67,12 +67,18 @@ services:
   test-service:
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
+    environment:
+      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
+      - POSTGRES_HOST=mathesar_dev_db
+      - POSTGRES_PORT=5432
     build:
       context: .
       dockerfile: Dockerfile
       args:
         PYTHON_REQUIREMENTS: requirements-dev.txt
-    entrypoint: ./run.sh
     depends_on:
       - dev-db
     ports:
