@@ -16,6 +16,7 @@ class ErrorCodes(Enum):
     TypeError = 4102
     ValueError = 4103
     NetworkError = 4104
+    InvalidConnection = 5001
 
     # DB Error Codes
     CheckViolation = 4215
