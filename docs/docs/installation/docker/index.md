@@ -2,20 +2,14 @@
 
 Use our [official Docker image](https://hub.docker.com/r/mathesar/mathesar-prod/tags): `mathesar/mathesar-prod:latest` hosted on Docker Hub to run Mathesar.
 
-- You need [Docker](https://docs.docker.com/get-docker/).
-    - We have tested with Docker v23. Older versions may not work.
-- You need permission to run Docker containers.
-
 ## Prerequisites
 
-### Operating System
+- You need Linux, MacOS, or Windows.
+- You need to install **[Docker](https://docs.docker.com/get-docker/)**
 
-You can install Mathesar using this method on Linux, MacOS, and Windows.
+    (We have tested with Docker v23. Older versions may not work.)
 
-### Software
-
-You'll need to install **[Docker](https://docs.docker.com/desktop/)** v23+
-
+- You need permission to run Docker containers.
                       
 ## Installation Steps
 
