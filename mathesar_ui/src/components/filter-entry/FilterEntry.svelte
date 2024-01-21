@@ -271,12 +271,21 @@
     display: flex;
     gap: 10px;
 
+    @media screen and (max-width : 560px){
+      display: flex;
+      flex-direction: column;
+    }
+
     .prefix {
       flex-basis: 80px;
       flex-shrink: 0;
       flex-grow: 0;
       display: flex;
       align-items: center;
+
+      @media screen and (max-width : 560px){
+      flex-basis: 0;
+    }
 
       > :global(.input-group-text) {
         padding: 5px 13px;
@@ -290,12 +299,22 @@
     &.horizontal {
       min-width: 560px;
 
+      @media screen and (max-width: 560px) {
+      min-width: 10%;
+        
+      }
       :global(.filter-column-id.trigger),
       :global(.filter-condition) {
         width: 140px;
         flex-basis: 140px;
         flex-shrink: 0;
         flex-grow: 0;
+
+        @media screen and (max-width: 560px) {
+      flex-basis: 0;
+        
+      }
+
       }
 
       :global(.filter-input) {

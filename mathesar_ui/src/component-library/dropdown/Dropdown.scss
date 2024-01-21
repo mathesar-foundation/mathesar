@@ -1,7 +1,7 @@
 button.dropdown.trigger {
   position: relative;
 
-  > .label {
+  >.label {
     display: inline-flex;
     align-items: center;
     position: relative;
@@ -12,16 +12,18 @@ button.dropdown.trigger {
     line-height: 1.2;
     min-height: 1.2em;
     flex-grow: 1;
-    > *:not(:last-child) {
+
+    >*:not(:last-child) {
       margin-right: 0.25rem;
     }
   }
 
-  > .arrow {
+  >.arrow {
     display: flex;
     align-items: center;
     padding: 0 0.1rem;
   }
+
   &:focus {
     outline: 2px solid var(--slate-300);
     outline-offset: 1px;
@@ -30,13 +32,11 @@ button.dropdown.trigger {
 }
 
 .dropdown.content {
-  box-shadow: var(
-    --Dropdown__box-shadow,
-    #000 0 0 0 0,
-    rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
-    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
-    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px
-  );
+  box-shadow: var(--Dropdown__box-shadow,
+      #000 0 0 0 0,
+      rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+      rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+      rgba(0, 0, 0, 0.05) 0px 4px 6px -2px);
   border: var(--Dropdown__border, none);
   border-radius: var(--border-radius-m);
   background: var(--Dropdown__background, var(--white));
@@ -54,5 +54,11 @@ button.dropdown.trigger {
 
   &.no-max-height {
     max-height: none;
+  }
+
+  @media screen and (max-width: 560px) {
+
+    width: 50%;
+
   }
 }
