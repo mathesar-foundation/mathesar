@@ -29,7 +29,7 @@
   {:else if type === 'primaryKey'}
     <div class="specifier-tag">
       <Icon {...iconConstraint} />
-      <span>{$_('linked_to')}</span>
+      <span>{$_('primary_key')}</span>
     </div>
   {/if}
 </div>
