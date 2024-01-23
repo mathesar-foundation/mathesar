@@ -146,7 +146,6 @@ def test_update_table_settings_negative_column_order(client, column_test_table):
         data=data,
     )
     response_data = response.json()[0]
-    print(response_data)
     assert response.status_code == 400
     assert response_data['code'] == ErrorCodes.InvalidColumnOrder.value
     assert response_data['message'] == 'Invalid column order.'
