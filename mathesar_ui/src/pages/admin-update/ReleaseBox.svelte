@@ -20,6 +20,7 @@
 
   $: date = new Date(release.date);
   $: dateString = date.toLocaleDateString();
+  $: notesUrl = `https://docs.mathesar.org/releases/${release.tagName}/`;
 </script>
 
 <div
@@ -54,7 +55,7 @@
       <div class="date">
         {$_('released_date', { values: { date: dateString } })}
       </div>
-      <a href={release.notesUrl} class="notes" target="_blank">
+      <a href={notesUrl} class="notes" target="_blank">
         {#if type === 'available-upgrade'}
           {$_('release_notes_and_upgrade_instructions')}
         {:else}

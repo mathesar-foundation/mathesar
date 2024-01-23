@@ -11,7 +11,6 @@ export interface Release {
   id: number;
   tagName: string;
   date: string;
-  notesUrl: string;
 }
 
 /**
@@ -28,7 +27,6 @@ function buildRelease(gh: GitHubRelease | undefined): Release | undefined {
     id: gh.id,
     tagName: gh.tag_name,
     date: gh.published_at,
-    notesUrl: gh.html_url,
   };
 }
 
