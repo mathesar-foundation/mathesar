@@ -1,18 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Button, Icon } from '@mathesar-component-library';
+
+  import { Icon } from '@mathesar-component-library';
   import Logo from '@mathesar/components/Logo.svelte';
   import {
     iconCurrentlyInstalledVersion,
     iconExternalHyperlink,
     iconUpgradeAvailable,
   } from '@mathesar/icons';
-  import { modal } from '@mathesar/stores/modal';
   import type { Release } from '@mathesar/stores/releases';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import UpgradeModal from './upgrade-modal/UpgradeModal.svelte';
-
-  const modalController = modal.spawnModalController();
 
   export let type:
     | 'available-upgrade'
@@ -55,29 +52,19 @@
     </div>
     <div class="right">
       <div class="date">
-        {$_('released_date', {
-          values: { date: dateString },
-        })}
+        {$_('released_date', { values: { date: dateString } })}
       </div>
       <a href={release.notesUrl} class="notes" target="_blank">
-        {$_('release_notes')}
+        {#if type === 'available-upgrade'}
+          {$_('release_notes_and_upgrade_instructions')}
+        {:else}
+          {$_('release_notes')}
+        {/if}
         <Icon {...iconExternalHyperlink} />
       </a>
     </div>
   </div>
-  {#if type === 'available-upgrade'}
-    <div class="update-action">
-      <div class="message">{$_('we_can_install_new_version')}</div>
-      <Button appearance="secondary" on:click={() => modalController.open()}>
-        {$_('upgrade')}...
-      </Button>
-    </div>
-  {/if}
 </div>
-
-{#if type === 'available-upgrade'}
-  <UpgradeModal controller={modalController} {release} />
-{/if}
 
 <style>
   .release {
@@ -133,16 +120,5 @@
   }
   .notes {
     color: inherit;
-  }
-  .update-action {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--yellow-200);
-  }
-  .message {
-    color: var(--color-text-muted);
   }
 </style>

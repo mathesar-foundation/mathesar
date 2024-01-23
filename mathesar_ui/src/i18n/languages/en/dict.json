@@ -410,6 +410,7 @@
   "related_records_help": "Each of the following records links to [recordSummary] from another table.",
   "release_data_store_not_found": "Release data store not found in context.",
   "release_notes": "Release Notes",
+  "release_notes_and_upgrade_instructions": "Release Notes and Upgrade Instructions",
   "released_date": "Released {date}",
   "remove_filters": "{count, plural, one {Remove Filter} other {Remove {count} Filters}}",
   "remove_grouping": "Remove Grouping",
