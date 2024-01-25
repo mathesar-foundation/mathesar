@@ -22,14 +22,14 @@ This is a quick way to play with Mathesar locally before installing, but will no
 
 1. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
 
-??? info "Some things to try next"
+??? info "How to"
     - Connect to the PostgreSQL server within Docker:
 
         TODO
     
-    - Shut down:
+    - Stop Mathesar:
 
-        `docker stop mathesar`
+        <kbd>Ctrl</kbd>+<kbd>C</kbd>
 
     - Start again:
 
