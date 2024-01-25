@@ -7,7 +7,6 @@ nav:
   - Introduction:
       - Welcome: index.md
   - Installation:
-      - Install using Docker image: installation/docker/index.md
       - Install using Docker Compose: installation/docker-compose/index.md
       - Install from scratch: installation/build-from-source/index.md
   - Configuration:

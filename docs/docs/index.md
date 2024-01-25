@@ -6,14 +6,40 @@ Mathesar is a self-hostable open source project that provides a spreadsheet-like
 
 ## Try Mathesar
 
+### Live demo
+
 See our [live demo site](https://demo.mathesar.org/) to try Mathesar without installing anything.
+
+### Try locally
+
+This is a quick way to play with Mathesar locally before installing, but will not be appropriate for saving data that you care about.
+
+1. With [Docker](https://docs.docker.com/get-docker/) installed, run:
+
+    ```
+    docker run -it --name mathesar -p 8000:8000 mathesar/mathesar-prod:latest
+    ```
+
+1. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
+
+??? info "Some things to try next"
+    - Connect to the PostgreSQL server within Docker:
+
+        TODO
+    
+    - Shut down:
+
+        `docker stop mathesar`
+
+    - Start again:
+
+        `docker start mathesar`
 
 ## Install Mathesar
 
 You can self-host Mathesar by following one of the guides below:
 
-- [Install using Docker image](installation/docker/index.md) — the quickest way to get Mathesar running locally.
-- [Install using Docker compose](installation/docker-compose/index.md) — a more robust production setup with separate reverse-proxy and database containers.
+- [Install using Docker compose](installation/docker-compose/index.md) — a production setup with separate reverse-proxy and database containers.
 - [Install from scratch](installation/build-from-source/index.md) — an advanced setup that doesn't rely on Docker.
 
 !!! info "More installation methods coming soon"
