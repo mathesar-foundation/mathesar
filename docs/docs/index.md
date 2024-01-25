@@ -33,7 +33,18 @@ This is a quick way to play with Mathesar locally before installing, but will no
 
     - Start again:
 
-        `docker start mathesar`
+        ```
+        docker start mathesar
+        ```
+
+    - Remove Docker container:
+
+        ```
+        docker rm mathesar
+        ```
+
+        ⚠️ This will also delete the data that you've saved within Mathesar!
+
 
 ## Install Mathesar
 
