@@ -1,10 +1,119 @@
 # Upgrade Mathesar
 
+!!!note
+    Upgrading Mathesar to 0.1.4 requires more reconfiguration than normal. If you're trying to upgrade to version 0.1.3 or older (this is not recommended), [click here](#upgrade-old).
+
+## Upgrade Mathesar to 0.1.4 {:# upgrade-new}
+
 The upgrade instructions vary depending on the [installation method](../index.md#installing-mathesar) you chose. Select your installation method below to proceed.
 
-- [Upgrade a **Docker compose** installation of Mathesar](../installation/docker-compose/index.md#upgrade)
-- [Upgrade a **Guided script** installation of Mathesar](../installation/docker-compose/index.md#upgrade)
+- [Upgrade a **Docker compose** installation of Mathesar](#upgrade-dc)
+- [Upgrade a **Guided script** installation of Mathesar](#upgrade-dc)
 - [Upgrade a **Manual source** installation of Mathesar](#upgrade-source)
+
+### Starting from a Docker compose or script-guided installation {:#upgrade-dc}
+
+!!!note
+    Depending on your setup, you may need to run commands with `sudo`.
+
+#### Find needed parts
+
+1. Find your `.env` and `docker-compose.yml` files. Run
+    ```
+    docker inspect mathesar_service 
+    ```
+    and look for the value of the `"com.docker.compose.project.config_files"` key in the resulting JSON to find the path to the `docker-compose.yml` file. The `.env` file should be in the same directory. If you have `jq` installed, you can run
+    ```
+    docker inspect mathesar_service | jq  '.[0].Config.Labels."com.docker.compose.project.config_files"'
+    ```
+    and get the path directly. The `.env` file should be in the same directory.
+
+1. Copy the path of the directory containing `docker-compose.yml` and `.env` into the box below. Do not include a trailing slash.
+
+    <input data-input-for="MATHESAR_INSTALLATION_DIR" aria-label="Your Mathesar installation directory"/>
+
+    Then press <kbd>Enter</kbd> to customize this guide with the configuration directory.
+
+
+1. If you are using a Docker container for your PostgreSQL database, Run
+   ```
+   docker volume inspect mathesar_postgresql_data
+   ```
+   and look for the `"Mountpoint"` in the resulting JSON.
+
+1. Copy the path of the directory into the box below. Do not include a trailing slash.
+
+    <input data-input-for="MATHESAR_PG_DIR" aria-label="Your Mathesar Postgres data directory"/>
+
+    Then press <kbd>Enter</kbd> to customize this guide with the PostgreSQL data directory.
+
+#### Stop Mathesar, remove old images
+
+```
+docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml down --rmi all
+```
+
+#### Set up new configuration
+
+1. Back up the old configuration files:
+   ```
+   mv xMATHESAR_INSTALLATION_DIRx/docker-compose.yml xMATHESAR_INSTALLATION_DIRx/docker-compose.yml.backup
+   cp xMATHESAR_INSTALLATION_DIRx/.env xMATHESAR_INSTALLATION_DIRx/env.backup  # We'll modify the old file, so we copy instead of moving it.
+   ```
+
+1. Download the new docker compose file:
+   ```
+   curl -sfL -o xMATHESAR_INSTALLATION_DIRx/docker-compose.yml https://raw.githubusercontent.com/mathesar-foundation/mathesar/0.1.4/docker-compose.yml
+   ```
+
+1. Edit the `xMATHESAR_INSTALLATION_DIRx/.env` file to break the `DJANGO_DATABASE_URL` variable into its parts.
+
+   This variable should have the form:
+   ```
+   DJANGO_DATABASE_URL=postgres://<username>:<password>@<host>:<port>/<database>
+   ```
+   You should edit the `.env` file to have the variables:
+   ```
+   POSTGRES_USER=<username>
+   POSTGRES_PASSWORD=<password>
+   POSTGRES_HOST=<host>
+   POSTGRES_PORT=<port>
+   POSTGRES_DB=<database>
+   ```
+   If you don't want to set those environment variables (e.g., if they're otherwise used), you can instead edit the `docker-compose.yml` file directly to add those variables.
+
+1. Double-check the rest of the configuration:
+
+   - You should have a variable called `SECRET_KEY` with a 50-character random string defined.
+   - If hosting on the internet, you should have a `DOMAIN_NAME` variable defined.
+
+#### Initialize new Mathesar installation
+
+```
+docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml up -d
+```
+
+This will pull new images, and start the Mathesar containers. Wait a few minutes, then run `docker ps` to verify that you have `mathesar_service`, `mathesar-caddy-reverse-proxy-1`, and `mathesar_db` running and that the service is healthy. The services should not be reporting errors. If you were _not_ using Docker volumes for your Mathesar PostgreSQL data, you're done, and you can login to Mathesar via your usual method. If you're not sure, try to login to Mathesar. If you're presented with a screen instructing you to create an Admin user, you likely need to proceed to the next step.
+
+#### Move your PostgreSQL directory
+
+1. Bring down the services:
+```
+docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml down
+```
+
+1. Remove scaffold database data, copy your old PostgreSQL volume to the new location:
+```
+rm -r xMATHESAR_INSTALLATION_DIRx/msar/pgdata
+cp -r xMATHESAR_PG_DIRx xMATHESAR_INSTALLATION_DIRx/msar/pgdata
+```
+
+1. Bring the services back up:
+```
+docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml up -d
+```
+
+If things look good, then you can try to login at the usual address using your normal username and password, and you should see your data.
 
 ### Installed from source {:#upgrade-source}
 
@@ -73,5 +182,10 @@ The upgrade instructions vary depending on the [installation method](../index.md
     sudo systemctl restart gunicorn
     ```
 
+## Upgrading to older versions {:#upgrade-old}
 
-
+- If you installed from source, the instructions are the same as [above](#upgrade-source), but you need not change the environment variables.
+- If you have a Docker compose installation (including one from the guided script), follow the instructions [above](#upgrade-dc) to find the location of your `docker-compose.yml`, copy it into the box as instructed, and then run the command below (which should now be appropriately customized):
+```
+docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml up --force-recreate --build service
+```

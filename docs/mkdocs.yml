@@ -39,7 +39,6 @@ plugins:
         "product/users.md": "user-guide/users.md"
         "install/index.md": "index.md"
         "install/docker-compose/index.md": "installation/docker-compose/index.md"
-        "install/docker/index.md": "installation/docker/index.md"
         "install/build-from-source/index.md": "installation/build-from-source/index.md"
   - macros
   - placeholder
