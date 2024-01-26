@@ -118,7 +118,3 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
         ```
     
     Restart the docker containers for the configuration to take effect.
-
-## Upgrading Mathesar {:#upgrade}
-
-See the [upgrading guide](../../administration/upgrade.md).
