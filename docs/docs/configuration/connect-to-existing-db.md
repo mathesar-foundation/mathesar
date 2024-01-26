@@ -65,7 +65,7 @@ You can try using `host.docker.internal` instead of `localhost`. Below are detai
     
     === "Linux"
         ```
-        sudo systemctl restart postgresql
+        systemctl restart postgresql
         ```
     === "MacOS"
         ```
