@@ -25,7 +25,10 @@ This is a quick way to play with Mathesar locally before installing, but will no
 ??? info "How to"
     - Connect to the PostgreSQL server within Docker:
 
-        TODO
+       - Using `psql` within the container:
+           ```
+           docker exec -it mathesar sudo -u postgres psql
+           ```
     
     - Stop Mathesar:
 
