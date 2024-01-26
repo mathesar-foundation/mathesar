@@ -36,10 +36,10 @@ The upgrade instructions vary depending on the [installation method](../index.md
 
 
 1. If you are using a Docker container for your PostgreSQL database, Run
-   ```
-   docker volume inspect mathesar_postgresql_data
-   ```
-   and look for the `"Mountpoint"` in the resulting JSON.
+    ```
+    docker volume inspect mathesar_postgresql_data
+    ```
+    and look for the `"Mountpoint"` in the resulting JSON.
 
 1. Copy the path of the directory into the box below. Do not include a trailing slash.
 
@@ -55,37 +55,40 @@ docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml down --rmi all
 
 #### Set up new configuration
 
+!!! warning
+    `MATHESAR_DATABASES` has been deprecated as of v0.1.4 and will be removed entirely in future releases of Mathesar. If you end up deleting the variable from your `.env` file before starting up Mathesar after the upgrade, you can still add the connections manually through Mathesar's UI.
+
 1. Back up the old configuration files:
-   ```
-   mv xMATHESAR_INSTALLATION_DIRx/docker-compose.yml xMATHESAR_INSTALLATION_DIRx/docker-compose.yml.backup
-   cp xMATHESAR_INSTALLATION_DIRx/.env xMATHESAR_INSTALLATION_DIRx/env.backup  # We'll modify the old file, so we copy instead of moving it.
-   ```
+    ```
+    mv xMATHESAR_INSTALLATION_DIRx/docker-compose.yml xMATHESAR_INSTALLATION_DIRx/docker-compose.yml.backup
+    cp xMATHESAR_INSTALLATION_DIRx/.env xMATHESAR_INSTALLATION_DIRx/env.backup  # We'll modify the old file, so we copy instead of moving it.
+    ```
 
 1. Download the new docker compose file:
-   ```
-   curl -sfL -o xMATHESAR_INSTALLATION_DIRx/docker-compose.yml https://raw.githubusercontent.com/mathesar-foundation/mathesar/0.1.4/docker-compose.yml
-   ```
+    ```
+    curl -sfL -o xMATHESAR_INSTALLATION_DIRx/docker-compose.yml https://raw.githubusercontent.com/mathesar-foundation/mathesar/0.1.4/docker-compose.yml
+    ```
 
 1. Edit the `xMATHESAR_INSTALLATION_DIRx/.env` file to break the `DJANGO_DATABASE_URL` variable into its parts.
 
-   This variable should have the form:
-   ```
-   DJANGO_DATABASE_URL=postgres://<username>:<password>@<host>:<port>/<database>
-   ```
-   You should edit the `.env` file to have the variables:
-   ```
-   POSTGRES_USER=<username>
-   POSTGRES_PASSWORD=<password>
-   POSTGRES_HOST=<host>
-   POSTGRES_PORT=<port>
-   POSTGRES_DB=<database>
-   ```
-   If you don't want to set those environment variables (e.g., if they're otherwise used), you can instead edit the `docker-compose.yml` file directly to add those variables.
+    This variable should have the form:
+    ```
+    DJANGO_DATABASE_URL=postgres://<username>:<password>@<host>:<port>/<database>
+    ```
+    You should edit the `.env` file to have the variables:
+    ```
+    POSTGRES_USER=<username>
+    POSTGRES_PASSWORD=<password>
+    POSTGRES_HOST=<host>
+    POSTGRES_PORT=<port>
+    POSTGRES_DB=<database>
+    ```
+    If you don't want to set those environment variables (e.g., if they're otherwise used), you can instead edit the `docker-compose.yml` file directly to add those variables.
 
 1. Double-check the rest of the configuration:
 
-   - You should have a variable called `SECRET_KEY` with a 50-character random string defined.
-   - If hosting on the internet, you should have a `DOMAIN_NAME` variable defined.
+    - You should have a variable called `SECRET_KEY` with a 50-character random string defined.
+    - If hosting on the internet, you should have a `DOMAIN_NAME` variable defined.
 
 #### Initialize new Mathesar installation
 
@@ -98,20 +101,20 @@ This will pull new images, and start the Mathesar containers. Wait a few minutes
 #### Move your PostgreSQL directory
 
 1. Bring down the services:
-```
-docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml down
-```
+    ```
+    docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml down
+    ```
 
 1. Remove scaffold database data, copy your old PostgreSQL volume to the new location:
-```
-rm -r xMATHESAR_INSTALLATION_DIRx/msar/pgdata
-cp -r xMATHESAR_PG_DIRx xMATHESAR_INSTALLATION_DIRx/msar/pgdata
-```
+    ```
+    rm -r xMATHESAR_INSTALLATION_DIRx/msar/pgdata
+    cp -r xMATHESAR_PG_DIRx xMATHESAR_INSTALLATION_DIRx/msar/pgdata
+    ```
 
 1. Bring the services back up:
-```
-docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml up -d
-```
+    ```
+    docker compose -f xMATHESAR_INSTALLATION_DIRx/docker-compose.yml up -d
+    ```
 
 If things look good, then you can try to login at the usual address using your normal username and password, and you should see your data.
 

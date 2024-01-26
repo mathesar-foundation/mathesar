@@ -127,6 +127,8 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 
 ## Upgrading Mathesar {:#upgrade}
 
+See the [upgrading guide](../../administratin/upgrade.md)
+
 1. [Stop](#start-stop) Mathesar if it is already running.
 2. Manually upgrade Mathesar to the newest version:
 
