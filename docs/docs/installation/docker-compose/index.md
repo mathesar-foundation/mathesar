@@ -119,31 +119,6 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
     
     Restart the docker containers for the configuration to take effect.
 
-- ### **Connecting to an external database**
-   <!-- TODO -->
-    TODO: Add how to connect to databases once UI for DB connections is merged.
-    Perhaps add screenshots??
-
-
 ## Upgrading Mathesar {:#upgrade}
 
-See the [upgrading guide](../../administratin/upgrade.md)
-
-1. [Stop](#start-stop) Mathesar if it is already running.
-2. Manually upgrade Mathesar to the newest version:
-
-    === "Linux"
-        ```
-        sudo docker compose -f docker-compose.yml up --force-recreate --build service
-        ```
-
-    === "MacOS"
-        ```
-        docker compose -f docker-compose.yml up --force-recreate --build service
-        ```
-
-3. Visit `localhost/connections` or `<your-mathesar-domain>/connections` to ensure that all your previous database connection(s) configured via `MATHESAR_DATABASES` environment variable show up in Mathesar.
-4. Optionally remove the `MATHESAR_DATABASES` environment variable from your `.env` file.
-
-!!! warning
-    `MATHESAR_DATABASES` has been deprecated as of v0.1.4 and will be removed entirely in future releases of Mathesar. If you end up deleting the variable from your `.env` file before starting up mathesar after the upgrade, you can still add the connections manually through Mathesar's UI.
+See the [upgrading guide](../../administration/upgrade.md).
