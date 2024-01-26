@@ -14,9 +14,6 @@ then
   export POSTGRES_HOST=localhost
   export POSTGRES_PORT=5432
   export POSTGRES_DB=mathesar_django
-  if [[ -z "${MATHESAR_DATABASES}" ]]; then
-    export MATHESAR_DATABASES='(mathesar_tables|postgresql://postgres:mathesar@localhost:5432/mathesar)'
-  fi
 fi
 
 python -m mathesar.install --skip-confirm

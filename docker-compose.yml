@@ -157,8 +157,7 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
 
       # WARNING: MATHESAR_DATABASES is deprecated, and will be removed in a future release.
-      # TODO Make the default empty once the connections UI is merged
-      MATHESAR_DATABASES: ${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
+      MATHESAR_DATABASES: ${MATHESAR_DATABASES:-}
     entrypoint: ./run.sh
     volumes:
       - ./msar/static:/code/static
