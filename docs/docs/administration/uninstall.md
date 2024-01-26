@@ -4,21 +4,24 @@ The uninstall instructions vary depending on the [installation method](../index.
 
 ## Uninstall a Docker installation of Mathesar
 
+!!!note
+    Depending on your Docker setup, you may need to run `docker` commands with `sudo`.
+
 1. Remove the Mathesar container.
 
-    ```bash
+    ```
     docker rm -v mathesar_service
     ```
 
 1. Remove the Mathesar Image
 
-    ```bash
+    ```
     docker rmi mathesar_service
     ```
 
 1. Remove volumes related to Mathesar
 
-    ```bash
+    ```
     docker volume rm static &&
     docker volume rm media
     ```
@@ -30,57 +33,50 @@ The uninstall instructions vary depending on the [installation method](../index.
 
 1. Remove all Mathesar Docker images and containers.
 
-    === "Linux"
-        ```
-        sudo docker compose -f docker-compose.yml down --rmi all -v
-        ```
-
-    === "MacOS"
-        ```
-        docker compose -f docker-compose.yml down --rmi all -v
-        ```
+    ```
+    docker compose -f docker-compose.yml down --rmi all -v
+    ```
 
 1. Remove configuration files.
 
-    ```sh
-    sudo rm -rf mathesar
+    ```
+    rm -rf xMATHESAR_INSTALLATION_DIRx  # may need sudo, depending on location
     ```
 
 {% include 'snippets/uninstall-schemas.md' %}
 
-
-## Uninstall a source built installation of Mathesar
-
-<!-- TODO rename heading, re-organize content, review -->
+## Uninstall a source installation of Mathesar
 
 1. Stop Caddy service
 
-    ```sh
-    sudo systemctl disable caddy.service && sudo systemctl stop caddy.service
+    ```
+    systemctl disable caddy.service && systemctl stop caddy.service
     ```
 
-1. Remove Caddy service file and Caddyfile
+1. Remove Caddy service file and Caddyfile (requires `sudo`)
 
-    ```sh
-    sudo rm /lib/systemd/system/caddy.service && sudo rm /etc/caddy/Caddyfile
+    ```
+    sudo rm /lib/systemd/system/caddy.service
+    sudo rm /etc/caddy/Caddyfile
     ```
 
 1. Stop Gunicorn
 
-    ```sh
-    sudo systemctl disable gunicorn.service && sudo systemctl stop gunicorn.service
+    ```
+    systemctl disable gunicorn.service
+    systemctl stop gunicorn.service
     ```
 
 1. Remove Gunicorn service file
 
-    ```sh
+    ```
     sudo rm /lib/systemd/system/gunicorn.service
     ```
 
 1. Remove your Mathesar installation directory
 
-    ```sh
-    sudo rm -r xMATHESAR_INSTALLATION_DIRx
+    ```
+    rm -r xMATHESAR_INSTALLATION_DIRx  # May need sudo, depending on location
     ```
 
     !!! warning "Your installation directory might be customized"
