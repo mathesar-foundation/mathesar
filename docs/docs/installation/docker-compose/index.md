@@ -7,10 +7,13 @@
 
 ## Step-by-Step Guide {: #steps}
 
+!!!note
+    Depending on your Docker setup, you may need to run `docker` commands with `sudo`.
+
 1. Download our [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file.
 
     ```
-    sudo wget https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml
+    wget https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml
     ```
 
 1. Open the downloaded docker-compose file using your favourite text editor.
@@ -54,21 +57,13 @@
         ```
 
 1. Run the docker compose file using:
-
-    === "Linux"
-        ```
-        sudo docker compose -f docker-compose.yml up
-        ```
-    === "MacOS"
         ```
         docker compose -f docker-compose.yml up
         ```
 
 1. Set up your user account
 
-    Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up.
-    You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
-
+    Mathesar is now installed! You can use it by visiting `localhost` or the domain you've set up. You'll be prompted to set up an admin user account the first time you open Mathesar. Just follow the instructions on screen.
 
 ## Starting and stopping Mathesar {:#start-stop}
 
@@ -76,45 +71,34 @@ The Mathesar server needs to be running for you to use Mathesar. If you restart 
 
 - **Start** Mathesar:
 
-    === "Linux"
-        ```
-        sudo docker compose -f docker-compose.yml up -d
-        ```
+    ```
+    docker compose -f docker-compose.yml up -d
+    ```
 
-    === "MacOS"
-        ```
-        docker compose -f docker-compose.yml up -d
-        ```
     !!! Info
         Exclude the `-d` flag if you'd like to see the container's logs.
 
 - **Stop** Mathesar:
 
-    === "Linux"
-        ```
-        sudo docker compose -f docker-compose.yml down
-        ```
-
-    === "MacOS"
-        ```
-        docker compose -f docker-compose.yml down
-        ```
+    ```
+    docker compose -f docker-compose.yml down
+    ```
 
     This stops all Mathesar Docker containers and releases their ports.
 
-
 ## Optional configurations
 
-- ### **Hosting Mathesar over a custom domain with https**
+### Hosting Mathesar over a custom domain with https
 
-    If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
+If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
 
-    **Ensure that the DNS for your domain or sub-domain is pointing to the public IP address of the machine that you're installing Mathesar on**.
+**Ensure that the DNS for your domain or sub-domain is pointing to the public IP address of the machine that you're installing Mathesar on**.
 
-    Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](../../configuration/env-variables/#domain_name) environment variable, in the **CONFIG** section of the docker-compose file.
-    !!! example
-        ```yaml
-        DOMAIN_NAME: ${DOMAIN_NAME:-yourdomain.org, yoursubdomain.example.org}
-        ```
-    
-    Restart the docker containers for the configuration to take effect.
+Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](../../configuration/env-variables/#domain_name) environment variable, in the **CONFIG** section of the docker-compose file.
+
+!!! example
+    ```yaml
+    DOMAIN_NAME: ${DOMAIN_NAME:-yourdomain.org, yoursubdomain.example.org}
+    ```
+
+Restart the docker containers for the configuration to take effect.
