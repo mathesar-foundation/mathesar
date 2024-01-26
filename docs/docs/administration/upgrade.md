@@ -1,22 +1,12 @@
 # Upgrade Mathesar
 
-## Upgrade Mathesar via the command line
-
 The upgrade instructions vary depending on the [installation method](../index.md#installing-mathesar) you chose. Select your installation method below to proceed.
 
 - [Upgrade a **Docker compose** installation of Mathesar](../installation/docker-compose/index.md#upgrade)
-- [Upgrade a **Docker** installation of Mathesar](../installation/docker/index.md#upgrade)
+- [Upgrade a **Guided script** installation of Mathesar](../installation/docker-compose/index.md#upgrade)
+- [Upgrade a **Manual source** installation of Mathesar](#upgrade-source)
 
-
-## Upgrading deprecated Mathesar installations
-
-
-### Installed from guided install
-
-!!! note
-    Upgrading a guided installation of Mathesar follows the same steps that are required to [upgrade a Docker compose installation of Mathesar](../installation/docker-compose/index.md#upgrade).
-
-### Installed from source
+### Installed from source {:#upgrade-source}
 
 1. Go to your Mathesar installation directory.
 
@@ -44,6 +34,8 @@ The upgrade instructions vary depending on the [installation method](../index.md
     ```sh
     source ./mathesar-venv/bin/activate
     ```
+
+1. Update your environment variables according to the [the new configuration specification](../configuration/env-variables.md#db). In particular, you must put the connection info for the internal DB into new `POSTGRES_*` variables. The `DJANGO_DATABASE_URL` variable is no longer supported.
 
 1. Add the environment variables to the shell before running Django commands
 
@@ -80,3 +72,6 @@ The upgrade instructions vary depending on the [installation method](../index.md
     ```sh
     sudo systemctl restart gunicorn
     ```
+
+
+
