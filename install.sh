@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 clear -x
-github_tag=${1-"0.1.3"}
+github_tag=${1-"0.1.4"}
 min_maj_docker_version=20
 min_maj_docker_compose_version=2
 min_min_docker_compose_version=7
