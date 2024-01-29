@@ -42,10 +42,8 @@ def get_records(
                          'direction' field.
         search:          list of dictionaries, where each dictionary has a 'column' and
                          'literal' field.
-                         See: https://github.com/centerofci/sqlalchemy-filters#sort-format
         filter:          a dictionary with one key-value pair, where the key is the filter id and
                          the value is a list of parameters; supports composition/nesting.
-                         See: https://github.com/centerofci/sqlalchemy-filters#filters-format
         group_by:        group.GroupBy object
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
