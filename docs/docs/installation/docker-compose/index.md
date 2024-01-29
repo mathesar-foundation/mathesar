@@ -16,17 +16,16 @@
     wget https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml
     ```
 
-1. Open the downloaded docker-compose file using your favourite text editor.
+1. Open the downloaded docker-compose file using your text editor.
 
-1. Set the required environment variable(s) in the **CONFIG** section of the docker compose file.
+1. Set the required environment variables in the **x-config** section of the docker compose file.
     
     !!! Config       
         ```yaml
-        # Customize your Mathesar installation with the following variables, if desired.
-
         x-config: &config
-          # (Required) Replace '?' with '-' followed by a 50 character random string.
-          # You can generate one at https://djecrety.ir/
+          # (REQUIRED) Replace '?' with '-' followed by a 50 character random string.
+          # You can generate one at https://djecrety.ir/ or by running:
+          #   echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
           SECRET_KEY: ${SECRET_KEY:?}
 
           # (Optional) Replace 'http://localhost' with custom domain(s) e.g.

@@ -185,10 +185,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
         touch .env
         ```
 
-    1. Edit your `.env` file, making the following changes:
-
-        - Add the [**Backend Configuration** environment variables](../../configuration/env-variables.md#backend)
-        - Customize the values of the environment variables to suit your needs.
+    1. Edit your `.env` file, adding [environment variables](../../configuration/env-variables.md) to configure Mathesar.
 
         !!! example
             Your `.env` file should look something like this
@@ -196,13 +193,19 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             ```
             DOMAIN_NAME='xDOMAIN_NAMEx'
             ALLOWED_HOSTS='xDOMAIN_NAMEx'
-            SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
-            SECRET_KEY='donotusethissecretkeyitisnotsecureyourdatawillgetstolen' # REPLACE THIS!
+            SECRET_KEY='REPLACE_THIS_WITH_YOUR_RANDOMLY_GENERATED_VALUE' # REPLACE THIS!
             POSTGRES_DB=mathesar_django
             POSTGRES_USER=mathesar
             POSTGRES_PASSWORD=mathesar1234  # Do not use this password!
             POSTGRES_HOST=localhost
             POSTGRES_PORT=5432
+            ```
+
+        !!! tip
+            You can generate a [SECRET_KEY variable](../../configuration/env-variables.md#secret_key) by running:
+
+            ```
+            echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
             ```
 
     1. Add the environment variables to the shell

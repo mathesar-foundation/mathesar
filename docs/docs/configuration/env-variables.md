@@ -9,16 +9,13 @@ This page contains all available environment variables supported by Mathesar. Se
 
 - **Description**: A unique random string used by Django for cryptographic signing ([see Django docs](https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-SECRET_KEY)). It helps Mathesar secure user sessions and encrypt saved PostgreSQL passwords.
 - **Format**: A 50 character string
-- **Additional information**: Here are some easy ways to generate a secret key:
+- **Additional information**:
 
-    - Run this command on MacOS or Linux.
+    To generate a secret key you can use [this browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
 
-        ```
-        cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50
-        ```
-
-    - Use [this website](https://djecrety.ir/).
-
+    ```
+    echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
+    ```
 
 ## Internal Database configuration {: #db}
 
