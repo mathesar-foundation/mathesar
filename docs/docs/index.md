@@ -22,32 +22,20 @@ This is a quick way to play with Mathesar locally before installing, but will no
 
 1. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
 
-??? info "How to"
-    - Connect to the PostgreSQL server within Docker:
+    ??? tip "Tips when trying Mathesar locally"
+        - To open a [psql](https://www.postgresql.org/docs/current/app-psql.html) shell within the container, run:
+        
+            ```
+            docker exec -it mathesar sudo -u postgres psql
+            ```
 
-       - Using `psql` within the container:
-           ```
-           docker exec -it mathesar sudo -u postgres psql
-           ```
-    
-    - Stop Mathesar:
+        - To stop Mathesar, press <kbd>Ctrl</kbd>+<kbd>C</kbd> in the shell where it is running.
 
-        <kbd>Ctrl</kbd>+<kbd>C</kbd>
+        - To start again, run `docker start mathesar`.
 
-    - Start again:
+        - To remove the Docker container, run `docker rm mathesar` .
 
-        ```
-        docker start mathesar
-        ```
-
-    - Remove Docker container:
-
-        ```
-        docker rm mathesar
-        ```
-
-        ⚠️ This will also delete the data that you've saved within Mathesar!
-
+            ⚠️ This will also delete the data that you've saved within Mathesar!
 
 ## Install Mathesar
 
