@@ -13,7 +13,9 @@ nav:
       - Environment variables: configuration/env-variables.md
       - Connect to an existing database server: configuration/connect-to-existing-db.md
   - Administration:
-      - Upgrade Mathesar: administration/upgrade.md
+      - Upgrade:
+        - To 0.1.4: administration/upgrade/0.1.4.md
+        - To older versions: administration/upgrade/older.md
       - Uninstall Mathesar: administration/uninstall.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
