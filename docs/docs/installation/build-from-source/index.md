@@ -11,7 +11,7 @@ We recommend having at least 60 GB disk space and 4 GB of RAM.
 
 ### Operating System
 
-We've tested this on **Ubuntu**, but we expect that it can be adapted for other Linux distributions as well.
+We've tested this on **Debian 12**, but we expect that it can be adapted for other Linux distributions as well.
 
 ### Access
 
@@ -28,7 +28,7 @@ You'll need to install the following system packages before you install Mathesar
 
         Python _newer_ than 3.10 will run Mathesar, but will require some slightly modified installation steps which we have [not yet documented](https://github.com/centerofci/mathesar/issues/2872).
 
-- [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify with `psql --version`)
+- [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`)
 
 - [NodeJS](https://nodejs.org/en/download) 14 or newer (Verify with `node --version`)
 
@@ -193,7 +193,9 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             
             ```
             DOMAIN_NAME='xDOMAIN_NAMEx'
+            ALLOWED_HOSTS='xDOMAIN_NAMEx'
             SECRET_KEY='dee551f449ce300ee457d339dcee9682eb1d6f96b8f28feda5283aaa1a21'
+            SECRET_KEY='donotusethissecretkeyitisnotsecureyourdatawillgetstolen' # REPLACE THIS!
             POSTGRES_DB=mathesar_django
             POSTGRES_USER=mathesar
             POSTGRES_PASSWORD=mathesar1234  # Do not use this password!
