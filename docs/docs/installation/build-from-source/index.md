@@ -30,11 +30,11 @@ You'll need to install the following system packages before you install Mathesar
 
 - [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`)
 
-- [NodeJS](https://nodejs.org/en/download) 14 or newer (Verify with `node --version`)
+- [NodeJS](https://nodejs.org/en/download) 18 or newer (Verify with `node --version`)
 
     _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
-- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 6 or newer (Verify with `npm --version`)
+- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 9 or newer (Verify with `npm --version`)
 
     _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
