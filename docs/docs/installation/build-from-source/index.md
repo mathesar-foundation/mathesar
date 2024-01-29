@@ -3,6 +3,8 @@
 !!! warning "For experienced Linux sysadmins"
     To follow this guide you need be experienced with Linux server administration, including the command line interface and some common utilities.
 
+    If you run into any trouble, we encourage you to [open an issue](https://github.com/mathesar-foundation/mathesar/issues/new/choose) or submit a PR proposing changes to [this file](https://github.com/mathesar-foundation/mathesar/blob/master/docs/docs/installation/build-from-source/index.md).
+
 ## Requirements
 
 ### System
