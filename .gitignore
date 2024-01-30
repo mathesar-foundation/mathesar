@@ -183,7 +183,6 @@ docs/_build/
 
 # UI
 node_modules/
-storybook-static/
 
 # Client Build files
 mathesar/static/mathesar/
@@ -196,3 +195,6 @@ core
 
 # non tracked settings
 config/settings/local.py
+
+# Transifex binary
+tx

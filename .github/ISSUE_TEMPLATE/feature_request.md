@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest a new feature for Mathesar
-labels: "type: enhancement, status: triage"
+labels: "type: enhancement, needs: triage"
 ---
 
 ## Problem

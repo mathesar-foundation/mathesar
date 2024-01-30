@@ -1,70 +1,128 @@
-import { writable, derived } from 'svelte/store';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import databaseApi from '@mathesar/api/databases';
-import { States } from '@mathesar/api/utils/requestUtils';
+import { some } from 'iter-tools';
+import { derived, get, writable, type Readable } from 'svelte/store';
 
-import type { Writable } from 'svelte/store';
-import type { Database } from '@mathesar/AppTypes';
-import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
-import type { CancellablePromise } from '@mathesar-component-library';
+import {
+  ImmutableMap,
+  WritableMap,
+  defined,
+} from '@mathesar-component-library';
+import connectionsApi, {
+  type Connection,
+  type CreateFromKnownConnectionProps,
+  type CreateFromScratchProps,
+  type CreateWithNewUserProps,
+  type UpdatableConnectionProperties,
+} from '@mathesar/api/connections';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
+import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 const commonData = preloadCommonData();
 
-export const currentDBName: Writable<Database['name'] | undefined> = writable(
-  commonData?.current_db ?? undefined,
-);
-
-export interface DatabaseStoreData {
-  preload?: boolean;
-  state: States;
-  data: Database[];
-  error?: string;
+function sortConnections(c: Iterable<Connection>): Connection[] {
+  return [...c].sort((a, b) => a.nickname.localeCompare(b.nickname));
 }
 
-export const databases = writable<DatabaseStoreData>({
-  preload: true,
-  state: States.Loading,
-  data: commonData?.databases ?? [],
-});
+/**
+ * @returns true if the given connection is the only one that points to the same
+ * database among all the supplied connections. Connections with the same ids
+ * will not be compared.
+ */
+export function connectionHasUniqueDatabaseReference(
+  connection: Connection,
+  allConnections: Iterable<Connection>,
+): boolean {
+  return !some(
+    (c) =>
+      c.id !== connection.id &&
+      c.host === connection.host &&
+      c.port === connection.port &&
+      c.database === connection.database,
+    allConnections,
+  );
+}
 
-export const currentDatabase = derived(
-  [currentDBName, databases],
-  ([_currentDBName, databasesStore]) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const _databases = databasesStore.data;
-    if (!_databases?.length) {
-      return undefined;
-    }
-    return _databases?.find((database) => database.name === _currentDBName);
-  },
-);
+class ConnectionsStore {
+  private readonly unsortedConnections = new WritableMap<
+    Connection['id'],
+    Connection
+  >();
 
-let databaseRequest: CancellablePromise<PaginatedResponse<Database>>;
+  readonly connections: Readable<ImmutableMap<Connection['id'], Connection>>;
 
-export async function reloadDatabases(): Promise<
-  PaginatedResponse<Database> | undefined
-> {
-  databases.update((currentData) => ({
-    ...currentData,
-    state: States.Loading,
-  }));
+  readonly currentConnectionId = writable<Connection['id'] | undefined>();
 
-  try {
-    databaseRequest?.cancel();
-    databaseRequest = databaseApi.list();
-    const response = await databaseRequest;
-    const data = response.results || [];
-    databases.set({
-      state: States.Done,
-      data,
-    });
-    return response;
-  } catch (err) {
-    databases.set({
-      data: [],
-      state: States.Error,
-      error: err instanceof Error ? err.message : undefined,
-    });
-    return undefined;
+  readonly currentConnection: Readable<Connection | undefined>;
+
+  constructor() {
+    this.unsortedConnections.reconstruct(
+      commonData.connections.map((c) => [c.id, c]),
+    );
+    this.connections = derived(
+      this.unsortedConnections,
+      (uc) =>
+        new ImmutableMap(sortConnections(uc.values()).map((c) => [c.id, c])),
+    );
+    this.currentConnectionId.set(commonData.current_connection ?? undefined);
+    this.currentConnection = derived(
+      [this.connections, this.currentConnectionId],
+      ([connections, id]) => defined(id, (v) => connections.get(v)),
+    );
+  }
+
+  private addConnection(connection: Connection) {
+    this.unsortedConnections.set(connection.id, connection);
+  }
+
+  async createFromKnownConnection(props: CreateFromKnownConnectionProps) {
+    const connection = await connectionsApi.createFromKnownConnection(props);
+    this.addConnection(connection);
+    return connection;
+  }
+
+  async createFromScratch(props: CreateFromScratchProps) {
+    const connection = await connectionsApi.createFromScratch(props);
+    this.addConnection(connection);
+    return connection;
+  }
+
+  async createWithNewUser(props: CreateWithNewUserProps) {
+    const connection = await connectionsApi.createWithNewUser(props);
+    this.addConnection(connection);
+    return connection;
+  }
+
+  setCurrentConnectionId(connectionId: Connection['id']) {
+    this.currentConnectionId.set(connectionId);
+  }
+
+  clearCurrentConnectionId() {
+    this.currentConnectionId.set(undefined);
+  }
+
+  async updateConnection(
+    id: Connection['id'],
+    properties: Partial<UpdatableConnectionProperties>,
+  ): Promise<Connection> {
+    const connection = await connectionsApi.update(id, properties);
+    this.unsortedConnections.set(id, connection);
+    return connection;
+  }
+
+  async deleteConnection(id: Connection['id'], deleteMathesarSchemas = false) {
+    const connections = get(this.connections);
+    const connection = connections.get(id);
+    if (!connection) return;
+    const databaseIsUnique = connectionHasUniqueDatabaseReference(
+      connection,
+      connections.values(),
+    );
+    await connectionsApi.delete(id, deleteMathesarSchemas && databaseIsUnique);
+    this.unsortedConnections.delete(id);
   }
 }
+
+export const connectionsStore: MakeWritablePropertiesReadable<ConnectionsStore> =
+  new ConnectionsStore();
+
+/** @deprecated Use connectionsStore.currentConnection instead */
+export const currentDatabase = connectionsStore.currentConnection;

@@ -16,6 +16,7 @@ class ErrorCodes(Enum):
     TypeError = 4102
     ValueError = 4103
     NetworkError = 4104
+    InvalidConnection = 5001
 
     # DB Error Codes
     CheckViolation = 4215
@@ -39,6 +40,7 @@ class ErrorCodes(Enum):
     UniqueImportViolation = 4303
 
     # Validation Error
+    BadDBCredentials = 4428
     ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
     MappingsNotFound = 4417
@@ -49,6 +51,7 @@ class ErrorCodes(Enum):
     URLNotReachableError = 4405
     URLInvalidContentType = 4406
     UnknownDBType = 4408
+    InvalidColumnOrder = 4430
     InvalidDateError = 4413
     InvalidDateFormatError = 4414
     InvalidLinkChoice = 4409
@@ -67,3 +70,4 @@ class ErrorCodes(Enum):
     InvalidJSONFormat = 4425
     UnsupportedJSONFormat = 4426
     UnsupportedFileFormat = 4427
+    UnsupportedInstallationDatabase = 4429

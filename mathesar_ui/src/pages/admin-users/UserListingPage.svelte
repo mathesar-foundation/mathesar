@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { AnchorButton, Icon } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { AnchorButton, Icon } from '@mathesar-component-library';
   import { iconAddNew } from '@mathesar/icons';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
   import type { UserModel } from '@mathesar/stores/users';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import Errors from '@mathesar/components/Errors.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import UserRow from './UserRow.svelte';
   import UserSkeleton from './UserSkeleton.svelte';
 
@@ -39,32 +40,40 @@
   $: userCountText = filteredUsers.length ? `(${filteredUsers.length})` : '';
 </script>
 
-<svelte:head><title>{makeSimplePageTitle('Users')}</title></svelte:head>
+<svelte:head><title>{makeSimplePageTitle($_('users'))}</title></svelte:head>
 
-<h1>Users {userCountText}</h1>
+<h1>{$_('users')} {userCountText}</h1>
 
 <section class="users-list-container">
   {#if $requestStatus?.state === 'processing'}
     <UserSkeleton />
   {:else if $requestStatus?.state === 'success'}
     <EntityContainerWithFilterBar
-      searchPlaceholder="Search Users"
+      searchPlaceholder={$_('search_users')}
       bind:searchQuery={filterQuery}
       on:clear={handleClearFilterQuery}
     >
-      <slot slot="action">
+      <svelte:fragment slot="action">
         <AnchorButton appearance="primary" href={ADMIN_USERS_PAGE_ADD_NEW_URL}>
           <Icon {...iconAddNew} />
-          <span>Add user</span>
+          <span>{$_('add_user')}</span>
         </AnchorButton>
-      </slot>
-      <slot slot="resultInfo">
+      </svelte:fragment>
+      <svelte:fragment slot="resultInfo">
         <p>
-          {labeledCount(filteredUsers, 'results')}
-          for all users matching <strong>{filterQuery}</strong>
+          <RichText
+            text={$_('users_matching_search', {
+              values: { count: filteredUsers.length },
+            })}
+            let:slotName
+          >
+            {#if slotName === 'searchValue'}
+              <strong>{filterQuery}</strong>
+            {/if}
+          </RichText>
         </p>
-      </slot>
-      <slot slot="content">
+      </svelte:fragment>
+      <svelte:fragment slot="content">
         {#if filteredUsers.length}
           <div class="users-list">
             {#each filteredUsers as user, index (user.id)}
@@ -75,14 +84,12 @@
             {/each}
           </div>
         {:else if filteredUsers.length === 0}
-          <p class="no-users-found-text">No users found</p>
+          <p class="no-users-found-text">{$_('no_users_found')}</p>
         {/if}
-      </slot>
+      </svelte:fragment>
     </EntityContainerWithFilterBar>
   {:else if $requestStatus?.state === 'failure'}
-    <ErrorBox>
-      <p>Error: {$requestStatus.errors}</p>
-    </ErrorBox>
+    <Errors errors={$requestStatus.errors} />
   {/if}
 </section>
 
@@ -101,9 +108,6 @@
     border-radius: var(--border-radius-m);
 
     hr {
-      border: 0;
-      border-top: 1px solid var(--slate-200);
-      display: block;
       margin: 0 var(--size-xx-small);
     }
   }

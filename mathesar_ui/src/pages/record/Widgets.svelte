@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Help, isDefinedNonNullable } from '@mathesar-component-library';
   import type {
     JoinableTable,
     JoinableTablesResult,
   } from '@mathesar/api/types/tables/joinable_tables';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { iconRecord } from '@mathesar/icons';
   import { tables } from '@mathesar/stores/tables';
   import TableWidget from './TableWidget.svelte';
@@ -24,7 +26,7 @@
     const table = $tables.data.get(joinableTable.target);
     if (!table) return undefined;
     const id = joinableTable.jp_path[0].slice(-1)[0];
-    const name = columnNameMap.get(id) ?? '(unknown column)';
+    const name = columnNameMap.get(id) ?? `(${$_('unknown_column')})`;
     return { table, fkColumn: { id, name } };
   }
 
@@ -38,13 +40,15 @@
 {#if tableWidgetInputs.length}
   <div class="widgets-area">
     <h2 class="passthrough">
-      Related Records
+      {$_('related_records')}
       <Help>
-        Each of the following records links to
-        <NameWithIcon icon={iconRecord} truncate={false}>
-          <strong>{recordSummary}</strong>
-        </NameWithIcon>
-        from another table.
+        <RichText text={$_('related_records_help')} let:slotName>
+          {#if slotName === 'recordSummary'}
+            <NameWithIcon icon={iconRecord} truncate={false}>
+              <strong>{recordSummary}</strong>
+            </NameWithIcon>
+          {/if}
+        </RichText>
       </Help>
     </h2>
     <div class="widgets">
@@ -73,14 +77,6 @@
     font-weight: 600;
     font-size: var(--size-large);
     background: var(--white);
-  }
-  h2 hr {
-    margin: 0;
-    position: absolute;
-    bottom: 0;
-    left: 1em;
-    right: 1em;
-    border: solid var(--slate-200) 1px;
   }
   .widgets {
     padding: var(--size-small);

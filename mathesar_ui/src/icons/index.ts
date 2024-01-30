@@ -28,6 +28,7 @@ import {
   faLock,
   faPalette,
   faPencilAlt,
+  faPlug,
   faPlus,
   faProjectDiagram,
   faQuestion,
@@ -64,9 +65,13 @@ import {
   faCircleInfo,
   faUserGear,
   faFilterCircleXmark,
+  faMicroscope,
+  faDiagramNext,
+  faWandSparkles,
   faShareFromSquare,
   faXmark,
   faExternalLink,
+  faGrip,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconProps } from '@mathesar-component-library/types';
 import {
@@ -109,6 +114,7 @@ export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
 export const iconGoToMarketingSite: IconProps = { data: faGlobe };
 export const iconImportData: IconProps = { data: faUpload };
+export const iconInferColumnType: IconProps = { data: faMicroscope };
 export const iconJoinEmailList: IconProps = { data: faEnvelope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
@@ -131,15 +137,19 @@ export const iconUndo: IconProps = { data: faUndo };
 export const iconUnlink: IconProps = { data: faUnlink };
 export const iconPaste: IconProps = { data: faPaste };
 export const iconLogout: IconProps = { data: faArrowRightFromBracket };
+export const iconUseFirstRowAsColumnName: IconProps = { data: faDiagramNext };
+export const iconUseFirstRowAsData: IconProps = { data: faWandSparkles };
 export const iconShare: IconProps = { data: faShareFromSquare };
 export const iconRecreate: IconProps = { data: faRedo };
 export const iconDisable: IconProps = { data: faXmark };
 export const iconOpenLinkInNewTab = { data: faExternalLink };
+export const iconGrip = { data: faGrip };
 
 // THINGS
 //
 // (These names should all be nouns)
 
+export const iconConnection: IconProps = { data: faPlug };
 export const iconConstraint: IconProps = { data: faKey };
 export const iconConstraintUnique: IconProps = { data: faSnowflake };
 export const iconDatabase: IconProps = { data: faDatabase };

@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { DbType } from '@mathesar/AppTypes';
 
   export let type: DbType | undefined;
 </script>
 
 <div>
-  Database type <span>{type ?? 'UNKNOWN'}</span>
+  {$_('database_type')}: <span>{type ?? 'UNKNOWN'}</span>
 </div>
 
 <style lang="scss">

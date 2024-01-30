@@ -61,12 +61,14 @@ export function orderProcessedColumns(
 }
 
 export function getLinkForTableItem(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   table: Pick<TableEntry, 'import_verified' | 'data_files' | 'id'>,
 ) {
   if (isTableImportConfirmationRequired(table)) {
-    return getImportPreviewPageUrl(databaseName, schemaId, table.id);
+    return getImportPreviewPageUrl(connectionId, schemaId, table.id, {
+      useColumnTypeInference: true,
+    });
   }
-  return getTablePageUrl(databaseName, schemaId, table.id);
+  return getTablePageUrl(connectionId, schemaId, table.id);
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import { Button, Icon, Spinner } from '@mathesar-component-library';
   import type { Response as ApiRecordsResponse } from '@mathesar/api/types/tables/records';
   import { postAPI, States } from '@mathesar/api/utils/requestUtils';
@@ -96,7 +96,7 @@
         template,
         transitiveData: buildRecordSummariesForSheet(previewData),
       });
-      submitResult({ recordId, recordSummary });
+      submitResult({ recordId, recordSummary, record });
     } catch (err) {
       toast.error(getErrorMessage(err));
       // TODO set errors in tabularData to appear within cells
@@ -139,7 +139,11 @@
       </div>
     {:else}
       <div class="no-results">
-        No {#if hasSearchQueries}matching{:else}existing{/if} records
+        {#if hasSearchQueries}
+          {$_('no_matching_records')}
+        {:else}
+          {$_('no_existing_records')}
+        {/if}
       </div>
     {/if}
   {/if}
@@ -159,16 +163,16 @@
           }}
         >
           <Icon {...iconAddNew} />
-          <span>Create Record From Search Criteria</span>
+          <span>{$_('create_record_from_search')}</span>
         </Button>
       </div>
     {/if}
     {#if records.length === 10 && isInitialized}
       <div class="message">
         {#if hasSearchQueries}
-          The 10 best matches are shown. Continue filtering to see more.
+          {$_('ten_best_matches_shown')}
         {:else}
-          The first 10 records are shown. Filter to see more.
+          {$_('first_ten_records_shown')}
         {/if}
       </div>
     {/if}

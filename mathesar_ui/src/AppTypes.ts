@@ -1,10 +1,13 @@
 import type { TreeItem } from '@mathesar-component-library/types';
 
+/** @deprecated in favor of Connection */
 export interface Database {
   id: number;
-  name: string;
-  deleted: boolean;
-  supported_types: string[];
+  nickname: string;
+  database: string;
+  username: string;
+  host: string;
+  port: number;
 }
 
 export interface DBObjectEntry {

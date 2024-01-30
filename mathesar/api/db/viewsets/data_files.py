@@ -2,6 +2,7 @@ from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, JSONParser
 
 from mathesar.api.dj_filters import DataFileFilter
 import mathesar.api.exceptions.data_import_exceptions.exceptions
@@ -21,6 +22,7 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DataFileFilter
+    parser_classes = [MultiPartParser, JSONParser]
 
     def partial_update(self, request, pk=None):
         serializer = DataFileSerializer(

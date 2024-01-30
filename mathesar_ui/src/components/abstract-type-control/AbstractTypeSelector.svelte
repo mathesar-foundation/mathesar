@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { Select, LabeledInput } from '@mathesar-component-library';
   import {
     currentDbAbstractTypes,
@@ -54,7 +55,7 @@
   }
 </script>
 
-<LabeledInput label="Data Type" layout={'stacked'}>
+<LabeledInput label={$_('data_type')} layout={'stacked'}>
   <Select
     options={allowedTypeConversions}
     value={selectedAbstractType}

@@ -1,7 +1,7 @@
 {% extends 'mathesar/app_styled_base.html' %}
 {% load i18n static %}
 
-{% block title %}{% translate "login"|title %}{% endblock %}
+{% block title %}{% translate "Login" %}{% endblock %}
 
 {% block page_styles %}
   <style type="text/css">
@@ -77,6 +77,13 @@
       font-size: var(--size-xx-large);
       text-align: center;
     }
+    .login-card .language-selector {
+      display: block;
+      background-color: transparent;
+      border: 1px solid var(--slate-200);
+      border-radius: 0.285rem;
+      cursor: pointer;
+    }
     @media (max-width: 50rem) {
       .unsupported-device {
         display: block;
@@ -108,7 +115,7 @@
   {% if live_demo_mode %}
     <div class="unsupported-device">
       <div class="warning-icon">⚠️</div>
-      <p class="title">{% translate "unsupported screen size"|title %}</p>
+      <p class="title">{% translate "Unsupported Screen Size" %}</p>
       <p>
       {% translate "Mathesar is a spreadsheet-like application with a rich UI that does not yet function well on screens this small. Improved support for mobile devices is on our" %}
         
@@ -122,7 +129,7 @@
     </div>
     <div class="tutorial align-center">
       <div class="header">
-        <strong>{% translate "live demo mode"|title %}</strong>
+        <strong>{% translate "Live Demo Mode" %}</strong>
       </div>
       <div class="body">
       {% translate "Mathesar's live demo is available to anyone to try out." %}
@@ -130,8 +137,8 @@
         {% if live_demo_username and live_demo_password %}
           {% translate "Use the following credentials to login" %}:
           <ul>
-            <li>{% translate "username" %}: <strong>{{live_demo_username}}</strong></li>
-            <li>{% translate "password" %}: <strong>{{live_demo_password}}</strong></li>
+            <li>{% translate "Username" %}: <strong>{{live_demo_username}}</strong></li>
+            <li>{% translate "Password" %}: <strong>{{live_demo_password}}</strong></li>
           </ul>
         {% endif %}
 
@@ -143,5 +150,21 @@
   <div class="login-card align-center">
     <h1>{% block h1 %} {% endblock %}</h1>
     {% block box_content %} {% endblock %}
+    <!-- Commenting it out to avoid releasing any half baked changes
+    {% comment %} set_language https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#the-set-language-redirect-view  {% endcomment %}
+    <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+      <input name="next" type="hidden" value="{{ redirect_to }}">
+      <select name="language" onchange="form.submit()" class="language-selector align-center" aria-label="Display Language">
+          {% get_current_language as LANGUAGE_CODE %}
+          {% get_available_languages as LANGUAGES %}
+          {% get_language_info_list for LANGUAGES as languages %}
+          {% for language in languages %}
+              <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                  {{ language.name_local }} ({{ language.code }})
+              </option>
+          {% endfor %}
+      </select>
+    </form>
+    -->
   </div>
 {% endblock %}

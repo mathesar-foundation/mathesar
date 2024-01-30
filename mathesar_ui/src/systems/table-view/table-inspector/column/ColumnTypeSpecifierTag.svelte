@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Icon, iconExternalLink } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { Icon, iconExternalLink } from '@mathesar-component-library';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconConstraint } from '@mathesar/icons';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -16,7 +17,7 @@
 <div class="specifier-tag-container">
   {#if type === 'foreignKey' && linkedTable}
     <div class="fk-container">
-      <span>Linked To</span>
+      <span>{$_('linked_to')}</span>
       <a
         class="specifier-tag"
         href={$storeToGetTablePageUrl({ tableId: linkedTableId })}
@@ -28,7 +29,7 @@
   {:else if type === 'primaryKey'}
     <div class="specifier-tag">
       <Icon {...iconConstraint} />
-      <span>Primary Key</span>
+      <span>{$_('primary_key')}</span>
     </div>
   {/if}
 </div>

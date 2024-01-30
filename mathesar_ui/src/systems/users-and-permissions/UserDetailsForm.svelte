@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import type { UnionToIntersection } from 'type-fest';
-
+  import { _ } from 'svelte-i18n';
   import {
     PasswordInput,
     TextInput,
@@ -21,8 +21,10 @@
   } from '@mathesar/components/form';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
+  import { setLanguage } from '@mathesar/i18n';
   import SelectUserType from './SelectUserType.svelte';
-  import UserFormInput from './UserFormInput.svelte';
+  // import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -34,13 +36,18 @@
   $: isNewUser = user === undefined;
   $: fullName = optionalField(user?.full_name ?? '');
   $: username = requiredField(user?.username ?? '', [
-    maxLength(150, 'Username cannot be longer than 150 characters.'),
-    matchRegex(
-      /^[A-Za-z0-9_@.+-]*$/,
-      'Username can only contain alphanumeric characters, _, @, +, ., and -.',
+    maxLength(
+      150,
+      $_('username_max_length_error', {
+        values: {
+          maxLength: 150,
+        },
+      }),
     ),
+    matchRegex(/^[A-Za-z0-9_@.+-]*$/, $_('username_restrict_chars_error')),
   ]);
   $: email = optionalField(user?.email ?? '', [isEmail()]);
+  $: displayLanguage = requiredField(user?.display_language ?? 'en');
   $: userType = requiredField<'user' | 'admin' | undefined>(
     user?.is_superuser ? 'admin' : 'user',
   );
@@ -49,7 +56,7 @@
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = { fullName, username, email, userType };
+    const fields = { fullName, username, email, userType, displayLanguage };
     return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
@@ -61,6 +68,7 @@
       username: formValues.username,
       email: formValues.email,
       is_superuser: formValues.userType === 'admin',
+      display_language: formValues.displayLanguage,
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
@@ -77,11 +85,14 @@
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
       }
+
+      const updatedLocale = request.display_language;
+      await setLanguage(updatedLocale);
       dispatch('update');
       return;
     }
 
-    throw new Error('Unable to update user');
+    throw new Error($_('unable_to_update_user'));
   }
 
   function getErrorMessages(e: unknown) {
@@ -112,16 +123,20 @@
 </script>
 
 <div class="user-details-form">
-  <UserFormInput
-    label="Display Name"
+  <GridFormInput
+    label={$_('display_name')}
     field={fullName}
     input={{ component: TextInput }}
   />
 
-  <UserFormInput label="Email" field={email} input={{ component: TextInput }} />
+  <GridFormInput
+    label={$_('email')}
+    field={email}
+    input={{ component: TextInput }}
+  />
 
-  <UserFormInput
-    label="Username *"
+  <GridFormInput
+    label={`${$_('username')} *`}
     field={username}
     input={{
       component: TextInput,
@@ -130,8 +145,8 @@
   />
 
   {#if isNewUser}
-    <UserFormInput
-      label="Password *"
+    <GridFormInput
+      label={`${$_('password')} *`}
       field={password}
       input={{
         component: PasswordInput,
@@ -140,8 +155,17 @@
     />
   {/if}
 
-  <UserFormInput
-    label="Role *"
+  <!-- Commenting this for now to avoid releasing any half baked changes to develop branch -->
+  <!-- <GridFormInput
+    label={`${$_('display_language')} *`}
+    field={displayLanguage}
+    input={{
+      component: SelectDisplayLanguage,
+    }}
+  /> -->
+
+  <GridFormInput
+    label={`${$_('role')} *`}
     field={userType}
     input={{
       component: SelectUserType,
@@ -155,8 +179,8 @@
     {form}
     catchErrors
     onProceed={saveUser}
-    proceedButton={{ label: 'Save', icon: iconSave }}
-    cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
+    proceedButton={{ label: $_('save'), icon: iconSave }}
+    cancelButton={{ label: $_('discard_changes'), icon: iconUndo }}
     {getErrorMessages}
     initiallyHidden={!!user}
     hasCancelButton={!!user}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
   import type { CommonData } from '@mathesar/utils/preloadData';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
@@ -9,7 +10,7 @@
   export let commonData: CommonData;
 </script>
 
-<!-- 
+<!--
   We're explicity having two separate routing context for the app to avoid the user
   from client routing across either of them.
 -->
@@ -20,7 +21,7 @@
       <AnonymousAccessRoutes />
 
       <Route fallback>
-        <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+        <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
       </Route>
     </Route>
 
@@ -41,7 +42,7 @@
     </Route>
 
     <Route fallback>
-      <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+      <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
     </Route>
   </Route>
 {/if}

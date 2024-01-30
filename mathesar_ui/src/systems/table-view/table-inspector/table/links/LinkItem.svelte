@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import TableName from '@mathesar/components/TableName.svelte';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { RichText } from '@mathesar/components/rich-text';
   import type { TableLink } from './utils';
 
   export let link: TableLink;
@@ -13,7 +15,13 @@
   <span class="table-name">
     <TableName table={link.table} truncate={false} />
   </span>
-  <span class="sub-text">Linked via <strong>{link.column.name}</strong></span>
+  <span class="sub-text">
+    <RichText text={$_('linked_via_column')} let:slotName>
+      {#if slotName === 'columnName'}
+        <strong>{link.column.name}</strong>
+      {/if}
+    </RichText>
+  </span>
 </a>
 
 <style lang="scss">

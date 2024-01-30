@@ -2,8 +2,8 @@
   import Label from '@mathesar-component-library-dir/label/Label.svelte';
   import type { LabeledInputLayout } from './LabeledInputTypes';
 
-  export let label: string | undefined = '';
-  export let help: string | undefined = '';
+  export let label: string | undefined = undefined;
+  export let help: string | undefined = undefined;
   export let layout: LabeledInputLayout = 'inline';
 </script>
 
@@ -15,15 +15,14 @@
 >
   <Label>
     <span class="label-content">
-      <span class="label">
-        {label}
-        <slot name="label" />
-      </span>
-      <span class="help">
-        {help}
-        <slot name="help" />
-      </span>
+      <!--
+        ⚠️ NOTE: Do not add any white space within `.label` or `.help`. We have
+        CSS that uses the `:empty` pseudo-class which does not work if there is
+        white space.
+      -->
+      <span class="label">{label ?? ''}<slot name="label" /></span>
       <span class="input"><slot /></span>
+      <span class="help">{help ?? ''}<slot name="help" /></span>
     </span>
   </Label>
 </div>

@@ -1,6 +1,6 @@
 .fieldset-group {
   padding: 0;
-  border: 0;
+  margin: 0;
   --spacing-y-default: 0.5em;
   --spacing-x-default: 1em;
 
@@ -15,9 +15,14 @@
   &.has-label .options {
     margin-top: 1em;
   }
-  &:not(.inline) .option {
+  &:not(.inline) .option:not(:first-child) {
     margin-top: var(--spacing-y, var(--spacing-y-default));
+  }
+  &:not(.inline) .option:not(:last-child) {
     margin-bottom: var(--spacing-y, var(--spacing-y-default));
+  }
+  &:not(.inline) .option.has-help:not(:last-child) {
+    margin-bottom: calc(2 * var(--spacing-y, var(--spacing-y-default)));
   }
 
   &.inline .options {
@@ -26,5 +31,15 @@
     .option:not(:last-child) {
       margin-right: var(--spacing-x, var(--spacing-x-default));
     }
+  }
+
+  &:not(.boxed) {
+    border: 0;
+  }
+  &.boxed {
+    border: 1px solid var(--slate-300);
+    border-radius: var(--border-radius-m);
+    padding: 1em;
+    padding-top: 0;
   }
 }

@@ -1,10 +1,17 @@
 import json
+from importlib import resources as impresources
 from mathesar.database.types import UIType
+from mathesar import data
 
 
 def _money_display_options_schema():
-    with open("currency_info.json", "r") as info_file:
-        currency_info = json.load(info_file)
+    try:
+        inp_file = (impresources.files(data) / 'currency_info.json')
+        with inp_file.open("rb") as f:  # or "rt" as text file with universal newlines
+            currency_info = json.load(f)
+    except AttributeError:
+        # Python < PY3.9, fall back to method deprecated in PY3.11.
+        currency_info = json.load(impresources.open_text(data, 'currency_info.json'))
     currency_codes = list(currency_info.keys())
     return {
         "options": [

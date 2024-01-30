@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Route } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconSettingsMajor } from '@mathesar/icons';
@@ -16,7 +16,7 @@
   item={{
     type: 'simple',
     href: ADMIN_URL,
-    label: 'Administration',
+    label: $_('administration'),
     icon: iconSettingsMajor,
   }}
 />
@@ -26,6 +26,7 @@
 <LayoutWithHeader
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
+    '--PageLayoutWithSidebar__sidebar-width': '15rem',
   }}
   restrictWidth
 >
@@ -33,7 +34,7 @@
     slot="secondary-header"
     theme="light"
     pageTitleAndMetaProps={{
-      name: 'Administration',
+      name: $_('administration'),
       icon: iconSettingsMajor,
     }}
   />
@@ -44,7 +45,7 @@
         item={{
           type: 'simple',
           href: ADMIN_UPDATE_PAGE_URL,
-          label: 'Software Update',
+          label: $_('software_update'),
         }}
       />
       <SoftwareUpdate />

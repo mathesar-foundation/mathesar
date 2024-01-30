@@ -15,6 +15,7 @@ from pathlib import Path
 
 from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
+from django.utils.translation import gettext_lazy
 
 
 # We use a 'tuple' with pipes as delimiters as decople naively splits the global
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -92,13 +94,26 @@ WSGI_APPLICATION = "config.wsgi.application"
 # See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
     db_key: db_url(url_string)
-    for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
+    for db_key, url_string in decouple_config('MATHESAR_DATABASES', default='', cast=Csv(pipe_delim))
 }
-DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
+
+# POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST & POSTGRES_PORT are required env variables for forming a pg connection string for the django database
+# lack of any one of these will result in the internal django database to be sqlite.
+POSTGRES_DB = decouple_config('POSTGRES_DB', default=None)
+POSTGRES_USER = decouple_config('POSTGRES_USER', default=None)
+POSTGRES_PASSWORD = decouple_config('POSTGRES_PASSWORD', default=None)
+POSTGRES_HOST = decouple_config('POSTGRES_HOST', default=None)
+POSTGRES_PORT = decouple_config('POSTGRES_PORT', default=None)
+
+if POSTGRES_DB and POSTGRES_USER and POSTGRES_PASSWORD and POSTGRES_HOST and POSTGRES_PORT:
+    DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}')
+else:
+    DATABASES['default'] = db_url('sqlite:///db.sqlite3')
 
 for db_key, db_dict in DATABASES.items():
-    # Engine can be '.postgresql' or '.postgresql_psycopg2'
-    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
+    # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s),
+    # however for the internal 'default' db 'sqlite3' can be used.
+    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql') and db_key != 'default':
         raise ValueError(
             f"{db_key} is not a PostgreSQL database. "
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
@@ -113,12 +128,12 @@ if TEST:
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = decouple_config('SECRET_KEY')
+SECRET_KEY = decouple_config('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple_config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = decouple_config('ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = decouple_config('ALLOWED_HOSTS', cast=Csv(), default=".localhost, 127.0.0.1, [::1]")
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -163,8 +178,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Media files (uploaded by the user)
-
-MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+DEFAULT_MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+MEDIA_ROOT = decouple_config('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
@@ -177,6 +192,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -227,7 +245,10 @@ FRIENDLY_ERRORS = {
 MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
 MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
-MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
+MATHESAR_CLIENT_DEV_URL = decouple_config(
+    'MATHESAR_CLIENT_DEV_URL',
+    default='http://localhost:3000'
+)
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
@@ -248,3 +269,14 @@ DRF_ACCESS_POLICY = {
 }
 # List of Template names that contains additional script tags to be added to the base template
 BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
+
+# i18n
+LANGUAGES = [
+    ('en', gettext_lazy('English')),
+    ('ja', gettext_lazy('Japanese')),
+]
+LOCALE_PATHS = [
+    'translations'
+]
+LANGUAGE_COOKIE_NAME = 'display_language'
+SALT_KEY = SECRET_KEY

@@ -1,4 +1,6 @@
-FROM postgres:13
+ARG PG_VERSION=13
+FROM postgres:${PG_VERSION}
+ARG PG_VERSION
 
 RUN apt update
-RUN apt install -y postgresql-13-pgtap postgresql-13-pldebugger && rm -rf /var/lib/apt/lists/*
+RUN apt install -y postgresql-${PG_VERSION}-pgtap postgresql-${PG_VERSION}-pldebugger && rm -rf /var/lib/apt/lists/*

@@ -127,6 +127,7 @@
           restrictWidthToRowWidth={!usesVirtualList}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
+          hasPaddingRight
         >
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
@@ -147,5 +148,6 @@
   .sheet-area {
     position: relative;
     height: 100%;
+    overflow-x: auto;
   }
 </style>

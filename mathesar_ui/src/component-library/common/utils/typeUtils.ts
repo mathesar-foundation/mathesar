@@ -47,12 +47,22 @@ export function requiredNonNullable<T>(
 }
 
 /**
+ * Used to make sure that a value is defined before using it.
+ */
+export function defined<T, U>(
+  v: T | undefined,
+  f: (v: T) => U | undefined,
+): U | undefined {
+  return v === undefined ? undefined : f(v);
+}
+
+/**
  * From https://stackoverflow.com/a/51365037/895563
  */
 export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends (infer U)[]
     ? RecursivePartial<U>[]
     : T[P] extends number | string | symbol | undefined
-    ? T[P]
-    : RecursivePartial<T[P]>;
+      ? T[P]
+      : RecursivePartial<T[P]>;
 };

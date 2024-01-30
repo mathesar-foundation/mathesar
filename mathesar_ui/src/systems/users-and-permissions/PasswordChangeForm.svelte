@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     PasswordInput,
     Button,
@@ -15,8 +16,8 @@
   import userApi, { type User } from '@mathesar/api/users';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import UserFormInput from './UserFormInput.svelte';
-  import UserFormInputRow from './UserFormInputRow.svelte';
+  import GridFormInputRow from '@mathesar/components/form/GridFormInputRow.svelte';
+  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -43,7 +44,7 @@
       : fields;
   })();
   $: form = makeForm(formFields, [
-    comboMustBeEqual([password, confirmPassword], 'Passwords do not match'),
+    comboMustBeEqual([password, confirmPassword], $_('passwords_do_not_match')),
   ]);
 
   $: userId,
@@ -78,10 +79,9 @@
     <div class="password-change-warning">
       <WarningBox fullWidth>
         {#if isUserUpdatingTheirOwnPassword}
-          You'll be redirected to the login page once you change your password.
+          {$_('redirected_login_page_password_change')}
         {:else}
-          Resetting the password will prompt the user to change their password
-          on their next login.
+          {$_('prompt_new_password_next_login')}
         {/if}
       </WarningBox>
     </div>
@@ -90,9 +90,9 @@
   <div class="password-inputs">
     {#if showChangePasswordForm}
       {#if isUserUpdatingTheirOwnPassword}
-        <UserFormInputRow>
-          <UserFormInput
-            label="Old Password *"
+        <GridFormInputRow>
+          <GridFormInput
+            label={`${$_('old_password')} *`}
             field={oldPassword}
             input={{ component: PasswordInput }}
             bypassRow
@@ -100,12 +100,12 @@
 
           <div />
           <div />
-        </UserFormInputRow>
+        </GridFormInputRow>
       {/if}
 
-      <UserFormInputRow>
-        <UserFormInput
-          label="New Password *"
+      <GridFormInputRow>
+        <GridFormInput
+          label={`${$_('new_password')} *`}
           field={password}
           input={{
             component: PasswordInput,
@@ -114,8 +114,8 @@
           bypassRow
         />
 
-        <UserFormInput
-          label="Confirm Password *"
+        <GridFormInput
+          label={`${$_('confirm_password')} *`}
           field={confirmPassword}
           input={{
             component: PasswordInput,
@@ -123,11 +123,11 @@
           }}
           bypassRow
         />
-      </UserFormInputRow>
+      </GridFormInputRow>
     {:else}
-      <UserFormInputRow>
-        <UserFormInput
-          label="Password"
+      <GridFormInputRow>
+        <GridFormInput
+          label={$_('password')}
           field={passwordPlaceholder}
           input={{ component: PasswordInput, props: { disabled: true } }}
           bypassRow
@@ -140,10 +140,10 @@
               showChangePasswordForm = true;
             }}
           >
-            Change Password
+            {$_('change_password')}
           </Button>
         </div>
-      </UserFormInputRow>
+      </GridFormInputRow>
     {/if}
   </div>
 
@@ -156,8 +156,8 @@
         onCancel={() => {
           showChangePasswordForm = false;
         }}
-        proceedButton={{ label: 'Save', icon: iconSave }}
-        cancelButton={{ label: 'Cancel' }}
+        proceedButton={{ label: $_('save'), icon: iconSave }}
+        cancelButton={{ label: $_('cancel') }}
       />
     </div>
   {/if}

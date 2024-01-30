@@ -6,7 +6,7 @@ from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
 from db.columns.operations.select import get_column_attnum_from_name, get_column_attnum_from_names_as_map
-from db.identifiers import truncate_if_necessary
+from db.constants import ID, ID_ORIGINAL
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
 from mathesar.models.users import DatabaseRole, SchemaRole
@@ -15,20 +15,6 @@ from mathesar.models.query import UIQuery
 from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.base import Column, Table, DataFile
-
-
-# DUPLICATE: We need a better testing organization schema. Now is not the time to fix.
-@pytest.fixture
-def long_column_data_file():
-    data_filepath = 'mathesar/tests/data/long_column_names.csv'
-    with open(data_filepath, "rb") as csv_file:
-        data_file = DataFile.objects.create(
-            file=File(csv_file),
-            created_from='file',
-            base_name='longdatafiled',
-            type='csv'
-        )
-    return data_file
 
 
 @pytest.fixture
@@ -40,6 +26,103 @@ def missing_keys_json_data_file():
             created_from='file',
             base_name='missing_keys',
             type='json'
+        )
+    return data_file
+
+
+@pytest.fixture
+def patents_excel_data_file(patents_excel_filepath):
+    with open(patents_excel_filepath, "rb") as excel_file:
+        data_file = DataFile.objects.create(
+            file=File(excel_file),
+            created_from='file',
+            base_name='patents',
+            type='excel'
+        )
+    return data_file
+
+
+@pytest.fixture
+def misaligned_table_excel_data_file():
+    data_filepath = 'mathesar/tests/data/excel_parsing/misaligned_table.xlsx'
+    with open(data_filepath, "rb") as excel_file:
+        data_file = DataFile.objects.create(
+            file=File(excel_file),
+            created_from='file',
+            base_name='misaligned_table',
+            type='excel'
+        )
+    return data_file
+
+
+@pytest.fixture
+def duplicate_id_csv_data_file(duplicate_id_table_csv_filepath):
+    with open(duplicate_id_table_csv_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='duplicate_id',
+            type='csv'
+        )
+    return data_file
+
+
+@pytest.fixture
+def null_id_csv_data_file(null_id_table_csv_filepath):
+    with open(null_id_table_csv_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='null_id',
+            type='csv'
+        )
+    return data_file
+
+
+@pytest.fixture
+def duplicate_id_json_data_file(duplicate_id_table_json_filepath):
+    with open(duplicate_id_table_json_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='duplicate_id',
+            type='json'
+        )
+    return data_file
+
+
+@pytest.fixture
+def null_id_json_data_file(null_id_table_json_filepath):
+    with open(null_id_table_json_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='null_id',
+            type='json'
+        )
+    return data_file
+
+
+@pytest.fixture
+def duplicate_id_excel_data_file(duplicate_id_table_excel_filepath):
+    with open(duplicate_id_table_excel_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='duplicate_id',
+            type='excel'
+        )
+    return data_file
+
+
+@pytest.fixture
+def null_id_excel_data_file(null_id_table_excel_filepath):
+    with open(null_id_table_excel_filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='null_id',
+            type='excel'
         )
     return data_file
 
@@ -168,7 +251,7 @@ def _create_table(client, data_files, table_name, schema, import_target_table, d
     return response, response_table, table
 
 
-def _get_expected_name(table_name, data_file=None):
+def get_expected_name(table_name, data_file=None):
     if not table_name and data_file:
         return data_file.base_name
     elif not table_name and data_file is None:
@@ -593,7 +676,7 @@ def test_table_previews_missing_columns(client, type_inference_table):
 
 @pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])
 def test_table_create_from_datafile(client, data_file, schema, table_name):
-    expt_name = _get_expected_name(table_name, data_file=data_file)
+    expt_name = get_expected_name(table_name, data_file=data_file)
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
                  '13/033,085', 'Polyimide Wire Insulation Repair System', None)
     column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
@@ -607,7 +690,7 @@ def test_table_create_from_datafile(client, data_file, schema, table_name):
 @pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])
 def test_table_create_from_datafile_with_import_target(client, data_file, schema, table_name):
     _, _, import_target_table = _create_table(client, None, 'target_table', schema, import_target_table=None)
-    expt_name = _get_expected_name(table_name, data_file=data_file)
+    expt_name = get_expected_name(table_name, data_file=data_file)
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
                  '13/033,085', 'Polyimide Wire Insulation Repair System', None)
     column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
@@ -620,7 +703,7 @@ def test_table_create_from_datafile_with_import_target(client, data_file, schema
 
 @pytest.mark.parametrize('table_name', ['Test Table Create From Paste', ''])
 def test_table_create_from_paste(client, schema, paste_data_file, table_name):
-    expt_name = _get_expected_name(table_name)
+    expt_name = get_expected_name(table_name)
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
                  '13/033,085', 'Polyimide Wire Insulation Repair System', None)
     column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
@@ -633,7 +716,7 @@ def test_table_create_from_paste(client, schema, paste_data_file, table_name):
 
 @pytest.mark.parametrize('table_name', ['Test Table Create From URL', ''])
 def test_table_create_from_url(client, schema, url_data_file, table_name):
-    expt_name = _get_expected_name(table_name, data_file=url_data_file)
+    expt_name = get_expected_name(table_name, data_file=url_data_file)
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
                  '13/033,085', 'Polyimide Wire Insulation Repair System', None)
     column_names = ['center', 'status', 'case_number', 'patent_number',
@@ -648,7 +731,7 @@ def test_table_create_from_url(client, schema, url_data_file, table_name):
 @pytest.mark.parametrize('table_name', ['test_table_no_file', ''])
 def test_table_create_without_datafile(client, schema, data_files, table_name):
     num_tables = Table.objects.count()
-    expt_name = _get_expected_name(table_name)
+    expt_name = get_expected_name(table_name)
 
     expect_comment = 'test comment for table create'
     response, response_table, table = _create_table(
@@ -1804,123 +1887,9 @@ def test_table_ui_dependency(client, create_patents_table, get_uid):
     assert response_data == expected_response
 
 
-@pytest.mark.parametrize(
-    'before_truncation, after_truncation',
-    [
-        [
-            "bbbbbbbbbbbbbb",
-            "bbbbbbbbbbbbbb",
-        ],
-        [
-            "cccccccccccccccccccccc",
-            "cccccccccccccccccccccc",
-        ],
-        [
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        ],
-        [
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-            "fffffffffffffffffffffffffffffffffffffff-7e43d30e"
-        ],
-        [
-            "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-            "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-d0ccef3c",
-        ],
-        [
-            "ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
-            "ggggggggggggggggggggggggggggggggggggggg-2910cecf",
-        ],
-    ]
-)
-def test_truncate_if_necessary(before_truncation, after_truncation):
-    assert truncate_if_necessary(before_truncation) == after_truncation
-
-
-def test_create_table_long_name_data_file(client, long_column_data_file, schema):
-    table_name = 'My Long column name datafile'
-    # response, response_table, table = _create_table(
-    # )
-    expt_name = _get_expected_name(table_name, data_file=long_column_data_file)
-    first_row = (
-        1, 'NATION', '8.6', '4.5', '8.5', '4.3', '8.3', '4.6', '78.6', '2.22',
-        '0.88', '0.66', '1.53', '3.75', '3.26', '0.45', '0.07', '53.9', '52.3',
-        '0.8', '0.38487', '3.15796', '2.3', '33247', '14.842144', '6.172333',
-        '47.158545', '1.698662', '2.345577', '7.882694', '0.145406', '3.395302',
-        '92.085375', '14.447634', '78.873848', '1.738571', '16.161024',
-        '19.436701', '8.145643', '94.937079', '74.115131', '75.601680',
-        '22.073834', '11.791045', '1.585233',
-        '1.016932', '2023-02-01'
-    )
-    column_names = [
-        "State or Nation",
-        "Cycle 1 Total Number of Health Deficiencies",
-        "Cycle 1 Total Number of Fire Safety Deficiencies",
-        "Cycle 2 Total Number of Health Deficiencies",
-        "Cycle 2 Total Number of Fire Safety Deficiencies",
-        "Cycle 3 Total Number of Health Deficiencies",
-        "Cycle 3 Total Number of Fire Safety Deficiencies",
-        "Average Number of Residents per Day",
-        "Reported Nurse Aide Staffing Hours per Resident per Day",
-        "Reported LPN Staffing Hours per Resident per Day",
-        "Reported RN Staffing Hours per Resident per Day",
-        "Reported Licensed Staffing Hours per Resident per Day",
-        "Reported Total Nurse Staffing Hours per Resident per Day",
-        "Total number of nurse staff hours per resident per day on the weekend",
-        "Registered Nurse hours per resident per day on the weekend",
-        "Reported Physical Therapist Staffing Hours per Resident Per Day",
-        "Total nursing staff turnover",
-        "Registered Nurse turnover",
-        "Number of administrators who have left the nursing home",
-        "Case-Mix RN Staffing Hours per Resident per Day",
-        "Case-Mix Total Nurse Staffing Hours per Resident per Day",
-        "Number of Fines",
-        "Fine Amount in Dollars",
-        "Percentage of long stay residents whose need for help with daily activities has increased",
-        "Percentage of long stay residents who lose too much weight",
-        "Percentage of low risk long stay residents who lose control of their bowels or bladder",
-        "Percentage of long stay residents with a catheter inserted and left in their bladder",
-        "Percentage of long stay residents with a urinary tract infection",
-        "Percentage of long stay residents who have depressive symptoms",
-        "Percentage of long stay residents who were physically restrained",
-        "Percentage of long stay residents experiencing one or more falls with major injury",
-        "Percentage of long stay residents assessed and appropriately given the pneumococcal vaccine",
-        "Percentage of long stay residents who received an antipsychotic medication",
-        "Percentage of short stay residents assessed and appropriately given the pneumococcal vaccine",
-        "Percentage of short stay residents who newly received an antipsychotic medication",
-        "Percentage of long stay residents whose ability to move independently worsened",
-        "Percentage of long stay residents who received an antianxiety or hypnotic medication",
-        "Percentage of high risk long stay residents with pressure ulcers",
-        "Percentage of long stay residents assessed and appropriately given the seasonal influenza vaccine",
-        "Percentage of short stay residents who made improvements in function",
-        "Percentage of short stay residents who were assessed and appropriately given the seasonal influenza vaccine",
-        "Percentage of short stay residents who were rehospitalized after a nursing home admission",
-        "Percentage of short stay residents who had an outpatient emergency department visit",
-        "Number of hospitalizations per 1000 long-stay resident days",
-        "Number of outpatient emergency department visits per 1000 long-stay resident days",
-        "Processing Date"
-    ]
-    # Make sure at least some column names require truncation;
-    # 63 is the hard Postgres limit; we're also experiencing problems with ids
-    # as short as 58 characters, but I'll leave this at 63 so that it doesn't
-    # have to be updated once that's fixed.
-    assert any(
-        len(column_name) >= 63
-        for column_name
-        in column_names
-    )
-    processed_column_names = [truncate_if_necessary(col) for col in column_names]
-    table = check_create_table_response(
-        client, table_name, expt_name, long_column_data_file, schema, first_row,
-        processed_column_names, import_target_table=None
-    )
-    # This just makes sure we can get records. This was a bug with long column names.
-    client.get(f'/api/db/v0/tables/{table.id}/records/')
-
-
 def test_create_table_and_normalize_json_data_file(client, missing_keys_json_data_file, schema):
     table_name = 'Missing keys'
-    expt_name = _get_expected_name(table_name, data_file=missing_keys_json_data_file)
+    expt_name = get_expected_name(table_name, data_file=missing_keys_json_data_file)
     first_row = (1, 'Matt', 'Murdock', 'Male', '["Stick", "Foggy"]', '{"street": "210", "city": "NY"}', None)
     column_names = [
         "first_name", "last_name", "gender", "friends", "address", "email"
@@ -2009,4 +1978,149 @@ def test_create_table_with_nested_json_objects(client, schema):
         check_create_table_response(
             client, table_name, table_name, datafile, schema, expected_data[index]["first_row"],
             expected_data[index]["column_names"], import_target_table=None
+        )
+
+
+def test_create_table_using_excel_data_file(client, patents_excel_data_file, schema):
+    table_name = 'patents'
+    expt_name = get_expected_name(table_name, data_file=patents_excel_data_file)
+    first_row = (
+        1,
+        "NASA Kennedy Space Center",
+        "Application",
+        "KSC-12871",
+        "0",
+        "13/033,085",
+        "Polyimide Wire Insulation Repair System",
+        None,
+    )
+    column_names = [
+        "Center",
+        "Status",
+        "Case Number",
+        "Patent Number",
+        "Application SN",
+        "Title",
+        "Patent Expiration Date",
+    ]
+
+    check_create_table_response(
+        client, table_name, expt_name, patents_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_and_normalize_excel_data_file(client, misaligned_table_excel_data_file, schema):
+    table_name = 'misaligned_table'
+    expt_name = get_expected_name(table_name, data_file=misaligned_table_excel_data_file)
+    first_row = (1, 'John', '25', 'Male')
+    column_names = ["Name", "Age", "Gender"]
+
+    check_create_table_response(
+        client, table_name, expt_name, misaligned_table_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_duplicate_id_csv_data_file(client, duplicate_id_csv_data_file, schema):
+    table_name = 'duplicate_id'
+    expt_name = get_expected_name(table_name, data_file=duplicate_id_csv_data_file)
+    first_row = (1, '1', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, duplicate_id_csv_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_null_id_csv_data_file(client, null_id_csv_data_file, schema):
+    table_name = 'null_id'
+    expt_name = get_expected_name(table_name, data_file=null_id_csv_data_file)
+    first_row = (1, '1', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, null_id_csv_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_duplicate_id_json_data_file(client, duplicate_id_json_data_file, schema):
+    table_name = 'duplicate_id'
+    expt_name = get_expected_name(table_name, data_file=duplicate_id_json_data_file)
+    first_row = (1, '1', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, duplicate_id_json_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_null_id_json_data_file(client, null_id_json_data_file, schema):
+    table_name = 'null_id'
+    expt_name = get_expected_name(table_name, data_file=null_id_json_data_file)
+    first_row = (1, '1.0', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, null_id_json_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_duplicate_id_excel_data_file(client, duplicate_id_excel_data_file, schema):
+    table_name = 'duplicate_id'
+    expt_name = get_expected_name(table_name, data_file=duplicate_id_excel_data_file)
+    first_row = (1, '1', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, duplicate_id_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def test_create_table_using_null_id_excel_data_file(client, null_id_excel_data_file, schema):
+    table_name = 'null_id'
+    expt_name = get_expected_name(table_name, data_file=null_id_excel_data_file)
+    first_row = (1, '1.0', 'John', '25')
+    column_names = [ID, ID_ORIGINAL, "Name", "Age"]
+
+    check_create_table_response(
+        client, table_name, expt_name, null_id_excel_data_file, schema, first_row,
+        column_names, import_target_table=None
+    )
+
+
+def _create_excel_datafile_using_sheet_index_param(filepath, sheet_index):
+    with open(filepath, "rb") as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='file',
+            base_name='multiple_sheets',
+            type='excel',
+            sheet_index=sheet_index
+        )
+    return data_file
+
+
+def test_create_table_with_multiple_sheets_excel_file(client, multiple_sheets_excel_filepath, schema):
+    column_names = ['Name', 'Age', 'Email']
+    test_datafile_objects_with_sheet_index = [
+        _create_excel_datafile_using_sheet_index_param(multiple_sheets_excel_filepath, sheet_index)
+        for sheet_index in range(3)
+    ]
+    expected_first_row_data = [
+        (1, 'Jim', '25', 'jim@example.com'),
+        (1, 'John', '25', 'john@example.com'),
+        (1, 'Jake', '25', 'jake@example.com'),
+    ]
+
+    for index, datafile in enumerate(test_datafile_objects_with_sheet_index):
+        table_name = f'Table {index}'
+        check_create_table_response(
+            client, table_name, table_name, datafile, schema, expected_first_row_data[index],
+            column_names, import_target_table=None
         )

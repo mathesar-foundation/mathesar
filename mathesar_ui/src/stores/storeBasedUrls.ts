@@ -8,27 +8,28 @@
  * store instances and this store will get used in every FK cell.
  */
 
-import * as urls from '@mathesar/routes/urls';
 import { derived } from 'svelte/store';
-import { currentDatabase } from './databases';
+
+import * as urls from '@mathesar/routes/urls';
+import { connectionsStore } from './databases';
 import { currentSchema } from './schemas';
 import { currentTable } from './tables';
 
 export const storeToGetRecordPageUrl = derived(
-  [currentDatabase, currentSchema, currentTable],
-  ([database, schema, table]) => {
+  [connectionsStore.currentConnection, currentSchema, currentTable],
+  ([connection, schema, table]) => {
     function getRecordPageUrl({
-      databaseName,
+      connectionId,
       schemaId,
       tableId,
       recordId,
     }: {
-      databaseName?: string;
+      connectionId?: number;
       schemaId?: number;
       tableId?: number;
       recordId: unknown;
     }): string | undefined {
-      const d = databaseName ?? database?.name;
+      const d = connectionId ?? connection?.id;
       const s = schemaId ?? schema?.id;
       const t = tableId ?? table?.id;
       const r = recordId ?? undefined;
@@ -47,18 +48,18 @@ export const storeToGetRecordPageUrl = derived(
 );
 
 export const storeToGetTablePageUrl = derived(
-  [currentDatabase, currentSchema, currentTable],
-  ([database, schema, table]) => {
+  [connectionsStore.currentConnection, currentSchema, currentTable],
+  ([connection, schema, table]) => {
     function getTablePageUrl({
-      databaseName,
+      connectionId,
       schemaId,
       tableId,
     }: {
-      databaseName?: string;
+      connectionId?: number;
       schemaId?: number;
       tableId?: number;
     }): string | undefined {
-      const d = databaseName ?? database?.name;
+      const d = connectionId ?? connection?.id;
       const s = schemaId ?? schema?.id;
       const t = tableId ?? table?.id;
       if (d === undefined || s === undefined || t === undefined) {

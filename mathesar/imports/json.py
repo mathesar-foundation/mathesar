@@ -11,6 +11,7 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.imports.utils import get_alternate_column_names, process_column_names
 from psycopg2.errors import IntegrityError, DataError
+from sqlalchemy.exc import IntegrityError as sqlalchemy_integrity_error
 
 from mathesar.state import reset_reflection
 
@@ -82,8 +83,8 @@ def insert_records_from_json_data_file(name, schema, column_names, engine, comme
 
 
 def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
-    db_name = schema.database.name
-    engine = create_mathesar_engine(db_name)
+    db_model = schema.database
+    engine = create_mathesar_engine(db_model)
     json_filepath = data_file.file.path
     max_level = data_file.max_level
     column_names = process_column_names(
@@ -92,10 +93,10 @@ def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
     try:
         table = insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level)
         update_pk_sequence_to_latest(engine, table)
-    except (IntegrityError, DataError):
+    except (IntegrityError, DataError, sqlalchemy_integrity_error):
         drop_table(name=name, schema=schema.name, engine=engine)
         column_names_alt = get_alternate_column_names(column_names)
         table = insert_records_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
 
-    reset_reflection(db_name=db_name)
+    reset_reflection(db_name=db_model.name)
     return table

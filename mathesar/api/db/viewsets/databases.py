@@ -1,8 +1,7 @@
 from django_filters import rest_framework as filters
 from rest_access_policy import AccessViewSetMixin
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
@@ -10,17 +9,17 @@ from mathesar.models.base import Database
 from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
-from mathesar.api.serializers.databases import DatabaseSerializer
+from mathesar.api.serializers.databases import ConnectionSerializer
 
 from db.functions.operations.check_support import get_supported_db_functions
 from mathesar.api.serializers.functions import DBFunctionSerializer
-
 from db.types.base import get_available_known_db_types
+from db.types.install import uninstall_mathesar_from_database
 from mathesar.api.serializers.db_types import DBTypeSerializer
 
 
-class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    serializer_class = DatabaseSerializer
+class ConnectionViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+    serializer_class = ConnectionSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DatabaseFilter
@@ -31,6 +30,14 @@ class DatabaseViewSet(AccessViewSetMixin, viewsets.GenericViewSet, ListModelMixi
             self.request,
             Database.objects.all().order_by('-created_at')
         )
+
+    def destroy(self, request, pk=None):
+        db_object = self.get_object()
+        if request.query_params.get('del_msar_schemas').lower() == 'true':
+            engine = db_object._sa_engine
+            uninstall_mathesar_from_database(engine)
+        db_object.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
     def functions(self, request, pk=None):

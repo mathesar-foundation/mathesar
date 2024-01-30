@@ -494,8 +494,12 @@ span.flatpickr-weekday {
 }
 .flatpickr-day.inRange {
   border-radius: 0;
-  -webkit-box-shadow: -5px 0 0 var(--slate-200), 5px 0 0 var(--slate-200);
-  box-shadow: -5px 0 0 var(--slate-200), 5px 0 0 var(--slate-200);
+  -webkit-box-shadow:
+    -5px 0 0 var(--slate-200),
+    5px 0 0 var(--slate-200);
+  box-shadow:
+    -5px 0 0 var(--slate-200),
+    5px 0 0 var(--slate-200);
 }
 .flatpickr-day.flatpickr-disabled,
 .flatpickr-day.flatpickr-disabled:hover,
@@ -516,8 +520,12 @@ span.flatpickr-weekday {
 }
 .flatpickr-day.week.selected {
   border-radius: 0;
-  -webkit-box-shadow: -5px 0 0 #569ff7, 5px 0 0 #569ff7;
-  box-shadow: -5px 0 0 #569ff7, 5px 0 0 #569ff7;
+  -webkit-box-shadow:
+    -5px 0 0 #569ff7,
+    5px 0 0 #569ff7;
+  box-shadow:
+    -5px 0 0 #569ff7,
+    5px 0 0 #569ff7;
 }
 .flatpickr-day.hidden {
   visibility: hidden;
