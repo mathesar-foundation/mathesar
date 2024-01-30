@@ -116,6 +116,7 @@ class Database(ReflectionManagerMixin, BaseModel):
     password = EncryptedCharField(max_length=255)
     host = models.CharField(max_length=255)
     port = models.IntegerField()
+    version = models.CharField(max_length=32, blank=True)
     current_objects = models.Manager()
     # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
     objects = DatabaseObjectManager()
@@ -167,6 +168,24 @@ class Database(ReflectionManagerMixin, BaseModel):
                 host=db_info['HOST'],
                 port=db_info['PORT'],
             )
+
+    def update_from_settings_key(self, db_key):
+        """
+        This is only supported for Postgres DBs (e.g., it won't work on an
+        SQLite3 internal DB; that returns NoneType)
+
+        Args:
+            db_key: This should be the key of the DB in settings.DATABASES
+        """
+        db_info = settings.DATABASES[db_key]
+        if 'postgres' in db_info['ENGINE']:
+            self.name = db_key
+            self.db_name = db_info['NAME']
+            self.username = db_info['USER']
+            self.password = db_info['PASSWORD']
+            self.host = db_info['HOST']
+            self.port = db_info['PORT']
+
 
     def save(self, **kwargs):
         db_name = self.name

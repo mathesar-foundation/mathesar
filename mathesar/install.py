@@ -12,6 +12,7 @@ from django.conf import settings
 from django.db.utils import IntegrityError
 from sqlalchemy.exc import OperationalError
 from db import install
+from mathesar import __version__
 
 
 def main(skip_static_collection=False):
@@ -42,7 +43,18 @@ def main(skip_static_collection=False):
 def install_on_db_with_key(database_key, skip_confirm):
     from mathesar.models.base import Database
     db_model = Database.create_from_settings_key(database_key)
-    db_model.save()
+    try:
+        db_model.version = __version__
+        db_model.save()
+    except IntegrityError:
+        # Temporary hack. Should be removed by 0.1.5
+        current_db_model = Database.current_objects.get(name=database_key)
+        if current_db_model.version == __version__:
+            return
+        else:
+            current_db_model.update_from_settings_key(database_key)
+            current_db_model.version = __version__
+            current_db_model.save()
     try:
         install.install_mathesar(
             database_name=db_model.db_name,
@@ -53,6 +65,7 @@ def install_on_db_with_key(database_key, skip_confirm):
             skip_confirm=skip_confirm
         )
     except OperationalError as e:
+        # Note that we never delete current_db_model
         db_model.delete()
         raise e
 
