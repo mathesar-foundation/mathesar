@@ -44,6 +44,7 @@ from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 from db.tables.utils import get_primary_key_column
 
+from mathesar import __version__
 from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.utils.prefetch import PrefetchManager, Prefetcher
@@ -189,6 +190,7 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     def save(self, **kwargs):
         db_name = self.name
+        self.version = __version__
         # invalidate cached engine as db credentials might get changed.
         if _engine_cache.get(db_name):
             _engine_cache[db_name].dispose()
