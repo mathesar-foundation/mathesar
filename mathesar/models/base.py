@@ -187,7 +187,6 @@ class Database(ReflectionManagerMixin, BaseModel):
             self.host = db_info['HOST']
             self.port = db_info['PORT']
 
-
     def save(self, **kwargs):
         db_name = self.name
         self.version = __version__
