@@ -4,21 +4,15 @@ This is developer documentation to help with release notes. It is not published 
 
 ## How to generate release notes
 
-1. Create an empty release notes file.
-
-    For example:
+1. Run the `find_missing_prs.sh` script, passing the release version number as the only argument.
 
     ```
-    touch 1.2.3.md
+    ./find_missing_prs.sh 1.2.3
     ```
 
-1. Run this script to find PRs which have been merged but not yet included in the latest release notes file.
-
-    ```
-    ./find_missing_prs.sh
-    ```
-
-    (See comments within the script to better understand how it works.)
+    - You can run this any time during the development cycle. If there is not yet a release branch, the script will compare `develop` to the previous release.
+    - If you haven't yet created a release notes file for this release, it will create one for you.
+    - The script will find PRs which have been merged but not yet included in the release notes file.
 
 1. Open `missing_prs.csv` to see the PRs you need to add. Incorporate them into the release notes as you see fit. Save the release notes and commit them.
 
