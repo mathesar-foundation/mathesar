@@ -18,3 +18,21 @@ This is developer documentation to help with release notes. It is not published 
 
 1. Re-run the script as needed. When more PRs are merged, they will appear in `missing_prs.csv`.
 
+## How to format the release notes content
+
+1. Group changes into sections in the following order
+
+    ```md
+    ## Security fixes
+    ## Breaking changes
+    ## New features
+    ## Groundwork
+    ## Documentation
+    ## Bug fixes
+    ## Maintenance
+    ```
+
+    You can omit sections if there are no applicable changes.
+
+1. Within the "New features" section, further categorize changes by specific features using level 3 headings.
+
