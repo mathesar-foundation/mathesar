@@ -13,7 +13,10 @@
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import type { Connection } from '@mathesar/api/connections';
-  import { connectionsStore } from '@mathesar/stores/databases';
+  import {
+    connectionHasUniqueDatabaseReference,
+    connectionsStore,
+  } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
@@ -23,9 +26,9 @@
   export let controller: ModalController;
   export let connection: Connection;
 
-  $: otherConnectionsUseSameDb = !!$connections.find(
-    (conn) =>
-      conn.id !== connection.id && conn.database === connection.database,
+  $: hasUniqueDatabaseReference = connectionHasUniqueDatabaseReference(
+    connection,
+    $connections.values(),
   );
 
   let deleteMathesarSchemas = false;
@@ -67,7 +70,7 @@
     {$_('delete_connection_db_delete_info')}
   </p>
 
-  {#if !otherConnectionsUseSameDb}
+  {#if hasUniqueDatabaseReference}
     <p>
       <LabeledInput
         layout="inline-input-first"

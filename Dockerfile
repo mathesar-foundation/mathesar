@@ -70,7 +70,7 @@ EXPOSE 5432
 WORKDIR /code/
 
 COPY requirements* ./
-RUN pip install --no-cache-dir -r ${PYTHON_REQUIREMENTS} --force-reinstall sqlalchemy-filters
+RUN pip install --no-cache-dir -r ${PYTHON_REQUIREMENTS}
 COPY . .
 
 RUN cd mathesar_ui && npm ci && npm run build

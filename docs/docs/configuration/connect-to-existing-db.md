@@ -6,15 +6,13 @@
     psql -c 'create database mathesar_django;'
     ```
 
-1. Configure the [`DJANGO_DATABASE_URL` environment variable](./env-variables.md#django_database_url) to point to the database you just created.
-
-1. (Optional) For Docker Compose related installations, you may [disable Mathesar's default database server](./customize-docker-compose.md#disable-db-service) if you like.
+1. Configure the [Internal database environment variables](./env-variables.md#db) to point to the database you just created.
 
 
 ## Connect to a database server running on the host {: #localhost-db }
 
 !!! info ""
-    This content is related to Mathesar running in Docker related environments. This is applicable for the [Guided installation method](../installation/guided-install/index.md), [Docker Compose installation method](../installation/docker-compose/index.md), and [Docker installation method](../installation/docker/index.md).
+    This content is related to Mathesar running in Docker related environments.
 
 If you're running Mathesar in a Docker related environment, and your database server runs on the host machine, you will not be able to connect to it using `localhost:<db_port>`, since `localhost` would refer to the Docker environment and not to the host.
 
@@ -67,7 +65,7 @@ You can try using `host.docker.internal` instead of `localhost`. Below are detai
     
     === "Linux"
         ```
-        sudo systemctl restart postgresql
+        systemctl restart postgresql
         ```
     === "MacOS"
         ```

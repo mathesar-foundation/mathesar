@@ -4,6 +4,7 @@ from sqlalchemy import Table as SATable
 
 from db.tables.operations.select import get_oid_from_table
 from mathesar.models import base as models_base
+from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
 @pytest.fixture
@@ -133,3 +134,18 @@ def test_update_table_settings_string_in_column_order(client, column_test_table)
     assert response.status_code == 200
     response_data = response.json()
     assert response_data['column_order'] == column_order_as_ints
+
+
+def test_update_table_settings_negative_column_order(client, column_test_table):
+    column_order = [-4, 5, 6]
+    data = {
+        "column_order": column_order
+    }
+    response = client.patch(
+        f"/api/db/v0/tables/{column_test_table.id}/settings/{column_test_table.settings.id}/",
+        data=data,
+    )
+    response_data = response.json()[0]
+    assert response.status_code == 400
+    assert response_data['code'] == ErrorCodes.InvalidColumnOrder.value
+    assert response_data['message'] == 'Invalid column order.'
