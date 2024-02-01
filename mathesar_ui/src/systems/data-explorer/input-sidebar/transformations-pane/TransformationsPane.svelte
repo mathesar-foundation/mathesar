@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     Icon,
@@ -176,23 +177,25 @@
 
   <div class="add-transform-control">
     <DropdownMenu
-      label="Add transformation step"
+      label={$_('add_transformation_step')}
       icon={iconAddNew}
       disabled={$processedColumns.size === 0}
       triggerAppearance="secondary"
     >
-      <ButtonMenuItem on:click={addFilter}>Filter</ButtonMenuItem>
+      <ButtonMenuItem on:click={addFilter}>{$_('filter')}</ButtonMenuItem>
       <ButtonMenuItem
         disabled={!isSortableColumnPresent}
-        on:click={addSortTransform}>Sort</ButtonMenuItem
+        on:click={addSortTransform}>{$_('sort')}</ButtonMenuItem
       >
       <ButtonMenuItem
         disabled={$query.hasSummarizationTransform()}
         on:click={addSummarization}
       >
-        Summarize
+        {$_('summarize')}
       </ButtonMenuItem>
-      <ButtonMenuItem on:click={addHideTransform}>Hide Columns</ButtonMenuItem>
+      <ButtonMenuItem on:click={addHideTransform}>
+        {$_('hide_columns')}
+      </ButtonMenuItem>
     </DropdownMenu>
   </div>
 </div>

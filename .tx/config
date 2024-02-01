@@ -1,0 +1,18 @@
+[main]
+host = https://app.transifex.com
+
+[o:mathesar:p:mathesar:r:django]
+file_filter            = translations/<lang>/LC_MESSAGES/django.po
+source_file            = translations/en/LC_MESSAGES/django.po
+source_lang            = en
+type                   = PO
+resource_name          = django
+replace_edited_strings = false
+
+[o:mathesar:p:mathesar:r:svelte]
+file_filter            = mathesar_ui/src/i18n/languages/<lang>/dict.json
+source_file            = mathesar_ui/src/i18n/languages/en/dict.json
+source_lang            = en
+type                   = KEYVALUEJSON
+resource_name          = svelte
+replace_edited_strings = false

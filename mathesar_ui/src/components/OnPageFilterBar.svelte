@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { iconSearch, Button } from '@mathesar-component-library';
   import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { createEventDispatcher } from 'svelte';
@@ -30,7 +31,9 @@
   {#if searchQuery}
     <div class="search-results-info">
       <slot name="resultInfo" />
-      <Button appearance="secondary" on:click={handleClear}>Clear</Button>
+      <Button appearance="secondary" on:click={handleClear}>
+        {$_('clear')}
+      </Button>
     </div>
   {/if}
 </div>

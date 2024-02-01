@@ -1,26 +1,26 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Help, Icon } from '@mathesar-component-library';
   import { iconJoinEmailList, iconGoToMarketingSite } from '@mathesar/icons';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
 
   const commonData = preloadCommonData();
 
-  $: liveDemo = !!commonData?.live_demo_mode;
+  $: liveDemo = !!commonData.live_demo_mode;
 </script>
 
 {#if liveDemo}
   <div class="demo-banner">
     <div class="side left">
-      <i>Mathesar is in demo mode.</i>
+      <i>{$_('mathesar_demo_mode')}</i>
       <Help>
-        Each session has its own copy of demo data. Data will be deleted
-        regularly.
+        {$_('mathesar_demo_mode_help')}
       </Help>
     </div>
     <div class="side right">
       <a href="https://mathesar.org/mailing-list.html" target="_blank">
         <Icon {...iconJoinEmailList} />
-        Join Email List
+        {$_('join_email_list')}
       </a>
       <a href="http://mathesar.org" target="_blank">
         <Icon {...iconGoToMarketingSite} />

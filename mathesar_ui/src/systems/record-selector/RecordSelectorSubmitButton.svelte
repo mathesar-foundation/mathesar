@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
+  import { _ } from 'svelte-i18n';
   import { Icon } from '@mathesar-component-library';
   import { iconLinkToRecordPage, iconPickRecord } from '@mathesar/icons';
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
@@ -11,7 +11,7 @@
   export let isSelected: boolean;
 
   $: icon = purpose === 'dataEntry' ? iconPickRecord : iconLinkToRecordPage;
-  $: phrase = purpose === 'dataEntry' ? 'Pick' : 'Open';
+  $: phrase = purpose === 'dataEntry' ? $_('pick') : $_('open');
   $: element = purpose === 'dataEntry' ? 'button' : 'div';
 
   function handleClick() {

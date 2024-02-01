@@ -18,8 +18,6 @@
   export let typeOptions: ColumnWithAbstractType['type_options'];
   export let column: ColumnWithAbstractType;
 
-  let dbFormHasError = false;
-
   $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
     selectedDbType,
@@ -31,7 +29,6 @@
     let isValid = true;
     if (dbForm) {
       const isDbFormValid = dbForm.getValidationResult().isValid;
-      dbFormHasError = !isDbFormValid;
       isValid = isValid && isDbFormValid;
     }
     return isValid;

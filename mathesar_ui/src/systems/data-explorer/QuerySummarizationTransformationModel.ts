@@ -1,3 +1,5 @@
+import { _ } from 'svelte-i18n';
+import { get } from 'svelte/store';
 import { ImmutableMap } from '@mathesar-component-library';
 import type {
   QueryInstanceSummarizationTransformation,
@@ -28,7 +30,7 @@ export default class QuerySummarizationTransformationModel
 {
   type = 'summarize' as const;
 
-  name = 'Summarization' as const;
+  name = get(_)('summarization');
 
   columnIdentifier;
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
@@ -32,10 +33,10 @@
   };
   $: infoAlertText = (() => {
     if (column.column.primary_key) {
-      return 'The data type of the primary key column is restricted and cannot be changed.';
+      return $_('data_type_pk_column_restricted');
     }
     if (column.linkFk) {
-      return 'The data type of this column must match the referenced column and cannot be changed.';
+      return $_('data_type_linked_column_restricted');
     }
     return '';
   })();

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import {
     Button,
     Icon,
@@ -50,7 +51,7 @@
     }
 
     // Ideally should never happen
-    return sortDirection === 'DESCENDING' ? 'Descending' : 'Ascending';
+    return sortDirection === 'DESCENDING' ? $_('descending') : $_('ascending');
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion

@@ -1,33 +1,33 @@
-export function getDatabasePageUrl(databaseName: string): string {
-  return `/db/${databaseName}/`;
+export function getDatabasePageUrl(connectionId: number): string {
+  return `/db/${connectionId}/`;
 }
 
 export function getSchemaPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getDatabasePageUrl(databaseName)}${schemaId}/`;
+  return `${getDatabasePageUrl(connectionId)}${schemaId}/`;
 }
 
 export function getSchemaPageTablesSectionUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(databaseName, schemaId)}tables/`;
+  return `${getSchemaPageUrl(connectionId, schemaId)}tables/`;
 }
 
 export function getSchemaPageExplorationsSectionUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(databaseName, schemaId)}explorations/`;
+  return `${getSchemaPageUrl(connectionId, schemaId)}explorations/`;
 }
 
 export function getImportPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(databaseName, schemaId)}import/`;
+  return `${getSchemaPageUrl(connectionId, schemaId)}import/`;
 }
 
 interface ImportPreviewPageQueryParams {
@@ -53,57 +53,57 @@ export function getImportPreviewPageQueryParams(
 }
 
 export function getImportPreviewPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   previewTableId: number,
   options: ImportPreviewPageQueryParams,
 ): string {
-  const importPageUrl = getImportPageUrl(databaseName, schemaId);
+  const importPageUrl = getImportPageUrl(connectionId, schemaId);
   const q = serializeImportPreviewPageQueryParams(options);
   return `${importPageUrl}${previewTableId}/?${q}`;
 }
 
 export function getDataExplorerPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(databaseName, schemaId)}data-explorer/`;
+  return `${getSchemaPageUrl(connectionId, schemaId)}data-explorer/`;
 }
 
 export function getExplorationPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   queryId: number,
 ): string {
   return `${getSchemaPageExplorationsSectionUrl(
-    databaseName,
+    connectionId,
     schemaId,
   )}${queryId}/`;
 }
 
 export function getExplorationEditorPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   queryId: number,
 ): string {
-  return `${getExplorationPageUrl(databaseName, schemaId, queryId)}edit/`;
+  return `${getExplorationPageUrl(connectionId, schemaId, queryId)}edit/`;
 }
 
 export function getTablePageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   tableId: number,
 ): string {
-  return `${getSchemaPageTablesSectionUrl(databaseName, schemaId)}${tableId}/`;
+  return `${getSchemaPageTablesSectionUrl(connectionId, schemaId)}${tableId}/`;
 }
 
 export function getRecordPageUrl(
-  databaseName: string,
+  connectionId: number,
   schemaId: number,
   tableId: number,
   recordId: unknown,
 ): string {
-  return `${getTablePageUrl(databaseName, schemaId, tableId)}${String(
+  return `${getTablePageUrl(connectionId, schemaId, tableId)}${String(
     recordId,
   )}`;
 }
@@ -114,14 +114,8 @@ export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
 export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const LOGOUT_URL = '/auth/logout/';
-
-export const DATABASE_CONNECTION_SLUG = 'db-connection';
-export const DATABASE_CONNECTION_LIST_URL = `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/`;
-export const DATABASE_CONNECTION_ADD_URL = `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/add/`;
-
-export function getDatabaseConnectionEditUrl(databaseName: string) {
-  return `${ADMIN_URL}${DATABASE_CONNECTION_SLUG}/edit/${databaseName}/`;
-}
+export const CONNECTIONS_URL = '/connections/';
+export const WELCOME_URL = '/welcome';
 
 export function getEditUsersPageUrl(userId: number) {
   return `${ADMIN_USERS_PAGE_URL}${userId}/`;
@@ -133,4 +127,12 @@ export function getSharedTablePageUrl(slug: string): string {
 
 export function getSharedExplorationPageUrl(slug: string): string {
   return `/shares/explorations/${slug}/`;
+}
+
+export function getDocsLink(path: string): string {
+  return `https://docs.mathesar.org${path}`;
+}
+
+export function getWikiLink(path: string): string {
+  return `https://wiki.mathesar.org${path}`;
 }
