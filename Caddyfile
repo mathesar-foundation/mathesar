@@ -12,33 +12,14 @@
 
 		file_server {
 			precompressed br zstd gzip
-			root {$MEDIA_ROOT:/mathesar/media/}
+			root {$MEDIA_ROOT:/code/media/}
 		}
 	}
 	handle_path /static/* {
 		file_server {
 			precompressed br zstd gzip
-			root {$STATIC_ROOT:/mathesar/static/}
+			root {$STATIC_ROOT:/code/static/}
 		}
 	}
-        # Rewrite and reverse proxy upgrade endpoint calls to Watchtower;
-        # Accepts only POST requests, rewrites them to GET.
-        @upgrade_request {
-          path /api/ui/v0/upgrade/
-          method POST
-        }
-        handle @upgrade_request {
-                rewrite * /v1/update
-                method * GET
-                reverse_proxy watchtower:8080 {
-                      header_up Authorization "Bearer mytoken"
-                      transport http {
-                        # We want keepalive connections to stay open as long as a dockerhub pull
-                        # might take, because Watchtower responds to the upgrade request only when
-                        # it's finished upgrading.
-                        keepalive 0.5h
-                      }
-                }
-        }
 	reverse_proxy mathesar_service:8000
 }

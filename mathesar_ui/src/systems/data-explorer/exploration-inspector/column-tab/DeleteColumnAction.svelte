@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Collapsible, Button, Icon } from '@mathesar-component-library';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import { pluralize } from '@mathesar/utils/languageUtils';
   import type QueryManager from '../../QueryManager';
   import type { ProcessedQueryOutputColumn } from '../../utils';
 
@@ -54,29 +54,21 @@
 </script>
 
 <Collapsible isOpen triggerAppearance="plain">
-  <span slot="header">Actions</span>
+  <span slot="header">{$_('actions')}</span>
   <div slot="content" class="section-content actions">
     {#if disallowColumnDeletion}
       <div class="warning">
         <WarningBox>
           {#if selectedColumnAliases.length === 1}
             {#if denyDeletionDueToLastRemainingBaseColumn}
-              This column cannot be deleted because atleast one column from the
-              base table is required. Please add another column from the base
-              table before deleting this column.
+              {$_('single_column_delete_error_last_base_column')}
             {:else}
-              This column cannot be deleted because it is either used in
-              transformations or a result of transformations. Please remove the
-              column from the transformations before deleting it.
+              {$_('single_column_delete_error_used_in_transformations')}
             {/if}
           {:else if denyDeletionDueToLastRemainingBaseColumn}
-            Some of the selected columns cannot be deleted because atleast one
-            column from the base table is required. Please add another column
-            from the base table before deleting them.
+            {$_('multiple_column_delete_error_last_base_column')}
           {:else}
-            Some of the selected columns cannot be deleted because they're
-            either used in transformations or results of transformations. Please
-            remove them from the transformations before deleting them.
+            {$_('multiple_column_delete_error_used_in_transformations')}
           {/if}
         </WarningBox>
       </div>
@@ -89,7 +81,11 @@
       on:click={deleteSelectedColumn}
     >
       <Icon {...iconDeleteMajor} />
-      <span>Delete {pluralize(selectedColumnAliases, 'columns', 'title')}</span>
+      <span>
+        {$_('delete_columns_count', {
+          values: { count: selectedColumnAliases.length },
+        })}
+      </span>
     </Button>
   </div>
 </Collapsible>

@@ -1,17 +1,15 @@
 <script lang="ts">
-  import { Button, Icon } from '@mathesar-component-library';
+  import { _ } from 'svelte-i18n';
+
+  import { Icon } from '@mathesar-component-library';
   import Logo from '@mathesar/components/Logo.svelte';
   import {
     iconCurrentlyInstalledVersion,
     iconExternalHyperlink,
     iconUpgradeAvailable,
   } from '@mathesar/icons';
-  import { modal } from '@mathesar/stores/modal';
   import type { Release } from '@mathesar/stores/releases';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import UpgradeModal from './upgrade-modal/UpgradeModal.svelte';
-
-  const modalController = modal.spawnModalController();
 
   export let type:
     | 'available-upgrade'
@@ -22,6 +20,7 @@
 
   $: date = new Date(release.date);
   $: dateString = date.toLocaleDateString();
+  $: notesUrl = `https://docs.mathesar.org/releases/${release.tagName}/`;
 </script>
 
 <div
@@ -33,15 +32,15 @@
   <div class="type">
     {#if type === 'available-upgrade'}
       <Icon {...iconUpgradeAvailable} />
-      New Version Available
+      {$_('new_version_available')}
     {:else if type === 'currently-installed-and-latest'}
       <Icon {...iconCurrentlyInstalledVersion} />
-      You are running the latest version
+      {$_('running_latest_version')}
     {:else if type === 'current'}
       <Icon {...iconCurrentlyInstalledVersion} />
-      Currently Installed
+      {$_('currently_installed')}
     {:else if type === 'latest'}
-      Latest Available Version (not installed)
+      {$_('latest_availabe_version_not_installed')}
     {:else}
       {assertExhaustive(type)}
     {/if}
@@ -49,29 +48,24 @@
   <div class="details">
     <div class="left">
       <div class="logo"><Logo /></div>
-      <div class="name">Mathesar</div>
+      <div class="name">{$_('mathesar')}</div>
       <div class="version">{release.tagName}</div>
     </div>
     <div class="right">
-      <div class="date">Released {dateString}</div>
-      <a href={release.notesUrl} class="notes" target="_blank">
-        Release Notes <Icon {...iconExternalHyperlink} />
+      <div class="date">
+        {$_('released_date', { values: { date: dateString } })}
+      </div>
+      <a href={notesUrl} class="notes" target="_blank">
+        {#if type === 'available-upgrade'}
+          {$_('release_notes_and_upgrade_instructions')}
+        {:else}
+          {$_('release_notes')}
+        {/if}
+        <Icon {...iconExternalHyperlink} />
       </a>
     </div>
   </div>
-  {#if type === 'available-upgrade'}
-    <div class="update-action">
-      <div class="message">We can install this new version for you</div>
-      <Button appearance="secondary" on:click={() => modalController.open()}>
-        Upgrade...
-      </Button>
-    </div>
-  {/if}
 </div>
-
-{#if type === 'available-upgrade'}
-  <UpgradeModal controller={modalController} {release} />
-{/if}
 
 <style>
   .release {
@@ -127,16 +121,5 @@
   }
   .notes {
     color: inherit;
-  }
-  .update-action {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--yellow-200);
-  }
-  .message {
-    color: var(--color-text-muted);
   }
 </style>

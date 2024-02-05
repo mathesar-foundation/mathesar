@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import {
     RadioGroup,
     TextArea,
@@ -22,7 +22,7 @@
   } from '@mathesar/components/form';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import { LL } from '@mathesar/i18n/i18n-svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { iconPaste, iconUrl } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
@@ -44,17 +44,17 @@
   const uploadMethods: UploadMethod[] = [
     {
       key: 'file',
-      label: $LL.importUploadPage.uploadAFile(),
+      label: $_('upload_a_file'),
       icon: iconUploadFile,
     },
     {
       key: 'url',
-      label: $LL.importUploadPage.provideUrlToFile(),
+      label: $_('provide_url_to_file'),
       icon: iconUrl,
     },
     {
       key: 'clipboard',
-      label: $LL.importUploadPage.copyAndPasteText(),
+      label: $_('copy_and_paste_text'),
       icon: iconPaste,
     },
   ];
@@ -89,7 +89,7 @@
   async function getDataFileId() {
     if ($uploadMethod.key === 'file') {
       if ($fileUploadId === undefined) {
-        throw new Error($LL.general.noFileUploaded());
+        throw new Error($_('no_file_uploaded'));
       }
       return $fileUploadId;
     }
@@ -113,7 +113,7 @@
         dataFiles: [dataFileId],
       });
       const previewPage = getImportPreviewPageUrl(
-        database.name,
+        database.id,
         schema.id,
         table.id,
         { useColumnTypeInference: $useColumnTypeInference },
@@ -127,7 +127,7 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($LL.general.import())}</title>
+  <title>{makeSimplePageTitle($_('import'))}</title>
 </svelte:head>
 
 <LayoutWithHeader
@@ -138,16 +138,16 @@
     '--layout-background-color': 'var(--sand-200)',
   }}
 >
-  <h1>{$LL.importUploadPage.createATableByImporting()}</h1>
+  <h1>{$_('create_a_table_by_importing')}</h1>
 
   <div class="import-file-view">
     {#if status?.state === 'processing'}
-      <h2>{$LL.general.processingData()}</h2>
+      <h2>{$_('processing_data')}</h2>
       <div class="processing-spinner">
         <Spinner />
       </div>
       <WarningBox>
-        {$LL.importUploadPage.largeDataTakesTimeWarning()}
+        {$_('large_data_takes_time_warning')}
       </WarningBox>
     {:else if status?.state === 'failure'}
       <ErrorBox>
@@ -164,7 +164,7 @@
           bind:value={$uploadMethod}
           options={uploadMethods}
           isInline
-          label={$LL.general.dataSource()}
+          label={$_('data_source')}
           getRadioLabel={(opt) => ({
             component: NameWithIcon,
             props: { name: opt.label, icon: opt.icon },
@@ -178,12 +178,12 @@
                 <Field
                   field={urlToFile}
                   layout="stacked"
-                  label="Enter the URL of the file you want to import"
+                  label={$_('enter_url_import_file')}
                 />
               {:else if $uploadMethod.key === 'clipboard'}
                 <Field
                   field={clipboardContent}
-                  label="Paste the data you want to import"
+                  label={$_('paste_data_import')}
                   layout="stacked"
                   input={{ component: TextArea, props: { rows: 10 } }}
                 />
@@ -192,11 +192,17 @@
               {/if}
             </div>
             <div class="upload-format-help">
-              The data must be in tabular format (CSV, TSV etc) or JSON. See
-              relevant
-              <DocsLink path="/user-guide/importing-data/"
-                >documentation</DocsLink
-              >.
+              <RichText
+                text={$_('data_tabular_format_help')}
+                let:slotName
+                let:translatedArg
+              >
+                {#if slotName === 'documentationLink'}
+                  <DocsLink path="/user-guide/importing-data/">
+                    {translatedArg}
+                  </DocsLink>
+                {/if}
+              </RichText>
             </div>
           </div>
         </RadioGroup>
@@ -212,7 +218,7 @@
           {form}
           onProceed={proceed}
           onCancel={reset}
-          cancelButton={{ label: 'Reset' }}
+          cancelButton={{ label: $_('reset') }}
           canCancel={$form.hasChanges}
         />
       </FieldLayout>

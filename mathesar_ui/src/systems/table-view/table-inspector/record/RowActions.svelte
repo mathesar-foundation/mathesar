@@ -1,12 +1,12 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     AnchorButton,
     Button,
     Icon,
     iconExternalLink,
-  } from '@mathesar/component-library';
+  } from '@mathesar-component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
-  import { getRecordDeleteMessage } from '@mathesar/pages/record/recordHelp';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
@@ -15,7 +15,6 @@
   } from '@mathesar/stores/table-data';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
 
   export let selectedRowIndices: number[];
   export let recordsData: RecordsData;
@@ -23,18 +22,23 @@
   export let canEditTableRecords: boolean;
 
   async function handleDeleteRecords() {
-    const confirmationTitle = labeledCount(selectedRowIndices, 'records', {
-      countWhenSingular: 'hidden',
-      casing: 'title',
-    });
     void confirmDelete({
-      identifierType: confirmationTitle,
-      body: getRecordDeleteMessage(selectedRowIndices),
+      identifierType: $_('multiple_records', {
+        values: { count: selectedRowIndices.length },
+      }),
+      body: [
+        $_('deleted_records_cannot_be_recovered', {
+          values: { count: selectedRowIndices.length },
+        }),
+        $_('are_you_sure_to_proceed'),
+      ],
       onProceed: () => recordsData.deleteSelected(selectedRowIndices),
       onError: (e) => toast.fromError(e),
       onSuccess: () => {
         toast.success({
-          title: `${confirmationTitle} deleted successfully!`,
+          title: $_('count_records_deleted_successfully', {
+            values: { count: selectedRowIndices.length },
+          }),
         });
         // // TODO_3037 verify that selection behaves okay after deleting records
         // selection.resetSelection();
@@ -76,7 +80,7 @@
       <div class="action-item">
         <div>
           <Icon {...iconRecord} />
-          <span> Open Record </span>
+          <span>{$_('open_record')}</span>
         </div>
         <Icon {...iconExternalLink} />
       </div>
@@ -86,16 +90,13 @@
     <Button on:click={handleDeleteRecords}>
       <Icon {...iconDeleteMajor} />
       <span>
-        Delete {labeledCount(selectedRowIndices, 'records', {
-          casing: 'title',
-          countWhenSingular: 'hidden',
-        })}
+        {$_('delete_records', { values: { count: selectedRowIndices.length } })}
       </span>
     </Button>
   {/if}
   {#if showNullStateText}
     <span class="null-text">
-      There are no actions to perform on the selected record.
+      {$_('no_actions_selected_record')}
     </span>
   {/if}
 </div>

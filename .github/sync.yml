@@ -1,80 +1,24 @@
-centerofci/mathesar-ansible:
-  - .github/actions/project_update/
-  - .github/workflows/add-to-project.yml
+mathesar-foundation/mathesar-ansible:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-close.yml
-  - .github/workflows/update-project-on-issue-edit.yml
-  - .github/workflows/update-project-on-issue-label.yml
-  - .github/workflows/update-project-on-pr-edit.yml
-  - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-data-playground:
-  - .github/actions/project_update/
-  - .github/workflows/add-to-project.yml
+mathesar-foundation/mathesar-data-playground:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-close.yml
-  - .github/workflows/update-project-on-issue-edit.yml
-  - .github/workflows/update-project-on-issue-label.yml
-  - .github/workflows/update-project-on-pr-edit.yml
-  - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-design:
-  - .github/actions/project_update/
-  - .github/workflows/add-to-project.yml
+mathesar-foundation/mathesar-design:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-close.yml
-  - .github/workflows/update-project-on-issue-edit.yml
-  - .github/workflows/update-project-on-issue-label.yml
-  - .github/workflows/update-project-on-pr-edit.yml
-  - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-internal-crm:
-  - .github/actions/project_update/
-  - .github/workflows/add-to-project.yml
+mathesar-foundation/mathesar-internal-crm:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-close.yml
-  - .github/workflows/update-project-on-issue-edit.yml
-  - .github/workflows/update-project-on-issue-label.yml
-  - .github/workflows/update-project-on-pr-edit.yml
-  - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-private-notes:
-  - .github/actions/project_update/
-  - .github/workflows/add-to-project.yml
+mathesar-foundation/mathesar-private-notes:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-close.yml
-  - .github/workflows/update-project-on-issue-edit.yml
-  - .github/workflows/update-project-on-issue-label.yml
-  - .github/workflows/update-project-on-pr-edit.yml
-  - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-scripts:
-  - .github/actions/project_update/
-  - .github/workflows/add-to-project.yml
+mathesar-foundation/mathesar-scripts:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-close.yml
-  - .github/workflows/update-project-on-issue-edit.yml
-  - .github/workflows/update-project-on-issue-label.yml
-  - .github/workflows/update-project-on-pr-edit.yml
-  - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-website:
-  - .github/actions/project_update/
-  - .github/workflows/add-to-project.yml
+mathesar-foundation/mathesar-website:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-close.yml
-  - .github/workflows/update-project-on-issue-edit.yml
-  - .github/workflows/update-project-on-issue-label.yml
-  - .github/workflows/update-project-on-pr-edit.yml
-  - .github/workflows/update-project-on-pr-label.yml
-centerofci/mathesar-wiki:
-  - .github/actions/project_update/
-  - .github/workflows/add-to-project.yml
+mathesar-foundation/mathesar-wiki:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
-  - .github/workflows/update-project-on-issue-close.yml
-  - .github/workflows/update-project-on-issue-edit.yml
-  - .github/workflows/update-project-on-issue-label.yml
-  - .github/workflows/update-project-on-pr-edit.yml
-  - .github/workflows/update-project-on-pr-label.yml

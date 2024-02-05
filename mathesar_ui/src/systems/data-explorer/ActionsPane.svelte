@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import {
     Icon,
     InputGroup,
@@ -56,13 +57,13 @@
   function getNameValidationErrors(name: string) {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      return ['Name cannot be empty.'];
+      return [$_('exploration_name_cannot_be_empty')];
     }
     const isDuplicate = Array.from($queries.data ?? []).some(
       ([, s]) => s.name.toLowerCase().trim() === trimmedName,
     );
     if (isDuplicate) {
-      return ['An exploration with that name already exists.'];
+      return [$_('exploration_with_name_already_exists')];
     }
     return [];
   }
@@ -116,26 +117,21 @@
   >
     <div class="detail-wrapper">
       <div class="detail">
-        {isSaved ? 'Based on' : 'Exploring from'}
+        {isSaved ? $_('based_on') : $_('exploring_from')}
       </div>
       <div class="base-table-holder" class:table-selected={currentTable}>
         {#if currentTable}
           <TableName table={currentTable} />
-          <Help>
-            The base table is the table that is being explored and determines
-            the columns that are available for exploration.
-          </Help>
         {:else}
           <SelectTableWithinCurrentSchema
             autoSelect="none"
             value={currentTable}
             on:change={(e) => updateBaseTable(e.detail)}
           />
-          <Help>
-            The base table determines the columns that are available for
-            exploration.
-          </Help>
         {/if}
+        <Help>
+          {$_('base_table_exploration_help')}
+        </Help>
       </div>
 
       {#if !isSaved && currentTable}
@@ -143,7 +139,7 @@
           appearance="secondary"
           on:click={() => updateBaseTable(undefined)}
         >
-          Start Over
+          {$_('start_over')}
         </Button>
       {/if}
 
@@ -162,8 +158,8 @@
             <!-- TODO: Change disabled condition to is_valid(query) -->
             <SpinnerButton
               label={querySaveRequestStatus === 'processing'
-                ? 'Saving'
-                : 'Save'}
+                ? $_('saving')
+                : $_('save')}
               disabled={!$query.base_table ||
                 hasNoColumns ||
                 querySaveRequestStatus === 'processing'}
@@ -180,9 +176,9 @@
                 }}
                 showArrow={false}
               >
-                <ButtonMenuItem on:click={save}>Save</ButtonMenuItem>
+                <ButtonMenuItem on:click={save}>{$_('save')}</ButtonMenuItem>
                 <ButtonMenuItem on:click={saveAndClose}>
-                  Save and Close
+                  {$_('save_and_close')}
                 </ButtonMenuItem>
               </DropdownMenu>
             {/if}
@@ -196,7 +192,7 @@
             on:click={() => queryManager.undo()}
           >
             <Icon {...iconUndo} size="0.8rem" />
-            <span>Undo</span>
+            <span>{$_('undo')}</span>
           </Button>
           <Button
             appearance="secondary"
@@ -204,7 +200,7 @@
             on:click={() => queryManager.redo()}
           >
             <Icon {...iconRedo} size="0.8rem" />
-            <span>Redo</span>
+            <span>{$_('redo')}</span>
           </Button>
         </InputGroup>
         <Button
@@ -215,7 +211,7 @@
           }}
         >
           <Icon {...iconInspector} size="0.8rem" />
-          <span>Inspector</span>
+          <span>{$_('inspector')}</span>
         </Button>
       {/if}
     </svelte:fragment>
@@ -229,7 +225,7 @@
   getInitialName={() => $query.name ?? ''}
   getInitialDescription={() => $query.description ?? ''}
 >
-  <span slot="title"> Save Exploration </span>
+  <span slot="title"> {$_('save_exploration')} </span>
 </NameAndDescInputModalForm>
 
 <style lang="scss">

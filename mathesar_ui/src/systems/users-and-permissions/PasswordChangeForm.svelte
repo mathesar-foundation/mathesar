@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     PasswordInput,
     Button,
@@ -43,7 +44,7 @@
       : fields;
   })();
   $: form = makeForm(formFields, [
-    comboMustBeEqual([password, confirmPassword], 'Passwords do not match'),
+    comboMustBeEqual([password, confirmPassword], $_('passwords_do_not_match')),
   ]);
 
   $: userId,
@@ -78,10 +79,9 @@
     <div class="password-change-warning">
       <WarningBox fullWidth>
         {#if isUserUpdatingTheirOwnPassword}
-          You'll be redirected to the login page once you change your password.
+          {$_('redirected_login_page_password_change')}
         {:else}
-          Resetting the password will prompt the user to change their password
-          on their next login.
+          {$_('prompt_new_password_next_login')}
         {/if}
       </WarningBox>
     </div>
@@ -92,7 +92,7 @@
       {#if isUserUpdatingTheirOwnPassword}
         <GridFormInputRow>
           <GridFormInput
-            label="Old Password *"
+            label={`${$_('old_password')} *`}
             field={oldPassword}
             input={{ component: PasswordInput }}
             bypassRow
@@ -105,7 +105,7 @@
 
       <GridFormInputRow>
         <GridFormInput
-          label="New Password *"
+          label={`${$_('new_password')} *`}
           field={password}
           input={{
             component: PasswordInput,
@@ -115,7 +115,7 @@
         />
 
         <GridFormInput
-          label="Confirm Password *"
+          label={`${$_('confirm_password')} *`}
           field={confirmPassword}
           input={{
             component: PasswordInput,
@@ -127,7 +127,7 @@
     {:else}
       <GridFormInputRow>
         <GridFormInput
-          label="Password"
+          label={$_('password')}
           field={passwordPlaceholder}
           input={{ component: PasswordInput, props: { disabled: true } }}
           bypassRow
@@ -140,7 +140,7 @@
               showChangePasswordForm = true;
             }}
           >
-            Change Password
+            {$_('change_password')}
           </Button>
         </div>
       </GridFormInputRow>
@@ -156,8 +156,8 @@
         onCancel={() => {
           showChangePasswordForm = false;
         }}
-        proceedButton={{ label: 'Save', icon: iconSave }}
-        cancelButton={{ label: 'Cancel' }}
+        proceedButton={{ label: $_('save'), icon: iconSave }}
+        cancelButton={{ label: $_('cancel') }}
       />
     </div>
   {/if}

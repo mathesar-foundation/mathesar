@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Route } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconImportData } from '@mathesar/icons';
@@ -15,8 +15,8 @@
 <AppendBreadcrumb
   item={{
     type: 'simple',
-    href: getImportPageUrl(database.name, schema.id),
-    label: 'Import',
+    href: getImportPageUrl(database.id, schema.id),
+    label: $_('import'),
     icon: iconImportData,
   }}
 />

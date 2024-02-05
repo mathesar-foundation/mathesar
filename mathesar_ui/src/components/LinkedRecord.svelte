@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
+  import { _ } from 'svelte-i18n';
   import { Icon } from '@mathesar-component-library';
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
   import { iconDeleteMinor } from '@mathesar/icons';
@@ -46,7 +46,7 @@
   {#if recordPageHref}
     <a
       class="record-summary record-page-link"
-      title="Go to record"
+      title={$_('go_to_record')}
       href={recordPageHref}
       tabindex="-1"
       on:mouseenter={() => {
@@ -77,8 +77,8 @@
       on:click|stopPropagation={handleDeleteButtonClick}
       role="button"
       tabindex="-1"
-      aria-label="Clear value"
-      title="Clear value"
+      aria-label={$_('clear_value')}
+      title={$_('clear_value')}
       on:mouseenter={() => {
         isHoveringDelete = true;
       }}

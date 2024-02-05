@@ -3,10 +3,10 @@
 </p>
 <p align="center"><b>An intuitive UI for managing data, for users of all technical skill levels. Built on Postgres.</b></p>
 <p align="center">
-    <img alt="License" src="https://img.shields.io/github/license/centerofci/mathesar">
-    <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/centerofci/mathesar">
-    <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/centerofci/mathesar">
-    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/centerofci/mathesar">
+    <img alt="License" src="https://img.shields.io/github/license/mathesar-foundation/mathesar">
+    <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/mathesar-foundation/mathesar">
+    <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/mathesar-foundation/mathesar">
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/mathesar-foundation/mathesar">
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@ You can use Mathesar to build **data models**, **enter data**, and even **build 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Sponsors
-Our top sponsors! Become a sponsor on [GitHub](https://github.com/sponsors/centerofci) or [Open Collective](https://opencollective.com/mathesar).
+Our top sponsors! Become a sponsor on [GitHub](https://github.com/sponsors/mathesar-foundation) or [Open Collective](https://opencollective.com/mathesar).
 
 <table>
   <tbody>

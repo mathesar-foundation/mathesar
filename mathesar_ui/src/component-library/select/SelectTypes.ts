@@ -4,7 +4,7 @@ import type { Appearance } from '@mathesar-component-library-dir/commonTypes';
 import type { ListBoxProps } from '@mathesar-component-library-dir/list-box/ListBoxTypes';
 
 export interface SelectProps<Option> extends BaseInputProps {
-  options: Option[];
+  options: readonly Option[];
   value?: Option;
   labelKey?: string;
   getLabel?: LabelGetter<Option | undefined>;

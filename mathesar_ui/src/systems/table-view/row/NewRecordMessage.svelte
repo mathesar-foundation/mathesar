@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { SheetPositionableCell } from '@mathesar/components/sheet';
 
   export let columnCount: number;
@@ -16,13 +17,13 @@
     {...htmlAttributes}
     style="{style};min-width:400px;"
   >
-    New records will be repositioned on refresh
+    {$_('new_records_reposition_refresh')}
   </div>
 </SheetPositionableCell>
 
 <style lang="scss">
   .new-record-message {
-    z-index: var(--z-index__sheet_new-record-message, auto);
+    z-index: var(--z-index__sheet__new-record-message, auto);
     background: var(--sky-200);
     display: flex;
     align-items: center;

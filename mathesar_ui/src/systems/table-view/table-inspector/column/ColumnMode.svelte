@@ -1,9 +1,9 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Collapsible } from '@mathesar-component-library';
   import { tables } from '@mathesar/stores/tables';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
-  import { labeledCount } from '@mathesar/utils/languageUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
@@ -52,13 +52,14 @@
 <div class="column-mode-container">
   {#if selectedColumns.length === 0}
     <span class="no-cell-selected">
-      Select one or more columns or cells to view the associated column
-      properties and actions.
+      {$_('select_columns_cells_view_properties')}
     </span>
   {:else}
     {#if selectedColumns.length > 1}
       <span class="columns-selected-count">
-        {labeledCount(selectedColumns, 'columns')} selected
+        {$_('multiple_columns_selected', {
+          values: { count: selectedColumns.length },
+        })}
       </span>
     {/if}
     {#if column}
@@ -66,7 +67,7 @@
         <Collapsible isOpen triggerAppearance="plain">
           <CollapsibleHeader
             slot="header"
-            title="Properties"
+            title={$_('properties')}
             isDbLevelConfiguration
           />
           <div slot="content" class="content-container column-properties">
@@ -97,7 +98,7 @@
       <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
-          title="Data Type"
+          title={$_('data_type')}
           isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
@@ -110,7 +111,7 @@
       <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader
           slot="header"
-          title="Default Value"
+          title={$_('default_value')}
           isDbLevelConfiguration
         />
         <div slot="content" class="content-container">
@@ -121,7 +122,7 @@
 
     {#if column}
       <Collapsible triggerAppearance="plain">
-        <CollapsibleHeader slot="header" title="Formatting" />
+        <CollapsibleHeader slot="header" title={$_('formatting')} />
         <div slot="content" class="content-container">
           {#key column}
             <ColumnFormatting {column} {canEditMetadata} />
@@ -138,7 +139,10 @@
           : $tables.data.get(referentTableId)}
       {#if referentTable !== undefined}
         <Collapsible triggerAppearance="plain">
-          <CollapsibleHeader slot="header" title="Linked Record Summary" />
+          <CollapsibleHeader
+            slot="header"
+            title={$_('linked_record_summary')}
+          />
           <div slot="content" class="content-container">
             <FkRecordSummaryConfig table={referentTable} />
           </div>
@@ -148,7 +152,7 @@
 
     {#if canExecuteDDL}
       <Collapsible isOpen triggerAppearance="plain">
-        <CollapsibleHeader slot="header" title="Actions" />
+        <CollapsibleHeader slot="header" title={$_('actions')} />
         <div slot="content" class="content-container">
           <ColumnActions columns={selectedColumns} />
         </div>

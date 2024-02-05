@@ -1,18 +1,22 @@
-import type {
-  SchemaResponse,
-  AbstractTypeResponse,
-  Database,
-} from '@mathesar/AppTypes';
+import type { SchemaResponse, AbstractTypeResponse } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/types/tables';
 import type { QueryInstance } from '@mathesar/api/types/queries';
+import type { Connection } from '@mathesar/api/connections';
 import type { User } from '@mathesar/api/users';
 
 export interface CommonData {
-  databases: Database[];
+  connections: Connection[];
   schemas: SchemaResponse[];
   tables: TableEntry[];
   queries: QueryInstance[];
-  current_db: string;
+  current_connection: Connection['id'] | null;
+  internal_db_connection: {
+    database: Connection['database'];
+    host: Connection['host'];
+    port: Connection['port'];
+    type: string;
+    user: string;
+  };
   current_schema: number | null;
   abstract_types: AbstractTypeResponse[];
   user: User;
@@ -41,6 +45,10 @@ export function preloadRouteData<T>(routeName: string): T | undefined {
   return getData<T>(`#${routeName}`);
 }
 
-export function preloadCommonData(): CommonData | undefined {
-  return getData('#common-data');
+export function preloadCommonData(): CommonData {
+  const commonData = getData<CommonData>('#common-data');
+  if (!commonData) {
+    throw new Error('commonData is undefined. This state should never occur');
+  }
+  return commonData;
 }

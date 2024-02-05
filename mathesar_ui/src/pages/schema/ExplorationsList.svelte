@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconExploration } from '@mathesar/icons';
@@ -19,7 +20,7 @@
     {/if}
   {:else}
     <EmptyEntity icon={iconExploration}>
-      <p>No Explorations</p>
+      <p>{$_('no_explorations')}</p>
     </EmptyEntity>
   {/each}
 </div>

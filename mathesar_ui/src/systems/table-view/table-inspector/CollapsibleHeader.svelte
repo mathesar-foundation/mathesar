@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Icon } from '@mathesar/component-library';
+  import { _ } from 'svelte-i18n';
+  import { Icon } from '@mathesar-component-library';
   import { iconDatabase } from '@mathesar/icons';
 
   export let title: string;
@@ -9,10 +10,7 @@
 <div class="collapsible-header-container">
   <span>{title}</span>
   {#if isDbLevelConfiguration}
-    <Icon
-      {...iconDatabase}
-      title="This section affects the configuration of the database."
-    />
+    <Icon {...iconDatabase} title={$_('section_affects_database_config')} />
   {/if}
 </div>
 

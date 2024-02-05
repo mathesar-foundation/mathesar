@@ -7,6 +7,8 @@ from mathesar.models.users import DatabaseRole
 from mathesar.state.django import reflect_db_objects
 from mathesar.models.base import Table, Schema, Database
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from db.install import install_mathesar
 from db.engine import create_future_engine_with_custom_types
 
 
@@ -92,15 +94,14 @@ def test_database_reflection_delete_table(db_dj_model):
 
 def check_database(database, response_database):
     assert database.id == response_database['id']
-    assert database.name == response_database['name']
-    assert database.deleted == response_database['deleted']
+    assert database.name == response_database['nickname']
     assert 'supported_types_url' in response_database
-    assert '/api/ui/v0/databases/' in response_database['supported_types_url']
+    assert '/api/ui/v0/connections/' in response_database['supported_types_url']
     assert response_database['supported_types_url'].endswith('/types/')
 
 
 def test_database_list(client, db_dj_model):
-    response = client.get('/api/db/v0/databases/')
+    response = client.get('/api/db/v0/connections/')
     response_data = response.json()
     assert response.status_code == 200
     assert response_data['count'] == 1
@@ -120,21 +121,23 @@ def test_database_list_permissions(FUN_create_dj_db, get_uid, client, client_bob
     db3 = FUN_create_dj_db(get_uid())
     DatabaseRole.objects.create(user=user_bob, database=db3, role='editor')
 
-    response = client_bob.get('/api/db/v0/databases/')
+    response = client_bob.get('/api/db/v0/connections/')
     response_data = response.json()
     assert response.status_code == 200
     assert response_data['count'] == 3
 
-    response = client_alice.get('/api/db/v0/databases/')
+    response = client_alice.get('/api/db/v0/connections/')
     response_data = response.json()
     assert response.status_code == 200
     assert response_data['count'] == 2
 
 
 def test_database_list_deleted(client, db_dj_model):
+    # Note that there is no longer a distinction between "deleted" and undeleted
+    # connections in the API.
     _remove_db(db_dj_model.name)
     cache.clear()
-    response = client.get('/api/db/v0/databases/')
+    response = client.get('/api/db/v0/connections/')
     response_data = response.json()
     assert response.status_code == 200
     assert response_data['count'] == 1
@@ -142,8 +145,35 @@ def test_database_list_deleted(client, db_dj_model):
     check_database(db_dj_model, response_data['results'][0])
 
 
+def test_delete_dbconn_with_msar_schemas(client, db_dj_model):
+    # install mathesar specific schemas
+    install_mathesar(
+        db_dj_model.name,
+        db_dj_model.username,
+        db_dj_model.password,
+        db_dj_model.host,
+        db_dj_model.port,
+        True
+    )
+    engine = db_dj_model._sa_engine
+    check_schema_exists = text(
+        "SELECT schema_name FROM information_schema.schemata \
+        WHERE schema_name LIKE '%msar' OR schema_name = 'mathesar_types';"
+    )
+    with engine.connect() as conn:
+        before_deletion = conn.execute(check_schema_exists)
+        response = client.delete(f'/api/db/v0/connections/{db_dj_model.id}/?del_msar_schemas=true')
+        after_deletion = conn.execute(check_schema_exists)
+
+    with pytest.raises(ObjectDoesNotExist):
+        Database.objects.get(id=db_dj_model.id)
+    assert response.status_code == 204
+    assert before_deletion.rowcount == 3
+    assert after_deletion.rowcount == 0
+
+
 def test_database_detail(client, db_dj_model):
-    response = client.get(f'/api/db/v0/databases/{db_dj_model.id}/')
+    response = client.get(f'/api/db/v0/connections/{db_dj_model.id}/')
     response_database = response.json()
 
     assert response.status_code == 200
@@ -154,8 +184,8 @@ def test_database_detail_permissions(FUN_create_dj_db, get_uid, client_bob, clie
     db1 = FUN_create_dj_db(get_uid())
     DatabaseRole.objects.create(user=user_bob, database=db1, role='viewer')
 
-    response = client_bob.get(f'/api/db/v0/databases/{db1.id}/')
+    response = client_bob.get(f'/api/db/v0/connections/{db1.id}/')
     assert response.status_code == 200
 
-    response = client_alice.get(f'/api/db/v0/databases/{db1.id}/')
+    response = client_alice.get(f'/api/db/v0/connections/{db1.id}/')
     assert response.status_code == 404

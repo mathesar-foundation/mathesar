@@ -1,6 +1,7 @@
 <script lang="ts">
   import { execPipe, filter, map } from 'iter-tools';
   import { onDestroy } from 'svelte';
+  import { _ } from 'svelte-i18n';
 
   import {
     Collapsible,
@@ -67,13 +68,15 @@
 
 {#if hasMultipleSelectedColumns}
   <div class="section-content">
-    {selectedColumns.length} columns selected
+    {$_('multiple_columns_selected', {
+      values: { count: selectedColumns.length },
+    })}
   </div>
 {:else if selectedColumn}
   <Collapsible isOpen triggerAppearance="plain">
-    <span slot="header">Properties</span>
+    <span slot="header">{$_('properties')}</span>
     <div slot="content" class="section-content">
-      <LabeledInput label="Name" layout="stacked">
+      <LabeledInput label={$_('name')} layout="stacked">
         <TextInput
           value={selectedColumn.column.display_name}
           on:input={onNameInput}
@@ -93,5 +96,5 @@
 {/if}
 
 {#if !selectedColumn}
-  <div class="section-content">Select a column to view it's properties.</div>
+  <div class="section-content">{$_('select_columns_view_properties')}</div>
 {/if}

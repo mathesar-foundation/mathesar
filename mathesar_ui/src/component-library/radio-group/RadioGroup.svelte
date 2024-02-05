@@ -7,7 +7,7 @@
 
   export let value: Option | undefined = undefined;
   export let isInline = false;
-  export let options: Option[] = [];
+  export let options: readonly Option[] = [];
   export let label: string | undefined = undefined;
   export let ariaLabel: string | undefined = undefined;
   export let radioLabelKey: string | undefined = undefined;
@@ -39,13 +39,13 @@
   {disabled}
   {boxed}
   let:option
-  let:disabled
+  let:disabled={innerDisabled}
   on:change
   labelKey={radioLabelKey}
   getLabel={getRadioLabel}
 >
   <Radio
-    {disabled}
+    disabled={innerDisabled}
     checked={valuesAreEqual(value, option)}
     on:change={({ detail: checked }) => {
       if (checked) {

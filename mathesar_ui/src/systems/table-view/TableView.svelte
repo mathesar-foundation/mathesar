@@ -157,5 +157,6 @@
   .sheet-area {
     position: relative;
     height: 100%;
+    overflow-x: auto;
   }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import {
     AnchorButton,
     Button,
@@ -31,7 +31,7 @@
   $: explorationPageUrl =
     $currentDatabase && $currentSchema
       ? createDataExplorerUrlToExploreATable(
-          $currentDatabase?.name,
+          $currentDatabase?.id,
           $currentSchema.id,
           {
             id: $tabularData.id,
@@ -44,7 +44,7 @@
       return undefined;
     }
     return constructDataExplorerUrlToSummarizeFromGroup(
-      $currentDatabase.name,
+      $currentDatabase.id,
       $currentSchema.id,
       {
         baseTable: { id, name: $currentTable.name },
@@ -56,7 +56,7 @@
 
   function handleDeleteTable() {
     void confirmDelete({
-      identifierType: 'Table',
+      identifierType: $_('table'),
       body: {
         component: TableDeleteConfirmationBody,
         props: {
@@ -70,7 +70,7 @@
         const schema = $currentSchema;
         if (database && schema) {
           await deleteTable(database, schema, $tabularData.id);
-          router.goto(getSchemaPageUrl(database.name, schema.id), true);
+          router.goto(getSchemaPageUrl(database.id, schema.id), true);
         }
       },
     });
@@ -82,9 +82,9 @@
     <AnchorButton href={explorationPageUrl}>
       <div class="action-item">
         <div>
-          <Icon {...iconExploration} /> <span>Explore Data</span>
+          <Icon {...iconExploration} /> <span>{$_('explore_data')}</span>
           <Help>
-            Open this table in Data Explorer to query and analyze your data.
+            {$_('open_table_in_data_explorer')}
           </Help>
         </div>
         <Icon {...iconExternalLink} />
@@ -95,10 +95,9 @@
         <div class="action-item">
           <div>
             <Icon {...iconExploration} />
-            <span>Summarize in Data Explorer</span>
+            <span>{$_('summarize_in_data_explorer')}</span>
             <Help>
-              Open a pre-configured exploration based on the current table
-              display.
+              {$_('summarize_in_data_explorer_help')}
             </Help>
           </div>
           <Icon {...iconExternalLink} />
@@ -110,7 +109,7 @@
   {#if canExecuteDDL}
     <Button appearance="outline-primary" on:click={handleDeleteTable}>
       <Icon {...iconDeleteMajor} />
-      <span>Delete Table</span>
+      <span>{$_('delete_table')}</span>
     </Button>
   {/if}
 </div>

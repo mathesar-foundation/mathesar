@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import type { Writable } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
   import {
     ButtonMenuItem,
@@ -180,32 +181,33 @@
     />
     <ContextMenu>
       {#if canEditTableRecords || showLinkedRecordHyperLink}
-        <MenuHeading>Cell</MenuHeading>
+        <MenuHeading>{$_('cell')}</MenuHeading>
         {#if canEditTableRecords}
           <ButtonMenuItem
             icon={iconSetToNull}
             disabled={!canSetNull}
             on:click={() => setValue(null)}
           >
-            Set to <Null />
+            {$_('set_to')}
+            <Null />
           </ButtonMenuItem>
         {/if}
         {#if showLinkedRecordHyperLink && linkedRecordHref}
           <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-            Go To Linked Record
+            {$_('go_to_linked_record')}
           </LinkMenuItem>
         {/if}
         <MenuDivider />
       {/if}
 
       <!-- Column Attributes -->
-      <MenuHeading>Column</MenuHeading>
+      <MenuHeading>{$_('column')}</MenuHeading>
       <ColumnHeaderContextMenu {processedColumn} />
 
       <!-- Row -->
       {#if canEditTableRecords || showLinkedRecordHyperLink}
         <MenuDivider />
-        <MenuHeading>Row</MenuHeading>
+        <MenuHeading>{$_('row')}</MenuHeading>
         <RowContextOptions recordPk={rowKey} {recordsData} {row} />
       {/if}
     </ContextMenu>

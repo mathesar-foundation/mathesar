@@ -1,4 +1,13 @@
 <script lang="ts">
+  /**
+   * @file
+   *
+   * NOTICE: There is some code duplication between this file and
+   * `CellMode.svelte` used for the table view. It might be good to resolve this
+   * duplication at some point. In the meantime, be mindful of propagating
+   * changes to both files as necessary.
+   */
+  import { _ } from 'svelte-i18n';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import { parseCellId } from '@mathesar/components/sheet/cellIds';
   import QueryRunner, { getRowSelectionId } from '../QueryRunner';
@@ -20,7 +29,7 @@
 <div class="section-content" class:has-content={cellValue !== undefined}>
   {#if cellValue !== undefined}
     <section class="cell-content">
-      <header>Content</header>
+      <header>{$_('content')}</header>
       <div class="content">
         {#if column}
           <CellFabric
@@ -33,7 +42,7 @@
       </div>
     </section>
   {:else}
-    Select a cell to view it's properties.
+    {$_('select_cell_view_properties')}
   {/if}
 </div>
 
@@ -47,7 +56,7 @@
         font-weight: 500;
       }
       .content {
-        word-wrap: anywhere;
+        white-space: pre-wrap;
         border: 1px solid var(--slate-300);
         padding: var(--size-xx-small);
         border-radius: var(--border-radius-m);

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-
+  import { _ } from 'svelte-i18n';
   import { ImmutableMap, ImmutableSet } from '@mathesar-component-library';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
@@ -71,8 +71,7 @@
 <div data-identifier="query-run-result">
   {#if !initial_columns.length}
     <div class="empty-state">
-      This exploration does not contain any columns. Edit the exploration to add
-      columns to it.
+      {$_('add_columns_to_exploration_empty_message')}
     </div>
   {:else if errors}
     <div class="empty-state">
@@ -123,10 +122,10 @@
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
                   isStatic
                   isControlCell
-                  let:htmlAttributes
+                  let:htmlAttributes={sheetCellHtmlAttributes}
                   let:style
                 >
-                  <div {...htmlAttributes} {style}>
+                  <div {...sheetCellHtmlAttributes} {style}>
                     <CellBackground color="var(--cell-bg-color-header)" />
                     {$pagination.offset + item.index + 1}
                   </div>
@@ -150,13 +149,16 @@
     <div data-identifier="status-bar">
       {#if totalCount}
         <div>
-          Showing {$pagination.leftBound}-{Math.min(
-            totalCount,
-            $pagination.rightBound,
-          )} of {totalCount}
+          {$_('showing_n_to_m_of_total', {
+            values: {
+              leftBound: $pagination.leftBound,
+              rightBound: Math.min(totalCount, $pagination.rightBound),
+              totalCount,
+            },
+          })}
         </div>
       {:else if recordRunState === 'success'}
-        No results found
+        {$_('no_results_found')}
       {/if}
       <div class="pagination-controls">
         <PaginationGroup

@@ -1,32 +1,31 @@
-import { derived, writable, get } from 'svelte/store';
-import { getAPI, States } from '@mathesar/api/utils/requestUtils';
+import type { Readable, Unsubscriber, Writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
+
+import type { CancellablePromise } from '@mathesar-component-library';
+import type { Connection } from '@mathesar/api/connections';
+import { States, getAPI } from '@mathesar/api/utils/requestUtils';
 import { currentDatabase } from '@mathesar/stores/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-
-import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import type { Database } from '@mathesar/AppTypes';
-import type { CancellablePromise } from '@mathesar-component-library';
+import { constructAbstractTypeMapFromResponse } from './abstractTypeCategories';
 import type {
+  AbstractTypeResponse,
   AbstractTypesMap,
   AbstractTypesSubstance,
-  AbstractTypeResponse,
 } from './types';
-
-import { constructAbstractTypeMapFromResponse } from './abstractTypeCategories';
 
 const commonData = preloadCommonData();
 
 const databasesToAbstractTypesStoreMap: Map<
-  Database['id'],
+  Connection['id'],
   Writable<AbstractTypesSubstance>
 > = new Map();
 const abstractTypesRequestMap: Map<
-  Database['id'],
+  Connection['id'],
   CancellablePromise<AbstractTypeResponse[]>
 > = new Map();
 
 export async function refetchTypesForDb(
-  databaseId: Database['id'],
+  databaseId: Connection['id'],
 ): Promise<AbstractTypesMap | undefined> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
@@ -43,7 +42,7 @@ export async function refetchTypesForDb(
     abstractTypesRequestMap.get(databaseId)?.cancel();
 
     const typesRequest = getAPI<AbstractTypeResponse[]>(
-      `/api/ui/v0/databases/${databaseId}/types/`,
+      `/api/ui/v0/connections/${databaseId}/types/`,
     );
     abstractTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;
@@ -74,18 +73,18 @@ export async function refetchTypesForDb(
  */
 let preload = true;
 
-function getTypesForDatabase(
-  database: Database,
+function getTypesForConnection(
+  connection: Connection,
 ): Writable<AbstractTypesSubstance> {
-  let store = databasesToAbstractTypesStoreMap.get(database.id);
+  let store = databasesToAbstractTypesStoreMap.get(connection.id);
   if (!store) {
     store = writable({
       state: States.Loading,
       data: new Map(),
     });
-    databasesToAbstractTypesStoreMap.set(database.id, store);
+    databasesToAbstractTypesStoreMap.set(connection.id, store);
 
-    if (preload && commonData?.current_db === database.name) {
+    if (preload && commonData.current_connection === connection.id) {
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,
@@ -93,11 +92,11 @@ function getTypesForDatabase(
         data: constructAbstractTypeMapFromResponse(commonData.abstract_types),
       }));
     } else {
-      void refetchTypesForDb(database.id);
+      void refetchTypesForDb(connection.id);
     }
     preload = false;
   } else if (get(store).error) {
-    void refetchTypesForDb(database.id);
+    void refetchTypesForDb(connection.id);
   }
   return store;
 }
@@ -113,7 +112,7 @@ export const currentDbAbstractTypes: Readable<AbstractTypesSubstance> = derived(
         data: new Map(),
       });
     } else {
-      const store = getTypesForDatabase($currentDatabase);
+      const store = getTypesForConnection($currentDatabase);
       unsubscribe = store.subscribe((typesData) => {
         set(typesData);
       });

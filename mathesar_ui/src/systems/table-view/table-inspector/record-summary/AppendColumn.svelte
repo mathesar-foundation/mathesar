@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/api/types/tables/columns';
@@ -32,7 +33,7 @@
   }
 </script>
 
-<DropdownMenu label="Append Column" icon={iconAddNew} {disabled}>
+<DropdownMenu label={$_('append_column')} icon={iconAddNew} {disabled}>
   {#each columns as column (column.id)}
     <ButtonMenuItem
       label={column.name}

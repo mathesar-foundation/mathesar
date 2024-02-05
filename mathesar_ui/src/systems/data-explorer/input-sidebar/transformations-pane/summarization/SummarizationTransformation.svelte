@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import {
     ImmutableMap,
     MultiSelect,
@@ -91,7 +92,7 @@
   />
   {#if groups.size > 0}
     <section>
-      <LabeledInput label="Not Aggregated" layout="stacked">
+      <LabeledInput label={$_('not_aggregated')} layout="stacked">
         <MultiSelect
           values={[...groups.values()].map((entry) => entry.inputAlias)}
           options={[...columns.without(model.columnIdentifier).values()].map(
@@ -117,7 +118,7 @@
   {/if}
   {#if aggregations.size > 0}
     <section>
-      <header>Aggregate</header>
+      <header>{$_('aggregate')}</header>
       {#each [...aggregations.values()] as aggregation (aggregation.inputAlias)}
         <Aggregation
           processedColumn={columns.get(aggregation.inputAlias)}

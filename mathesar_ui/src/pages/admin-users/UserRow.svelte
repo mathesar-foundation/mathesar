@@ -28,7 +28,7 @@
     {/if}
   </div>
   <div class="user-type">
-    <Icon class="icon" {...userTypeInfo.icon} />
+    <Icon {...userTypeInfo.icon} size="0.9rem" />
     <span>{userTypeInfo.displayName}</span>
   </div>
 </a>
@@ -83,9 +83,5 @@
     padding: 0.25rem 0.5rem;
     border-radius: 1.17rem;
     font-size: var(--text-size-small);
-
-    :global(.icon) {
-      font-size: 0.9em;
-    }
   }
 </style>

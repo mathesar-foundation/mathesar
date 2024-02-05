@@ -1,6 +1,6 @@
 def test_db_type_list_well_formed(client, test_db_model):
     database_id = test_db_model.id
-    response = client.get(f'/api/db/v0/databases/{database_id}/types/')
+    response = client.get(f'/api/db/v0/connections/{database_id}/types/')
     assert response.status_code == 200
     json_db_types = response.json()
     assert isinstance(json_db_types, list)
