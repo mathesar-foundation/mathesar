@@ -40,8 +40,6 @@ class RecordViewSet(AccessViewSetMixin, viewsets.ViewSet):
 
     # For filter parameter formatting, see:
     # db/functions/operations/deserialize.py::get_db_function_from_ma_function_spec function doc>
-    # For sorting parameter formatting, see:
-    # https://github.com/centerofci/sqlalchemy-filters#sort-format
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetPagination()
 

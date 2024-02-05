@@ -23,7 +23,7 @@
 
 <style lang="scss">
   .new-record-message {
-    z-index: var(--z-index__sheet_new-record-message, auto);
+    z-index: var(--z-index__sheet__new-record-message, auto);
     background: var(--sky-200);
     display: flex;
     align-items: center;

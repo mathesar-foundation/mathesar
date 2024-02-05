@@ -28,11 +28,13 @@ version: "3.9"
 #-------------------------------------------------------------------------------
 # CONFIG
 #
-# Customize your Mathesar installation with the following variables, if desired.
+# Customize your Mathesar installation with the following variables.
+# See https://docs.mathesar.org/configuration/env-variables/ for more info.
 #
 x-config: &config
-  # (Required) Replace '?' with '-' followed by a 50 character random string.
-  # You can generate one at https://djecrety.ir/
+  # (REQUIRED) Replace '?' with '-' followed by a 50 character random string.
+  # You can generate one at https://djecrety.ir/ or by running:
+  #   echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
   SECRET_KEY: ${SECRET_KEY:?}
 
   # (Optional) Replace 'http://localhost' with custom domain(s) e.g.
@@ -157,8 +159,7 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
 
       # WARNING: MATHESAR_DATABASES is deprecated, and will be removed in a future release.
-      # TODO Make the default empty once the connections UI is merged
-      MATHESAR_DATABASES: ${MATHESAR_DATABASES-(mathesar_tables|postgresql://mathesar:mathesar@mathesar_db:5432/mathesar)}
+      MATHESAR_DATABASES: ${MATHESAR_DATABASES:-}
     entrypoint: ./run.sh
     volumes:
       - ./msar/static:/code/static
