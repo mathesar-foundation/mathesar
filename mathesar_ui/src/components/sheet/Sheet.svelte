@@ -139,10 +139,11 @@
     --z-index__sheet__column-resizer: 2;
     --z-index__sheet__active-cell: 3;
     --z-index__sheet__row-header-cell: 4;
-    --z-index__sheet__group-header: 5;
-    --z-index__sheet__new-record-message: 6;
-    --z-index__sheet__horizontal-scrollbar: 7;
-    --z-index__sheet__vertical-scrollbar: 8;
+    --z-index__sheet__positionable-cell: 5;
+    --z-index__sheet__column-header-cell: 6;
+    --z-index__sheet__origin-cell: 7;
+    --z-index__sheet__horizontal-scrollbar: 8;
+    --z-index__sheet__vertical-scrollbar: 9;
 
     --virtual-list-horizontal-scrollbar-z-index: var(
       --z-index__sheet__horizontal-scrollbar
@@ -168,33 +169,7 @@
       min-width: 100%;
     }
 
-    :global([data-sheet-element='cell']) {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      border-bottom: var(--cell-border-horizontal);
-      border-right: var(--cell-border-vertical);
-      left: 0;
-      top: 0;
-      height: 100%;
-    }
-
-    :global([data-sheet-element='cell'][data-cell-static='true']) {
-      position: sticky;
-      z-index: var(--z-index__sheet__row-header-cell);
-    }
-
-    :global([data-sheet-element='cell'][data-cell-control='true']) {
-      font-size: var(--text-size-x-small);
-      padding: 0 1.5rem;
-      justify-content: center;
-      color: var(--color-text-muted);
-      display: inline-flex;
-      align-items: center;
-      height: 100%;
-    }
-
-    :global([data-sheet-element='row']) {
+    :global([data-sheet-element='data-row']) {
       transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
     }
   }

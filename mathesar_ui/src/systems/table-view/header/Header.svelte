@@ -94,80 +94,46 @@
 </script>
 
 <SheetHeader>
-  <SheetCell
-    columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-    isStatic
-    isControlCell
-    let:htmlAttributes
-    let:style
-  >
+  <SheetCell type="origin-cell" columnIdentifierKey={ID_ROW_CONTROL_COLUMN}>
     <Droppable
       on:drop={() => dropColumn()}
       on:dragover={(e) => e.preventDefault()}
       locationOfFirstDraggedColumn={0}
       columnLocation={-1}
-    >
-      <div {...htmlAttributes} {style} />
-    </Droppable>
+    />
   </SheetCell>
 
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
     {@const isSelected = $selection.columnIds.has(String(columnId))}
-    <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
+    <SheetCell type="column-header-cell" columnIdentifierKey={columnId}>
+      <!-- TODO_3037: why is this div here? Can we get rid of it? -->
       <div>
-        <div {...htmlAttributes} {style}>
-          <Draggable
-            on:dragstart={() => dragColumn()}
-            column={processedColumn}
-            {selection}
+        <Draggable
+          on:dragstart={() => dragColumn()}
+          column={processedColumn}
+          {selection}
+        >
+          <Droppable
+            on:drop={() => dropColumn(processedColumn)}
+            on:dragover={(e) => e.preventDefault()}
+            {locationOfFirstDraggedColumn}
+            columnLocation={columnOrderString.indexOf(columnId.toString())}
+            {isSelected}
           >
-            <Droppable
-              on:drop={() => dropColumn(processedColumn)}
-              on:dragover={(e) => e.preventDefault()}
-              {locationOfFirstDraggedColumn}
-              columnLocation={columnOrderString.indexOf(columnId.toString())}
-              {isSelected}
-            >
-              <HeaderCell
-                {processedColumn}
-                {isSelected}
-                on:mousedown={() => {
-                  // // TODO_3037
-                  // selection.onColumnSelectionStart(processedColumn)
-                }}
-                on:mouseenter={() => {
-                  // // TODO_3037
-                  // selection.onMouseEnterColumnHeaderWhileSelection(
-                  //   processedColumn,
-                  // )
-                }}
-              />
-            </Droppable>
-          </Draggable>
-          <SheetCellResizer columnIdentifierKey={columnId} />
-          <ContextMenu>
-            <ColumnHeaderContextMenu {processedColumn} />
-          </ContextMenu>
-        </div>
+            <HeaderCell {processedColumn} {isSelected} />
+          </Droppable>
+        </Draggable>
+        <SheetCellResizer columnIdentifierKey={columnId} />
+        <ContextMenu>
+          <ColumnHeaderContextMenu {processedColumn} />
+        </ContextMenu>
       </div>
     </SheetCell>
   {/each}
 
   {#if hasNewColumnButton}
-    <SheetCell
-      columnIdentifierKey={ID_ADD_NEW_COLUMN}
-      let:htmlAttributes
-      let:style
-    >
-      <div {...htmlAttributes} class="new-column-cell" {style}>
-        <NewColumnCell />
-      </div>
+    <SheetCell type="new-column-cell" columnIdentifierKey={ID_ADD_NEW_COLUMN}>
+      <NewColumnCell />
     </SheetCell>
   {/if}
 </SheetHeader>
-
-<style lang="scss">
-  .new-column-cell {
-    padding: 0 0.2rem;
-  }
-</style>

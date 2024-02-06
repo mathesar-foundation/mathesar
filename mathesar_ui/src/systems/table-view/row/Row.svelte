@@ -54,20 +54,6 @@
     //   selection.selectAndActivateFirstDataEntryCellInLastRow();
     // }
   }
-
-  const handleRowMouseDown = () => {
-    // // TODO_3037
-    // if (rowHasRecord(row) && !isPlaceholderRow(row)) {
-    //   selection.onRowSelectionStart(row);
-    // }
-  };
-
-  const handleRowMouseEnter = () => {
-    // // TODO_3037
-    // if (rowHasRecord(row) && !isPlaceholderRow(row)) {
-    //   selection.onMouseEnterRowHeaderWhileSelection(row);
-    // }
-  };
 </script>
 
 <SheetRow {style} let:htmlAttributes let:styleString>
@@ -85,32 +71,22 @@
     on:mousedown={checkAndCreateEmptyRow}
   >
     <SheetCell
+      type="row-header-cell"
       columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-      isStatic
-      isControlCell
-      let:htmlAttributes={cellHtmlAttr}
-      let:style={sheetCellStyle}
     >
-      <div
-        {...cellHtmlAttr}
-        style={sheetCellStyle}
-        on:mousedown={handleRowMouseDown}
-        on:mouseenter={handleRowMouseEnter}
-      >
-        {#if rowHasRecord(row)}
-          <RowControl
-            {primaryKeyColumnId}
-            {row}
-            {meta}
-            {recordsData}
-            {isSelected}
-            hasErrors={hasAnyErrors}
-          />
-          <ContextMenu>
-            <RowContextOptions recordPk={rowKey} {recordsData} {row} />
-          </ContextMenu>
-        {/if}
-      </div>
+      {#if rowHasRecord(row)}
+        <RowControl
+          {primaryKeyColumnId}
+          {row}
+          {meta}
+          {recordsData}
+          {isSelected}
+          hasErrors={hasAnyErrors}
+        />
+        <ContextMenu>
+          <RowContextOptions recordPk={rowKey} {recordsData} {row} />
+        </ContextMenu>
+      {/if}
     </SheetCell>
 
     {#if isHelpTextRow(row)}
@@ -159,7 +135,7 @@
       cursor: pointer;
 
       :global(
-          [data-sheet-element='cell']:not(.is-active)
+          [data-sheet-element='data-cell']:not(.is-active)
             .cell-fabric
             .cell-wrapper
             > *

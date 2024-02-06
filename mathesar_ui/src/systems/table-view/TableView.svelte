@@ -94,7 +94,7 @@
     // //Better document why we need id.
     //
     // const target = e.target as HTMLElement;
-    // if (!target.closest('[data-sheet-element="cell"')) {
+    // if (!target.closest('[data-sheet-element="data-cell"')) {
     //   if ($activeCell) {
     //     selection.focusCell(
     //       // TODO make sure to use getRowSelectionId instead of rowIndex

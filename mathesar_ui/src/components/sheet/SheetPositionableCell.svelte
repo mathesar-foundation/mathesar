@@ -25,13 +25,8 @@
   }
 
   $: style = calculateStyle($columnStyleMap, index, columnSpan);
-
-  export let isStatic = false;
-
-  $: htmlAttributes = {
-    'data-sheet-element': 'cell',
-    'data-cell-static': isStatic ? true : undefined,
-  };
 </script>
 
-<slot {htmlAttributes} {style} />
+<div data-sheet-element="positionable-cell" {style}>
+  <slot />
+</div>

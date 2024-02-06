@@ -38,14 +38,14 @@ function scrollToElement(htmlElement: HTMLElement | null): void {
 
 export function scrollBasedOnActiveCell(): void {
   const activeCell: HTMLElement | null = document.querySelector(
-    '[data-sheet-element="cell"].is-active',
+    '[data-sheet-element="data-cell"].is-active',
   );
   scrollToElement(activeCell);
 }
 
 export function scrollBasedOnSelection(): void {
   const selectedCell: HTMLElement | null = document.querySelector(
-    '[data-sheet-element="cell"].is-selected',
+    '[data-sheet-element="data-cell"].is-selected',
   );
   scrollToElement(selectedCell);
 }

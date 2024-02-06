@@ -15,31 +15,28 @@
 </script>
 
 <SheetCell
+  type="column-header-cell"
   columnIdentifierKey={processedQueryColumn.id}
-  let:htmlAttributes
-  let:style
 >
-  <div {...htmlAttributes} {style}>
-    <Button
-      appearance="plain"
-      class="column-name-wrapper {isSelected ? 'selected' : ''}"
-      on:click={() => {
-        queryRunner.selectColumn(processedQueryColumn.column.alias);
+  <Button
+    appearance="plain"
+    class="column-name-wrapper {isSelected ? 'selected' : ''}"
+    on:click={() => {
+      queryRunner.selectColumn(processedQueryColumn.column.alias);
+    }}
+  >
+    <!--TODO: Use a separate prop to identify column that isn't fetched yet
+                    instead of type:unknown-->
+    <ColumnName
+      isLoading={columnRunState === 'processing' &&
+        processedQueryColumn.column.type === 'unknown'}
+      column={{
+        ...processedQueryColumn.column,
+        name:
+          processedQueryColumn.column.display_name ??
+          processedQueryColumn.column.alias,
       }}
-    >
-      <!--TODO: Use a separate prop to identify column that isn't fetched yet
-                      instead of type:unknown-->
-      <ColumnName
-        isLoading={columnRunState === 'processing' &&
-          processedQueryColumn.column.type === 'unknown'}
-        column={{
-          ...processedQueryColumn.column,
-          name:
-            processedQueryColumn.column.display_name ??
-            processedQueryColumn.column.alias,
-        }}
-      />
-    </Button>
-    <SheetCellResizer columnIdentifierKey={processedQueryColumn.id} />
-  </div>
+    />
+  </Button>
+  <SheetCellResizer columnIdentifierKey={processedQueryColumn.id} />
 </SheetCell>

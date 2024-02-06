@@ -98,104 +98,77 @@
   }
 </script>
 
-<SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
-  <div
-    class="cell editable-cell"
-    class:error={hasError}
-    class:modified={modificationStatus?.state === 'success'}
-    class:is-active={isActive}
-    class:is-processing={isProcessing}
-    class:is-pk={column.primary_key}
-    class:is-selected={isSelected}
-    {...htmlAttributes}
-    {style}
-  >
-    <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
-    <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
-    {#if !(isEditable && isActive)}
-      <!--
-      We hide these backgrounds when the cell is editable and active because a
-      white background better communicates that the user can edit the active
-      cell.
-    -->
-      <RowCellBackgrounds hasErrors={rowHasErrors} />
+<SheetCell
+  type="data-cell"
+  columnIdentifierKey={column.id}
+  {isActive}
+  lightText={hasError || isProcessing}
+>
+  <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
+  <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
+  {#if !(isEditable && isActive)}
+    <!--
+    We hide these backgrounds when the cell is editable and active because a
+    white background better communicates that the user can edit the active
+    cell.
+  -->
+    <RowCellBackgrounds hasErrors={rowHasErrors} />
+  {/if}
+
+  <CellFabric
+    columnFabric={processedColumn}
+    {isActive}
+    {isSelected}
+    {value}
+    {isProcessing}
+    {canViewLinkedEntities}
+    recordSummary={$recordSummaries.get(String(column.id))?.get(String(value))}
+    setRecordSummary={(recordId, recordSummary) =>
+      recordSummaries.addBespokeRecordSummary({
+        columnId: String(columnId),
+        recordId,
+        recordSummary,
+      })}
+    showAsSkeleton={$recordsDataState === States.Loading}
+    disabled={!isEditable}
+    on:movementKeyDown={({ detail }) =>
+      handleKeyboardEventOnCell(detail.originalEvent, selection)}
+    on:update={valueUpdated}
+    horizontalAlignment={column.primary_key ? 'left' : undefined}
+  />
+  <ContextMenu>
+    {#if canEditTableRecords || showLinkedRecordHyperLink}
+      <MenuHeading>{$_('cell')}</MenuHeading>
+      {#if canEditTableRecords}
+        <ButtonMenuItem
+          icon={iconSetToNull}
+          disabled={!canSetNull}
+          on:click={() => setValue(null)}
+        >
+          {$_('set_to')}
+          <Null />
+        </ButtonMenuItem>
+      {/if}
+      {#if showLinkedRecordHyperLink && linkedRecordHref}
+        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
+          {$_('go_to_linked_record')}
+        </LinkMenuItem>
+      {/if}
+      <MenuDivider />
     {/if}
 
-    <CellFabric
-      columnFabric={processedColumn}
-      {isActive}
-      {isSelected}
-      {value}
-      {isProcessing}
-      {canViewLinkedEntities}
-      recordSummary={$recordSummaries
-        .get(String(column.id))
-        ?.get(String(value))}
-      setRecordSummary={(recordId, recordSummary) =>
-        recordSummaries.addBespokeRecordSummary({
-          columnId: String(columnId),
-          recordId,
-          recordSummary,
-        })}
-      showAsSkeleton={$recordsDataState === States.Loading}
-      disabled={!isEditable}
-      on:movementKeyDown={({ detail }) =>
-        handleKeyboardEventOnCell(detail.originalEvent, selection)}
-      on:update={valueUpdated}
-      horizontalAlignment={column.primary_key ? 'left' : undefined}
-    />
-    <ContextMenu>
-      {#if canEditTableRecords || showLinkedRecordHyperLink}
-        <MenuHeading>{$_('cell')}</MenuHeading>
-        {#if canEditTableRecords}
-          <ButtonMenuItem
-            icon={iconSetToNull}
-            disabled={!canSetNull}
-            on:click={() => setValue(null)}
-          >
-            {$_('set_to')}
-            <Null />
-          </ButtonMenuItem>
-        {/if}
-        {#if showLinkedRecordHyperLink && linkedRecordHref}
-          <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-            {$_('go_to_linked_record')}
-          </LinkMenuItem>
-        {/if}
-        <MenuDivider />
-      {/if}
+    <!-- Column Attributes -->
+    <MenuHeading>{$_('column')}</MenuHeading>
+    <ColumnHeaderContextMenu {processedColumn} />
 
-      <!-- Column Attributes -->
-      <MenuHeading>{$_('column')}</MenuHeading>
-      <ColumnHeaderContextMenu {processedColumn} />
-
-      <!-- Row -->
-      {#if canEditTableRecords || showLinkedRecordHyperLink}
-        <MenuDivider />
-        <MenuHeading>{$_('row')}</MenuHeading>
-        <RowContextOptions recordPk={rowKey} {recordsData} {row} />
-      {/if}
-    </ContextMenu>
-    {#if errors.length}
-      <CellErrors {errors} forceShowErrors={isActive} />
+    <!-- Row -->
+    {#if canEditTableRecords || showLinkedRecordHyperLink}
+      <MenuDivider />
+      <MenuHeading>{$_('row')}</MenuHeading>
+      <RowContextOptions recordPk={rowKey} {recordsData} {row} />
     {/if}
-  </div>
+  </ContextMenu>
+  {#if errors.length}
+    <CellErrors {errors} forceShowErrors={isActive} />
+  {/if}
 </SheetCell>
-
-<style lang="scss">
-  .editable-cell.cell {
-    user-select: none;
-    -webkit-user-select: none; /* Safari */
-    background: var(--cell-bg-color-base);
-    &.is-active {
-      z-index: var(--z-index__sheet__active-cell);
-      border-color: transparent;
-      min-height: 100%;
-      height: auto !important;
-    }
-    &.error,
-    &.is-processing {
-      color: var(--cell-text-color-processing);
-    }
-  }
-</style>

@@ -37,7 +37,6 @@
     pagination,
     runState,
     selection,
-    inspector,
   } = queryHandler);
   $: ({ initial_columns } = $query);
   $: clipboardHandler = new SheetClipboardHandler({
@@ -87,15 +86,9 @@
     >
       <SheetHeader>
         <SheetCell
+          type="origin-cell"
           columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-          isStatic
-          isControlCell
-          let:htmlAttributes
-          let:style
-        >
-          <div {...htmlAttributes} {style} />
-        </SheetCell>
-
+        />
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
           <ResultHeaderCell
             {processedQueryColumn}
@@ -119,16 +112,11 @@
                 style="--cell-height:{rowHeightPx - 1}px;{styleString}"
               >
                 <SheetCell
+                  type="row-header-cell"
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-                  isStatic
-                  isControlCell
-                  let:htmlAttributes={sheetCellHtmlAttributes}
-                  let:style
                 >
-                  <div {...sheetCellHtmlAttributes} {style}>
-                    <CellBackground color="var(--cell-bg-color-header)" />
-                    {$pagination.offset + item.index + 1}
-                  </div>
+                  <CellBackground color="var(--cell-bg-color-header)" />
+                  {$pagination.offset + item.index + 1}
                 </SheetCell>
 
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
@@ -137,7 +125,6 @@
                     column={processedQueryColumn}
                     {recordRunState}
                     {selection}
-                    {inspector}
                   />
                 {/each}
               </div>
@@ -234,7 +221,7 @@
     :global(.column-name-wrapper.selected) {
       background: var(--slate-200) !important;
     }
-    :global([data-sheet-element='cell'].selected) {
+    :global([data-sheet-element='data-cell'].selected) {
       background: var(--slate-100);
     }
   }

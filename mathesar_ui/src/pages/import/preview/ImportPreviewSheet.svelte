@@ -25,20 +25,18 @@
   <Sheet restrictWidthToRowWidth {columns} getColumnIdentifier={(c) => c.id}>
     <SheetHeader inheritFontStyle>
       {#each columns as column (column.id)}
-        <SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
-          <div {...htmlAttributes} {style}>
-            <PreviewColumn
-              {isLoading}
-              processedColumn={column}
-              {updateTypeRelatedOptions}
-              bind:selected={columnPropertiesMap[column.id].selected}
-              bind:displayName={columnPropertiesMap[column.id].displayName}
-            />
-            <SheetCellResizer
-              columnIdentifierKey={column.id}
-              minColumnWidth={120}
-            />
-          </div>
+        <SheetCell type="column-header-cell" columnIdentifierKey={column.id}>
+          <PreviewColumn
+            {isLoading}
+            processedColumn={column}
+            {updateTypeRelatedOptions}
+            bind:selected={columnPropertiesMap[column.id].selected}
+            bind:displayName={columnPropertiesMap[column.id].displayName}
+          />
+          <SheetCellResizer
+            columnIdentifierKey={column.id}
+            minColumnWidth={120}
+          />
         </SheetCell>
       {/each}
     </SheetHeader>
@@ -50,19 +48,13 @@
       >
         <div {...htmlAttributes} style={styleString}>
           {#each columns as column (column)}
-            <SheetCell
-              columnIdentifierKey={column.id}
-              let:htmlAttributes={sheetCellHtmlAttributes}
-              let:style
-            >
-              <div {...sheetCellHtmlAttributes} {style}>
-                <CellFabric
-                  columnFabric={column}
-                  value={record[column.column.name]}
-                  showAsSkeleton={isLoading}
-                  disabled={true}
-                />
-              </div>
+            <SheetCell type="data-cell" columnIdentifierKey={column.id}>
+              <CellFabric
+                columnFabric={column}
+                value={record[column.column.name]}
+                showAsSkeleton={isLoading}
+                disabled={true}
+              />
             </SheetCell>
           {/each}
         </div>
@@ -73,13 +65,17 @@
 
 <style lang="scss">
   .import-preview {
-    :global([data-sheet-element='row'] [data-sheet-element='cell']) {
+    :global([data-sheet-element='data-cell']) {
       background: var(--white);
     }
-    :global([data-sheet-element] [data-sheet-element='cell']:last-child) {
+    :global([data-sheet-element='data-cell']:last-child),
+    :global([data-sheet-element='column-header-cell']:last-child) {
       border-right: none;
     }
-    :global([data-sheet-element='row']:last-child [data-sheet-element='cell']) {
+    :global(
+        [data-sheet-element='data-row']:last-child
+          [data-sheet-element='data-cell']
+      ) {
       border-bottom: none;
     }
   }
