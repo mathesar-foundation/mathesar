@@ -80,10 +80,11 @@
     }
   }
 
-  function handleMouseDown() {
-    wasActiveBeforeClick = isActive;
-    dispatch('activate');
-  }
+  // // TODO_3037: test and see if we need `wasActiveBeforeClick`
+  // function handleMouseDown() {
+  //   wasActiveBeforeClick = isActive;
+  //   dispatch('activate');
+  // }
 
   function handleClick() {
     if (wasActiveBeforeClick) {
@@ -99,7 +100,6 @@
   {isIndependentOfSheet}
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
-  on:mousedown={handleMouseDown}
   on:click={handleClick}
   on:dblclick={launchRecordSelector}
   hasPadding={false}

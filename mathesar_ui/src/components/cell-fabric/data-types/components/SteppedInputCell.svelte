@@ -143,12 +143,6 @@
     resetEditMode();
   }
 
-  function handleMouseDown() {
-    if (!isActive) {
-      dispatch('activate');
-    }
-  }
-
   onMount(initLastSavedValue);
 </script>
 
@@ -159,7 +153,6 @@
   bind:element={cellRef}
   on:dblclick={setModeToEdit}
   on:keydown={handleKeyDown}
-  on:mousedown={handleMouseDown}
   on:mouseenter
   mode={isEditMode ? 'edit' : 'default'}
   {multiLineTruncate}

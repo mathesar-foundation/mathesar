@@ -28,10 +28,6 @@
     e.stopPropagation();
   }
 
-  function handleValueMouseDown() {
-    dispatch('activate');
-  }
-
   function handleKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case 'Tab':
@@ -63,7 +59,7 @@
     class="primary-key-cell"
     class:is-independent-of-sheet={isIndependentOfSheet}
   >
-    <span class="value" on:mousedown={handleValueMouseDown}>
+    <span class="value">
       {#if value === undefined}
         <Default />
       {:else}

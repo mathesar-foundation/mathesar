@@ -32,7 +32,6 @@
   let:handleInputKeydown
   formatValue={formatForDisplay}
   on:movementKeyDown
-  on:activate
   on:mouseenter
   on:update
 >

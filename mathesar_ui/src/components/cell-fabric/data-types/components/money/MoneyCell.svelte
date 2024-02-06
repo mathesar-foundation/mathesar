@@ -30,7 +30,6 @@
   let:handleInputKeydown
   on:movementKeyDown
   on:mouseenter
-  on:activate
   on:update
 >
   <MoneyCellInput

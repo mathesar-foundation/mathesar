@@ -58,12 +58,15 @@
     cellRef?.focus();
   }
 
-  function handleMouseDown() {
-    if (!isActive) {
-      isFirstActivated = true;
-      dispatch('activate');
-    }
-  }
+  // // TODO_3037: test checkbox cell thoroughly. The `isFirstActivated`
+  // // variable is no longer getting set. We need to figure out what to do to
+  // // handle this.
+  // function handleMouseDown() {
+  //   if (!isActive) {
+  //     isFirstActivated = true;
+  //     dispatch('activate');
+  //   }
+  // }
 </script>
 
 <CellWrapper
@@ -76,7 +79,6 @@
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
   on:click={checkAndToggle}
-  on:mousedown={handleMouseDown}
 >
   {#if value === undefined}
     <Default />

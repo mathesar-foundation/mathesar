@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
   import type { Writable } from 'svelte/store';
 
@@ -17,12 +16,10 @@
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import {
-    SheetCell,
-    scrollBasedOnActiveCell,
-  } from '@mathesar/components/sheet';
+  import { SheetCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+  import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
@@ -39,7 +36,6 @@
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import CellErrors from './CellErrors.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
-  import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
 
   export let recordsData: RecordsData;
   export let selection: Writable<SheetSelection>;
@@ -145,21 +141,8 @@
       disabled={!isEditable}
       on:movementKeyDown={({ detail }) =>
         handleKeyboardEventOnCell(detail.originalEvent, selection)}
-      on:activate={() => selection.update((s) => s.ofOneCell(cellId))}
       on:update={valueUpdated}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
-      on:onSelectionStart={() => {
-        // // TODO_3037
-        // selection.onStartSelection(row, processedColumn);
-      }}
-      on:onMouseEnterCellWhileSelection={() => {
-        // // This enables the click + drag to
-        // // select multiple cells
-        // //
-        // // TODO_3037
-        // //
-        // selection.onMouseEnterCellWhileSelection(row, processedColumn);
-      }}
     />
     <ContextMenu>
       {#if canEditTableRecords || showLinkedRecordHyperLink}

@@ -34,12 +34,6 @@
         break;
     }
   }
-
-  function handleMouseDown() {
-    if (!isActive) {
-      dispatch('activate');
-    }
-  }
 </script>
 
 <CellWrapper
@@ -49,7 +43,6 @@
   {isIndependentOfSheet}
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
-  on:mousedown={handleMouseDown}
 >
   <CellValue {value}>
     {#if isDefinedNonNullable(value)}

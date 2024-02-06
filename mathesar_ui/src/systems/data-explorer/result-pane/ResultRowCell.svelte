@@ -33,27 +33,6 @@
         disabled={true}
         on:movementKeyDown={({ detail }) =>
           handleKeyboardEventOnCell(detail.originalEvent, selection)}
-        on:activate={() => {
-          // // TODO_3037
-          // if (row) {
-          //   selection.activateCell(row, processedQueryColumn);
-          //   inspector.selectCellTab();
-          // }
-        }}
-        on:onSelectionStart={() => {
-          // // TODO_3037
-          // if (row) {
-          //   selection.onStartSelection(row, processedQueryColumn);
-          // }
-        }}
-        on:onMouseEnterCellWhileSelection={() => {
-          // // TODO_3037
-          // if (row) {
-          //   // This enables the click + drag to
-          //   // select multiple cells
-          //   selection.onMouseEnterCellWhileSelection(row, processedQueryColumn);
-          // }
-        }}
       />
     {/if}
   </div>

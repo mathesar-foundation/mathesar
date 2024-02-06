@@ -43,12 +43,13 @@
     isInitiallyActivated = false;
   }
 
-  function handleMouseDown() {
-    if (!isActive) {
-      isInitiallyActivated = true;
-      dispatch('activate');
-    }
-  }
+  // // TODO_3037 test an see how to fix `isInitiallyActivated` logic
+  // function handleMouseDown() {
+  //   if (!isActive) {
+  //     isInitiallyActivated = true;
+  //     dispatch('activate');
+  //   }
+  // }
 
   function handleKeyDown(
     e: KeyboardEvent,
@@ -116,7 +117,6 @@
     {isSelected}
     {disabled}
     {isIndependentOfSheet}
-    on:mousedown={handleMouseDown}
     on:mouseenter
     on:click={() => checkAndToggle(api)}
     on:keydown={(e) => handleKeyDown(e, api, isOpen)}
