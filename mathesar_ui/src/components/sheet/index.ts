@@ -8,4 +8,4 @@ export { default as SheetRow } from './SheetRow.svelte';
 export {
   scrollBasedOnActiveCell,
   scrollBasedOnSelection,
-} from './sheetScollingUtils';
+} from './sheetScrollingUtils';

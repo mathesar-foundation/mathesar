@@ -1,3 +1,5 @@
+import { tick } from 'svelte';
+
 // TODO: Create a common utility action to handle active element based scroll
 function scrollToElement(htmlElement: HTMLElement | null): void {
   const activeRow = htmlElement?.parentElement;
@@ -46,4 +48,9 @@ export function scrollBasedOnSelection(): void {
     '[data-sheet-element="cell"].is-selected',
   );
   scrollToElement(selectedCell);
+}
+
+export async function autoScroll() {
+  await tick();
+  scrollBasedOnActiveCell();
 }

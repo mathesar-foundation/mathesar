@@ -5,28 +5,6 @@ export enum Direction {
   Right = 'right',
 }
 
-export function getDirection(event: KeyboardEvent): Direction | undefined {
-  const { key } = event;
-  const shift = event.shiftKey;
-  switch (true) {
-    case shift && key === 'Tab':
-      return Direction.Left;
-    case shift:
-      return undefined;
-    case key === 'ArrowUp':
-      return Direction.Up;
-    case key === 'ArrowDown':
-      return Direction.Down;
-    case key === 'ArrowLeft':
-      return Direction.Left;
-    case key === 'ArrowRight':
-    case key === 'Tab':
-      return Direction.Right;
-    default:
-      return undefined;
-  }
-}
-
 export function getColumnOffset(direction: Direction): number {
   switch (direction) {
     case Direction.Left:

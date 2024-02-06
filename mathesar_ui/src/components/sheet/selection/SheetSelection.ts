@@ -480,6 +480,8 @@ export default class SheetSelection {
    * is simpler.
    */
   resized(direction: Direction): SheetSelection {
-    throw new Error('Not implemented');
+    // TODO
+    console.log('Sheet selection resizing is not yet implemented');
+    return this;
   }
 }

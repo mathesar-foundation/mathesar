@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
+  import type { Writable } from 'svelte/store';
 
   import {
     ButtonMenuItem,
@@ -39,6 +39,7 @@
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import CellErrors from './CellErrors.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
+  import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
 
   export let recordsData: RecordsData;
   export let selection: Writable<SheetSelection>;
@@ -84,26 +85,6 @@
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
-
-  async function checkTypeAndScroll(type?: string) {
-    if (type === 'moved') {
-      await tick();
-      scrollBasedOnActiveCell();
-    }
-  }
-
-  async function moveThroughCells(
-    event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
-  ) {
-    // // TODO_3037
-    // const { originalEvent } = event.detail;
-    // const type = selection.handleKeyEventsOnActiveCell(originalEvent);
-    // if (type) {
-    //   originalEvent.stopPropagation();
-    //   originalEvent.preventDefault();
-    //   await checkTypeAndScroll(type);
-    // }
-  }
 
   async function setValue(newValue: unknown) {
     if (newValue === value) {
@@ -162,7 +143,8 @@
         })}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
-      on:movementKeyDown={moveThroughCells}
+      on:movementKeyDown={({ detail }) =>
+        handleKeyboardEventOnCell(detail.originalEvent, selection)}
       on:activate={() => selection.update((s) => s.ofOneCell(cellId))}
       on:update={valueUpdated}
       horizontalAlignment={column.primary_key ? 'left' : undefined}
