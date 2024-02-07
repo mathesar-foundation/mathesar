@@ -3,7 +3,7 @@
 
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import { SheetCell } from '@mathesar/components/sheet';
+  import { SheetDataCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
@@ -19,7 +19,11 @@
   $: isActive = cellId === $selection.activeCellId;
 </script>
 
-<SheetCell type="data-cell" columnIdentifierKey={column.id} {isActive}>
+<SheetDataCell
+  columnIdentifierKey={column.id}
+  cellSelectionId={cellId}
+  {isActive}
+>
   {#if row || recordRunState === 'processing'}
     <CellFabric
       {isActive}
@@ -32,4 +36,4 @@
         handleKeyboardEventOnCell(detail.originalEvent, selection)}
     />
   {/if}
-</SheetCell>
+</SheetDataCell>

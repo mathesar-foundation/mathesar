@@ -3,8 +3,9 @@
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
     Sheet,
-    SheetCell,
     SheetCellResizer,
+    SheetColumnHeaderCell,
+    SheetDataCell,
     SheetHeader,
     SheetRow,
   } from '@mathesar/components/sheet';
@@ -25,7 +26,7 @@
   <Sheet restrictWidthToRowWidth {columns} getColumnIdentifier={(c) => c.id}>
     <SheetHeader inheritFontStyle>
       {#each columns as column (column.id)}
-        <SheetCell type="column-header-cell" columnIdentifierKey={column.id}>
+        <SheetColumnHeaderCell columnIdentifierKey={column.id}>
           <PreviewColumn
             {isLoading}
             processedColumn={column}
@@ -37,7 +38,7 @@
             columnIdentifierKey={column.id}
             minColumnWidth={120}
           />
-        </SheetCell>
+        </SheetColumnHeaderCell>
       {/each}
     </SheetHeader>
     {#each records as record (record)}
@@ -48,14 +49,14 @@
       >
         <div {...htmlAttributes} style={styleString}>
           {#each columns as column (column)}
-            <SheetCell type="data-cell" columnIdentifierKey={column.id}>
+            <SheetDataCell columnIdentifierKey={column.id}>
               <CellFabric
                 columnFabric={column}
                 value={record[column.column.name]}
                 showAsSkeleton={isLoading}
                 disabled={true}
               />
-            </SheetCell>
+            </SheetDataCell>
           {/each}
         </div>
       </SheetRow>

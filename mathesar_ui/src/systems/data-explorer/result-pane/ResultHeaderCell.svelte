@@ -1,6 +1,9 @@
 <script lang="ts">
   import { Button } from '@mathesar-component-library';
-  import { SheetCell, SheetCellResizer } from '@mathesar/components/sheet';
+  import {
+    SheetColumnHeaderCell,
+    SheetCellResizer,
+  } from '@mathesar/components/sheet';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import type { ProcessedQueryOutputColumn } from '../utils';
   import type QueryRunner from '../QueryRunner';
@@ -14,10 +17,7 @@
   $: columnRunState = $runState?.state;
 </script>
 
-<SheetCell
-  type="column-header-cell"
-  columnIdentifierKey={processedQueryColumn.id}
->
+<SheetColumnHeaderCell columnIdentifierKey={processedQueryColumn.id}>
   <Button
     appearance="plain"
     class="column-name-wrapper {isSelected ? 'selected' : ''}"
@@ -25,8 +25,10 @@
       queryRunner.selectColumn(processedQueryColumn.column.alias);
     }}
   >
-    <!--TODO: Use a separate prop to identify column that isn't fetched yet
-                    instead of type:unknown-->
+    <!--
+      TODO: Use a separate prop to identify column that isn't fetched yet
+      instead of type:unknown
+    -->
     <ColumnName
       isLoading={columnRunState === 'processing' &&
         processedQueryColumn.column.type === 'unknown'}
@@ -39,4 +41,4 @@
     />
   </Button>
   <SheetCellResizer columnIdentifierKey={processedQueryColumn.id} />
-</SheetCell>
+</SheetColumnHeaderCell>

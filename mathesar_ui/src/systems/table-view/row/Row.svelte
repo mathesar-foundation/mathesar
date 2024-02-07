@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ContextMenu } from '@mathesar/component-library';
-  import { SheetCell, SheetRow } from '@mathesar/components/sheet';
+  import { SheetRow, SheetRowHeaderCell } from '@mathesar/components/sheet';
   import { rowHeightPx } from '@mathesar/geometry';
   import {
     ID_ROW_CONTROL_COLUMN,
@@ -70,10 +70,7 @@
     style="--cell-height:{rowHeightPx - 1}px;{styleString}"
     on:mousedown={checkAndCreateEmptyRow}
   >
-    <SheetCell
-      type="row-header-cell"
-      columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-    >
+    <SheetRowHeaderCell rowSelectionId={'TODO_3037'}>
       {#if rowHasRecord(row)}
         <RowControl
           {primaryKeyColumnId}
@@ -87,7 +84,7 @@
           <RowContextOptions recordPk={rowKey} {recordsData} {row} />
         </ContextMenu>
       {/if}
-    </SheetCell>
+    </SheetRowHeaderCell>
 
     {#if isHelpTextRow(row)}
       <NewRecordMessage columnCount={$processedColumns.size} />

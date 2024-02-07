@@ -4,16 +4,14 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import { ContextMenu } from '@mathesar/component-library';
   import {
-    SheetCell,
     SheetCellResizer,
+    SheetColumnHeaderCell,
     SheetHeader,
+    SheetColumnCreationCell,
   } from '@mathesar/components/sheet';
+  import SheetOriginCell from '@mathesar/components/sheet/cells/SheetOriginCell.svelte';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
-  import {
-    getTabularDataStoreFromContext,
-    ID_ADD_NEW_COLUMN,
-    ID_ROW_CONTROL_COLUMN,
-  } from '@mathesar/stores/table-data';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { saveColumnOrder } from '@mathesar/stores/tables';
   import { Draggable, Droppable } from './drag-and-drop';
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
@@ -94,18 +92,18 @@
 </script>
 
 <SheetHeader>
-  <SheetCell type="origin-cell" columnIdentifierKey={ID_ROW_CONTROL_COLUMN}>
+  <SheetOriginCell>
     <Droppable
       on:drop={() => dropColumn()}
       on:dragover={(e) => e.preventDefault()}
       locationOfFirstDraggedColumn={0}
       columnLocation={-1}
     />
-  </SheetCell>
+  </SheetOriginCell>
 
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
     {@const isSelected = $selection.columnIds.has(String(columnId))}
-    <SheetCell type="column-header-cell" columnIdentifierKey={columnId}>
+    <SheetColumnHeaderCell columnIdentifierKey={columnId}>
       <!-- TODO_3037: why is this div here? Can we get rid of it? -->
       <div>
         <Draggable
@@ -128,12 +126,12 @@
           <ColumnHeaderContextMenu {processedColumn} />
         </ContextMenu>
       </div>
-    </SheetCell>
+    </SheetColumnHeaderCell>
   {/each}
 
   {#if hasNewColumnButton}
-    <SheetCell type="new-column-cell" columnIdentifierKey={ID_ADD_NEW_COLUMN}>
+    <SheetColumnCreationCell>
       <NewColumnCell />
-    </SheetCell>
+    </SheetColumnCreationCell>
   {/if}
 </SheetHeader>

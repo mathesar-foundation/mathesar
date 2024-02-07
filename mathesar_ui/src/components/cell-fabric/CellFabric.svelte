@@ -23,6 +23,7 @@
   export let isIndependentOfSheet = false;
   export let showTruncationPopover = false;
   export let canViewLinkedEntities = true;
+  export let lightText = false;
 
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
@@ -34,6 +35,7 @@
   data-column-identifier={columnFabric.id}
   class:show-as-skeleton={showAsSkeleton}
   class:is-independent={isIndependentOfSheet}
+  class:light-text={lightText}
 >
   <svelte:component
     this={component}
@@ -97,5 +99,8 @@
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;
+  }
+  .light-text {
+    color: var(--cell-text-color-processing);
   }
 </style>

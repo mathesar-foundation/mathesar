@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
+  import { get } from 'svelte/store';
+
   import { ImmutableMap, ImmutableSet } from '@mathesar-component-library';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import {
     Sheet,
-    SheetCell,
     SheetHeader,
+    SheetRowHeaderCell,
     SheetRow,
     SheetVirtualRows,
+    SheetOriginCell,
   } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
@@ -85,10 +87,7 @@
       usesVirtualList
     >
       <SheetHeader>
-        <SheetCell
-          type="origin-cell"
-          columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-        />
+        <SheetOriginCell />
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
           <ResultHeaderCell
             {processedQueryColumn}
@@ -111,13 +110,10 @@
                 {...htmlAttributes}
                 style="--cell-height:{rowHeightPx - 1}px;{styleString}"
               >
-                <SheetCell
-                  type="row-header-cell"
-                  columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-                >
+                <SheetRowHeaderCell rowSelectionId={'TODO_3037'}>
                   <CellBackground color="var(--cell-bg-color-header)" />
                   {$pagination.offset + item.index + 1}
-                </SheetCell>
+                </SheetRowHeaderCell>
 
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
                   <ResultRowCell

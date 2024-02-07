@@ -16,7 +16,7 @@
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import { SheetCell } from '@mathesar/components/sheet';
+  import { SheetDataCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
@@ -98,11 +98,10 @@
   }
 </script>
 
-<SheetCell
-  type="data-cell"
+<SheetDataCell
   columnIdentifierKey={column.id}
+  cellSelectionId={cellId}
   {isActive}
-  lightText={hasError || isProcessing}
 >
   <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
   <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
@@ -135,6 +134,7 @@
       handleKeyboardEventOnCell(detail.originalEvent, selection)}
     on:update={valueUpdated}
     horizontalAlignment={column.primary_key ? 'left' : undefined}
+    lightText={hasError || isProcessing}
   />
   <ContextMenu>
     {#if canEditTableRecords || showLinkedRecordHyperLink}
@@ -171,4 +171,4 @@
   {#if errors.length}
     <CellErrors {errors} forceShowErrors={isActive} />
   {/if}
-</SheetCell>
+</SheetDataCell>
