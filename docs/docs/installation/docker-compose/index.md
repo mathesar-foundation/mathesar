@@ -10,7 +10,8 @@
 !!!note
     Depending on your Docker setup, you may need to run `docker` commands with `sudo`.
 
-(A [video walkthrough of these steps](https://www.youtube.com/watch?v=XTO_QWBghR8) is also available on YouTube.)
+???info "Video walkthrough (Click to expand)"
+    <iframe width=100% height=480px src="https://www.youtube.com/embed/0AFfvrUMkas?si=tZkhRHXBqS-sqyto" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 1. Download our [docker-compose.yml](https://github.com/mathesar-foundation/mathesar/raw/{{mathesar_version}}/docker-compose.yml) file.
 
