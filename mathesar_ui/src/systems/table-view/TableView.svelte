@@ -127,16 +127,17 @@
     <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
       {#if $processedColumns.size}
         <Sheet
-          columns={sheetColumns}
-          getColumnIdentifier={(entry) => entry.column.id}
-          {usesVirtualList}
-          {columnWidths}
           {clipboardHandler}
-          hasBorder={sheetHasBorder}
-          restrictWidthToRowWidth={!usesVirtualList}
+          {columnWidths}
+          {selection}
+          {usesVirtualList}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
+          columns={sheetColumns}
+          getColumnIdentifier={(entry) => entry.column.id}
+          hasBorder={sheetHasBorder}
           hasPaddingRight
+          restrictWidthToRowWidth={!usesVirtualList}
         >
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />

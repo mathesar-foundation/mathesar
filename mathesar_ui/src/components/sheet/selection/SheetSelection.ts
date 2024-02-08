@@ -1,10 +1,12 @@
 import { execPipe, filter, first, map } from 'iter-tools';
 
 import { ImmutableSet } from '@mathesar/component-library';
+import { match } from '@mathesar/utils/patternMatching';
 import { assertExhaustive } from '@mathesar/utils/typeUtils';
 import { makeCells, parseCellId } from '../cellIds';
 import { Direction, getColumnOffset } from './Direction';
 import Plane from './Plane';
+import type { SheetCellDetails } from './selectionUtils';
 
 /**
  * - `'dataCells'` means that the selection contains data cells. This is by far
@@ -280,12 +282,52 @@ export default class SheetSelection {
    * selection is made only of data cells, and will never include cells in the
    * placeholder row, even if a user drags to select a cell in it.
    */
-  ofCellRange(cellIdA: string, cellIdB: string): SheetSelection {
+  ofDataCellRange(cellIdA: string, cellIdB: string): SheetSelection {
     return this.withBasis(
       basisFromDataCells(
         this.plane.dataCellsInFlexibleCellRange(cellIdA, cellIdB),
       ),
     );
+  }
+
+  ofSheetCellRange(
+    cellA: SheetCellDetails,
+    cellB: SheetCellDetails,
+  ): SheetSelection {
+    // TODO_3037 finish implementation
+    return match(cellA, 'type', {
+      'data-cell': (a) =>
+        match(cellB, 'type', {
+          'data-cell': (b) => this.ofDataCellRange(a.cellId, b.cellId),
+          'column-header-cell': (b) => {
+            throw new Error('Not implemented');
+          },
+          'row-header-cell': (b) => {
+            throw new Error('Not implemented');
+          },
+        }),
+      'column-header-cell': (a) =>
+        match(cellB, 'type', {
+          'data-cell': (b) => {
+            throw new Error('Not implemented');
+          },
+          'column-header-cell': (b) =>
+            this.ofColumnRange(a.columnId, b.columnId),
+          'row-header-cell': (b) => {
+            throw new Error('Not implemented');
+          },
+        }),
+      'row-header-cell': (a) =>
+        match(cellB, 'type', {
+          'data-cell': (b) => {
+            throw new Error('Not implemented');
+          },
+          'column-header-cell': (b) => {
+            throw new Error('Not implemented');
+          },
+          'row-header-cell': (b) => this.ofRowRange(a.rowId, b.rowId),
+        }),
+    });
   }
 
   /**
@@ -391,8 +433,8 @@ export default class SheetSelection {
    * by the active cell (also the first cell selected when dragging) and the
    * provided cell.
    */
-  drawnToCell(cellId: string): SheetSelection {
-    return this.ofCellRange(this.activeCellId ?? cellId, cellId);
+  drawnToDataCell(cellId: string): SheetSelection {
+    return this.ofDataCellRange(this.activeCellId ?? cellId, cellId);
   }
 
   /**

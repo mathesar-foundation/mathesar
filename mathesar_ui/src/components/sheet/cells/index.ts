@@ -4,3 +4,4 @@ export { default as SheetColumnCreationCell } from './SheetColumnCreationCell.sv
 export { default as SheetOriginCell } from './SheetOriginCell.svelte';
 export { default as SheetPositionableCell } from './SheetPositionableCell.svelte';
 export { default as SheetRowHeaderCell } from './SheetRowHeaderCell.svelte';
+export * from './sheetCellUtils';

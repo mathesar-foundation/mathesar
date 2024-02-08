@@ -1,12 +1,14 @@
 <script lang="ts">
-  import { writable } from 'svelte/store';
+  import { writable, type Writable } from 'svelte/store';
 
   import { ImmutableMap } from '@mathesar-component-library/types';
   import type { ClipboardHandler } from '@mathesar/stores/clipboard';
   import { getClipboardHandlerStoreFromContext } from '@mathesar/stores/clipboard';
+  import { beginSelection, findContainingSheetCell } from './selection';
+  import type SheetSelection from './selection/SheetSelection';
   import {
-    DEFAULT_COLUMN_WIDTH,
     calculateColumnStyleMapAndRowWidth,
+    DEFAULT_COLUMN_WIDTH,
     setSheetContext,
   } from './utils';
 
@@ -21,6 +23,7 @@
   export let hasBorder = false;
   export let hasPaddingRight = false;
   export let clipboardHandler: ClipboardHandler | undefined = undefined;
+  export let selection: Writable<SheetSelection> | undefined = undefined;
 
   export let getColumnIdentifier: (
     c: SheetColumnType,
@@ -33,6 +36,8 @@
 
   export let columnWidths: ImmutableMap<SheetColumnIdentifierKey, number> =
     new ImmutableMap();
+
+  let sheetElement: HTMLElement;
 
   $: ({ columnStyleMap, rowWidth } = calculateColumnStyleMapAndRowWidth(
     columns,
@@ -114,6 +119,17 @@
   function disableClipboard() {
     clipboardHandlerStore?.set(undefined);
   }
+
+  function handleMouseDown(e: MouseEvent) {
+    if (!selection) return;
+    // TODO_3037:
+    // - handle mouse events with other buttons
+    // - handle Shift/Alt/Ctrl key modifiers
+    const target = e.target as HTMLElement;
+    const startingCell = findContainingSheetCell(target);
+    if (!startingCell) return;
+    beginSelection({ selection, sheetElement, startingCell });
+  }
 </script>
 
 <div
@@ -122,9 +138,10 @@
   class:uses-virtual-list={usesVirtualList}
   class:set-to-row-width={restrictWidthToRowWidth}
   {style}
-  on:click
+  on:mousedown={handleMouseDown}
   on:focusin={enableClipboard}
   on:focusout={disableClipboard}
+  bind:this={sheetElement}
 >
   {#if columns.length}
     <slot />
