@@ -3,7 +3,7 @@ import { execPipe, filter, first, map } from 'iter-tools';
 import { ImmutableSet } from '@mathesar/component-library';
 import { match } from '@mathesar/utils/patternMatching';
 import { assertExhaustive } from '@mathesar/utils/typeUtils';
-import { makeCells, parseCellId } from '../cellIds';
+import { makeCellId, makeCells, parseCellId } from '../cellIds';
 import { Direction, getColumnOffset } from './Direction';
 import Plane from './Plane';
 import type { SheetCellDetails } from './selectionUtils';
@@ -291,42 +291,41 @@ export default class SheetSelection {
   }
 
   ofSheetCellRange(
-    cellA: SheetCellDetails,
-    cellB: SheetCellDetails,
+    startingCell: SheetCellDetails,
+    endingCell: SheetCellDetails,
   ): SheetSelection {
-    // TODO_3037 finish implementation
-    return match(cellA, 'type', {
-      'data-cell': (a) =>
-        match(cellB, 'type', {
-          'data-cell': (b) => this.ofDataCellRange(a.cellId, b.cellId),
-          'column-header-cell': (b) => {
-            throw new Error('Not implemented');
-          },
-          'row-header-cell': (b) => {
-            throw new Error('Not implemented');
-          },
-        }),
-      'column-header-cell': (a) =>
-        match(cellB, 'type', {
-          'data-cell': (b) => {
-            throw new Error('Not implemented');
-          },
-          'column-header-cell': (b) =>
-            this.ofColumnRange(a.columnId, b.columnId),
-          'row-header-cell': (b) => {
-            throw new Error('Not implemented');
-          },
-        }),
-      'row-header-cell': (a) =>
-        match(cellB, 'type', {
-          'data-cell': (b) => {
-            throw new Error('Not implemented');
-          },
-          'column-header-cell': (b) => {
-            throw new Error('Not implemented');
-          },
-          'row-header-cell': (b) => this.ofRowRange(a.rowId, b.rowId),
-        }),
+    // Nullish coalescing is safe here since we know we'll have a first row and
+    // first column in the cases where we're selecting things.
+    const firstRow = () => this.plane.rowIds.first ?? '';
+    const firstColumn = () => this.plane.columnIds.first ?? '';
+
+    return match(startingCell, 'type', {
+      'data-cell': ({ cellId: startingCellId }) => {
+        const endingCellId = match(endingCell, 'type', {
+          'data-cell': (b) => b.cellId,
+          'column-header-cell': (b) => makeCellId(firstRow(), b.columnId),
+          'row-header-cell': (b) => makeCellId(b.rowId, firstColumn()),
+        });
+        return this.ofDataCellRange(startingCellId, endingCellId);
+      },
+
+      'column-header-cell': ({ columnId: startingColumnId }) => {
+        const endingColumnId = match(endingCell, 'type', {
+          'data-cell': (b) => parseCellId(b.cellId).columnId,
+          'column-header-cell': (b) => b.columnId,
+          'row-header-cell': () => firstColumn(),
+        });
+        return this.ofColumnRange(startingColumnId, endingColumnId);
+      },
+
+      'row-header-cell': ({ rowId: startingRowId }) => {
+        const endingRowId = match(endingCell, 'type', {
+          'data-cell': (b) => parseCellId(b.cellId).rowId,
+          'column-header-cell': () => firstRow(),
+          'row-header-cell': (b) => b.rowId,
+        });
+        return this.ofRowRange(startingRowId, endingRowId);
+      },
     });
   }
 
