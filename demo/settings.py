@@ -1,5 +1,4 @@
-from config.settings.production import *  # noqa
-from config.settings import *  # noqa
+from config.settings.common_settings import *  # noqa
 from decouple import config as decouple_config
 
 INSTALLED_APPS += [  # noqa
