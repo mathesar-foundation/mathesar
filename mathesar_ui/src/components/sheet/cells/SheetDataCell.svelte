@@ -1,14 +1,30 @@
 <script lang="ts">
+  import type SheetSelection from '../selection/SheetSelection';
+
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { getSheetCellStyle } from './sheetCellUtils';
 
   type SheetColumnIdentifierKey = $$Generic;
 
   export let columnIdentifierKey: SheetColumnIdentifierKey;
   export let cellSelectionId: string | undefined = undefined;
-  export let isActive = false;
-  export let isSelected = false;
+  export let selection: SheetSelection | undefined = undefined;
 
   $: style = getSheetCellStyle(columnIdentifierKey);
+  $: ({ isActive, isSelected, hasSelectionBackground } = (() => {
+    if (!selection || !cellSelectionId)
+      return {
+        isActive: false,
+        isSelected: false,
+        hasSelectionBackground: false,
+      };
+    const isSelected = selection.cellIds.has(cellSelectionId);
+    return {
+      isActive: selection.activeCellId === cellSelectionId,
+      isSelected: selection.cellIds.has(cellSelectionId),
+      hasSelectionBackground: isSelected && selection.cellIds.size > 1,
+    };
+  })());
 </script>
 
 <div
@@ -18,7 +34,10 @@
   data-cell-selected={isSelected ? '' : undefined}
   style={$style}
 >
-  <slot />
+  {#if hasSelectionBackground}
+    <CellBackground color="rgba(14, 101, 235, 0.1)" when={isSelected} />
+  {/if}
+  <slot {isActive} {isSelected} />
 </div>
 
 <style>

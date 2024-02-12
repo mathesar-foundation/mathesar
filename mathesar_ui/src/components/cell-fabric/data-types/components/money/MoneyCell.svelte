@@ -6,7 +6,6 @@
   type $$Props = MoneyCellProps;
 
   export let isActive: $$Props['isActive'];
-  export let isSelected: $$Props['isSelected'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -19,7 +18,6 @@
 <SteppedInputCell
   bind:value
   {isActive}
-  {isSelected}
   {disabled}
   {searchValue}
   {isIndependentOfSheet}

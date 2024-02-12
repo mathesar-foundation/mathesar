@@ -6,7 +6,6 @@
 
   export let element: HTMLElement | undefined = undefined;
   export let isActive = false;
-  export let isSelected = false;
   export let disabled = false;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
@@ -116,7 +115,6 @@
   {...$$restProps}
 >
   {#if mode !== 'edit'}
-    <CellBackground color="rgba(14, 101, 235, 0.1)" when={isSelected} />
     <CellBackground
       color="var(--cell-background-color)"
       when={valueComparisonOutcome !== 'noMatch'}

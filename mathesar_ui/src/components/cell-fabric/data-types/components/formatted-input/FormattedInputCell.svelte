@@ -6,7 +6,6 @@
   type $$Props = FormattedInputCellProps;
 
   export let isActive: $$Props['isActive'];
-  export let isSelected: $$Props['isSelected'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
@@ -23,7 +22,6 @@
 <SteppedInputCell
   bind:value
   {isActive}
-  {isSelected}
   {disabled}
   {isIndependentOfSheet}
   {showTruncationPopover}

@@ -10,7 +10,6 @@
   const dispatch = createEventDispatcher();
 
   export let isActive: $$Props['isActive'];
-  export let isSelected: $$Props['isSelected'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -72,7 +71,6 @@
 <CellWrapper
   bind:element={cellRef}
   {isActive}
-  {isSelected}
   {disabled}
   {isIndependentOfSheet}
   {valueComparisonOutcome}

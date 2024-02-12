@@ -11,7 +11,6 @@
   type $$Props = CellTypeProps<string>;
 
   export let isActive: $$Props['isActive'];
-  export let isSelected: $$Props['isSelected'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -22,7 +21,6 @@
 <SteppedInputCell
   bind:value
   {isActive}
-  {isSelected}
   {disabled}
   {searchValue}
   {isIndependentOfSheet}

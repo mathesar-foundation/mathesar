@@ -16,18 +16,17 @@
   export let selection: Writable<SheetSelection>;
 
   $: cellId = row && makeCellId(getRowSelectionId(row), column.id);
-  $: isActive = cellId === $selection.activeCellId;
 </script>
 
 <SheetDataCell
   columnIdentifierKey={column.id}
   cellSelectionId={cellId}
-  {isActive}
+  selection={$selection}
+  let:isActive
 >
   {#if row || recordRunState === 'processing'}
     <CellFabric
       {isActive}
-      isSelected={$selection.cellIds.has(cellId ?? '')}
       columnFabric={column}
       value={row?.record[column.id]}
       showAsSkeleton={recordRunState === 'processing'}

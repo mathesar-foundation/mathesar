@@ -65,8 +65,6 @@
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
-  $: isActive = $selection.activeCellId === cellId;
-  $: isSelected = $selection.cellIds.has(cellId);
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -101,7 +99,8 @@
 <SheetDataCell
   columnIdentifierKey={column.id}
   cellSelectionId={cellId}
-  {isActive}
+  selection={$selection}
+  let:isActive
 >
   <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
   <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
@@ -117,7 +116,6 @@
   <CellFabric
     columnFabric={processedColumn}
     {isActive}
-    {isSelected}
     {value}
     {isProcessing}
     {canViewLinkedEntities}

@@ -14,7 +14,6 @@
     | ((recordId: string, recordSummary: string) => void)
     | undefined = undefined;
   export let isActive = false;
-  export let isSelected = false;
   export let disabled = false;
   export let showAsSkeleton = false;
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
@@ -42,7 +41,6 @@
     {...props}
     {columnFabric}
     {isActive}
-    {isSelected}
     {disabled}
     {isIndependentOfSheet}
     {horizontalAlignment}
