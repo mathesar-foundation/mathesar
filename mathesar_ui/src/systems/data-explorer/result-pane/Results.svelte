@@ -46,10 +46,8 @@
       rowsMap: get(selectableRowsMap),
       columnsMap: get(processedColumns),
       recordSummaries: new ImmutableMap(),
-      // TODO_3037
-      selectedRowIds: new ImmutableSet(),
-      // TODO_3037
-      selectedColumnIds: new ImmutableSet(),
+      selectedRowIds: get(selection).rowIds,
+      selectedColumnIds: get(selection).columnIds,
     }),
     showToastInfo: toast.info,
   });
