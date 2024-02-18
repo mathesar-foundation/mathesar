@@ -39,6 +39,7 @@
   $: ({ pkColumn } = columnsDataStore);
   $: primaryKeyColumnId = $pkColumn?.id;
   $: rowKey = getRowKey(row, primaryKeyColumnId);
+  $: rowSelectionId = getRowSelectionId(row);
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
@@ -71,7 +72,7 @@
     on:mousedown={checkAndCreateEmptyRow}
   >
     <SheetRowHeaderCell
-      rowSelectionId={'TODO_3037'}
+      {rowSelectionId}
       columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
     >
       {#if rowHasRecord(row)}
