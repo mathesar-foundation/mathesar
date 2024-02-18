@@ -85,6 +85,7 @@
       {columnWidths}
       {clipboardHandler}
       usesVirtualList
+      {selection}
     >
       <SheetHeader>
         <SheetOriginCell columnIdentifierKey={ID_ROW_CONTROL_COLUMN} />
