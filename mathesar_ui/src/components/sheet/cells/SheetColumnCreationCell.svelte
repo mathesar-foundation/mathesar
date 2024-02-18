@@ -1,8 +1,11 @@
 <script lang="ts">
-  import { ID_ADD_NEW_COLUMN } from '@mathesar/stores/table-data';
   import { getSheetCellStyle } from './sheetCellUtils';
 
-  const style = getSheetCellStyle(ID_ADD_NEW_COLUMN);
+  type ColumnIdentifierKey = $$Generic;
+
+  export let columnIdentifierKey: ColumnIdentifierKey;
+
+  $: style = getSheetCellStyle(columnIdentifierKey);
 </script>
 
 <div data-sheet-element="new-column-cell" style={$style}>

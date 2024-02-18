@@ -70,7 +70,10 @@
     style="--cell-height:{rowHeightPx - 1}px;{styleString}"
     on:mousedown={checkAndCreateEmptyRow}
   >
-    <SheetRowHeaderCell rowSelectionId={'TODO_3037'}>
+    <SheetRowHeaderCell
+      rowSelectionId={'TODO_3037'}
+      columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+    >
       {#if rowHasRecord(row)}
         <RowControl
           {primaryKeyColumnId}

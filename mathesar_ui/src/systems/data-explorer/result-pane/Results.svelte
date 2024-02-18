@@ -87,7 +87,7 @@
       usesVirtualList
     >
       <SheetHeader>
-        <SheetOriginCell />
+        <SheetOriginCell columnIdentifierKey={ID_ROW_CONTROL_COLUMN} />
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
           <ResultHeaderCell
             {processedQueryColumn}
@@ -110,7 +110,10 @@
                 {...htmlAttributes}
                 style="--cell-height:{rowHeightPx - 1}px;{styleString}"
               >
-                <SheetRowHeaderCell rowSelectionId={'TODO_3037'}>
+                <SheetRowHeaderCell
+                  rowSelectionId={'TODO_3037'}
+                  columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+                >
                   <CellBackground color="var(--cell-bg-color-header)" />
                   {$pagination.offset + item.index + 1}
                 </SheetRowHeaderCell>

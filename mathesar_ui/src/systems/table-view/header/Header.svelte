@@ -5,13 +5,17 @@
   import { ContextMenu } from '@mathesar/component-library';
   import {
     SheetCellResizer,
+    SheetColumnCreationCell,
     SheetColumnHeaderCell,
     SheetHeader,
-    SheetColumnCreationCell,
   } from '@mathesar/components/sheet';
   import SheetOriginCell from '@mathesar/components/sheet/cells/SheetOriginCell.svelte';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import {
+    ID_ADD_NEW_COLUMN,
+    ID_ROW_CONTROL_COLUMN,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
   import { saveColumnOrder } from '@mathesar/stores/tables';
   import { Draggable, Droppable } from './drag-and-drop';
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
@@ -92,7 +96,7 @@
 </script>
 
 <SheetHeader>
-  <SheetOriginCell>
+  <SheetOriginCell columnIdentifierKey={ID_ROW_CONTROL_COLUMN}>
     <Droppable
       on:drop={() => dropColumn()}
       on:dragover={(e) => e.preventDefault()}
@@ -130,7 +134,7 @@
   {/each}
 
   {#if hasNewColumnButton}
-    <SheetColumnCreationCell>
+    <SheetColumnCreationCell columnIdentifierKey={ID_ADD_NEW_COLUMN}>
       <NewColumnCell />
     </SheetColumnCreationCell>
   {/if}
