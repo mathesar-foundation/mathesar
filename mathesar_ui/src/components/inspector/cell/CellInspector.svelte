@@ -1,12 +1,4 @@
 <script lang="ts">
-  /**
-   * @file
-   *
-   * NOTICE: There is some code duplication between this file and
-   * `CellTab.svelte` used for the data explorer. It might be good to resolve
-   * this duplication at some point. In the meantime, be mindful of propagating
-   * changes to both files as necessary.
-   */
   import { _ } from 'svelte-i18n';
 
   import type { SelectedCellData } from './cellInspectorUtils';
