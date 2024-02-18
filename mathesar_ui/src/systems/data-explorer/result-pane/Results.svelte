@@ -2,22 +2,23 @@
   import { _ } from 'svelte-i18n';
   import { get } from 'svelte/store';
 
-  import { ImmutableMap, ImmutableSet } from '@mathesar-component-library';
+  import { ImmutableMap } from '@mathesar-component-library';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import {
     Sheet,
     SheetHeader,
-    SheetRowHeaderCell,
-    SheetRow,
-    SheetVirtualRows,
     SheetOriginCell,
+    SheetRow,
+    SheetRowHeaderCell,
+    SheetVirtualRows,
   } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
+  import { getRowSelectionId } from '../QueryRunner';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
   import QueryRunErrors from './QueryRunErrors.svelte';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
@@ -65,6 +66,13 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
+
+  function getRow(index: number) {
+    // Type assertion is here to widen type because we don't have
+    // `noUncheckedIndexedAccess` enabled yet. See
+    // https://github.com/mathesar-foundation/mathesar/issues/1966
+    return rows[index] as (typeof rows)[0] | undefined;
+  }
 </script>
 
 <div data-identifier="query-run-result">
@@ -103,14 +111,16 @@
         let:items
       >
         {#each items as item (item.key)}
-          {#if rows[item.index] || showDummyGhostRow}
+          {@const row = getRow(item.index)}
+          {@const rowSelectionId = (row && getRowSelectionId(row)) ?? ''}
+          {#if row || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div
                 {...htmlAttributes}
                 style="--cell-height:{rowHeightPx - 1}px;{styleString}"
               >
                 <SheetRowHeaderCell
-                  rowSelectionId={'TODO_3037'}
+                  {rowSelectionId}
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
                 >
                   <CellBackground color="var(--cell-bg-color-header)" />
@@ -119,7 +129,8 @@
 
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
                   <ResultRowCell
-                    row={rows[item.index]}
+                    {row}
+                    {rowSelectionId}
                     column={processedQueryColumn}
                     {recordRunState}
                     {selection}

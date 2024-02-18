@@ -7,15 +7,16 @@
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
-  import { getRowSelectionId, type QueryRow } from '../QueryRunner';
+  import type { QueryRow } from '../QueryRunner';
   import type { ProcessedQueryOutputColumn } from '../utils';
 
   export let column: ProcessedQueryOutputColumn;
   export let row: QueryRow | undefined;
+  export let rowSelectionId: string;
   export let recordRunState: RequestStatus['state'] | undefined;
   export let selection: Writable<SheetSelection>;
 
-  $: cellId = row && makeCellId(getRowSelectionId(row), column.id);
+  $: cellId = row && makeCellId(rowSelectionId, column.id);
 </script>
 
 <SheetDataCell
