@@ -48,9 +48,10 @@ fi
 PREV_NOTES_FILE=$(ls -1 | sort | grep -B 1 $NOTES_FILE | head -n 1)
 PREV_RELEASE=$(echo $PREV_NOTES_FILE | sed s/.md$//)
 
-COMMITS_FILE=cache/commits.txt
-ALL_PRS_FILE=cache/all_prs.json
-INCLUDED_PRS_FILE=cache/included_prs.txt
+CACHE_DIR=cache
+COMMITS_FILE="$CACHE_DIR/commits.txt"
+ALL_PRS_FILE="$CACHE_DIR/all_prs.json"
+INCLUDED_PRS_FILE="$CACHE_DIR/included_prs.txt"
 MISSING_PRS_FILE=missing_prs.csv
 
 # Use the latest release notes file
@@ -71,6 +72,8 @@ RELEASE_BRANCH=$(
     echo "develop"
   fi
 )
+
+mkdir -p "$CACHE_DIR"
 
 # Find and cache the hashes for all the PR-merge commits included in the release
 # branch but not included in the master branch.
