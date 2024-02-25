@@ -1,11 +1,18 @@
+"""
+Dump data for all the tables of a provided schema to seperate {table_name}.csv files
+with header as column names.
+
+Usage: python dumpcsvs.py
+"""
 import psycopg
 import csv
 
 DB_NAME = "mathesar"
 DB_USER = "mathesar"
 DB_PASSWORD = "mathesar"
-DB_HOST = "mathesar_dev_db"  # If running locally, use "localhost"
+DB_HOST = "mathesar_dev_db"
 SCHEMA_NAME = "Movie Collection"
+
 conn = psycopg.connect(
     dbname=DB_NAME,
     user=DB_USER,
@@ -18,7 +25,6 @@ conn = psycopg.connect(
 tables = conn.execute(
     f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{SCHEMA_NAME}'"
 ).fetchall()
-# tables = tables.fetchall()
 
 for table in tables:
     table_name = table[0]
@@ -27,10 +33,8 @@ for table in tables:
         columns = conn.execute(
             f"""SELECT column_name FROM information_schema.columns WHERE
             table_schema = '{SCHEMA_NAME}' AND table_name = '{table_name}';"""
-            ).fetchall()
+        ).fetchall()
         columns = [column[0] for column in columns]
         csv_writer.writerow(columns)
-        # data = conn.copy()
         with conn.cursor().copy(f"""COPY "{SCHEMA_NAME}"."{table_name}" TO STDOUT""") as copy:
-            #for row in copy.rows():
             csv_writer.writerows(copy.rows())

@@ -23,7 +23,7 @@ def load_movies_dataset(engine, safe_mode=False):
             table_name = file.name.split('.csv')[0]
             with open(file, 'r') as csv_file:
                 conn.connection.cursor().copy_expert(
-                f"""COPY "{MOVIE_COLLECTION}"."{table_name}" FROM STDIN DELIMITER ',' CSV HEADER""",
-                csv_file
+                    f"""COPY "{MOVIE_COLLECTION}"."{table_name}" FROM STDIN DELIMITER ',' CSV HEADER""",
+                    csv_file
                 )
         conn.execute(text(f2.read()))
