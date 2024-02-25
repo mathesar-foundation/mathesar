@@ -1,8 +1,9 @@
-import type { SchemaResponse, AbstractTypeResponse } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { QueryInstance } from '@mathesar/api/types/queries';
+import type { SchemaResponse } from '@mathesar/AppTypes';
 import type { Connection } from '@mathesar/api/connections';
+import type { QueryInstance } from '@mathesar/api/types/queries';
+import type { TableEntry } from '@mathesar/api/types/tables';
 import type { User } from '@mathesar/api/users';
+import type { AbstractTypeResponse } from '@mathesar/stores/abstract-types/types';
 
 export interface CommonData {
   connections: Connection[];

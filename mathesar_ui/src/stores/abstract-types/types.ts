@@ -15,10 +15,21 @@ type AbstractTypeCategoryKeys = keyof typeof abstractTypeCategory;
 export type AbstractTypeCategoryIdentifier =
   (typeof abstractTypeCategory)[AbstractTypeCategoryKeys];
 
+interface FilterConfiguration {
+  db_type: DbType;
+  opitons: {
+    op?: string;
+    value?: {
+      allowed_types: DbType[];
+    };
+  }[];
+}
+
 export interface AbstractTypeResponse {
   name: string;
   identifier: AbstractTypeCategoryIdentifier;
   db_types: DbType[];
+  filters?: FilterConfiguration;
 }
 
 export interface AbstractTypeConfigFormVariable
