@@ -1,7 +1,7 @@
-import type { Readable, Unsubscriber, Writable } from 'svelte/store';
-import { derived, get, writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
+import { derived, get, readable, writable } from 'svelte/store';
 
-import type { CancellablePromise } from '@mathesar-component-library';
+import { collapse, type CancellablePromise } from '@mathesar-component-library';
 import type { Connection } from '@mathesar/api/connections';
 import { States, getAPI } from '@mathesar/api/utils/requestUtils';
 import { currentDatabase } from '@mathesar/stores/databases';
@@ -101,25 +101,12 @@ function getTypesForConnection(
   return store;
 }
 
-export const currentDbAbstractTypes: Readable<AbstractTypesSubstance> = derived(
-  currentDatabase,
-  ($currentDatabase, set) => {
-    let unsubscribe: Unsubscriber;
-
-    if (!$currentDatabase) {
-      set({
-        state: States.Done,
-        data: new Map(),
-      });
-    } else {
-      const store = getTypesForConnection($currentDatabase);
-      unsubscribe = store.subscribe((typesData) => {
-        set(typesData);
-      });
-    }
-
-    return () => {
-      unsubscribe?.();
-    };
-  },
-);
+export const currentDbAbstractTypes: Readable<AbstractTypesSubstance> =
+  collapse(
+    derived(currentDatabase, ($currentDatabase) => {
+      if (!$currentDatabase) {
+        return readable({ state: States.Done, data: new Map() });
+      }
+      return getTypesForConnection($currentDatabase);
+    }),
+  );
