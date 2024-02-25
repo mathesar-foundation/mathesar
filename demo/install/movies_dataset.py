@@ -2,7 +2,7 @@
 import os
 from sqlalchemy import text
 
-from demo.install.base import MOVIE_COLLECTION, MOVIES_SQL, MOVIES_CSV, MOVIES_SQL2
+from demo.install.base import MOVIE_COLLECTION, MOVIES_SQL_TABLES, MOVIES_CSV, MOVIES_SQL_FKS
 
 
 def load_movies_dataset(engine, safe_mode=False):
@@ -15,7 +15,7 @@ def load_movies_dataset(engine, safe_mode=False):
                    schema already exists instead of dropping it.
     """
     drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MOVIE_COLLECTION}" CASCADE;""")
-    with engine.begin() as conn, open(MOVIES_SQL) as f, open(MOVIES_SQL2) as f2:
+    with engine.begin() as conn, open(MOVIES_SQL_TABLES) as f, open(MOVIES_SQL_FKS) as f2:
         if safe_mode is False:
             conn.execute(drop_schema_query)
         conn.execute(text(f.read()))
