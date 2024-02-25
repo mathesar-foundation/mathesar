@@ -1,5 +1,5 @@
 """
-Dump data for all the tables of a provided schema to seperate {table_name}.csv files
+Dump data for all the tables of a provided schema to separate {table_name}.csv files
 with header as column names.
 
 Usage: python dumpcsvs.py
