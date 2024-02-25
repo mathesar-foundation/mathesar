@@ -8,12 +8,15 @@
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import ShareExplorationDropdown from './ShareExplorationDropdown.svelte';
 
-  export let database: Database;
+  export let database: Database | undefined;
   export let schema: SchemaEntry;
   export let query: QueryInstance;
   export let isInspectorOpen = true;
   export let canEditMetadata: boolean;
   export let context: 'page' | 'shared-consumer-page' = 'page';
+
+  $: editorPageUrl =
+    database && getExplorationEditorPageUrl(database.id, schema.id, query.id);
 </script>
 
 <EntityPageHeader
@@ -25,11 +28,8 @@
 >
   <svelte:fragment slot="actions-right">
     {#if context !== 'shared-consumer-page'}
-      {#if canEditMetadata}
-        <a
-          class="btn btn-primary"
-          href={getExplorationEditorPageUrl(database.id, schema.id, query.id)}
-        >
+      {#if canEditMetadata && editorPageUrl}
+        <a class="btn btn-primary" href={editorPageUrl}>
           <span>{$_('edit_in_data_explorer')}</span>
         </a>
       {/if}

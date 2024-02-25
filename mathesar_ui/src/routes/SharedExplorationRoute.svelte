@@ -26,7 +26,7 @@
 </script>
 
 <Route path="/">
-  {#if query && database && schema}
+  {#if query && schema}
     <ExplorationPage {database} {schema} {query} {shareConsumer} />
   {:else}
     <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>

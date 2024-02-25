@@ -19,14 +19,15 @@
 
   const userProfile = getUserProfileStoreFromContext();
 
-  export let database: Database;
+  export let database: Database | undefined;
   export let schema: SchemaEntry;
   export let query: QueryInstance;
   export let shareConsumer: ShareConsumer | undefined = undefined;
 
   $: canEditMetadata =
-    $userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
-    false;
+    !!database &&
+    ($userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
+      false);
 
   let queryRunner: QueryRunner | undefined;
   let isInspectorOpen = true;
@@ -49,7 +50,8 @@
   $: createQueryRunner(query, $currentDbAbstractTypes.data);
 
   function gotoSchemaPage() {
-    router.goto(getSchemaPageUrl(database.id, schema.id));
+    const url = (database && getSchemaPageUrl(database.id, schema.id)) ?? '/';
+    router.goto(url);
   }
 </script>
 
