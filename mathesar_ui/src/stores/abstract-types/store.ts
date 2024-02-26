@@ -105,7 +105,10 @@ export const currentDbAbstractTypes: Readable<AbstractTypesSubstance> =
   collapse(
     derived(currentDatabase, ($currentDatabase) => {
       if (!$currentDatabase) {
-        return readable({ state: States.Done, data: new Map() });
+        return readable({
+          state: States.Done,
+          data: constructAbstractTypeMapFromResponse(commonData.abstract_types),
+        });
       }
       return getTypesForConnection($currentDatabase);
     }),
