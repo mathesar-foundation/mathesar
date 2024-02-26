@@ -80,14 +80,18 @@
       </LabeledInput>
     </p>
 
-    <p>
+    <!--
+      TODO: Uncomment this when we have a docs page to link to.
+      See: https://github.com/mathesar-foundation/mathesar/issues/3450
+     -->
+    <!-- <p>
       <WarningBox>
         {$_('using_custom_types')}
         <DocsLink path="/">
           {$_('learn_implications_deleting_mathesar_schemas')}
         </DocsLink>
       </WarningBox>
-    </p>
+    </p> -->
   {/if}
 
   <CancelOrProceedButtonPair
