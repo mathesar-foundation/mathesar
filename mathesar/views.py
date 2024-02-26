@@ -241,7 +241,7 @@ def get_common_data_for_shared_entity(request, schema=None):
     return {
         **get_base_data_all_routes(request, database, schema),
         'schemas': serialized_schemas,
-        'databases': serialized_databases,
+        'connections': serialized_databases,
         'routing_context': 'anonymous',
     }
 
