@@ -1,11 +1,52 @@
 #!/usr/bin/env bash
 
-## DEPENDENCIES
-##
-## This script requires the following things to be installed:
-##
-## - The GitHub CLI: https://cli.github.com/
-## - DuckDB: https://duckdb.org/
+function print_help {
+    cat << EOF
+Usage: $(basename $0) <VERSION_NUMBER>
+
+Description:
+    This script finds all the PRs that have been merged into the release branch
+    but have not yet been included in the release notes.
+
+Arguments:
+    VERSION_NUMBER: (Required) e.g. "0.1.0"
+
+Options:
+    --help: Print this help message.
+EOF
+}
+
+if [[ $# -eq 0 || "$1" == "--help" ]]; then
+    print_help
+    exit 0
+fi
+
+if ! type duckdb >/dev/null 2>&1; then
+  echo "Error: This script requires DuckDB to be installed." \
+    "The 'duckdb' command must be in your path." \
+    "See installation instructions at:"
+  echo "  https://duckdb.org/"
+  exit 1
+fi
+
+if ! type gh >/dev/null 2>&1; then
+  echo "Error: This script requires the GitHub CLI to be installed." \
+    "The 'gh' command must be in your path." \
+    "See installation instructions at:"
+  echo "  https://cli.github.com/"
+  exit 1
+fi
+
+RELEASE=$1
+NOTES_FILE=$RELEASE.md
+
+# If the notes file doesn't yet exist, create one
+if [ ! -f $NOTES_FILE ]; then
+  echo "# Mathesar $RELEASE" > $NOTES_FILE
+fi
+
+PREV_NOTES_FILE=$(ls -1 | sort | grep -B 1 $NOTES_FILE | head -n 1)
+PREV_RELEASE=$(echo $PREV_NOTES_FILE | sed s/.md$//)
 
 COMMITS_FILE=cache/commits.txt
 ALL_PRS_FILE=cache/all_prs.json
@@ -33,7 +74,7 @@ RELEASE_BRANCH=$(
 
 # Find and cache the hashes for all the PR-merge commits included in the release
 # branch but not included in the master branch.
-git log --format=%H --first-parent master..$RELEASE_BRANCH > $COMMITS_FILE
+git log --format=%H --first-parent $PREV_RELEASE..$RELEASE_BRANCH > $COMMITS_FILE
 
 # Find and cache details about all the PRs merged within the past year. This
 # gets more PRs than we need, but we'll filter it shortly.
@@ -74,4 +115,8 @@ echo "
   WHERE included.url IS NULL
   ORDER BY pr.additions DESC;" | \
   duckdb -csv > $MISSING_PRS_FILE
+
+COUNT=$(tail -n +2 $MISSING_PRS_FILE | wc -l)
+
+echo "$COUNT missing PRs written to $MISSING_PRS_FILE"
 
