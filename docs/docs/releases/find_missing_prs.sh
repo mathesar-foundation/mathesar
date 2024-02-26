@@ -39,10 +39,12 @@ fi
 
 RELEASE=$1
 NOTES_FILE=$RELEASE.md
+TEMPLATE_FILE=TEMPLATE.md
 
 # If the notes file doesn't yet exist, create one
 if [ ! -f $NOTES_FILE ]; then
-  echo "# Mathesar $RELEASE" > $NOTES_FILE
+  cp $TEMPLATE_FILE $NOTES_FILE
+  sed -i "s/__VERSION__/$RELEASE/g" $NOTES_FILE
 fi
 
 PREV_NOTES_FILE=$(ls -1 | sort | grep -B 1 $NOTES_FILE | head -n 1)
@@ -122,4 +124,4 @@ echo $'\n\n## (TO CATEGORIZE)\n' >> $NOTES_FILE
 echo "$PR_LIST" >> $NOTES_FILE
 echo $'\n' >> $NOTES_FILE
 COUNT=$(wc -l <<< "$PR_LIST")
-echo "$COUNT additional PRs written to $NOTES_FILE. Please categorize them."
+echo "$COUNT PRs added to $NOTES_FILE. Please categorize them."
