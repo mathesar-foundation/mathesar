@@ -12,7 +12,7 @@ See our [live demo site](https://demo.mathesar.org/) to try Mathesar without ins
 
 ### Try locally
 
-This is a quick way to play with Mathesar locally before installing, but will not be appropriate for saving data that you care about.
+This is a quick way to play with Mathesar locally, but is not appropriate for saving data that you care about or setting up a long-term installation.
 
 1. With [Docker](https://docs.docker.com/get-docker/) installed, run:
 
@@ -51,8 +51,8 @@ You can self-host Mathesar by following one of the guides below:
 
 Mathesar should be pretty intuitive to use. More documentation is coming soon, but for now, we've written some documentation for some things that could be tricky.
 
-- [Syncing Database Changes](./user-guide/syncing-db.md)
-- [Users & Access Levels](./user-guide/users.md)
+- [Syncing database changes](./user-guide/syncing-db.md) if the database's structure is changed outside of Mathesar.
+- How to set up [users with different access levels](./user-guide/users.md)
 
 ## Contribute to Mathesar
 
