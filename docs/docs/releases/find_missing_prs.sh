@@ -83,7 +83,6 @@ git log --format=%H --first-parent $PREV_RELEASE..$RELEASE_BRANCH > $COMMITS_FIL
 # Find and cache details about all the PRs merged within the past year. This
 # gets more PRs than we need, but we'll filter it shortly.
 gh pr list \
-  --base $RELEASE_BRANCH \
   --limit 1000 \
   --json additions,author,deletions,mergeCommit,title,url \
   --search "is:closed merged:>$(date -d '1 year ago' '+%Y-%m-%d')" \
