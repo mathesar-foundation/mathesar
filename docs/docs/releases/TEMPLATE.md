@@ -17,7 +17,7 @@ TODO
 <!-- (This section lists any breaking changes to publicly exposed and documented machine interfaces to Mathesar such as the API or DB functions) -->
 
 
-<!-- ## New Features -->
+<!-- ## Improvements -->
 <!-- (Each feature within this section should have its own level-three heading) -->
 
 
@@ -25,10 +25,10 @@ TODO
 <!-- (Use this section to list any incremental work done on still-incomplete changes) -->
 
 
-<!-- ## Documentation -->
-
-
 <!-- ## Bug fixes -->
+
+
+<!-- ## Documentation -->
 
 
 <!-- ## Maintenance -->
