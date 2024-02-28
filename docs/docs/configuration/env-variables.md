@@ -50,6 +50,9 @@ This page contains all available environment variables supported by Mathesar. Se
 
 ## Caddy reverse proxy configuration {: #caddy}
 
+!!!note
+    These variables are only needed if you're using the Caddy configuration in our [default Docker Compose](../../installation/docker-compose/#steps) file.
+
 ### `DOMAIN_NAME`
 
 - **Description**: The public URL that will be used to access Mathesar ([see Caddy docs](https://caddyserver.com/docs/caddyfile/concepts#addresses)).

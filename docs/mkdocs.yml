@@ -11,9 +11,9 @@ nav:
       - Install from scratch: installation/build-from-source/index.md
   - Configuration:
       - Environment variables: configuration/env-variables.md
-      - Connect to an existing database server: configuration/connect-to-existing-db.md
   - Administration:
       - Upgrade:
+        - To 0.1.5: administration/upgrade/0.1.5.md
         - To 0.1.4: administration/upgrade/0.1.4.md
         - To older versions: administration/upgrade/older.md
       - Uninstall Mathesar: administration/uninstall.md
@@ -24,6 +24,7 @@ nav:
       - Users & access levels: user-guide/users.md
       - Glossary: user-guide/glossary.md
   - Releases:
+      - '0.1.5': releases/0.1.5.md
       - '0.1.4': releases/0.1.4.md
       - '0.1.3': releases/0.1.3.md
       - '0.1.2': releases/0.1.2.md
