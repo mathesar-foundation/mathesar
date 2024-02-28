@@ -104,3 +104,16 @@ Add your domain(s) or sub-domain(s) to the [`DOMAIN_NAME`](../../configuration/e
     ```
 
 Restart the docker containers for the configuration to take effect.
+
+### Using an external PostgreSQL server for Mathesar's internal database
+
+If you'd like to use an external PostgreSQL server for Mathesar's internal database, you'll need to do the following:
+
+
+1. On the existing database server, [create a new database](https://www.postgresql.org/docs/current/sql-createdatabase.html) for Mathesar to store its metadata.
+
+    ```bash
+    psql -c 'create database mathesar_django;'
+    ```
+
+1. Configure the [internal database environment variables](../../configuration/env-variables.md#db) to point to the database you just created. Ensure that you change the default values for the user, password, and host.
