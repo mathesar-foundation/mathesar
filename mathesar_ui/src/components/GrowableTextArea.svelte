@@ -1,4 +1,4 @@
-<!-- 
+<!--
   @component This is a textarea that grows in height as its text grows
 
   ## Limitations:
@@ -27,18 +27,16 @@
     element.style.height = `calc(${heights.join(' + ')})`;
   }
 
-  function handleMountElement(el: HTMLTextAreaElement) {
-    el.style.height = '1em';
-    const computedStyle = getComputedStyle(el);
+  function handleMountElement() {
+    if (!element) return;
+    element.style.height = '1em';
+    const computedStyle = getComputedStyle(element);
     borderTopWidth = computedStyle.borderTopWidth;
     borderBottomWidth = computedStyle.borderBottomWidth;
     fitHeight();
   }
 
-  $: if (element) {
-    handleMountElement(element);
-  }
-
+  $: element, handleMountElement();
   $: value, fitHeight();
 </script>
 
