@@ -22,7 +22,6 @@
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
-  import { orderProcessedColumns } from '@mathesar/utils/tables';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
@@ -72,13 +71,9 @@
    */
   $: supportsTableInspector = context === 'page';
   $: sheetColumns = (() => {
-    const orderedProcessedColumns = orderProcessedColumns(
-      $processedColumns,
-      table,
-    );
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...orderedProcessedColumns.values(),
+      ...$processedColumns.values(),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });

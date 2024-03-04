@@ -47,10 +47,7 @@ export class TabularData {
 
   columnsDataStore: ColumnsDataStore;
 
-  /** TODO_3037 eliminate `processedColumns` in favor of `orderedProcessedColumns` */
   processedColumns: ProcessedColumnsStore;
-
-  orderedProcessedColumns: ProcessedColumnsStore;
 
   constraintsDataStore: ConstraintsDataStore;
 
@@ -96,35 +93,34 @@ export class TabularData {
       this.recordsData,
     );
 
+    this.table = props.table;
+
     this.processedColumns = derived(
       [this.columnsDataStore.columns, this.constraintsDataStore],
       ([columns, constraintsData]) =>
-        new Map(
-          columns.map((column, columnIndex) => [
-            column.id,
-            processColumn({
-              tableId: this.id,
-              column,
-              columnIndex,
-              constraints: constraintsData.constraints,
-              abstractTypeMap: props.abstractTypesMap,
-              hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
-            }),
-          ]),
+        orderProcessedColumns(
+          new Map(
+            columns.map((column, columnIndex) => [
+              column.id,
+              processColumn({
+                tableId: this.id,
+                column,
+                columnIndex,
+                constraints: constraintsData.constraints,
+                abstractTypeMap: props.abstractTypesMap,
+                hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
+              }),
+            ]),
+          ),
+          this.table,
         ),
     );
 
-    this.table = props.table;
-
-    this.orderedProcessedColumns = derived(this.processedColumns, (p) =>
-      orderProcessedColumns(p, this.table),
-    );
-
     const plane = derived(
-      [this.recordsData.selectableRowsMap, this.orderedProcessedColumns],
-      ([selectableRowsMap, orderedProcessedColumns]) => {
+      [this.recordsData.selectableRowsMap, this.processedColumns],
+      ([selectableRowsMap, processedColumns]) => {
         const rowIds = new Series([...selectableRowsMap.keys()]);
-        const columns = [...orderedProcessedColumns.values()];
+        const columns = [...processedColumns.values()];
         const columnIds = new Series(columns.map((c) => String(c.id)));
         return new Plane(rowIds, columnIds);
       },
