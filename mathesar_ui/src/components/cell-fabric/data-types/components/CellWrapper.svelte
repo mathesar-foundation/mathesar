@@ -106,7 +106,9 @@
   on:click
   on:dblclick
   on:mousedown
+  on:mouseup
   on:mouseenter
+  on:mouseleave
   on:keydown
   on:copy={handleCopy}
   on:focus={handleFocus}

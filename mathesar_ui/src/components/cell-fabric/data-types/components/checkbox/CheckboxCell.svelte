@@ -17,7 +17,7 @@
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
 
   let cellRef: HTMLElement;
-  let isFirstActivated = false;
+  let shouldToggleOnMouseUp = false;
 
   $: valueComparisonOutcome = compareWholeValues(searchValue, value);
 
@@ -48,24 +48,20 @@
     }
   }
 
-  function checkAndToggle(e: Event) {
-    if (!disabled && isActive && e.target === cellRef && !isFirstActivated) {
+  function handleMouseDown() {
+    shouldToggleOnMouseUp = isActive;
+  }
+
+  function handleMouseLeave() {
+    shouldToggleOnMouseUp = false;
+  }
+
+  function handleMouseUp() {
+    if (!disabled && isActive && shouldToggleOnMouseUp) {
       value = !value;
       dispatchUpdate();
     }
-    isFirstActivated = false;
-    cellRef?.focus();
   }
-
-  // // TODO_3037: test checkbox cell thoroughly. The `isFirstActivated`
-  // // variable is no longer getting set. We need to figure out what to do to
-  // // handle this.
-  // function handleMouseDown() {
-  //   if (!isActive) {
-  //     isFirstActivated = true;
-  //     dispatch('activate');
-  //   }
-  // }
 </script>
 
 <CellWrapper
@@ -75,8 +71,10 @@
   {isIndependentOfSheet}
   {valueComparisonOutcome}
   on:mouseenter
+  on:mouseleave={handleMouseLeave}
   on:keydown={handleWrapperKeyDown}
-  on:click={checkAndToggle}
+  on:mousedown={handleMouseDown}
+  on:mouseup={handleMouseUp}
 >
   {#if value === undefined}
     <Default />
