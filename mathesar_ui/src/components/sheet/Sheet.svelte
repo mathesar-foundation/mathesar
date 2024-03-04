@@ -137,12 +137,12 @@
     flex-direction: column;
     isolation: isolate;
     --z-index__sheet__column-resizer: 2;
-    --z-index__sheet__top-left-cell: 3;
-    --z-index__sheet_group-header: 3;
-    --z-index__sheet_new-record-message: 3;
-    --z-index__sheet__active-cell: 4;
-    --z-index__sheet__horizontal-scrollbar: 4;
-    --z-index__sheet__vertical-scrollbar: 5;
+    --z-index__sheet__active-cell: 3;
+    --z-index__sheet__row-header-cell: 4;
+    --z-index__sheet__group-header: 5;
+    --z-index__sheet__new-record-message: 6;
+    --z-index__sheet__horizontal-scrollbar: 7;
+    --z-index__sheet__vertical-scrollbar: 8;
 
     --virtual-list-horizontal-scrollbar-z-index: var(
       --z-index__sheet__horizontal-scrollbar
@@ -181,7 +181,7 @@
 
     :global([data-sheet-element='cell'][data-cell-static='true']) {
       position: sticky;
-      z-index: var(--z-index__sheet__top-left-cell);
+      z-index: var(--z-index__sheet__row-header-cell);
     }
 
     :global([data-sheet-element='cell'][data-cell-control='true']) {

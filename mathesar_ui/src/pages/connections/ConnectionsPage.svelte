@@ -48,7 +48,13 @@
   <title>{makeSimplePageTitle($_('connections'))}</title>
 </svelte:head>
 
-<LayoutWithHeader cssVariables={{ '--page-padding': '0' }}>
+<LayoutWithHeader
+  restrictWidth
+  cssVariables={{
+    '--page-padding': '0',
+    '--max-layout-width': 'var(--max-layout-width-console-pages)',
+  }}
+>
   <div data-identifier="connections-header">
     <span>
       {$_('database_connections')}

@@ -39,19 +39,21 @@ fi
 
 RELEASE=$1
 NOTES_FILE=$RELEASE.md
+TEMPLATE_FILE=TEMPLATE.md
 
 # If the notes file doesn't yet exist, create one
 if [ ! -f $NOTES_FILE ]; then
-  echo "# Mathesar $RELEASE" > $NOTES_FILE
+  cp $TEMPLATE_FILE $NOTES_FILE
+  sed -i "s/__VERSION__/$RELEASE/g" $NOTES_FILE
 fi
 
 PREV_NOTES_FILE=$(ls -1 | sort | grep -B 1 $NOTES_FILE | head -n 1)
 PREV_RELEASE=$(echo $PREV_NOTES_FILE | sed s/.md$//)
 
-COMMITS_FILE=cache/commits.txt
-ALL_PRS_FILE=cache/all_prs.json
-INCLUDED_PRS_FILE=cache/included_prs.txt
-MISSING_PRS_FILE=missing_prs.csv
+CACHE_DIR=cache
+COMMITS_FILE="$CACHE_DIR/commits.txt"
+ALL_PRS_FILE="$CACHE_DIR/all_prs.json"
+INCLUDED_PRS_FILE="$CACHE_DIR/included_prs.txt"
 
 # Use the latest release notes file
 NOTES_FILE=$(ls -1 | grep -e '^[0-9]\.[0-9]\.[0-9]' | sort | tail -n 1)
@@ -72,6 +74,8 @@ RELEASE_BRANCH=$(
   fi
 )
 
+mkdir -p "$CACHE_DIR"
+
 # Find and cache the hashes for all the PR-merge commits included in the release
 # branch but not included in the master branch.
 git log --format=%H --first-parent $PREV_RELEASE..$RELEASE_BRANCH > $COMMITS_FILE
@@ -79,14 +83,11 @@ git log --format=%H --first-parent $PREV_RELEASE..$RELEASE_BRANCH > $COMMITS_FIL
 # Find and cache details about all the PRs merged within the past year. This
 # gets more PRs than we need, but we'll filter it shortly.
 gh pr list \
-  --base $RELEASE_BRANCH \
   --limit 1000 \
   --json additions,author,deletions,mergeCommit,title,url \
   --search "is:closed merged:>$(date -d '1 year ago' '+%Y-%m-%d')" \
   --jq 'map({
       additions: .additions,
-      author: .author.login,
-      deletions: .deletions,
       mergeCommit: .mergeCommit.oid,
       title: .title,
       url: .url
@@ -99,14 +100,11 @@ grep -Po 'https://github\.com/mathesar-foundation/mathesar/pull/\d*' \
 
 # Generate a CSV containing details for PRs that match commits in the release
 # but not in the release notes.
-echo "
+PR_LIST=$(echo "
   SELECT
-    pr.title,
-    pr.url,
-    pr.author,
-    pr.additions,
-    pr.deletions,
-    '[#' || regexp_extract(pr.url, '(\d+)$', 1) || '](' || pr.url || ')' AS link
+    '- ' || pr.title ||
+    ' _[#' || regexp_extract(pr.url, '(\d+)$', 1) || ']' ||
+    '(' || pr.url || ' \"' || replace(pr.title, '\"', '') || '\")_' AS link
   FROM read_json('$ALL_PRS_FILE', auto_detect=true) AS pr
   JOIN read_csv('$COMMITS_FILE', columns={'hash': 'text'}) AS commit
     ON commit.hash = pr.mergeCommit
@@ -114,9 +112,15 @@ echo "
     ON included.url = pr.url
   WHERE included.url IS NULL
   ORDER BY pr.additions DESC;" | \
-  duckdb -csv > $MISSING_PRS_FILE
+  duckdb -ascii -noheader -newline $'\n')
 
-COUNT=$(tail -n +2 $MISSING_PRS_FILE | wc -l)
+if [ -z "$PR_LIST" ]; then
+  echo "No missing PRs"
+  exit 0
+fi
 
-echo "$COUNT missing PRs written to $MISSING_PRS_FILE"
-
+echo $'\n\n## (TO CATEGORIZE)\n' >> $NOTES_FILE
+echo "$PR_LIST" >> $NOTES_FILE
+echo $'\n' >> $NOTES_FILE
+COUNT=$(wc -l <<< "$PR_LIST")
+echo "$COUNT PRs added to $NOTES_FILE. Please categorize them."
