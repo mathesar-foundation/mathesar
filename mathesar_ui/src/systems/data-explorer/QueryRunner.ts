@@ -64,8 +64,8 @@ export default class QueryRunner {
     new ImmutableMap(),
   );
 
-  /** Keys are row ids, values are records */
-  selectableRowsMap: Readable<Map<string, Record<string, unknown>>>;
+  /** Keys are row selection ids */
+  selectableRowsMap: Readable<Map<string, QueryRow>>;
 
   selection: Writable<SheetSelection>;
 
@@ -108,7 +108,7 @@ export default class QueryRunner {
     void this.run();
     this.selectableRowsMap = derived(
       this.rowsData,
-      ({ rows }) => new Map(rows.map((r) => [getRowSelectionId(r), r.record])),
+      ({ rows }) => new Map(rows.map((r) => [getRowSelectionId(r), r])),
     );
 
     const plane = derived(

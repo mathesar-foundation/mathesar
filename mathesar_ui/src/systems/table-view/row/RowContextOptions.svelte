@@ -17,6 +17,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
 
   export let row: RecordRow;
   export let recordPk: string;
@@ -37,14 +38,13 @@
 
   async function handleDeleteRecords() {
     if (rowHasRecord(row)) {
-      const selectedRowIndices = [Number(row.rowIndex)];
       void confirmDelete({
         identifierType: $_('record'),
         body: [
           $_('deleted_records_cannot_be_recovered', { values: { count: 1 } }),
           $_('are_you_sure_to_proceed'),
         ],
-        onProceed: () => recordsData.deleteSelected(selectedRowIndices),
+        onProceed: () => recordsData.deleteSelected(getRowSelectionId(row)),
         onError: (e) => toast.fromError(e),
         onSuccess: () =>
           toast.success({

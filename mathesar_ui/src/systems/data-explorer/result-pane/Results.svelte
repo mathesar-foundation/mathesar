@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { map } from 'iter-tools';
   import { _ } from 'svelte-i18n';
   import { get } from 'svelte/store';
 
@@ -44,7 +45,7 @@
   $: ({ initial_columns } = $query);
   $: clipboardHandler = new SheetClipboardHandler({
     getCopyingContext: () => ({
-      rowsMap: get(selectableRowsMap),
+      rowsMap: new Map(map(([k, r]) => [k, r.record], get(selectableRowsMap))),
       columnsMap: get(processedColumns),
       recordSummaries: new ImmutableMap(),
       selectedRowIds: get(selection).rowIds,

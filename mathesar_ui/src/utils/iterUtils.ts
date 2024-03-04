@@ -32,3 +32,15 @@ export function mapExactlyOne<T, Z, O, M>(
   }
   return p.whenMany;
 }
+
+/**
+ * If the iterable contains exactly one element, returns that element. Otherwise
+ * returns undefined.
+ */
+export function takeFirstAndOnly<T>(iterable: Iterable<T>): T | undefined {
+  return mapExactlyOne(iterable, {
+    whenZero: undefined,
+    whenOne: (v) => v,
+    whenMany: undefined,
+  });
+}

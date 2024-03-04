@@ -18,7 +18,8 @@
     { database, schema },
     'canEditTableRecords',
   );
-  $: selectedRowCount = $selection.rowIds.size;
+  $: selectedRowIds = $selection.rowIds;
+  $: selectedRowCount = selectedRowIds.size;
 
   // TODO_3037 Need to calculate selectedRowIndices. This might be a deeper
   // problem. Seems like we might need access to the row index here instead of
@@ -39,7 +40,7 @@
       <CollapsibleHeader slot="header" title={$_('actions')} />
       <div slot="content" class="content-container">
         <RowActions
-          {selectedRowIndices}
+          {selectedRowIds}
           {recordsData}
           columnsDataStore={$tabularData.columnsDataStore}
           {canEditTableRecords}

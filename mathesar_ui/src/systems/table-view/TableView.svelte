@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { map } from 'iter-tools';
   import { get } from 'svelte/store';
 
   import { ImmutableMap } from '@mathesar-component-library';
@@ -49,7 +50,9 @@
     $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
     getCopyingContext: () => ({
-      rowsMap: get(recordsData.selectableRowsMap),
+      rowsMap: new Map(
+        map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
+      ),
       columnsMap: stringifyMapKeys(get(processedColumns)),
       recordSummaries: get(recordsData.recordSummaries),
       selectedRowIds: get(selection).rowIds,

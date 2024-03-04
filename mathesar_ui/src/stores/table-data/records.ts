@@ -302,8 +302,8 @@ export class RecordsData {
 
   error: Writable<string | undefined>;
 
-  /** Keys are row ids, values are records */
-  selectableRowsMap: Readable<Map<string, Record<string, unknown>>>;
+  /** Keys are row selection ids */
+  selectableRowsMap: Readable<Map<string, RecordRow>>;
 
   private promise: CancellablePromise<ApiRecordsResponse> | undefined;
 
@@ -364,7 +364,7 @@ export class RecordsData {
       [this.savedRecords, this.newRecords],
       ([savedRecords, newRecords]) => {
         const records = [...savedRecords, ...newRecords];
-        return new Map(records.map((r) => [getRowSelectionId(r), r.record]));
+        return new Map(records.map((r) => [getRowSelectionId(r), r]));
       },
     );
 
@@ -457,22 +457,23 @@ export class RecordsData {
     return undefined;
   }
 
-  async deleteSelected(selectedRowIndices: number[]): Promise<void> {
-    const recordRows = this.getRecordRows();
+  async deleteSelected(rowSelectionIds: Iterable<string>): Promise<void> {
+    const ids =
+      typeof rowSelectionIds === 'string' ? [rowSelectionIds] : rowSelectionIds;
     const pkColumn = get(this.columnsDataStore.pkColumn);
     const primaryKeysOfSavedRows: string[] = [];
     const identifiersOfUnsavedRows: string[] = [];
-    selectedRowIndices.forEach((index) => {
-      const row = recordRows[index];
-      if (row) {
-        const rowKey = getRowKey(row, pkColumn?.id);
-        if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
-          primaryKeysOfSavedRows.push(rowKey);
-        } else {
-          identifiersOfUnsavedRows.push(rowKey);
-        }
+    const selectableRows = get(this.selectableRowsMap);
+    for (const rowId of ids) {
+      const row = selectableRows.get(rowId);
+      if (!row) continue;
+      const rowKey = getRowKey(row, pkColumn?.id);
+      if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
+        primaryKeysOfSavedRows.push(rowKey);
+      } else {
+        identifiersOfUnsavedRows.push(rowKey);
       }
-    });
+    }
     const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
     if (rowKeys.length === 0) {
