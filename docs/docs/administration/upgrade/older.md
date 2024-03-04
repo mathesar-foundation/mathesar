@@ -5,8 +5,7 @@
 If you have a Docker compose installation (including one from the guided script), run the command below:
 
 ```
-docker compose -f /etc/mathesar/docker-compose.yml up \
-  --force-recreate --build service
+docker compose -f /etc/mathesar/docker-compose.yml up --pull always -d
 ```
 
 !!! note "Your installation directory may be different"
