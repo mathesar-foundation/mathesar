@@ -20,7 +20,7 @@ def _setup_demo_template_db():
     print("Initializing demo template database...")
 
     template_db_name = settings.MATHESAR_DEMO_TEMPLATE
-    django_model = Database.current_objects.get(name=settings.DATABASES["default"]["NAME"])
+    django_model = Database.create_from_settings_key("default")
     root_engine = create_mathesar_engine(django_model)
     with root_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
