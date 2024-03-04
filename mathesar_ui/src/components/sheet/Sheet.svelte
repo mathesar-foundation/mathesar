@@ -4,7 +4,12 @@
   import { ImmutableMap } from '@mathesar-component-library/types';
   import type { ClipboardHandler } from '@mathesar/stores/clipboard';
   import { getClipboardHandlerStoreFromContext } from '@mathesar/stores/clipboard';
-  import { beginSelection, findContainingSheetCell } from './selection';
+  import { getModifierKeyCombo } from '@mathesar/utils/pointerUtils';
+  import {
+    beginSelection,
+    findContainingSheetCell,
+    type SheetCellDetails,
+  } from './selection';
   import type SheetSelection from './selection/SheetSelection';
   import {
     calculateColumnStyleMapAndRowWidth,
@@ -122,13 +127,25 @@
 
   function handleMouseDown(e: MouseEvent) {
     if (!selection) return;
-    // TODO_3037:
-    // - handle mouse events with other buttons
-    // - handle Shift/Alt/Ctrl key modifiers
+
     const target = e.target as HTMLElement;
-    const startingCell = findContainingSheetCell(target);
+    const targetCell = findContainingSheetCell(target);
+    if (!targetCell) return;
+
+    const startingCell: SheetCellDetails | undefined = (() => {
+      const modifierKeyCombo = getModifierKeyCombo(e);
+      if (modifierKeyCombo === '') return targetCell;
+      if (modifierKeyCombo === 'Shift') {
+        if (!$selection) return undefined;
+        const { activeCellId } = $selection;
+        if (!activeCellId) return undefined;
+        return { type: 'data-cell', cellId: activeCellId };
+      }
+      return undefined;
+    })();
     if (!startingCell) return;
-    beginSelection({ selection, sheetElement, startingCell });
+
+    beginSelection({ selection, sheetElement, startingCell, targetCell });
   }
 </script>
 

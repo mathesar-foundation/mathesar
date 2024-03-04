@@ -41,10 +41,12 @@ export function beginSelection({
   selection,
   sheetElement,
   startingCell,
+  targetCell,
 }: {
-  startingCell: SheetCellDetails;
   selection: Writable<SheetSelection>;
   sheetElement: HTMLElement;
+  startingCell: SheetCellDetails;
+  targetCell: SheetCellDetails;
 }) {
   let previousTarget: HTMLElement | undefined;
 
@@ -65,7 +67,7 @@ export function beginSelection({
     window.removeEventListener('mouseup', finish);
   }
 
-  drawToCell(startingCell);
+  drawToCell(targetCell);
   sheetElement.addEventListener('mousemove', drawToPoint);
   window.addEventListener('mouseup', finish);
 }
