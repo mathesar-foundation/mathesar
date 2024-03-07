@@ -1,20 +1,17 @@
-import type { TextTypeOptions } from '@mathesar/api/types/tables/columns';
+import { TextInput, optionalNonNullable } from '@mathesar-component-library';
 import type {
   ComponentAndProps,
   TextInputProps,
 } from '@mathesar-component-library/types';
-import {
-  TextInput,
-  TextArea,
-  optionalNonNullable,
-} from '@mathesar-component-library';
-import TextBoxCell from './components/textbox/TextBoxCell.svelte';
+import type { TextTypeOptions } from '@mathesar/api/types/tables/columns';
+import GrowableTextArea from '@mathesar/components/GrowableTextArea.svelte';
 import TextAreaCell from './components/textarea/TextAreaCell.svelte';
+import TextBoxCell from './components/textbox/TextBoxCell.svelte';
 import type {
-  TextBoxCellExternalProps,
   TextAreaCellExternalProps,
+  TextBoxCellExternalProps,
 } from './components/typeDefinitions';
-import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
+import type { CellColumnLike, CellComponentFactory } from './typeDefinitions';
 
 export interface StringLikeColumn extends CellColumnLike {
   type_options: Partial<TextTypeOptions> | null;
@@ -36,7 +33,7 @@ const stringType: CellComponentFactory = {
     column: StringLikeColumn,
     config?: { multiLine?: boolean },
   ): ComponentAndProps<TextInputProps> => {
-    const component = config?.multiLine ? TextArea : TextInput;
+    const component = config?.multiLine ? GrowableTextArea : TextInput;
     return {
       component,
       props: {
