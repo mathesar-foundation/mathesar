@@ -9,6 +9,7 @@ from copy import deepcopy
 from django.core.files import File
 from django.core.cache import cache
 from django.conf import settings
+from django.db import connection as dj_connection
 from rest_framework.test import APIClient
 
 from sqlalchemy import Column, MetaData, Integer, Date
@@ -151,15 +152,9 @@ def add_db_to_dj_settings(request):
     added_dbs = set()
 
     def _add(db_name):
-        reference_entry = dj_databases["default"]
-        new_entry = dict(
-            USER=reference_entry['USER'],
-            PASSWORD=reference_entry['PASSWORD'],
-            HOST=reference_entry['HOST'],
-            PORT=reference_entry['PORT'],
-            NAME=db_name,
-        )
-        dj_databases[db_name] = new_entry
+        reference_entry = dj_connection.settings_dict
+        dj_databases[db_name] = reference_entry
+        dj_databases[db_name]['NAME'] = db_name
         cache.clear()
         added_dbs.add(db_name)
         return db_name

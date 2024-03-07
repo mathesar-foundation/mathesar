@@ -77,4 +77,4 @@ class DependentSerializer(serializers.Serializer):
 
 
 class DependentFilterSerializer(serializers.Serializer):
-    exclude = serializers.MultipleChoiceField(DATABASE_OBJECT_TYPES, required=False)
+    exclude = serializers.MultipleChoiceField(choices=DATABASE_OBJECT_TYPES, required=False)

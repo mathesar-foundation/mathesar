@@ -1527,6 +1527,7 @@ def test_record_post_exclusion_violation(reservations_table, engine, client):
         ("room_number" WITH =, TSRANGE("check_in_date", "check_out_date", '[]') WITH &&);"""
     )
     with engine.begin() as conn:
+        conn.execute(text("""SET search_path="Reservations";"""))
         conn.execute(query)
     reset_reflection(db_name=table.schema.database.name)
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data={
@@ -1555,6 +1556,7 @@ def test_record_patch_exclusion_violation(reservations_table, engine, client):
         ("room_number" WITH =, TSRANGE("check_in_date", "check_out_date", '[]') WITH &&);"""
     )
     with engine.begin() as conn:
+        conn.execute(text("""SET search_path="Reservations";"""))
         conn.execute(query)
     reset_reflection(db_name=table.schema.database.name)
     response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}/', data={
