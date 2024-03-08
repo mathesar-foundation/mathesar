@@ -1,7 +1,8 @@
 site_name: Mathesar Documentation
 site_url: https://docs.mathesar.org/
-repo_url: https://github.com/centerofci/mathesar/
-repo_name: centerofci/mathesar
+repo_url: https://github.com/mathesar-foundation/mathesar/
+repo_name: mathesar-foundation/mathesar
+edit_uri: edit/develop/docs/docs/
 
 nav:
   - Introduction:
