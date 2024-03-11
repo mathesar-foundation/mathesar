@@ -1,0 +1,170 @@
+# 
+# Translators:
+# Kriti Godey, 2024
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-22 07:32+0000\n"
+"PO-Revision-Date: 2024-03-04 05:44+0000\n"
+"Last-Translator: Kriti Godey, 2024\n"
+"Language-Team: Japanese (https://app.transifex.com/mathesar/teams/172265/ja/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: config/settings/common_settings.py:264
+msgid "English"
+msgstr "英語"
+
+#: config/settings/common_settings.py:265
+msgid "Japanese"
+msgstr "日本語"
+
+#: mathesar/templates/mathesar/login_base.html:4
+msgid "Login"
+msgstr "ログイン"
+
+#: mathesar/templates/mathesar/login_base.html:118
+msgid "Unsupported Screen Size"
+msgstr "非対応の画面サイズ"
+
+#: mathesar/templates/mathesar/login_base.html:120
+msgid ""
+"Mathesar is a spreadsheet-like application with a rich UI that does not yet "
+"function well on screens this small. Improved support for mobile devices is "
+"on our"
+msgstr ""
+"MathesarはリッチなUIを備えたスプレッドシートのようなアプリケーションですが、このような小さな画面ではまだうまく機能しません。モバイルデバイスのサポートを改善することは私達の"
+
+#: mathesar/templates/mathesar/login_base.html:123
+msgid "roadmap"
+msgstr "ロードマップ"
+
+#: mathesar/templates/mathesar/login_base.html:127
+msgid ""
+"You can still use this demo site, but some features may not work correctly. "
+"We encourage you to try Mathesar on a device with a larger screen."
+msgstr ""
+"このデモサイトは引き続きご利用いただけますが、一部の機能が正しく動作しない場合があります。より大きな画面のデバイスでMathesarをお試しいただくようお勧めします。"
+
+#: mathesar/templates/mathesar/login_base.html:132
+msgid "Live Demo Mode"
+msgstr "ライブデモモード"
+
+#: mathesar/templates/mathesar/login_base.html:135
+msgid "Mathesar's live demo is available to anyone to try out."
+msgstr "Mathesarのライブデモは、どなたでもお試しいただけます。"
+
+#: mathesar/templates/mathesar/login_base.html:138
+msgid "Use the following credentials to login"
+msgstr "次の認証情報を使用してログインする"
+
+#: mathesar/templates/mathesar/login_base.html:140
+#: mathesar/templates/registration/login.html:16
+#: mathesar/templates/registration/superuser_create.html:119
+msgid "Username"
+msgstr "ユーザー名"
+
+#: mathesar/templates/mathesar/login_base.html:141
+#: mathesar/templates/registration/login.html:37
+#: mathesar/templates/registration/superuser_create.html:144
+msgid "Password"
+msgstr "パスワード"
+
+#: mathesar/templates/mathesar/login_base.html:145
+msgid "Keep in mind that the data in the live demo is reset regularly."
+msgstr "ライブデモのデータは定期的にリセットされることに注意してください。"
+
+#: mathesar/templates/registration/login.html:3
+msgid "Logging In..."
+msgstr "ログイン中..."
+
+#: mathesar/templates/registration/login.html:5
+msgid "Log in to Mathesar"
+msgstr "Mathesarにログインする"
+
+#: mathesar/templates/registration/login.html:65
+msgid "Log In"
+msgstr "ログイン"
+
+#: mathesar/templates/registration/superuser_create.html:3
+msgid "Creating Admin User..."
+msgstr "管理者ユーザーを作成中..."
+
+#: mathesar/templates/registration/superuser_create.html:5
+#: mathesar/templates/registration/superuser_create.html:111
+#: mathesar/templates/registration/superuser_create.html:215
+msgid "Create Admin User"
+msgstr "管理者ユーザーを作成する"
+
+#: mathesar/templates/registration/superuser_create.html:105
+msgid "Welcome"
+msgstr "ようこそ"
+
+#: mathesar/templates/registration/superuser_create.html:107
+msgid ""
+"To get started with Mathesar, you need to create an Admin user. This user "
+"will have full control over your Mathesar installation."
+msgstr ""
+"Mathesarを使い始めるには、管理者ユーザーを作成する必要があります。このユーザーは、Mathesarのインストールを完全に制御できます。"
+
+#: mathesar/templates/registration/superuser_create.html:167
+#, python-format
+msgid ""
+"Your password must be at least 8 characters long and include at least one "
+"number and one special character (e.g., !, @, #, $, %%).Please avoid using "
+"spaces or unicode characters."
+msgstr ""
+"パスワードは8文字以上で、少なくとも1つの数字と１つの特殊文字（例：!, @, #, $, "
+"%%）を含む必要があります。スペースやユニコード文字の使用は避けてください。"
+
+#: mathesar/templates/registration/superuser_create.html:173
+msgid "Confirm Password"
+msgstr "パスワードを確認する"
+
+#: mathesar/templates/registration/superuser_create.html:210
+msgid ""
+"Important: You will need this password to log in. Please store it in a "
+"secure location."
+msgstr "重要： ログインするにはこのパスワードが必要です。安全な場所に保管してください。"
+
+#: mathesar/templates/users/password_reset_confirmation.html:4
+msgid "Update Your Password"
+msgstr "パスワードを更新する"
+
+#: mathesar/templates/users/password_reset_confirmation.html:8
+msgid ""
+"Since your password was set by an administrator, you need to update your "
+"password to continue."
+msgstr "パスワードは管理者が設定したものなので、続行するにはパスワードを更新する必要があります。"
+
+#: mathesar/templates/users/password_reset_confirmation.html:14
+msgid "New Password"
+msgstr "新しいパスワード"
+
+#: mathesar/templates/users/password_reset_confirmation.html:41
+msgid "Confirm"
+msgstr "確認する"
+
+#: mathesar/templates/users/password_reset_confirmation.html:67
+msgid "Update Password"
+msgstr "パスワードを更新する"
+
+#: mathesar/templates/users/password_reset_confirmation.html:71
+msgid "After updating your password, you'll need to log in again."
+msgstr "パスワードを更新したら、再度ログインする必要があります。"
+
+#: mathesar/templates/users/password_reset_confirmation.html:76
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr "パスワードリセットリンクは、おそらくすでに使用されているため、無効でした。新しいパスワードのリセットをリクエストしてください。"
+
+#: mathesar/users/password_reset.py:24
+msgid "Change Default Password"
+msgstr "デフォルトのパスワードを変更する"
