@@ -160,7 +160,6 @@ services:
 
       # WARNING: MATHESAR_DATABASES is deprecated, and will be removed in a future release.
       MATHESAR_DATABASES: ${MATHESAR_DATABASES:-}
-    entrypoint: ./run.sh
     volumes:
       - ./msar/static:/code/static
       - ./msar/media:/code/media
