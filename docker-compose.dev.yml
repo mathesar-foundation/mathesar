@@ -36,9 +36,8 @@ services:
     image: mathesar/mathesar-dev:latest
     build:
       context: .
+      target: development
       dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-dev.txt
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
@@ -52,7 +51,6 @@ services:
       - POSTGRES_PASSWORD=mathesar
       - POSTGRES_HOST=mathesar_dev_db
       - POSTGRES_PORT=5432
-    entrypoint: ./dev-run.sh
     volumes:
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/
@@ -76,10 +74,10 @@ services:
       - POSTGRES_PORT=5432
     build:
       context: .
+      target: development
       dockerfile: Dockerfile
       args:
         PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
-        PYTHON_REQUIREMENTS: requirements-dev.txt
     depends_on:
       - dev-db
     ports:
