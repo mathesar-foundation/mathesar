@@ -9,7 +9,7 @@ def frontend_settings(request):
     manifest_data = get_manifest_data()
     development_mode = settings.MATHESAR_MODE == 'DEVELOPMENT'
 
-    i18n_settings = get_i18n_settings(manifest_data, development_mode)
+    i18n_settings = get_i18n_settings(request, manifest_data, development_mode)
     frontend_settings = {
         'development_mode': development_mode,
         'manifest_data': manifest_data,
@@ -36,13 +36,13 @@ def get_display_language_from_request(request):
         return lang_from_locale_middleware
 
 
-def get_i18n_settings(manifest_data, development_mode):
+def get_i18n_settings(request, manifest_data, development_mode):
     """
     Hard coding this for now
     but will be taken from users model
     and cookies later on
     """
-    display_language = 'en'
+    display_language = get_display_language_from_request(request)
     fallback_language = 'en'
 
     client_dev_url = settings.MATHESAR_CLIENT_DEV_URL

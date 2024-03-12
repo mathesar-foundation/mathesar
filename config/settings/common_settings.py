@@ -272,8 +272,8 @@ BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
 
 # i18n
 LANGUAGES = [
-    ('en', gettext_lazy('English')),
-    ('ja', gettext_lazy('Japanese')),
+    ('en', 'English'),
+    ('ja', 'Japanese'),
 ]
 LOCALE_PATHS = [
     'translations'
