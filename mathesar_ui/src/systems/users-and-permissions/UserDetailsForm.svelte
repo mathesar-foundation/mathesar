@@ -24,7 +24,7 @@
   import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
   import { setLanguage } from '@mathesar/i18n';
   import SelectUserType from './SelectUserType.svelte';
-  // import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
+  import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -84,10 +84,10 @@
       await userApi.update(user.id, request);
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
+        const updatedLocale = request.display_language;
+        await setLanguage(updatedLocale);
       }
 
-      const updatedLocale = request.display_language;
-      await setLanguage(updatedLocale);
       dispatch('update');
       return;
     }
@@ -155,14 +155,13 @@
     />
   {/if}
 
-  <!-- Commenting this for now to avoid releasing any half baked changes to develop branch -->
-  <!-- <GridFormInput
+  <GridFormInput
     label={`${$_('display_language')} *`}
     field={displayLanguage}
     input={{
       component: SelectDisplayLanguage,
     }}
-  /> -->
+  />
 
   <GridFormInput
     label={`${$_('role')} *`}
