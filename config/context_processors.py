@@ -54,8 +54,8 @@ def get_i18n_settings_dev(display_language):
 
 
 def get_prod_translation_file_urls(language, manifest_data):
-    prod_module_url = static(manifest_data[language]["file"])
-    prod_legacy_url = static(manifest_data[f"{language}-legacy"]["file"])
+    prod_module_url = static(manifest_data[f"language_{language}"]["file"])
+    prod_legacy_url = static(manifest_data[f"language_{language}_legacy"]["file"])
 
     return {
         'module': prod_module_url,
