@@ -40,4 +40,14 @@
   $: value, fitHeight();
 </script>
 
-<TextArea bind:value bind:element {...$$restProps} />
+<TextArea
+  bind:value
+  bind:element
+  {...$$restProps}
+  on:input
+  on:change
+  on:focus
+  on:blur
+  on:keydown
+  on:processedKeyDown
+/>
