@@ -279,4 +279,6 @@ LOCALE_PATHS = [
     'translations'
 ]
 LANGUAGE_COOKIE_NAME = 'display_language'
+FALLBACK_LANGUAGE = 'en'
+
 SALT_KEY = SECRET_KEY
