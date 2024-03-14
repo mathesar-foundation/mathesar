@@ -27,7 +27,7 @@ def frontend_settings(request):
     else:
         i18n_settings = get_i18n_settings_prod(display_language, manifest_data)
 
-    frontend_settings = { **frontend_settings, **i18n_settings }
+    frontend_settings = {**frontend_settings, **i18n_settings}
 
     return frontend_settings
 
