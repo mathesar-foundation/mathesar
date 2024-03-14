@@ -1,0 +1,34 @@
+name: Build static files and create draft release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+        run: cd mathesar_ui && npm ci && npm run build
+        run: cd ..
+
+      - uses: montudor/action-zip@v1
+        with:
+          args: zip -r static_files.zip ./mathesar/static/mathesar/
+
+      - name: Create a Release
+        id: create_release
+        uses: shogo82148/actions-create-release@v1
+
+      # A release created by shogo82148/actions-create-release is always a draft release.
+
+      - name: Upload Assets
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: static_files.zip
