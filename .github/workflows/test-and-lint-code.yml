@@ -114,7 +114,7 @@ jobs:
     strategy:
       matrix:
         py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm]
-        pg-version: [13, 14, 15]
+        pg-version: [13, 14, 15, 16]
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
@@ -139,7 +139,7 @@ jobs:
         needs.all_be_tests_required.outputs.tests_should_run
     strategy:
       matrix:
-        pg-version: [13, 14, 15]
+        pg-version: [13, 14, 15, 16]
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
