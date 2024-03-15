@@ -22,12 +22,12 @@ jobs:
         run: npm ci && npm run build
 
       - name: Move static files
-        run: mv ./mathesar/static/mathesar ./static-files
+        run: mv ./mathesar/static/mathesar ./static_files
 
       - name: Zip static files
         uses: montudor/action-zip@v1
         with:
-          args: zip -qq -r static_files.zip static-files
+          args: zip -qq -r static_files.zip static_files
 
       - name: Create a draft release
         id: create_release
