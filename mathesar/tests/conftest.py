@@ -365,27 +365,26 @@ def create_mathesar_table(create_db_schema):
 
 
 @pytest.fixture
-def reservations_table(engine, reservations_schema):
+def create_reservations_table(engine_with_schema, reservations_schema):
+    engine, _ = engine_with_schema
+    table_name = 'Exclusion Check'
     schema_name = reservations_schema.name
-
-    def _create_test_table(table_name, schema_name=schema_name):
-        table_name = table_name or 'Exclusion Check'
-        schema_name = reservations_schema.name
-        cols = [
-            Column('id', Integer, primary_key=True),
-            Column('room_number', Integer),
-            Column('check_in_date', Date),
-            Column('check_out_date', Date)
-        ]
-        insert_data = [
-            (1, 1, '11/10/2023', '11/15/2023'),
-            (2, 1, '11/16/2023', '11/20/2023')
-        ]
-        sa_table = create_test_table(table_name, cols, insert_data, schema_name, engine)
-        table_oid = get_oid_from_table(sa_table.name, schema_name, engine)
-        table = Table.current_objects.create(oid=table_oid, schema=reservations_schema)
-        return table
-    return _create_test_table
+    cols = [
+        Column('id', Integer, primary_key=True),
+        Column('room_number', Integer),
+        Column('check_in_date', Date),
+        Column('check_out_date', Date)
+    ]
+    insert_data = [
+        (1, 1, '11/10/2023', '11/15/2023'),
+        (2, 1, '11/16/2023', '11/20/2023')
+    ]
+    sa_table = create_test_table(table_name, cols, insert_data, schema_name, engine)
+    table_oid = get_oid_from_table(sa_table.name, schema_name, engine)
+    table = Table.current_objects.create(oid=table_oid, schema=reservations_schema)
+    yield table
+    table.delete_sa_table()
+    table.delete()
 
 
 @pytest.fixture

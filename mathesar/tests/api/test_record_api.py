@@ -1513,21 +1513,19 @@ def test_record_patch_unique_violation(create_patents_table, client):
     assert actual_constraint_details['name'] == 'NASA unique record PATCH_pkey'
 
 
-def test_record_post_exclusion_violation(reservations_table, engine, client):
-    table_name = 'Exclusion test post'
-    table = reservations_table(table_name)
+def test_record_post_exclusion_violation(create_reservations_table, engine, client):
+    table = create_reservations_table
     room_number_column_id = table.get_column_name_id_bidirectional_map()['room_number']
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     query = text(
         f"""CREATE EXTENSION IF NOT EXISTS btree_gist;
-        ALTER TABLE "Reservations"."{table_name}" DROP CONSTRAINT IF EXISTS room_overlap;
-        ALTER TABLE "Reservations"."{table_name}"
+        ALTER TABLE "Reservations"."{table.name}" DROP CONSTRAINT IF EXISTS room_overlap;
+        ALTER TABLE "Reservations"."{table.name}"
         ADD CONSTRAINT room_overlap
         EXCLUDE USING gist
         ("room_number" WITH =, TSRANGE("check_in_date", "check_out_date", '[]') WITH &&);"""
     )
     with engine.begin() as conn:
-        conn.execute(text("""SET search_path="Reservations";"""))
         conn.execute(query)
     reset_reflection(db_name=table.schema.database.name)
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data={
@@ -1542,21 +1540,19 @@ def test_record_post_exclusion_violation(reservations_table, engine, client):
     assert actual_exception['detail']['constraint_columns'] == [room_number_column_id]
 
 
-def test_record_patch_exclusion_violation(reservations_table, engine, client):
-    table_name = 'Exclusion test patch'
-    table = reservations_table(table_name)
+def test_record_patch_exclusion_violation(create_reservations_table, engine, client):
+    table = create_reservations_table
     room_number_column_id = table.get_column_name_id_bidirectional_map()['room_number']
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     query = text(
         f"""CREATE EXTENSION IF NOT EXISTS btree_gist;
-        ALTER TABLE "Reservations"."{table_name}" DROP CONSTRAINT IF EXISTS room_overlap;
-        ALTER TABLE "Reservations"."{table_name}"
+        ALTER TABLE "Reservations"."{table.name}" DROP CONSTRAINT IF EXISTS room_overlap;
+        ALTER TABLE "Reservations"."{table.name}"
         ADD CONSTRAINT room_overlap
         EXCLUDE USING gist
         ("room_number" WITH =, TSRANGE("check_in_date", "check_out_date", '[]') WITH &&);"""
     )
     with engine.begin() as conn:
-        conn.execute(text("""SET search_path="Reservations";"""))
         conn.execute(query)
     reset_reflection(db_name=table.schema.database.name)
     response = client.patch(f'/api/db/v0/tables/{table.id}/records/{2}/', data={
