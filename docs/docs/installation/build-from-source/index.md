@@ -32,14 +32,6 @@ You'll need to install the following system packages before you install Mathesar
 
 - [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`)
 
-- [NodeJS](https://nodejs.org/en/download) 18 or newer (Verify with `node --version`)
-
-    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
-
-- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 9 or newer (Verify with `npm --version`)
-
-    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
-
 - [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
 
 - [git](https://git-scm.com/downloads) (Verify with `git --version`)
@@ -220,16 +212,20 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             You need to export the environment variables each time you restart the shell as they don't persist across sessions.
 
 
-1. Install the frontend dependencies
+1. Download release static files and extract into the correct directory
 
     ```
-    npm ci --prefix mathesar_ui
+    wget https://github.com/mathesar-foundation/mathesar/releases/download/{{mathesar_version}}/static_files.zip
+    unzip static_files.zip && mv static_files /mathesar/static/mathesar
     ```
-      
-1. Compile the Mathesar Frontend App
-   ```
-   npm run --prefix mathesar_ui build --max_old_space_size=4096
-   ```
+
+
+1. Compile Mathesar translation files
+
+    ```
+    python manage.py compilemessages
+    ```
+
 
 1. Install Mathesar functions on the database:
 
