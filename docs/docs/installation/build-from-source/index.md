@@ -23,7 +23,7 @@ You should have **root access** to the machine you're installing Mathesar on.
 
 You'll need to install the following system packages before you install Mathesar:
 
-- [Python](https://www.python.org/downloads/) 3.9 or 3.10
+- [Python](https://www.python.org/downloads/) 3.9, 3.10, 3.11 or 3.12
 
     !!! note "Python version"
         Python _older_ than 3.9 will not run Mathesar.
