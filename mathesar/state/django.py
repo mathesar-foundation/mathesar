@@ -145,7 +145,7 @@ def _invalidate_columns_with_incorrect_display_options(tables):
                 data=column.display_options,
                 context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: column.db_type}
             )
-            if not serializer.is_valid(False):
+            if not serializer.is_valid(raise_exception=False):
                 columns_with_invalid_display_option.append(column.id)
     if len(columns_with_invalid_display_option) > 0:
         models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)

@@ -110,7 +110,7 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
         table = self.get_object()
         column_names_id_map = table.get_column_name_id_bidirectional_map()
         serializer = SplitTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
-        if serializer.is_valid(True):
+        if serializer.is_valid(raise_exception=True):
             # We need to get the column names before splitting the table,
             # as they are the only reference to the new column after it is moved to a new table
             columns_to_extract = serializer.validated_data['extract_columns']
@@ -128,14 +128,14 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
                 'fk_column': remainder_fk_column.id
             }
             response_serializer = SplitTableResponseSerializer(data=split_table_response)
-            response_serializer.is_valid(True)
+            response_serializer.is_valid(raise_exception=True)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
     def move_columns(self, request, pk=None):
         table = self.get_object()
         serializer = MoveTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
-        if serializer.is_valid(True):
+        if serializer.is_valid(raise_exception=True):
             target_table = serializer.validated_data['target_table']
             move_columns = serializer.validated_data['move_columns']
             table.move_columns(
