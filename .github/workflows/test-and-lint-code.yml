@@ -113,6 +113,7 @@ jobs:
         needs.all_be_tests_required.outputs.tests_should_run
     strategy:
       matrix:
+        py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm]
         pg-version: [13, 14, 15, 16]
     steps:
       - uses: actions/checkout@v4
@@ -125,6 +126,7 @@ jobs:
       - name: Build the stack
         run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
+          PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
