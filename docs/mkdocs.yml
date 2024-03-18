@@ -97,4 +97,4 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.1.5
+  mathesar_version: 0.1.6
