@@ -209,6 +209,17 @@ export default class DateTimeSpecification {
     return dateObject.toISOString();
   }
 
+  getAdditionalFormattingStrings(): string[] {
+    return [
+      'MM/DD/YYYY',
+      'DD-MM-YYYY',
+      'YYYY/MM/DD',
+      'YYYY.MM.DD',
+      'DD.MM.YYYY',
+      'D/M/YYYY',
+    ];
+  }
+
   hasSecondsInTime(): boolean {
     if (this.type === 'date') {
       return false;
