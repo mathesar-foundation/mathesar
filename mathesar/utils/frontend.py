@@ -26,8 +26,8 @@ def get_manifest_data():
     manifest_data['legacy_js'] = legacy_data['file']
 
     for locale, _ in settings.LANGUAGES or []:
-        manifest_data[locale] = raw_data[f'src/i18n/languages/{locale}/index.ts']
-        manifest_data[f"{locale}-legacy"] = raw_data[f'src/i18n/languages/{locale}/index-legacy.ts']
+        manifest_data[f"language_{locale}"] = raw_data[f'src/i18n/languages/{locale}/index.ts']
+        manifest_data[f"language_{locale}_legacy"] = raw_data[f'src/i18n/languages/{locale}/index-legacy.ts']
 
     # Cache data for 1 hour
     cache.set('manifest_data', manifest_data, 60 * 60)

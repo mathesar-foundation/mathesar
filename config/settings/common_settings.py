@@ -15,7 +15,6 @@ from pathlib import Path
 
 from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
-from django.utils.translation import gettext_lazy
 
 
 # We use a 'tuple' with pipes as delimiters as decople naively splits the global
@@ -272,11 +271,13 @@ BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
 
 # i18n
 LANGUAGES = [
-    ('en', gettext_lazy('English')),
-    ('ja', gettext_lazy('Japanese')),
+    ('en', 'English'),
+    ('ja', 'Japanese'),
 ]
 LOCALE_PATHS = [
     'translations'
 ]
 LANGUAGE_COOKIE_NAME = 'display_language'
+FALLBACK_LANGUAGE = 'en'
+
 SALT_KEY = SECRET_KEY

@@ -150,7 +150,6 @@
   <div class="login-card align-center">
     <h1>{% block h1 %} {% endblock %}</h1>
     {% block box_content %} {% endblock %}
-    <!-- Commenting it out to avoid releasing any half baked changes
     {% comment %} set_language https://docs.djangoproject.com/en/4.2/topics/i18n/translation/#the-set-language-redirect-view  {% endcomment %}
     <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
       <input name="next" type="hidden" value="{{ redirect_to }}">
@@ -165,6 +164,6 @@
           {% endfor %}
       </select>
     </form>
-    -->
+   
   </div>
 {% endblock %}
