@@ -1,6 +1,6 @@
 #=========== STAGE: BASE =====================================================#
-
-FROM python:3.9-buster AS base
+ARG PYTHON_VERSION=3.9-bookworm
+FROM python:$PYTHON_VERSION AS base
 
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
@@ -13,7 +13,7 @@ RUN mkdir -p /etc/apt/keyrings;
 
 # Add Postgres source
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - ; \
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/pgdg.list;
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list;
 
 # Install common dependencies
 RUN apt-get update && \

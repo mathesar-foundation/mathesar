@@ -6,7 +6,6 @@
     <img alt="License" src="https://img.shields.io/github/license/mathesar-foundation/mathesar">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/mathesar-foundation/mathesar">
     <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/mathesar-foundation/mathesar">
-    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/mathesar-foundation/mathesar">
 </p>
 
 <p align="center">
