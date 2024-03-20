@@ -446,5 +446,4 @@ def _get_default_display_name_for_group_output_alias(
         .map_of_output_alias_to_input_alias[output_alias]
     input_alias_display_name = current_display_names.get(input_alias)
     if input_alias_display_name:
-        suffix_to_add = " group"
-        return input_alias_display_name + suffix_to_add
+        return input_alias_display_name
