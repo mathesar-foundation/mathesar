@@ -6,7 +6,6 @@
 
   export let element: HTMLElement | undefined = undefined;
   export let isActive = false;
-  export let isSelectedInRange = false;
   export let disabled = false;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
@@ -107,7 +106,9 @@
   on:click
   on:dblclick
   on:mousedown
+  on:mouseup
   on:mouseenter
+  on:mouseleave
   on:keydown
   on:copy={handleCopy}
   on:focus={handleFocus}
@@ -116,7 +117,6 @@
   {...$$restProps}
 >
   {#if mode !== 'edit'}
-    <CellBackground color="rgba(14, 101, 235, 0.1)" when={isSelectedInRange} />
     <CellBackground
       color="var(--cell-background-color)"
       when={valueComparisonOutcome !== 'noMatch'}

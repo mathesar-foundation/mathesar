@@ -20,8 +20,7 @@
   $: styleString = calculateStyle(style, $rowWidth);
 
   const htmlAttributes = {
-    'data-sheet-element': 'row',
-    'data-sheet-section': 'body',
+    'data-sheet-element': 'data-row',
   };
 </script>
 

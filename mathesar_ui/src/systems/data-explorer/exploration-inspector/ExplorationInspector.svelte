@@ -4,7 +4,7 @@
   import type QueryManager from '../QueryManager';
   import ExplorationTab from './ExplorationTab.svelte';
   import ColumnTab from './column-tab/ColumnTab.svelte';
-  import CellTab from './CellTab.svelte';
+  import CellTab from './cell/CellTab.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
   export let canEditMetadata: boolean;

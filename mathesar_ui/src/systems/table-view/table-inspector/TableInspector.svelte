@@ -35,22 +35,20 @@
 
   let activeTab: TabItem;
 
-  const tabularData = getTabularDataStoreFromContext();
-  $: ({ selection } = $tabularData);
-  $: ({ selectedCells } = selection);
-
-  $: {
-    // Explicit dependency
-    $selectedCells;
-
-    if (selection.isAnyColumnCompletelySelected()) {
-      [, activeTab] = tabs;
-    }
-
-    if (selection.isAnyRowCompletelySelected()) {
-      [, , activeTab] = tabs;
-    }
-  }
+  // // TODO_3037 restore logic to select tab based on cell selection
+  // const tabularData = getTabularDataStoreFromContext();
+  // $: ({ selection } = $tabularData);
+  // $: ({ selectedCells } = selection);
+  // $: {
+  //   // Explicit dependency
+  //   $selectedCells;
+  //   if (selection.isAnyColumnCompletelySelected()) {
+  //     [, activeTab] = tabs;
+  //   }
+  //   if (selection.isAnyRowCompletelySelected()) {
+  //     [, , activeTab] = tabs;
+  //   }
+  // }
 </script>
 
 <div class="table-inspector">

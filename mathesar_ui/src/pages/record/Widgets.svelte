@@ -84,10 +84,6 @@
     :global(.sheet) {
       background: var(--white);
     }
-
-    :global(.sheet [data-sheet-element='header']) {
-      background: var(--slate-100);
-    }
   }
 
   .table-widget-positioner {

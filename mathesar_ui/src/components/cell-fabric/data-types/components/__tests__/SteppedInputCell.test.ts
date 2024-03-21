@@ -4,7 +4,7 @@ import SteppedInputCell from '../SteppedInputCell.svelte';
 
 const requiredProps = {
   isActive: false,
-  isSelectedInRange: false,
+  isSelected: false,
   disabled: false,
 };
 

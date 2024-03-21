@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
+  import { map } from 'iter-tools';
   import { _ } from 'svelte-i18n';
+  import { get } from 'svelte/store';
+
   import { ImmutableMap } from '@mathesar-component-library';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import {
-    isColumnSelected,
     Sheet,
-    SheetCell,
     SheetHeader,
+    SheetOriginCell,
     SheetRow,
+    SheetRowHeaderCell,
     SheetVirtualRows,
   } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
@@ -17,6 +19,7 @@
   import { toast } from '@mathesar/stores/toast';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
+  import { getRowSelectionId } from '../QueryRunner';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
   import QueryRunErrors from './QueryRunErrors.svelte';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
@@ -34,20 +37,23 @@
     query,
     processedColumns,
     rowsData,
+    selectableRowsMap,
     pagination,
     runState,
     selection,
-    inspector,
   } = queryHandler);
   $: ({ initial_columns } = $query);
   $: clipboardHandler = new SheetClipboardHandler({
-    selection,
-    toast,
-    getRows: () => get(rowsData).rows,
-    getColumnsMap: () => get(processedColumns),
-    getRecordSummaries: () => new ImmutableMap(),
+    getCopyingContext: () => ({
+      rowsMap: new Map(map(([k, r]) => [k, r.record], get(selectableRowsMap))),
+      columnsMap: get(processedColumns),
+      recordSummaries: new ImmutableMap(),
+      selectedRowIds: get(selection).rowIds,
+      selectedColumnIds: get(selection).columnIds,
+    }),
+    showToastInfo: toast.info,
   });
-  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
+  $: ({ columnIds } = $selection);
   $: recordRunState = $runState?.state;
   $: errors = $runState?.state === 'failure' ? $runState.errors : undefined;
   $: columnList = [...$processedColumns.values()];
@@ -61,6 +67,13 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
+
+  function getRow(index: number) {
+    // Type assertion is here to widen type because we don't have
+    // `noUncheckedIndexedAccess` enabled yet. See
+    // https://github.com/mathesar-foundation/mathesar/issues/1966
+    return rows[index] as (typeof rows)[0] | undefined;
+  }
 </script>
 
 <div data-identifier="query-run-result">
@@ -79,27 +92,15 @@
       {columnWidths}
       {clipboardHandler}
       usesVirtualList
+      {selection}
     >
       <SheetHeader>
-        <SheetCell
-          columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-          isStatic
-          isControlCell
-          let:htmlAttributes
-          let:style
-        >
-          <div {...htmlAttributes} {style} />
-        </SheetCell>
-
+        <SheetOriginCell columnIdentifierKey={ID_ROW_CONTROL_COLUMN} />
         {#each columnList as processedQueryColumn (processedQueryColumn.id)}
           <ResultHeaderCell
             {processedQueryColumn}
             queryRunner={queryHandler}
-            isSelected={isColumnSelected(
-              $selectedCells,
-              $columnsSelectedWhenTheTableIsEmpty,
-              processedQueryColumn,
-            )}
+            isSelected={columnIds.has(processedQueryColumn.id)}
           />
         {/each}
       </SheetHeader>
@@ -111,32 +112,29 @@
         let:items
       >
         {#each items as item (item.key)}
-          {#if rows[item.index] || showDummyGhostRow}
+          {@const row = getRow(item.index)}
+          {@const rowSelectionId = (row && getRowSelectionId(row)) ?? ''}
+          {#if row || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div
                 {...htmlAttributes}
                 style="--cell-height:{rowHeightPx - 1}px;{styleString}"
               >
-                <SheetCell
+                <SheetRowHeaderCell
+                  {rowSelectionId}
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-                  isStatic
-                  isControlCell
-                  let:htmlAttributes={sheetCellHtmlAttributes}
-                  let:style
                 >
-                  <div {...sheetCellHtmlAttributes} {style}>
-                    <CellBackground color="var(--cell-bg-color-header)" />
-                    {$pagination.offset + item.index + 1}
-                  </div>
-                </SheetCell>
+                  <CellBackground color="var(--cell-bg-color-header)" />
+                  {$pagination.offset + item.index + 1}
+                </SheetRowHeaderCell>
 
                 {#each columnList as processedQueryColumn (processedQueryColumn.id)}
                   <ResultRowCell
-                    {processedQueryColumn}
-                    row={rows[item.index]}
+                    {row}
+                    {rowSelectionId}
+                    column={processedQueryColumn}
                     {recordRunState}
                     {selection}
-                    {inspector}
                   />
                 {/each}
               </div>
@@ -233,7 +231,7 @@
     :global(.column-name-wrapper.selected) {
       background: var(--slate-200) !important;
     }
-    :global([data-sheet-element='cell'].selected) {
+    :global([data-sheet-element='data-cell'].selected) {
       background: var(--slate-100);
     }
   }

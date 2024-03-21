@@ -24,7 +24,6 @@
   const id = getGloballyUniqueId();
 
   export let isActive: DefinedProps['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: DefinedProps['value'] = undefined;
   export let disabled: DefinedProps['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
@@ -113,7 +112,6 @@
     aria-controls={id}
     aria-haspopup="listbox"
     {isActive}
-    {isSelectedInRange}
     {disabled}
     {isIndependentOfSheet}
     on:mousedown={handleMouseDown}

@@ -26,9 +26,9 @@ import {
   States,
   deleteAPI,
   getAPI,
+  getQueryStringFromParams,
   patchAPI,
   postAPI,
-  getQueryStringFromParams,
 } from '@mathesar/api/utils/requestUtils';
 import type Pagination from '@mathesar/utils/Pagination';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -174,13 +174,16 @@ export function filterRecordRows(rows: Row[]): RecordRow[] {
 export function rowHasSavedRecord(row: Row): row is RecordRow {
   return rowHasRecord(row) && Object.entries(row.record).length > 0;
 }
-
 export interface TableRecordsData {
   state: States;
   error?: string;
   savedRecordRowsWithGroupHeaders: Row[];
   totalCount: number;
   grouping?: RecordGrouping;
+}
+
+export function getRowSelectionId(row: Row): string {
+  return row.identifier;
 }
 
 export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
@@ -299,6 +302,9 @@ export class RecordsData {
 
   error: Writable<string | undefined>;
 
+  /** Keys are row selection ids */
+  selectableRowsMap: Readable<Map<string, RecordRow>>;
+
   private promise: CancellablePromise<ApiRecordsResponse> | undefined;
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
@@ -353,6 +359,14 @@ export class RecordsData {
     this.contextualFilters = contextualFilters;
     this.url = `/api/db/v0/tables/${this.tableId}/records/`;
     void this.fetch();
+
+    this.selectableRowsMap = derived(
+      [this.savedRecords, this.newRecords],
+      ([savedRecords, newRecords]) => {
+        const records = [...savedRecords, ...newRecords];
+        return new Map(records.map((r) => [getRowSelectionId(r), r]));
+      },
+    );
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
     this.requestParamsUnsubscriber =
@@ -443,22 +457,23 @@ export class RecordsData {
     return undefined;
   }
 
-  async deleteSelected(selectedRowIndices: number[]): Promise<void> {
-    const recordRows = this.getRecordRows();
+  async deleteSelected(rowSelectionIds: Iterable<string>): Promise<void> {
+    const ids =
+      typeof rowSelectionIds === 'string' ? [rowSelectionIds] : rowSelectionIds;
     const pkColumn = get(this.columnsDataStore.pkColumn);
     const primaryKeysOfSavedRows: string[] = [];
     const identifiersOfUnsavedRows: string[] = [];
-    selectedRowIndices.forEach((index) => {
-      const row = recordRows[index];
-      if (row) {
-        const rowKey = getRowKey(row, pkColumn?.id);
-        if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
-          primaryKeysOfSavedRows.push(rowKey);
-        } else {
-          identifiersOfUnsavedRows.push(rowKey);
-        }
+    const selectableRows = get(this.selectableRowsMap);
+    for (const rowId of ids) {
+      const row = selectableRows.get(rowId);
+      if (!row) continue;
+      const rowKey = getRowKey(row, pkColumn?.id);
+      if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
+        primaryKeysOfSavedRows.push(rowKey);
+      } else {
+        identifiersOfUnsavedRows.push(rowKey);
       }
-    });
+    }
     const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
     if (rowKeys.length === 0) {

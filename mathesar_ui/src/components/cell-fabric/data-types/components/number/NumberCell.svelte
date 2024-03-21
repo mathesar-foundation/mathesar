@@ -9,7 +9,6 @@
   type $$Props = NumberCellProps;
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -23,7 +22,6 @@
 <SteppedInputCell
   bind:value
   {isActive}
-  {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
   {showTruncationPopover}
@@ -33,7 +31,6 @@
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown
-  on:activate
   on:mouseenter
   on:update
 >
