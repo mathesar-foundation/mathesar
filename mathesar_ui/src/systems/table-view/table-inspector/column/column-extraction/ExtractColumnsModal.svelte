@@ -119,7 +119,6 @@
       // unmounting this component.
       return;
     }
-    // TODO_3037 test to verify that selected columns are updated
     const columnIds = _columns.map((c) => String(c.id));
     selection.update((s) => s.ofRowColumnIntersection(s.rowIds, columnIds));
   }
