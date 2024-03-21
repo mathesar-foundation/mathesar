@@ -22,12 +22,18 @@
   $: database = $currentDatabase;
   $: schema = $currentSchema;
   $: ({ processedColumns, selection } = $tabularData);
-  // TODO_3037 verify that table inspector shows selected columns
   $: selectedColumns = (() => {
     const ids = $selection.columnIds;
     const columns = [];
     for (const id of ids) {
-      // TODO_3037 add code comments explaining why this is necessary
+      // This is a  little annoying that we need to parse the id as a string to
+      // a number. The reason is tricky. The cell selection system uses strings
+      // as column ids because they're more general purpose and can work with
+      // the string-based ids that the data explorer uses. However the table
+      // page stores processed columns with numeric ids. We could avoid this
+      // parsing by either making the selection system generic over the id type
+      // (which would be a pain, ergonomically), or by using string-based ids
+      // for columns in the table page too (which would require refactoring).
       const parsedId = parseInt(id, 10);
       const column = $processedColumns.get(parsedId);
       if (column !== undefined) {
