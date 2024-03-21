@@ -20,11 +20,6 @@
   );
   $: selectedRowIds = $selection.rowIds;
   $: selectedRowCount = selectedRowIds.size;
-
-  // TODO_3037 Need to calculate selectedRowIndices. This might be a deeper
-  // problem. Seems like we might need access to the row index here instead of
-  // the row identifier.
-  $: selectedRowIndices = [];
 </script>
 
 <div class="column-mode-container">
