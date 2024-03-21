@@ -23,12 +23,13 @@ You should have **root access** to the machine you're installing Mathesar on.
 
 You'll need to install the following system packages before you install Mathesar:
 
-- [Python](https://www.python.org/downloads/) 3.9, 3.10, 3.11 or 3.12
+- [Python](https://www.python.org/downloads/) 3.9, 3.10, or 3.11
 
     !!! note "Python version"
+
         Python _older_ than 3.9 will not run Mathesar.
 
-        Python _newer_ than 3.10 will run Mathesar, but will require some slightly modified installation steps which we have [not yet documented](https://github.com/centerofci/mathesar/issues/2872).
+        Python 3.12 will run Mathesar, but you'll have to take extra steps to get some dependencies to build. Installing a package for your OS that provides the `libpq-fe.h` header file should be enough in most cases. On Debian 12, this header is provided by the `libpq-dev` package.
 
 - [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`)
 
@@ -36,19 +37,21 @@ You'll need to install the following system packages before you install Mathesar
 
 - [git](https://git-scm.com/downloads) (Verify with `git --version`)
 
+- [GNU gettext](https://www.gnu.org/software/gettext/) (Verify with `gettext --version`)
 
 ### Domain (optional)
+
 If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
 
 Before you start installation, **ensure that the DNS for your sub-domain or domain is pointing to the machine that you're installing Mathesar on**.
 
 ## Customizing this Guide
+
 Type your domain name into the box below. Do not include a trailing slash.
 
 <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
 
 Then press <kbd>Enter</kbd> to customize this guide with your domain name.
-
 
 ## Installation Steps
 
