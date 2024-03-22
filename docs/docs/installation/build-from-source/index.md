@@ -78,12 +78,6 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     CREATE DATABASE mathesar_django OWNER mathesar;
     ```
 
-1. Now we let us create a database for storing your data.
-
-    ```postgresql
-    CREATE DATABASE your_db_name OWNER mathesar;
-    ```
-
 1. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to exit the `psql` shell.
 
 
