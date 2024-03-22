@@ -132,7 +132,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Clone the git repo into the installation directory.
 
     ```
-    git clone https://github.com/centerofci/mathesar.git .
+    git clone https://github.com/mathesar-foundation/mathesar.git .
     ```
 
 1. Checkout the tag of the latest stable release, `{{mathesar_version}}`.
