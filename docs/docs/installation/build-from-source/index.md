@@ -138,9 +138,6 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     !!! warning "Important"
         If you don't run the above command you'll end up installing the latest _development_ version of Mathesar, which will be less stable.
 
-    !!! tip
-        You can install a specific Mathesar release by running commands like `git checkout 0.1.1` (to install version 0.1.1, for example). You can see all available versions by running `git tag`.
-
 1. We need to create a python virtual environment for the Mathesar application.
 
     ```
