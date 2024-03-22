@@ -219,7 +219,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 
     ```
     wget https://github.com/mathesar-foundation/mathesar/releases/download/{{mathesar_version}}/static_files.zip
-    unzip static_files.zip && mv static_files mathesar/static/mathesar
+    unzip static_files.zip && mv static_files mathesar/static/mathesar && rm static_files.zip
     ```
 
 
