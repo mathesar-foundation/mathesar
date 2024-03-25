@@ -326,6 +326,103 @@ TypeScript types (including interfaces) which describe API requests and response
 
 ## Svelte
 
+### Do not dispatch events from components
+
+⚠️ **Note:** This is a new standard and our codebase is not yet in compliance with it. _New_ code should adhere to the standard, and refactoring should take this standard into account when feasible.
+
+Svelte has an [events](https://svelte.dev/docs#template-syntax-component-directives-on-eventname) system whereby components can dispatch events to imperatively pass messages and data to their parents.
+
+- ✅ It's okay to listen to Svelte events _on DOM nodes_. For example:
+
+    ```svelte
+    <button on:click={handleClick}>
+    ```
+
+- ❌ It's not okay to use events on our components
+
+    ```svelte
+    <Button on:click={handleClick}>
+    ```
+
+- ✅ **Our components should use props instead of events**
+
+    ```svelte
+    <Button onClick={handleClick}>
+    ```
+
+- When consuming third party components that use events, it's okay to listen to those events directly. (No need to wrap it in a component that complies with our code standards.)
+
+- For example, in a `Child.svelte` component:
+
+    - ❌ Events are dispatched as follows. Don't do this.
+
+        ```svelte
+        <script lang="ts">
+          import { createEventDispatcher } from 'svelte';
+
+          const dispatch = createEventDispatcher<{ valueChange: number }>();
+
+          dispatch('valueChange', 42);
+        </script>
+        ```
+
+    - ✅ Use props instead.
+
+        ```svelte
+        <script lang="ts">
+          export onValueChange: (value: number) => void;
+
+          onValueChange(42);
+        </script>
+        ```
+
+- Then, in the consuming (parent) component:
+
+    - ❌ Events would be handled as follows:
+
+        ```svelte
+        <script lang="ts">
+          import Child from `./Child.svelte`;
+
+          function handleValueChange({ detail: value }: CustomEvent<number>) {
+                                  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Yuck!
+            console.log(`Child reports that its value is: ${value}`)
+          }
+        </script>
+
+        <Child on:valueChange={handleValueChange}/>
+        ```
+
+    - ✅ With props:
+
+        ```svelte
+        <script lang="ts">
+          import Child from `./Child.svelte`;
+
+          function handleValueChange(value: number) {
+                                  // ^^^^^^^^^^^^^ Nicer!
+            console.log(`Child reports that its value is: ${value}`)
+          }
+        </script>
+
+        <Child onValueChange={handleValueChange}/>
+        ```
+
+- Rationale
+
+    | | Events | Props |
+    | --  | -- | -- |
+    | Synchronicity | ❌ Events are always synchronous. There's no way to await the `dispatch` call. | ✅ Props give us the ability to define asynchronous callbacks and then await them within the component. We do this within `SpinnerButton` for example. |
+    | Dynamic passing | ❌ Event callbacks [cannot be passed dynamically](https://stackoverflow.com/questions/60934557/how-to-bind-events-dynamically-in-svelte) to dynamically rendered components with `<svelte:component>`. This makes it impossible to do things like perform imperative logic when we're using a `ComponentAndProps` object. | ✅ Props callbacks are easily passed via spreading `{...props}` |
+    | Forwarding | ❌ Event callbacks [cannot be forwarded en masse to child components](https://github.com/sveltejs/svelte/issues/2837). Instead, each event must be manually forwarded. This makes composition more arduous. | ✅ Props callbacks are easily forwarded en masse to child components via `{...$$restProps}` |
+    | Callback parameters | ❌ Events require destructuring the `detail` property when defining callback functions that accept values. This is extra syntax, especially in the type signature of the callback function. | ✅ Props allow us to defined the callback function parameters as we see fit, with no destructuring needed. This is cleaner. |
+    | Required callbacks | ❌ Events are always optional. There is no way to enforce consumers to implement callback functions. This can lead to bugs when someone writing a child component assumes that all parents will implement the callback function. | ✅ Props can be required through the type system. In fact, they are required _by default_. Extra code is necessary to make them optional. The strict defaults make it less bug-prone because error are caught at compile time. |
+    | Simplicity | ❌ Events require extra code to import and call `createEventDispatcher`. | ✅ Props require less code. |
+    | Type safety | ❌ Events Require diligence to obtain type safety. It's easy to accidentally call `createEventDispatcher` without passing type arguments. | ✅ Props are type safe by default. |
+    | Introspection | ❌ Events are defined in many places throughout the component. Determining the events that a component dispatches requires searching the whole file for `dispatch` (or potentially a different string, if the component uses a non-idiomatic event dispatcher name) and searching the whole file for `on:` (because child components might be forwarding events). | ✅ Props are reliably defined in one easy-to-find place. |
+    | Inline modifiers | ⚖️ Events can call `preventDefault` and `stopPropagation` _inline_ which might save one or two lines of code. However, the rationale for using such modifiers is often not self evident, and placing them inline discourages code comments which would express intent and justify their usage. | ⚖️ Props require slightly more code when adding modifiers. But putting the modifiers on their own lines encourages devs to add code comments explaining why the modifiers are necessary. |
+    | Idioms | ⚖️ Events are more idiomatic within the Svelte and Vue communities. | ⚖️ Props are more idiomatic within the React community. |
+
 ### Minimize Svelte store instances
 
 - ✅ Good because only one `cost` store is created.
