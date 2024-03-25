@@ -18,6 +18,7 @@ nav:
         - To 0.1.4: administration/upgrade/0.1.4.md
         - To older versions: administration/upgrade/older.md
       - Uninstall Mathesar: administration/uninstall.md
+      - Debug Mathesar: administration/debug.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
       - Importing data: user-guide/importing-data.md
