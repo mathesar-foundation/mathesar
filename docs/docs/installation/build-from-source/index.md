@@ -78,12 +78,6 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     CREATE DATABASE mathesar_django OWNER mathesar;
     ```
 
-1. Now we let us create a database for storing your data.
-
-    ```postgresql
-    CREATE DATABASE your_db_name OWNER mathesar;
-    ```
-
 1. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to exit the `psql` shell.
 
 
@@ -132,7 +126,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Clone the git repo into the installation directory.
 
     ```
-    git clone https://github.com/centerofci/mathesar.git .
+    git clone https://github.com/mathesar-foundation/mathesar.git .
     ```
 
 1. Checkout the tag of the latest stable release, `{{mathesar_version}}`.
@@ -143,9 +137,6 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 
     !!! warning "Important"
         If you don't run the above command you'll end up installing the latest _development_ version of Mathesar, which will be less stable.
-
-    !!! tip
-        You can install a specific Mathesar release by running commands like `git checkout 0.1.1` (to install version 0.1.1, for example). You can see all available versions by running `git tag`.
 
 1. We need to create a python virtual environment for the Mathesar application.
 
@@ -219,7 +210,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 
     ```
     wget https://github.com/mathesar-foundation/mathesar/releases/download/{{mathesar_version}}/static_files.zip
-    unzip static_files.zip && mv static_files mathesar/static/mathesar
+    unzip static_files.zip && mv static_files mathesar/static/mathesar && rm static_files.zip
     ```
 
 
