@@ -25,6 +25,7 @@ nav:
       - Users & access levels: user-guide/users.md
       - Glossary: user-guide/glossary.md
   - Releases:
+      - '0.1.6': releases/0.1.6.md
       - '0.1.5': releases/0.1.5.md
       - '0.1.4': releases/0.1.4.md
       - '0.1.3': releases/0.1.3.md
