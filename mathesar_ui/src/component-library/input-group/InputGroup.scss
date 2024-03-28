@@ -33,10 +33,11 @@
     flex-direction: column;
     flex-grow: 1;
 
-    .input-element + .input-element {
+    .input-element+.input-element {
       margin-top: 0.6rem;
     }
   }
+
   &:not(.vertical) {
     width: 100%;
 
@@ -45,15 +46,24 @@
       min-width: 0;
     }
 
-    > *:not(:last-child) {
+    >*:not(:last-child) {
       border-top-right-radius: 0 !important;
       border-bottom-right-radius: 0 !important;
     }
 
-    > * + * {
+    >*+* {
       border-top-left-radius: 0 !important;
       border-bottom-left-radius: 0 !important;
       margin-left: -1px !important;
     }
+  }
+}
+
+
+@media screen and (max-width: 560px) {
+  .input-group {
+    display: flex !important;
+    flex-direction: column !important;
+    row-gap: 1rem;
   }
 }
