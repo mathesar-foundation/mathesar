@@ -1,28 +1,26 @@
 <script lang="ts">
   import { Spinner } from '@mathesar-component-library';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import { isLoading as isTranslationLoading, locale } from 'svelte-i18n';
   import AppContext from './AppContext.svelte';
   import RootRoute from './routes/RootRoute.svelte';
   import { initI18n } from './i18n';
 
   const commonData = preloadCommonData();
-
-  let isTranslationsLoaded = false;
-  void (async () => {
-    await initI18n(commonData.user.display_language ?? 'en');
-    isTranslationsLoaded = true;
-  })();
+  void initI18n(commonData.user.display_language ?? 'en');
 </script>
 
-{#if isTranslationsLoaded}
-  <AppContext {commonData}>
-    <RootRoute {commonData} />
-  </AppContext>
-{:else if !isTranslationsLoaded}
-  <div class="app-loader">
-    <Spinner size="2rem" />
-  </div>
-{/if}
+<AppContext {commonData}>
+  {#if $isTranslationLoading}
+    <div class="app-loader">
+      <Spinner size="2rem" />
+    </div>
+  {:else}
+    {#key $locale}
+      <RootRoute {commonData} />
+    {/key}
+  {/if}
+</AppContext>
 
 <!--
   Supporting aliases in scss within the preprocessor is a bit of work.

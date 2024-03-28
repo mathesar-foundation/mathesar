@@ -2,7 +2,8 @@ from config.settings.common_settings import *  # noqa
 from decouple import config as decouple_config
 
 INSTALLED_APPS += [  # noqa
-    "demo"
+    "demo",
+    "health_check",
 ]
 
 MIDDLEWARE += [  # noqa

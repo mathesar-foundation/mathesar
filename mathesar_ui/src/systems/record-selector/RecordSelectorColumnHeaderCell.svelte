@@ -137,6 +137,7 @@
     position: absolute;
     bottom: var(--padding);
     height: var(--input-height);
+    max-height: var(--input-height);
     left: var(--padding);
     width: calc(100% - 2 * var(--padding));
     background: var(--white);
