@@ -117,11 +117,10 @@
 
       .actions-right {
         margin-left: auto;
-        display: flex;
-
-        > :global(* + *) {
-          margin-left: var(--size-xx-small);
-        }
+        display: grid;
+        grid-auto-flow: column;
+        align-items: center;
+        gap: var(--size-xx-small);
       }
     }
 
