@@ -108,3 +108,15 @@ RUN rm -rf ./docs
 EXPOSE 8000
 
 ENTRYPOINT ["./run.sh"]
+
+
+#=========== STAGE: DEMO =====================================================#
+
+FROM production AS demo
+
+# Install prod requirements
+RUN pip install --no-cache-dir -r requirements-demo.txt
+
+EXPOSE 8000
+
+ENTRYPOINT ["./run.sh"]
