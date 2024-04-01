@@ -10,6 +10,9 @@ MIDDLEWARE += [  # noqa
     "demo.middleware.LiveDemoModeMiddleware",
 ]
 
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 MATHESAR_MODE = 'PRODUCTION'
 MATHESAR_LIVE_DEMO = True
 MATHESAR_LIVE_DEMO_USERNAME = decouple_config('MATHESAR_LIVE_DEMO_USERNAME', default=None)
