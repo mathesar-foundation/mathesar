@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
+from modernrpc.views import RPCEntryPoint
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -273,6 +275,9 @@ def get_common_data_for_shared_query(request, query):
         'queries': serialized_queries,
     }
 
+
+class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
+    pass
 
 @login_required
 @api_view(['POST'])
