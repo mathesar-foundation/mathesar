@@ -3,3 +3,5 @@ mkdocs-material==8.5.11
 mkdocs-redirects==1.2.0
 mkdocs-macros-plugin==0.7.0
 mkdocs-placeholder-plugin==0.3.1
+mkdocstrings==0.24.2
+mkdocstrings-python==1.9.2

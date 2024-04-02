@@ -49,6 +49,16 @@ plugins:
         "install/build-from-source/index.md": "installation/build-from-source/index.md"
   - macros
   - placeholder
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [..]
+          options:
+            docstring_style: google
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_source: false
 
 theme:
   name: material
