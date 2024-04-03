@@ -25,6 +25,7 @@ nav:
       - Importing data: user-guide/importing-data.md
       - Syncing database changes: user-guide/syncing-db.md
       - Users & access levels: user-guide/users.md
+      - Using the RPC endpoint: user-guide/rpc-functions.md
       - Glossary: user-guide/glossary.md
   - Releases:
       - '0.1.6': releases/0.1.6.md
