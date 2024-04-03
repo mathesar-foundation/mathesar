@@ -62,6 +62,8 @@ plugins:
             show_root_heading: true
             show_root_full_path: false
             show_source: false
+            show_symbol_type_heading: true
+            group_by_category: false
 
 theme:
   name: material

@@ -40,3 +40,8 @@ To use an RPC function:
 ---
 
 ::: mathesar.rpc.connections
+    options:
+      members:
+      - create_from_known_connection
+      - create_from_scratch
+      - DBModelReturn
