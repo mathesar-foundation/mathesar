@@ -6,16 +6,17 @@ from modernrpc.auth.basic import http_basic_auth_superuser_required
 
 from mathesar.utils import connections
 
+
 @rpc_method(name='connections.create_from_known_connection')
 @http_basic_auth_superuser_required
 def create_from_known_connection(
         *,
         nickname: str,
         db_name: str,
-        create_db: bool=False,
-        connection_type: str='internal_database',
-        connection_id: int=None,
-        sample_data: list[str]=[],
+        create_db: bool = False,
+        connection_type: str = 'internal_database',
+        connection_id: int = None,
+        sample_data: list[str] = [],
 ) -> int:
     """
     Create a new connection from an already existing one.
@@ -58,7 +59,7 @@ def create_from_scratch(
         password: str,
         host: str,
         port: str,
-        sample_data: list[str]=[],
+        sample_data: list[str] = [],
 ) -> int:
     """
     Create a new connection to a PostgreSQL server from scratch.

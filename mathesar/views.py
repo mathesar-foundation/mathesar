@@ -279,6 +279,7 @@ def get_common_data_for_shared_query(request, query):
 class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
     pass
 
+
 @login_required
 @api_view(['POST'])
 def reflect_all(_):
