@@ -6,7 +6,7 @@ Mathesar has an API available at `/api/rpc/v0/` which follows the [JSON-RPC](htt
 
 ### Status
 
-We are currently in the process of [transitioning](https://wiki.mathesar.org/projects/2024/architecture-transition/rpc/) our API architecture from a [RESTful](../rest.md) API to this RPC-style API, and we hope to have all functionality available through the RPC API by Mathesar's beta release.
+We are currently in the process of [transitioning](https://wiki.mathesar.org/projects/2024/architecture-transition/rpc/) our API architecture from a [RESTful](rest.md) API to this RPC-style API, and we hope to have all functionality available through the RPC API by Mathesar's beta release.
 
 !!! caution "Stability"
     The RPC API is not yet stable and may change in the future, even after we've completed the transition to the RPC API architecture. If you build logic that depends on this API, be mindful that it may change in the future without warning or notice.
