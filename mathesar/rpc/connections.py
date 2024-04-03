@@ -1,10 +1,42 @@
 """
-Functions exposed to the RPC endpoint for creating connections.
+Classes and functions exposed to the RPC endpoint for creating connections.
 """
 from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_superuser_required
 
 from mathesar.utils import connections
+
+
+class DBModelReturn:
+
+    """
+    Information about a database model.
+
+    Attributes:
+        id (int): The Django id of the Database object created.
+        nickname (str): Used to identify the created connection.
+        database (str): The name of the database on the server.
+        username (str): The username of the role for the connection.
+        host (str): The hostname or IP address of the Postgres server.
+        port (int): The port of the Postgres server.
+    """
+
+    def __init__(
+            self,
+            id: int,
+            name: str,
+            db_name: str,
+            username: str,
+            host: str,
+            port: int,
+            **kwargs
+    ):
+        self.id = id
+        self.nickname = name
+        self.database = db_name
+        self.username = username
+        self.host = host
+        self.port = port
 
 
 @rpc_method(name='connections.create_from_known_connection')
@@ -14,23 +46,20 @@ def create_from_known_connection(
         nickname: str,
         db_name: str,
         create_db: bool = False,
-        connection_type: str = 'internal_database',
         connection_id: int = None,
         sample_data: list[str] = [],
-) -> int:
+) -> DBModelReturn:
     """
     Create a new connection from an already existing one.
 
-    When using `connection_type`='user_database', the `connection_id`
-    parameter is required.
+    If no `connection_id` is passed, the internal database connection
+    will be used.
 
     Args:
         nickname: Used to identify the created connection
         db_name: The name of the database on the server.
         create_db: Whether we should create the database `db_name` if it
             doesn't already exist.
-        connection_type: Type of the known connection - one of
-            'internal_database' or 'user_database'
         connection_id: Identifies the known connection when combined with
             the user_database value for the connection_type parameter
         sample_data: A list of strings requesting that some example data
@@ -38,15 +67,20 @@ def create_from_known_connection(
             members are 'library_management' and 'movie_collection'.
 
     Returns:
-        The Django id of the Database object associated with the connection.
+        Metadata about the Database associated with the connection.
     """
+    if connection_id is not None:
+        connection_type = 'user_database'
+    else:
+        connection_type = 'internal_database'
     connection = {
-        'connection_type': connection_type, 'connection_id': connection_id
+        'connection_type': connection_type,
+        'connection_id': connection_id
     }
     db_model = connections.copy_connection_from_preexisting(
         connection, nickname, db_name, create_db, sample_data
     )
-    return db_model.id
+    return DBModelReturn(**db_model.__dict__).__dict__
 
 
 @rpc_method(name='connections.create_from_scratch')
@@ -60,7 +94,7 @@ def create_from_scratch(
         host: str,
         port: str,
         sample_data: list[str] = [],
-) -> int:
+) -> DBModelReturn:
     """
     Create a new connection to a PostgreSQL server from scratch.
 
@@ -81,9 +115,9 @@ def create_from_scratch(
             members are 'library_management' and 'movie_collection'.
 
     Returns:
-        The Django id of the Database object associated with the connection.
+        Metadata about the Database associated with the connection.
     """
     db_model = connections.create_connection_from_scratch(
         user, password, host, port, nickname, db_name, sample_data
     )
-    return db_model.id
+    return DBModelReturn(**db_model.__dict__).__dict__
