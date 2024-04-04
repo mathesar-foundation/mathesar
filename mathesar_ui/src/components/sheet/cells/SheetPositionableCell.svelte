@@ -30,3 +30,11 @@
 <div data-sheet-element="positionable-cell" {style}>
   <slot />
 </div>
+
+<style>
+  [data-sheet-element='positionable-cell'] {
+    position: absolute;
+    top: 0;
+    height: 100%;
+  }
+</style>
