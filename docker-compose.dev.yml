@@ -38,6 +38,8 @@ services:
       context: .
       target: development
       dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
