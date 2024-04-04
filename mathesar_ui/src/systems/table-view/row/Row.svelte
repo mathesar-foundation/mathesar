@@ -71,11 +71,11 @@
     style="--cell-height:{rowHeightPx - 1}px;{styleString}"
     on:mousedown={checkAndCreateEmptyRow}
   >
-    <SheetRowHeaderCell
-      {rowSelectionId}
-      columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-    >
-      {#if rowHasRecord(row)}
+    {#if rowHasRecord(row)}
+      <SheetRowHeaderCell
+        {rowSelectionId}
+        columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
+      >
         <RowControl
           {primaryKeyColumnId}
           {row}
@@ -87,8 +87,8 @@
         <ContextMenu>
           <RowContextOptions recordPk={rowKey} {recordsData} {row} />
         </ContextMenu>
-      {/if}
-    </SheetRowHeaderCell>
+      </SheetRowHeaderCell>
+    {/if}
 
     {#if isHelpTextRow(row)}
       <NewRecordMessage columnCount={$processedColumns.size} />
