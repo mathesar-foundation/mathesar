@@ -53,12 +53,19 @@ export default class Series<Value> {
     return this.values.slice(startIndex, endIndex + 1);
   }
 
+  /**
+   * Get the value at a specific index.
+   */
+  at(index: number): Value | undefined {
+    return this.values[index];
+  }
+
   get first(): Value | undefined {
-    return this.values[0];
+    return this.at(0);
   }
 
   get last(): Value | undefined {
-    return this.values[this.values.length - 1];
+    return this.at(this.values.length - 1);
   }
 
   has(value: Value): boolean {

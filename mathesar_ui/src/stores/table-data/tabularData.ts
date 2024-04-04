@@ -215,6 +215,11 @@ export class TabularData {
     return this.refresh();
   }
 
+  addEmptyRecord() {
+    void this.recordsData.addEmptyRecord();
+    this.selection.update((s) => s.ofNewRecordDataEntryCell());
+  }
+
   destroy(): void {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();

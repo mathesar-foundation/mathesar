@@ -233,6 +233,23 @@ export default class SheetSelection {
   }
 
   /**
+   * @returns a new selection formed by selecting the one cell that we think
+   * users are most likely to want selected after choosing to add a new record.
+   *
+   * We use the last row because that's where we add new records. If there is
+   * only one column, then we select the first cell in that column. Otherwise,
+   * we select the cell in the second column (because we assume the first column
+   * is probably a PK column which can't accept data entry.)
+   */
+  ofNewRecordDataEntryCell(): SheetSelection {
+    const rowId = this.plane.rowIds.last;
+    if (!rowId) return this;
+    const columnId = this.plane.columnIds.at(1) ?? this.plane.columnIds.first;
+    if (!columnId) return this;
+    return this.ofOneCell(makeCellId(rowId, columnId));
+  }
+
+  /**
    * @returns a new selection with all rows selected between (and including) the
    * provided rows.
    *

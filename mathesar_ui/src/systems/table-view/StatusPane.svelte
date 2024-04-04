@@ -68,11 +68,7 @@
         disabled={$isLoading}
         size="medium"
         appearance="primary"
-        on:click={() => {
-          void recordsData.addEmptyRecord();
-          // // TODO_3037
-          // selection.selectAndActivateFirstDataEntryCellInLastRow();
-        }}
+        on:click={() => $tabularData.addEmptyRecord()}
       >
         <Icon {...iconAddNew} />
         <span>{$_('new_record')}</span>

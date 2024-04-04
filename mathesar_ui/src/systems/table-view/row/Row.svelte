@@ -48,12 +48,11 @@
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
-  function checkAndCreateEmptyRow() {
-    // // TODO_3037
-    // if (isPlaceholderRow(row)) {
-    //   void recordsData.addEmptyRecord();
-    //   selection.selectAndActivateFirstDataEntryCellInLastRow();
-    // }
+  function handleMouseDown(e: MouseEvent) {
+    if (isPlaceholderRow(row)) {
+      $tabularData.addEmptyRecord();
+      e.stopPropagation(); // Prevents cell selection from starting
+    }
   }
 </script>
 
@@ -69,7 +68,7 @@
     class:is-add-placeholder={isPlaceholderRow(row)}
     {...htmlAttributes}
     style="--cell-height:{rowHeightPx - 1}px;{styleString}"
-    on:mousedown={checkAndCreateEmptyRow}
+    on:mousedown={handleMouseDown}
   >
     {#if rowHasRecord(row)}
       <SheetRowHeaderCell
