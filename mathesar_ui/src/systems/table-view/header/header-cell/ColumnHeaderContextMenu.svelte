@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
   import { ButtonMenuItem } from '@mathesar-component-library';
   import {
@@ -92,10 +93,15 @@
   function removeGrouping() {
     grouping.update((g) => g.withoutColumns([columnId]));
   }
+
+  function goToTablePage() {
+    router.goto(linkedTableHref);
+  }
+
 </script>
 
 {#if linkedTableHref && linkedTableName}
-  <ButtonMenuItem icon={iconTable} on:click={linkedTableHref}>
+  <ButtonMenuItem icon={iconTable} on:click={goToTablePage}>
     {$_('open')}
     <Identifier>{column.name}</Identifier>
     {$_('table')}
