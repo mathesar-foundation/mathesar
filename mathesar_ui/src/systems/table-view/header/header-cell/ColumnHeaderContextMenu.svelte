@@ -6,6 +6,7 @@
     type SortDirection,
   } from '@mathesar/components/sort-entry/utils';
   import {
+    iconTable,
     iconAddFilter,
     iconGrouping,
     iconRemoveFilter,
@@ -20,6 +21,8 @@
   } from '@mathesar/stores/table-data';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
+  import Identifier from '@mathesar/components/Identifier.svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -53,6 +56,14 @@
 
   $: hasGrouping = $grouping.hasColumn(columnId);
 
+  $: linkKey = processedColumn.linkFk;
+  $: getTablePageUrl = $storeToGetTablePageUrl;
+  $: linkedTableName = linkKey ? linkKey.name : undefined;
+  $: linkedTableHref = linkKey
+    ? getTablePageUrl({ tableId: linkKey.referent_table })
+    : undefined;
+  $: ({ column } = processedColumn);
+
   function addFilter() {
     void imperativeFilterController?.beginAddingNewFilteringEntry(columnId);
   }
@@ -83,6 +94,13 @@
   }
 </script>
 
+{#if linkedTableHref && linkedTableName}
+  <ButtonMenuItem icon={iconTable} on:click={linkedTableHref}>
+    {$_('open')}
+    <Identifier>{column.name}</Identifier>
+    {$_('table')}
+  </ButtonMenuItem>
+{/if}
 {#if columnAllowsFiltering}
   <ButtonMenuItem icon={iconAddFilter} on:click={addFilter}>
     {#if filterCount > 0}

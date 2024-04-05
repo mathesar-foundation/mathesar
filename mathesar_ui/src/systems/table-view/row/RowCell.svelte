@@ -21,7 +21,7 @@
     scrollBasedOnActiveCell,
     SheetCell,
   } from '@mathesar/components/sheet';
-  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import { iconSetToNull, iconRecord } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -34,6 +34,7 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
@@ -207,8 +208,12 @@
           </ButtonMenuItem>
         {/if}
         {#if showLinkedRecordHyperLink && linkedRecordHref}
-          <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-            {$_('go_to_linked_record')}
+          <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
+            {$_('open')}
+            <Identifier
+              >{$recordSummaries.get(String(column.id))?.get(String(value)) ||
+                value}</Identifier
+            >
           </LinkMenuItem>
         {/if}
         <MenuDivider />
