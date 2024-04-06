@@ -91,9 +91,13 @@ module.exports = {
       },
     },
     {
-      // Temporary block, will be merged with the base svelte override
-      // when the entire app is translated
-      files: ['src/components/**/*.svelte', 'src/systems/**/*.svelte'],
+      files: ['*.svelte'],
+      excludedFiles: [
+        'src/**/__meta__/**/*.svelte',
+        // Temporary exclusion
+        // Remove this when component library i18n context is implemented
+        'src/component-library/**/*.svelte',
+      ],
       extends: ['plugin:@intlify/svelte/recommended'],
       rules: {
         '@intlify/svelte/no-raw-text': [
@@ -107,17 +111,24 @@ module.exports = {
                 'title',
                 'placeholder',
                 'ariaLabel',
+                'searchPlaceholder',
               ],
             },
             ignoreText: [
               'DEFAULT',
               'Mathesar.org',
               'NULL',
+              '@',
+              '/',
               '*',
               '+',
               ':',
               '(',
               ')',
+              '.',
+              '...',
+              '|',
+              '%',
             ],
           },
         ],

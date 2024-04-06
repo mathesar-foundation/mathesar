@@ -484,6 +484,45 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
+-- ROLE MANIPULATION FUNCTIONS
+--
+-- Functions in this section should always involve creating, granting, or revoking privileges or
+-- roles
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+-- Create mathesar user ----------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.create_basic_mathesar_user(username text, password_ text) RETURNS TEXT AS $$/*
+*/
+DECLARE
+  sch_name text;
+  mathesar_schemas text[] := ARRAY['mathesar_types', '__msar', 'msar'];
+BEGIN
+  PERFORM __msar.exec_ddl('CREATE USER %I WITH PASSWORD %L', username, password_);
+  PERFORM __msar.exec_ddl(
+    'GRANT CREATE, CONNECT, TEMP ON DATABASE %I TO %I',
+    current_database()::text,
+    username
+  );
+  FOREACH sch_name IN ARRAY mathesar_schemas LOOP
+    BEGIN
+      PERFORM __msar.exec_ddl('GRANT USAGE ON SCHEMA %I TO %I', sch_name, username);
+    EXCEPTION
+      WHEN invalid_schema_name THEN
+        RAISE NOTICE 'Schema % does not exist', sch_name;
+    END;
+  END LOOP;
+  RETURN username;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- ALTER SCHEMA FUNCTIONS
 --
 -- Functions in this section should always involve 'ALTER SCHEMA'.

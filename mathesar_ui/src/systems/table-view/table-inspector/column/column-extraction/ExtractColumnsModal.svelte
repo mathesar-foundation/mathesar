@@ -181,13 +181,23 @@
         const columnNames = extractedColumns.map(
           (processedColumn) => processedColumn.column.name,
         );
-        const message = $_('columns_moved_to_table', {
-          values: {
-            count: columnNames.length,
-            columnNames: columnNames.join(','),
-            tableName: $linkedTable?.table.name ?? '',
-          },
-        });
+        const linkedTableName = $linkedTable?.table.name ?? '';
+        let message: string;
+        if (columnNames.length === 1) {
+          message = $_('column_moved_to_table', {
+            values: {
+              columnName: columnNames[0],
+              tableName: linkedTableName,
+            },
+          });
+        } else {
+          message = $_('columns_moved_to_table', {
+            values: {
+              columnNames: columnNames.join(','),
+              tableName: linkedTableName,
+            },
+          });
+        }
         toast.success(message);
       }
       controller.close();

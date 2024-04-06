@@ -1,3 +1,9 @@
+<!--
+  @component
+
+  @deprecated in favor of components in @mathesar/components/grid-form which
+  have looser coupling with the form validation system.
+-->
 <script lang="ts">
   export let bypass = false;
 </script>

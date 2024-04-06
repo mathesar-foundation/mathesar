@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
@@ -24,5 +25,5 @@
 
   <ExplorationPage {database} {schema} {query} />
 {:else}
-  <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+  <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
 {/if}

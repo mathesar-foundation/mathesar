@@ -17,12 +17,10 @@
   }
 
   .help {
-    // TODO figure out how we want to support help text with an inline layout.
-    // This CSS assumes the layout is stacked
     display: block;
     font-size: var(--text-size-small);
     color: var(--color-text-muted);
-    margin-top: 0.5rem;
+    margin-top: var(--spacing-y, var(--spacing-y-default));
     &:empty {
       display: none;
     }
@@ -34,29 +32,33 @@
     }
   }
 
-  &.layout-inline .label-content,
-  &.layout-inline-input-first .label-content {
+  // TODO: add support for help text with an inline layout.
+  &.layout-inline .label-content {
     display: inline-flex;
+    flex-direction: row;
+    align-items: center; // To support a text input that's taller than the label
     .label {
       flex: 1 1 auto;
     }
     .input {
       flex: 0 0 auto;
-    }
-  }
-
-  &.layout-inline .label-content {
-    flex-direction: row;
-    align-items: center; // To support a text input that's taller than the label
-    .input {
       margin-left: var(--spacing-x, var(--spacing-x-default));
     }
   }
+
   &.layout-inline-input-first .label-content {
-    flex-direction: row-reverse;
-    align-items: flex-start; // To support a checkbox with a wrapping label
+    display: grid;
+    grid-template: auto auto / auto 1fr;
     .input {
+      grid-area: 1 / 1 / 1 / 1;
       margin-right: var(--spacing-x, var(--spacing-x-default));
+    }
+    .label {
+      grid-area: 1 / 2 / 1 / 2;
+    }
+    .help {
+      grid-area: 2 / 2 / 2 / 2;
+      margin-top: var(--spacing-y, var(--spacing-y-default));
     }
   }
 }

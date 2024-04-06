@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router } from 'tinro';
-
+  import { _ } from 'svelte-i18n';
   import { Spinner } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { dataFilesApi } from '@mathesar/api/dataFiles';
@@ -44,7 +44,7 @@
   $: error = $tableFetch.error ?? $dataFileFetch.error;
 </script>
 
-<svelte:head><title>{makeSimplePageTitle('Import')}</title></svelte:head>
+<svelte:head><title>{makeSimplePageTitle($_('import'))}</title></svelte:head>
 
 {#if $tableFetch.resolvedValue && $dataFileFetch.resolvedValue}
   <ImportPreviewContent
@@ -59,7 +59,7 @@
 {:else}
   <ImportPreviewLayout>
     <ErrorBox>
-      <p>Unable to load import table</p>
+      <p>{$_('unable_to_load_preview')}</p>
       <p>{getErrorMessage(error)}</p>
     </ErrorBox>
   </ImportPreviewLayout>

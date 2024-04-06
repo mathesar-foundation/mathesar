@@ -1,9 +1,10 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { iconInferColumnType } from '@mathesar/icons';
 </script>
 
 <NameWithIcon icon={iconInferColumnType} truncate={false}>
-  Pick the best data type for each column
-  <em>(slower for large imports)</em>
+  {$_('pick_best_data_type_column')}
+  <em>({$_('slower_for_large_imports')})</em>
 </NameWithIcon>

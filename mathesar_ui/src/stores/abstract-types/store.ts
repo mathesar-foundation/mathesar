@@ -84,7 +84,7 @@ function getTypesForConnection(
     });
     databasesToAbstractTypesStoreMap.set(connection.id, store);
 
-    if (preload && commonData?.current_connection === connection.id) {
+    if (preload && commonData.current_connection === connection.id) {
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,

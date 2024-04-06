@@ -81,7 +81,7 @@
 
   export let autoSelect: DefinedProps['autoSelect'] = 'first';
 
-  function setValueFromArray(values: (Option | undefined)[]) {
+  function setValueFromArray(values: readonly (Option | undefined)[]) {
     [value] = values;
     dispatch('change', value);
     dispatch('input', value);
@@ -89,7 +89,7 @@
     dispatch('artificialInput', value);
   }
 
-  function setValueOnOptionChange(opts: Option[]) {
+  function setValueOnOptionChange(opts: readonly Option[]) {
     if (autoSelect === 'none') {
       return;
     }

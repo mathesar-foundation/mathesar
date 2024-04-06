@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
   import { getDetailedRecordsErrors } from '@mathesar/api/utils/recordUtils';
@@ -12,6 +13,7 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import RecordSummary from '@mathesar/components/RecordSummary.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import type { TableStructure } from '@mathesar/stores/table-data';
@@ -52,8 +54,11 @@
         </NameWithIcon>
       </h1>
       <div class="table-name">
-        Record in
-        <strong><TableName {table} truncate={false} /></strong>
+        <RichText text={$_('record_in_table')} let:slotName>
+          {#if slotName === 'tableName'}
+            <strong><TableName {table} truncate={false} /></strong>
+          {/if}
+        </RichText>
       </div>
       <div class="form-status"><FormStatus {form} /></div>
     </div>
@@ -66,8 +71,8 @@
       <FormSubmit
         {form}
         catchErrors
-        proceedButton={{ label: 'Save', icon: iconSave }}
-        cancelButton={{ label: 'Discard Changes', icon: iconUndo }}
+        proceedButton={{ label: $_('save'), icon: iconSave }}
+        cancelButton={{ label: $_('discard_changes'), icon: iconUndo }}
         onProceed={() => record.patch($form.values)}
         getErrorMessages={(e) => {
           const { columnErrors, recordErrors } = getDetailedRecordsErrors(e);

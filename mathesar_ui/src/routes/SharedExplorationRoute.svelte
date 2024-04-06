@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
   import { preloadRouteData } from '@mathesar/utils/preloadData';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
@@ -28,6 +29,6 @@
   {#if query && database && schema}
     <ExplorationPage {database} {schema} {query} {shareConsumer} />
   {:else}
-    <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+    <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
   {/if}
 </Route>

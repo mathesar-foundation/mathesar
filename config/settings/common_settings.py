@@ -15,7 +15,6 @@ from pathlib import Path
 
 from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
-from django.utils.translation import gettext_lazy
 
 
 # We use a 'tuple' with pipes as delimiters as decople naively splits the global
@@ -94,10 +93,21 @@ WSGI_APPLICATION = "config.wsgi.application"
 # See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
     db_key: db_url(url_string)
-    for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
+    for db_key, url_string in decouple_config('MATHESAR_DATABASES', default='', cast=Csv(pipe_delim))
 }
 
-DATABASES[decouple_config('DJANGO_DATABASE_KEY', default="default")] = decouple_config('DJANGO_DATABASE_URL', cast=db_url, default='sqlite:///db.sqlite3')
+# POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST & POSTGRES_PORT are required env variables for forming a pg connection string for the django database
+# lack of any one of these will result in the internal django database to be sqlite.
+POSTGRES_DB = decouple_config('POSTGRES_DB', default=None)
+POSTGRES_USER = decouple_config('POSTGRES_USER', default=None)
+POSTGRES_PASSWORD = decouple_config('POSTGRES_PASSWORD', default=None)
+POSTGRES_HOST = decouple_config('POSTGRES_HOST', default=None)
+POSTGRES_PORT = decouple_config('POSTGRES_PORT', default=None)
+
+if POSTGRES_DB and POSTGRES_USER and POSTGRES_PASSWORD and POSTGRES_HOST and POSTGRES_PORT:
+    DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}')
+else:
+    DATABASES['default'] = db_url('sqlite:///db.sqlite3')
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s),
@@ -261,11 +271,13 @@ BASE_TEMPLATE_ADDITIONAL_SCRIPT_TEMPLATES = []
 
 # i18n
 LANGUAGES = [
-    ('en', gettext_lazy('English')),
-    ('ja', gettext_lazy('Japanese')),
+    ('en', 'English'),
+    ('ja', 'Japanese'),
 ]
 LOCALE_PATHS = [
     'translations'
 ]
 LANGUAGE_COOKIE_NAME = 'display_language'
+FALLBACK_LANGUAGE = 'en'
+
 SALT_KEY = SECRET_KEY

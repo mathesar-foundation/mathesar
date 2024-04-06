@@ -1,20 +1,20 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import { Button, Icon } from '@mathesar-component-library';
-  import { connectionsStore } from '@mathesar/stores/databases';
   import type { Connection } from '@mathesar/api/connections';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { iconAddNew } from '@mathesar/icons';
-  import Errors from '@mathesar/components/Errors.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import { iconAddNew } from '@mathesar/icons';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { connectionsStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
-    ConnectionsEmptyState,
     AddConnectionModal,
+    ConnectionsEmptyState,
   } from '@mathesar/systems/connections';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import ConnectionRow from './ConnectionRow.svelte';
 
   const addConnectionModalController = modal.spawnModalController();
@@ -25,31 +25,23 @@
 
   let filterQuery = '';
 
-  $: connections = connectionsStore.connections;
-  $: connectionsRequestStatus = connectionsStore.requestStatus;
+  $: ({ connections } = connectionsStore);
 
-  function isMatch(connection: Connection, q: string) {
-    return (
-      connection.nickname.toLowerCase().includes(q) ||
-      connection.database.toLowerCase().includes(q)
-    );
-  }
-
-  function filterConnections(_connections: Connection[], query: string) {
-    return _connections.filter((connection) => {
-      if (query) {
-        const sanitizedQuery = query.trim().toLowerCase();
-        return isMatch(connection, sanitizedQuery);
-      }
-      return true;
-    });
+  function filterConnections(allConnections: Connection[], query: string) {
+    if (!query) return allConnections;
+    const sanitizedQuery = query.trim().toLowerCase();
+    const match = (t: string) => t.toLowerCase().includes(sanitizedQuery);
+    return allConnections.filter((c) => match(c.nickname) || match(c.database));
   }
 
   function handleClearFilterQuery() {
     filterQuery = '';
   }
 
-  $: filteredConnections = filterConnections($connections ?? [], filterQuery);
+  $: filteredConnections = filterConnections(
+    [...$connections.values()],
+    filterQuery,
+  );
 </script>
 
 <svelte:head>
@@ -57,21 +49,21 @@
 </svelte:head>
 
 <LayoutWithHeader
+  restrictWidth
   cssVariables={{
     '--page-padding': '0',
+    '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
   <div data-identifier="connections-header">
     <span>
       {$_('database_connections')}
-      {#if $connections.length}({$connections.length}){/if}
+      {#if $connections.size}({$connections.size}){/if}
     </span>
   </div>
 
   <section data-identifier="connections-container">
-    {#if $connectionsRequestStatus.state === 'failure'}
-      <Errors errors={$connectionsRequestStatus.errors} />
-    {:else if $connections.length === 0}
+    {#if $connections.size === 0}
       <ConnectionsEmptyState />
     {:else}
       <EntityContainerWithFilterBar

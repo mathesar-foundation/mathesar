@@ -7,7 +7,7 @@
 
   export let value: Option | undefined = undefined;
   export let isInline = false;
-  export let options: Option[] = [];
+  export let options: readonly Option[] = [];
   export let label: string | undefined = undefined;
   export let ariaLabel: string | undefined = undefined;
   export let radioLabelKey: string | undefined = undefined;

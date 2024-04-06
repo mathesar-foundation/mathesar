@@ -1,4 +1,3 @@
-from config.settings.common_settings import DATABASES
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -158,16 +157,17 @@ def get_base_data_all_routes(request, database=None, schema=None):
 
 
 def _get_internal_db_meta():
-    internal_db = DATABASES['default']
-    if internal_db['ENGINE'].startswith('django.db.backends.postgresql'):
+    internal_db = Database.create_from_settings_key('default')
+    if internal_db is not None:
         return {
             'type': 'postgres',
-            'user': internal_db['USER'],
-            'host': internal_db['HOST'],
-            'port': internal_db['PORT'],
-            'database': internal_db['NAME']
+            'user': internal_db.username,
+            'host': internal_db.host,
+            'port': internal_db.port,
+            'database': internal_db.db_name
         }
-    return {'type': 'sqlite'}
+    else:
+        return {'type': 'sqlite'}
 
 
 def get_common_data(request, database=None, schema=None):
@@ -241,7 +241,7 @@ def get_common_data_for_shared_entity(request, schema=None):
     return {
         **get_base_data_all_routes(request, database, schema),
         'schemas': serialized_schemas,
-        'databases': serialized_databases,
+        'connections': serialized_databases,
         'routing_context': 'anonymous',
     }
 
@@ -289,7 +289,7 @@ def home(request):
         return redirect('connections')
     elif number_of_connections == 1:
         db = connection_list[0]
-        return redirect('schemas', db_name=db['nickname'])
+        return redirect('schemas', connection_id=db['id'])
     else:
         return render(request, 'mathesar/index.html', {
             'common_data': get_common_data(request)

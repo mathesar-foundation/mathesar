@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import InsetPageSection from '@mathesar/components/InsetPageSection.svelte';
@@ -15,7 +16,9 @@
 </script>
 
 <svelte:head>
-  <title>{userProfile?.getDisplayName() ?? 'User profile'} | Mathesar</title>
+  <title>
+    {userProfile?.getDisplayName() ?? $_('user_profile')} | {$_('mathesar')}
+  </title>
 </svelte:head>
 
 <LayoutWithHeader
@@ -27,10 +30,12 @@
   }}
 >
   <InsetPageLayout hasMultipleSections>
-    <h1 slot="header">User Profile</h1>
+    <h1 slot="header">{$_('user_profile')}</h1>
     {#if userProfile}
       <InsetPageSection>
-        <h2 class="large-bold-header" slot="header">Account Details</h2>
+        <h2 class="large-bold-header" slot="header">
+          {$_('account_details')}
+        </h2>
         <UserDetailsForm user={userProfile.getUser()} />
       </InsetPageSection>
       <InsetPageSection>
@@ -39,17 +44,18 @@
 
       {#if !userProfile.isSuperUser}
         <InsetPageSection>
-          <h2 class="large-bold-header" slot="header">Delete Account</h2>
+          <h2 class="large-bold-header" slot="header">
+            {$_('delete_account')}
+          </h2>
           <div>
-            Please contact your administrator to request permanent deletion of
-            your account
+            {$_('delete_account_contact_admin')}
           </div>
         </InsetPageSection>
       {/if}
     {:else}
       <!-- This should never happen -->
       <ErrorBox>
-        Could not fetch user profile details. Try refreshing your page.
+        {$_('could_not_fetch_profile_error')}
       </ErrorBox>
     {/if}
   </InsetPageLayout>

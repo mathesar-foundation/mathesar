@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
   import type { CommonData } from '@mathesar/utils/preloadData';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
@@ -20,7 +21,7 @@
       <AnonymousAccessRoutes />
 
       <Route fallback>
-        <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+        <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
       </Route>
     </Route>
 
@@ -41,7 +42,7 @@
     </Route>
 
     <Route fallback>
-      <ErrorPage>The page you're looking for doesn't exist.</ErrorPage>
+      <ErrorPage>{$_('page_doesnt_exist')}</ErrorPage>
     </Route>
   </Route>
 {/if}

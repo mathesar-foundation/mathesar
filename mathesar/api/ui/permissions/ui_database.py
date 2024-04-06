@@ -11,9 +11,22 @@ class UIDatabaseAccessPolicy(AccessPolicy):
     """
     statements = [
         {
-            'action': ['list', 'retrieve', 'types', 'functions', 'filters'],
+            'action': [
+                'list', 'retrieve', 'types', 'functions', 'filters'
+            ],
             'principal': 'authenticated',
             'effect': 'allow',
+        },
+        {
+            'action': [
+                'create', 'partial_update', 'destroy',
+                'create_from_known_connection',
+                'create_from_scratch',
+                'create_with_new_user',
+            ],
+            'principal': 'authenticated',
+            'effect': 'allow',
+            'condition': 'is_superuser'
         }
     ]
 

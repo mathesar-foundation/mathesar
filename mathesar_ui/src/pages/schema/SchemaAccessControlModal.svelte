@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import {
     setUsersStoreInContext,
     type UserModel,
@@ -56,7 +58,11 @@
   closeOn={['button', 'esc', 'overlay']}
 >
   <svelte:fragment slot="title">
-    Manage <Identifier>{schema.name}</Identifier> Schema Access
+    <RichText text={$_('manage_schema_access')} let:slotName>
+      {#if slotName === 'databaseName'}
+        <Identifier>{schema.name}</Identifier>
+      {/if}
+    </RichText>
   </svelte:fragment>
 
   {#if $requestStatus?.state === 'success'}
@@ -69,7 +75,7 @@
       {getUserRoles}
     />
   {:else if $requestStatus?.state === 'processing'}
-    <div>Loading</div>
+    <div>{$_('loading')}</div>
   {:else if $requestStatus?.state === 'failure'}
     <ErrorBox>
       {$requestStatus.errors.join(', ')}

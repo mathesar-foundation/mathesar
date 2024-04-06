@@ -1,5 +1,6 @@
 <!-- TODO: Shouldn't this be inside the schema page instead? -->
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { ModalController } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import {
@@ -10,6 +11,7 @@
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { toast } from '@mathesar/stores/toast';
 
   export let database: Database;
@@ -29,10 +31,10 @@
 
   function getNameValidationErrors(name: string) {
     if (!name.trim()) {
-      return ['Name cannot be empty.'];
+      return [$_('schema_name_cannot_be_empty')];
     }
     if (nameIsDuplicate(name)) {
-      return ['A schema with that name already exists.'];
+      return [$_('schema_name_already_exists')];
     }
     return [];
   }
@@ -56,24 +58,25 @@
   {getNameValidationErrors}
   getInitialName={() => schema?.name ?? ''}
   getInitialDescription={() => schema?.description ?? ''}
-  saveButtonLabel={schema ? 'Save' : 'Create New Schema'}
+  saveButtonLabel={schema ? $_('save') : $_('create_new_schema')}
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
       <InfoBox>
-        Name your schema to reflect its purpose. For example, your personal
-        financial schema may be called "Personal Finances" and your movie
-        collection "Movies." Add a description to your schema to remember what
-        it's for.
+        {$_('name_your_schema_help')}
       </InfoBox>
     {/if}
   </svelte:fragment>
 
   <span slot="title" let:initialName>
     {#if schema}
-      Rename <Identifier>{initialName}</Identifier> Schema
+      <RichText text={$_('rename_schema')} let:slotName>
+        {#if slotName === 'schemaName'}
+          <Identifier>{initialName}</Identifier>
+        {/if}
+      </RichText>
     {:else}
-      Create Schema
+      {$_('create_schema')}
     {/if}
   </span>
 </NameAndDescInputModalForm>

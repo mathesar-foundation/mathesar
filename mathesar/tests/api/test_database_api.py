@@ -7,6 +7,8 @@ from mathesar.models.users import DatabaseRole
 from mathesar.state.django import reflect_db_objects
 from mathesar.models.base import Table, Schema, Database
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from db.install import install_mathesar
 from db.engine import create_future_engine_with_custom_types
 
 
@@ -141,6 +143,33 @@ def test_database_list_deleted(client, db_dj_model):
     assert response_data['count'] == 1
     assert len(response_data['results']) == 1
     check_database(db_dj_model, response_data['results'][0])
+
+
+def test_delete_dbconn_with_msar_schemas(client, db_dj_model):
+    # install mathesar specific schemas
+    install_mathesar(
+        db_dj_model.name,
+        db_dj_model.username,
+        db_dj_model.password,
+        db_dj_model.host,
+        db_dj_model.port,
+        True
+    )
+    engine = db_dj_model._sa_engine
+    check_schema_exists = text(
+        "SELECT schema_name FROM information_schema.schemata \
+        WHERE schema_name LIKE '%msar' OR schema_name = 'mathesar_types';"
+    )
+    with engine.connect() as conn:
+        before_deletion = conn.execute(check_schema_exists)
+        response = client.delete(f'/api/db/v0/connections/{db_dj_model.id}/?del_msar_schemas=true')
+        after_deletion = conn.execute(check_schema_exists)
+
+    with pytest.raises(ObjectDoesNotExist):
+        Database.objects.get(id=db_dj_model.id)
+    assert response.status_code == 204
+    assert before_deletion.rowcount == 3
+    assert after_deletion.rowcount == 0
 
 
 def test_database_detail(client, db_dj_model):

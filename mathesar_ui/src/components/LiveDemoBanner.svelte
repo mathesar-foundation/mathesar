@@ -6,7 +6,7 @@
 
   const commonData = preloadCommonData();
 
-  $: liveDemo = !!commonData?.live_demo_mode;
+  $: liveDemo = !!commonData.live_demo_mode;
 </script>
 
 {#if liveDemo}

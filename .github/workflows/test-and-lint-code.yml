@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v41
         with:
           files: |
             *.py
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v41
         with:
           files: '**.py'
 
@@ -55,9 +55,11 @@ jobs:
       tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
     steps:
       - uses: actions/checkout@v4
+      - name: echo
+        run: echo "${{needs.all_tests_required.outputs.tests_should_run}}"
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v41
         with:
           files: '**.sql'
 
@@ -70,9 +72,25 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed_files
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v41
         with:
           files: 'mathesar_ui/**'
+
+  all_be_tests_required:
+    name: Check for file changes requiring all backend tests
+    runs-on: ubuntu-latest
+    outputs:
+      tests_should_run: ${{ steps.changed_files.outputs.any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            **.yml
+            **.sh
+            Dockerfile*
 
 ################################################################################
 ##                         BACK END TEST/LINT RUNNERS                         ##
@@ -90,11 +108,13 @@ jobs:
   python_tests:
     name: Run Python tests
     runs-on: ubuntu-latest
-    needs: python_tests_required
-    if: needs.python_tests_required.outputs.tests_should_run == 'true'
+    needs: [python_tests_required, all_be_tests_required]
+    if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run
     strategy:
       matrix:
-        pg-version: [13, 14, 15]
+        py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm]
+        pg-version: [13, 14, 15, 16]
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
@@ -104,8 +124,9 @@ jobs:
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
       - name: Build the stack
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d test-service
+        run: docker compose -f docker-compose.dev.yml up --build -d test-service
         env:
+          PYTHON_VERSION: ${{ matrix.py-version }}
           PG_VERSION: ${{ matrix.pg-version }}
       - name: Run tests with pytest
         run: docker exec mathesar_service_test ./run_pytest.sh
@@ -113,11 +134,12 @@ jobs:
   sql_tests:
     name: Run SQL tests
     runs-on: ubuntu-latest
-    needs: sql_tests_required
-    if: needs.sql_tests_required.outputs.tests_should_run == 'true'
+    needs: [sql_tests_required, all_be_tests_required]
+    if: needs.sql_tests_required.outputs.tests_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run
     strategy:
       matrix:
-        pg-version: [13, 14, 15]
+        pg-version: [13, 14, 15, 16]
     steps:
       - uses: actions/checkout@v4
       - name: Copy env file
@@ -127,7 +149,7 @@ jobs:
       - name: Fix permissions
         run: sudo chown -R 1000:1000 .
       - name: Build the test DB
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d dev-db
+        run: docker compose -f docker-compose.dev.yml up --build -d dev-db
         env:
           PG_VERSION: ${{ matrix.pg-version }}
       - name: Run tests with pg_prove
@@ -136,8 +158,9 @@ jobs:
   python_lint:
     name: Run Python linter
     runs-on: ubuntu-latest
-    needs: python_lint_required
-    if: needs.python_lint_required.outputs.lint_should_run == 'true'
+    needs: [python_lint_required, all_be_tests_required]
+    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
@@ -153,8 +176,9 @@ jobs:
   vulture:
     name: Find unused code
     runs-on: ubuntu-latest
-    needs: python_lint_required
-    if: needs.python_lint_required.outputs.lint_should_run == 'true'
+    needs: [python_lint_required, all_be_tests_required]
+    if: needs.python_lint_required.outputs.lint_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4

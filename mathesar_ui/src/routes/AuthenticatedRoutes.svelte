@@ -1,32 +1,27 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import { connectionsStore } from '@mathesar/stores/databases';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
+
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import WelcomePage from '@mathesar/pages/WelcomePage.svelte';
   import ConnectionsPage from '@mathesar/pages/connections/ConnectionsPage.svelte';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { CONNECTIONS_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { connectionsStore } from '@mathesar/stores/databases';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { mapExactlyOne } from '@mathesar/utils/iterUtils';
+  import AdminRoute from './AdminRoute.svelte';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
-  import AdminRoute from './AdminRoute.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
 
   $: ({ connections } = connectionsStore);
 
-  $: rootPathRedirectUrl = (() => {
-    const numberOfConnections = $connections?.length ?? 0;
-    if (numberOfConnections === 0) {
-      // There is no redirection when `redirect` is `undefined`.
-      return undefined;
-    }
-    if (numberOfConnections > 1) {
-      return CONNECTIONS_URL;
-    }
-    const firstConnection = $connections[0];
-    return getDatabasePageUrl(firstConnection.id);
-  })();
+  $: rootPathRedirectUrl = mapExactlyOne($connections, {
+    whenZero: undefined,
+    whenOne: ([id]) => getDatabasePageUrl(id),
+    whenMany: CONNECTIONS_URL,
+  });
 </script>
 
 <Route path="/" redirect={rootPathRedirectUrl}>

@@ -2057,3 +2057,25 @@ BEGIN
   RETURN NEXT is(msar.is_default_possibly_dynamic(tab_id, 6), true);
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_basic_mathesar_user() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM msar.create_basic_mathesar_user('testuser', 'mypass1234');
+  RETURN NEXT database_privs_are (
+    'mathesar_testing', 'testuser', ARRAY['CREATE', 'CONNECT', 'TEMPORARY']
+  );
+  RETURN NEXT schema_privs_are ('msar', 'testuser', ARRAY['USAGE']);
+  RETURN NEXT schema_privs_are ('__msar', 'testuser', ARRAY['USAGE']);
+  PERFORM msar.create_basic_mathesar_user(
+    'Ro"\bert''); DROP SCHEMA public;', 'my''pass1234"; DROP SCHEMA public;'
+  );
+  RETURN NEXT has_schema('public');
+  RETURN NEXT has_user('Ro"\bert''); DROP SCHEMA public;');
+  RETURN NEXT database_privs_are (
+    'mathesar_testing', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['CREATE', 'CONNECT', 'TEMPORARY']
+  );
+  RETURN NEXT schema_privs_are ('msar', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['USAGE']);
+  RETURN NEXT schema_privs_are ('__msar', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['USAGE']);
+END;
+$$ LANGUAGE plpgsql;

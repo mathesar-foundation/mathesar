@@ -1,5 +1,5 @@
 from sqlalchemy import text
-
+from sqlalchemy.exc import OperationalError
 from django.conf import settings
 from django.core.management import BaseCommand
 
@@ -20,7 +20,7 @@ def _setup_demo_template_db():
     print("Initializing demo template database...")
 
     template_db_name = settings.MATHESAR_DEMO_TEMPLATE
-    django_model = Database.current_objects.get(name=settings.DATABASES["default"]["NAME"])
+    django_model = Database.create_from_settings_key("default")
     root_engine = create_mathesar_engine(django_model)
     with root_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
@@ -36,14 +36,18 @@ def _setup_demo_template_db():
             'port': django_model.port
         }
     )
-    install_mathesar(
-        database_name=template_db_name,
-        hostname=db_model.host,
-        username=db_model.username,
-        password=db_model.password,
-        port=db_model.port,
-        skip_confirm=True
-    )
+    try:
+        install_mathesar(
+            database_name=template_db_name,
+            hostname=db_model.host,
+            username=db_model.username,
+            password=db_model.password,
+            port=db_model.port,
+            skip_confirm=True
+        )
+    except OperationalError as e:
+        db_model.delete()
+        raise e
     user_engine = create_mathesar_engine(db_model)
     load_datasets(user_engine)
     user_engine.dispose()

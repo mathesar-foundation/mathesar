@@ -28,25 +28,6 @@ services:
       timeout: 1s
       retries: 30
       start_period: 5s
-  test-service:
-    extends:
-      file: docker-compose.yml
-      service: service
-    environment:
-      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
-      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
-    container_name: mathesar_service_test
-    image: mathesar/mathesar-test:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PYTHON_REQUIREMENTS: requirements-dev.txt
-    depends_on:
-      - dev-db
-    # On testing, the HTTP port is exposed to other containers, and the host.
-    ports:
-      - "8000:8000"
   # A Django development webserver + Svelte development server used when developing Mathesar.
   #  The code changes are hot reloaded and debug flags are enabled to aid developers working on Mathesar.
   #  It is not recommended to use this service in production environment.
@@ -55,20 +36,23 @@ services:
     image: mathesar/mathesar-dev:latest
     build:
       context: .
+      target: development
       dockerfile: Dockerfile
       args:
-        PYTHON_REQUIREMENTS: requirements-dev.txt
+        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
-      - DJANGO_ALLOW_ASYNC_UNSAFE=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       - SECRET_KEY=${SECRET_KEY}
-      - DJANGO_DATABASE_URL=postgres://mathesar:mathesar@mathesar_dev_db:5432/mathesar_django
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
       - DJANGO_SUPERUSER_PASSWORD=password
-    entrypoint: ./dev-run.sh
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
+      - POSTGRES_HOST=mathesar_dev_db
+      - POSTGRES_PORT=5432
     volumes:
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/
@@ -80,6 +64,26 @@ services:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
+  test-service:
+    container_name: mathesar_service_test
+    image: mathesar/mathesar-test:latest
+    environment:
+      - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
+      - POSTGRES_HOST=mathesar_dev_db
+      - POSTGRES_PORT=5432
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
+    depends_on:
+      - dev-db
+    ports:
+      - "8000:8000"
 volumes:
   ui_node_modules:
   dev_postgres_data:

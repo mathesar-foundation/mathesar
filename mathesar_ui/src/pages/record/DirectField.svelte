@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import {
     ButtonMenuItem,
     DropdownMenu,
     iconExpandDown,
     Label,
     LabelController,
-  } from '@mathesar/component-library';
+  } from '@mathesar-component-library';
   import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
@@ -76,7 +77,9 @@
           showArrow={false}
           triggerAppearance="plain"
           closeOnInnerClick={true}
-          ariaLabel="{column.name} Field Options"
+          ariaLabel={$_('column_field_options', {
+            values: { columnName: column.name },
+          })}
           icon={iconExpandDown}
         >
           <ButtonMenuItem
@@ -84,7 +87,8 @@
             on:click={() => field.set(null)}
             {disabled}
           >
-            Set to <Null />
+            {$_('set_to')}
+            <Null />
           </ButtonMenuItem>
         </DropdownMenu>
       </div>

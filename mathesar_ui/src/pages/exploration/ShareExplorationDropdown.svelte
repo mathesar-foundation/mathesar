@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { iconShare } from '@mathesar/icons';
   import type { QueryInstance } from '@mathesar/api/types/queries';
   import { Dropdown, Icon } from '@mathesar-component-library';
@@ -13,21 +14,20 @@
   showArrow={false}
   triggerAppearance="secondary"
   {...$$restProps}
-  ariaLabel="Share"
+  ariaLabel={$_('share')}
 >
   <svelte:fragment slot="trigger">
     <Icon {...iconShare} />
-    <span class="responsive-button-label"> Share </span>
+    <span class="responsive-button-label"> {$_('share')} </span>
   </svelte:fragment>
   <ShareEntity
     slot="content"
     entityId={id}
     api={queryShareApi}
     text={{
-      header: 'Share Exploration',
-      description:
-        'Give read-only access to this exploration to anyone via a link.',
-      empty: 'This exploration is currently not shared.',
+      header: $_('share_exploration'),
+      description: $_('share_exploration_help'),
+      empty: $_('exploration_not_shared'),
     }}
     getLink={(share) => getSharedExplorationPageUrl(share.slug)}
   />

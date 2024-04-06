@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
   import { Icon } from '@mathesar-component-library';
   import type { User } from '@mathesar/api/users';
@@ -24,12 +25,12 @@
   item={{
     type: 'simple',
     href: ADMIN_USERS_PAGE_ADD_NEW_URL,
-    label: 'New User',
+    label: $_('new_user'),
     icon: iconAddUser,
   }}
 />
 
-<h1><Icon {...iconAddUser} /> New User</h1>
+<h1><Icon {...iconAddUser} /> {$_('new_user')}</h1>
 
 <FormBox>
   <UserDetailsForm on:create={(e) => onUserCreate(e.detail)} />

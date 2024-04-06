@@ -1,20 +1,21 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Route } from 'tinro';
-
-  import type { Connection } from '@mathesar/api/connections';
+  import { _ } from 'svelte-i18n';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
+  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { connectionsStore } from '@mathesar/stores/databases';
+  import type { Connection } from '@mathesar/api/connections';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import SchemaRoute from './SchemaRoute.svelte';
 
   export let connectionId: Connection['id'];
 
   $: connectionsStore.setCurrentConnectionId(connectionId);
   $: ({ connections } = connectionsStore);
-  $: connection = $connections?.find((c) => c.id === connectionId);
+  $: connection = $connections.get(connectionId);
 
   function handleUnmount() {
     connectionsStore.clearCurrentConnectionId();
@@ -38,6 +39,10 @@
   </Route>
 {:else}
   <ErrorPage>
-    Database with name <Identifier>{connectionId}</Identifier> is not found.
+    <RichText text={$_('database_not_found')} let:slotName>
+      {#if slotName === 'connectionId'}
+        <Identifier>{connectionId}</Identifier>
+      {/if}
+    </RichText>
   </ErrorPage>
 {/if}

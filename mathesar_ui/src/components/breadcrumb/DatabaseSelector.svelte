@@ -9,7 +9,7 @@
 
   const { connections, currentConnectionId } = connectionsStore;
 
-  function makeBreadcrumbSelectorItem(
+  function makeBreadcrumbSelectorEntry(
     connection: Connection,
   ): BreadcrumbSelectorEntry {
     return {
@@ -20,12 +20,14 @@
       isActive: () => connection.id === $currentConnectionId,
     };
   }
+
+  $: breadcrumbEntries = [...$connections.values()].map(
+    makeBreadcrumbSelectorEntry,
+  );
 </script>
 
 <BreadcrumbSelector
-  data={new Map([
-    [$_('connections'), $connections.map(makeBreadcrumbSelectorItem)],
-  ])}
+  data={new Map([[$_('connections'), breadcrumbEntries]])}
   triggerLabel={$_('choose_connection')}
   persistentLinks={[
     {

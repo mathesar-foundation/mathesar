@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { Button, Icon } from '@mathesar-component-library';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
@@ -10,16 +11,18 @@
 </script>
 
 <ErrorBox fullWidth>
-  <div class="title">Failed to load preview</div>
+  <div class="title">
+    {$_('failed_load_preview')}
+  </div>
   <div>{error}</div>
   <div class="buttons">
     <Button appearance="primary" on:click={() => dispatch('retry')}>
-      Retry
+      {$_('retry')}
     </Button>
-    <span>or</span>
+    <span>{$_('or')}</span>
     <Button appearance="outline-primary" on:click={() => dispatch('delete')}>
       <Icon {...iconDeleteMajor} />
-      <span>Delete import</span>
+      <span>{$_('delete_import')}</span>
     </Button>
   </div>
 </ErrorBox>

@@ -1,2 +1,3 @@
 MATHESAR_INSTALLATION_DIR: /etc/mathesar
+MATHESAR_PG_DIR: /var/lib/docker/volumes/mathesar_postgresql_data/_data
 DOMAIN_NAME: localhost

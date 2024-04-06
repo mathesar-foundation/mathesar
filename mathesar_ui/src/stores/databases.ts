@@ -1,88 +1,94 @@
-/* eslint-disable max-classes-per-file */
+import { some } from 'iter-tools';
+import { derived, get, writable, type Readable } from 'svelte/store';
 
 import {
-  writable,
-  derived,
-  type Writable,
-  type Readable,
-  get,
-} from 'svelte/store';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
+  ImmutableMap,
+  WritableMap,
+  defined,
+} from '@mathesar-component-library';
 import connectionsApi, {
   type Connection,
+  type CreateFromKnownConnectionProps,
+  type CreateFromScratchProps,
+  type CreateWithNewUserProps,
   type UpdatableConnectionProperties,
 } from '@mathesar/api/connections';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 const commonData = preloadCommonData();
 
-class ConnectionModel {
-  readonly id: Connection['id'];
+function sortConnections(c: Iterable<Connection>): Connection[] {
+  return [...c].sort((a, b) => a.nickname.localeCompare(b.nickname));
+}
 
-  readonly nickname: Connection['nickname'];
-
-  readonly database: Connection['database'];
-
-  readonly username: Connection['username'];
-
-  readonly host: Connection['host'];
-
-  readonly port: Connection['port'];
-
-  constructor(connectionDetails: Connection) {
-    this.id = connectionDetails.id;
-    this.nickname = connectionDetails.nickname;
-    this.database = connectionDetails.database;
-    this.username = connectionDetails.username;
-    this.host = connectionDetails.host;
-    this.port = connectionDetails.port;
-  }
-
-  getConnectionJson(): Connection {
-    return {
-      id: this.id,
-      nickname: this.nickname,
-      database: this.database,
-      username: this.username,
-      host: this.host,
-      port: this.port,
-    };
-  }
-
-  with(connectionDetails: Partial<Connection>): ConnectionModel {
-    return new ConnectionModel({
-      ...this.getConnectionJson(),
-      ...connectionDetails,
-    });
-  }
+/**
+ * @returns true if the given connection is the only one that points to the same
+ * database among all the supplied connections. Connections with the same ids
+ * will not be compared.
+ */
+export function connectionHasUniqueDatabaseReference(
+  connection: Connection,
+  allConnections: Iterable<Connection>,
+): boolean {
+  return !some(
+    (c) =>
+      c.id !== connection.id &&
+      c.host === connection.host &&
+      c.port === connection.port &&
+      c.database === connection.database,
+    allConnections,
+  );
 }
 
 class ConnectionsStore {
-  readonly requestStatus: Writable<RequestStatus> = writable();
+  private readonly unsortedConnections = new WritableMap<
+    Connection['id'],
+    Connection
+  >();
 
-  readonly connections = writable<ConnectionModel[]>([]);
-
-  readonly count = writable(0);
+  readonly connections: Readable<ImmutableMap<Connection['id'], Connection>>;
 
   readonly currentConnectionId = writable<Connection['id'] | undefined>();
 
-  readonly currentConnection: Readable<ConnectionModel | undefined>;
+  readonly currentConnection: Readable<Connection | undefined>;
 
   constructor() {
-    this.requestStatus.set({ state: 'success' });
-    this.connections.set(
-      commonData?.connections.map(
-        (connection) => new ConnectionModel(connection),
-      ) ?? [],
+    this.unsortedConnections.reconstruct(
+      commonData.connections.map((c) => [c.id, c]),
     );
-    this.count.set(commonData?.connections.length ?? 0);
-    this.currentConnectionId.set(commonData?.current_connection ?? undefined);
+    this.connections = derived(
+      this.unsortedConnections,
+      (uc) =>
+        new ImmutableMap(sortConnections(uc.values()).map((c) => [c.id, c])),
+    );
+    this.currentConnectionId.set(commonData.current_connection ?? undefined);
     this.currentConnection = derived(
       [this.connections, this.currentConnectionId],
-      ([connections, currentConnectionId]) =>
-        connections.find((c) => c.id === currentConnectionId),
+      ([connections, id]) => defined(id, (v) => connections.get(v)),
     );
+  }
+
+  private addConnection(connection: Connection) {
+    this.unsortedConnections.set(connection.id, connection);
+  }
+
+  async createFromKnownConnection(props: CreateFromKnownConnectionProps) {
+    const connection = await connectionsApi.createFromKnownConnection(props);
+    this.addConnection(connection);
+    return connection;
+  }
+
+  async createFromScratch(props: CreateFromScratchProps) {
+    const connection = await connectionsApi.createFromScratch(props);
+    this.addConnection(connection);
+    return connection;
+  }
+
+  async createWithNewUser(props: CreateWithNewUserProps) {
+    const connection = await connectionsApi.createWithNewUser(props);
+    this.addConnection(connection);
+    return connection;
   }
 
   setCurrentConnectionId(connectionId: Connection['id']) {
@@ -94,44 +100,24 @@ class ConnectionsStore {
   }
 
   async updateConnection(
-    connectionId: Connection['id'],
+    id: Connection['id'],
     properties: Partial<UpdatableConnectionProperties>,
   ): Promise<Connection> {
-    const updatedConnection = await connectionsApi.update(
-      connectionId,
-      properties,
-    );
-    const newConnectionModel = new ConnectionModel(updatedConnection);
-    this.connections.update((connections) =>
-      connections.map((connection) => {
-        if (connection.id === connectionId) {
-          return newConnectionModel;
-        }
-        return connection;
-      }),
-    );
-    return newConnectionModel;
+    const connection = await connectionsApi.update(id, properties);
+    this.unsortedConnections.set(id, connection);
+    return connection;
   }
 
-  async deleteConnection(
-    connectionId: Connection['id'],
-    deleteMathesarSchemas = false,
-  ) {
+  async deleteConnection(id: Connection['id'], deleteMathesarSchemas = false) {
     const connections = get(this.connections);
-    const connectionToDelete = connections.find(
-      (conn) => conn.id === connectionId,
+    const connection = connections.get(id);
+    if (!connection) return;
+    const databaseIsUnique = connectionHasUniqueDatabaseReference(
+      connection,
+      connections.values(),
     );
-    const otherConnectionsUseSameDb = !!connections.find(
-      (conn) =>
-        conn.id !== connectionId &&
-        conn.database === connectionToDelete?.database,
-    );
-    const mathesarSchemasShouldBeDeleted =
-      !otherConnectionsUseSameDb && deleteMathesarSchemas;
-    await connectionsApi.delete(connectionId, mathesarSchemasShouldBeDeleted);
-    this.connections.update((conns) =>
-      conns.filter((conn) => conn.id !== connectionId),
-    );
+    await connectionsApi.delete(id, deleteMathesarSchemas && databaseIsUnique);
+    this.unsortedConnections.delete(id);
   }
 }
 
@@ -140,5 +126,3 @@ export const connectionsStore: MakeWritablePropertiesReadable<ConnectionsStore> 
 
 /** @deprecated Use connectionsStore.currentConnection instead */
 export const currentDatabase = connectionsStore.currentConnection;
-
-/* eslint-enable max-classes-per-file */

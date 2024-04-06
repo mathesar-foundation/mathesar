@@ -33,7 +33,7 @@ class ConnectionViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
     def destroy(self, request, pk=None):
         db_object = self.get_object()
-        if request.query_params.get('del_msar_schemas'):
+        if request.query_params.get('del_msar_schemas').lower() == 'true':
             engine = db_object._sa_engine
             uninstall_mathesar_from_database(engine)
         db_object.delete()

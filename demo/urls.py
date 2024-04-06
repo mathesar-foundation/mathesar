@@ -17,5 +17,6 @@ urlpatterns = [
     re_path(r'^api/ui/v0/users/(?P<pk>[^/.]+)/password_reset/', permission_denied, name='password_reset'),
     path('api/ui/v0/users/password_change/', permission_denied, name='password_change'),
     path('auth/password_reset_confirm/', RedirectView.as_view(url='/'), name='password_reset'),
+    path(r'health/', include('health_check.urls')),
     path('', include(root_urls)),
 ]

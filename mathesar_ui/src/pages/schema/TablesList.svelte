@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
@@ -16,7 +17,7 @@
     <TableCard {canExecuteDDL} {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>
-      <p>No Tables</p>
+      <p>{$_('no_tables')}</p>
     </EmptyEntity>
   {/each}
 </div>

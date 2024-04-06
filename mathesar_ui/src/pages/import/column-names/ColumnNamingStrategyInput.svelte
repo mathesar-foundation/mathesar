@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
-
+  import { _ } from 'svelte-i18n';
   import { RadioGroup } from '@mathesar-component-library';
   import LabelYesHeaderRow from './LabelYesHeaderRow.svelte';
   import LabelNoHeaderRow from './LabelNoHeaderRow.svelte';
@@ -16,7 +16,7 @@
   on:change
   boxed
   options={[true, false]}
-  label="Column Names"
+  label={$_('column_names')}
   getRadioLabel={(v) =>
     v ? { component: LabelYesHeaderRow } : { component: LabelNoHeaderRow }}
   {...$$restProps}

@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-
-from mathesar.models.base import PreviewColumnSettings, TableSettings, compute_default_preview_template
+from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidColumnOrder
+from mathesar.models.base import PreviewColumnSettings, TableSettings, compute_default_preview_template, ValidationError
 
 
 class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
@@ -37,6 +37,9 @@ class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.Hyperlinked
 
         column_order_data = validated_data.pop('column_order', None)
         if column_order_data is not None:
-            instance.column_order = column_order_data
-            instance.save()
+            try:
+                instance.column_order = column_order_data
+                instance.save()
+            except ValidationError:
+                raise InvalidColumnOrder()
         return instance

@@ -49,7 +49,7 @@
     'canExecuteDDL',
   );
   $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
-  $: isNormalRoutingContext = commonData?.routing_context === 'normal';
+  $: isNormalRoutingContext = commonData.routing_context === 'normal';
 
   let isCreatingNewEmptyTable = false;
 

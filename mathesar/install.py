@@ -9,8 +9,9 @@ import django
 from django.core import management
 from decouple import config as decouple_config
 from django.conf import settings
-from db import install
 from django.db.utils import IntegrityError
+from sqlalchemy.exc import OperationalError
+from db import install
 
 
 def main(skip_static_collection=False):
@@ -24,7 +25,6 @@ def main(skip_static_collection=False):
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
     django.setup()
     management.call_command('migrate')
-    from mathesar.models.base import Database
     debug_mode = decouple_config('DEBUG', default=False, cast=bool)
     #
     if not debug_mode and not skip_static_collection:
@@ -33,44 +33,36 @@ def main(skip_static_collection=False):
     django_db_key = decouple_config('DJANGO_DATABASE_KEY', default="default")
     user_databases = [key for key in settings.DATABASES if key != django_db_key]
     for database_key in user_databases:
-        credentials = settings.DATABASES[database_key]
         try:
-            install_on_db_with_key(credentials, skip_confirm)
-            Database.current_objects.create(
-                name=database_key,
-                db_name=credentials["NAME"],
-                username=credentials["USER"],
-                password=credentials["PASSWORD"],
-                host=credentials["HOST"],
-                port=credentials["PORT"]
-            ).save()
-        except IntegrityError as e:
-            if e.args[0].startswith(
-                (
-                    'duplicate key value violates unique constraint',
-                    'UNIQUE constraint failed: mathesar_database.name'
-                )
-            ):
-                db_model = Database.current_objects.get(name=database_key)
-                db_model.db_name = credentials["NAME"]
-                db_model.username = credentials["USER"]
-                db_model.password = credentials["PASSWORD"]
-                db_model.host = credentials["HOST"]
-                db_model.port = credentials["PORT"]
-                db_model.save()
-            else:
-                raise e
+            install_on_db_with_key(database_key, skip_confirm)
+        except IntegrityError:
+            continue
+    if getattr(settings, 'MATHESAR_LIVE_DEMO', False) is True:
+        management.call_command(
+            'createsuperuser',
+            '--no-input',
+            '--username', 'demo',
+            '--email', 'admin@example.com',
+        )
+        management.call_command('setup_demo_template_db')
 
 
-def install_on_db_with_key(credentials, skip_confirm):
-    return install.install_mathesar(
-        database_name=credentials["NAME"],
-        hostname=credentials["HOST"],
-        username=credentials["USER"],
-        password=credentials["PASSWORD"],
-        port=credentials["PORT"],
-        skip_confirm=skip_confirm
-    )
+def install_on_db_with_key(database_key, skip_confirm):
+    from mathesar.models.base import Database
+    db_model = Database.create_from_settings_key(database_key)
+    db_model.save()
+    try:
+        install.install_mathesar(
+            database_name=db_model.db_name,
+            hostname=db_model.host,
+            username=db_model.username,
+            password=db_model.password,
+            port=db_model.port,
+            skip_confirm=skip_confirm
+        )
+    except OperationalError as e:
+        db_model.delete()
+        raise e
 
 
 if __name__ == "__main__":

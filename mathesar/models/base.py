@@ -92,7 +92,7 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
     """
     Objects that can be referenced using a database identifier
     """
-    oid = models.IntegerField()
+    oid = models.PositiveIntegerField()
 
     class Meta:
         abstract = True
@@ -145,6 +145,28 @@ class Database(ReflectionManagerMixin, BaseModel):
 
     def __repr__(self):
         return f'{self.__class__.__name__}: {self.name}, {self.id}'
+
+    @classmethod
+    def create_from_settings_key(cls, db_key):
+        """
+        Get an ethereal instance of the model from Django settings.
+
+        This is only supported for Postgres DBs (e.g., it won't work on an
+        SQLite3 internal DB; that returns NoneType)
+
+        Args:
+            db_key: This should be the key of the DB in settings.DATABASES
+        """
+        db_info = settings.DATABASES[db_key]
+        if 'postgres' in db_info['ENGINE']:
+            return cls(
+                name=db_key,
+                db_name=db_info['NAME'],
+                username=db_info['USER'],
+                password=db_info['PASSWORD'],
+                host=db_info['HOST'],
+                port=db_info['PORT'],
+            )
 
     def save(self, **kwargs):
         db_name = self.name
@@ -898,10 +920,26 @@ class PreviewColumnSettings(BaseModel):
     template = models.CharField(max_length=255)
 
 
+def validate_column_order(value):
+    """
+    Custom validator to ensure that all elements in the list are positive integers.
+    """
+    if not all(isinstance(item, int) and item > 0 for item in value):
+        raise ValidationError("All elements of column order must be positive integers.")
+
+
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
-    column_order = JSONField(null=True, default=None)
+    column_order = JSONField(null=True, blank=True, default=None, validators=[validate_column_order])
+
+    def save(self, **kwargs):
+        # Cleans the fields before saving by running respective field validator(s)
+        try:
+            self.clean_fields()
+        except ValidationError as e:
+            raise e
+        super().save(**kwargs)
 
 
 def _create_table_settings(tables):

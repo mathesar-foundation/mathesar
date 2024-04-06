@@ -1,53 +1,51 @@
 site_name: Mathesar Documentation
 site_url: https://docs.mathesar.org/
-repo_url: https://github.com/centerofci/mathesar/
-repo_name: centerofci/mathesar
+repo_url: https://github.com/mathesar-foundation/mathesar/
+repo_name: mathesar-foundation/mathesar
+edit_uri: edit/develop/docs/docs/
 
 nav:
   - Introduction:
       - Welcome: index.md
   - Installation:
-      - Install with Docker Compose: installation/docker-compose/index.md
+      - Install using Docker Compose: installation/docker-compose/index.md
       - Install from scratch: installation/build-from-source/index.md
-      - Install with guided script: installation/guided-install/index.md
-      - Appendix to guided script:
-          - Under the hood: installation/guided-install/under-the-hood.md
-          - Troubleshooting: installation/guided-install/troubleshooting.md
-      - Install using Docker image: installation/docker/index.md
   - Configuration:
       - Environment variables: configuration/env-variables.md
-      - Connect to an existing database server: configuration/connect-to-existing-db.md
-      - Customize Docker Compose installations: configuration/customize-docker-compose.md
   - Administration:
-      - Upgrade Mathesar: administration/upgrade.md
+      - Upgrade:
+        - To 0.1.6: administration/upgrade/0.1.6.md
+        - To 0.1.5: administration/upgrade/0.1.5.md
+        - To 0.1.4: administration/upgrade/0.1.4.md
+        - To older versions: administration/upgrade/older.md
       - Uninstall Mathesar: administration/uninstall.md
+      - Debug Mathesar: administration/debug.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
       - Importing data: user-guide/importing-data.md
       - Syncing database changes: user-guide/syncing-db.md
       - Users & access levels: user-guide/users.md
       - Glossary: user-guide/glossary.md
+  - Releases:
+      - '0.1.6': releases/0.1.6.md
+      - '0.1.5': releases/0.1.5.md
+      - '0.1.4': releases/0.1.4.md
+      - '0.1.3': releases/0.1.3.md
+      - '0.1.2': releases/0.1.2.md
+      - '0.1.1': releases/0.1.1.md
+      - '0.1.0': releases/0.1.0.md
 
 plugins:
   - search:
       lang: en
   - redirects:
       redirect_maps:
-        "installation-dc/administration.md": "installation/guided-install/index.md#start-stop"
         "installation-dc/ansible-setup.md": "installation/docker-compose/index.md"
-        "installation-dc/quickstart.md": "installation/guided-install/index.md"
-        "installation-dc/troubleshooting.md": "installation/guided-install/troubleshooting.md"
-        "installation-dc/under-the-hood.md": "installation/guided-install/under-the-hood.md"
-        "installation-dc/uninstall.md": "installation/guided-install/index.md#uninstall"
         "product/intro.md": "user-guide/index.md"
         "product/syncing-db.md": "user-guide/syncing-db.md"
         "product/users.md": "user-guide/users.md"
         "install/index.md": "index.md"
-        "install/guided-install/index.md": "installation/guided-install/index.md"
         "install/docker-compose/index.md": "installation/docker-compose/index.md"
-        "install/docker-compose/under-the-hood.md": "installation/guided-install/under-the-hood.md"
-        "install/docker-compose/troubleshooting.md": "installation/guided-install/troubleshooting.md"
-        "install/docker/index.md": "installation/docker/index.md"
         "install/build-from-source/index.md": "installation/build-from-source/index.md"
   - macros
   - placeholder
@@ -102,4 +100,4 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.1.3
+  mathesar_version: 0.1.6

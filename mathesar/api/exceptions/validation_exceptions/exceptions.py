@@ -148,6 +148,19 @@ class DictHasBadKeys(MathesarValidationException):
         super().__init__(None, self.error_code, message, field, None)
 
 
+class UnsupportedInstallationDatabase(MathesarValidationException):
+    error_code = ErrorCodes.UnsupportedInstallationDatabase.value
+
+    def __init__(
+            self,
+            message=None,
+            field=None,
+    ):
+        if message is None:
+            message = "Installing on the internal database isn't allowed."
+        super().__init__(None, self.error_code, message, field, None)
+
+
 class InvalidTableName(MathesarValidationException):
     error_code = ErrorCodes.InvalidTableName.value
 
@@ -181,3 +194,14 @@ class EditingPublicSchemaIsDisallowed(MathesarValidationException):
             field=None,
     ):
         super().__init__(None, self.error_code, message, field)
+
+
+class InvalidColumnOrder(MathesarValidationException):
+    error_code = ErrorCodes.InvalidColumnOrder.value
+
+    def __init__(
+            self,
+            message="Invalid column order.",
+            field=None,
+    ):
+        super().__init__(None, self.error_code, message, field, None)
