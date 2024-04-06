@@ -95,9 +95,8 @@
   }
 
   function goToTablePage() {
-    router.goto(linkedTableHref);
+    router.goto(linkedTableHref, true);
   }
-
 </script>
 
 {#if linkedTableHref && linkedTableName}
