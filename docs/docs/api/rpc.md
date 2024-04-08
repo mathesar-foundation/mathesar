@@ -21,7 +21,7 @@ To use an RPC function:
 
 !!! example
 
-    To call function `create_from_known_connection` from the `connections` section of this page, you'd send something like:
+    To call function `add_from_known_connection` from the `connections` section of this page, you'd send something like:
 
     `POST /api/rpc/v0/`
 
@@ -29,7 +29,7 @@ To use an RPC function:
     {
       "jsonrpc": "2.0",
       "id": 234,
-      "method": "connections.create_from_known_connection",
+      "method": "connections.add_from_known_connection",
       "params": {
         "nickname": "anewconnection",
         "db_name": "mynewcooldb"
@@ -42,6 +42,6 @@ To use an RPC function:
 ::: mathesar.rpc.connections
     options:
       members:
-      - create_from_known_connection
-      - create_from_scratch
+      - add_from_known_connection
+      - add_from_scratch
       - DBModelReturn
