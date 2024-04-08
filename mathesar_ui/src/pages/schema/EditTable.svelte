@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { ModalController } from '@mathesar-component-library';
   import EditTableHoc from '@mathesar/components/EditTableHOC.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';

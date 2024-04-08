@@ -5,7 +5,7 @@
     RadioGroup,
     Spinner,
   } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import {
     FormSubmit,
     makeForm,

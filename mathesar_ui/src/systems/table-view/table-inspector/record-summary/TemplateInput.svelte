@@ -2,7 +2,7 @@
   import type { ComponentProps } from 'svelte';
 
   import { FormattedInput } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import TemplateInputFormatter from './TemplateInputFormatter';
   import AppendColumn from './AppendColumn.svelte';
 

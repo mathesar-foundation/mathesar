@@ -11,7 +11,7 @@
     setUsersStoreInContext,
     type UserModel,
   } from '@mathesar/stores/users';
-  import type { UserRole } from '@mathesar/api/users';
+  import type { UserRole } from '@mathesar/api/rest/users';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { AccessControlView } from '@mathesar/systems/users-and-permissions';
   import type { ObjectRoleMap } from '@mathesar/utils/permissions';

@@ -8,7 +8,7 @@
     PasswordInput,
     type ModalController,
   } from '@mathesar-component-library';
-  import type { Connection } from '@mathesar/api/connections';
+  import type { Connection } from '@mathesar/api/rest/connections';
   import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
   import TextInput from '@mathesar/component-library/text-input/TextInput.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';

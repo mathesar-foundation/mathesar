@@ -1,7 +1,7 @@
 import { derived, writable, type Readable } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Response as ApiResponse } from '@mathesar/api/types/tables/records';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Response as ApiResponse } from '@mathesar/api/rest/types/tables/records';
 import { WritableMap } from '@mathesar/component-library';
 import {
   renderTransitiveRecordSummary,
@@ -12,7 +12,7 @@ import {
   getAPI,
   patchAPI,
   type RequestStatus,
-} from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 

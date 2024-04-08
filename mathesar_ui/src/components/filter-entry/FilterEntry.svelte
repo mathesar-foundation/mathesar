@@ -20,7 +20,7 @@
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
   import type { FilterEntryColumnLike } from './types';
   import { FILTER_INPUT_CLASS, validateFilterEntry } from './utils';
 

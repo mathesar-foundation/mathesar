@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import { iconAddNew, iconConstraint, iconTableLink } from '@mathesar/icons';
   import {
     getColumnIconProps,

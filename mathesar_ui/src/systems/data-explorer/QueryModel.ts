@@ -3,7 +3,7 @@ import type {
   QueryInstanceTransformation,
   QueryInstance,
   QueryRunRequest,
-} from '@mathesar/api/types/queries';
+} from '@mathesar/api/rest/types/queries';
 import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';

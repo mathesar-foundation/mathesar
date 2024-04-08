@@ -5,7 +5,7 @@ import {
 import type {
   MoneyColumn,
   NumberFormat,
-} from '@mathesar/api/types/tables/columns';
+} from '@mathesar/api/rest/types/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import MoneyCell from './components/money/MoneyCell.svelte';
 import MoneyCellInput from './components/money/MoneyCellInput.svelte';

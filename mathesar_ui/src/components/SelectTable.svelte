@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { Select } from '@mathesar-component-library';
   import type { SelectProps } from '@mathesar-component-library/types';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import TableName from './TableName.svelte';
 
   type $$Events = Select<TableEntry | undefined>['$$events_def'];

@@ -15,7 +15,7 @@
     type CommonCreationProps,
     type Connection,
     type SampleDataSchemaIdentifier,
-  } from '@mathesar/api/connections';
+  } from '@mathesar/api/rest/connections';
   import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
   import LabeledInput from '@mathesar/component-library/labeled-input/LabeledInput.svelte';
   import Select from '@mathesar/component-library/select/Select.svelte';

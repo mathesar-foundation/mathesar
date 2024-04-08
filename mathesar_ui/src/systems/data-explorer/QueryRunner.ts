@@ -1,7 +1,7 @@
 import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-import { ApiMultiError } from '@mathesar/api/utils/errors';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
 import { ImmutableMap, CancellablePromise } from '@mathesar-component-library';
 import Pagination from '@mathesar/utils/Pagination';
 import type {
@@ -9,7 +9,7 @@ import type {
   QueryRunResponse,
   QueryResultsResponse,
   QueryColumnMetaData,
-} from '@mathesar/api/types/queries';
+} from '@mathesar/api/rest/types/queries';
 import { runQuery, fetchQueryResults } from '@mathesar/stores/queries';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';

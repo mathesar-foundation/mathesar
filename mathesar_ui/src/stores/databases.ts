@@ -12,7 +12,7 @@ import connectionsApi, {
   type CreateFromScratchProps,
   type CreateWithNewUserProps,
   type UpdatableConnectionProperties,
-} from '@mathesar/api/connections';
+} from '@mathesar/api/rest/connections';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 

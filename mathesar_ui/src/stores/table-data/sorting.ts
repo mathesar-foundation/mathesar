@@ -7,7 +7,7 @@ import type {
   SortDirection as ApiSortDirection,
   SortingEntry as ApiSortingEntry,
   GetRequestParams,
-} from '@mathesar/api/types/tables/records';
+} from '@mathesar/api/rest/types/tables/records';
 import type { Grouping } from './grouping';
 
 function sortDirectionIsValid(d: string): boolean {

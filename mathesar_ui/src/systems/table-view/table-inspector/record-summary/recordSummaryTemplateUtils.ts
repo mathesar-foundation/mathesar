@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import { validIf, type ValidationFn } from '@mathesar/components/form';
 
 export type ColumnLike = Pick<Column, 'id' | 'name'>;
