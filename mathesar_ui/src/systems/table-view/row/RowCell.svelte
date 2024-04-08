@@ -34,7 +34,7 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
@@ -102,6 +102,9 @@
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
+  $: recordName = $recordSummaries
+    .get(String(column.id))
+    ?.get(String(value));
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -168,9 +171,7 @@
       {value}
       {isProcessing}
       {canViewLinkedEntities}
-      recordSummary={$recordSummaries
-        .get(String(column.id))
-        ?.get(String(value))}
+      recordSummary={recordName}
       setRecordSummary={(recordId, recordSummary) =>
         recordSummaries.addBespokeRecordSummary({
           columnId: String(columnId),
@@ -209,11 +210,11 @@
         {/if}
         {#if showLinkedRecordHyperLink && linkedRecordHref}
           <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
-            {$_('open')}
-            <Identifier
-              >{$recordSummaries.get(String(column.id))?.get(String(value)) ||
-                value}</Identifier
-            >
+            <RichText text={$_('open_named_record')} let:slotName>
+              {#if slotName === 'recordName'}
+                {recordName}
+              {/if}
+            </RichText>
           </LinkMenuItem>
         {/if}
         <MenuDivider />

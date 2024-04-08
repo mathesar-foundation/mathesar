@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import { ButtonMenuItem } from '@mathesar-component-library';
+  import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
+  import { RichText } from '@mathesar/components/rich-text';
   import {
     getSortingLabelForColumn,
     type SortDirection,
@@ -23,7 +23,7 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
-  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { tables } from '@mathesar/stores/tables';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -63,7 +63,9 @@
   $: linkedTableHref = linkKey
     ? getTablePageUrl({ tableId: linkKey.referent_table })
     : undefined;
-  $: ({ column } = processedColumn);
+  $: table = processedColumn.linkFk
+    ? $tables.data.get(processedColumn.linkFk.referent_table)
+    : null;
 
   function addFilter() {
     void imperativeFilterController?.beginAddingNewFilteringEntry(columnId);
@@ -93,18 +95,16 @@
   function removeGrouping() {
     grouping.update((g) => g.withoutColumns([columnId]));
   }
-
-  function goToTablePage() {
-    router.goto(linkedTableHref, true);
-  }
 </script>
 
 {#if linkedTableHref && linkedTableName}
-  <ButtonMenuItem icon={iconTable} on:click={goToTablePage}>
-    {$_('open')}
-    <Identifier>{column.name}</Identifier>
-    {$_('table')}
-  </ButtonMenuItem>
+  <LinkMenuItem icon={iconTable} href={linkedTableHref}>
+    <RichText text={$_('open_named_table')} let:slotName>
+      {#if slotName === 'tableName'}
+        {table?.name}
+      {/if}
+    </RichText>
+  </LinkMenuItem>
 {/if}
 {#if columnAllowsFiltering}
   <ButtonMenuItem icon={iconAddFilter} on:click={addFilter}>
