@@ -24,6 +24,7 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import { tables } from '@mathesar/stores/tables';
+  import Identifier from '@mathesar/components/Identifier.svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -97,7 +98,7 @@
   <LinkMenuItem icon={iconTable} href={linkedTableHref}>
     <RichText text={$_('open_named_table')} let:slotName>
       {#if slotName === 'tableName'}
-        {linkedTable.name}
+        <Identifier>{linkedTable.name}</Identifier>
       {/if}
     </RichText>
   </LinkMenuItem>
