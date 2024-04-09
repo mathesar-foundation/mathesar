@@ -65,7 +65,7 @@
     : undefined;
   $: table = processedColumn.linkFk
     ? $tables.data.get(processedColumn.linkFk.referent_table)
-    : null;
+    : undefined;
 
   function addFilter() {
     void imperativeFilterController?.beginAddingNewFilteringEntry(columnId);
