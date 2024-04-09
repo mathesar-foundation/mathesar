@@ -1,30 +1,31 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import {
     getSortingLabelForColumn,
     type SortDirection,
   } from '@mathesar/components/sort-entry/utils';
   import {
-    iconTable,
     iconAddFilter,
     iconGrouping,
     iconRemoveFilter,
     iconSortAscending,
     iconSortDescending,
+    iconTable,
   } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
-  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import { tables } from '@mathesar/stores/tables';
-  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
 
   const userProfile = getUserProfileStoreFromContext();
 

@@ -1,27 +1,30 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
+
   import {
     ButtonMenuItem,
     ContextMenu,
     LinkMenuItem,
-    WritableMap,
     MenuDivider,
     MenuHeading,
+    WritableMap,
   } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { States } from '@mathesar/api/utils/requestUtils';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import {
+    SheetCell,
     isCellActive,
     isCellSelected,
     scrollBasedOnActiveCell,
-    SheetCell,
   } from '@mathesar/components/sheet';
-  import { iconSetToNull, iconRecord } from '@mathesar/icons';
+  import { iconRecord, iconSetToNull } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -34,11 +37,9 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { RichText } from '@mathesar/components/rich-text';
-  import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import CellErrors from './CellErrors.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
-  import Identifier from '@mathesar/components/Identifier.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
