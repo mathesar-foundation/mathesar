@@ -38,6 +38,7 @@
   import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
 
   export let recordsData: RecordsData;
   export let selection: TabularDataSelection;
@@ -212,7 +213,7 @@
           <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
             <RichText text={$_('open_named_record')} let:slotName>
               {#if slotName === 'recordName'}
-                {recordSummary}
+                <Identifier>{recordSummary}</Identifier>
               {/if}
             </RichText>
           </LinkMenuItem>
