@@ -57,14 +57,10 @@
 
   $: hasGrouping = $grouping.hasColumn(columnId);
 
-  $: linkKey = processedColumn.linkFk;
-  $: getTablePageUrl = $storeToGetTablePageUrl;
-  $: linkedTableName = linkKey ? linkKey.name : undefined;
-  $: linkedTableHref = linkKey
-    ? getTablePageUrl({ tableId: linkKey.referent_table })
-    : undefined;
-  $: table = processedColumn.linkFk
-    ? $tables.data.get(processedColumn.linkFk.referent_table)
+  $: ({ linkFk } = processedColumn);
+  $: linkedTable = linkFk ? $tables.data.get(linkFk.referent_table) : undefined;
+  $: linkedTableHref = linkedTable
+    ? $storeToGetTablePageUrl({ tableId: linkedTable.id })
     : undefined;
 
   function addFilter() {
@@ -97,11 +93,11 @@
   }
 </script>
 
-{#if linkedTableHref && linkedTableName}
+{#if linkedTable && linkedTableHref}
   <LinkMenuItem icon={iconTable} href={linkedTableHref}>
     <RichText text={$_('open_named_table')} let:slotName>
       {#if slotName === 'tableName'}
-        {table?.name}
+        {linkedTable.name}
       {/if}
     </RichText>
   </LinkMenuItem>
