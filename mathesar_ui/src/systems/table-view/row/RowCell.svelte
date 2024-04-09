@@ -102,7 +102,7 @@
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
-  $: recordName = $recordSummaries
+  $: recordSummary = $recordSummaries
     .get(String(column.id))
     ?.get(String(value));
 
@@ -171,12 +171,12 @@
       {value}
       {isProcessing}
       {canViewLinkedEntities}
-      recordSummary={recordName}
-      setRecordSummary={(recordId, recordSummary) =>
+      {recordSummary}
+      setRecordSummary={(recordId, rs) =>
         recordSummaries.addBespokeRecordSummary({
           columnId: String(columnId),
           recordId,
-          recordSummary,
+          recordSummary: rs,
         })}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
@@ -212,7 +212,7 @@
           <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
             <RichText text={$_('open_named_record')} let:slotName>
               {#if slotName === 'recordName'}
-                {recordName}
+                {recordSummary}
               {/if}
             </RichText>
           </LinkMenuItem>
