@@ -7,6 +7,7 @@ from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_superuser_required
 
 from mathesar.utils import connections
+from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
 class DBModelReturn(TypedDict):
@@ -42,6 +43,7 @@ class DBModelReturn(TypedDict):
 
 @rpc_method(name='connections.add_from_known_connection')
 @http_basic_auth_superuser_required
+@handle_rpc_exceptions
 def add_from_known_connection(
         *,
         nickname: str,
@@ -86,6 +88,7 @@ def add_from_known_connection(
 
 @rpc_method(name='connections.add_from_scratch')
 @http_basic_auth_superuser_required
+@handle_rpc_exceptions
 def add_from_scratch(
         *,
         nickname: str,
