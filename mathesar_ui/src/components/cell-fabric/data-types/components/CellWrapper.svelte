@@ -23,8 +23,6 @@
    */
   export let horizontalAlignment: HorizontalAlignment = 'left';
 
-  let isFocused = false;
-
   function shouldAutoFocus(
     _isActive: boolean,
     _mode: 'edit' | 'default',
@@ -60,23 +58,6 @@
   }
   $: void handleStateChange(isActive, mode);
 
-  function handleFocus() {
-    isFocused = true;
-    // Note: you might think we ought to automatically activate the cell at this
-    // point to ensure that we don't have any cells which are focused but not
-    // active. I tried this and it caused bugs with selecting columns and rows
-    // via header cells. I didn't want to spend time tracking them down because
-    // we are planning to refactor the cell selection logic soon anyway. It
-    // doesn't _seem_ like we have any code which focuses the cell without
-    // activating it, but it would be nice to eventually build a better
-    // guarantee into the codebase which prevents cells from being focused
-    // without being activated.
-  }
-
-  function handleBlur() {
-    isFocused = false;
-  }
-
   function handleCopy(e: ClipboardEvent) {
     if (e.target !== element) {
       // When the user copies text _within_ a cell (e.g. from within an input
@@ -93,7 +74,6 @@
 <div
   class="cell-wrapper"
   class:is-active={isActive}
-  class:is-focused={isFocused}
   class:disabled
   class:is-edit-mode={mode === 'edit'}
   class:truncate={multiLineTruncate && !isIndependentOfSheet}
@@ -111,8 +91,6 @@
   on:mouseleave
   on:keydown
   on:copy={handleCopy}
-  on:focus={handleFocus}
-  on:blur={handleBlur}
   tabindex={-1}
   {...$$restProps}
 >
@@ -146,7 +124,7 @@
       box-shadow: 0 0 0 2px var(--slate-300);
       border-radius: 2px;
 
-      &.is-focused {
+      &:focus {
         box-shadow: 0 0 0 2px var(--sky-700);
       }
     }
