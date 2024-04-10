@@ -115,13 +115,16 @@ export class TabularData {
     );
 
     const plane = derived(
-      [this.recordsData.selectableRowsMap, this.processedColumns],
-      ([selectableRowsMap, processedColumns]) => {
+      [
+        this.recordsData.selectableRowsMap,
+        this.processedColumns,
+        this.display.placeholderRowId,
+      ],
+      ([selectableRowsMap, processedColumns, placeholderRowId]) => {
         const rowIds = new Series([...selectableRowsMap.keys()]);
         const columns = [...processedColumns.values()];
         const columnIds = new Series(columns.map((c) => String(c.id)));
-        // TODO_3037 incorporate placeholder row into plane
-        return new Plane(rowIds, columnIds);
+        return new Plane(rowIds, columnIds, placeholderRowId);
       },
     );
     this.selection = new SheetSelectionStore(plane);
