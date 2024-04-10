@@ -1,7 +1,11 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import type { HorizontalAlignment } from './typeDefinitions';
+
+  const dispatch = createEventDispatcher();
 
   export let element: HTMLElement | undefined = undefined;
   export let isActive = false;
@@ -57,6 +61,17 @@
       e.stopPropagation();
     }
   }
+
+  function handleMouseDown(e: MouseEvent) {
+    if (mode === 'edit') {
+      // In edit mode we want to capture mousedown events and prevent them from
+      // propagating to the sheet where mousedown events are used to select
+      // cells. Without this call, clicking inside a cell input would cause the
+      // cell to exit edit mode.
+      e.stopPropagation();
+    }
+    dispatch('mousedown', e);
+  }
 </script>
 
 <div
@@ -73,7 +88,7 @@
   bind:this={element}
   on:click
   on:dblclick
-  on:mousedown
+  on:mousedown={handleMouseDown}
   on:mouseup
   on:mouseenter
   on:mouseleave
