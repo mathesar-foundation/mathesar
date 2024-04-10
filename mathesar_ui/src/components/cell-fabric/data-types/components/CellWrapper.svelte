@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
-  import { tick } from 'svelte';
   import type { HorizontalAlignment } from './typeDefinitions';
 
   export let element: HTMLElement | undefined = undefined;
@@ -23,40 +22,29 @@
    */
   export let horizontalAlignment: HorizontalAlignment = 'left';
 
-  function shouldAutoFocus(
-    _isActive: boolean,
-    _mode: 'edit' | 'default',
-  ): boolean {
-    if (!_isActive) {
-      // Don't auto-focus inactive cells
-      return false;
-    }
-    if (_mode === 'edit') {
-      // Don't auto-focus cells in edit mode
-      return false;
-    }
+  /**
+   * This function exists to ensure that the cell is focused after the user
+   * moves from edit mode to default mode via pressing Enter.
+   */
+  function autoFocus() {
     if (!element) {
       // Can't focus if we haven't mounted an element yet
-      return false;
+      return;
     }
-    if (element.contains(document.activeElement)) {
-      // Don't auto-focus if the cell contains another element that is already
-      // focused (e.g. an input).
-      return false;
+    if (!element.contains(document.activeElement)) {
+      // Only auto-focus when the cell contains another element that is already
+      // focused (e.g. an input). If the user moves from edit mode to default
+      // mode via clicking on some UI element outside sheet, then we _don't_
+      // want to focus the cell. We want to keep the focus on the other UI
+      // element that they clicked.
+      return;
     }
-    return true;
+    element.focus();
   }
 
-  async function handleStateChange(
-    _isActive: boolean,
-    _mode: 'edit' | 'default',
-  ) {
-    await tick();
-    if (shouldAutoFocus(_isActive, _mode)) {
-      element?.focus();
-    }
+  $: if (mode === 'default') {
+    autoFocus();
   }
-  $: void handleStateChange(isActive, mode);
 
   function handleCopy(e: ClipboardEvent) {
     if (e.target !== element) {
@@ -73,7 +61,6 @@
 
 <div
   class="cell-wrapper"
-  class:is-active={isActive}
   class:disabled
   class:is-edit-mode={mode === 'edit'}
   class:truncate={multiLineTruncate && !isIndependentOfSheet}
@@ -82,6 +69,7 @@
   class:exact-match={valueComparisonOutcome === 'exactMatch'}
   class:substring-match={valueComparisonOutcome === 'substringMatch'}
   class:no-match={valueComparisonOutcome === 'noMatch'}
+  data-active-cell={isActive ? '' : undefined}
   bind:this={element}
   on:click
   on:dblclick
@@ -120,7 +108,7 @@
       text-align: right;
     }
 
-    &.is-active {
+    &[data-active-cell] {
       box-shadow: 0 0 0 2px var(--slate-300);
       border-radius: 2px;
 

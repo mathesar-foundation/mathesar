@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { writable, type Writable } from 'svelte/store';
+  import { onMount, tick } from 'svelte';
+  import { writable } from 'svelte/store';
 
   import { ImmutableMap } from '@mathesar-component-library/types';
   import type { ClipboardHandler } from '@mathesar/stores/clipboard';
@@ -10,7 +11,7 @@
     findContainingSheetCell,
     type SheetCellDetails,
   } from './selection';
-  import type SheetSelection from './selection/SheetSelection';
+  import type SheetSelectionStore from './selection/SheetSelectionStore';
   import {
     calculateColumnStyleMapAndRowWidth,
     DEFAULT_COLUMN_WIDTH,
@@ -28,7 +29,7 @@
   export let hasBorder = false;
   export let hasPaddingRight = false;
   export let clipboardHandler: ClipboardHandler | undefined = undefined;
-  export let selection: Writable<SheetSelection> | undefined = undefined;
+  export let selection: SheetSelectionStore | undefined = undefined;
 
   export let getColumnIdentifier: (
     c: SheetColumnType,
@@ -145,8 +146,23 @@
     })();
     if (!startingCell) return;
 
+    // If we're selecting cells, then we need to prevent this mouse event from
+    // inadvertently setting clicked elements to become focused. If they get
+    // focused then there can be race conditions which (sometimes) prevent the
+    // active cell within the selection from becoming focused. For example, this
+    // problem can happen when clicking on column header cells to select all
+    // cells in the column.
+    e.preventDefault();
+
     beginSelection({ selection, sheetElement, startingCell, targetCell });
   }
+
+  async function focusActiveCell() {
+    await tick();
+    sheetElement.querySelector<HTMLElement>('[data-active-cell]')?.focus();
+  }
+
+  onMount(() => selection?.on('focus', focusActiveCell));
 </script>
 
 <div

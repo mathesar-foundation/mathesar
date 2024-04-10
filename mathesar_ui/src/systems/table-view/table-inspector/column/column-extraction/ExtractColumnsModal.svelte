@@ -120,7 +120,9 @@
       return;
     }
     const columnIds = _columns.map((c) => String(c.id));
-    selection.update((s) => s.ofRowColumnIntersection(s.rowIds, columnIds));
+    selection.updateWithoutFocus((s) =>
+      s.ofRowColumnIntersection(s.rowIds, columnIds),
+    );
   }
   $: handleColumnsChange($columns);
 
