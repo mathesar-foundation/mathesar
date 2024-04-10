@@ -31,7 +31,7 @@
     const id = takeFirstAndOnly(selectedRowIds);
     if (!id) return undefined;
     const row = $selectableRowsMap.get(id);
-    if (!row) return;
+    if (!row) return undefined;
     try {
       const recordId = getPkValueInRecord(row.record, $columns);
       return $storeToGetRecordPageUrl({ recordId });

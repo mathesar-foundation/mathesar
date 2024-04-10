@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type SheetSelection from '../selection/SheetSelection';
-
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import type SheetSelection from '../selection/SheetSelection';
   import { getSheetCellStyle } from './sheetCellUtils';
 
   type SheetColumnIdentifierKey = $$Generic;
@@ -12,17 +11,18 @@
 
   $: style = getSheetCellStyle(columnIdentifierKey);
   $: ({ isActive, isSelected, hasSelectionBackground } = (() => {
-    if (!selection || !cellSelectionId)
+    if (!selection || !cellSelectionId) {
       return {
         isActive: false,
         isSelected: false,
         hasSelectionBackground: false,
       };
-    const isSelected = selection.cellIds.has(cellSelectionId);
+    }
+    const selected = selection.cellIds.has(cellSelectionId);
     return {
       isActive: selection.activeCellId === cellSelectionId,
-      isSelected: selection.cellIds.has(cellSelectionId),
-      hasSelectionBackground: isSelected && selection.cellIds.size > 1,
+      isSelected: selected,
+      hasSelectionBackground: selected && selection.cellIds.size > 1,
     };
   })());
 </script>
