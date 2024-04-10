@@ -12,7 +12,7 @@ import { ApiMultiError } from '@mathesar/api/utils/errors';
 import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
-import SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { fetchQueryResults, runQuery } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
@@ -67,7 +67,7 @@ export default class QueryRunner {
   /** Keys are row selection ids */
   selectableRowsMap: Readable<Map<string, QueryRow>>;
 
-  selection: Writable<SheetSelection>;
+  selection: SheetSelectionStore;
 
   inspector: QueryInspector;
 
@@ -80,8 +80,6 @@ export default class QueryRunner {
   private onRunWithIdCallback?: (results: QueryResultsResponse) => unknown;
 
   private shareConsumer?: ShareConsumer;
-
-  private cleanupFunctions: (() => void)[] = [];
 
   constructor({
     query,
@@ -120,12 +118,7 @@ export default class QueryRunner {
         return new Plane(rowIds, columnIds);
       },
     );
-
-    this.selection = writable(new SheetSelection());
-
-    this.cleanupFunctions.push(
-      plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
-    );
+    this.selection = new SheetSelectionStore(plane);
 
     this.inspector = new QueryInspector(this.query);
   }
@@ -279,6 +272,6 @@ export default class QueryRunner {
 
   destroy(): void {
     this.runPromise?.cancel();
-    this.cleanupFunctions.forEach((fn) => fn());
+    this.selection.destroy();
   }
 }

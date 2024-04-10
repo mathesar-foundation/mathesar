@@ -7,7 +7,7 @@ import type { Column } from '@mathesar/api/types/tables/columns';
 import { States } from '@mathesar/api/utils/requestUtils';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
-import SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
@@ -57,11 +57,9 @@ export class TabularData {
 
   isLoading: Readable<boolean>;
 
-  selection: Writable<SheetSelection>;
+  selection: SheetSelectionStore;
 
   table: TableEntry;
-
-  private cleanupFunctions: (() => void)[] = [];
 
   shareConsumer?: ShareConsumer;
 
@@ -122,16 +120,11 @@ export class TabularData {
         const rowIds = new Series([...selectableRowsMap.keys()]);
         const columns = [...processedColumns.values()];
         const columnIds = new Series(columns.map((c) => String(c.id)));
+        // TODO_3037 incorporate placeholder row into plane
         return new Plane(rowIds, columnIds);
       },
     );
-
-    // TODO_3037 add id of placeholder row to selection
-    this.selection = writable(new SheetSelection());
-
-    this.cleanupFunctions.push(
-      plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
-    );
+    this.selection = new SheetSelectionStore(plane);
 
     this.isLoading = derived(
       [
@@ -224,7 +217,7 @@ export class TabularData {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
-    this.cleanupFunctions.forEach((f) => f());
+    this.selection.destroy();
   }
 }
 
