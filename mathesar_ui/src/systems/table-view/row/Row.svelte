@@ -135,9 +135,9 @@
       cursor: pointer;
 
       :global(
-          [data-sheet-element='data-cell']:not(.is-active)
+          [data-sheet-element='data-cell']
             .cell-fabric
-            .cell-wrapper
+            .cell-wrapper:not(.is-edit-mode)
             > *
         ) {
         visibility: hidden;
