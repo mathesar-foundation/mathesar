@@ -22,15 +22,22 @@ class DBModelReturn(TypedDict):
         port (int): The port of the Postgres server.
     """
     id: int
-    name: str
-    db_name: str
+    nickname: str
+    database: str
     username: str
     host: str
     port: int
 
     @classmethod
     def from_db_model(cls, db_model):
-        return cls(**{key: db_model.__dict__[key] for key in cls.__annotations__})
+        return cls(
+            id=db_model.id,
+            nickname=db_model.name,
+            database=db_model.db_name,
+            username=db_model.username,
+            host=db_model.host,
+            port=db_model.port
+        )
 
 
 @rpc_method(name='connections.add_from_known_connection')
@@ -86,7 +93,7 @@ def add_from_scratch(
         user: str,
         password: str,
         host: str,
-        port: str,
+        port: int,
         sample_data: list[str] = [],
 ) -> DBModelReturn:
     """
@@ -111,7 +118,7 @@ def add_from_scratch(
     Returns:
         Metadata about the Database associated with the connection.
     """
-    db_model = connections.add_connection_from_scratch(
+    db_model = connections.create_connection_from_scratch(
         user, password, host, port, nickname, db_name, sample_data
     )
     return DBModelReturn.from_db_model(db_model)
