@@ -149,6 +149,10 @@
     color: inherit;
     scrollbar-width: none;
   }
+  .column-header-cell :global(.has-error) {
+    border-color: var(--red-500);
+    background: var(--red-100);
+  }
   .column-header-cell :global(.record-selector-input::-webkit-scrollbar) {
     display: none;
   }

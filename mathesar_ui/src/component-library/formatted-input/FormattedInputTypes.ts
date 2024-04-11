@@ -30,4 +30,5 @@ export interface FormattedInputProps<T> extends SimplifiedTextInputProps {
   formatter: InputFormatter<T>;
   value?: T | null;
   onParseError?: ParseErrorCallback;
+  allowPartialParse?: boolean;
 }
