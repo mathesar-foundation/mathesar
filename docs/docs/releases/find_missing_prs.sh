@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 shopt -s expand_aliases
-source ~/.bash_profile
 
 function print_help {
     cat << EOF
@@ -47,7 +46,9 @@ TEMPLATE_FILE=TEMPLATE.md
 # If the notes file doesn't yet exist, create one
 if [ ! -f $NOTES_FILE ]; then
   cp $TEMPLATE_FILE $NOTES_FILE
-  sed -i '' "s/__VERSION__/$RELEASE/g" $NOTES_FILE
+  # Note: We're not using the `-i` option to sed because it's not portable
+  sed "s/__VERSION__/$RELEASE/g" $NOTES_FILE > $NOTES_FILE.tmp
+  mv $NOTES_FILE.tmp $NOTES_FILE
 fi
 
 PREV_NOTES_FILE=$(ls -1 | sort | grep -B 1 $NOTES_FILE | head -n 1)
@@ -83,12 +84,17 @@ mkdir -p "$CACHE_DIR"
 # branch but not included in the master branch.
 git log --format=%H --first-parent $PREV_RELEASE..$RELEASE_BRANCH > $COMMITS_FILE
 
+ONE_YEAR_AGO=$(python3 -c "
+from datetime import datetime, timedelta
+one_year_ago = datetime.utcnow() - timedelta(days=365)
+print(one_year_ago.strftime('%Y-%m-%d'))")
+
 # Find and cache details about all the PRs merged within the past year. This
 # gets more PRs than we need, but we'll filter it shortly.
 gh pr list \
   --limit 1000 \
   --json additions,author,deletions,mergeCommit,title,url \
-  --search "is:closed merged:>$(date -d '1 year ago' '+%Y-%m-%d')" \
+  --search "is:closed merged:>$ONE_YEAR_AGO" \
   --jq 'map({
       additions: .additions,
       mergeCommit: .mergeCommit.oid,
@@ -98,7 +104,7 @@ gh pr list \
 
 # Find and cache the URLs to any PRs that we've already referenced in the
 # release notes.
-grep -o 'https://github\.com/mathesar-foundation/mathesar/pull/\d*' \
+grep -Eo 'https://github\.com/mathesar-foundation/mathesar/pull/[0-9]+' \
   $NOTES_FILE > $INCLUDED_PRS_FILE
 
 # Generate a CSV containing details for PRs that match commits in the release
