@@ -40,7 +40,7 @@ def get_error_code(err):
     elif err_module.startswith("sqlalchemy"):
         return sqlalch_error_map.get(err_name, sqlalch_error_map["UNKNOWN"])
     else:
-        return other_error_map.get(err_name)
+        return other_error_map.get(err_name, other_error_map["UNKNOWN"])
 
 
 builtin_error_map = frozendict({
