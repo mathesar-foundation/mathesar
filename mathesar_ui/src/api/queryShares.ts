@@ -32,7 +32,7 @@ function update(
 
 function regenerate(queryId: number, shareId: QueryShare['id']) {
   return postAPI<QueryShare>(
-    `/api/ui/v0/tables/${queryId}/shares/${shareId}/regenerate/`,
+    `/api/ui/v0/queries/${queryId}/shares/${shareId}/regenerate/`,
   );
 }
 
