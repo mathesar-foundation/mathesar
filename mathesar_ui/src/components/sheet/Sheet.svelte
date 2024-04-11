@@ -84,13 +84,14 @@
     },
   };
 
+  const selectionInProgress = writable(false);
   const stores = {
     columnStyleMap: writable(columnStyleMap),
     rowWidth: writable(rowWidth),
     horizontalScrollOffset: writable(horizontalScrollOffset),
     scrollOffset: writable(scrollOffset),
     paddingRight: writable(paddingRight),
-    selectionInProgress: writable(false),
+    selectionInProgress,
   };
 
   // Setting these values in stores for reactivity in context
@@ -160,7 +161,7 @@
       sheetElement,
       startingCell,
       targetCell,
-      selectionInProgress: stores.selectionInProgress,
+      selectionInProgress,
     });
   }
 
@@ -177,6 +178,7 @@
   class:has-border={hasBorder}
   class:uses-virtual-list={usesVirtualList}
   class:set-to-row-width={restrictWidthToRowWidth}
+  class:selection-in-progress={$selectionInProgress}
   {style}
   on:mousedown={handleMouseDown}
   on:focusin={enableClipboard}
@@ -228,6 +230,10 @@
 
     :global([data-sheet-element='data-row']) {
       transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    &.selection-in-progress :global(*) {
+      cursor: default;
     }
   }
 </style>
