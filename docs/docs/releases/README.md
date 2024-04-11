@@ -2,6 +2,15 @@
 
 This is developer documentation to help with release notes. It is not published in our docs guide.
 
+## Requirements
+- This script assumes you're running a Bash shell.
+- Install [DuckDB](https://duckdb.org/#quickinstall). 
+    - On Macs, the easiest way to do this is via [Homebrew](https://brew.sh/): `brew install duckdb`.
+- Install the [GitHub CLI](https://cli.github.com/).
+    - On Macs, the easiest way to do this is via [Homebrew](https://brew.sh/): `brew install gh`.
+- If you're on a Mac, you also need to:
+    - Install the GNU date library and alias it to the `date` command: `brew install coreutils ; echo "alias date=gdate" >> ~/.bash_profile`
+
 ## How to generate release notes
 
 1. Run the `find_missing_prs.sh` script, passing the release version number as the only argument.

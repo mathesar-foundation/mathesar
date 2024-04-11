@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+shopt -s expand_aliases
+source ~/.bash_profile
+
 function print_help {
     cat << EOF
 Usage: $(basename $0) <VERSION_NUMBER>
@@ -44,7 +47,7 @@ TEMPLATE_FILE=TEMPLATE.md
 # If the notes file doesn't yet exist, create one
 if [ ! -f $NOTES_FILE ]; then
   cp $TEMPLATE_FILE $NOTES_FILE
-  sed -i "s/__VERSION__/$RELEASE/g" $NOTES_FILE
+  sed -i '' "s/__VERSION__/$RELEASE/g" $NOTES_FILE
 fi
 
 PREV_NOTES_FILE=$(ls -1 | sort | grep -B 1 $NOTES_FILE | head -n 1)
@@ -95,7 +98,7 @@ gh pr list \
 
 # Find and cache the URLs to any PRs that we've already referenced in the
 # release notes.
-grep -Po 'https://github\.com/mathesar-foundation/mathesar/pull/\d*' \
+grep -o 'https://github\.com/mathesar-foundation/mathesar/pull/\d*' \
   $NOTES_FILE > $INCLUDED_PRS_FILE
 
 # Generate a CSV containing details for PRs that match commits in the release
