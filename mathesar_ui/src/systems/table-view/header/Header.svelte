@@ -108,28 +108,25 @@
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
     {@const isSelected = $selection.columnIds.has(String(columnId))}
     <SheetColumnHeaderCell columnIdentifierKey={columnId}>
-      <!-- TODO_3037: why is this div here? Can we get rid of it? -->
-      <div>
-        <Draggable
-          on:dragstart={() => dragColumn()}
-          column={processedColumn}
-          {selection}
+      <Draggable
+        on:dragstart={() => dragColumn()}
+        column={processedColumn}
+        {selection}
+      >
+        <Droppable
+          on:drop={() => dropColumn(processedColumn)}
+          on:dragover={(e) => e.preventDefault()}
+          {locationOfFirstDraggedColumn}
+          columnLocation={columnOrderString.indexOf(columnId.toString())}
+          {isSelected}
         >
-          <Droppable
-            on:drop={() => dropColumn(processedColumn)}
-            on:dragover={(e) => e.preventDefault()}
-            {locationOfFirstDraggedColumn}
-            columnLocation={columnOrderString.indexOf(columnId.toString())}
-            {isSelected}
-          >
-            <HeaderCell {processedColumn} {isSelected} />
-          </Droppable>
-        </Draggable>
-        <SheetCellResizer columnIdentifierKey={columnId} />
-        <ContextMenu>
-          <ColumnHeaderContextMenu {processedColumn} />
-        </ContextMenu>
-      </div>
+          <HeaderCell {processedColumn} {isSelected} />
+        </Droppable>
+      </Draggable>
+      <SheetCellResizer columnIdentifierKey={columnId} />
+      <ContextMenu>
+        <ColumnHeaderContextMenu {processedColumn} />
+      </ContextMenu>
     </SheetColumnHeaderCell>
   {/each}
 

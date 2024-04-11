@@ -7,17 +7,18 @@
   export let selection: Writable<SheetSelection>;
   export let column: ProcessedColumn;
 
-  // // TODO_3037: Verify that we're not losing functionality here by removing
-  // `selectionInProgress` logic
-  //
-  // $: draggable = !selectionInProgress && selection &&
-  //   selection.isCompleteColumnSelected(column);
-
   $: draggable = $selection.fullySelectedColumnIds.has(String(column.id));
+
+  function handleMouseDown(event: MouseEvent) {
+    if (draggable) {
+      event.stopPropagation();
+    }
+  }
 </script>
 
 <div
   on:dragstart
+  on:mousedown={handleMouseDown}
   class="draggable"
   class:draggable_active={draggable}
   {draggable}
