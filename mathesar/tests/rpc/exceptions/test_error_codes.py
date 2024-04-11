@@ -24,7 +24,7 @@ class NotARealError(Exception):
         (UnknownDBFunctionID, -27000),
         (IntegrityError, -26000),
         (CannotSendRequest, -25000),
-   ]
+    ]
 )
 def test_get_error_code_unknown(monkeypatch, example_err, expect_code):
     """
@@ -47,10 +47,10 @@ def test_get_error_code_unknown(monkeypatch, example_err, expect_code):
         (AssertionError, -31002),
         (BadCopyFileFormat, -30009),
         (FieldDoesNotExist, -29030),
-        (BadInstallationTarget, -28000),
+        (BadInstallationTarget, -28002),
         (UnknownDBFunctionID, -27024),
         (CannotSendRequest, -25031),
-   ]
+    ]
 )
 def test_get_error_code(error, expect_code):
     try:
