@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-shopt -s expand_aliases
-
 function print_help {
     cat << EOF
 Usage: $(basename $0) <VERSION_NUMBER>
