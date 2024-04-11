@@ -4,16 +4,19 @@
 
   type SheetColumnIdentifierKey = $$Generic;
 
-  const { api } = getSheetContext<SheetColumnIdentifierKey>();
+  const { api, stores } = getSheetContext<SheetColumnIdentifierKey>();
 
   export let minColumnWidth = 50;
   export let columnIdentifierKey: SheetColumnIdentifierKey;
 
   let isResizing = false;
+
+  $: ({ selectionInProgress } = stores);
 </script>
 
 <div
   class="column-resizer"
+  class:selection-in-progress={$selectionInProgress}
   class:is-resizing={isResizing}
   use:slider={{
     getStartingValue: () => api.getColumnWidth(columnIdentifierKey),
@@ -51,6 +54,9 @@
     background: var(--sky-700);
   }
   .column-resizer:not(:hover):not(.is-resizing) .indicator {
+    display: none;
+  }
+  .column-resizer.selection-in-progress {
     display: none;
   }
 </style>

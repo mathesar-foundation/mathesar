@@ -15,6 +15,7 @@ export interface SheetContextStores<SheetColumnIdentifierKey> {
   horizontalScrollOffset: Readable<number>;
   scrollOffset: Readable<number>;
   paddingRight: Readable<number>;
+  selectionInProgress: Readable<boolean>;
 }
 
 export interface SheetContext<SheetColumnIdentifierKey> {

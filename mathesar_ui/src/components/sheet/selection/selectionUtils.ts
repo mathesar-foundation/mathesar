@@ -42,11 +42,13 @@ export function beginSelection({
   sheetElement,
   startingCell,
   targetCell,
+  selectionInProgress,
 }: {
   selection: Writable<SheetSelection>;
   sheetElement: HTMLElement;
   startingCell: SheetCellDetails;
   targetCell: SheetCellDetails;
+  selectionInProgress: Writable<boolean>;
 }) {
   let previousTarget: HTMLElement | undefined;
 
@@ -65,8 +67,10 @@ export function beginSelection({
   function finish() {
     sheetElement.removeEventListener('mousemove', drawToPoint);
     window.removeEventListener('mouseup', finish);
+    selectionInProgress.set(false);
   }
 
+  selectionInProgress.set(true);
   drawToCell(targetCell);
   sheetElement.addEventListener('mousemove', drawToPoint);
   window.addEventListener('mouseup', finish);

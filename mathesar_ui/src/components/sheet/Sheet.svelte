@@ -90,6 +90,7 @@
     horizontalScrollOffset: writable(horizontalScrollOffset),
     scrollOffset: writable(scrollOffset),
     paddingRight: writable(paddingRight),
+    selectionInProgress: writable(false),
   };
 
   // Setting these values in stores for reactivity in context
@@ -154,7 +155,13 @@
     // cells in the column.
     e.preventDefault();
 
-    beginSelection({ selection, sheetElement, startingCell, targetCell });
+    beginSelection({
+      selection,
+      sheetElement,
+      startingCell,
+      targetCell,
+      selectionInProgress: stores.selectionInProgress,
+    });
   }
 
   async function focusActiveCell() {
