@@ -1,27 +1,30 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
+
   import {
     ButtonMenuItem,
     ContextMenu,
     LinkMenuItem,
-    WritableMap,
     MenuDivider,
     MenuHeading,
+    WritableMap,
   } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { States } from '@mathesar/api/utils/requestUtils';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import {
+    SheetCell,
     isCellActive,
     isCellSelected,
     scrollBasedOnActiveCell,
-    SheetCell,
   } from '@mathesar/components/sheet';
-  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
+  import { iconRecord, iconSetToNull } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -34,8 +37,8 @@
     type TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import CellErrors from './CellErrors.svelte';
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+  import CellErrors from './CellErrors.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
 
   export let recordsData: RecordsData;
@@ -101,6 +104,9 @@
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
+  $: recordSummary = $recordSummaries
+    .get(String(column.id))
+    ?.get(String(value));
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -167,14 +173,12 @@
       {value}
       {isProcessing}
       {canViewLinkedEntities}
-      recordSummary={$recordSummaries
-        .get(String(column.id))
-        ?.get(String(value))}
-      setRecordSummary={(recordId, recordSummary) =>
+      {recordSummary}
+      setRecordSummary={(recordId, rs) =>
         recordSummaries.addBespokeRecordSummary({
           columnId: String(columnId),
           recordId,
-          recordSummary,
+          recordSummary: rs,
         })}
       showAsSkeleton={$recordsDataState === States.Loading}
       disabled={!isEditable}
@@ -207,8 +211,12 @@
           </ButtonMenuItem>
         {/if}
         {#if showLinkedRecordHyperLink && linkedRecordHref}
-          <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-            {$_('go_to_linked_record')}
+          <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
+            <RichText text={$_('open_named_record')} let:slotName>
+              {#if slotName === 'recordName'}
+                <Identifier>{recordSummary}</Identifier>
+              {/if}
+            </RichText>
           </LinkMenuItem>
         {/if}
         <MenuDivider />
