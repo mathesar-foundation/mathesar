@@ -87,42 +87,22 @@
   ]);
   $: showTableInspector = $isTableInspectorVisible && supportsTableInspector;
 
-  function checkAndReinstateFocusOnActiveCell(e: Event) {
-    // // TODO_3037 Figure out what is actually broken without this code.
-    // //Better document why we need id.
-    //
-    // const target = e.target as HTMLElement;
-    // if (!target.closest('[data-sheet-element="data-cell"')) {
-    //   if ($activeCell) {
-    //     selection.focusCell(
-    //       // TODO make sure to use getRowSelectionId instead of rowIndex
-    //       { rowIndex: $activeCell.rowIndex },
-    //       { id: Number($activeCell.columnId) },
-    //     );
-    //   }
-    // }
-  }
-
-  // function selectAndActivateFirstCellOnTableLoad(
-  //   _isLoading: boolean,
-  //   _selection: TabularDataSelection,
-  //   _context: Context,
-  // ) {
+  // // TODO_3037
+  // function selectFirstCellOnTableLoad(_isLoading: boolean, _context: Context) {
   //   // We only activate the first cell on the page, not in the widget. Doing so
   //   // on the widget causes the cell to focus and the page to scroll down to
   //   // bring that element into view.
   //   if (_context !== 'widget' && !_isLoading) {
-  //     _selection.selectAndActivateFirstCellIfExists();
+  //     selection.update((s) => s.ofFirstDataCell());
   //   }
   // }
 
-  // // TODO_3037 Figure out what is actually broken without this code.
-  // $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection, context);
+  // $: void selectFirstCellOnTableLoad($isLoading, context);
 </script>
 
 <div class="table-view">
   <WithTableInspector {context} {showTableInspector}>
-    <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
+    <div class="sheet-area">
       {#if $processedColumns.size}
         <Sheet
           {clipboardHandler}
