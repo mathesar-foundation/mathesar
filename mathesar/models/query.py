@@ -6,11 +6,28 @@ from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.transforms.operations.deserialize import deserialize_transformation
 from db.transforms.operations.serialize import serialize_transformation
 from db.transforms.base import Summarize
-from db.functions.base import Count, ArrayAgg, Sum, Median, Mode, Percentage_True, Max, Min, Mean, PeakTime, PeakMonth
+from db.functions.base import (
+    Count,
+    ArrayAgg,
+    Sum,
+    Median,
+    Mode,
+    Percentage_True,
+    Max,
+    Min,
+    Mean,
+    PeakTime,
+    PeakMonth,
+)
 from db.functions.packed import DistinctArrayAgg
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess
-from mathesar.models.validators import DictValidator, InitialColumnsValidator, ListOfDictValidator, TransformationsValidator
+from mathesar.models.validators import (
+    DictValidator,
+    InitialColumnsValidator,
+    ListOfDictValidator,
+    TransformationsValidator,
+)
 from mathesar.state.cached_property import cached_property
 from mathesar.models.base import BaseModel, Column
 from mathesar.models.relation import Relation
@@ -22,13 +39,10 @@ class UIQuery(BaseModel, Relation):
         max_length=128,
     )
 
-    description = models.TextField(
-        null=True,
-        blank=True
-    )
+    description = models.TextField(null=True, blank=True)
 
     base_table = models.ForeignKey(
-        'Table', on_delete=models.CASCADE, related_name='queries'
+        "Table", on_delete=models.CASCADE, related_name="queries"
     )
 
     # sequence of dicts
@@ -82,8 +96,7 @@ class UIQuery(BaseModel, Relation):
         """
         return tuple(
             self._describe_query_column(sa_col)
-            for sa_col
-            in self.db_query.sa_output_columns
+            for sa_col in self.db_query.sa_output_columns
         )
 
     @property
@@ -94,16 +107,13 @@ class UIQuery(BaseModel, Relation):
     def initial_columns_described(self):
         return tuple(
             {
-                'alias': initial_col_alias,
-                'display_name': self._get_display_name_for_alias(
-                    initial_col_alias
-                ),
-                'type': dj_col.db_type.id,
-                'type_options': dj_col._sa_column.type_options,
-                'display_options': dj_col.display_options
+                "alias": initial_col_alias,
+                "display_name": self._get_display_name_for_alias(initial_col_alias),
+                "type": dj_col.db_type.id,
+                "type_options": dj_col._sa_column.type_options,
+                "display_options": dj_col.display_options,
             }
-            for initial_col_alias, dj_col
-            in self._map_of_initial_col_alias_to_dj_column.items()
+            for initial_col_alias, dj_col in self._map_of_initial_col_alias_to_dj_column.items()
         )
 
     def _describe_query_column(self, sa_col):
@@ -126,7 +136,9 @@ class UIQuery(BaseModel, Relation):
         )
         output = output | optionals
         if is_initial_column:
-            initial_dj_column = _get_dj_column_for_initial_db_column(initial_db_column, self._database)
+            initial_dj_column = _get_dj_column_for_initial_db_column(
+                initial_db_column, self._database
+            )
             output = output | dict(
                 input_column_name=initial_dj_column.name,
                 input_table_name=initial_dj_column.table.name,
@@ -134,9 +146,7 @@ class UIQuery(BaseModel, Relation):
             )
         else:
             input_alias = self.db_query.get_input_alias_for_output_alias(alias)
-            output = output | dict(
-                input_alias=input_alias
-            )
+            output = output | dict(input_alias=input_alias)
         return output
 
     def _get_db_initial_column_by_alias(self, alias):
@@ -180,8 +190,7 @@ class UIQuery(BaseModel, Relation):
     def _processed_transformations(self):
         return tuple(
             serialize_transformation(db_transformation)
-            for db_transformation
-            in self._processed_db_transformations
+            for db_transformation in self._processed_db_transformations
         )
 
     @property
@@ -212,15 +221,14 @@ class UIQuery(BaseModel, Relation):
             engine=self._sa_engine,
             transformations=self._db_transformations,
             name=self.name,
-            metadata=get_cached_metadata()
+            metadata=get_cached_metadata(),
         )
 
     # TODO reused; consider using cached_property
     @property
     def _db_initial_columns(self):
         return tuple(
-            _db_initial_column_from_json(json_col)
-            for json_col in self.initial_columns
+            _db_initial_column_from_json(json_col) for json_col in self.initial_columns
         )
 
     @property
@@ -228,9 +236,7 @@ class UIQuery(BaseModel, Relation):
         """No processing necessary."""
         if self.transformations:
             return tuple(
-                deserialize_transformation(json)
-                for json
-                in self.transformations
+                deserialize_transformation(json) for json in self.transformations
             )
 
     def _get_display_name_for_alias(self, alias):
@@ -248,8 +254,7 @@ class UIQuery(BaseModel, Relation):
                 display_options = dj_col.display_options
         # Try recursively repeating these steps for its parent alias, if it can be found
         if display_options is None:
-            parent_alias = \
-                self.db_query.map_of_output_alias_to_input_alias.get(alias)
+            parent_alias = self.db_query.map_of_output_alias_to_input_alias.get(alias)
             if parent_alias:
                 display_options = self._get_display_options_for_alias(parent_alias)
         return display_options
@@ -286,46 +291,49 @@ class UIQuery(BaseModel, Relation):
         attribute), though they are used when generating some of the default display names.
         """
         current_display_names = self.display_names or dict()
-        default_display_names_for_initial_columns = self._default_display_names_for_initial_columns
-        current_display_names = \
-            default_display_names_for_initial_columns \
-            | current_display_names
-        default_display_names_for_summarize_transforms = \
+        default_display_names_for_initial_columns = (
+            self._default_display_names_for_initial_columns
+        )
+        current_display_names = (
+            default_display_names_for_initial_columns | current_display_names
+        )
+        default_display_names_for_summarize_transforms = (
             self._get_default_display_names_for_summarize_transforms(
                 current_display_names
             )
-        default_display_names = \
-            default_display_names_for_summarize_transforms \
+        )
+        default_display_names = (
+            default_display_names_for_summarize_transforms
             | default_display_names_for_initial_columns
+        )
         return default_display_names
 
     @property
     def _default_display_names_for_initial_columns(self):
         return {
             alias: dj_col.name
-            for alias, dj_col
-            in self._map_of_initial_col_alias_to_dj_column.items()
+            for alias, dj_col in self._map_of_initial_col_alias_to_dj_column.items()
         }
 
-    def _get_default_display_names_for_summarize_transforms(self, current_display_names):
+    def _get_default_display_names_for_summarize_transforms(
+        self, current_display_names
+    ):
         default_display_names = dict()
         if not current_display_names:
             return default_display_names
         summarize_transforms = [
             db_transform
-            for db_transform
-            in self.db_query.transformations
+            for db_transform in self.db_query.transformations
             if isinstance(db_transform, Summarize)
         ]
         for summarize_transform in summarize_transforms:
             # Find default display names for grouping output aliases
             for output_alias in summarize_transform.grouping_output_aliases:
-                default_display_name = \
-                    _get_default_display_name_for_group_output_alias(
-                        summarize_transform,
-                        output_alias,
-                        current_display_names,
-                    )
+                default_display_name = _get_default_display_name_for_group_output_alias(
+                    summarize_transform,
+                    output_alias,
+                    current_display_names,
+                )
                 if default_display_name:
                     default_display_names[output_alias] = default_display_name
             # Find default display names for aggregation output aliases
@@ -333,25 +341,22 @@ class UIQuery(BaseModel, Relation):
                 input_alias = agg_col_spec.get("input_alias")
                 output_alias = agg_col_spec.get("output_alias")
                 agg_function = agg_col_spec.get("function")
-                default_display_name = \
-                    _get_default_display_name_for_agg_output_alias(
-                        output_alias,
-                        input_alias,
-                        agg_function,
-                        current_display_names,
-                    )
+                default_display_name = _get_default_display_name_for_agg_output_alias(
+                    output_alias,
+                    input_alias,
+                    agg_function,
+                    current_display_names,
+                )
                 if default_display_name:
                     default_display_names[output_alias] = default_display_name
         return default_display_names
 
     @property
     def _map_of_initial_col_alias_to_dj_column(self):
-        dj_column_ids = [col['id'] for col in self.initial_columns]
+        dj_column_ids = [col["id"] for col in self.initial_columns]
         dj_columns = Column.objects.filter(pk__in=dj_column_ids)
         initial_col_aliases = [
-            initial_col['alias']
-            for initial_col
-            in self.initial_columns
+            initial_col["alias"] for initial_col in self.initial_columns
         ]
         return frozendict(
             zip(
@@ -383,9 +388,7 @@ def _db_initial_column_from_json(col_json):
     attnum = column_pair[1]
     alias = col_json["alias"]
     jp_path = [
-        _join_parameter_from_json(jp_json)
-        for jp_json
-        in col_json.get("jp_path", [])
+        _join_parameter_from_json(jp_json) for jp_json in col_json.get("jp_path", [])
     ]
     return InitialColumn(
         reloid=reloid,
@@ -441,10 +444,6 @@ def _get_default_display_name_for_group_output_alias(
     output_alias,
     current_display_names,
 ):
-    input_alias = \
-        summarize_transform\
-        .map_of_output_alias_to_input_alias[output_alias]
+    input_alias = summarize_transform.map_of_output_alias_to_input_alias[output_alias]
     input_alias_display_name = current_display_names.get(input_alias)
-    if input_alias_display_name:
-        suffix_to_add = " group"
-        return input_alias_display_name + suffix_to_add
+    return input_alias_display_name
