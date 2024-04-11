@@ -23,7 +23,7 @@ class NotARealError(Exception):
         (BadInstallationTarget, -28000),
         (UnknownDBFunctionID, -27000),
         (IntegrityError, -26000),
-        (CannotSendRequest, -25000)
+        (CannotSendRequest, -25000),
    ]
 )
 def test_get_error_code_unknown(monkeypatch, example_err, expect_code):
@@ -36,6 +36,39 @@ def test_get_error_code_unknown(monkeypatch, example_err, expect_code):
     monkeypatch.setattr(NotARealError, '__module__', example_err.__module__)
     try:
         raise NotARealError('Message text')
+    except Exception as e:
+        actual_code = err_codes.get_error_code(e)
+
+    assert actual_code == expect_code
+
+
+@pytest.mark.parametrize(
+    "error,expect_code", [
+        (AssertionError, -31002),
+        (BadCopyFileFormat, -30009),
+        (FieldDoesNotExist, -29030),
+        (BadInstallationTarget, -28000),
+        (UnknownDBFunctionID, -27024),
+        (CannotSendRequest, -25031),
+   ]
+)
+def test_get_error_code(error, expect_code):
+    try:
+        raise error("Message text")
+    except Exception as e:
+        actual_code = err_codes.get_error_code(e)
+
+    assert actual_code == expect_code
+
+
+def test_get_error_code_sqlalchemy():
+    """
+    This is needed since most SQLAlchemy exceptions have extra required
+    init parameters.
+    """
+    expect_code = -26014
+    try:
+        raise IntegrityError("message test", None, None)
     except Exception as e:
         actual_code = err_codes.get_error_code(e)
 
