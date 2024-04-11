@@ -13,9 +13,11 @@
   import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import { States } from '@mathesar/api/utils/requestUtils';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { SheetDataCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
@@ -79,6 +81,9 @@
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
+  $: recordSummary = $recordSummaries
+    .get(String(column.id))
+    ?.get(String(value));
 
   async function setValue(newValue: unknown) {
     if (newValue === value) {
@@ -119,12 +124,12 @@
     {value}
     {isProcessing}
     {canViewLinkedEntities}
-    recordSummary={$recordSummaries.get(String(column.id))?.get(String(value))}
-    setRecordSummary={(recordId, recordSummary) =>
+    {recordSummary}
+    setRecordSummary={(recordId, rs) =>
       recordSummaries.addBespokeRecordSummary({
         columnId: String(columnId),
         recordId,
-        recordSummary,
+        recordSummary: rs,
       })}
     showAsSkeleton={$recordsDataState === States.Loading}
     disabled={!isEditable}
@@ -149,7 +154,11 @@
       {/if}
       {#if showLinkedRecordHyperLink && linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
-          {$_('go_to_linked_record')}
+          <RichText text={$_('open_named_record')} let:slotName>
+            {#if slotName === 'recordName'}
+              <Identifier>{recordSummary}</Identifier>
+            {/if}
+          </RichText>
         </LinkMenuItem>
       {/if}
       <MenuDivider />
