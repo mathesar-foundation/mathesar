@@ -45,3 +45,42 @@ To use an RPC function:
       - add_from_known_connection
       - add_from_scratch
       - DBModelReturn
+
+## Responses
+
+### Success
+
+Upon a successful call to an RPC function, the API will return a success object. Such an object has the following form:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 234,
+  "result": <any>
+}
+```
+
+The `result` is whatever was returned by the underlying function.
+
+### Errors
+
+When an error is produced by a call to the RPC endpoint, we produce an error of the following form:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 234,
+  "error": {
+    "code": <int>,
+    "message": <str>
+  }
+}
+```
+
+The `code` is a negative integer. Some codes are produced according to the [JSON-RPC spec](https://www.jsonrpc.org/specification#error_object).
+
+More specific codes are produced according to the following documentation:
+
+---
+
+::: mathesar.rpc.exceptions.error_codes.get_error_code

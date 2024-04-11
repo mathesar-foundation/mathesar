@@ -3,28 +3,40 @@ This file holds mappings recording a unique error code for (hopefully)
 all exceptions that Mathesar could possibly throw.
 
 The purpose is to let us send a code with an error response in case an
-RPC function call fails. The codes are organized by the underlying
-code section that could throw the exception:
+RPC function call fails.
 
-- builtins: -31xxx
-- psycopg or psycopg2: -30xxx
-- django: -29xxx
-- mathesar (our code): -28xxx
-- db (our code): -27xxx
-- SQLAlchemy: -26xxx
-- other: -25xxx
-
-Unknown errors return a "round number" code, so an unknown builtin error
-gets the code 31000.
-
-THESE ENUMs ARE INITIALLY AUTO-GENERATED!
+THESE CODES WERE INITIALLY AUTO-GENERATED!
 """
 from frozendict import frozendict
 
 UNKNOWN_KEY = "UNKNOWN"
 
 
-def get_error_code(err):
+def get_error_code(err: Exception) -> int:
+    """
+    Return an error code, given an exception.
+
+    The code produced will align with expectations of a JSON-RPC
+    endpoint. Additionally, the codes are organized by the underlying
+    section of code that could throw the exception:
+
+    - builtins: -31xxx
+    - psycopg or psycopg2: -30xxx
+    - django: -29xxx
+    - mathesar (our code): -28xxx
+    - db (our code): -27xxx
+    - SQLAlchemy: -26xxx
+    - other: -25xxx
+
+    Unknown errors return a "round number" code, so an unknown `builtins`
+    error gets the code -31000.
+
+    Args:
+        err: the Exception for which we need a code.
+
+    Returns:
+        A negative integer code.
+    """
     err_module = err.__class__.__module__
     err_name = err.__class__.__name__
     if err_module.startswith("builtin"):
