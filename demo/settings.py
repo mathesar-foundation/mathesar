@@ -2,12 +2,16 @@ from config.settings.common_settings import *  # noqa
 from decouple import config as decouple_config
 
 INSTALLED_APPS += [  # noqa
-    "demo"
+    "demo",
+    "health_check",
 ]
 
 MIDDLEWARE += [  # noqa
     "demo.middleware.LiveDemoModeMiddleware",
 ]
+
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 MATHESAR_MODE = 'PRODUCTION'
 MATHESAR_LIVE_DEMO = True

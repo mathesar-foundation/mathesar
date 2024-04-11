@@ -1,7 +1,8 @@
 site_name: Mathesar Documentation
 site_url: https://docs.mathesar.org/
-repo_url: https://github.com/centerofci/mathesar/
-repo_name: centerofci/mathesar
+repo_url: https://github.com/mathesar-foundation/mathesar/
+repo_name: mathesar-foundation/mathesar
+edit_uri: edit/develop/docs/docs/
 
 nav:
   - Introduction:
@@ -13,10 +14,12 @@ nav:
       - Environment variables: configuration/env-variables.md
   - Administration:
       - Upgrade:
+        - To 0.1.6: administration/upgrade/0.1.6.md
         - To 0.1.5: administration/upgrade/0.1.5.md
         - To 0.1.4: administration/upgrade/0.1.4.md
         - To older versions: administration/upgrade/older.md
       - Uninstall Mathesar: administration/uninstall.md
+      - Debug Mathesar: administration/debug.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
       - Importing data: user-guide/importing-data.md
@@ -24,6 +27,7 @@ nav:
       - Users & access levels: user-guide/users.md
       - Glossary: user-guide/glossary.md
   - Releases:
+      - '0.1.6': releases/0.1.6.md
       - '0.1.5': releases/0.1.5.md
       - '0.1.4': releases/0.1.4.md
       - '0.1.3': releases/0.1.3.md
@@ -96,4 +100,4 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.1.4
+  mathesar_version: 0.1.6

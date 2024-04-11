@@ -23,40 +23,35 @@ You should have **root access** to the machine you're installing Mathesar on.
 
 You'll need to install the following system packages before you install Mathesar:
 
-- [Python](https://www.python.org/downloads/) 3.9 or 3.10
+- [Python](https://www.python.org/downloads/) 3.9, 3.10, or 3.11
 
     !!! note "Python version"
+
         Python _older_ than 3.9 will not run Mathesar.
 
-        Python _newer_ than 3.10 will run Mathesar, but will require some slightly modified installation steps which we have [not yet documented](https://github.com/centerofci/mathesar/issues/2872).
+        Python 3.12 will run Mathesar, but you'll have to take extra steps to get some dependencies to build. Installing a package for your OS that provides the `libpq-fe.h` header file should be enough in most cases. On Debian 12, this header is provided by the `libpq-dev` package.
 
 - [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`)
-
-- [NodeJS](https://nodejs.org/en/download) 18 or newer (Verify with `node --version`)
-
-    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
-
-- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 9 or newer (Verify with `npm --version`)
-
-    _(This is required for installation only and will eventually be [relaxed](https://github.com/centerofci/mathesar/issues/2871))_
 
 - [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
 
 - [git](https://git-scm.com/downloads) (Verify with `git --version`)
 
+- [GNU gettext](https://www.gnu.org/software/gettext/) (Verify with `gettext --version`)
 
 ### Domain (optional)
+
 If you want Mathesar to be accessible over the internet, you'll probably want to set up a domain or sub-domain to use. **If you don't need a domain, you can skip this section.**
 
 Before you start installation, **ensure that the DNS for your sub-domain or domain is pointing to the machine that you're installing Mathesar on**.
 
 ## Customizing this Guide
+
 Type your domain name into the box below. Do not include a trailing slash.
 
 <input data-input-for="DOMAIN_NAME" aria-label="Your Domain name "/>
 
 Then press <kbd>Enter</kbd> to customize this guide with your domain name.
-
 
 ## Installation Steps
 
@@ -81,12 +76,6 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 
     ```postgresql
     CREATE DATABASE mathesar_django OWNER mathesar;
-    ```
-
-1. Now we let us create a database for storing your data.
-
-    ```postgresql
-    CREATE DATABASE your_db_name OWNER mathesar;
     ```
 
 1. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to exit the `psql` shell.
@@ -137,7 +126,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Clone the git repo into the installation directory.
 
     ```
-    git clone https://github.com/centerofci/mathesar.git .
+    git clone https://github.com/mathesar-foundation/mathesar.git .
     ```
 
 1. Checkout the tag of the latest stable release, `{{mathesar_version}}`.
@@ -148,9 +137,6 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 
     !!! warning "Important"
         If you don't run the above command you'll end up installing the latest _development_ version of Mathesar, which will be less stable.
-
-    !!! tip
-        You can install a specific Mathesar release by running commands like `git checkout 0.1.1` (to install version 0.1.1, for example). You can see all available versions by running `git tag`.
 
 1. We need to create a python virtual environment for the Mathesar application.
 
@@ -220,16 +206,20 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             You need to export the environment variables each time you restart the shell as they don't persist across sessions.
 
 
-1. Install the frontend dependencies
+1. Download release static files and extract into the correct directory
 
     ```
-    npm ci --prefix mathesar_ui
+    wget https://github.com/mathesar-foundation/mathesar/releases/download/{{mathesar_version}}/static_files.zip
+    unzip static_files.zip && mv static_files mathesar/static/mathesar && rm static_files.zip
     ```
-      
-1. Compile the Mathesar Frontend App
-   ```
-   npm run --prefix mathesar_ui build --max_old_space_size=4096
-   ```
+
+
+1. Compile Mathesar translation files
+
+    ```
+    python manage.py compilemessages
+    ```
+
 
 1. Install Mathesar functions on the database:
 

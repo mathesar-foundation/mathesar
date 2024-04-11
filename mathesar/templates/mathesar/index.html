@@ -19,12 +19,20 @@
     {% endfor %}
   {% endif %}
 
-  <script type="module" src="{{ module_translations_file_path }}"></script>
-
   {% if development_mode %}
+    <script type="module" src="{{ dev_display_language_url }}"></script>
+    {% if include_i18n_fallback %}
+      <script type="module" src="{{ dev_fallback_language_url }}"></script>
+    {% endif %}
+
     <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
     <script type="module" src="{{ client_dev_url }}/src/main.ts"></script>
   {% else %}
+    <script type="module" src="{{ prod_display_language_urls.module }}"></script>
+    {% if include_i18n_fallback %}
+      <script type="module" src="{{ prod_fallback_language_urls.module }}"></script>
+    {% endif %}
+
     <!-- For legacy browsers that do not support modules -->
     <script nomodule>
       !(function () {
@@ -54,15 +62,29 @@
       nomodule
       src="{% static manifest_data.legacy_polyfill_js %}"
     ></script>
+
     <script
       nomodule
-      id="vite-legacy-translations-slot"
-      data-src="{{ legacy_translations_file_path }}"
+      id="vite-legacy-display-lang-slot"
+      data-src="{{ prod_display_language_urls.legacy }}"
     >
       System.import(
-        document.getElementById("vite-legacy-translations-slot").getAttribute("data-src")
+        document.getElementById("vite-legacy-display-lang-slot").getAttribute("data-src")
       );
     </script>
+
+    {% if include_i18n_fallback %}
+      <script
+        nomodule
+        id="vite-legacy-fallback-lang-slot"
+        data-src="{{ prod_fallback_language_urls.legacy }}"
+      >
+        System.import(
+          document.getElementById("vite-legacy-fallback-lang-slot").getAttribute("data-src")
+        );
+      </script>
+    {% endif %}
+
     <script
       nomodule
       id="vite-legacy-js-slot"
