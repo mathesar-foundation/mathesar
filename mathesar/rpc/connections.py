@@ -59,7 +59,7 @@ def add_from_known_connection(
     will be used.
 
     Args:
-        nickname: Used to identify the added connection
+        nickname: Identify the added connection. Should be unique.
         db_name: The name of the database on the server.
         create_db: Whether we should create the database `db_name` if it
             doesn't already exist.
@@ -107,7 +107,7 @@ def add_from_scratch(
     exist on the PostgreSQL server.
 
     Args:
-        nickname: Used to identify the added connection.
+        nickname: Identify the added connection. Should be unique.
         db_name: The name of the database on the server.
         user: A valid user (role) on the server, with `CONNECT` and
             `CREATE` privileges on the database given by `db_name`.
