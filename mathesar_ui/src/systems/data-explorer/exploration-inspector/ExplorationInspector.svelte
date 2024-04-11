@@ -1,16 +1,25 @@
 <script lang="ts">
   import { TabContainer } from '@mathesar-component-library';
-  import type QueryRunner from '../QueryRunner';
+  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
+  import type MessageBus from '@mathesar/utils/MessageBus';
   import type QueryManager from '../QueryManager';
+  import type QueryRunner from '../QueryRunner';
   import ExplorationTab from './ExplorationTab.svelte';
-  import ColumnTab from './column-tab/ColumnTab.svelte';
   import CellTab from './cell/CellTab.svelte';
+  import ColumnTab from './column-tab/ColumnTab.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
   export let canEditMetadata: boolean;
+  export let cellSelectionStarted: MessageBus<SheetCellDetails> | undefined =
+    undefined;
 
   $: ({ inspector, query } = queryHandler);
   $: ({ tabs, activeTab } = inspector);
+  $: cellSelectionStarted?.listen((targetCell) => {
+    if (targetCell.type === 'column-header-cell') {
+      $activeTab = $tabs.find((tab) => tab.id === 'inspect-column');
+    }
+  });
 </script>
 
 <aside class="exploration-inspector">

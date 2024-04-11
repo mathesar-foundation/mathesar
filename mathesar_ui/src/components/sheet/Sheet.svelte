@@ -5,6 +5,7 @@
   import { ImmutableMap } from '@mathesar-component-library/types';
   import type { ClipboardHandler } from '@mathesar/stores/clipboard';
   import { getClipboardHandlerStoreFromContext } from '@mathesar/stores/clipboard';
+  import type MessageBus from '@mathesar/utils/MessageBus';
   import { getModifierKeyCombo } from '@mathesar/utils/pointerUtils';
   import {
     beginSelection,
@@ -30,6 +31,8 @@
   export let hasPaddingRight = false;
   export let clipboardHandler: ClipboardHandler | undefined = undefined;
   export let selection: SheetSelectionStore | undefined = undefined;
+  export let cellSelectionStarted: MessageBus<SheetCellDetails> | undefined =
+    undefined;
 
   export let getColumnIdentifier: (
     c: SheetColumnType,
@@ -163,6 +166,10 @@
       targetCell,
       selectionInProgress,
     });
+
+    if (startingCell === targetCell) {
+      cellSelectionStarted?.send(targetCell);
+    }
   }
 
   async function focusActiveCell() {

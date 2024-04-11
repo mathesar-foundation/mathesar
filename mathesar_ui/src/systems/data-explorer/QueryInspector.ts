@@ -32,14 +32,4 @@ export default class QueryInspector {
     });
     this.activeTab = writable(get(this.tabs)[0]);
   }
-
-  selectColumnTab() {
-    this.activeTab.set(
-      get(this.tabs).find((tab) => tab.id === 'inspect-column'),
-    );
-  }
-
-  selectCellTab() {
-    this.activeTab.set(get(this.tabs).find((tab) => tab.id === 'inspect-cell'));
-  }
 }

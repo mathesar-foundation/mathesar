@@ -1,54 +1,33 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import { TabContainer } from '@mathesar-component-library';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import type { ComponentType } from 'svelte';
+  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
+  import type MessageBus from '@mathesar/utils/MessageBus';
+  import CellMode from './cell/CellMode.svelte';
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';
-  import CellMode from './cell/CellMode.svelte';
-
   import TableMode from './table/TableMode.svelte';
 
-  type TabItem = { label: string; id: number; component: ComponentType };
-  const tabs: TabItem[] = [
-    {
-      label: $_('table'),
-      component: TableMode,
-      id: 1,
-    },
-    {
-      label: $_('column'),
-      component: ColumnMode,
-      id: 2,
-    },
-    {
-      label: $_('record'),
-      component: RecordMode,
-      id: 3,
-    },
-    {
-      label: $_('cell'),
-      component: CellMode,
-      id: 4,
-    },
-  ];
+  const tableTab = { label: $_('table'), component: TableMode, id: 1 };
+  const columnTab = { label: $_('column'), component: ColumnMode, id: 2 };
+  const recordTab = { label: $_('record'), component: RecordMode, id: 3 };
+  const cellTab = { label: $_('cell'), component: CellMode, id: 4 };
+  const tabs = [tableTab, columnTab, recordTab, cellTab];
 
-  let activeTab: TabItem;
+  export let cellSelectionStarted: MessageBus<SheetCellDetails> | undefined =
+    undefined;
 
-  // // TODO_3037 restore logic to select tab based on cell selection
-  // const tabularData = getTabularDataStoreFromContext();
-  // $: ({ selection } = $tabularData);
-  // $: ({ selectedCells } = selection);
-  // $: {
-  //   // Explicit dependency
-  //   $selectedCells;
-  //   if (selection.isAnyColumnCompletelySelected()) {
-  //     [, activeTab] = tabs;
-  //   }
-  //   if (selection.isAnyRowCompletelySelected()) {
-  //     [, , activeTab] = tabs;
-  //   }
-  // }
+  let activeTab: (typeof tabs)[number];
+
+  $: cellSelectionStarted?.listen((targetCell) => {
+    if (targetCell.type === 'column-header-cell') {
+      activeTab = columnTab;
+    }
+    if (targetCell.type === 'row-header-cell') {
+      activeTab = recordTab;
+    }
+  });
 </script>
 
 <div class="table-inspector">

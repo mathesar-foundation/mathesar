@@ -1,11 +1,16 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type QueryRunner from '../QueryRunner';
+
+  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
+  import type MessageBus from '@mathesar/utils/MessageBus';
   import type QueryManager from '../QueryManager';
-  import Results from './Results.svelte';
+  import type QueryRunner from '../QueryRunner';
   import QueryRefreshButton from './QueryRefreshButton.svelte';
+  import Results from './Results.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
+  export let cellSelectionStarted: MessageBus<SheetCellDetails> | undefined =
+    undefined;
 </script>
 
 <section data-identifier="result">
@@ -15,7 +20,7 @@
       <QueryRefreshButton queryRunner={queryHandler} />
     </div>
   </header>
-  <Results {queryHandler} />
+  <Results {queryHandler} {cellSelectionStarted} />
 </section>
 
 <style lang="scss">

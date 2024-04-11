@@ -15,8 +15,10 @@
     SheetVirtualRows,
   } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
+  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
+  import type MessageBus from '@mathesar/utils/MessageBus';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
   import { getRowSelectionId } from '../QueryRunner';
@@ -27,6 +29,8 @@
 
   export let queryHandler: QueryRunner | QueryManager;
   export let isExplorationPage = false;
+  export let cellSelectionStarted: MessageBus<SheetCellDetails> | undefined =
+    undefined;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
   const columnWidths = new ImmutableMap([
@@ -93,6 +97,7 @@
       {clipboardHandler}
       usesVirtualList
       {selection}
+      {cellSelectionStarted}
     >
       <SheetHeader>
         <SheetOriginCell columnIdentifierKey={ID_ROW_CONTROL_COLUMN} />

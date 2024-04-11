@@ -1,13 +1,18 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import { Tutorial } from '@mathesar-component-library';
+  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
   import { queries } from '@mathesar/stores/queries';
+  import MessageBus from '@mathesar/utils/MessageBus';
   import ActionsPane from './ActionsPane.svelte';
   import type QueryManager from './QueryManager';
   import { WithExplorationInspector } from './exploration-inspector';
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
   import ResultPane from './result-pane/ResultPane.svelte';
   import type { ColumnWithLink } from './utils';
+
+  const cellSelectionStarted = new MessageBus<SheetCellDetails>();
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
@@ -58,9 +63,10 @@
             {isInspectorOpen}
             queryHandler={queryManager}
             {canEditMetadata}
+            {cellSelectionStarted}
             on:delete
           >
-            <ResultPane queryHandler={queryManager} />
+            <ResultPane queryHandler={queryManager} {cellSelectionStarted} />
           </WithExplorationInspector>
         {/if}
       </WithInputSidebar>

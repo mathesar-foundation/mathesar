@@ -21,9 +21,6 @@
   <Button
     appearance="plain"
     class="column-name-wrapper {isSelected ? 'selected' : ''}"
-    on:click={() => {
-      queryRunner.selectColumn(processedQueryColumn.column.alias);
-    }}
   >
     <!--
       TODO: Use a separate prop to identify column that isn't fetched yet

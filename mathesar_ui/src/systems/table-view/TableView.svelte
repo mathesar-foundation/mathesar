@@ -6,6 +6,7 @@
   import type { TableEntry } from '@mathesar/api/types/tables';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
+  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
@@ -22,6 +23,7 @@
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
+  import MessageBus from '@mathesar/utils/MessageBus';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
@@ -31,6 +33,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
+  const cellSelectionStarted = new MessageBus<SheetCellDetails>();
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -101,7 +104,7 @@
 </script>
 
 <div class="table-view">
-  <WithTableInspector {context} {showTableInspector}>
+  <WithTableInspector {context} {showTableInspector} {cellSelectionStarted}>
     <div class="sheet-area">
       {#if $processedColumns.size}
         <Sheet
@@ -109,6 +112,7 @@
           {columnWidths}
           {selection}
           {usesVirtualList}
+          {cellSelectionStarted}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
           columns={sheetColumns}
