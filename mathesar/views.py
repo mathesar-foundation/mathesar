@@ -5,8 +5,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from demo.utils import get_is_live_demo_mode, get_live_demo_db_name
-
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.query import QueryAccessPolicy
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
@@ -58,12 +56,6 @@ def _get_permissible_db_queryset(request):
         dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=deleted)
         permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
         permitted_dbs_qs = permitted_dbs_qs.distinct()
-        if get_is_live_demo_mode():
-            live_demo_db_name = get_live_demo_db_name(request)
-            if live_demo_db_name:
-                permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
-            else:
-                raise Exception('This should never happen')
         if deleted:
             failed_permitted_dbs_qs = permitted_dbs_qs
         else:
@@ -150,7 +142,6 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'abstract_types': get_ui_type_list(request, database),
         'user': get_user_data(request),
         'is_authenticated': not request.user.is_anonymous,
-        'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
         'internal_db_connection': _get_internal_db_meta(),
     }

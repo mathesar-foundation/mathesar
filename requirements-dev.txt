@@ -1,4 +1,4 @@
--r requirements-demo.txt
+-r requirements.txt
 flake8==3.9.0
 ipython==8.10.0
 pytest==8.0.2

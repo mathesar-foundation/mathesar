@@ -16,12 +16,9 @@ DEVCON_DATASET = os.path.join(RESOURCES, "devcon_dataset.sql")
 MOVIES_SQL_TABLES = os.path.join(RESOURCES, "movie_collection_tables.sql")
 MOVIES_SQL_FKS = os.path.join(RESOURCES, "movie_collection_fks.sql")
 MOVIES_CSV = os.path.join(RESOURCES, 'movies_csv')
-ARXIV_SETUP_SQL = os.path.join(RESOURCES, 'arxiv_dataset_setup.sql')
-ARXIV_PAPERS_PICKLE = os.path.join(RESOURCES, 'arxiv_papers.pickle')
 LIBRARY_MANAGEMENT = 'Library Management'
 MOVIE_COLLECTION = 'Movie Collection'
 MATHESAR_CON = 'Mathesar Con'
-ARXIV = 'Latest Papers from arXiv'
 
 
 def get_dj_schema_by_name(engine, name):

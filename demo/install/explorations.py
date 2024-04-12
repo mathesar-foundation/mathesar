@@ -1,6 +1,6 @@
 """This module contains logic for creating premade explorations of demo data."""
 from demo.install.base import (
-    LIBRARY_MANAGEMENT, MATHESAR_CON, ARXIV,
+    LIBRARY_MANAGEMENT, MATHESAR_CON,
     get_dj_column_by_name, get_dj_schema_by_name, get_dj_table_by_name,
 )
 from mathesar.models.query import UIQuery
@@ -333,7 +333,7 @@ def _create_organizations_by_topic_view(engine):
 
 
 def _create_paper_authors_view(engine):
-    schema = get_dj_schema_by_name(engine, ARXIV)
+    schema = get_dj_schema_by_name(engine)
 
     papers = get_dj_table_by_name(schema, "Papers")
     pa_map = get_dj_table_by_name(schema, "Paper-Author Map")
