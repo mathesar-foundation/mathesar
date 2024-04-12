@@ -49,10 +49,10 @@ Before getting started with your code changes, read our [Contributor guide](./CO
 
 ## Loading sample data
 
-1. Using a CSV File (limited visibility of features):
+- Using a CSV File (limited visibility of features):
 For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`.
 
-1. Using Mathesar Data Playground (recommended):
+- Using Mathesar Data Playground (recommended):
 
     1. Clone the `mathesar-data-playground` repo:
     ```
