@@ -79,8 +79,14 @@ When an error is produced by a call to the RPC endpoint, we produce an error of 
 
 The `code` is a negative integer. Some codes are produced according to the [JSON-RPC spec](https://www.jsonrpc.org/specification#error_object).
 
-More specific codes are produced according to the following documentation:
+Other error codes are grouped according to the library that produced the Exception:
 
----
+- `builtins`: -31xxx
+- `psycopg` or `psycopg2`: -30xxx
+- `django`: -29xxx
+- `mathesar` (our code): -28xxx
+- `db` (our code): -27xxx
+- `sqlalchemy`: -26xxx
+- other: -25xxx
 
-::: mathesar.rpc.exceptions.error_codes.get_error_code
+Unrecognized errors from a given library return a "round number" code, so an unknown `builtins` error gets the code -31000.
