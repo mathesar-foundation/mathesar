@@ -50,23 +50,24 @@ Before getting started with your code changes, read our [Contributor guide](./CO
 ## Loading sample data
 
 - Using a CSV File (limited visibility of features):
-For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`.
+
+    For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`.
 
 - Using Mathesar Data Playground (recommended):
 
     1. Clone the `mathesar-data-playground` repo:
-    ```
-    git clone https://github.com/mathesar-foundation/mathesar-data-playground.git
-    ```
+        ```
+        git clone https://github.com/mathesar-foundation/mathesar-data-playground.git
+        ```
 
-    1. Load the data from sql by running:
-    ```
-    sudo docker exec -i mathesar_dev_db bash -c 'psql -U mathesar' < /path/to/your/cloned/repo/mathesar-data-playground/realistic_library_simulation/simulation_runs/simulation_run_20230106_00.sql
-    ```
-    ```
-    sudo docker exec -i mathesar_dev_db bash -c 'psql -U mathesar' < /path/to/your/cloned/repo/mathesar-data-playground/realistic_library_simulation/simulation_runs/simulation_run_20230106_00_checkouts.sql
-    ```
-    1. [Sync]( https://docs.mathesar.org/user-guide/syncing-db/) these changes from the UI.
+    2. Load the data from sql by running:
+        ```
+        sudo docker exec -i mathesar_dev_db bash -c 'psql -U mathesar' < /path/to/your/cloned/repo/mathesar-data-playground/realistic_library_simulation/simulation_runs/simulation_run_20230106_00.sql
+        ```
+        ```
+        sudo docker exec -i mathesar_dev_db bash -c 'psql -U mathesar' < /path/to/your/cloned/repo/mathesar-data-playground/realistic_library_simulation/simulation_runs/simulation_run_20230106_00_checkouts.sql
+        ```
+    3. [Sync]( https://docs.mathesar.org/user-guide/syncing-db/) these changes from the UI.
 
 
 <!-- TODO add more content about sample data -->
