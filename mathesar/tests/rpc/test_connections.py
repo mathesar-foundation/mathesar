@@ -25,7 +25,7 @@ def test_add_from_known_connection(create_db, connection_id, sample_data):
         ) as mock_exec:
             rpc_conn.add_from_known_connection(
                 nickname='mathesar_tables',
-                db_name='mathesar',
+                database='mathesar',
                 create_db=create_db,
                 connection_id=connection_id,
                 sample_data=sample_data
@@ -63,7 +63,7 @@ def test_add_from_scratch(port, sample_data):
         ) as mock_exec:
             rpc_conn.add_from_scratch(
                 nickname='mathesar_tables',
-                db_name='mathesar',
+                database='mathesar',
                 user='mathesar_user',
                 password='mathesar_password',
                 host='mathesar_dev_db',

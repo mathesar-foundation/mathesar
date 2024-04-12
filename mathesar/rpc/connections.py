@@ -47,7 +47,7 @@ class DBModelReturn(TypedDict):
 def add_from_known_connection(
         *,
         nickname: str,
-        db_name: str,
+        database: str,
         create_db: bool = False,
         connection_id: int = None,
         sample_data: list[str] = [],
@@ -60,8 +60,8 @@ def add_from_known_connection(
 
     Args:
         nickname: Identify the added connection. Should be unique.
-        db_name: The name of the database on the server.
-        create_db: Whether we should create the database `db_name` if it
+        database: The name of the database on the server.
+        create_db: Whether we should create the database `database` if it
             doesn't already exist.
         connection_id: Identifies the known connection when combined with
             the user_database value for the connection_type parameter
@@ -81,7 +81,7 @@ def add_from_known_connection(
         'connection_id': connection_id
     }
     db_model = connections.copy_connection_from_preexisting(
-        connection, nickname, db_name, create_db, sample_data
+        connection, nickname, database, create_db, sample_data
     )
     return DBModelReturn.from_db_model(db_model)
 
@@ -92,7 +92,7 @@ def add_from_known_connection(
 def add_from_scratch(
         *,
         nickname: str,
-        db_name: str,
+        database: str,
         user: str,
         password: str,
         host: str,
@@ -103,14 +103,14 @@ def add_from_scratch(
     Add a new connection to a PostgreSQL server from scratch.
 
     This requires inputting valid credentials for the connection. When
-    setting up the connection, therefore, the `db_name` must already
+    setting up the connection, therefore, the `database` must already
     exist on the PostgreSQL server.
 
     Args:
         nickname: Identify the added connection. Should be unique.
-        db_name: The name of the database on the server.
+        database: The name of the database on the server.
         user: A valid user (role) on the server, with `CONNECT` and
-            `CREATE` privileges on the database given by `db_name`.
+            `CREATE` privileges on the database given by `database`.
         password: The password for `user`.
         host: The hostname or IP address of the PostgreSQL server.
         port: The port of the PostgreSQL server.
@@ -122,6 +122,6 @@ def add_from_scratch(
         Metadata about the Database associated with the connection.
     """
     db_model = connections.create_connection_from_scratch(
-        user, password, host, port, nickname, db_name, sample_data
+        user, password, host, port, nickname, database, sample_data
     )
     return DBModelReturn.from_db_model(db_model)
