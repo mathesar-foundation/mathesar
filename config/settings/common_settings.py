@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django_filters",
     "django_property_filter",
     "drf_spectacular",
+    "modernrpc",
     "mathesar",
 ]
 
@@ -63,6 +64,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+
+MODERNRPC_METHODS_MODULES = [
+    'mathesar.rpc.connections'
+]
 
 TEMPLATES = [
     {
