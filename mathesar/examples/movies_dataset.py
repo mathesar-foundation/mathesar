@@ -2,7 +2,9 @@
 import os
 from sqlalchemy import text
 
-from demo.install.base import MOVIE_COLLECTION, MOVIES_SQL_TABLES, MOVIES_CSV, MOVIES_SQL_FKS
+from mathesar.examples.base import (
+    MOVIE_COLLECTION, MOVIES_SQL_TABLES, MOVIES_CSV, MOVIES_SQL_FKS
+)
 
 
 def load_movies_dataset(engine, safe_mode=False):
