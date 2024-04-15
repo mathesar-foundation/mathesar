@@ -41,12 +41,6 @@ def _get_permissible_db_queryset(request):
     Note, connections that a user is permitted to access is the union of those
     permitted by DatabaseAccessPolicy and those containing Schemas permitted by
     SchemaAccessPolicy.
-
-    Note, the live demo mode is an exception where the user is only permitted to
-    access the database generated for him. We treat that as a subset of the
-    connections the user can normally access, just in case someone finds a way
-    to manipulate how we define whether we're in demo mode and which db is a
-    user's demo db.
     """
     for deleted in (True, False):
         dbs_qs = Database.objects.filter(deleted=deleted)
@@ -180,16 +174,7 @@ def get_current_database(request, connection_id):
     if connection_id is not None:
         current_database = get_object_or_404(permitted_databases, id=connection_id)
     else:
-        request_database_name = get_live_demo_db_name(request)
-        try:
-            if request_database_name is not None:
-                # Try to get the database named specified in the request
-                current_database = permitted_databases.get(name=request_database_name)
-            else:
-                # Try to get the first database available
-                current_database = permitted_databases.order_by('id').first()
-        except Database.DoesNotExist:
-            current_database = None
+        current_database = None
     return current_database
 
 
