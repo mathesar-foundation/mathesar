@@ -9,7 +9,7 @@ from mathesar.examples.base import (
 
 def load_movies_dataset(engine, safe_mode=False):
     """
-    Load the movie demo data set.
+    Load the movie example data set.
 
     Args:
         engine: an SQLAlchemy engine defining the connection to load data into.
