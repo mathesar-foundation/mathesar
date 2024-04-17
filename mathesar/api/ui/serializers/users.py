@@ -1,7 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
 from rest_framework import serializers
-import django.contrib.auth.password_validation as validators
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
