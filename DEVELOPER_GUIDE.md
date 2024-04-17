@@ -216,12 +216,6 @@ If you'd like to manually push or pull translations, follow the instructions in 
 
 1. Commit and push the changes to our repo.
 
-## Demo mode
-
-Mathesar can be run in "demo mode" to meet the specific needs of our [live demo site](https://demo.mathesar.org).
-
-See our [Live demo mode](./demo/README.md) guide for more information on enabling live demo mode locally
-
 
 ## Opening a shell in the container
 

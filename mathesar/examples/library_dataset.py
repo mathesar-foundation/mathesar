@@ -1,7 +1,7 @@
 """This module contains functions to load the Library Management dataset."""
 
 from sqlalchemy import text
-from demo.install.base import LIBRARY_MANAGEMENT, LIBRARY_ONE, LIBRARY_TWO
+from mathesar.examples.base import LIBRARY_MANAGEMENT, LIBRARY_ONE, LIBRARY_TWO
 
 
 def load_library_dataset(engine, safe_mode=False):

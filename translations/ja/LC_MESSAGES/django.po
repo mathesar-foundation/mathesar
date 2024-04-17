@@ -45,21 +45,6 @@ msgstr ""
 msgid "roadmap"
 msgstr "ロードマップ"
 
-#: mathesar/templates/mathesar/login_base.html:127
-msgid ""
-"You can still use this demo site, but some features may not work correctly. "
-"We encourage you to try Mathesar on a device with a larger screen."
-msgstr ""
-"このデモサイトは引き続きご利用いただけますが、一部の機能が正しく動作しない場合があります。より大きな画面のデバイスでMathesarをお試しいただくようお勧めします。"
-
-#: mathesar/templates/mathesar/login_base.html:132
-msgid "Live Demo Mode"
-msgstr "ライブデモモード"
-
-#: mathesar/templates/mathesar/login_base.html:135
-msgid "Mathesar's live demo is available to anyone to try out."
-msgstr "Mathesarのライブデモは、どなたでもお試しいただけます。"
-
 #: mathesar/templates/mathesar/login_base.html:138
 msgid "Use the following credentials to login"
 msgstr "次の認証情報を使用してログインする"
@@ -75,10 +60,6 @@ msgstr "ユーザー名"
 #: mathesar/templates/registration/superuser_create.html:144
 msgid "Password"
 msgstr "パスワード"
-
-#: mathesar/templates/mathesar/login_base.html:145
-msgid "Keep in mind that the data in the live demo is reset regularly."
-msgstr "ライブデモのデータは定期的にリセットされることに注意してください。"
 
 #: mathesar/templates/registration/login.html:3
 msgid "Logging In..."
