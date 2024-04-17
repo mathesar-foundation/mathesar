@@ -169,7 +169,6 @@ jobs:
         with:
           checkName: "flake8"
           path: "."
-          plugins: flake8-no-types
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

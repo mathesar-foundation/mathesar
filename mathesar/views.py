@@ -1,11 +1,11 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
+from modernrpc.views import RPCEntryPoint
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
-from demo.utils import get_is_live_demo_mode, get_live_demo_db_name
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.query import QueryAccessPolicy
@@ -43,12 +43,6 @@ def _get_permissible_db_queryset(request):
     Note, connections that a user is permitted to access is the union of those
     permitted by DatabaseAccessPolicy and those containing Schemas permitted by
     SchemaAccessPolicy.
-
-    Note, the live demo mode is an exception where the user is only permitted to
-    access the database generated for him. We treat that as a subset of the
-    connections the user can normally access, just in case someone finds a way
-    to manipulate how we define whether we're in demo mode and which db is a
-    user's demo db.
     """
     for deleted in (True, False):
         dbs_qs = Database.objects.filter(deleted=deleted)
@@ -58,12 +52,6 @@ def _get_permissible_db_queryset(request):
         dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=deleted)
         permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
         permitted_dbs_qs = permitted_dbs_qs.distinct()
-        if get_is_live_demo_mode():
-            live_demo_db_name = get_live_demo_db_name(request)
-            if live_demo_db_name:
-                permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
-            else:
-                raise Exception('This should never happen')
         if deleted:
             failed_permitted_dbs_qs = permitted_dbs_qs
         else:
@@ -150,7 +138,6 @@ def get_base_data_all_routes(request, database=None, schema=None):
         'abstract_types': get_ui_type_list(request, database),
         'user': get_user_data(request),
         'is_authenticated': not request.user.is_anonymous,
-        'live_demo_mode': get_is_live_demo_mode(),
         'current_release_tag_name': __version__,
         'internal_db_connection': _get_internal_db_meta(),
     }
@@ -189,16 +176,7 @@ def get_current_database(request, connection_id):
     if connection_id is not None:
         current_database = get_object_or_404(permitted_databases, id=connection_id)
     else:
-        request_database_name = get_live_demo_db_name(request)
-        try:
-            if request_database_name is not None:
-                # Try to get the database named specified in the request
-                current_database = permitted_databases.get(name=request_database_name)
-            else:
-                # Try to get the first database available
-                current_database = permitted_databases.order_by('id').first()
-        except Database.DoesNotExist:
-            current_database = None
+        current_database = None
     return current_database
 
 
@@ -272,6 +250,10 @@ def get_common_data_for_shared_query(request, query):
         **get_common_data_for_shared_entity(request, schema),
         'queries': serialized_queries,
     }
+
+
+class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
+    pass
 
 
 @login_required

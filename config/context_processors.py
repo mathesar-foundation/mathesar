@@ -14,9 +14,6 @@ def frontend_settings(request):
     frontend_settings = {
         'development_mode': development_mode,
         'manifest_data': manifest_data,
-        'live_demo_mode': getattr(settings, 'MATHESAR_LIVE_DEMO', False),
-        'live_demo_username': getattr(settings, 'MATHESAR_LIVE_DEMO_USERNAME', None),
-        'live_demo_password': getattr(settings, 'MATHESAR_LIVE_DEMO_PASSWORD', None),
         'display_language': display_language,
         'include_i18n_fallback': display_language != fallback_language,
     }

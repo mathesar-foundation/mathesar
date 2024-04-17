@@ -37,14 +37,6 @@ def main(skip_static_collection=False):
             install_on_db_with_key(database_key, skip_confirm)
         except IntegrityError:
             continue
-    if getattr(settings, 'MATHESAR_LIVE_DEMO', False) is True:
-        management.call_command(
-            'createsuperuser',
-            '--no-input',
-            '--username', 'demo',
-            '--email', 'admin@example.com',
-        )
-        management.call_command('setup_demo_template_db')
 
 
 def install_on_db_with_key(database_key, skip_confirm):

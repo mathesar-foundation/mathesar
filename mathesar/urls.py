@@ -38,6 +38,7 @@ ui_router.register(r'tables/(?P<table_pk>[^/.]+)/shares', ui_viewsets.SharedTabl
 ui_router.register(r'queries/(?P<query_pk>[^/.]+)/shares', ui_viewsets.SharedQueryViewSet, basename='shared-query')
 
 urlpatterns = [
+    path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
