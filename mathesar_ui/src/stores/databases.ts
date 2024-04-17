@@ -8,11 +8,10 @@ import {
 } from '@mathesar-component-library';
 import connectionsApi, {
   type Connection,
-  type CreateFromKnownConnectionProps,
-  type CreateFromScratchProps,
   type CreateWithNewUserProps,
   type UpdatableConnectionProperties,
 } from '@mathesar/api/rest/connections';
+import { api } from '@mathesar/api/rpc';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
@@ -73,14 +72,20 @@ class ConnectionsStore {
     this.unsortedConnections.set(connection.id, connection);
   }
 
-  async createFromKnownConnection(props: CreateFromKnownConnectionProps) {
-    const connection = await connectionsApi.createFromKnownConnection(props);
+  async createFromKnownConnection(
+    props: Parameters<typeof api.connections.add_from_known_connection>[0],
+  ) {
+    const connection = await api.connections
+      .add_from_known_connection(props)
+      .run();
     this.addConnection(connection);
     return connection;
   }
 
-  async createFromScratch(props: CreateFromScratchProps) {
-    const connection = await connectionsApi.createFromScratch(props);
+  async createFromScratch(
+    props: Parameters<typeof api.connections.add_from_scratch>[0],
+  ) {
+    const connection = await api.connections.add_from_scratch(props).run();
     this.addConnection(connection);
     return connection;
   }
