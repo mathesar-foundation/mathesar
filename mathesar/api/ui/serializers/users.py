@@ -77,7 +77,7 @@ class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer
     def validate_old_password(self, value):
         user = self.context['request'].user
         if user.check_password(value) is True:
-           return value 
+            return value
         raise IncorrectOldPassword(field='old_password')
 
     def validate_password(self, value):
