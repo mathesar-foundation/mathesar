@@ -40,20 +40,6 @@ msgstr ""
 msgid "roadmap"
 msgstr ""
 
-#: mathesar/templates/mathesar/login_base.html:127
-msgid ""
-"You can still use this demo site, but some features may not work correctly. "
-"We encourage you to try Mathesar on a device with a larger screen."
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:132
-msgid "Live Demo Mode"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:135
-msgid "Mathesar's live demo is available to anyone to try out."
-msgstr ""
-
 #: mathesar/templates/mathesar/login_base.html:138
 msgid "Use the following credentials to login"
 msgstr ""
@@ -68,10 +54,6 @@ msgstr ""
 #: mathesar/templates/registration/login.html:37
 #: mathesar/templates/registration/superuser_create.html:144
 msgid "Password"
-msgstr ""
-
-#: mathesar/templates/mathesar/login_base.html:145
-msgid "Keep in mind that the data in the live demo is reset regularly."
 msgstr ""
 
 #: mathesar/templates/registration/login.html:3
