@@ -87,9 +87,9 @@ EXPOSE 8000 3000 6006
 ENTRYPOINT ["./dev-run.sh"]
 
 
-#=========== STAGE: COMMON ===================================================#
+#=========== STAGE: PRODUCTION ===============================================#
 
-from base as common
+from base as production
 
 # Install prod requirements
 RUN pip install --no-cache-dir -r requirements-prod.txt
@@ -104,11 +104,6 @@ COPY --from=development /code/mathesar/static/mathesar ./mathesar/static/mathesa
 RUN rm -rf ./mathesar_ui
 RUN rm -rf ./mathesar/tests ./db/tests
 RUN rm -rf ./docs
-
-
-#=========== STAGE: PRODUCTION ===============================================#
-
-FROM common AS production
 
 EXPOSE 8000
 
