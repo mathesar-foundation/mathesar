@@ -61,9 +61,11 @@ def test_user_password_reset_non_superuser(client_bob, user_bob):
 
 
 def test_user_password_change(client_bob, user_bob):
-    new_password = 'new_password'
+    new_password = 'NewPass0!'
+    old_password = 'password'
     data = {
-        'password': new_password
+        'password': 'NewPass0!',
+        'old_password': old_password
     }
     response = client_bob.post('/api/ui/v0/users/password_change/', data=data)
     assert response.status_code == 200

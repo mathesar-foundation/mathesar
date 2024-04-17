@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
 from rest_framework import serializers
 import django.contrib.auth.password_validation as validators
@@ -74,20 +75,18 @@ class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer
     password = serializers.CharField(write_only=True, required=True)
     old_password = serializers.CharField(write_only=True, required=True)
 
-    def validate(self, data):
-        user = User(**data)
-        password = data.get('password')
-        errors = dict()
-        validators.validate_password(password=password, user=user)
-        if errors:
-            raise serializers.ValidationError(errors)
-        return super(ChangePasswordSerializer, self).validate(data)
-
     def validate_old_password(self, value):
         user = self.context['request'].user
         if user.check_password(value) is True:
-            return value
+           return value 
         raise IncorrectOldPassword(field='old_password')
+
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except serializers.ValidationError as exc:
+            raise serializers.ValidationError(str(exc))
+        return value
 
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
@@ -97,15 +96,6 @@ class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer
 
 class PasswordResetSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     password = serializers.CharField(write_only=True, required=True)
-
-    def validate(self, data):
-        user = User(**data)
-        password = data.get('password')
-        errors = dict()
-        validators.validate_password(password=password, user=user)
-        if errors:
-            raise serializers.ValidationError(errors)
-        return super(PasswordResetSerializer, self).validate(data)
 
 
 class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
