@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "django_property_filter",
-    "drf_spectacular",
     "modernrpc",
     "mathesar",
 ]
@@ -207,18 +206,6 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'EXCEPTION_HANDLER':
         'mathesar.exception_handlers.mathesar_exception_handler',
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
-}
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Mathesar API',
-    'DESCRIPTION': '',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'PREPROCESSING_HOOKS': ['config.settings.openapi.custom_preprocessing_hook'],
-    'POSTPROCESSING_HOOKS': [
-        'config.settings.openapi.remove_url_prefix_hook',
-    ],
-    # OTHER SETTINGS
 }
 FRIENDLY_ERRORS = {
     'FIELD_ERRORS': {
