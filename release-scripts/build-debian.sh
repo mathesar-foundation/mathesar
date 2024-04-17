@@ -11,7 +11,6 @@ cp ../pyproject.toml build/pyproject.toml
 cp ../MANIFEST.in build/MANIFEST.in
 cp -r ../mathesar build/mathesar/
 cp -r ../static build/static/
-cp -r ../demo build/demo/
 cp -r ../config build/config/
 cp -r ../db build/db
 cp -r debian build/debian

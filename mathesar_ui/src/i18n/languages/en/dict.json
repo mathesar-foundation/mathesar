@@ -291,8 +291,6 @@
   "many_to_one": "Many to One",
   "many_to_one_link_description": "Multiple [baseTable] records can link to the same [targetTable] record.",
   "mathesar": "Mathesar",
-  "mathesar_demo_mode": "Mathesar is in demo mode.",
-  "mathesar_demo_mode_help": "Each session has its own copy of demo data. Data will be deleted regularly.",
   "max_time_unit": "Max Time Unit",
   "milliseconds": "Milliseconds",
   "min_time_unit": "Min Time Unit",

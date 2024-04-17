@@ -4,8 +4,8 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from mathesar.models.base import Database
 from db import install, connection as dbconn
 from mathesar.state import reset_reflection
-from demo.install.library_dataset import load_library_dataset
-from demo.install.movies_dataset import load_movies_dataset
+from mathesar.examples.library_dataset import load_library_dataset
+from mathesar.examples.movies_dataset import load_movies_dataset
 
 
 class BadInstallationTarget(Exception):

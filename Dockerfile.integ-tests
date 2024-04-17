@@ -129,11 +129,9 @@ WORKDIR /code/
 
 COPY requirements.txt .
 COPY requirements-dev.txt .
-COPY requirements-demo.txt .
 
 RUN pip install -r requirements.txt
 RUN pip install -r requirements-dev.txt
-RUN pip install -r requirements-demo.txt
 COPY . .
 
 RUN cd mathesar_ui && npm ci && npm run build
