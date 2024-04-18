@@ -32,5 +32,6 @@
     font-size: var(--text-size-x-small);
     padding: 0 1.5rem;
     color: var(--color-text-muted);
+    cursor: default;
   }
 </style>
