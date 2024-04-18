@@ -262,6 +262,7 @@ export default class SheetSelection {
     return this.withBasis(
       basisFromDataCells(
         this.plane.dataCellsInFlexibleRowRange(rowIdA, rowIdB),
+        makeCellId(rowIdA, this.plane.columnIds.first ?? ''),
       ),
     );
   }
@@ -271,9 +272,10 @@ export default class SheetSelection {
    * provided columnIds, inclusive.
    */
   ofColumnRange(columnIdA: string, columnIdB: string): SheetSelection {
-    const newBasis = this.plane.hasResultRows
+    const newBasis = this.plane.rowIds.first
       ? basisFromDataCells(
           this.plane.dataCellsInColumnRange(columnIdA, columnIdB),
+          makeCellId(this.plane.rowIds.first, columnIdA),
         )
       : basisFromEmptyColumns(this.plane.columnIds.range(columnIdA, columnIdB));
     return this.withBasis(newBasis);
@@ -303,6 +305,7 @@ export default class SheetSelection {
     return this.withBasis(
       basisFromDataCells(
         this.plane.dataCellsInFlexibleCellRange(cellIdA, cellIdB),
+        cellIdA,
       ),
     );
   }
