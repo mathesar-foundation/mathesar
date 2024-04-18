@@ -119,6 +119,7 @@
         {#each items as item (item.key)}
           {@const row = getRow(item.index)}
           {@const rowSelectionId = (row && getRowSelectionId(row)) ?? ''}
+          {@const isSelected = $selection.rowIds.has(rowSelectionId)}
           {#if row || showDummyGhostRow}
             <SheetRow style={item.style} let:htmlAttributes let:styleString>
               <div
@@ -130,6 +131,10 @@
                   columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
                 >
                   <CellBackground color="var(--cell-bg-color-header)" />
+                  <CellBackground
+                    when={isSelected}
+                    color="var(--cell-bg-color-row-selected)"
+                  />
                   {$pagination.offset + item.index + 1}
                 </SheetRowHeaderCell>
 
