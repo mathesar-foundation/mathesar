@@ -64,13 +64,26 @@ def test_user_password_change(client_bob, user_bob):
     new_password = 'NewPass0!'
     old_password = 'password'
     data = {
-        'password': 'NewPass0!',
+        'password': new_password,
         'old_password': old_password
     }
     response = client_bob.post('/api/ui/v0/users/password_change/', data=data)
     assert response.status_code == 200
     user_bob.refresh_from_db()
     assert user_bob.check_password(new_password) is True
+
+
+def test_user_password_change_invalid(client_bob, user_bob):
+    new_password = 'new_pwd'
+    old_password = 'password'
+    data = {
+        'password': new_password,
+        'old_password': old_password
+    }
+    response = client_bob.post('/api/ui/v0/users/password_change/', data=data)
+    assert response.status_code == 400
+    user_bob.refresh_from_db()
+    assert user_bob.check_password(new_password) is False
 
 
 def test_diff_user_detail_as_non_superuser(client_bob, admin_user):

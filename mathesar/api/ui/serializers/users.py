@@ -1,4 +1,5 @@
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
 from rest_framework import serializers
 
@@ -83,8 +84,8 @@ class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer
     def validate_password(self, value):
         try:
             validate_password(value)
-        except serializers.ValidationError as exc:
-            raise serializers.ValidationError(str(exc))
+        except DjangoValidationError as exc:
+            raise DjangoValidationError(str(exc))
         return value
 
     def update(self, instance, validated_data):
