@@ -6,6 +6,7 @@ module.exports = {
     'dist',
     'index.html',
     'src/**/*.stories.svelte',
+    '*.cjs',
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,
@@ -22,6 +23,9 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:svelte/recommended',
     'plugin:svelte/prettier',
+    'plugin:import/errors',
+		'plugin:import/warnings',
+    'plugin:import/typescript'
   ],
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
@@ -44,6 +48,19 @@ module.exports = {
     'no-restricted-syntax': 0,
     '@typescript-eslint/require-await': 'off',
     'class-methods-use-this': 'off',
+    "no-multiple-empty-lines": 1,
+    'import/order': [
+			'warn',
+			{
+				alphabetize: {
+					order: 'asc',
+          orderImportKind:'asc',
+					caseInsensitive: true
+				},
+				'newlines-between': 'always',
+        'groups': ['builtin', 'external', 'internal', ['parent', 'sibling'], 'index'],
+			}
+		]
   },
   overrides: [
     {

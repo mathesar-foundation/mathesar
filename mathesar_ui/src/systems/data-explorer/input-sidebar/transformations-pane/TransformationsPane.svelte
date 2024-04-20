@@ -1,5 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import { iconAddNew, iconDeleteMajor } from '@mathesar/icons';
   import {
     Button,
     Icon,
@@ -8,18 +10,18 @@
     ImmutableMap,
     Collapsible,
   } from '@mathesar-component-library';
-  import { iconAddNew, iconDeleteMajor } from '@mathesar/icons';
-  import type QueryManager from '../../QueryManager';
+
   import FilterTransformation from './FilterTransformation.svelte';
-  import QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
-  import { calcAllowedColumnsPerTransformation } from './transformationUtils';
-  import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
-  import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
   import HideTransformation from './HideTransformation.svelte';
-  import QueryHideTransformationModel from '../../QueryHideTransformationModel';
   import SortTransformation from './SortTransformation.svelte';
-  import QuerySortTransformationModel from '../../QuerySortTransformationModel';
+  import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
+  import { calcAllowedColumnsPerTransformation } from './transformationUtils';
+  import QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
+  import QueryHideTransformationModel from '../../QueryHideTransformationModel';
+  import type QueryManager from '../../QueryManager';
   import type { QueryTransformationModel } from '../../QueryModel';
+  import QuerySortTransformationModel from '../../QuerySortTransformationModel';
+  import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
 
   export let queryManager: QueryManager;
 
