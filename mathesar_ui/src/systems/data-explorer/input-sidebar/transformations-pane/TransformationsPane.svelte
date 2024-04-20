@@ -4,11 +4,11 @@
   import { iconAddNew, iconDeleteMajor } from '@mathesar/icons';
   import {
     Button,
-    Icon,
-    DropdownMenu,
     ButtonMenuItem,
-    ImmutableMap,
     Collapsible,
+    DropdownMenu,
+    Icon,
+    ImmutableMap,
   } from '@mathesar-component-library';
 
   import FilterTransformation from './FilterTransformation.svelte';

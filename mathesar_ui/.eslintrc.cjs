@@ -60,7 +60,13 @@ module.exports = {
 				'newlines-between': 'always',
         'groups': ['builtin', 'external', 'internal', ['parent', 'sibling'], 'index'],
 			}
-		]
+		],
+    'sort-imports': [
+      'warn',
+      {
+        'ignoreDeclarationSort': true,
+      }
+    ],
   },
   overrides: [
     {
