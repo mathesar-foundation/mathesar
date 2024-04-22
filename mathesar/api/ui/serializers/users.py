@@ -84,8 +84,8 @@ class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer
     def validate_password(self, value):
         try:
             validate_password(value)
-        except DjangoValidationError as exc:
-            raise DjangoValidationError(str(exc))
+        except DjangoValidationError as e:
+            raise e
         return value
 
     def update(self, instance, validated_data):
