@@ -1,4 +1,5 @@
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
 from rest_framework import serializers
 
@@ -71,7 +72,7 @@ class UserSerializer(MathesarErrorMessageMixin, FieldAccessMixin, serializers.Mo
 
 
 class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(write_only=True, required=True)
     old_password = serializers.CharField(write_only=True, required=True)
 
     def validate_old_password(self, value):
@@ -80,6 +81,13 @@ class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer
             return value
         raise IncorrectOldPassword(field='old_password')
 
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except DjangoValidationError as e:
+            raise e
+        return value
+
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
         instance.save()
@@ -87,7 +95,7 @@ class ChangePasswordSerializer(MathesarErrorMessageMixin, serializers.Serializer
 
 
 class PasswordResetSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(write_only=True, required=True)
 
 
 class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
