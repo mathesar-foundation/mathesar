@@ -468,6 +468,83 @@ AND attrelid = msar.get_relation_oid(sch_name, rel_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_interval_fields(typ_mod integer) RETURNS text AS $$/*
+Return the string giving the fields for an interval typmod integer.
+
+This logic is ported from the relevant PostgreSQL source code, reimplemented in SQL. See:
+https://doxygen.postgresql.org/backend_2utils_2adt_2timestamp_8c.html
+
+Args:
+  typ_mod: The atttypmod from the pg_attribute table. Should be valid for the interval type.
+*/
+SELECT CASE (typ_mod >> 16 & 32767)
+  WHEN 1 << 2 THEN 'year'
+  WHEN 1 << 1 THEN 'month'
+  WHEN 1 << 3 THEN 'day'
+  WHEN 1 << 10 THEN 'hour'
+  WHEN 1 << 11 THEN 'minute'
+  WHEN 1 << 12 THEN 'second'
+  WHEN (1 << 2) | (1 << 1) THEN 'year to month'
+  WHEN (1 << 3) | (1 << 10) THEN 'day to hour'
+  WHEN (1 << 3) | (1 << 10) | (1 << 11) THEN 'day to minute'
+  WHEN (1 << 3) | (1 << 10) | (1 << 11) | (1 << 12) THEN 'day to second'
+  WHEN (1 << 10) | (1 << 11) THEN 'hour to minute'
+  WHEN (1 << 10) | (1 << 11) | (1 << 12) THEN 'hour to second'
+  WHEN (1 << 11) | (1 << 12) THEN 'minute to second'
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_type_options(typ_id oid, typ_mod integer, typ_ndims integer) RETURNS jsonb AS $$/*
+Return the type options calculated from a type, typmod pair.
+
+This function uses a number of hard-coded constants.
+
+Args:
+  typ_id: The OID of the type.
+  typ_mod: The integer corresponding to the type options; see pg_attribute catalog table.
+*/
+SELECT CASE
+  -- Columns with no type options store -1 in the atttypmod column.
+  WHEN typ_id = 'numeric'::regtype::oid OR typ_id='numeric[]'::regtype::oid THEN
+    jsonb_build_object(
+      -- This calculation is modified from the relevant PostgreSQL source code. See
+      -- https://doxygen.postgresql.org/backend_2utils_2adt_2numeric_8c.html
+      'precision', ((nullif(typ_mod, -1) - 4) >> 16) & 65535,
+      -- This calculation is also from the source code.
+      'scale', (((nullif(typ_mod, -1) - 4) & 2047) # 1024) - 1024
+    )
+  WHEN typ_id = 'interval'::regtype::oid OR typ_id = '_interval'::regtype::oid THEN
+    jsonb_build_object(
+      'precision', NULLIF(typ_mod & 65535, 65535),
+      'fields', msar.get_interval_fields(typ_mod)
+    )
+  WHEN ARRAY[typ_id] <@ ARRAY[
+      'bpchar'::regtype::oid, 'varchar'::regtype::oid,
+      '_bpchar'::regtype::oid, '_varchar'::regtype::oid
+  ] THEN
+    jsonb_build_object(
+      'length', nullif(typ_mod, -1) - 4
+    )
+  WHEN ARRAY[typ_id] <@ ARRAY[
+      'bit'::regtype::oid, 'varbit'::regtype::oid,
+      '_bit'::regtype::oid, '_varbit'::regtype::oid,
+      'time'::regtype::oid, 'timetz'::regtype::oid,
+      '_time'::regtype::oid, '_timetz'::regtype::oid,
+      'timestamp'::regtype::oid, 'timestamptz'::regtype::oid,
+      '_timestamp'::regtype::oid, '_timestamptz'::regtype::oid
+  ] THEN
+    -- For all these types, the typmod is equal to the precision.
+    jsonb_build_object(
+      'precision', nullif(typ_mod, -1)
+    )
+  ELSE jsonb_build_object()
+END || jsonb_build_object('array', typ_ndims>0);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
 Return true if the given column exists in the table, false otherwise.
 */
