@@ -19,6 +19,7 @@
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
   import type MessageBus from '@mathesar/utils/MessageBus';
+  import { arrayIndex } from '@mathesar/utils/typeUtils';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
   import { getRowSelectionId } from '../QueryRunner';
@@ -71,13 +72,6 @@
     (recordRunState === 'success' || recordRunState === 'processing') &&
     !rows.length;
   $: sheetItemCount = showDummyGhostRow ? 1 : rows.length;
-
-  function getRow(index: number) {
-    // Type assertion is here to widen type because we don't have
-    // `noUncheckedIndexedAccess` enabled yet. See
-    // https://github.com/mathesar-foundation/mathesar/issues/1966
-    return rows[index] as (typeof rows)[0] | undefined;
-  }
 </script>
 
 <div data-identifier="query-run-result">
@@ -117,7 +111,7 @@
         let:items
       >
         {#each items as item (item.key)}
-          {@const row = getRow(item.index)}
+          {@const row = arrayIndex(rows, item.index)}
           {@const rowSelectionId = (row && getRowSelectionId(row)) ?? ''}
           {@const isSelected = $selection.rowIds.has(rowSelectionId)}
           {#if row || showDummyGhostRow}
