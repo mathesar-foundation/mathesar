@@ -376,15 +376,31 @@ export class RecordsData {
   }
 
   async fetch(
-    retainExistingRows = false,
+    opts: {
+      clearNewRecords?: boolean;
+      setLoadingState?: boolean;
+      clearMetaStatuses?: boolean;
+    } = {},
   ): Promise<TableRecordsData | undefined> {
+    const options = {
+      clearNewRecords: true,
+      setLoadingState: true,
+      clearMetaStatuses: true,
+      ...opts,
+    };
+
     this.promise?.cancel();
     const { offset } = get(this.meta.pagination);
 
     this.error.set(undefined);
-    if (!retainExistingRows) {
-      this.state.set(States.Loading);
+
+    if (options.clearNewRecords) {
       this.newRecords.set([]);
+    }
+    if (options.setLoadingState) {
+      this.state.set(States.Loading);
+    }
+    if (options.clearMetaStatuses) {
       this.meta.clearAllStatusesAndErrors();
     }
 
@@ -513,7 +529,11 @@ export class RecordsData {
     // flag instead of just re-fetching the records immediately after deleting
     // the saved records.
     if (shouldReFetchRecords) {
-      await this.fetch(true);
+      await this.fetch({
+        clearMetaStatuses: false,
+        clearNewRecords: false,
+        setLoadingState: false,
+      });
     }
 
     this.meta.rowCreationStatus.delete(Array.from(savedRecordKeys, String));
