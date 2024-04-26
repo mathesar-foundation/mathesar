@@ -37,6 +37,7 @@
 
   export let context: Context = 'page';
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let sheetElement: HTMLElement | undefined = undefined;
 
   let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
     'table';
@@ -44,8 +45,7 @@
   $: usesVirtualList = context !== 'widget';
   $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
-  $: ({ processedColumns, display, isLoading, selection, recordsData } =
-    $tabularData);
+  $: ({ processedColumns, display, selection, recordsData } = $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
     getCopyingContext: () => ({
       rowsMap: new Map(
@@ -127,6 +127,7 @@
           hasBorder={sheetHasBorder}
           hasPaddingRight
           restrictWidthToRowWidth={!usesVirtualList}
+          bind:sheetElement
         >
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />

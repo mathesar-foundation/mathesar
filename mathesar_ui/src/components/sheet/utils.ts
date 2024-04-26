@@ -74,3 +74,7 @@ export function getSheetContext<
 >(): SheetContext<SheetColumnIdentifierKey> {
   return getContext(SHEET_CONTEXT_KEY);
 }
+
+export function focusActiveCell(sheetElement: HTMLElement): void {
+  sheetElement?.querySelector<HTMLElement>('[data-active-cell]')?.focus();
+}

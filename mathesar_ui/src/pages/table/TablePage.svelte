@@ -1,17 +1,19 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { router } from 'tinro';
 
   import type { TableEntry } from '@mathesar/api/types/tables';
+  import { focusActiveCell } from '@mathesar/components/sheet/utils';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
-    setTabularDataStoreInContext,
-    TabularData,
     Meta,
+    TabularData,
+    setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { ShareConsumer } from '@mathesar/utils/shares';
   import { setNewImperativeFilterControllerInContext } from './ImperativeFilterController';
 
@@ -27,6 +29,8 @@
   export let table: TableEntry;
   export let shareConsumer: ShareConsumer | undefined = undefined;
 
+  let sheetElement: HTMLElement;
+
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: ({ query } = $router);
   $: meta = Meta.fromSerialization(query[metaSerializationQueryKey] ?? '');
@@ -37,9 +41,25 @@
     table,
     shareConsumer,
   });
+  $: ({ isLoading, selection } = tabularData);
   $: tabularDataStore.set(tabularData);
   let context: 'shared-consumer-page' | 'page' = 'page';
   $: context = shareConsumer ? 'shared-consumer-page' : 'page';
+
+  async function activateFirstDataCell() {
+    selection.updateWithoutFocus((s) => s.ofFirstDataCell());
+    // Don't steal focus if the user has already focused on another UI element
+    // while the table data is loading.
+    if (document.activeElement === document.body) {
+      await tick();
+      focusActiveCell(sheetElement);
+    }
+  }
+  let hasInitialized = false;
+  $: if (!hasInitialized && !$isLoading) {
+    hasInitialized = true;
+    void activateFirstDataCell();
+  }
 
   function handleMetaSerializationChange(s: string) {
     router.location.query.set(metaSerializationQueryKey, s);
@@ -53,7 +73,7 @@
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
     <ActionsPane {table} {context} />
-    <TableView {table} {context} />
+    <TableView {table} {context} bind:sheetElement />
   </div>
 </LayoutWithHeader>
 

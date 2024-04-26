@@ -15,6 +15,7 @@
   import {
     calculateColumnStyleMapAndRowWidth,
     DEFAULT_COLUMN_WIDTH,
+    focusActiveCell,
     setSheetContext,
   } from './utils';
 
@@ -44,7 +45,7 @@
   export let columnWidths: ImmutableMap<SheetColumnIdentifierKey, number> =
     new ImmutableMap();
 
-  let sheetElement: HTMLElement;
+  export let sheetElement: HTMLElement | undefined = undefined;
 
   $: ({ columnStyleMap, rowWidth } = calculateColumnStyleMapAndRowWidth(
     columns,
@@ -131,6 +132,7 @@
 
   function handleMouseDown(e: MouseEvent) {
     if (!selection) return;
+    if (!sheetElement) return;
 
     const target = e.target as HTMLElement;
     const targetCell = findContainingSheetCell(target);
@@ -170,12 +172,13 @@
     }
   }
 
-  async function focusActiveCell() {
-    await tick();
-    sheetElement.querySelector<HTMLElement>('[data-active-cell]')?.focus();
-  }
-
-  onMount(() => selection?.on('focus', focusActiveCell));
+  onMount(() =>
+    selection?.on('focus', async () => {
+      if (!sheetElement) return;
+      await tick();
+      focusActiveCell(sheetElement);
+    }),
+  );
 </script>
 
 <div
