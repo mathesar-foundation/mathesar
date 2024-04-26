@@ -6,30 +6,59 @@ import {
   type Writable,
 } from 'svelte/store';
 import { _ } from 'svelte-i18n';
+
 import type { Tab } from '@mathesar-component-library/types';
 import type QueryModel from './QueryModel';
 
-export default class QueryInspector {
-  tabs: Readable<Tab[]>;
+/**
+ * This is a function instead of a const because we can't run `get(_)` at the
+ * top level since i18n isn't initialized at build time.
+ */
+function makeTabMap() {
+  return {
+    exploration: { label: get(_)('exploration') },
+    column: { label: get(_)('column') },
+    cell: { label: get(_)('cell') },
+  };
+}
 
-  activeTab: Writable<Tab | undefined>;
+export interface ExplorationInspectorTab extends Tab {
+  id: keyof ReturnType<typeof makeTabMap>;
+  label: string;
+}
+
+function makeTab([id, { label }]: [string, { label: string }]) {
+  return { id, label } as ExplorationInspectorTab;
+}
+
+function makeTabList(tabMap: Record<string, { label: string }>) {
+  return Object.entries(tabMap).map(makeTab);
+}
+
+export default class QueryInspector {
+  tabs: Readable<ExplorationInspectorTab[]>;
+
+  activeTabId: Writable<ExplorationInspectorTab['id']>;
+
+  activeTab: Readable<ExplorationInspectorTab>;
 
   constructor(query: Writable<QueryModel>) {
-    const generalTabs: Tab[] = [
-      { id: 'inspect-column', label: get(_)('column') },
-      { id: 'inspect-cell', label: get(_)('cell') },
-    ];
-    const tabsWhenQueryIsSaved: Tab[] = [
-      { id: 'inspect-exploration', label: get(_)('exploration') },
-      ...generalTabs,
-    ];
-
-    this.tabs = derived(query, ($query) => {
-      if ($query.isSaved()) {
-        return tabsWhenQueryIsSaved;
+    const tabMap = makeTabMap();
+    this.tabs = derived(query, (q) => {
+      if (q.isSaved()) {
+        return makeTabList(tabMap);
       }
-      return generalTabs;
+      const { exploration, ...unsavedExplorationTabMap } = tabMap;
+      return makeTabList(unsavedExplorationTabMap);
     });
-    this.activeTab = writable(get(this.tabs)[0]);
+    const firstTabId = get(this.tabs)[0].id;
+    this.activeTabId = writable(firstTabId);
+    this.activeTab = derived(this.activeTabId, (id) =>
+      makeTab([id, tabMap[id]]),
+    );
+  }
+
+  activate(tabId: ExplorationInspectorTab['id']) {
+    this.activeTabId.set(tabId);
   }
 }

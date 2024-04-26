@@ -1,7 +1,7 @@
 <script lang="ts">
   import { TabContainer } from '@mathesar-component-library';
-  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
-  import type MessageBus from '@mathesar/utils/MessageBus';
+  import type { Tab } from '@mathesar/component-library/types';
+  import type { ExplorationInspectorTab } from '../QueryInspector';
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
   import ExplorationTab from './ExplorationTab.svelte';
@@ -10,27 +10,26 @@
 
   export let queryHandler: QueryRunner | QueryManager;
   export let canEditMetadata: boolean;
-  export let cellSelectionStarted: MessageBus<SheetCellDetails> | undefined =
-    undefined;
 
   $: ({ inspector, query } = queryHandler);
   $: ({ tabs, activeTab } = inspector);
-  $: cellSelectionStarted?.listen((targetCell) => {
-    if (targetCell.type === 'column-header-cell') {
-      $activeTab = $tabs.find((tab) => tab.id === 'inspect-column');
-    }
-  });
+
+  function handleTabSelected(e: CustomEvent<{ tab: Tab }>) {
+    const tab = e.detail.tab as ExplorationInspectorTab;
+    inspector.activate(tab.id);
+  }
 </script>
 
 <aside class="exploration-inspector">
   <TabContainer
     tabStyle="compact"
     tabs={$tabs}
-    bind:activeTab={$activeTab}
+    activeTab={$activeTab}
     fillTabWidth
     fillContainerHeight
+    on:tabSelected={handleTabSelected}
   >
-    {#if $activeTab?.id === 'inspect-exploration'}
+    {#if $activeTab.id === 'exploration'}
       <ExplorationTab
         {queryHandler}
         name={$query.name}
@@ -38,9 +37,9 @@
         {canEditMetadata}
         on:delete
       />
-    {:else if $activeTab?.id === 'inspect-column'}
+    {:else if $activeTab.id === 'column'}
       <ColumnTab {queryHandler} />
-    {:else if $activeTab?.id === 'inspect-cell'}
+    {:else if $activeTab.id === 'cell'}
       <CellTab {queryHandler} />
     {/if}
   </TabContainer>

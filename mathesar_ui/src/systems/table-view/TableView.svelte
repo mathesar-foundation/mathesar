@@ -1,12 +1,12 @@
 <script lang="ts">
   import { map } from 'iter-tools';
+  import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
 
   import { ImmutableMap } from '@mathesar-component-library';
   import type { TableEntry } from '@mathesar/api/types/tables';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
-  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
@@ -14,16 +14,10 @@
     getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
-    type ProcessedColumn,
   } from '@mathesar/stores/table-data';
-  import {
-    getRowSelectionId,
-    type RecordRow,
-  } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
-  import MessageBus from '@mathesar/utils/MessageBus';
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';
@@ -33,7 +27,6 @@
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
-  const cellSelectionStarted = new MessageBus<SheetCellDetails>();
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -44,6 +37,9 @@
 
   export let context: Context = 'page';
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+
+  let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
+    'table';
 
   $: usesVirtualList = context !== 'widget';
   $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
@@ -104,7 +100,11 @@
 </script>
 
 <div class="table-view">
-  <WithTableInspector {context} {showTableInspector} {cellSelectionStarted}>
+  <WithTableInspector
+    {context}
+    {showTableInspector}
+    bind:activeTabId={tableInspectorTab}
+  >
     <div class="sheet-area">
       {#if $processedColumns.size}
         <Sheet
@@ -112,7 +112,14 @@
           {columnWidths}
           {selection}
           {usesVirtualList}
-          {cellSelectionStarted}
+          onCellSelectionStart={(cell) => {
+            if (cell.type === 'column-header-cell') {
+              tableInspectorTab = 'column';
+            }
+            if (cell.type === 'row-header-cell') {
+              tableInspectorTab = 'record';
+            }
+          }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
           columns={sheetColumns}

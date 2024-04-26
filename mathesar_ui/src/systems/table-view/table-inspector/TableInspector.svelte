@@ -1,50 +1,46 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { TabContainer } from '@mathesar-component-library';
-  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
-  import type MessageBus from '@mathesar/utils/MessageBus';
+  import { TabContainer, defined } from '@mathesar-component-library';
+  import type { Tab } from '@mathesar/component-library/types';
   import CellMode from './cell/CellMode.svelte';
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';
   import TableMode from './table/TableMode.svelte';
 
-  const tableTab = { label: $_('table'), component: TableMode, id: 1 };
-  const columnTab = { label: $_('column'), component: ColumnMode, id: 2 };
-  const recordTab = { label: $_('record'), component: RecordMode, id: 3 };
-  const cellTab = { label: $_('cell'), component: CellMode, id: 4 };
-  const tabs = [tableTab, columnTab, recordTab, cellTab];
+  const tabMap = {
+    table: { label: $_('table'), component: TableMode },
+    column: { label: $_('column'), component: ColumnMode },
+    record: { label: $_('record'), component: RecordMode },
+    cell: { label: $_('cell'), component: CellMode },
+  };
 
-  export let cellSelectionStarted: MessageBus<SheetCellDetails> | undefined =
-    undefined;
+  type TableInspectorTabId = keyof typeof tabMap;
 
-  let activeTab: (typeof tabs)[number];
+  export let activeTabId: TableInspectorTabId | undefined;
 
-  $: cellSelectionStarted?.listen((targetCell) => {
-    if (targetCell.type === 'column-header-cell') {
-      activeTab = columnTab;
-    }
-    if (targetCell.type === 'row-header-cell') {
-      activeTab = recordTab;
-    }
-  });
+  $: tabs = Object.entries(tabMap).map(([id, tab]) => ({ id, ...tab }));
+  $: activeTab = defined(activeTabId, (id) => tabMap[id]);
+
+  function handleTabSelected(e: CustomEvent<{ tab: Tab }>) {
+    activeTabId = e.detail.tab.id as TableInspectorTabId;
+  }
 </script>
 
 <div class="table-inspector">
   <TabContainer
-    bind:activeTab
+    {activeTab}
     {tabs}
     tabStyle="compact"
     fillContainerHeight
     fillTabWidth
+    on:tabSelected={handleTabSelected}
   >
-    <slot>
-      {#if activeTab}
-        <div class="tabs-container">
-          <svelte:component this={activeTab.component} />
-        </div>
-      {/if}
-    </slot>
+    {#if activeTab}
+      <div class="tabs-container">
+        <svelte:component this={activeTab.component} />
+      </div>
+    {/if}
   </TabContainer>
 </div>
 

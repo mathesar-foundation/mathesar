@@ -4,7 +4,6 @@
 
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import type { QueryInstance } from '@mathesar/api/types/queries';
-  import type { SheetCellDetails } from '@mathesar/components/sheet/selection';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
@@ -16,12 +15,10 @@
     QueryRunner,
     WithExplorationInspector,
   } from '@mathesar/systems/data-explorer';
-  import MessageBus from '@mathesar/utils/MessageBus';
   import type { ShareConsumer } from '@mathesar/utils/shares';
   import Header from './Header.svelte';
 
   const userProfile = getUserProfileStoreFromContext();
-  const cellSelectionStarted = new MessageBus<SheetCellDetails>();
 
   export let database: Database;
   export let schema: SchemaEntry;
@@ -77,13 +74,8 @@
         queryHandler={queryRunner}
         {canEditMetadata}
         on:delete={gotoSchemaPage}
-        {cellSelectionStarted}
       >
-        <ExplorationResult
-          queryHandler={queryRunner}
-          isExplorationPage
-          {cellSelectionStarted}
-        />
+        <ExplorationResult queryHandler={queryRunner} isExplorationPage />
       </WithExplorationInspector>
     </div>
   {/if}
