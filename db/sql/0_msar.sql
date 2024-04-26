@@ -506,42 +506,40 @@ Args:
   typ_id: The OID of the type.
   typ_mod: The integer corresponding to the type options; see pg_attribute catalog table.
 */
-SELECT CASE
-  -- Columns with no type options store -1 in the atttypmod column.
-  WHEN typ_id = 'numeric'::regtype::oid OR typ_id='numeric[]'::regtype::oid THEN
-    jsonb_build_object(
-      -- This calculation is modified from the relevant PostgreSQL source code. See
-      -- https://doxygen.postgresql.org/backend_2utils_2adt_2numeric_8c.html
-      'precision', ((nullif(typ_mod, -1) - 4) >> 16) & 65535,
-      -- This calculation is also from the source code.
-      'scale', (((nullif(typ_mod, -1) - 4) & 2047) # 1024) - 1024
-    )
-  WHEN typ_id = 'interval'::regtype::oid OR typ_id = '_interval'::regtype::oid THEN
-    jsonb_build_object(
-      'precision', NULLIF(typ_mod & 65535, 65535),
-      'fields', msar.get_interval_fields(typ_mod)
-    )
-  WHEN ARRAY[typ_id] <@ ARRAY[
-      'bpchar'::regtype::oid, 'varchar'::regtype::oid,
-      '_bpchar'::regtype::oid, '_varchar'::regtype::oid
-  ] THEN
-    jsonb_build_object(
-      'length', nullif(typ_mod, -1) - 4
-    )
-  WHEN ARRAY[typ_id] <@ ARRAY[
-      'bit'::regtype::oid, 'varbit'::regtype::oid,
-      '_bit'::regtype::oid, '_varbit'::regtype::oid,
-      'time'::regtype::oid, 'timetz'::regtype::oid,
-      '_time'::regtype::oid, '_timetz'::regtype::oid,
-      'timestamp'::regtype::oid, 'timestamptz'::regtype::oid,
-      '_timestamp'::regtype::oid, '_timestamptz'::regtype::oid
-  ] THEN
-    -- For all these types, the typmod is equal to the precision.
-    jsonb_build_object(
-      'precision', nullif(typ_mod, -1)
-    )
-  ELSE jsonb_build_object()
-END || jsonb_build_object('array', typ_ndims>0);
+SELECT nullif(
+  CASE
+    WHEN typ_id = ANY('{numeric, _numeric}'::regtype[]) THEN
+      jsonb_build_object(
+        -- This calculation is modified from the relevant PostgreSQL source code. See
+        -- https://doxygen.postgresql.org/backend_2utils_2adt_2numeric_8c.html
+        'precision', ((nullif(typ_mod, -1) - 4) >> 16) & 65535,
+        -- This calculation is also from the source code.
+        'scale', (((nullif(typ_mod, -1) - 4) & 2047) # 1024) - 1024
+      )
+    WHEN typ_id = ANY('{interval, _interval}'::regtype[]) THEN
+      jsonb_build_object(
+        'precision', nullif(typ_mod & 65535, 65535),
+        'fields', msar.get_interval_fields(typ_mod)
+      )
+    WHEN typ_id = ANY('{bpchar, _bpchar, varchar, _varchar}'::regtype[]) THEN
+      jsonb_build_object('length', nullif(typ_mod, -1) - 4)
+    WHEN typ_id = ANY(
+      '{bit, varbit, time, timetz, timestamp, timestamptz}'::regtype[]
+      || '{_bit, _varbit, _time, _timetz, _timestamp, _timestamptz}'::regtype[]
+    ) THEN
+      -- For all these types, the typmod is equal to the precision.
+      jsonb_build_object(
+        'precision', nullif(typ_mod, -1)
+      )
+    ELSE jsonb_build_object()
+  END
+  || CASE
+    WHEN typ_ndims>0 THEN
+      jsonb_build_object('item_type', typ_id::regtype)
+    ELSE '{}'
+  END,
+  '{}'
+)
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -578,7 +576,7 @@ SELECT jsonb_agg(
   jsonb_build_object(
     'id', attnum,
     'name', attname,
-    'type', rtrim(atttypid::regtype::text, '[]'),
+    'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END,
     'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
     'nullable', NOT attnotnull,
     'primary_key', COALESCE(pgi.indisprimary, false),
