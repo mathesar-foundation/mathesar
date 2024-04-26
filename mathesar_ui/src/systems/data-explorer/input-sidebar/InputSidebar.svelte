@@ -14,13 +14,7 @@
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
 
-  $: ({
-    query,
-    state,
-    confirmationNeededForMultipleResults,
-    inspector,
-    selection,
-  } = queryManager);
+  $: ({ query, state, confirmationNeededForMultipleResults } = queryManager);
   $: ({ inputColumnsFetchState } = $state);
 
   const tabs = [

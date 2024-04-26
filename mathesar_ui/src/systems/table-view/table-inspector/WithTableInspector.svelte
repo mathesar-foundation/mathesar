@@ -1,8 +1,9 @@
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
+
   import { WithPanel } from '@mathesar-component-library';
   import { tableInspectorWidth } from '@mathesar/stores/localStorage';
   import TableInspector from './TableInspector.svelte';
-  import type { ComponentProps } from 'svelte';
 
   export let context: 'page' | 'widget' | 'shared-consumer-page';
   export let showTableInspector: boolean;
