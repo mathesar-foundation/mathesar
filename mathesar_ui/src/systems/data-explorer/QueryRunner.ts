@@ -3,6 +3,7 @@ import { derived, get, writable } from 'svelte/store';
 
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 import type {
+  QueryColumnMetaData,
   QueryResultRecord,
   QueryResultsResponse,
   QueryRunResponse,
@@ -254,6 +255,15 @@ export default class QueryRunner {
   protected async resetPaginationAndRun(): Promise<void> {
     this.resetPagination();
     await this.run();
+  }
+
+  selectColumn(alias: QueryColumnMetaData['alias']): void {
+    const processedColumn = get(this.processedColumns).get(alias);
+    if (!processedColumn) {
+      return;
+    }
+    this.selection.update((s) => s.ofOneColumn(processedColumn.id));
+    this.inspector.activate('column');
   }
 
   getQueryModel(): QueryModel {
