@@ -545,6 +545,71 @@ END || jsonb_build_object('array', typ_ndims>0);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_valid_target_type_strings(typ_id oid) RETURNS jsonb AS $$/*
+TODO
+*/
+SELECT jsonb_agg(prorettype::regtype::text)
+FROM pg_proc
+WHERE
+  pronamespace='mathesar_types'::regnamespace::oid
+  AND proargtypes[0]=typ_id
+  AND left(proname, 5) = 'cast_';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.has_dependents(rel_id oid, att_id smallint) RETURNS boolean AS $$/*
+Return a boolean according to whether the column identified by the given oid, attnum pair is
+referenced (i.e., would dropping that column require CASCADE?).
+
+Args:
+  rel_id: The relation of the attribute.
+  att_id: The attnum of the attribute in the relation.
+*/
+SELECT EXISTS (
+  SELECT 1 FROM pg_depend WHERE refobjid=rel_id AND refobjsubid=att_id AND deptype='n'
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
+TODO
+*/
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'id', attnum,
+    'name', attname,
+    'type', rtrim(atttypid::regtype::text, '[]'),
+    'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
+    'nullable', NOT attnotnull,
+    'primary_key', COALESCE(pgi.indisprimary, false),
+    'valid_target_types', msar.get_valid_target_type_strings(atttypid),
+    'default',
+    nullif(
+      jsonb_strip_nulls(
+        jsonb_build_object(
+          'value',
+          CASE
+            WHEN attidentity='' THEN pg_get_expr(adbin, tab_id)
+            ELSE 'identity'
+          END,
+          'is_dynamic', msar.is_default_possibly_dynamic(tab_id, attnum)
+        )
+      ),
+      jsonb_build_object()
+    ),
+    'has_dependents', msar.has_dependents(tab_id, attnum),
+    'description', msar.col_description(tab_id, attnum)
+  )
+)
+FROM pg_attribute pga
+  LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
+  LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
+WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+
+
 CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
 Return true if the given column exists in the table, false otherwise.
 */
