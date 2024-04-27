@@ -6,7 +6,10 @@ import { assertExhaustive } from '@mathesar/utils/typeUtils';
 import { makeCellId, makeCells, parseCellId } from '../cellIds';
 import { Direction, getColumnOffset } from './Direction';
 import Plane from './Plane';
-import type { SheetCellDetails } from './selectionUtils';
+import {
+  fitSelectedValuesToSeriesTransformation,
+  type SheetCellDetails,
+} from './selectionUtils';
 
 /**
  * - `'dataCells'` means that the selection contains data cells. This is by far
@@ -373,35 +376,41 @@ export default class SheetSelection {
 
   /**
    * @returns a new selection that fits within the provided plane. This is
-   * useful when a column is deleted, reordered, or inserted.
+   * relevant when paginating or when rows/columns are deleted/reordered/inserted.
    */
   forNewPlane(newPlane: Plane): SheetSelection {
     if (this.basis.type === 'dataCells') {
       if (!newPlane.hasResultRows) {
         return new SheetSelection(newPlane, basisFromZeroEmptyColumns());
       }
-      const minColumnId = newPlane.columnIds.min(this.basis.columnIds);
-      const maxColumnId = newPlane.columnIds.max(this.basis.columnIds);
-      const minRowId = newPlane.rowIds.min(this.basis.rowIds);
-      const maxRowId = newPlane.rowIds.max(this.basis.rowIds);
+
+      const [minRowId, maxRowId] = fitSelectedValuesToSeriesTransformation(
+        this.basis.rowIds,
+        this.plane.rowIds,
+        newPlane.rowIds,
+      );
+      const [minColumnId, maxColumnId] =
+        fitSelectedValuesToSeriesTransformation(
+          this.basis.columnIds,
+          this.plane.columnIds,
+          newPlane.columnIds,
+        );
       if (
-        minColumnId === undefined ||
-        maxColumnId === undefined ||
         minRowId === undefined ||
-        maxRowId === undefined
+        maxRowId === undefined ||
+        minColumnId === undefined ||
+        maxColumnId === undefined
       ) {
-        // TODO: in some cases maybe we can be smarter here. Instead of
-        // returning an empty selection, we could try to return a selection of
-        // the same dimensions that is placed as close as possible to the
-        // original selection.
         return new SheetSelection(newPlane);
       }
+
       const cellIds = newPlane.dataCellsInFlexibleRowColumnRange(
         minRowId,
         maxRowId,
         minColumnId,
         maxColumnId,
       );
+      // TODO set active cell
       return new SheetSelection(newPlane, basisFromDataCells(cellIds));
     }
 

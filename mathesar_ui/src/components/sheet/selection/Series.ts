@@ -24,7 +24,7 @@ export default class Series<Value> {
     }
   }
 
-  private getIndex(value: Value): number | undefined {
+  getIndex(value: Value): number | undefined {
     return this.indexLookup.get(value);
   }
 
@@ -89,10 +89,20 @@ export default class Series<Value> {
     return findBest(comparator, (v) => this.getIndex(v) ?? 0, validValues);
   }
 
+  /**
+   * Of all the supplied values, return the value that is the lowest as ordered
+   * within the series. If no such value is present, then `undefined` will
+   * be returned.
+   */
   min(values: Iterable<Value>): Value | undefined {
     return this.best(values, firstLowest);
   }
 
+  /**
+   * Of all the supplied values, return the value that is the highest as ordered
+   * within the series. If no such value is present, then `undefined` will be
+   * returned.
+   */
   max(values: Iterable<Value>): Value | undefined {
     return this.best(values, firstHighest);
   }
