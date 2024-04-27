@@ -104,13 +104,13 @@ function getFullySelectedColumnIds(
 ): ImmutableSet<string> {
   if (basis.type === 'dataCells') {
     // The logic within this branch is somewhat complex because:
-    // - We want to suppor non-rectangular selections.
+    // - We might want to support non-rectangular selections someday.
     // - For performance, we want to avoid iterating over all the selected
     //   cells.
 
-    const selctedRowCount = basis.rowIds.size;
+    const selectedRowCount = basis.rowIds.size;
     const availableRowCount = plane.rowIds.length;
-    if (selctedRowCount < availableRowCount) {
+    if (selectedRowCount < availableRowCount) {
       // Performance heuristic. If the number of selected rows is less than the
       // total number of rows, we can assume that no column exist in which all
       // rows are selected.
@@ -131,7 +131,8 @@ function getFullySelectedColumnIds(
     // This is the worst-case scenario, performance-wise, which is why we try to
     // return early before hitting this branch. This case will only happen when
     // we have a mix of fully selected columns and partially selected columns.
-    // This case should be rare because most selections are rectangular.
+    // This case should be rare because most (maybe all?) selections are
+    // rectangular.
     const countSelectedCellsPerColumn = new Map<string, number>();
     for (const cellId of basis.cellIds) {
       const { columnId } = parseCellId(cellId);
