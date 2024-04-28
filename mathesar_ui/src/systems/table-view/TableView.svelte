@@ -85,18 +85,6 @@
     [ID_ADD_NEW_COLUMN, 32],
   ]);
   $: showTableInspector = $isTableInspectorVisible && supportsTableInspector;
-
-  // // TODO_3037
-  // function selectFirstCellOnTableLoad(_isLoading: boolean, _context: Context) {
-  //   // We only activate the first cell on the page, not in the widget. Doing so
-  //   // on the widget causes the cell to focus and the page to scroll down to
-  //   // bring that element into view.
-  //   if (_context !== 'widget' && !_isLoading) {
-  //     selection.update((s) => s.ofFirstDataCell());
-  //   }
-  // }
-
-  // $: void selectFirstCellOnTableLoad($isLoading, context);
 </script>
 
 <div class="table-view">
