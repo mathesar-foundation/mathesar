@@ -15,6 +15,7 @@
   export let processedColumn: ProcessedColumn;
   export let recordSummaries: RecordSummaryStore;
   export let searchFuzzy: Writable<SearchFuzzy>;
+  export let isLoading = false;
 
   $: ({ column } = processedColumn);
   $: searchValue = $searchFuzzy.get(column.id);
@@ -30,7 +31,7 @@
     {value}
     {recordSummary}
     disabled
-    showAsSkeleton={!rowHasSavedRecord(row)}
+    showAsSkeleton={!rowHasSavedRecord(row) || isLoading}
     {searchValue}
     showTruncationPopover
   />
