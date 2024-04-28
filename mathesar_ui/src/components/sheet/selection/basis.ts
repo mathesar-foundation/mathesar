@@ -43,14 +43,24 @@ export interface Basis {
 }
 
 export function basisFromDataCells(
-  cellIds: Iterable<string>,
-  activeCellId?: string,
+  _cellIds: Iterable<string>,
+  _activeCellId?: string,
 ): Basis {
-  const parsedCells = [...cellIds].map(parseCellId);
+  const parsedCells = [..._cellIds].map(parseCellId);
+  const cellIds = new ImmutableSet(_cellIds);
+  const activeCellId = (() => {
+    if (_activeCellId === undefined) {
+      return first(_cellIds);
+    }
+    if (cellIds.has(_activeCellId)) {
+      return _activeCellId;
+    }
+    return first(_cellIds);
+  })();
   return {
     type: 'dataCells',
-    activeCellId: activeCellId ?? first(cellIds),
-    cellIds: new ImmutableSet(cellIds),
+    activeCellId,
+    cellIds,
     columnIds: new ImmutableSet(parsedCells.map((cellId) => cellId.columnId)),
     rowIds: new ImmutableSet(parsedCells.map((cellId) => cellId.rowId)),
   };
