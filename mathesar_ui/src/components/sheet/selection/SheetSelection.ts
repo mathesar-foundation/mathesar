@@ -333,8 +333,11 @@ export default class SheetSelection {
         minColumnId,
         maxColumnId,
       );
-      // TODO set active cell
-      return new SheetSelection(newPlane, basisFromDataCells(cellIds));
+
+      return new SheetSelection(
+        newPlane,
+        basisFromDataCells(cellIds, this.activeCellId),
+      );
     }
 
     if (this.basis.type === 'emptyColumns') {
