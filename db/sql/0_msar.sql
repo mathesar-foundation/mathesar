@@ -562,7 +562,8 @@ SELECT nullif(
   END
   || CASE
     WHEN typ_ndims>0 THEN
-      jsonb_build_object('item_type', typ_id::regtype)
+      -- This string wrangling is debatably dubious, but avoids a slow join.
+      jsonb_build_object('item_type', rtrim(typ_id::regtype::text, '[]'))
     ELSE '{}'
   END,
   '{}'

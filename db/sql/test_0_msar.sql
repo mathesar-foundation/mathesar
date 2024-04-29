@@ -2110,7 +2110,15 @@ CREATE TABLE manytypes (
     ivl_hr_se6 interval hour to second(6),
     ivl_mi_se0 interval minute to second(0),
     ivl_mi_se3 interval minute to second(3),
-    ivl_mi_se6 interval minute to second(6)
+    ivl_mi_se6 interval minute to second(6),
+    -- Below here is less throrough, more ad-hoc
+    ivl_plain_arr interval[],
+    ivl_mi_se6_arr interval minute to second(6)[],
+    num_plain numeric,
+    num_8 numeric(8),
+    num_17_2 numeric(17, 2),
+    num_plain_arr numeric[],
+    num_17_2_arr numeric(17, 2)[]
 );
 END;
 $$ LANGUAGE plpgsql;
@@ -2155,5 +2163,68 @@ BEGIN
       ('minute to second')
     $w$
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_type_options() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(msar.get_type_options(atttypid, atttypmod, attndims), NULL)
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='id';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"fields": null, "precision": null}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_plain';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"fields": "day to second", "precision": null}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_dy_se';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"fields": "second", "precision": 3}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_se_3';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"fields": "hour to second", "precision": 0}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_hr_se_0';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"fields": null, "precision": null, "item_type": "interval"}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_plain_arr';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"fields": "minute to second", "precision": 6, "item_type": "interval"}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='ivl_mi_se6_arr';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"precision": null, "scale": null}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_plain';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"precision": 8, "scale": 0}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_8';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"precision": 17, "scale": 2}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_17_2';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"precision": null, "scale": null, "item_type": "numeric"}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_plain_arr';
+  RETURN NEXT is(
+    msar.get_type_options(atttypid, atttypmod, attndims),
+    '{"precision": 17, "scale": 2, "item_type": "numeric"}'::jsonb
+  )
+  FROM pg_attribute WHERE attrelid='manytypes'::regclass AND attname='num_17_2_arr';
 END;
 $$ LANGUAGE plpgsql;
