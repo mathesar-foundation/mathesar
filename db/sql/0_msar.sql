@@ -472,7 +472,8 @@ CREATE OR REPLACE FUNCTION
 msar.get_interval_fields(typ_mod integer) RETURNS text AS $$/*
 Return the string giving the fields for an interval typmod integer.
 
-This logic is ported from the relevant PostgreSQL source code, reimplemented in SQL. See:
+This logic is ported from the relevant PostgreSQL source code, reimplemented in SQL. See the
+`intervaltypmodout` function at
 https://doxygen.postgresql.org/backend_2utils_2adt_2timestamp_8c.html
 
 Args:
@@ -497,23 +498,31 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_type_options(typ_id oid, typ_mod integer, typ_ndims integer) RETURNS jsonb AS $$/*
+msar.get_type_options(typ_id regtype, typ_mod integer, typ_ndims integer) RETURNS jsonb AS $$/*
 Return the type options calculated from a type, typmod pair.
 
-This function uses a number of hard-coded constants.
+This function uses a number of hard-coded constants. The form of the returned object is determined
+by the input type, but the keys will be a subset of:
+  precision: the precision of a numeric or interval type. See PostgreSQL docs for details.
+  scale: the scale of a numeric type
+  fields: See PostgreSQL documentation of the `interval` type.
+  length: Applies to "text" types where the user can specify the length.
+  item_type: Gives the type of array members for array-types
 
 Args:
-  typ_id: The OID of the type.
+  typ_id: an OID or valid type representing string will work here.
   typ_mod: The integer corresponding to the type options; see pg_attribute catalog table.
+  typ_ndims: Used to determine whether the type is actually an array without an extra join.
 */
 SELECT nullif(
   CASE
     WHEN typ_id = ANY('{numeric, _numeric}'::regtype[]) THEN
       jsonb_build_object(
-        -- This calculation is modified from the relevant PostgreSQL source code. See
+        -- This calculation is modified from the relevant PostgreSQL source code. See the function
+        -- numeric_typmod_precision(int32) at
         -- https://doxygen.postgresql.org/backend_2utils_2adt_2numeric_8c.html
         'precision', ((nullif(typ_mod, -1) - 4) >> 16) & 65535,
-        -- This calculation is also from the source code.
+        -- This calculation is from numeric_typmod_scale(int32) at the same location
         'scale', (((nullif(typ_mod, -1) - 4) & 2047) # 1024) - 1024
       )
     WHEN typ_id = ANY('{interval, _interval}'::regtype[]) THEN
@@ -522,6 +531,7 @@ SELECT nullif(
         'fields', msar.get_interval_fields(typ_mod)
       )
     WHEN typ_id = ANY('{bpchar, _bpchar, varchar, _varchar}'::regtype[]) THEN
+      -- For char and varchar types, the typemod is equal to 4 more than the set length.
       jsonb_build_object('length', nullif(typ_mod, -1) - 4)
     WHEN typ_id = ANY(
       '{bit, varbit, time, timetz, timestamp, timestamptz}'::regtype[]
@@ -543,8 +553,11 @@ SELECT nullif(
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_valid_target_type_strings(typ_id oid) RETURNS jsonb AS $$/*
-TODO
+CREATE OR REPLACE FUNCTION msar.get_valid_target_type_strings(typ_id regtype) RETURNS jsonb AS $$/*
+Given a source type, return the target types for which Mathesar provides a casting function.
+
+Args:
+  typ_id: The type we're casting from.
 */
 SELECT jsonb_agg(prorettype::regtype::text)
 FROM pg_proc
@@ -570,7 +583,26 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
-TODO
+Given a table identifier, return an array of objects describing the columns of the table.
+
+Each returned JSON object in the array will have the form:
+  {
+    "id": <int>,
+    "name": <str>,
+    "type": <str>,
+    "type_options": <obj>,
+    "nullable": <bool>,
+    "primary_key": <bool>,
+    "valid_target_types": [<str>, <str>, ..., <str>]
+    "default": {"value": <str>, "is_dynamic": <bool>},
+    "has_dependents": <bool>,
+    "description": <str>
+  }
+
+The `type_options` object is described in the docstring of `msar.get_type_options`. The `default`
+object has the keys:
+  value: A string giving the value (as an SQL expression) of the default.
+  is_dynamic: A boolean giving whether the default is (likely to be) dynamic.
 */
 SELECT jsonb_agg(
   jsonb_build_object(
@@ -604,8 +636,6 @@ FROM pg_attribute pga
   LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
 WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
 
 
 CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
