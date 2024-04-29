@@ -131,6 +131,23 @@ Wraps the `?` jsonb operator for improved readability.
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
+Return true if the given schema exists in the current database, false otherwise.
+*/
+SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION __msar.get_schema_oid(sch_name text) RETURNS oid AS $$/*
+Return the OID of a schema, if it can be diretly found from a name.
+
+Args :
+  sch_name: The name of the schema.
+*/
+SELECT CASE WHEN msar.schema_exists(sch_name) THEN sch_name::regnamespace::oid END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION __msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
 Return the name for a given schema, quoted as appropriate.
 
@@ -559,10 +576,11 @@ Given a source type, return the target types for which Mathesar provides a casti
 Args:
   typ_id: The type we're casting from.
 */
+
 SELECT jsonb_agg(prorettype::regtype::text)
 FROM pg_proc
 WHERE
-  pronamespace='mathesar_types'::regnamespace::oid
+  pronamespace=__msar.get_schema_oid('mathesar_types')
   AND proargtypes[0]=typ_id
   AND left(proname, 5) = 'cast_';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -642,13 +660,6 @@ CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS
 Return true if the given column exists in the table, false otherwise.
 */
 SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_name);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
-Return true if the given schema exists in the current database, false otherwise.
-*/
-SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
