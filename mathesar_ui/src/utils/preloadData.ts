@@ -20,7 +20,6 @@ export interface CommonData {
   current_schema: number | null;
   abstract_types: AbstractTypeResponse[];
   user: User;
-  live_demo_mode: boolean;
   current_release_tag_name: string;
   supported_languages: Record<string, string>;
   is_authenticated: boolean;

@@ -291,8 +291,6 @@
   "many_to_one": "多対1",
   "many_to_one_link_description": "複数の[baseTable]の記録は同じ[targetTable]の記録にリンクすることができます。",
   "mathesar": "Mathesar",
-  "mathesar_demo_mode": "Mathesarはデモモードです。",
-  "mathesar_demo_mode_help": "各セッションには独自のデモデータのコピーがあります。データは定期的に削除されます。",
   "max_time_unit": "最大時間単位",
   "milliseconds": "ミリ秒",
   "min_time_unit": "最小時間単位",

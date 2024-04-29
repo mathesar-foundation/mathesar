@@ -22,10 +22,3 @@ If you prefer a non-browser tool for API development, you'll have to:
 1. Extract the key, value pair for the cookie named `sessionid` using dev tools.
 1. submit that cookie with each request until it expires.
 1. Repeat as necessary (e.g., when the cookie expires).
-
-## Generate the OpenAPI spec
-
-To generate the OpenAPI spec file in YAML format,run the following command in the respective environment:
-```bash
-python manage.py spectacular --color --file schema.yml
-```
