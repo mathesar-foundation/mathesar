@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS pgtap;
 
 -- msar.drop_columns -------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION setup_drop_columns() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION __setup_drop_columns() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE atable (dodrop1 integer, dodrop2 integer, dontdrop text);
 END;
@@ -14,6 +14,7 @@ CREATE OR REPLACE FUNCTION test_drop_columns_oid() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
 BEGIN
+  PERFORM __setup_drop_columns();
   rel_id := 'atable'::regclass::oid;
   PERFORM msar.drop_columns(rel_id, 1, 2);
   RETURN NEXT has_column(
@@ -31,6 +32,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_drop_columns_names() RETURNS SETOF TEXT AS $$
 BEGIN
+  PERFORM __setup_drop_columns();
   PERFORM msar.drop_columns('public', 'atable', 'dodrop1', 'dodrop2');
   RETURN NEXT has_column(
     'atable', 'dontdrop', 'Dropper keeps correct columns'
@@ -47,7 +49,7 @@ $$ LANGUAGE plpgsql;
 
 -- msar.drop_table ---------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION setup_drop_tables() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION __setup_drop_tables() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE dropme (id SERIAL PRIMARY KEY, col1 integer);
 END;
@@ -57,6 +59,7 @@ CREATE OR REPLACE FUNCTION test_drop_table_oid() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
 BEGIN
+  PERFORM __setup_drop_tables();
   rel_id := 'dropme'::regclass::oid;
   PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false, if_exists => false);
   RETURN NEXT hasnt_table('dropme', 'Drops table');
@@ -68,6 +71,7 @@ CREATE OR REPLACE FUNCTION test_drop_table_oid_if_exists() RETURNS SETOF TEXT AS
 DECLARE
   rel_id oid;
 BEGIN
+  PERFORM __setup_drop_tables();
   rel_id := 'dropme'::regclass::oid;
   PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false, if_exists => true);
   RETURN NEXT hasnt_table('dropme', 'Drops table with IF EXISTS');
@@ -79,6 +83,7 @@ CREATE OR REPLACE FUNCTION test_drop_table_oid_restricted_fkey() RETURNS SETOF T
 DECLARE
   rel_id oid;
 BEGIN
+  PERFORM __setup_drop_tables();
   rel_id := 'dropme'::regclass::oid;
   CREATE TABLE
     dependent (id SERIAL PRIMARY KEY, col1 integer REFERENCES dropme);
@@ -96,6 +101,7 @@ CREATE OR REPLACE FUNCTION test_drop_table_oid_cascade_fkey() RETURNS SETOF TEXT
 DECLARE
   rel_id oid;
 BEGIN
+  PERFORM __setup_drop_tables();
   rel_id := 'dropme'::regclass::oid;
   CREATE TABLE
     dependent (id SERIAL PRIMARY KEY, col1 integer REFERENCES dropme);
@@ -107,6 +113,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_drop_table_name() RETURNS SETOF TEXT AS $$
 BEGIN
+  PERFORM __setup_drop_tables();
   PERFORM msar.drop_table(
     sch_name => 'public',
     tab_name => 'dropme',
@@ -120,6 +127,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_drop_table_name_missing_if_exists() RETURNS SETOF TEXT AS $$
 BEGIN
+  PERFORM __setup_drop_tables();
   PERFORM msar.drop_table(
     sch_name => 'public',
     tab_name => 'dropmenew',
@@ -201,7 +209,7 @@ $f$ LANGUAGE plpgsql;
 
 -- msar.add_columns --------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION setup_add_columns() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION __setup_add_columns() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE add_col_testable (id serial primary key, col1 integer, col2 varchar);
 END;
@@ -215,6 +223,7 @@ DECLARE
       {"name": "tcol", "type": {"name": "text"}, "not_null": true, "default": "my super default"}
     ]$j$;
 BEGIN
+  PERFORM __setup_add_columns();
   RETURN NEXT is(
     msar.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4}'::smallint[]
   );
@@ -233,6 +242,7 @@ default value. The name should be "Column <n>", where <n> is the attnum of the a
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "text"}}]';
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_is_null('add_col_testable', 'Column 4');
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'text');
@@ -245,10 +255,12 @@ CREATE OR REPLACE FUNCTION test_add_columns_comment() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_name text := 'tcol';
   description text := 'Some; comment with a semicolon';
-  tab_id integer := 'add_col_testable'::regclass::oid;
+  tab_id integer;
   col_id integer;
   col_create_arr jsonb;
 BEGIN
+  PERFORM __setup_add_columns();
+  tab_id := 'add_col_testable'::regclass::oid;
   col_create_arr := format('[{"name": "%s", "description": "%s"}]', col_name, description);
   PERFORM msar.add_columns(tab_id, col_create_arr);
   col_id := msar.get_attnum(tab_id, col_name);
@@ -268,6 +280,7 @@ default value. The name should be "Column <n>", where <n> is the attnum of the a
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "text"}}, {"type": {"name": "numeric"}}]';
 BEGIN
+  PERFORM __setup_add_columns();
   RETURN NEXT is(
     msar.add_columns('add_col_testable'::regclass::oid, col_create_arr), '{4, 5}'::smallint[]
   );
@@ -281,6 +294,7 @@ CREATE OR REPLACE FUNCTION test_add_columns_numeric_def() RETURNS SETOF TEXT AS 
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "numeric"}, "default": 3.14159}]';
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric');
   RETURN NEXT col_default_is('add_col_testable', 'Column 4', 3.14159);
@@ -292,6 +306,7 @@ CREATE OR REPLACE FUNCTION test_add_columns_numeric_prec() RETURNS SETOF TEXT AS
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "numeric", "options": {"precision": 3}}}]';
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,0)');
 END;
@@ -304,6 +319,7 @@ DECLARE
     {"type": {"name": "numeric", "options": {"precision": 3, "scale": 2}}}
   ]$j$;
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric(3,2)');
 END;
@@ -314,6 +330,7 @@ CREATE OR REPLACE FUNCTION test_add_columns_caps_numeric() RETURNS SETOF TEXT AS
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "NUMERIC"}}]';
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'numeric');
 END;
@@ -324,6 +341,7 @@ CREATE OR REPLACE FUNCTION test_add_columns_varchar_length() RETURNS SETOF TEXT 
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "varchar", "options": {"length": 128}}}]';
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'character varying(128)');
 END;
@@ -333,45 +351,48 @@ CREATE OR REPLACE FUNCTION test_add_columns_interval_precision() RETURNS SETOF T
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"precision": 6}}}]';
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval(6)');
 END;
 $f$ LANGUAGE plpgsql;
 
 
--- upstream pgTAP bug: https://github.com/theory/pgtap/issues/315
--- CREATE OR REPLACE FUNCTION test_add_columns_interval_fields() RETURNS SETOF TEXT AS $f$
--- DECLARE
---   col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"fields": "year"}}}]';
--- BEGIN
---   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
---   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval year');
--- END;
--- $f$ LANGUAGE plpgsql;
---
---
--- CREATE OR REPLACE FUNCTION test_add_columns_interval_fields_prec() RETURNS SETOF TEXT AS $f$
--- DECLARE
---   col_create_arr jsonb := $j$
---     [{"type": {"name": "interval", "options": {"fields": "second", "precision": 3}}}]
---   $j$;
--- BEGIN
---   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
---   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval second(3)');
--- END;
--- $f$ LANGUAGE plpgsql;
---
---
--- CREATE OR REPLACE FUNCTION test_add_columns_timestamp_prec() RETURNS SETOF TEXT AS $f$
--- DECLARE
---   col_create_arr jsonb := $j$
---     [{"type": {"name": "timestamp", "options": {"precision": 3}}}]
---   $j$;
--- BEGIN
---   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
---   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp(3) without time zone');
--- END;
--- $f$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION test_add_columns_interval_fields() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := '[{"type": {"name": "interval", "options": {"fields": "year"}}}]';
+BEGIN
+  PERFORM __setup_add_columns();
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval year');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_interval_fields_prec() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := $j$
+    [{"type": {"name": "interval", "options": {"fields": "second", "precision": 3}}}]
+  $j$;
+BEGIN
+  PERFORM __setup_add_columns();
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'interval second(3)');
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_columns_timestamp_prec() RETURNS SETOF TEXT AS $f$
+DECLARE
+  col_create_arr jsonb := $j$
+    [{"type": {"name": "timestamp", "options": {"precision": 3}}}]
+  $j$;
+BEGIN
+  PERFORM __setup_add_columns();
+  PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr);
+  RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp(3) without time zone');
+END;
+$f$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_add_columns_timestamp_raw_default() RETURNS SETOF TEXT AS $f$
@@ -381,6 +402,7 @@ This test will fail if the default is being sanitized, but will succeed if it's 
 DECLARE
   col_create_arr jsonb := '[{"type": {"name": "timestamp"}, "default": "now()::timestamp"}]';
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => true);
   RETURN NEXT col_type_is('add_col_testable', 'Column 4', 'timestamp without time zone');
   RETURN NEXT col_default_is(
@@ -401,6 +423,7 @@ DECLARE
     [{"type": {"name": "text"}, "default": "null; drop table add_col_testable"}]
   $j$;
 BEGIN
+  PERFORM __setup_add_columns();
   PERFORM msar.add_columns('add_col_testable'::regclass::oid, col_create_arr, raw_default => false);
   RETURN NEXT has_table('add_col_testable');
 END;
@@ -409,6 +432,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_add_columns_errors() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_add_columns();
   RETURN NEXT throws_ok(
     format(
       'SELECT msar.add_columns(tab_id => %s, col_defs => ''%s'');',
@@ -436,7 +460,7 @@ $f$ LANGUAGE plpgsql;
 
 -- msar.copy_column --------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION setup_copy_column() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION __setup_copy_column() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE copy_coltest (
     id SERIAL PRIMARY KEY,
@@ -460,6 +484,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_copy_column_copies_unique() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 2::smallint, 'col1 supercopy', true, true
   );
@@ -481,6 +506,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_copy_column_copies_unique_and_nnull() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 3::smallint, null, true, true
   );
@@ -502,6 +528,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_copy_column_false_copy_data_and_con() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 3::smallint, null, false, false
   );
@@ -518,6 +545,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_copy_column_num_options_static_default() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 4::smallint, null, true, false
   );
@@ -534,6 +562,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_copy_column_nullable_dynamic_default() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 5::smallint, null, true, false
   );
@@ -546,6 +575,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_copy_column_non_null_dynamic_default() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 6::smallint, null, true, true
   );
@@ -556,19 +586,20 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
--- upstream pgTAP bug: https://github.com/theory/pgtap/issues/315
--- CREATE OR REPLACE FUNCTION test_copy_column_interval_notation() RETURNS SETOF TEXT AS $f$
--- BEGIN
---   PERFORM msar.copy_column(
---     'copy_coltest'::regclass::oid, 7::smallint, null, false, false
---   );
---   RETURN NEXT col_type_is('copy_coltest', 'col6 1', 'interval second(3)');
--- END;
--- $f$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION test_copy_column_interval_notation() RETURNS SETOF TEXT AS $f$
+BEGIN
+  PERFORM __setup_copy_column();
+  PERFORM msar.copy_column(
+    'copy_coltest'::regclass::oid, 7::smallint, null, false, false
+  );
+  RETURN NEXT col_type_is('copy_coltest', 'col6 1', 'interval second(3)');
+END;
+$f$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_copy_column_space_name() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 8::smallint, null, false, false
   );
@@ -579,6 +610,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_copy_column_pkey() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 1::smallint, null, true, true
   );
@@ -595,6 +627,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_copy_column_increment_name() RETURNS SETOF TEXT AS $f$
 BEGIN
+  PERFORM __setup_copy_column();
   PERFORM msar.copy_column(
     'copy_coltest'::regclass::oid, 2::smallint, null, true, true
   );
@@ -608,7 +641,7 @@ $f$ LANGUAGE plpgsql;
 
 -- msar.add_constraints ----------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION setup_add_pkey() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION __setup_add_pkey() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE add_pkeytest (col1 serial, col2 serial, col3 text);
   INSERT INTO add_pkeytest (col1, col2, col3) VALUES
@@ -631,6 +664,7 @@ DECLARE
   created_name text;
   deferrable_ boolean;
 BEGIN
+  PERFORM __setup_add_pkey();
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
@@ -647,6 +681,7 @@ DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [1]}]';
   created_name text;
 BEGIN
+  PERFORM __setup_add_pkey();
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
   created_name := conname FROM pg_constraint
@@ -661,6 +696,7 @@ DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [1, 2]}]';
   created_name text;
 BEGIN
+  PERFORM __setup_add_pkey();
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', ARRAY['col1', 'col2']);
   created_name := conname FROM pg_constraint
@@ -674,6 +710,7 @@ CREATE OR REPLACE FUNCTION test_add_constraint_pkey_tab_name_singlecol() RETURNS
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [1]}]';
 BEGIN
+  PERFORM __setup_add_pkey();
   PERFORM msar.add_constraints('public', 'add_pkeytest', con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
 END;
@@ -684,6 +721,7 @@ CREATE OR REPLACE FUNCTION test_add_constraint_pkey_col_name_singlecol() RETURNS
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": ["col1"]}]';
 BEGIN
+  PERFORM __setup_add_pkey();
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', 'col1');
 END;
@@ -694,6 +732,7 @@ CREATE OR REPLACE FUNCTION test_add_constraint_pkey_col_name_multicol() RETURNS 
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": ["col1", "col2"]}]';
 BEGIN
+  PERFORM __setup_add_pkey();
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', ARRAY['col1', 'col2']);
 END;
@@ -704,6 +743,7 @@ CREATE OR REPLACE FUNCTION test_add_constraint_pkey_col_mix_multicol() RETURNS S
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [1, "col2"]}]';
 BEGIN
+  PERFORM __setup_add_pkey();
   PERFORM msar.add_constraints('add_pkeytest'::regclass::oid, con_create_arr);
   RETURN NEXT col_is_pk('add_pkeytest', ARRAY['col1', 'col2']);
 END;
@@ -954,6 +994,7 @@ CREATE OR REPLACE FUNCTION test_add_constraint_errors() RETURNS SETOF TEXT AS $f
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": [7]}]'::jsonb;
 BEGIN
+  PERFORM __setup_add_pkey();
   RETURN NEXT throws_ok(
     format(
       'SELECT msar.add_constraints(%s, ''%s'');',
