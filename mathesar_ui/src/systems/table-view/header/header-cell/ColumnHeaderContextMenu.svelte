@@ -1,6 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { ButtonMenuItem } from '@mathesar-component-library';
+
+  import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import {
     getSortingLabelForColumn,
     type SortDirection,
@@ -11,15 +14,18 @@
     iconRemoveFilter,
     iconSortAscending,
     iconSortDescending,
+    iconTable,
   } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
+  import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     getTabularDataStoreFromContext,
     type ProcessedColumn,
   } from '@mathesar/stores/table-data';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
+  import { tables } from '@mathesar/stores/tables';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
 
   const userProfile = getUserProfileStoreFromContext();
 
@@ -53,6 +59,12 @@
 
   $: hasGrouping = $grouping.hasColumn(columnId);
 
+  $: ({ linkFk } = processedColumn);
+  $: linkedTable = linkFk ? $tables.data.get(linkFk.referent_table) : undefined;
+  $: linkedTableHref = linkedTable
+    ? $storeToGetTablePageUrl({ tableId: linkedTable.id })
+    : undefined;
+
   function addFilter() {
     void imperativeFilterController?.beginAddingNewFilteringEntry(columnId);
   }
@@ -83,6 +95,15 @@
   }
 </script>
 
+{#if linkedTable && linkedTableHref}
+  <LinkMenuItem icon={iconTable} href={linkedTableHref}>
+    <RichText text={$_('open_named_table')} let:slotName>
+      {#if slotName === 'tableName'}
+        <Identifier>{linkedTable.name}</Identifier>
+      {/if}
+    </RichText>
+  </LinkMenuItem>
+{/if}
 {#if columnAllowsFiltering}
   <ButtonMenuItem icon={iconAddFilter} on:click={addFilter}>
     {#if filterCount > 0}

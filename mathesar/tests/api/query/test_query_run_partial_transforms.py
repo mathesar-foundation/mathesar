@@ -113,7 +113,7 @@ def test_partial_summarize_transform(
             'transformations': output_transformations,
             'display_names': {
                 'col1': 'Center',
-                'col1_grouped': 'Center group',
+                'col1_grouped': 'Center',
                 'col2': 'Case Number',
                 'col2_agged': 'Case Number distinct list',
             },
@@ -135,7 +135,7 @@ def test_partial_summarize_transform(
             },
             'col1_grouped': {
                 'alias': 'col1_grouped',
-                'display_name': 'Center group',
+                'display_name': 'Center',
                 'display_options': None,
                 'input_alias': 'col1',
                 'input_column_name': None,

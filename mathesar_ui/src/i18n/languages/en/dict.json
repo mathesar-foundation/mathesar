@@ -361,6 +361,8 @@
   "one_to_many_link_desc": "One [baseTable] record can be linked from multiple [targetTable] records.",
   "open": "Open",
   "open_data_explorer": "Open Data Explorer",
+  "open_named_record": "Open [recordName]",
+  "open_named_table": "Open [tableName] table",
   "open_record": "Open Record",
   "open_table_in_data_explorer": "Open this table in Data Explorer to query and analyze your data.",
   "open_table_record": "Open a Record from [tableName]",
