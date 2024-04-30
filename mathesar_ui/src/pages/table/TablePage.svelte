@@ -1,7 +1,7 @@
 <script lang="ts">
   import { router } from 'tinro';
 
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     setTabularDataStoreInContext,

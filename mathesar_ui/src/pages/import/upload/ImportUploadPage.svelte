@@ -8,8 +8,8 @@
   } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { dataFilesApi } from '@mathesar/api/dataFiles';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';

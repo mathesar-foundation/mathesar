@@ -5,7 +5,7 @@ import {
   postAPI,
   States,
   addQueryParamsToUrl,
-} from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/utils/requestUtils';
 import type {
   Writable,
   Updater,
@@ -13,11 +13,11 @@ import type {
   Unsubscriber,
   Readable,
 } from 'svelte/store';
-import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
+import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
 import type { CancellablePromise } from '@mathesar-component-library';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Constraint as ApiConstraint } from '@mathesar/api/types/tables/constraints';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Constraint as ApiConstraint } from '@mathesar/api/rest/types/tables/constraints';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 
 /**

@@ -3,7 +3,7 @@ import type {
   DateDisplayOptions,
   DateFormat,
   Column,
-} from '@mathesar/api/types/tables/columns';
+} from '@mathesar/api/rest/types/tables/columns';
 import { iconUiTypeDate } from '@mathesar/icons';
 import type {
   AbstractTypeConfigForm,

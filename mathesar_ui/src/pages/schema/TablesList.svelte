@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import EmptyEntity from './EmptyEntity.svelte';

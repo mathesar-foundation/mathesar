@@ -5,8 +5,8 @@
     getTabularDataStoreFromContext,
     type Constraint,
   } from '@mathesar/stores/table-data';
-  import { States } from '@mathesar/api/utils/requestUtils';
-  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';

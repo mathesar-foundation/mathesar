@@ -1,11 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { AnchorButton, Button } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';

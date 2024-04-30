@@ -3,7 +3,7 @@
   import { _ } from 'svelte-i18n';
   import { Spinner } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { dataFilesApi } from '@mathesar/api/dataFiles';
+  import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getTablePageUrl } from '@mathesar/routes/urls';

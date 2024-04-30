@@ -6,10 +6,10 @@
     Spinner,
   } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { columnsApi } from '@mathesar/api/columns';
-  import type { DataFile } from '@mathesar/api/types/dataFiles';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import { columnsApi } from '@mathesar/api/rest/columns';
+  import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import {
     Field,
     FieldLayout,

@@ -2,7 +2,7 @@ import type {
   MoneyDisplayOptions,
   NumberFormat,
   Column,
-} from '@mathesar/api/types/tables/columns';
+} from '@mathesar/api/rest/types/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import { iconUiTypeMoney } from '@mathesar/icons';
 import type {

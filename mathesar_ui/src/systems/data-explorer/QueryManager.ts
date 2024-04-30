@@ -2,15 +2,15 @@ import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 import type { CancellablePromise } from '@mathesar-component-library';
-import { getAPI } from '@mathesar/api/utils/requestUtils';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type {
   QueryInstance,
   QueryRunResponse,
-} from '@mathesar/api/types/queries';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
+} from '@mathesar/api/rest/types/queries';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';

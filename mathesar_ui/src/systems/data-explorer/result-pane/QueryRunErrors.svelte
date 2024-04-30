@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { Button, hasProperty } from '@mathesar-component-library';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { ApiMultiError } from '@mathesar/api/utils/errors';
-  import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/utils/errorCodes';
+  import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
+  import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/rest/utils/errorCodes';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';

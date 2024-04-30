@@ -4,7 +4,7 @@ import { derived, type Readable } from 'svelte/store';
 import type {
   Connection,
   ConnectionReference,
-} from '@mathesar/api/connections';
+} from '@mathesar/api/rest/connections';
 import { connectionsStore } from '@mathesar/stores/databases';
 import {
   preloadCommonData,

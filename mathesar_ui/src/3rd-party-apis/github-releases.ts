@@ -1,4 +1,4 @@
-import { getExternalApi } from '@mathesar/api/utils/requestUtils';
+import { getExternalApi } from '@mathesar/api/rest/utils/requestUtils';
 
 /**
  * GitHub's REST API gives way more info than we have here. See [docs][1]. But

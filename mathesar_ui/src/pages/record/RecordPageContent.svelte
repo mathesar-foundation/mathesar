@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
-  import { getDetailedRecordsErrors } from '@mathesar/api/utils/recordUtils';
-  import { getAPI } from '@mathesar/api/utils/requestUtils';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
+  import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
+  import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
   import {
     FormSubmit,
     makeForm,

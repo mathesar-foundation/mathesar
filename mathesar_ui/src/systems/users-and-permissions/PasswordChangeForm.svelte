@@ -13,7 +13,7 @@
     comboMustBeEqual,
   } from '@mathesar/components/form';
   import { iconSave } from '@mathesar/icons';
-  import userApi, { type User } from '@mathesar/api/users';
+  import userApi, { type User } from '@mathesar/api/rest/users';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import GridFormInputRow from '@mathesar/components/form/GridFormInputRow.svelte';

@@ -10,8 +10,8 @@
     FileUpload,
     FileUploadAddDetail,
   } from '@mathesar-component-library/types';
-  import { dataFilesApi as api } from '@mathesar/api/dataFiles';
-  import type { UploadCompletionOpts } from '@mathesar/api/utils/requestUtils';
+  import { dataFilesApi as api } from '@mathesar/api/rest/dataFiles';
+  import type { UploadCompletionOpts } from '@mathesar/api/rest/utils/requestUtils';
   import { toast } from '@mathesar/stores/toast';
 
   /**

@@ -3,8 +3,8 @@ import { derived } from 'svelte/store';
 
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { States } from '@mathesar/api/utils/requestUtils';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import { States } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import { ColumnsDataStore } from './columns';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';

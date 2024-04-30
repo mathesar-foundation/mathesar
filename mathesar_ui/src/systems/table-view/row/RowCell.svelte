@@ -10,8 +10,8 @@
     MenuHeading,
     WritableMap,
   } from '@mathesar-component-library';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import { States } from '@mathesar/api/utils/requestUtils';
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import Null from '@mathesar/components/Null.svelte';

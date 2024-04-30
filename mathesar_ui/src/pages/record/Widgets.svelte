@@ -4,7 +4,7 @@
   import type {
     JoinableTable,
     JoinableTablesResult,
-  } from '@mathesar/api/types/tables/joinable_tables';
+  } from '@mathesar/api/rest/types/tables/joinable_tables';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconRecord } from '@mathesar/icons';

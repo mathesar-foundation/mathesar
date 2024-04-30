@@ -1,4 +1,4 @@
-import type { DurationUnit } from '@mathesar/api/types/tables/columns';
+import type { DurationUnit } from '@mathesar/api/rest/types/tables/columns';
 
 export interface DurationConfig {
   max: DurationUnit;

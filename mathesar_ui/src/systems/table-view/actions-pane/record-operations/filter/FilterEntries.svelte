@@ -8,7 +8,7 @@
     type FilterEntry,
     type ProcessedColumns,
   } from '@mathesar/stores/table-data';
-  import type { FilterCombination } from '@mathesar/api/types/tables/records';
+  import type { FilterCombination } from '@mathesar/api/rest/types/tables/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import { Icon } from '@mathesar-component-library';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';

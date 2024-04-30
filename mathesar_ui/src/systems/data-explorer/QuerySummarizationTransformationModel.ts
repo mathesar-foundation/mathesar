@@ -4,7 +4,7 @@ import { ImmutableMap } from '@mathesar-component-library';
 import type {
   QueryInstanceSummarizationTransformation,
   QuerySummarizationFunctionId,
-} from '@mathesar/api/types/queries';
+} from '@mathesar/api/rest/types/queries';
 
 export interface QuerySummarizationAggregationEntry {
   inputAlias: string;

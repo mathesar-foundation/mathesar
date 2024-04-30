@@ -12,7 +12,7 @@
   } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { saveColumnOrder } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { ContextMenu } from '@mathesar/component-library';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';

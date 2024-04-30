@@ -1,4 +1,4 @@
-import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
+import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from './tables/columns';
 
 export type MinimalColumnDetails = Pick<

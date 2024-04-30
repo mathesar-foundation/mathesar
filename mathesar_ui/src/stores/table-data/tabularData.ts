@@ -7,10 +7,10 @@ import {
   type Writable,
 } from 'svelte/store';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/types/tables';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { States } from '@mathesar/api/utils/requestUtils';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import { States } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import { SheetSelection } from '@mathesar/components/sheet';
 import { getColumnOrder } from '@mathesar/utils/tables';
 import type { ShareConsumer } from '@mathesar/utils/shares';

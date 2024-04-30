@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
   import { Icon } from '@mathesar-component-library';
-  import type { User } from '@mathesar/api/users';
+  import type { User } from '@mathesar/api/rest/users';
   import { iconAddUser } from '@mathesar/icons';
   import {
     getEditUsersPageUrl,

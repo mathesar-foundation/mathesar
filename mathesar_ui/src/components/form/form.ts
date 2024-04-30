@@ -4,7 +4,7 @@ import {
   unite,
   withSideChannelSubscriptions,
 } from '@mathesar-component-library';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import {
   comboErrorsKey,
   disabledKey,
