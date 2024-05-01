@@ -58,6 +58,54 @@ CREATE SCHEMA IF NOT EXISTS msar;
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
+-- HELPER FUNCTIONS
+--
+-- Low-level utils functions used by other functions.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+__msar.extract_smallints(v jsonb) RETURNS smallint[] AS $$/*
+From the supplied JSONB value, extract all top-level JSONB array elements which can be successfully
+cast to PostgreSQL smallint values. Return the resulting array of smallint values.
+
+If the supplied jsonb value is not an array, this function will return an empty array.
+
+If any jsonb array element cannot be cast to a smallint, it will be silently ignored.
+
+This function does not raise any exceptions. It will always return an array.
+
+This function should not be used on large arrays. It will be slow due to the performance
+limitations[1] of EXCEPTION blocks.
+
+[1]: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-ERROR-TRAPPING
+
+Args:
+  v: any JSONB value.
+*/
+DECLARE
+  result smallint[];
+  element jsonb;
+BEGIN
+  FOR element IN SELECT jsonb_array_elements(v)
+  LOOP
+    BEGIN
+      result := result || (element::smallint);
+    EXCEPTION
+      -- Ignore any elements that can't be cast to smallint.
+      WHEN others THEN
+        CONTINUE;
+    END;
+  END LOOP;
+  RETURN result;
+EXCEPTION
+  WHEN others THEN
+    RETURN '{}'::smallint[]; -- Return an empty array if the input is not an array.
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- GENERAL DDL FUNCTIONS
 --
 -- Functions in this section are quite general, and are the basis of the others.
