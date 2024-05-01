@@ -158,3 +158,42 @@ BEGIN
   -- - Handle columns which can't be automatically cast to TEXT
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_record_summaries_via_query(
+  query text,
+  id_values anyarray
+) RETURNS TABLE (
+  id anyelement,
+  record_summary text
+) AS $$/*
+  Given a query and an array of IDs, this function returns the record summaries for the IDs
+  specified in the array.
+
+  Args:
+    query: A query that returns a result set with the following columns:
+      - id: The primary key column of the table. This is always named `id`, even if the PK within
+        the table has a different name. It will be unique.
+      - record_summary: A string that represents the record summary.
+
+    id_values: An array of IDs for which to retrieve record summaries.
+
+  RETURN VALUE:
+  
+  A result set with the following columns:
+    - id: The primary key column of the table. This is always named `id`, even if the PK within
+      the table has a different name. It will be unique.
+    - record_summary: A string that represents the record summary.
+*/
+BEGIN
+  CREATE TEMP TABLE ids ON COMMIT DROP AS SELECT DISTINCT unnest(id_values) AS id;
+  RETURN QUERY EXECUTE concat('
+    WITH q AS ( ', query, ' )
+    SELECT q.id, q.record_summary
+    FROM ids
+    JOIN q ON q.id = ids.id
+  ');
+  DROP TABLE ids;
+END;
+$$ LANGUAGE plpgsql;
