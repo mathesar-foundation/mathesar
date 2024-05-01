@@ -33,14 +33,16 @@ msar.build_record_summary_query_from_template(
   An array entry in the template represents a reference to data. Each element in the array is a
   column attnum. The first column attnum refers to a column in the base table. If the array
   contains more than one column reference, it represents a chain of FK columns starting from
-  the base table and ending with a non-FK column. Foreign keys should be followed to produce the
-  joins. Multi-column FK constraints are not supported.
+  the base table and ending with a non-FK column. This function follows the foreign keys to
+  produce the joins. Multi-column FK constraints are not supported.
   
   RETURN VALUE:
   
-  The query returned by this function has the following columns:
-    id: The primary key column of the table. (This is always named `id`, even if the PK within
-      the table has a different name.)
+  The query returned by this function produces a result set with the following columns:
+
+    id: The primary key column of the table. This is always named `id`, even if the PK within
+      the table has a different name. It will be unique.
+
     record_summary: A string that represents the record summary.
 */
 DECLARE
