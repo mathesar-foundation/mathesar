@@ -1,4 +1,13 @@
+[project]
+name = "Mathesar"
+version = "0.1.6"
 [tool.vulture]
 exclude = ["mathesar/migrations"]
 ignore_names = ["go_to_patents_data_table", "go_to_all_types_table", "go_to_table_with_numbers_in_text", "admin_user"]
 min_confidence = 90
+[tool.setuptools.package-data]
+"*" = ["*.sql", "*.json", "*.html", "*.js", "*.css", "*.svg", "*.txt"]
+[tool.setuptools.packages.find]
+where = ["."]  # list of folders that contain the packages (["."] by default)
+include = ["db*", "media*", "config*", "mathesar*", "demo*", "static*"]  # package names should match these glob patterns (["*"] by default)
+exclude = []  # exclude packages matching these glob patterns (empty by default)
