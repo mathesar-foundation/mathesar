@@ -56,9 +56,9 @@ msar.auto_generate_record_summary_template(
     tab_id: The OID of the table for which to generate a record summary template.
 
   Return value:
-    A JSON array that represents the record summary template. The array contains a single element
-    which is an array of column attnums. The column attnum is the best column to use for the record
-    summary.
+    A JSON array that represents the record summary template as described in
+      msar.build_record_summary_query_from_template. The array contains a single element which is an
+      array of column attnums. The column attnum is the best column to use for the record summary.
 */
 BEGIN
   RETURN jsonb_build_array(
@@ -102,14 +102,8 @@ msar.build_record_summary_query_from_template(
   the base table and ending with a non-FK column. This function follows the foreign keys to
   produce the joins. Multi-column FK constraints are not supported.
   
-  Return value:
-  
-    The query returned by this function produces a result set with the following columns:
-
-      id: The primary key column of the table. This is always named `id`, even if the PK within
-        the table has a different name. It will be unique.
-
-      record_summary: A string that represents the record summary.
+  Return value: a stringified query which produces a result set matching the structure described
+    in the return value of msar.get_record_summaries_via_query.
 */
 DECLARE
   base_alias CONSTANT text := 'base';
@@ -238,19 +232,14 @@ msar.get_record_summaries_via_query(
   specified in the array.
 
   Args:
-    query: A query that returns a result set with the following columns:
-      - id: The primary key column of the table. This is always named `id`, even if the PK within
-        the table has a different name. It will be unique.
-      - record_summary: A string that represents the record summary.
-
+    query: A stringified query which returns a result set having a structure identical to the
+      return value of this function (described below).
     id_values: An array of IDs for which to retrieve record summaries.
 
-  Return value:
-  
-    A result set with the following columns:
-      - id: The primary key column of the table. This is always named `id`, even if the PK within
-        the table has a different name. It will be unique.
-      - record_summary: A string that represents the record summary.
+  Return value: A table with the following columns:
+    id: The primary key column of the table. This is always named `id`, even if the PK within the
+      table has a different name. It will be unique.
+    record_summary: A string that represents the record summary.
 */
 BEGIN
   CREATE TEMP TABLE ids ON COMMIT DROP AS SELECT DISTINCT unnest(id_values) AS id;
@@ -263,3 +252,56 @@ BEGIN
   DROP TABLE ids;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_record_summaries(
+  tab_id oid,
+  id_values anyarray,
+  template jsonb
+) RETURNS TABLE (
+  id anyelement,
+  record_summary text
+) AS $$/*
+  Given a table OID, an array of primary key values, and (optionally) a record summary template,
+  this function returns a table with the record summaries for the IDs specified in the array.
+
+  Args:
+    tab_id: The OID of the table for which to retrieve record summaries.
+    id_values: An array of IDs for which to retrieve record summaries.
+    template: (optional) A JSON array that represents the record summary template. If it is
+      NULL or 'null'::jsonb, then the template will be auto-generated. See
+      msar.build_record_summary_query_from_template for a full description of the template
+      structure.
+*/
+SELECT * FROM msar.get_record_summaries_via_query(
+  msar.build_record_summary_query_from_template(
+    tab_id,
+    CASE
+      WHEN template IS NULL OR jsonb_typeof(template) = 'null' THEN
+        msar.auto_generate_record_summary_template(tab_id)
+      ELSE template
+    END 
+  ),
+  id_values
+)
+$$ LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_record_summaries(
+  tab_id oid,
+  id_values anyarray
+) RETURNS TABLE (
+  id anyelement,
+  record_summary text
+) AS $$/*
+  Given a table OID, an array of primary key values this function returns a table with the record
+  summaries for the IDs specified in the array.
+
+  Args:
+    tab_id: The OID of the table for which to retrieve record summaries.
+    id_values: An array of IDs for which to retrieve record summaries.
+*/
+SELECT * FROM msar.get_record_summaries(tab_id, id_values, NULL)
+$$ LANGUAGE sql;
