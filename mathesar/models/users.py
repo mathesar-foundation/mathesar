@@ -17,6 +17,9 @@ class User(AbstractUser):
     password_change_needed = models.BooleanField(default=False)
     display_language = models.CharField(max_length=30, blank=True, default='en')
 
+    def metadata_privileges(self, database_id):
+        return 'read write'
+
 
 class Role(models.TextChoices):
     MANAGER = 'manager', 'Manager'
