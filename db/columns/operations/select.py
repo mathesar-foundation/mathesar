@@ -10,7 +10,7 @@ from db.utils import execute_statement, get_pg_catalog_table
 
 def get_column_info_for_table(table, conn):
     """
-    Return a list of dictionaries desrcibing the columns of the table.
+    Return a list of dictionaries describing the columns of the table.
 
     The `table` can be given as either a "qualified name", or an OID.
     The OID is the preferred identifier, since it's much more robust.
