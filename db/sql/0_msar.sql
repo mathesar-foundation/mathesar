@@ -612,7 +612,6 @@ Each returned JSON object in the array will have the form:
     "type_options": <obj>,
     "nullable": <bool>,
     "primary_key": <bool>,
-    "valid_target_types": [<str>, <str>, ..., <str>]
     "default": {"value": <str>, "is_dynamic": <bool>},
     "has_dependents": <bool>,
     "description": <str>
@@ -631,7 +630,6 @@ SELECT jsonb_agg(
     'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
     'nullable', NOT attnotnull,
     'primary_key', COALESCE(pgi.indisprimary, false),
-    'valid_target_types', msar.get_valid_target_type_strings(atttypid),
     'default',
     nullif(
       jsonb_strip_nulls(

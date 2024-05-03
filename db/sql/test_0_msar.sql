@@ -2466,8 +2466,7 @@ BEGIN
         "description": null,
         "primary_key": true,
         "type_options": null,
-        "has_dependents": true,
-        "valid_target_types": null
+        "has_dependents": true
       },
       {
         "id": 2,
@@ -2481,8 +2480,7 @@ BEGIN
           "scale": null,
           "precision": null
         },
-        "has_dependents": false,
-        "valid_target_types": null
+        "has_dependents": false
       },
       {
         "id": 3,
@@ -2495,8 +2493,7 @@ BEGIN
         "type_options": {
           "length": 128
         },
-        "has_dependents": false,
-        "valid_target_types": null
+        "has_dependents": false
       },
       {
         "id": 4,
@@ -2510,11 +2507,7 @@ BEGIN
         "description": "A super comment ;",
         "primary_key": false,
         "type_options": null,
-        "has_dependents": false,
-        "valid_target_types": [
-          "numeric",
-          "text"
-        ]
+        "has_dependents": false
       },
       {
         "id": 5,
@@ -2530,8 +2523,7 @@ BEGIN
         "type_options": {
           "precision": null
         },
-        "has_dependents": false,
-        "valid_target_types": null
+        "has_dependents": false
       },
       {
         "id": 6,
@@ -2544,8 +2536,7 @@ BEGIN
         "type_options": {
           "item_type": "integer"
         },
-        "has_dependents": false,
-        "valid_target_types": null
+        "has_dependents": false
       },
       {
         "id": 7,
@@ -2560,8 +2551,7 @@ BEGIN
           "item_type": "numeric",
           "precision": 15
         },
-        "has_dependents": false,
-        "valid_target_types": null
+        "has_dependents": false
       }
     ]$j$::jsonb
   );
