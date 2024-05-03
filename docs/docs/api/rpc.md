@@ -46,6 +46,14 @@ To use an RPC function:
       - add_from_scratch
       - DBModelReturn
 
+---
+
+::: mathesar.rpc.columns
+    options:
+      members:
+      - list
+      - ColumnInfo
+
 ## Responses
 
 ### Success
