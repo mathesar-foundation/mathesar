@@ -10,8 +10,6 @@ STRING_LIKE_TYPES = frozenset({
     *STRING_TYPES,
     PostgresType.CHAR,
     PostgresType.NAME,
-    MathesarCustomType.URI,
-    MathesarCustomType.EMAIL,
 })
 
 INTEGER_TYPES = frozenset({
