@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError
+from sqlalchemy.exc import DataError, IntegrityError, ProgrammingError, InternalError
 
 from db.types.exceptions import UnsupportedTypeException
 from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError, ColumnMappingsNotFound
@@ -154,7 +154,7 @@ class TableViewSet(AccessViewSetMixin, CreateModelMixin, RetrieveModelMixin, Lis
         table_data = TableSerializer(table, context={"request": request}).data
         try:
             preview_records = table.get_preview(columns)
-        except (DataError, IntegrityError) as e:
+        except (DataError, IntegrityError, InternalError) as e:
             if type(e.orig) is InvalidTextRepresentation or type(e.orig) is CheckViolation:
                 raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
