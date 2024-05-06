@@ -23,5 +23,7 @@ This is developer documentation to help with release notes. It is not published 
 
 1. Open the release notes file and find a new section at the end titled **(TO CATEGORIZE)**. Incorporate PRs listed within this section into the release notes as you see fit. Rewrite the title text that appears directly in the markdown. Leave the titles as-written within the quotes (these will appear within hover text). Save the release notes and commit them.
 
+1. Edit `mkdocs.yml`, adding the newly-generated release notes file to the nav menu.
+
 1. Re-run the script as needed.
 
