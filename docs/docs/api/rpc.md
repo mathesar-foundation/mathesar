@@ -53,6 +53,8 @@ To use an RPC function:
       members:
       - list
       - ColumnInfo
+      - TypeOptions
+      - ColumnDefault
 
 ## Responses
 
