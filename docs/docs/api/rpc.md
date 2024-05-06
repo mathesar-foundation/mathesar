@@ -51,7 +51,8 @@ To use an RPC function:
 ::: mathesar.rpc.columns
     options:
       members:
-      - list
+      - list_
+      - ColumnListReturn
       - ColumnInfo
       - TypeOptions
       - ColumnDefault

@@ -109,18 +109,30 @@ class ColumnInfo(TypedDict):
         )
 
 
+class ColumnListReturn(TypedDict):
+    """
+    Information about the columns of a table.
+
+    Attributes:
+        column_info: Column information from the user's database.
+        display_options: Display metadata managed by Mathesar.
+    """
+    column_info: list[ColumnInfo]
+    display_options: list[dict]
+
+
 @rpc_method(name="columns.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list(*, table_oid: int, database_id: int, **kwargs):
+def list_(*, table_oid: int, database_id: int, **kwargs):
     """
-    List columns for a table, with information about each.
+    List information about columns for a table. Exposed as `list`.
 
     Also return display options for each column, if they're defined.
 
     Args:
         table_oid: Identity of the table in the user's database.
-        database_id: The Django model id of the database containing the table.
+        database_id: The Django id of the database containing the table.
 
     Returns:
         A list of column details, and a separate list of display options.
@@ -136,7 +148,7 @@ def list(*, table_oid: int, database_id: int, **kwargs):
         display_options = get_display_options(table_oid, attnums)
     else:
         display_options = None
-    return {
-        "column_info": column_info,
-        "display_options": display_options
-    }
+    return ColumnListReturn(
+        column_info=column_info,
+        display_options=display_options,
+    )
