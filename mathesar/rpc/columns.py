@@ -145,6 +145,8 @@ def list_(*, table_oid: int, database_id: int, **kwargs):
         ]
     if request.user.metadata_privileges(database_id) is not None:
         attnums = [col['id'] for col in column_info]
+        # TODO Use TypedDict spec pattern (above) for display_options once we
+        # have that model defined.
         display_options = get_display_options(table_oid, attnums)
     else:
         display_options = None
