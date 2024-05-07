@@ -11,17 +11,18 @@
     ImmutableMap,
   } from '@mathesar-component-library';
 
-  import FilterTransformation from './FilterTransformation.svelte';
-  import HideTransformation from './HideTransformation.svelte';
-  import SortTransformation from './SortTransformation.svelte';
-  import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
-  import { calcAllowedColumnsPerTransformation } from './transformationUtils';
   import QueryFilterTransformationModel from '../../QueryFilterTransformationModel';
   import QueryHideTransformationModel from '../../QueryHideTransformationModel';
   import type QueryManager from '../../QueryManager';
   import type { QueryTransformationModel } from '../../QueryModel';
   import QuerySortTransformationModel from '../../QuerySortTransformationModel';
   import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
+
+  import FilterTransformation from './FilterTransformation.svelte';
+  import HideTransformation from './HideTransformation.svelte';
+  import SortTransformation from './SortTransformation.svelte';
+  import SummarizationTransformation from './summarization/SummarizationTransformation.svelte';
+  import { calcAllowedColumnsPerTransformation } from './transformationUtils';
 
   export let queryManager: QueryManager;
 
