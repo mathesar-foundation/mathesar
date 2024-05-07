@@ -33,7 +33,9 @@ def test_columns_list(rf, monkeypatch):
             }, {
                 'id': 2, 'name': 'numcol', 'type': 'numeric',
                 'default': {'value': "'8'::numeric", 'is_dynamic': False},
-                'nullable': True, 'description': None, 'primary_key': False,
+                'nullable': True,
+                'description': 'My super numeric column',
+                'primary_key': False,
                 'type_options': {'scale': None, 'precision': None},
                 'has_dependents': False
             }, {
@@ -43,30 +45,16 @@ def test_columns_list(rf, monkeypatch):
                 'type_options': {'scale': 3, 'precision': 5},
                 'has_dependents': False
             }, {
-                'id': 6, 'name': 'numarr', 'type': '_array',
-                'default': None,
-                'nullable': True,
-                'description': 'a numeric array column',
-                'primary_key': False,
-                'type_options': {'scale': 2, 'item_type': 'numeric', 'precision': 8},
-                'has_dependents': False
-            }, {
                 'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
                 'default': None,
                 'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'fields': 'day to second', 'precision': 3},
+                'type_options': {'fields': 'day to second'},
                 'has_dependents': False
             }, {
                 'id': 10, 'name': 'arrcol', 'type': '_array',
                 'default': None,
                 'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'item_type': 'text'},
-                'has_dependents': False
-            }, {
-                'id': 12, 'name': 'vccol', 'type': 'character varying',
-                'default': None,
-                'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'length': 123},
+                'type_options': {'item_type': 'character varying', 'length': 3},
                 'has_dependents': False
             },
         ]
@@ -75,7 +63,7 @@ def test_columns_list(rf, monkeypatch):
         if (
                 database_id != 2
                 or table_oid != 23457
-                or attnums != (1, 2, 4, 6, 8, 10, 12)
+                or attnums != (1, 2, 4, 8, 10)
                 or user.username != 'alice'
         ):
             raise AssertionError("incorrect parameters passed")
@@ -103,7 +91,9 @@ def test_columns_list(rf, monkeypatch):
             }, {
                 'id': 2, 'name': 'numcol', 'type': 'numeric',
                 'default': {'value': "'8'::numeric", 'is_dynamic': False},
-                'nullable': True, 'description': None, 'primary_key': False,
+                'nullable': True,
+                'description': 'My super numeric column',
+                'primary_key': False,
                 'type_options': None,
                 'has_dependents': False
             }, {
@@ -113,30 +103,16 @@ def test_columns_list(rf, monkeypatch):
                 'type_options': {'scale': 3, 'precision': 5},
                 'has_dependents': False
             }, {
-                'id': 6, 'name': 'numarr', 'type': '_array',
-                'default': None,
-                'nullable': True,
-                'description': 'a numeric array column',
-                'primary_key': False,
-                'type_options': {'scale': 2, 'item_type': 'numeric', 'precision': 8},
-                'has_dependents': False
-            }, {
                 'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
                 'default': None,
                 'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'fields': 'day to second', 'precision': 3},
+                'type_options': {'fields': 'day to second'},
                 'has_dependents': False
             }, {
                 'id': 10, 'name': 'arrcol', 'type': '_array',
                 'default': None,
                 'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'item_type': 'text'},
-                'has_dependents': False
-            }, {
-                'id': 12, 'name': 'vccol', 'type': 'character varying',
-                'default': None,
-                'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'length': 123},
+                'type_options': {'item_type': 'character varying', 'length': 3},
                 'has_dependents': False
             }
         ),
