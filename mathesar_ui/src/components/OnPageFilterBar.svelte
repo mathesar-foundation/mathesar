@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import { iconSearch, Button } from '@mathesar-component-library';
-  import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { createEventDispatcher } from 'svelte';
+  import { _ } from 'svelte-i18n';
+
+  import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
+  import { Button, iconSearch } from '@mathesar-component-library';
 
   const dispatch = createEventDispatcher();
 

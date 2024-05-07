@@ -1,7 +1,8 @@
 import type { SelectedCellData } from '@mathesar/components/inspector/cell/cellInspectorUtils';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
-import { getRowSelectionId, type QueryRow } from '../../QueryRunner';
+
+import { type QueryRow, getRowSelectionId } from '../../QueryRunner';
 import type { ProcessedQueryOutputColumnMap } from '../../utils';
 
 export function getSelectedCellData(

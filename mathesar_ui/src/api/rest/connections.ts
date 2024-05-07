@@ -1,10 +1,10 @@
 import {
+  type PaginatedResponse,
   addQueryParamsToUrl,
   deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
-  type PaginatedResponse,
 } from './utils/requestUtils';
 
 export interface Connection {

@@ -1,4 +1,5 @@
 import { makeCellId, makeCells, parseCellId } from '../cellIds';
+
 import { Direction, getColumnOffset, getRowOffset } from './Direction';
 import Series from './Series';
 

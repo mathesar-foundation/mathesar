@@ -1,6 +1,6 @@
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
-import { getErrors, type Filled, type ValidationFn } from './validators';
+import { type Filled, type ValidationFn, getErrors } from './validators';
 
 export const comboErrorsKey = Symbol('comboErrors');
 export const disabledKey = Symbol('disabled');

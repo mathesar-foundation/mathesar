@@ -1,13 +1,14 @@
 <script lang="ts">
   import type { Placement } from '@popperjs/core/lib/enums';
+
+  import Button from '@mathesar-component-library-dir/button/Button.svelte';
+  import { iconExpandDown } from '@mathesar-component-library-dir/common/icons';
   import type {
     Appearance,
     Size,
   } from '@mathesar-component-library-dir/commonTypes';
-  import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
 
-  import { iconExpandDown } from '@mathesar-component-library-dir/common/icons';
   import AttachableDropdown from './AttachableDropdown.svelte';
 
   export let triggerClass = '';

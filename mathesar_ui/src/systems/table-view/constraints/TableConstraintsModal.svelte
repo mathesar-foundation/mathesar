@@ -1,9 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import {
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
+
   import TableConstraints from './TableConstraints.svelte';
 
   export let controller: ModalController;

@@ -1,10 +1,11 @@
+import { getErrorMessage } from '@mathesar/utils/errors';
 import {
+  ImmutableMap,
   hasProperty,
   hasStringProperty,
-  ImmutableMap,
   isNumber,
 } from '@mathesar-component-library';
-import { getErrorMessage } from '@mathesar/utils/errors';
+
 import { ApiError, ApiMultiError } from './errors';
 
 /** Keys are column ids */

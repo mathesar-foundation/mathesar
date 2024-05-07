@@ -1,11 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { iconShare } from '@mathesar/icons';
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import { Dropdown, Icon } from '@mathesar-component-library';
-  import ShareEntity from '@mathesar/systems/shares/ShareEntity.svelte';
+
   import queryShareApi from '@mathesar/api/rest/queryShares';
+  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import { iconShare } from '@mathesar/icons';
   import { getSharedExplorationPageUrl } from '@mathesar/routes/urls';
+  import ShareEntity from '@mathesar/systems/shares/ShareEntity.svelte';
+  import { Dropdown, Icon } from '@mathesar-component-library';
 
   export let id: QueryInstance['id'];
 </script>

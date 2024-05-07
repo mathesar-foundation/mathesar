@@ -1,4 +1,5 @@
 import { toAsciiLowerCase } from '@mathesar-component-library-dir/common/utils';
+
 import type {
   MatchPart,
   ValueComparisonOutcome,

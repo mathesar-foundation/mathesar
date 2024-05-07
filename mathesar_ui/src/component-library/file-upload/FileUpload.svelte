@@ -11,6 +11,7 @@
   } from '@mathesar-component-library-dir/common/utils';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import Progress from '@mathesar-component-library-dir/progress/Progress.svelte';
+
   import type { FileUpload, FileUploadAddDetail } from './FileUploadTypes';
 
   const dispatch = createEventDispatcher<{ add: FileUploadAddDetail }>();

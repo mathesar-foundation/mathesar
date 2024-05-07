@@ -1,8 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { TabContainer, defined } from '@mathesar-component-library';
   import type { Tab } from '@mathesar/component-library/types';
+  import { TabContainer, defined } from '@mathesar-component-library';
+
   import CellMode from './cell/CellMode.svelte';
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';

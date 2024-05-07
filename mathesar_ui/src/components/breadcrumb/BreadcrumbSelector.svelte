@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import {
     AttachableDropdown,
     Button,
@@ -6,9 +8,9 @@
     iconSearch,
   } from '@mathesar/component-library';
   import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
-  import { iconExpandRight } from '@mathesar/icons';
-  import { _ } from 'svelte-i18n';
   import { RichText } from '@mathesar/components/rich-text';
+  import { iconExpandRight } from '@mathesar/icons';
+
   import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
   import type {
     BreadcrumbSelectorData,

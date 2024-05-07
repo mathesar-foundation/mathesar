@@ -1,4 +1,5 @@
 import { get, writable } from 'svelte/store';
+
 import { collapse, unite } from '../storeUtils';
 
 test('collapse', () => {

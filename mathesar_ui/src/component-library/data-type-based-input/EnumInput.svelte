@@ -1,16 +1,17 @@
 <script lang="ts">
   import Select from '@mathesar-component-library-dir/select/Select.svelte';
   import type { Appearance } from '@mathesar-component-library-dir/types';
-  import {
-    generateSelectOptions,
-    getSelectedValue,
-    getInitialValue,
-  } from './utils';
+
   import type {
-    DataTypeBasedInputType,
     DataTypeBasedInputSelectElement,
+    DataTypeBasedInputType,
     EnumSelectOption,
   } from './types';
+  import {
+    generateSelectOptions,
+    getInitialValue,
+    getSelectedValue,
+  } from './utils';
 
   export let dataType: DataTypeBasedInputType;
   export let enumValues: unknown[] | undefined = undefined;

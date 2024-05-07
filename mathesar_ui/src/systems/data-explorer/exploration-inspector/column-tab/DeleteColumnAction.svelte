@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Collapsible, Button, Icon } from '@mathesar-component-library';
+
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import { Button, Collapsible, Icon } from '@mathesar-component-library';
+
   import type QueryManager from '../../QueryManager';
   import type { ProcessedQueryOutputColumn } from '../../utils';
 

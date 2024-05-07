@@ -4,6 +4,7 @@
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
   import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import FieldsetGroup from '@mathesar-component-library-dir/fieldset-group/FieldsetGroup.svelte';
+
   import type { ComponentWithProps } from '../types';
 
   type Option = $$Generic;

@@ -1,13 +1,14 @@
 import {
-  derived,
-  writable,
-  get,
   type Readable,
   type Writable,
+  derived,
+  get,
+  writable,
 } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { Tab } from '@mathesar-component-library/types';
+
 import type QueryModel from './QueryModel';
 
 /**

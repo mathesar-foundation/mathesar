@@ -5,13 +5,14 @@
 -->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    CancelOrProceedButtonPair,
-    TextInput,
-    TextArea,
-  } from '@mathesar-component-library';
+
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import {
+    CancelOrProceedButtonPair,
+    TextArea,
+    TextInput,
+  } from '@mathesar-component-library';
 
   export let initialValue = '';
   export let onSubmit: (value: string) => Promise<void>;

@@ -1,8 +1,10 @@
+import { get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
-import { ModalController } from '@mathesar-component-library';
+
 import { invalidIf, requiredField } from '@mathesar/components/form';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import { writable, get } from 'svelte/store';
+import { ModalController } from '@mathesar-component-library';
+
 import type { ColumnExtractionTargetType } from './columnExtractionTypes';
 
 export class ExtractColumnsModalController extends ModalController {

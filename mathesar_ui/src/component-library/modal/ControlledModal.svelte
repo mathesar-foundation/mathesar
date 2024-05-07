@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { ModalCloseAction, ModalWidth } from './modalTypes';
   import IndependentModal from './IndependentModal.svelte';
   import type ModalController from './ModalController';
+  import type { ModalCloseAction, ModalWidth } from './modalTypes';
 
   export let controller: ModalController;
   export let title: string | undefined = undefined;

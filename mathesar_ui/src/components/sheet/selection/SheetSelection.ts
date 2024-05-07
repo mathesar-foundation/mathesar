@@ -1,23 +1,24 @@
 import { execPipe, filter, first, map } from 'iter-tools';
 
-import { ImmutableSet } from '@mathesar/component-library';
 import { match } from '@mathesar/utils/patternMatching';
-import { assertExhaustive } from '@mathesar/utils/typeUtils';
+import { ImmutableSet, assertExhaustive } from '@mathesar-component-library';
+
 import { makeCellId, makeCells, parseCellId } from '../cellIds';
-import { Direction, getColumnOffset } from './Direction';
-import Plane from './Plane';
+
 import {
+  type Basis,
   basisFromDataCells,
   basisFromEmptyColumns,
   basisFromOneDataCell,
   basisFromPlaceholderCell,
   basisFromZeroEmptyColumns,
   emptyBasis,
-  type Basis,
 } from './basis';
+import { Direction, getColumnOffset } from './Direction';
+import Plane from './Plane';
 import {
-  fitSelectedValuesToSeriesTransformation,
   type SheetCellDetails,
+  fitSelectedValuesToSeriesTransformation,
 } from './selectionUtils';
 
 function getFullySelectedColumnIds(

@@ -1,20 +1,21 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
-  import type { CommonData } from '@mathesar/utils/preloadData';
-  import { confirmationController } from '@mathesar/stores/confirmation';
-  import { toast } from '@mathesar/stores/toast';
+
+  import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
   import { setNewClipboardHandlerStoreInContext } from '@mathesar/stores/clipboard';
-  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
-  import { setReleasesStoreInContext } from '@mathesar/stores/releases';
-  import { AnonymousViewerUserModel } from '@mathesar/stores/users';
+  import { confirmationController } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
+  import { setReleasesStoreInContext } from '@mathesar/stores/releases';
+  import { toast } from '@mathesar/stores/toast';
+  import { setUserProfileStoreInContext } from '@mathesar/stores/userProfile';
+  import { AnonymousViewerUserModel } from '@mathesar/stores/users';
+  import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
   import {
     RecordSelectorController,
     setRecordSelectorControllerInContext,
   } from '@mathesar/systems/record-selector/RecordSelectorController';
-  import ModalRecordSelector from '@mathesar/systems/record-selector/ModalRecordSelector.svelte';
-  import { setBreadcrumbItemsInContext } from '@mathesar/components/breadcrumb/breadcrumbUtils';
+  import type { CommonData } from '@mathesar/utils/preloadData';
+  import { Confirmation, ToastPresenter } from '@mathesar-component-library';
 
   export let commonData: CommonData;
 

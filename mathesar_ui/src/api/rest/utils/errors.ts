@@ -1,11 +1,11 @@
 /* eslint-disable max-classes-per-file */
 
+import { getErrorMessage } from '@mathesar/utils/errors';
 import {
+  ImmutableMap,
   hasProperty,
   hasStringProperty,
-  ImmutableMap,
 } from '@mathesar-component-library';
-import { getErrorMessage } from '@mathesar/utils/errors';
 
 /**
  * This is our front end representation of API errors. It's almost the same as

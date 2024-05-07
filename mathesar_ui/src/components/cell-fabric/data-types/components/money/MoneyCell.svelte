@@ -1,6 +1,7 @@
 <script lang="ts">
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { MoneyCellProps } from '../typeDefinitions';
+
   import MoneyCellInput from './MoneyCellInput.svelte';
 
   type $$Props = MoneyCellProps;

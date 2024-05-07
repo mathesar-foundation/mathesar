@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { Spinner } from '@mathesar-component-library';
-  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import { isLoading as isTranslationLoading, locale } from 'svelte-i18n';
+
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import { Spinner } from '@mathesar-component-library';
+
   import AppContext from './AppContext.svelte';
-  import RootRoute from './routes/RootRoute.svelte';
   import { initI18n } from './i18n';
+  import RootRoute from './routes/RootRoute.svelte';
 
   const commonData = preloadCommonData();
   void initI18n(commonData.user.display_language ?? 'en');

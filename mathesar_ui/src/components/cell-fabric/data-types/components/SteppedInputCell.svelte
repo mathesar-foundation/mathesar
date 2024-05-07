@@ -1,18 +1,19 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
 
+  import CellValue from '@mathesar/components/CellValue.svelte';
   import {
     Truncate,
     compareWholeValues,
     getValueComparisonOutcome,
     splitMatchParts,
   } from '@mathesar-component-library';
-  import CellValue from '@mathesar/components/CellValue.svelte';
+
   import CellWrapper from './CellWrapper.svelte';
   import type {
     CellTypeProps,
-    HorizontalAlignment,
     CellValueFormatter,
+    HorizontalAlignment,
   } from './typeDefinitions';
 
   const dispatch = createEventDispatcher();

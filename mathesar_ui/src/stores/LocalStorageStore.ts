@@ -1,8 +1,8 @@
 import {
-  writable,
   type Subscriber,
   type Unsubscriber,
   type Writable,
+  writable,
 } from 'svelte/store';
 
 interface Props<T> {

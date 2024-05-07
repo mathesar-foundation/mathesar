@@ -1,5 +1,6 @@
-import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import type { QueryInstanceHideTransformation } from '@mathesar/api/rest/types/queries';
 
 export interface QueryHideTransformationEntry {

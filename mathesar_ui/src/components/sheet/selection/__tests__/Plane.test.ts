@@ -1,6 +1,6 @@
-import Series from '../Series';
-import Plane from '../Plane';
 import { Direction } from '../Direction';
+import Plane from '../Plane';
+import Series from '../Series';
 
 test('Plane with placeholder row', () => {
   const p = new Plane(

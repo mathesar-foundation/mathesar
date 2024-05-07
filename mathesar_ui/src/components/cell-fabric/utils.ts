@@ -1,8 +1,9 @@
-import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import DataTypes from './data-types';
 import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
 import LinkedRecordInput from './data-types/components/linked-record/LinkedRecordInput.svelte';

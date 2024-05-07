@@ -1,10 +1,10 @@
-import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/rest/types/queries';
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import type { TerseGrouping } from '@mathesar/stores/table-data';
 import Url64 from '@mathesar/utils/Url64';
-import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/rest/types/queries';
 
 type TerseSummarizedColumn = Pick<Column, 'id' | 'name'>;
 type BaseTable = Pick<TableEntry, 'id' | 'name'>;

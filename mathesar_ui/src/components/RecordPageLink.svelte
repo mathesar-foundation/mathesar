@@ -1,7 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Icon } from '@mathesar-component-library';
+
   import { iconLinkToRecordPage } from '@mathesar/icons';
+  import { Icon } from '@mathesar-component-library';
 
   export let href: string;
 

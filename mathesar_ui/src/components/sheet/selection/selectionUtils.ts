@@ -1,6 +1,7 @@
 import type { Writable } from 'svelte/store';
 
-import { defined, type ImmutableSet } from '@mathesar-component-library';
+import { type ImmutableSet, defined } from '@mathesar-component-library';
+
 import type Series from './Series';
 import type SheetSelection from './SheetSelection';
 

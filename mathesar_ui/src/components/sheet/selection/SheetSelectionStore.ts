@@ -2,6 +2,7 @@ import type { Readable, Writable } from 'svelte/store';
 
 import { EventHandler } from '@mathesar/component-library';
 import PreventableEffectsStore from '@mathesar/stores/PreventableEffectsStore';
+
 import type Plane from './Plane';
 import SheetSelection from './SheetSelection';
 

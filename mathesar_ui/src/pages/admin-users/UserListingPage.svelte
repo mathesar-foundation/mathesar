@@ -1,14 +1,16 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { AnchorButton, Icon } from '@mathesar-component-library';
+
+  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import Errors from '@mathesar/components/Errors.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { iconAddNew } from '@mathesar/icons';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { ADMIN_USERS_PAGE_ADD_NEW_URL } from '@mathesar/routes/urls';
   import type { UserModel } from '@mathesar/stores/users';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
-  import Errors from '@mathesar/components/Errors.svelte';
-  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
+  import { AnchorButton, Icon } from '@mathesar-component-library';
+
   import UserRow from './UserRow.svelte';
   import UserSkeleton from './UserSkeleton.svelte';
 

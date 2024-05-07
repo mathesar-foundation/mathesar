@@ -1,24 +1,26 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import Form from '@mathesar/components/Form.svelte';
+  import FormField from '@mathesar/components/FormField.svelte';
+  import {
+    type ProcessedColumn,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
+  import { tables } from '@mathesar/stores/tables';
+  import { toast } from '@mathesar/stores/toast';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { getAvailableName } from '@mathesar/utils/db';
+  import { getErrorMessage } from '@mathesar/utils/errors';
+  import { CancelOrProceedButtonPair } from '@mathesar-component-library';
   import {
     LabeledInput,
     MultiSelect,
     RadioGroup,
     TextInput,
   } from '@mathesar-component-library';
-  import { CancelOrProceedButtonPair } from '@mathesar-component-library';
-  import {
-    getTabularDataStoreFromContext,
-    type ProcessedColumn,
-  } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
-  import FormField from '@mathesar/components/FormField.svelte';
-  import { toast } from '@mathesar/stores/toast';
-  import Form from '@mathesar/components/Form.svelte';
-  import { getAvailableName } from '@mathesar/utils/db';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
-  import { getErrorMessage } from '@mathesar/utils/errors';
+
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;

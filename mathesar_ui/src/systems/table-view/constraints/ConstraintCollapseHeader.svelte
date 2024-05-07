@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Constraint } from '@mathesar/api/rest/types/tables/constraints';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
   export let constraint: Constraint;

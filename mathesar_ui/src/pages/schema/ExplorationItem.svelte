@@ -1,12 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import { Icon } from '@mathesar-component-library';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { tables as tablesStore } from '@mathesar/stores/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { Icon } from '@mathesar-component-library';
 
   export let exploration: QueryInstance;
   export let database: Database;

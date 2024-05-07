@@ -1,14 +1,15 @@
 <script lang="ts">
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { SheetPositionableCell } from '@mathesar/components/sheet';
   import type {
-    RecordGrouping,
-    RecordGroup,
     GroupHeaderRow,
     ProcessedColumn,
+    RecordGroup,
+    RecordGrouping,
   } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { Badge } from '@mathesar-component-library';
+
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;

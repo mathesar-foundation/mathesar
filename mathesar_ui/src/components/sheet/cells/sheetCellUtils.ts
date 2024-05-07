@@ -1,4 +1,5 @@
-import { derived, type Readable } from 'svelte/store';
+import { type Readable, derived } from 'svelte/store';
+
 import { getSheetContext } from '../utils';
 
 export function getSheetCellStyle<ColumnIdentifierKey>(

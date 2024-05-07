@@ -1,5 +1,5 @@
-import { writable } from 'svelte/store';
 import type { Readable, Subscriber, Unsubscriber } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 /**
  * AccompanyingElements stores references to any DOM nodes which "accompany" a

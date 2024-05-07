@@ -1,22 +1,23 @@
 /* eslint-disable max-classes-per-file */
 
-import { setContext, getContext } from 'svelte';
-import { derived, get, writable, type Writable } from 'svelte/store';
+import { getContext, setContext } from 'svelte';
+import { type Writable, derived, get, writable } from 'svelte/store';
+
 import userApi, {
-  type User,
-  type UnsavedUser,
   type DatabaseRole,
   type SchemaRole,
+  type UnsavedUser,
+  type User,
   type UserRole,
 } from '@mathesar/api/rest/users';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { getErrorMessage } from '@mathesar/utils/errors';
-import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import { getErrorMessage } from '@mathesar/utils/errors';
 import {
-  rolesAllowOperation,
   type AccessOperation,
+  rolesAllowOperation,
 } from '@mathesar/utils/permissions';
+import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
 export class UserModel {
   readonly id: User['id'];

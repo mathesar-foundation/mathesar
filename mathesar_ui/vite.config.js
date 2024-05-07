@@ -1,7 +1,9 @@
-import { defineConfig } from 'vite';
-import legacy from '@vitejs/plugin-legacy';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
 import path from 'path';
+
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import legacy from '@vitejs/plugin-legacy';
+import { defineConfig } from 'vite';
+
 import * as data from './tsconfig.json';
 
 function getAlias() {

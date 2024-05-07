@@ -1,9 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { isDefinedNonNullable, Chip } from '@mathesar-component-library';
+
   import CellValue from '@mathesar/components/CellValue.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import { labeledCount } from '@mathesar/utils/languageUtils';
+  import { Chip, isDefinedNonNullable } from '@mathesar-component-library';
+
   import CellWrapper from '../CellWrapper.svelte';
   import type { ArrayCellProps } from '../typeDefinitions';
 

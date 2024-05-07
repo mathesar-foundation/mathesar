@@ -1,4 +1,5 @@
 import { iconUiTypeUri } from '@mathesar/icons';
+
 import type { AbstractTypeConfiguration } from '../types';
 
 const DB_TYPES = {

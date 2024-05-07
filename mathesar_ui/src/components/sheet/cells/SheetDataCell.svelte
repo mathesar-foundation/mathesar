@@ -1,6 +1,8 @@
 <script lang="ts">
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+
   import type SheetSelection from '../selection/SheetSelection';
+
   import { getSheetCellStyle } from './sheetCellUtils';
 
   type SheetColumnIdentifierKey = $$Generic;

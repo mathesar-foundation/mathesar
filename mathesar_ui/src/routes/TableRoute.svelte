@@ -2,11 +2,13 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
   import { currentTableId, tables } from '@mathesar/stores/tables';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+
   import RecordPageRoute from './RecordPageRoute.svelte';
 
   export let database: Database;

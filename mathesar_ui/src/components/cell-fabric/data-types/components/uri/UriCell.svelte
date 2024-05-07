@@ -1,11 +1,13 @@
 <script lang="ts">
+  import CellValue from '@mathesar/components/CellValue.svelte';
   import {
     PrecomputedMatchHighlighter,
     TextInput,
   } from '@mathesar-component-library';
-  import CellValue from '@mathesar/components/CellValue.svelte';
+
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { CellTypeProps } from '../typeDefinitions';
+
   import UriCellContent from './UriCellContent.svelte';
 
   type $$Props = CellTypeProps<string>;

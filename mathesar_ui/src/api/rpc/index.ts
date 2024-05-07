@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 
 import { buildRpcApi } from '@mathesar/packages/json-rpc-client-builder';
+
 import { connections } from './connections';
 
 /** Mathesar's JSON-RPC API */

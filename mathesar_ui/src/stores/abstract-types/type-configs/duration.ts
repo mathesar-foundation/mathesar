@@ -1,10 +1,11 @@
-import type { FormValues } from '@mathesar-component-library/types';
 import type {
-  DurationDisplayOptions,
   Column,
+  DurationDisplayOptions,
 } from '@mathesar/api/rest/types/tables/columns';
 import { iconUiTypeDuration } from '@mathesar/icons';
 import { DurationSpecification } from '@mathesar/utils/duration';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,

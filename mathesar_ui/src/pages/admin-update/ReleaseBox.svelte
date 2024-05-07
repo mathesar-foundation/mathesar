@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { Icon } from '@mathesar-component-library';
   import Logo from '@mathesar/components/Logo.svelte';
   import {
     iconCurrentlyInstalledVersion,
@@ -9,7 +8,7 @@
     iconUpgradeAvailable,
   } from '@mathesar/icons';
   import type { Release } from '@mathesar/stores/releases';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import { Icon, assertExhaustive } from '@mathesar-component-library';
 
   export let type:
     | 'available-upgrade'

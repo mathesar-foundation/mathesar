@@ -1,6 +1,7 @@
 import { first } from 'iter-tools';
 
 import { ImmutableSet } from '@mathesar/component-library';
+
 import { parseCellId } from '../cellIds';
 
 /**

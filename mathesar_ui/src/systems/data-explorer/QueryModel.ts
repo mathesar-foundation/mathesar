@@ -1,15 +1,16 @@
 import type {
+  QueryInstance,
   QueryInstanceInitialColumn,
   QueryInstanceTransformation,
-  QueryInstance,
   QueryRunRequest,
 } from '@mathesar/api/rest/types/queries';
-import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+import { assertExhaustive } from '@mathesar-component-library';
+
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
-import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
 import QuerySortTransformationModel from './QuerySortTransformationModel';
+import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 
 export interface QueryModelUpdateDiff {
   model: QueryModel;
@@ -43,7 +44,7 @@ function getTransformationModel(
     case 'order':
       return new QuerySortTransformationModel(transformation);
     default:
-      throw new MissingExhaustiveConditionError(transformation);
+      return assertExhaustive(transformation);
   }
 }
 

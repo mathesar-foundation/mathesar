@@ -4,6 +4,7 @@
   import { get } from 'svelte/store';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import { ImmutableMap } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
@@ -17,7 +18,6 @@
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
-  import { ImmutableMap } from '@mathesar-component-library';
 
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';

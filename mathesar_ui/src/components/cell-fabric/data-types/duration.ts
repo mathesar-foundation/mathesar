@@ -1,3 +1,8 @@
+import type { DurationDisplayOptions } from '@mathesar/api/rest/types/tables/columns';
+import {
+  DurationFormatter,
+  DurationSpecification,
+} from '@mathesar/utils/duration';
 import {
   FormattedInput,
   isDefinedNonNullable,
@@ -6,14 +11,10 @@ import type {
   ComponentAndProps,
   FormattedInputProps,
 } from '@mathesar-component-library/types';
-import type { DurationDisplayOptions } from '@mathesar/api/rest/types/tables/columns';
-import {
-  DurationFormatter,
-  DurationSpecification,
-} from '@mathesar/utils/duration';
+
 import FormattedInputCell from './components/formatted-input/FormattedInputCell.svelte';
 import type { FormattedInputCellExternalProps } from './components/typeDefinitions';
-import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
+import type { CellColumnLike, CellComponentFactory } from './typeDefinitions';
 
 export interface DurationLikeColumn extends CellColumnLike {
   display_options: Partial<DurationDisplayOptions> | null;

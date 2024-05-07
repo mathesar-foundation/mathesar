@@ -1,13 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import {
-    AnchorButton,
-    Button,
-    Icon,
-    ImmutableSet,
-    iconExternalLink,
-  } from '@mathesar-component-library';
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -18,6 +11,13 @@
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
   import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
+  import {
+    AnchorButton,
+    Button,
+    Icon,
+    ImmutableSet,
+    iconExternalLink,
+  } from '@mathesar-component-library';
 
   export let selectedRowIds: ImmutableSet<string>;
   export let recordsData: RecordsData;

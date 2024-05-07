@@ -1,6 +1,7 @@
 <script lang="ts">
   import { TextArea, optionalNonNullable } from '@mathesar-component-library';
   import type { TextAreaProcessedKeyDown } from '@mathesar-component-library/types';
+
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { TextAreaCellProps } from '../typeDefinitions';
 

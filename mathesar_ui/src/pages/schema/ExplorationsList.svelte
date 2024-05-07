@@ -1,10 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconExploration } from '@mathesar/icons';
-  import ExplorationItem from './ExplorationItem.svelte';
+
   import EmptyEntity from './EmptyEntity.svelte';
+  import ExplorationItem from './ExplorationItem.svelte';
 
   export let explorations: QueryInstance[];
   export let database: Database;

@@ -1,8 +1,8 @@
 import type {
   FilterCombination,
-  GetRequestParams,
   FilterCondition,
   FilterConditionParams,
+  GetRequestParams,
 } from '@mathesar/api/rest/types/tables/records';
 
 export interface FilterEntry {

@@ -1,5 +1,6 @@
-import { writable } from 'svelte/store';
 import { getContext, setContext } from 'svelte';
+import { writable } from 'svelte/store';
+
 import { getGloballyUniqueId } from '../common/utils/domUtils';
 
 export class LabelController {

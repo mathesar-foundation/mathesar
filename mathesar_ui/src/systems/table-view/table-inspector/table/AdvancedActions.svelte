@@ -1,13 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import { iconConstraint } from '@mathesar/icons';
+  import { modal } from '@mathesar/stores/modal';
   import {
     Button,
     Help,
     Icon,
     iconSettings,
   } from '@mathesar-component-library';
-  import { iconConstraint } from '@mathesar/icons';
-  import { modal } from '@mathesar/stores/modal';
+
   import TableConstraintsModal from '../../constraints/TableConstraintsModal.svelte';
 
   const constraintsModal = modal.spawnModalController();

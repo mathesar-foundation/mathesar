@@ -1,11 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    ButtonMenuItem,
-    DropdownMenu,
-    Icon,
-    Truncate,
-  } from '@mathesar-component-library';
+
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
@@ -26,8 +21,15 @@
   import { deleteTable } from '@mathesar/stores/tables';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
-  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
+  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
+  import {
+    ButtonMenuItem,
+    DropdownMenu,
+    Icon,
+    Truncate,
+  } from '@mathesar-component-library';
+
   import EditTable from './EditTable.svelte';
 
   const recordSelector = getRecordSelectorFromContext();

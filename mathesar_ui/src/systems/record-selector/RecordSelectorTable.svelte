@@ -1,36 +1,37 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
 
-  import { ImmutableSet } from '@mathesar-component-library';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
+    type RecordRow,
+    TabularData,
     constraintIsFk,
     setTabularDataStoreInContext,
-    TabularData,
-    type RecordRow,
   } from '@mathesar/stores/table-data';
   import {
     buildInputData,
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { tables } from '@mathesar/stores/tables';
-  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
-  import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
+  import { ImmutableSet } from '@mathesar-component-library';
+
   import Cell from './RecordSelectorCellWrapper.svelte';
+  import RecordSelectorColumnHeaderCell from './RecordSelectorColumnHeaderCell.svelte';
   import type {
     RecordSelectorController,
     RecordSelectorResult,
   } from './RecordSelectorController';
   import { setRecordSelectorControllerInContext } from './RecordSelectorController';
+  import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
   import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
-  import RecordSelectorColumnHeaderCell from './RecordSelectorColumnHeaderCell.svelte';
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
   import { getColumnIdToFocusInitially } from './recordSelectorUtils';
-  import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;

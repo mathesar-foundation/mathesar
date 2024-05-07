@@ -1,5 +1,6 @@
 <script lang="ts">
   import { FormattedInput } from '@mathesar-component-library';
+
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { FormattedInputCellProps } from '../typeDefinitions';
 

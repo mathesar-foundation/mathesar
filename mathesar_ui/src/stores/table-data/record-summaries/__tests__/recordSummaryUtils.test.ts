@@ -1,9 +1,10 @@
 import { ImmutableMap } from '@mathesar-component-library';
+
 import {
+  type RecordSummariesForSheet,
   nullPlaceholder,
   prepareFieldsAsRecordSummaryInputData,
   renderTransitiveRecordSummary,
-  type RecordSummariesForSheet,
 } from '../recordSummaryUtils';
 
 describe('Record Summary', () => {

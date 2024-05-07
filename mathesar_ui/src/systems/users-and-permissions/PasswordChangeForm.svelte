@@ -1,23 +1,24 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import userApi, { type User } from '@mathesar/api/rest/users';
   import {
-    PasswordInput,
+    FormSubmit,
+    comboMustBeEqual,
+    makeForm,
+    optionalField,
+    requiredField,
+  } from '@mathesar/components/form';
+  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
+  import GridFormInputRow from '@mathesar/components/form/GridFormInputRow.svelte';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { iconSave } from '@mathesar/icons';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import {
     Button,
+    PasswordInput,
     hasProperty,
   } from '@mathesar-component-library';
-  import {
-    requiredField,
-    makeForm,
-    FormSubmit,
-    optionalField,
-    comboMustBeEqual,
-  } from '@mathesar/components/form';
-  import { iconSave } from '@mathesar/icons';
-  import userApi, { type User } from '@mathesar/api/rest/users';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import GridFormInputRow from '@mathesar/components/form/GridFormInputRow.svelte';
-  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;

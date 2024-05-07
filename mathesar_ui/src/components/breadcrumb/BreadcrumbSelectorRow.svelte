@@ -2,7 +2,9 @@
   import { MatchHighlighter } from '@mathesar/component-library';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import RecordSelectorNavigationButton from '@mathesar/systems/record-selector/RecordSelectorNavigationButton.svelte';
+
   import TableName from '../TableName.svelte';
+
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
   export let entry: BreadcrumbSelectorEntry;

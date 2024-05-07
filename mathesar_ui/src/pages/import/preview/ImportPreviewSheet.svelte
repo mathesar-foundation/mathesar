@@ -9,11 +9,12 @@
     SheetHeader,
     SheetRow,
   } from '@mathesar/components/sheet';
-  import PreviewColumn from './PreviewColumn.svelte';
+
   import type {
     ColumnProperties,
     ProcessedPreviewColumn,
   } from './importPreviewPageUtils';
+  import PreviewColumn from './PreviewColumn.svelte';
 
   export let columns: ProcessedPreviewColumn[];
   export let isLoading: boolean;

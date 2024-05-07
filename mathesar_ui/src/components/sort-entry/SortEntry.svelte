@@ -1,22 +1,24 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import type { ReadableMapLike } from '@mathesar/typeUtils';
   import {
     Button,
     Icon,
     InputGroup,
     Select,
   } from '@mathesar-component-library';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { iconDeleteMajor } from '@mathesar/icons';
-  import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
+
+  import type { SortEntryColumnLike } from './types';
   import {
     type SortDirection,
     allowedSortDirections,
     getSortingLabelForColumn,
   } from './utils';
-  import type { SortEntryColumnLike } from './types';
 
   type T = $$Generic;
   type ColumnLikeType = SortEntryColumnLike & T;

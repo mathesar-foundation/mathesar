@@ -1,6 +1,7 @@
 import type { Writable } from 'svelte/store';
 
 import { KeyboardShortcut } from '@mathesar/utils/KeyboardShortcut';
+
 import { Direction } from './selection/Direction';
 import type SheetSelection from './selection/SheetSelection';
 import { autoScroll } from './sheetScrollingUtils';

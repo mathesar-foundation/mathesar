@@ -1,9 +1,10 @@
-import type { FormValues } from '@mathesar-component-library/types';
 import type {
   BooleanDisplayOptions,
   Column,
 } from '@mathesar/api/rest/types/tables/columns';
 import { iconUiTypeBoolean } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,

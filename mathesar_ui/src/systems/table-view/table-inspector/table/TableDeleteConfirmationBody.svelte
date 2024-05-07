@@ -1,9 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { TextInput } from '@mathesar-component-library';
-  import { RichText } from '@mathesar/components/rich-text';
+
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { confirmationController } from '@mathesar/stores/confirmation';
+  import { TextInput } from '@mathesar-component-library';
 
   export let tableName: string;
 

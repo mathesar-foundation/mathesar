@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
   import FormElement from './FormElement.svelte';
   import type { FormBuildConfiguration } from './types';
 

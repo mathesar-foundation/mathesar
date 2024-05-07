@@ -1,4 +1,5 @@
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type { Readable } from 'svelte/store';
+
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { Constraint } from '@mathesar/api/rest/types/tables/constraints';
@@ -20,7 +21,8 @@ import type {
   AbstractTypePreprocFunctionDefinition,
   AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
-import type { Readable } from 'svelte/store';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import { findFkConstraintsForColumn } from './constraintsUtils';
 import type { RecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 

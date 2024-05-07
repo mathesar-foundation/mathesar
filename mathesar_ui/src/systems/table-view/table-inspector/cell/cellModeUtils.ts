@@ -1,4 +1,3 @@
-import { defined } from '@mathesar-component-library';
 import type { SelectedCellData } from '@mathesar/components/inspector/cell/cellInspectorUtils';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
@@ -7,6 +6,7 @@ import type {
   RecordRow,
   RecordSummariesForSheet,
 } from '@mathesar/stores/table-data';
+import { defined } from '@mathesar-component-library';
 
 export function getSelectedCellData(
   selection: SheetSelection,

@@ -1,17 +1,18 @@
 <script lang="ts">
-  import {
-    FormBuilder,
-    getValidationContext,
-  } from '@mathesar-component-library';
-  import type { FormValues } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/AppTypes';
   import type {
     AbstractType,
     AbstractTypeDbConfig,
   } from '@mathesar/stores/abstract-types/types';
+  import {
+    FormBuilder,
+    getValidationContext,
+  } from '@mathesar-component-library';
+  import type { FormValues } from '@mathesar-component-library/types';
+
   import DbTypeIndicator from './DbTypeIndicator.svelte';
-  import { constructDbForm } from './utils';
   import type { ColumnWithAbstractType } from './utils';
+  import { constructDbForm } from './utils';
 
   export let selectedAbstractType: AbstractType;
   export let selectedDbType: DbType;
