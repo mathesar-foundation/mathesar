@@ -6,7 +6,6 @@ Fixtures:
     admin_client(pytest-django): Provides a client logged in as a superuser.
 """
 import pytest
-from modernrpc.core import Protocol
 from modernrpc.auth import user_is_authenticated, user_is_superuser
 
 from mathesar.rpc import columns

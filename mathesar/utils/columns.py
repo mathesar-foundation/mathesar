@@ -8,9 +8,9 @@ def get_raw_display_options(database_id, table_oid, attnums, user):
         return [
             {"id": c.attnum} | c.display_options
             for c in Column.current_objects.filter(
-                    table__schema__database__id=database_id,
-                    table__oid=table_oid,
-                    attnum__in=attnums
+                table__schema__database__id=database_id,
+                table__oid=table_oid,
+                attnum__in=attnums
             )
             if c.display_options is not None
         ]
