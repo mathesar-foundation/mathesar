@@ -95,6 +95,16 @@ We use [ESLint](https://eslint.org/) to help spot more complex issues within cod
   docker exec -it -w /code/mathesar_ui mathesar_service_dev npx eslint src/App.svelte
   ```
 
+### Auto-fixing linting errors
+
+ESLint can fix some errors automatically. In particular, we rely on ESLint to auto-sort our JavaScript import statements, so if you don't auto-fix your linting errors before submitting a PR, you're likely to get some CI errors in your PR which complain about out-of-order import statements.
+
+- Auto-fix all possible linting errors:
+
+  ```
+  docker exec -it -w /code/mathesar_ui mathesar_service_dev npm run lint-fix
+  ```
+
 ## Testing
 
 ### Integration tests
