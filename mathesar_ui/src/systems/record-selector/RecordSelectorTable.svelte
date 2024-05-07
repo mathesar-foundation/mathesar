@@ -2,7 +2,7 @@
   import { onMount, tick } from 'svelte';
 
   import { ImmutableSet } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     constraintIsFk,
@@ -15,7 +15,7 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { tables } from '@mathesar/stores/tables';
-  import { States } from '@mathesar/api/utils/requestUtils';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';

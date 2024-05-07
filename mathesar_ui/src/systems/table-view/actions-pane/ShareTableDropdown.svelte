@@ -1,10 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { iconShare } from '@mathesar/icons';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { Dropdown, Icon } from '@mathesar-component-library';
   import ShareEntity from '@mathesar/systems/shares/ShareEntity.svelte';
-  import tableShareApi from '@mathesar/api/tableShares';
+  import tableShareApi from '@mathesar/api/rest/tableShares';
   import { getSharedTablePageUrl } from '@mathesar/routes/urls';
 
   export let id: TableEntry['id'];

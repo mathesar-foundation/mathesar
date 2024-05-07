@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
   import { Button, Collapsible, Help, Icon } from '@mathesar/component-library';
   import type { Constraint } from '@mathesar/stores/table-data';
   import { iconDeleteMajor } from '@mathesar/icons';

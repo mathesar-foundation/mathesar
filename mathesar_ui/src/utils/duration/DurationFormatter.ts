@@ -4,7 +4,7 @@ import type {
   InputFormatter,
   ParseResult,
 } from '@mathesar-component-library/types';
-import type { DurationUnit } from '@mathesar/api/types/tables/columns';
+import type { DurationUnit } from '@mathesar/api/rest/types/tables/columns';
 import type DurationSpecification from './DurationSpecification';
 
 const FLOAT_REGEX = /^((\.?\d+)|(\d+(\.\d+)?))$/;

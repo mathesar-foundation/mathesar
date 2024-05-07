@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { Icon } from '@mathesar/component-library';
   import { iconSelectRecord } from '@mathesar/icons';
   import { getRecordSelectorFromContext } from './RecordSelectorController';

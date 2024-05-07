@@ -3,7 +3,7 @@
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { AnchorButton } from '@mathesar-component-library';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import ExplorationsList from './ExplorationsList.svelte';

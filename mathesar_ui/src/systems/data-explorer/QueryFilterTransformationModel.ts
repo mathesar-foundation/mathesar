@@ -1,6 +1,6 @@
 import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
-import type { QueryInstanceFilterTransformation } from '@mathesar/api/types/queries';
+import type { QueryInstanceFilterTransformation } from '@mathesar/api/rest/types/queries';
 import { getLimitedFilterInformationById } from '@mathesar/stores/abstract-types';
 import { validateFilterEntry } from '@mathesar/components/filter-entry';
 

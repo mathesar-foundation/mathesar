@@ -1,7 +1,7 @@
 <script lang="ts">
   import { first } from 'iter-tools';
 
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { ContextMenu } from '@mathesar/component-library';
   import {
     SheetCellResizer,

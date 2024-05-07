@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import { Button, Icon } from '@mathesar-component-library';
-  import type { Connection } from '@mathesar/api/connections';
+  import type { Connection } from '@mathesar/api/rest/connections';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconAddNew } from '@mathesar/icons';

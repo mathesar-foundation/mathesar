@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
 
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import { SheetDataCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';

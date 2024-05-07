@@ -9,7 +9,7 @@
   } from '@mathesar/stores/table-data';
   import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
   import type Pagination from '@mathesar/utils/Pagination';
-  import type { States } from '@mathesar/api/utils/requestUtils';
+  import type { States } from '@mathesar/api/rest/utils/requestUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 

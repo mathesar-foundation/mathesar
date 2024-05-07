@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import TableName from '@mathesar/components/TableName.svelte';
 
   export let table: Pick<TableEntry, 'name'>;

@@ -2,9 +2,9 @@ import { getContext, setContext } from 'svelte';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import { States } from '@mathesar/api/utils/requestUtils';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import { States } from '@mathesar/api/rest/utils/requestUtils';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';

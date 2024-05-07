@@ -7,9 +7,9 @@ import type {
   QueryResultRecord,
   QueryResultsResponse,
   QueryRunResponse,
-} from '@mathesar/api/types/queries';
-import { ApiMultiError } from '@mathesar/api/utils/errors';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/types/queries';
+import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';

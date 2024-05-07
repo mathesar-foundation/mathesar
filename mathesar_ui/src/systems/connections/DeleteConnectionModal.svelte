@@ -9,9 +9,10 @@
     LabeledInput,
     ModalController,
   } from '@mathesar-component-library';
-  import type { Connection } from '@mathesar/api/connections';
+  import type { Connection } from '@mathesar/api/rest/connections';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
+
   import {
     connectionHasUniqueDatabaseReference,
     connectionsStore,

@@ -9,7 +9,7 @@
     Help,
   } from '@mathesar-component-library';
   import { iconAddNew } from '@mathesar/icons';
-  import type { UserRole } from '@mathesar/api/users';
+  import type { UserRole } from '@mathesar/api/rest/users';
   import {
     getDisplayNameForRole,
     type ObjectRoleMap,

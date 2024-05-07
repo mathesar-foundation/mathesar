@@ -7,8 +7,8 @@
     TextInput,
     hasProperty,
   } from '@mathesar-component-library';
-  import userApi, { type User } from '@mathesar/api/users';
-  import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
+  import userApi, { type User } from '@mathesar/api/rest/users';
+  import { extractDetailedFieldBasedErrors } from '@mathesar/api/rest/utils/errors';
   import {
     FormSubmit,
     isEmail,

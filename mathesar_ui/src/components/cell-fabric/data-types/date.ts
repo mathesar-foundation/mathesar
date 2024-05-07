@@ -1,5 +1,5 @@
 import { isDefinedNonNullable } from '@mathesar-component-library';
-import type { DateDisplayOptions } from '@mathesar/api/types/tables/columns';
+import type { DateDisplayOptions } from '@mathesar/api/rest/types/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import {
   DateTimeFormatter,

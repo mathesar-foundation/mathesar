@@ -8,7 +8,7 @@
     EditConnectionModal,
     DeleteConnectionModal,
   } from '@mathesar/systems/connections';
-  import type { Connection } from '@mathesar/api/connections';
+  import type { Connection } from '@mathesar/api/rest/connections';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import { iconConnection } from '@mathesar/icons';
 

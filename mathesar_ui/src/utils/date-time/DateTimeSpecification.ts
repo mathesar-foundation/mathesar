@@ -2,7 +2,7 @@ import { dayjs } from '@mathesar-component-library';
 import type {
   DateFormat,
   TimeFormat,
-} from '@mathesar/api/types/tables/columns';
+} from '@mathesar/api/rest/types/tables/columns';
 
 interface DateConfig {
   type: 'date';

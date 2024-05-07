@@ -40,11 +40,11 @@ import {
   postAPI,
   putAPI,
   addQueryParamsToUrl,
-} from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/utils/requestUtils';
 import type {
   RequestStatus,
   PaginatedResponse,
-} from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/utils/requestUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { SchemaEntry } from '@mathesar/AppTypes';
@@ -54,7 +54,7 @@ import type {
   QueryRunRequest,
   QueryRunResponse,
   QueryResultsResponse,
-} from '@mathesar/api/types/queries';
+} from '@mathesar/api/rest/types/queries';
 import { CancellablePromise } from '@mathesar-component-library';
 import { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import {
     CancelOrProceedButtonPair,
     LabeledInput,

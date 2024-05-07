@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 
 import type { IconProps } from '@mathesar-component-library/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { DisplayColumn } from '@mathesar/components/column/types';
 import { uniqueWith, type ValidationFn } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';

@@ -1,7 +1,7 @@
 import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 import {
   type ValidationOutcome,
