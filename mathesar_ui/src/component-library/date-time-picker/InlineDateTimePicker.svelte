@@ -5,7 +5,6 @@
 
   import { dayjs } from '@mathesar-component-library-dir/common/utils';
 
-
   import type { InlineDateTimePickerProps } from './DateTimePickerTypes';
 
   type $$Props = InlineDateTimePickerProps;

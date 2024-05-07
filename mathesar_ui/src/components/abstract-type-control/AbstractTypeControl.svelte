@@ -19,7 +19,6 @@
     hasTypeOptionsChanged,
   } from './utils';
 
-
   const dispatch = createEventDispatcher();
 
   export let column: ColumnWithAbstractType;

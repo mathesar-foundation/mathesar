@@ -34,7 +34,6 @@
   import type { Timeout } from './timer';
   import { cancelTimeout, requestTimeout } from './timer';
 
-
   const dispatch = createEventDispatcher();
 
   let classes = 'default';

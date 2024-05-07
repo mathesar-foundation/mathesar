@@ -6,7 +6,6 @@
   import portal from '@mathesar-component-library-dir/common/actions/portal';
   import Menu from '@mathesar-component-library-dir/menu/Menu.svelte';
 
-
   /**
    * A reference to the DOM node where we'll attach the contextmenu event
    * listener. Right-clicking anywhere inside this element will open the context
