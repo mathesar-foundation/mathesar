@@ -9,7 +9,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 from db.columns.operations.select import get_column_info_for_table
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
-from mathesar.utils.columns import get_display_options
+from mathesar.utils.columns import get_raw_display_options
 
 
 class TypeOptions(TypedDict, total=False):
@@ -36,17 +36,20 @@ class TypeOptions(TypedDict, total=False):
 
     @classmethod
     def from_dict(cls, type_options):
-        if type_options is not None:
-            # All keys are optional, but we want to validate the keys
-            # we actually return.
-            all_keys = dict(
-                precision=type_options.get("precision"),
-                scale=type_options.get("scale"),
-                fields=type_options.get("fields"),
-                length=type_options.get("length"),
-                item_type=type_options.get("item_type"),
-            )
-            return cls(**{k: v for k, v in all_keys.items() if v is not None})
+        if type_options is None:
+            return
+        # All keys are optional, but we want to validate the keys we
+        # actually return.
+        all_keys = dict(
+            precision=type_options.get("precision"),
+            scale=type_options.get("scale"),
+            fields=type_options.get("fields"),
+            length=type_options.get("length"),
+            item_type=type_options.get("item_type"),
+        )
+        reduced_keys = {k: v for k, v in all_keys.items() if v is not None}
+        if reduced_keys != {}:
+            return cls(**reduced_keys)
 
 
 class ColumnDefault(TypedDict):
@@ -124,7 +127,7 @@ class ColumnListReturn(TypedDict):
 @rpc_method(name="columns.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, table_oid: int, database_id: int, **kwargs):
+def list_(*, table_oid: int, database_id: int, **kwargs) -> ColumnListReturn:
     """
     List information about columns for a table. Exposed as `list`.
 
@@ -137,19 +140,17 @@ def list_(*, table_oid: int, database_id: int, **kwargs):
     Returns:
         A list of column details, and a separate list of display options.
     """
-    request = kwargs.get(REQUEST_KEY)
-    with connect(database_id, request.user) as conn:
-        column_info = [
-            ColumnInfo.from_dict(col)
-            for col in get_column_info_for_table(table_oid, conn)
-        ]
-    if request.user.metadata_privileges(database_id) is not None:
-        attnums = [col['id'] for col in column_info]
-        # TODO Use TypedDict spec pattern (above) for display_options once we
-        # have that model defined.
-        display_options = get_display_options(table_oid, attnums)
-    else:
-        display_options = None
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        raw_column_info = get_column_info_for_table(table_oid, conn)
+    column_info, attnums = tuple(
+        zip(
+            *[(ColumnInfo.from_dict(col), col['id']) for col in raw_column_info]
+        )
+    )
+    display_options = get_raw_display_options(
+        database_id, table_oid, attnums, user
+    )
     return ColumnListReturn(
         column_info=column_info,
         display_options=display_options,
