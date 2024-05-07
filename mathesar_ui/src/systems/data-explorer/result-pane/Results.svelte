@@ -1,9 +1,8 @@
 <script lang="ts">
   import { map } from 'iter-tools';
-  import { _ } from 'svelte-i18n';
   import { get } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
-  import { ImmutableMap } from '@mathesar-component-library';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import {
@@ -18,9 +17,12 @@
   import { rowHeaderWidthPx, rowHeightPx } from '@mathesar/geometry';
   import { toast } from '@mathesar/stores/toast';
   import { arrayIndex } from '@mathesar/utils/typeUtils';
+  import { ImmutableMap } from '@mathesar-component-library';
+
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
   import { getRowSelectionId } from '../QueryRunner';
+
   import QueryRefreshButton from './QueryRefreshButton.svelte';
   import QueryRunErrors from './QueryRunErrors.svelte';
   import ResultHeaderCell from './ResultHeaderCell.svelte';

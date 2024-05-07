@@ -1,23 +1,15 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
   import type { Writable } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
 
-  import {
-    ButtonMenuItem,
-    ContextMenu,
-    LinkMenuItem,
-    MenuDivider,
-    MenuHeading,
-    WritableMap,
-  } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { SheetDataCell } from '@mathesar/components/sheet';
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
@@ -27,15 +19,25 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
-    rowHasNewRecord,
     type CellKey,
     type ProcessedColumn,
     type RecordRow,
     type RecordsData,
+    rowHasNewRecord,
   } from '@mathesar/stores/table-data';
   import { getRowSelectionId } from '@mathesar/stores/table-data/records';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import {
+    ButtonMenuItem,
+    ContextMenu,
+    LinkMenuItem,
+    MenuDivider,
+    MenuHeading,
+    WritableMap,
+  } from '@mathesar-component-library';
+
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+
   import CellErrors from './CellErrors.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
 

@@ -2,19 +2,20 @@
   import { onMount, tick } from 'svelte';
   import { writable } from 'svelte/store';
 
-  import { ImmutableMap } from '@mathesar-component-library/types';
   import type { ClipboardHandler } from '@mathesar/stores/clipboard';
   import { getClipboardHandlerStoreFromContext } from '@mathesar/stores/clipboard';
   import { getModifierKeyCombo } from '@mathesar/utils/pointerUtils';
+  import { ImmutableMap } from '@mathesar-component-library/types';
+
   import {
+    type SheetCellDetails,
     beginSelection,
     findContainingSheetCell,
-    type SheetCellDetails,
   } from './selection';
   import type SheetSelectionStore from './selection/SheetSelectionStore';
   import {
-    calculateColumnStyleMapAndRowWidth,
     DEFAULT_COLUMN_WIDTH,
+    calculateColumnStyleMapAndRowWidth,
     focusActiveCell,
     setSheetContext,
   } from './utils';

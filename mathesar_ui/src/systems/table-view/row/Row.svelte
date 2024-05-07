@@ -4,6 +4,7 @@
   import { rowHeightPx } from '@mathesar/geometry';
   import {
     ID_ROW_CONTROL_COLUMN,
+    type Row,
     getCellKey,
     getRowKey,
     getTabularDataStoreFromContext,
@@ -12,9 +13,9 @@
     isNewRecordRow,
     isPlaceholderRow,
     rowHasRecord,
-    type Row,
   } from '@mathesar/stores/table-data';
   import { getRowSelectionId } from '@mathesar/stores/table-data/records';
+
   import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';
   import RowCell from './RowCell.svelte';

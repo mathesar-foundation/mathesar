@@ -2,6 +2,15 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
+  import type { Connection } from '@mathesar/api/rest/connections';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import RichText from '@mathesar/components/rich-text/RichText.svelte';
+  import {
+    connectionHasUniqueDatabaseReference,
+    connectionsStore,
+  } from '@mathesar/stores/databases';
+  import { toast } from '@mathesar/stores/toast';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import {
     CancelOrProceedButtonPair,
     Checkbox,
@@ -9,16 +18,6 @@
     LabeledInput,
     ModalController,
   } from '@mathesar-component-library';
-  import type { Connection } from '@mathesar/api/rest/connections';
-  import Identifier from '@mathesar/components/Identifier.svelte';
-  import RichText from '@mathesar/components/rich-text/RichText.svelte';
-
-  import {
-    connectionHasUniqueDatabaseReference,
-    connectionsStore,
-  } from '@mathesar/stores/databases';
-  import { toast } from '@mathesar/stores/toast';
-  import { getErrorMessage } from '@mathesar/utils/errors';
 
   const { connections } = connectionsStore;
   const dispatch = createEventDispatcher<{ delete: undefined }>();

@@ -17,6 +17,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { saveColumnOrder } from '@mathesar/stores/tables';
+
   import { Draggable, Droppable } from './drag-and-drop';
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
   import HeaderCell from './header-cell/HeaderCell.svelte';

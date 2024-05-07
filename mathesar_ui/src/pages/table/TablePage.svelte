@@ -12,9 +12,10 @@
     TabularData,
     setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
-  import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
+  import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import type { ShareConsumer } from '@mathesar/utils/shares';
+
   import { setNewImperativeFilterControllerInContext } from './ImperativeFilterController';
 
   const metaSerializationQueryKey = 'q';

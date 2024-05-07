@@ -1,8 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
+
   import type { HorizontalAlignment } from './typeDefinitions';
 
   const dispatch = createEventDispatcher();

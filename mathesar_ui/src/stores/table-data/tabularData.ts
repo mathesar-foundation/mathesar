@@ -1,16 +1,17 @@
 import { getContext, setContext } from 'svelte';
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
-import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import { States } from '@mathesar/api/rest/utils/requestUtils';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
+
 import { ColumnsDataStore } from './columns';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';

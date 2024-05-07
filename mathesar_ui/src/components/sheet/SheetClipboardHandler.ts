@@ -1,11 +1,11 @@
 import * as Papa from 'papaparse';
 
-import type { ImmutableSet } from '@mathesar-component-library';
 import type { AbstractTypeCategoryIdentifier } from '@mathesar/stores/abstract-types/types';
 import type { ClipboardHandler } from '@mathesar/stores/clipboard';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data';
 import type { ReadableMapLike } from '@mathesar/typeUtils';
 import { labeledCount } from '@mathesar/utils/languageUtils';
+import type { ImmutableSet } from '@mathesar-component-library';
 
 const MIME_PLAIN_TEXT = 'text/plain';
 const MIME_MATHESAR_SHEET_CLIPBOARD =

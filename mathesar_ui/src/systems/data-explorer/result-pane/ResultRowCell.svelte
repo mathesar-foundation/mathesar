@@ -7,6 +7,7 @@
   import { makeCellId } from '@mathesar/components/sheet/cellIds';
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
+
   import type { QueryRow } from '../QueryRunner';
   import type { ProcessedQueryOutputColumn } from '../utils';
 

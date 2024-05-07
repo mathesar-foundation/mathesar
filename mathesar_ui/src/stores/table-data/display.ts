@@ -2,9 +2,10 @@ import type { Readable, Writable } from 'svelte/store';
 import { derived, writable } from 'svelte/store';
 
 import { WritableMap } from '@mathesar-component-library';
+
 import type { ColumnsDataStore } from './columns';
 import type { Meta } from './meta';
-import { filterRecordRows, type RecordsData, type Row } from './records';
+import { type RecordsData, type Row, filterRecordRows } from './records';
 
 // @deprecated
 export const DEFAULT_COLUMN_WIDTH = 160;

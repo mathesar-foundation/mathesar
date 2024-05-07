@@ -1,7 +1,6 @@
 import type { Readable, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
-import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 import type {
   QueryColumnMetaData,
   QueryResultRecord,
@@ -17,15 +16,17 @@ import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { fetchQueryResults, runQuery } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
+import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
+
 import QueryInspector from './QueryInspector';
 import type QueryModel from './QueryModel';
 import {
-  getProcessedOutputColumns,
-  processColumnMetaData,
-  speculateColumnMetaData,
   type InputColumnsStoreSubstance,
   type ProcessedQueryOutputColumnMap,
   type ProcessedQueryResultColumnMap,
+  getProcessedOutputColumns,
+  processColumnMetaData,
+  speculateColumnMetaData,
 } from './utils';
 
 export interface QueryRow {

@@ -3,6 +3,7 @@
 
   import type QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
+
   import QueryRefreshButton from './QueryRefreshButton.svelte';
   import Results from './Results.svelte';
 
