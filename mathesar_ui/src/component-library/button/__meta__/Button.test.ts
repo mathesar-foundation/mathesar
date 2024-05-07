@@ -1,7 +1,9 @@
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
-import { render, fireEvent } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+
 import SlotTest from '@mathesar-component-library-dir/__meta__/utils/SlotTest.svelte';
+
 import Button from '../Button.svelte';
 
 test('renders button in default appearance and medium size', () => {

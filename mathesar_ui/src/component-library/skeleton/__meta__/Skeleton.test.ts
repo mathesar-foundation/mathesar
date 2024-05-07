@@ -1,4 +1,5 @@
 import { render } from '@testing-library/svelte';
+
 import Skeleton from '../Skeleton.svelte';
 
 test('renders skeleton when loading is true', () => {

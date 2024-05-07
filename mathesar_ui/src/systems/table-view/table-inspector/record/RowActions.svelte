@@ -1,11 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    AnchorButton,
-    Button,
-    Icon,
-    iconExternalLink,
-  } from '@mathesar-component-library';
+
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -16,6 +11,12 @@
   } from '@mathesar/stores/table-data';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
+  import {
+    AnchorButton,
+    Button,
+    Icon,
+    iconExternalLink,
+  } from '@mathesar-component-library';
 
   export let selectedRowIndices: number[];
   export let recordsData: RecordsData;

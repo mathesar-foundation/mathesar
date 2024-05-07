@@ -2,16 +2,9 @@
   import { map } from 'iter-tools';
   import { _ } from 'svelte-i18n';
 
-  import {
-    ControlledModal,
-    LabeledInput,
-    PasswordInput,
-    type ModalController,
-  } from '@mathesar-component-library';
   import type { Connection } from '@mathesar/api/rest/connections';
   import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
   import TextInput from '@mathesar/component-library/text-input/TextInput.svelte';
-  import Identifier from '@mathesar/components/Identifier.svelte';
   import {
     Field,
     FieldLayout,
@@ -21,11 +14,18 @@
     requiredField,
     uniqueWith,
   } from '@mathesar/components/form';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { connectionsStore } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import {
+    ControlledModal,
+    LabeledInput,
+    type ModalController,
+    PasswordInput,
+  } from '@mathesar-component-library';
 
   export let controller: ModalController;
   export let connection: Connection;

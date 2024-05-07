@@ -1,5 +1,6 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
+
 import type { UserRole } from '@mathesar/api/rest/users';
 import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { SpinnerButton } from '@mathesar-component-library';
+
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
@@ -8,6 +8,8 @@
   import type { ReleaseDataStore } from '@mathesar/stores/releases';
   import { toast } from '@mathesar/stores/toast';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import { SpinnerButton } from '@mathesar-component-library';
+
   import ReleaseBox from './ReleaseBox.svelte';
 
   export let releaseDataStore: ReleaseDataStore;

@@ -1,26 +1,27 @@
 <script lang="ts">
+  import { type Readable, readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import {
-    QueryManager,
-    QueryModel,
-    constructQueryModelFromHash,
-  } from '@mathesar/systems/data-explorer';
-  import { getQuery } from '@mathesar/stores/queries';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import type { CancellablePromise } from '@mathesar/component-library';
+
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { CancellablePromise } from '@mathesar/component-library';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import { iconEdit, iconExploration } from '@mathesar/icons';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import {
     getDataExplorerPageUrl,
     getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconEdit, iconExploration } from '@mathesar/icons';
-  import { readable, type Readable } from 'svelte/store';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+  import { getQuery } from '@mathesar/stores/queries';
+  import {
+    QueryManager,
+    QueryModel,
+    constructQueryModelFromHash,
+  } from '@mathesar/systems/data-explorer';
 
   export let database: Database;
   export let schema: SchemaEntry;

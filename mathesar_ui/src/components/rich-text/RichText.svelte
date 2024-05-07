@@ -45,6 +45,7 @@
 -->
 <script lang="ts">
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
+
   import { parse } from './richTextUtils';
 
   export let text: string;

@@ -19,18 +19,21 @@
 </script>
 
 <script lang="ts">
-  import {
-    createEventDispatcher,
-    onMount,
-    afterUpdate,
-    onDestroy,
-  } from 'svelte';
   import PerfectScrollbar from 'perfect-scrollbar';
+  import {
+    afterUpdate,
+    createEventDispatcher,
+    onDestroy,
+    onMount,
+  } from 'svelte';
+
+  import type { SheetVirtualRowsApi } from '../types';
+
+  import type { ItemInfo, Props } from './listUtils';
+  import listUtils from './listUtils';
   import type { Timeout } from './timer';
   import { cancelTimeout, requestTimeout } from './timer';
-  import listUtils from './listUtils';
-  import type { Props, ItemInfo } from './listUtils';
-  import type { SheetVirtualRowsApi } from '../types';
+
 
   const dispatch = createEventDispatcher();
 

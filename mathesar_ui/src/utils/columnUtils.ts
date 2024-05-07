@@ -1,16 +1,17 @@
 import { get } from 'svelte/store';
 
-import type { IconProps } from '@mathesar-component-library/types';
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { DisplayColumn } from '@mathesar/components/column/types';
-import { uniqueWith, type ValidationFn } from '@mathesar/components/form';
+import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
 import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
-import { getAvailableName } from '@mathesar/utils/db';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import { getAvailableName } from '@mathesar/utils/db';
+import type { IconProps } from '@mathesar-component-library/types';
+
 import { makeSingular } from './languageUtils';
 
 export function getColumnIconProps(

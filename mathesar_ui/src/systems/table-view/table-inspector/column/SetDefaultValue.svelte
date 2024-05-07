@@ -1,17 +1,18 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
+  import {
+    type ProcessedColumn,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
+  import { toast } from '@mathesar/stores/toast';
   import {
     CancelOrProceedButtonPair,
     LabeledInput,
     Radio,
   } from '@mathesar-component-library';
-  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import {
-    getTabularDataStoreFromContext,
-    type ProcessedColumn,
-  } from '@mathesar/stores/table-data';
-  import { toast } from '@mathesar/stores/toast';
 
   export let column: ProcessedColumn;
   export let canExecuteDDL: boolean;

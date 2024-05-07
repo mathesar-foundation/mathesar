@@ -1,10 +1,11 @@
 import { getContext, setContext } from 'svelte';
 
 import {
-  gitHubReleases,
   type GitHubRelease,
+  gitHubReleases,
 } from '@mathesar/3rd-party-apis/github-releases';
 import { CachedFetchStore } from '@mathesar/utils/cachedFetchStore';
+
 import { LOCAL_STORAGE_KEYS } from './localStorage';
 
 export interface Release {

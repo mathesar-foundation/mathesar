@@ -1,4 +1,5 @@
 import type { ActionReturn } from 'svelte/action';
+
 import AttachableDropdown from '@mathesar-component-library-dir/dropdown/AttachableDropdown.svelte';
 import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
 

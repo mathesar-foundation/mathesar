@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import { Select } from '@mathesar-component-library';
+
   import type { UserType } from './utils';
 
   const userTypes: UserType[] = ['standard', 'admin'];

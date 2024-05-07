@@ -1,10 +1,12 @@
 <script lang="ts">
   import { TabContainer } from '@mathesar-component-library';
-  import type QueryRunner from '../QueryRunner';
+
   import type QueryManager from '../QueryManager';
-  import ExplorationTab from './ExplorationTab.svelte';
-  import ColumnTab from './column-tab/ColumnTab.svelte';
+  import type QueryRunner from '../QueryRunner';
+
   import CellTab from './CellTab.svelte';
+  import ColumnTab from './column-tab/ColumnTab.svelte';
+  import ExplorationTab from './ExplorationTab.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
   export let canEditMetadata: boolean;

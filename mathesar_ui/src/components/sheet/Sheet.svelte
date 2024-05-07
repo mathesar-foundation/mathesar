@@ -1,9 +1,10 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
 
-  import { ImmutableMap } from '@mathesar-component-library/types';
   import type { ClipboardHandler } from '@mathesar/stores/clipboard';
   import { getClipboardHandlerStoreFromContext } from '@mathesar/stores/clipboard';
+  import { ImmutableMap } from '@mathesar-component-library/types';
+
   import {
     DEFAULT_COLUMN_WIDTH,
     calculateColumnStyleMapAndRowWidth,

@@ -1,12 +1,12 @@
 <script lang="ts">
+  import FormCustomComponent from './FormCustomComponent.svelte';
   import FormInput from './FormInput.svelte';
   import FormLayout from './FormLayout.svelte';
-  import Switch from './Switch.svelte';
   import If from './If.svelte';
-  import FormCustomComponent from './FormCustomComponent.svelte';
+  import Switch from './Switch.svelte';
   import type {
-    FormElement,
     FormBuildConfiguration,
+    FormElement,
     FormValidationResult,
   } from './types';
 

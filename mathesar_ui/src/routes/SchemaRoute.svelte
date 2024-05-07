@@ -2,17 +2,19 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
+
   import type { Database } from '@mathesar/AppTypes';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+
   import DataExplorerRoute from './DataExplorerRoute.svelte';
-  import TableRoute from './TableRoute.svelte';
-  import ImportRoute from './ImportRoute.svelte';
   import ExplorationRoute from './ExplorationRoute.svelte';
+  import ImportRoute from './ImportRoute.svelte';
+  import TableRoute from './TableRoute.svelte';
 
   const userProfile = getUserProfileStoreFromContext();
 

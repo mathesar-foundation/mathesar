@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
-  import { Icon, Button } from '@mathesar-component-library';
+
+  import { Button, Icon } from '@mathesar-component-library';
   import {
     iconClose,
     iconError,

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
+
   import PageTitleAndMeta from './PageTitleAndMeta.svelte';
 
   export let pageTitleAndMetaProps: ComponentProps<PageTitleAndMeta>;

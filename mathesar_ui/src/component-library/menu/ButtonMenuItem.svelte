@@ -1,8 +1,10 @@
 <script lang="ts">
-  import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
   import { createEventDispatcher } from 'svelte';
-  import MenuItemWrapper from './MenuItemWrapper.svelte';
+
+  import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+
   import MenuItemContents from './MenuItemContents.svelte';
+  import MenuItemWrapper from './MenuItemWrapper.svelte';
 
   const dispatch = createEventDispatcher();
 

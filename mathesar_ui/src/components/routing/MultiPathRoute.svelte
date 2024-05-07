@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import type { TinroRouteMeta } from 'tinro';
+
   import EventfulRoute from './EventfulRoute.svelte';
   import type { RoutePath } from './utils';
 

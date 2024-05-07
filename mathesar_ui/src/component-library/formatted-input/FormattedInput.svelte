@@ -1,9 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
 
+  import type { ArtificialEvents } from '@mathesar/component-library/common/types/ArtificialEvents';
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
-  import type { ArtificialEvents } from '@mathesar/component-library/common/types/ArtificialEvents';
+
   import type { FormattedInputProps, ParseResult } from './FormattedInputTypes';
   import { getCursorPositionAfterReformat } from './formattedInputUtils';
   import { scrollCaretIntoView } from './scrollCaretIntoView';

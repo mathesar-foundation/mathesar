@@ -1,12 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { Icon } from '@mathesar-component-library';
+
   import CellWrapper from '@mathesar/components/cell-fabric/data-types/components/CellWrapper.svelte';
   import type { PrimaryKeyCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import Default from '@mathesar/components/Default.svelte';
   import { iconLinkToRecordPage } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { Icon } from '@mathesar-component-library';
 
   type $$Props = PrimaryKeyCellProps;
 

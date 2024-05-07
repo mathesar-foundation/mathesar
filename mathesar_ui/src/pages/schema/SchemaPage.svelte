@@ -1,31 +1,34 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { queries } from '@mathesar/stores/queries';
-  import {
-    tables as tablesStore,
-    importVerifiedTables as importVerifiedTablesStore,
-  } from '@mathesar/stores/tables';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconSchema, iconEdit, iconManageAccess } from '@mathesar/icons';
-  import { modal } from '@mathesar/stores/modal';
-  import { Button, TabContainer, Icon } from '@mathesar-component-library';
+  import { iconEdit, iconManageAccess, iconSchema } from '@mathesar/icons';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     getSchemaPageExplorationsSectionUrl,
     getSchemaPageTablesSectionUrl,
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
+  import { modal } from '@mathesar/stores/modal';
+  import { queries } from '@mathesar/stores/queries';
+  import {
+    importVerifiedTables as importVerifiedTablesStore,
+    tables as tablesStore,
+  } from '@mathesar/stores/tables';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { logEvent } from '@mathesar/utils/telemetry';
+  import { Button, Icon, TabContainer } from '@mathesar-component-library';
+
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
-  import SchemaOverview from './SchemaOverview.svelte';
-  import SchemaTables from './SchemaTables.svelte';
-  import SchemaExplorations from './SchemaExplorations.svelte';
-  import TableSkeleton from './TableSkeleton.svelte';
+
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import SchemaAccessControlModal from './SchemaAccessControlModal.svelte';
+  import SchemaExplorations from './SchemaExplorations.svelte';
+  import SchemaOverview from './SchemaOverview.svelte';
+  import SchemaTables from './SchemaTables.svelte';
+  import TableSkeleton from './TableSkeleton.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { slider } from '@mathesar-component-library';
   import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import { slider } from '@mathesar-component-library';
 
   export let placement: 'top' | 'bottom' | 'left' | 'right' = 'right';
   export let sizePx = 300;

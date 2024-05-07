@@ -1,5 +1,4 @@
 import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
-import { isDefinedNonNullable } from '@mathesar-component-library';
 import {
   getEqualityFiltersForAbstractType,
   getFiltersForAbstractType,
@@ -9,6 +8,7 @@ import type {
   AbstractTypeFilterDefinition,
   AbstractTypeLimitedFilterInformation,
 } from '@mathesar/stores/abstract-types/types';
+import { isDefinedNonNullable } from '@mathesar-component-library';
 
 export const FILTER_INPUT_CLASS = 'filter-input';
 

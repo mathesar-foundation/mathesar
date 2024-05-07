@@ -1,10 +1,12 @@
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
   import { _ } from 'svelte-i18n';
+
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import { Spinner } from '@mathesar-component-library';
   import { Field, type FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
-  import type { ComponentProps } from 'svelte';
+  import { Spinner } from '@mathesar-component-library';
+
   import Pill from './LinkTablePill.svelte';
 
   const label = 'Column Name';

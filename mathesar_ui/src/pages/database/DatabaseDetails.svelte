@@ -1,24 +1,23 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    Button,
-    Help,
-    Icon,
-    DropdownMenu,
-    ButtonMenuItem,
-  } from '@mathesar-component-library';
+  import { router } from 'tinro';
+
   import { reflectApi } from '@mathesar/api/rest/reflect';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import {
     iconAddNew,
     iconDatabase,
-    iconManageAccess,
-    iconRefresh,
-    iconMoreActions,
-    iconEdit,
     iconDeleteMajor,
+    iconEdit,
+    iconManageAccess,
+    iconMoreActions,
+    iconRefresh,
   } from '@mathesar/icons';
+  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
@@ -29,19 +28,23 @@
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import {
-    EditConnectionModal,
     DeleteConnectionModal,
+    EditConnectionModal,
   } from '@mathesar/systems/connections';
-  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
-  import { router } from 'tinro';
+  import {
+    Button,
+    ButtonMenuItem,
+    DropdownMenu,
+    Help,
+    Icon,
+  } from '@mathesar-component-library';
+
+
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import DbAccessControlModal from './DbAccessControlModal.svelte';
-  import SchemaRow from './SchemaRow.svelte';
   import SchemaListSkeleton from './SchemaListSkeleton.svelte';
+  import SchemaRow from './SchemaRow.svelte';
 
   const addEditModal = modal.spawnModalController();
   const accessControlModal = modal.spawnModalController();

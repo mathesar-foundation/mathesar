@@ -1,27 +1,30 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import { StringOrComponent } from '@mathesar/component-library';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { iconConnection, iconExploration, iconRecord } from '@mathesar/icons';
   import {
+    CONNECTIONS_URL,
     getDatabasePageUrl,
     getExplorationPageUrl,
     getRecordPageUrl,
     getSchemaPageUrl,
-    CONNECTIONS_URL,
   } from '@mathesar/routes/urls';
-  import { StringOrComponent } from '@mathesar/component-library';
-  import { iconExploration, iconRecord, iconConnection } from '@mathesar/icons';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
+
+  import RecordSummary from '../RecordSummary.svelte';
+
   import BreadcrumbLink from './BreadcrumbLink.svelte';
+  import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
+  import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
   import DatabaseSelector from './DatabaseSelector.svelte';
   import EntitySelector from './EntitySelector.svelte';
   import SchemaSelector from './SchemaSelector.svelte';
-  import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
-  import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
-  import RecordSummary from '../RecordSummary.svelte';
 
   export let item: BreadcrumbItem;
 </script>

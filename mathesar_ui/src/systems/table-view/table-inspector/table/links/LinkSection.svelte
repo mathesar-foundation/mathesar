@@ -1,13 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Icon } from '@mathesar-component-library';
+
   import {
     iconLinksFromOtherTables,
     iconLinksInThisTable,
   } from '@mathesar/icons';
   import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
-  import type { TableLink, TableLinkType } from './utils';
+  import { Icon } from '@mathesar-component-library';
+
   import LinkItem from './LinkItem.svelte';
+  import type { TableLink, TableLinkType } from './utils';
 
   export let links: TableLink[];
   export let type: TableLinkType;

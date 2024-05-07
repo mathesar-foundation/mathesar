@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
@@ -14,6 +14,8 @@
     iconNotEditable,
   } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
+  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
+
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
   const dispatch = createEventDispatcher();

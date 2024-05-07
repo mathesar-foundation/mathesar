@@ -1,10 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
+  import Pagination from '@mathesar/utils/Pagination';
   import {
     Pagination as PaginationComponent,
     Select,
   } from '@mathesar-component-library';
-  import Pagination from '@mathesar/utils/Pagination';
 
   const dispatch = createEventDispatcher();
 

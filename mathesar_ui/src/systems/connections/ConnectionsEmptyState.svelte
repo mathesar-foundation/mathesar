@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Tutorial, Icon, Button } from '@mathesar-component-library';
-  import { iconConnection, iconAddNew } from '@mathesar/icons';
+
+  import { iconAddNew, iconConnection } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
+  import { Button, Icon, Tutorial } from '@mathesar-component-library';
+
   import AddConnectionModal from './AddConnectionModal.svelte';
 
   const addConnectionModalController = modal.spawnModalController();

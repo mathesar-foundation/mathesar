@@ -1,10 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     refetchTablesForSchema,
-    updateTableMetaData,
     tables,
+    updateTableMetaData,
   } from '@mathesar/stores/tables';
   import type { AtLeastOne } from '@mathesar/typeUtils';
 

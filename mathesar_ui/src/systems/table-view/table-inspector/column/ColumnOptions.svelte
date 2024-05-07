@@ -1,21 +1,22 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import {
-    Icon,
-    Checkbox,
-    iconLoading,
-    Help,
-    LabeledInput,
-  } from '@mathesar-component-library';
+
   import { RichText } from '@mathesar/components/rich-text';
   import type {
     ColumnsDataStore,
-    ProcessedColumn,
     ConstraintsDataStore,
+    ProcessedColumn,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { createEventDispatcher } from 'svelte';
+  import {
+    Checkbox,
+    Help,
+    Icon,
+    LabeledInput,
+    iconLoading,
+  } from '@mathesar-component-library';
 
   export let column: ProcessedColumn;
   export let columnsDataStore: ColumnsDataStore;

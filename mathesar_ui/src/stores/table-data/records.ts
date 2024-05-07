@@ -1,17 +1,12 @@
 import {
-  derived,
-  get,
-  writable,
   type Readable,
   type Unsubscriber,
   type Writable,
+  derived,
+  get,
+  writable,
 } from 'svelte/store';
 
-import {
-  getGloballyUniqueId,
-  isDefinedNonNullable,
-  type CancellablePromise,
-} from '@mathesar-component-library';
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
@@ -26,14 +21,20 @@ import {
   States,
   deleteAPI,
   getAPI,
+  getQueryStringFromParams,
   patchAPI,
   postAPI,
-  getQueryStringFromParams,
 } from '@mathesar/api/rest/utils/requestUtils';
-import type Pagination from '@mathesar/utils/Pagination';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
+import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
+import {
+  type CancellablePromise,
+  getGloballyUniqueId,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
+
 import type { ColumnsDataStore } from './columns';
 import type { Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';

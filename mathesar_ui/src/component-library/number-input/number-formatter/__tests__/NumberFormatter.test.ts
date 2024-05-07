@@ -1,5 +1,5 @@
-import type { Options } from '../options';
 import NumberFormatter from '../NumberFormatter';
+import type { Options } from '../options';
 
 function getFormatter(partialOpts: Partial<Options> = {}): NumberFormatter {
   /**

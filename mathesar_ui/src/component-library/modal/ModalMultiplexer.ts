@@ -1,7 +1,8 @@
 import type { Readable, Writable } from 'svelte/store';
-import { writable, derived } from 'svelte/store';
-import ModalStack from './ModalStack';
+import { derived, writable } from 'svelte/store';
+
 import ModalController from './ModalController';
+import ModalStack from './ModalStack';
 
 /**
  * Controls all the modals in the system.

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import EditTableHOC from '@mathesar/components/EditTableHOC.svelte';
-  import { tables } from '@mathesar/stores/tables';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { tables } from '@mathesar/stores/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 

@@ -1,30 +1,32 @@
-import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
-import type { CancellablePromise } from '@mathesar-component-library';
-import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import CacheManager from '@mathesar/utils/CacheManager';
+
 import type {
   QueryInstance,
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import QueryModel from './QueryModel';
+import CacheManager from '@mathesar/utils/CacheManager';
+import type { CancellablePromise } from '@mathesar-component-library';
+
 import type { QueryModelUpdateDiff } from './QueryModel';
-import QueryUndoRedoManager from './QueryUndoRedoManager';
-import {
-  getTablesThatReferenceBaseTable,
-  getBaseTableColumnsWithLinks,
-  getColumnInformationMap,
-} from './utils';
-import type { InputColumnsStoreSubstance } from './utils';
+import QueryModel from './QueryModel';
 import QueryRunner from './QueryRunner';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
+import QueryUndoRedoManager from './QueryUndoRedoManager';
+import type { InputColumnsStoreSubstance } from './utils';
+import {
+  getBaseTableColumnsWithLinks,
+  getColumnInformationMap,
+  getTablesThatReferenceBaseTable,
+} from './utils';
 
 export default class QueryManager extends QueryRunner {
   private undoRedoManager: QueryUndoRedoManager;

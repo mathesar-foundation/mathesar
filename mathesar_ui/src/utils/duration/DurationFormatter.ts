@@ -1,10 +1,12 @@
-import { dayjs } from '@mathesar-component-library';
 import type { Duration, DurationUnitType } from 'dayjs/plugin/duration';
+
+import type { DurationUnit } from '@mathesar/api/rest/types/tables/columns';
+import { dayjs } from '@mathesar-component-library';
 import type {
   InputFormatter,
   ParseResult,
 } from '@mathesar-component-library/types';
-import type { DurationUnit } from '@mathesar/api/rest/types/tables/columns';
+
 import type DurationSpecification from './DurationSpecification';
 
 const FLOAT_REGEX = /^((\.?\d+)|(\d+(\.\d+)?))$/;

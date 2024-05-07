@@ -1,9 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Icon, Button } from '@mathesar-component-library';
+
   import { iconAddNew } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import LinkTableModal from '@mathesar/systems/table-view/link-table/LinkTableModal.svelte';
+  import { Button, Icon } from '@mathesar-component-library';
+
   import LinkSection from './LinkSection.svelte';
   import type { TableLink } from './utils';
 

@@ -1,14 +1,16 @@
-import type { FormValues } from '@mathesar-component-library/types';
 import type {
+  Column,
   DateDisplayOptions,
   DateFormat,
-  Column,
 } from '@mathesar/api/rest/types/tables/columns';
 import { iconUiTypeDate } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
+
 import { getDateFormatOptions } from './utils';
 
 const displayForm: AbstractTypeConfigForm = {

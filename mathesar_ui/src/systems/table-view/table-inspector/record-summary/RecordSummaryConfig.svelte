@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { RadioGroup, Spinner } from '@mathesar-component-library';
+
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import {
     FormSubmit,
@@ -21,6 +21,8 @@
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { RadioGroup, Spinner } from '@mathesar-component-library';
+
   import {
     columnIsConformant,
     getColumnsInTemplate,

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { IconProps } from '@mathesar-component-library/types';
   import { Icon } from '@mathesar-component-library';
+  import type { IconProps } from '@mathesar-component-library/types';
 
   export let icon: IconProps | undefined = undefined;
   export let style: string | undefined = undefined;

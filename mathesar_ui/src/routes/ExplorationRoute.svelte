@@ -1,10 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
   import { queries } from '@mathesar/stores/queries';
-  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

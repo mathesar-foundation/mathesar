@@ -1,13 +1,15 @@
 <script lang="ts">
-  import { tick, createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
+
   import { Button, Icon } from '@mathesar-component-library';
   import {
+    iconChooseItemManyAhead,
+    iconChooseItemManyPrior,
+    iconChooseItemNext,
     iconChooseItemPrevious,
     iconShowMore,
-    iconChooseItemManyPrior,
-    iconChooseItemManyAhead,
-    iconChooseItemNext,
   } from '@mathesar-component-library-dir/common/icons';
+
   import { calculatePages, getPageCount } from './paginationUtils';
 
   const dispatch = createEventDispatcher();

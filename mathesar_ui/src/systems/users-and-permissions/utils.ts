@@ -1,7 +1,7 @@
-import type { IconProps } from '@mathesar-component-library/types';
-import { iconUser, iconAdminUser } from '@mathesar/icons';
-import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
+import { iconAdminUser, iconUser } from '@mathesar/icons';
 import type { UserModel } from '@mathesar/stores/users';
+import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
+import type { IconProps } from '@mathesar-component-library/types';
 
 export type UserType = 'admin' | 'standard';
 

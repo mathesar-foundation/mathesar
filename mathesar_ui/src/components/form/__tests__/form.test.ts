@@ -1,8 +1,8 @@
 import { get } from 'svelte/store';
 
-import { uniqueWith, min, comboInvalidIf } from '../validators';
-import { makeForm } from '../form';
 import { requiredField } from '../field';
+import { makeForm } from '../form';
+import { comboInvalidIf, min, uniqueWith } from '../validators';
 
 type Beverage = 'juice' | 'water' | 'beer';
 

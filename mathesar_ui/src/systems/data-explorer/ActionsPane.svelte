@@ -1,32 +1,34 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
+  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
+  import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
+  import TableName from '@mathesar/components/TableName.svelte';
   import {
-    Icon,
-    InputGroup,
-    Button,
-    SpinnerButton,
-    DropdownMenu,
-    ButtonMenuItem,
-    iconExpandDown,
-    Help,
-  } from '@mathesar-component-library';
-  import {
+    iconExploration,
+    iconInspector,
     iconRedo,
     iconUndo,
-    iconInspector,
-    iconExploration,
   } from '@mathesar/icons';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import { tables as tablesDataStore } from '@mathesar/stores/tables';
-  import TableName from '@mathesar/components/TableName.svelte';
-  import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
-  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
-  import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
-  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { modal } from '@mathesar/stores/modal';
-  import { toast } from '@mathesar/stores/toast';
   import { queries } from '@mathesar/stores/queries';
+  import { tables as tablesDataStore } from '@mathesar/stores/tables';
+  import { toast } from '@mathesar/stores/toast';
+  import {
+    Button,
+    ButtonMenuItem,
+    DropdownMenu,
+    Help,
+    Icon,
+    InputGroup,
+    SpinnerButton,
+    iconExpandDown,
+  } from '@mathesar-component-library';
+
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
 

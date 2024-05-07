@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
@@ -12,12 +13,13 @@
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import RecordSummary from '@mathesar/components/RecordSummary.svelte';
-  import TableName from '@mathesar/components/TableName.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
+
   import DirectField from './DirectField.svelte';
   import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
   import type RecordStore from './RecordStore';

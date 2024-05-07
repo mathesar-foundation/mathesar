@@ -2,22 +2,14 @@
   import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import {
-    ButtonMenuItem,
-    ContextMenu,
-    LinkMenuItem,
-    MenuDivider,
-    MenuHeading,
-    WritableMap,
-  } from '@mathesar-component-library';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import Null from '@mathesar/components/Null.svelte';
-  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import {
     SheetCell,
     isCellActive,
@@ -29,15 +21,25 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
-    rowHasNewRecord,
     type CellKey,
     type ProcessedColumn,
     type RecordRow,
     type RecordsData,
     type TabularDataSelection,
+    rowHasNewRecord,
   } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import {
+    ButtonMenuItem,
+    ContextMenu,
+    LinkMenuItem,
+    MenuDivider,
+    MenuHeading,
+    WritableMap,
+  } from '@mathesar-component-library';
+
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
+
   import CellErrors from './CellErrors.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
 

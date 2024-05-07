@@ -1,15 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
+  import { createEventDispatcher, setContext } from 'svelte';
   import type { Writable } from 'svelte/store';
-  import { setContext, createEventDispatcher } from 'svelte';
+  import { writable } from 'svelte/store';
+
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
+
   import type {
+    ListBoxApi,
+    ListBoxContext,
+    ListBoxContextState,
     ListBoxProps,
     ListBoxStaticContextProps,
-    ListBoxApi,
-    ListBoxContextState,
-    ListBoxContext,
   } from './ListBoxTypes';
 
   type Option = $$Generic;

@@ -25,9 +25,10 @@
 -->
 <script lang="ts">
   import FormattedInput from '../formatted-input/FormattedInput.svelte';
+
   import { NumberFormatter } from './number-formatter';
-  import { getInputMode } from './numberInputUtils';
   import type { NumberInputProps } from './NumberInputTypes';
+  import { getInputMode } from './numberInputUtils';
 
   type $$Props = NumberInputProps;
 

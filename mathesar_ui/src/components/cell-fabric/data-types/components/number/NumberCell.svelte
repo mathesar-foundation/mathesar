@@ -4,6 +4,7 @@
     HorizontalAlignment,
     NumberCellProps,
   } from '../typeDefinitions';
+
   import NumberCellInput from './NumberCellInput.svelte';
 
   type $$Props = NumberCellProps;

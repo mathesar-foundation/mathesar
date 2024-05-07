@@ -1,5 +1,6 @@
-import { setContext, getContext } from 'svelte';
+import { getContext, setContext } from 'svelte';
 import type { Readable } from 'svelte/store';
+
 import type { ImmutableMap } from '@mathesar-component-library/types';
 
 export interface ColumnPosition {

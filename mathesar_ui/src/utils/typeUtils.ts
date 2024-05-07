@@ -1,4 +1,5 @@
 import type { Readable, Writable } from 'svelte/store';
+
 import { MissingExhaustiveConditionError } from './errors';
 
 /**

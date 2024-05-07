@@ -1,10 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import SelectableColumnTree from './SelectableColumnTree.svelte';
-  import SelectableColumn from './SelectableColumn.svelte';
+
   import type QueryManager from '../../QueryManager';
-  import TableGroupCollapsible from './TableGroupCollapsible.svelte';
   import type { ColumnWithLink } from '../../utils';
+
+  import SelectableColumn from './SelectableColumn.svelte';
+  import SelectableColumnTree from './SelectableColumnTree.svelte';
+  import TableGroupCollapsible from './TableGroupCollapsible.svelte';
+
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =

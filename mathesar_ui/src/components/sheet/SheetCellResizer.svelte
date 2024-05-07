@@ -1,5 +1,6 @@
 <script lang="ts">
   import { slider } from '@mathesar-component-library';
+
   import { getSheetContext } from './utils';
 
   type SheetColumnIdentifierKey = $$Generic;

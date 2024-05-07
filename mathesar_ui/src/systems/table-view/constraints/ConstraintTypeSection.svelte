@@ -1,16 +1,18 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
   import { Button, Collapsible, Help, Icon } from '@mathesar/component-library';
-  import type { Constraint } from '@mathesar/stores/table-data';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import type { Constraint } from '@mathesar/stores/table-data';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+
   import ConstraintCollapseHeader from './ConstraintCollapseHeader.svelte';
-  import NewUniqueConstraint from './NewUniqueConstraint.svelte';
-  import NewFkConstraint from './NewFkConstraint.svelte';
   import ConstraintDetails from './ConstraintDetails.svelte';
   import ForeignKeyConstraintDetails from './ForeignKeyConstraintDetails.svelte';
+  import NewFkConstraint from './NewFkConstraint.svelte';
+  import NewUniqueConstraint from './NewUniqueConstraint.svelte';
 
   export let constraintType: ConstraintType;
   export let constraints: Constraint[];
