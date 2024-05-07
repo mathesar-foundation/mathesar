@@ -5,9 +5,9 @@ import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type {
   PaginatedResponse,
   RequestStatus,
-} from '@mathesar/api/utils/requestUtils';
-import schemasApi from '@mathesar/api/schemas';
-import type { Connection } from '@mathesar/api/connections';
+} from '@mathesar/api/rest/utils/requestUtils';
+import schemasApi from '@mathesar/api/rest/schemas';
+import type { Connection } from '@mathesar/api/rest/connections';
 
 import type { SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';

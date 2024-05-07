@@ -1,4 +1,4 @@
-import type { TableEntry } from '@mathesar/api/types/tables';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import {
   getImportPreviewPageUrl,

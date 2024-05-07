@@ -3,9 +3,9 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Constraint } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
-  import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
-  import { getAPI } from '@mathesar/api/utils/requestUtils';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
+  import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import { Icon, iconError, Spinner } from '@mathesar/component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
 

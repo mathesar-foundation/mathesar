@@ -8,8 +8,8 @@ import userApi, {
   type DatabaseRole,
   type SchemaRole,
   type UserRole,
-} from '@mathesar/api/users';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/users';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';

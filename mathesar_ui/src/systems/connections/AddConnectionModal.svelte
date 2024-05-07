@@ -6,7 +6,7 @@
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
-  import type { Connection } from '@mathesar/api/connections';
+  import type { Connection } from '@mathesar/api/rest/connections';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import AddConnection from './AddConnection.svelte';
 

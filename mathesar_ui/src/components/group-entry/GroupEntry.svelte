@@ -10,7 +10,7 @@
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
   import type { GroupEntryColumnLike } from './types';
 
   type T = $$Generic;

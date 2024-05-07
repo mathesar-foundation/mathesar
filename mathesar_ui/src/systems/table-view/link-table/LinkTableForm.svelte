@@ -4,9 +4,9 @@
     ensureReadable,
     portalToWindowFooter,
   } from '@mathesar-component-library';
-  import type { LinksPostRequest } from '@mathesar/api/types/links';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { postAPI } from '@mathesar/api/utils/requestUtils';
+  import type { LinksPostRequest } from '@mathesar/api/rest/types/links';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import { postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import {
     Field,

@@ -5,7 +5,7 @@
     Button,
     Icon,
   } from '@mathesar-component-library';
-  import { States } from '@mathesar/api/utils/requestUtils';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import RefreshButton from '@mathesar/components/RefreshButton.svelte';

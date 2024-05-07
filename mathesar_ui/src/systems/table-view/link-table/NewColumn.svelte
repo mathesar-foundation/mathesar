@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { Spinner } from '@mathesar-component-library';
   import { Field, type FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';

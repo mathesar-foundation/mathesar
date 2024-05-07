@@ -23,26 +23,26 @@ import {
 import type {
   MinimalColumnDetails,
   TableEntry,
-} from '@mathesar/api/types/tables';
+} from '@mathesar/api/rest/types/tables';
 import type {
   SplitTableRequest,
   SplitTableResponse,
-} from '@mathesar/api/types/tables/split_table';
+} from '@mathesar/api/rest/types/tables/split_table';
 import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
 import type {
   PaginatedResponse,
   RequestStatus,
-} from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/utils/requestUtils';
 import {
   deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
-} from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/utils/requestUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
-import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
+import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { AtLeastOne } from '@mathesar/typeUtils';
 import { currentSchemaId, addCountToSchemaNumTables } from './schemas';
 

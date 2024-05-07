@@ -7,7 +7,7 @@
     DropdownMenu,
     ButtonMenuItem,
   } from '@mathesar-component-library';
-  import { reflectApi } from '@mathesar/api/reflect';
+  import { reflectApi } from '@mathesar/api/rest/reflect';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {

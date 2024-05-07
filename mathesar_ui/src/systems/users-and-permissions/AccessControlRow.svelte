@@ -15,7 +15,7 @@
     iconSchema,
   } from '@mathesar/icons';
   import type { UserModel } from '@mathesar/stores/users';
-  import type { UserRole } from '@mathesar/api/users';
+  import type { UserRole } from '@mathesar/api/rest/users';
   import {
     getDisplayNameForRole,
     getDescriptionForRole,

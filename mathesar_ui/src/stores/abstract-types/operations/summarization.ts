@@ -1,4 +1,4 @@
-import { querySummarizationFunctionIds } from '@mathesar/api/types/queries';
+import { querySummarizationFunctionIds } from '@mathesar/api/rest/types/queries';
 import { abstractTypeCategory } from '../constants';
 import type {
   AbstractTypeCategoryIdentifier,

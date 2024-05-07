@@ -11,7 +11,7 @@
     Icon,
   } from '@mathesar-component-library';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import { queries, putQuery, deleteQuery } from '@mathesar/stores/queries';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getAvailableName } from '@mathesar/utils/db';

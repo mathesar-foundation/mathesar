@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { Connection } from '@mathesar/api/connections';
+  import type { Connection } from '@mathesar/api/rest/connections';
   import { iconDatabase, iconConnection } from '@mathesar/icons';
   import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
   import { connectionsStore } from '@mathesar/stores/databases';

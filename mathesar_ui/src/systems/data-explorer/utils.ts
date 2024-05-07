@@ -6,7 +6,7 @@ import type {
   QueryRunResponse,
   QueryInitialColumnSource,
   QueryGeneratedColumnSource,
-} from '@mathesar/api/types/queries';
+} from '@mathesar/api/rest/types/queries';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
@@ -26,12 +26,12 @@ import {
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type {
   JpPath,
   JoinableTablesResult,
-} from '@mathesar/api/types/tables/joinable_tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+} from '@mathesar/api/rest/types/tables/joinable_tables';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type QueryModel from './QueryModel';
 
 type ProcessedQueryResultColumnSource =

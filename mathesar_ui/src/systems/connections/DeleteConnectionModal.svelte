@@ -12,7 +12,7 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import type { Connection } from '@mathesar/api/connections';
+  import type { Connection } from '@mathesar/api/rest/connections';
   import {
     connectionHasUniqueDatabaseReference,
     connectionsStore,

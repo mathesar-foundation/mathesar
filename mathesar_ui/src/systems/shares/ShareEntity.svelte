@@ -10,9 +10,9 @@
     Icon,
     type AccompanyingElements,
   } from '@mathesar-component-library';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import type { ShareApi, Share } from '@mathesar/api/shares';
-  import { getApiErrorMessages } from '@mathesar/api/utils/errors';
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { ShareApi, Share } from '@mathesar/api/rest/shares';
+  import { getApiErrorMessages } from '@mathesar/api/rest/utils/errors';
   import {
     iconCopyMajor,
     iconAddNew,

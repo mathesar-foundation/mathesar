@@ -6,8 +6,8 @@ import type {
 } from '@mathesar-component-library/types';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
 
 export type CellColumnLike = Pick<
   Column,
