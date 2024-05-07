@@ -24,8 +24,8 @@ module.exports = {
     'plugin:svelte/recommended',
     'plugin:svelte/prettier',
     'plugin:import/errors',
-		'plugin:import/warnings',
-    'plugin:import/typescript'
+    'plugin:import/warnings',
+    'plugin:import/typescript',
   ],
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
@@ -48,24 +48,31 @@ module.exports = {
     'no-restricted-syntax': 0,
     '@typescript-eslint/require-await': 'off',
     'class-methods-use-this': 'off',
-    "no-multiple-empty-lines": 1,
+    'no-multiple-empty-lines': 1,
     'import/order': [
-			'warn',
-			{
-				alphabetize: {
-					order: 'asc',
-          orderImportKind:'asc',
-					caseInsensitive: true
-				},
-				'newlines-between': 'always',
-        'groups': ['builtin', 'external', 'internal', ['parent', 'sibling'], 'index'],
-			}
-		],
-    'sort-imports': [
-      'warn',
+      'error',
       {
-        'ignoreDeclarationSort': true,
-      }
+        alphabetize: {
+          order: 'asc',
+          orderImportKind: 'asc',
+          caseInsensitive: true,
+        },
+        'newlines-between': 'always',
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+        ],
+      },
+    ],
+    'sort-imports': [
+      'error',
+      {
+        ignoreDeclarationSort: true,
+      },
     ],
   },
   overrides: [
