@@ -4,8 +4,7 @@
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import { Label, Radio } from '@mathesar-component-library';
+  import { Label, Radio, assertExhaustive } from '@mathesar-component-library';
 
   import Diagram from './diagram/Diagram.svelte';
   import Pill from './LinkTablePill.svelte';

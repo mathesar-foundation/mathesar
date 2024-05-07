@@ -24,14 +24,13 @@
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import { createTable } from '@mathesar/stores/tables';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import {
     RadioGroup,
     TextArea,
+    assertExhaustive,
     iconUploadFile,
   } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
-
 
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
 

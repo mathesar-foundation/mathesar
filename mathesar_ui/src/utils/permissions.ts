@@ -2,7 +2,7 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { UserRole } from '@mathesar/api/rest/users';
-import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
+import { assertExhaustive } from '@mathesar-component-library';
 
 /**
  * - `canEditTableRecords`: DML operations on table rows and cells.
@@ -46,7 +46,7 @@ export function roleAllowsOperation(
     case 'viewer':
       return operationsForViewer.has(operation);
     default:
-      throw new MissingExhaustiveConditionError(userRole);
+      return assertExhaustive(userRole);
   }
 }
 
@@ -66,7 +66,7 @@ export function getDisplayNameForRole(userRole: UserRole): string {
     case 'viewer':
       return get(_)('viewer');
     default:
-      throw new MissingExhaustiveConditionError(userRole);
+      return assertExhaustive(userRole);
   }
 }
 
@@ -79,7 +79,7 @@ export function getDescriptionForRole(userRole: UserRole): string {
     case 'viewer':
       return get(_)('readonly_access');
     default:
-      throw new MissingExhaustiveConditionError(userRole);
+      return assertExhaustive(userRole);
   }
 }
 

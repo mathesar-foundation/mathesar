@@ -5,7 +5,7 @@ import type {
   QueryRunRequest,
 } from '@mathesar/api/rest/types/queries';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
-import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
+import { assertExhaustive } from '@mathesar-component-library';
 
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
@@ -44,7 +44,7 @@ function getTransformationModel(
     case 'order':
       return new QuerySortTransformationModel(transformation);
     default:
-      throw new MissingExhaustiveConditionError(transformation);
+      return assertExhaustive(transformation);
   }
 }
 

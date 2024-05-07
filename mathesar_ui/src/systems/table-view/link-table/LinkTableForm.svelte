@@ -36,8 +36,8 @@
   } from '@mathesar/utils/columnUtils';
   import { getAvailableName } from '@mathesar/utils/db';
   import { makeSingular } from '@mathesar/utils/languageUtils';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import {
+    assertExhaustive,
     ensureReadable,
     portalToWindowFooter,
   } from '@mathesar-component-library';

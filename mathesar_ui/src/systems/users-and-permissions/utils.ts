@@ -1,7 +1,9 @@
 import { iconAdminUser, iconUser } from '@mathesar/icons';
 import type { UserModel } from '@mathesar/stores/users';
-import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
-import type { IconProps } from '@mathesar-component-library/types';
+import {
+  type IconProps,
+  assertExhaustive,
+} from '@mathesar-component-library/types';
 
 export type UserType = 'admin' | 'standard';
 
@@ -12,7 +14,7 @@ export function getDisplayNameForUserType(userType: UserType): string {
     case 'standard':
       return 'Standard';
     default:
-      throw new MissingExhaustiveConditionError(userType);
+      return assertExhaustive(userType);
   }
 }
 

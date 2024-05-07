@@ -5,8 +5,7 @@
     iconLinksFromOtherTables,
     iconLinksInThisTable,
   } from '@mathesar/icons';
-  import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
-  import { Icon } from '@mathesar-component-library';
+  import { Icon, assertExhaustive } from '@mathesar-component-library';
 
   import LinkItem from './LinkItem.svelte';
   import type { TableLink, TableLinkType } from './utils';
@@ -21,7 +20,7 @@
       case 'from_other_tables':
         return iconLinksFromOtherTables;
       default:
-        throw new MissingExhaustiveConditionError(type);
+        return assertExhaustive(type);
     }
   })();
 
@@ -32,7 +31,7 @@
       case 'from_other_tables':
         return $_('from_other_tables');
       default:
-        throw new MissingExhaustiveConditionError(type);
+        return assertExhaustive(type);
     }
   })();
 </script>

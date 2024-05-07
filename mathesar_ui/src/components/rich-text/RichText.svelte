@@ -44,7 +44,7 @@
   ```
 -->
 <script lang="ts">
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
+  import { assertExhaustive } from '@mathesar-component-library';
 
   import { parse } from './richTextUtils';
 

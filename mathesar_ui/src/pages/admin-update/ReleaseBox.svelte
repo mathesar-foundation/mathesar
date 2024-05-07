@@ -8,8 +8,7 @@
     iconUpgradeAvailable,
   } from '@mathesar/icons';
   import type { Release } from '@mathesar/stores/releases';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import { Icon } from '@mathesar-component-library';
+  import { Icon, assertExhaustive } from '@mathesar-component-library';
 
   export let type:
     | 'available-upgrade'

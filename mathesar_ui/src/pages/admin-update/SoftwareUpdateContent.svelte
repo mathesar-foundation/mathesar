@@ -7,8 +7,7 @@
   import { iconRefresh } from '@mathesar/icons';
   import type { ReleaseDataStore } from '@mathesar/stores/releases';
   import { toast } from '@mathesar/stores/toast';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import { SpinnerButton } from '@mathesar-component-library';
+  import { SpinnerButton, assertExhaustive } from '@mathesar-component-library';
 
   import ReleaseBox from './ReleaseBox.svelte';
 
