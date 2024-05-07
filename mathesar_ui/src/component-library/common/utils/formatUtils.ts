@@ -1,4 +1,5 @@
 import type { ComponentAndProps } from '@mathesar-component-library-dir/common/types/ComponentAndPropsTypes';
+
 import { hasStringProperty } from './typeUtils';
 
 export function formatSize(sizeInBytes: number): string {

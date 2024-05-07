@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
 

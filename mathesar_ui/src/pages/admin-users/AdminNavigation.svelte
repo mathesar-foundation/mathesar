@@ -1,13 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { active } from 'tinro';
-  import { Menu, MenuItemContents } from '@mathesar-component-library';
-  import { iconSettingsMajor, iconMultipleUsers } from '@mathesar/icons';
+
+  import { iconMultipleUsers, iconSettingsMajor } from '@mathesar/icons';
   import {
     ADMIN_UPDATE_PAGE_URL,
     ADMIN_USERS_PAGE_URL,
   } from '@mathesar/routes/urls';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
+  import { Menu, MenuItemContents } from '@mathesar-component-library';
 
   const releaseDataStore = getReleaseDataStoreFromContext();
 

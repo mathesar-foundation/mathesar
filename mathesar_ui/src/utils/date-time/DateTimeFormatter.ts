@@ -3,6 +3,7 @@ import type {
   InputFormatter,
   ParseResult,
 } from '@mathesar-component-library/types';
+
 import type DateTimeSpecification from './DateTimeSpecification';
 
 export default class DateTimeFormatter implements InputFormatter<string> {

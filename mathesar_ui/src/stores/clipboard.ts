@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import { writable, type Writable } from 'svelte/store';
+import { type Writable, writable } from 'svelte/store';
 
 export interface ClipboardHandler {
   handleCopy: (event: ClipboardEvent) => void;

@@ -2,12 +2,13 @@
   import { Route } from 'tinro';
 
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import WelcomePage from '@mathesar/pages/WelcomePage.svelte';
   import ConnectionsPage from '@mathesar/pages/connections/ConnectionsPage.svelte';
+  import WelcomePage from '@mathesar/pages/WelcomePage.svelte';
   import { CONNECTIONS_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
   import { connectionsStore } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { mapExactlyOne } from '@mathesar/utils/iterUtils';
+
   import AdminRoute from './AdminRoute.svelte';
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';

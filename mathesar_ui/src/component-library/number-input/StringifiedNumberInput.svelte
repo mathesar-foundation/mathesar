@@ -30,9 +30,10 @@
 -->
 <script lang="ts">
   import FormattedInput from '@mathesar-component-library-dir/formatted-input/FormattedInput.svelte';
+
   import { StringifiedNumberFormatter } from './number-formatter';
-  import { getInputMode } from './numberInputUtils';
   import type { StringifiedNumberInputProps } from './NumberInputTypes';
+  import { getInputMode } from './numberInputUtils';
 
   type $$Props = StringifiedNumberInputProps;
 

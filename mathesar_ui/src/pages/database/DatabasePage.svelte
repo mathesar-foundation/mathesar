@@ -2,6 +2,7 @@
   import type { Database } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+
   import DatabaseDetails from './DatabaseDetails.svelte';
 
   export let database: Database;

@@ -1,22 +1,23 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    ButtonMenuItem,
-    iconExternalLink,
-    LinkMenuItem,
-  } from '@mathesar-component-library';
+
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
+    type RecordRow,
     RecordsData,
     rowHasRecord,
-    type RecordRow,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
+  import {
+    ButtonMenuItem,
+    LinkMenuItem,
+    iconExternalLink,
+  } from '@mathesar-component-library';
 
   export let row: RecordRow;
   export let recordPk: string;

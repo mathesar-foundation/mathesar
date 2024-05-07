@@ -1,5 +1,6 @@
-import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import type { QueryInstanceSortTransformation } from '@mathesar/api/rest/types/queries';
 import type { SortDirection } from '@mathesar/components/sort-entry/utils';
 

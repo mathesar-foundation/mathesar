@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import { TabContainer } from '@mathesar-component-library';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { ComponentType } from 'svelte';
+  import { _ } from 'svelte-i18n';
+
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { TabContainer } from '@mathesar-component-library';
+
+  import CellMode from './cell/CellMode.svelte';
   import ColumnMode from './column/ColumnMode.svelte';
   import RecordMode from './record/RecordMode.svelte';
-  import CellMode from './cell/CellMode.svelte';
-
   import TableMode from './table/TableMode.svelte';
 
   type TabItem = { label: string; id: number; component: ComponentType };

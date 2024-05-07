@@ -1,17 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { InputGroupText, Select } from '@mathesar-component-library';
-  import {
-    filterCombinations,
-    defaultFilterCombination,
-    type FilterEntry,
-    type ProcessedColumns,
-  } from '@mathesar/stores/table-data';
+
   import type { FilterCombination } from '@mathesar/api/rest/types/tables/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
-  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import {
+    type FilterEntry,
+    type ProcessedColumns,
+    defaultFilterCombination,
+    filterCombinations,
+  } from '@mathesar/stores/table-data';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { InputGroupText, Select } from '@mathesar-component-library';
 
   const dispatch = createEventDispatcher<{
     remove: number;

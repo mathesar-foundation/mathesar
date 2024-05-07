@@ -1,22 +1,23 @@
 <script lang="ts">
   import { get } from 'svelte/store';
 
-  import { ImmutableMap } from '@mathesar-component-library';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import {
-    getTabularDataStoreFromContext,
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     type TabularDataSelection,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { orderProcessedColumns } from '@mathesar/utils/tables';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import { ImmutableMap } from '@mathesar-component-library';
+
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
   import StatusPane from './StatusPane.svelte';

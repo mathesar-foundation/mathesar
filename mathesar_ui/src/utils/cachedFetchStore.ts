@@ -1,4 +1,4 @@
-import { writable, type Readable, type Writable } from 'svelte/store';
+import { type Readable, type Writable, writable } from 'svelte/store';
 
 function deserialize<T>(s: string): T | undefined {
   try {

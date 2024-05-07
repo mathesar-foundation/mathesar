@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { Button } from '@mathesar-component-library';
-  import { SheetCell, SheetCellResizer } from '@mathesar/components/sheet';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import type { ProcessedQueryOutputColumn } from '../utils';
+  import { SheetCell, SheetCellResizer } from '@mathesar/components/sheet';
+  import { Button } from '@mathesar-component-library';
+
   import type QueryRunner from '../QueryRunner';
+  import type { ProcessedQueryOutputColumn } from '../utils';
 
   export let queryRunner: QueryRunner;
   export let processedQueryColumn: ProcessedQueryOutputColumn;

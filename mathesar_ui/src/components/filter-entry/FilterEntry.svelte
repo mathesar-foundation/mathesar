@@ -2,16 +2,7 @@
   import { createEventDispatcher, onDestroy } from 'svelte';
   import { readable } from 'svelte/store';
 
-  import {
-    Button,
-    Icon,
-    InputGroup,
-    Select,
-  } from '@mathesar-component-library';
-  import {
-    ImmutableMap,
-    type ComponentAndProps,
-  } from '@mathesar-component-library/types';
+  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
@@ -20,7 +11,17 @@
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
+  import {
+    Button,
+    Icon,
+    InputGroup,
+    Select,
+  } from '@mathesar-component-library';
+  import {
+    type ComponentAndProps,
+    ImmutableMap,
+  } from '@mathesar-component-library/types';
+
   import type { FilterEntryColumnLike } from './types';
   import { FILTER_INPUT_CLASS, validateFilterEntry } from './utils';
 

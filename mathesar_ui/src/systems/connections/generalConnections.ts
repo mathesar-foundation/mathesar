@@ -1,5 +1,5 @@
 import { map } from 'iter-tools';
-import { derived, type Readable } from 'svelte/store';
+import { type Readable, derived } from 'svelte/store';
 
 import type {
   Connection,
@@ -7,8 +7,8 @@ import type {
 } from '@mathesar/api/rest/connections';
 import { connectionsStore } from '@mathesar/stores/databases';
 import {
-  preloadCommonData,
   type CommonData,
+  preloadCommonData,
 } from '@mathesar/utils/preloadData';
 
 interface UserDatabaseConnection {

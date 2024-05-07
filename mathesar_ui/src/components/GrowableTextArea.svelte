@@ -8,6 +8,7 @@
 -->
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
+
   import { TextArea } from '@mathesar-component-library';
 
   const MAX_HEIGHT_PX = 400;

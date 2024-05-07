@@ -1,6 +1,6 @@
 <script lang="ts">
+  import type { ConditionalIfElement, FormValueStore } from './types';
   import { computeIfElements } from './utils';
-  import type { FormValueStore, ConditionalIfElement } from './types';
 
   export let store: FormValueStore;
   export let condition: ConditionalIfElement['condition'] = 'eq';

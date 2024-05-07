@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { Form } from './form';
   import ModificationStatus from '../ModificationStatus.svelte';
+
+  import type { Form } from './form';
 
   export let form: Form;
 

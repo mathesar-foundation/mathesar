@@ -1,4 +1,5 @@
 import { iconUiTypeEmail } from '@mathesar/icons';
+
 import type { AbstractTypeConfiguration } from '../types';
 
 const emailType: AbstractTypeConfiguration = {

@@ -1,15 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Icon, iconLoading } from '@mathesar-component-library';
-  import {
-    getTabularDataStoreFromContext,
-    type Constraint,
-  } from '@mathesar/stores/table-data';
-  import { States } from '@mathesar/api/rest/utils/requestUtils';
+
   import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import {
+    type Constraint,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { Icon, iconLoading } from '@mathesar-component-library';
+
   import ConstraintTypeSection from './ConstraintTypeSection.svelte';
 
   const tabularData = getTabularDataStoreFromContext();

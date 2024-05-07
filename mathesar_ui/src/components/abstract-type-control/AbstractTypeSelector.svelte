@@ -1,13 +1,15 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { Select, LabeledInput } from '@mathesar-component-library';
+
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
     currentDbAbstractTypes,
     getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
   } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
+  import { LabeledInput, Select } from '@mathesar-component-library';
+
   import type { ColumnWithAbstractType } from './utils';
 
   const dispatch = createEventDispatcher<{

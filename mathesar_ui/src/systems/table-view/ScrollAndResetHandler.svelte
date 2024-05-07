@@ -1,15 +1,16 @@
 <script lang="ts">
   import { beforeUpdate, tick } from 'svelte';
+
+  import type { States } from '@mathesar/api/rest/utils/requestUtils';
+  import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
   import {
-    Sorting,
     Filtering,
     Grouping,
-    getTabularDataStoreFromContext,
     type Row,
+    Sorting,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
   import type Pagination from '@mathesar/utils/Pagination';
-  import type { States } from '@mathesar/api/rest/utils/requestUtils';
 
   const tabularData = getTabularDataStoreFromContext();
 

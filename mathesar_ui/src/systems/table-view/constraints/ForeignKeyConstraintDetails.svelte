@@ -1,13 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
+  import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import { Icon, Spinner, iconError } from '@mathesar/component-library';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Constraint } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
-  import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-  import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
-  import { Icon, iconError, Spinner } from '@mathesar/component-library';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
 
   export let constraint: Constraint;
 

@@ -1,4 +1,5 @@
 import type { DbType } from '@mathesar/AppTypes';
+
 import Fallback from './type-configs/fallback';
 import type { AbstractType, AbstractTypesMap } from './types';
 

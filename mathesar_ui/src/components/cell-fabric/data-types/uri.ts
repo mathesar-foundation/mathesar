@@ -1,5 +1,6 @@
-import type { ComponentAndProps } from '@mathesar-component-library/types';
 import { TextInput } from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import UriCell from './components/uri/UriCell.svelte';
 import type { CellComponentFactory } from './typeDefinitions';
 

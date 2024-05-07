@@ -1,17 +1,19 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Button, Icon, iconSettings } from '@mathesar-component-library';
+
   import {
     iconDeleteMajor,
-    iconMoveColumnsToNewLinkedTable,
     iconMoveColumnsToExistingLinkedTable,
+    iconMoveColumnsToNewLinkedTable,
   } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import {
-    getTabularDataStoreFromContext,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
+  import { Button, Icon, iconSettings } from '@mathesar-component-library';
+
   import ExtractColumnsModal from './column-extraction/ExtractColumnsModal.svelte';
   import { ExtractColumnsModalController } from './column-extraction/ExtractColumnsModalController';
 

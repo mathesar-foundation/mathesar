@@ -1,7 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Checkbox, compareWholeValues } from '@mathesar-component-library';
+
   import Default from '@mathesar/components/Default.svelte';
+  import { Checkbox, compareWholeValues } from '@mathesar-component-library';
+
   import CellWrapper from '../CellWrapper.svelte';
   import type { CheckBoxCellProps } from '../typeDefinitions';
 

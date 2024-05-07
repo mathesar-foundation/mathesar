@@ -1,4 +1,4 @@
-import { Filtering, type FilterEntry } from '@mathesar/stores/table-data';
+import { type FilterEntry, Filtering } from '@mathesar/stores/table-data';
 
 export function deepCloneFiltering(
   filtering: Pick<Filtering, 'combination' | 'entries'>,

@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
+
+  import type QueryModel from '../../QueryModel';
   import type { ColumnWithLink } from '../../utils';
+
   import SelectableColumn from './SelectableColumn.svelte';
   import TableGroupCollapsible from './TableGroupCollapsible.svelte';
-  import type QueryModel from '../../QueryModel';
 
   export let query: Writable<QueryModel>;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =

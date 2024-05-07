@@ -1,11 +1,12 @@
-import { derived, get, writable, readable } from 'svelte/store';
 import type { Readable } from 'svelte/store';
+import { derived, get, readable, writable } from 'svelte/store';
+
 import type {
-  FormConfiguration,
   FormBuildConfiguration,
-  FormValues,
-  FormValidationResult,
+  FormConfiguration,
   FormElement,
+  FormValidationResult,
+  FormValues,
 } from './types';
 import { computeIfElements, computeSwitchElements } from './utils';
 

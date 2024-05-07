@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import type {
     ColumnsDataStore,

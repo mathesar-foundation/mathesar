@@ -1,24 +1,25 @@
-import { writable, get as getStoreValue, derived } from 'svelte/store';
+import type {
+  Readable,
+  Subscriber,
+  Unsubscriber,
+  Updater,
+  Writable,
+} from 'svelte/store';
+import { derived, get as getStoreValue, writable } from 'svelte/store';
+
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Constraint as ApiConstraint } from '@mathesar/api/rest/types/tables/constraints';
+import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
 import {
+  States,
+  addQueryParamsToUrl,
   deleteAPI,
   getAPI,
   postAPI,
-  States,
-  addQueryParamsToUrl,
 } from '@mathesar/api/rest/utils/requestUtils';
-import type {
-  Writable,
-  Updater,
-  Subscriber,
-  Unsubscriber,
-  Readable,
-} from 'svelte/store';
-import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-import type { CancellablePromise } from '@mathesar-component-library';
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
-import type { Constraint as ApiConstraint } from '@mathesar/api/rest/types/tables/constraints';
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { ShareConsumer } from '@mathesar/utils/shares';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 /**
  * When representing a constraint on the front end, we directly use the object

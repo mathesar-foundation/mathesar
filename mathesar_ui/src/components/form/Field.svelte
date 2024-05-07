@@ -3,10 +3,11 @@
 
   import { LabeledInput, TextInput } from '@mathesar-component-library';
   import type { ComponentWithProps } from '@mathesar-component-library/types';
+
+  import type { FieldStore } from './field';
   import FieldErrors from './FieldErrors.svelte';
   import FieldHelp from './FieldHelp.svelte';
   import FieldLayout from './FieldLayout.svelte';
-  import type { FieldStore } from './field';
 
   type Layout = ComponentProps<LabeledInput>['layout'];
   type Value = $$Generic;

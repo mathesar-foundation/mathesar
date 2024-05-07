@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { Constraint } from '@mathesar/stores/table-data';
 
   export let constraint: Constraint;

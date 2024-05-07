@@ -5,6 +5,7 @@
  */
 
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
+
 import type { Column } from './columns';
 
 type ForeignKeyId = number;

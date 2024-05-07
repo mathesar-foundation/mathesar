@@ -2,9 +2,11 @@
   import type { ComponentProps } from 'svelte';
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
-  import { BadgeCount, Dropdown, Icon } from '@mathesar-component-library';
+
   import { iconSorting } from '@mathesar/icons';
   import type { Sorting } from '@mathesar/stores/table-data';
+  import { BadgeCount, Dropdown, Icon } from '@mathesar-component-library';
+
   import Sort from './Sort.svelte';
 
   interface $$Props extends ComponentProps<Dropdown> {

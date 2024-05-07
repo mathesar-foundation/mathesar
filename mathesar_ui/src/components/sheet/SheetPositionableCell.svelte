@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getSheetContext } from './utils';
   import type { ColumnPosition } from './utils';
+  import { getSheetContext } from './utils';
 
   const { stores } = getSheetContext();
   const { columnStyleMap } = stores;

@@ -3,12 +3,13 @@
 
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
-    rowHasSavedRecord,
-    SearchFuzzy,
     type ProcessedColumn,
     type RecordRow,
+    SearchFuzzy,
+    rowHasSavedRecord,
   } from '@mathesar/stores/table-data';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
+
   import Cell from './RecordSelectorCellWrapper.svelte';
 
   export let row: RecordRow;

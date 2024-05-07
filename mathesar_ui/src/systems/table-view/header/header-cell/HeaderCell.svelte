@@ -4,19 +4,19 @@
   using table inspector
 -->
 <script lang="ts">
-  import { Icon } from '@mathesar-component-library';
-  import {
-    getTabularDataStoreFromContext,
-    type ProcessedColumn,
-  } from '@mathesar/stores/table-data';
-  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import {
     iconFiltering,
     iconGrouping,
     iconSortAscending,
     iconSortDescending,
   } from '@mathesar/icons';
+  import {
+    type ProcessedColumn,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
+  import { Icon } from '@mathesar-component-library';
 
   export let processedColumn: ProcessedColumn;
   export let isSelected = false;

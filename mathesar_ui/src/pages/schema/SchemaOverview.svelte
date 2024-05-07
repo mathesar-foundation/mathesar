@@ -1,24 +1,26 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton, Button } from '@mathesar-component-library';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
+  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';
   import { refetchTablesForSchema } from '@mathesar/stores/tables';
-  import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
-  import OverviewHeader from './OverviewHeader.svelte';
-  import TablesList from './TablesList.svelte';
-  import ExplorationsList from './ExplorationsList.svelte';
-  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
+  import { AnchorButton, Button } from '@mathesar-component-library';
+
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
   import CreateNewTableButton from './CreateNewTableButton.svelte';
-  import TableSkeleton from './TableSkeleton.svelte';
+  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
+  import ExplorationsList from './ExplorationsList.svelte';
+  import OverviewHeader from './OverviewHeader.svelte';
+  import TableSkeleton from './TableSkeleton.svelte';
+  import TablesList from './TablesList.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
   export let explorationsMap: Map<number, QueryInstance>;

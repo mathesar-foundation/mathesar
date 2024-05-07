@@ -1,4 +1,5 @@
 import { CancellablePromise, hasProperty } from '@mathesar-component-library';
+
 import { RpcError } from './RpcError';
 
 const METHOD_PATH_SEPARATOR = '.';

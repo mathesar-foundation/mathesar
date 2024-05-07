@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { WithPanel } from '@mathesar-component-library';
   import { dataExplorerRightSidebarWidth } from '@mathesar/stores/localStorage';
   import type QueryManager from '@mathesar/systems/data-explorer/QueryManager';
   import type QueryRunner from '@mathesar/systems/data-explorer/QueryRunner';
+  import { WithPanel } from '@mathesar-component-library';
+
   import ExplorationInspector from './ExplorationInspector.svelte';
 
   export let isInspectorOpen: boolean;

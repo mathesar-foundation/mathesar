@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from '../icon/Icon.svelte';
+
   import TextInput from './TextInput.svelte';
   import type { TextInputWithPrefixProps } from './TextInputTypes';
 

@@ -3,18 +3,10 @@
   import { _ } from 'svelte-i18n';
 
   import {
-    CheckboxGroup,
-    NumberInput,
-    PasswordInput,
-    RadioGroup,
-    defined,
-    portalToWindowFooter,
-  } from '@mathesar-component-library';
-  import {
-    sampleDataOptions,
     type CommonCreationProps,
     type Connection,
     type SampleDataSchemaIdentifier,
+    sampleDataOptions,
   } from '@mathesar/api/rest/connections';
   import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
   import LabeledInput from '@mathesar/component-library/labeled-input/LabeledInput.svelte';
@@ -35,6 +27,15 @@
   import { connectionsStore } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
   import { getAvailableName } from '@mathesar/utils/db';
+  import {
+    CheckboxGroup,
+    NumberInput,
+    PasswordInput,
+    RadioGroup,
+    defined,
+    portalToWindowFooter,
+  } from '@mathesar-component-library';
+
   import GeneralConnection from './GeneralConnection.svelte';
   import {
     generalConnections,

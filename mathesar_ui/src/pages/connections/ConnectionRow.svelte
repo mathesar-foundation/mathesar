@@ -1,16 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Icon, Button } from '@mathesar-component-library';
-  import { iconEdit, iconDeleteMajor } from '@mathesar/icons';
+
+  import type { Connection } from '@mathesar/api/rest/connections';
+  import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
+  import { iconConnection } from '@mathesar/icons';
+  import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
-    EditConnectionModal,
     DeleteConnectionModal,
+    EditConnectionModal,
   } from '@mathesar/systems/connections';
-  import type { Connection } from '@mathesar/api/rest/connections';
-  import { getDatabasePageUrl } from '@mathesar/routes/urls';
-  import { iconConnection } from '@mathesar/icons';
+  import { Button, Icon } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;

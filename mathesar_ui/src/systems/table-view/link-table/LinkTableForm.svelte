@@ -1,25 +1,22 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    ensureReadable,
-    portalToWindowFooter,
-  } from '@mathesar-component-library';
+
   import type { LinksPostRequest } from '@mathesar/api/rest/types/links';
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { postAPI } from '@mathesar/api/rest/utils/requestUtils';
-  import SelectTable from '@mathesar/components/SelectTable.svelte';
   import {
     Field,
     FieldLayout,
+    type FilledFormValues,
     FormSubmit,
     comboInvalidIf,
     makeForm,
     requiredField,
-    type FilledFormValues,
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
@@ -39,15 +36,20 @@
   } from '@mathesar/utils/columnUtils';
   import { getAvailableName } from '@mathesar/utils/db';
   import { makeSingular } from '@mathesar/utils/languageUtils';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import Pill from './LinkTablePill.svelte';
-  import NewColumn from './NewColumn.svelte';
-  import SelectLinkType from './SelectLinkType.svelte';
   import {
+    assertExhaustive,
+    ensureReadable,
+    portalToWindowFooter,
+  } from '@mathesar-component-library';
+
+  import Pill from './LinkTablePill.svelte';
+  import {
+    type LinkType,
     columnNameIsNotId,
     suggestMappingTableName,
-    type LinkType,
   } from './linkTableUtils';
+  import NewColumn from './NewColumn.svelte';
+  import SelectLinkType from './SelectLinkType.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 

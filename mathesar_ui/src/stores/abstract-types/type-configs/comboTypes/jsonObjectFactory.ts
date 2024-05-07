@@ -1,4 +1,5 @@
 import { iconUiTypeJsonObject } from '@mathesar/icons';
+
 import type { AbstractTypeConfigurationFactory } from '../../types';
 
 const jsonObjectFactory: AbstractTypeConfigurationFactory = () => ({

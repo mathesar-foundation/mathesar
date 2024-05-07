@@ -1,23 +1,24 @@
 <script lang="ts">
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import { ContextMenu } from '@mathesar/component-library';
   import {
-    getTabularDataStoreFromContext,
-    ID_ADD_NEW_COLUMN,
-    ID_ROW_CONTROL_COLUMN,
-  } from '@mathesar/stores/table-data';
-  import {
-    SheetHeader,
     SheetCell,
     SheetCellResizer,
+    SheetHeader,
     isColumnSelected,
   } from '@mathesar/components/sheet';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import {
+    ID_ADD_NEW_COLUMN,
+    ID_ROW_CONTROL_COLUMN,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
   import { saveColumnOrder } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import { ContextMenu } from '@mathesar/component-library';
-  import HeaderCell from './header-cell/HeaderCell.svelte';
-  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
+
   import { Draggable, Droppable } from './drag-and-drop';
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
+  import HeaderCell from './header-cell/HeaderCell.svelte';
+  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 

@@ -2,8 +2,8 @@
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
 
-  import Window from '@mathesar-component-library-dir/window/Window.svelte';
   import portal from '@mathesar-component-library-dir/common/actions/portal';
+  import Window from '@mathesar-component-library-dir/window/Window.svelte';
 
   import type { ModalCloseAction, ModalWidth } from './modalTypes';
 

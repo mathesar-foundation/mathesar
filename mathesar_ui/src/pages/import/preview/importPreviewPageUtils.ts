@@ -1,4 +1,3 @@
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
 import type {
@@ -6,13 +5,14 @@ import type {
   TableEntry,
 } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
-import AsyncStore from '@mathesar/stores/AsyncStore';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,
   AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
+import AsyncStore from '@mathesar/stores/AsyncStore';
 import { createTable, deleteTable } from '@mathesar/stores/tables';
 
 /**

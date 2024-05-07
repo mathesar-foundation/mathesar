@@ -1,6 +1,6 @@
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
-import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
+import { assertExhaustive } from '@mathesar-component-library';
 
 export type TableLinkType = 'in_this_table' | 'from_other_tables';
 export type TableLink = {
@@ -49,6 +49,6 @@ export function getTableLinks(
       return links;
     }
     default:
-      throw new MissingExhaustiveConditionError(type);
+      return assertExhaustive(type);
   }
 }
