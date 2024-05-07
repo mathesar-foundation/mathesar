@@ -1,6 +1,6 @@
-import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { fireEvent, render } from '@testing-library/svelte';
+import { vi } from 'vitest';
 
 import SlotTest from '@mathesar-component-library-dir/__meta__/utils/SlotTest.svelte';
 

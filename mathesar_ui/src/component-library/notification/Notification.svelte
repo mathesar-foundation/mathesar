@@ -2,11 +2,12 @@
   import { createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
 
-  import { Button, Icon } from '@mathesar-component-library';
+  import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import {
     iconClose,
     iconError,
   } from '@mathesar-component-library-dir/common/icons';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
 
   const dispatch = createEventDispatcher();
 

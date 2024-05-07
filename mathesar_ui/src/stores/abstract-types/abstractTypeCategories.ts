@@ -11,8 +11,8 @@ import Duration from './type-configs/duration';
 import Email from './type-configs/email';
 import Fallback from './type-configs/fallback';
 import Money from './type-configs/money';
-import Text, { DB_TYPES as textDbTypes } from './type-configs/text';
 import Number from './type-configs/number';
+import Text, { DB_TYPES as textDbTypes } from './type-configs/text';
 import Time from './type-configs/time';
 import Uri from './type-configs/uri';
 import type {
