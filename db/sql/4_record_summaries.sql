@@ -107,7 +107,7 @@ msar.build_record_summary_query_from_template(
 */
 DECLARE
   base_alias CONSTANT text := 'base';
-  expr_parts text[];
+  expr_parts text[] := ARRAY[]::text[];
   expr text;
   base_tab_fqn text := __msar.get_relation_name(tab_id);
   base_pk_name text := msar.get_column_name(tab_id, msar.get_pk_column(tab_id));
@@ -195,7 +195,7 @@ BEGIN
     END;
   END LOOP;
 
-  IF array_length(expr_parts, 1) = 0 THEN
+  IF cardinality(expr_parts) = 0 THEN
     -- If the template didn't give us anything to render, then we show '?' as a fallback. This can
     -- happen if (e.g.) the template only contains a reference which is no longer valid due to a
     -- column being deleted.
