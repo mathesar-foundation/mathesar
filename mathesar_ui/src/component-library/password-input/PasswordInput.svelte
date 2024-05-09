@@ -1,5 +1,6 @@
 <script lang="ts">
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+
   import type { PasswordInputProps } from './PasswordInputTypes';
 
   type $$Props = PasswordInputProps;

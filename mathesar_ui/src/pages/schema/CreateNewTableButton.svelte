@@ -1,17 +1,18 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import { createTable } from '@mathesar/stores/tables';
-  import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
+  import { router } from 'tinro';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import {
-    DropdownMenu,
-    Spinner,
-    ButtonMenuItem,
-  } from '@mathesar-component-library';
-  import { iconAddNew } from '@mathesar/icons';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import { iconAddNew } from '@mathesar/icons';
+  import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
+  import { createTable } from '@mathesar/stores/tables';
+  import {
+    ButtonMenuItem,
+    DropdownMenu,
+    Spinner,
+  } from '@mathesar-component-library';
 
   export let database: Database;
   export let schema: SchemaEntry;

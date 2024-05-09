@@ -1,5 +1,6 @@
-import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
@@ -9,9 +10,9 @@ import {
   valid,
 } from '@mathesar/components/form';
 import {
-  constraintIsFk,
   type Constraint,
   type ProcessedColumn,
+  constraintIsFk,
 } from '@mathesar/stores/table-data';
 
 import type { LinkedTable } from './columnExtractionTypes';

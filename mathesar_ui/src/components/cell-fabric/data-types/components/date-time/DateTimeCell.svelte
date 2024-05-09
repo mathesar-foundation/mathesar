@@ -1,6 +1,7 @@
 <script lang="ts">
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { DateTimeCellProps } from '../typeDefinitions';
+
   import DateTimeInput from './DateTimeInput.svelte';
 
   type $$Props = DateTimeCellProps;

@@ -1,5 +1,6 @@
-import { iconUiTypeArray } from '@mathesar/icons';
 import type { ArrayTypeOptions } from '@mathesar/api/rest/types/tables/columns';
+import { iconUiTypeArray } from '@mathesar/icons';
+
 import type { AbstractTypeConfigurationFactory } from '../../types';
 import { getAbstractTypeForDbType } from '../../utils';
 

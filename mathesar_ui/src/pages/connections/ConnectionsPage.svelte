@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { Button, Icon } from '@mathesar-component-library';
   import type { Connection } from '@mathesar/api/rest/connections';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
@@ -15,6 +14,8 @@
     AddConnectionModal,
     ConnectionsEmptyState,
   } from '@mathesar/systems/connections';
+  import { Button, Icon } from '@mathesar-component-library';
+
   import ConnectionRow from './ConnectionRow.svelte';
 
   const addConnectionModalController = modal.spawnModalController();

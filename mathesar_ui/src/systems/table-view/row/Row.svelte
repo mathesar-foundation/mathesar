@@ -1,28 +1,29 @@
 <script lang="ts">
+  import { ContextMenu } from '@mathesar/component-library';
   import {
-    getCellKey,
-    getTabularDataStoreFromContext,
-    isNewRecordRow,
-    isPlaceholderRow,
-    rowHasRecord,
-    isGroupHeaderRow,
-    isHelpTextRow,
-    getRowKey,
-    ID_ROW_CONTROL_COLUMN,
-    type Row,
-  } from '@mathesar/stores/table-data';
-  import {
-    SheetRow,
     SheetCell,
+    SheetRow,
     isRowSelected,
   } from '@mathesar/components/sheet';
   import { rowHeightPx } from '@mathesar/geometry';
-  import { ContextMenu } from '@mathesar/component-library';
-  import NewRecordMessage from './NewRecordMessage.svelte';
+  import {
+    ID_ROW_CONTROL_COLUMN,
+    type Row,
+    getCellKey,
+    getRowKey,
+    getTabularDataStoreFromContext,
+    isGroupHeaderRow,
+    isHelpTextRow,
+    isNewRecordRow,
+    isPlaceholderRow,
+    rowHasRecord,
+  } from '@mathesar/stores/table-data';
+
   import GroupHeader from './GroupHeader.svelte';
+  import NewRecordMessage from './NewRecordMessage.svelte';
   import RowCell from './RowCell.svelte';
-  import RowControl from './RowControl.svelte';
   import RowContextOptions from './RowContextOptions.svelte';
+  import RowControl from './RowControl.svelte';
 
   export let row: Row;
   export let style: { [key: string]: string | number };

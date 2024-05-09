@@ -1,13 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { portal, Window } from '@mathesar-component-library';
-  import TableName from '@mathesar/components/TableName.svelte';
+
   import { RichText } from '@mathesar/components/rich-text';
+  import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
   import { getTableName } from '@mathesar/stores/tables';
-  import Pagination from '@mathesar/utils/Pagination';
   import { tables } from '@mathesar/stores/tables';
+  import Pagination from '@mathesar/utils/Pagination';
+  import { Window, portal } from '@mathesar-component-library';
+
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
 

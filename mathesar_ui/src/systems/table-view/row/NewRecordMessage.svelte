@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import { SheetPositionableCell } from '@mathesar/components/sheet';
 
   export let columnCount: number;

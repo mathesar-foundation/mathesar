@@ -1,14 +1,16 @@
 import type {
+  Column,
   MoneyDisplayOptions,
   NumberFormat,
-  Column,
 } from '@mathesar/api/rest/types/tables/columns';
-import type { FormValues } from '@mathesar-component-library/types';
 import { iconUiTypeMoney } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
+
 import { getDecimalPlaces } from './number';
 
 const DB_TYPES = {

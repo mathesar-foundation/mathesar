@@ -1,11 +1,12 @@
 import type { CancellablePromise } from '@mathesar-component-library';
+
 import type { DataFile } from './types/dataFiles';
 import {
+  type UploadCompletionOpts,
   getAPI,
   patchAPI,
   postAPI,
   uploadFile,
-  type UploadCompletionOpts,
 } from './utils/requestUtils';
 
 const ENDPOINT = '/api/db/v0/data_files/';

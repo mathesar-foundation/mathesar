@@ -1,15 +1,12 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import {
-    CancelOrProceedButtonPair,
-    Spinner,
-  } from '@mathesar-component-library';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { router } from 'tinro';
+
   import { columnsApi } from '@mathesar/api/rest/columns';
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import {
     Field,
     FieldLayout,
@@ -24,8 +21,8 @@
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
-  import AsyncStore from '@mathesar/stores/AsyncStore';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import AsyncStore from '@mathesar/stores/AsyncStore';
   import {
     generateTablePreview,
     getTypeSuggestionsForTable,
@@ -33,11 +30,16 @@
     tables,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
+  import {
+    CancelOrProceedButtonPair,
+    Spinner,
+  } from '@mathesar-component-library';
+
   import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
+
   import ErrorInfo from './ErrorInfo.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
-  import ImportPreviewSheet from './ImportPreviewSheet.svelte';
   import {
     buildColumnPropertiesMap,
     finalizeColumns,
@@ -46,6 +48,7 @@
     makeHeaderUpdateRequest,
     processColumns,
   } from './importPreviewPageUtils';
+  import ImportPreviewSheet from './ImportPreviewSheet.svelte';
 
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;

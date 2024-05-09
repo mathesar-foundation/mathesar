@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { _ } from 'svelte-i18n';
   import { fade } from 'svelte/transition';
+  import { _ } from 'svelte-i18n';
+
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+
   import StatusIndicator from './StatusIndicator.svelte';
 
   let incomingRequestState: RequestStatus['state'] | undefined;

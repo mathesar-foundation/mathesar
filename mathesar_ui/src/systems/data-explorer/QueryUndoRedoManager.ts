@@ -1,4 +1,5 @@
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+
 import QueryListEntry from './QueryListEntry';
 import QueryModel from './QueryModel';
 

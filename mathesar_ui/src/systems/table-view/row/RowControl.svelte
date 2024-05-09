@@ -1,17 +1,18 @@
 <script lang="ts">
-  import { Icon, iconLoading } from '@mathesar-component-library';
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import {
+    type Meta,
+    type RecordsData,
+    type Row,
     getRowKey,
     isNewRecordRow,
     isPlaceholderRow,
     rowHasRecord,
-    type Meta,
-    type RecordsData,
-    type Row,
   } from '@mathesar/stores/table-data';
-  import CellBackground from '@mathesar/components/CellBackground.svelte';
-  import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
+  import { Icon, iconLoading } from '@mathesar-component-library';
+
   import CellErrors from './CellErrors.svelte';
 
   export let primaryKeyColumnId: number | undefined = undefined;

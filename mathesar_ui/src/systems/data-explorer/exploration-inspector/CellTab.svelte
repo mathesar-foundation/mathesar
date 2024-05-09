@@ -8,7 +8,9 @@
    * changes to both files as necessary.
    */
   import { _ } from 'svelte-i18n';
+
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+
   import type QueryRunner from '../QueryRunner';
 
   export let queryHandler: QueryRunner;

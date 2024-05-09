@@ -1,17 +1,18 @@
-import {
-  StringifiedNumberFormatter,
-  isDefinedNonNullable,
-} from '@mathesar-component-library';
 import type {
   MoneyColumn,
   NumberFormat,
 } from '@mathesar/api/rest/types/tables/columns';
+import {
+  StringifiedNumberFormatter,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import MoneyCell from './components/money/MoneyCell.svelte';
 import MoneyCellInput from './components/money/MoneyCellInput.svelte';
 import type { MoneyCellExternalProps } from './components/typeDefinitions';
-import type { CellComponentFactory } from './typeDefinitions';
 import { getUseGrouping } from './number';
+import type { CellComponentFactory } from './typeDefinitions';
 
 // Values to use if for some reason we don't get them from the API.
 const FALLBACK_CURRENCY_SYMBOL = '$';

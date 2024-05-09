@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+
   import { getSheetContext } from './utils';
 
   const { stores, api } = getSheetContext();

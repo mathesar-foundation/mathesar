@@ -1,24 +1,25 @@
 import { type Readable, derived, writable } from 'svelte/store';
+
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
-import {
-  type CancellablePromise,
-  EventHandler,
-  WritableSet,
-} from '@mathesar-component-library';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   PaginatedResponse,
   RequestStatus,
 } from '@mathesar/api/rest/utils/requestUtils';
 import {
+  addQueryParamsToUrl,
   deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
-  addQueryParamsToUrl,
 } from '@mathesar/api/rest/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { ShareConsumer } from '@mathesar/utils/shares';
+import {
+  type CancellablePromise,
+  EventHandler,
+  WritableSet,
+} from '@mathesar-component-library';
 
 function api(url: string) {
   return {

@@ -1,8 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { Icon } from '@mathesar-component-library';
+
   import { iconLinkToRecordPage, iconPickRecord } from '@mathesar/icons';
+  import { Icon } from '@mathesar-component-library';
+
   import type { RecordSelectorPurpose } from './recordSelectorUtils';
 
   const dispatch = createEventDispatcher();

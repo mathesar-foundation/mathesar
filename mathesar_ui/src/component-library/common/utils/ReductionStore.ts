@@ -1,9 +1,10 @@
 import {
-  derived,
   type Readable,
   type Subscriber,
   type Unsubscriber,
+  derived,
 } from 'svelte/store';
+
 import { collapse, ensureReadable, unite } from './storeUtils';
 import WritableSet from './WritableSet';
 

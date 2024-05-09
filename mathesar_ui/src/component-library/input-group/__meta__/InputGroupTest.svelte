@@ -1,5 +1,6 @@
 <script lang="ts">
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
+
   import InputGroup from '../InputGroup.svelte';
   import InputGroupText from '../InputGroupText.svelte';
 </script>

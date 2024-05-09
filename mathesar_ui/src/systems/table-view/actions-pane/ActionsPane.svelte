@@ -1,14 +1,16 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Button, Icon } from '@mathesar-component-library';
+
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconInspector, iconTable } from '@mathesar/icons';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { Button, Icon } from '@mathesar-component-library';
+
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';

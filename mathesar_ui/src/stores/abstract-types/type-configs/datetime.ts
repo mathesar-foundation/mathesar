@@ -1,16 +1,18 @@
-import type { FormValues } from '@mathesar-component-library/types';
 import type {
-  TimeStampDisplayOptions,
-  TimeFormat,
-  DateFormat,
   Column,
+  DateFormat,
+  TimeFormat,
+  TimeStampDisplayOptions,
 } from '@mathesar/api/rest/types/tables/columns';
 import { iconUiTypeDateTime } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
-  AbstractTypeDbConfig,
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
+  AbstractTypeDbConfig,
 } from '../types';
+
 import { getDateFormatOptions, getTimeFormatOptions } from './utils';
 
 const DB_TYPES = {

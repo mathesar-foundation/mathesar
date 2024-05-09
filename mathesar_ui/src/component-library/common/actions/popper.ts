@@ -1,9 +1,9 @@
 // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
 import { createPopper } from '@popperjs/core/dist/umd/popper.min';
 import type {
+  Instance,
   ModifierArguments,
   Options,
-  Instance,
   VirtualElement,
 } from '@popperjs/core/lib/types';
 import type { ActionReturn } from 'svelte/action';

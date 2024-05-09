@@ -1,4 +1,5 @@
 import { get } from 'svelte/store';
+
 import { makeForm } from '../formFactory';
 
 describe('Form factory tests', () => {

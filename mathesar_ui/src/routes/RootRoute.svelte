@@ -1,11 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
-  import type { CommonData } from '@mathesar/utils/preloadData';
-  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+
   import RouteObserver from '@mathesar/components/routing/RouteObserver.svelte';
-  import AuthenticatedRoutes from './AuthenticatedRoutes.svelte';
+  import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
+  import type { CommonData } from '@mathesar/utils/preloadData';
+
   import AnonymousAccessRoutes from './AnonymousAccessRoutes.svelte';
+  import AuthenticatedRoutes from './AuthenticatedRoutes.svelte';
 
   export let commonData: CommonData;
 </script>

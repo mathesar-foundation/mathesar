@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import { iconExploration } from '@mathesar/icons';
+
   import NameWithIcon from './NameWithIcon.svelte';
 
   export let query: QueryInstance;

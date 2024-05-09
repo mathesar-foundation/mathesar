@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Help, isDefinedNonNullable } from '@mathesar-component-library';
+
   import type {
     JoinableTable,
     JoinableTablesResult,
@@ -9,6 +9,8 @@
   import { RichText } from '@mathesar/components/rich-text';
   import { iconRecord } from '@mathesar/icons';
   import { tables } from '@mathesar/stores/tables';
+  import { Help, isDefinedNonNullable } from '@mathesar-component-library';
+
   import TableWidget from './TableWidget.svelte';
 
   export let recordPk: string;

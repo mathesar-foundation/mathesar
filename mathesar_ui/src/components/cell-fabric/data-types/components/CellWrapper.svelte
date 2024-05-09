@@ -1,7 +1,9 @@
 <script lang="ts">
-  import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
-  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { tick } from 'svelte';
+
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
+  import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
+
   import type { HorizontalAlignment } from './typeDefinitions';
 
   export let element: HTMLElement | undefined = undefined;

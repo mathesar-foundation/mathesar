@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import { faBackspace, faTimes } from '@fortawesome/free-solid-svg-icons';
+  import { createEventDispatcher } from 'svelte';
+
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
   import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
   import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';

@@ -1,11 +1,6 @@
 import { some } from 'iter-tools';
-import { derived, get, writable, type Readable } from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 
-import {
-  ImmutableMap,
-  WritableMap,
-  defined,
-} from '@mathesar-component-library';
 import connectionsApi, {
   type Connection,
   type CreateWithNewUserProps,
@@ -14,6 +9,11 @@ import connectionsApi, {
 import { api } from '@mathesar/api/rpc';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
+import {
+  ImmutableMap,
+  WritableMap,
+  defined,
+} from '@mathesar-component-library';
 
 const commonData = preloadCommonData();
 

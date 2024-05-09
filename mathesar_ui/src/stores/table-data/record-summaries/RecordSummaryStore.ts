@@ -1,9 +1,10 @@
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import { ImmutableMap } from '@mathesar-component-library';
+
 import {
-  mergeRecordSummariesForSheet,
   type RecordSummariesForSheet,
+  mergeRecordSummariesForSheet,
 } from './recordSummaryUtils';
 
 /**

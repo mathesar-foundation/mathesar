@@ -1,13 +1,7 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import {
-    AnchorButton,
-    Button,
-    Help,
-    Icon,
-    iconExternalLink,
-  } from '@mathesar-component-library';
+  import { router } from 'tinro';
+
   import { iconDeleteMajor, iconExploration } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
@@ -19,6 +13,14 @@
     constructDataExplorerUrlToSummarizeFromGroup,
     createDataExplorerUrlToExploreATable,
   } from '@mathesar/systems/data-explorer';
+  import {
+    AnchorButton,
+    Button,
+    Help,
+    Icon,
+    iconExternalLink,
+  } from '@mathesar-component-library';
+
   import TableDeleteConfirmationBody from './TableDeleteConfirmationBody.svelte';
 
   export let canExecuteDDL: boolean;

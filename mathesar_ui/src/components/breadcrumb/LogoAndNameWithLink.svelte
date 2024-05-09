@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import Logo from '../Logo.svelte';
 
   export let hasResponsiveAbridgement = false;

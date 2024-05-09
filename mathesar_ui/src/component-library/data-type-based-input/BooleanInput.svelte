@@ -1,5 +1,6 @@
 <script lang="ts">
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
+
   import type { DataTypeBasedInputInterface } from './types';
 
   export let value = false;

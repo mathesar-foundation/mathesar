@@ -1,13 +1,15 @@
-import { makeForm } from '@mathesar-component-library';
+import { readable } from 'svelte/store';
+
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { DbType } from '@mathesar/AppTypes';
-import type { FormBuildConfiguration } from '@mathesar-component-library/types';
 import type {
   AbstractType,
   AbstractTypeDbConfig,
   AbstractTypeDisplayConfig,
 } from '@mathesar/stores/abstract-types/types';
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
-import { readable } from 'svelte/store';
+import { makeForm } from '@mathesar-component-library';
+import type { FormBuildConfiguration } from '@mathesar-component-library/types';
+
 import DurationConfiguration from './config-components/DurationConfiguration.svelte';
 
 export interface ColumnWithAbstractType

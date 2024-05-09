@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { getUsername, type GeneralConnection } from './generalConnections';
+  import { type GeneralConnection, getUsername } from './generalConnections';
 
   export let generalConnection: GeneralConnection;
 

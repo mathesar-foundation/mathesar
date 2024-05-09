@@ -1,9 +1,9 @@
-import type { Share, UnsavedShare, ShareApi } from './shares';
+import type { Share, ShareApi, UnsavedShare } from './shares';
 import {
+  type PaginatedResponse,
   getAPI,
   patchAPI,
   postAPI,
-  type PaginatedResponse,
 } from './utils/requestUtils';
 
 type UnsavedQueryShare = UnsavedShare;

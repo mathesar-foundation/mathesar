@@ -1,32 +1,34 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    ensureReadable,
-    RadioGroup,
-    Spinner,
-  } from '@mathesar-component-library';
+
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import {
+    type FilledFormValues,
     FormSubmit,
     makeForm,
     requiredField,
     uniqueWith,
-    type FilledFormValues,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
-    getTabularDataStoreFromContext,
-    TableStructure,
     type ProcessedColumn,
+    TableStructure,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
   import { getAvailableName } from '@mathesar/utils/db';
+  import {
+    RadioGroup,
+    Spinner,
+    ensureReadable,
+  } from '@mathesar-component-library';
+
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;

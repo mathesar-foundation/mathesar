@@ -1,10 +1,11 @@
+import type { TextTypeOptions } from '@mathesar/api/rest/types/tables/columns';
+import GrowableTextArea from '@mathesar/components/GrowableTextArea.svelte';
 import { TextInput, optionalNonNullable } from '@mathesar-component-library';
 import type {
   ComponentAndProps,
   TextInputProps,
 } from '@mathesar-component-library/types';
-import type { TextTypeOptions } from '@mathesar/api/rest/types/tables/columns';
-import GrowableTextArea from '@mathesar/components/GrowableTextArea.svelte';
+
 import TextAreaCell from './components/textarea/TextAreaCell.svelte';
 import TextBoxCell from './components/textbox/TextBoxCell.svelte';
 import type {

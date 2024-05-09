@@ -1,6 +1,7 @@
 <script lang="ts">
-  import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import AttachableDropdown from '@mathesar-component-library-dir/dropdown/AttachableDropdown.svelte';
+  import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
+
   import InlineDateTimePicker from './InlineDateTimePicker.svelte';
 
   export let value: string | null | undefined;

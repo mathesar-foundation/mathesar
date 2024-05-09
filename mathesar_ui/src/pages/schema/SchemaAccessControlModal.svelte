@@ -1,20 +1,21 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import type { UserRole } from '@mathesar/api/rest/users';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
+  import {
+    type UserModel,
+    setUsersStoreInContext,
+  } from '@mathesar/stores/users';
+  import { AccessControlView } from '@mathesar/systems/users-and-permissions';
+  import type { ObjectRoleMap } from '@mathesar/utils/permissions';
   import {
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import Identifier from '@mathesar/components/Identifier.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
-  import {
-    setUsersStoreInContext,
-    type UserModel,
-  } from '@mathesar/stores/users';
-  import type { UserRole } from '@mathesar/api/rest/users';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { AccessControlView } from '@mathesar/systems/users-and-permissions';
-  import type { ObjectRoleMap } from '@mathesar/utils/permissions';
 
   export let controller: ModalController;
   export let database: Database;
