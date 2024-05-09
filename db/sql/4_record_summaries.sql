@@ -151,7 +151,7 @@ BEGIN
             join_clause text;
           BEGIN
             IF fk_col_name IS NULL THEN
-              -- Silently ignore references to non-existing columns. This can happen if a column
+              -- Silently ignore references to non-existing FK columns. This can happen if a column
               -- has been deleted.
               CONTINUE template_parts_loop;
             END IF;
@@ -183,10 +183,12 @@ BEGIN
         END LOOP;
 
         ref_column_name := msar.get_column_name(contextual_tab_id, ref_chain[ref_chain_length]);
-        expr_parts := array_append(
-          expr_parts,
-          concat('cast(', prev_alias,'.', ref_column_name, ' AS text)')
-        );
+        IF ref_column_name IS NOT NULL THEN
+          expr_parts := array_append(
+            expr_parts,
+            concat('cast(', prev_alias,'.', ref_column_name, ' AS text)')
+          );
+        END IF;
 
       -- String literal template parts
       ELSIF jsonb_typeof(template_part) = 'string' THEN
