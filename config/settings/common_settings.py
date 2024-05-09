@@ -65,7 +65,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = "config.urls"
 
 MODERNRPC_METHODS_MODULES = [
-    'mathesar.rpc.connections'
+    'mathesar.rpc.connections',
+    'mathesar.rpc.columns'
 ]
 
 TEMPLATES = [

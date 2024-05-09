@@ -1,9 +1,11 @@
+from unittest.mock import patch
 import warnings
 import pytest
 from sqlalchemy import (
     String, Integer, Column, Table, MetaData, DateTime, func
 )
 from db.columns.exceptions import DynamicDefaultWarning
+from db.columns.operations import select as col_select
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default,
     get_column_name_from_attnum, get_columns_attnum_from_names,
@@ -11,6 +13,14 @@ from db.columns.operations.select import (
 from db.tables.operations.select import get_oid_from_table
 from db.tests.columns.utils import column_test_dict, get_default
 from db.metadata import get_empty_metadata
+
+
+def test_get_column_info_for_table():
+    with patch.object(col_select, 'exec_msar_func') as mock_exec:
+        mock_exec.return_value.fetchone = lambda: ('a', 'b')
+        result = col_select.get_column_info_for_table('table', 'conn')
+    mock_exec.assert_called_once_with('conn', 'get_column_info', 'table')
+    assert result == 'a'
 
 
 def test_get_attnum_from_name(engine_with_schema):
