@@ -183,7 +183,10 @@ BEGIN
         END LOOP;
 
         ref_column_name := msar.get_column_name(contextual_tab_id, ref_chain[ref_chain_length]);
-        expr_parts := array_append(expr_parts, concat(prev_alias, '.', ref_column_name));
+        expr_parts := array_append(
+          expr_parts,
+          concat('cast(', prev_alias,'.', ref_column_name, ' AS text)')
+        );
 
       -- String literal template parts
       ELSIF jsonb_typeof(template_part) = 'string' THEN
