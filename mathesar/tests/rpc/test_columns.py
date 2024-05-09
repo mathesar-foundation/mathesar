@@ -1,3 +1,10 @@
+"""
+This file tests the column listing function.
+
+Fixtures:
+    rf(pytest-django): Provides mocked `Request` objects.
+    admin_client(pytest): Lets you monkeypatch an object for testing.
+"""
 from contextlib import contextmanager
 
 from mathesar.rpc import columns
