@@ -6,7 +6,7 @@ on:
       - master
   workflow_dispatch:
   schedule:
-    - cron: '1,9,17,30,45 6,7,8 * * *'
+    - cron: '30 6 * * *'
 
 
 env:
