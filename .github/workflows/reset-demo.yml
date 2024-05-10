@@ -6,7 +6,7 @@ on:
       - master
   workflow_dispatch:
   schedule:
-    - cron: '1,9,17,30,45 6,7,8 * * *'
+    - cron: '30 6 * * *'
 
 
 env:
@@ -34,17 +34,19 @@ jobs:
           location: ${{ env.GKE_ZONE }}
 
       - name: Delete existing demo deployment
-        run: kubectl delete deployments.apps demo-serve
+        run: kubectl delete deployments.apps demo-serve --ignore-not-found=true
 
       - name: Wait until all pods are removed
         run: >-
-          attempts=10
-          until [ $attempts -le 0 ] || [ -z "$(kubectl get pods)" ]; do
-            sleep 5
-            attempts=$((attempts - 1))
+          attempts=10;
+          until [ $attempts -le 0 ] || [ -z "$(kubectl get pods --selector=run=demo-serve)" ];
+          do
+            sleep 5;
+            attempts=$((attempts - 1));
           done
-          if [ $attempts -le 0 ]; then
-            return 1
+          if [ $attempts -le 0 ];
+          then
+            return 1;
           fi
 
       - name: Deploy demo
