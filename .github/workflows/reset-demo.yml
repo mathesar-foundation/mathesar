@@ -43,11 +43,11 @@ jobs:
           do
             sleep 5;
             attempts=$((attempts - 1));
-          done
+          done;
           if [ $attempts -le 0 ];
           then
             return 1;
-          fi
+          fi;
 
       - name: Deploy demo
         run: kubectl apply -f ./kubernetes_manifests/mathesar-demo.yml
