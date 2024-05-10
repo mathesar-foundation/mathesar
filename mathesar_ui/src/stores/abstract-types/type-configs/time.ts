@@ -1,15 +1,17 @@
-import type { FormValues } from '@mathesar-component-library/types';
 import type {
+  Column,
   TimeDisplayOptions,
   TimeFormat,
-  Column,
-} from '@mathesar/api/types/tables/columns';
+} from '@mathesar/api/rest/types/tables/columns';
 import { iconUiTypeTime } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
-  AbstractTypeDbConfig,
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
+  AbstractTypeDbConfig,
 } from '../types';
+
 import { getTimeFormatOptions } from './utils';
 
 const DB_TYPES = {

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { popper, portal } from '@mathesar-component-library';
   import { onMount } from 'svelte';
+
+  import { popper, portal } from '@mathesar-component-library';
 
   export let errors: string[];
   export let forceShowErrors = false;

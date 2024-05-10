@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+
 import NumberInput from '../NumberInput.svelte';
 
 test.each([

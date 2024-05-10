@@ -1,14 +1,15 @@
 import type { DbType } from '@mathesar/AppTypes';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
 import { TextInput, isDefinedNonNullable } from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import ArrayCell from './components/array/ArrayCell.svelte';
 import type { ArrayCellExternalProps } from './components/typeDefinitions';
 import type {
-  SimpleCellDataTypes,
-  CellComponentFactory,
   CellColumnLike,
+  CellComponentFactory,
+  SimpleCellDataTypes,
 } from './typeDefinitions';
-import { getCellInfo, getCellConfiguration } from './utils';
+import { getCellConfiguration, getCellInfo } from './utils';
 
 export interface ArrayLikeColumn extends CellColumnLike {
   type_options: {

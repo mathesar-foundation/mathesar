@@ -1,9 +1,9 @@
 import { abstractTypeCategory } from '../constants';
 import type {
   AbstractTypeCategoryIdentifier,
-  AbstractTypePreprocFunctionsResponse,
   AbstractTypePreprocFunctionDefinition,
   AbstractTypePreprocFunctionDefinitionMap,
+  AbstractTypePreprocFunctionsResponse,
 } from '../types';
 
 const preprocFunctionsResponse: AbstractTypePreprocFunctionsResponse[] = [

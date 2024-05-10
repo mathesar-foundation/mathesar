@@ -1,11 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { AnchorButton, Icon } from '@mathesar-component-library';
+
   import { iconExternalHyperlink } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getDocsLink, getWikiLink } from '@mathesar/routes/urls';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { ConnectionsEmptyState } from '@mathesar/systems/connections';
+  import { AnchorButton, Icon } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;

@@ -1,7 +1,7 @@
 import {
-  splitMatchParts,
   match as m,
   nonMatch as n,
+  splitMatchParts,
 } from '../matchHighlighterUtils';
 
 test.each([

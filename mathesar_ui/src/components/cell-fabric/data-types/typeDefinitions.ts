@@ -1,7 +1,8 @@
 import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import type {
-  CellValueFormatter,
   CellColumnLike as CellColumnLikeInner,
+  CellValueFormatter,
 } from './components/typeDefinitions';
 
 export type CellColumnLike = CellColumnLikeInner;

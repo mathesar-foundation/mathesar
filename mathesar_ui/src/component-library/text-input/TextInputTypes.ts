@@ -3,6 +3,7 @@ import type {
   CssVariablesObj,
   SimplifiedInputProps,
 } from '@mathesar-component-library-dir/commonTypes';
+
 import type { IconProps } from '../types';
 
 export interface TextInputProps extends SimplifiedInputProps, BaseInputProps {

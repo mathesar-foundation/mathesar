@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import { Button, Icon, Spinner } from '@mathesar-component-library';
-  import type { Response as ApiRecordsResponse } from '@mathesar/api/types/tables/records';
-  import { postAPI, States } from '@mathesar/api/utils/requestUtils';
+  import { router } from 'tinro';
+
+  import type { Response as ApiRecordsResponse } from '@mathesar/api/rest/types/tables/records';
+  import { States, postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import { iconAddNew } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
@@ -19,6 +19,8 @@
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { Button, Icon, Spinner } from '@mathesar-component-library';
+
   import type {
     RecordSelectorController,
     RecordSelectorResult,

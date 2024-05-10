@@ -1,5 +1,6 @@
 <script lang="ts">
   import { TextInput, optionalNonNullable } from '@mathesar-component-library';
+
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { TextBoxCellProps } from '../typeDefinitions';
 

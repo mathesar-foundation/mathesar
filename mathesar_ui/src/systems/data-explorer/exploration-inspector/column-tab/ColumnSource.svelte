@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import TableName from '@mathesar/components/TableName.svelte';
+
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import TableName from '@mathesar/components/TableName.svelte';
+
   import type {
     ProcessedQueryResultColumn,
     ProcessedQueryResultColumnMap,

@@ -1,9 +1,10 @@
 import type { ParseResult } from '@mathesar-component-library-dir/formatted-input/FormattedInputTypes';
+
 import { factoryToNormalize, factoryToSimplify } from './cleaners';
 import {
+  factoryToFormatSimplifiedInputForLocale,
   formatToNormalizedForm,
   makeFormatter,
-  factoryToFormatSimplifiedInputForLocale,
 } from './formatter';
 import { fractionDigitCount, hasTrailingDecimal } from './inference';
 import type { DerivedOptions } from './options';

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { DbType } from '@mathesar/AppTypes';
 
   export let type: DbType | undefined;

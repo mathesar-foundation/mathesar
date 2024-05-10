@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import { iconSchema } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
@@ -7,6 +8,7 @@
     currentSchemaId,
     schemas as schemasStore,
   } from '@mathesar/stores/schemas';
+
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 

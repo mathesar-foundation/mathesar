@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
   import { _ } from 'svelte-i18n';
+
   import { RadioGroup } from '@mathesar-component-library';
-  import LabelYesHeaderRow from './LabelYesHeaderRow.svelte';
+
   import LabelNoHeaderRow from './LabelNoHeaderRow.svelte';
+  import LabelYesHeaderRow from './LabelYesHeaderRow.svelte';
 
   type $$Props = ComponentProps<RadioGroup<boolean>>;
 

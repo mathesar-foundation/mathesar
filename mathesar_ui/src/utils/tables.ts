@@ -1,9 +1,9 @@
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import {
   getImportPreviewPageUrl,
   getTablePageUrl,
 } from '@mathesar/routes/urls';
+import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 export function isTableImportConfirmationRequired(
   table: Partial<Pick<TableEntry, 'import_verified' | 'data_files'>>,

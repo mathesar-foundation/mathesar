@@ -1,15 +1,14 @@
-import { writable, derived, get } from 'svelte/store';
-import type { Writable, Readable, Unsubscriber } from 'svelte/store';
+import type { Readable, Unsubscriber, Writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
 
-import { preloadCommonData } from '@mathesar/utils/preloadData';
+import type { Connection } from '@mathesar/api/rest/connections';
+import schemasApi from '@mathesar/api/rest/schemas';
 import type {
   PaginatedResponse,
   RequestStatus,
-} from '@mathesar/api/utils/requestUtils';
-import schemasApi from '@mathesar/api/schemas';
-import type { Connection } from '@mathesar/api/connections';
-
+} from '@mathesar/api/rest/utils/requestUtils';
 import type { SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 import { connectionsStore } from './databases';

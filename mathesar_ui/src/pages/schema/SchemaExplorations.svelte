@@ -1,13 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+
+  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton } from '@mathesar-component-library';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import ExplorationsList from './ExplorationsList.svelte';
+  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import { AnchorButton } from '@mathesar-component-library';
+
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
+  import ExplorationsList from './ExplorationsList.svelte';
 
   export let database: Database;
   export let schema: SchemaEntry;

@@ -1,28 +1,29 @@
 import type { DbType } from '@mathesar/AppTypes';
+
 import { abstractTypeCategory } from './constants';
-import Text, { DB_TYPES as textDbTypes } from './type-configs/text';
-import Money from './type-configs/money';
-import Email from './type-configs/email';
-import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
-import Uri from './type-configs/uri';
-import Duration from './type-configs/duration';
-import Date from './type-configs/date';
-import Time from './type-configs/time';
-import DateTime from './type-configs/datetime';
-import Fallback from './type-configs/fallback';
+import arrayFactory from './type-configs/comboTypes/arrayFactory';
 import jsonArrayFactory from './type-configs/comboTypes/jsonArrayFactory';
 import jsonObjectFactory from './type-configs/comboTypes/jsonObjectFactory';
-import arrayFactory from './type-configs/comboTypes/arrayFactory';
+import Date from './type-configs/date';
+import DateTime from './type-configs/datetime';
+import Duration from './type-configs/duration';
+import Email from './type-configs/email';
+import Fallback from './type-configs/fallback';
+import Money from './type-configs/money';
+import Number from './type-configs/number';
+import Text, { DB_TYPES as textDbTypes } from './type-configs/text';
+import Time from './type-configs/time';
+import Uri from './type-configs/uri';
 import type {
   AbstractType,
-  AbstractTypesMap,
-  AbstractTypeResponse,
   AbstractTypeCategoryIdentifier,
-  AbstractTypeConfigurationPartialMap,
   AbstractTypeConfigurationFactory,
+  AbstractTypeConfigurationPartialMap,
+  AbstractTypeResponse,
+  AbstractTypesMap,
 } from './types';
-import { unknownAbstractType, identifyAbstractTypeForDbType } from './utils';
+import { identifyAbstractTypeForDbType, unknownAbstractType } from './utils';
 
 /**
  * This is meant to be serializable and replaced by an API

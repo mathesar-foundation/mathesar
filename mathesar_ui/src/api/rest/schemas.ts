@@ -1,12 +1,13 @@
 import type { SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
+
+import type { Connection } from './connections';
 import {
-  getAPI,
-  patchAPI,
   type PaginatedResponse,
   deleteAPI,
+  getAPI,
+  patchAPI,
   postAPI,
 } from './utils/requestUtils';
-import type { Connection } from './connections';
 
 function list(connectionId: Connection['id']) {
   return getAPI<PaginatedResponse<SchemaResponse>>(

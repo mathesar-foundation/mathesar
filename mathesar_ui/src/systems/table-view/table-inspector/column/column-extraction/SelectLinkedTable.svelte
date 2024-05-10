@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Select } from '@mathesar/component-library';
+
   import type { LinkedTable } from './columnExtractionTypes';
   import LinkedTableName from './LinkedTableName.svelte';
 

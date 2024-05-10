@@ -1,29 +1,31 @@
-import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-import { ApiMultiError } from '@mathesar/api/utils/errors';
-import { ImmutableMap, CancellablePromise } from '@mathesar-component-library';
-import Pagination from '@mathesar/utils/Pagination';
+import { get, writable } from 'svelte/store';
+
 import type {
-  QueryResultRecord,
-  QueryRunResponse,
-  QueryResultsResponse,
   QueryColumnMetaData,
-} from '@mathesar/api/types/queries';
-import { runQuery, fetchQueryResults } from '@mathesar/stores/queries';
+  QueryResultRecord,
+  QueryResultsResponse,
+  QueryRunResponse,
+} from '@mathesar/api/rest/types/queries';
+import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { SheetSelection } from '@mathesar/components/sheet';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { fetchQueryResults, runQuery } from '@mathesar/stores/queries';
+import Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
-import type QueryModel from './QueryModel';
+import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
+
 import QueryInspector from './QueryInspector';
+import type QueryModel from './QueryModel';
 import {
-  processColumnMetaData,
-  getProcessedOutputColumns,
-  speculateColumnMetaData,
-  type ProcessedQueryOutputColumn,
-  type ProcessedQueryResultColumnMap,
-  type ProcessedQueryOutputColumnMap,
   type InputColumnsStoreSubstance,
+  type ProcessedQueryOutputColumn,
+  type ProcessedQueryOutputColumnMap,
+  type ProcessedQueryResultColumnMap,
+  getProcessedOutputColumns,
+  processColumnMetaData,
+  speculateColumnMetaData,
 } from './utils';
 
 export interface QueryRow {

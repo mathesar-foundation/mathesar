@@ -1,5 +1,5 @@
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 
 /**
  * - 'dataEntry' - each row is a button that submits the recordId via a Promise.

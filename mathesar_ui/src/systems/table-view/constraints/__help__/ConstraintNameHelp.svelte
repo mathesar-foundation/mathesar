@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import { Help } from '@mathesar-component-library';
 </script>
 

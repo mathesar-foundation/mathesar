@@ -1,8 +1,9 @@
 <script lang="ts">
   import { router } from 'tinro';
-  import { createTable } from '@mathesar/stores/tables';
-  import { getTablePageUrl } from '@mathesar/routes/urls';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { getTablePageUrl } from '@mathesar/routes/urls';
+  import { createTable } from '@mathesar/stores/tables';
   import { Button, Spinner } from '@mathesar-component-library';
 
   export let database: Database;

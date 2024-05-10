@@ -1,5 +1,6 @@
 <script lang="ts">
   import Errors from '@mathesar/components/Errors.svelte';
+
   import type { FieldStore } from './field';
 
   export let field: FieldStore;

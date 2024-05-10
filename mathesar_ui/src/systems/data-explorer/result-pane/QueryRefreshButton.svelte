@@ -1,5 +1,6 @@
 <script lang="ts">
   import RefreshButton from '@mathesar/components/RefreshButton.svelte';
+
   import type QueryRunner from '../QueryRunner';
 
   export let queryRunner: QueryRunner;

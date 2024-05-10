@@ -1,31 +1,32 @@
 <script lang="ts">
   import { getContext, tick } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import type { Share, ShareApi } from '@mathesar/api/rest/shares';
+  import { getApiErrorMessages } from '@mathesar/api/rest/utils/errors';
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import Errors from '@mathesar/components/Errors.svelte';
   import {
-    SpinnerButton,
-    Spinner,
-    TextInput,
-    InputGroup,
-    Button,
-    Icon,
-    type AccompanyingElements,
-  } from '@mathesar-component-library';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import type { ShareApi, Share } from '@mathesar/api/shares';
-  import { getApiErrorMessages } from '@mathesar/api/utils/errors';
-  import {
-    iconCopyMajor,
     iconAddNew,
-    iconRecreate,
+    iconCopyMajor,
     iconDisable,
     iconOpenLinkInNewTab,
+    iconRecreate,
   } from '@mathesar/icons';
-  import Errors from '@mathesar/components/Errors.svelte';
-  import { toast } from '@mathesar/stores/toast';
   import {
     confirm,
     confirmationController,
   } from '@mathesar/stores/confirmation';
+  import { toast } from '@mathesar/stores/toast';
+  import {
+    type AccompanyingElements,
+    Button,
+    Icon,
+    InputGroup,
+    Spinner,
+    SpinnerButton,
+    TextInput,
+  } from '@mathesar-component-library';
 
   const dropdownAccompanyingElements = getContext<
     AccompanyingElements | undefined

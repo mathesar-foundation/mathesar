@@ -1,28 +1,29 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import type { UserRole } from '@mathesar/api/rest/users';
   import {
-    Chip,
-    Icon,
-    SpinnerButton,
-    Button,
-    Help,
-    Tooltip,
-  } from '@mathesar-component-library';
-  import {
-    iconUser,
-    iconDeleteMajor,
     iconDatabase,
+    iconDeleteMajor,
     iconSchema,
+    iconUser,
   } from '@mathesar/icons';
   import type { UserModel } from '@mathesar/stores/users';
-  import type { UserRole } from '@mathesar/api/users';
   import {
-    getDisplayNameForRole,
-    getDescriptionForRole,
-    getObjectWithHighestPrecedenceByRoles,
-    type ObjectRoleMap,
     type AccessControlObject,
+    type ObjectRoleMap,
+    getDescriptionForRole,
+    getDisplayNameForRole,
+    getObjectWithHighestPrecedenceByRoles,
   } from '@mathesar/utils/permissions';
+  import {
+    Button,
+    Chip,
+    Help,
+    Icon,
+    SpinnerButton,
+    Tooltip,
+  } from '@mathesar-component-library';
 
   export let userProfile: UserModel | undefined;
   export let userModel: UserModel;

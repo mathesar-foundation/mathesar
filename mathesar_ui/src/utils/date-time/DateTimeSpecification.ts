@@ -1,8 +1,8 @@
-import { dayjs } from '@mathesar-component-library';
 import type {
   DateFormat,
   TimeFormat,
-} from '@mathesar/api/types/tables/columns';
+} from '@mathesar/api/rest/types/tables/columns';
+import { dayjs } from '@mathesar-component-library';
 
 interface DateConfig {
   type: 'date';

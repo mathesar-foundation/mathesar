@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { Label, Radio } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { FieldStore } from '@mathesar/components/form';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import { _ } from 'svelte-i18n';
+
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
+  import { Label, Radio, assertExhaustive } from '@mathesar-component-library';
+
   import Diagram from './diagram/Diagram.svelte';
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';

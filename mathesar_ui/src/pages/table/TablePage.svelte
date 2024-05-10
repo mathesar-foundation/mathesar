@@ -1,18 +1,19 @@
 <script lang="ts">
   import { router } from 'tinro';
 
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
-    setTabularDataStoreInContext,
-    TabularData,
     Meta,
+    TabularData,
+    setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
-  import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import ActionsPane from '@mathesar/systems/table-view/actions-pane/ActionsPane.svelte';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import TableView from '@mathesar/systems/table-view/TableView.svelte';
   import type { ShareConsumer } from '@mathesar/utils/shares';
+
   import { setNewImperativeFilterControllerInContext } from './ImperativeFilterController';
 
   const metaSerializationQueryKey = 'q';

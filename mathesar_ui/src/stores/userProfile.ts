@@ -1,7 +1,8 @@
-import { setContext, getContext } from 'svelte';
-import { writable, type Writable } from 'svelte/store';
+import { getContext, setContext } from 'svelte';
+import { type Writable, writable } from 'svelte/store';
 
-import type { User } from '@mathesar/api/users';
+import type { User } from '@mathesar/api/rest/users';
+
 import { UserModel } from './users';
 
 const contextKey = Symbol('UserProfileStore');

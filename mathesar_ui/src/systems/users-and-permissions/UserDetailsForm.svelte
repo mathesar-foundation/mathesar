@@ -1,15 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import type { UnionToIntersection } from 'type-fest';
   import { _ } from 'svelte-i18n';
+  import type { UnionToIntersection } from 'type-fest';
+
+  import userApi, { type User } from '@mathesar/api/rest/users';
+  import { extractDetailedFieldBasedErrors } from '@mathesar/api/rest/utils/errors';
   import {
-    PasswordInput,
-    TextInput,
-    hasProperty,
-  } from '@mathesar-component-library';
-  import userApi, { type User } from '@mathesar/api/users';
-  import { extractDetailedFieldBasedErrors } from '@mathesar/api/utils/errors';
-  import {
+    type FieldStore,
     FormSubmit,
     isEmail,
     makeForm,
@@ -17,14 +14,19 @@
     maxLength,
     optionalField,
     requiredField,
-    type FieldStore,
   } from '@mathesar/components/form';
-  import { iconSave, iconUndo } from '@mathesar/icons';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
   import { setLanguage } from '@mathesar/i18n';
-  import SelectUserType from './SelectUserType.svelte';
+  import { iconSave, iconUndo } from '@mathesar/icons';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import {
+    PasswordInput,
+    TextInput,
+    hasProperty,
+  } from '@mathesar-component-library';
+
   import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
+  import SelectUserType from './SelectUserType.svelte';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();

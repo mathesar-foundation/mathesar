@@ -2,8 +2,8 @@
   import { createEventDispatcher } from 'svelte';
 
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
-  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { iconClose } from '@mathesar-component-library-dir/common/icons';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
 
   const dispatch = createEventDispatcher();
 

@@ -11,6 +11,7 @@
 import { derived } from 'svelte/store';
 
 import * as urls from '@mathesar/routes/urls';
+
 import { connectionsStore } from './databases';
 import { currentSchema } from './schemas';
 import { currentTable } from './tables';

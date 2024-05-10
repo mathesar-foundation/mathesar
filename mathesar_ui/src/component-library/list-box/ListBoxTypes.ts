@@ -1,4 +1,5 @@
 import type { Readable } from 'svelte/store';
+
 import type CancellablePromise from '@mathesar-component-library-dir/common/utils/CancellablePromise';
 import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
 

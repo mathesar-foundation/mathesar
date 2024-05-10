@@ -1,17 +1,19 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
+  import CellValue from '@mathesar/components/CellValue.svelte';
   import {
     AttachableDropdown,
+    Icon,
     ListBox,
     ListBoxOptions,
-    getGloballyUniqueId,
-    Icon,
-    isDefinedNonNullable,
     getLabel as defaultGetLabel,
+    getGloballyUniqueId,
     iconExpandDown,
+    isDefinedNonNullable,
   } from '@mathesar-component-library';
   import type { ListBoxApi } from '@mathesar-component-library/types';
-  import CellValue from '@mathesar/components/CellValue.svelte';
+
   import CellWrapper from '../CellWrapper.svelte';
   import type { SingleSelectCellProps } from '../typeDefinitions';
 

@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import { Spinner } from '@mathesar-component-library';
+  import { router } from 'tinro';
+
+  import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { dataFilesApi } from '@mathesar/api/dataFiles';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getTablePageUrl } from '@mathesar/routes/urls';
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { Spinner } from '@mathesar-component-library';
+
   import ImportPreviewContent from './ImportPreviewContent.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
 

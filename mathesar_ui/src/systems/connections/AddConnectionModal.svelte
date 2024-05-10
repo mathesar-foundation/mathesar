@@ -2,12 +2,13 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
+  import type { Connection } from '@mathesar/api/rest/connections';
+  import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import {
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
-  import type { Connection } from '@mathesar/api/connections';
-  import { getDatabasePageUrl } from '@mathesar/routes/urls';
+
   import AddConnection from './AddConnection.svelte';
 
   export let controller: ModalController;

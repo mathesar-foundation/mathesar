@@ -1,11 +1,12 @@
 import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import type { Language } from '@mathesar/i18n/languages/utils';
+
 import {
+  type PaginatedResponse,
   deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
-  type PaginatedResponse,
 } from './utils/requestUtils';
 
 export interface UnsavedUser {

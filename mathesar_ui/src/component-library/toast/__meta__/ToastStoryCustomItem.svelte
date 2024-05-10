@@ -2,6 +2,7 @@
   import Button from '../../button/Button.svelte';
   import { makeToast } from '../ToastController';
   import ToastPresenter from '../ToastPresenter.svelte';
+
   import ToastCustomItem from './ToastCustomItem.svelte';
 
   const toast = makeToast();

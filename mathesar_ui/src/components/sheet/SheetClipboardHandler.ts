@@ -1,7 +1,6 @@
 import * as Papa from 'papaparse';
 import { get } from 'svelte/store';
 
-import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
 import SheetSelection, {
   isCellSelected,
 } from '@mathesar/components/sheet/SheetSelection';
@@ -16,6 +15,7 @@ import type { QueryRow } from '@mathesar/systems/data-explorer/QueryRunner';
 import type { ProcessedQueryOutputColumn } from '@mathesar/systems/data-explorer/utils';
 import type { ReadableMapLike } from '@mathesar/typeUtils';
 import { labeledCount } from '@mathesar/utils/languageUtils';
+import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
 
 const MIME_PLAIN_TEXT = 'text/plain';
 const MIME_MATHESAR_SHEET_CLIPBOARD =

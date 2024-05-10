@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { RichText } from '@mathesar/components/rich-text';
+
   import type { TableLink } from './utils';
 
   export let link: TableLink;

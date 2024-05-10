@@ -1,16 +1,17 @@
-import type { BooleanDisplayOptions } from '@mathesar/api/types/tables/columns';
+import type { BooleanDisplayOptions } from '@mathesar/api/rest/types/tables/columns';
+import { Select, isDefinedNonNullable } from '@mathesar-component-library';
 import type {
   ComponentAndProps,
   SelectProps,
 } from '@mathesar-component-library/types';
-import { Select, isDefinedNonNullable } from '@mathesar-component-library';
+
 import CheckboxCell from './components/checkbox/CheckboxCell.svelte';
 import SingleSelectCell from './components/select/SingleSelectCell.svelte';
 import type {
   CheckBoxCellExternalProps,
   SingleSelectCellExternalProps,
 } from './components/typeDefinitions';
-import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
+import type { CellColumnLike, CellComponentFactory } from './typeDefinitions';
 
 export interface BooleanLikeColumn extends CellColumnLike {
   display_options: Partial<BooleanDisplayOptions> | null;

@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { displayRecordSummaryAsPlainText } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { currentTable } from '@mathesar/stores/tables';
+
   import RecordPageContent from './RecordPageContent.svelte';
   import RecordPageLoadingSpinner from './RecordPageLoadingSpinner.svelte';
   import type RecordStore from './RecordStore';

@@ -1,18 +1,21 @@
 <script>
   import { _ } from 'svelte-i18n';
-  import { Collapsible } from '@mathesar-component-library';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { currentTable } from '@mathesar/stores/tables';
-  import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import TableName from './TableName.svelte';
-  import TableActions from './TableActions.svelte';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { currentTable } from '@mathesar/stores/tables';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
+  import { Collapsible } from '@mathesar-component-library';
+
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
+
   import AdvancedActions from './AdvancedActions.svelte';
   import TableLinks from './links/TableLinks.svelte';
+  import TableActions from './TableActions.svelte';
   import TableDescription from './TableDescription.svelte';
+  import TableName from './TableName.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();

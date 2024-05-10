@@ -1,11 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Icon, iconExternalLink } from '@mathesar-component-library';
+
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconConstraint } from '@mathesar/icons';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
+  import { Icon, iconExternalLink } from '@mathesar-component-library';
 
   export let type: 'primaryKey' | 'foreignKey';
   export let column: ProcessedColumn;

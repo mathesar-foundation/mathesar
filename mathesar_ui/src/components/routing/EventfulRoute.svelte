@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Route } from 'tinro';
+
   import RouteObserver from './RouteObserver.svelte';
 
   export let path: string;
