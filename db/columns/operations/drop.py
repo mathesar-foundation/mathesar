@@ -28,4 +28,6 @@ def drop_columns_from_table(table_oid, column_attnums, conn):
         column_attnums: The attnums of the columns to drop.
         conn: A psycopg connection to the relevant database.
     """
-    db_conn.exec_msar_func(conn, 'drop_columns', table_oid, *column_attnums)
+    return db_conn.exec_msar_func(
+        conn, 'drop_columns', table_oid, *column_attnums
+    ).fetchone()[0]

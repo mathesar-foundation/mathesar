@@ -1137,9 +1137,10 @@ DECLARE col_names text[];
 BEGIN
   SELECT array_agg(quote_ident(attname))
   FROM pg_attribute
-  WHERE attrelid=tab_id AND ARRAY[attnum::integer] <@ col_ids
+  WHERE attrelid=tab_id AND NOT attisdropped AND ARRAY[attnum::integer] <@ col_ids
   INTO col_names;
-  RETURN __msar.drop_columns(msar.get_relation_name_or_null(tab_id), variadic col_names);
+  PERFORM __msar.drop_columns(msar.get_relation_name_or_null(tab_id), variadic col_names);
+  RETURN array_length(col_names, 1);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
