@@ -208,6 +208,26 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_relation_name_or_null(rel_id oid) RETURNS text AS $$/*
+Return the name for a given relation (e.g., table), qualified or quoted as appropriate.
+
+In cases where the relation is already included in the search path, the returned name will not be
+fully-qualified.
+
+The relation *must* be in the pg_class table to use this function. This function will return NULL if
+no corresponding relation can be found.
+
+Args:
+  rel_id: The OID of the relation.
+*/
+SELECT CASE
+  WHEN EXISTS (SELECT oid FROM pg_class WHERE oid=rel_id) THEN rel_id::regclass::text
+END
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+
 DROP FUNCTION IF EXISTS msar.get_relation_oid(text, text) CASCADE;
 CREATE OR REPLACE FUNCTION
 msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
@@ -1119,7 +1139,7 @@ BEGIN
   FROM pg_attribute
   WHERE attrelid=tab_id AND ARRAY[attnum::integer] <@ col_ids
   INTO col_names;
-  RETURN __msar.drop_columns(__msar.get_relation_name(tab_id), variadic col_names);
+  RETURN __msar.drop_columns(msar.get_relation_name_or_null(tab_id), variadic col_names);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
