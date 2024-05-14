@@ -12,13 +12,6 @@ from mathesar.rpc import columns
 from mathesar.rpc import connections
 
 
-exposed_functions = [
-    "columns.list",
-    "connections.add_from_known_connection",
-    "connections.add_from_scratch",
-]
-
-
 def test_rpc_endpoint_expected_methods(live_server, admin_client):
     """Smoketest checks that we have exposed the expected methods."""
     all_methods = admin_client.post(
@@ -32,6 +25,7 @@ def test_rpc_endpoint_expected_methods(live_server, admin_client):
     ).json()["result"]
     mathesar_methods = [m for m in all_methods if not m.startswith("system.")]
     expect_methods = [
+        "columns.delete",
         "columns.list",
         "connections.add_from_known_connection",
         "connections.add_from_scratch",
@@ -42,6 +36,11 @@ def test_rpc_endpoint_expected_methods(live_server, admin_client):
 @pytest.mark.parametrize(
     "func,exposed_name,auth_pred_params",
     [
+        (
+            columns.delete,
+            "columns.delete",
+            [user_is_authenticated]
+        ),
         (
             columns.list_,
             "columns.list",

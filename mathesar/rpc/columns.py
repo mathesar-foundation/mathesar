@@ -7,6 +7,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.columns.operations.select import get_column_info_for_table
+from db.columns.operations.drop import drop_columns_from_table
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_raw_display_options
@@ -155,3 +156,25 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> ColumnListReturn:
         column_info=column_info,
         display_options=display_options,
     )
+
+
+@rpc_method(name="columns.delete")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def delete(
+        *, column_attnums: list[int], table_oid: int, database_id: int, **kwargs
+) -> int:
+    """
+    Delete columns from a table.
+
+    Args:
+        column_attnums: A list of attnums of columns to delete.
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The number of columns dropped.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        return drop_columns_from_table(table_oid, column_attnums, conn)
