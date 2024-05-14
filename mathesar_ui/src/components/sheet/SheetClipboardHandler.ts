@@ -62,7 +62,7 @@ function getFormattedCellValue<
 function serializeTsv(data: string[][]): string {
   return Papa.unparse(data, {
     delimiter: '\t',
-    escapeFormulae: /^=|^\+|^@|^\t|^\r/,
+    escapeFormulae: /^=|^\+|^@|^\t|^\r|^-(?!\d+(\.\d+)?$)/,
   });
 }
 
