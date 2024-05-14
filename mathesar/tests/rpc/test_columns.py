@@ -156,7 +156,7 @@ def test_columns_delete(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
 
     def mock_column_drop(_table_oid, _column_attnums, conn):
-        if _table_oid != table_oid or _column_attnums  != column_attnums:
+        if _table_oid != table_oid or _column_attnums != column_attnums:
             raise AssertionError('incorrect parameters passed')
         return 3
 
