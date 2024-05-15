@@ -175,29 +175,6 @@ async function refetchSchemasForDB(
   }
 }
 
-export async function refetchSchema(
-  connectionId: Connection['id'],
-  schemaId: SchemaEntry['id'],
-): Promise<SchemaResponse | undefined> {
-  const store = dbSchemaStoreMap.get(connectionId);
-  if (!store) {
-    console.error(`DB Schemas store for db: ${connectionId} not found.`);
-    return undefined;
-  }
-
-  try {
-    const schemaRequest = schemasApi.get(schemaId);
-    const response = await schemaRequest;
-    if (!response) {
-      return undefined;
-    }
-    updateSchemaInDBSchemaStore(connectionId, response);
-    return response;
-  } catch (err) {
-    return undefined;
-  }
-}
-
 let preload = true;
 
 function getSchemasStoreForDB(
