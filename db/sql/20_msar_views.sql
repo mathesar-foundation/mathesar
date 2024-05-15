@@ -18,7 +18,7 @@
 --
 -- This file creates a schema `msar_views` where internal mathesar views will be stored.
 --
--- For naming conventions, see 0_msar.sql
+-- For naming conventions, see 00_msar.sql
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS msar_views;
