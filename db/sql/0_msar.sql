@@ -662,6 +662,45 @@ SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_schemas() RETURNS jsonb AS $$/*
+Return a json array of objects describing the user-defined schemas in the database.
+
+PostgreSQL system schemas are ignored.
+
+Internal Mathesar-specifc schemas are INCLUDED. These should be filtered out by the caller. This
+behavior is to avoid tight coupling between this function and other SQL files that might need to
+define additional Mathesar-specific schemas as our codebase grows.
+
+Each returned JSON object in the array will have the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "description": <str|null>
+    "table_count": <int>
+  }
+*/
+SELECT jsonb_agg(schema_data)
+FROM (
+  SELECT 
+    s.oid AS oid,
+    min(s.nspname) AS name,
+    min(d.description) AS description,
+    COALESCE(count(c.oid), 0) AS table_count
+  FROM pg_catalog.pg_namespace s
+  LEFT JOIN pg_catalog.pg_description d ON
+    d.objoid = s.oid AND
+    d.objsubid = 0
+  LEFT JOIN pg_catalog.pg_class c ON
+    c.relnamespace = s.oid AND
+    c.relkind = 'r'
+  WHERE
+    s.nspname <> 'information_schema' AND
+    s.nspname NOT LIKE 'pg_%'
+  GROUP BY s.oid
+) AS schema_data;
+$$ LANGUAGE sql;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ROLE MANIPULATION FUNCTIONS

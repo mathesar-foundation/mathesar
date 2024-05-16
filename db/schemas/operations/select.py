@@ -3,6 +3,11 @@ from sqlalchemy import select, and_, not_, or_, func
 from db.constants import INTERNAL_SCHEMAS
 from db.utils import get_pg_catalog_table
 from db.metadata import get_empty_metadata
+from db.connection import exec_msar_func
+
+
+def get_schemas(conn):
+    return exec_msar_func(conn, 'get_schemas').fetchone()[0]
 
 
 def reflect_schema(engine, name=None, oid=None, metadata=None):
