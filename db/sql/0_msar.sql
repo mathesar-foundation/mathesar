@@ -122,6 +122,17 @@ from Python through a single Python module.
   END
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION msar.obj_description(obj_id oid, catalog_name text) RETURNS text AS $$/*
+Transparent wrapper for obj_description. Putting it in the `msar` namespace helps route all DB calls
+from Python through a single Python module.
+*/
+  BEGIN
+    RETURN obj_description(obj_id, catalog_name);
+  END
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __msar.jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
 Wraps the `?` jsonb operator for improved readability.
 */
@@ -659,6 +670,23 @@ CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS
 Return true if the given column exists in the table, false otherwise.
 */
 SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_table_info() RETURNS jsonb AS $$
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'id', pgc.oid,
+    'name', relname,
+    'schema', pgn.nspname,
+    'description', msar.obj_description(pgc.oid, 'pg_class')
+  )
+)
+FROM pg_catalog.pg_class AS pgc 
+  LEFT JOIN pg_namespace AS pgn ON pgc.relnamespace = pgn.oid 
+WHERE pgn.nspname NOT IN (
+  'pg_toast', 'pg_catalog', 'information_schema', '__msar', 'msar', 'mathesar_types'
+) AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
