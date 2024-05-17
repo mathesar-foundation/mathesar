@@ -10,7 +10,7 @@ from django.db.models import JSONField
 from encrypted_fields.fields import EncryptedCharField
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
-from db.columns.operations.alter import alter_column
+from db.columns.operations.alter import alter_column_deprecated
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import (
     get_column_description,
@@ -456,7 +456,7 @@ class Table(DatabaseObject, Relation):
         return result
 
     def alter_column(self, column_attnum, column_data):
-        result = alter_column(
+        result = alter_column_deprecated(
             self.schema._sa_engine,
             self.oid,
             column_attnum,

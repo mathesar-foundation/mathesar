@@ -8,7 +8,7 @@ from db.columns.defaults import NAME, NULLABLE, DESCRIPTION
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 
 
-def alter_column(engine, table_oid, column_attnum, column_data, connection=None):
+def alter_column_deprecated(engine, table_oid, column_attnum, column_data, connection=None):
     """
     Alter a column of the a table.
 
@@ -81,7 +81,7 @@ def alter_column_type(
         target_type: PostgresType defining the type to alter to.
         type_options: dict defining the options for the type to alter to.
     """
-    alter_column(
+    alter_column_deprecated(
         engine,
         table_oid,
         column_attnum,
@@ -102,7 +102,7 @@ def rename_column(table_oid, column_attnum, engine, connection, new_name):
         connection: psycopg2 connection object.
         new_name: string giving the new name for the column.
     """
-    alter_column(
+    alter_column_deprecated(
         engine,
         table_oid,
         column_attnum,
