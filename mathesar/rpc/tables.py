@@ -11,7 +11,7 @@ from mathesar.rpc.utils import connect
 class TableInfo(TypedDict):
     id: int
     name: str
-    schema: str
+    schema: int
     description: str
 
 
@@ -22,12 +22,12 @@ class TableListReturn(TypedDict):
 @rpc_method(name="tables.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, database_id: int, **kwargs) -> TableListReturn:
+def list_(*, schema_oid: int, database_id: int, **kwargs) -> TableListReturn:
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        raw_table_info = get_table_info(conn)
+        raw_table_info = get_table_info(schema_oid, conn)
     table_info = [
-        TableInfo.from_dict(tab) for tab in raw_table_info
+        TableInfo(tab) for tab in raw_table_info
     ]
     return TableListReturn(
         table_info=table_info

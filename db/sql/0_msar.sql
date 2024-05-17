@@ -673,20 +673,18 @@ SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_table_info() RETURNS jsonb AS $$
+CREATE OR REPLACE FUNCTION msar.get_table_info(sch_id regnamespace) RETURNS jsonb AS $$
 SELECT jsonb_agg(
   jsonb_build_object(
     'id', pgc.oid,
-    'name', relname,
-    'schema', pgn.nspname,
+    'name', pgc.relname,
+    'schema', pgc.relnamespace,
     'description', msar.obj_description(pgc.oid, 'pg_class')
   )
 )
 FROM pg_catalog.pg_class AS pgc 
   LEFT JOIN pg_namespace AS pgn ON pgc.relnamespace = pgn.oid 
-WHERE pgn.nspname NOT IN (
-  'pg_toast', 'pg_catalog', 'information_schema', '__msar', 'msar', 'mathesar_types'
-) AND pgc.relkind = 'r';
+WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 

@@ -15,8 +15,8 @@ TARGET = 'target'
 MULTIPLE_RESULTS = 'multiple_results'
 
 
-def get_table_info(conn):
-    return exec_msar_func(conn, 'get_table_info').fetchone()[0]
+def get_table_info(schema_oid, conn):
+    return exec_msar_func(conn, 'get_table_info', schema_oid).fetchone()[0]
 
 
 def reflect_table(name, schema, engine, metadata, connection_to_use=None, keep_existing=False):
