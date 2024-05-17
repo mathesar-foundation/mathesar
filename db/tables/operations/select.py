@@ -15,8 +15,26 @@ TARGET = 'target'
 MULTIPLE_RESULTS = 'multiple_results'
 
 
-def get_table_info(schema_oid, conn):
-    return exec_msar_func(conn, 'get_table_info', schema_oid).fetchone()[0]
+def get_table_info(schema, conn):
+    """
+    Return a list of dictionaries describing the tables of a schema.
+
+    The `schema` can be given as either a "qualified name", or an OID.
+    The OID is the preferred identifier, since it's much more robust.
+
+    The returned list contains dictionaries of the following form:
+
+        {
+            "id": <int>,
+            "name": <str>,
+            "schema": <int>,
+            "description": <str>
+        }
+
+    Args:
+        schema: The schema for which we want table info.
+    """
+    return exec_msar_func(conn, 'get_table_info', schema).fetchone()[0]
 
 
 def reflect_table(name, schema, engine, metadata, connection_to_use=None, keep_existing=False):

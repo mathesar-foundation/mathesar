@@ -673,7 +673,20 @@ SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_table_info(sch_id regnamespace) RETURNS jsonb AS $$
+CREATE OR REPLACE FUNCTION msar.get_table_info(sch_id regnamespace) RETURNS jsonb AS $$/*
+Given a schema identifier, return an array of objects describing the tables of the schema.
+
+Each returned JSON object in the array will have the form:
+  {
+    "id": <int>,
+    "name": <str>,
+    "schema": <int>,
+    "description": <str>
+  }
+
+Args:
+  sch_id: The OID or name of the schema.
+*/
 SELECT jsonb_agg(
   jsonb_build_object(
     'id', pgc.oid,
