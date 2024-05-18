@@ -2,6 +2,7 @@
   import { get } from 'svelte/store';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
@@ -117,6 +118,11 @@
 <div class="table-view">
   <WithTableInspector {context} {showTableInspector}>
     <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
+      {#if $isLoading}
+        <div class="loading-sheet">
+          <Spinner />
+        </div>
+      {/if}
       {#if $processedColumns.size}
         <Sheet
           columns={sheetColumns}
@@ -150,5 +156,10 @@
     position: relative;
     height: 100%;
     overflow-x: auto;
+  }
+  .loading-sheet {
+    text-align: center;
+    font-size: 2rem;
+    color: var(--slate-500);
   }
 </style>
