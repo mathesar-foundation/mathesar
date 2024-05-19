@@ -193,7 +193,7 @@ def alter_columns_in_table(table_oid, column_data_list, conn):
     transformed_column_data = [
         _transform_column_alter_dict(column) for column in column_data_list
     ]
-    db_conn.execute_msar_func_with_engine(
+    db_conn.exec_msar_func(
         conn, 'alter_columns', table_oid, json.dumps(transformed_column_data)
     )
     return len(column_data_list)
