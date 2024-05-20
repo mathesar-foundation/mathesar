@@ -222,7 +222,7 @@ Args:
   rel_id: The OID of the relation.
 */
 SELECT CASE
-  WHEN EXISTS (SELECT oid FROM pg_class WHERE oid=rel_id) THEN rel_id::regclass::text
+  WHEN EXISTS (SELECT oid FROM pg_catalog.pg_class WHERE oid=rel_id) THEN rel_id::regclass::text
 END
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -1136,7 +1136,7 @@ Args:
 DECLARE col_names text[];
 BEGIN
   SELECT array_agg(quote_ident(attname))
-  FROM pg_attribute
+  FROM pg_catalog.pg_attribute
   WHERE attrelid=tab_id AND NOT attisdropped AND ARRAY[attnum::integer] <@ col_ids
   INTO col_names;
   PERFORM __msar.drop_columns(msar.get_relation_name_or_null(tab_id), variadic col_names);
