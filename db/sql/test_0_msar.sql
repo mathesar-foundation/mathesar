@@ -1378,7 +1378,7 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_add_mathesar_table_badname() RETURNS SETOF TEXT AS $f$
 DECLARE
-  badname text := $b$M"new"'dsf' \t"$b$;
+  badname text := '"new"''dsf'' \t"';
 BEGIN
   PERFORM msar.add_mathesar_table(
     'tab_create_schema'::regnamespace::oid, badname, null, null, null
