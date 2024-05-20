@@ -689,6 +689,8 @@ FROM (
   FROM pg_catalog.pg_namespace s
   LEFT JOIN pg_catalog.pg_class c ON
     c.relnamespace = s.oid AND
+    -- Filter on relkind so that we only count tables. This must be done in the ON clause so that
+    -- we still get a row for schemas with no tables.
     c.relkind = 'r'
   WHERE
     s.nspname <> 'information_schema' AND
