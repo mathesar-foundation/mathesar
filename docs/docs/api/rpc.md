@@ -48,10 +48,19 @@ To use an RPC function:
 
 ---
 
+::: mathesar.rpc.schemas
+    options:
+      members:
+      - list_
+      - SchemaInfo
+
+---
+
 ::: mathesar.rpc.columns
     options:
       members:
       - list_
+      - delete
       - ColumnListReturn
       - ColumnInfo
       - TypeOptions

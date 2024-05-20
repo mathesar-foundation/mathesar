@@ -1,7 +1,7 @@
 import warnings
 from sqlalchemy import select, Table, MetaData, text
 
-from db import types
+from db.constants import TYPES_SCHEMA
 from db.tables.operations import infer_types
 from db.schemas.operations import select as ssel
 
@@ -27,7 +27,7 @@ def test_get_mathesar_schemas_with_oids_avoids_information_schema(engine_with_sc
 def test_get_mathesar_schemas_with_oids_avoids_types_schema(engine_with_schema):
     engine, schema = engine_with_schema
     actual_schemas = ssel.get_mathesar_schemas_with_oids(engine)
-    assert all([schema != types.base.SCHEMA for schema, _ in actual_schemas])
+    assert all([schema != TYPES_SCHEMA for schema, _ in actual_schemas])
 
 
 def test_get_mathesar_schemas_with_oids_avoids_temp_schema(engine_with_schema):
