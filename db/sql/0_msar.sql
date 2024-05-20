@@ -684,12 +684,9 @@ FROM (
   SELECT 
     s.oid AS oid,
     s.nspname AS name,
-    d.description AS description,
+    obj_description(s.oid) AS description,
     COALESCE(count(c.oid), 0) AS table_count
   FROM pg_catalog.pg_namespace s
-  LEFT JOIN pg_catalog.pg_description d ON
-    d.objoid = s.oid AND
-    d.objsubid = 0
   LEFT JOIN pg_catalog.pg_class c ON
     c.relnamespace = s.oid AND
     c.relkind = 'r'
@@ -698,8 +695,7 @@ FROM (
     s.nspname NOT LIKE 'pg_%'
   GROUP BY
     s.oid,
-    s.nspname,
-    d.description
+    s.nspname
 ) AS schema_data;
 $$ LANGUAGE sql;
 
