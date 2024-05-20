@@ -56,6 +56,14 @@ To use an RPC function:
 
 ---
 
+::: mathesar.rpc.tables
+    options:
+      members:
+      - list_
+      - TableInfo
+
+---
+
 ::: mathesar.rpc.columns
     options:
       members:
