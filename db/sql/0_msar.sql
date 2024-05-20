@@ -696,7 +696,7 @@ SELECT jsonb_agg(
   )
 )
 FROM pg_catalog.pg_class AS pgc 
-  LEFT JOIN pg_namespace AS pgn ON pgc.relnamespace = pgn.oid 
+  LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
 WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
