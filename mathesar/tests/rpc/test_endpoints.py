@@ -12,10 +12,22 @@ from mathesar.rpc import columns
 from mathesar.rpc import connections
 
 
-exposed_functions = [
-    "columns.list",
-    "connections.add_from_known_connection",
-    "connections.add_from_scratch",
+METHODS = [
+    (
+        columns.list_,
+        "columns.list",
+        [user_is_authenticated]
+    ),
+    (
+        connections.add_from_known_connection,
+        "connections.add_from_known_connection",
+        [user_is_superuser]
+    ),
+    (
+        connections.add_from_scratch,
+        "connections.add_from_scratch",
+        [user_is_superuser]
+    )
 ]
 
 
@@ -31,34 +43,10 @@ def test_rpc_endpoint_expected_methods(live_server, admin_client):
         content_type="application/json"
     ).json()["result"]
     mathesar_methods = [m for m in all_methods if not m.startswith("system.")]
-    expect_methods = [
-        "columns.list",
-        "connections.add_from_known_connection",
-        "connections.add_from_scratch",
-    ]
-    assert sorted(mathesar_methods) == expect_methods
+    assert sorted(mathesar_methods) == sorted(m[1] for m in METHODS)
 
 
-@pytest.mark.parametrize(
-    "func,exposed_name,auth_pred_params",
-    [
-        (
-            columns.list_,
-            "columns.list",
-            [user_is_authenticated]
-        ),
-        (
-            connections.add_from_known_connection,
-            "connections.add_from_known_connection",
-            [user_is_superuser]
-        ),
-        (
-            connections.add_from_scratch,
-            "connections.add_from_scratch",
-            [user_is_superuser]
-        )
-    ]
-)
+@pytest.mark.parametrize("func,exposed_name,auth_pred_params", METHODS)
 def test_correctly_exposed(func, exposed_name, auth_pred_params):
     """Tests to make sure every RPC function is correctly wired up."""
     # Make sure we didn't typo the function names for the endpoint.
