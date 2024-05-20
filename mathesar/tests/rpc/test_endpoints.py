@@ -14,6 +14,11 @@ from mathesar.rpc import schemas
 
 METHODS = [
     (
+        columns.delete,
+        "columns.delete",
+        [user_is_authenticated]
+    ),
+    (
         columns.list_,
         "columns.list",
         [user_is_authenticated]

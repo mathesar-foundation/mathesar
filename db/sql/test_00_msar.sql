@@ -30,6 +30,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_drop_columns_ne_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE "12345" (bleh text, bleh2 numeric);
+  PERFORM msar.drop_columns(12345, 1);
+  RETURN NEXT has_column(
+    '12345', 'bleh', 'Doesn''t drop columns of stupidly-named table'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_drop_columns_names() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_columns();
