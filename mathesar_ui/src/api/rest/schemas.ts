@@ -15,10 +15,6 @@ function list(connectionId: Connection['id']) {
   );
 }
 
-function get(schemaId: SchemaEntry['id']) {
-  return getAPI<SchemaResponse>(`/api/db/v0/schemas/${schemaId}/`);
-}
-
 function add(props: {
   name: SchemaEntry['name'];
   description: SchemaEntry['description'];
@@ -48,7 +44,6 @@ function deleteSchema(schemaId: SchemaEntry['id']) {
 
 export default {
   list,
-  get,
   add,
   update,
   delete: deleteSchema,
