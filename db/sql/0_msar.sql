@@ -683,8 +683,8 @@ SELECT jsonb_agg(schema_data)
 FROM (
   SELECT 
     s.oid AS oid,
-    min(s.nspname) AS name,
-    min(d.description) AS description,
+    s.nspname AS name,
+    d.description AS description,
     COALESCE(count(c.oid), 0) AS table_count
   FROM pg_catalog.pg_namespace s
   LEFT JOIN pg_catalog.pg_description d ON
@@ -696,7 +696,10 @@ FROM (
   WHERE
     s.nspname <> 'information_schema' AND
     s.nspname NOT LIKE 'pg_%'
-  GROUP BY s.oid
+  GROUP BY
+    s.oid,
+    s.nspname,
+    d.description
 ) AS schema_data;
 $$ LANGUAGE sql;
 
