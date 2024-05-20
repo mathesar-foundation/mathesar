@@ -684,7 +684,7 @@ FROM (
   SELECT 
     s.oid AS oid,
     s.nspname AS name,
-    obj_description(s.oid) AS description,
+    pg_catalog.obj_description(s.oid) AS description,
     COALESCE(count(c.oid), 0) AS table_count
   FROM pg_catalog.pg_namespace s
   LEFT JOIN pg_catalog.pg_class c ON
