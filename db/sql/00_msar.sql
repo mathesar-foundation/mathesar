@@ -698,7 +698,7 @@ Given a schema identifier, return an array of objects describing the tables of t
 
 Each returned JSON object in the array will have the form:
   {
-    "id": <int>,
+    "oid": <int>,
     "name": <str>,
     "schema": <int>,
     "description": <str>
@@ -709,7 +709,7 @@ Args:
 */
 SELECT jsonb_agg(
   jsonb_build_object(
-    'id', pgc.oid,
+    'oid', pgc.oid,
     'name', pgc.relname,
     'schema', pgc.relnamespace,
     'description', msar.obj_description(pgc.oid, 'pg_class')

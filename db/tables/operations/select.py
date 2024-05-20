@@ -25,7 +25,7 @@ def get_table_info(schema, conn):
     The returned list contains dictionaries of the following form:
 
         {
-            "id": <int>,
+            "oid": <int>,
             "name": <str>,
             "schema": <int>,
             "description": <str>

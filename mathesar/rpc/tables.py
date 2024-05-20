@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -13,31 +13,21 @@ class TableInfo(TypedDict):
     Information about a table.
 
     Attributes:
-        id: The `oid` of the table in the schema.
+        oid: The `oid` of the table in the schema.
         name: The name of the table.
         schema: The `oid` of the schema where the table lives.
         description: The description of the table.
     """
-    id: int
+    oid: int
     name: str
     schema: int
-    description: str
-
-
-class TableListReturn(TypedDict):
-    """
-    Information about the tables of a schema.
-
-    Attributes:
-        table_info: Column information from the user's database.
-    """
-    table_info: list[TableInfo]
+    description: Optional[str]
 
 
 @rpc_method(name="tables.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, schema_oid: int, database_id: int, **kwargs) -> TableListReturn:
+def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableInfo]:
     """
     List information about tables for a schema. Exposed as `list`.
 
@@ -51,9 +41,6 @@ def list_(*, schema_oid: int, database_id: int, **kwargs) -> TableListReturn:
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         raw_table_info = get_table_info(schema_oid, conn)
-    table_info = [
+    return [
         TableInfo(tab) for tab in raw_table_info
     ]
-    return TableListReturn(
-        table_info=table_info
-    )
