@@ -1,6 +1,6 @@
 from sqlalchemy import text
+from db.constants import TYPES_SCHEMA
 from db.types import install
-from db.types import base
 from db.types.custom import email
 from db.types.install import install_mathesar_on_database
 
@@ -10,7 +10,7 @@ def test_create_type_schema(engine):
     with engine.connect() as conn:
         res = conn.execute(text("SELECT * FROM information_schema.schemata"))
     schemata = {row['schema_name'] for row in res.fetchall()}
-    assert base.SCHEMA in schemata
+    assert TYPES_SCHEMA in schemata
 
 
 def test_create_type_schema_when_exists(engine):

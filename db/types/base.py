@@ -2,7 +2,7 @@ from enum import Enum
 
 from sqlalchemy import text, create_engine as sa_create_engine
 
-from db import constants
+from db.constants import TYPES_SCHEMA
 from db.utils import OrderByIds
 
 
@@ -143,8 +143,6 @@ class PostgresType(DatabaseType, Enum):
     UUID = 'uuid'
 
 
-SCHEMA = f"{constants.MATHESAR_PREFIX}types"
-
 # Since we want to have our identifiers quoted appropriately for use in
 # PostgreSQL, we want to use the postgres dialect preparer to set this up.
 _preparer = sa_create_engine("postgresql://").dialect.identifier_preparer
@@ -154,7 +152,7 @@ def get_ma_qualified_schema():
     """
     Should usually return `mathesar_types`
     """
-    return _preparer.quote_schema(SCHEMA)
+    return _preparer.quote_schema(TYPES_SCHEMA)
 
 
 # TODO rename to get_qualified_mathesar_obj_name
