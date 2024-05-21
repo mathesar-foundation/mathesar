@@ -10,7 +10,7 @@ def test_drop_columns():
     assert result == 3
 
 
-def test_get_column_info_for_table():
+def test_drop_columns_single():
     with patch.object(col_drop.db_conn, 'exec_msar_func') as mock_exec:
         mock_exec.return_value.fetchone = lambda: (1,)
         result = col_drop.drop_columns_from_table(123, [1], 'conn')
