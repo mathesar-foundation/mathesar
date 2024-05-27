@@ -122,6 +122,17 @@ from Python through a single Python module.
   END
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION msar.obj_description(obj_id oid, catalog_name text) RETURNS text AS $$/*
+Transparent wrapper for obj_description. Putting it in the `msar` namespace helps route all DB calls
+from Python through a single Python module.
+*/
+  BEGIN
+    RETURN obj_description(obj_id, catalog_name);
+  END
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __msar.jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
 Wraps the `?` jsonb operator for improved readability.
 */
@@ -679,6 +690,34 @@ CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS
 Return true if the given column exists in the table, false otherwise.
 */
 SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_table_info(sch_id regnamespace) RETURNS jsonb AS $$/*
+Given a schema identifier, return an array of objects describing the tables of the schema.
+
+Each returned JSON object in the array will have the form:
+  {
+    "oid": <int>,
+    "name": <str>,
+    "schema": <int>,
+    "description": <str>
+  }
+
+Args:
+  sch_id: The OID or name of the schema.
+*/
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'oid', pgc.oid,
+    'name', pgc.relname,
+    'schema', pgc.relnamespace,
+    'description', msar.obj_description(pgc.oid, 'pg_class')
+  )
+)
+FROM pg_catalog.pg_class AS pgc 
+  LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
+WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
