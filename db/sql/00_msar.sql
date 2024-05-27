@@ -2135,16 +2135,21 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_table(tab_id oid, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
-Drop a table, returning the command executed.
+msar.drop_table(tab_id oid, cascade_ boolean) RETURNS text AS $$/*
+Drop a table, returning the fully qualified name of the dropped table.
 
 Args:
   tab_id: The OID of the table to drop
   cascade_: Whether to drop dependent objects.
-  if_exists_: Whether to ignore an error if the table doesn't exist
 */
+DECLARE relation_name text;
 BEGIN
-  RETURN __msar.drop_table(__msar.get_relation_name(tab_id), cascade_, if_exists);
+  relation_name := __msar.get_relation_name(tab_id);
+  -- if_exists doesn't work while working with oids because 
+  -- the SQL query gets parameterized with tab_id instead of relation_name
+  -- since we're unable to find the relation_name for a non existing table. 
+  PERFORM __msar.drop_table(relation_name, cascade_, if_exists => false);
+  RETURN relation_name;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 

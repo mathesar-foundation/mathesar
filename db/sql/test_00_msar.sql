@@ -72,20 +72,8 @@ DECLARE
 BEGIN
   PERFORM __setup_drop_tables();
   rel_id := 'dropme'::regclass::oid;
-  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false, if_exists => false);
+  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false);
   RETURN NEXT hasnt_table('dropme', 'Drops table');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_table_oid_if_exists() RETURNS SETOF TEXT AS $$
-DECLARE
-  rel_id oid;
-BEGIN
-  PERFORM __setup_drop_tables();
-  rel_id := 'dropme'::regclass::oid;
-  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false, if_exists => true);
-  RETURN NEXT hasnt_table('dropme', 'Drops table with IF EXISTS');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -99,7 +87,7 @@ BEGIN
   CREATE TABLE
     dependent (id SERIAL PRIMARY KEY, col1 integer REFERENCES dropme);
   RETURN NEXT throws_ok(
-    format('SELECT msar.drop_table(tab_id => %s, cascade_ => false, if_exists => true);', rel_id),
+    format('SELECT msar.drop_table(tab_id => %s, cascade_ => false);', rel_id),
     '2BP01',
     'cannot drop table dropme because other objects depend on it',
     'Table dropper throws for dependent objects'
@@ -116,7 +104,7 @@ BEGIN
   rel_id := 'dropme'::regclass::oid;
   CREATE TABLE
     dependent (id SERIAL PRIMARY KEY, col1 integer REFERENCES dropme);
-  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => true, if_exists => false);
+  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => true);
   RETURN NEXT hasnt_table('dropme', 'Drops table with dependent using CASCADE');
 END;
 $$ LANGUAGE plpgsql;
