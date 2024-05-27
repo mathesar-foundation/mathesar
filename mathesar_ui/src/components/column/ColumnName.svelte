@@ -3,6 +3,7 @@
 
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { getColumnIconProps } from '@mathesar/utils/columnUtils';
+
   import type { DisplayColumn } from './types';
 
   interface $$Props extends Omit<ComponentProps<NameWithIcon>, 'icon'> {

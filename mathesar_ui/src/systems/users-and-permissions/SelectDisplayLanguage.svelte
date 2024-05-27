@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Select } from '@mathesar-component-library';
   import type { Language } from '@mathesar/i18n/languages/utils';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import { Select } from '@mathesar-component-library';
 
   const commonData = preloadCommonData();
   const supportedLanguages = commonData.supported_languages ?? {};

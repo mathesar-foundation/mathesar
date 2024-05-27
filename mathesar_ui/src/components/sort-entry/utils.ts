@@ -1,5 +1,6 @@
-import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
+import { _ } from 'svelte-i18n';
+
 import type { CellDataType } from '../cell-fabric/data-types/typeDefinitions';
 
 export type SortDirection = 'ASCENDING' | 'DESCENDING';

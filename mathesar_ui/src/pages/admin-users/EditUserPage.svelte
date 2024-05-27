@@ -1,7 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
-  import { Icon, SpinnerButton } from '@mathesar-component-library';
+
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import FormBox from '@mathesar/components/form/FormBox.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconDeleteMajor, iconEditUser } from '@mathesar/icons';
   import {
     ADMIN_USERS_PAGE_URL,
@@ -10,15 +13,13 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import type { UserModel } from '@mathesar/stores/users';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import {
     PasswordChangeForm,
     UserDetailsForm,
   } from '@mathesar/systems/users-and-permissions';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import type { UserModel } from '@mathesar/stores/users';
-  import FormBox from '@mathesar/components/form/FormBox.svelte';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { Icon, SpinnerButton } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
   const usersStore = getUsersStoreFromContext();

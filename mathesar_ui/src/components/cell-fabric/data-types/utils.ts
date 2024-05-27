@@ -1,10 +1,11 @@
 import { get } from 'svelte/store';
+
 import type { DbType } from '@mathesar/AppTypes';
-import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
+import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 
 export function getCellInfo(dbType: DbType): CellInfo | undefined {
   const abstractTypeOfColumn = getAbstractTypeForDbType(

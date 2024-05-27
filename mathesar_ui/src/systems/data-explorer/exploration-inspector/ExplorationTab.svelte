@@ -1,25 +1,27 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import {
-    Collapsible,
-    LabeledInput,
-    TextInput,
-    TextArea,
-    CancelOrProceedButtonPair,
-    Button,
-    Icon,
-  } from '@mathesar-component-library';
-  import { iconDeleteMajor } from '@mathesar/icons';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
-  import { queries, putQuery, deleteQuery } from '@mathesar/stores/queries';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { getAvailableName } from '@mathesar/utils/db';
+
+  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { deleteQuery, putQuery, queries } from '@mathesar/stores/queries';
   import { toast } from '@mathesar/stores/toast';
-  import type QueryRunner from '../QueryRunner';
+  import { getAvailableName } from '@mathesar/utils/db';
+  import {
+    Button,
+    CancelOrProceedButtonPair,
+    Collapsible,
+    Icon,
+    LabeledInput,
+    TextArea,
+    TextInput,
+  } from '@mathesar-component-library';
+
   import QueryManager from '../QueryManager';
+  import type QueryRunner from '../QueryRunner';
 
   const dispatch = createEventDispatcher();
 

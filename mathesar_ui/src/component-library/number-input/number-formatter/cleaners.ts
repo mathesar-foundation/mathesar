@@ -1,4 +1,5 @@
 import { escapeRegex } from '@mathesar-component-library-dir/common/utils/stringUtils';
+
 import type { DerivedOptions } from './options';
 
 type Cleaner = (input: string) => string;

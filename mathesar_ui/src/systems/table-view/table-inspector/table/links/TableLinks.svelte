@@ -2,6 +2,7 @@
   import { Spinner } from '@mathesar/component-library';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { getJoinableTablesResult } from '@mathesar/stores/tables';
+
   import LinksSectionContainer from './LinksSectionContainer.svelte';
   import { getTableLinks } from './utils';
 

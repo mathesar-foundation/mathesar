@@ -1,4 +1,4 @@
-import { setContext, getContext } from 'svelte';
+import { getContext, setContext } from 'svelte';
 
 import ReductionStore from '@mathesar-component-library-dir/common/utils/ReductionStore';
 

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
   import type {
-    TextAreaProps,
     TextAreaProcessedKeyDown,
+    TextAreaProps,
   } from '@mathesar-component-library-dir/text-area/TextAreaTypes';
 
   const dispatch = createEventDispatcher<{

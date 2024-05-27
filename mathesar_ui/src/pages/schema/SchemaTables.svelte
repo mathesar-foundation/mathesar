@@ -1,12 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import TablesList from './TablesList.svelte';
-  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
+
   import CreateNewTableButton from './CreateNewTableButton.svelte';
+  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
+  import TablesList from './TablesList.svelte';
 
   export let tablesMap: Map<number, TableEntry>;
 

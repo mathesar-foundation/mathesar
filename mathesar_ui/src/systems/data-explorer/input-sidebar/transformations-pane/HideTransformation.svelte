@@ -1,8 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { MultiSelect, LabeledInput } from '@mathesar-component-library';
+
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { LabeledInput, MultiSelect } from '@mathesar-component-library';
+
   import type QueryHideTransformationModel from '../../QueryHideTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../utils';
 

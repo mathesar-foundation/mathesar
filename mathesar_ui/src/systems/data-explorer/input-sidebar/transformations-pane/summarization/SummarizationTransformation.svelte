@@ -1,17 +1,20 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
   import {
     ImmutableMap,
-    MultiSelect,
     LabeledInput,
+    MultiSelect,
   } from '@mathesar-component-library';
-  import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+
   import type QuerySummarizationTransformationModel from '../../../QuerySummarizationTransformationModel';
-  import type { ProcessedQueryResultColumnMap } from '../../../utils';
-  import Aggregation from './Aggregation.svelte';
   import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
+  import type { ProcessedQueryResultColumnMap } from '../../../utils';
+
+  import Aggregation from './Aggregation.svelte';
 
   const dispatch = createEventDispatcher();
 

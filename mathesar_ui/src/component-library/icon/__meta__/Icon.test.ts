@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
-import { render } from '@testing-library/svelte';
 import { faCat } from '@fortawesome/free-solid-svg-icons';
+import { render } from '@testing-library/svelte';
+
 import Icon from '../Icon.svelte';
 
 test('renders icon with default role as presentation', () => {

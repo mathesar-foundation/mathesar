@@ -32,33 +32,34 @@
  * to having us use the currentSchemaId store directly.
  */
 
-import { derived, writable, get } from 'svelte/store';
-import type { Readable, Writable, Unsubscriber } from 'svelte/store';
+import type { Readable, Unsubscriber, Writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
+
+import type {
+  QueryGetResponse,
+  QueryInstance,
+  QueryResultsResponse,
+  QueryRunRequest,
+  QueryRunResponse,
+} from '@mathesar/api/rest/types/queries';
+import type {
+  PaginatedResponse,
+  RequestStatus,
+} from '@mathesar/api/rest/utils/requestUtils';
 import {
+  addQueryParamsToUrl,
   deleteAPI,
   getAPI,
   postAPI,
   putAPI,
-  addQueryParamsToUrl,
-} from '@mathesar/api/utils/requestUtils';
-import type {
-  RequestStatus,
-  PaginatedResponse,
-} from '@mathesar/api/utils/requestUtils';
-import { preloadCommonData } from '@mathesar/utils/preloadData';
-import CacheManager from '@mathesar/utils/CacheManager';
+} from '@mathesar/api/rest/utils/requestUtils';
 import type { SchemaEntry } from '@mathesar/AppTypes';
-import type {
-  QueryInstance,
-  QueryGetResponse,
-  QueryRunRequest,
-  QueryRunResponse,
-  QueryResultsResponse,
-} from '@mathesar/api/types/queries';
-import { CancellablePromise } from '@mathesar-component-library';
+import CacheManager from '@mathesar/utils/CacheManager';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
+import { CancellablePromise } from '@mathesar-component-library';
 
-import { currentSchemaId, addCountToSchemaNumExplorations } from './schemas';
+import { addCountToSchemaNumExplorations, currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
 

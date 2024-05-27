@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import type { ResultValue } from '@mathesar/api/rest/types/tables/records';
   import CellValue from '@mathesar/components/CellValue.svelte';
-  import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import type { ResultValue } from '@mathesar/api/types/tables/records';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
   export let recordSummariesForSheet: RecordSummariesForSheet;

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
-  import { Icon, Button } from '@mathesar-component-library';
+
   import SortEntry from '@mathesar/components/sort-entry/SortEntry.svelte';
   import type { SortDirection } from '@mathesar/components/sort-entry/utils';
   import {
@@ -15,6 +15,7 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { Button, Icon } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
 

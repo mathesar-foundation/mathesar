@@ -1,16 +1,16 @@
 /* eslint-disable max-classes-per-file */
 
 import {
-  writable,
   type Readable,
-  type Writable,
   type Subscriber,
   type Unsubscriber,
+  type Writable,
   get,
+  writable,
 } from 'svelte/store';
 
-import type { CancellablePromise } from '@mathesar-component-library';
 import { getErrorMessage } from '@mathesar/utils/errors';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 export type AsyncStoreSettlement<T, E> =
   | { state: 'resolved'; value: T }

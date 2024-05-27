@@ -1,18 +1,19 @@
 <!-- TODO: Shouldn't this be inside the schema page instead? -->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { ModalController } from '@mathesar-component-library';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import {
-    schemas,
-    createSchema,
-    updateSchema,
-  } from '@mathesar/stores/schemas';
-  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import {
+    createSchema,
+    schemas,
+    updateSchema,
+  } from '@mathesar/stores/schemas';
   import { toast } from '@mathesar/stores/toast';
+  import type { ModalController } from '@mathesar-component-library';
 
   export let database: Database;
   export let controller: ModalController;

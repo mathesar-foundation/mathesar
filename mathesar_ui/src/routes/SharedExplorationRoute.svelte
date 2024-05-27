@@ -1,12 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
-  import { preloadRouteData } from '@mathesar/utils/preloadData';
+
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { queries } from '@mathesar/stores/queries';
+  import { currentSchema } from '@mathesar/stores/schemas';
+  import { preloadRouteData } from '@mathesar/utils/preloadData';
   import { ShareConsumer } from '@mathesar/utils/shares';
 
   const routeSpecificData = preloadRouteData<{ query_id: number | null }>(

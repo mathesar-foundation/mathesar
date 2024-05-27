@@ -8,8 +8,9 @@
    * changes to both files as necessary.
    */
   import { _ } from 'svelte-i18n';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
   const tabularData = getTabularDataStoreFromContext();
 

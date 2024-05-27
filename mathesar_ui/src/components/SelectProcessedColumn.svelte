@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Select } from '@mathesar-component-library';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import { Select } from '@mathesar-component-library';
+
   import ProcessedColumnName from './column/ProcessedColumnName.svelte';
 
   export let columns: ProcessedColumn[];

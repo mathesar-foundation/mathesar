@@ -1,11 +1,12 @@
 import type { Readable, Unsubscriber, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
-import type { CancellablePromise } from '@mathesar-component-library';
-import type { Connection } from '@mathesar/api/connections';
-import { States, getAPI } from '@mathesar/api/utils/requestUtils';
+import type { Connection } from '@mathesar/api/rest/connections';
+import { States, getAPI } from '@mathesar/api/rest/utils/requestUtils';
 import { currentDatabase } from '@mathesar/stores/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
+import type { CancellablePromise } from '@mathesar-component-library';
+
 import { constructAbstractTypeMapFromResponse } from './abstractTypeCategories';
 import type {
   AbstractTypeResponse,

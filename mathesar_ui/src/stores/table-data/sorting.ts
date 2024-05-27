@@ -1,13 +1,14 @@
-import { ImmutableMap } from '@mathesar-component-library';
-import {
-  type SortDirection,
-  allowedSortDirections,
-} from '@mathesar/components/sort-entry/utils';
 import type {
   SortDirection as ApiSortDirection,
   SortingEntry as ApiSortingEntry,
   GetRequestParams,
-} from '@mathesar/api/types/tables/records';
+} from '@mathesar/api/rest/types/tables/records';
+import {
+  type SortDirection,
+  allowedSortDirections,
+} from '@mathesar/components/sort-entry/utils';
+import { ImmutableMap } from '@mathesar-component-library';
+
 import type { Grouping } from './grouping';
 
 function sortDirectionIsValid(d: string): boolean {

@@ -1,7 +1,6 @@
 import * as Papa from 'papaparse';
 import { get } from 'svelte/store';
 
-import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
 import SheetSelection, {
   isCellSelected,
 } from '@mathesar/components/sheet/SheetSelection';
@@ -16,6 +15,7 @@ import type { QueryRow } from '@mathesar/systems/data-explorer/QueryRunner';
 import type { ProcessedQueryOutputColumn } from '@mathesar/systems/data-explorer/utils';
 import type { ReadableMapLike } from '@mathesar/typeUtils';
 import { labeledCount } from '@mathesar/utils/languageUtils';
+import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
 
 const MIME_PLAIN_TEXT = 'text/plain';
 const MIME_MATHESAR_SHEET_CLIPBOARD =
@@ -62,7 +62,19 @@ function getFormattedCellValue<
 function serializeTsv(data: string[][]): string {
   return Papa.unparse(data, {
     delimiter: '\t',
-    escapeFormulae: true,
+    // From the [Papa Parse][1] library, `escapeFormulae` helps defend against
+    // formula [injection attacks][2]. We modify the default value though
+    // because it [didn't work][3] for negative numbers. We're supplying our own
+    // regex that uses the default behavior plus special handling for negative
+    // numbers. It doesn't escape negative numbers because they are valid. But
+    // it does escape anything else that begins with a hyphen.
+    //
+    // [1]: https://www.papaparse.com/docs
+    //
+    // [2]: https://owasp.org/www-community/attacks/CSV_Injection
+    //
+    // [3]: https://github.com/mathesar-foundation/mathesar/issues/3576
+    escapeFormulae: /^=|^\+|^@|^\t|^\r|^-(?!\d+(\.\d+)?$)/,
   });
 }
 

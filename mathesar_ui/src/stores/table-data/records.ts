@@ -1,19 +1,14 @@
 import {
-  derived,
-  get,
-  writable,
   type Readable,
   type Unsubscriber,
   type Writable,
+  derived,
+  get,
+  writable,
 } from 'svelte/store';
 
-import {
-  getGloballyUniqueId,
-  isDefinedNonNullable,
-  type CancellablePromise,
-} from '@mathesar-component-library';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   GetRequestParams as ApiGetRequestParams,
   Group as ApiGroup,
@@ -21,19 +16,25 @@ import type {
   Result as ApiRecord,
   Response as ApiRecordsResponse,
   GroupingMode,
-} from '@mathesar/api/types/tables/records';
+} from '@mathesar/api/rest/types/tables/records';
 import {
   States,
   deleteAPI,
   getAPI,
+  getQueryStringFromParams,
   patchAPI,
   postAPI,
-  getQueryStringFromParams,
-} from '@mathesar/api/utils/requestUtils';
-import type Pagination from '@mathesar/utils/Pagination';
+} from '@mathesar/api/rest/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
+import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
+import {
+  type CancellablePromise,
+  getGloballyUniqueId,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
+
 import type { ColumnsDataStore } from './columns';
 import type { Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';

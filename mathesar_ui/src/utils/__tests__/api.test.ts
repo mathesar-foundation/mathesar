@@ -1,4 +1,4 @@
-import { getMostImportantRequestStatusState } from '../../api/utils/requestUtils';
+import { getMostImportantRequestStatusState } from '@mathesar/api/rest/utils/requestUtils';
 
 test('getMostImportantRequestStatusState', () => {
   expect(

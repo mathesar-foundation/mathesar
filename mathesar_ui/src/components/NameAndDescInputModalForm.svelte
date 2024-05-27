@@ -10,6 +10,9 @@
    */
   import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import TextArea from '@mathesar/component-library/text-area/TextArea.svelte';
+  import { toast } from '@mathesar/stores/toast';
   import {
     LabeledInput,
     type ModalController,
@@ -19,8 +22,6 @@
     ControlledModal,
     TextInput,
   } from '@mathesar-component-library';
-  import { toast } from '@mathesar/stores/toast';
-  import TextArea from '@mathesar/component-library/text-area/TextArea.svelte';
 
   export let saveButtonLabel = $_('save');
   export let controller: ModalController;

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { splitMatchParts } from './matchHighlighterUtils';
   import type Match from './Match.svelte';
+  import { splitMatchParts } from './matchHighlighterUtils';
   import PrecomputedMatchHighlighter from './PrecomputedMatchHighlighter.svelte';
 
   export let text: string;

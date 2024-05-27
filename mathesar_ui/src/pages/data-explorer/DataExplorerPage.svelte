@@ -1,16 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import {
+    getExplorationPageUrl,
+    getSchemaPageUrl,
+  } from '@mathesar/routes/urls';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { DataExplorer } from '@mathesar/systems/data-explorer';
   import type { QueryManager } from '@mathesar/systems/data-explorer/types';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import {
-    getSchemaPageUrl,
-    getExplorationPageUrl,
-  } from '@mathesar/routes/urls';
 
   const userProfile = getUserProfileStoreFromContext();
 

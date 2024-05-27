@@ -1,19 +1,22 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Collapsible } from '@mathesar-component-library';
-  import { tables } from '@mathesar/stores/tables';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import ColumnNameAndDescription from './ColumnNameAndDescription.svelte';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { tables } from '@mathesar/stores/tables';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
+  import { Collapsible } from '@mathesar-component-library';
+
+  import CollapsibleHeader from '../CollapsibleHeader.svelte';
+
   import ColumnActions from './ColumnActions.svelte';
+  import ColumnFormatting from './ColumnFormatting.svelte';
+  import ColumnNameAndDescription from './ColumnNameAndDescription.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
-  import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import ColumnTypeSpecifierTag from './ColumnTypeSpecifierTag.svelte';
-  import ColumnFormatting from './ColumnFormatting.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
 
   const tabularData = getTabularDataStoreFromContext();

@@ -1,16 +1,17 @@
 <script lang="ts">
-  import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
-  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import {
-    InputGroup,
-    InputGroupText,
-  } from '@mathesar-component-library-dir/input-group';
+  import { iconSearch } from '@mathesar-component-library-dir/common/icons';
   import { filterTree } from '@mathesar-component-library-dir/common/utils/filterUtils';
   import {
     hasProperty,
     hasStringProperty,
   } from '@mathesar-component-library-dir/common/utils/typeUtils';
-  import { iconSearch } from '@mathesar-component-library-dir/common/icons';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import {
+    InputGroup,
+    InputGroupText,
+  } from '@mathesar-component-library-dir/input-group';
+  import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
+
   import TreeItemComponent from './TreeItem.svelte';
 
   type TreeItem = $$Generic;

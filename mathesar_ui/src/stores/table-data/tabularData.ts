@@ -1,31 +1,33 @@
 import { getContext, setContext } from 'svelte';
 import {
-  derived,
-  writable,
-  get,
   type Readable,
   type Writable,
+  derived,
+  get,
+  writable,
 } from 'svelte/store';
+
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { States } from '@mathesar/api/utils/requestUtils';
-import type { Column } from '@mathesar/api/types/tables/columns';
 import { SheetSelection } from '@mathesar/components/sheet';
-import { getColumnOrder } from '@mathesar/utils/tables';
+import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type { ShareConsumer } from '@mathesar/utils/shares';
-import { Meta } from './meta';
+import { getColumnOrder } from '@mathesar/utils/tables';
+
 import { ColumnsDataStore } from './columns';
-import type { RecordRow, TableRecordsData } from './records';
-import { RecordsData } from './records';
-import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
+import { Display } from './display';
+import { Meta } from './meta';
 import type {
   ProcessedColumn,
   ProcessedColumnsStore,
 } from './processedColumns';
 import { processColumn } from './processedColumns';
+import type { RecordRow, TableRecordsData } from './records';
+import { RecordsData } from './records';
 
 export interface TabularDataProps {
   id: DBObjectEntry['id'];

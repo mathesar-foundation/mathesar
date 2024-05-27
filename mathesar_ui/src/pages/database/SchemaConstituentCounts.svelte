@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { SchemaEntry } from '@mathesar/AppTypes';
 
   export let schema: SchemaEntry;

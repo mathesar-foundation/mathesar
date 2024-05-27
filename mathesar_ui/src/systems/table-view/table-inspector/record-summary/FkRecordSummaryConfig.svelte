@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { Meta, TabularData } from '@mathesar/stores/table-data';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { Meta, TabularData } from '@mathesar/stores/table-data';
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
   import Pagination from '@mathesar/utils/Pagination';
 

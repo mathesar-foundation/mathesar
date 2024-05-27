@@ -1,11 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { ModalController } from '@mathesar-component-library';
+
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import EditTableHoc from '@mathesar/components/EditTableHOC.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
+  import type { ModalController } from '@mathesar-component-library';
 
   export let table: TableEntry;
   export let modalController: ModalController;

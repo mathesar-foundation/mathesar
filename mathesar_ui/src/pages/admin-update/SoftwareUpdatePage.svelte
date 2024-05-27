@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
+
   import SoftwareUpdateContent from './SoftwareUpdateContent.svelte';
 
   const releaseDataStore = getReleaseDataStoreFromContext();

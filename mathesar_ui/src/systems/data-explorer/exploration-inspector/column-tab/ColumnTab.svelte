@@ -1,13 +1,16 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { _ } from 'svelte-i18n';
+
   import {
     Collapsible,
     LabeledInput,
     TextInput,
   } from '@mathesar-component-library';
-  import type QueryRunner from '../../QueryRunner';
+
   import QueryManager from '../../QueryManager';
+  import type QueryRunner from '../../QueryRunner';
+
   import ColumnSource from './ColumnSource.svelte';
   import DeleteColumnAction from './DeleteColumnAction.svelte';
 

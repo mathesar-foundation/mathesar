@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
-import { addMessages, init, register, locale } from 'svelte-i18n';
+import { addMessages, init, locale, register } from 'svelte-i18n';
+
 import type { LangObject } from './languages/utils';
 
 const loaders = {

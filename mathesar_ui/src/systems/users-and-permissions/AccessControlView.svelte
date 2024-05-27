@@ -1,24 +1,26 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import type { UserRole } from '@mathesar/api/rest/users';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { iconAddNew } from '@mathesar/icons';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import type { UserModel } from '@mathesar/stores/users';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import {
+    type AccessControlObject,
+    type ObjectRoleMap,
+    getDisplayNameForRole,
+  } from '@mathesar/utils/permissions';
+  import {
+    Button,
+    Help,
+    Icon,
     LabeledInput,
     Select,
     SpinnerButton,
-    Button,
-    Icon,
-    Help,
   } from '@mathesar-component-library';
-  import { iconAddNew } from '@mathesar/icons';
-  import type { UserRole } from '@mathesar/api/users';
-  import {
-    getDisplayNameForRole,
-    type ObjectRoleMap,
-    type AccessControlObject,
-  } from '@mathesar/utils/permissions';
-  import type { UserModel } from '@mathesar/stores/users';
-  import { getErrorMessage } from '@mathesar/utils/errors';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+
   import AccessControlRow from './AccessControlRow.svelte';
 
   const roles: UserRole[] = ['viewer', 'editor', 'manager'];

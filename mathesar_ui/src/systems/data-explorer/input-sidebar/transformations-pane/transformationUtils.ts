@@ -1,9 +1,10 @@
-import type { QueryInstanceInitialColumn } from '@mathesar/api/types/queries';
-import {
-  getProcessedOutputColumns,
-  type ProcessedQueryResultColumnMap,
-} from '../../utils';
+import type { QueryInstanceInitialColumn } from '@mathesar/api/rest/types/queries';
+
 import type { QueryTransformationModel } from '../../QueryModel';
+import {
+  type ProcessedQueryResultColumnMap,
+  getProcessedOutputColumns,
+} from '../../utils';
 
 export function calcAllowedColumnsPerTransformation(
   initialColumns: QueryInstanceInitialColumn[],

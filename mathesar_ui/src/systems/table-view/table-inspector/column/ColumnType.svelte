@@ -1,13 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    getTabularDataStoreFromContext,
-    type ProcessedColumn,
-  } from '@mathesar/stores/table-data';
+
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
-  import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
   import AbstractTypeSelector from '@mathesar/components/abstract-type-control/AbstractTypeSelector.svelte';
+  import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import {
+    type ProcessedColumn,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore } = $tabularData);

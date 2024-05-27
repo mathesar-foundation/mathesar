@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
-  import TableName from '@mathesar/components/TableName.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import TableName from '@mathesar/components/TableName.svelte';
+
   import type { LinkedTable } from './columnExtractionTypes';
 
   export let linkedTable: LinkedTable;

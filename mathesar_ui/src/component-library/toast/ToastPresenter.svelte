@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { SvelteComponent } from 'svelte';
-  import { fade, fly } from 'svelte/transition';
   import { flip } from 'svelte/animate';
   import type { Readable } from 'svelte/store';
+  import { fade, fly } from 'svelte/transition';
+
   import type { ToastEntry } from './ToastController';
   import ToastItem from './ToastItem.svelte';
 

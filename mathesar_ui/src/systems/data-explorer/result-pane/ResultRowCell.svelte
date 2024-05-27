@@ -1,16 +1,18 @@
 <script lang="ts">
   import { tick } from 'svelte';
+
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
     SheetCell,
     isCellActive,
-    scrollBasedOnActiveCell,
     isCellSelected,
+    scrollBasedOnActiveCell,
   } from '@mathesar/components/sheet';
-  import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+
+  import type QueryInspector from '../QueryInspector';
   import type { QueryRow, QuerySheetSelection } from '../QueryRunner';
   import type { ProcessedQueryOutputColumn } from '../utils';
-  import type QueryInspector from '../QueryInspector';
 
   export let processedQueryColumn: ProcessedQueryOutputColumn;
   export let row: QueryRow | undefined;

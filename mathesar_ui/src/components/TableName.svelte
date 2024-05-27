@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { iconTable } from '@mathesar/icons';
+  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
+
   import NameWithIcon from './NameWithIcon.svelte';
 
   interface $$Props extends Omit<ComponentProps<NameWithIcon>, 'icon'> {

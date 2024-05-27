@@ -4,6 +4,7 @@
     mergeStyleStrings,
   } from '@mathesar-component-library-dir/common/utils/styleUtils';
   import type { CssVariablesObj } from '@mathesar-component-library-dir/types';
+
   import { setNewMenuControllerInContext } from './MenuController';
 
   const controller = setNewMenuControllerInContext();

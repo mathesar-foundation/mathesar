@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton, Tutorial } from '@mathesar-component-library';
   import { getImportPageUrl } from '@mathesar/routes/urls';
+  import { AnchorButton, Tutorial } from '@mathesar-component-library';
+
   import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
 
   export let database: Database;
