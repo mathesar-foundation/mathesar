@@ -44,7 +44,6 @@ def get_column_cast_expression(column, target_type, engine, type_options=None):
 
 def install_all_casts(engine):
     create_boolean_casts(engine)
-    create_date_casts(engine)
     create_decimal_number_casts(engine)
     create_email_casts(engine)
     create_integer_casts(engine)
@@ -62,11 +61,6 @@ def install_all_casts(engine):
 def create_boolean_casts(engine):
     type_body_map = _get_boolean_type_body_map()
     create_cast_functions(PostgresType.BOOLEAN, type_body_map, engine)
-
-
-def create_date_casts(engine):
-    type_body_map = _get_date_type_body_map()
-    create_cast_functions(PostgresType.DATE, type_body_map, engine)
 
 
 def create_json_casts(engine):
