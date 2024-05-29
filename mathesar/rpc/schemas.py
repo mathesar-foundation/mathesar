@@ -8,6 +8,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.constants import INTERNAL_SCHEMAS
 from db.schemas.operations.select import get_schemas
+from db.schemas.operations.drop import drop_schema_via_oid
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -53,3 +54,18 @@ def list_(*, database_id: int, **kwargs) -> list[SchemaInfo]:
     # refactored the models so that each exploration is associated with a schema
     # (by oid) in a specific database.
     return [{**s, "exploration_count": 0} for s in user_defined_schemas]
+
+
+@rpc_method(name="schemas.delete")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def delete(*, database_id: int, schema_id: int, **kwargs) -> None:
+    """
+    Delete a schema, given its OID.
+
+    Args:
+        database_id: The Django id of the database containing the schema.
+        schema_id: The OID of the schema to delete.
+    """
+    with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
+        drop_schema_via_oid(conn, schema_id)

@@ -40,6 +40,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        schemas.delete,
+        "schemas.delete",
+        [user_is_authenticated]
+    ),
+    (
         tables.list_,
         "tables.list",
         [user_is_authenticated]
