@@ -2403,10 +2403,13 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_valid_target_type_strings() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_cast_functions();
-  RETURN NEXT is(msar.get_valid_target_type_strings('text'), '["numeric", "text"]'::jsonb);
-  RETURN NEXT is(
-    msar.get_valid_target_type_strings('text'::regtype::oid), '["numeric", "text"]'::jsonb
-  );
+
+  RETURN NEXT ok(msar.get_valid_target_type_strings('text') @> '["numeric", "text"]');
+  RETURN NEXT is(jsonb_array_length(msar.get_valid_target_type_strings('text')), 2);
+
+  RETURN NEXT ok(msar.get_valid_target_type_strings('text'::regtype::oid) @> '["numeric", "text"]');
+  RETURN NEXT is(jsonb_array_length(msar.get_valid_target_type_strings('text'::regtype::oid)), 2);
+  
   RETURN NEXT is(msar.get_valid_target_type_strings('interval'), NULL);
 END;
 $$ LANGUAGE plpgsql;
