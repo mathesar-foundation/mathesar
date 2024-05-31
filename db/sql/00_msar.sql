@@ -2144,8 +2144,8 @@ Args:
 */
 DECLARE relation_name text;
 BEGIN
-  relation_name := __msar.get_relation_name(tab_id);
-  -- if_exists doesn't work while working with oids because 
+  relation_name := msar.get_relation_name_or_null(tab_id);
+  -- if_exists doesn't work while working with oids because
   -- the SQL query gets parameterized with tab_id instead of relation_name
   -- since we're unable to find the relation_name for a non existing table. 
   PERFORM __msar.drop_table(relation_name, cascade_, if_exists => false);
