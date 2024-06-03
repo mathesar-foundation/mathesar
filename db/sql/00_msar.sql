@@ -990,7 +990,8 @@ DECLARE
 BEGIN
   SELECT nspname INTO sch_name FROM pg_namespace WHERE oid = sch_id;
   IF sch_name IS NULL THEN
-    RAISE EXCEPTION 'No schema with OID % exists.', sch_id;
+    RAISE EXCEPTION 'No schema with OID % exists.', sch_id
+    USING ERRCODE = '3F000'; -- invalid_schema_name
   END IF;
   PERFORM msar.drop_schema(sch_name, cascade_);
 END;

@@ -1256,7 +1256,7 @@ BEGIN
         cascade_ => false
       )
     $d$,
-    'P0001'
+    '3F000'
   );
 END;
 $$ LANGUAGE plpgsql;
