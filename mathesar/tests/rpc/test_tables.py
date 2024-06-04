@@ -123,6 +123,6 @@ def test_tables_delete(rf, monkeypatch):
         return 'public."Table 0"'
 
     monkeypatch.setattr(tables, 'connect', mock_connect)
-    monkeypatch.setattr(tables, 'drop_table_from_schema', mock_drop_table)
+    monkeypatch.setattr(tables, 'drop_table_from_database', mock_drop_table)
     deleted_table = tables.delete(table_oid=1964474, database_id=11, request=request)
     assert deleted_table == 'public."Table 0"'
