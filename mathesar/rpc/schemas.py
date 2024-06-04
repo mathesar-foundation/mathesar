@@ -59,13 +59,13 @@ def list_(*, database_id: int, **kwargs) -> list[SchemaInfo]:
 @rpc_method(name="schemas.delete")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def delete(*, database_id: int, schema_id: int, **kwargs) -> None:
+def delete(*, schema_id: int, database_id: int, **kwargs) -> None:
     """
     Delete a schema, given its OID.
 
     Args:
-        database_id: The Django id of the database containing the schema.
         schema_id: The OID of the schema to delete.
+        database_id: The Django id of the database containing the schema.
     """
     with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
         drop_schema_via_oid(conn, schema_id)
