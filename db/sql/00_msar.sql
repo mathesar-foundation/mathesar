@@ -122,6 +122,17 @@ from Python through a single Python module.
   END
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION msar.obj_description(obj_id oid, catalog_name text) RETURNS text AS $$/*
+Transparent wrapper for obj_description. Putting it in the `msar` namespace helps route all DB calls
+from Python through a single Python module.
+*/
+  BEGIN
+    RETURN obj_description(obj_id, catalog_name);
+  END
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __msar.jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
 Wraps the `?` jsonb operator for improved readability.
 */
@@ -129,6 +140,23 @@ Wraps the `?` jsonb operator for improved readability.
     RETURN data ? key;
   END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
+Return true if the given schema exists in the current database, false otherwise.
+*/
+SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION __msar.get_schema_oid(sch_name text) RETURNS oid AS $$/*
+Return the OID of a schema, if it can be diretly found from a name.
+
+Args :
+  sch_name: The name of the schema.
+*/
+SELECT CASE WHEN msar.schema_exists(sch_name) THEN sch_name::regnamespace::oid END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION __msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
@@ -189,6 +217,26 @@ BEGIN
   RETURN rel_id::regclass::text;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_relation_name_or_null(rel_id oid) RETURNS text AS $$/*
+Return the name for a given relation (e.g., table), qualified or quoted as appropriate.
+
+In cases where the relation is already included in the search path, the returned name will not be
+fully-qualified.
+
+The relation *must* be in the pg_class table to use this function. This function will return NULL if
+no corresponding relation can be found.
+
+Args:
+  rel_id: The OID of the relation.
+*/
+SELECT CASE
+  WHEN EXISTS (SELECT oid FROM pg_catalog.pg_class WHERE oid=rel_id) THEN rel_id::regclass::text
+END
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 
 DROP FUNCTION IF EXISTS msar.get_relation_oid(text, text) CASCADE;
@@ -468,6 +516,176 @@ AND attrelid = msar.get_relation_oid(sch_name, rel_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_interval_fields(typ_mod integer) RETURNS text AS $$/*
+Return the string giving the fields for an interval typmod integer.
+
+This logic is ported from the relevant PostgreSQL source code, reimplemented in SQL. See the
+`intervaltypmodout` function at
+https://doxygen.postgresql.org/backend_2utils_2adt_2timestamp_8c.html
+
+Args:
+  typ_mod: The atttypmod from the pg_attribute table. Should be valid for the interval type.
+*/
+SELECT CASE (typ_mod >> 16 & 32767)
+  WHEN 1 << 2 THEN 'year'
+  WHEN 1 << 1 THEN 'month'
+  WHEN 1 << 3 THEN 'day'
+  WHEN 1 << 10 THEN 'hour'
+  WHEN 1 << 11 THEN 'minute'
+  WHEN 1 << 12 THEN 'second'
+  WHEN (1 << 2) | (1 << 1) THEN 'year to month'
+  WHEN (1 << 3) | (1 << 10) THEN 'day to hour'
+  WHEN (1 << 3) | (1 << 10) | (1 << 11) THEN 'day to minute'
+  WHEN (1 << 3) | (1 << 10) | (1 << 11) | (1 << 12) THEN 'day to second'
+  WHEN (1 << 10) | (1 << 11) THEN 'hour to minute'
+  WHEN (1 << 10) | (1 << 11) | (1 << 12) THEN 'hour to second'
+  WHEN (1 << 11) | (1 << 12) THEN 'minute to second'
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_type_options(typ_id regtype, typ_mod integer, typ_ndims integer) RETURNS jsonb AS $$/*
+Return the type options calculated from a type, typmod pair.
+
+This function uses a number of hard-coded constants. The form of the returned object is determined
+by the input type, but the keys will be a subset of:
+  precision: the precision of a numeric or interval type. See PostgreSQL docs for details.
+  scale: the scale of a numeric type
+  fields: See PostgreSQL documentation of the `interval` type.
+  length: Applies to "text" types where the user can specify the length.
+  item_type: Gives the type of array members for array-types
+
+Args:
+  typ_id: an OID or valid type representing string will work here.
+  typ_mod: The integer corresponding to the type options; see pg_attribute catalog table.
+  typ_ndims: Used to determine whether the type is actually an array without an extra join.
+*/
+SELECT nullif(
+  CASE
+    WHEN typ_id = ANY('{numeric, _numeric}'::regtype[]) THEN
+      jsonb_build_object(
+        -- This calculation is modified from the relevant PostgreSQL source code. See the function
+        -- numeric_typmod_precision(int32) at
+        -- https://doxygen.postgresql.org/backend_2utils_2adt_2numeric_8c.html
+        'precision', ((nullif(typ_mod, -1) - 4) >> 16) & 65535,
+        -- This calculation is from numeric_typmod_scale(int32) at the same location
+        'scale', (((nullif(typ_mod, -1) - 4) & 2047) # 1024) - 1024
+      )
+    WHEN typ_id = ANY('{interval, _interval}'::regtype[]) THEN
+      jsonb_build_object(
+        'precision', nullif(typ_mod & 65535, 65535),
+        'fields', msar.get_interval_fields(typ_mod)
+      )
+    WHEN typ_id = ANY('{bpchar, _bpchar, varchar, _varchar}'::regtype[]) THEN
+      -- For char and varchar types, the typemod is equal to 4 more than the set length.
+      jsonb_build_object('length', nullif(typ_mod, -1) - 4)
+    WHEN typ_id = ANY(
+      '{bit, varbit, time, timetz, timestamp, timestamptz}'::regtype[]
+      || '{_bit, _varbit, _time, _timetz, _timestamp, _timestamptz}'::regtype[]
+    ) THEN
+      -- For all these types, the typmod is equal to the precision.
+      jsonb_build_object(
+        'precision', nullif(typ_mod, -1)
+      )
+    ELSE jsonb_build_object()
+  END
+  || CASE
+    WHEN typ_ndims>0 THEN
+      -- This string wrangling is debatably dubious, but avoids a slow join.
+      jsonb_build_object('item_type', rtrim(typ_id::regtype::text, '[]'))
+    ELSE '{}'
+  END,
+  '{}'
+)
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_valid_target_type_strings(typ_id regtype) RETURNS jsonb AS $$/*
+Given a source type, return the target types for which Mathesar provides a casting function.
+
+Args:
+  typ_id: The type we're casting from.
+*/
+
+SELECT jsonb_agg(prorettype::regtype::text)
+FROM pg_proc
+WHERE
+  pronamespace=__msar.get_schema_oid('mathesar_types')
+  AND proargtypes[0]=typ_id
+  AND left(proname, 5) = 'cast_';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.has_dependents(rel_id oid, att_id smallint) RETURNS boolean AS $$/*
+Return a boolean according to whether the column identified by the given oid, attnum pair is
+referenced (i.e., would dropping that column require CASCADE?).
+
+Args:
+  rel_id: The relation of the attribute.
+  att_id: The attnum of the attribute in the relation.
+*/
+SELECT EXISTS (
+  SELECT 1 FROM pg_depend WHERE refobjid=rel_id AND refobjsubid=att_id AND deptype='n'
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
+Given a table identifier, return an array of objects describing the columns of the table.
+
+Each returned JSON object in the array will have the form:
+  {
+    "id": <int>,
+    "name": <str>,
+    "type": <str>,
+    "type_options": <obj>,
+    "nullable": <bool>,
+    "primary_key": <bool>,
+    "default": {"value": <str>, "is_dynamic": <bool>},
+    "has_dependents": <bool>,
+    "description": <str>
+  }
+
+The `type_options` object is described in the docstring of `msar.get_type_options`. The `default`
+object has the keys:
+  value: A string giving the value (as an SQL expression) of the default.
+  is_dynamic: A boolean giving whether the default is (likely to be) dynamic.
+*/
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'id', attnum,
+    'name', attname,
+    'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END,
+    'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
+    'nullable', NOT attnotnull,
+    'primary_key', COALESCE(pgi.indisprimary, false),
+    'default',
+    nullif(
+      jsonb_strip_nulls(
+        jsonb_build_object(
+          'value',
+          CASE
+            WHEN attidentity='' THEN pg_get_expr(adbin, tab_id)
+            ELSE 'identity'
+          END,
+          'is_dynamic', msar.is_default_possibly_dynamic(tab_id, attnum)
+        )
+      ),
+      jsonb_build_object()
+    ),
+    'has_dependents', msar.has_dependents(tab_id, attnum),
+    'description', msar.col_description(tab_id, attnum)
+  )
+)
+FROM pg_attribute pga
+  LEFT JOIN pg_index pgi ON pga.attrelid=pgi.indrelid AND pga.attnum=ANY(pgi.indkey)
+  LEFT JOIN pg_attrdef pgd ON pga.attrelid=pgd.adrelid AND pga.attnum=pgd.adnum
+WHERE pga.attrelid=tab_id AND pga.attnum > 0 and NOT attisdropped;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.column_exists(tab_id oid, col_name text) RETURNS boolean AS $$/*
 Return true if the given column exists in the table, false otherwise.
 */
@@ -475,11 +693,72 @@ SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
-Return true if the given schema exists in the current database, false otherwise.
+CREATE OR REPLACE FUNCTION msar.get_table_info(sch_id regnamespace) RETURNS jsonb AS $$/*
+Given a schema identifier, return an array of objects describing the tables of the schema.
+
+Each returned JSON object in the array will have the form:
+  {
+    "oid": <int>,
+    "name": <str>,
+    "schema": <int>,
+    "description": <str>
+  }
+
+Args:
+  sch_id: The OID or name of the schema.
 */
-SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'oid', pgc.oid,
+    'name', pgc.relname,
+    'schema', pgc.relnamespace,
+    'description', msar.obj_description(pgc.oid, 'pg_class')
+  )
+)
+FROM pg_catalog.pg_class AS pgc 
+  LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
+WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_schemas() RETURNS jsonb AS $$/*
+Return a json array of objects describing the user-defined schemas in the database.
+
+PostgreSQL system schemas are ignored.
+
+Internal Mathesar-specifc schemas are INCLUDED. These should be filtered out by the caller. This
+behavior is to avoid tight coupling between this function and other SQL files that might need to
+define additional Mathesar-specific schemas as our codebase grows.
+
+Each returned JSON object in the array will have the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "description": <str|null>
+    "table_count": <int>
+  }
+*/
+SELECT jsonb_agg(schema_data)
+FROM (
+  SELECT 
+    s.oid AS oid,
+    s.nspname AS name,
+    pg_catalog.obj_description(s.oid) AS description,
+    COALESCE(count(c.oid), 0) AS table_count
+  FROM pg_catalog.pg_namespace s
+  LEFT JOIN pg_catalog.pg_class c ON
+    c.relnamespace = s.oid AND
+    -- Filter on relkind so that we only count tables. This must be done in the ON clause so that
+    -- we still get a row for schemas with no tables.
+    c.relkind = 'r'
+  WHERE
+    s.nspname <> 'information_schema' AND
+    s.nspname NOT LIKE 'pg_%'
+  GROUP BY
+    s.oid,
+    s.nspname
+) AS schema_data;
+$$ LANGUAGE sql;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -936,10 +1215,11 @@ Args:
 DECLARE col_names text[];
 BEGIN
   SELECT array_agg(quote_ident(attname))
-  FROM pg_attribute
-  WHERE attrelid=tab_id AND ARRAY[attnum::integer] <@ col_ids
+  FROM pg_catalog.pg_attribute
+  WHERE attrelid=tab_id AND NOT attisdropped AND ARRAY[attnum::integer] <@ col_ids
   INTO col_names;
-  RETURN __msar.drop_columns(__msar.get_relation_name(tab_id), variadic col_names);
+  PERFORM __msar.drop_columns(msar.get_relation_name_or_null(tab_id), variadic col_names);
+  RETURN array_length(col_names, 1);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
