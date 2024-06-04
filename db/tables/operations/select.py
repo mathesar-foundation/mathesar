@@ -17,7 +17,7 @@ MULTIPLE_RESULTS = 'multiple_results'
 
 def get_table(table, conn):
     """
-    Return a list of dictionaries describing the tables of a schema.
+    Return a dictionary describing a table of a schema.
 
     The `table` can be given as either a "qualified name", or an OID.
     The OID is the preferred identifier, since it's much more robust.
