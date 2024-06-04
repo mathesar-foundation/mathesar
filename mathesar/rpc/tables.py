@@ -55,7 +55,7 @@ def get_(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
     List information about a table for a schema. Exposed as `get_`.
 
     Args:
-        schema_oid: Identity of the table in the user's database.
+        table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
 
     Returns:
