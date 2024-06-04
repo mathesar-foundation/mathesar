@@ -1,4 +1,5 @@
 import sys
+from unittest.mock import patch
 from sqlalchemy import text
 from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations import select as ma_sel
@@ -32,6 +33,14 @@ JP_PATH = ma_sel.JP_PATH
 FK_PATH = ma_sel.FK_PATH
 TARGET = ma_sel.TARGET
 MULTIPLE_RESULTS = ma_sel.MULTIPLE_RESULTS
+
+
+def test_get_table_info():
+    with patch.object(ma_sel, 'exec_msar_func') as mock_exec:
+        mock_exec.return_value.fetchone = lambda: ('a', 'b')
+        result = ma_sel.get_table_info('schema', 'conn')
+    mock_exec.assert_called_once_with('conn', 'get_table_info', 'schema')
+    assert result == 'a'
 
 
 def _transform_row_to_names(row, engine):
