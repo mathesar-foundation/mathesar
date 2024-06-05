@@ -693,6 +693,29 @@ SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_table(tab_id regclass) RETURNS jsonb AS $$/*
+Given a table identifier, return a JSON object describing the table.
+
+Each returned JSON object will have the form:
+  {
+    "oid": <int>,
+    "name": <str>,
+    "schema": <int>,
+    "description": <str>
+  }
+
+Args:
+  tab_id: The OID or name of the table.
+*/
+SELECT jsonb_build_object(
+  'oid', oid,
+  'name', relname,
+  'schema', relnamespace,
+  'description', msar.obj_description(oid, 'pg_class')
+) FROM pg_catalog.pg_class WHERE oid = tab_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_table_info(sch_id regnamespace) RETURNS jsonb AS $$/*
 Given a schema identifier, return an array of objects describing the tables of the schema.
 

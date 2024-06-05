@@ -50,6 +50,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        tables.get,
+        "tables.get",
+        [user_is_authenticated]
+    ),
+    (
         tables.delete,
         "tables.delete",
         [user_is_authenticated]

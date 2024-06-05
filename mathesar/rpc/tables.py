@@ -3,7 +3,7 @@ from typing import Optional, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.tables.operations.select import get_table_info
+from db.tables.operations.select import get_table_info, get_table
 from db.tables.operations.drop import drop_table_from_database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
@@ -45,6 +45,26 @@ def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableInfo]:
     return [
         TableInfo(tab) for tab in raw_table_info
     ]
+
+
+@rpc_method(name="tables.get")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
+    """
+    List information about a table for a schema.
+
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        Table details for a given table oid.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        raw_table_info = get_table(table_oid, conn)
+    return TableInfo(raw_table_info)
 
 
 @rpc_method(name="tables.delete")
