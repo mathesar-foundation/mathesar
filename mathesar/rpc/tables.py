@@ -80,14 +80,14 @@ def add(
 
     Args:
         table_name: Name of the table to be created.
-        schema_oid: The oid of the schema where the table will be created.
+        schema_oid: Identity of the schema in the user's database.
         database_id: The Django id of the database containing the table.
         columns: A list of columns dict for the new table, in order.
         constraints: A list of constraints dict for the new table.
         comment: The comment for the new table.
 
     Returns:
-        Table oid of the created table.
+        The `oid` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:

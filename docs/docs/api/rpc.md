@@ -61,7 +61,8 @@ To use an RPC function:
     options:
       members:
       - list_
-      - get_
+      - get
+      - add
       - delete
       - TableInfo
 
