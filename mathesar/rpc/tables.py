@@ -4,6 +4,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.tables.operations.select import get_table_info
+from db.tables.operations.drop import drop_table_from_database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -44,3 +45,25 @@ def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableInfo]:
     return [
         TableInfo(tab) for tab in raw_table_info
     ]
+
+
+@rpc_method(name="tables.delete")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def delete(
+    *, table_oid: int, database_id: int, cascade: bool = False, **kwargs
+) -> str:
+    """
+    Delete a table from a schema.
+
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        cascade: Whether to drop the dependent objects.
+
+    Returns:
+        The name of the dropped table.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        return drop_table_from_database(table_oid, conn, cascade)

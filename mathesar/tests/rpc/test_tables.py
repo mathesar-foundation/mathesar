@@ -62,3 +62,30 @@ def test_tables_list(rf, monkeypatch):
     ]
     actual_table_list = tables.list_(schema_oid=2200, database_id=11, request=request)
     assert actual_table_list == expect_table_list
+
+
+def test_tables_delete(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
+    table_oid = 1964474
+    database_id = 11
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_drop_table(_table_oid, conn, cascade):
+        if _table_oid != table_oid:
+            raise AssertionError('incorrect parameters passed')
+        return 'public."Table 0"'
+
+    monkeypatch.setattr(tables, 'connect', mock_connect)
+    monkeypatch.setattr(tables, 'drop_table_from_database', mock_drop_table)
+    deleted_table = tables.delete(table_oid=1964474, database_id=11, request=request)
+    assert deleted_table == 'public."Table 0"'
