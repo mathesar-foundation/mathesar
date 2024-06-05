@@ -50,7 +50,7 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        tables.get_,
+        tables.get,
         "tables.get",
         [user_is_authenticated]
     ),
