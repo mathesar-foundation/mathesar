@@ -1201,49 +1201,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_false() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_drop_schema_using_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_schema();
   PERFORM msar.drop_schema(
     sch_name => 'drop_test_schema', 
-    cascade_ => false, 
-    if_exists => false
+    cascade_ => false
   );
   RETURN NEXT hasnt_schema('drop_test_schema');
   RETURN NEXT throws_ok(
-    format(
-      'SELECT msar.drop_schema(
-        sch_name => ''%s'',
-        cascade_ => false,
-        if_exists => false
-      );', 
-      'drop_non_existing_schema'
-    ),
-    '3F000',
-    'schema "drop_non_existing_schema" does not exist'
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_true() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_drop_schema();
-  PERFORM msar.drop_schema(
-    sch_name => 'drop_test_schema',
-    cascade_ => false,
-    if_exists => true
-  );
-  RETURN NEXT hasnt_schema('drop_test_schema');
-  RETURN NEXT lives_ok(
-    format(
-      'SELECT msar.drop_schema(
-        sch_name => ''%s'',
-        cascade_ => false,
-        if_exists => true
-      );', 
-      'drop_non_existing_schema'
-    )
+    $d$
+      SELECT msar.drop_schema(
+        sch_name => 'drop_non_existing_schema',
+        cascade_ => false
+      )
+    $d$, 
+    '3F000'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -1254,10 +1227,25 @@ BEGIN
   PERFORM __setup_drop_schema();
   PERFORM msar.drop_schema(
     sch_id => 'drop_test_schema'::regnamespace::oid,
-    cascade_ => false,
-    if_exists => false
+    cascade_ => false
   );
   RETURN NEXT hasnt_schema('drop_test_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_using_invalid_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_drop_schema();
+  RETURN NEXT throws_ok(
+    $d$
+      SELECT msar.drop_schema(
+        sch_id => 0,
+        cascade_ => false
+      )
+    $d$,
+    '3F000'
+  );
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1278,8 +1266,7 @@ BEGIN
   PERFORM __setup_schema_with_dependent_obj();
   PERFORM msar.drop_schema(
     sch_name => 'schema1',
-    cascade_ => true,
-    if_exists => false
+    cascade_ => true
   );
   RETURN NEXT hasnt_schema('schema1');
 END;
@@ -1290,16 +1277,13 @@ CREATE OR REPLACE FUNCTION test_drop_schema_restricted() RETURNS SETOF TEXT AS $
 BEGIN
   PERFORM __setup_schema_with_dependent_obj();
   RETURN NEXT throws_ok(
-    format(
-      'SELECT msar.drop_schema(
-        sch_name => ''%s'',
-        cascade_ => false,
-        if_exists => false
-      );',
-      'schema1'
-    ),
-    '2BP01',
-    'cannot drop schema schema1 because other objects depend on it'
+    $d$
+      SELECT msar.drop_schema(
+        sch_name => 'schema1',
+        cascade_ => false
+      )
+    $d$,
+    '2BP01'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -2407,10 +2391,13 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_valid_target_type_strings() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_cast_functions();
-  RETURN NEXT is(msar.get_valid_target_type_strings('text'), '["numeric", "text"]'::jsonb);
-  RETURN NEXT is(
-    msar.get_valid_target_type_strings('text'::regtype::oid), '["numeric", "text"]'::jsonb
-  );
+
+  RETURN NEXT ok(msar.get_valid_target_type_strings('text') @> '["numeric", "text"]');
+  RETURN NEXT is(jsonb_array_length(msar.get_valid_target_type_strings('text')), 2);
+
+  RETURN NEXT ok(msar.get_valid_target_type_strings('text'::regtype::oid) @> '["numeric", "text"]');
+  RETURN NEXT is(jsonb_array_length(msar.get_valid_target_type_strings('text'::regtype::oid)), 2);
+  
   RETURN NEXT is(msar.get_valid_target_type_strings('interval'), NULL);
 END;
 $$ LANGUAGE plpgsql;

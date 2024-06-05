@@ -957,61 +957,43 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 
 
--- Drop schema -------------------------------------------------------------------------------------
-
 CREATE OR REPLACE FUNCTION
-__msar.drop_schema(sch_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
-Drop a schema, returning the command executed.
+msar.drop_schema(sch_name text, cascade_ boolean) RETURNS void AS $$/*
+Drop a schema
 
-Args:
-  sch_name: A properly quoted name of the schema to be dropped
-  cascade_: Whether to drop dependent objects.
-  if_exists: Whether to ignore an error if the schema doesn't exist
-*/
-DECLARE
-  cmd_template text;
-BEGIN
-  IF if_exists
-  THEN
-    cmd_template := 'DROP SCHEMA IF EXISTS %s';
-  ELSE
-    cmd_template := 'DROP SCHEMA %s';
-  END IF;
-  IF cascade_
-  THEN
-    cmd_template = cmd_template || ' CASCADE';
-  END IF;
-  RETURN __msar.exec_ddl(cmd_template, sch_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_schema(sch_id oid, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
-Drop a schema, returning the command executed.
-
-Args:
-  sch_id: The OID of the schema to drop
-  cascade_: Whether to drop dependent objects.
-  if_exists: Whether to ignore an error if the schema doesn't exist
-*/
-BEGIN
-  RETURN __msar.drop_schema(__msar.get_schema_name(sch_id), cascade_, if_exists);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_schema(sch_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
-Drop a schema, returning the command executed.
+If no schema exists with the given name, an exception will be raised.
 
 Args:
   sch_name: An unqoted name of the schema to be dropped
-  cascade_: Whether to drop dependent objects.
-  if_exists: Whether to ignore an error if the schema doesn't exist
+  cascade_: When true, dependent objects will be dropped automatically
 */
+DECLARE
+  cascade_sql text = CASE cascade_ WHEN TRUE THEN ' CASCADE' ELSE '' END;
 BEGIN
-  RETURN __msar.drop_schema(quote_ident(sch_name), cascade_, if_exists);
+  EXECUTE 'DROP SCHEMA ' || quote_ident(sch_name) || cascade_sql;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schema(sch_id oid, cascade_ boolean) RETURNS void AS $$/*
+Drop a schema
+
+If no schema exists with the given oid, an exception will be raised.
+
+Args:
+  sch_id: The OID of the schema to drop
+  cascade_: When true, dependent objects will be dropped automatically
+*/
+DECLARE
+  sch_name text;
+BEGIN
+  SELECT nspname INTO sch_name FROM pg_namespace WHERE oid = sch_id;
+  IF sch_name IS NULL THEN
+    RAISE EXCEPTION 'No schema with OID % exists.', sch_id
+    USING ERRCODE = '3F000'; -- invalid_schema_name
+  END IF;
+  PERFORM msar.drop_schema(sch_name, cascade_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
