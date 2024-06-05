@@ -50,9 +50,9 @@ def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableInfo]:
 @rpc_method(name="tables.get")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def get_(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
+def get(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
     """
-    List information about a table for a schema. Exposed as `get_`.
+    List information about a table for a schema.
 
     Args:
         table_oid: Identity of the table in the user's database.

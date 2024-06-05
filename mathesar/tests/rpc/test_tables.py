@@ -97,7 +97,7 @@ def test_tables_get(rf, monkeypatch):
         'schema': 2200,
         'description': 'a description on the authors table.'
     }
-    actual_table_list = tables.get_(table_oid=1964474, database_id=11, request=request)
+    actual_table_list = tables.get(table_oid=1964474, database_id=11, request=request)
     assert actual_table_list == expect_table_list
 
 
