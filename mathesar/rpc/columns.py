@@ -221,7 +221,6 @@ def patch(
         return alter_columns_in_table(table_oid, column_data_list, conn)
 
 
-
 @rpc_method(name="columns.delete")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
