@@ -21,7 +21,7 @@
   export let activeTabId: TableInspectorTabId | undefined;
 
   $: tabs = Object.entries(tabMap).map(([id, tab]) => ({ id, ...tab }));
-  $: activeTab = defined(activeTabId, (id) => tabMap[id]);
+  $: activeTab = defined(activeTabId, (id) => ({ id, ...tabMap[id] }));
 
   function handleTabSelected(e: CustomEvent<{ tab: Tab }>) {
     activeTabId = e.detail.tab.id as TableInspectorTabId;
