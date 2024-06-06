@@ -60,9 +60,11 @@ To use an RPC function:
     options:
       members:
       - list_
+      - patch
       - delete
       - ColumnListReturn
       - ColumnInfo
+      - SettableColumnInfo
       - TypeOptions
       - ColumnDefault
 
