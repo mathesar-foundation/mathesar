@@ -138,6 +138,39 @@ def test_columns_list(rf, monkeypatch):
     assert actual_col_list == expect_col_list
 
 
+def test_columns_patch(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username='alice', password='pass1234')
+    table_oid = 23457
+    database_id = 2
+    column_data_list = [{"id": 3, "name": "newname"}]
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == 2 and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_column_alter(_table_oid, _column_data_list, conn):
+        if _table_oid != table_oid or _column_data_list != column_data_list:
+            raise AssertionError('incorrect parameters passed')
+        return 1
+
+    monkeypatch.setattr(columns, 'connect', mock_connect)
+    monkeypatch.setattr(columns, 'alter_columns_in_table', mock_column_alter)
+    actual_result = columns.patch(
+        column_data_list=column_data_list,
+        table_oid=table_oid,
+        database_id=database_id,
+        request=request
+    )
+    assert actual_result == 1
+
+
 def test_columns_delete(rf, monkeypatch):
     request = rf.post('/api/rpc/v0/', data={})
     request.user = User(username='alice', password='pass1234')
