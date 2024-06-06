@@ -4,7 +4,7 @@
   import { get } from 'svelte/store';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import { ImmutableMap } from '@mathesar/component-library';
+  import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
@@ -46,7 +46,8 @@
   $: usesVirtualList = context !== 'widget';
   $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
   $: sheetHasBorder = context === 'widget';
-  $: ({ processedColumns, display, selection, recordsData } = $tabularData);
+  $: ({ processedColumns, display, isLoading, selection, recordsData } =
+    $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
     getCopyingContext: () => ({
       rowsMap: new Map(
@@ -95,6 +96,11 @@
     bind:activeTabId={tableInspectorTab}
   >
     <div class="sheet-area">
+      {#if $isLoading}
+        <div class="loading-sheet">
+          <Spinner />
+        </div>
+      {/if}
       {#if $processedColumns.size}
         <Sheet
           {clipboardHandler}
@@ -138,5 +144,11 @@
     position: relative;
     height: 100%;
     overflow-x: auto;
+  }
+  .loading-sheet {
+    text-align: center;
+    font-size: 2rem;
+    padding: 2rem;
+    color: var(--slate-500);
   }
 </style>
