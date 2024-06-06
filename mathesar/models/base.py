@@ -28,7 +28,7 @@ from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
 from db.records.operations.select import get_records
 from db.records.operations.update import update_record
-from db.schemas.operations.drop import drop_schema
+from db.schemas.operations.drop import drop_schema_via_name
 from db.schemas.operations.select import get_schema_description
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
@@ -241,9 +241,8 @@ class Schema(DatabaseObject):
         return result
 
     def delete_sa_schema(self):
-        result = drop_schema(self.name, self._sa_engine, cascade=True)
+        drop_schema_via_name(self._sa_engine, self.name, cascade=True)
         reset_reflection(db_name=self.database.name)
-        return result
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"

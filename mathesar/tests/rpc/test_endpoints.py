@@ -11,6 +11,7 @@ from modernrpc.auth import user_is_authenticated, user_is_superuser
 from mathesar.rpc import columns
 from mathesar.rpc import connections
 from mathesar.rpc import schemas
+from mathesar.rpc import tables
 
 METHODS = [
     (
@@ -38,6 +39,26 @@ METHODS = [
         "schemas.list",
         [user_is_authenticated]
     ),
+    (
+        schemas.delete,
+        "schemas.delete",
+        [user_is_authenticated]
+    ),
+    (
+        tables.list_,
+        "tables.list",
+        [user_is_authenticated]
+    ),
+    (
+        tables.get,
+        "tables.get",
+        [user_is_authenticated]
+    ),
+    (
+        tables.delete,
+        "tables.delete",
+        [user_is_authenticated]
+    )
 ]
 
 

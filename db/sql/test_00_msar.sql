@@ -72,20 +72,8 @@ DECLARE
 BEGIN
   PERFORM __setup_drop_tables();
   rel_id := 'dropme'::regclass::oid;
-  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false, if_exists => false);
+  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false);
   RETURN NEXT hasnt_table('dropme', 'Drops table');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_table_oid_if_exists() RETURNS SETOF TEXT AS $$
-DECLARE
-  rel_id oid;
-BEGIN
-  PERFORM __setup_drop_tables();
-  rel_id := 'dropme'::regclass::oid;
-  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => false, if_exists => true);
-  RETURN NEXT hasnt_table('dropme', 'Drops table with IF EXISTS');
 END;
 $$ LANGUAGE plpgsql;
 
@@ -99,7 +87,7 @@ BEGIN
   CREATE TABLE
     dependent (id SERIAL PRIMARY KEY, col1 integer REFERENCES dropme);
   RETURN NEXT throws_ok(
-    format('SELECT msar.drop_table(tab_id => %s, cascade_ => false, if_exists => true);', rel_id),
+    format('SELECT msar.drop_table(tab_id => %s, cascade_ => false);', rel_id),
     '2BP01',
     'cannot drop table dropme because other objects depend on it',
     'Table dropper throws for dependent objects'
@@ -116,7 +104,7 @@ BEGIN
   rel_id := 'dropme'::regclass::oid;
   CREATE TABLE
     dependent (id SERIAL PRIMARY KEY, col1 integer REFERENCES dropme);
-  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => true, if_exists => false);
+  PERFORM msar.drop_table(tab_id => rel_id, cascade_ => true);
   RETURN NEXT hasnt_table('dropme', 'Drops table with dependent using CASCADE');
 END;
 $$ LANGUAGE plpgsql;
@@ -1213,49 +1201,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_false() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_drop_schema_using_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_drop_schema();
   PERFORM msar.drop_schema(
     sch_name => 'drop_test_schema', 
-    cascade_ => false, 
-    if_exists => false
+    cascade_ => false
   );
   RETURN NEXT hasnt_schema('drop_test_schema');
   RETURN NEXT throws_ok(
-    format(
-      'SELECT msar.drop_schema(
-        sch_name => ''%s'',
-        cascade_ => false,
-        if_exists => false
-      );', 
-      'drop_non_existing_schema'
-    ),
-    '3F000',
-    'schema "drop_non_existing_schema" does not exist'
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_schema_if_exists_true() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_drop_schema();
-  PERFORM msar.drop_schema(
-    sch_name => 'drop_test_schema',
-    cascade_ => false,
-    if_exists => true
-  );
-  RETURN NEXT hasnt_schema('drop_test_schema');
-  RETURN NEXT lives_ok(
-    format(
-      'SELECT msar.drop_schema(
-        sch_name => ''%s'',
-        cascade_ => false,
-        if_exists => true
-      );', 
-      'drop_non_existing_schema'
-    )
+    $d$
+      SELECT msar.drop_schema(
+        sch_name => 'drop_non_existing_schema',
+        cascade_ => false
+      )
+    $d$, 
+    '3F000'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -1266,10 +1227,25 @@ BEGIN
   PERFORM __setup_drop_schema();
   PERFORM msar.drop_schema(
     sch_id => 'drop_test_schema'::regnamespace::oid,
-    cascade_ => false,
-    if_exists => false
+    cascade_ => false
   );
   RETURN NEXT hasnt_schema('drop_test_schema');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_drop_schema_using_invalid_oid() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_drop_schema();
+  RETURN NEXT throws_ok(
+    $d$
+      SELECT msar.drop_schema(
+        sch_id => 0,
+        cascade_ => false
+      )
+    $d$,
+    '3F000'
+  );
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1290,8 +1266,7 @@ BEGIN
   PERFORM __setup_schema_with_dependent_obj();
   PERFORM msar.drop_schema(
     sch_name => 'schema1',
-    cascade_ => true,
-    if_exists => false
+    cascade_ => true
   );
   RETURN NEXT hasnt_schema('schema1');
 END;
@@ -1302,16 +1277,13 @@ CREATE OR REPLACE FUNCTION test_drop_schema_restricted() RETURNS SETOF TEXT AS $
 BEGIN
   PERFORM __setup_schema_with_dependent_obj();
   RETURN NEXT throws_ok(
-    format(
-      'SELECT msar.drop_schema(
-        sch_name => ''%s'',
-        cascade_ => false,
-        if_exists => false
-      );',
-      'schema1'
-    ),
-    '2BP01',
-    'cannot drop schema schema1 because other objects depend on it'
+    $d$
+      SELECT msar.drop_schema(
+        sch_name => 'schema1',
+        cascade_ => false
+      )
+    $d$,
+    '2BP01'
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -2419,10 +2391,13 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_valid_target_type_strings() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_cast_functions();
-  RETURN NEXT is(msar.get_valid_target_type_strings('text'), '["numeric", "text"]'::jsonb);
-  RETURN NEXT is(
-    msar.get_valid_target_type_strings('text'::regtype::oid), '["numeric", "text"]'::jsonb
-  );
+
+  RETURN NEXT ok(msar.get_valid_target_type_strings('text') @> '["numeric", "text"]');
+  RETURN NEXT is(jsonb_array_length(msar.get_valid_target_type_strings('text')), 2);
+
+  RETURN NEXT ok(msar.get_valid_target_type_strings('text'::regtype::oid) @> '["numeric", "text"]');
+  RETURN NEXT is(jsonb_array_length(msar.get_valid_target_type_strings('text'::regtype::oid)), 2);
+  
   RETURN NEXT is(msar.get_valid_target_type_strings('interval'), NULL);
 END;
 $$ LANGUAGE plpgsql;
@@ -2565,6 +2540,61 @@ BEGIN
         "has_dependents": false
       }
     ]$j$::jsonb
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_get_table_info() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE SCHEMA pi;
+  -- Two tables with one having description
+  CREATE TABLE pi.three(id INT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY);
+  CREATE TABLE pi.one(id INT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY);
+  COMMENT ON TABLE pi.one IS 'first decimal digit of pi';
+
+  CREATE SCHEMA alice;
+  -- No tables in the schema  
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_table_info() RETURNS SETOF TEXT AS $$
+DECLARE
+ pi_table_info jsonb;
+ alice_table_info jsonb;
+BEGIN
+  PERFORM __setup_get_table_info();
+  SELECT msar.get_table_info('pi') INTO pi_table_info;
+  SELECT msar.get_table_info('alice') INTO alice_table_info;
+
+  -- Test table info for schema 'pi'
+    -- Check if all the required keys exist in the json blob
+    -- Check whether the correct name is returned
+    -- Check whether the correct description is returned
+  RETURN NEXT is(
+    pi_table_info->0 ?& array['oid', 'name', 'schema', 'description'], true
+  );
+  RETURN NEXT is(
+    pi_table_info->0->>'name', 'three'
+  );
+  RETURN NEXT is(
+    pi_table_info->0->>'description', null
+  );
+
+  RETURN NEXT is(
+    pi_table_info->1 ?& array['oid', 'name', 'schema', 'description'], true
+  );
+  RETURN NEXT is(
+    pi_table_info->1->>'name', 'one'
+  );
+  RETURN NEXT is(
+    pi_table_info->1->>'description', 'first decimal digit of pi'
+  );
+
+  -- Test table info for schema 'alice' that contains no tables
+  RETURN NEXT is(
+    alice_table_info, null
   );
 END;
 $$ LANGUAGE plpgsql;

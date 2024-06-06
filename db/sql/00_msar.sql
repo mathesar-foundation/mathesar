@@ -122,6 +122,17 @@ from Python through a single Python module.
   END
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION msar.obj_description(obj_id oid, catalog_name text) RETURNS text AS $$/*
+Transparent wrapper for obj_description. Putting it in the `msar` namespace helps route all DB calls
+from Python through a single Python module.
+*/
+  BEGIN
+    RETURN obj_description(obj_id, catalog_name);
+  END
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __msar.jsonb_key_exists(data jsonb, key text) RETURNS boolean AS $$/*
 Wraps the `?` jsonb operator for improved readability.
 */
@@ -682,6 +693,57 @@ SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_table(tab_id regclass) RETURNS jsonb AS $$/*
+Given a table identifier, return a JSON object describing the table.
+
+Each returned JSON object will have the form:
+  {
+    "oid": <int>,
+    "name": <str>,
+    "schema": <int>,
+    "description": <str>
+  }
+
+Args:
+  tab_id: The OID or name of the table.
+*/
+SELECT jsonb_build_object(
+  'oid', oid,
+  'name', relname,
+  'schema', relnamespace,
+  'description', msar.obj_description(oid, 'pg_class')
+) FROM pg_catalog.pg_class WHERE oid = tab_id;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_table_info(sch_id regnamespace) RETURNS jsonb AS $$/*
+Given a schema identifier, return an array of objects describing the tables of the schema.
+
+Each returned JSON object in the array will have the form:
+  {
+    "oid": <int>,
+    "name": <str>,
+    "schema": <int>,
+    "description": <str>
+  }
+
+Args:
+  sch_id: The OID or name of the schema.
+*/
+SELECT jsonb_agg(
+  jsonb_build_object(
+    'oid', pgc.oid,
+    'name', pgc.relname,
+    'schema', pgc.relnamespace,
+    'description', msar.obj_description(pgc.oid, 'pg_class')
+  )
+)
+FROM pg_catalog.pg_class AS pgc 
+  LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
+WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_schemas() RETURNS jsonb AS $$/*
 Return a json array of objects describing the user-defined schemas in the database.
 
@@ -918,61 +980,43 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 
 
--- Drop schema -------------------------------------------------------------------------------------
-
 CREATE OR REPLACE FUNCTION
-__msar.drop_schema(sch_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
-Drop a schema, returning the command executed.
+msar.drop_schema(sch_name text, cascade_ boolean) RETURNS void AS $$/*
+Drop a schema
 
-Args:
-  sch_name: A properly quoted name of the schema to be dropped
-  cascade_: Whether to drop dependent objects.
-  if_exists: Whether to ignore an error if the schema doesn't exist
-*/
-DECLARE
-  cmd_template text;
-BEGIN
-  IF if_exists
-  THEN
-    cmd_template := 'DROP SCHEMA IF EXISTS %s';
-  ELSE
-    cmd_template := 'DROP SCHEMA %s';
-  END IF;
-  IF cascade_
-  THEN
-    cmd_template = cmd_template || ' CASCADE';
-  END IF;
-  RETURN __msar.exec_ddl(cmd_template, sch_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_schema(sch_id oid, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
-Drop a schema, returning the command executed.
-
-Args:
-  sch_id: The OID of the schema to drop
-  cascade_: Whether to drop dependent objects.
-  if_exists: Whether to ignore an error if the schema doesn't exist
-*/
-BEGIN
-  RETURN __msar.drop_schema(__msar.get_schema_name(sch_id), cascade_, if_exists);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_schema(sch_name text, cascade_ boolean, if_exists boolean) RETURNS TEXT AS $$/*
-Drop a schema, returning the command executed.
+If no schema exists with the given name, an exception will be raised.
 
 Args:
   sch_name: An unqoted name of the schema to be dropped
-  cascade_: Whether to drop dependent objects.
-  if_exists: Whether to ignore an error if the schema doesn't exist
+  cascade_: When true, dependent objects will be dropped automatically
 */
+DECLARE
+  cascade_sql text = CASE cascade_ WHEN TRUE THEN ' CASCADE' ELSE '' END;
 BEGIN
-  RETURN __msar.drop_schema(quote_ident(sch_name), cascade_, if_exists);
+  EXECUTE 'DROP SCHEMA ' || quote_ident(sch_name) || cascade_sql;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_schema(sch_id oid, cascade_ boolean) RETURNS void AS $$/*
+Drop a schema
+
+If no schema exists with the given oid, an exception will be raised.
+
+Args:
+  sch_id: The OID of the schema to drop
+  cascade_: When true, dependent objects will be dropped automatically
+*/
+DECLARE
+  sch_name text;
+BEGIN
+  SELECT nspname INTO sch_name FROM pg_namespace WHERE oid = sch_id;
+  IF sch_name IS NULL THEN
+    RAISE EXCEPTION 'No schema with OID % exists.', sch_id
+    USING ERRCODE = '3F000'; -- invalid_schema_name
+  END IF;
+  PERFORM msar.drop_schema(sch_name, cascade_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -2096,16 +2140,21 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_table(tab_id oid, cascade_ boolean, if_exists boolean) RETURNS text AS $$/*
-Drop a table, returning the command executed.
+msar.drop_table(tab_id oid, cascade_ boolean) RETURNS text AS $$/*
+Drop a table, returning the fully qualified name of the dropped table.
 
 Args:
   tab_id: The OID of the table to drop
   cascade_: Whether to drop dependent objects.
-  if_exists_: Whether to ignore an error if the table doesn't exist
 */
+DECLARE relation_name text;
 BEGIN
-  RETURN __msar.drop_table(__msar.get_relation_name(tab_id), cascade_, if_exists);
+  relation_name := msar.get_relation_name_or_null(tab_id);
+  -- if_exists doesn't work while working with oids because
+  -- the SQL query gets parameterized with tab_id instead of relation_name
+  -- since we're unable to find the relation_name for a non existing table. 
+  PERFORM __msar.drop_table(relation_name, cascade_, if_exists => false);
+  RETURN relation_name;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 

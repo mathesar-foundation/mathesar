@@ -52,7 +52,18 @@ To use an RPC function:
     options:
       members:
       - list_
+      - delete
       - SchemaInfo
+
+---
+
+::: mathesar.rpc.tables
+    options:
+      members:
+      - list_
+      - get_
+      - delete
+      - TableInfo
 
 ---
 
