@@ -269,7 +269,8 @@
   }
   .sheet-holder {
     max-width: fit-content;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin: 0 auto;
     border: 1px solid var(--slate-200);
   }

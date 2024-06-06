@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { ColumnPosition } from './utils';
-  import { getSheetContext } from './utils';
+  import type { ColumnPosition } from '../utils';
+  import { getSheetContext } from '../utils';
 
   const { stores } = getSheetContext();
   const { columnStyleMap } = stores;
@@ -25,13 +25,16 @@
   }
 
   $: style = calculateStyle($columnStyleMap, index, columnSpan);
-
-  export let isStatic = false;
-
-  $: htmlAttributes = {
-    'data-sheet-element': 'cell',
-    'data-cell-static': isStatic ? true : undefined,
-  };
 </script>
 
-<slot {htmlAttributes} {style} />
+<div data-sheet-element="positionable-cell" {style}>
+  <slot />
+</div>
+
+<style>
+  [data-sheet-element='positionable-cell'] {
+    position: absolute;
+    top: 0;
+    height: 100%;
+  }
+</style>

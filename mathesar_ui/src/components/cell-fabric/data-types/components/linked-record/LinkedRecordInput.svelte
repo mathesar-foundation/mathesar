@@ -24,7 +24,7 @@
   interface $$Props
     extends Omit<
       LinkedRecordCellProps,
-      'isActive' | 'isSelectedInRange' | 'isProcessing' | 'isIndependentOfSheet'
+      'isActive' | 'isSelected' | 'isProcessing' | 'isIndependentOfSheet'
     > {
     class?: string;
     id?: string;
