@@ -31,13 +31,8 @@
   );
 </script>
 
-<SheetPositionableCell
-  index={0}
-  columnSpan={processedColumnsMap.size + 1}
-  let:htmlAttributes
-  let:style
->
-  <div {...htmlAttributes} {style} class="group-header">
+<SheetPositionableCell index={0} columnSpan={processedColumnsMap.size + 1}>
+  <div class="group-header">
     <CellBackground color="var(--sand-200)" />
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
@@ -61,7 +56,6 @@
 <style lang="scss">
   .group-header {
     padding: 0.5rem 1.5rem;
-    z-index: var(--z-index__sheet__group-header);
 
     .groups-data {
       align-items: start;

@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { map } from 'iter-tools';
+  import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
@@ -11,13 +13,11 @@
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
-    type TabularDataSelection,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { orderProcessedColumns } from '@mathesar/utils/tables';
-  import { ImmutableMap } from '@mathesar-component-library';
+  import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
 
   import Body from './Body.svelte';
   import Header from './header/Header.svelte';
@@ -38,6 +38,10 @@
 
   export let context: Context = 'page';
   export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let sheetElement: HTMLElement | undefined = undefined;
+
+  let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
+    'table';
 
   $: usesVirtualList = context !== 'widget';
   $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
@@ -45,16 +49,17 @@
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
   $: clipboardHandler = new SheetClipboardHandler({
-    selection,
-    toast,
-    getRows: () => [
-      ...get(recordsData.savedRecords),
-      ...get(recordsData.newRecords),
-    ],
-    getColumnsMap: () => get(processedColumns),
-    getRecordSummaries: () => get(recordsData.recordSummaries),
+    getCopyingContext: () => ({
+      rowsMap: new Map(
+        map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
+      ),
+      columnsMap: stringifyMapKeys(get(processedColumns)),
+      recordSummaries: get(recordsData.recordSummaries),
+      selectedRowIds: get(selection).rowIds,
+      selectedColumnIds: get(selection).columnIds,
+    }),
+    showToastInfo: toast.info,
   });
-  $: ({ activeCell } = selection);
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
   $: ({ settings } = table);
@@ -67,13 +72,9 @@
    */
   $: supportsTableInspector = context === 'page';
   $: sheetColumns = (() => {
-    const orderedProcessedColumns = orderProcessedColumns(
-      $processedColumns,
-      table,
-    );
     const columns = [
       { column: { id: ID_ROW_CONTROL_COLUMN, name: 'ROW_CONTROL' } },
-      ...orderedProcessedColumns.values(),
+      ...$processedColumns.values(),
     ];
     if (hasNewColumnButton) {
       columns.push({ column: { id: ID_ADD_NEW_COLUMN, name: 'ADD_NEW' } });
@@ -86,38 +87,15 @@
     [ID_ADD_NEW_COLUMN, 32],
   ]);
   $: showTableInspector = $isTableInspectorVisible && supportsTableInspector;
-
-  function selectAndActivateFirstCellOnTableLoad(
-    _isLoading: boolean,
-    _selection: TabularDataSelection,
-    _context: Context,
-  ) {
-    // We only activate the first cell on the page, not in the widget. Doing so
-    // on the widget causes the cell to focus and the page to scroll down to
-    // bring that element into view.
-    if (_context !== 'widget' && !_isLoading) {
-      _selection.selectAndActivateFirstCellIfExists();
-    }
-  }
-
-  function checkAndReinstateFocusOnActiveCell(e: Event) {
-    const target = e.target as HTMLElement;
-    if (!target.closest('[data-sheet-element="cell"')) {
-      if ($activeCell) {
-        selection.focusCell(
-          { rowIndex: $activeCell.rowIndex },
-          { id: Number($activeCell.columnId) },
-        );
-      }
-    }
-  }
-
-  $: void selectAndActivateFirstCellOnTableLoad($isLoading, selection, context);
 </script>
 
 <div class="table-view">
-  <WithTableInspector {context} {showTableInspector}>
-    <div class="sheet-area" on:click={checkAndReinstateFocusOnActiveCell}>
+  <WithTableInspector
+    {context}
+    {showTableInspector}
+    bind:activeTabId={tableInspectorTab}
+  >
+    <div class="sheet-area">
       {#if $isLoading}
         <div class="loading-sheet">
           <Spinner />
@@ -125,16 +103,26 @@
       {/if}
       {#if $processedColumns.size}
         <Sheet
-          columns={sheetColumns}
-          getColumnIdentifier={(entry) => entry.column.id}
-          {usesVirtualList}
-          {columnWidths}
           {clipboardHandler}
-          hasBorder={sheetHasBorder}
-          restrictWidthToRowWidth={!usesVirtualList}
+          {columnWidths}
+          {selection}
+          {usesVirtualList}
+          onCellSelectionStart={(cell) => {
+            if (cell.type === 'column-header-cell') {
+              tableInspectorTab = 'column';
+            }
+            if (cell.type === 'row-header-cell') {
+              tableInspectorTab = 'record';
+            }
+          }}
           bind:horizontalScrollOffset={$horizontalScrollOffset}
           bind:scrollOffset={$scrollOffset}
+          columns={sheetColumns}
+          getColumnIdentifier={(entry) => entry.column.id}
+          hasBorder={sheetHasBorder}
           hasPaddingRight
+          restrictWidthToRowWidth={!usesVirtualList}
+          bind:sheetElement
         >
           <Header {hasNewColumnButton} {columnOrder} {table} />
           <Body {usesVirtualList} />
@@ -160,6 +148,7 @@
   .loading-sheet {
     text-align: center;
     font-size: 2rem;
+    padding: 2rem;
     color: var(--slate-500);
   }
 </style>
