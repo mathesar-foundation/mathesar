@@ -2,8 +2,8 @@ import os
 from db.connection import load_file_with_engine
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
-MSAR_SQL = os.path.join(FILE_DIR, '0_msar.sql')
-MSAR_AGGREGATE_SQL = os.path.join(FILE_DIR, '3_msar_custom_aggregates.sql')
+MSAR_SQL = os.path.join(FILE_DIR, '00_msar.sql')
+MSAR_AGGREGATE_SQL = os.path.join(FILE_DIR, '30_msar_custom_aggregates.sql')
 
 
 def install(engine):
