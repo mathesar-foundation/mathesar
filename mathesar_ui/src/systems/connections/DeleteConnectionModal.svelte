@@ -3,9 +3,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { Connection } from '@mathesar/api/rest/connections';
-  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
   import {
     connectionHasUniqueDatabaseReference,

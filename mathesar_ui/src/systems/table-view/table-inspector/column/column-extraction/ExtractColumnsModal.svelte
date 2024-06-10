@@ -121,7 +121,10 @@
       // unmounting this component.
       return;
     }
-    selection.intersectSelectedRowsWithGivenColumns(_columns);
+    const columnIds = _columns.map((c) => String(c.id));
+    selection.updateWithoutFocus((s) =>
+      s.ofRowColumnIntersection(s.rowIds, columnIds),
+    );
   }
   $: handleColumnsChange($columns);
 
@@ -215,7 +218,7 @@
         // will need to modify this logic when we position the new column where
         // the old columns were.
         const newFkColumn = allColumns.slice(-1)[0];
-        selection.toggleColumnSelection(newFkColumn);
+        selection.update((s) => s.ofOneColumn(String(newFkColumn.id)));
         await tick();
         scrollBasedOnSelection();
       }
