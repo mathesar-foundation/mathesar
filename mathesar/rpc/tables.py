@@ -100,7 +100,7 @@ def add(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         created_table_oid = create_table_on_database(
-            conn, table_name, schema_oid, column_data_list, constraint_data_list, comment
+            table_name, schema_oid, conn, column_data_list, constraint_data_list, comment
         )
     return created_table_oid
 

@@ -34,9 +34,9 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
 
 
 def create_table_on_database(
-    conn,
     table_name,
     schema_oid,
+    conn,
     column_data_list=[],
     constraint_data_list=[],
     comment=None

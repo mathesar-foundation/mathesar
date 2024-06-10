@@ -144,7 +144,7 @@ def test_tables_add(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
-    def mock_table_add(_schema_oid, conn):
+    def mock_table_add(table_name, _schema_oid, conn, column_data_list, constraint_data_list, comment):
         if _schema_oid != schema_oid:
             raise AssertionError('incorrect parameters passed')
         return 1964474
