@@ -147,35 +147,8 @@ def test_tables_add(rf, monkeypatch):
     def mock_table_add(_schema_oid, conn):
         if _schema_oid != schema_oid:
             raise AssertionError('incorrect parameters passed')
-        return [
-            {
-                'oid': 17408,
-                'name': 'Authors',
-                'schema': schema_oid,
-                'description': 'a description on the authors table.'
-            },
-            {
-                'oid': 17809,
-                'name': 'Books',
-                'schema': schema_oid,
-                'description': None
-            }
-        ]
+        return 1964474
     monkeypatch.setattr(tables, 'connect', mock_connect)
     monkeypatch.setattr(tables, 'create_table_on_database', mock_table_add)
-    expect_table_list = [
-        {
-            'oid': 17408,
-            'name': 'Authors',
-            'schema': schema_oid,
-            'description': 'a description on the authors table.'
-        },
-        {
-            'oid': 17809,
-            'name': 'Books',
-            'schema': schema_oid,
-            'description': None
-        }
-    ]
-    actual_table_list = tables.add(schema_oid=2200, database_id=11, request=request)
-    assert actual_table_list == expect_table_list
+    actual_table_oid = tables.add(table_name='newtable', schema_oid=2200, database_id=11, request=request)
+    assert actual_table_oid == 1964474
