@@ -15,6 +15,7 @@ export interface SheetContextStores<SheetColumnIdentifierKey> {
   horizontalScrollOffset: Readable<number>;
   scrollOffset: Readable<number>;
   paddingRight: Readable<number>;
+  selectionInProgress: Readable<boolean>;
 }
 
 export interface SheetContext<SheetColumnIdentifierKey> {
@@ -72,4 +73,8 @@ export function getSheetContext<
   SheetColumnIdentifierKey,
 >(): SheetContext<SheetColumnIdentifierKey> {
   return getContext(SHEET_CONTEXT_KEY);
+}
+
+export function focusActiveCell(sheetElement: HTMLElement): void {
+  sheetElement?.querySelector<HTMLElement>('[data-active-cell]')?.focus();
 }

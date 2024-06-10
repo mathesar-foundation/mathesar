@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { getSelectedRowIndex } from '@mathesar/components/sheet';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
@@ -18,26 +17,20 @@
   $: database = $currentDatabase;
   $: schema = $currentSchema;
   $: ({ selection, recordsData } = $tabularData);
-  $: ({ selectedCells } = selection);
-  $: selectedRowIndices = $selectedCells
-    .valuesArray()
-    .map((cell) => getSelectedRowIndex(cell));
-  $: uniquelySelectedRowIndices = Array.from(new Set(selectedRowIndices));
-
   $: canEditTableRecords = !!$userProfile?.hasPermission(
     { database, schema },
     'canEditTableRecords',
   );
+  $: selectedRowIds = $selection.rowIds;
+  $: selectedRowCount = selectedRowIds.size;
 </script>
 
 <div class="column-mode-container">
-  {#if uniquelySelectedRowIndices.length}
-    {#if uniquelySelectedRowIndices.length > 1}
+  {#if selectedRowCount > 0}
+    {#if selectedRowCount > 1}
       <span class="records-selected-count">
         {$_('multiple_records_selected', {
-          values: {
-            count: uniquelySelectedRowIndices.length,
-          },
+          values: { count: selectedRowCount },
         })}
       </span>
     {/if}
@@ -45,9 +38,8 @@
       <CollapsibleHeader slot="header" title={$_('actions')} />
       <div slot="content" class="content-container">
         <RowActions
-          selectedRowIndices={uniquelySelectedRowIndices}
+          {selectedRowIds}
           {recordsData}
-          {selection}
           columnsDataStore={$tabularData.columnsDataStore}
           {canEditTableRecords}
         />

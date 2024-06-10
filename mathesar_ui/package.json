@@ -56,7 +56,7 @@
     "dayjs": "^1.11.5",
     "fast-diff": "^1.2.0",
     "flatpickr": "^4.6.13",
-    "iter-tools": "^7.4.0",
+    "iter-tools": "^7.5.3",
     "js-cookie": "^3.0.1",
     "papaparse": "^5.4.1",
     "perfect-scrollbar": "^1.5.5",

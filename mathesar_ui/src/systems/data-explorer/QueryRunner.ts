@@ -1,5 +1,5 @@
-import type { Writable } from 'svelte/store';
-import { get, writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
 
 import type {
   QueryColumnMetaData,
@@ -9,7 +9,9 @@ import type {
 } from '@mathesar/api/rest/types/queries';
 import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { SheetSelection } from '@mathesar/components/sheet';
+import Plane from '@mathesar/components/sheet/selection/Plane';
+import Series from '@mathesar/components/sheet/selection/Series';
+import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { fetchQueryResults, runQuery } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
@@ -20,7 +22,6 @@ import QueryInspector from './QueryInspector';
 import type QueryModel from './QueryModel';
 import {
   type InputColumnsStoreSubstance,
-  type ProcessedQueryOutputColumn,
   type ProcessedQueryOutputColumnMap,
   type ProcessedQueryResultColumnMap,
   getProcessedOutputColumns,
@@ -33,15 +34,14 @@ export interface QueryRow {
   rowIndex: number;
 }
 
+export function getRowSelectionId(row: QueryRow): string {
+  return String(row.rowIndex);
+}
+
 export interface QueryRowsData {
   totalCount: number;
   rows: QueryRow[];
 }
-
-export type QuerySheetSelection = SheetSelection<
-  QueryRow,
-  ProcessedQueryOutputColumn
->;
 
 type QueryRunMode = 'queryId' | 'queryObject';
 
@@ -65,7 +65,10 @@ export default class QueryRunner {
     new ImmutableMap(),
   );
 
-  selection: QuerySheetSelection;
+  /** Keys are row selection ids */
+  selectableRowsMap: Readable<Map<string, QueryRow>>;
+
+  selection: SheetSelectionStore;
 
   inspector: QueryInspector;
 
@@ -102,20 +105,22 @@ export default class QueryRunner {
     this.shareConsumer = shareConsumer;
     this.speculateProcessedColumns();
     void this.run();
-    this.selection = new SheetSelection({
-      getColumns: () => [...get(this.processedColumns).values()],
-      getColumnOrder: () =>
-        [...get(this.processedColumns).values()].map((column) => column.id),
-      getRows: () => get(this.rowsData).rows,
-      getMaxSelectionRowIndex: () => {
-        const rowLength = get(this.rowsData).rows.length;
-        const totalCount = get(this.rowsData).totalCount ?? 0;
-        const pagination = get(this.pagination);
-        const { offset } = pagination;
-        const pageSize = pagination.size;
-        return Math.min(pageSize, totalCount - offset, rowLength) - 1;
+    this.selectableRowsMap = derived(
+      this.rowsData,
+      ({ rows }) => new Map(rows.map((r) => [getRowSelectionId(r), r])),
+    );
+
+    const plane = derived(
+      [this.rowsData, this.processedColumns],
+      ([{ rows }, columnsMap]) => {
+        const rowIds = new Series(rows.map(getRowSelectionId));
+        const columns = [...columnsMap.values()];
+        const columnIds = new Series(columns.map((c) => String(c.id)));
+        return new Plane(rowIds, columnIds);
       },
-    });
+    );
+    this.selection = new SheetSelectionStore(plane);
+
     this.inspector = new QueryInspector(this.query);
   }
 
@@ -228,7 +233,6 @@ export default class QueryRunner {
   async setPagination(pagination: Pagination): Promise<void> {
     this.pagination.set(pagination);
     await this.run();
-    this.selection.activateFirstCellInSelectedColumn();
   }
 
   protected resetPagination(): void {
@@ -242,7 +246,6 @@ export default class QueryRunner {
   }
 
   protected resetResults(): void {
-    this.clearSelection();
     this.runPromise?.cancel();
     this.resetPagination();
     this.rowsData.set({ totalCount: 0, rows: [] });
@@ -253,34 +256,15 @@ export default class QueryRunner {
   protected async resetPaginationAndRun(): Promise<void> {
     this.resetPagination();
     await this.run();
-    this.selection.activateFirstCellInSelectedColumn();
   }
 
   selectColumn(alias: QueryColumnMetaData['alias']): void {
     const processedColumn = get(this.processedColumns).get(alias);
     if (!processedColumn) {
-      this.selection.resetSelection();
-      this.selection.selectAndActivateFirstCellIfExists();
-      this.inspector.selectCellTab();
       return;
     }
-
-    const isSelected = this.selection.toggleColumnSelection(processedColumn);
-    if (isSelected) {
-      this.inspector.selectColumnTab();
-      return;
-    }
-
-    this.selection.activateFirstCellInSelectedColumn();
-    this.inspector.selectCellTab();
-  }
-
-  clearSelection(): void {
-    this.selection.resetSelection();
-  }
-
-  getRows(): QueryRow[] {
-    return get(this.rowsData).rows;
+    this.selection.update((s) => s.ofOneColumn(processedColumn.id));
+    this.inspector.activate('column');
   }
 
   getQueryModel(): QueryModel {
@@ -288,7 +272,7 @@ export default class QueryRunner {
   }
 
   destroy(): void {
-    this.selection.destroy();
     this.runPromise?.cancel();
+    this.selection.destroy();
   }
 }

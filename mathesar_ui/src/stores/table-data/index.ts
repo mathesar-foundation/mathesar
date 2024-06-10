@@ -42,7 +42,6 @@ export {
   getTabularDataStoreFromContext,
   TabularData,
   type TabularDataProps,
-  type TabularDataSelection,
 } from './tabularData';
 export {
   type ProcessedColumn,
