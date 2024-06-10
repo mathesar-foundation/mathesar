@@ -6,6 +6,8 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 from db.tables.operations.select import get_table_info, get_table
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
+from mathesar.rpc.columns import CreateableColumnInfo
+from mathesar.rpc.constraints import CreateableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -72,8 +74,14 @@ def get(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def add(
-    *, table_name: str, schema_oid: int, database_id: int,
-    columns: list[dict] = [], constraints: list[dict] = [], comment: str = None, **kwargs
+    *,
+    table_name: str,
+    schema_oid: int,
+    database_id: int,
+    column_data_list: list[CreateableColumnInfo] = [],
+    constraint_data_list: list[CreateableConstraintInfo] = [],
+    comment: str = None,
+    **kwargs
 ) -> int:
     """
     Add a table with a default id column.
@@ -82,8 +90,8 @@ def add(
         table_name: Name of the table to be created.
         schema_oid: Identity of the schema in the user's database.
         database_id: The Django id of the database containing the table.
-        columns: A list of columns dict for the new table, in order.
-        constraints: A list of constraints dict for the new table.
+        column_data_list: A list describing columns to be created for the new table, in order.
+        constraint_data_list: A list describing constraints to be created for the new table.
         comment: The comment for the new table.
 
     Returns:
@@ -92,7 +100,7 @@ def add(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         created_table_oid = create_table_on_database(
-            table_name, schema_oid, conn, columns, constraints, comment
+            conn, table_name, schema_oid, column_data_list, constraint_data_list, comment
         )
     return created_table_oid
 

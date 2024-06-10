@@ -33,7 +33,14 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
     ).fetchone()[0]
 
 
-def create_table_on_database(table_name, schema_oid, conn, columns=[], constraints=[], comment=None):
+def create_table_on_database(
+    conn,
+    table_name,
+    schema_oid,
+    column_data_list=[],
+    constraint_data_list=[],
+    comment=None
+):
     """
     Creates a table with a default id column.
 
@@ -52,8 +59,8 @@ def create_table_on_database(table_name, schema_oid, conn, columns=[], constrain
         'add_mathesar_table',
         schema_oid,
         table_name,
-        json.dumps(columns),
-        json.dumps(constraints),
+        json.dumps(column_data_list),
+        json.dumps(constraint_data_list),
         comment
     ).fetchone()[0]
 
