@@ -74,9 +74,9 @@ class ColumnDefault(TypedDict):
             )
 
 
-class CreateableColumnInfo(TypedDict):
+class CreatableColumnInfo(TypedDict):
     """
-    Information about adding a new column.
+    Information needed to add a new column.
 
     Only the `name` & `type` keys are required.
 
