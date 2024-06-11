@@ -29,6 +29,17 @@ def create_column(engine, table_oid, column_data):
 
 
 def add_columns_to_table(table_oid, column_data_list, conn):
+    """
+    Add columns to the given table.
+
+    For a description of the members of column_data_list, see
+    _transform_column_create_dict
+
+    Args:
+        table_oid: The OID of the table whose columns we'll alter.
+        column_data_list: A list of dicts describing columns to add.
+        conn: A psycopg connection.
+    """
     transformed_column_data = [
         _transform_column_create_dict(col) for col in column_data_list
     ]
