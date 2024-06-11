@@ -7,6 +7,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.columns.operations.alter import alter_columns_in_table
+from db.columns.operations.create import add_columns_to_table
 from db.columns.operations.drop import drop_columns_from_table
 from db.columns.operations.select import get_column_info_for_table
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -78,7 +79,7 @@ class CreatableColumnInfo(TypedDict):
     """
     Information needed to add a new column.
 
-    Only the `name` & `type` keys are required.
+    No keys are required.
 
     Attributes:
         name: The name of the column.
@@ -88,8 +89,8 @@ class CreatableColumnInfo(TypedDict):
         default: The default value.
         description: The description of the column.
     """
-    name: str
-    type: str
+    name: Optional[str]
+    type: Optional[str]
     type_options: Optional[TypeOptions]
     nullable: Optional[bool]
     default: Optional[ColumnDefault]
@@ -213,6 +214,34 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> ColumnListReturn:
         column_info=column_info,
         display_options=display_options,
     )
+
+
+@rpc_method(name="columns.add")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def add(
+        *,
+        column_data_list: list[CreatableColumnInfo],
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> list[int]:
+    """
+    Alter details of preexisting columns in a table.
+
+    Does not support altering the type or type options of array columns.
+
+    Args:
+        column_data_list: A list describing desired column alterations.
+        table_oid: Identity of the table whose columns we'll modify.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The number of columns altered.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        return add_columns_to_table(table_oid, column_data_list, conn)
 
 
 @rpc_method(name="columns.patch")
