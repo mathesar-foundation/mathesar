@@ -74,6 +74,28 @@ class ColumnDefault(TypedDict):
             )
 
 
+class CreateableColumnInfo(TypedDict):
+    """
+    Information about adding a new column.
+
+    Only the `name` & `type` keys are required.
+
+    Attributes:
+        name: The name of the column.
+        type: The type of the column on the database.
+        type_options: The options applied to the column type.
+        nullable: Whether or not the column is nullable.
+        default: The default value.
+        description: The description of the column.
+    """
+    name: str
+    type: str
+    type_options: Optional[TypeOptions]
+    nullable: Optional[bool]
+    default: Optional[ColumnDefault]
+    description: Optional[str]
+
+
 class SettableColumnInfo(TypedDict):
     """
     Information about a column, restricted to settable fields.

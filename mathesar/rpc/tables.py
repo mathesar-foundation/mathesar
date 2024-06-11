@@ -5,6 +5,9 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.tables.operations.select import get_table_info, get_table
 from db.tables.operations.drop import drop_table_from_database
+from db.tables.operations.create import create_table_on_database
+from mathesar.rpc.columns import CreateableColumnInfo
+from mathesar.rpc.constraints import CreateableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -65,6 +68,41 @@ def get(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
     with connect(database_id, user) as conn:
         raw_table_info = get_table(table_oid, conn)
     return TableInfo(raw_table_info)
+
+
+@rpc_method(name="tables.add")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def add(
+    *,
+    table_name: str,
+    schema_oid: int,
+    database_id: int,
+    column_data_list: list[CreateableColumnInfo] = [],
+    constraint_data_list: list[CreateableConstraintInfo] = [],
+    comment: str = None,
+    **kwargs
+) -> int:
+    """
+    Add a table with a default id column.
+
+    Args:
+        table_name: Name of the table to be created.
+        schema_oid: Identity of the schema in the user's database.
+        database_id: The Django id of the database containing the table.
+        column_data_list: A list describing columns to be created for the new table, in order.
+        constraint_data_list: A list describing constraints to be created for the new table.
+        comment: The comment for the new table.
+
+    Returns:
+        The `oid` of the created table.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        created_table_oid = create_table_on_database(
+            table_name, schema_oid, conn, column_data_list, constraint_data_list, comment
+        )
+    return created_table_oid
 
 
 @rpc_method(name="tables.delete")
