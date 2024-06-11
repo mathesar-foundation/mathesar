@@ -137,7 +137,9 @@ def delete(
 @rpc_method(name="tables.patch")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def patch(*, table_oid: str, table_data_dict: SettableTableInfo, database_id: int, **kwargs):
+def patch(
+    *, table_oid: str, table_data_dict: SettableTableInfo, database_id: int, **kwargs
+) -> int:
     """
     Alter details of preexisting tables in a database.
 
