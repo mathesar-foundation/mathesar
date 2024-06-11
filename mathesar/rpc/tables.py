@@ -139,7 +139,7 @@ def delete(
 @handle_rpc_exceptions
 def patch(
     *, table_oid: str, table_data_dict: SettableTableInfo, database_id: int, **kwargs
-) -> int:
+) -> str:
     """
     Alter details of preexisting tables in a database.
 
