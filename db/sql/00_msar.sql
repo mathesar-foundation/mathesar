@@ -1089,8 +1089,12 @@ Args:
   tab_name: The qualified, quoted name of the table whose comment we will change.
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
-SELECT __msar.exec_ddl('COMMENT ON TABLE %s IS %s', tab_name, comment_);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+DECLARE
+  comment_or_null text := COALESCE(comment_, 'NULL');
+BEGIN
+RETURN __msar.exec_ddl('COMMENT ON TABLE %s IS %s', tab_name, comment_or_null);
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -1102,7 +1106,7 @@ Args:
   comment_: The new comment.
 */
 SELECT __msar.comment_on_table(__msar.get_relation_name(tab_id), quote_literal(comment_));
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
@@ -1118,12 +1122,25 @@ SELECT __msar.comment_on_table(
   msar.get_fully_qualified_object_name(sch_name, tab_name),
   quote_literal(comment_)
 );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
 -- Alter table -------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION
-msar.alter_table(tab_id oid, tab_alters jsonb) RETURNS text AS $$
+msar.alter_table(tab_id oid, tab_alters jsonb) RETURNS text AS $$/*
+Alter columns of the given table in bulk, returning the IDs of the columns so altered.
+
+Args:
+  tab_id: The OID of the table whose columns we'll alter.
+  tab_alters: a JSONB describing the alterations to make.
+
+  The tab_alters should have the form:
+  {
+    "name": <str>,
+    "description": <str>
+    "columns": <col_alters>,
+  }
+*/
 DECLARE
   new_tab_name text;
   comment text;

@@ -30,6 +30,21 @@ class TableInfo(TypedDict):
 
 
 class SettableTableInfo(TypedDict):
+    """
+    Information about a table, restricted to settable fields.
+
+    When possible, Passing `null` for a key will clear the underlying
+    setting. E.g.,
+
+    - `description = null` clears the table description.
+
+    Setting any of `name`, `columns` to `null` is a noop.
+
+    Attributes:
+        name: The new name of the table.
+        description: The description of the table.
+        columns: A list describing desired column alterations.
+    """
     name: Optional[str]
     description: Optional[str]
     columns: Optional[list[SettableColumnInfo]]
@@ -141,7 +156,7 @@ def patch(
     *, table_oid: str, table_data_dict: SettableTableInfo, database_id: int, **kwargs
 ) -> str:
     """
-    Alter details of preexisting tables in a database.
+    Alter details of a preexisting table in a database.
 
     Args:
         table_oid: Identity of the table whose name, description or columns we'll modify.
