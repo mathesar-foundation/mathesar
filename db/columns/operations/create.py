@@ -5,39 +5,18 @@ from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from psycopg.errors import InvalidTextRepresentation, InvalidParameterValue
 
-from db.columns.defaults import DEFAULT, NAME, NULLABLE, TYPE, DESCRIPTION
+from db import connection as db_conn
+from db.columns.defaults import DEFAULT, NAME, NULLABLE, DESCRIPTION
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeOptionError
-from db.connection import execute_msar_func_with_engine
 from db.tables.operations.select import reflect_table_from_oid
 from db.types.base import PostgresType
 from db.metadata import get_empty_metadata
 
 
 def create_column(engine, table_oid, column_data):
-    column_name = (column_data.get(NAME) or '').strip() or None
-    column_type_id = (
-        column_data.get(
-            # TYPE = 'sa_type'. This is coming straight from the API.
-            # TODO Determine whether we actually need 'sa_type' and 'type'
-            TYPE, column_data.get("type")
-        )
-        or PostgresType.CHARACTER_VARYING.id
-    )
-    column_type_options = column_data.get("type_options", {})
-    column_nullable = column_data.get(NULLABLE, True)
-    default_value = column_data.get(DEFAULT, {}).get('value')
-    column_description = column_data.get(DESCRIPTION)
-    col_create_def = [
-        {
-            "name": column_name,
-            "type": {"name": column_type_id, "options": column_type_options},
-            "not_null": not column_nullable,
-            "default": default_value,
-            "description": column_description,
-        }
-    ]
+    col_create_def = [_transform_column_create_dict(column_data)]
     try:
-        curr = execute_msar_func_with_engine(
+        curr = db_conn.execute_msar_func_with_engine(
             engine, 'add_columns',
             table_oid,
             json.dumps(col_create_def)
@@ -47,6 +26,53 @@ def create_column(engine, table_oid, column_data):
     except InvalidParameterValue:
         raise InvalidTypeOptionError
     return curr.fetchone()[0]
+
+
+def add_columns_to_table(table_oid, column_data_list, conn):
+    transformed_column_data = [
+        _transform_column_create_dict(col) for col in column_data_list
+    ]
+    result = db_conn.exec_msar_func(
+        conn, 'add_columns', table_oid, json.dumps(transformed_column_data)
+    ).fetchone()[0]
+    return result
+
+
+# TODO This function wouldn't be needed if we had the same form in the DB
+# as the RPC API function.
+def _transform_column_create_dict(data):
+    """
+    Transform the data dict into the form needed for the DB functions.
+
+    Input data form:
+    {
+        "name": <str>,
+        "type": <str>,
+        "type_options": <dict>,
+        "nullable": <bool>,
+        "default": {"value": <any>}
+        "description": <str>
+    }
+
+    Output form:
+    {
+        "type": {"name": <str>, "options": <dict>},
+        "name": <str>,
+        "not_null": <bool>,
+        "default": <any>,
+        "description": <str>
+    }
+    """
+    return {
+        "name": (data.get(NAME) or '').strip() or None,
+        "type": {
+            "name": data.get("type") or PostgresType.CHARACTER_VARYING.id,
+            "options": data.get("type_options", {})
+        },
+        "not_null": not data.get(NULLABLE, True),
+        "default": data.get(DEFAULT, {}).get('value'),
+        "description": data.get(DESCRIPTION),
+    }
 
 
 def bulk_create_mathesar_column(engine, table_oid, columns, schema):
@@ -67,7 +93,7 @@ def duplicate_column(
         copy_data=True,
         copy_constraints=True
 ):
-    curr = execute_msar_func_with_engine(
+    curr = db_conn.execute_msar_func_with_engine(
         engine,
         'copy_column',
         table_oid,

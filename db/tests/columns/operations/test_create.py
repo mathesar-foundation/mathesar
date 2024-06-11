@@ -29,7 +29,7 @@ def test_create_column_name(engine_with_schema, in_name, out_name):
     given a (maybe empty) name param
     """
     engine, schema = engine_with_schema
-    with patch.object(col_create, "execute_msar_func_with_engine") as mock_exec:
+    with patch.object(col_create.db_conn, "execute_msar_func_with_engine") as mock_exec:
         col_create.create_column(engine, 12345, {"name": in_name})
     call_args = mock_exec.call_args_list[0][0]
     assert call_args[0] == engine
@@ -47,7 +47,7 @@ def test_create_column_type(engine_with_schema, in_type, out_type):
     given a (maybe empty) type
     """
     engine, schema = engine_with_schema
-    with patch.object(col_create, "execute_msar_func_with_engine") as mock_exec:
+    with patch.object(col_create.db_conn, "execute_msar_func_with_engine") as mock_exec:
         col_create.create_column(engine, 12345, {"type": in_type})
     call_args = mock_exec.call_args_list[0][0]
     assert call_args[0] == engine
@@ -68,7 +68,7 @@ def test_create_column_type_options(engine_with_schema, in_options, out_options)
     given a (maybe empty) type options dict.
     """
     engine, schema = engine_with_schema
-    with patch.object(col_create, "execute_msar_func_with_engine") as mock_exec:
+    with patch.object(col_create.db_conn, "execute_msar_func_with_engine") as mock_exec:
         col_create.create_column(engine, 12345, {"type_options": in_options})
     call_args = mock_exec.call_args_list[0][0]
     assert call_args[0] == engine
@@ -81,7 +81,7 @@ def test_create_column_type_options(engine_with_schema, in_options, out_options)
 def test_duplicate_column_smoke(engine_with_schema):
     """This is just a smoke test, since the underlying function is trivial."""
     engine, schema = engine_with_schema
-    with patch.object(col_create, "execute_msar_func_with_engine") as mock_exec:
+    with patch.object(col_create.db_conn, "execute_msar_func_with_engine") as mock_exec:
         col_create.duplicate_column(
             12345,
             4,
