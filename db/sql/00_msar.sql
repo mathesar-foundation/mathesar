@@ -1121,7 +1121,24 @@ SELECT __msar.comment_on_table(
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
--- Alter Table: LEFT IN PYTHON (for now) -----------------------------------------------------------
+-- Alter table -------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION
+msar.alter_table(tab_id oid, tab_alters jsonb) RETURNS text AS $$
+DECLARE
+  new_tab_name text;
+  comment text;
+  col_alters jsonb;
+BEGIN
+  new_tab_name := tab_alters->>'name';
+  comment := tab_alters->>'description';
+  col_alters := tab_alters->>'columns';
+  PERFORM msar.rename_table(tab_id, new_tab_name);
+  PERFORM msar.comment_on_table(tab_id, comment);
+  PERFORM msar.alter_columns(tab_id, col_alters);
+  RETURN tab_id::regclass::text;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------

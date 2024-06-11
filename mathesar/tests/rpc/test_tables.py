@@ -152,3 +152,43 @@ def test_tables_add(rf, monkeypatch):
     monkeypatch.setattr(tables, 'create_table_on_database', mock_table_add)
     actual_table_oid = tables.add(table_name='newtable', schema_oid=2200, database_id=11, request=request)
     assert actual_table_oid == 1964474
+
+
+def test_tables_patch(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
+    table_oid = 1964474
+    database_id = 11
+    table_data_dict = {
+        "name": "newtabname",
+        "description": "this is a description",
+        "columns": {}
+    }
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_table_patch(_table_oid, _table_data_dict, conn):
+        if _table_oid != table_oid and _table_data_dict != table_data_dict:
+            raise AssertionError('incorrect parameters passed')
+        return 'newtabname'
+    monkeypatch.setattr(tables, 'connect', mock_connect)
+    monkeypatch.setattr(tables, 'alter_table_on_database', mock_table_patch)
+    altered_table_name = tables.patch(
+        table_oid=1964474,
+        table_data_dict={
+            "name": "newtabname",
+            "description": "this is a description",
+            "columns": {}
+        },
+        database_id=11,
+        request=request
+    )
+    assert altered_table_name == 'newtabname'
