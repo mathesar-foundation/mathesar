@@ -227,17 +227,15 @@ def add(
         **kwargs
 ) -> list[int]:
     """
-    Alter details of preexisting columns in a table.
-
-    Does not support altering the type or type options of array columns.
+    Add columns to a table.
 
     Args:
-        column_data_list: A list describing desired column alterations.
-        table_oid: Identity of the table whose columns we'll modify.
+        column_data_list: A list describing desired columns to add.
+        table_oid: Identity of the table to which we'll add columns.
         database_id: The Django id of the database containing the table.
 
     Returns:
-        The number of columns altered.
+        An array of the attnums of the new columns.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
