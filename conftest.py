@@ -14,7 +14,7 @@ from db.engine import add_custom_types_to_ischema_names, create_engine as sa_cre
 from db.types import install
 from db.sql import install as sql_install
 from db.schemas.operations.drop import drop_schema_via_name as drop_sa_schema
-from db.schemas.operations.create import create_schema as create_sa_schema
+from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 
 from fixtures.utils import create_scoped_fixtures
@@ -210,7 +210,7 @@ def create_db_schema(SES_engine_cache):
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
         logger.debug(f'creating {schema_name}')
-        create_sa_schema(schema_name, engine, if_not_exists=True)
+        create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
         schema_oid = get_schema_oid_from_name(schema_name, engine)
         db_name = engine.url.database
         created_schemas_in_this_engine = created_schemas.setdefault(db_name, {})

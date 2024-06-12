@@ -40,6 +40,11 @@ METHODS = [
         [user_is_superuser]
     ),
     (
+        schemas.add,
+        "schemas.add",
+        [user_is_authenticated]
+    ),
+    (
         schemas.list_,
         "schemas.list",
         [user_is_authenticated]

@@ -1183,15 +1183,36 @@ $$ LANGUAGE plpgsql;
 
 -- msar.schema_ddl --------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION test_create_schema() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_create_schema_without_description() RETURNS SETOF TEXT AS $$
+DECLARE sch_oid oid;
 BEGIN
-  PERFORM msar.create_schema(
-    sch_name => 'create_schema'::text,
-    if_not_exists => false
-  );
-  RETURN NEXT has_schema('create_schema');
+  SELECT msar.create_schema('foo bar') INTO sch_oid;
+  RETURN NEXT has_schema('foo bar');
+  RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
+  RETURN NEXT is(obj_description(sch_oid), NULL);
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_schema_with_description() RETURNS SETOF TEXT AS $$
+DECLARE sch_oid oid;
+BEGIN
+  SELECT msar.create_schema('foo bar', 'yay') INTO sch_oid;
+  RETURN NEXT has_schema('foo bar');
+  RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
+  RETURN NEXT is(obj_description(sch_oid), 'yay');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_create_schema_that_already_exists() RETURNS SETOF TEXT AS $t$
+DECLARE sch_oid oid;
+BEGIN
+  SELECT msar.create_schema('foo bar') INTO sch_oid;
+  RETURN NEXT throws_ok($$SELECT msar.create_schema('foo bar')$$, '42P06');
+  RETURN NEXT is(msar.create_schema_if_not_exists('foo bar'), sch_oid);
+END;
+$t$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION __setup_drop_schema() RETURNS SETOF TEXT AS $$

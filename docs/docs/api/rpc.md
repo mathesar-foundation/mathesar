@@ -52,6 +52,7 @@ To use an RPC function:
     options:
       members:
       - list_
+      - add
       - delete
       - SchemaInfo
 
