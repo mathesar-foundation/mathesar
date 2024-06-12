@@ -1148,7 +1148,7 @@ DECLARE
 BEGIN
   new_tab_name := tab_alters->>'name';
   comment := tab_alters->>'description';
-  col_alters := tab_alters->>'columns';
+  col_alters := tab_alters->'columns';
   PERFORM msar.rename_table(tab_id, new_tab_name);
   PERFORM msar.comment_on_table(tab_id, comment);
   PERFORM msar.alter_columns(tab_id, col_alters);
