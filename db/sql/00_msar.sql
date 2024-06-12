@@ -1057,7 +1057,7 @@ Args:
   new_tab_name: unquoted, unqualified table name
 */
 BEGIN
-  RETURN __msar.rename_table(__msar.get_relation_name(tab_id), quote_ident(new_tab_name));
+  RETURN __msar.rename_table(msar.get_relation_name_or_null(tab_id), quote_ident(new_tab_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1105,7 +1105,7 @@ Args:
   tab_id: The OID of the table whose comment we will change.
   comment_: The new comment.
 */
-SELECT __msar.comment_on_table(__msar.get_relation_name(tab_id), quote_literal(comment_));
+SELECT __msar.comment_on_table(msar.get_relation_name_or_null(tab_id), quote_literal(comment_));
 $$ LANGUAGE SQL;
 
 
@@ -1152,7 +1152,7 @@ BEGIN
   PERFORM msar.rename_table(tab_id, new_tab_name);
   PERFORM msar.comment_on_table(tab_id, comment);
   PERFORM msar.alter_columns(tab_id, col_alters);
-  RETURN tab_id::regclass::text;
+  RETURN msar.get_relation_name_or_null(tab_id);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
