@@ -72,6 +72,7 @@ To use an RPC function:
     options:
       members:
       - list_
+      - add
       - patch
       - delete
       - ColumnListReturn
