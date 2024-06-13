@@ -7,6 +7,7 @@ from db.tables.operations.select import get_table_info, get_table
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
 from db.tables.operations.alter import alter_table_on_database
+from db.tables.operations.import_ import import_csv
 from mathesar.rpc.columns import CreateableColumnInfo, SettableColumnInfo
 from mathesar.rpc.constraints import CreateableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -174,5 +175,9 @@ def patch(
 @rpc_method(name="tables.import")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def import_():
-    pass
+def import_(
+    *, data_file_id: int, table_name: str, schema_oid: int, database_id: int, comment=None, **kwargs
+) -> int:
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        return import_csv(data_file_id, table_name, schema_oid, conn, comment)
