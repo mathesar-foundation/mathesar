@@ -1128,7 +1128,7 @@ $$ LANGUAGE SQL;
 -- Alter table -------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION
 msar.alter_table(tab_id oid, tab_alters jsonb) RETURNS text AS $$/*
-Alter columns of the given table in bulk, returning the IDs of the columns so altered.
+Alter the name, description, or columns of a table, returning name of the altered table.
 
 Args:
   tab_id: The OID of the table whose columns we'll alter.
