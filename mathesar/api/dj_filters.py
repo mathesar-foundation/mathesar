@@ -1,7 +1,7 @@
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from mathesar.models.base import Schema, Table, Database, DataFile
+from mathesar.models.base import Schema, Table, Connection, DataFile
 from mathesar.models.query import UIQuery
 
 
@@ -19,7 +19,7 @@ class DatabaseFilter(PropertyFilterSet):
     )
 
     class Meta:
-        model = Database
+        model = Connection
         fields = ['deleted']
 
 

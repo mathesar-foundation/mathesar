@@ -1,14 +1,14 @@
 from mathesar.database.base import get_psycopg_connection
-from mathesar.models.base import Database
+from mathesar.models.base import Connection
 
 
-def connect(db_id, user):
+def connect(conn_id, user):
     """
-    Return a psycopg connection, given a Database model id.
+    Return a psycopg connection, given a Connection model id.
 
     Args:
-        db_id: The Django id corresponding to the Database.
+        conn_id: The Django id corresponding to the Connection.
     """
     print("User is: ", user)
-    db_model = Database.current_objects.get(id=db_id)
-    return get_psycopg_connection(db_model)
+    conn_model = Connection.current_objects.get(id=conn_id)
+    return get_psycopg_connection(conn_model)

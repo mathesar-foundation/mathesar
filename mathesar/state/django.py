@@ -32,7 +32,7 @@ def clear_dj_cache():
 
 
 def reflect_db_objects(metadata, db_name=None):
-    databases = models.Database.current_objects.all()
+    databases = models.Connection.current_objects.all()
     if db_name is not None:
         databases = databases.filter(name=db_name)
     sync_databases_status(databases)
@@ -53,7 +53,7 @@ def reflect_db_objects(metadata, db_name=None):
 
 
 def sync_databases_status(databases):
-    """Update status and check health for current Database Model instances."""
+    """Update status and check health for current Connection Model instances."""
     for db in databases:
         try:
             db._sa_engine.connect()
@@ -65,7 +65,7 @@ def sync_databases_status(databases):
 
 def _set_db_is_deleted(db, deleted):
     """
-    Assures that a Django Database model's `deleted` field is equal to the `deleted`
+    Assures that a Django Connection model's `deleted` field is equal to the `deleted`
     parameter, updating if necessary. Takes care to `save()` only when an update has been performed,
     to save on the noteworthy performance cost.
     """

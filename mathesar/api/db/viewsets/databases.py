@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
-from mathesar.models.base import Database
+from mathesar.models.base import Connection
 from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
@@ -28,7 +28,7 @@ class ConnectionViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         return self.access_policy.scope_queryset(
             self.request,
-            Database.objects.all().order_by('-created_at')
+            Connection.objects.all().order_by('-created_at')
         )
 
     def destroy(self, request, pk=None):

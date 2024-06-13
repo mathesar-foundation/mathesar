@@ -6,7 +6,7 @@ from db.identifiers import is_identifier_too_long
 from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.models.base import Database, Schema, Table
+from mathesar.models.base import Connection, Schema, Table
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
@@ -19,7 +19,7 @@ class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSe
     connection_id = PermittedPkRelatedField(
         source='database',
         access_policy=DatabaseAccessPolicy,
-        queryset=Database.current_objects.all()
+        queryset=Connection.current_objects.all()
     )
     description = serializers.CharField(
         required=False, allow_blank=True, default=None, allow_null=True

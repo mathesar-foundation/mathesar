@@ -4,12 +4,12 @@ from rest_framework.exceptions import ValidationError
 from db.schemas.operations.create import create_schema
 from db.schemas.utils import get_schema_oid_from_name, get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
-from mathesar.models.base import Schema, Database
+from mathesar.models.base import Schema, Connection
 
 
 def create_schema_and_object(name, connection_id, comment=None):
     try:
-        database_model = Database.objects.get(id=connection_id)
+        database_model = Connection.objects.get(id=connection_id)
         database_name = database_model.name
     except ObjectDoesNotExist:
         raise ValidationError({"database": f"Database '{database_name}' not found"})

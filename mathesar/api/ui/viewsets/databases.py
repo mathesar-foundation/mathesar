@@ -7,7 +7,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
 from mathesar.api.ui.permissions.ui_database import UIDatabaseAccessPolicy
-from mathesar.models.base import Database
+from mathesar.models.base import Connection
 from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     DictHasBadKeys, UnsupportedInstallationDatabase
@@ -39,7 +39,7 @@ class ConnectionViewSet(
     def get_queryset(self):
         return self.access_policy.scope_queryset(
             self.request,
-            Database.objects.all().order_by('-created_at')
+            Connection.objects.all().order_by('-created_at')
         )
 
     @action(methods=['get'], detail=True)

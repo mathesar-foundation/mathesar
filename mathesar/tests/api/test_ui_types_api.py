@@ -1,12 +1,12 @@
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
-from mathesar.models.base import Database
+from mathesar.models.base import Connection
 from mathesar.database.types import get_ui_type_from_id, UIType
 from db.types.base import PostgresType, MathesarCustomType
 from mathesar.models.users import DatabaseRole
 
 
 def test_type_list(client, test_db_name):
-    database = Database.objects.get(name=test_db_name)
+    database = Connection.objects.get(name=test_db_name)
 
     response = client.get(f'/api/ui/v0/connections/{database.id}/types/')
     response_data = response.json()
@@ -62,7 +62,7 @@ def test_database_types_installed(client, test_db_name):
             'display_options': None
         },
     ]
-    default_database = Database.objects.get(name=test_db_name)
+    default_database = Connection.objects.get(name=test_db_name)
 
     response = client.get(f'/api/ui/v0/connections/{default_database.id}/types/')
     assert response.status_code == 200

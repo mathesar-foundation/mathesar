@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from mathesar.models.base import BaseModel, Database, Schema
+from mathesar.models.base import BaseModel, Connection, Schema
 
 
 class User(AbstractUser):
@@ -29,7 +29,7 @@ class Role(models.TextChoices):
 
 class DatabaseRole(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='database_roles')
-    database = models.ForeignKey(Database, on_delete=models.CASCADE)
+    database = models.ForeignKey(Connection, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=Role.choices)
 
     class Meta:

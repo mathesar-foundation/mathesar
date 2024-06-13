@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
-from mathesar.models.base import Database
+from mathesar.models.base import Connection
 from mathesar.models.users import DatabaseRole, Role
 
 
@@ -32,7 +32,7 @@ class DatabaseRoleAccessPolicy(AccessPolicy):
         if not (request.user.is_superuser or request.user.is_anonymous):
             # TODO Consider moving to more reusable place
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
-            databases_with_view_access = Database.objects.filter(
+            databases_with_view_access = Connection.objects.filter(
                 Q(database_role__role__in=allowed_roles) & Q(database_role__user=request.user)
             )
             qs = qs.filter(database__in=databases_with_view_access)

@@ -1,7 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from mathesar.models.base import Table, Schema, Database
+from mathesar.models.base import Table, Schema, Connection
 
 
 @pytest.fixture(autouse=True)
@@ -66,7 +66,7 @@ def test_multi_db_oid_unique():
     """
     schema_oid = 5000
     table_oid = 5001
-    all_dbs = Database.objects.all()
+    all_dbs = Connection.objects.all()
     assert len(all_dbs) > 1
     for db in all_dbs:
         schema = Schema.objects.create(oid=schema_oid, database=db)
@@ -75,7 +75,7 @@ def test_multi_db_oid_unique():
 
 def test_single_db_oid_unique_exception():
     table_oid = 5001
-    dbs = Database.objects.all()
+    dbs = Connection.objects.all()
     assert len(dbs) > 0
     db = dbs[0]
     schema_1 = Schema.objects.create(oid=4000, database=db)

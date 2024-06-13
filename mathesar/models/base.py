@@ -109,7 +109,7 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
 _engine_cache = {}
 
 
-class Database(ReflectionManagerMixin, BaseModel):
+class Connection(ReflectionManagerMixin, BaseModel):
     name = models.CharField(max_length=128, unique=True)
     db_name = models.CharField(max_length=128)
     username = EncryptedCharField(max_length=255)
@@ -178,7 +178,7 @@ class Database(ReflectionManagerMixin, BaseModel):
 
 
 class Schema(DatabaseObject):
-    database = models.ForeignKey('Database', on_delete=models.CASCADE,
+    database = models.ForeignKey('Connection', on_delete=models.CASCADE,
                                  related_name='schemas')
 
     class Meta:
