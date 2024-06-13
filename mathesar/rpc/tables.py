@@ -169,3 +169,10 @@ def patch(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return alter_table_on_database(table_oid, table_data_dict, conn)
+
+
+@rpc_method(name="tables.import")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def import_():
+    pass

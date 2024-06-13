@@ -1,17 +1,20 @@
 from io import TextIOWrapper
-
+import tempfile
 import clevercsv as csv
+from psycopg import sql
 
 from db.tables.operations.alter import update_pk_sequence_to_latest
 from mathesar.database.base import create_mathesar_engine
 from db.records.operations.insert import insert_records_from_csv
-from db.tables.operations.create import create_string_column_table
+from db.tables.operations.create import create_string_column_table, prepare_table_for_import
 from db.tables.operations.drop import drop_table
+from db.tables.operations.select import get_relation_name
 from mathesar.errors import InvalidTableError
 from mathesar.imports.utils import get_alternate_column_names, process_column_names
 from db.constants import COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
-
+from mathesar.models.base import DataFile
+from db.encoding_utils import get_sql_compatible_encoding
 from mathesar.state import reset_reflection
 
 # The user-facing documentation replicates these delimiter characters. If you
@@ -161,3 +164,86 @@ def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
         table = insert_records_from_csv_data_file(name, schema, column_names_alt, engine, comment, data_file)
     reset_reflection(db_name=db_model.name)
     return table
+
+
+def insert_csv(data_file_id, table_name, schema_oid, conn, comment=None):
+    data_file = DataFile.current_objects.get(id=data_file_id)
+    file_path = data_file.file.path
+    header = data_file.header
+    dialect = csv.dialect.SimpleDialect(
+        data_file.delimiter,
+        data_file.quotechar,
+        data_file.escapechar
+    )
+    encoding = get_file_encoding(data_file.file)
+    with open(file_path, 'rb', encoding=encoding) as csv_file:
+        csv_reader = get_sv_reader(csv_file, header, dialect)
+        column_names = process_column_names(csv_reader.fieldnames)
+        table_oid = prepare_table_for_import(
+            table_name,
+            schema_oid,
+            column_names,
+            conn,
+            comment
+        )
+        insert_csv_records(
+            table_oid,
+            conn,
+            csv_file,
+            column_names,
+            header,
+            dialect.delimiter,
+            dialect.escapechar,
+            dialect.quotechar,
+            encoding
+        )
+
+
+def insert_csv_records(
+    table_oid,
+    conn,
+    csv_file,
+    column_names,
+    header,
+    delimiter=None,
+    escape=None,
+    quote=None,
+    encoding=None
+):
+    conversion_encoding, sql_encoding = get_sql_compatible_encoding(encoding)
+    fq_table_name = sql.SQL(get_relation_name(table_oid, conn))
+    formatted_columns = sql.SQL(",").join(
+        sql.Identifier(column_name) for column_name in column_names
+    )
+    copy_sql = sql.SQL(
+        f"COPY {fq_table_name} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote} {encoding}"
+    ).format(
+        fq_table_name=fq_table_name,
+        formatted_columns=formatted_columns,
+        header=sql.SQL("HEADER" if header else ""),
+        delimiter=sql.SQL(f"DELIMITER E'{delimiter}'" if delimiter else ""),
+        escape=sql.SQL(f"ESCAPE '{escape}'" if escape else ""),
+        quote=sql.SQL(
+            ("QUOTE ''''" if quote == "'" else f"QUOTE '{quote}'")
+            if quote
+            else ""
+        ),
+        encoding=sql.SQL(f"ENCODING '{sql_encoding}'" if sql_encoding else ""),
+    )
+    cursor = conn.connection.cursor()
+    if conversion_encoding == encoding:
+        with cursor.copy(copy_sql) as copy:
+            if data := csv_file.read():
+                copy.write(data)
+    else:
+        # File needs to be converted to compatible database supported encoding
+        with tempfile.SpooledTemporaryFile(mode='wb+', encoding=conversion_encoding) as temp_file:
+            while True:
+                contents = csv_file.read(SAMPLE_SIZE).encode(conversion_encoding, "replace")
+                if not contents:
+                    break
+                temp_file.write(contents)
+            temp_file.seek(0)
+            with cursor.copy(copy_sql) as copy:
+                if data := temp_file.read():
+                    copy.write(data)
