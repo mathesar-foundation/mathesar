@@ -50,4 +50,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(model_name='database', name='host'),
         migrations.RemoveField(model_name='database', name='port'),
+
+        migrations.RenameField(model_name='database', old_name='name', new_name='display_name'),
+        migrations.RenameField(model_name='database', old_name='db_name', new_name='name'),
     ]

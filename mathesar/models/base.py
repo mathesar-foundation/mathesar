@@ -115,8 +115,8 @@ class Server(BaseModel):
 
 
 class Database(ReflectionManagerMixin, BaseModel):
-    name = models.CharField(max_length=128, unique=True)
-    db_name = models.CharField(max_length=128)
+    display_name = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=128)
     username = EncryptedCharField(max_length=255)
     password = EncryptedCharField(max_length=255)
     server = models.ForeignKey("Server", on_delete=models.CASCADE, related_name="databases")
@@ -169,8 +169,8 @@ class Database(ReflectionManagerMixin, BaseModel):
         db_info = settings.DATABASES[db_key]
         if 'postgres' in db_info['ENGINE']:
             return cls(
-                name=db_key,
-                db_name=db_info['NAME'],
+                display_name=db_key,
+                name=db_info['NAME'],
                 username=db_info['USER'],
                 password=db_info['PASSWORD'],
                 server=Server.objects.get_or_create(
@@ -180,7 +180,7 @@ class Database(ReflectionManagerMixin, BaseModel):
             )
 
     def save(self, **kwargs):
-        db_name = self.name
+        db_name = self.display_name
         # invalidate cached engine as db credentials might get changed.
         if _engine_cache.get(db_name):
             _engine_cache[db_name].dispose()

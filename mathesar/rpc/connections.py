@@ -33,8 +33,9 @@ class DBModelReturn(TypedDict):
     def from_db_model(cls, db_model):
         return cls(
             id=db_model.id,
-            nickname=db_model.name,
-            database=db_model.db_name,
+            # TODO These names are misaligned with the underlying model
+            nickname=db_model.display_name,
+            database=db_model.name,
             username=db_model.username,
             host=db_model.host,
             port=db_model.port

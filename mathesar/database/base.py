@@ -16,7 +16,7 @@ def _get_credentials_for_db_model(db_model):
         username=db_model.username,
         password=db_model.password,
         hostname=db_model.host,
-        database=db_model.db_name,
+        database=db_model.name,
         port=db_model.port,
     )
 
@@ -31,7 +31,7 @@ def get_psycopg_connection(db_model):
     return psycopg.connect(
         host=db_model.host,
         port=db_model.port,
-        dbname=db_model.db_name,
+        dbname=db_model.name,
         user=db_model.username,
         password=db_model.password,
     )

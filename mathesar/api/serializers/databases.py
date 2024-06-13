@@ -8,8 +8,8 @@ from mathesar.models.base import Database
 
 class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     supported_types_url = serializers.SerializerMethodField()
-    nickname = serializers.CharField(source='name')
-    database = serializers.CharField(source='db_name')
+    nickname = serializers.CharField(source='display_name')
+    database = serializers.CharField(source='name')
 
     class Meta:
         model = Database

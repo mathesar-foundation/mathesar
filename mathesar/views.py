@@ -73,8 +73,8 @@ def get_database_list(request):
             'username': db.username,
             'port': db.port,
             'host': db.host,
-            'nickname': db.name,
-            'database': db.db_name,
+            'nickname': db.display_name,
+            'database': db.name,
             'error': 'Error connecting to the database'
         })
     return database_serializer.data + failed_db_data
@@ -151,7 +151,7 @@ def _get_internal_db_meta():
             'user': internal_db.username,
             'host': internal_db.host,
             'port': internal_db.port,
-            'database': internal_db.db_name
+            'database': internal_db.name
         }
     else:
         return {'type': 'sqlite'}

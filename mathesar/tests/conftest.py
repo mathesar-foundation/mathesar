@@ -107,8 +107,8 @@ def create_dj_db(request):
             port=credentials['PORT']
         )
         database_model = Database.current_objects.create(
+            display_name=db_name,
             name=db_name,
-            db_name=db_name,
             username=credentials['USER'],
             password=credentials['PASSWORD'],
             server=server_model,
@@ -140,8 +140,8 @@ def test_db_model(request, test_db_name, django_db_blocker):
             port=credentials['PORT']
         )
         database_model = Database.current_objects.create(
+            display_name=test_db_name,
             name=test_db_name,
-            db_name=test_db_name,
             username=credentials['USER'],
             password=credentials['PASSWORD'],
             server=server_model,

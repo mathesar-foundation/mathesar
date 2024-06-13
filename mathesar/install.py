@@ -45,7 +45,7 @@ def install_on_db_with_key(database_key, skip_confirm):
     db_model.save()
     try:
         install.install_mathesar(
-            database_name=db_model.db_name,
+            database_name=db_model.name,
             hostname=db_model.host,
             username=db_model.username,
             password=db_model.password,

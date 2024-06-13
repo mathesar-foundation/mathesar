@@ -23,7 +23,7 @@ def copy_connection_from_preexisting(
         db_model.id = None
     else:
         raise KeyError("connection_type")
-    root_db = db_model.db_name
+    root_db = db_model.name
     return _save_and_install(
         db_model, db_name, root_db, nickname, create_db, sample_data
     )
@@ -63,12 +63,12 @@ def _save_and_install(
         db_model, db_name, root_db, nickname, create_db, sample_data
 ):
     db_model.name = nickname
-    db_model.db_name = db_name
+    db_model.name = db_name
     _validate_db_model(db_model)
     db_model.save()
     try:
         install.install_mathesar(
-            database_name=db_model.db_name,
+            database_name=db_model.name,
             username=db_model.username,
             password=db_model.password,
             hostname=db_model.host,
@@ -106,7 +106,7 @@ def _validate_db_model(db_model):
             internal_db_model is not None
             and db_model.host == internal_db_model.host
             and db_model.port == internal_db_model.port
-            and db_model.db_name == internal_db_model.db_name
+            and db_model.name == internal_db_model.name
     ):
         raise BadInstallationTarget(
             "Mathesar can't be installed in the internal DB namespace"
