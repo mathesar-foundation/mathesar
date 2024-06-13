@@ -229,6 +229,10 @@ def add(
     """
     Add columns to a table.
 
+    There are defaults for both the name and type of a column, and so
+    passing `[{}]` for `column_data_list` would add a single column of
+    type `CHARACTER VARYING`, with an auto-generated name.
+
     Args:
         column_data_list: A list describing desired columns to add.
         table_oid: Identity of the table to which we'll add columns.
