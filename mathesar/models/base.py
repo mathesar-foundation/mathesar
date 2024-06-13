@@ -109,17 +109,26 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
 _engine_cache = {}
 
 
+class Server(BaseModel):
+    host = models.CharField(max_length=255)
+    port = models.IntegerField()
+
+
 class Database(ReflectionManagerMixin, BaseModel):
     name = models.CharField(max_length=128, unique=True)
     db_name = models.CharField(max_length=128)
     username = EncryptedCharField(max_length=255)
     password = EncryptedCharField(max_length=255)
-    host = models.CharField(max_length=255)
-    port = models.IntegerField()
-    current_objects = models.Manager()
-    # TODO does this need to be defined, given that ReflectionManagerMixin defines an identical attribute?
-    objects = DatabaseObjectManager()
+    server = models.ForeignKey("Server", on_delete=models.CASCADE, related_name="databases")
     deleted = models.BooleanField(blank=True, default=False)
+
+    @property
+    def host(self):
+        return self.server.host
+
+    @property
+    def port(self):
+        return self.server.port
 
     @property
     def _sa_engine(self):
@@ -164,8 +173,10 @@ class Database(ReflectionManagerMixin, BaseModel):
                 db_name=db_info['NAME'],
                 username=db_info['USER'],
                 password=db_info['PASSWORD'],
-                host=db_info['HOST'],
-                port=db_info['PORT'],
+                server=Server.objects.get_or_create(
+                    host=db_info['HOST'],
+                    port=db_info['PORT']
+                )[0],
             )
 
     def save(self, **kwargs):
