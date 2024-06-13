@@ -7,8 +7,8 @@ from db.tables.operations.select import get_table_info, get_table
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
 from db.tables.operations.alter import alter_table_on_database
-from mathesar.rpc.columns import CreateableColumnInfo, SettableColumnInfo
-from mathesar.rpc.constraints import CreateableConstraintInfo
+from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo
+from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -100,8 +100,8 @@ def add(
     table_name: str,
     schema_oid: int,
     database_id: int,
-    column_data_list: list[CreateableColumnInfo] = [],
-    constraint_data_list: list[CreateableConstraintInfo] = [],
+    column_data_list: list[CreatableColumnInfo] = [],
+    constraint_data_list: list[CreatableConstraintInfo] = [],
     comment: str = None,
     **kwargs
 ) -> int:
