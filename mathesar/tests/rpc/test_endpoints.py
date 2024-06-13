@@ -73,6 +73,11 @@ METHODS = [
         tables.delete,
         "tables.delete",
         [user_is_authenticated]
+    ),
+    (
+        tables.patch,
+        "tables.patch",
+        [user_is_authenticated]
     )
 ]
 

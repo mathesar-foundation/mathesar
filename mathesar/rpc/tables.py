@@ -6,7 +6,8 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 from db.tables.operations.select import get_table_info, get_table
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
-from mathesar.rpc.columns import CreatableColumnInfo
+from db.tables.operations.alter import alter_table_on_database
+from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
@@ -26,6 +27,27 @@ class TableInfo(TypedDict):
     name: str
     schema: int
     description: Optional[str]
+
+
+class SettableTableInfo(TypedDict):
+    """
+    Information about a table, restricted to settable fields.
+
+    When possible, Passing `null` for a key will clear the underlying
+    setting. E.g.,
+
+    - `description = null` clears the table description.
+
+    Setting any of `name`, `columns` to `null` is a noop.
+
+    Attributes:
+        name: The new name of the table.
+        description: The description of the table.
+        columns: A list describing desired column alterations.
+    """
+    name: Optional[str]
+    description: Optional[str]
+    columns: Optional[list[SettableColumnInfo]]
 
 
 @rpc_method(name="tables.list")
@@ -125,3 +147,25 @@ def delete(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return drop_table_from_database(table_oid, conn, cascade)
+
+
+@rpc_method(name="tables.patch")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def patch(
+    *, table_oid: str, table_data_dict: SettableTableInfo, database_id: int, **kwargs
+) -> str:
+    """
+    Alter details of a preexisting table in a database.
+
+    Args:
+        table_oid: Identity of the table whose name, description or columns we'll modify.
+        table_data_dict: A list describing desired table alterations.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The name of the altered table.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        return alter_table_on_database(table_oid, table_data_dict, conn)

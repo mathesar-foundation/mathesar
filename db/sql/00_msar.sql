@@ -1057,7 +1057,7 @@ Args:
   new_tab_name: unquoted, unqualified table name
 */
 BEGIN
-  RETURN __msar.rename_table(__msar.get_relation_name(tab_id), quote_ident(new_tab_name));
+  RETURN __msar.rename_table(msar.get_relation_name_or_null(tab_id), quote_ident(new_tab_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1089,8 +1089,12 @@ Args:
   tab_name: The qualified, quoted name of the table whose comment we will change.
   comment_: The new comment. Any quotes or special characters must be escaped.
 */
-SELECT __msar.exec_ddl('COMMENT ON TABLE %s IS %s', tab_name, comment_);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+DECLARE
+  comment_or_null text := COALESCE(comment_, 'NULL');
+BEGIN
+RETURN __msar.exec_ddl('COMMENT ON TABLE %s IS %s', tab_name, comment_or_null);
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -1101,8 +1105,8 @@ Args:
   tab_id: The OID of the table whose comment we will change.
   comment_: The new comment.
 */
-SELECT __msar.comment_on_table(__msar.get_relation_name(tab_id), quote_literal(comment_));
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+SELECT __msar.comment_on_table(msar.get_relation_name_or_null(tab_id), quote_literal(comment_));
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
@@ -1118,10 +1122,40 @@ SELECT __msar.comment_on_table(
   msar.get_fully_qualified_object_name(sch_name, tab_name),
   quote_literal(comment_)
 );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL;
 
 
--- Alter Table: LEFT IN PYTHON (for now) -----------------------------------------------------------
+-- Alter table -------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION
+msar.alter_table(tab_id oid, tab_alters jsonb) RETURNS text AS $$/*
+Alter the name, description, or columns of a table, returning name of the altered table.
+
+Args:
+  tab_id: The OID of the table whose columns we'll alter.
+  tab_alters: a JSONB describing the alterations to make.
+
+  The tab_alters should have the form:
+  {
+    "name": <str>,
+    "description": <str>
+    "columns": <col_alters>,
+  }
+*/
+DECLARE
+  new_tab_name text;
+  comment text;
+  col_alters jsonb;
+BEGIN
+  new_tab_name := tab_alters->>'name';
+  comment := tab_alters->>'description';
+  col_alters := tab_alters->'columns';
+  PERFORM msar.rename_table(tab_id, new_tab_name);
+  PERFORM msar.comment_on_table(tab_id, comment);
+  PERFORM msar.alter_columns(tab_id, col_alters);
+  RETURN msar.get_relation_name_or_null(tab_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
