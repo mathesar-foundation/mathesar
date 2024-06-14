@@ -30,6 +30,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        columns.add,
+        "columns.add",
+        [user_is_authenticated]
+    ),
+    (
         connections.add_from_known_connection,
         "connections.add_from_known_connection",
         [user_is_superuser]
@@ -38,6 +43,11 @@ METHODS = [
         connections.add_from_scratch,
         "connections.add_from_scratch",
         [user_is_superuser]
+    ),
+    (
+        schemas.add,
+        "schemas.add",
+        [user_is_authenticated]
     ),
     (
         schemas.list_,

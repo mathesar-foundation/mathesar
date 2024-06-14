@@ -5,7 +5,7 @@ from sqlalchemy import select
 from db import constants
 from db.columns.base import MathesarColumn
 from db.columns.operations.infer_types import infer_column_type
-from db.schemas.operations.create import create_schema
+from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
 from db.tables.operations.create import CreateTableAs
 from db.tables.operations.select import reflect_table
 from db.types.operations.convert import get_db_type_enum_from_class
@@ -43,7 +43,7 @@ def infer_table_column_types(schema, table_name, engine, metadata=None, columns_
     table = reflect_table(table_name, schema, engine, metadata=metadata)
 
     temp_name = TEMP_TABLE % (int(time()))
-    create_schema(TEMP_SCHEMA, engine, if_not_exists=True)
+    create_schema_if_not_exists_via_sql_alchemy(TEMP_SCHEMA, engine)
     with engine.begin() as conn:
         while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
             temp_name = TEMP_TABLE.format(int(time()))
