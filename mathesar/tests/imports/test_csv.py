@@ -7,7 +7,7 @@ from mathesar.models.base import DataFile, Schema
 from mathesar.errors import InvalidTableError
 from mathesar.imports.base import create_table_from_data_file
 from mathesar.imports.csv import get_sv_dialect, get_sv_reader
-from db.schemas.operations.create import create_schema
+from db.schemas.operations.create import create_schema_via_sql_alchemy
 from db.schemas.utils import get_schema_oid_from_name
 from db.constants import COLUMN_NAME_TEMPLATE
 from psycopg.errors import DuplicateTable
@@ -45,7 +45,7 @@ def col_headers_empty_data_file(col_headers_empty_csv_filepath):
 
 @pytest.fixture()
 def schema(engine, test_db_model):
-    create_schema(TEST_SCHEMA, engine)
+    create_schema_via_sql_alchemy(TEST_SCHEMA, engine)
     schema_oid = get_schema_oid_from_name(TEST_SCHEMA, engine)
     yield Schema.current_objects.create(oid=schema_oid, database=test_db_model)
     with engine.begin() as conn:

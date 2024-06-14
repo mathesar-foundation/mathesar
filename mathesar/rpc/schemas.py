@@ -7,6 +7,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.constants import INTERNAL_SCHEMAS
+from db.schemas.operations.create import create_schema
 from db.schemas.operations.select import get_schemas
 from db.schemas.operations.drop import drop_schema_via_oid
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -22,13 +23,40 @@ class SchemaInfo(TypedDict):
         name: The name of the schema
         description: A description of the schema
         table_count: The number of tables in the schema
-        exploration_count: The number of explorations in the schema
     """
     oid: int
     name: str
     description: Optional[str]
     table_count: int
-    exploration_count: int
+
+
+@rpc_method(name="schemas.add")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def add(
+    *,
+    name: str,
+    database_id: int,
+    description: Optional[str] = None,
+    **kwargs,
+) -> int:
+    """
+    Add a schema
+
+    Args:
+        name: The name of the schema to add.
+        database_id: The Django id of the database containing the schema.
+        description: A description of the schema
+
+    Returns:
+        The integer OID of the schema created
+    """
+    with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
+        return create_schema(
+            schema_name=name,
+            conn=conn,
+            description=description
+        )
 
 
 @rpc_method(name="schemas.list")
@@ -42,18 +70,13 @@ def list_(*, database_id: int, **kwargs) -> list[SchemaInfo]:
         database_id: The Django id of the database containing the table.
 
     Returns:
-        A list of schema details
+        A list of SchemaInfo objects
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         schemas = get_schemas(conn)
 
-    user_defined_schemas = [s for s in schemas if s['name'] not in INTERNAL_SCHEMAS]
-
-    # TODO_FOR_BETA: join exploration count from internal DB here after we've
-    # refactored the models so that each exploration is associated with a schema
-    # (by oid) in a specific database.
-    return [{**s, "exploration_count": 0} for s in user_defined_schemas]
+    return [s for s in schemas if s['name'] not in INTERNAL_SCHEMAS]
 
 
 @rpc_method(name="schemas.delete")
