@@ -176,7 +176,13 @@ def patch(
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def import_(
-    *, data_file_id: int, table_name: str, schema_oid: int, database_id: int, comment=None, **kwargs
+    *,
+    data_file_id: int,
+    table_name: str,
+    schema_oid: int,
+    database_id: int,
+    comment: str = None,
+    **kwargs
 ) -> int:
     """
     Import a CSV/TSV into a table.
