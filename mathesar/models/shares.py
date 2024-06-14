@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 
-from mathesar.models.deprecated import BaseModel
+from mathesar.models.base import BaseModel
 
 
 class SharedEntity(BaseModel):

@@ -44,6 +44,7 @@ from db.tables.operations.split import extract_columns_from_table
 from db.records.operations.insert import insert_from_select
 from db.tables.utils import get_primary_key_column
 
+from mathesar.models.base import BaseModel
 from mathesar.models.relation import Relation
 from mathesar.utils import models as model_utils
 from mathesar.utils.prefetch import PrefetchManager, Prefetcher
@@ -55,14 +56,6 @@ from mathesar.api.exceptions.database_exceptions.base_exceptions import Programm
 
 
 NAME_CACHE_INTERVAL = 60 * 5
-
-
-class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
 
 
 class DatabaseObjectManager(PrefetchManager):
