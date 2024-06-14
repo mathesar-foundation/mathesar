@@ -27,10 +27,8 @@ def comment_on_schema(schema_name, engine, comment):
     Change description of a schema.
 
     Args:
-        schema_name: The name of the schema whose comment we will
-                     change.
-        comment: The new comment. Any quotes or special characters must
-                 be escaped.
+        schema_name: The name of the schema whose comment we will change.
+        comment: The new comment.
         engine: SQLAlchemy engine object for connecting.
 
     Returns:

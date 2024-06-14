@@ -143,24 +143,27 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
-Return true if the given schema exists in the current database, false otherwise.
+Return true if the schema exists, false otherwise.
+
+Args :
+  sch_name: The name of the schema, UNQUOTED.
 */
 SELECT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname=schema_name);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION __msar.get_schema_oid(sch_name text) RETURNS oid AS $$/*
-Return the OID of a schema, if it can be diretly found from a name.
+CREATE OR REPLACE FUNCTION msar.get_schema_oid(sch_name text) RETURNS oid AS $$/*
+Return the OID of a schema, or NULL if the schema does not exist.
 
 Args :
-  sch_name: The name of the schema.
+  sch_name: The name of the schema, UNQUOTED.
 */
-SELECT CASE WHEN msar.schema_exists(sch_name) THEN sch_name::regnamespace::oid END;
+SELECT oid FROM pg_namespace WHERE nspname=sch_name;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION __msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
-Return the name for a given schema, quoted as appropriate.
+Return the QUOTED name for a given schema.
 
 The schema *must* be in the pg_namespace table to use this function.
 
@@ -612,7 +615,7 @@ Args:
 SELECT jsonb_agg(prorettype::regtype::text)
 FROM pg_proc
 WHERE
-  pronamespace=__msar.get_schema_oid('mathesar_types')
+  pronamespace=msar.get_schema_oid('mathesar_types')
   AND proargtypes[0]=typ_id
   AND left(proname, 5) = 'cast_';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -885,8 +888,8 @@ __msar.comment_on_schema(sch_name text, comment_ text) RETURNS TEXT AS $$/*
 Change the description of a schema, returning command executed.
 
 Args:
-  sch_name: The quoted name of the schema whose comment we will change.
-  comment_: The new comment. Any quotes or special characters must be escaped.
+  sch_name: The QUOTED name of the schema whose comment we will change.
+  comment_: The new comment, QUOTED
 */
 DECLARE
   cmd_template text;
@@ -902,8 +905,8 @@ msar.comment_on_schema(sch_name text, comment_ text) RETURNS TEXT AS $$/*
 Change the description of a schema, returning command executed.
 
 Args:
-  sch_name: The quoted name of the schema whose comment we will change.
-  comment_: The new comment.
+  sch_name: The UNQUOTED name of the schema whose comment we will change.
+  comment_: The new comment, UNQUOTED
 */
 BEGIN
   RETURN __msar.comment_on_schema(quote_ident(sch_name), quote_literal(comment_));
@@ -916,7 +919,7 @@ Change the description of a schema, returning command executed.
 
 Args:
   sch_id: The OID of the schema.
-  comment_: The new comment.
+  comment_: The new comment, UNQUOTED
 */
 BEGIN
   RETURN __msar.comment_on_schema(__msar.get_schema_name(sch_id), quote_literal(comment_));
@@ -932,43 +935,54 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+-- This gets rid of `msar.create_schema` as defined in Mathesar 0.1.7. We don't want that old
+-- function definition hanging around because it will get invoked when passing NULL as the second
+-- argument like `msar.create_schema('foo', NULL)`.
+DROP FUNCTION IF EXISTS msar.create_schema(text, boolean);
 
--- Create schema -----------------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION
-__msar.create_schema(sch_name text, if_not_exists boolean) RETURNS TEXT AS $$/*
-Create a schema, returning the command executed.
-
-Args:
-  sch_name: A properly quoted name of the schema to be created
-  if_not_exists: Whether to ignore an error if the schema does exist
-*/
-DECLARE
-  cmd_template text;
-BEGIN
-  IF if_not_exists
-  THEN
-    cmd_template := 'CREATE SCHEMA IF NOT EXISTS %s';
-  ELSE
-    cmd_template := 'CREATE SCHEMA %s';
-  END IF;
-  RETURN __msar.exec_ddl(cmd_template, sch_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.create_schema(sch_name text, if_not_exists boolean) RETURNS TEXT AS $$/*
-Create a schema, returning the command executed.
+CREATE OR REPLACE FUNCTION msar.create_schema_if_not_exists(sch_name text) RETURNS oid AS $$/*
+Ensure that a schema exists in the database.
 
 Args:
-  sch_name: An unquoted name of the schema to be created
-  if_not_exists: Whether to ignore an error if the schema does exist
+  sch_name: the name of the schema to be created, UNQUOTED.
+
+Returns:
+  The integer OID of the schema
 */
 BEGIN
-  RETURN __msar.create_schema(quote_ident(sch_name), if_not_exists);
+  EXECUTE 'CREATE SCHEMA IF NOT EXISTS ' || quote_ident(sch_name);
+  RETURN msar.get_schema_oid(sch_name);
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION msar.create_schema(
+  sch_name text,
+  description text DEFAULT ''
+) RETURNS oid AS $$/*
+Create a schema, possibly with a description.
+
+If a schema with the given name already exists, an exception will be raised.
+
+Args:
+  sch_name: the name of the schema to be created, UNQUOTED.
+  description: (optional) A description for the schema, UNQUOTED.
+
+Returns:
+  The integer OID of the schema
+
+Note: This function does not support IF NOT EXISTS because it's simpler that way. I originally tried
+to support descriptions and if_not_exists in the same function, but as I discovered more edge cases
+and inconsistencies, it got too complex, and I didn't think we'd have a good enough use case for it.
+*/
+DECLARE schema_oid oid;
+BEGIN
+  EXECUTE 'CREATE SCHEMA ' || quote_ident(sch_name);
+  schema_oid := msar.get_schema_oid(sch_name);
+  PERFORM msar.comment_on_schema(schema_oid, description);
+  RETURN schema_oid;
+END;
+$$ LANGUAGE plpgsql;
 
 
 ----------------------------------------------------------------------------------------------------

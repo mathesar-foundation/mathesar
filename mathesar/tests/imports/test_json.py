@@ -5,7 +5,7 @@ from sqlalchemy import text
 
 from mathesar.models.base import DataFile, Schema
 from mathesar.imports.base import create_table_from_data_file
-from db.schemas.operations.create import create_schema
+from db.schemas.operations.create import create_schema_via_sql_alchemy
 from db.schemas.utils import get_schema_oid_from_name
 from psycopg.errors import DuplicateTable
 
@@ -21,7 +21,7 @@ def data_file(patents_json_filepath):
 
 @pytest.fixture()
 def schema(engine, test_db_model):
-    create_schema(TEST_SCHEMA, engine)
+    create_schema_via_sql_alchemy(TEST_SCHEMA, engine)
     schema_oid = get_schema_oid_from_name(TEST_SCHEMA, engine)
     yield Schema.current_objects.create(oid=schema_oid, database=test_db_model)
     with engine.begin() as conn:
