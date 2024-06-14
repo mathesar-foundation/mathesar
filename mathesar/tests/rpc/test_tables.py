@@ -192,3 +192,30 @@ def test_tables_patch(rf, monkeypatch):
         request=request
     )
     assert altered_table_name == 'newtabname'
+
+
+def test_tables_import(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
+    schema_oid = 2200
+    data_file_id = 10
+    database_id = 11
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_table_import(_data_file_id, table_name, _schema_oid, conn, comment):
+        if _schema_oid != schema_oid and _data_file_id != data_file_id:
+            raise AssertionError('incorrect parameters passed')
+        return 1964474
+    monkeypatch.setattr(tables, 'connect', mock_connect)
+    monkeypatch.setattr(tables, 'import_csv', mock_table_import)
+    actual_table_oid = tables.import_(data_file_id=10, table_name='imported_table', schema_oid=2200, database_id=11, request=request)
+    assert actual_table_oid == 1964474

@@ -178,6 +178,19 @@ def patch(
 def import_(
     *, data_file_id: int, table_name: str, schema_oid: int, database_id: int, comment=None, **kwargs
 ) -> int:
+    """
+    Import a CSV/TSV into a table.
+
+    Args:
+        data_file_id: The Django id of the DataFile containing desired CSV/TSV.
+        table_name: Name of the table to be imported.
+        schema_oid: Identity of the schema in the user's database.
+        database_id: The Django id of the database containing the table.
+        comment: The comment for the new table.
+
+    Returns:
+        The `oid` of the created table.
+    """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return import_csv(data_file_id, table_name, schema_oid, conn, comment)

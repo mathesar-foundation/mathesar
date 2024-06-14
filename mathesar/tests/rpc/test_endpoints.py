@@ -73,6 +73,11 @@ METHODS = [
         tables.patch,
         "tables.patch",
         [user_is_authenticated]
+    ),
+    (
+        tables.import_,
+        "tables.import",
+        [user_is_authenticated]
     )
 ]
 

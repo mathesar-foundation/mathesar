@@ -62,6 +62,9 @@ def get_table_info(schema, conn):
 def get_fully_qualified_relation_name(table_oid, conn):
     """
     Return a fully qualified table name.
+
+    Args:
+        table_oid: The table oid for which we want fully qualified name.
     """
     return exec_msar_func(conn, 'get_fully_qualified_relation_name', table_oid).fetchone()[0]
 
