@@ -11,8 +11,8 @@ from db.columns.operations.select import get_column_attnums_from_tables
 from db.constraints.operations.select import get_constraints_with_oids
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
 from db.tables.operations.select import get_table_oids_from_schemas
-# We import the entire models.base module to avoid a circular import error
-from mathesar.models import base as models
+# We import the entire models_deprecated.deprecated module to avoid a circular import error
+from mathesar.models import deprecated as models_deprecated
 from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
 from mathesar.database.base import create_mathesar_engine
@@ -32,24 +32,24 @@ def clear_dj_cache():
 
 
 def reflect_db_objects(metadata, db_name=None):
-    databases = models.Connection.current_objects.all()
+    databases = models_deprecated.Connection.current_objects.all()
     if db_name is not None:
         databases = databases.filter(name=db_name)
     sync_databases_status(databases)
     for database in databases:
         if database.deleted is False:
             reflect_schemas_from_database(database)
-            schemas = models.Schema.current_objects.filter(database=database).prefetch_related(
+            schemas = models_deprecated.Schema.current_objects.filter(database=database).prefetch_related(
                 Prefetch('database', queryset=databases)
             )
             reflect_tables_from_schemas(schemas, metadata=metadata)
-            tables = models.Table.current_objects.filter(schema__in=schemas).prefetch_related(
+            tables = models_deprecated.Table.current_objects.filter(schema__in=schemas).prefetch_related(
                 Prefetch('schema', queryset=schemas)
             )
             reflect_columns_from_tables(tables, metadata=metadata)
             reflect_constraints_from_database(database)
         else:
-            models.Schema.current_objects.filter(database=database).delete()
+            models_deprecated.Schema.current_objects.filter(database=database).delete()
 
 
 def sync_databases_status(databases):
@@ -83,10 +83,10 @@ def reflect_schemas_from_database(database):
 
     schemas = []
     for oid in db_schema_oids:
-        schema = models.Schema(oid=oid, database=database)
+        schema = models_deprecated.Schema(oid=oid, database=database)
         schemas.append(schema)
-    models.Schema.current_objects.bulk_create(schemas, ignore_conflicts=True)
-    for schema in models.Schema.current_objects.all().select_related('database'):
+    models_deprecated.Schema.current_objects.bulk_create(schemas, ignore_conflicts=True)
+    for schema in models_deprecated.Schema.current_objects.all().select_related('database'):
         if schema.database == database and schema.oid not in db_schema_oids:
             # Deleting Schemas are a rare occasion, not worth deleting in bulk
             schema.delete()
@@ -105,17 +105,17 @@ def reflect_tables_from_schemas(schemas, metadata):
     tables = []
     for oid, schema_oid in db_table_oids:
         schema = next(schema for schema in schemas if schema.oid == schema_oid)
-        table = models.Table(oid=oid, schema=schema)
+        table = models_deprecated.Table(oid=oid, schema=schema)
         tables.append(table)
-    models.Table.current_objects.bulk_create(tables, ignore_conflicts=True)
+    models_deprecated.Table.current_objects.bulk_create(tables, ignore_conflicts=True)
     # Calling signals manually because bulk create does not emit any signals
-    models._create_table_settings(models.Table.current_objects.filter(settings__isnull=True))
+    models_deprecated._create_table_settings(models_deprecated.Table.current_objects.filter(settings__isnull=True))
     deleted_tables = []
-    for table in models.Table.current_objects.filter(schema__in=schemas).select_related('schema'):
+    for table in models_deprecated.Table.current_objects.filter(schema__in=schemas).select_related('schema'):
         if (table.oid, table.schema.oid) not in db_table_oids:
             deleted_tables.append(table.id)
 
-    models.Table.current_objects.filter(id__in=deleted_tables).delete()
+    models_deprecated.Table.current_objects.filter(id__in=deleted_tables).delete()
 
 
 def reflect_columns_from_tables(tables, metadata):
@@ -130,14 +130,14 @@ def reflect_columns_from_tables(tables, metadata):
     _delete_stale_columns(attnum_tuples, tables)
     # Manually trigger preview templates computation signal
     for table in tables:
-        models._set_default_preview_template(table)
+        models_deprecated._set_default_preview_template(table)
 
     _invalidate_columns_with_incorrect_display_options(tables)
 
 
 def _invalidate_columns_with_incorrect_display_options(tables):
     columns_with_invalid_display_option = []
-    columns = models.Column.current_objects.filter(table__in=tables)
+    columns = models_deprecated.Column.current_objects.filter(table__in=tables)
     for column in columns:
         if column.display_options:
             # If the type of column has changed, existing display options won't be valid anymore.
@@ -148,16 +148,16 @@ def _invalidate_columns_with_incorrect_display_options(tables):
             if not serializer.is_valid(raise_exception=False):
                 columns_with_invalid_display_option.append(column.id)
     if len(columns_with_invalid_display_option) > 0:
-        models.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
+        models_deprecated.Column.current_objects.filter(id__in=columns_with_invalid_display_option).update(display_options=None)
 
 
 def _create_reflected_columns(attnum_tuples, tables):
     columns = []
     for attnum, table_oid in attnum_tuples:
         table = next(table for table in tables if table.oid == table_oid)
-        column = models.Column(attnum=attnum, table=table, display_options=None)
+        column = models_deprecated.Column(attnum=attnum, table=table, display_options=None)
         columns.append(column)
-    models.Column.current_objects.bulk_create(columns, ignore_conflicts=True)
+    models_deprecated.Column.current_objects.bulk_create(columns, ignore_conflicts=True)
 
 
 def _delete_stale_columns(attnum_tuples, tables):
@@ -176,7 +176,7 @@ def _delete_stale_columns(attnum_tuples, tables):
         operator.or_,
         stale_columns_conditions
     )
-    models.Column.objects.filter(stale_columns_query).delete()
+    models_deprecated.Column.objects.filter(stale_columns_query).delete()
 
 
 # TODO pass in a cached engine instead of creating a new one
@@ -190,14 +190,14 @@ def reflect_constraints_from_database(database):
         map_of_table_oid_to_constraint_oids[table_oid].append(constraint_oid)
 
     table_oids = map_of_table_oid_to_constraint_oids.keys()
-    tables = models.Table.current_objects.filter(oid__in=table_oids)
+    tables = models_deprecated.Table.current_objects.filter(oid__in=table_oids)
     constraint_objs_to_create = []
     for table in tables:
         constraint_oids = map_of_table_oid_to_constraint_oids.get(table.oid, [])
         for constraint_oid in constraint_oids:
-            constraint_obj = models.Constraint(oid=constraint_oid, table=table)
+            constraint_obj = models_deprecated.Constraint(oid=constraint_oid, table=table)
             constraint_objs_to_create.append(constraint_obj)
-    models.Constraint.current_objects.bulk_create(constraint_objs_to_create, ignore_conflicts=True)
+    models_deprecated.Constraint.current_objects.bulk_create(constraint_objs_to_create, ignore_conflicts=True)
     _delete_stale_dj_constraints(db_constraints, database)
     engine.dispose()
 
@@ -212,7 +212,7 @@ def _delete_stale_dj_constraints(known_db_constraints, database):
         for known_db_constraint
         in known_db_constraints
     )
-    stale_dj_constraints = models.Constraint.current_objects.filter(
+    stale_dj_constraints = models_deprecated.Constraint.current_objects.filter(
         ~Q(oid__in=known_db_constraint_oids),
         table__schema__database=database,
     )
@@ -224,7 +224,7 @@ def reflect_new_table_constraints(table):
     engine = create_mathesar_engine(table.schema.database)
     db_constraints = get_constraints_with_oids(engine, table_oid=table.oid)
     constraints = [
-        models.Constraint.current_objects.get_or_create(
+        models_deprecated.Constraint.current_objects.get_or_create(
             oid=db_constraint['oid'],
             table=table
         )

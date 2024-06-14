@@ -6,7 +6,7 @@ import re
 
 from db.records.operations import group
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models.base import Table
+from mathesar.models.deprecated import Table
 from mathesar.models.query import UIQuery
 from mathesar.utils.preview import column_alias_from_preview_template
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import BadDBCredentials

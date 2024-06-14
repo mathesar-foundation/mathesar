@@ -7,7 +7,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
 from mathesar.api.ui.permissions.ui_database import UIDatabaseAccessPolicy
-from mathesar.models.base import Connection
+from mathesar.models.deprecated import Connection
 from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     DictHasBadKeys, UnsupportedInstallationDatabase

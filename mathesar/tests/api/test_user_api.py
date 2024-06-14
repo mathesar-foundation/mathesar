@@ -1,7 +1,7 @@
 from django.db import transaction
 
 from db.schemas.utils import get_schema_oid_from_name
-from mathesar.models.base import Connection, Schema
+from mathesar.models.deprecated import Connection, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
 

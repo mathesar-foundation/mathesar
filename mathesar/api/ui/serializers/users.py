@@ -8,7 +8,7 @@ from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import IncorrectOldPassword
 from mathesar.api.ui.permissions.users import UserAccessPolicy
-from mathesar.models.base import Connection, Schema
+from mathesar.models.deprecated import Connection, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
 

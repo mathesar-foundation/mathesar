@@ -1,5 +1,5 @@
 from mathesar.database.types import UIType
-from mathesar.models.base import Connection
+from mathesar.models.deprecated import Connection
 from db.types.base import known_db_types
 
 

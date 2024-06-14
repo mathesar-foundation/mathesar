@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import mathesar.models.base
+import mathesar.models.deprecated
 
 
 class Migration(migrations.Migration):
@@ -29,6 +29,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='tablesettings',
             name='column_order',
-            field=models.JSONField(blank=True, default=None, null=True, validators=[mathesar.models.base.validate_column_order]),
+            field=models.JSONField(blank=True, default=None, null=True, validators=[mathesar.models.deprecated.validate_column_order]),
         ),
     ]

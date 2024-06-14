@@ -8,7 +8,7 @@ from rest_framework import serializers
 from mathesar.api.db.permissions.query_table import QueryTableAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import DuplicateUIQueryInSchemaAPIException
-from mathesar.models.base import Table
+from mathesar.models.deprecated import Table
 from mathesar.models.query import UIQuery
 
 

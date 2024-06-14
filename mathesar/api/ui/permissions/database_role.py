@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
-from mathesar.models.base import Connection
+from mathesar.models.deprecated import Connection
 from mathesar.models.users import DatabaseRole, Role
 
 

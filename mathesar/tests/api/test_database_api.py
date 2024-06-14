@@ -5,7 +5,7 @@ from sqlalchemy import text
 from db.metadata import get_empty_metadata
 from mathesar.models.users import DatabaseRole
 from mathesar.state.django import reflect_db_objects
-from mathesar.models.base import Table, Schema, Connection
+from mathesar.models.deprecated import Table, Schema, Connection
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from db.install import install_mathesar

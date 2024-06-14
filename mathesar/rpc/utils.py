@@ -1,5 +1,5 @@
 from mathesar.database.base import get_psycopg_connection
-from mathesar.models.base import Connection
+from mathesar.models.deprecated import Connection
 
 
 def connect(conn_id, user):

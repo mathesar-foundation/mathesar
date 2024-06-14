@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from mathesar.models.base import Table, Schema, DataFile
+from mathesar.models.deprecated import Table, Schema, DataFile
 from mathesar.models.users import User
 from mathesar.models.query import UIQuery
 from mathesar.models.shares import SharedTable, SharedQuery

@@ -1,7 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from mathesar.models.base import Table, Schema, Connection
+from mathesar.models.deprecated import Table, Schema, Connection
 
 
 @pytest.fixture(autouse=True)

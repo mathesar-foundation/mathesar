@@ -14,7 +14,7 @@ from mathesar.models.query import UIQuery
 
 from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models.base import Column, Table, DataFile
+from mathesar.models.deprecated import Column, Table, DataFile
 
 
 @pytest.fixture

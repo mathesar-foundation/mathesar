@@ -1,7 +1,7 @@
 from mathesar.api.serializers.shared_serializers import MathesarPolymorphicErrorMixin, ReadOnlyPolymorphicSerializerMappingMixin
 from rest_framework import serializers
 
-from mathesar.models.base import Constraint, Schema, Table
+from mathesar.models.deprecated import Constraint, Schema, Table
 
 
 DATABASE_OBJECT_TYPES = [

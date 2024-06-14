@@ -40,7 +40,7 @@ def main(skip_static_collection=False):
 
 
 def install_on_db_with_key(database_key, skip_confirm):
-    from mathesar.models.base import Connection
+    from mathesar.models.deprecated import Connection
     db_model = Connection.create_from_settings_key(database_key)
     db_model.save()
     try:

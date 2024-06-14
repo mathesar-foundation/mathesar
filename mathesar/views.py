@@ -18,7 +18,7 @@ from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.api.ui.serializers.users import UserSerializer
 from mathesar.api.utils import is_valid_uuid_v4
 from mathesar.database.types import UIType
-from mathesar.models.base import Connection, Schema, Table
+from mathesar.models.deprecated import Connection, Schema, Table
 from mathesar.models.query import UIQuery
 from mathesar.models.shares import SharedTable, SharedQuery
 from mathesar.state import reset_reflection

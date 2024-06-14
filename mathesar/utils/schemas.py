@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from db.schemas.operations.create import create_schema_via_sql_alchemy
 from db.schemas.utils import get_schema_oid_from_name, get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
-from mathesar.models.base import Schema, Connection
+from mathesar.models.deprecated import Schema, Connection
 
 
 def create_schema_and_object(name, connection_id, comment=None):

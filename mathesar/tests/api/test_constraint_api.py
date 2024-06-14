@@ -7,7 +7,7 @@ from sqlalchemy.sql import text
 from db.columns.operations.select import get_column_attnum_from_name
 from db.constraints.base import UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
-from mathesar.models.base import Constraint, Table, Column
+from mathesar.models.deprecated import Constraint, Table, Column
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from db.metadata import get_empty_metadata
 from mathesar.state import reset_reflection

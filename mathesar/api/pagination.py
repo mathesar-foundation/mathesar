@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
 from mathesar.api.utils import get_table_or_404, process_annotated_records
-from mathesar.models.base import Column, Table
+from mathesar.models.deprecated import Column, Table
 from mathesar.models.query import UIQuery
 from mathesar.utils.preview import get_preview_info
 

@@ -29,7 +29,7 @@ from mathesar.models.validators import (
     TransformationsValidator,
 )
 from mathesar.state.cached_property import cached_property
-from mathesar.models.base import BaseModel, Column
+from mathesar.models.deprecated import BaseModel, Column
 from mathesar.models.relation import Relation
 from mathesar.state import get_cached_metadata
 

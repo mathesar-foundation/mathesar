@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
-from mathesar.models.base import Connection
+from mathesar.models.deprecated import Connection
 from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 

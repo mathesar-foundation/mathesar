@@ -1,4 +1,4 @@
-from mathesar.models.base import Connection
+from mathesar.models.deprecated import Connection
 from mathesar.filters.base import get_available_filters
 from mathesar.models.users import DatabaseRole
 

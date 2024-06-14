@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 from django.core.cache import cache
 
-from mathesar.models.base import Connection, Schema, Table, schema_utils
+from mathesar.models.deprecated import Connection, Schema, Table, schema_utils
 from mathesar.utils.models import attempt_dumb_query
 
 
