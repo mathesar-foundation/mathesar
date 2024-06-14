@@ -220,6 +220,30 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_fully_qualified_relation_name(rel_id oid) RETURNS text AS $$/*
+Return the fully-qualified name for a given relation (e.g., table).
+
+The relation *must* be in the pg_class table to use this function. This function will return NULL if
+no corresponding relation can be found.
+
+Args:
+  rel_id: The OID of the relation.
+*/
+DECLARE
+  sch_name text;
+  rel_name text;
+BEGIN
+  SELECT nspname, relname INTO sch_name, rel_name
+  FROM pg_catalog.pg_class AS pgc
+  LEFT JOIN pg_catalog.pg_namespace AS pgn
+  ON pgc.relnamespace = pgn.oid
+  WHERE pgc.oid = rel_id;
+  RETURN msar.get_fully_qualified_object_name(sch_name, rel_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_relation_name_or_null(rel_id oid) RETURNS text AS $$/*
 Return the name for a given relation (e.g., table), qualified or quoted as appropriate.
 
