@@ -11,6 +11,7 @@ from mathesar.errors import InvalidTableError
 from mathesar.imports.utils import get_alternate_column_names, process_column_names
 from db.constants import COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
+
 from mathesar.state import reset_reflection
 
 # The user-facing documentation replicates these delimiter characters. If you
