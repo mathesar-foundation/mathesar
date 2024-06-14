@@ -217,5 +217,11 @@ def test_tables_import(rf, monkeypatch):
         return 1964474
     monkeypatch.setattr(tables, 'connect', mock_connect)
     monkeypatch.setattr(tables, 'import_csv', mock_table_import)
-    actual_table_oid = tables.import_(data_file_id=10, table_name='imported_table', schema_oid=2200, database_id=11, request=request)
-    assert actual_table_oid == 1964474
+    imported_table_oid = tables.import_(
+        data_file_id=10,
+        table_name='imported_table',
+        schema_oid=2200,
+        database_id=11,
+        request=request
+    )
+    assert imported_table_oid == 1964474
