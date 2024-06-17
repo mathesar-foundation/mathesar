@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.models.base import Database
+from mathesar.models.deprecated import Connection
 
 
 class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
@@ -12,7 +12,7 @@ class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerialize
     database = serializers.CharField(source='db_name')
 
     class Meta:
-        model = Database
+        model = Connection
         fields = ['id', 'nickname', 'database', 'supported_types_url', 'username', 'password', 'host', 'port']
         read_only_fields = ['id', 'supported_types_url']
         extra_kwargs = {
@@ -20,7 +20,7 @@ class ConnectionSerializer(MathesarErrorMessageMixin, serializers.ModelSerialize
         }
 
     def get_supported_types_url(self, obj):
-        if isinstance(obj, Database) and not self.partial:
+        if isinstance(obj, Connection) and not self.partial:
             # Only get records if we are serializing an existing table
             request = self.context['request']
             return request.build_absolute_uri(reverse('connection-types', kwargs={'pk': obj.pk}))

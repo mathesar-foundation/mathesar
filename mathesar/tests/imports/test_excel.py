@@ -2,7 +2,7 @@ import pytest
 
 from django.core.files import File
 
-from mathesar.models.base import DataFile, Schema
+from mathesar.models.deprecated import DataFile, Schema
 from mathesar.imports.base import create_table_from_data_file
 from db.schemas.utils import get_schema_oid_from_name
 from psycopg.errors import DuplicateTable

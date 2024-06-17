@@ -1,6 +1,6 @@
 from db.tables.operations import select as ma_sel
 from db.metadata import get_empty_metadata
-from mathesar.models.base import Table, Column, Constraint
+from mathesar.models.deprecated import Table, Column, Constraint
 
 TARGET = 'target'
 FK_PATH = 'fk_path'

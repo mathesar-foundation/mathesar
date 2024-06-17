@@ -1,4 +1,4 @@
-from mathesar.models.base import Column
+from mathesar.models.deprecated import Column
 
 
 # This should be replaced once we have the ColumnMetadata model sorted out.

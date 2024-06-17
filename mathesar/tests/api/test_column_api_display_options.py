@@ -9,7 +9,7 @@ from db.types.base import PostgresType, MathesarCustomType
 from db.types.custom.money import MathesarMoney
 from db.metadata import get_empty_metadata
 
-from mathesar.models.base import Table, Column
+from mathesar.models.deprecated import Table, Column
 
 
 @pytest.fixture
