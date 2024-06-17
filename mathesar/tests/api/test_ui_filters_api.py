@@ -1,10 +1,10 @@
-from mathesar.models.base import Database
+from mathesar.models.deprecated import Connection
 from mathesar.filters.base import get_available_filters
 from mathesar.models.users import DatabaseRole
 
 
 def test_filter_list(client, test_db_name):
-    database = Database.objects.get(name=test_db_name)
+    database = Connection.objects.get(name=test_db_name)
 
     response = client.get(f'/api/ui/v0/connections/{database.id}/filters/')
     response_data = response.json()

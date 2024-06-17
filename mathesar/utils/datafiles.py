@@ -13,7 +13,7 @@ from mathesar.api.exceptions.database_exceptions import (
 from mathesar.errors import URLDownloadError
 from mathesar.imports.csv import is_valid_csv, get_sv_dialect, get_file_encoding
 from mathesar.imports.json import is_valid_json, validate_json_format
-from mathesar.models.base import DataFile
+from mathesar.models.deprecated import DataFile
 
 
 ALLOWED_FILE_FORMATS = ['csv', 'tsv', 'json', 'xls', 'xlsx', 'xlsm', 'xlsb', 'odf', 'ods', 'odt']

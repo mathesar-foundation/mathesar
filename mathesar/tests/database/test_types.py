@@ -1,5 +1,5 @@
 from mathesar.database.types import UIType
-from mathesar.models.base import Database
+from mathesar.models.deprecated import Connection
 from db.types.base import known_db_types
 
 
@@ -33,6 +33,6 @@ def _verify_type_mapping(supported_ui_types):
 
 
 def test_type_mapping():
-    databases = Database.objects.all()
+    databases = Connection.objects.all()
     for database in databases:
         _verify_type_mapping(database.supported_ui_types)

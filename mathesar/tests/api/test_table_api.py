@@ -10,11 +10,11 @@ from db.constants import ID, ID_ORIGINAL
 from db.types.base import PostgresType, MathesarCustomType
 from db.metadata import get_empty_metadata
 from mathesar.models.users import DatabaseRole, SchemaRole
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 
 from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models.base import Column, Table, DataFile
+from mathesar.models.deprecated import Column, Table, DataFile
 
 
 @pytest.fixture
@@ -1876,7 +1876,7 @@ def test_table_ui_dependency(client, create_patents_table, get_uid):
             },
         ],
     }
-    query = UIQuery.objects.create(**query_data)
+    query = Exploration.objects.create(**query_data)
     response = client.get(f'/api/db/v0/tables/{base_table.id}/ui_dependents/')
     response_data = response.json()
     expected_response = {

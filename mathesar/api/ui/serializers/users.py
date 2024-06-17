@@ -8,7 +8,7 @@ from mathesar.api.db.permissions.schema import SchemaAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import IncorrectOldPassword
 from mathesar.api.ui.permissions.users import UserAccessPolicy
-from mathesar.models.base import Database, Schema
+from mathesar.models.deprecated import Connection, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
 
@@ -107,7 +107,7 @@ class DatabaseRoleSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
     # Refer https://rsinger86.github.io/drf-access-policy/policy_reuse/ for the usage of `PermittedPkRelatedField`
     database = PermittedPkRelatedField(
         access_policy=DatabaseAccessPolicy,
-        queryset=Database.current_objects.all()
+        queryset=Connection.current_objects.all()
     )
 
 

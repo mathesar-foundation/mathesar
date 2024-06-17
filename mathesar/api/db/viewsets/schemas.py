@@ -10,7 +10,7 @@ from mathesar.api.dj_filters import SchemaFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.dependents import DependentSerializer, DependentFilterSerializer
 from mathesar.api.serializers.schemas import SchemaSerializer
-from mathesar.models.base import Schema
+from mathesar.models.deprecated import Schema
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.api.exceptions.validation_exceptions.exceptions import EditingPublicSchemaIsDisallowed
 
