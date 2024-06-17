@@ -54,7 +54,9 @@ To use an RPC function:
       - list_
       - add
       - delete
+      - patch
       - SchemaInfo
+      - SchemaPatch
 
 ---
 

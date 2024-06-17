@@ -10,6 +10,7 @@ from db.constants import INTERNAL_SCHEMAS
 from db.schemas.operations.create import create_schema
 from db.schemas.operations.select import get_schemas
 from db.schemas.operations.drop import drop_schema_via_oid
+from db.schemas.operations.alter import patch_schema
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -28,6 +29,16 @@ class SchemaInfo(TypedDict):
     name: str
     description: Optional[str]
     table_count: int
+
+
+class SchemaPatch(TypedDict):
+    """
+    Attributes:
+        name: The name of the schema
+        description: A description of the schema
+    """
+    name: Optional[str]
+    description: Optional[str]
 
 
 @rpc_method(name="schemas.add")
@@ -82,13 +93,30 @@ def list_(*, database_id: int, **kwargs) -> list[SchemaInfo]:
 @rpc_method(name="schemas.delete")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def delete(*, schema_id: int, database_id: int, **kwargs) -> None:
+def delete(*, schema_oid: int, database_id: int, **kwargs) -> None:
     """
     Delete a schema, given its OID.
 
     Args:
-        schema_id: The OID of the schema to delete.
+        schema_oid: The OID of the schema to delete.
         database_id: The Django id of the database containing the schema.
     """
     with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
-        drop_schema_via_oid(conn, schema_id)
+        drop_schema_via_oid(conn, schema_oid)
+
+
+@rpc_method(name="schemas.patch")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def patch(*, schema_oid: int, database_id: int, patch: SchemaPatch, **kwargs) -> None:
+    """
+    Patch a schema, given its OID.
+
+    Args:
+        schema_oid: The OID of the schema to delete.
+        database_id: The Django id of the database containing the schema.
+        patch: A SchemaPatch object containing the fields to update.
+    """
+    with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
+        patch_schema(schema_oid, conn, patch)
+
