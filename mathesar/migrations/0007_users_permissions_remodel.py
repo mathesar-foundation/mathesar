@@ -7,6 +7,7 @@ import encrypted_fields.fields
 
 import mathesar.models.deprecated
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -15,7 +16,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameModel(old_name='Database', new_name='Connection'),
-        migrations.RenameModel(old_name='UIQuery', new_name='Exploration'),
         migrations.AlterField(
             model_name='databaserole',
             name='database',
@@ -31,6 +31,7 @@ class Migration(migrations.Migration):
             name='column_order',
             field=models.JSONField(blank=True, default=None, null=True, validators=[mathesar.models.deprecated.validate_column_order]),
         ),
+        migrations.RenameModel(old_name='UIQuery', new_name='Exploration'),
         migrations.CreateModel(
             name='Server',
             fields=[
