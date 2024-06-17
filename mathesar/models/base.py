@@ -25,6 +25,9 @@ class Database(BaseModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["name", "server"], name="unique_database"
+            ),
+            models.UniqueConstraint(
+                fields=["id", "server"], name="database_id_server_index"
             )
         ]
 
@@ -35,6 +38,13 @@ class Role(BaseModel):
         'Server', on_delete=models.CASCADE, related_name='roles'
     )
     password = EncryptedCharField(max_length=255)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["id", "server"], name="role_id_server_index"
+            )
+        ]
 
 
 class UserDatabaseRoleMap(BaseModel):

@@ -14,10 +14,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameModel(
-            old_name='Database',
-            new_name='Connection',
-        ),
+        migrations.RenameModel(old_name='Database', new_name='Connection'),
+        migrations.RenameModel(old_name='UIQuery', new_name='Exploration'),
         migrations.AlterField(
             model_name='databaserole',
             name='database',
@@ -60,6 +58,10 @@ class Migration(migrations.Migration):
             model_name='database',
             constraint=models.UniqueConstraint(fields=('name', 'server'), name='unique_database'),
         ),
+        migrations.AddConstraint(
+            model_name='database',
+            constraint=models.UniqueConstraint(fields=('id', 'server'), name='database_id_server_index'),
+        ),
         migrations.CreateModel(
             name='Role',
             fields=[
@@ -73,6 +75,10 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
+        ),
+        migrations.AddConstraint(
+            model_name='role',
+            constraint=models.UniqueConstraint(fields=('id', 'server'), name='role_id_server_index'),
         ),
         migrations.CreateModel(
             name='UserDatabaseRoleMap',
@@ -90,5 +96,28 @@ class Migration(migrations.Migration):
             model_name='userdatabaserolemap',
             constraint=models.UniqueConstraint(fields=('user', 'database'), name='user_one_role_per_database'),
         ),
-        migrations.RenameModel(old_name='UIQuery', new_name='Exploration'),
+        migrations.RunSQL(
+            sql="""
+            ALTER TABLE mathesar_userdatabaserolemap
+            ADD CONSTRAINT userdatabaserolemap_database_server_integrity
+              FOREIGN KEY (database_id, server_id)
+              REFERENCES mathesar_database(id, server_id);
+            """,
+            reverse_sql="""
+            ALTER TABLE mathesar_userdatabaserolemap
+            DROP CONSTRAINT userdatabaserolemap_database_server_integrity;
+            """
+        ),
+        migrations.RunSQL(
+            sql="""
+            ALTER TABLE mathesar_userdatabaserolemap
+            ADD CONSTRAINT userdatabaserolemap_role_server_integrity
+              FOREIGN KEY (role_id, server_id)
+              REFERENCES mathesar_role(id, server_id);
+            """,
+            reverse_sql="""
+            ALTER TABLE mathesar_userdatabaserolemap
+            DROP CONSTRAINT userdatabaserolemap_role_server_integrity;
+            """
+        ),
     ]
