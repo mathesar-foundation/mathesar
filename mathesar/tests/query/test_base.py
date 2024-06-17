@@ -1,4 +1,4 @@
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 from db.queries.base import DBQuery, InitialColumn
 from db.transforms import base as transforms_base
 
@@ -49,7 +49,7 @@ def test_convert_to_db_query(create_patents_table, get_uid):
         transforms_base.Offset(15),
     ]
     name = "some query"
-    ui_query = UIQuery(
+    ui_query = Exploration(
         name=name,
         base_table=base_table_dj,
         initial_columns=initial_columns_json,

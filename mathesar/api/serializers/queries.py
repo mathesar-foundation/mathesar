@@ -7,9 +7,9 @@ from rest_framework import serializers
 
 from mathesar.api.db.permissions.query_table import QueryTableAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.api.exceptions.validation_exceptions.exceptions import DuplicateUIQueryInSchemaAPIException
+from mathesar.api.exceptions.validation_exceptions.exceptions import DuplicateExplorationInSchemaAPIException
 from mathesar.models.deprecated import Table
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 
 
 class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
     )
 
     class Meta:
-        model = UIQuery
+        model = Exploration
         fields = ['schema', 'initial_columns', 'transformations', 'base_table', 'display_names']
 
     def get_schema(self, uiquery):
@@ -48,9 +48,9 @@ class BaseQuerySerializer(MathesarErrorMessageMixin, serializers.ModelSerializer
             if base_table:
                 schema = base_table.schema
                 is_duplicate_q = self._get_is_duplicate_q(name, schema)
-                duplicates = UIQuery.objects.filter(is_duplicate_q)
+                duplicates = Exploration.objects.filter(is_duplicate_q)
                 if duplicates.exists():
-                    raise DuplicateUIQueryInSchemaAPIException(field='name')
+                    raise DuplicateExplorationInSchemaAPIException(field='name')
 
     def _get_is_duplicate_q(self, name, schema):
         has_same_name_q = Q(name=name)
@@ -71,28 +71,28 @@ class QuerySerializer(BaseQuerySerializer):
     columns_url = serializers.SerializerMethodField('get_columns_url')
 
     class Meta:
-        model = UIQuery
+        model = Exploration
         fields = '__all__'
 
     def get_records_url(self, obj):
-        if isinstance(obj, UIQuery) and obj.pk is not None:
-            # Only get records_url if we are serializing an existing persisted UIQuery
+        if isinstance(obj, Exploration) and obj.pk is not None:
+            # Only get records_url if we are serializing an existing persisted Exploration
             request = self.context['request']
             return request.build_absolute_uri(reverse('query-records', kwargs={'pk': obj.pk}))
         else:
             return None
 
     def get_columns_url(self, obj):
-        if isinstance(obj, UIQuery) and obj.pk is not None:
-            # Only get columns_url if we are serializing an existing persisted UIQuery
+        if isinstance(obj, Exploration) and obj.pk is not None:
+            # Only get columns_url if we are serializing an existing persisted Exploration
             request = self.context['request']
             return request.build_absolute_uri(reverse('query-columns', kwargs={'pk': obj.pk}))
         else:
             return None
 
     def get_results_url(self, obj):
-        if isinstance(obj, UIQuery) and obj.pk is not None:
-            # Only get records_url if we are serializing an existing persisted UIQuery
+        if isinstance(obj, Exploration) and obj.pk is not None:
+            # Only get records_url if we are serializing an existing persisted Exploration
             request = self.context['request']
             return request.build_absolute_uri(reverse('query-results', kwargs={'pk': obj.pk}))
         else:

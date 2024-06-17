@@ -1,7 +1,7 @@
 import pytest
 import json
 
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def joining_patents_query(academics_ma_tables):
         'name': dict(a=1),
         'institution_name': dict(b=2),
     }
-    ui_query = UIQuery.objects.create(
+    ui_query = Exploration.objects.create(
         base_table=academics_table,
         initial_columns=initial_columns,
         display_options=display_options,

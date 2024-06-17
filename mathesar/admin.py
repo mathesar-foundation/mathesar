@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 
 from mathesar.models.deprecated import Table, Schema, DataFile
 from mathesar.models.users import User
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 from mathesar.models.shares import SharedTable, SharedQuery
 
 
@@ -24,6 +24,6 @@ admin.site.register(Table)
 admin.site.register(Schema)
 admin.site.register(DataFile)
 admin.site.register(User, MathesarUserAdmin)
-admin.site.register(UIQuery)
+admin.site.register(Exploration)
 admin.site.register(SharedTable)
 admin.site.register(SharedQuery)

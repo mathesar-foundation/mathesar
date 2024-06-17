@@ -90,4 +90,5 @@ class Migration(migrations.Migration):
             model_name='userdatabaserolemap',
             constraint=models.UniqueConstraint(fields=('user', 'database'), name='user_one_role_per_database'),
         ),
+        migrations.RenameModel(old_name='UIQuery', new_name='Exploration'),
     ]

@@ -19,7 +19,7 @@ from mathesar.api.ui.serializers.users import UserSerializer
 from mathesar.api.utils import is_valid_uuid_v4
 from mathesar.database.types import UIType
 from mathesar.models.deprecated import Connection, Schema, Table
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 from mathesar.models.shares import SharedTable, SharedQuery
 from mathesar.state import reset_reflection
 from mathesar import __version__
@@ -96,7 +96,7 @@ def get_table_list(request, schema):
 def get_queries_list(request, schema):
     if schema is None:
         return []
-    qs = UIQuery.objects.filter(base_table__schema=schema)
+    qs = Exploration.objects.filter(base_table__schema=schema)
     permission_restricted_qs = QueryAccessPolicy.scope_queryset(request, qs)
 
     query_serializer = QuerySerializer(

@@ -1,5 +1,5 @@
 import pytest
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def create_minimal_patents_query(create_patents_table, get_uid, patent_schema):
             'col1': dict(a=1),
             'col2': dict(b=2),
         }
-        ui_query = UIQuery.objects.create(
+        ui_query = Exploration.objects.create(
             base_table=base_table,
             initial_columns=initial_columns,
             display_options=display_options,

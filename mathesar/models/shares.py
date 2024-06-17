@@ -24,5 +24,5 @@ class SharedTable(SharedEntity):
 
 class SharedQuery(SharedEntity):
     query = models.ForeignKey(
-        'UIQuery', on_delete=models.CASCADE, related_name='shared_query'
+        'Exploration', on_delete=models.CASCADE, related_name='shared_query'
     )

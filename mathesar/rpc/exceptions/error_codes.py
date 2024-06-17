@@ -516,7 +516,7 @@ mathesar_error_map = frozendict({
     "DictHasBadKeys": -28007,
     "DistinctColumnRequiredAPIException": -28008,
     "DoesNotExist": -28009,
-    "DuplicateUIQueryInSchemaAPIException": -28010,
+    "DuplicateExplorationInSchemaAPIException": -28010,
     "EditingPublicSchemaIsDisallowed": -28011,
     "GenericAPIException": -28012,
     "IncompatibleFractionDigitValuesAPIException": -28013,
