@@ -122,21 +122,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.get_fully_qualified_object_name(sch_name text, obj_name text) RETURNS text AS $$/*
-Return the fully-qualified name for a given database object (e.g., table).
-
-Args:
-  sch_name: The schema of the object, quoted.
-  obj_name: The name of the object, unqualified and quoted.
-*/
-BEGIN
-  RETURN format('%s.%s', sch_name, obj_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.get_fully_qualified_object_name(sch_name text, obj_name text) RETURNS text AS $$/*
+msar.build_qualified_name_sql(sch_name text, obj_name text) RETURNS text AS $$/*
 Return the fully-qualified, properly quoted, name for a given database object (e.g., table).
 
 Args:
@@ -144,7 +130,7 @@ Args:
   obj_name: The name of the object, unqualified and unquoted.
 */
 BEGIN
-  RETURN __msar.get_fully_qualified_object_name(quote_ident(sch_name), quote_ident(obj_name));
+  RETURN  format('%I.%I', sch_name, obj_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -199,7 +185,7 @@ Args:
   rel_name: The name of the relation, unqualified and unquoted.
 */
 BEGIN
-  RETURN msar.get_fully_qualified_object_name(sch_name, rel_name)::regclass::oid;
+  RETURN msar.build_qualified_name_sql(sch_name, rel_name)::regclass::oid;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1032,7 +1018,7 @@ Args:
 */
 DECLARE fullname text;
 BEGIN
-  fullname := msar.get_fully_qualified_object_name(sch_name, old_tab_name);
+  fullname := msar.build_qualified_name_sql(sch_name, old_tab_name);
   RETURN __msar.rename_table(fullname, quote_ident(new_tab_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -1078,7 +1064,7 @@ Args:
   comment_: The new comment.
 */
 SELECT __msar.comment_on_table(
-  msar.get_fully_qualified_object_name(sch_name, tab_name),
+  msar.build_qualified_name_sql(sch_name, tab_name),
   quote_literal(comment_)
 );
 $$ LANGUAGE SQL;
@@ -1176,7 +1162,7 @@ Args:
 */
 DECLARE qualified_tab_name text;
 BEGIN
-  qualified_tab_name := msar.get_fully_qualified_object_name(sch_name, tab_name);
+  qualified_tab_name := msar.build_qualified_name_sql(sch_name, tab_name);
   RETURN __msar.update_pk_sequence_to_latest(qualified_tab_name, quote_ident(col_name));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -1235,7 +1221,7 @@ DECLARE prepared_col_names text[];
 DECLARE fully_qualified_tab_name text;
 BEGIN
   SELECT array_agg(quote_ident(col)) FROM unnest(col_names) AS col INTO prepared_col_names;
-  fully_qualified_tab_name := msar.get_fully_qualified_object_name(sch_name, tab_name);
+  fully_qualified_tab_name := msar.build_qualified_name_sql(sch_name, tab_name);
   RETURN __msar.drop_columns(fully_qualified_tab_name, variadic prepared_col_names);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -1531,7 +1517,7 @@ SELECT COALESCE(
   -- Second choice is the type specified by string IDs.
   __msar.get_formatted_base_type(
     COALESCE(
-      msar.get_fully_qualified_object_name(typ_jsonb ->> 'schema', typ_jsonb ->> 'name'),
+      msar.build_qualified_name_sql(typ_jsonb ->> 'schema', typ_jsonb ->> 'name'),
       typ_jsonb ->> 'name',
       'text'  -- We fall back to 'text' when input is null or empty.
     ),
@@ -1892,7 +1878,7 @@ SELECT array_agg(
     -- Build the relation name where the constraint will be applied. Prefer numeric ID.
     COALESCE(
       __msar.get_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
-      msar.get_fully_qualified_object_name(
+      msar.build_qualified_name_sql(
         con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
       )
     ),
@@ -2165,7 +2151,7 @@ Args:
 */
 DECLARE qualified_tab_name text;
 BEGIN
-  qualified_tab_name := msar.get_fully_qualified_object_name(sch_name, tab_name);
+  qualified_tab_name := msar.build_qualified_name_sql(sch_name, tab_name);
   RETURN __msar.drop_table(qualified_tab_name, cascade_, if_exists);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -2209,7 +2195,7 @@ Args:
 */
 BEGIN
   RETURN __msar.drop_constraint(
-    msar.get_fully_qualified_object_name(sch_name, tab_name), quote_ident(con_name)
+    msar.build_qualified_name_sql(sch_name, tab_name), quote_ident(con_name)
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -2673,7 +2659,7 @@ Args:
   comment_: The new comment.
 */
 SELECT __msar.comment_on_column(
-  msar.get_fully_qualified_object_name(sch_name, tab_name),
+  msar.build_qualified_name_sql(sch_name, tab_name),
   quote_ident(col_name),
   quote_literal(comment_)
 );
