@@ -45,6 +45,10 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+        migrations.AddConstraint(
+            model_name='server',
+            constraint=models.UniqueConstraint(fields=('host', 'port'), name='unique_server'),
+        ),
         migrations.CreateModel(
             name='Database',
             fields=[
@@ -76,6 +80,10 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
+        ),
+        migrations.AddConstraint(
+            model_name='role',
+            constraint=models.UniqueConstraint(fields=('name', 'server'), name='unique_role'),
         ),
         migrations.AddConstraint(
             model_name='role',

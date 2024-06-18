@@ -44,6 +44,7 @@ To use an RPC function:
       members:
       - add_from_known_connection
       - add_from_scratch
+      - grant_access_to_user
       - DBModelReturn
 
 ---
