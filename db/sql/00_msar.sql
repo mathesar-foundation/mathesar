@@ -238,8 +238,8 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_column_names(rel_id oid, columns jsonb) RETURNS text[] AS $$/*
-Return the names for given columns in a given relation (e.g., table).
+__msar.get_column_names(rel_id oid, columns jsonb) RETURNS text[] AS $$/*
+Return the QUOTED names for given columns in a given relation (e.g., table).
 
 - If the rel_id is given as 0, the assumption is that this is a new table, so we just apply normal
 quoting rules to a column without validating anything further.
@@ -1872,7 +1872,7 @@ SELECT array_agg(
     -- set the constraint type as a single char. See __msar.build_con_def_text for details.
     con_create_obj ->> 'type',
     -- Set the column names associated with the constraint.
-    msar.get_column_names(tab_id, con_create_obj -> 'columns'),
+    __msar.get_column_names(tab_id, con_create_obj -> 'columns'),
     -- Set whether the constraint is deferrable or not (boolean).
     con_create_obj ->> 'deferrable',
     -- Build the relation name where the constraint will be applied. Prefer numeric ID.
@@ -1883,7 +1883,7 @@ SELECT array_agg(
       )
     ),
     -- Build the array of foreign columns for an fkey constraint.
-    msar.get_column_names(
+    __msar.get_column_names(
       COALESCE(
         -- We validate that the given OID (if any) is correct.
         (con_create_obj -> 'fkey_relation_id')::integer::oid,
