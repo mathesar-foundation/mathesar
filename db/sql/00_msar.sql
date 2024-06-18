@@ -1831,7 +1831,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_con_def_jsonb(tab_id oid, con_create_arr jsonb)
+__msar.process_con_def_jsonb(tab_id oid, con_create_arr jsonb)
   RETURNS __msar.con_def[] AS $$/*
 Create an array of  __msar.con_def from a JSON array of constraint creation defining JSON.
 
@@ -1927,12 +1927,12 @@ Add constraints to a table.
 
 Args:
   tab_id: The OID of the table to which we'll add constraints.
-  col_defs: a JSONB array defining constraints to add. See msar.process_con_def_jsonb for details.
+  col_defs: a JSONB array defining constraints to add. See __msar.process_con_def_jsonb for details.
 */
 DECLARE
   con_create_defs __msar.con_def[];
 BEGIN
-  con_create_defs := msar.process_con_def_jsonb(tab_id, con_defs);
+  con_create_defs := __msar.process_con_def_jsonb(tab_id, con_defs);
   PERFORM __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
   RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
 END;
@@ -1947,7 +1947,7 @@ Add constraints to a table.
 Args:
   sch_name: unquoted schema name of the table to which we'll add constraints.
   tab_name: unquoted, unqualified name of the table to which we'll add constraints.
-  con_defs: a JSONB array defining constraints to add. See msar.process_con_def_jsonb for details.
+  con_defs: a JSONB array defining constraints to add. See __msar.process_con_def_jsonb for details.
 */
 SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -2054,7 +2054,7 @@ CREATE OR REPLACE FUNCTION
 msar.get_extracted_con_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
 Get a JSON array of constraint definitions from given columns for creation of an extracted table.
 
-See the msar.process_con_def_jsonb for a description of the JSON.
+See the __msar.process_con_def_jsonb for a description of the JSON.
 
 Args:
   tab_id: The OID of the table containing the constraints whose definitions we want.
@@ -2272,7 +2272,7 @@ DECLARE
 BEGIN
   fq_table_name := format('%s.%s', __msar.get_schema_name(sch_oid), quote_ident(tab_name));
   column_defs := __msar.process_col_def_jsonb(0, col_defs, false, true);
-  constraint_defs := msar.process_con_def_jsonb(0, con_defs);
+  constraint_defs := __msar.process_con_def_jsonb(0, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
