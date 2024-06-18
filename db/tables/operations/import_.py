@@ -4,7 +4,7 @@ from psycopg import sql
 from db.tables.operations.create import prepare_table_for_import
 from db.tables.operations.select import get_fully_qualified_relation_name
 from db.encoding_utils import get_sql_compatible_encoding
-from mathesar.models.base import DataFile
+from mathesar.models.deprecated import DataFile
 from mathesar.imports.csv import get_file_encoding, get_sv_reader, process_column_names
 
 
