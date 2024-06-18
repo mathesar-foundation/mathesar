@@ -64,7 +64,6 @@ class UserDatabaseRoleMap(BaseModel):
             )
         ]
 
-
     @property
     def connection(self):
         return psycopg.connect(
