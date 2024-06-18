@@ -119,4 +119,3 @@ def patch(*, schema_oid: int, database_id: int, patch: SchemaPatch, **kwargs) ->
     """
     with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
         patch_schema(schema_oid, conn, patch)
-
