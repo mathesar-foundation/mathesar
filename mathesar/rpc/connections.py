@@ -132,7 +132,7 @@ def add_from_scratch(
 @handle_rpc_exceptions
 def grant_access_to_user(*, connection_id: int, user_id: int):
     """
-    Migrate a connection to new models, grant access for a user.
+    Migrate a connection to new models and grant access to a user.
 
     This function is designed to be temporary, and should probably be
     removed once we have completed the new users and permissions setup
