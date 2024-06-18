@@ -15,6 +15,13 @@ class Server(BaseModel):
     host = models.CharField(max_length=255)
     port = models.IntegerField()
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["host", "port"], name="unique_server"
+            ),
+        ]
+
 
 class Database(BaseModel):
     name = models.CharField(max_length=128)
