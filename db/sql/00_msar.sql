@@ -379,13 +379,13 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.get_constraint_name(con_id oid) RETURNS text AS $$/*
-Return the quoted constraint name of the correponding constraint oid.
+Return the UNQUOTED constraint name of the corresponding constraint oid.
 
 Args:
   con_id: The OID of the constraint.
 */
 BEGIN
-  RETURN quote_ident(conname::text) FROM pg_constraint WHERE pg_constraint.oid = con_id;
+  RETURN conname::text FROM pg_constraint WHERE pg_constraint.oid = con_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -2211,7 +2211,8 @@ Args:
 */
 BEGIN
   RETURN __msar.drop_constraint(
-    __msar.get_relation_name(tab_id), msar.get_constraint_name(con_id)
+    __msar.get_relation_name(tab_id),
+    quote_ident(msar.get_constraint_name(con_id))
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
