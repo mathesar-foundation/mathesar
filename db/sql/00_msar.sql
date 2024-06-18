@@ -1267,7 +1267,7 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_duplicate_col_defs(
+CREATE OR REPLACE FUNCTION __msar.get_duplicate_col_defs(
   tab_id oid,
   col_ids smallint[],
   new_names text[],
@@ -2021,7 +2021,7 @@ DECLARE
   col_name text;
   created_col_id smallint;
 BEGIN
-  col_defs := msar.get_duplicate_col_defs(
+  col_defs := __msar.get_duplicate_col_defs(
     tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
   );
   tab_name := __msar.get_relation_name(tab_id);
