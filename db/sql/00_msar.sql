@@ -205,7 +205,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_id integer) RETURNS text AS $$/*
-Return the name for a given column in a given relation (e.g., table).
+Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
 More precisely, this function returns the name of attributes of any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function).
@@ -214,13 +214,13 @@ Args:
   rel_id:  The OID of the relation.
   col_id:  The attnum of the column in the relation.
 */
-SELECT quote_ident(attname::text) FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id;
+SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attnum=col_id;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_name text) RETURNS text AS $$/*
-Return the name for a given column in a given relation (e.g., table).
+Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
 More precisely, this function returns the quoted name of attributes of any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function). If the given
@@ -233,7 +233,7 @@ Args:
   rel_id:  The OID of the relation.
   col_name:  The unquoted name of the column in the relation.
 */
-SELECT quote_ident(attname::text) FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name;
+SELECT attname::text FROM pg_attribute WHERE attrelid=rel_id AND attname=col_name;
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
@@ -259,8 +259,8 @@ Args:
 SELECT array_agg(
   CASE
     WHEN rel_id=0 THEN quote_ident(col #>> '{}')
-    WHEN jsonb_typeof(col)='number' THEN msar.get_column_name(rel_id, col::integer)
-    WHEN jsonb_typeof(col)='string' THEN msar.get_column_name(rel_id, col #>> '{}')
+    WHEN jsonb_typeof(col)='number' THEN quote_ident(msar.get_column_name(rel_id, col::integer))
+    WHEN jsonb_typeof(col)='string' THEN quote_ident(msar.get_column_name(rel_id, col #>> '{}'))
   END
 )
 FROM jsonb_array_elements(columns) AS x(col);
@@ -1145,7 +1145,7 @@ DECLARE tab_name text;
 DECLARE col_name text;
 BEGIN
   tab_name :=  __msar.get_relation_name(tab_id);
-  col_name := msar.get_column_name(tab_id, col_id);
+  col_name := quote_ident(msar.get_column_name(tab_id, col_id));
   RETURN __msar.update_pk_sequence_to_latest(tab_name, col_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -2025,7 +2025,7 @@ BEGIN
     tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
   );
   tab_name := __msar.get_relation_name(tab_id);
-  col_name := msar.get_column_name(tab_id, col_id);
+  col_name := quote_ident(msar.get_column_name(tab_id, col_id));
   PERFORM __msar.add_columns(tab_name, VARIADIC col_defs);
   created_col_id := attnum
     FROM pg_attribute
@@ -2033,7 +2033,7 @@ BEGIN
   IF copy_data THEN
     PERFORM __msar.exec_ddl(
       'UPDATE %s SET %s=%s',
-      tab_name, col_defs[1].name_, msar.get_column_name(tab_id, col_id)
+      tab_name, col_defs[1].name_, quote_ident(msar.get_column_name(tab_id, col_id))
     );
   END IF;
   IF copy_constraints THEN
@@ -2326,7 +2326,7 @@ Args:
 BEGIN
   PERFORM __msar.rename_column(
     tab_name => __msar.get_relation_name(tab_id),
-    old_col_name => msar.get_column_name(tab_id, col_id),
+    old_col_name => quote_ident(msar.get_column_name(tab_id, col_id)),
     new_col_name => quote_ident(new_col_name)
   );
   RETURN col_id;
@@ -2376,7 +2376,7 @@ Args:
                column's default.
 */
 SELECT CASE WHEN new_type IS NOT NULL OR jsonb_typeof(new_default)='null' THEN
-  'ALTER COLUMN ' || msar.get_column_name(tab_id, col_id) || ' DROP DEFAULT'
+  'ALTER COLUMN ' || quote_ident(msar.get_column_name(tab_id, col_id)) || ' DROP DEFAULT'
  END;
 $$ LANGUAGE SQL;
 
@@ -2393,11 +2393,11 @@ Args:
   new_type: The target type to which we'll alter the column.
 */
 SELECT 'ALTER COLUMN '
-  || msar.get_column_name(tab_id, col_id)
+  || quote_ident(msar.get_column_name(tab_id, col_id))
   || ' TYPE '
   || new_type
   || ' USING '
-  || __msar.build_cast_expr(msar.get_column_name(tab_id, col_id), new_type);
+  || __msar.build_cast_expr(quote_ident(msar.get_column_name(tab_id, col_id)), new_type);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -2452,7 +2452,7 @@ BEGIN
     default_expr := format('%L', raw_default_expr);
   END IF;
   RETURN
-    format('ALTER COLUMN %s SET DEFAULT ', msar.get_column_name(tab_id, col_id)) || default_expr;
+    format('ALTER COLUMN %I SET DEFAULT ', msar.get_column_name(tab_id, col_id)) || default_expr;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2467,7 +2467,7 @@ Args:
   not_null: If true, we 'SET NOT NULL'. If false, we 'DROP NOT NULL' if null, we do nothing.
 */
 SELECT 'ALTER COLUMN '
-  || msar.get_column_name(tab_id, col_id)
+  || quote_ident(msar.get_column_name(tab_id, col_id))
   || CASE WHEN not_null THEN ' SET ' ELSE ' DROP ' END
   || 'NOT NULL';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -2482,7 +2482,7 @@ Args:
   col_id: The attnum of the column whose nullability we'll alter.
   col_delete: If true, we drop the column. If false or null, we do nothing.
 */
-SELECT CASE WHEN col_delete THEN 'DROP COLUMN ' || msar.get_column_name(tab_id, col_id) END;
+SELECT CASE WHEN col_delete THEN 'DROP COLUMN ' || quote_ident(msar.get_column_name(tab_id, col_id)) END;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -2681,7 +2681,7 @@ Args:
 */
 SELECT __msar.comment_on_column(
   __msar.get_relation_name(tab_id),
-  msar.get_column_name(tab_id, col_id),
+  quote_ident(msar.get_column_name(tab_id, col_id)),
   comment_
 );
 $$ LANGUAGE SQL;
