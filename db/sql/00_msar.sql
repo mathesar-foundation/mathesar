@@ -1351,7 +1351,7 @@ CREATE OR REPLACE FUNCTION
 msar.get_extracted_col_def_jsonb(tab_id oid, col_ids integer[]) RETURNS jsonb AS $$/*
 Get a JSON array of column definitions from given columns for creation of an extracted table.
 
-See the msar.process_col_def_jsonb for a description of the JSON.
+See the __msar.process_col_def_jsonb for a description of the JSON.
 
 Args:
   tab_id: The OID of the table containing the columns whose definitions we want.
@@ -1578,7 +1578,7 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.process_col_def_jsonb(
+__msar.process_col_def_jsonb(
   tab_id oid,
   col_defs jsonb,
   raw_default boolean,
@@ -1687,14 +1687,14 @@ Add columns to a table.
 
 Args:
   tab_id: The OID of the table to which we'll add columns.
-  col_defs: a JSONB array defining columns to add. See msar.process_col_def_jsonb for details.
+  col_defs: a JSONB array defining columns to add. See __msar.process_col_def_jsonb for details.
   raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 DECLARE
   col_create_defs __msar.col_def[];
   fq_table_name text := __msar.get_relation_name(tab_id);
 BEGIN
-  col_create_defs := msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
+  col_create_defs := __msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(fq_table_name, variadic col_create_defs);
 
   PERFORM
@@ -1722,7 +1722,7 @@ Add columns to a table.
 Args:
   sch_name: unquoted schema name of the table to which we'll add columns.
   tab_name: unquoted, unqualified name of the table to which we'll add columns.
-  col_defs: a JSONB array defining columns to add. See msar.process_col_def_jsonb for details.
+  col_defs: a JSONB array defining columns to add. See __msar.process_col_def_jsonb for details.
   raw_default: Whether to treat defaults as raw SQL. DANGER!
 */
 SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
@@ -2271,7 +2271,7 @@ DECLARE
   constraint_defs __msar.con_def[];
 BEGIN
   fq_table_name := format('%s.%s', __msar.get_schema_name(sch_oid), quote_ident(tab_name));
-  column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
+  column_defs := __msar.process_col_def_jsonb(0, col_defs, false, true);
   constraint_defs := msar.process_con_def_jsonb(0, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;

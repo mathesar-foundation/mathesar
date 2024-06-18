@@ -169,12 +169,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.process_col_def_jsonb ----------------------------------------------------------------------
+-- __msar.process_col_def_jsonb ----------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_process_col_def_jsonb() RETURNS SETOF TEXT AS $f$
 BEGIN
   RETURN NEXT is(
-    msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
+    __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false),
     ARRAY[
       ('"Column 1"', 'text', null, null, false, null),
       ('"Column 2"', 'text', null, null, false, null)
@@ -182,12 +182,12 @@ BEGIN
     'Empty columns should result in defaults'
   );
   RETURN NEXT is(
-    msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false),
+    __msar.process_col_def_jsonb(0, '[{"name": "id"}]'::jsonb, false),
     null,
     'Column definition processing should ignore "id" column'
   );
   RETURN NEXT is(
-    msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
+    __msar.process_col_def_jsonb(0, '[{}, {}]'::jsonb, false, true),
     ARRAY[
       ('id', 'integer', true, null, true, 'Mathesar default ID column'),
       ('"Column 1"', 'text', null, null, false, null),
@@ -196,7 +196,7 @@ BEGIN
     'Column definition processing add "id" column'
   );
   RETURN NEXT is(
-    msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
+    __msar.process_col_def_jsonb(0, '[{"description": "Some comment"}]'::jsonb, false),
     ARRAY[
       ('"Column 1"', 'text', null, null, false, '''Some comment''')
     ]::__msar.col_def[],
