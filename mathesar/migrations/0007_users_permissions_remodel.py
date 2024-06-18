@@ -79,6 +79,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='role',
+            constraint=models.UniqueConstraint(fields=('name', 'server'), name='unique_role'),
+        ),
+        migrations.AddConstraint(
+            model_name='role',
             constraint=models.UniqueConstraint(fields=('id', 'server'), name='role_id_server_index'),
         ),
         migrations.CreateModel(
