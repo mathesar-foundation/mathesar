@@ -46,7 +46,9 @@ As of mid-2024, Mathesar is in the midst of a gradual transition from one patter
 
     **If it _can_ be unquoted, then it _should_ be unquoted.**
 
-    For example, if you're dealing with a plain table name such as `foo bar`, then leave it unquoted. If you need to qualify that table name with a schema too, then either store both values unquoted in some composite type (e.g. jsonb, tuple, custom type, etc) or store them _quoted_ in a string like `"my schema"."foo bar"`. That string represents a fragment of SQL, and because of the dot there is no way to leave the values unquoted. With fragments of SQL like this, utilize descriptive naming and helpful code comments to be extra clear about when a string represents an SQL fragment. Try not to pass around too many fragments of SQL if you can avoid it. Prefer to pass around raw, unquoted values when possible/easy.
+    For example, if you're dealing with a plain table name such as `foo bar`, then definitely leave it unquoted.
+    
+    To hone in on an edge case, let's say you need to qualify that table name with a schema name too. In this case try to handle and store both values (schema name and table name) separately (unquoted) as much as possible. You can use separate variables, separate arguments, or a composite type for return values. As a last resort, you can store the qualified name quoted in an SQL fragment string like `"my schema"."foo bar"`. We have some code like this already, but it's not ideal. Because of the dot in that SQL fragment, there is no way to leave the values unquoted. With fragments of SQL like this, take care to utilize descriptive naming and helpful code comments to be extra clear about when a string represents an SQL fragment. But in general try to avoid passing around SQL fragments if you can. Prefer to pass around raw unquoted values. Or better yet, pass around unique identifiers like OIDs when possible.
 
 From [OWASP](https://owasp.org/www-project-proactive-controls/v3/en/c4-encode-escape-data):
 
