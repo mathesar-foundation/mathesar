@@ -154,7 +154,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_relation_name_or_null(rel_id oid) RETURNS text AS $$/*
+__msar.get_relation_name_or_null(rel_id oid) RETURNS text AS $$/*
 Return the name for a given relation (e.g., table), qualified or quoted as appropriate.
 
 In cases where the relation is already included in the search path, the returned name will not be
@@ -1002,7 +1002,10 @@ Args:
   new_tab_name: unquoted, unqualified table name
 */
 BEGIN
-  RETURN __msar.rename_table(msar.get_relation_name_or_null(tab_id), quote_ident(new_tab_name));
+  RETURN __msar.rename_table(
+    __msar.get_relation_name_or_null(tab_id),
+    quote_ident(new_tab_name)
+  );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1050,7 +1053,7 @@ Args:
   tab_id: The OID of the table whose comment we will change.
   comment_: The new comment.
 */
-SELECT __msar.comment_on_table(msar.get_relation_name_or_null(tab_id), quote_literal(comment_));
+SELECT __msar.comment_on_table(__msar.get_relation_name_or_null(tab_id), quote_literal(comment_));
 $$ LANGUAGE SQL;
 
 
@@ -1097,7 +1100,7 @@ BEGIN
   PERFORM msar.rename_table(tab_id, new_tab_name);
   PERFORM msar.comment_on_table(tab_id, comment);
   PERFORM msar.alter_columns(tab_id, col_alters);
-  RETURN msar.get_relation_name_or_null(tab_id);
+  RETURN __msar.get_relation_name_or_null(tab_id);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1202,7 +1205,7 @@ BEGIN
   FROM pg_catalog.pg_attribute
   WHERE attrelid=tab_id AND NOT attisdropped AND ARRAY[attnum::integer] <@ col_ids
   INTO col_names;
-  PERFORM __msar.drop_columns(msar.get_relation_name_or_null(tab_id), variadic col_names);
+  PERFORM __msar.drop_columns(__msar.get_relation_name_or_null(tab_id), variadic col_names);
   RETURN array_length(col_names, 1);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -2128,7 +2131,7 @@ Args:
 */
 DECLARE relation_name text;
 BEGIN
-  relation_name := msar.get_relation_name_or_null(tab_id);
+  relation_name := __msar.get_relation_name_or_null(tab_id);
   -- if_exists doesn't work while working with oids because
   -- the SQL query gets parameterized with tab_id instead of relation_name
   -- since we're unable to find the relation_name for a non existing table. 
