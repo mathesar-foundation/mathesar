@@ -1307,7 +1307,7 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_unique_column_name_unquoted(tab_id oid, col_name text) RETURNS text AS $$/*
+msar.build_unique_column_name(tab_id oid, col_name text) RETURNS text AS $$/*
 Get a unique column name based on the given name.
 
 Args:
@@ -1342,7 +1342,7 @@ will be of the form: <frel_name>_id. Then, we apply some logic to ensure the res
 */
 BEGIN
   fk_col_name := COALESCE(fk_col_name, format('%s_id', frel_name));
-  RETURN msar.build_unique_column_name_unquoted(tab_id, fk_col_name);
+  RETURN msar.build_unique_column_name(tab_id, fk_col_name);
 END;
 $$ LANGUAGE plpgsql;
 
