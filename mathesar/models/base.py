@@ -1,5 +1,6 @@
 from django.db import models
 from encrypted_fields.fields import EncryptedCharField
+import psycopg
 
 
 class BaseModel(models.Model):
@@ -13,6 +14,13 @@ class BaseModel(models.Model):
 class Server(BaseModel):
     host = models.CharField(max_length=255)
     port = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["host", "port"], name="unique_server"
+            ),
+        ]
 
 
 class Database(BaseModel):
@@ -42,6 +50,9 @@ class Role(BaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
+                fields=["name", "server"], name="unique_role"
+            ),
+            models.UniqueConstraint(
                 fields=["id", "server"], name="role_id_server_index"
             )
         ]
@@ -59,3 +70,13 @@ class UserDatabaseRoleMap(BaseModel):
                 fields=["user", "database"], name="user_one_role_per_database"
             )
         ]
+
+    @property
+    def connection(self):
+        return psycopg.connect(
+            host=self.server.host,
+            port=self.server.port,
+            dbname=self.database.name,
+            user=self.role.name,
+            password=self.role.password,
+        )

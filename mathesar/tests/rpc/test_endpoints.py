@@ -45,6 +45,11 @@ METHODS = [
         [user_is_superuser]
     ),
     (
+        connections.grant_access_to_user,
+        "connections.grant_access_to_user",
+        [user_is_superuser]
+    ),
+    (
         schemas.add,
         "schemas.add",
         [user_is_authenticated]
