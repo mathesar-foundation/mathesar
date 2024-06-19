@@ -223,30 +223,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_fully_qualified_relation_name(rel_id oid) RETURNS text AS $$/*
-Return the fully-qualified name for a given relation (e.g., table).
-
-The relation *must* be in the pg_class table to use this function. This function will return NULL if
-no corresponding relation can be found.
-
-Args:
-  rel_id: The OID of the relation.
-*/
-DECLARE
-  sch_name text;
-  rel_name text;
-BEGIN
-  SELECT nspname, relname INTO sch_name, rel_name
-  FROM pg_catalog.pg_class AS pgc
-  LEFT JOIN pg_catalog.pg_namespace AS pgn
-  ON pgc.relnamespace = pgn.oid
-  WHERE pgc.oid = rel_id;
-  RETURN msar.get_fully_qualified_object_name(sch_name, rel_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.get_relation_name_or_null(rel_id oid) RETURNS text AS $$/*
 Return the name for a given relation (e.g., table), qualified or quoted as appropriate.
 
@@ -2370,6 +2346,48 @@ BEGIN
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
   RETURN created_table_id;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.prepare_table_for_import(
+  sch_oid oid,
+  tab_name text,
+  col_defs jsonb,
+  comment_ text
+) RETURNS jsonb AS $$/*
+Add a table, with a default id column, returning a JSON object describing the table.
+
+Each returned JSON object will have the form:
+  {
+    "schema_name": <str>,
+    "table_name": <str>,
+    "table_oid": <int>
+  }
+
+Args:
+  sch_oid: The OID of the schema where the table will be created.
+  tab_name: The unquoted name for the new table.
+  col_defs: The columns for the new table, in order.
+  comment_ (optional): The comment for the new table.
+*/
+DECLARE
+  sch_name text;
+  rel_name text;
+  rel_id oid;
+BEGIN
+  rel_id := msar.add_mathesar_table(sch_oid, tab_name, col_defs, NULL, comment_);
+  SELECT nspname, relname INTO sch_name, rel_name
+  FROM pg_catalog.pg_class AS pgc
+  LEFT JOIN pg_catalog.pg_namespace AS pgn
+  ON pgc.relnamespace = pgn.oid
+  WHERE pgc.oid = rel_id;
+  RETURN jsonb_build_object(
+    'schema_name', quote_ident(sch_name),
+    'table_name', quote_ident(rel_name),
+    'table_oid', rel_id
+  );
 END;
 $$ LANGUAGE plpgsql;
 

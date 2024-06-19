@@ -87,21 +87,28 @@ def prepare_table_for_import(table_name, schema_oid, column_names, conn, comment
     """
     This method creates a Postgres table in the specified schema, with all
     columns being String type.
+
+    Returns the schema_name, table_name and table_oid of the created table.
     """
-    columns_ = [
+    column_data_list = [
         {
             "name": column_name,
             "type": {"name": PostgresType.TEXT.id}
         } for column_name in column_names
     ]
-    table_oid = create_table_on_database(
-        table_name=table_name,
-        schema_oid=schema_oid,
-        conn=conn,
-        column_data_list=columns_,
-        comment=comment
+    table_info = exec_msar_func(
+        conn,
+        'prepare_table_for_import',
+        schema_oid,
+        table_name,
+        json.dumps(column_data_list),
+        comment
+    ).fetchone()[0]
+    return (
+        table_info['schema_name'],
+        table_info['table_name'],
+        table_info['table_oid']
     )
-    return table_oid
 
 
 class CreateTableAs(DDLElement):

@@ -59,16 +59,6 @@ def get_table_info(schema, conn):
     return exec_msar_func(conn, 'get_table_info', schema).fetchone()[0]
 
 
-def get_fully_qualified_relation_name(table_oid, conn):
-    """
-    Return a fully qualified table name.
-
-    Args:
-        table_oid: The table oid for which we want fully qualified name.
-    """
-    return exec_msar_func(conn, 'get_fully_qualified_relation_name', table_oid).fetchone()[0]
-
-
 def reflect_table(name, schema, engine, metadata, connection_to_use=None, keep_existing=False):
     extend_existing = not keep_existing
     autoload_with = engine if connection_to_use is None else connection_to_use
