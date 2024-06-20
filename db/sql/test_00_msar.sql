@@ -1310,47 +1310,40 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION __setup_alter_schema() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_patch_schema() RETURNS SETOF TEXT AS $$
+DECLARE sch_oid oid;
 BEGIN
-  CREATE SCHEMA alter_me;
-END;
-$$ LANGUAGE plpgsql;
+  CREATE SCHEMA foo;
+  SELECT msar.get_schema_oid('foo') INTO sch_oid;
 
-
-CREATE OR REPLACE FUNCTION test_rename_schema() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_schema();
-  PERFORM msar.rename_schema(
-    old_sch_name => 'alter_me',
-    new_sch_name => 'altered'
-  );
-  RETURN NEXT hasnt_schema('alter_me');
+  PERFORM msar.patch_schema('foo', '{"name": "altered"}');
+  RETURN NEXT hasnt_schema('foo');
   RETURN NEXT has_schema('altered');
-END;
-$$ LANGUAGE plpgsql;
+  RETURN NEXT is(obj_description(sch_oid), NULL);
+  RETURN NEXT is(msar.get_schema_name(sch_oid), 'altered');
 
+  PERFORM msar.patch_schema(sch_oid, '{"description": "yay"}');
+  RETURN NEXT is(obj_description(sch_oid), 'yay');
 
-CREATE OR REPLACE FUNCTION test_rename_schema_using_oid() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_schema();
-  PERFORM msar.rename_schema(
-    sch_id => 'alter_me'::regnamespace::oid,
-    new_sch_name => 'altered'
-  );
-  RETURN NEXT hasnt_schema('alter_me');
-  RETURN NEXT has_schema('altered');
-END;
-$$ LANGUAGE plpgsql;
+  -- Edge case: setting the description to null doesn't actually remove it. This behavior is
+  -- debatable. I did it this way because it was easier to implement.
+  PERFORM msar.patch_schema(sch_oid, '{"description": null}');
+  RETURN NEXT is(obj_description(sch_oid), 'yay');
 
+  -- Description is removed when an empty string is passed.
+  PERFORM msar.patch_schema(sch_oid, '{"description": ""}');
+  RETURN NEXT is(obj_description(sch_oid), NULL);
 
-CREATE OR REPLACE FUNCTION test_comment_on_schema() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_schema();
-  PERFORM msar.comment_on_schema(
-    sch_name => 'alter_me',
-    comment_ => 'test comment'
-  );
-  RETURN NEXT is(obj_description('alter_me'::regnamespace::oid), 'test comment');
+  PERFORM msar.patch_schema(sch_oid, '{"name": "NEW", "description": "WOW"}');
+  RETURN NEXT has_schema('NEW');
+  RETURN NEXT is(msar.get_schema_name(sch_oid), 'NEW');
+  RETURN NEXT is(obj_description(sch_oid), 'WOW');
+
+  -- Patching should be idempotent
+  PERFORM msar.patch_schema(sch_oid, '{"name": "NEW", "description": "WOW"}');
+  RETURN NEXT has_schema('NEW');
+  RETURN NEXT is(msar.get_schema_name(sch_oid), 'NEW');
+  RETURN NEXT is(obj_description(sch_oid), 'WOW');
 END;
 $$ LANGUAGE plpgsql;
 
