@@ -37,7 +37,7 @@ To use an RPC function:
     }
     ```
 
----
+## Connections
 
 ::: connections
     options:
@@ -47,7 +47,7 @@ To use an RPC function:
       - grant_access_to_user
       - DBModelReturn
 
----
+## Schemas
 
 ::: schemas
     options:
@@ -57,7 +57,7 @@ To use an RPC function:
       - delete
       - SchemaInfo
 
----
+## Tables
 
 ::: tables
     options:
@@ -70,7 +70,7 @@ To use an RPC function:
       - TableInfo
       - SettableTableInfo
 
----
+## Columns
 
 ::: columns
     options:
@@ -85,12 +85,13 @@ To use an RPC function:
       - TypeOptions
       - ColumnDefault
  
----
+## Column Metadata
 
 ::: columns.metadata
     options:
       members:
       - list_
+      - ColumnMetaData
 
 ## Responses
 
