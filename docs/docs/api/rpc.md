@@ -39,7 +39,7 @@ To use an RPC function:
 
 ---
 
-::: mathesar.rpc.connections
+::: connections
     options:
       members:
       - add_from_known_connection
@@ -49,7 +49,7 @@ To use an RPC function:
 
 ---
 
-::: mathesar.rpc.schemas
+::: schemas
     options:
       members:
       - list_
@@ -59,7 +59,7 @@ To use an RPC function:
 
 ---
 
-::: mathesar.rpc.tables
+::: tables
     options:
       members:
       - list_
@@ -72,7 +72,7 @@ To use an RPC function:
 
 ---
 
-::: mathesar.rpc.columns
+::: columns
     options:
       members:
       - list_
@@ -84,6 +84,13 @@ To use an RPC function:
       - SettableColumnInfo
       - TypeOptions
       - ColumnDefault
+ 
+---
+
+::: columns.metadata
+    options:
+      members:
+      - list_
 
 ## Responses
 
