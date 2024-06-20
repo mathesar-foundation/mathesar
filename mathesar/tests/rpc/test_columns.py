@@ -84,9 +84,9 @@ def test_columns_list(rf, monkeypatch):
                 'minimum_fraction_digits': 2
             }
         ]
-    monkeypatch.setattr(columns, 'connect', mock_connect)
-    monkeypatch.setattr(columns, 'get_column_info_for_table', mock_column_info)
-    monkeypatch.setattr(columns, 'get_raw_display_options', mock_display_options)
+    monkeypatch.setattr(columns.base, 'connect', mock_connect)
+    monkeypatch.setattr(columns.base, 'get_column_info_for_table', mock_column_info)
+    monkeypatch.setattr(columns.base, 'get_raw_display_options', mock_display_options)
     expect_col_list = {
         'column_info': (
             {
@@ -160,8 +160,8 @@ def test_columns_patch(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return 1
 
-    monkeypatch.setattr(columns, 'connect', mock_connect)
-    monkeypatch.setattr(columns, 'alter_columns_in_table', mock_column_alter)
+    monkeypatch.setattr(columns.base, 'connect', mock_connect)
+    monkeypatch.setattr(columns.base, 'alter_columns_in_table', mock_column_alter)
     actual_result = columns.patch(
         column_data_list=column_data_list,
         table_oid=table_oid,
@@ -193,8 +193,8 @@ def test_columns_add(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return [3, 4]
 
-    monkeypatch.setattr(columns, 'connect', mock_connect)
-    monkeypatch.setattr(columns, 'add_columns_to_table', mock_column_create)
+    monkeypatch.setattr(columns.base, 'connect', mock_connect)
+    monkeypatch.setattr(columns.base, 'add_columns_to_table', mock_column_create)
     actual_result = columns.add(
         column_data_list=column_data_list,
         table_oid=table_oid,
@@ -226,8 +226,8 @@ def test_columns_delete(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return 3
 
-    monkeypatch.setattr(columns, 'connect', mock_connect)
-    monkeypatch.setattr(columns, 'drop_columns_from_table', mock_column_drop)
+    monkeypatch.setattr(columns.base, 'connect', mock_connect)
+    monkeypatch.setattr(columns.base, 'drop_columns_from_table', mock_column_drop)
     actual_result = columns.delete(
         column_attnums=column_attnums,
         table_oid=table_oid,
