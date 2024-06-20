@@ -26,7 +26,7 @@ from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_a
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.api.serializers.table_settings import TableSettingsSerializer
-from mathesar.models.base import Column, Schema, Table, DataFile
+from mathesar.models.deprecated import Column, Schema, Table, DataFile
 from mathesar.utils.tables import gen_table_name, create_table_from_datafile, create_empty_table
 
 

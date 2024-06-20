@@ -9,7 +9,7 @@ from db.columns.operations.select import get_column_attnum_from_name
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import PostgresType
-from mathesar.models.base import Table, DataFile, Column as ServiceLayerColumn
+from mathesar.models.deprecated import Table, DataFile, Column as ServiceLayerColumn
 from db.metadata import get_empty_metadata
 from mathesar.state import reset_reflection
 

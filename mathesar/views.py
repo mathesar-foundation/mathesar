@@ -18,8 +18,8 @@ from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.api.ui.serializers.users import UserSerializer
 from mathesar.api.utils import is_valid_uuid_v4
 from mathesar.database.types import UIType
-from mathesar.models.base import Database, Schema, Table
-from mathesar.models.query import UIQuery
+from mathesar.models.deprecated import Connection, Schema, Table
+from mathesar.models.query import Exploration
 from mathesar.models.shares import SharedTable, SharedQuery
 from mathesar.state import reset_reflection
 from mathesar import __version__
@@ -45,11 +45,11 @@ def _get_permissible_db_queryset(request):
     SchemaAccessPolicy.
     """
     for deleted in (True, False):
-        dbs_qs = Database.objects.filter(deleted=deleted)
+        dbs_qs = Connection.objects.filter(deleted=deleted)
         permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
         schemas_qs = Schema.objects.all()
         permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
-        dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=deleted)
+        dbs_containing_permitted_schemas_qs = Connection.objects.filter(schemas__in=permitted_schemas_qs, deleted=deleted)
         permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
         permitted_dbs_qs = permitted_dbs_qs.distinct()
         if deleted:
@@ -96,7 +96,7 @@ def get_table_list(request, schema):
 def get_queries_list(request, schema):
     if schema is None:
         return []
-    qs = UIQuery.objects.filter(base_table__schema=schema)
+    qs = Exploration.objects.filter(base_table__schema=schema)
     permission_restricted_qs = QueryAccessPolicy.scope_queryset(request, qs)
 
     query_serializer = QuerySerializer(
@@ -144,7 +144,7 @@ def get_base_data_all_routes(request, database=None, schema=None):
 
 
 def _get_internal_db_meta():
-    internal_db = Database.create_from_settings_key('default')
+    internal_db = Connection.create_from_settings_key('default')
     if internal_db is not None:
         return {
             'type': 'postgres',

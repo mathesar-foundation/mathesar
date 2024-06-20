@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import InvalidColumnOrder
-from mathesar.models.base import PreviewColumnSettings, TableSettings, compute_default_preview_template, ValidationError
+from mathesar.models.deprecated import PreviewColumnSettings, TableSettings, compute_default_preview_template, ValidationError
 
 
 class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):

@@ -10,7 +10,7 @@ from db.identifiers import truncate_if_necessary, POSTGRES_IDENTIFIER_SIZE_LIMIT
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
-from mathesar.models.base import DataFile
+from mathesar.models.deprecated import DataFile
 
 from mathesar.tests.api.test_table_api import check_create_table_response, get_expected_name
 

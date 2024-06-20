@@ -3,7 +3,7 @@ from django.core.files.base import File
 
 from db.columns.operations.select import get_column_attnum_from_name
 from db.metadata import get_empty_metadata
-from mathesar.models.base import DataFile, Table
+from mathesar.models.deprecated import DataFile, Table
 from mathesar.utils.display_options_inference import infer_mathesar_money_display_options
 
 create_display_options_test_list = [

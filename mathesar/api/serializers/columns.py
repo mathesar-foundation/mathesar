@@ -17,7 +17,7 @@ from mathesar.api.serializers.shared_serializers import (
     DisplayOptionsMappingSerializer,
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
 )
-from mathesar.models.base import Column
+from mathesar.models.deprecated import Column
 
 
 class InputValueField(serializers.CharField):

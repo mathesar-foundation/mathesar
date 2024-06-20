@@ -13,7 +13,7 @@ from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
     MathesarAPIException,
     get_default_exception_detail,
 )
-from mathesar.models.base import Column, Constraint
+from mathesar.models.deprecated import Column, Constraint
 from mathesar.state import get_cached_metadata
 
 

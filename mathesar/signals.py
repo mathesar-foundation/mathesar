@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from mathesar.models.base import (
+from mathesar.models.deprecated import (
     Column, Table, _set_default_preview_template,
     _create_table_settings,
 )

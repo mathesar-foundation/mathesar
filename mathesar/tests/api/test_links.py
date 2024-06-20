@@ -6,7 +6,7 @@ from db.constraints.utils import ConstraintType
 from db.tables.operations.select import get_oid_from_table
 from db.tables.utils import get_primary_key_column
 
-from mathesar.models.base import Constraint, Table
+from mathesar.models.deprecated import Constraint, Table
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 

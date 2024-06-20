@@ -5,8 +5,8 @@ from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
 from mathesar.api.utils import get_table_or_404, process_annotated_records
-from mathesar.models.base import Column, Table
-from mathesar.models.query import UIQuery
+from mathesar.models.deprecated import Column, Table
+from mathesar.models.query import Exploration
 from mathesar.utils.preview import get_preview_info
 
 
@@ -89,7 +89,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             table_columns = [{'id': column.id, 'alias': column.name} for column in columns_query]
             columns_to_fetch = table_columns + preview_columns
 
-            query = UIQuery(name="preview", base_table=table, initial_columns=columns_to_fetch)
+            query = Exploration(name="preview", base_table=table, initial_columns=columns_to_fetch)
         else:
             query = table
         records = query.get_records(

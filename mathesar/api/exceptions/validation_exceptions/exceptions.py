@@ -2,12 +2,12 @@ from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.validation_exceptions.base_exceptions import MathesarValidationException
 
 
-class DuplicateUIQueryInSchemaAPIException(MathesarValidationException):
-    error_code = ErrorCodes.DuplicateUIQueryInSchema.value
+class DuplicateExplorationInSchemaAPIException(MathesarValidationException):
+    error_code = ErrorCodes.DuplicateExplorationInSchema.value
 
     def __init__(
             self,
-            message="UIQuery names must be unique per schema",
+            message="Exploration names must be unique per schema",
             field=None,
             details=None,
     ):

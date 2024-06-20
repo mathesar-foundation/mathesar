@@ -6,8 +6,8 @@ import re
 
 from db.records.operations import group
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models.base import Table
-from mathesar.models.query import UIQuery
+from mathesar.models.deprecated import Table
+from mathesar.models.query import Exploration
 from mathesar.utils.preview import column_alias_from_preview_template
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import BadDBCredentials
 import psycopg
@@ -40,8 +40,8 @@ def get_table_or_404(pk):
 
 def get_query_or_404(pk):
     try:
-        query = UIQuery.objects.get(id=pk)
-    except UIQuery.DoesNotExist:
+        query = Exploration.objects.get(id=pk)
+    except Exploration.DoesNotExist:
         raise generic_api_exceptions.NotFoundAPIException(
             NotFound,
             error_code=ErrorCodes.QueryNotFound.value,
