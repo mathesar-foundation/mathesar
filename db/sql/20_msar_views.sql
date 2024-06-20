@@ -56,7 +56,7 @@ BEGIN
   INTO view_cols;
   RETURN __msar.exec_ddl(
     'CREATE OR REPLACE VIEW %s AS SELECT %s FROM %s',
-    view_name, view_cols, __msar.get_relation_name(tab_id)
+    view_name, view_cols, __msar.get_qualified_relation_name(tab_id)
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

@@ -136,7 +136,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.get_relation_name(rel_id oid) RETURNS text AS $$/*
+__msar.get_qualified_relation_name(rel_id oid) RETURNS text AS $$/*
 Return the name for a given relation (e.g., table), qualified or quoted as appropriate.
 
 In cases where the relation is already included in the search path, the returned name will not be
@@ -154,7 +154,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.get_relation_name_or_null(rel_id oid) RETURNS text AS $$/*
+__msar.get_qualified_relation_name_or_null(rel_id oid) RETURNS text AS $$/*
 Return the name for a given relation (e.g., table), qualified or quoted as appropriate.
 
 In cases where the relation is already included in the search path, the returned name will not be
@@ -1003,7 +1003,7 @@ Args:
 */
 BEGIN
   RETURN __msar.rename_table(
-    __msar.get_relation_name_or_null(tab_id),
+    __msar.get_qualified_relation_name_or_null(tab_id),
     quote_ident(new_tab_name)
   );
 END;
@@ -1053,7 +1053,10 @@ Args:
   tab_id: The OID of the table whose comment we will change.
   comment_: The new comment.
 */
-SELECT __msar.comment_on_table(__msar.get_relation_name_or_null(tab_id), quote_literal(comment_));
+SELECT __msar.comment_on_table(
+  __msar.get_qualified_relation_name_or_null(tab_id),
+  quote_literal(comment_)
+);
 $$ LANGUAGE SQL;
 
 
@@ -1100,7 +1103,7 @@ BEGIN
   PERFORM msar.rename_table(tab_id, new_tab_name);
   PERFORM msar.comment_on_table(tab_id, comment);
   PERFORM msar.alter_columns(tab_id, col_alters);
-  RETURN __msar.get_relation_name_or_null(tab_id);
+  RETURN __msar.get_qualified_relation_name_or_null(tab_id);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1147,7 +1150,7 @@ Args:
 DECLARE tab_name text;
 DECLARE col_name text;
 BEGIN
-  tab_name :=  __msar.get_relation_name(tab_id);
+  tab_name :=  __msar.get_qualified_relation_name(tab_id);
   col_name := quote_ident(msar.get_column_name(tab_id, col_id));
   RETURN __msar.update_pk_sequence_to_latest(tab_name, col_name);
 END;
@@ -1205,7 +1208,10 @@ BEGIN
   FROM pg_catalog.pg_attribute
   WHERE attrelid=tab_id AND NOT attisdropped AND ARRAY[attnum::integer] <@ col_ids
   INTO col_names;
-  PERFORM __msar.drop_columns(__msar.get_relation_name_or_null(tab_id), variadic col_names);
+  PERFORM __msar.drop_columns(
+    __msar.get_qualified_relation_name_or_null(tab_id),
+    variadic col_names
+  );
   RETURN array_length(col_names, 1);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -1695,7 +1701,7 @@ Args:
 */
 DECLARE
   col_create_defs __msar.col_def[];
-  fq_table_name text := __msar.get_relation_name(tab_id);
+  fq_table_name text := __msar.get_qualified_relation_name(tab_id);
 BEGIN
   col_create_defs := __msar.process_col_def_jsonb(tab_id, col_defs, raw_default);
   PERFORM __msar.add_columns(fq_table_name, variadic col_create_defs);
@@ -1880,7 +1886,7 @@ SELECT array_agg(
     con_create_obj ->> 'deferrable',
     -- Build the relation name where the constraint will be applied. Prefer numeric ID.
     COALESCE(
-      __msar.get_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
+      __msar.get_qualified_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
       msar.build_qualified_name_sql(
         con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
       )
@@ -1936,7 +1942,10 @@ DECLARE
   con_create_defs __msar.con_def[];
 BEGIN
   con_create_defs := __msar.process_con_def_jsonb(tab_id, con_defs);
-  PERFORM __msar.add_constraints(__msar.get_relation_name(tab_id), variadic con_create_defs);
+  PERFORM __msar.add_constraints(
+    __msar.get_qualified_relation_name(tab_id),
+    variadic con_create_defs
+  );
   RETURN array_agg(oid) FROM pg_constraint WHERE conrelid=tab_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -2027,7 +2036,7 @@ BEGIN
   col_defs := __msar.get_duplicate_col_defs(
     tab_id, ARRAY[col_id], ARRAY[copy_name], copy_data
   );
-  tab_name := __msar.get_relation_name(tab_id);
+  tab_name := __msar.get_qualified_relation_name(tab_id);
   col_name := quote_ident(msar.get_column_name(tab_id, col_id));
   PERFORM __msar.add_columns(tab_name, VARIADIC col_defs);
   created_col_id := attnum
@@ -2131,7 +2140,7 @@ Args:
 */
 DECLARE relation_name text;
 BEGIN
-  relation_name := __msar.get_relation_name_or_null(tab_id);
+  relation_name := __msar.get_qualified_relation_name_or_null(tab_id);
   -- if_exists doesn't work while working with oids because
   -- the SQL query gets parameterized with tab_id instead of relation_name
   -- since we're unable to find the relation_name for a non existing table. 
@@ -2214,7 +2223,7 @@ Args:
 */
 BEGIN
   RETURN __msar.drop_constraint(
-    __msar.get_relation_name(tab_id),
+    __msar.get_qualified_relation_name(tab_id),
     quote_ident(msar.get_constraint_name(con_id))
   );
 END;
@@ -2329,7 +2338,7 @@ Args:
 */
 BEGIN
   PERFORM __msar.rename_column(
-    tab_name => __msar.get_relation_name(tab_id),
+    tab_name => __msar.get_qualified_relation_name(tab_id),
     old_col_name => quote_ident(msar.get_column_name(tab_id, col_id)),
     new_col_name => quote_ident(new_col_name)
   );
@@ -2587,7 +2596,7 @@ BEGIN
   IF col_alter_str IS NOT NULL THEN
     PERFORM __msar.exec_ddl(
       'ALTER TABLE %s %s',
-      __msar.get_relation_name(tab_id),
+      __msar.get_qualified_relation_name(tab_id),
       msar.process_col_alter_jsonb(tab_id, col_alters)
     );
   END IF;
@@ -2684,7 +2693,7 @@ Args:
   comment_: The new comment.
 */
 SELECT __msar.comment_on_column(
-  __msar.get_relation_name(tab_id),
+  __msar.get_qualified_relation_name(tab_id),
   quote_ident(msar.get_column_name(tab_id, col_id)),
   comment_
 );
@@ -2845,7 +2854,7 @@ BEGIN
     new_tab_name,
     extracted_col_defs,
     extracted_con_defs,
-    format('Extracted from %s', __msar.get_relation_name(tab_id))
+    format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
   );
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
   fkey_attnum := msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
@@ -2866,9 +2875,9 @@ BEGIN
     -- %1$s  This is a comma separated string of the extracted column names
     string_agg(quote_ident(col_def ->> 'name'), ', '),
     -- %2$s  This is the name of the original (remainder) table
-    __msar.get_relation_name(tab_id),
+    __msar.get_qualified_relation_name(tab_id),
     -- %3$s  This is the new extracted table name
-    __msar.get_relation_name(extracted_table_id),
+    __msar.get_qualified_relation_name(extracted_table_id),
     -- %4$I  This is the name of the fkey column in the remainder table.
     fkey_name
   ) FROM jsonb_array_elements(extracted_col_defs) AS col_def;
