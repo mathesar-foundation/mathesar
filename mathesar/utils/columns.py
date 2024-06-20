@@ -1,4 +1,5 @@
 from mathesar.models.deprecated import Column
+from mathesar.models.base import ColumnMetaData
 
 
 # This should be replaced once we have the ColumnMetadata model sorted out.
@@ -14,3 +15,7 @@ def get_raw_display_options(database_id, table_oid, attnums, user):
             )
             if c.display_options is not None
         ]
+
+
+def get_columns_meta_data(table_oid, database_id):
+    return ColumnMetaData.filter(database__id=database_id, table_oid=table_oid)
