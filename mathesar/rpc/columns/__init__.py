@@ -1,1 +1,1 @@
-from mathesar.rpc.columns.base import *
+from .base import *  # noqa

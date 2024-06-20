@@ -3,7 +3,7 @@ Classes and functions exposed to the RPC endpoint for managing column metadata.
 """
 from typing import Literal, Optional, TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
+from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -54,6 +54,16 @@ class ColumnMetaData(TypedDict):
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnMetaData]:
+    """
+    List metadata associated with columns for a table. Exposed as `list`.
+
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        A list of column meta data objects.
+    """
     columns_meta_data = get_columns_meta_data(table_oid, database_id)
     return [
         ColumnMetaData.from_db_model(db_model) for db_model in columns_meta_data
