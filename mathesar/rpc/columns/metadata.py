@@ -11,7 +11,34 @@ from mathesar.utils.columns import get_columns_meta_data
 
 
 class ColumnMetaData(TypedDict):
-    database: int
+    """
+    Metadata for a column in a table.
+
+    Only the
+      - database,
+      - table_oid, and
+      - attnum
+    keys are required.
+
+    Attributes:
+        database_id: The Django id of the database containing the table.
+        table_oid: The OID of the table containing the column
+        attnum: The attnum of the column in the table.
+        bool_input: How the input for a boolean column should be shown.
+        bool_true: A string to display for `true` values.
+        bool_false: A string to display for `false` values.
+        num_min_frac_digits: Minimum digits shown after the decimal point.
+        num_max_frac_digits: Maximum digits shown after the decimal point.
+        num_show_as_perc: Whether to show a numeric value as a percentage.
+        mon_currency_symbol: The currency symbol shown for money value.
+        mon_currency_location: Where the currency symbol should be shown.
+        time_format: A string representing the format of time values.
+        date_format: A string representing the format of date values.
+        duration_min: Optional[str]
+        duration_max: Optional[str]
+        duration_show_units: Optional[bool]
+    """
+    database_id: int
     table_oid: int
     attnum: int
     bool_input: Optional[Literal["dropdown", "checkbox"]]
@@ -31,7 +58,7 @@ class ColumnMetaData(TypedDict):
     @classmethod
     def from_db_model(cls, db_model):
         return cls(
-            database=db_model.database.id,
+            database_id=db_model.database.id,
             table_oid=db_model.table_oid,
             attnum=db_model.attnum,
             bool_input=db_model.bool_input,
