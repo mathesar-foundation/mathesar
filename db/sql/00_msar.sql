@@ -869,7 +869,7 @@ CREATE OR REPLACE FUNCTION msar.set_schema_description(
 Set the PostgreSQL description (aka COMMENT) of a schema.
 
 Descriptions are removed by passing an empty string. Passing a NULL description will cause
-this function to return NULL withou doing anything.
+this function to return NULL without doing anything.
 
 Args:
   sch_id: The OID of the schema.
@@ -902,7 +902,7 @@ CREATE OR REPLACE FUNCTION msar.patch_schema(sch_name text, patch jsonb) RETURNS
 Modify a schema according to the given patch.
 
 Args:
-  sch_id: The name of the schema.
+  sch_name: The name of the schema, UNQUOTED
   patch: A JSONB object as specified by msar.patch_schema(sch_id oid, patch jsonb)
 */
 BEGIN
