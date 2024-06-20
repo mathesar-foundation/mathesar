@@ -162,18 +162,26 @@ SELECT oid FROM pg_namespace WHERE nspname=sch_name;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION __msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
-Return the QUOTED name for a given schema.
+CREATE OR REPLACE FUNCTION msar.get_schema_name(sch_id oid) RETURNS TEXT AS $$/*
+Return the UNQUOTED name for a given schema.
 
-The schema *must* be in the pg_namespace table to use this function.
+Raises an exception if the schema is not found.
 
 Args:
   sch_id: The OID of the schema.
 */
+DECLARE sch_name text;
 BEGIN
-  RETURN sch_id::regnamespace::text;
+  SELECT nspname INTO sch_name FROM pg_namespace WHERE oid=sch_id;
+
+  IF sch_name IS NULL THEN
+    RAISE EXCEPTION 'No schema with OID % exists.', sch_id
+    USING ERRCODE = '3F000'; -- invalid_schema_name
+  END IF;
+
+  RETURN sch_name;
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -834,95 +842,71 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
-
--- Rename schema -----------------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION
-__msar.rename_schema(old_sch_name text, new_sch_name text) RETURNS TEXT AS $$/*
-Change a schema's name, returning the command executed.
+DROP FUNCTION IF EXISTS msar.rename_schema(oid, text);
+CREATE OR REPLACE FUNCTION msar.rename_schema(sch_id oid, new_sch_name text) RETURNS void AS $$/*
+Change a schema's name
 
 Args:
-  old_sch_name: A properly quoted original schema name
-  new_sch_name: A properly quoted new schema name
+  sch_id: The OID of the schema to rename
+  new_sch_name: A new for the schema, UNQUOTED
 */
 DECLARE
-  cmd_template text;
+  old_sch_name text := msar.get_schema_name(sch_id);
 BEGIN
-  cmd_template := 'ALTER SCHEMA %s RENAME TO %s';
-  RETURN __msar.exec_ddl(cmd_template, old_sch_name, new_sch_name);
+  IF old_sch_name = new_sch_name THEN
+    -- Return early if the names are the same. This avoids an error from Postgres.
+    RETURN;
+  END IF;
+  EXECUTE format('ALTER SCHEMA %I RENAME TO %I', old_sch_name, new_sch_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.rename_schema(old_sch_name text, new_sch_name text) RETURNS TEXT AS $$/*
-Change a schema's name, returning the command executed.
+CREATE OR REPLACE FUNCTION msar.set_schema_description(
+  sch_id oid,
+  description text
+) RETURNS void AS $$/*
+Set the PostgreSQL description (aka COMMENT) of a schema.
 
-Args:
-  old_sch_name: An unquoted original schema name
-  new_sch_name: An unquoted new schema name
-*/
-BEGIN
-  RETURN __msar.rename_schema(quote_ident(old_sch_name), quote_ident(new_sch_name));
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.rename_schema(sch_id oid, new_sch_name text) RETURNS TEXT AS $$/*
-Change a schema's name, returning the command executed.
-
-Args:
-  sch_id: The OID of the original schema
-  new_sch_name: An unquoted new schema name
-*/
-BEGIN
-  RETURN __msar.rename_schema(__msar.get_schema_name(sch_id), quote_ident(new_sch_name));
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
--- Comment on schema -------------------------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION
-__msar.comment_on_schema(sch_name text, comment_ text) RETURNS TEXT AS $$/*
-Change the description of a schema, returning command executed.
-
-Args:
-  sch_name: The QUOTED name of the schema whose comment we will change.
-  comment_: The new comment, QUOTED
-*/
-DECLARE
-  cmd_template text;
-BEGIN
-  cmd_template := 'COMMENT ON SCHEMA %s IS %s';
-  RETURN __msar.exec_ddl(cmd_template, sch_name, comment_);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.comment_on_schema(sch_name text, comment_ text) RETURNS TEXT AS $$/*
-Change the description of a schema, returning command executed.
-
-Args:
-  sch_name: The UNQUOTED name of the schema whose comment we will change.
-  comment_: The new comment, UNQUOTED
-*/
-BEGIN
-  RETURN __msar.comment_on_schema(quote_ident(sch_name), quote_literal(comment_));
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION msar.comment_on_schema(sch_id oid, comment_ text) RETURNS TEXT AS $$/*
-Change the description of a schema, returning command executed.
+Descriptions are removed by passing an empty string. Passing a NULL description will cause
+this function to return NULL without doing anything.
 
 Args:
   sch_id: The OID of the schema.
-  comment_: The new comment, UNQUOTED
+  description: The new description, UNQUOTED
 */
 BEGIN
-  RETURN __msar.comment_on_schema(__msar.get_schema_name(sch_id), quote_literal(comment_));
+  EXECUTE format('COMMENT ON SCHEMA %I IS %L', msar.get_schema_name(sch_id), description);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS void AS $$/*
+Modify a schema according to the given patch.
+
+Args:
+  sch_id: The OID of the schema.
+  patch: A JSONB object with the following keys:
+    - name: (optional) The new name of the schema
+    - description: (optional) The new description of the schema. To remove a description, pass an
+      empty string. Passing a NULL description will have no effect on the description.
+*/
+BEGIN
+  PERFORM msar.rename_schema(sch_id, patch->>'name');
+  PERFORM msar.set_schema_description(sch_id, patch->>'description');
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.patch_schema(sch_name text, patch jsonb) RETURNS void AS $$/*
+Modify a schema according to the given patch.
+
+Args:
+  sch_name: The name of the schema, UNQUOTED
+  patch: A JSONB object as specified by msar.patch_schema(sch_id oid, patch jsonb)
+*/
+BEGIN
+  PERFORM msar.patch_schema(msar.get_schema_oid(sch_name), patch);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -979,7 +963,7 @@ DECLARE schema_oid oid;
 BEGIN
   EXECUTE 'CREATE SCHEMA ' || quote_ident(sch_name);
   schema_oid := msar.get_schema_oid(sch_name);
-  PERFORM msar.comment_on_schema(schema_oid, description);
+  PERFORM msar.set_schema_description(schema_oid, description);
   RETURN schema_oid;
 END;
 $$ LANGUAGE plpgsql;
@@ -1022,15 +1006,8 @@ Args:
   sch_id: The OID of the schema to drop
   cascade_: When true, dependent objects will be dropped automatically
 */
-DECLARE
-  sch_name text;
 BEGIN
-  SELECT nspname INTO sch_name FROM pg_namespace WHERE oid = sch_id;
-  IF sch_name IS NULL THEN
-    RAISE EXCEPTION 'No schema with OID % exists.', sch_id
-    USING ERRCODE = '3F000'; -- invalid_schema_name
-  END IF;
-  PERFORM msar.drop_schema(sch_name, cascade_);
+  PERFORM msar.drop_schema(msar.get_schema_name(sch_id), cascade_);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -2339,7 +2316,7 @@ DECLARE
   column_defs __msar.col_def[];
   constraint_defs __msar.con_def[];
 BEGIN
-  fq_table_name := format('%s.%s', __msar.get_schema_name(sch_oid), quote_ident(tab_name));
+  fq_table_name := format('%I.%I', msar.get_schema_name(sch_oid), tab_name);
   column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
   constraint_defs := msar.process_con_def_jsonb(0, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
