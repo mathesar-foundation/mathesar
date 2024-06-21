@@ -2321,10 +2321,10 @@ DECLARE
 BEGIN
   schema_name := msar.get_schema_name(sch_id);
   IF NULLIF(tab_name, '') IS NOT NULL THEN
-    fq_table_name := format('%s.%s', schema_name, quote_ident(tab_name));
+    fq_table_name := format('%I.%I', schema_name, quote_ident(tab_name));
   ELSE
     SELECT COUNT(*) INTO table_count FROM pg_catalog.pg_class WHERE relkind = 'r' AND relnamespace = sch_id;
-    fq_table_name := format('%s.%s', schema_name, quote_ident('Table ' || (table_count + 1)));
+    fq_table_name := format('%I.%I', schema_name, quote_ident('Table ' || (table_count + 1)));
   END IF;
   column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
   constraint_defs := msar.process_con_def_jsonb(0, con_defs);
