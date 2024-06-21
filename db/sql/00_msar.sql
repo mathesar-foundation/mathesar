@@ -2294,12 +2294,12 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_mathesar_table(sch_oid oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
+msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
   RETURNS oid AS $$/*
 Add a table, with a default id column, returning the OID of the created table.
 
 Args:
-  sch_oid: The OID of the schema where the table will be created.
+  sch_id: The OID of the schema where the table will be created.
   tab_name (optional): The unquoted name for the new table.
   col_defs (optional): The columns for the new table, in order.
   con_defs (optional): The constraints for the new table.
@@ -2319,11 +2319,11 @@ DECLARE
   column_defs __msar.col_def[];
   constraint_defs __msar.con_def[];
 BEGIN
-  schema_name := msar.get_schema_name(sch_oid);
+  schema_name := msar.get_schema_name(sch_id);
   IF NULLIF(tab_name, '') IS NOT NULL THEN
     fq_table_name := format('%s.%s', schema_name, quote_ident(tab_name));
   ELSE
-    SELECT COUNT(*) INTO table_count FROM pg_catalog.pg_class WHERE relkind = 'r' AND relnamespace = sch_oid;
+    SELECT COUNT(*) INTO table_count FROM pg_catalog.pg_class WHERE relkind = 'r' AND relnamespace = sch_id;
     fq_table_name := format('%s.%s', schema_name, quote_ident('Table ' || (table_count + 1)));
   END IF;
   column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
