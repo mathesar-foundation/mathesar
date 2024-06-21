@@ -14,11 +14,7 @@ class ColumnMetaData(TypedDict):
     """
     Metadata for a column in a table.
 
-    Only the
-      - database,
-      - table_oid, and
-      - attnum
-    keys are required.
+    Only the `database`, `table_oid`, and `attnum` keys are required.
 
     Attributes:
         database_id: The Django id of the database containing the table.
@@ -34,9 +30,9 @@ class ColumnMetaData(TypedDict):
         mon_currency_location: Where the currency symbol should be shown.
         time_format: A string representing the format of time values.
         date_format: A string representing the format of date values.
-        duration_min: Optional[str]
-        duration_max: Optional[str]
-        duration_show_units: Optional[bool]
+        duration_min: The smallest unit for displaying durations.
+        duration_max: The largest unit for displaying durations.
+        duration_show_units: Whether to show the units for durations.
     """
     database_id: int
     table_oid: int
