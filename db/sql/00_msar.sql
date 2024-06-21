@@ -105,6 +105,18 @@ __msar.build_text_tuple(text[]) RETURNS text AS $$
 SELECT '(' || string_agg(col, ', ') || ')' FROM unnest($1) x(col);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
+
+CREATE OR REPLACE FUNCTION
+__msar.exec_dql(command text) RETURNS jsonb AS $$
+DECLARE
+  records jsonb;
+BEGIN
+  EXECUTE 'WITH cte AS (' || command || ')
+  SELECT jsonb_agg(row_to_json(cte.*)) FROM cte' INTO records;
+  RETURN records;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- INFO FUNCTIONS
@@ -1301,7 +1313,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 DROP TYPE IF EXISTS __msar.col_def CASCADE;
 CREATE TYPE __msar.col_def AS (
   name_ text, -- The name of the column to create, quoted.
-  type_ text, -- The type of the column to create, fully specced with arguments.
+  type_ jsonb, -- The type of the column to create, fully specced with arguments.
   not_null boolean, -- A boolean to describe whether the column is nullable or not.
   default_ text, -- Text SQL giving the default value for the column.
   identity_ boolean, -- A boolean giving whether the column is an identity pkey column.
@@ -2388,6 +2400,42 @@ BEGIN
     'table_name', quote_ident(rel_name),
     'table_oid', rel_id
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_preview(
+  tab_id oid,
+  col_cast_def jsonb,
+  rec_limit integer
+) RETURNS jsonb AS $$
+DECLARE
+  tab_name text;
+  sel_query text;
+  result jsonb;
+BEGIN
+  tab_name := __msar.get_relation_name(tab_id);
+  WITH preview_cte AS (
+    SELECT string_agg(
+      'CAST(' ||
+      __msar.build_cast_expr(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer), col_cast -> 'type' ->> 'name') ||
+      ' AS ' ||
+      msar.build_type_text(col_cast -> 'type') ||
+      ')'|| ' AS ' || msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer),
+      ', '
+    ) AS cast_expr
+    FROM jsonb_array_elements(col_cast_def) AS col_cast
+    WHERE NOT msar.is_mathesar_id_column(tab_id, (col_cast ->> 'attnum')::integer)
+  )
+  SELECT
+    CASE WHEN rec_limit IS NOT NULL THEN
+      format('SELECT id, %s FROM %s LIMIT %s', cast_expr, tab_name, rec_limit)
+    ELSE
+      format('SELECT id, %s FROM %s', cast_expr, tab_name)
+    END
+  INTO sel_query FROM preview_cte;
+  RETURN __msar.exec_dql(sel_query);
 END;
 $$ LANGUAGE plpgsql;
 

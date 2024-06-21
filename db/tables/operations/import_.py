@@ -1,6 +1,11 @@
+import json
 import tempfile
+
 import clevercsv as csv
 from psycopg import sql
+
+from db.connection import exec_msar_func
+from db.columns.operations.alter import _transform_column_alter_dict
 from db.tables.operations.create import prepare_table_for_import
 from db.encoding_utils import get_sql_compatible_encoding
 from mathesar.models.deprecated import DataFile
@@ -89,3 +94,8 @@ def insert_csv_records(
                 with cursor.copy(copy_sql) as copy:
                     while data := temp_file.read():
                         copy.write(data)
+
+
+def get_preview(table_oid, column_list, conn, limit=20):
+    transformed_column_data = [_transform_column_alter_dict(col) for col in column_list]
+    return exec_msar_func(conn, 'get_preview', table_oid, json.dumps(transformed_column_data), limit).fetchone()[0]

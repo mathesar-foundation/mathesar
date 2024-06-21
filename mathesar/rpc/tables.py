@@ -7,8 +7,8 @@ from db.tables.operations.select import get_table_info, get_table
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
 from db.tables.operations.alter import alter_table_on_database
-from db.tables.operations.import_ import import_csv
-from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo
+from db.tables.operations.import_ import import_csv, get_preview
+from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
@@ -200,3 +200,19 @@ def import_(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return import_csv(data_file_id, table_name, schema_oid, conn, comment)
+
+
+@rpc_method(name="tables.get_import_preview")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get_import_preview(
+    *,
+    table_oid: int,
+    columns: PreviewableColumnInfo,
+    database_id: int,
+    limit: int = 20,
+    **kwargs
+):
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        return get_preview(table_oid, columns, conn, limit)
