@@ -1,7 +1,7 @@
 import re
 
 from db.constraints.utils import ConstraintType
-from mathesar.models.base import Column, Constraint, Table
+from mathesar.models.deprecated import Column, Constraint, Table
 
 
 def _preview_info_by_column_id(fk_constraints, previous_path=None, exising_columns=None):

@@ -1,10 +1,6 @@
 <script lang="ts">
   import { ContextMenu } from '@mathesar/component-library';
-  import {
-    SheetCell,
-    SheetRow,
-    isRowSelected,
-  } from '@mathesar/components/sheet';
+  import { SheetRow, SheetRowHeaderCell } from '@mathesar/components/sheet';
   import { rowHeightPx } from '@mathesar/geometry';
   import {
     ID_ROW_CONTROL_COLUMN,
@@ -18,6 +14,7 @@
     isPlaceholderRow,
     rowHasRecord,
   } from '@mathesar/stores/table-data';
+  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
 
   import GroupHeader from './GroupHeader.svelte';
   import NewRecordMessage from './NewRecordMessage.svelte';
@@ -43,33 +40,21 @@
   $: ({ pkColumn } = columnsDataStore);
   $: primaryKeyColumnId = $pkColumn?.id;
   $: rowKey = getRowKey(row, primaryKeyColumnId);
+  $: rowSelectionId = getRowSelectionId(row);
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
-  $: ({ selectedCells } = selection);
-  $: isSelected = rowHasRecord(row) && isRowSelected($selectedCells, row);
+  $: isSelected = $selection.rowIds.has(getRowSelectionId(row));
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
-  function checkAndCreateEmptyRow() {
+  function handleMouseDown(e: MouseEvent) {
     if (isPlaceholderRow(row)) {
-      void recordsData.addEmptyRecord();
-      selection.selectAndActivateFirstDataEntryCellInLastRow();
+      $tabularData.addEmptyRecord();
+      e.stopPropagation(); // Prevents cell selection from starting
     }
   }
-
-  const handleRowMouseDown = () => {
-    if (rowHasRecord(row) && !isPlaceholderRow(row)) {
-      selection.onRowSelectionStart(row);
-    }
-  };
-
-  const handleRowMouseEnter = () => {
-    if (rowHasRecord(row) && !isPlaceholderRow(row)) {
-      selection.onMouseEnterRowHeaderWhileSelection(row);
-    }
-  };
 </script>
 
 <SheetRow {style} let:htmlAttributes let:styleString>
@@ -84,36 +69,26 @@
     class:is-add-placeholder={isPlaceholderRow(row)}
     {...htmlAttributes}
     style="--cell-height:{rowHeightPx - 1}px;{styleString}"
-    on:mousedown={checkAndCreateEmptyRow}
+    on:mousedown={handleMouseDown}
   >
-    <SheetCell
-      columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-      isStatic
-      isControlCell
-      let:htmlAttributes={cellHtmlAttr}
-      let:style={sheetCellStyle}
-    >
-      <div
-        {...cellHtmlAttr}
-        style={sheetCellStyle}
-        on:mousedown={handleRowMouseDown}
-        on:mouseenter={handleRowMouseEnter}
+    {#if rowHasRecord(row)}
+      <SheetRowHeaderCell
+        {rowSelectionId}
+        columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
       >
-        {#if rowHasRecord(row)}
-          <RowControl
-            {primaryKeyColumnId}
-            {row}
-            {meta}
-            {recordsData}
-            {isSelected}
-            hasErrors={hasAnyErrors}
-          />
-          <ContextMenu>
-            <RowContextOptions recordPk={rowKey} {recordsData} {row} />
-          </ContextMenu>
-        {/if}
-      </div>
-    </SheetCell>
+        <RowControl
+          {primaryKeyColumnId}
+          {row}
+          {meta}
+          {recordsData}
+          {isSelected}
+          hasErrors={hasAnyErrors}
+        />
+        <ContextMenu>
+          <RowContextOptions recordPk={rowKey} {recordsData} {row} />
+        </ContextMenu>
+      </SheetRowHeaderCell>
+    {/if}
 
     {#if isHelpTextRow(row)}
       <NewRecordMessage columnCount={$processedColumns.size} />
@@ -161,9 +136,9 @@
       cursor: pointer;
 
       :global(
-          [data-sheet-element='cell']:not(.is-active)
+          [data-sheet-element='data-cell']
             .cell-fabric
-            .cell-wrapper
+            .cell-wrapper:not(.is-edit-mode)
             > *
         ) {
         visibility: hidden;

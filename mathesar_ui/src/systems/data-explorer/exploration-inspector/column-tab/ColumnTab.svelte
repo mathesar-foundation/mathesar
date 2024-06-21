@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { execPipe, filter, map } from 'iter-tools';
   import { onDestroy } from 'svelte';
   import { _ } from 'svelte-i18n';
 
@@ -6,6 +7,7 @@
     Collapsible,
     LabeledInput,
     TextInput,
+    isDefinedNonNullable,
   } from '@mathesar-component-library';
 
   import QueryManager from '../../QueryManager';
@@ -19,21 +21,14 @@
   $: queryManager =
     queryHandler instanceof QueryManager ? queryHandler : undefined;
   $: ({ selection, columnsMetaData, processedColumns } = queryHandler);
-  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
-  $: selectedColumns = (() => {
-    const ids = selection.getSelectedUniqueColumnsId(
-      $selectedCells,
-      $columnsSelectedWhenTheTableIsEmpty,
-    );
-    const columns = [];
-    for (const id of ids) {
-      const c = $processedColumns.get(id);
-      if (c !== undefined) {
-        columns.push(c);
-      }
-    }
-    return columns;
-  })();
+  $: ({ columnIds } = $selection);
+  $: selectedColumns = Array.from(
+    execPipe(
+      columnIds,
+      map((id) => $processedColumns.get(id)),
+      filter(isDefinedNonNullable),
+    ),
+  );
   $: hasMultipleSelectedColumns = selectedColumns.length > 1;
   $: selectedColumn =
     selectedColumns.length > 0 ? selectedColumns[0] : undefined;

@@ -28,7 +28,7 @@ from mathesar.api.serializers.tables import (
     TableImportSerializer,
     MoveTableRequestSerializer
 )
-from mathesar.models.base import Table
+from mathesar.models.deprecated import Table
 from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.joins import get_processed_joinable_tables
 

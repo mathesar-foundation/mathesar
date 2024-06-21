@@ -14,7 +14,7 @@ from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
 )
-from mathesar.models.base import Column, Constraint, Table
+from mathesar.models.deprecated import Column, Constraint, Table
 
 
 class TableFilteredPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):

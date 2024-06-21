@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
-from mathesar.models.base import Database, Schema
+from mathesar.models.deprecated import Connection, Schema
 from mathesar.models.users import DatabaseRole, Role, SchemaRole
 
 
@@ -27,7 +27,7 @@ class SchemaRoleAccessPolicy(AccessPolicy):
     def scope_queryset(cls, request, qs):
         if not (request.user.is_superuser or request.user.is_anonymous):
             allowed_roles = (Role.MANAGER.value, Role.EDITOR.value, Role.VIEWER.value)
-            databases_with_view_access = Database.objects.filter(
+            databases_with_view_access = Connection.objects.filter(
                 Q(database_role__role__in=allowed_roles) & Q(database_role__user=request.user)
             )
             schema_with_view_access = Schema.objects.filter(

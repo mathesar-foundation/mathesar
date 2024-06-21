@@ -1,4 +1,4 @@
-from mathesar.models.base import Table
+from mathesar.models.deprecated import Table
 from mathesar.imports.csv import create_db_table_from_csv_data_file
 from mathesar.imports.excel import create_db_table_from_excel_data_file
 from mathesar.imports.json import create_db_table_from_json_data_file

@@ -64,7 +64,7 @@ class ErrorCodes(Enum):
     DeletedColumnAccess = 4418
     IncorrectOldPassword = 4419
     EditingPublicSchema = 4421
-    DuplicateUIQueryInSchema = 4422
+    DuplicateExplorationInSchema = 4422
     IdentifierTooLong = 4423
     DynamicDefaultAlterationToStaticDefault = 4424
     InvalidJSONFormat = 4425

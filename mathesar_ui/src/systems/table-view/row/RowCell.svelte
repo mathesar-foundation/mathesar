@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick } from 'svelte';
+  import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
@@ -10,13 +10,11 @@
   import Null from '@mathesar/components/Null.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import RowCellBackgrounds from '@mathesar/components/RowCellBackgrounds.svelte';
-  import {
-    SheetCell,
-    isCellActive,
-    isCellSelected,
-    scrollBasedOnActiveCell,
-  } from '@mathesar/components/sheet';
-  import { iconRecord, iconSetToNull } from '@mathesar/icons';
+  import { SheetDataCell } from '@mathesar/components/sheet';
+  import { makeCellId } from '@mathesar/components/sheet/cellIds';
+  import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+  import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
+  import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -25,9 +23,9 @@
     type ProcessedColumn,
     type RecordRow,
     type RecordsData,
-    type TabularDataSelection,
     rowHasNewRecord,
   } from '@mathesar/stores/table-data';
+  import { getRowSelectionId } from '@mathesar/stores/table-data/records';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     ButtonMenuItem,
@@ -44,7 +42,7 @@
   import RowContextOptions from './RowContextOptions.svelte';
 
   export let recordsData: RecordsData;
-  export let selection: TabularDataSelection;
+  export let selection: Writable<SheetSelection>;
   export let row: RecordRow;
   export let rowHasErrors = false;
   export let key: CellKey;
@@ -56,6 +54,7 @@
 
   const userProfile = getUserProfileStoreFromContext();
 
+  $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
   $: database = $currentDatabase;
   $: schema = $currentSchema;
   $: canEditTableRecords = !!$userProfile?.hasPermission(
@@ -70,28 +69,6 @@
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
-  $: ({ activeCell, selectedCells } = selection);
-  $: isActive = $activeCell && isCellActive($activeCell, row, processedColumn);
-
-  /**
-   * The name indicates that this boolean is only true when more than one cell
-   * is selected. However, because of the bug that [the active cell and selected
-   * cells do not remain in sync when using keyboard][1] this boolean is
-   * sometimes true even when multiple cells are selected. This is to
-   * differentiate between different active and selected cell using blue
-   * background styling for selected cell and blue border styling for active
-   * cell.
-   *
-   * The above bug can be fixed when following two conditions are met
-   *
-   * - We are working on keyboard accessability of the application.
-   * - `selectedCells` and `activeCell` are merged in a single store.
-   *
-   * [1]: https://github.com/centerofci/mathesar/issues/1534
-   */
-  $: isSelectedInRange =
-    isCellSelected($selectedCells, row, processedColumn) &&
-    $selectedCells.size > 1;
   $: modificationStatus = $modificationStatusMap.get(key);
   $: serverErrors =
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
@@ -110,25 +87,6 @@
     .get(String(column.id))
     ?.get(String(value));
 
-  async function checkTypeAndScroll(type?: string) {
-    if (type === 'moved') {
-      await tick();
-      scrollBasedOnActiveCell();
-    }
-  }
-
-  async function moveThroughCells(
-    event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
-  ) {
-    const { originalEvent } = event.detail;
-    const type = selection.handleKeyEventsOnActiveCell(originalEvent);
-    if (type) {
-      originalEvent.stopPropagation();
-      originalEvent.preventDefault();
-      await checkTypeAndScroll(type);
-    }
-  }
-
   async function setValue(newValue: unknown) {
     if (newValue === value) {
       return;
@@ -145,116 +103,81 @@
   }
 </script>
 
-<SheetCell columnIdentifierKey={column.id} let:htmlAttributes let:style>
-  <div
-    class="cell editable-cell"
-    class:error={hasError}
-    class:modified={modificationStatus?.state === 'success'}
-    class:is-active={isActive}
-    class:is-processing={isProcessing}
-    class:is-pk={column.primary_key}
-    class:is-selected={isSelectedInRange}
-    {...htmlAttributes}
-    {style}
-  >
-    <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
-    <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
-    {#if !(isEditable && isActive)}
-      <!--
-      We hide these backgrounds when the cell is editable and active because a
-      white background better communicates that the user can edit the active
-      cell.
-    -->
-      <RowCellBackgrounds hasErrors={rowHasErrors} />
+<SheetDataCell
+  columnIdentifierKey={column.id}
+  cellSelectionId={cellId}
+  selection={$selection}
+  let:isActive
+>
+  <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
+  <CellBackground when={!isEditable} color="var(--cell-bg-color-disabled)" />
+  {#if !(isEditable && isActive)}
+    <!--
+    We hide these backgrounds when the cell is editable and active because a
+    white background better communicates that the user can edit the active
+    cell.
+  -->
+    <RowCellBackgrounds hasErrors={rowHasErrors} />
+  {/if}
+
+  <CellFabric
+    columnFabric={processedColumn}
+    {isActive}
+    {value}
+    {isProcessing}
+    {canViewLinkedEntities}
+    {recordSummary}
+    setRecordSummary={(recordId, rs) =>
+      recordSummaries.addBespokeRecordSummary({
+        columnId: String(columnId),
+        recordId,
+        recordSummary: rs,
+      })}
+    showAsSkeleton={$recordsDataState === States.Loading}
+    disabled={!isEditable}
+    on:movementKeyDown={({ detail }) =>
+      handleKeyboardEventOnCell(detail.originalEvent, selection)}
+    on:update={valueUpdated}
+    horizontalAlignment={column.primary_key ? 'left' : undefined}
+    lightText={hasError || isProcessing}
+  />
+  <ContextMenu>
+    {#if canEditTableRecords || showLinkedRecordHyperLink}
+      <MenuHeading>{$_('cell')}</MenuHeading>
+      {#if canEditTableRecords}
+        <ButtonMenuItem
+          icon={iconSetToNull}
+          disabled={!canSetNull}
+          on:click={() => setValue(null)}
+        >
+          {$_('set_to')}
+          <Null />
+        </ButtonMenuItem>
+      {/if}
+      {#if showLinkedRecordHyperLink && linkedRecordHref}
+        <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
+          <RichText text={$_('open_named_record')} let:slotName>
+            {#if slotName === 'recordName'}
+              <Identifier>{recordSummary}</Identifier>
+            {/if}
+          </RichText>
+        </LinkMenuItem>
+      {/if}
+      <MenuDivider />
     {/if}
 
-    <CellFabric
-      columnFabric={processedColumn}
-      {isActive}
-      {isSelectedInRange}
-      {value}
-      {isProcessing}
-      {canViewLinkedEntities}
-      {recordSummary}
-      setRecordSummary={(recordId, rs) =>
-        recordSummaries.addBespokeRecordSummary({
-          columnId: String(columnId),
-          recordId,
-          recordSummary: rs,
-        })}
-      showAsSkeleton={$recordsDataState === States.Loading}
-      disabled={!isEditable}
-      on:movementKeyDown={moveThroughCells}
-      on:activate={() => {
-        selection.activateCell(row, processedColumn);
-      }}
-      on:update={valueUpdated}
-      horizontalAlignment={column.primary_key ? 'left' : undefined}
-      on:onSelectionStart={() => {
-        selection.onStartSelection(row, processedColumn);
-      }}
-      on:onMouseEnterCellWhileSelection={() => {
-        // This enables the click + drag to
-        // select multiple cells
-        selection.onMouseEnterCellWhileSelection(row, processedColumn);
-      }}
-    />
-    <ContextMenu>
-      {#if canEditTableRecords || showLinkedRecordHyperLink}
-        <MenuHeading>{$_('cell')}</MenuHeading>
-        {#if canEditTableRecords}
-          <ButtonMenuItem
-            icon={iconSetToNull}
-            disabled={!canSetNull}
-            on:click={() => setValue(null)}
-          >
-            {$_('set_to')}
-            <Null />
-          </ButtonMenuItem>
-        {/if}
-        {#if showLinkedRecordHyperLink && linkedRecordHref}
-          <LinkMenuItem icon={iconRecord} href={linkedRecordHref}>
-            <RichText text={$_('open_named_record')} let:slotName>
-              {#if slotName === 'recordName'}
-                <Identifier>{recordSummary}</Identifier>
-              {/if}
-            </RichText>
-          </LinkMenuItem>
-        {/if}
-        <MenuDivider />
-      {/if}
+    <!-- Column Attributes -->
+    <MenuHeading>{$_('column')}</MenuHeading>
+    <ColumnHeaderContextMenu {processedColumn} />
 
-      <!-- Column Attributes -->
-      <MenuHeading>{$_('column')}</MenuHeading>
-      <ColumnHeaderContextMenu {processedColumn} />
-
-      <!-- Row -->
-      {#if canEditTableRecords || showLinkedRecordHyperLink}
-        <MenuDivider />
-        <MenuHeading>{$_('row')}</MenuHeading>
-        <RowContextOptions recordPk={rowKey} {recordsData} {row} />
-      {/if}
-    </ContextMenu>
-    {#if errors.length}
-      <CellErrors {errors} forceShowErrors={isActive} />
+    <!-- Row -->
+    {#if canEditTableRecords || showLinkedRecordHyperLink}
+      <MenuDivider />
+      <MenuHeading>{$_('row')}</MenuHeading>
+      <RowContextOptions recordPk={rowKey} {recordsData} {row} />
     {/if}
-  </div>
-</SheetCell>
-
-<style lang="scss">
-  .editable-cell.cell {
-    user-select: none;
-    -webkit-user-select: none; /* Safari */
-    background: var(--cell-bg-color-base);
-    &.is-active {
-      z-index: var(--z-index__sheet__active-cell);
-      border-color: transparent;
-      min-height: 100%;
-      height: auto !important;
-    }
-    &.error,
-    &.is-processing {
-      color: var(--cell-text-color-processing);
-    }
-  }
-</style>
+  </ContextMenu>
+  {#if errors.length}
+    <CellErrors {errors} forceShowErrors={isActive} />
+  {/if}
+</SheetDataCell>

@@ -290,6 +290,7 @@
                 {processedColumn}
                 {recordSummaries}
                 {searchFuzzy}
+                isLoading={recordsDataIsLoading}
               />
             {/each}
           </RecordSelectorDataRow>

@@ -14,7 +14,6 @@
   const dispatch = createEventDispatcher();
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
@@ -36,22 +35,14 @@
         break;
     }
   }
-
-  function handleMouseDown() {
-    if (!isActive) {
-      dispatch('activate');
-    }
-  }
 </script>
 
 <CellWrapper
   {isActive}
-  {isSelectedInRange}
   {disabled}
   {isIndependentOfSheet}
   on:mouseenter
   on:keydown={handleWrapperKeyDown}
-  on:mousedown={handleMouseDown}
 >
   <CellValue {value}>
     {#if isDefinedNonNullable(value)}

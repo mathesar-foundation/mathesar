@@ -42,7 +42,7 @@
 
 <div
   bind:this={headerRef}
-  data-sheet-element="header"
+  data-sheet-element="header-row"
   class:inherit-font-style={inheritFontStyle}
 >
   <div style:width="{$rowWidth}px">
@@ -51,7 +51,7 @@
 </div>
 
 <style lang="scss">
-  [data-sheet-element='header'] {
+  [data-sheet-element='header-row'] {
     min-width: 100%;
     position: relative;
     flex-grow: 0;
@@ -66,16 +66,8 @@
       height: var(--sheet-header-height, 32px);
     }
 
-    :global([data-sheet-element='cell']) {
-      border-bottom: none;
-      background: var(--slate-100);
-      font-size: var(--text-size-small);
-      font-weight: 500;
-      overflow: hidden;
-    }
-
     &.inherit-font-style {
-      :global([data-sheet-element='cell']) {
+      :global([data-sheet-element='column-header-cell']) {
         font-size: inherit;
         font-weight: inherit;
       }

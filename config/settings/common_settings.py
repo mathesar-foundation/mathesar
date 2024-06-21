@@ -65,7 +65,10 @@ MIDDLEWARE = [
 ROOT_URLCONF = "config.urls"
 
 MODERNRPC_METHODS_MODULES = [
-    'mathesar.rpc.connections'
+    'mathesar.rpc.connections',
+    'mathesar.rpc.columns',
+    'mathesar.rpc.schemas',
+    'mathesar.rpc.tables'
 ]
 
 TEMPLATES = [
@@ -243,6 +246,8 @@ MATHESAR_CLIENT_DEV_URL = decouple_config(
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # UI source files have to be served by Django in order for static assets to be included during dev mode
 # https://vitejs.dev/guide/assets.html

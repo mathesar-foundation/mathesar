@@ -65,6 +65,8 @@ export class Display {
 
   displayableRecords: Readable<Row[]>;
 
+  placeholderRowId: Readable<string>;
+
   constructor(
     meta: Meta,
     columnsDataStore: ColumnsDataStore,
@@ -100,6 +102,9 @@ export class Display {
       ),
     );
 
+    const placeholderRowId = writable('');
+    this.placeholderRowId = placeholderRowId;
+
     const { savedRecordRowsWithGroupHeaders, newRecords } = this.recordsData;
     this.displayableRecords = derived(
       [savedRecordRowsWithGroupHeaders, newRecords],
@@ -122,11 +127,24 @@ export class Display {
             })
             .concat($newRecords);
         }
-        allRecords = allRecords.concat({
+        const placeholderRow = {
           ...this.recordsData.getNewEmptyRecord(),
           rowIndex: savedRecords.length + $newRecords.length,
           isAddPlaceholder: true,
-        });
+        };
+
+        // This is really hacky! We have a side effect (mutating state) within a
+        // derived store, which I don't like. I put this here during a large
+        // refactor of the cell selection code because the Plane needs to know
+        // the id of the placeholder row since cell selection behaves
+        // differently in the placeholder row. I think we have some major
+        // refactoring to do across all the code that handles "rows" and
+        // "records" and things like that. There is a ton of mess there and I
+        // didn't want to lump any of that refactoring into an already-large
+        // refactor.
+        placeholderRowId.set(placeholderRow.identifier);
+
+        allRecords = allRecords.concat(placeholderRow);
         return allRecords;
       },
     );

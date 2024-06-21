@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 from django.core.cache import cache
 
-from mathesar.models.base import Database, Schema, Table, schema_utils
+from mathesar.models.deprecated import Connection, Schema, Table, schema_utils
 from mathesar.utils.models import attempt_dumb_query
 
 
@@ -50,14 +50,14 @@ def test_schema_name_handles_missing(monkeypatch, test_db_model):
     assert name_ == 'MISSING'
 
 
-@pytest.mark.parametrize("model", [Database, Schema, Table])
+@pytest.mark.parametrize("model", [Connection, Schema, Table])
 def test_model_queryset_reflects_db_objects(model):
     with patch('mathesar.state.base.reflect_db_objects') as mock_reflect:
         model.objects.all()
     mock_reflect.assert_called()
 
 
-@pytest.mark.parametrize("model", [Database, Schema, Table])
+@pytest.mark.parametrize("model", [Connection, Schema, Table])
 def test_model_current_queryset_does_not_reflects_db_objects(model):
     with patch('mathesar.state.base.reflect_db_objects') as mock_reflect:
         model.current_objects.all()
@@ -78,5 +78,5 @@ def test_database_engine_cache_stability(FUN_create_dj_db, iteration, uid):
     del iteration  # An unused parameter
     some_db_name = uid
     FUN_create_dj_db(some_db_name)
-    db_model = Database.objects.get(name=some_db_name)
+    db_model = Connection.objects.get(name=some_db_name)
     attempt_dumb_query(db_model._sa_engine)

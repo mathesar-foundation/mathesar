@@ -22,8 +22,8 @@ from db.schemas.utils import get_schema_oid_from_name
 
 import mathesar.tests.conftest
 from mathesar.imports.base import create_table_from_data_file
-from mathesar.models.base import Schema, Table, Database, DataFile
-from mathesar.models.base import Column as mathesar_model_column
+from mathesar.models.deprecated import Schema, Table, Connection, DataFile
+from mathesar.models.deprecated import Column as mathesar_model_column
 from mathesar.models.users import DatabaseRole, SchemaRole, User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
@@ -102,7 +102,7 @@ def create_dj_db(request):
         create_db(db_name)
         add_db_to_dj_settings(db_name)
         credentials = settings.DATABASES.get(db_name)
-        database_model = Database.current_objects.create(
+        database_model = Connection.current_objects.create(
             name=db_name,
             db_name=db_name,
             username=credentials['USER'],
@@ -132,7 +132,7 @@ def test_db_model(request, test_db_name, django_db_blocker):
     add_db_to_dj_settings(test_db_name)
     with django_db_blocker.unblock():
         credentials = settings.DATABASES.get(test_db_name)
-        database_model = Database.current_objects.create(
+        database_model = Connection.current_objects.create(
             name=test_db_name,
             db_name=test_db_name,
             username=credentials['USER'],
