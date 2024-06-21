@@ -68,6 +68,7 @@ To use an RPC function:
       - delete
       - patch
       - import_
+      - get_import_preview
       - TableInfo
       - SettableTableInfo
 
@@ -80,8 +81,10 @@ To use an RPC function:
       - add
       - patch
       - delete
-      - ColumnListReturn
       - ColumnInfo
+      - ColumnListReturn
+      - CreatableColumnInfo
+      - PreviewableColumnInfo
       - SettableColumnInfo
       - TypeOptions
       - ColumnDefault

@@ -212,7 +212,7 @@ def get_import_preview(
     database_id: int,
     limit: int = 20,
     **kwargs
-):
+) -> list[dict]:
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return get_preview(table_oid, columns, conn, limit)
