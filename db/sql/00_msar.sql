@@ -2300,23 +2300,32 @@ Add a table, with a default id column, returning the OID of the created table.
 
 Args:
   sch_oid: The OID of the schema where the table will be created.
-  tab_name: The unquoted name for the new table.
+  tab_name (optional): The unquoted name for the new table.
   col_defs (optional): The columns for the new table, in order.
   con_defs (optional): The constraints for the new table.
   comment_ (optional): The comment for the new table.
 
-Note that even if col_defs is null, we will still create a table with a default 'id' column. Also,
+Note that if tab_name is null, the table will be created with a name in the format 'Table <n>'.
+If col_defs is null, the table will still be created with a default 'id' column. Also,
 if an 'id' column is given in the input, it will be replaced with our default 'id' column. This is
 the behavior of the current python functions, so we're keeping it for now. In any case, the created
 table will always have our default 'id' column as its first column.
 */
 DECLARE
+  schema_name text;
+  table_count integer;
   fq_table_name text;
   created_table_id oid;
   column_defs __msar.col_def[];
   constraint_defs __msar.con_def[];
 BEGIN
-  fq_table_name := format('%I.%I', msar.get_schema_name(sch_oid), tab_name);
+  schema_name := __msar.get_schema_name(sch_oid);
+  IF NULLIF(tab_name, '') IS NOT NULL THEN
+    fq_table_name := format('%s.%s', schema_name, quote_ident(tab_name));
+  ELSE
+    SELECT COUNT(*) INTO table_count FROM pg_catalog.pg_class WHERE relkind = 'r' AND relnamespace = sch_oid;
+    fq_table_name := format('%s.%s', schema_name, quote_ident('Table ' || (table_count + 1)));
+  END IF;
   column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
   constraint_defs := msar.process_con_def_jsonb(0, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
