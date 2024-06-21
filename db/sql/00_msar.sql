@@ -2352,7 +2352,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION
 msar.prepare_table_for_import(
-  sch_oid oid,
+  sch_id oid,
   tab_name text,
   col_defs jsonb,
   comment_ text
@@ -2367,7 +2367,7 @@ Each returned JSON object will have the form:
   }
 
 Args:
-  sch_oid: The OID of the schema where the table will be created.
+  sch_id: The OID of the schema where the table will be created.
   tab_name: The unquoted name for the new table.
   col_defs: The columns for the new table, in order.
   comment_ (optional): The comment for the new table.
@@ -2377,7 +2377,7 @@ DECLARE
   rel_name text;
   rel_id oid;
 BEGIN
-  rel_id := msar.add_mathesar_table(sch_oid, tab_name, col_defs, NULL, comment_);
+  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_);
   SELECT nspname, relname INTO sch_name, rel_name
   FROM pg_catalog.pg_class AS pgc
   LEFT JOIN pg_catalog.pg_namespace AS pgn
