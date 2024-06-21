@@ -1313,7 +1313,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 DROP TYPE IF EXISTS __msar.col_def CASCADE;
 CREATE TYPE __msar.col_def AS (
   name_ text, -- The name of the column to create, quoted.
-  type_ jsonb, -- The type of the column to create, fully specced with arguments.
+  type_ text, -- The type of the column to create, fully specced with arguments.
   not_null boolean, -- A boolean to describe whether the column is nullable or not.
   default_ text, -- Text SQL giving the default value for the column.
   identity_ boolean, -- A boolean giving whether the column is an identity pkey column.
