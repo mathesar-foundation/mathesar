@@ -1451,6 +1451,19 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_noname() RETURNS SETOF TEXT AS $f$
+DECLARE
+  generated_name text := 'Table 1';
+BEGIN
+  PERFORM __setup_create_table();
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, null, null, null, null
+  );
+  RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_mathesar_table_columns() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_defs jsonb := $j$[
