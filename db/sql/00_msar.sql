@@ -2419,7 +2419,9 @@ BEGIN
   WITH preview_cte AS (
     SELECT string_agg(
       'CAST(' ||
-      __msar.build_cast_expr(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer), col_cast -> 'type' ->> 'name') ||
+      __msar.build_cast_expr(
+        msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer), col_cast -> 'type' ->> 'name'
+      ) ||
       ' AS ' ||
       msar.build_type_text(col_cast -> 'type') ||
       ')'|| ' AS ' || msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer),
@@ -2428,12 +2430,8 @@ BEGIN
     FROM jsonb_array_elements(col_cast_def) AS col_cast
     WHERE NOT msar.is_mathesar_id_column(tab_id, (col_cast ->> 'attnum')::integer)
   )
-  SELECT
-    CASE WHEN rec_limit IS NOT NULL THEN
-      format('SELECT id, %s FROM %s LIMIT %s', cast_expr, tab_name, rec_limit)
-    ELSE
-      format('SELECT id, %s FROM %s', cast_expr, tab_name)
-    END
+  SELECT 
+    format('SELECT id, %s FROM %s LIMIT %L', cast_expr, tab_name, rec_limit)
   INTO sel_query FROM preview_cte;
   RETURN __msar.exec_dql(sel_query);
 END;
