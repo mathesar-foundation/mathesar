@@ -2319,7 +2319,7 @@ DECLARE
   column_defs __msar.col_def[];
   constraint_defs __msar.con_def[];
 BEGIN
-  schema_name := __msar.get_schema_name(sch_oid);
+  schema_name := msar.get_schema_name(sch_oid);
   IF NULLIF(tab_name, '') IS NOT NULL THEN
     fq_table_name := format('%s.%s', schema_name, quote_ident(tab_name));
   ELSE
