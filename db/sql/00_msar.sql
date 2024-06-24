@@ -144,7 +144,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.exec_dql(command_template text, arguments variadic anynonarray) RETURNS jsonb AS $$/*
+__msar.exec_dql(command_template text, arguments variadic anyarray) RETURNS jsonb AS $$/*
 Execute a templated command, returning a JSON object describing the records in the following form:
 [ 
   {"id": 1, "col1_name": "value1", "col2_name": "value2"},
