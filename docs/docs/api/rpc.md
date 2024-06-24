@@ -79,7 +79,6 @@ To use an RPC function:
       - add
       - patch
       - delete
-      - ColumnListReturn
       - ColumnInfo
       - SettableColumnInfo
       - TypeOptions

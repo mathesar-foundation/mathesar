@@ -66,74 +66,43 @@ def test_columns_list(rf, monkeypatch):
             },
         ]
 
-    def mock_display_options(_database_id, _table_oid, attnums, user):
-        if (
-                database_id != 2
-                or table_oid != 23457
-                or attnums != (1, 2, 4, 8, 10)
-                or user.username != 'alice'
-        ):
-            raise AssertionError("incorrect parameters passed")
-        return [
-            {
-                'id': 4,
-                'use_grouping': 'true',
-                'number_format': 'english',
-                'show_as_percentage': False,
-                'maximum_fraction_digits': 2,
-                'minimum_fraction_digits': 2
-            }
-        ]
     monkeypatch.setattr(columns.base, 'connect', mock_connect)
     monkeypatch.setattr(columns.base, 'get_column_info_for_table', mock_column_info)
-    monkeypatch.setattr(columns.base, 'get_raw_display_options', mock_display_options)
-    expect_col_list = {
-        'column_info': (
-            {
-                'id': 1, 'name': 'id', 'type': 'integer',
-                'default': {'value': 'identity', 'is_dynamic': True},
-                'nullable': False, 'description': None, 'primary_key': True,
-                'type_options': None,
-                'has_dependents': True
-            }, {
-                'id': 2, 'name': 'numcol', 'type': 'numeric',
-                'default': {'value': "'8'::numeric", 'is_dynamic': False},
-                'nullable': True,
-                'description': 'My super numeric column',
-                'primary_key': False,
-                'type_options': None,
-                'has_dependents': False
-            }, {
-                'id': 4, 'name': 'numcolmod', 'type': 'numeric',
-                'default': None,
-                'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'scale': 3, 'precision': 5},
-                'has_dependents': False
-            }, {
-                'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
-                'default': None,
-                'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'fields': 'day to second'},
-                'has_dependents': False
-            }, {
-                'id': 10, 'name': 'arrcol', 'type': '_array',
-                'default': None,
-                'nullable': True, 'description': None, 'primary_key': False,
-                'type_options': {'item_type': 'character varying', 'length': 3},
-                'has_dependents': False
-            }
-        ),
-        'display_options': [
-            {
-                'id': 4,
-                'use_grouping': 'true',
-                'number_format': 'english',
-                'show_as_percentage': False,
-                'maximum_fraction_digits': 2,
-                'minimum_fraction_digits': 2
-            }
-        ]
-    }
+    expect_col_list = [
+        {
+            'id': 1, 'name': 'id', 'type': 'integer',
+            'default': {'value': 'identity', 'is_dynamic': True},
+            'nullable': False, 'description': None, 'primary_key': True,
+            'type_options': None,
+            'has_dependents': True
+        }, {
+            'id': 2, 'name': 'numcol', 'type': 'numeric',
+            'default': {'value': "'8'::numeric", 'is_dynamic': False},
+            'nullable': True,
+            'description': 'My super numeric column',
+            'primary_key': False,
+            'type_options': None,
+            'has_dependents': False
+        }, {
+            'id': 4, 'name': 'numcolmod', 'type': 'numeric',
+            'default': None,
+            'nullable': True, 'description': None, 'primary_key': False,
+            'type_options': {'scale': 3, 'precision': 5},
+            'has_dependents': False
+        }, {
+            'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
+            'default': None,
+            'nullable': True, 'description': None, 'primary_key': False,
+            'type_options': {'fields': 'day to second'},
+            'has_dependents': False
+        }, {
+            'id': 10, 'name': 'arrcol', 'type': '_array',
+            'default': None,
+            'nullable': True, 'description': None, 'primary_key': False,
+            'type_options': {'item_type': 'character varying', 'length': 3},
+            'has_dependents': False
+        }
+    ]
     actual_col_list = columns.list_(table_oid=23457, database_id=2, request=request)
     assert actual_col_list == expect_col_list
 
