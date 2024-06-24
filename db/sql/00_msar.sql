@@ -2314,6 +2314,7 @@ table will always have our default 'id' column as its first column.
 DECLARE
   schema_name text;
   table_count integer;
+  uq_table_name text;
   fq_table_name text;
   created_table_id oid;
   column_defs __msar.col_def[];
@@ -2323,8 +2324,19 @@ BEGIN
   IF NULLIF(tab_name, '') IS NOT NULL THEN
     fq_table_name := format('%I.%I', schema_name, tab_name);
   ELSE
-    SELECT COUNT(*) INTO table_count FROM pg_catalog.pg_class WHERE relkind = 'r' AND relnamespace = sch_id;
-    fq_table_name := format('%I.%I', schema_name, 'Table ' || (table_count + 1));
+    -- generate a table name if one doesn't exist
+    SELECT COUNT(*) + 1 INTO table_count
+    FROM pg_catalog.pg_class
+    WHERE relkind = 'r' AND relnamespace = sch_id;
+    uq_table_name := 'Table ' || table_count;
+    -- avoid name collisions
+    WHILE EXISTS (
+      SELECT oid FROM pg_catalog.pg_class WHERE relname = uq_table_name AND relnamespace = sch_id
+    ) LOOP
+      table_count := table_count + 1;
+      uq_table_name := 'Table ' || table_count;
+    END LOOP;
+    fq_table_name := format('%I.%I', schema_name, uq_table_name);
   END IF;
   column_defs := msar.process_col_def_jsonb(0, col_defs, false, true);
   constraint_defs := msar.process_con_def_jsonb(0, con_defs);
