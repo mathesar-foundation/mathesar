@@ -208,11 +208,23 @@ def import_(
 def get_import_preview(
     *,
     table_oid: int,
-    columns: PreviewableColumnInfo,
+    columns: list[PreviewableColumnInfo],
     database_id: int,
     limit: int = 20,
     **kwargs
 ) -> list[dict]:
+    """
+    Preview an imported table.
+
+    Args:
+        table_oid: Identity of the imported table in the user's database.
+        columns: List of settings describing the casts to be applied to the columns.
+        database_id: The Django id of the database containing the table.
+        limit: The upper limit for the number of records to return.
+
+    Returns:
+        The records from the specified columns of the table.
+    """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return get_preview(table_oid, columns, conn, limit)

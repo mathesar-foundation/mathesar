@@ -97,5 +97,16 @@ def insert_csv_records(
 
 
 def get_preview(table_oid, column_list, conn, limit=20):
+    """
+    Preview an imported table. Returning the records from the specified columns of the table.
+
+    Args:
+        table_oid: Identity of the imported table in the user's database.
+        column_list: List of settings describing the casts to be applied to the columns.
+        limit: The upper limit for the number of records to return.
+
+    Note that these casts are temporary and do not alter the data in the underlying table,
+    if you wish to alter these settings permanantly for the columns see tables/alter.py.
+    """
     transformed_column_data = [_transform_column_alter_dict(col) for col in column_list]
     return exec_msar_func(conn, 'get_preview', table_oid, json.dumps(transformed_column_data), limit).fetchone()[0]
