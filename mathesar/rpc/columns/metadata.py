@@ -52,24 +52,24 @@ class ColumnMetaData(TypedDict):
     duration_show_units: Optional[bool]
 
     @classmethod
-    def from_db_model(cls, db_model):
+    def from_model(cls, model):
         return cls(
-            database_id=db_model.database.id,
-            table_oid=db_model.table_oid,
-            attnum=db_model.attnum,
-            bool_input=db_model.bool_input,
-            bool_true=db_model.bool_true,
-            bool_false=db_model.bool_false,
-            num_min_frac_digits=db_model.num_min_frac_digits,
-            num_max_frac_digits=db_model.num_max_frac_digits,
-            num_show_as_perc=db_model.num_show_as_perc,
-            mon_currency_symbol=db_model.mon_currency_symbol,
-            mon_currency_location=db_model.mon_currency_location,
-            time_format=db_model.time_format,
-            date_format=db_model.date_format,
-            duration_min=db_model.duration_min,
-            duration_max=db_model.duration_max,
-            duration_show_units=db_model.duration_show_units,
+            database_id=model.database.id,
+            table_oid=model.table_oid,
+            attnum=model.attnum,
+            bool_input=model.bool_input,
+            bool_true=model.bool_true,
+            bool_false=model.bool_false,
+            num_min_frac_digits=model.num_min_frac_digits,
+            num_max_frac_digits=model.num_max_frac_digits,
+            num_show_as_perc=model.num_show_as_perc,
+            mon_currency_symbol=model.mon_currency_symbol,
+            mon_currency_location=model.mon_currency_location,
+            time_format=model.time_format,
+            date_format=model.date_format,
+            duration_min=model.duration_min,
+            duration_max=model.duration_max,
+            duration_show_units=model.duration_show_units,
         )
 
 
@@ -89,5 +89,5 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnMetaData]
     """
     columns_meta_data = get_columns_meta_data(table_oid, database_id)
     return [
-        ColumnMetaData.from_db_model(db_model) for db_model in columns_meta_data
+        ColumnMetaData.from_model(model) for model in columns_meta_data
     ]
