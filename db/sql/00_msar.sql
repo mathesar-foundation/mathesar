@@ -230,7 +230,7 @@ CREATE OR REPLACE FUNCTION
 msar.get_column_name(rel_id oid, col_name text) RETURNS text AS $$/*
 Return the UNQUOTED name for a given column in a given relation (e.g., table).
 
-More precisely, this function returns the quoted name of attributes of any relation appearing in the
+More precisely, this function returns the unquoted name of attributes of any relation appearing in the
 pg_class catalog table (so you could find attributes of indices with this function). If the given
 col_name is not in the relation, we return null.
 
