@@ -1,5 +1,5 @@
 """
-This file tests the column listing function.
+This file tests the column RPC functions.
 
 Fixtures:
     rf(pytest-django): Provides mocked `Request` objects.
