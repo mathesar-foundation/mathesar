@@ -2406,10 +2406,10 @@ BEGIN
   options_sql := concat_ws(
     ' ',
     CASE WHEN header THEN 'HEADER' END,
-    CASE WHEN delimiter IS NOT NULL THEN 'DELIMITER ' || quote_literal(delimiter) END,
+    CASE WHEN NULLIF(delimiter, '') IS NOT NULL THEN 'DELIMITER ' || quote_literal(delimiter) END,
     CASE WHEN NULLIF(escapechar, '') IS NOT NULL THEN 'ESCAPE ' || quote_literal(escapechar) END,
-    CASE WHEN quotechar IS NOT NULL THEN 'QUOTE ' || quote_literal(quotechar) END,
-    CASE WHEN encoding_ IS NOT NULL THEN 'ENCODING '|| quote_literal(encoding_) END
+    CASE WHEN NULLIF(quotechar, '') IS NOT NULL THEN 'QUOTE ' || quote_literal(quotechar) END,
+    CASE WHEN NULLIF(encoding_, '') IS NOT NULL THEN 'ENCODING '|| quote_literal(encoding_) END
   );
   -- Create a properly formatted COPY SQL string
   copy_sql := format('COPY %I.%I (%s) FROM STDIN CSV %s', sch_name, rel_name, col_names_sql, options_sql);
