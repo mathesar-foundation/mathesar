@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { ensureReadable } from '@mathesar-component-library';
   import type { OverflowDetails } from '@mathesar/utils/overflowObserver';
+  import { ensureReadable } from '@mathesar-component-library';
+
   import type {
-    CellLayoutRowType,
     CellLayoutColumnType,
+    CellLayoutRowType,
   } from './recordSelectorUtils';
 
   export let rowType: CellLayoutRowType;

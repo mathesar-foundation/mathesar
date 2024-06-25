@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import { iconExpandDown } from '@mathesar-component-library-dir/common/icons';
   import type { Appearance } from '@mathesar-component-library-dir/commonTypes';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
 
   export let isOpen = false;
   export let triggerAppearance: Appearance = 'default';

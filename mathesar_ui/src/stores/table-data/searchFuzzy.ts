@@ -1,4 +1,4 @@
-import type { GetRequestParams } from '@mathesar/api/types/tables/records';
+import type { GetRequestParams } from '@mathesar/api/rest/types/tables/records';
 import { ImmutableMap } from '@mathesar/component-library';
 
 /**

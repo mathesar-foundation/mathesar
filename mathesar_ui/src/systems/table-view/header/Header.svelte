@@ -1,23 +1,27 @@
 <script lang="ts">
+  import { first } from 'iter-tools';
+
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import { ContextMenu } from '@mathesar/component-library';
   import {
-    getTabularDataStoreFromContext,
+    SheetCellResizer,
+    SheetColumnCreationCell,
+    SheetColumnHeaderCell,
+    SheetHeader,
+  } from '@mathesar/components/sheet';
+  import SheetOriginCell from '@mathesar/components/sheet/cells/SheetOriginCell.svelte';
+  import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import {
-    SheetHeader,
-    SheetCell,
-    SheetCellResizer,
-    isColumnSelected,
-  } from '@mathesar/components/sheet';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { saveColumnOrder } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { ContextMenu } from '@mathesar/component-library';
-  import HeaderCell from './header-cell/HeaderCell.svelte';
-  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
+
   import { Draggable, Droppable } from './drag-and-drop';
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
+  import HeaderCell from './header-cell/HeaderCell.svelte';
+  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -27,17 +31,7 @@
 
   $: columnOrder = columnOrder ?? [];
   $: columnOrderString = columnOrder.map(String);
-
   $: ({ selection, processedColumns } = $tabularData);
-  $: ({
-    selectedCells,
-    columnsSelectedWhenTheTableIsEmpty,
-    selectionInProgress,
-  } = selection);
-  $: selectedColumnIds = selection.getSelectedUniqueColumnsId(
-    $selectedCells,
-    $columnsSelectedWhenTheTableIsEmpty,
-  );
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
   let selectedColumnIdsOrdered: string[] = [];
@@ -55,7 +49,7 @@
     columnOrderString = columnOrderString;
     // Remove selected column IDs and keep their order
     for (const id of columnOrderString) {
-      if (selectedColumnIds.map(String).includes(id)) {
+      if ($selection.columnIds.has(id)) {
         selectedColumnIdsOrdered.push(id);
         if (!locationOfFirstDraggedColumn) {
           locationOfFirstDraggedColumn = columnOrderString.indexOf(id);
@@ -70,9 +64,8 @@
     // Early exit if a column is dropped in the same place.
     // Should only be done for single column if non-continuous selection is allowed.
     if (
-      selectedColumnIds.length > 0 &&
       columnDroppedOn &&
-      selectedColumnIds[0] === columnDroppedOn.id
+      first($selection.columnIds) === String(columnDroppedOn.id)
     ) {
       // Reset drag information
       locationOfFirstDraggedColumn = undefined;
@@ -104,84 +97,43 @@
 </script>
 
 <SheetHeader>
-  <SheetCell
-    columnIdentifierKey={ID_ROW_CONTROL_COLUMN}
-    isStatic
-    isControlCell
-    let:htmlAttributes
-    let:style
-  >
+  <SheetOriginCell columnIdentifierKey={ID_ROW_CONTROL_COLUMN}>
     <Droppable
       on:drop={() => dropColumn()}
       on:dragover={(e) => e.preventDefault()}
       locationOfFirstDraggedColumn={0}
       columnLocation={-1}
-    >
-      <div {...htmlAttributes} {style} />
-    </Droppable>
-  </SheetCell>
+    />
+  </SheetOriginCell>
 
   {#each [...$processedColumns] as [columnId, processedColumn] (columnId)}
-    <SheetCell columnIdentifierKey={columnId} let:htmlAttributes let:style>
-      <div>
-        <div {...htmlAttributes} {style}>
-          <Draggable
-            on:dragstart={() => dragColumn()}
-            column={processedColumn}
-            {selection}
-            selectionInProgress={$selectionInProgress}
-          >
-            <Droppable
-              on:drop={() => dropColumn(processedColumn)}
-              on:dragover={(e) => e.preventDefault()}
-              {locationOfFirstDraggedColumn}
-              columnLocation={columnOrderString.indexOf(columnId.toString())}
-              isSelected={isColumnSelected(
-                $selectedCells,
-                $columnsSelectedWhenTheTableIsEmpty,
-                processedColumn,
-              )}
-            >
-              <HeaderCell
-                {processedColumn}
-                isSelected={isColumnSelected(
-                  $selectedCells,
-                  $columnsSelectedWhenTheTableIsEmpty,
-                  processedColumn,
-                )}
-                on:mousedown={() =>
-                  selection.onColumnSelectionStart(processedColumn)}
-                on:mouseenter={() =>
-                  selection.onMouseEnterColumnHeaderWhileSelection(
-                    processedColumn,
-                  )}
-              />
-            </Droppable>
-          </Draggable>
-          <SheetCellResizer columnIdentifierKey={columnId} />
-          <ContextMenu>
-            <ColumnHeaderContextMenu {processedColumn} />
-          </ContextMenu>
-        </div>
-      </div>
-    </SheetCell>
+    {@const isSelected = $selection.columnIds.has(String(columnId))}
+    <SheetColumnHeaderCell columnIdentifierKey={columnId}>
+      <Draggable
+        on:dragstart={() => dragColumn()}
+        column={processedColumn}
+        {selection}
+      >
+        <Droppable
+          on:drop={() => dropColumn(processedColumn)}
+          on:dragover={(e) => e.preventDefault()}
+          {locationOfFirstDraggedColumn}
+          columnLocation={columnOrderString.indexOf(columnId.toString())}
+          {isSelected}
+        >
+          <HeaderCell {processedColumn} {isSelected} />
+        </Droppable>
+      </Draggable>
+      <SheetCellResizer columnIdentifierKey={columnId} />
+      <ContextMenu>
+        <ColumnHeaderContextMenu {processedColumn} />
+      </ContextMenu>
+    </SheetColumnHeaderCell>
   {/each}
 
   {#if hasNewColumnButton}
-    <SheetCell
-      columnIdentifierKey={ID_ADD_NEW_COLUMN}
-      let:htmlAttributes
-      let:style
-    >
-      <div {...htmlAttributes} class="new-column-cell" {style}>
-        <NewColumnCell />
-      </div>
-    </SheetCell>
+    <SheetColumnCreationCell columnIdentifierKey={ID_ADD_NEW_COLUMN}>
+      <NewColumnCell />
+    </SheetColumnCreationCell>
   {/if}
 </SheetHeader>
-
-<style lang="scss">
-  .new-column-cell {
-    padding: 0 0.2rem;
-  }
-</style>

@@ -3,19 +3,11 @@
   import { _ } from 'svelte-i18n';
 
   import {
-    CheckboxGroup,
-    NumberInput,
-    PasswordInput,
-    RadioGroup,
-    defined,
-    portalToWindowFooter,
-  } from '@mathesar-component-library';
-  import {
-    sampleDataOptions,
     type CommonCreationProps,
     type Connection,
     type SampleDataSchemaIdentifier,
-  } from '@mathesar/api/connections';
+    sampleDataOptions,
+  } from '@mathesar/api/rest/connections';
   import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
   import LabeledInput from '@mathesar/component-library/labeled-input/LabeledInput.svelte';
   import Select from '@mathesar/component-library/select/Select.svelte';
@@ -35,6 +27,15 @@
   import { connectionsStore } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
   import { getAvailableName } from '@mathesar/utils/db';
+  import {
+    CheckboxGroup,
+    NumberInput,
+    PasswordInput,
+    RadioGroup,
+    defined,
+    portalToWindowFooter,
+  } from '@mathesar-component-library';
+
   import GeneralConnection from './GeneralConnection.svelte';
   import {
     generalConnections,
@@ -130,22 +131,27 @@
       if (!connection) {
         throw new Error('Bug: $connectionToReuse is undefined');
       }
+      const connectionReference = getConnectionReference(connection);
+      const connectionId =
+        connectionReference.connection_type === 'user_database'
+          ? connectionReference.id
+          : undefined;
       return connectionsStore.createFromKnownConnection({
-        ...commonProps,
-        credentials: {
-          connection: getConnectionReference(connection),
-        },
-        create_database: $createDatabase,
+        database: commonProps.database_name,
+        nickname: commonProps.nickname,
+        sample_data: commonProps.sample_data,
+        connection_id: connectionId,
+        create_db: $createDatabase,
       });
     }
     return connectionsStore.createFromScratch({
-      ...commonProps,
-      credentials: {
-        host: $host,
-        port: String($port),
-        user: $user,
-        password: $password,
-      },
+      database: commonProps.database_name,
+      nickname: commonProps.nickname,
+      sample_data: commonProps.sample_data,
+      host: $host,
+      port: $port,
+      user: $user,
+      password: $password,
     });
   }
 

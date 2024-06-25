@@ -16,35 +16,36 @@
 import type { Readable, Unsubscriber, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
-import {
-  CancellablePromise,
-  type RecursivePartial,
-} from '@mathesar-component-library';
 import type {
   MinimalColumnDetails,
   TableEntry,
-} from '@mathesar/api/types/tables';
+} from '@mathesar/api/rest/types/tables';
+import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type {
   SplitTableRequest,
   SplitTableResponse,
-} from '@mathesar/api/types/tables/split_table';
-import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/AppTypes';
-import { invalidIf } from '@mathesar/components/form';
+} from '@mathesar/api/rest/types/tables/split_table';
 import type {
   PaginatedResponse,
   RequestStatus,
-} from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/utils/requestUtils';
 import {
   deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
-} from '@mathesar/api/utils/requestUtils';
+} from '@mathesar/api/rest/utils/requestUtils';
+import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/AppTypes';
+import { invalidIf } from '@mathesar/components/form';
+import type { AtLeastOne } from '@mathesar/typeUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
-import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
-import type { AtLeastOne } from '@mathesar/typeUtils';
-import { currentSchemaId, addCountToSchemaNumTables } from './schemas';
+import {
+  CancellablePromise,
+  type RecursivePartial,
+} from '@mathesar-component-library';
+
+import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
 

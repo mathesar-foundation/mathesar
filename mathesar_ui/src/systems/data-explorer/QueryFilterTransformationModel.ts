@@ -1,8 +1,9 @@
-import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
-import type { QueryInstanceFilterTransformation } from '@mathesar/api/types/queries';
-import { getLimitedFilterInformationById } from '@mathesar/stores/abstract-types';
+import { _ } from 'svelte-i18n';
+
+import type { QueryInstanceFilterTransformation } from '@mathesar/api/rest/types/queries';
 import { validateFilterEntry } from '@mathesar/components/filter-entry';
+import { getLimitedFilterInformationById } from '@mathesar/stores/abstract-types';
 
 export interface QueryFilterTransformationEntry {
   columnIdentifier: string;

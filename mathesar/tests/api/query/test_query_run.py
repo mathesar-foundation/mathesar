@@ -1,7 +1,7 @@
 import pytest
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models.base import Column
+from mathesar.models.deprecated import Column
 
 run_client_with_status_code = [
     ('db_manager_client_factory', 200, 200),

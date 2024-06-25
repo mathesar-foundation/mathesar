@@ -1,5 +1,6 @@
 import type { SvelteComponent } from 'svelte';
 import type { Readable, Writable } from 'svelte/store';
+
 import type { DataTypeBasedInputType } from '@mathesar-component-library-dir/data-type-based-input/types';
 
 export interface FormInputBaseElement {

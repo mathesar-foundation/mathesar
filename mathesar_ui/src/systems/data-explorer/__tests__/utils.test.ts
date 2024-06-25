@@ -1,17 +1,18 @@
+import { getLinkFromColumn } from '../utils';
+
 import {
-  checkoutsJoinableTables,
   CheckoutsPkColumnId,
-  checkoutsLinkTreeFromItems,
-  selfRefTableJoinableTables,
   SelfRefTableFkColumnId,
-  selfRefTableLinkTree,
+  checkoutsJoinableTables,
+  checkoutsLinkTreeFromItems,
   groupTable,
-  groupTablePerson1ColumnId,
-  groupTablePerson2ColumnId,
   groupTableLinkTreeFromPerson1,
   groupTableLinkTreeFromPerson2,
+  groupTablePerson1ColumnId,
+  groupTablePerson2ColumnId,
+  selfRefTableJoinableTables,
+  selfRefTableLinkTree,
 } from './mockData';
-import { getLinkFromColumn } from '../utils';
 
 vi.mock('@mathesar/utils/preloadData', () => ({
   preloadCommonData: () => ({

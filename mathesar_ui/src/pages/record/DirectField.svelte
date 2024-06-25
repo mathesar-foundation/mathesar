@@ -1,12 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    ButtonMenuItem,
-    DropdownMenu,
-    iconExpandDown,
-    Label,
-    LabelController,
-  } from '@mathesar-component-library';
+
   import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
@@ -18,6 +12,14 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import {
+    ButtonMenuItem,
+    DropdownMenu,
+    Label,
+    LabelController,
+    iconExpandDown,
+  } from '@mathesar-component-library';
+
   import type RecordStore from './RecordStore';
 
   const userProfile = getUserProfileStoreFromContext();

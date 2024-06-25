@@ -1,20 +1,23 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import {
-    createValidationContext,
-    CancelOrProceedButtonPair,
-  } from '@mathesar-component-library';
+
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import { toast } from '@mathesar/stores/toast';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
   import {
-    type ColumnWithAbstractType,
-    type ColumnTypeOptionsSaveArgs,
-    hasTypeOptionsChanged,
-  } from './utils';
+    CancelOrProceedButtonPair,
+    createValidationContext,
+  } from '@mathesar-component-library';
+
+  import WarningBox from '../message-boxes/WarningBox.svelte';
+
   import AbstractTypeDBOptions from './AbstractTypeDBOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
-  import WarningBox from '../message-boxes/WarningBox.svelte';
+  import {
+    type ColumnTypeOptionsSaveArgs,
+    type ColumnWithAbstractType,
+    hasTypeOptionsChanged,
+  } from './utils';
 
   const dispatch = createEventDispatcher();
 

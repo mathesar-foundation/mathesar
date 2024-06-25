@@ -1,5 +1,6 @@
-import { setContext, getContext } from 'svelte';
+import { getContext, setContext } from 'svelte';
 import type { Readable } from 'svelte/store';
+
 import type { ImmutableMap } from '@mathesar-component-library/types';
 
 export interface ColumnPosition {
@@ -14,6 +15,7 @@ export interface SheetContextStores<SheetColumnIdentifierKey> {
   horizontalScrollOffset: Readable<number>;
   scrollOffset: Readable<number>;
   paddingRight: Readable<number>;
+  selectionInProgress: Readable<boolean>;
 }
 
 export interface SheetContext<SheetColumnIdentifierKey> {
@@ -71,4 +73,8 @@ export function getSheetContext<
   SheetColumnIdentifierKey,
 >(): SheetContext<SheetColumnIdentifierKey> {
   return getContext(SHEET_CONTEXT_KEY);
+}
+
+export function focusActiveCell(sheetElement: HTMLElement): void {
+  sheetElement?.querySelector<HTMLElement>('[data-active-cell]')?.focus();
 }

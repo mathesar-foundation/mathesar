@@ -1,5 +1,6 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
+
 import { currentSchema } from '@mathesar/stores/schemas';
 
 const SEPARATOR = ' | ';

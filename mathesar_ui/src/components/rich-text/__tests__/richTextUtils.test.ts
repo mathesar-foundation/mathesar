@@ -1,8 +1,8 @@
 import {
-  parse,
   type Token,
-  textToken as text,
+  parse,
   slotToken as slot,
+  textToken as text,
 } from '../richTextUtils';
 
 describe('RichText', () => {

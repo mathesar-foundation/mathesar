@@ -1,12 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import {
-    getSortingLabelForColumn,
     type SortDirection,
+    getSortingLabelForColumn,
   } from '@mathesar/components/sort-entry/utils';
   import {
     iconAddFilter,
@@ -21,11 +20,12 @@
   import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
-    getTabularDataStoreFromContext,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
 
   const userProfile = getUserProfileStoreFromContext();
 

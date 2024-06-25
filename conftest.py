@@ -13,8 +13,8 @@ from sqlalchemy_utils import database_exists, create_database, drop_database
 from db.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
 from db.types import install
 from db.sql import install as sql_install
-from db.schemas.operations.drop import drop_schema as drop_sa_schema
-from db.schemas.operations.create import create_schema as create_sa_schema
+from db.schemas.operations.drop import drop_schema_via_name as drop_sa_schema
+from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 
 from fixtures.utils import create_scoped_fixtures
@@ -210,7 +210,7 @@ def create_db_schema(SES_engine_cache):
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
         logger.debug(f'creating {schema_name}')
-        create_sa_schema(schema_name, engine, if_not_exists=True)
+        create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
         schema_oid = get_schema_oid_from_name(schema_name, engine)
         db_name = engine.url.database
         created_schemas_in_this_engine = created_schemas.setdefault(db_name, {})
@@ -225,7 +225,7 @@ def create_db_schema(SES_engine_cache):
                 # Handle schemas being renamed during test
                 schema_name = get_schema_name_from_oid(schema_oid, engine)
                 if schema_name:
-                    drop_sa_schema(schema_name, engine, cascade=True, if_exists=True)
+                    drop_sa_schema(engine, schema_name, cascade=True)
                     logger.debug(f'dropping {schema_name}')
         except OperationalError as e:
             logger.debug(f'ignoring operational error: {e}')

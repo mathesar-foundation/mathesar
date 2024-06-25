@@ -5,7 +5,7 @@ from sqlalchemy import text
 from db.metadata import get_empty_metadata
 from mathesar.models.users import DatabaseRole
 from mathesar.state.django import reflect_db_objects
-from mathesar.models.base import Table, Schema, Database
+from mathesar.models.deprecated import Table, Schema, Connection
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from db.install import install_mathesar
@@ -50,7 +50,7 @@ def test_db_name(worker_id):
 @pytest.fixture
 def db_dj_model(test_db_name):
     _recreate_db(test_db_name)
-    db = Database.objects.get_or_create(
+    db = Connection.objects.get_or_create(
         name=test_db_name,
         defaults={
             'db_name': test_db_name,
@@ -70,7 +70,7 @@ def test_database_reflection_delete(db_dj_model):
     assert db_dj_model.deleted is False  # check DB is not marked deleted inappropriately
     _remove_db(db_dj_model.name)
     reflect_db_objects(get_empty_metadata())
-    fresh_db_model = Database.objects.get(name=db_dj_model.name)
+    fresh_db_model = Connection.objects.get(name=db_dj_model.name)
     assert fresh_db_model.deleted is True  # check DB is marked deleted appropriately
 
 
@@ -166,7 +166,7 @@ def test_delete_dbconn_with_msar_schemas(client, db_dj_model):
         after_deletion = conn.execute(check_schema_exists)
 
     with pytest.raises(ObjectDoesNotExist):
-        Database.objects.get(id=db_dj_model.id)
+        Connection.objects.get(id=db_dj_model.id)
     assert response.status_code == 204
     assert before_deletion.rowcount == 3
     assert after_deletion.rowcount == 0

@@ -1,19 +1,14 @@
 import {
-  derived,
-  get,
-  writable,
   type Readable,
   type Unsubscriber,
   type Writable,
+  derived,
+  get,
+  writable,
 } from 'svelte/store';
 
-import {
-  getGloballyUniqueId,
-  isDefinedNonNullable,
-  type CancellablePromise,
-} from '@mathesar-component-library';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   GetRequestParams as ApiGetRequestParams,
   Group as ApiGroup,
@@ -21,19 +16,25 @@ import type {
   Result as ApiRecord,
   Response as ApiRecordsResponse,
   GroupingMode,
-} from '@mathesar/api/types/tables/records';
+} from '@mathesar/api/rest/types/tables/records';
 import {
   States,
   deleteAPI,
   getAPI,
+  getQueryStringFromParams,
   patchAPI,
   postAPI,
-  getQueryStringFromParams,
-} from '@mathesar/api/utils/requestUtils';
-import type Pagination from '@mathesar/utils/Pagination';
+} from '@mathesar/api/rest/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
+import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
+import {
+  type CancellablePromise,
+  getGloballyUniqueId,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
+
 import type { ColumnsDataStore } from './columns';
 import type { Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
@@ -174,13 +175,16 @@ export function filterRecordRows(rows: Row[]): RecordRow[] {
 export function rowHasSavedRecord(row: Row): row is RecordRow {
   return rowHasRecord(row) && Object.entries(row.record).length > 0;
 }
-
 export interface TableRecordsData {
   state: States;
   error?: string;
   savedRecordRowsWithGroupHeaders: Row[];
   totalCount: number;
   grouping?: RecordGrouping;
+}
+
+export function getRowSelectionId(row: Row): string {
+  return row.identifier;
 }
 
 export function getRowKey(row: Row, primaryKeyColumnId?: Column['id']): string {
@@ -299,6 +303,9 @@ export class RecordsData {
 
   error: Writable<string | undefined>;
 
+  /** Keys are row selection ids */
+  selectableRowsMap: Readable<Map<string, RecordRow>>;
+
   private promise: CancellablePromise<ApiRecordsResponse> | undefined;
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
@@ -354,6 +361,14 @@ export class RecordsData {
     this.url = `/api/db/v0/tables/${this.tableId}/records/`;
     void this.fetch();
 
+    this.selectableRowsMap = derived(
+      [this.savedRecords, this.newRecords],
+      ([savedRecords, newRecords]) => {
+        const records = [...savedRecords, ...newRecords];
+        return new Map(records.map((r) => [getRowSelectionId(r), r]));
+      },
+    );
+
     // TODO: Create base class to abstract subscriptions and unsubscriptions
     this.requestParamsUnsubscriber =
       this.meta.recordsRequestParamsData.subscribe(() => {
@@ -362,35 +377,31 @@ export class RecordsData {
   }
 
   async fetch(
-    retainExistingRows = false,
+    opts: {
+      clearNewRecords?: boolean;
+      setLoadingState?: boolean;
+      clearMetaStatuses?: boolean;
+    } = {},
   ): Promise<TableRecordsData | undefined> {
+    const options = {
+      clearNewRecords: true,
+      setLoadingState: true,
+      clearMetaStatuses: true,
+      ...opts,
+    };
+
     this.promise?.cancel();
     const { offset } = get(this.meta.pagination);
 
-    this.savedRecordRowsWithGroupHeaders.update((existingData) => {
-      let data = [...existingData];
-      data.length = Math.min(data.length, get(this.meta.pagination).size);
-
-      let index = -1;
-      data = data.map((entry) => {
-        index += 1;
-        if (!retainExistingRows || !entry) {
-          return {
-            state: 'loading',
-            identifier: generateRowIdentifier('dummy', offset, index),
-            rowIndex: index,
-            record: {},
-          };
-        }
-        return entry;
-      });
-
-      return data;
-    });
     this.error.set(undefined);
-    if (!retainExistingRows) {
-      this.state.set(States.Loading);
+
+    if (options.clearNewRecords) {
       this.newRecords.set([]);
+    }
+    if (options.setLoadingState) {
+      this.state.set(States.Loading);
+    }
+    if (options.clearMetaStatuses) {
       this.meta.clearAllStatusesAndErrors();
     }
 
@@ -443,22 +454,23 @@ export class RecordsData {
     return undefined;
   }
 
-  async deleteSelected(selectedRowIndices: number[]): Promise<void> {
-    const recordRows = this.getRecordRows();
+  async deleteSelected(rowSelectionIds: Iterable<string>): Promise<void> {
+    const ids =
+      typeof rowSelectionIds === 'string' ? [rowSelectionIds] : rowSelectionIds;
     const pkColumn = get(this.columnsDataStore.pkColumn);
     const primaryKeysOfSavedRows: string[] = [];
     const identifiersOfUnsavedRows: string[] = [];
-    selectedRowIndices.forEach((index) => {
-      const row = recordRows[index];
-      if (row) {
-        const rowKey = getRowKey(row, pkColumn?.id);
-        if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
-          primaryKeysOfSavedRows.push(rowKey);
-        } else {
-          identifiersOfUnsavedRows.push(rowKey);
-        }
+    const selectableRows = get(this.selectableRowsMap);
+    for (const rowId of ids) {
+      const row = selectableRows.get(rowId);
+      if (!row) continue;
+      const rowKey = getRowKey(row, pkColumn?.id);
+      if (pkColumn?.id && isDefinedNonNullable(row.record[pkColumn?.id])) {
+        primaryKeysOfSavedRows.push(rowKey);
+      } else {
+        identifiersOfUnsavedRows.push(rowKey);
       }
-    });
+    }
     const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
     if (rowKeys.length === 0) {
@@ -518,7 +530,11 @@ export class RecordsData {
     // flag instead of just re-fetching the records immediately after deleting
     // the saved records.
     if (shouldReFetchRecords) {
-      await this.fetch(true);
+      await this.fetch({
+        clearMetaStatuses: false,
+        clearNewRecords: false,
+        setLoadingState: false,
+      });
     }
 
     this.meta.rowCreationStatus.delete(Array.from(savedRecordKeys, String));

@@ -1,14 +1,16 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Button, hasProperty } from '@mathesar-component-library';
+
+  import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/rest/utils/errorCodes';
+  import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { ApiMultiError } from '@mathesar/api/utils/errors';
-  import { QUERY_CONTAINS_DELETED_COLUMN } from '@mathesar/api/utils/errorCodes';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import type QueryRunner from '../QueryRunner';
+  import { Button, hasProperty } from '@mathesar-component-library';
+
   import QueryManager from '../QueryManager';
+  import type QueryRunner from '../QueryRunner';
 
   export let queryHandler: QueryRunner | QueryManager;
   export let errors: ApiMultiError | string[];

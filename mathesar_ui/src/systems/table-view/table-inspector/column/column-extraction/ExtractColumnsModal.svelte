@@ -2,22 +2,23 @@
   import { tick } from 'svelte';
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
-  import { ControlledModal } from '@mathesar-component-library';
+
   import {
-    comboValidator,
     Field,
     FormSubmit,
+    comboValidator,
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
-    getTabularDataStoreFromContext,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import {
     getTableFromStoreOrApi,
@@ -32,7 +33,8 @@
     getSuggestedFkColumnName,
   } from '@mathesar/utils/columnUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { RichText } from '@mathesar/components/rich-text';
+  import { ControlledModal } from '@mathesar-component-library';
+
   import type { LinkedTable } from './columnExtractionTypes';
   import {
     getLinkedTables,
@@ -119,7 +121,10 @@
       // unmounting this component.
       return;
     }
-    selection.intersectSelectedRowsWithGivenColumns(_columns);
+    const columnIds = _columns.map((c) => String(c.id));
+    selection.updateWithoutFocus((s) =>
+      s.ofRowColumnIntersection(s.rowIds, columnIds),
+    );
   }
   $: handleColumnsChange($columns);
 
@@ -213,7 +218,7 @@
         // will need to modify this logic when we position the new column where
         // the old columns were.
         const newFkColumn = allColumns.slice(-1)[0];
-        selection.toggleColumnSelection(newFkColumn);
+        selection.update((s) => s.ofOneColumn(String(newFkColumn.id)));
         await tick();
         scrollBasedOnSelection();
       }

@@ -1,8 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton, Tutorial } from '@mathesar-component-library';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import { AnchorButton, Tutorial } from '@mathesar-component-library';
 
   export let database: Database;
   export let schema: SchemaEntry;

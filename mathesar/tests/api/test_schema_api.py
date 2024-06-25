@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import text
 
 from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
-from mathesar.models.base import Schema
+from mathesar.models.deprecated import Schema
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models.users import DatabaseRole
 

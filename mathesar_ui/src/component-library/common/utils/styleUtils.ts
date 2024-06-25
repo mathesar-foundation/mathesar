@@ -1,4 +1,5 @@
 import type { CssVariablesObj } from '@mathesar-component-library-dir/types';
+
 import { isDefinedNonNullable } from './typeUtils';
 
 const isCssVariable = (str: string) => str.indexOf('--') === 0;

@@ -1,14 +1,15 @@
-from mathesar.database.base import get_psycopg_connection
-from mathesar.models.base import Database
+from mathesar.models.base import UserDatabaseRoleMap
 
 
-def connect(db_id, user):
+def connect(database_id, user):
     """
-    Return a psycopg connection, given a Database model id.
+    Get a psycopg database connection.
 
     Args:
-        db_id: The Django id corresponding to the Database.
+        database_id: The Django id of the Database used for connecting.
+        user: A user model instance who'll connect to the database.
     """
-    print("User is: ", user)
-    db_model = Database.current_objects.get(id=db_id)
-    return get_psycopg_connection(db_model)
+    user_database_role = UserDatabaseRoleMap.objects.get(
+        user=user, database__id=database_id
+    )
+    return user_database_role.connection

@@ -1,11 +1,12 @@
 import type {
+  Column,
   NumberDisplayOptions,
   NumberFormat,
-  Column,
-} from '@mathesar/api/types/tables/columns';
-import type { FormValues } from '@mathesar-component-library/types';
+} from '@mathesar/api/rest/types/tables/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeNumber } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,

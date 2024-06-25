@@ -1,18 +1,19 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    getPaginationPageCount,
-    Button,
-    Icon,
-  } from '@mathesar-component-library';
-  import { States } from '@mathesar/api/utils/requestUtils';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import RefreshButton from '@mathesar/components/RefreshButton.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import {
+    Button,
+    Icon,
+    getPaginationPageCount,
+  } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
@@ -26,14 +27,8 @@
 
   export let context: 'page' | 'widget' | 'shared-consumer-page' = 'page';
 
-  $: ({
-    recordsData,
-    meta,
-    isLoading,
-    columnsDataStore,
-    constraintsDataStore,
-    selection,
-  } = $tabularData);
+  $: ({ recordsData, meta, isLoading, columnsDataStore, constraintsDataStore } =
+    $tabularData);
   $: ({ pagination } = meta);
   $: ({ size: pageSize, leftBound, rightBound } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
@@ -74,10 +69,7 @@
         disabled={$isLoading}
         size="medium"
         appearance="primary"
-        on:click={() => {
-          void recordsData.addEmptyRecord();
-          selection.selectAndActivateFirstDataEntryCellInLastRow();
-        }}
+        on:click={() => $tabularData.addEmptyRecord()}
       >
         <Icon {...iconAddNew} />
         <span>{$_('new_record')}</span>

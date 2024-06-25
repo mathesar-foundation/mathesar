@@ -9,13 +9,13 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 
 from mathesar.api.db.permissions.query import QueryAccessPolicy
-from mathesar.api.dj_filters import UIQueryFilter
+from mathesar.api.dj_filters import ExplorationFilter
 
 from mathesar.api.exceptions.query_exceptions.exceptions import DeletedColumnAccess, DeletedColumnAccessAPIException
 from mathesar.api.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.api.serializers.queries import BaseQuerySerializer, QuerySerializer
 from mathesar.api.serializers.records import RecordListParameterSerializer
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 
 
 class QueryViewSet(
@@ -30,7 +30,7 @@ class QueryViewSet(
     serializer_class = QuerySerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = UIQueryFilter
+    filterset_class = ExplorationFilter
     permission_classes = [IsAuthenticatedOrReadOnly]
     access_policy = QueryAccessPolicy
 
@@ -55,10 +55,10 @@ class QueryViewSet(
         if should_queryset_be_scoped:
             queryset = self.access_policy.scope_queryset(
                 self.request,
-                UIQuery.objects.all()
+                Exploration.objects.all()
             )
         else:
-            queryset = UIQuery.objects.all()
+            queryset = Exploration.objects.all()
         return queryset
 
     @action(methods=['get'], detail=True)
@@ -119,7 +119,7 @@ class QueryViewSet(
         paginator = TableLimitOffsetPagination()
         input_serializer = BaseQuerySerializer(data=request.data, context={'request': request})
         input_serializer.is_valid(raise_exception=True)
-        query = UIQuery(**input_serializer.validated_data)
+        query = Exploration(**input_serializer.validated_data)
         try:
             query.replace_transformations_with_processed_transformations()
             query.add_defaults_to_display_names()

@@ -1,14 +1,15 @@
+import type { QuerySummarizationFunctionId } from '@mathesar/api/rest/types/queries';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { States } from '@mathesar/api/rest/utils/requestUtils';
+import type { DbType } from '@mathesar/AppTypes';
+import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 import type {
   FormConfiguration,
   FormConfigurationVariable,
   FormValues,
   IconProps,
 } from '@mathesar-component-library/types';
-import type { DbType } from '@mathesar/AppTypes';
-import type { QuerySummarizationFunctionId } from '@mathesar/api/types/queries';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import type { States } from '@mathesar/api/utils/requestUtils';
-import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
+
 import type { abstractTypeCategory } from './constants';
 
 type AbstractTypeCategoryKeys = keyof typeof abstractTypeCategory;

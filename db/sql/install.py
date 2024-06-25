@@ -4,8 +4,8 @@ from db.connection import load_file_with_engine
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 SQL_FILES = [
-    '0_msar.sql',
-    '3_msar_custom_aggregates.sql',
+    '00_msar.sql',
+    '30_msar_custom_aggregates.sql',
 ]
 
 

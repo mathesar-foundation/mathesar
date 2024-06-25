@@ -1,14 +1,15 @@
-import { isDefinedNonNullable } from '@mathesar-component-library';
-import type { TimeDisplayOptions } from '@mathesar/api/types/tables/columns';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type { TimeDisplayOptions } from '@mathesar/api/rest/types/tables/columns';
 import {
   DateTimeFormatter,
   DateTimeSpecification,
 } from '@mathesar/utils/date-time';
-import type { DateTimeCellExternalProps } from './components/typeDefinitions';
-import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
+import { isDefinedNonNullable } from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import DateTimeCell from './components/date-time/DateTimeCell.svelte';
 import DateTimeInput from './components/date-time/DateTimeInput.svelte';
+import type { DateTimeCellExternalProps } from './components/typeDefinitions';
+import type { CellColumnLike, CellComponentFactory } from './typeDefinitions';
 
 export interface TimeLikeColumn extends CellColumnLike {
   display_options: Partial<TimeDisplayOptions> | null;

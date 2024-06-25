@@ -1,5 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
 </script>

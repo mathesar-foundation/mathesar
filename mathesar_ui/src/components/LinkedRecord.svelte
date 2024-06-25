@@ -1,9 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import { iconDeleteMinor } from '@mathesar/icons';
   import { Icon } from '@mathesar-component-library';
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
-  import { iconDeleteMinor } from '@mathesar/icons';
+
   import RecordSummary from './RecordSummary.svelte';
 
   const dispatch = createEventDispatcher();

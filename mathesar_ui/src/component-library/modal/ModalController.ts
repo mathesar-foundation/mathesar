@@ -1,11 +1,12 @@
 import type {
-  Writable,
   Readable,
   Subscriber,
   Unsubscriber,
   Updater,
+  Writable,
 } from 'svelte/store';
 import { derived } from 'svelte/store';
+
 import type ModalStack from './ModalStack';
 
 /**

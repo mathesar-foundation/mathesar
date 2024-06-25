@@ -1,5 +1,6 @@
 <script lang="ts">
   import Label from '@mathesar-component-library-dir/label/Label.svelte';
+
   import type { LabeledInputLayout } from './LabeledInputTypes';
 
   export let label: string | undefined = undefined;

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Icon, Button } from '@mathesar-component-library';
+
+  import { Button, Icon } from '@mathesar-component-library';
   import { iconVerticallyCollapsed } from '@mathesar-component-library-dir/common/icons';
 
   type TreeItem = $$Generic;

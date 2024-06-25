@@ -1,9 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type QueryRunner from '../QueryRunner';
+
   import type QueryManager from '../QueryManager';
-  import Results from './Results.svelte';
+  import type QueryRunner from '../QueryRunner';
+
   import QueryRefreshButton from './QueryRefreshButton.svelte';
+  import Results from './Results.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
 </script>

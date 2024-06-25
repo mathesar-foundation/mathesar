@@ -2,8 +2,8 @@ import {
   type Readable,
   type Subscriber,
   type Unsubscriber,
-  readable,
   derived,
+  readable,
 } from 'svelte/store';
 
 export function isReadable<T>(v: Readable<T> | T): v is Readable<T> {

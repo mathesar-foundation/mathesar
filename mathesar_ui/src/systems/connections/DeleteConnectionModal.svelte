@@ -1,24 +1,23 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import {
-    Checkbox,
-    ControlledModal,
-    LabeledInput,
-    ModalController,
-    CancelOrProceedButtonPair,
-  } from '@mathesar-component-library';
-  import DocsLink from '@mathesar/components/DocsLink.svelte';
+
+  import type { Connection } from '@mathesar/api/rest/connections';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
-  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
-  import type { Connection } from '@mathesar/api/connections';
   import {
     connectionHasUniqueDatabaseReference,
     connectionsStore,
   } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import {
+    CancelOrProceedButtonPair,
+    Checkbox,
+    ControlledModal,
+    LabeledInput,
+    ModalController,
+  } from '@mathesar-component-library';
 
   const { connections } = connectionsStore;
   const dispatch = createEventDispatcher<{ delete: undefined }>();

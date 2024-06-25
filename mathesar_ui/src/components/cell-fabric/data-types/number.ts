@@ -1,13 +1,14 @@
-import {
-  isDefinedNonNullable,
-  StringifiedNumberFormatter,
-} from '@mathesar-component-library';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type {
   NumberColumn,
   NumberDisplayOptions,
   NumberFormat,
-} from '@mathesar/api/types/tables/columns';
+} from '@mathesar/api/rest/types/tables/columns';
+import {
+  StringifiedNumberFormatter,
+  isDefinedNonNullable,
+} from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import NumberCell from './components/number/NumberCell.svelte';
 import NumberCellInput from './components/number/NumberCellInput.svelte';
 import type { NumberCellExternalProps } from './components/typeDefinitions';

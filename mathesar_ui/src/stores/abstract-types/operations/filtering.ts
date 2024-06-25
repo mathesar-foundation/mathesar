@@ -1,9 +1,9 @@
 import { abstractTypeCategory } from '../constants';
 import type {
   AbstractTypeCategoryIdentifier,
-  AbstractTypeFilterDefinitionResponse,
-  AbstractTypeFilterDefinitionMap,
   AbstractTypeFilterDefinition,
+  AbstractTypeFilterDefinitionMap,
+  AbstractTypeFilterDefinitionResponse,
   AbstractTypeLimitedFilterInformation,
 } from '../types';
 

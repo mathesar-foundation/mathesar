@@ -1,4 +1,4 @@
-import { assertExhaustive } from './typeUtils';
+import { assertExhaustive } from '@mathesar-component-library';
 
 export function makeSingular(word: string): string {
   return word.length > 1 ? word.replace(/s$/i, '') : word;

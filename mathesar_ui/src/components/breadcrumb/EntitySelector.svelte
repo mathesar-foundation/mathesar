@@ -1,22 +1,24 @@
 <script lang="ts">
-  import { meta } from 'tinro';
   import { _ } from 'svelte-i18n';
+  import { meta } from 'tinro';
+
+  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { iconTable } from '@mathesar/icons';
+  import { getExplorationPageUrl } from '@mathesar/routes/urls';
+  import { queries as queriesStore } from '@mathesar/stores/queries';
   import {
     currentTableId,
     tables as tablesStore,
   } from '@mathesar/stores/tables';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { getExplorationPageUrl } from '@mathesar/routes/urls';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { iconTable } from '@mathesar/icons';
-  import { queries as queriesStore } from '@mathesar/stores/queries';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
+
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
     BreadcrumbSelectorEntry,
-    SimpleBreadcrumbSelectorEntry,
     BreadcrumbSelectorEntryForTable,
+    SimpleBreadcrumbSelectorEntry,
   } from './breadcrumbTypes';
 
   export let database: Database;

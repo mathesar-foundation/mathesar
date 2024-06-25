@@ -5,11 +5,12 @@
     faExclamationTriangle,
   } from '@fortawesome/free-solid-svg-icons';
   import { onMount } from 'svelte';
+
   import Button from '../../button/Button.svelte';
-  import ToastPresenter from '../ToastPresenter.svelte';
-  import { ToastController } from '../ToastController';
-  import Select from '../../select/Select.svelte';
   import Icon from '../../icon/Icon.svelte';
+  import Select from '../../select/Select.svelte';
+  import { ToastController } from '../ToastController';
+  import ToastPresenter from '../ToastPresenter.svelte';
 
   const toast = new ToastController();
   const { entries } = toast;

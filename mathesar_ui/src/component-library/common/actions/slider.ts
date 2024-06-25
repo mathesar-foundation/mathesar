@@ -128,6 +128,8 @@ export default function slider(
   }
 
   function start(e: MouseEvent | TouchEvent) {
+    e.stopPropagation();
+    e.preventDefault();
     opts.onStart();
     startingValue = opts.getStartingValue();
     startingPosition = getPosition(e, opts.axis);

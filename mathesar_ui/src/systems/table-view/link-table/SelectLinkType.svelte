@@ -1,9 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
+
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';
   import LinkTypeOption from './LinkTypeOption.svelte';

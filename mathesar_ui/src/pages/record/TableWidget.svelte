@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     Meta,
-    setTabularDataStoreInContext,
     TabularData,
+    setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
   import MiniActionsPane from '@mathesar/systems/table-view/actions-pane/MiniActionsPane.svelte';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';

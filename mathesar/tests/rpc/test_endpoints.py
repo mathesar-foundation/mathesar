@@ -10,12 +10,90 @@ from modernrpc.auth import user_is_authenticated, user_is_superuser
 
 from mathesar.rpc import columns
 from mathesar.rpc import connections
+from mathesar.rpc import schemas
+from mathesar.rpc import tables
 
-
-exposed_functions = [
-    "columns.list",
-    "connections.add_from_known_connection",
-    "connections.add_from_scratch",
+METHODS = [
+    (
+        columns.delete,
+        "columns.delete",
+        [user_is_authenticated]
+    ),
+    (
+        columns.list_,
+        "columns.list",
+        [user_is_authenticated]
+    ),
+    (
+        columns.patch,
+        "columns.patch",
+        [user_is_authenticated]
+    ),
+    (
+        columns.add,
+        "columns.add",
+        [user_is_authenticated]
+    ),
+    (
+        connections.add_from_known_connection,
+        "connections.add_from_known_connection",
+        [user_is_superuser]
+    ),
+    (
+        connections.add_from_scratch,
+        "connections.add_from_scratch",
+        [user_is_superuser]
+    ),
+    (
+        connections.grant_access_to_user,
+        "connections.grant_access_to_user",
+        [user_is_superuser]
+    ),
+    (
+        schemas.add,
+        "schemas.add",
+        [user_is_authenticated]
+    ),
+    (
+        schemas.list_,
+        "schemas.list",
+        [user_is_authenticated]
+    ),
+    (
+        schemas.delete,
+        "schemas.delete",
+        [user_is_authenticated]
+    ),
+    (
+        schemas.patch,
+        "schemas.patch",
+        [user_is_authenticated]
+    ),
+    (
+        tables.list_,
+        "tables.list",
+        [user_is_authenticated]
+    ),
+    (
+        tables.get,
+        "tables.get",
+        [user_is_authenticated]
+    ),
+    (
+        tables.add,
+        "tables.add",
+        [user_is_authenticated]
+    ),
+    (
+        tables.delete,
+        "tables.delete",
+        [user_is_authenticated]
+    ),
+    (
+        tables.patch,
+        "tables.patch",
+        [user_is_authenticated]
+    )
 ]
 
 
@@ -31,34 +109,10 @@ def test_rpc_endpoint_expected_methods(live_server, admin_client):
         content_type="application/json"
     ).json()["result"]
     mathesar_methods = [m for m in all_methods if not m.startswith("system.")]
-    expect_methods = [
-        "columns.list",
-        "connections.add_from_known_connection",
-        "connections.add_from_scratch",
-    ]
-    assert sorted(mathesar_methods) == expect_methods
+    assert sorted(mathesar_methods) == sorted(m[1] for m in METHODS)
 
 
-@pytest.mark.parametrize(
-    "func,exposed_name,auth_pred_params",
-    [
-        (
-            columns.list_,
-            "columns.list",
-            [user_is_authenticated]
-        ),
-        (
-            connections.add_from_known_connection,
-            "connections.add_from_known_connection",
-            [user_is_superuser]
-        ),
-        (
-            connections.add_from_scratch,
-            "connections.add_from_scratch",
-            [user_is_superuser]
-        )
-    ]
-)
+@pytest.mark.parametrize("func,exposed_name,auth_pred_params", METHODS)
 def test_correctly_exposed(func, exposed_name, auth_pred_params):
     """Tests to make sure every RPC function is correctly wired up."""
     # Make sure we didn't typo the function names for the endpoint.

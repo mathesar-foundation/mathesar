@@ -2,9 +2,9 @@
   import type { ComponentProps } from 'svelte';
 
   import Dropdown from '@mathesar-component-library-dir/dropdown/Dropdown.svelte';
-  import Menu from '@mathesar-component-library-dir/menu/Menu.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+  import Menu from '@mathesar-component-library-dir/menu/Menu.svelte';
 
   interface $$Props extends ComponentProps<Dropdown> {
     label?: string;

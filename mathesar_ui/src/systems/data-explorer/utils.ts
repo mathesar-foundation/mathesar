@@ -1,12 +1,23 @@
-import { ImmutableMap } from '@mathesar-component-library';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
 import type {
-  QueryResultColumn,
   QueryColumnMetaData,
-  QueryRunResponse,
-  QueryInitialColumnSource,
   QueryGeneratedColumnSource,
-} from '@mathesar/api/types/queries';
+  QueryInitialColumnSource,
+  QueryResultColumn,
+  QueryRunResponse,
+} from '@mathesar/api/rest/types/queries';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type {
+  JoinableTablesResult,
+  JpPath,
+} from '@mathesar/api/rest/types/tables/joinable_tables';
+import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
+import {
+  getCellCap,
+  getDbTypeBasedInputCap,
+  getDisplayFormatter,
+  getInitialInputValue,
+} from '@mathesar/components/cell-fabric/utils';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,
@@ -15,23 +26,13 @@ import {
 } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,
-  AbstractTypesMap,
   AbstractTypePreprocFunctionDefinition,
   AbstractTypeSummarizationFunction,
+  AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
-import {
-  getCellCap,
-  getDbTypeBasedInputCap,
-  getDisplayFormatter,
-  getInitialInputValue,
-} from '@mathesar/components/cell-fabric/utils';
-import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type {
-  JpPath,
-  JoinableTablesResult,
-} from '@mathesar/api/types/tables/joinable_tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import { ImmutableMap } from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import type QueryModel from './QueryModel';
 
 type ProcessedQueryResultColumnSource =

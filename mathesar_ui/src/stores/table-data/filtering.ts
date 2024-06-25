@@ -1,9 +1,9 @@
 import type {
   FilterCombination,
-  GetRequestParams,
   FilterCondition,
   FilterConditionParams,
-} from '@mathesar/api/types/tables/records';
+  GetRequestParams,
+} from '@mathesar/api/rest/types/tables/records';
 
 export interface FilterEntry {
   readonly columnId: number;

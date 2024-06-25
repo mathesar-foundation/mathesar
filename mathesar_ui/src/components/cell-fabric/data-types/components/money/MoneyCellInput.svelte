@@ -1,6 +1,7 @@
 <script lang="ts">
   import { StringifiedNumberInput } from '@mathesar-component-library';
   import type { StringifiedNumberInputProps } from '@mathesar-component-library/types';
+
   import type { NumberCellProps } from '../typeDefinitions';
 
   interface $$Props extends Omit<StringifiedNumberInputProps, 'value'> {

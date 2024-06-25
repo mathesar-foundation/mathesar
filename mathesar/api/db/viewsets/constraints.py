@@ -12,7 +12,7 @@ from mathesar.api.db.permissions.constraint import ConstraintAccessPolicy
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.constraints import ConstraintSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.models.base import Constraint
+from mathesar.models.deprecated import Constraint
 
 
 class ConstraintViewSet(AccessViewSetMixin, ListModelMixin, RetrieveModelMixin, CreateModelMixin, viewsets.GenericViewSet):

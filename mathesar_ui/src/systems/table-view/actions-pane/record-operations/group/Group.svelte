@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import { DropdownMenu, ButtonMenuItem } from '@mathesar-component-library';
   import type { Writable } from 'svelte/store';
+  import { _ } from 'svelte-i18n';
+
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
   import {
-    getTabularDataStoreFromContext,
     type Grouping,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
 

@@ -1,17 +1,18 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
-  import { Icon } from '@mathesar-component-library';
-  import type { User } from '@mathesar/api/users';
+
+  import type { User } from '@mathesar/api/rest/users';
+  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
+  import FormBox from '@mathesar/components/form/FormBox.svelte';
   import { iconAddUser } from '@mathesar/icons';
   import {
-    getEditUsersPageUrl,
     ADMIN_USERS_PAGE_ADD_NEW_URL,
+    getEditUsersPageUrl,
   } from '@mathesar/routes/urls';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
   import { UserDetailsForm } from '@mathesar/systems/users-and-permissions';
-  import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import FormBox from '@mathesar/components/form/FormBox.svelte';
+  import { Icon } from '@mathesar-component-library';
 
   const usersStore = getUsersStoreFromContext();
 

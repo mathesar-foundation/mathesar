@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, MetaData
 from sqlalchemy import Table as SATable
 
 from db.tables.operations.select import get_oid_from_table
-from mathesar.models import base as models_base
+from mathesar.models import deprecated as models_deprecated
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
@@ -31,7 +31,7 @@ def column_test_table(patent_schema, engine):
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = models_base.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    table = models_deprecated.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     return table
 
 
@@ -86,7 +86,7 @@ def test_update_table_settings_permission(create_patents_table, request, client_
     table = create_patents_table(table_name)
     settings_id = table.settings.id
     client = request.getfixturevalue(client_name)(table.schema)
-    columns = models_base.Column.objects.filter(table=table).values_list('id', flat=True)
+    columns = models_deprecated.Column.objects.filter(table=table).values_list('id', flat=True)
     preview_template = ','.join(f'{{{ column }}}' for column in columns)
     data = {
         "preview_settings": {
@@ -100,7 +100,7 @@ def test_update_table_settings_permission(create_patents_table, request, client_
 
 
 def test_update_table_settings(client, column_test_table):
-    columns = models_base.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
+    columns = models_deprecated.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
     preview_template = ','.join(f'{{{ column }}}' for column in columns)
     settings_id = column_test_table.settings.id
     column_order = [4, 5, 6]

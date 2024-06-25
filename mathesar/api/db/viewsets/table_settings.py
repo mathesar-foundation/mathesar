@@ -5,7 +5,7 @@ from mathesar.api.db.permissions.table_settings import TableSettingAccessPolicy
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.table_settings import TableSettingsSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.models.base import TableSettings
+from mathesar.models.deprecated import TableSettings
 
 
 class TableSettingsViewSet(AccessViewSetMixin, ModelViewSet):

@@ -44,7 +44,33 @@ To use an RPC function:
       members:
       - add_from_known_connection
       - add_from_scratch
+      - grant_access_to_user
       - DBModelReturn
+
+---
+
+::: mathesar.rpc.schemas
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - patch
+      - SchemaInfo
+      - SchemaPatch
+
+---
+
+::: mathesar.rpc.tables
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - patch
+      - TableInfo
+      - SettableTableInfo
 
 ---
 
@@ -52,8 +78,12 @@ To use an RPC function:
     options:
       members:
       - list_
+      - add
+      - patch
+      - delete
       - ColumnListReturn
       - ColumnInfo
+      - SettableColumnInfo
       - TypeOptions
       - ColumnDefault
 

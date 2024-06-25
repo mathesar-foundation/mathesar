@@ -1,23 +1,24 @@
 <script lang="ts">
+  import { SheetVirtualRows } from '@mathesar/components/sheet';
   import {
+    groupHeaderRowHeightPx,
+    helpTextRowHeightPx,
+    rowHeightPx,
+  } from '@mathesar/geometry';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
+  import {
+    type Row as RowType,
+    getRowKey,
     getTabularDataStoreFromContext,
     isGroupHeaderRow,
     isHelpTextRow,
-    type Row as RowType,
-    getRowKey,
     isPlaceholderRow,
   } from '@mathesar/stores/table-data';
-  import { SheetVirtualRows } from '@mathesar/components/sheet';
-  import {
-    rowHeightPx,
-    helpTextRowHeightPx,
-    groupHeaderRowHeightPx,
-  } from '@mathesar/geometry';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
-  import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
+
   import Row from './row/Row.svelte';
+  import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   const userProfile = getUserProfileStoreFromContext();
@@ -58,8 +59,6 @@
     return record ? getItemSizeFromRow(record) : rowHeightPx;
   }
 </script>
-
-<svelte:window />
 
 {#key id}
   {#if usesVirtualList}

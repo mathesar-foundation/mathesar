@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from 'svelte';
+
   import type { ArtificialEvents } from '@mathesar-component-library-dir/common/types/ArtificialEvents';
 
   const dispatch = createEventDispatcher<ArtificialEvents<unknown>>();

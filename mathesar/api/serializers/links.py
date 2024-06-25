@@ -11,7 +11,7 @@ from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
 )
-from mathesar.models.base import Table
+from mathesar.models.deprecated import Table
 from mathesar.state import reset_reflection
 
 

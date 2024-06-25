@@ -1,13 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
-  import { iconMultipleUsers } from '@mathesar/icons';
+
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import UserListingPage from '@mathesar/pages/admin-users/UserListingPage.svelte';
-  import NewUserPage from '@mathesar/pages/admin-users/NewUserPage.svelte';
+  import { iconMultipleUsers } from '@mathesar/icons';
   import EditUserPage from '@mathesar/pages/admin-users/EditUserPage.svelte';
-  import { setUsersStoreInContext } from '@mathesar/stores/users';
+  import NewUserPage from '@mathesar/pages/admin-users/NewUserPage.svelte';
+  import UserListingPage from '@mathesar/pages/admin-users/UserListingPage.svelte';
   import { ADMIN_USERS_PAGE_URL } from '@mathesar/routes/urls';
+  import { setUsersStoreInContext } from '@mathesar/stores/users';
 
   setUsersStoreInContext();
 </script>

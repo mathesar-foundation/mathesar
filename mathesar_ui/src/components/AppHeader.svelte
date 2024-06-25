@@ -1,16 +1,7 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import { preloadCommonData } from '@mathesar/utils/preloadData';
-  import {
-    DropdownMenu,
-    Icon,
-    iconLoading,
-    LinkMenuItem,
-    MenuDivider,
-    MenuHeading,
-    ButtonMenuItem,
-  } from '@mathesar-component-library';
+  import { router } from 'tinro';
+
   import {
     iconAddNew,
     iconConnection,
@@ -24,18 +15,29 @@
   import {
     ADMIN_URL,
     CONNECTIONS_URL,
-    getDatabasePageUrl,
-    getDataExplorerPageUrl,
-    getImportPageUrl,
-    getTablePageUrl,
     LOGOUT_URL,
     USER_PROFILE_URL,
+    getDataExplorerPageUrl,
+    getDatabasePageUrl,
+    getImportPageUrl,
+    getTablePageUrl,
   } from '@mathesar/routes/urls';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { createTable } from '@mathesar/stores/tables';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import {
+    ButtonMenuItem,
+    DropdownMenu,
+    Icon,
+    LinkMenuItem,
+    MenuDivider,
+    MenuHeading,
+    iconLoading,
+  } from '@mathesar-component-library';
+
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
 
   const commonData = preloadCommonData();

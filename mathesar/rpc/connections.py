@@ -6,7 +6,7 @@ from typing import TypedDict
 from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_superuser_required
 
-from mathesar.utils import connections
+from mathesar.utils import connections, permissions
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
@@ -125,3 +125,22 @@ def add_from_scratch(
         user, password, host, port, nickname, database, sample_data
     )
     return DBModelReturn.from_db_model(db_model)
+
+
+@rpc_method(name='connections.grant_access_to_user')
+@http_basic_auth_superuser_required
+@handle_rpc_exceptions
+def grant_access_to_user(*, connection_id: int, user_id: int):
+    """
+    Migrate a connection to new models and grant access to a user.
+
+    This function is designed to be temporary, and should probably be
+    removed once we have completed the new users and permissions setup
+    for beta. You pass any conneciton id and user id. The function will
+    fill the required models as needed.
+
+    Args:
+        connection_id: The Django id of an old-style connection.
+        user_id: The Django id of a user.
+    """
+    permissions.create_user_database_role_map(connection_id, user_id)

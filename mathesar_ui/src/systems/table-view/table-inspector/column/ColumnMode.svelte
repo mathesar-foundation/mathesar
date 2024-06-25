@@ -1,19 +1,22 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Collapsible } from '@mathesar-component-library';
-  import { tables } from '@mathesar/stores/tables';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
-  import ColumnNameAndDescription from './ColumnNameAndDescription.svelte';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { tables } from '@mathesar/stores/tables';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
+  import { Collapsible } from '@mathesar-component-library';
+
+  import CollapsibleHeader from '../CollapsibleHeader.svelte';
+
   import ColumnActions from './ColumnActions.svelte';
+  import ColumnFormatting from './ColumnFormatting.svelte';
+  import ColumnNameAndDescription from './ColumnNameAndDescription.svelte';
   import ColumnOptions from './ColumnOptions.svelte';
   import ColumnType from './ColumnType.svelte';
-  import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import ColumnTypeSpecifierTag from './ColumnTypeSpecifierTag.svelte';
-  import ColumnFormatting from './ColumnFormatting.svelte';
   import SetDefaultValue from './SetDefaultValue.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
@@ -22,17 +25,22 @@
   $: database = $currentDatabase;
   $: schema = $currentSchema;
   $: ({ processedColumns, selection } = $tabularData);
-  $: ({ selectedCells, columnsSelectedWhenTheTableIsEmpty } = selection);
   $: selectedColumns = (() => {
-    const ids = selection.getSelectedUniqueColumnsId(
-      $selectedCells,
-      $columnsSelectedWhenTheTableIsEmpty,
-    );
+    const ids = $selection.columnIds;
     const columns = [];
     for (const id of ids) {
-      const c = $processedColumns.get(id);
-      if (c !== undefined) {
-        columns.push(c);
+      // This is a  little annoying that we need to parse the id as a string to
+      // a number. The reason is tricky. The cell selection system uses strings
+      // as column ids because they're more general purpose and can work with
+      // the string-based ids that the data explorer uses. However the table
+      // page stores processed columns with numeric ids. We could avoid this
+      // parsing by either making the selection system generic over the id type
+      // (which would be a pain, ergonomically), or by using string-based ids
+      // for columns in the table page too (which would require refactoring).
+      const parsedId = parseInt(id, 10);
+      const column = $processedColumns.get(parsedId);
+      if (column !== undefined) {
+        columns.push(column);
       }
     }
     return columns;

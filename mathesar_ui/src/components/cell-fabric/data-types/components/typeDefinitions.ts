@@ -1,13 +1,13 @@
+import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 import type {
+  ComponentAndProps,
   FormattedInputProps,
   NumberFormatterOptions,
   SelectProps,
-  ComponentAndProps,
 } from '@mathesar-component-library/types';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
-import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
 
 export type CellColumnLike = Pick<
   Column,
@@ -33,7 +33,6 @@ export type CellValueFormatter<T> = (
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
   isActive: boolean;
-  isSelectedInRange: boolean;
   disabled: boolean;
   searchValue?: unknown;
   isProcessing: boolean;

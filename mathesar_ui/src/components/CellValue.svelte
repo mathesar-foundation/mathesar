@@ -1,6 +1,7 @@
 <script lang="ts">
   import { PrecomputedMatchHighlighter } from '@mathesar-component-library';
   import type { MatchPart } from '@mathesar-component-library/types';
+
   import Default from './Default.svelte';
   import Null from './Null.svelte';
 

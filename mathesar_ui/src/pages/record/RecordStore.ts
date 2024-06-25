@@ -1,20 +1,20 @@
-import { derived, writable, type Readable } from 'svelte/store';
+import { type Readable, derived, writable } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Response as ApiResponse } from '@mathesar/api/types/tables/records';
-import { WritableMap } from '@mathesar/component-library';
+import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Response as ApiResponse } from '@mathesar/api/rest/types/tables/records';
 import {
-  renderTransitiveRecordSummary,
-  prepareFieldsAsRecordSummaryInputData,
-  buildRecordSummariesForSheet,
-} from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-import {
+  type RequestStatus,
   getAPI,
   patchAPI,
-  type RequestStatus,
-} from '@mathesar/api/utils/requestUtils';
-import { getErrorMessage } from '@mathesar/utils/errors';
+} from '@mathesar/api/rest/utils/requestUtils';
+import { WritableMap } from '@mathesar/component-library';
 import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
+import {
+  buildRecordSummariesForSheet,
+  prepareFieldsAsRecordSummaryInputData,
+  renderTransitiveRecordSummary,
+} from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+import { getErrorMessage } from '@mathesar/utils/errors';
 
 export default class RecordStore {
   fetchRequest = writable<RequestStatus | undefined>(undefined);
