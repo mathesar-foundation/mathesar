@@ -129,7 +129,7 @@ BEGIN
   <<template_parts_loop>>
   FOR template_part IN SELECT jsonb_array_elements(template) LOOP
     DECLARE
-      ref_chain smallint[] := __msar.extract_smallints(template_part);
+      ref_chain smallint[] := msar.extract_smallints(template_part);
       ref_chain_length integer := array_length(ref_chain, 1);
       fk_col_id smallint;
       contextual_tab_id oid := tab_id;

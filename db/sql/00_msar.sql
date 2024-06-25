@@ -65,7 +65,7 @@ CREATE SCHEMA IF NOT EXISTS msar;
 ----------------------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.extract_smallints(v jsonb) RETURNS smallint[] AS $$/*
+msar.extract_smallints(v jsonb) RETURNS smallint[] AS $$/*
 From the supplied JSONB value, extract all top-level JSONB array elements which can be successfully
 cast to PostgreSQL smallint values. Return the resulting array of smallint values.
 
