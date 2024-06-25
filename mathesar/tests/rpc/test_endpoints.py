@@ -70,6 +70,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        schemas.patch,
+        "schemas.patch",
+        [user_is_authenticated]
+    ),
+    (
         tables.list_,
         "tables.list",
         [user_is_authenticated]
