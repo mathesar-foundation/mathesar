@@ -19,7 +19,7 @@ def test_columns_list(rf, monkeypatch):
 
     @contextmanager
     def mock_connect(_database_id, user):
-        if _database_id == 2 and user.username == 'alice':
+        if _database_id == database_id and user.username == 'alice':
             try:
                 yield True
             finally:
@@ -103,7 +103,7 @@ def test_columns_list(rf, monkeypatch):
             'has_dependents': False
         }
     ]
-    actual_col_list = columns.list_(table_oid=23457, database_id=2, request=request)
+    actual_col_list = columns.list_(table_oid=23457, database_id=database_id, request=request)
     assert actual_col_list == expect_col_list
 
 
