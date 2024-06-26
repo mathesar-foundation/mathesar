@@ -72,8 +72,8 @@ Execute the given command, returning a JSON object describing the records in the
 
 Useful for SELECTing from tables. Most useful when you're performing DQL.
 
-Note that you always have to include the primary key column(`id` in case of a Mathesar table) in the
-command_template for the returned records to be uniquely identifiable.
+Note that you must include the primary key column(`id` in case of a Mathesar table) in the
+command_template if you want the returned records to be uniquely identifiable.
 
 Args:
   command: Raw string that will be executed as a command.
@@ -101,8 +101,8 @@ Execute a templated command, returning a JSON object describing the records in t
 The template is given in the first argument, and all further arguments are used to fill in the
 template. Useful for SELECTing from tables. Most useful when you're performing DQL.
 
-Note that you always have to include the primary key column(`id` in case of a Mathesar table) in the
-command_template for the returned records to be uniquely identifiable.
+Note that you must include the primary key column(`id` in case of a Mathesar table) in the
+command_template if you want the returned records to be uniquely identifiable.
 
 Args:
   command_template: Raw string that will be executed as a command.
