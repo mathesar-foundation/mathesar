@@ -2507,11 +2507,11 @@ BEGIN
     SELECT string_agg(
       'CAST(' ||
       __msar.build_cast_expr(
-        msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer), col_cast -> 'type' ->> 'name'
+        quote_ident(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer)), col_cast -> 'type' ->> 'name'
       ) ||
       ' AS ' ||
       msar.build_type_text(col_cast -> 'type') ||
-      ')'|| ' AS ' || msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer),
+      ')'|| ' AS ' || quote_ident(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer)),
       ', '
     ) AS cast_expr
     FROM jsonb_array_elements(col_cast_def) AS col_cast
