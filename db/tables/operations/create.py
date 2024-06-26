@@ -66,6 +66,7 @@ def create_table_on_database(
 
 
 # TODO stop relying on reflections, instead return oid of the created table.
+# TODO remove this function
 def create_string_column_table(name, schema_oid, column_names, engine, comment=None):
     """
     This method creates a Postgres table in the specified schema, with all
@@ -80,6 +81,49 @@ def create_string_column_table(name, schema_oid, column_names, engine, comment=N
     table_oid = create_mathesar_table(engine, name, schema_oid, columns_, comment=comment)
     table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
     return table
+
+
+def prepare_table_for_import(
+    table_name,
+    schema_oid,
+    column_names,
+    header,
+    conn,
+    delimiter=None,
+    escapechar=None,
+    quotechar=None,
+    encoding=None,
+    comment=None
+):
+    """
+    This method creates a Postgres table in the specified schema, with all
+    columns being String type.
+
+    Returns the copy_sql and table_oid for carrying out import into the created table.
+    """
+    column_data_list = [
+        {
+            "name": column_name,
+            "type": {"name": PostgresType.TEXT.id}
+        } for column_name in column_names
+    ]
+    import_info = exec_msar_func(
+        conn,
+        'prepare_table_for_import',
+        schema_oid,
+        table_name,
+        json.dumps(column_data_list),
+        header,
+        delimiter,
+        escapechar,
+        quotechar,
+        encoding,
+        comment
+    ).fetchone()[0]
+    return (
+        import_info['copy_sql'],
+        import_info['table_oid']
+    )
 
 
 class CreateTableAs(DDLElement):

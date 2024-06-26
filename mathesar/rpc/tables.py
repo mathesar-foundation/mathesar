@@ -7,6 +7,7 @@ from db.tables.operations.select import get_table_info, get_table
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
 from db.tables.operations.alter import alter_table_on_database
+from db.tables.operations.import_ import import_csv
 from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -169,3 +170,33 @@ def patch(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return alter_table_on_database(table_oid, table_data_dict, conn)
+
+
+@rpc_method(name="tables.import")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def import_(
+    *,
+    data_file_id: int,
+    table_name: str,
+    schema_oid: int,
+    database_id: int,
+    comment: str = None,
+    **kwargs
+) -> int:
+    """
+    Import a CSV/TSV into a table.
+
+    Args:
+        data_file_id: The Django id of the DataFile containing desired CSV/TSV.
+        table_name: Name of the table to be imported.
+        schema_oid: Identity of the schema in the user's database.
+        database_id: The Django id of the database containing the table.
+        comment: The comment for the new table.
+
+    Returns:
+        The `oid` of the created table.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        return import_csv(data_file_id, table_name, schema_oid, conn, comment)
