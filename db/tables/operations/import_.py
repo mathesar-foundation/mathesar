@@ -2,13 +2,9 @@ import json
 import tempfile
 
 import clevercsv as csv
-<<<<<<< import_preview
-from psycopg import sql
 
 from db.connection import exec_msar_func
 from db.columns.operations.alter import _transform_column_alter_dict
-=======
->>>>>>> develop
 from db.tables.operations.create import prepare_table_for_import
 from db.encoding_utils import get_sql_compatible_encoding
 from mathesar.models.deprecated import DataFile
