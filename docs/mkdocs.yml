@@ -57,14 +57,14 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: [..]
+          paths: [../mathesar/rpc/]
           options:
+            heading_level: 3
             docstring_style: google
             separate_signature: true
-            show_root_heading: true
-            show_root_full_path: false
+            show_root_toc_entry: false
+            show_root_members_full_path: true
             show_source: false
-            show_symbol_type_heading: true
             group_by_category: false
 
 theme:
