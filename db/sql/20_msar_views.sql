@@ -32,7 +32,7 @@ Args:
   tab_id: The OID of the table whose associated view we want to name.
 */
 BEGIN
-  RETURN msar.get_fully_qualified_object_name('msar_views', format('mv%s', tab_id));
+  RETURN __msar.build_qualified_name_sql('msar_views', format('mv%s', tab_id));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -56,7 +56,7 @@ BEGIN
   INTO view_cols;
   RETURN __msar.exec_ddl(
     'CREATE OR REPLACE VIEW %s AS SELECT %s FROM %s',
-    view_name, view_cols, __msar.get_relation_name(tab_id)
+    view_name, view_cols, __msar.get_qualified_relation_name(tab_id)
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

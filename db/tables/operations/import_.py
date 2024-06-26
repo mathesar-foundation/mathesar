@@ -2,10 +2,13 @@ import json
 import tempfile
 
 import clevercsv as csv
+<<<<<<< import_preview
 from psycopg import sql
 
 from db.connection import exec_msar_func
 from db.columns.operations.alter import _transform_column_alter_dict
+=======
+>>>>>>> develop
 from db.tables.operations.create import prepare_table_for_import
 from db.encoding_utils import get_sql_compatible_encoding
 from mathesar.models.deprecated import DataFile
@@ -22,60 +25,39 @@ def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
         data_file.escapechar
     )
     encoding = get_file_encoding(data_file.file)
+    conversion_encoding, sql_encoding = get_sql_compatible_encoding(encoding)
     with open(file_path, 'rb') as csv_file:
         csv_reader = get_sv_reader(csv_file, header, dialect)
         column_names = process_column_names(csv_reader.fieldnames)
-    schema_name, table_name, table_oid = prepare_table_for_import(
+    copy_sql, table_oid = prepare_table_for_import(
         table_name,
         schema_oid,
         column_names,
-        conn,
-        comment
-    )
-    insert_csv_records(
-        schema_name,
-        table_name,
-        conn,
-        file_path,
-        column_names,
         header,
+        conn,
         dialect.delimiter,
         dialect.escapechar,
         dialect.quotechar,
-        encoding
+        sql_encoding,
+        comment
+    )
+    insert_csv_records(
+        copy_sql,
+        file_path,
+        encoding,
+        conversion_encoding,
+        conn
     )
     return table_oid
 
 
 def insert_csv_records(
-    schema_name,
-    table_name,
-    conn,
+    copy_sql,
     file_path,
-    column_names,
-    header,
-    delimiter=None,
-    escape=None,
-    quote=None,
-    encoding=None
+    encoding,
+    conversion_encoding,
+    conn
 ):
-    conversion_encoding, sql_encoding = get_sql_compatible_encoding(encoding)
-    formatted_columns = sql.SQL(",").join(sql.Identifier(column_name) for column_name in column_names)
-    copy_sql = sql.SQL(
-        "COPY {relation_name} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote} {encoding}"
-    ).format(
-        relation_name=sql.Identifier(schema_name, table_name),
-        formatted_columns=formatted_columns,
-        header=sql.SQL("HEADER" if header else ""),
-        delimiter=sql.SQL(f"DELIMITER E'{delimiter}'" if delimiter else ""),
-        escape=sql.SQL(f"ESCAPE '{escape}'" if escape else ""),
-        quote=sql.SQL(
-            ("QUOTE ''''" if quote == "'" else f"QUOTE '{quote}'")
-            if quote
-            else ""
-        ),
-        encoding=sql.SQL(f"ENCODING '{sql_encoding}'" if sql_encoding else ""),
-    )
     cursor = conn.cursor()
     with open(file_path, 'r', encoding=encoding) as csv_file:
         if conversion_encoding == encoding:
