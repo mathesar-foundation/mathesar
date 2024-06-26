@@ -58,4 +58,27 @@ From [OWASP](https://owasp.org/www-project-proactive-controls/v3/en/c4-encode-es
 
 Always qualify system catalog tables by prefixing them with `pg_catalog.`. If you don't, then user-defined tables can shadow the system catalog tables, breaking core functionality.
 
+## Casting OIDs to JSON
+
+Always cast OID values to `bigint` before putting them in JSON (or jsonb).
+
+_Don't_ cast OID values to `integer`.
+
+This is because the [`oid` type](https://www.postgresql.org/docs/current/datatype-oid.html) is an _unsigned_ 32-bit integer whereas the `integer` type is a _signed_ 32-bit integer. That means it's possible for a database to have OID values which don't fit into the `integer` type.
+
+For example, putting a large OID value into JSON by casting it to an integer will cause overflow:
+
+```SQL
+SELECT jsonb_build_object('foo', 3333333333::oid::integer); -- ❌ Bad
+```
+
+> `{"foo": -961633963}`
+
+Instead, cast it to `bigint`
+
+```SQL
+SELECT jsonb_build_object('foo', 3333333333::oid::bigint); -- ✅ Good
+```
+
+> `{"foo": 3333333333}`
 
