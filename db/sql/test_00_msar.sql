@@ -1483,6 +1483,10 @@ CREATE OR REPLACE FUNCTION test_get_preview() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_cast_def jsonb := $j$[
     {
+      "attnum": 1,
+      "type": {"name": "integer"}
+    },
+    {
       "attnum":2,
       "type": {"name": "numeric", "options": {"precision":5, "scale":2}}
     }

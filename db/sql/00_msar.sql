@@ -2452,7 +2452,7 @@ DECLARE
   records jsonb;
 BEGIN
   tab_name := __msar.get_qualified_relation_name(tab_id);
-  sel_query := 'SELECT id, %s FROM %s LIMIT %L';
+  sel_query := 'SELECT %s FROM %s LIMIT %L';
   WITH preview_cte AS (
     SELECT string_agg(
       'CAST(' ||
@@ -2465,7 +2465,6 @@ BEGIN
       ', '
     ) AS cast_expr
     FROM jsonb_array_elements(col_cast_def) AS col_cast
-    WHERE NOT msar.is_mathesar_id_column(tab_id, (col_cast ->> 'attnum')::integer)
   )
   SELECT 
     __msar.exec_dql(sel_query, cast_expr, tab_name, rec_limit::text)
