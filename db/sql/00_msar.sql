@@ -2451,7 +2451,7 @@ DECLARE
   sel_query text;
   records jsonb;
 BEGIN
-  tab_name := __msar.get_relation_name(tab_id);
+  tab_name := __msar.get_qualified_relation_name(tab_id);
   sel_query := 'SELECT id, %s FROM %s LIMIT %L';
   WITH preview_cte AS (
     SELECT string_agg(
