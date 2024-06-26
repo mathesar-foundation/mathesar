@@ -69,6 +69,7 @@ To use an RPC function:
       - add
       - delete
       - patch
+      - import_
       - TableInfo
       - SettableTableInfo
 
