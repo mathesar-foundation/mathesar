@@ -84,8 +84,8 @@ class UserDatabaseRoleMap(BaseModel):
 
 class ColumnMetaData(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
-    table_oid = models.PositiveIntegerField()
-    attnum = models.PositiveIntegerField()
+    table_oid = models.PositiveBigIntegerField()
+    attnum = models.SmallIntegerField()
     bool_input = models.CharField(
         choices=[("dropdown", "dropdown"), ("checkbox", "checkbox")],
         blank=True
@@ -119,5 +119,23 @@ class ColumnMetaData(BaseModel):
                     & models.Q(num_min_frac_digits__lte=models.F("num_max_frac_digits"))
                 ),
                 name="frac_digits_integrity"
+            )
+        ]
+
+
+class TableMetaData(BaseModel):
+    database = models.ForeignKey('Database', on_delete=models.CASCADE)
+    schema_oid = models.PositiveBigIntegerField()
+    table_oid = models.PositiveBigIntegerField()
+    import_verified = models.BooleanField(default=False)
+    column_order = models.JSONField(default=list)
+    preview_customized = models.BooleanField(default=False)
+    preview_template = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["database", "schema_oid", "table_oid"],
+                name="unique_table_metadata"
             )
         ]
