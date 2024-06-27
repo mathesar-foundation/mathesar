@@ -103,6 +103,11 @@ METHODS = [
         tables.import_,
         "tables.import",
         [user_is_authenticated]
+    ),
+    (
+        tables.get_import_preview,
+        "tables.get_import_preview",
+        [user_is_authenticated]
     )
 ]
 

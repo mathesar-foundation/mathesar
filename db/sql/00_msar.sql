@@ -50,6 +50,72 @@ __msar.build_text_tuple(text[]) RETURNS text AS $$
 SELECT '(' || string_agg(col, ', ') || ')' FROM unnest($1) x(col);
 $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- GENERAL DQL FUNCTIONS
+--
+-- Functions in this section are quite general, and are the basis of the others.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+__msar.exec_dql(command text) RETURNS jsonb AS $$/*
+Execute the given command, returning a JSON object describing the records in the following form:
+[ 
+  {"id": 1, "col1_name": "value1", "col2_name": "value2"},
+  {"id": 2, "col1_name": "value1", "col2_name": "value2"},
+  {"id": 3, "col1_name": "value1", "col2_name": "value2"},
+  ...
+]
+
+Useful for SELECTing from tables. Most useful when you're performing DQL.
+
+Note that you must include the primary key column(`id` in case of a Mathesar table) in the
+command_template if you want the returned records to be uniquely identifiable.
+
+Args:
+  command: Raw string that will be executed as a command.
+*/
+DECLARE
+  records jsonb;
+BEGIN
+  EXECUTE 'WITH cte AS (' || command || ')
+  SELECT jsonb_agg(row_to_json(cte.*)) FROM cte' INTO records;
+  RETURN records;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+__msar.exec_dql(command_template text, arguments variadic anyarray) RETURNS jsonb AS $$/*
+Execute a templated command, returning a JSON object describing the records in the following form:
+[ 
+  {"id": 1, "col1_name": "value1", "col2_name": "value2"},
+  {"id": 2, "col1_name": "value1", "col2_name": "value2"},
+  {"id": 3, "col1_name": "value1", "col2_name": "value2"},
+  ...
+]
+
+The template is given in the first argument, and all further arguments are used to fill in the
+template. Useful for SELECTing from tables. Most useful when you're performing DQL.
+
+Note that you must include the primary key column(`id` in case of a Mathesar table) in the
+command_template if you want the returned records to be uniquely identifiable.
+
+Args:
+  command_template: Raw string that will be executed as a command.
+  arguments: arguments that will be used to fill in the template.
+*/
+DECLARE formatted_command TEXT;
+BEGIN
+  formatted_command := format(command_template, VARIADIC arguments);
+  RETURN __msar.exec_dql(formatted_command);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- INFO FUNCTIONS
@@ -2338,6 +2404,72 @@ BEGIN
     'copy_sql', copy_sql,
     'table_oid', rel_id
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_preview(
+  tab_id oid,
+  col_cast_def jsonb,
+  rec_limit integer
+) RETURNS jsonb AS $$/*
+Preview a table, applying different type casts and options to the underlying columns before import,
+returning a JSON object describing the records of the table.
+
+Note that these casts are temporary and do not alter the data in the underlying table,
+if you wish to alter these settings permanantly for the columns see msar.alter_columns.
+
+Args:
+  tab_id: The OID of the table to preview.
+  col_cast_def: A JSON object describing the column settings to apply.
+  rec_limit (optional): The upper limit for the number of records to return.
+
+The col_cast_def JSONB should have the form:
+[
+  {
+    "attnum": <int>,
+    "type": {
+      "name": <str>,
+      "options": {
+        "length": <integer>,
+        "precision": <integer>,
+        "scale": <integer>
+        "fields": <str>,
+        "array": <boolean>
+      }
+    },
+  },
+  {
+    ...
+  },
+  ...
+]
+*/
+DECLARE
+  tab_name text;
+  sel_query text;
+  records jsonb;
+BEGIN
+  tab_name := __msar.get_qualified_relation_name(tab_id);
+  sel_query := 'SELECT %s FROM %s LIMIT %L';
+  WITH preview_cte AS (
+    SELECT string_agg(
+      'CAST(' ||
+      __msar.build_cast_expr(
+        quote_ident(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer)), col_cast -> 'type' ->> 'name'
+      ) ||
+      ' AS ' ||
+      msar.build_type_text(col_cast -> 'type') ||
+      ')'|| ' AS ' || quote_ident(msar.get_column_name(tab_id, (col_cast ->> 'attnum')::integer)),
+      ', '
+    ) AS cast_expr
+    FROM jsonb_array_elements(col_cast_def) AS col_cast
+  )
+  SELECT 
+    __msar.exec_dql(sel_query, cast_expr, tab_name, rec_limit::text)
+  INTO records FROM preview_cte;
+  RETURN records;
 END;
 $$ LANGUAGE plpgsql;
 

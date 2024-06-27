@@ -5,6 +5,7 @@ Fixtures:
     rf(pytest-django): Provides mocked `Request` objects.
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
 """
+from decimal import Decimal
 from contextlib import contextmanager
 
 from mathesar.rpc import tables
@@ -225,3 +226,44 @@ def test_tables_import(rf, monkeypatch):
         request=request
     )
     assert imported_table_oid == 1964474
+
+
+def test_tables_preview(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
+    table_oid = 1964474
+    database_id = 11
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_table_preview(_table_oid, columns, conn, limit):
+        if _table_oid != table_oid:
+            raise AssertionError('incorrect parameters passed')
+        return [
+            {'id': 1, 'length': Decimal('2.0')},
+            {'id': 2, 'length': Decimal('3.0')},
+            {'id': 3, 'length': Decimal('4.0')},
+            {'id': 4, 'length': Decimal('5.22')}
+        ]
+    monkeypatch.setattr(tables, 'connect', mock_connect)
+    monkeypatch.setattr(tables, 'get_preview', mock_table_preview)
+    records = tables.get_import_preview(
+        table_oid=1964474,
+        columns=[{'attnum': 2, 'type': {'name': 'numeric', 'options': {'precision': 3, 'scale': 2}}}],
+        database_id=11,
+        request=request
+    )
+    assert records == [
+        {'id': 1, 'length': Decimal('2.0')},
+        {'id': 2, 'length': Decimal('3.0')},
+        {'id': 3, 'length': Decimal('4.0')},
+        {'id': 4, 'length': Decimal('5.22')}
+    ]

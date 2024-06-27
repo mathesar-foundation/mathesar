@@ -130,6 +130,20 @@ class SettableColumnInfo(TypedDict):
     description: Optional[str]
 
 
+class PreviewableColumnInfo(TypedDict):
+    """
+    Information needed to preview a column.
+
+    Attributes:
+        id: The `attnum` of the column in the table.
+        type: The new type to be applied to a column.
+        type_options: The options to be applied to the column type.
+    """
+    id: int
+    type: Optional[str]
+    type_options: Optional[TypeOptions]
+
+
 class ColumnInfo(TypedDict):
     """
     Information about a column. Extends the settable fields.
