@@ -5,6 +5,7 @@ Fixtures:
     rf(pytest-django): Provides mocked `Request` objects.
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
 """
+from decimal import Decimal
 from contextlib import contextmanager
 
 from mathesar.rpc import tables
@@ -192,3 +193,77 @@ def test_tables_patch(rf, monkeypatch):
         request=request
     )
     assert altered_table_name == 'newtabname'
+
+
+def test_tables_import(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
+    schema_oid = 2200
+    data_file_id = 10
+    database_id = 11
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_table_import(_data_file_id, table_name, _schema_oid, conn, comment):
+        if _schema_oid != schema_oid and _data_file_id != data_file_id:
+            raise AssertionError('incorrect parameters passed')
+        return 1964474
+    monkeypatch.setattr(tables, 'connect', mock_connect)
+    monkeypatch.setattr(tables, 'import_csv', mock_table_import)
+    imported_table_oid = tables.import_(
+        data_file_id=10,
+        table_name='imported_table',
+        schema_oid=2200,
+        database_id=11,
+        request=request
+    )
+    assert imported_table_oid == 1964474
+
+
+def test_tables_preview(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
+    table_oid = 1964474
+    database_id = 11
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_table_preview(_table_oid, columns, conn, limit):
+        if _table_oid != table_oid:
+            raise AssertionError('incorrect parameters passed')
+        return [
+            {'id': 1, 'length': Decimal('2.0')},
+            {'id': 2, 'length': Decimal('3.0')},
+            {'id': 3, 'length': Decimal('4.0')},
+            {'id': 4, 'length': Decimal('5.22')}
+        ]
+    monkeypatch.setattr(tables, 'connect', mock_connect)
+    monkeypatch.setattr(tables, 'get_preview', mock_table_preview)
+    records = tables.get_import_preview(
+        table_oid=1964474,
+        columns=[{'attnum': 2, 'type': {'name': 'numeric', 'options': {'precision': 3, 'scale': 2}}}],
+        database_id=11,
+        request=request
+    )
+    assert records == [
+        {'id': 1, 'length': Decimal('2.0')},
+        {'id': 2, 'length': Decimal('3.0')},
+        {'id': 3, 'length': Decimal('4.0')},
+        {'id': 4, 'length': Decimal('5.22')}
+    ]
