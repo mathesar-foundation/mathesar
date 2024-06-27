@@ -37,9 +37,9 @@ To use an RPC function:
     }
     ```
 
----
+## Connections
 
-::: mathesar.rpc.connections
+::: connections
     options:
       members:
       - add_from_known_connection
@@ -47,9 +47,9 @@ To use an RPC function:
       - grant_access_to_user
       - DBModelReturn
 
----
+## Schemas
 
-::: mathesar.rpc.schemas
+::: schemas
     options:
       members:
       - list_
@@ -59,9 +59,9 @@ To use an RPC function:
       - SchemaInfo
       - SchemaPatch
 
----
+## Tables
 
-::: mathesar.rpc.tables
+::: tables
     options:
       members:
       - list_
@@ -74,9 +74,9 @@ To use an RPC function:
       - TableInfo
       - SettableTableInfo
 
----
+## Columns
 
-::: mathesar.rpc.columns
+::: columns
     options:
       members:
       - list_
@@ -90,6 +90,14 @@ To use an RPC function:
       - SettableColumnInfo
       - TypeOptions
       - ColumnDefault
+ 
+## Column Metadata
+
+::: columns.metadata
+    options:
+      members:
+      - list_
+      - ColumnMetaData
 
 ## Responses
 
