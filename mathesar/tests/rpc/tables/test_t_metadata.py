@@ -8,7 +8,7 @@ from mathesar.models.base import TableMetaData, Database, Server
 from mathesar.rpc.tables import metadata
 
 
-def test_columns_meta_data_list(monkeypatch):
+def test_tables_meta_data_list(monkeypatch):
     database_id = 2
     schema_oid = 123456
 
