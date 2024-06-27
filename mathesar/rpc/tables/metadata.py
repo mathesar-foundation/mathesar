@@ -7,7 +7,7 @@ from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.utils.tables import get_table_meta_data
+from mathesar.utils.tables import get_tables_meta_data
 
 
 class TableMetaData(TypedDict):
@@ -46,10 +46,10 @@ class TableMetaData(TypedDict):
         )
 
 
-@rpc_method(name="tables.metadata.get")
+@rpc_method(name="tables.metadata.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list(*, schema_oid: int, database_id: int, **kwargs) -> list[TableMetaData]:
+def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableMetaData]:
     """
     List metadata associated with tables for a schema.
 
@@ -60,7 +60,7 @@ def list(*, schema_oid: int, database_id: int, **kwargs) -> list[TableMetaData]:
     Returns:
         Metadata object for a given table oid.
     """
-    table_meta_data = get_table_meta_data(schema_oid, database_id)
+    table_meta_data = get_tables_meta_data(schema_oid, database_id)
     return [
         TableMetaData.from_model(model) for model in table_meta_data
     ]

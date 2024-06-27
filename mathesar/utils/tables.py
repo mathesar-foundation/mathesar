@@ -86,5 +86,5 @@ def create_empty_table(name, schema, comment=None):
     return table
 
 
-def get_table_meta_data(schema_oid, database_id):
+def get_tables_meta_data(schema_oid, database_id):
     return TableMetaData.objects.filter(database__id=database_id, schema_oid=schema_oid)
