@@ -113,6 +113,11 @@ METHODS = [
         tables.metadata.list_,
         "tables.metadata.list",
         [user_is_authenticated]
+    ),
+    (
+        tables.metadata.patch,
+        "tables.metadata.patch",
+        [user_is_authenticated]
     )
 ]
 
