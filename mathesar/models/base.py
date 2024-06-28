@@ -92,8 +92,8 @@ class ColumnMetaData(BaseModel):
     )
     bool_true = models.CharField(default='True')
     bool_false = models.CharField(default='False')
-    num_min_frac_digits = models.PositiveIntegerField(blank=True)
-    num_max_frac_digits = models.PositiveIntegerField(blank=True)
+    num_min_frac_digits = models.PositiveIntegerField(default=0)
+    num_max_frac_digits = models.PositiveIntegerField(default=20)
     num_show_as_perc = models.BooleanField(default=False)
     mon_currency_symbol = models.CharField(default="$")
     mon_currency_location = models.CharField(
