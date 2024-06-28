@@ -74,6 +74,16 @@ To use an RPC function:
       - TableInfo
       - SettableTableInfo
 
+## Table Metadata
+
+::: tables.metadata
+    options:
+      members:
+      - list_
+      - patch
+      - TableMetaData
+      - SettableTableMetaData
+
 ## Columns
 
 ::: columns
