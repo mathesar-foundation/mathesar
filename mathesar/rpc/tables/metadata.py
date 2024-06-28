@@ -7,7 +7,7 @@ from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.utils.tables import get_tables_meta_data
+from mathesar.utils.tables import get_tables_meta_data, patch_table_meta_data
 
 
 class TableMetaData(TypedDict):
@@ -17,6 +17,7 @@ class TableMetaData(TypedDict):
     Only the `database`, `schema_oid`, and `table_oid` keys are required.
 
     Attributes:
+        id: The Django id of the TableMetaData object.
         database_id: The Django id of the database containing the table.
         schema_oid: The OID of the schema containing the table.
         table_oid: The OID of the table in the database.
@@ -25,6 +26,7 @@ class TableMetaData(TypedDict):
         preview_customized: Specifies whether the preview has been customized.
         preview_template: Preview template for a referent column.
     """
+    id: int
     database_id: int
     schema_oid: int
     table_oid: int
@@ -36,6 +38,7 @@ class TableMetaData(TypedDict):
     @classmethod
     def from_model(cls, model):
         return cls(
+            id=model.id,
             database_id=model.database.id,
             schema_oid=model.schema_oid,
             table_oid=model.table_oid,
@@ -44,6 +47,22 @@ class TableMetaData(TypedDict):
             preview_customized=model.preview_customized,
             preview_template=model.preview_template,
         )
+
+
+class SettableTableMetaData(TypedDict):
+    """
+    Settable metadata fields for a table in a database.
+
+    Attributes:
+        import_verified: Specifies whether a file has been successfully imported into a table.
+        column_order: The order in which columns of a table are displayed.
+        preview_customized: Specifies whether the preview has been customized.
+        preview_template: Preview template for a referent column.
+    """
+    import_verified: Optional[bool]
+    column_order: Optional[list[int]]
+    preview_customized: Optional[bool]
+    preview_template: Optional[str]
 
 
 @rpc_method(name="tables.metadata.list")
@@ -64,3 +83,23 @@ def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableMetaData]
     return [
         TableMetaData.from_model(model) for model in table_meta_data
     ]
+
+
+@rpc_method(name="tables.metadata.patch")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def patch(
+    *, metadata_id: int, metadata_dict: SettableTableMetaData, **kwargs
+) -> TableMetaData:
+    """
+    Alter metadata settings associated with a table for a schema.
+
+    Args:
+        metadata_id: Identity of the table metadata in the user's database.
+        metadata_dict: The dict describing desired table metadata alterations.
+
+    Returns:
+        Altered metadata object.
+    """
+    table_meta_data = patch_table_meta_data(metadata_id, metadata_dict)
+    return TableMetaData.from_model(table_meta_data)
