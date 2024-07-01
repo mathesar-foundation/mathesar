@@ -1,14 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
   import { queries } from '@mathesar/stores/queries';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let queryId: number;
 
   $: query = $queries.data.get(queryId);

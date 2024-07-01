@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
@@ -37,7 +38,7 @@
 
   export let table: TableEntry;
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let canExecuteDDL: boolean;
 
   let isHoveringMenuTrigger = false;
@@ -46,13 +47,13 @@
 
   $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
   $: tablePageUrl = isTableImportConfirmationNeeded
-    ? getImportPreviewPageUrl(database.id, schema.id, table.id, {
+    ? getImportPreviewPageUrl(database.id, schema.oid, table.id, {
         useColumnTypeInference: true,
       })
-    : getTablePageUrl(database.id, schema.id, table.id);
+    : getTablePageUrl(database.id, schema.oid, table.id);
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.id,
-    schema.id,
+    schema.oid,
     table,
   );
   $: description = table.description ?? '';
