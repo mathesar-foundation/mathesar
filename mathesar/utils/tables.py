@@ -86,15 +86,14 @@ def create_empty_table(name, schema, comment=None):
     return table
 
 
-def get_tables_meta_data(schema_oid, database_id):
-    return TableMetaData.objects.filter(database__id=database_id, schema_oid=schema_oid)
+def get_tables_meta_data(database_id):
+    return TableMetaData.objects.filter(database__id=database_id)
 
 
-def patch_table_meta_data(metadata_id, metadata_dict):
-    metadata_model = TableMetaData.objects.get(id=metadata_id)
-    metadata_model.import_verified = metadata_dict.get('import_verified', metadata_model.import_verified)
-    metadata_model.column_order = metadata_dict.get('column_order', metadata_model.column_order)
-    metadata_model.preview_customized = metadata_dict.get('preview_customized', metadata_model.preview_customized)
-    metadata_model.preview_template = metadata_dict.get('preview_template', metadata_model.preview_template)
+def patch_table_meta_data(table_oid, metadata_dict, database_id):
+    metadata_model = TableMetaData.objects.get(database__id=database_id, table_oid=table_oid)
+    for field, value in metadata_dict.items():
+        if hasattr(metadata_model, field):
+            setattr(metadata_model, field, value)
     metadata_model.save()
     return metadata_model

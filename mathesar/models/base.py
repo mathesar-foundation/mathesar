@@ -125,17 +125,16 @@ class ColumnMetaData(BaseModel):
 
 class TableMetaData(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
-    schema_oid = models.PositiveBigIntegerField()
     table_oid = models.PositiveBigIntegerField()
     import_verified = models.BooleanField(default=False)
     column_order = models.JSONField(default=list)
-    preview_customized = models.BooleanField(default=False)
-    preview_template = models.CharField(max_length=255, blank=True)
+    record_summary_customized = models.BooleanField(default=False)
+    record_summary_template = models.CharField(max_length=255, blank=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["database", "schema_oid", "table_oid"],
+                fields=["database", "table_oid"],
                 name="unique_table_metadata"
             )
         ]

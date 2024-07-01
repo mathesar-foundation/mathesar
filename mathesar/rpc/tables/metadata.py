@@ -14,38 +14,35 @@ class TableMetaData(TypedDict):
     """
     Metadata for a table in a database.
 
-    Only the `database`, `schema_oid`, and `table_oid` keys are required.
+    Only the `database` and `table_oid` keys are required.
 
     Attributes:
         id: The Django id of the TableMetaData object.
         database_id: The Django id of the database containing the table.
-        schema_oid: The OID of the schema containing the table.
         table_oid: The OID of the table in the database.
         import_verified: Specifies whether a file has been successfully imported into a table.
         column_order: The order in which columns of a table are displayed.
-        preview_customized: Specifies whether the preview has been customized.
-        preview_template: Preview template for a referent column.
+        record_summary_customized: Specifies whether the record summary has been customized.
+        record_summary_template: Record summary template for a referent column.
     """
     id: int
     database_id: int
-    schema_oid: int
     table_oid: int
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
-    preview_customized: Optional[bool]
-    preview_template: Optional[str]
+    record_summary_customized: Optional[bool]
+    record_summary_template: Optional[str]
 
     @classmethod
     def from_model(cls, model):
         return cls(
             id=model.id,
             database_id=model.database.id,
-            schema_oid=model.schema_oid,
             table_oid=model.table_oid,
             import_verified=model.import_verified,
             column_order=model.column_order,
-            preview_customized=model.preview_customized,
-            preview_template=model.preview_template,
+            record_summary_customized=model.record_summary_customized,
+            record_summary_template=model.record_summary_template,
         )
 
 
@@ -56,30 +53,29 @@ class SettableTableMetaData(TypedDict):
     Attributes:
         import_verified: Specifies whether a file has been successfully imported into a table.
         column_order: The order in which columns of a table are displayed.
-        preview_customized: Specifies whether the preview has been customized.
-        preview_template: Preview template for a referent column.
+        record_summary_customized: Specifies whether the record summary has been customized.
+        record_summary_template: Record summary template for a referent column.
     """
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
-    preview_customized: Optional[bool]
-    preview_template: Optional[str]
+    record_summary_customized: Optional[bool]
+    record_summary_template: Optional[str]
 
 
 @rpc_method(name="tables.metadata.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableMetaData]:
+def list_(*, database_id: int, **kwargs) -> list[TableMetaData]:
     """
-    List metadata associated with tables for a schema.
+    List metadata associated with tables for a database.
 
     Args:
-        schema_oid: Identity of the schema in the user's database.
         database_id: The Django id of the database containing the table.
 
     Returns:
         Metadata object for a given table oid.
     """
-    table_meta_data = get_tables_meta_data(schema_oid, database_id)
+    table_meta_data = get_tables_meta_data(database_id)
     return [
         TableMetaData.from_model(model) for model in table_meta_data
     ]
@@ -89,17 +85,18 @@ def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableMetaData]
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def patch(
-    *, metadata_id: int, metadata_dict: SettableTableMetaData, **kwargs
+    *, table_oid: int, metadata_dict: SettableTableMetaData, database_id: int, **kwargs
 ) -> TableMetaData:
     """
-    Alter metadata settings associated with a table for a schema.
+    Alter metadata settings associated with a table for a database.
 
     Args:
-        metadata_id: Identity of the table metadata in the user's database.
+        table_oid: Identity of the table whose metadata we'll modify.
         metadata_dict: The dict describing desired table metadata alterations.
+        database_id: The Django id of the database containing the table.
 
     Returns:
         Altered metadata object.
     """
-    table_meta_data = patch_table_meta_data(metadata_id, metadata_dict)
+    table_meta_data = patch_table_meta_data(table_oid, metadata_dict, database_id)
     return TableMetaData.from_model(table_meta_data)
