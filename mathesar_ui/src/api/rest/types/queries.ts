@@ -1,7 +1,7 @@
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { JpPath } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-import type { SchemaEntry } from '@mathesar/AppTypes';
+import type { Schema } from '@mathesar/api/rpc/schemas';
 
 export type QueryColumnAlias = string;
 
@@ -182,7 +182,7 @@ export interface QueryResultsResponse {
 
 export interface QueryRunResponse extends QueryResultsResponse {
   query: {
-    schema: SchemaEntry['id'];
+    schema: Schema['oid'];
     base_table: QueryInstance['base_table'];
     initial_columns: QueryInstanceInitialColumn[];
     transformations?: QueryInstanceTransformation[];

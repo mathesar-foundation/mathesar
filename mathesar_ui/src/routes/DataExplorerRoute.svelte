@@ -4,7 +4,8 @@
   import { router } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import type { CancellablePromise } from '@mathesar/component-library';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconEdit, iconExploration } from '@mathesar/icons';
@@ -24,7 +25,7 @@
   } from '@mathesar/systems/data-explorer';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let queryId: number | undefined;
 
   let is404 = false;
@@ -42,7 +43,7 @@
         try {
           const url = getExplorationEditorPageUrl(
             database.id,
-            schema.id,
+            schema.oid,
             instance.id,
           );
           router.goto(url, true);
@@ -134,7 +135,7 @@
     <AppendBreadcrumb
       item={{
         type: 'simple',
-        href: getExplorationEditorPageUrl(database.id, schema.id, $query.id),
+        href: getExplorationEditorPageUrl(database.id, schema.oid, $query.id),
         label: $_('edit'),
         icon: iconEdit,
       }}
@@ -143,7 +144,7 @@
     <AppendBreadcrumb
       item={{
         type: 'simple',
-        href: getExplorationEditorPageUrl(database.id, schema.id, $query.id),
+        href: getExplorationEditorPageUrl(database.id, schema.oid, $query.id),
         label: $_('data_explorer'),
         icon: iconExploration,
       }}
@@ -153,7 +154,7 @@
   <AppendBreadcrumb
     item={{
       type: 'simple',
-      href: getDataExplorerPageUrl(database.id, schema.id),
+      href: getDataExplorerPageUrl(database.id, schema.oid),
       label: $_('data_explorer'),
       icon: iconExploration,
     }}

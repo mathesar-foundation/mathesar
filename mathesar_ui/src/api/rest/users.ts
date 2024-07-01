@@ -1,4 +1,5 @@
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { Database } from '@mathesar/AppTypes';
 import type { Language } from '@mathesar/i18n/languages/utils';
 
 import {
@@ -27,7 +28,7 @@ export interface DatabaseRole {
 
 export interface SchemaRole {
   id: number;
-  schema: SchemaEntry['id'];
+  schema: Schema['oid'];
   role: UserRole;
 }
 
@@ -92,7 +93,7 @@ function deleteDatabaseRole(roleId: DatabaseRole['id']) {
 
 function addSchemaRole(
   userId: User['id'],
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
   role: UserRole,
 ) {
   return postAPI<SchemaRole>('/api/ui/v0/schema_roles/', {

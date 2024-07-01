@@ -3,7 +3,8 @@
   import { router } from 'tinro';
 
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getTablePageUrl } from '@mathesar/routes/urls';
@@ -19,12 +20,12 @@
   const dataFileFetch = new AsyncStore(dataFilesApi.get);
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let tableId: number;
   export let useColumnTypeInference = false;
 
   function redirectToTablePage() {
-    router.goto(getTablePageUrl(database.id, schema.id, tableId));
+    router.goto(getTablePageUrl(database.id, schema.oid, tableId));
   }
 
   $: void (async () => {

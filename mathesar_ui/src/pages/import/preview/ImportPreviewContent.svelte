@@ -6,7 +6,8 @@
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import {
     Field,
     FieldLayout,
@@ -60,7 +61,7 @@
   const cancelationRequest = makeDeleteTableRequest();
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let table: TableEntry;
   export let dataFile: DataFile;
   export let useColumnTypeInference = false;
@@ -108,7 +109,7 @@
   }) {
     const tableId = props.table?.id ?? table.id;
     router.goto(
-      getImportPreviewPageUrl(database.id, schema.id, tableId, {
+      getImportPreviewPageUrl(database.id, schema.oid, tableId, {
         useColumnTypeInference:
           props.useColumnTypeInference ?? useColumnTypeInference,
       }),
@@ -146,7 +147,7 @@
   async function cancel() {
     const response = await cancelationRequest.run({ database, schema, table });
     if (response.isOk) {
-      router.goto(getSchemaPageUrl(database.id, schema.id), true);
+      router.goto(getSchemaPageUrl(database.id, schema.oid), true);
     } else {
       toast.fromError(response.error);
     }
@@ -159,7 +160,7 @@
         import_verified: true,
         columns: finalizeColumns(columns, columnPropertiesMap),
       });
-      router.goto(getTablePageUrl(database.id, schema.id, table.id), true);
+      router.goto(getTablePageUrl(database.id, schema.oid, table.id), true);
     } catch (err) {
       toast.fromError(err);
     }

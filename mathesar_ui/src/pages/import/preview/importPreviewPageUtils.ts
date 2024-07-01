@@ -5,7 +5,8 @@ import type {
   TableEntry,
 } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { Database } from '@mathesar/AppTypes';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type {
@@ -51,7 +52,7 @@ export function processColumns(
 export function makeHeaderUpdateRequest() {
   interface Props {
     database: Database;
-    schema: SchemaEntry;
+    schema: Schema;
     table: Pick<TableEntry, 'id'>;
     dataFile: Pick<DataFile, 'id'>;
     firstRowIsHeader: boolean;
@@ -73,7 +74,7 @@ export function makeHeaderUpdateRequest() {
 export function makeDeleteTableRequest() {
   interface Props {
     database: Database;
-    schema: SchemaEntry;
+    schema: Schema;
     table: Pick<TableEntry, 'id'>;
   }
   return new AsyncStore((props: Props) =>

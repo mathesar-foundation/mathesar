@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
 
@@ -13,7 +14,7 @@
   export let tablesMap: Map<number, TableEntry>;
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let canExecuteDDL: boolean;
 
   $: showTutorial = tablesMap.size === 0 && canExecuteDDL;

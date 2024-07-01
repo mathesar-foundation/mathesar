@@ -2,12 +2,9 @@ import type { Readable, Unsubscriber, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
 import type { Connection } from '@mathesar/api/rest/connections';
-import schemasApi from '@mathesar/api/rest/schemas';
-import type {
-  PaginatedResponse,
-  RequestStatus,
-} from '@mathesar/api/rest/utils/requestUtils';
-import type { SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type { Schema } from '@mathesar/api/rpc/schemas';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -15,12 +12,13 @@ import { connectionsStore } from './databases';
 
 const commonData = preloadCommonData();
 
-export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
-  writable(commonData.current_schema ?? undefined);
+export const currentSchemaId: Writable<Schema['oid'] | undefined> = writable(
+  commonData.current_schema ?? undefined,
+);
 
 export interface DBSchemaStoreData {
   requestStatus: RequestStatus;
-  data: Map<SchemaEntry['id'], SchemaEntry>;
+  data: Map<Schema['oid'], Schema>;
 }
 
 const dbSchemaStoreMap: Map<
@@ -29,22 +27,16 @@ const dbSchemaStoreMap: Map<
 > = new Map();
 const dbSchemasRequestMap: Map<
   Connection['id'],
-  CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
+  CancellablePromise<Schema[]>
 > = new Map();
-
-function findStoreBySchemaId(id: SchemaEntry['id']) {
-  return [...dbSchemaStoreMap.values()].find((entry) =>
-    get(entry).data.has(id),
-  );
-}
 
 function setDBSchemaStore(
   connectionId: Connection['id'],
-  schemas: SchemaResponse[],
+  schemas: Schema[],
 ): Writable<DBSchemaStoreData> {
   const schemaMap: DBSchemaStoreData['data'] = new Map();
   schemas.forEach((schema) => {
-    schemaMap.set(schema.id, schema);
+    schemaMap.set(schema.oid, schema);
   });
   const storeValue: DBSchemaStoreData = {
     requestStatus: { state: 'success' },
@@ -63,12 +55,12 @@ function setDBSchemaStore(
 
 function updateSchemaInDBSchemaStore(
   connectionId: Connection['id'],
-  schema: SchemaResponse,
+  schema: Schema,
 ) {
   const store = dbSchemaStoreMap.get(connectionId);
   if (store) {
     store.update((value) => {
-      value.data?.set(schema.id, schema);
+      value.data?.set(schema.oid, schema);
       return {
         ...value,
         data: new Map(value.data),
@@ -79,7 +71,7 @@ function updateSchemaInDBSchemaStore(
 
 function removeSchemaInDBSchemaStore(
   connectionId: Connection['id'],
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
 ) {
   const store = dbSchemaStoreMap.get(connectionId);
   if (store) {
@@ -95,36 +87,16 @@ function removeSchemaInDBSchemaStore(
 
 export function addCountToSchemaNumTables(
   connection: Connection,
-  schema: SchemaEntry,
+  schema: Schema,
   count: number,
 ) {
   const store = dbSchemaStoreMap.get(connection.id);
   if (store) {
     store.update((value) => {
-      const schemaToModify = value.data.get(schema.id);
+      const schemaToModify = value.data.get(schema.oid);
       if (schemaToModify) {
-        schemaToModify.num_tables += count;
-        value.data.set(schema.id, schemaToModify);
-      }
-      return {
-        ...value,
-        data: new Map(value.data),
-      };
-    });
-  }
-}
-
-export function addCountToSchemaNumExplorations(
-  schemaId: SchemaEntry['id'],
-  count: number,
-) {
-  const store = findStoreBySchemaId(schemaId);
-  if (store) {
-    store.update((value) => {
-      const schemaToModify = value.data.get(schemaId);
-      if (schemaToModify) {
-        schemaToModify.num_queries += count;
-        value.data.set(schemaId, schemaToModify);
+        schemaToModify.table_count += count;
+        value.data.set(schema.oid, schemaToModify);
       }
       return {
         ...value,
@@ -153,10 +125,9 @@ async function refetchSchemasForDB(
 
     dbSchemasRequestMap.get(connectionId)?.cancel();
 
-    const schemaRequest = schemasApi.list(connectionId);
+    const schemaRequest = api.schemas.list({ database_id: connectionId }).run();
     dbSchemasRequestMap.set(connectionId, schemaRequest);
-    const response = await schemaRequest;
-    const schemas = response?.results || [];
+    const schemas = await schemaRequest;
 
     const dbSchemasStore = setDBSchemaStore(connectionId, schemas);
 
@@ -201,8 +172,8 @@ function getSchemasStoreForDB(
 
 export function getSchemaInfo(
   connectionId: Connection['id'],
-  schemaId: SchemaEntry['id'],
-): SchemaEntry | undefined {
+  schemaId: Schema['oid'],
+): Schema | undefined {
   const store = dbSchemaStoreMap.get(connectionId);
   if (!store) {
     return undefined;
@@ -212,32 +183,51 @@ export function getSchemaInfo(
 
 export async function createSchema(
   connectionId: Connection['id'],
-  schemaName: SchemaEntry['name'],
-  description: SchemaEntry['description'],
-): Promise<SchemaResponse> {
-  const response = await schemasApi.add({
-    name: schemaName,
+  name: Schema['name'],
+  description: Schema['description'],
+): Promise<void> {
+  const schemaOid = await api.schemas
+    .add({
+      database_id: connectionId,
+      name,
+      description,
+    })
+    .run();
+  updateSchemaInDBSchemaStore(connectionId, {
+    oid: schemaOid,
+    name,
     description,
-    connectionId,
+    table_count: 0,
   });
-  updateSchemaInDBSchemaStore(connectionId, response);
-  return response;
 }
 
 export async function updateSchema(
   connectionId: Connection['id'],
-  schema: SchemaEntry,
-): Promise<SchemaResponse> {
-  const response = await schemasApi.update(schema);
-  updateSchemaInDBSchemaStore(connectionId, response);
-  return response;
+  schema: Schema,
+): Promise<void> {
+  await api.schemas
+    .patch({
+      database_id: connectionId,
+      schema_oid: schema.oid,
+      patch: {
+        name: schema.name,
+        description: schema.description,
+      },
+    })
+    .run();
+  updateSchemaInDBSchemaStore(connectionId, schema);
 }
 
 export async function deleteSchema(
   connectionId: Connection['id'],
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
 ): Promise<void> {
-  await schemasApi.delete(schemaId);
+  await api.schemas
+    .delete({
+      database_id: connectionId,
+      schema_oid: schemaId,
+    })
+    .run();
   removeSchemaInDBSchemaStore(connectionId, schemaId);
 }
 
@@ -264,7 +254,7 @@ export const schemas: Readable<DBSchemaStoreData> = derived(
   },
 );
 
-export const currentSchema: Readable<SchemaEntry | undefined> = derived(
+export const currentSchema: Readable<Schema | undefined> = derived(
   [currentSchemaId, schemas],
   ([$currentSchemaId, $schemas]) =>
     $currentSchemaId ? $schemas.data.get($currentSchemaId) : undefined,

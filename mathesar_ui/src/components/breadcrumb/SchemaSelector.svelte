@@ -1,7 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import { iconSchema } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import {
@@ -14,16 +15,14 @@
 
   export let database: Database;
 
-  function makeBreadcrumbSelectorItem(
-    schemaEntry: SchemaEntry,
-  ): BreadcrumbSelectorEntry {
+  function makeBreadcrumbSelectorItem(schema: Schema): BreadcrumbSelectorEntry {
     return {
       type: 'simple',
-      label: schemaEntry.name,
-      href: getSchemaPageUrl(database.id, schemaEntry.id),
+      label: schema.name,
+      href: getSchemaPageUrl(database.id, schema.oid),
       icon: iconSchema,
       isActive() {
-        return schemaEntry.id === $currentSchemaId;
+        return schema.oid === $currentSchemaId;
       },
     };
   }

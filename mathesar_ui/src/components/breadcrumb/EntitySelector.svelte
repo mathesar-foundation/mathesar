@@ -4,7 +4,8 @@
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { queries as queriesStore } from '@mathesar/stores/queries';
@@ -22,7 +23,7 @@
   } from './breadcrumbTypes';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   function makeTableBreadcrumbSelectorItem(
     table: TableEntry,
@@ -31,7 +32,7 @@
       type: 'table',
       table,
       label: table.name,
-      href: getLinkForTableItem(database.id, schema.id, table),
+      href: getLinkForTableItem(database.id, schema.oid, table),
       icon: iconTable,
       isActive() {
         return table.id === $currentTableId;
@@ -47,13 +48,13 @@
     return {
       type: 'simple',
       label: queryInstance.name,
-      href: getExplorationPageUrl(database.id, schema.id, queryInstance.id),
+      href: getExplorationPageUrl(database.id, schema.oid, queryInstance.id),
       icon: iconTable,
       isActive() {
         // TODO we don't have a store for what the current query is, so we fallback to comparing hrefs.
         const entryhref = getExplorationPageUrl(
           database.id,
-          schema.id,
+          schema.oid,
           queryInstance.id,
         );
         const currentHref = $currentRoute.url;

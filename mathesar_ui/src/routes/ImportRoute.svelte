@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconImportData } from '@mathesar/icons';
   import ImportPreviewPage from '@mathesar/pages/import/preview/ImportPreviewPage.svelte';
@@ -11,13 +12,13 @@
   import { getImportPageUrl, getImportPreviewPageQueryParams } from './urls';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 </script>
 
 <AppendBreadcrumb
   item={{
     type: 'simple',
-    href: getImportPageUrl(database.id, schema.id),
+    href: getImportPageUrl(database.id, schema.oid),
     label: $_('import'),
     icon: iconImportData,
   }}

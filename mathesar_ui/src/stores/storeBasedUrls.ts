@@ -31,7 +31,7 @@ export const storeToGetRecordPageUrl = derived(
       recordId: unknown;
     }): string | undefined {
       const d = connectionId ?? connection?.id;
-      const s = schemaId ?? schema?.id;
+      const s = schemaId ?? schema?.oid;
       const t = tableId ?? table?.id;
       const r = recordId ?? undefined;
       if (
@@ -61,7 +61,7 @@ export const storeToGetTablePageUrl = derived(
       tableId?: number;
     }): string | undefined {
       const d = connectionId ?? connection?.id;
-      const s = schemaId ?? schema?.id;
+      const s = schemaId ?? schema?.oid;
       const t = tableId ?? table?.id;
       if (d === undefined || s === undefined || t === undefined) {
         return undefined;

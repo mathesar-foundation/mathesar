@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
@@ -16,7 +17,7 @@
   const userProfile = getUserProfileStoreFromContext();
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let queryManager: QueryManager;
 
   $: ({ query } = queryManager);
@@ -25,12 +26,12 @@
     false;
 
   function gotoSchemaPage() {
-    router.goto(getSchemaPageUrl(database.id, schema.id));
+    router.goto(getSchemaPageUrl(database.id, schema.oid));
   }
 
   function gotoExplorationPage() {
     if ($query.id) {
-      router.goto(getExplorationPageUrl(database.id, schema.id, $query.id));
+      router.goto(getExplorationPageUrl(database.id, schema.oid, $query.id));
     }
   }
 </script>

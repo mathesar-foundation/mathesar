@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import { iconAddNew } from '@mathesar/icons';
@@ -15,7 +16,7 @@
   } from '@mathesar-component-library';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   let isCreatingNewTable = false;
 
@@ -23,7 +24,7 @@
     isCreatingNewTable = true;
     const tableInfo = await createTable(database, schema, {});
     isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.id, schema.id, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, tableInfo.id), false);
   }
 </script>
 
@@ -44,7 +45,7 @@
   <ButtonMenuItem on:click={handleCreateEmptyTable}>
     {$_('from_scratch')}
   </ButtonMenuItem>
-  <LinkMenuItem href={getImportPageUrl(database.id, schema.id)}>
+  <LinkMenuItem href={getImportPageUrl(database.id, schema.oid)}>
     {$_('from_data_import')}
   </LinkMenuItem>
 </DropdownMenu>

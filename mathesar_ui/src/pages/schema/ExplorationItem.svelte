@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
@@ -11,14 +12,14 @@
 
   export let exploration: QueryInstance;
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   $: baseTable = $tablesStore.data.get(exploration.base_table);
 </script>
 
 <a
   class="link-container"
-  href={getExplorationPageUrl(database.id, schema.id, exploration.id)}
+  href={getExplorationPageUrl(database.id, schema.oid, exploration.id)}
 >
   <div class="container">
     <div class="horizontal-container name-and-icon">

@@ -53,32 +53,32 @@ import {
   postAPI,
   putAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
-import type { SchemaEntry } from '@mathesar/AppTypes';
+import type { Schema } from '@mathesar/api/rpc/schemas';
 import CacheManager from '@mathesar/utils/CacheManager';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
 import { CancellablePromise } from '@mathesar-component-library';
 
-import { addCountToSchemaNumExplorations, currentSchemaId } from './schemas';
+import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
 
 export type UnsavedQueryInstance = Partial<QueryInstance>;
 
 export interface QueriesStoreSubstance {
-  schemaId: SchemaEntry['id'];
+  schemaId: Schema['oid'];
   requestStatus: RequestStatus;
   data: Map<QueryInstance['id'], QueryInstance>;
 }
 
 // Cache the query list of the last 3 opened schemas
 const schemasCacheManager = new CacheManager<
-  SchemaEntry['id'],
+  Schema['oid'],
   Writable<QueriesStoreSubstance>
 >(3);
 
 const requestMap: Map<
-  SchemaEntry['id'],
+  Schema['oid'],
   CancellablePromise<PaginatedResponse<QueryInstance>>
 > = new Map();
 
@@ -87,7 +87,7 @@ function sortedQueryEntries(queryEntries: QueryInstance[]): QueryInstance[] {
 }
 
 function setSchemaQueriesStore(
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
   queryEntries?: QueryInstance[],
 ): Writable<QueriesStoreSubstance> {
   const queries: QueriesStoreSubstance['data'] = new Map();
@@ -120,7 +120,7 @@ function findSchemaStoreForQuery(id: QueryInstance['id']) {
 }
 
 export async function refetchQueriesForSchema(
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
 ): Promise<QueriesStoreSubstance | undefined> {
   const store = schemasCacheManager.get(schemaId);
   if (!store) {
@@ -164,7 +164,7 @@ export async function refetchQueriesForSchema(
 let preload = true;
 
 export function getQueriesStoreForSchema(
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
 ): Writable<QueriesStoreSubstance> {
   let store = schemasCacheManager.get(schemaId);
   if (!store) {
@@ -212,7 +212,6 @@ export function createQuery(
 ): CancellablePromise<QueryGetResponse> {
   const promise = postAPI<QueryGetResponse>('/api/db/v0/queries/', newQuery);
   void promise.then((instance) => {
-    addCountToSchemaNumExplorations(instance.schema, 1);
     void refetchQueriesForSchema(instance.schema);
     return instance;
   });
@@ -306,7 +305,6 @@ export function deleteQuery(queryId: number): CancellablePromise<void> {
         storeData.data.delete(queryId);
         return { ...storeData, data: new Map(storeData.data) };
       });
-      addCountToSchemaNumExplorations(get(store).schemaId, -1);
     }
     return undefined;
   });
