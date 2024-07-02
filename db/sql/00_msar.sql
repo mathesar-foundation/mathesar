@@ -2302,6 +2302,8 @@ SELECT __msar.exec_ddl(
 FROM col_cte, con_cte;
 $$ LANGUAGE SQL;
 
+-- Drop function defined in Mathesar 0.1.7 with different argument names
+DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
 msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
