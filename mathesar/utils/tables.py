@@ -96,7 +96,7 @@ def patch_table_meta_data(table_oid, metadata_dict, database_id):
         'import_verified', 'column_order', 'record_summary_customized', 'record_summary_template'
     )
     for field, value in metadata_dict.items():
-        if hasattr(metadata_model, field) and field in alterable_fields:
+        if field in alterable_fields:
             setattr(metadata_model, field, value)
     metadata_model.save()
     return metadata_model
