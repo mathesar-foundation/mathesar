@@ -865,8 +865,7 @@ CREATE OR REPLACE FUNCTION msar.set_schema_description(
 ) RETURNS void AS $$/*
 Set the PostgreSQL description (aka COMMENT) of a schema.
 
-Descriptions are removed by passing an empty string. Passing a NULL description will cause
-this function to return NULL without doing anything.
+Descriptions are removed by passing an empty string or NULL.
 
 Args:
   sch_id: The OID of the schema.
@@ -875,7 +874,7 @@ Args:
 BEGIN
   EXECUTE format('COMMENT ON SCHEMA %I IS %L', msar.get_schema_name(sch_id), description);
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS void AS $$/*

@@ -1325,10 +1325,9 @@ BEGIN
   PERFORM msar.patch_schema(sch_oid, '{"description": "yay"}');
   RETURN NEXT is(obj_description(sch_oid), 'yay');
 
-  -- Edge case: setting the description to null doesn't actually remove it. This behavior is
-  -- debatable. I did it this way because it was easier to implement.
+  -- Description is removed when NULL is passed.
   PERFORM msar.patch_schema(sch_oid, '{"description": null}');
-  RETURN NEXT is(obj_description(sch_oid), 'yay');
+  RETURN NEXT is(obj_description(sch_oid), NULL);
 
   -- Description is removed when an empty string is passed.
   PERFORM msar.patch_schema(sch_oid, '{"description": ""}');
