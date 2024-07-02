@@ -1451,6 +1451,48 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_noname() RETURNS SETOF TEXT AS $f$
+DECLARE
+  generated_name text := 'Table 1';
+BEGIN
+  PERFORM __setup_create_table();
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, null, null, null, null
+  );
+  RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
+END;
+$f$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_mathesar_table_noname_avoid_collision()
+RETURNS SETOF TEXT AS $f$
+DECLARE
+  generated_name text := 'Table 3';
+BEGIN
+  PERFORM __setup_create_table();
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, null, null, null, null
+  );
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, null, null, null, null
+  );
+  RETURN NEXT has_table('tab_create_schema'::name, 'Table 1'::name);
+  RETURN NEXT has_table('tab_create_schema'::name, 'Table 2'::name);
+  PERFORM msar.drop_table(
+    sch_name => 'tab_create_schema',
+    tab_name => 'Table 1',
+    cascade_ => false,
+    if_exists => false
+  );
+  RETURN NEXT hasnt_table('tab_create_schema'::name, 'Table 1'::name);
+  PERFORM msar.add_mathesar_table(
+    'tab_create_schema'::regnamespace::oid, null, null, null, null
+  );
+  RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
+END;
+$f$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_mathesar_table_columns() RETURNS SETOF TEXT AS $f$
 DECLARE
   col_defs jsonb := $j$[
