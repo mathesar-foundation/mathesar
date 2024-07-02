@@ -108,6 +108,16 @@ METHODS = [
         tables.get_import_preview,
         "tables.get_import_preview",
         [user_is_authenticated]
+    ),
+    (
+        tables.metadata.list_,
+        "tables.metadata.list",
+        [user_is_authenticated]
+    ),
+    (
+        tables.metadata.patch,
+        "tables.metadata.patch",
+        [user_is_authenticated]
     )
 ]
 

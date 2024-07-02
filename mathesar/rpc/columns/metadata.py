@@ -18,7 +18,7 @@ class ColumnMetaData(TypedDict):
 
     Attributes:
         database_id: The Django id of the database containing the table.
-        table_oid: The OID of the table containing the column
+        table_oid: The OID of the table containing the column.
         attnum: The attnum of the column in the table.
         bool_input: How the input for a boolean column should be shown.
         bool_true: A string to display for `true` values.

@@ -84,16 +84,16 @@ class UserDatabaseRoleMap(BaseModel):
 
 class ColumnMetaData(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
-    table_oid = models.PositiveIntegerField()
-    attnum = models.PositiveIntegerField()
+    table_oid = models.PositiveBigIntegerField()
+    attnum = models.SmallIntegerField()
     bool_input = models.CharField(
         choices=[("dropdown", "dropdown"), ("checkbox", "checkbox")],
         blank=True
     )
     bool_true = models.CharField(default='True')
     bool_false = models.CharField(default='False')
-    num_min_frac_digits = models.PositiveIntegerField(blank=True)
-    num_max_frac_digits = models.PositiveIntegerField(blank=True)
+    num_min_frac_digits = models.PositiveIntegerField(default=0)
+    num_max_frac_digits = models.PositiveIntegerField(default=20)
     num_show_as_perc = models.BooleanField(default=False)
     mon_currency_symbol = models.CharField(default="$")
     mon_currency_location = models.CharField(
@@ -119,5 +119,22 @@ class ColumnMetaData(BaseModel):
                     & models.Q(num_min_frac_digits__lte=models.F("num_max_frac_digits"))
                 ),
                 name="frac_digits_integrity"
+            )
+        ]
+
+
+class TableMetaData(BaseModel):
+    database = models.ForeignKey('Database', on_delete=models.CASCADE)
+    table_oid = models.PositiveBigIntegerField()
+    import_verified = models.BooleanField(default=False)
+    column_order = models.JSONField(default=list)
+    record_summary_customized = models.BooleanField(default=False)
+    record_summary_template = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["database", "table_oid"],
+                name="unique_table_metadata"
             )
         ]
