@@ -107,7 +107,9 @@ To use an RPC function:
     options:
       members:
       - list_
+      - patch
       - ColumnMetaData
+      - SettableColumnMetaData
 
 ## Responses
 
