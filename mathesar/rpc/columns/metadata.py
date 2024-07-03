@@ -138,7 +138,7 @@ def patch(
         table_oid: int,
         database_id: int,
         **kwargs
-) -> ColumnMetaData:
+) -> list[ColumnMetaData]:
     """
     Alter metadata settings associated with columns of a table for a database.
 
@@ -150,7 +150,9 @@ def patch(
     Returns:
         List of altered metadata objects.
     """
-    column_meta_data = patch_column_meta_data(
+    columns_meta_data = patch_column_meta_data(
         column_meta_data_list, table_oid, database_id
     )
-    return ColumnMetaData.from_model(table_meta_data)
+    return [
+        ColumnMetaData.from_model(model) for model in columns_meta_data
+    ]
