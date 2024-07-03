@@ -865,8 +865,7 @@ CREATE OR REPLACE FUNCTION msar.set_schema_description(
 ) RETURNS void AS $$/*
 Set the PostgreSQL description (aka COMMENT) of a schema.
 
-Descriptions are removed by passing an empty string. Passing a NULL description will cause
-this function to return NULL without doing anything.
+Descriptions are removed by passing an empty string or NULL.
 
 Args:
   sch_id: The OID of the schema.
@@ -875,7 +874,7 @@ Args:
 BEGIN
   EXECUTE format('COMMENT ON SCHEMA %I IS %L', msar.get_schema_name(sch_id), description);
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS void AS $$/*
@@ -886,11 +885,12 @@ Args:
   patch: A JSONB object with the following keys:
     - name: (optional) The new name of the schema
     - description: (optional) The new description of the schema. To remove a description, pass an
-      empty string. Passing a NULL description will have no effect on the description.
+      empty string or NULL.
 */
 BEGIN
   PERFORM msar.rename_schema(sch_id, patch->>'name');
-  PERFORM msar.set_schema_description(sch_id, patch->>'description');
+  PERFORM CASE WHEN patch ? 'description'
+  THEN msar.set_schema_description(sch_id, patch->>'description') END;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1137,14 +1137,13 @@ Args:
 */
 DECLARE
   new_tab_name text;
-  comment text;
   col_alters jsonb;
 BEGIN
   new_tab_name := tab_alters->>'name';
-  comment := tab_alters->>'description';
   col_alters := tab_alters->'columns';
   PERFORM msar.rename_table(tab_id, new_tab_name);
-  PERFORM msar.comment_on_table(tab_id, comment);
+  PERFORM CASE WHEN tab_alters ? 'description'
+  THEN msar.comment_on_table(tab_id, tab_alters->>'description') END;
   PERFORM msar.alter_columns(tab_id, col_alters);
   RETURN __msar.get_qualified_relation_name_or_null(tab_id);
 END;
