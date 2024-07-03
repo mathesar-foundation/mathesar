@@ -66,6 +66,7 @@ ROOT_URLCONF = "config.urls"
 
 MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.connections',
+    'mathesar.rpc.constraints',
     'mathesar.rpc.columns',
     'mathesar.rpc.columns.metadata',
     'mathesar.rpc.schemas',

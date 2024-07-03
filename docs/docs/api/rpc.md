@@ -47,6 +47,16 @@ To use an RPC function:
       - grant_access_to_user
       - DBModelReturn
 
+## Constraints
+
+::: mathesar.rpc.constraints
+    options:
+      members:
+      - add_from_known_connection
+      - add_from_scratch
+      - grant_access_to_user
+      - DBModelReturn
+
 ## Schemas
 
 ::: schemas

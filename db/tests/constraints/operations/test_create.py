@@ -23,7 +23,7 @@ from db.constraints.base import UniqueConstraint, ForeignKeyConstraint
 def test_add_constraint_db(engine_with_schema, constraint_obj):
     engine = engine_with_schema
     with patch.object(con_create, 'execute_msar_func_with_engine') as mock_exec:
-        con_create.add_constraint(
+        con_create.add_constraint_via_sql_alchemy(
             engine=engine,
             constraint_obj=constraint_obj
         )

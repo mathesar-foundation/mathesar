@@ -246,6 +246,52 @@ END
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_relation_name(rel_oid oid) RETURNS TEXT AS $$/*
+Return the UNQUOTED name of a given relation (e.g., table).
+
+If the relation does not exist, an exception will be raised.
+
+Args:
+  rel_oid: The OID of the relation.
+*/
+DECLARE rel_name text;
+BEGIN
+  SELECT relname INTO rel_name FROM pg_class WHERE oid=rel_oid;
+
+  IF rel_name IS NULL THEN
+    RAISE EXCEPTION 'Relation with OID % does not exist', rel_oid
+    USING ERRCODE = '42P01'; -- undefined_table
+  END IF;
+
+  RETURN rel_name;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_relation_schema_name(rel_oid oid) RETURNS TEXT AS $$/*
+Return the UNQUOTED name of the schema which contains a given relation (e.g., table).
+
+If the relation does not exist, an exception will be raised.
+
+Args:
+  rel_oid: The OID of the relation.
+*/
+DECLARE sch_name text;
+BEGIN
+  SELECT n.nspname INTO sch_name
+  FROM pg_catalog.pg_class c
+  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace 
+  WHERE c.oid = rel_oid;
+
+  IF sch_name IS NULL THEN
+    RAISE EXCEPTION 'Relation with OID % does not exist', rel_oid
+    USING ERRCODE = '42P01'; -- undefined_table
+  END IF;
+
+  RETURN sch_name;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 DROP FUNCTION IF EXISTS msar.get_relation_oid(text, text) CASCADE;
 CREATE OR REPLACE FUNCTION
@@ -449,6 +495,59 @@ BEGIN
   RETURN format('mathesar_types.cast_to_%s', target_type_prepped);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_constraint_type_api_code(contype "char") RETURNS TEXT AS $$/*
+This function returns a string that represents the constraint type code used to describe
+constraints when listing them within the Mathesar API.
+
+PostgreSQL constraint types are documented by the `contype` field here:
+https://www.postgresql.org/docs/current/catalog-pg-constraint.html
+
+Notably, we don't include 't' (trigger) because triggers a bit different structurally and we don't
+support working with them (yet?) in Mathesar.
+*/
+SELECT CASE contype
+  WHEN 'c' THEN 'check'
+  WHEN 'f' THEN 'foreignkey'
+  WHEN 'p' THEN 'primary'
+  WHEN 'u' THEN 'unique'
+  WHEN 'x' THEN 'exclude'
+END;
+$$ LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TABLE
+(
+  oid oid,
+  name text,
+  columns smallint[],
+  type text,
+  referent_table_oid oid,
+  referent_columns smallint[]
+)
+AS $$/*
+Return data describing the constraints set on a given table.
+
+Args:
+  tab_id: The OID of the table.
+*/
+WITH constraints AS (
+  SELECT
+    oid,
+    conname AS name,
+    conkey AS columns,
+    msar.get_constraint_type_api_code(contype) AS type,
+    confrelid AS referent_table_oid,
+    confkey AS referent_columns
+  FROM pg_catalog.pg_constraint
+  WHERE conrelid = tab_id
+)
+SELECT *
+FROM constraints
+-- Only return constraints with types that we're able to classify
+WHERE type IS NOT NULL
+$$ LANGUAGE sql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -2220,28 +2319,9 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
--- Drop constraint ---------------------------------------------------------------------------------
-
-
 CREATE OR REPLACE FUNCTION
-__msar.drop_constraint(tab_name text, con_name text) RETURNS text AS $$/*
-Drop a constraint, returning the command executed.
-
-Args:
-  tab_name: A qualified & quoted name of the table that has the constraint to be dropped.
-  con_name: Name of the constraint to drop, properly quoted.
-*/
-BEGIN
-  RETURN __msar.exec_ddl(
-    'ALTER TABLE %s DROP CONSTRAINT %s', tab_name, con_name
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_constraint(sch_name text, tab_name text, con_name text) RETURNS text AS $$/*
-Drop a constraint, returning the command executed.
+msar.drop_constraint(sch_name text, tab_name text, con_name text) RETURNS void AS $$/*
+Drop a constraint
 
 Args:
   sch_name: The name of the schema where the table with constraint to be dropped resides, unquoted.
@@ -2249,25 +2329,24 @@ Args:
   con_name: Name of the constraint to drop, unquoted.
 */
 BEGIN
-  RETURN __msar.drop_constraint(
-    __msar.build_qualified_name_sql(sch_name, tab_name), quote_ident(con_name)
-  );
+  EXECUTE format('ALTER TABLE %I.%I DROP CONSTRAINT %I', sch_name, tab_name, con_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.drop_constraint(tab_id oid, con_id oid) RETURNS TEXT AS $$/*
-Drop a constraint, returning the command executed.
+Drop a constraint
 
 Args:
   tab_id: OID of the table that has the constraint to be dropped.
   con_id: OID of the constraint to be dropped.
 */
 BEGIN
-  RETURN __msar.drop_constraint(
-    __msar.get_qualified_relation_name(tab_id),
-    quote_ident(msar.get_constraint_name(con_id))
+  PERFORM msar.drop_constraint(
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_constraint_name(con_id)
   );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
