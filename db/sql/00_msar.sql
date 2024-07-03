@@ -280,7 +280,7 @@ DECLARE sch_name text;
 BEGIN
   SELECT n.nspname INTO sch_name
   FROM pg_catalog.pg_class c
-  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace 
+  JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
   WHERE c.oid = rel_oid;
 
   IF sch_name IS NULL THEN
@@ -497,7 +497,7 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_constraint_type_api_code(contype "char") RETURNS TEXT AS $$/*
+CREATE OR REPLACE FUNCTION msar.get_constraint_type_api_code(contype char) RETURNS TEXT AS $$/*
 This function returns a string that represents the constraint type code used to describe
 constraints when listing them within the Mathesar API.
 
@@ -521,8 +521,8 @@ CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TA
 (
   oid oid,
   name text,
-  columns smallint[],
   type text,
+  columns smallint[],
   referent_table_oid oid,
   referent_columns smallint[]
 )
@@ -536,8 +536,8 @@ WITH constraints AS (
   SELECT
     oid,
     conname AS name,
-    conkey AS columns,
     msar.get_constraint_type_api_code(contype) AS type,
+    conkey AS columns,
     confrelid AS referent_table_oid,
     confkey AS referent_columns
   FROM pg_catalog.pg_constraint
@@ -547,7 +547,7 @@ SELECT *
 FROM constraints
 -- Only return constraints with types that we're able to classify
 WHERE type IS NOT NULL
-$$ LANGUAGE sql;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION

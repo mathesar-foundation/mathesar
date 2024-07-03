@@ -1,3 +1,6 @@
+"""
+Classes and functions exposed to the RPC endpoint for managing tables in a database.
+"""
 from typing import Optional, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
