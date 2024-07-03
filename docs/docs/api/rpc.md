@@ -49,13 +49,12 @@ To use an RPC function:
 
 ## Constraints
 
-::: mathesar.rpc.constraints
+::: constraints
     options:
       members:
-      - add_from_known_connection
-      - add_from_scratch
-      - grant_access_to_user
-      - DBModelReturn
+      - list_
+      - Constraint
+      - CreatableConstraintInfo
 
 ## Schemas
 
