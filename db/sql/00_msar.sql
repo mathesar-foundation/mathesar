@@ -514,7 +514,7 @@ SELECT CASE contype
   WHEN 'u' THEN 'unique'
   WHEN 'x' THEN 'exclude'
 END;
-$$ LANGUAGE sql;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TABLE
@@ -536,7 +536,7 @@ WITH constraints AS (
   SELECT
     oid,
     conname AS name,
-    msar.get_constraint_type_api_code(contype) AS type,
+    msar.get_constraint_type_api_code(contype::char) AS type,
     conkey AS columns,
     confrelid AS referent_table_oid,
     confkey AS referent_columns
@@ -2342,7 +2342,7 @@ Args:
   con_id: OID of the constraint to be dropped.
 */
 BEGIN
-  PERFORM msar.drop_constraint(
+  RETURN msar.drop_constraint(
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     msar.get_constraint_name(con_id)
