@@ -7,7 +7,7 @@ from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.utils.columns import get_columns_meta_data
+from mathesar.utils.columns import get_columns_meta_data, patch_columns_meta_data
 
 
 class ColumnMetaData(TypedDict):
@@ -150,7 +150,7 @@ def patch(
     Returns:
         List of altered metadata objects.
     """
-    columns_meta_data = patch_column_meta_data(
+    columns_meta_data = patch_columns_meta_data(
         column_meta_data_list, table_oid, database_id
     )
     return [
