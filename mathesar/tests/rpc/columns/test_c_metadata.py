@@ -57,3 +57,57 @@ def test_columns_meta_data_list(monkeypatch):
     ]
     actual_metadata_list = metadata.list_(table_oid=table_oid, database_id=database_id)
     assert actual_metadata_list == expect_metadata_list
+
+
+# TODO consider mocking out ColumnMetaData queryset for this test
+def test_columns_meta_data_patch(monkeypatch):
+    database_id = 2
+    table_oid = 123456
+    expect_metadata_list = [
+        metadata.ColumnMetaData(
+            database_id=database_id, table_oid=table_oid, attnum=2,
+            bool_input="dropdown", bool_true="TRUE", bool_false="FALSE",
+            num_min_frac_digits=5, num_max_frac_digits=10, num_show_as_perc=False,
+            mon_currency_symbol="EUR", mon_currency_location="end-with-space",
+            time_format=None, date_format=None,
+            duration_min=None, duration_max=None, duration_show_units=True,
+        ),
+        metadata.ColumnMetaData(
+            database_id=database_id, table_oid=table_oid, attnum=8,
+            bool_input="checkbox", bool_true="true", bool_false="false",
+            num_min_frac_digits=2, num_max_frac_digits=8, num_show_as_perc=True,
+            mon_currency_symbol="$", mon_currency_location="after-minus",
+            time_format=None, date_format=None,
+            duration_min=None, duration_max=None, duration_show_units=True,
+        ),
+    ]
+
+    def mock_patch_columns_meta_data(column_meta_data_list, _table_oid, _database_id):
+        server_model = Server(id=2, host='example.com', port=5432)
+        db_model = Database(id=_database_id, name='mymathesardb', server=server_model)
+        return [
+            ColumnMetaData(
+                database=db_model, table_oid=_table_oid, attnum=2,
+                bool_input="dropdown", bool_true="TRUE", bool_false="FALSE",
+                num_min_frac_digits=5, num_max_frac_digits=10, num_show_as_perc=False,
+                mon_currency_symbol="EUR", mon_currency_location="end-with-space",
+                time_format=None, date_format=None,
+                duration_min=None, duration_max=None, duration_show_units=True,
+            ),
+            ColumnMetaData(
+                database=db_model, table_oid=_table_oid, attnum=8,
+                bool_input="checkbox", bool_true="true", bool_false="false",
+                num_min_frac_digits=2, num_max_frac_digits=8, num_show_as_perc=True,
+                mon_currency_symbol="$", mon_currency_location="after-minus",
+                time_format=None, date_format=None,
+                duration_min=None, duration_max=None, duration_show_units=True,
+            )
+        ]
+
+    monkeypatch.setattr(metadata, "patch_columns_meta_data", mock_patch_columns_meta_data)
+    actual_metadata_list = metadata.patch(
+        column_meta_data_list=expect_metadata_list,
+        table_oid=table_oid,
+        database_id=database_id
+    )
+    assert actual_metadata_list == expect_metadata_list
