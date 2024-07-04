@@ -47,15 +47,6 @@ To use an RPC function:
       - grant_access_to_user
       - DBModelReturn
 
-## Constraints
-
-::: constraints
-    options:
-      members:
-      - list_
-      - Constraint
-      - CreatableConstraintInfo
-
 ## Schemas
 
 ::: schemas
@@ -119,6 +110,20 @@ To use an RPC function:
       - patch
       - ColumnMetaData
       - SettableColumnMetaData
+
+## Constraints
+
+::: constraints
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - Constraint
+      - ForeignKeyConstraint
+      - PrimaryKeyConstraint
+      - UniqueConstraint
+      - CreatableConstraintInfo
 
 ## Responses
 

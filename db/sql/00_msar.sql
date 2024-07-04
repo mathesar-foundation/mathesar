@@ -2319,7 +2319,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-msar.drop_constraint(sch_name text, tab_name text, con_name text) RETURNS void AS $$/*
+msar.drop_constraint(sch_name text, tab_name text, con_name text) RETURNS TEXT AS $$/*
 Drop a constraint
 
 Args:
@@ -2329,6 +2329,7 @@ Args:
 */
 BEGIN
   EXECUTE format('ALTER TABLE %I.%I DROP CONSTRAINT %I', sch_name, tab_name, con_name);
+  RETURN con_name;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 

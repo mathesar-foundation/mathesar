@@ -66,6 +66,16 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        constraints.add,
+        "constraints.add"
+        [user_is_authenticated]
+    ),
+    (
+        constraints.delete,
+        "constraints.delete"
+        [user_is_authenticated]
+    ),
+    (
         schemas.add,
         "schemas.add",
         [user_is_authenticated]
