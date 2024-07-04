@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table constraints.
 """
-from typing import Optional, TypedDict
+from typing import Optional, TypedDict, Union
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -37,9 +37,9 @@ class ForeignKeyConstraint(TypedDict):
     deferrable: Optional[bool]
     fkey_relation_id: int
     fkey_columns: list[int]
-    fkey_update_action: str = 'a' | 'r' | 'c' | 'n' | 'd'
-    fkey_delete_action: str = 'a' | 'r' | 'c' | 'n' | 'd'
-    fkey_match_type: str = 's' | 'f'
+    fkey_update_action: str
+    fkey_delete_action: str
+    fkey_match_type: str
 
 
 class PrimaryKeyConstraint(TypedDict):
@@ -74,7 +74,7 @@ class UniqueConstraint(TypedDict):
     deferrable: Optional[bool]
 
 
-CreatableConstraintInfo = list[ForeignKeyConstraint | PrimaryKeyConstraint | UniqueConstraint]
+CreatableConstraintInfo = list[Union[ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint]]
 """
 Type alias for a list of createable constraints which can be unique, primary key, or foreign key constraints.
 """
