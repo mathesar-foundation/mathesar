@@ -7,7 +7,7 @@ from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.utils.columns import get_columns_meta_data
+from mathesar.utils.columns import get_columns_meta_data, patch_columns_meta_data
 
 
 class ColumnMetaData(TypedDict):
@@ -73,6 +73,42 @@ class ColumnMetaData(TypedDict):
         )
 
 
+class SettableColumnMetaData(TypedDict):
+    """
+    Settable metadata fields for a column in a table.
+
+    Attributes:
+        attnum: The attnum of the column in the table.
+        bool_input: How the input for a boolean column should be shown.
+        bool_true: A string to display for `true` values.
+        bool_false: A string to display for `false` values.
+        num_min_frac_digits: Minimum digits shown after the decimal point.
+        num_max_frac_digits: Maximum digits shown after the decimal point.
+        num_show_as_perc: Whether to show a numeric value as a percentage.
+        mon_currency_symbol: The currency symbol shown for money value.
+        mon_currency_location: Where the currency symbol should be shown.
+        time_format: A string representing the format of time values.
+        date_format: A string representing the format of date values.
+        duration_min: The smallest unit for displaying durations.
+        duration_max: The largest unit for displaying durations.
+        duration_show_units: Whether to show the units for durations.
+    """
+    attnum: int
+    bool_input: Optional[Literal["dropdown", "checkbox"]]
+    bool_true: Optional[str]
+    bool_false: Optional[str]
+    num_min_frac_digits: Optional[int]
+    num_max_frac_digits: Optional[int]
+    num_show_as_perc: Optional[bool]
+    mon_currency_symbol: Optional[str]
+    mon_currency_location: Optional[Literal["after-minus", "end-with-space"]]
+    time_format: Optional[str]
+    date_format: Optional[str]
+    duration_min: Optional[str]
+    duration_max: Optional[str]
+    duration_show_units: Optional[bool]
+
+
 @rpc_method(name="columns.metadata.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
@@ -88,6 +124,35 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnMetaData]
         A list of column meta data objects.
     """
     columns_meta_data = get_columns_meta_data(table_oid, database_id)
+    return [
+        ColumnMetaData.from_model(model) for model in columns_meta_data
+    ]
+
+
+@rpc_method(name="columns.metadata.patch")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def patch(
+        *,
+        column_meta_data_list: list[SettableColumnMetaData],
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> list[ColumnMetaData]:
+    """
+    Alter metadata settings associated with columns of a table for a database.
+
+    Args:
+        column_meta_data_list: A list describing desired metadata alterations.
+        table_oid: Identity of the table whose metadata we'll modify.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        List of altered metadata objects.
+    """
+    columns_meta_data = patch_columns_meta_data(
+        column_meta_data_list, table_oid, database_id
+    )
     return [
         ColumnMetaData.from_model(model) for model in columns_meta_data
     ]
