@@ -4,8 +4,6 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from mathesar.models.deprecated import Connection
 from db import install, connection as dbconn
 from mathesar.state import reset_reflection
-from mathesar.examples.library_dataset import load_library_dataset
-from mathesar.examples.movies_dataset import load_movies_dataset
 
 
 class BadInstallationTarget(Exception):
@@ -85,19 +83,7 @@ def _save_and_install(
 
 
 def _load_sample_data(engine, sample_data):
-    DATASET_MAP = {
-        'library_management': load_library_dataset,
-        'movie_collection': load_movies_dataset,
-    }
-    for key in sample_data:
-        try:
-            DATASET_MAP[key](engine, safe_mode=True)
-        except ProgrammingError as e:
-            if isinstance(e.orig, DuplicateSchema):
-                # We swallow this error, since otherwise we'll raise an error on the
-                # front end even though installation generally succeeded.
-                continue
-    reset_reflection()
+    pass
 
 
 def _validate_conn_model(conn_model):

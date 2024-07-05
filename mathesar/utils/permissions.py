@@ -1,7 +1,9 @@
 from django.db import transaction
 from django.conf import settings
 
-from db import install
+from db.install import install_mathesar
+from mathesar.examples.library_dataset import load_library_dataset
+from mathesar.examples.movies_dataset import load_movies_dataset
 from mathesar.models.base import Server, Database, Role, UserDatabaseRoleMap
 from mathesar.models.deprecated import Connection
 from mathesar.models.users import User
@@ -20,7 +22,9 @@ def migrate_connection_for_user(connection_id, user_id):
 
 
 @transaction.atomic
-def set_up_new_database_for_user_on_internal_server(database_name, user):
+def set_up_new_database_for_user_on_internal_server(
+        database_name, user, sample_data=[]
+):
     """
     Create a database on the internal server and install Mathesar.
 
@@ -31,7 +35,7 @@ def set_up_new_database_for_user_on_internal_server(database_name, user):
         raise BadInstallationTarget(
             "Mathesar can't be installed in the internal database."
         )
-    user_db_role_map = _setup_connection_models(
+    user_database_role = _setup_connection_models(
         conn_info["HOST"],
         conn_info["PORT"],
         database_name,
@@ -39,7 +43,7 @@ def set_up_new_database_for_user_on_internal_server(database_name, user):
         conn_info["PASSWORD"],
         user
     )
-    install.install_mathesar(
+    install_mathesar(
         database_name,
         conn_info["USER"],
         conn_info["PASSWORD"],
@@ -48,7 +52,9 @@ def set_up_new_database_for_user_on_internal_server(database_name, user):
         True,
         root_db=conn_info["NAME"],
     )
-    return user_db_role_map
+    with user_database_role.connection as conn:
+        _load_sample_data(conn, sample_data)
+    return user_database_role
 
 
 @transaction.atomic
@@ -66,3 +72,19 @@ def _setup_connection_models(host, port, db_name, role_name, password, user):
         role=role,
         server=server
     )
+
+
+def _load_sample_data(conn, sample_data):
+    DATASET_MAP = {
+        'library_management': load_library_dataset,
+        'movie_collection': load_movies_dataset,
+    }
+    for key in sample_data:
+        try:
+            DATASET_MAP[key](conn)
+        except ProgrammingError as e:
+            if isinstance(e.orig, DuplicateSchema):
+                # We swallow this error, since otherwise we'll raise an
+                # error on the front end even though installation
+                # generally succeeded.
+                continue

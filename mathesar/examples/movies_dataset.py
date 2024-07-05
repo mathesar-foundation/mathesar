@@ -1,31 +1,31 @@
 """This module contains functions to load the Movie Collection dataset."""
 import os
-from sqlalchemy import text
+from psycopg import sql
 
 from mathesar.examples.base import (
     MOVIE_COLLECTION, MOVIES_SQL_TABLES, MOVIES_CSV, MOVIES_SQL_FKS
 )
 
 
-def load_movies_dataset(engine, safe_mode=False):
+def load_movies_dataset(conn):
     """
     Load the movie example data set.
 
     Args:
-        engine: an SQLAlchemy engine defining the connection to load data into.
-        safe_mode: When True, we will throw an error if the "Movie Collection"
-                   schema already exists instead of dropping it.
+        conn: a psycopg (3) connection for loading the data.
+
+    Uses given connection to define database to load into. Raises an
+    Exception if the "Movie Collection" schema already exists.
     """
-    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{MOVIE_COLLECTION}" CASCADE;""")
-    with engine.begin() as conn, open(MOVIES_SQL_TABLES) as f, open(MOVIES_SQL_FKS) as f2:
-        if safe_mode is False:
-            conn.execute(drop_schema_query)
-        conn.execute(text(f.read()))
+    with open(MOVIES_SQL_TABLES) as f, open(MOVIES_SQL_FKS) as f2:
+        conn.execute(f.read())
         for file in os.scandir(MOVIES_CSV):
             table_name = file.name.split('.csv')[0]
-            with open(file, 'r') as csv_file:
-                conn.connection.cursor().copy_expert(
-                    f"""COPY "{MOVIE_COLLECTION}"."{table_name}" FROM STDIN DELIMITER ',' CSV HEADER""",
-                    csv_file
-                )
-        conn.execute(text(f2.read()))
+            copy_sql = sql.SQL(
+                "COPY {}.{} FROM STDIN DELIMITER ',' CSV HEADER"
+            ).format(
+                sql.Identifier(MOVIE_COLLECTION), sql.Identifier(table_name)
+            )
+            with open(file, 'r') as csv, conn.cursor().copy(copy_sql) as copy:
+                copy.write(csv.read())
+        conn.execute(f2.read())
