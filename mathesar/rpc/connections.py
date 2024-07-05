@@ -10,12 +10,12 @@ from mathesar.utils import connections, permissions
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
-class DBModelReturn(TypedDict):
+class ConnectionReturn(TypedDict):
     """
-    Information about a database model.
+    Information about a connection model.
 
     Attributes:
-        id (int): The Django id of the Database object added.
+        id (int): The Django id of the Connection object added.
         nickname (str): Used to identify the added connection.
         database (str): The name of the database on the server.
         username (str): The username of the role for the connection.
@@ -30,14 +30,14 @@ class DBModelReturn(TypedDict):
     port: int
 
     @classmethod
-    def from_db_model(cls, db_model):
+    def from_model(cls, connection):
         return cls(
-            id=db_model.id,
-            nickname=db_model.name,
-            database=db_model.db_name,
-            username=db_model.username,
-            host=db_model.host,
-            port=db_model.port
+            id=connection.id,
+            nickname=connection.name,
+            database=connection.db_name,
+            username=connection.username,
+            host=connection.host,
+            port=connection.port
         )
 
 
@@ -51,7 +51,7 @@ def add_from_known_connection(
         create_db: bool = False,
         connection_id: int = None,
         sample_data: list[str] = [],
-) -> DBModelReturn:
+) -> ConnectionReturn:
     """
     Add a new connection from an already existing one.
 
@@ -80,10 +80,10 @@ def add_from_known_connection(
         'connection_type': connection_type,
         'connection_id': connection_id
     }
-    db_model = connections.copy_connection_from_preexisting(
+    connection_model = connections.copy_connection_from_preexisting(
         connection, nickname, database, create_db, sample_data
     )
-    return DBModelReturn.from_db_model(db_model)
+    return ConnectionReturn.from_model(connection_model)
 
 
 @rpc_method(name='connections.add_from_scratch')
@@ -98,7 +98,7 @@ def add_from_scratch(
         host: str,
         port: int,
         sample_data: list[str] = [],
-) -> DBModelReturn:
+) -> ConnectionReturn:
     """
     Add a new connection to a PostgreSQL server from scratch.
 
@@ -121,10 +121,10 @@ def add_from_scratch(
     Returns:
         Metadata about the Database associated with the connection.
     """
-    db_model = connections.create_connection_from_scratch(
+    connection_model = connections.create_connection_from_scratch(
         user, password, host, port, nickname, database, sample_data
     )
-    return DBModelReturn.from_db_model(db_model)
+    return ConnectionReturn.from_model(connection_model)
 
 
 @rpc_method(name='connections.grant_access_to_user')
