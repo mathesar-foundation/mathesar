@@ -111,6 +111,15 @@ To use an RPC function:
       - ColumnMetaData
       - SettableColumnMetaData
 
+## Roles
+
+::: roles
+    options:
+      members:
+      - list_
+      - RoleInfo
+      - RoleMember
+
 ## Responses
 
 ### Success
