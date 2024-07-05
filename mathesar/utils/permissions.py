@@ -10,24 +10,22 @@ from mathesar.utils.connections import BadInstallationTarget
 INTERNAL_DB_KEY = 'default'
 
 
-@transaction.atomic
 def migrate_connection_for_user(connection_id, user_id):
     """Move data from old-style connection model to new models."""
     conn = Connection.current_objects.get(id=connection_id)
-    server, database, role = _setup_connection_models(
-        conn.host, conn.port, conn.db_name, conn.username, conn.password
-    )
-    return UserDatabaseRoleMap.objects.create(
-        user=User.objects.get(id=user_id),
-        database=database,
-        role=role,
-        server=server
+    user = User.objects.get(id=user_id)
+    return _setup_connection_models(
+        conn.host, conn.port, conn.db_name, conn.username, conn.password, user
     )
 
 
 @transaction.atomic
-def set_up_new_database_on_internal_server(database_name):
-    """Create a database on the internal server, install Mathesar."""
+def set_up_new_database_for_user_on_internal_server(database_name, user):
+    """
+    Create a database on the internal server and install Mathesar.
+
+    This database will be set up to be accessible for the given user.
+    """
     conn_info = settings.DATABASES[INTERNAL_DB_KEY]
     if database_name == conn_info["NAME"]:
         raise BadInstallationTarget(
@@ -39,6 +37,7 @@ def set_up_new_database_on_internal_server(database_name):
         conn_info["NAME"],
         conn_info["USER"],
         conn_info["PASSWORD"],
+        user
     )
     install.install_mathesar(
         database_name,
@@ -51,8 +50,8 @@ def set_up_new_database_on_internal_server(database_name):
     )
 
 
-
-def _setup_connection_models(host, port, db_name, role_name, password):
+@transaction.atomic
+def _setup_connection_models(host, port, db_name, role_name, password, user):
     server, _ = Server.objects.get_or_create(host=host, port=port)
     database, _ = Database.objects.get_or_create(name=db_name, server=server)
     role, _ = Role.objects.get_or_create(
@@ -60,4 +59,9 @@ def _setup_connection_models(host, port, db_name, role_name, password):
         server=server,
         defaults={"password": password},
     )
-    return server, database, role
+    return UserDatabaseRoleMap.objects.create(
+        user=user,
+        database=database,
+        role=role,
+        server=server
+    )
