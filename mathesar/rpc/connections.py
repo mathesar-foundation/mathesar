@@ -143,4 +143,4 @@ def grant_access_to_user(*, connection_id: int, user_id: int):
         connection_id: The Django id of an old-style connection.
         user_id: The Django id of a user.
     """
-    permissions.create_user_database_role_map(connection_id, user_id)
+    permissions.migrate_connection_for_user(connection_id, user_id)
