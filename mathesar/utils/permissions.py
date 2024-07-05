@@ -31,10 +31,10 @@ def set_up_new_database_for_user_on_internal_server(database_name, user):
         raise BadInstallationTarget(
             "Mathesar can't be installed in the internal database."
         )
-    _setup_connection_models(
+    user_db_role_map = _setup_connection_models(
         conn_info["HOST"],
         conn_info["PORT"],
-        conn_info["NAME"],
+        database_name,
         conn_info["USER"],
         conn_info["PASSWORD"],
         user
@@ -48,6 +48,7 @@ def set_up_new_database_for_user_on_internal_server(database_name, user):
         True,
         root_db=conn_info["NAME"],
     )
+    return user_db_role_map
 
 
 @transaction.atomic
