@@ -149,7 +149,7 @@ def add(
         database_id: The Django id of the database containing the table.
 
     Returns:
-        The oid(s) of the created constraints.
+        The oid(s) of all the constraints on the table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
