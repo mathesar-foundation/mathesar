@@ -67,12 +67,12 @@ METHODS = [
     ),
     (
         constraints.add,
-        "constraints.add"
+        "constraints.add",
         [user_is_authenticated]
     ),
     (
         constraints.delete,
-        "constraints.delete"
+        "constraints.delete",
         [user_is_authenticated]
     ),
     (
