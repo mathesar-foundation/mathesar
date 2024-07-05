@@ -18,12 +18,12 @@ class ForeignKeyConstraint(TypedDict):
     Information about a foreign key constraint.
 
     Attributes:
-        name: The name of the constraint.
         type: The type of the constraint(`'f'` for foreign key constraint).
         columns: List of columns to set a foreign key on.
-        deferrable: Whether to postpone constraint checking until the end of the transaction.
         fkey_relation_id: The OID of the referent table.
         fkey_columns: List of referent column(s).
+        name: The name of the constraint.
+        deferrable: Whether to postpone constraint checking until the end of the transaction.
         fkey_update_action: Specifies what action should be taken when the referenced key is updated.
             Valid options include `'a'(no action)`(default behavior), `'r'(restrict)`, `'c'(cascade)`, `'n'(set null)`, `'d'(set default)`
         fkey_delete_action: Specifies what action should be taken when the referenced key is deleted.
@@ -31,12 +31,12 @@ class ForeignKeyConstraint(TypedDict):
         fkey_match_type: Specifies how the foreign key matching should be performed.
             Valid options include `'f'(full match)`, `'s'(simple match)`(default behavior).
     """
-    name: Optional[str]
     type: str = 'f'
     columns: list[int]
-    deferrable: Optional[bool]
     fkey_relation_id: int
     fkey_columns: list[int]
+    name: Optional[str]
+    deferrable: Optional[bool]
     fkey_update_action: Optional[str]
     fkey_delete_action: Optional[str]
     fkey_match_type: Optional[str]
@@ -47,14 +47,14 @@ class PrimaryKeyConstraint(TypedDict):
     Information about a primary key constraint.
 
     Attributes:
-        name: The name of the constraint.
         type: The type of the constraint(`'p'` for primary key constraint).
         columns: List of columns to set a primary key on.
+        name: The name of the constraint.
         deferrable: Whether to postpone constraint checking until the end of the transaction.
     """
-    name: Optional[str]
     type: str = 'p'
     columns: list[int]
+    name: Optional[str]
     deferrable: Optional[bool]
 
 
@@ -63,14 +63,14 @@ class UniqueConstraint(TypedDict):
     Information about a unique constraint.
 
     Attributes:
-        name: The name of the constraint.
         type: The type of the constraint(`'u'` for unique constraint).
         columns: List of columns to set a unique constraint on.
+        name: The name of the constraint.
         deferrable: Whether to postpone constraint checking until the end of the transaction.
     """
-    name: Optional[str]
     type: str = 'u'
     columns: list[int]
+    name: Optional[str]
     deferrable: Optional[bool]
 
 
