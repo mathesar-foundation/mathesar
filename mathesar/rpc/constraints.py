@@ -37,9 +37,9 @@ class ForeignKeyConstraint(TypedDict):
     deferrable: Optional[bool]
     fkey_relation_id: int
     fkey_columns: list[int]
-    fkey_update_action: str
-    fkey_delete_action: str
-    fkey_match_type: str
+    fkey_update_action: Optional[str]
+    fkey_delete_action: Optional[str]
+    fkey_match_type: Optional[str]
 
 
 class PrimaryKeyConstraint(TypedDict):
@@ -93,7 +93,7 @@ class ConstraintInfo(TypedDict):
         referent_columns: List of referent column(s).
     """
     oid: int
-    table_oid: int
+    name: str
     type: str
     columns: list[int]
     referent_table_oid: Optional[int]
@@ -103,7 +103,7 @@ class ConstraintInfo(TypedDict):
     def from_dict(cls, con_info):
         return cls(
             oid=con_info["oid"],
-            table_oid=con_info["table_oid"],
+            name=con_info["name"],
             type=con_info["type"],
             columns=con_info["columns"],
             referent_table_oid=con_info["referent_table_oid"],
