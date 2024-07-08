@@ -1,9 +1,7 @@
 """Utilities to help with creating and managing connections in Mathesar."""
-from psycopg2.errors import DuplicateSchema
-from sqlalchemy.exc import OperationalError, ProgrammingError
+from sqlalchemy.exc import OperationalError
 from mathesar.models.deprecated import Connection
 from db import install, connection as dbconn
-from mathesar.state import reset_reflection
 
 
 class BadInstallationTarget(Exception):

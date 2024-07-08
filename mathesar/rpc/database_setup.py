@@ -34,6 +34,7 @@ class DatabaseConnectionResult(TypedDict):
             role_id=model.role.id,
         )
 
+
 @rpc_method(name='database_setup.create_new')
 @http_basic_auth_superuser_required
 @handle_rpc_exceptions

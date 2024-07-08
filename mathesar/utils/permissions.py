@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.conf import settings
+from psycopg.errors import DuplicateSchema
 
 from db.install import install_mathesar
 from mathesar.examples.library_dataset import load_library_dataset
@@ -58,9 +59,37 @@ def set_up_new_database_for_user_on_internal_server(
 
 
 @transaction.atomic
-def _setup_connection_models(host, port, db_name, role_name, password, user):
+def set_up_preexisting_database_for_user(
+        host, port, database_name, role_name, password, user, sample_data=[]
+):
+    internal_conn_info = settings.DATABASES[INTERNAL_DB_KEY]
+    if (
+            host == internal_conn_info["HOST"]
+            and port == internal_conn_info["PORT"]
+            and database_name == internal_conn_info["NAME"]
+    ):
+        raise BadInstallationTarget(
+            "Mathesar can't be installed in the internal database."
+        )
+    user_database_role = _setup_connection_models(
+        host, port, database_name, role_name, password, user
+    )
+    install_mathesar(
+        database_name, role_name, password, host, port, True, create_db=False,
+    )
+    with user_database_role.connection as conn:
+        _load_sample_data(conn, sample_data)
+    return user_database_role
+
+
+@transaction.atomic
+def _setup_connection_models(
+        host, port, database_name, role_name, password, user
+):
     server, _ = Server.objects.get_or_create(host=host, port=port)
-    database, _ = Database.objects.get_or_create(name=db_name, server=server)
+    database, _ = Database.objects.get_or_create(
+        name=database_name, server=server
+    )
     role, _ = Role.objects.get_or_create(
         name=role_name,
         server=server,
@@ -82,9 +111,8 @@ def _load_sample_data(conn, sample_data):
     for key in sample_data:
         try:
             DATASET_MAP[key](conn)
-        except ProgrammingError as e:
-            if isinstance(e.orig, DuplicateSchema):
-                # We swallow this error, since otherwise we'll raise an
-                # error on the front end even though installation
-                # generally succeeded.
-                continue
+        except DuplicateSchema:
+            # We swallow this error, since otherwise we'll raise an
+            # error on the front end even though installation
+            # generally succeeded.
+            continue
