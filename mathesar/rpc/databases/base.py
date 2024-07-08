@@ -11,9 +11,10 @@ class DatabaseInfo(TypedDict):
     """
     Information about a database.
 
-    id: the Django ID of the database model instance.
-    name: The name of the database on the server.
-    server_id: the Django ID of the server model instance for the database.
+    Attributes:
+        id: the Django ID of the database model instance.
+        name: The name of the database on the server.
+        server_id: the Django ID of the server model instance for the database.
     """
     id: int
     name: str
