@@ -40,6 +40,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        columns.metadata.patch,
+        "columns.metadata.patch",
+        [user_is_authenticated]
+    ),
+    (
         connections.add_from_known_connection,
         "connections.add_from_known_connection",
         [user_is_superuser]
@@ -107,6 +112,16 @@ METHODS = [
     (
         tables.get_import_preview,
         "tables.get_import_preview",
+        [user_is_authenticated]
+    ),
+    (
+        tables.metadata.list_,
+        "tables.metadata.list",
+        [user_is_authenticated]
+    ),
+    (
+        tables.metadata.patch,
+        "tables.metadata.patch",
         [user_is_authenticated]
     )
 ]

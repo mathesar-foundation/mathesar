@@ -74,6 +74,16 @@ To use an RPC function:
       - TableInfo
       - SettableTableInfo
 
+## Table Metadata
+
+::: tables.metadata
+    options:
+      members:
+      - list_
+      - patch
+      - TableMetaData
+      - SettableTableMetaData
+
 ## Columns
 
 ::: columns
@@ -97,7 +107,9 @@ To use an RPC function:
     options:
       members:
       - list_
+      - patch
       - ColumnMetaData
+      - SettableColumnMetaData
 
 ## Responses
 

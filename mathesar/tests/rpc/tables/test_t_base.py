@@ -45,8 +45,8 @@ def test_tables_list(rf, monkeypatch):
                 'description': None
             }
         ]
-    monkeypatch.setattr(tables, 'connect', mock_connect)
-    monkeypatch.setattr(tables, 'get_table_info', mock_table_info)
+    monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'get_table_info', mock_table_info)
     expect_table_list = [
         {
             'oid': 17408,
@@ -90,8 +90,8 @@ def test_tables_get(rf, monkeypatch):
             'schema': 2200,
             'description': 'a description on the authors table.'
         }
-    monkeypatch.setattr(tables, 'connect', mock_connect)
-    monkeypatch.setattr(tables, 'get_table', mock_table_get)
+    monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'get_table', mock_table_get)
     expect_table_list = {
         'oid': table_oid,
         'name': 'Authors',
@@ -123,8 +123,8 @@ def test_tables_delete(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return 'public."Table 0"'
 
-    monkeypatch.setattr(tables, 'connect', mock_connect)
-    monkeypatch.setattr(tables, 'drop_table_from_database', mock_drop_table)
+    monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'drop_table_from_database', mock_drop_table)
     deleted_table = tables.delete(table_oid=1964474, database_id=11, request=request)
     assert deleted_table == 'public."Table 0"'
 
@@ -149,8 +149,8 @@ def test_tables_add(rf, monkeypatch):
         if _schema_oid != schema_oid:
             raise AssertionError('incorrect parameters passed')
         return 1964474
-    monkeypatch.setattr(tables, 'connect', mock_connect)
-    monkeypatch.setattr(tables, 'create_table_on_database', mock_table_add)
+    monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'create_table_on_database', mock_table_add)
     actual_table_oid = tables.add(table_name='newtable', schema_oid=2200, database_id=11, request=request)
     assert actual_table_oid == 1964474
 
@@ -180,8 +180,8 @@ def test_tables_patch(rf, monkeypatch):
         if _table_oid != table_oid and _table_data_dict != table_data_dict:
             raise AssertionError('incorrect parameters passed')
         return 'newtabname'
-    monkeypatch.setattr(tables, 'connect', mock_connect)
-    monkeypatch.setattr(tables, 'alter_table_on_database', mock_table_patch)
+    monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'alter_table_on_database', mock_table_patch)
     altered_table_name = tables.patch(
         table_oid=1964474,
         table_data_dict={
@@ -216,8 +216,8 @@ def test_tables_import(rf, monkeypatch):
         if _schema_oid != schema_oid and _data_file_id != data_file_id:
             raise AssertionError('incorrect parameters passed')
         return 1964474
-    monkeypatch.setattr(tables, 'connect', mock_connect)
-    monkeypatch.setattr(tables, 'import_csv', mock_table_import)
+    monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'import_csv', mock_table_import)
     imported_table_oid = tables.import_(
         data_file_id=10,
         table_name='imported_table',
@@ -253,8 +253,8 @@ def test_tables_preview(rf, monkeypatch):
             {'id': 3, 'length': Decimal('4.0')},
             {'id': 4, 'length': Decimal('5.22')}
         ]
-    monkeypatch.setattr(tables, 'connect', mock_connect)
-    monkeypatch.setattr(tables, 'get_preview', mock_table_preview)
+    monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'get_preview', mock_table_preview)
     records = tables.get_import_preview(
         table_oid=1964474,
         columns=[{'attnum': 2, 'type': {'name': 'numeric', 'options': {'precision': 3, 'scale': 2}}}],

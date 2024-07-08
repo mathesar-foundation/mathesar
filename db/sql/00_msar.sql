@@ -865,8 +865,7 @@ CREATE OR REPLACE FUNCTION msar.set_schema_description(
 ) RETURNS void AS $$/*
 Set the PostgreSQL description (aka COMMENT) of a schema.
 
-Descriptions are removed by passing an empty string. Passing a NULL description will cause
-this function to return NULL without doing anything.
+Descriptions are removed by passing an empty string or NULL.
 
 Args:
   sch_id: The OID of the schema.
@@ -875,7 +874,7 @@ Args:
 BEGIN
   EXECUTE format('COMMENT ON SCHEMA %I IS %L', msar.get_schema_name(sch_id), description);
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS void AS $$/*
@@ -886,11 +885,12 @@ Args:
   patch: A JSONB object with the following keys:
     - name: (optional) The new name of the schema
     - description: (optional) The new description of the schema. To remove a description, pass an
-      empty string. Passing a NULL description will have no effect on the description.
+      empty string or NULL.
 */
 BEGIN
   PERFORM msar.rename_schema(sch_id, patch->>'name');
-  PERFORM msar.set_schema_description(sch_id, patch->>'description');
+  PERFORM CASE WHEN patch ? 'description'
+  THEN msar.set_schema_description(sch_id, patch->>'description') END;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1137,14 +1137,13 @@ Args:
 */
 DECLARE
   new_tab_name text;
-  comment text;
   col_alters jsonb;
 BEGIN
   new_tab_name := tab_alters->>'name';
-  comment := tab_alters->>'description';
   col_alters := tab_alters->'columns';
   PERFORM msar.rename_table(tab_id, new_tab_name);
-  PERFORM msar.comment_on_table(tab_id, comment);
+  PERFORM CASE WHEN tab_alters ? 'description'
+  THEN msar.comment_on_table(tab_id, tab_alters->>'description') END;
   PERFORM msar.alter_columns(tab_id, col_alters);
   RETURN __msar.get_qualified_relation_name_or_null(tab_id);
 END;
@@ -2302,31 +2301,54 @@ SELECT __msar.exec_ddl(
 FROM col_cte, con_cte;
 $$ LANGUAGE SQL;
 
+-- Drop function defined in Mathesar 0.1.7 with different argument names
+DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
-msar.add_mathesar_table(sch_oid oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
+msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
   RETURNS oid AS $$/*
 Add a table, with a default id column, returning the OID of the created table.
 
 Args:
-  sch_oid: The OID of the schema where the table will be created.
-  tab_name: The unquoted name for the new table.
+  sch_id: The OID of the schema where the table will be created.
+  tab_name (optional): The unquoted name for the new table.
   col_defs (optional): The columns for the new table, in order.
   con_defs (optional): The constraints for the new table.
   comment_ (optional): The comment for the new table.
 
-Note that even if col_defs is null, we will still create a table with a default 'id' column. Also,
+Note that if tab_name is null, the table will be created with a name in the format 'Table <n>'.
+If col_defs is null, the table will still be created with a default 'id' column. Also,
 if an 'id' column is given in the input, it will be replaced with our default 'id' column. This is
 the behavior of the current python functions, so we're keeping it for now. In any case, the created
 table will always have our default 'id' column as its first column.
 */
 DECLARE
+  schema_name text;
+  table_count integer;
+  uq_table_name text;
   fq_table_name text;
   created_table_id oid;
   column_defs __msar.col_def[];
   constraint_defs __msar.con_def[];
 BEGIN
-  fq_table_name := format('%I.%I', msar.get_schema_name(sch_oid), tab_name);
+  schema_name := msar.get_schema_name(sch_id);
+  IF NULLIF(tab_name, '') IS NOT NULL THEN
+    fq_table_name := format('%I.%I', schema_name, tab_name);
+  ELSE
+    -- generate a table name if one doesn't exist
+    SELECT COUNT(*) + 1 INTO table_count
+    FROM pg_catalog.pg_class
+    WHERE relkind = 'r' AND relnamespace = sch_id;
+    uq_table_name := 'Table ' || table_count;
+    -- avoid name collisions
+    WHILE EXISTS (
+      SELECT oid FROM pg_catalog.pg_class WHERE relname = uq_table_name AND relnamespace = sch_id
+    ) LOOP
+      table_count := table_count + 1;
+      uq_table_name := 'Table ' || table_count;
+    END LOOP;
+    fq_table_name := format('%I.%I', schema_name, uq_table_name);
+  END IF;
   column_defs := __msar.process_col_def_jsonb(0, col_defs, false, true);
   constraint_defs := __msar.process_con_def_jsonb(0, con_defs);
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
