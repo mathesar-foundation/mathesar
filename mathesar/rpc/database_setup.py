@@ -40,7 +40,7 @@ class DatabaseConnectionResult(TypedDict):
 @handle_rpc_exceptions
 def create_new(
         *,
-        database_name: str,
+        database: str,
         sample_data: list[str] = [],
         **kwargs
 ) -> DatabaseConnectionResult:
@@ -51,13 +51,49 @@ def create_new(
     role stored in Django settings.
 
     Args:
-        database_name: The name of the new database.
+        database: The name of the new database.
         sample_data: A list of strings requesting that some example data
             sets be installed on the underlying database. Valid list
             members are 'library_management' and 'movie_collection'.
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_new_database_for_user_on_internal_server(
-        database_name, user, sample_data=sample_data
+        database, user, sample_data=sample_data
+    )
+    return DatabaseConnectionResult.from_model(result)
+
+
+@rpc_method(name='database_setup.connect_existing')
+@http_basic_auth_superuser_required
+@handle_rpc_exceptions
+def connect_existing(
+        *,
+        host: str,
+        port: int,
+        database: str,
+        role: str,
+        password: str,
+        sample_data: list[str] = [],
+        **kwargs
+) -> DatabaseConnectionResult:
+    """
+    Connect Mathesar to an existing database on a server.
+
+    The calling user will get access to that database using the
+    credentials passed to this function.
+
+    Args:
+        host: The host of the database server.
+        port: The port of the database server.
+        database: The name of the database on the server.
+        role: The role on the server to use for the connection.
+        password: A password valid for the role.
+        sample_data: A list of strings requesting that some example data
+            sets be installed on the underlying database. Valid list
+            members are 'library_management' and 'movie_collection'.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    result = permissions.set_up_preexisting_database_for_user(
+        host, port, database, role, password, user, sample_data=sample_data
     )
     return DatabaseConnectionResult.from_model(result)
