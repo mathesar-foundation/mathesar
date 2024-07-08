@@ -69,6 +69,7 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.columns',
     'mathesar.rpc.columns.metadata',
     'mathesar.rpc.database_setup',
+    'mathesar.rpc.databases',
     'mathesar.rpc.schemas',
     'mathesar.rpc.tables',
     'mathesar.rpc.tables.metadata'
