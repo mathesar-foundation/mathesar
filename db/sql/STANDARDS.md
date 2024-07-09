@@ -62,23 +62,35 @@ Always qualify system catalog tables by prefixing them with `pg_catalog.`. If yo
 
 Always cast OID values to `bigint` before putting them in JSON (or jsonb).
 
-_Don't_ cast OID values to `integer`.
+- _Don't_ leave OID values in JSON without casting.
 
-This is because the [`oid` type](https://www.postgresql.org/docs/current/datatype-oid.html) is an _unsigned_ 32-bit integer whereas the `integer` type is a _signed_ 32-bit integer. That means it's possible for a database to have OID values which don't fit into the `integer` type.
+    This is because (strangely!) raw OID values become _strings_ in JSON unless you cast them.
 
-For example, putting a large OID value into JSON by casting it to an integer will cause overflow:
+    ```sql
+    SELECT jsonb_build_object('foo', 42::oid); -- ❌ Bad
+    ```
 
-```SQL
-SELECT jsonb_build_object('foo', 3333333333::oid::integer); -- ❌ Bad
-```
+    > `{"foo": "42"}`
 
-> `{"foo": -961633963}`
+    If you keep OID values as strings in JSON, it can cause bugs. For example, a client may later feed a received OID value back to the DB layer when making a modification to a DB object. If the client sends a stringifed OID back to the DB layer, it might get treated as a _name_ instead of an OID due to function overloading.
+    
+- _Don't_ cast OID values to `integer`.
 
-Instead, cast it to `bigint`
+    This is because the [`oid` type](https://www.postgresql.org/docs/current/datatype-oid.html) is an _unsigned_ 32-bit integer whereas the `integer` type is a _signed_ 32-bit integer. That means it's possible for a database to have OID values which don't fit into the `integer` type.
 
-```SQL
-SELECT jsonb_build_object('foo', 3333333333::oid::bigint); -- ✅ Good
-```
+    For example, putting a large OID value into JSON by casting it to an integer will cause overflow:
 
-> `{"foo": 3333333333}`
+    ```SQL
+    SELECT jsonb_build_object('foo', 3333333333::oid::integer); -- ❌ Bad
+    ```
+
+    > `{"foo": -961633963}`
+
+    Instead, cast it to `bigint`
+
+    ```SQL
+    SELECT jsonb_build_object('foo', 3333333333::oid::bigint); -- ✅ Good
+    ```
+
+    > `{"foo": 3333333333}`
 

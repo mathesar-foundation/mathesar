@@ -10,8 +10,10 @@ from modernrpc.auth import user_is_authenticated, user_is_superuser
 
 from mathesar.rpc import columns
 from mathesar.rpc import connections
+from mathesar.rpc import constraints
 from mathesar.rpc import database_setup
 from mathesar.rpc import databases
+from mathesar.rpc import roles
 from mathesar.rpc import schemas
 from mathesar.rpc import tables
 
@@ -62,6 +64,21 @@ METHODS = [
         [user_is_superuser]
     ),
     (
+        constraints.list_,
+        "constraints.list",
+        [user_is_authenticated]
+    ),
+    (
+        constraints.add,
+        "constraints.add",
+        [user_is_authenticated]
+    ),
+    (
+        constraints.delete,
+        "constraints.delete",
+        [user_is_authenticated]
+    ),
+    (
         database_setup.create_new,
         "database_setup.create_new",
         [user_is_superuser]
@@ -74,6 +91,11 @@ METHODS = [
     (
         databases.list_,
         "databases.list",
+        [user_is_authenticated]
+    ),
+    (
+        roles.list_,
+        "roles.list",
         [user_is_authenticated]
     ),
     (
