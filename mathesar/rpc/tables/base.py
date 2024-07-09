@@ -96,7 +96,7 @@ class JoinableTableInfo(TypedDict):
             join_path=joinables["join_path"],
             fkey_path=joinables["fkey_path"],
             depth=joinables["depth"],
-            multiple_results=joinables["multiple_reslults"]
+            multiple_results=joinables["multiple_results"]
         )
 
 

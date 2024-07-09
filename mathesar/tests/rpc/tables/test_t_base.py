@@ -390,5 +390,5 @@ def test_list_joinable(rf, monkeypatch):
     ]
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
     monkeypatch.setattr(tables.base, 'list_joinable_tables', mock_list_joinable_tables)
-    actual_list = tables.list_joinable(table_oid=2254329, database_id=11, max_depth=3)
+    actual_list = tables.list_joinable(table_oid=2254329, database_id=11, max_depth=3, request=request)
     assert expected_list == actual_list
