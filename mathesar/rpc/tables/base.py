@@ -83,8 +83,8 @@ class JoinableTableInfo(TypedDict):
     """
     base: int
     target: int
-    join_path: list[list[list[int, int], list[int, int]]]
-    fkey_path: list[list[int, str]]
+    join_path: list
+    fkey_path: list
     depth: int
     multiple_results: bool
 
@@ -302,4 +302,5 @@ def list_joinable(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return list_joinable_tables(table_oid, conn, max_depth)
+        joinables = list_joinable_tables(table_oid, conn, max_depth)
+        return [JoinableTableInfo.from_dict(joinable) for joinable in joinables]
