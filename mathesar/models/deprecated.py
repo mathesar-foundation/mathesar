@@ -17,7 +17,7 @@ from db.columns.operations.select import (
     get_column_attnum_from_names_as_map, get_column_name_from_attnum,
     get_map_of_attnum_to_column_name, get_map_of_attnum_and_table_oid_to_column_name,
 )
-from db.constraints.operations.create import add_constraint
+from db.constraints.operations.create import add_constraint_via_sql_alchemy
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_record_from_oid
 from db.constraints import utils as constraint_utils
@@ -558,7 +558,7 @@ class Table(DatabaseObject, Relation):
         # the most newly-created constraint. Other methods (e.g., trying to get
         # a constraint by name when it wasn't set here) are even less robust.
         constraint_oid = max(
-            add_constraint(constraint_obj, engine=self._sa_engine)
+            add_constraint_via_sql_alchemy(constraint_obj, engine=self._sa_engine)
         )
         result = Constraint.current_objects.create(oid=constraint_oid, table=self)
         reset_reflection(db_name=self.schema.database.name)

@@ -111,6 +111,29 @@ To use an RPC function:
       - ColumnMetaData
       - SettableColumnMetaData
 
+## Constraints
+
+::: constraints
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - Constraint
+      - ForeignKeyConstraint
+      - PrimaryKeyConstraint
+      - UniqueConstraint
+      - CreatableConstraintInfo
+
+## Roles
+
+::: roles
+    options:
+      members:
+      - list_
+      - RoleInfo
+      - RoleMember
+
 ## Responses
 
 ### Success
