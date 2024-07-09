@@ -29,7 +29,7 @@ whether to travel from referrer to referant (when False) or from referant to ref
 */
 
 
-CREATE TYPE mathesar_types.joinable_tables AS (
+CREATE TYPE __msar.joinable_tables AS (
   base integer, -- The OID of the table from which the paths start
   target integer, -- The OID of the table where the paths end
   join_path jsonb, -- A JSONB array of arrays of arrays
@@ -40,8 +40,8 @@ CREATE TYPE mathesar_types.joinable_tables AS (
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_joinable_tables(max_depth integer) RETURNS SETOF mathesar_types.joinable_tables AS $$/*
-This function returns a table of mathesar_types.joinable_tables objects, giving paths to various
+msar.get_joinable_tables(max_depth integer) RETURNS SETOF __msar.joinable_tables AS $$/*
+This function returns a table of __msar.joinable_tables objects, giving paths to various
 joinable tables.
 
 Args:
@@ -132,6 +132,6 @@ $$ LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION
 msar.get_joinable_tables(max_depth integer, table_id oid) RETURNS
-  SETOF mathesar_types.joinable_tables AS $$
+  SETOF __msar.joinable_tables AS $$
   SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id
 $$ LANGUAGE sql;
