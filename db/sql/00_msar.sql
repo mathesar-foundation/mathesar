@@ -915,7 +915,7 @@ WITH rolemembers as (
     pgr.oid AS oid,
     jsonb_agg(
       jsonb_build_object(
-        'oid', pgm.member,
+        'oid', pgm.member::bigint,
         'admin', pgm.admin_option
       )
     ) AS members
@@ -926,7 +926,7 @@ WITH rolemembers as (
 SELECT jsonb_agg(role_data)
 FROM (
   SELECT
-    r.oid AS oid,
+    r.oid::bigint AS oid,
     r.rolname AS name,
     r.rolsuper AS super,
     r.rolinherit AS inherits,
