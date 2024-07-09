@@ -137,6 +137,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        tables.list_joinable,
+        "tables.list_joinable",
+        [user_is_authenticated]
+    ),
+    (
         tables.metadata.list_,
         "tables.metadata.list",
         [user_is_authenticated]
