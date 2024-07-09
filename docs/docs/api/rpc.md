@@ -125,6 +125,15 @@ To use an RPC function:
       - UniqueConstraint
       - CreatableConstraintInfo
 
+## Roles
+
+::: roles
+    options:
+      members:
+      - list_
+      - RoleInfo
+      - RoleMember
+
 ## Responses
 
 ### Success
