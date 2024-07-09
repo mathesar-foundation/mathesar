@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.db.permissions.query import QueryAccessPolicy
 from mathesar.api.db.permissions.schema import SchemaAccessPolicy
@@ -26,14 +27,10 @@ from mathesar import __version__
 
 
 def get_schema_list(request, database):
-    qs = Schema.objects.filter(database=database)
-    permission_restricted_qs = SchemaAccessPolicy.scope_queryset(request, qs)
-    schema_serializer = SchemaSerializer(
-        permission_restricted_qs,
-        many=True,
-        context={'request': request}
-    )
-    return schema_serializer.data
+    if database is not None:
+        return schemas_list(request=request, database_id=database.id)
+    else:
+        return []
 
 
 def _get_permissible_db_queryset(request):
@@ -180,19 +177,6 @@ def get_current_database(request, connection_id):
     return current_database
 
 
-def get_current_schema(request, schema_id, database):
-    # if there's a schema ID passed in, try to retrieve the schema, or return a 404 error.
-    if schema_id is not None:
-        permitted_schemas = SchemaAccessPolicy.scope_queryset(request, Schema.objects.all())
-        return get_object_or_404(permitted_schemas, id=schema_id)
-    else:
-        try:
-            # Try to get the first schema in the DB
-            return Schema.objects.filter(database=database).order_by('id').first()
-        except Schema.DoesNotExist:
-            return None
-
-
 def render_schema(request, database, schema):
     # if there's no schema available, redirect to the schemas page.
     if not schema:
@@ -300,16 +284,7 @@ def admin_home(request, **kwargs):
 
 
 @login_required
-def schema_home(request, connection_id, schema_id, **kwargs):
-    database = get_current_database(request, connection_id)
-    schema = get_current_schema(request, schema_id, database)
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request, database, schema)
-    })
-
-
-@login_required
-def schemas(request, connection_id):
+def schemas(request, connection_id, **kwargs):
     database = get_current_database(request, connection_id)
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, None)
