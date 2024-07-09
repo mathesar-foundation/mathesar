@@ -792,6 +792,57 @@ FROM (
 $$ LANGUAGE sql;
 
 
+CREATE OR REPLACE FUNCTION msar.get_roles() RETURNS jsonb AS $$/*
+Return a json array of objects with the list of roles in a database server,
+excluding pg system roles.
+
+Each returned JSON object in the array has the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "super": <bool>
+    "inherits": <bool>
+    "create_role": <bool>
+    "create_db": <bool>
+    "login": <bool>
+    "description": <str|null>
+    "members": <[
+        { "oid": <int>, "admin": <bool> }
+      ]|null>
+  }
+*/
+WITH rolemembers as (
+  SELECT
+    pgr.oid AS oid,
+    jsonb_agg(
+      jsonb_build_object(
+        'oid', pgm.member,
+        'admin', pgm.admin_option
+      )
+    ) AS members
+    FROM pg_catalog.pg_roles pgr
+      INNER JOIN pg_catalog.pg_auth_members pgm ON pgr.oid=pgm.roleid
+    GROUP BY pgr.oid
+)
+SELECT jsonb_agg(role_data)
+FROM (
+  SELECT
+    r.oid AS oid,
+    r.rolname AS name,
+    r.rolsuper AS super,
+    r.rolinherit AS inherits,
+    r.rolcreaterole AS create_role,
+    r.rolcreatedb AS create_db,
+    r.rolcanlogin AS login,
+    pg_catalog.shobj_description(r.oid, 'pg_authid') AS description,
+    rolemembers.members AS members
+  FROM pg_catalog.pg_roles r
+    LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid
+  WHERE r.rolname NOT LIKE 'pg_%'
+) AS role_data;
+$$ LANGUAGE sql;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ROLE MANIPULATION FUNCTIONS

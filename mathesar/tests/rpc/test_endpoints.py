@@ -10,6 +10,7 @@ from modernrpc.auth import user_is_authenticated, user_is_superuser
 
 from mathesar.rpc import columns
 from mathesar.rpc import connections
+from mathesar.rpc import roles
 from mathesar.rpc import schemas
 from mathesar.rpc import tables
 
@@ -58,6 +59,11 @@ METHODS = [
         connections.grant_access_to_user,
         "connections.grant_access_to_user",
         [user_is_superuser]
+    ),
+    (
+        roles.list_,
+        "roles.list",
+        [user_is_authenticated]
     ),
     (
         schemas.add,
