@@ -267,3 +267,128 @@ def test_tables_preview(rf, monkeypatch):
         {'id': 3, 'length': Decimal('4.0')},
         {'id': 4, 'length': Decimal('5.22')}
     ]
+
+
+def test_list_joinable(rf, monkeypatch):
+    request = rf.post('/api/rpc/v0', data={})
+    request.user = User(username='alice', password='pass1234')
+    table_oid = 2254329
+    database_id = 11
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == 'alice':
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_list_joinable_tables(_table_oid, conn, max_depth):
+        if _table_oid != table_oid:
+            raise AssertionError('incorrect parameters passed')
+        return [
+            {
+                'base': 2254329,
+                'target': 2254334,
+                'join_path': [[[2254329, 2], [2254334, 1]]],
+                'fkey_path': [['2254406', False]],
+                'depth': 1,
+                'multiple_results': False
+            },
+            {
+                'base': 2254329,
+                'target': 2254350,
+                'join_path': [[[2254329, 3], [2254350, 1]]],
+                'fkey_path': [['2254411', False]],
+                'depth': 1,
+                'multiple_results': False
+            },
+            {
+                'base': 2254329,
+                'target': 2254321,
+                'join_path': [[[2254329, 2], [2254334, 1]], [[2254334, 5], [2254321, 1]]],
+                'fkey_path': [['2254406', False], ['2254399', False]],
+                'depth': 2,
+                'multiple_results': False
+            },
+            {
+                'base': 2254329,
+                'target': 2254358,
+                'join_path': [
+                    [[2254329, 2], [2254334, 1]],
+                    [[2254334, 5], [2254321, 1]],
+                    [[2254321, 11], [2254358, 1]]
+                ],
+                'fkey_path': [['2254406', False], ['2254399', False], ['2254394', False]],
+                'depth': 3,
+                'multiple_results': False
+            },
+            {
+                'base': 2254329,
+                'target': 2254313,
+                'join_path': [
+                    [[2254329, 2], [2254334, 1]],
+                    [[2254334, 5], [2254321, 1]],
+                    [[2254321, 10], [2254313, 1]]
+                ],
+                'fkey_path': [['2254406', False], ['2254399', False], ['2254389', False]],
+                'depth': 3,
+                'multiple_results': False
+            }
+        ]
+    expected_list = [
+        {
+            'base': 2254329,
+            'target': 2254334,
+            'join_path': [[[2254329, 2], [2254334, 1]]],
+            'fkey_path': [['2254406', False]],
+            'depth': 1,
+            'multiple_results': False
+        },
+        {
+            'base': 2254329,
+            'target': 2254350,
+            'join_path': [[[2254329, 3], [2254350, 1]]],
+            'fkey_path': [['2254411', False]],
+            'depth': 1,
+            'multiple_results': False
+        },
+        {
+            'base': 2254329,
+            'target': 2254321,
+            'join_path': [[[2254329, 2], [2254334, 1]], [[2254334, 5], [2254321, 1]]],
+            'fkey_path': [['2254406', False], ['2254399', False]],
+            'depth': 2,
+            'multiple_results': False
+        },
+        {
+            'base': 2254329,
+            'target': 2254358,
+            'join_path': [
+                [[2254329, 2], [2254334, 1]],
+                [[2254334, 5], [2254321, 1]],
+                [[2254321, 11], [2254358, 1]]
+            ],
+            'fkey_path': [['2254406', False], ['2254399', False], ['2254394', False]],
+            'depth': 3,
+            'multiple_results': False
+        },
+        {
+            'base': 2254329,
+            'target': 2254313,
+            'join_path': [
+                [[2254329, 2], [2254334, 1]],
+                [[2254334, 5], [2254321, 1]],
+                [[2254321, 10], [2254313, 1]]
+            ],
+            'fkey_path': [['2254406', False], ['2254399', False], ['2254389', False]],
+            'depth': 3,
+            'multiple_results': False
+        }
+    ]
+    monkeypatch.setattr(tables.base, 'connect', mock_connect)
+    monkeypatch.setattr(tables.base, 'list_joinable_tables', mock_list_joinable_tables)
+    actual_list = tables.list_joinable(table_oid=2254329, database_id=11, max_depth=3)
+    assert expected_list == actual_list
