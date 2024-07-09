@@ -716,9 +716,9 @@ Args:
   tab_id: The OID or name of the table.
 */
 SELECT jsonb_build_object(
-  'oid', oid,
+  'oid', oid::bigint,
   'name', relname,
-  'schema', relnamespace,
+  'schema', relnamespace::bigint,
   'description', msar.obj_description(oid, 'pg_class')
 ) FROM pg_catalog.pg_class WHERE oid = tab_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -740,9 +740,9 @@ Args:
 */
 SELECT jsonb_agg(
   jsonb_build_object(
-    'oid', pgc.oid,
+    'oid', pgc.oid::bigint,
     'name', pgc.relname,
-    'schema', pgc.relnamespace,
+    'schema', pgc.relnamespace::bigint,
     'description', msar.obj_description(pgc.oid, 'pg_class')
   )
 )
@@ -772,7 +772,7 @@ Each returned JSON object in the array will have the form:
 SELECT jsonb_agg(schema_data)
 FROM (
   SELECT 
-    s.oid AS oid,
+    s.oid::bigint AS oid,
     s.nspname AS name,
     pg_catalog.obj_description(s.oid) AS description,
     COALESCE(count(c.oid), 0) AS table_count
@@ -2120,7 +2120,7 @@ SELECT jsonb_agg(
     'type', contype,
     'columns', ARRAY[attname],
     'deferrable', condeferrable,
-    'fkey_relation_id', confrelid::integer,
+    'fkey_relation_id', confrelid::bigint,
     'fkey_columns', confkey,
     'fkey_update_action', confupdtype,
     'fkey_delete_action', confdeltype,
