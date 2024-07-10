@@ -3,7 +3,7 @@ bidict==0.21.4
 frozendict==2.1.3
 charset-normalizer==2.0.7
 clevercsv==0.6.8
-Django==4.2.11
+Django==4.2.14
 dj-database-url==0.5.0
 django-filter==23.5
 django-modern-rpc==1.0.3
