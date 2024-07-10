@@ -3207,8 +3207,7 @@ BEGIN
     $t$,
     -- %1$s  This is a comma separated string of the extracted column names
     string_agg(quote_ident(col_def ->> 'name'), ', '),
-    -- %2$s  This is the name of the original (remainder) table
-    __msar.get_qualified_relation_name(tab_id),
+    -- %2$s  This is the name of the original (remainder) table __msar.get_qualified_relation_name(tab_id),
     -- %3$s  This is the new extracted table name
     __msar.get_qualified_relation_name(extracted_table_id),
     -- %4$I  This is the name of the fkey column in the remainder table.
@@ -3228,3 +3227,79 @@ BEGIN
   RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- DQL FUNCTIONS
+--
+-- This set of functions is for getting records from python.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.sanitize_direction(direction text) RETURNS text AS $$/*
+*/
+SELECT CASE lower(direction)
+  WHEN 'asc' THEN 'ASC'
+  WHEN 'desc' THEN 'DESC'
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_order_by_expr(tab_id oid, order_ jsonb) RETURNS text AS $$/*
+*/
+SELECT 'ORDER BY ' || string_agg(format('%I %s', field, msar.sanitize_direction(direction)), ', ')
+FROM jsonb_to_recordset(order_) AS x(field integer, direction text);
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_selectable_column_expr(tab_id oid) RETURNS text AS $$/*
+*/
+SELECT string_agg(format('%I AS %I', attname, attnum), ', ')
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id AND attnum > 0 AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_records_from_table(
+  tab_id oid,
+  limit_ integer,
+  offset_ integer,
+  order_ jsonb,
+  filter_ jsonb,
+  group_ jsonb,
+  search_ jsonb
+) RETURNS jsonb AS $$/*
+*/
+DECLARE
+  records jsonb;
+BEGIN
+  EXECUTE format(
+    $q$
+    WITH count_cte AS (
+      SELECT count(1) AS count FROM %2$I.%3$I
+    ), results_cte AS (
+      SELECT %1$s FROM %2$I.%3$I %6$s LIMIT %4$L OFFSET %5$L
+    )
+    SELECT jsonb_build_object(
+      'results', jsonb_agg(row_to_json(results_cte.*)),
+      'count', max(count_cte.count)
+    )
+    FROM results_cte, count_cte
+    $q$,
+    msar.build_selectable_column_expr(tab_id),
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    limit_,
+    offset_,
+    msar.build_order_by_expr(tab_id, order_)
+  ) INTO records;
+  RETURN records;
+END;
+$$ LANGUAGE plpgsql;
