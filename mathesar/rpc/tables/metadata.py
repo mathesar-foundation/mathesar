@@ -7,10 +7,10 @@ from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.utils.tables import get_tables_meta_data, patch_table_meta_data
+from mathesar.utils.tables import get_tables_meta_data, set_table_meta_data
 
 
-class TableMetaData(TypedDict):
+class TableMetaDataRecord(TypedDict):
     """
     Metadata for a table in a database.
 
@@ -46,9 +46,9 @@ class TableMetaData(TypedDict):
         )
 
 
-class SettableTableMetaData(TypedDict):
+class TableMetaDataBlob(TypedDict):
     """
-    Settable metadata fields for a table in a database.
+    The metadata fields which can be set on a table
 
     Attributes:
         import_verified: Specifies whether a file has been successfully imported into a table.
@@ -65,7 +65,7 @@ class SettableTableMetaData(TypedDict):
 @rpc_method(name="tables.metadata.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, database_id: int, **kwargs) -> list[TableMetaData]:
+def list_(*, database_id: int, **kwargs) -> list[TableMetaDataRecord]:
     """
     List metadata associated with tables for a database.
 
@@ -77,26 +77,22 @@ def list_(*, database_id: int, **kwargs) -> list[TableMetaData]:
     """
     table_meta_data = get_tables_meta_data(database_id)
     return [
-        TableMetaData.from_model(model) for model in table_meta_data
+        TableMetaDataRecord.from_model(model) for model in table_meta_data
     ]
 
 
-@rpc_method(name="tables.metadata.patch")
+@rpc_method(name="tables.metadata.set")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def patch(
-    *, table_oid: int, metadata_dict: SettableTableMetaData, database_id: int, **kwargs
-) -> TableMetaData:
+def set_(
+    *, table_oid: int, metadata: TableMetaDataBlob, database_id: int, **kwargs
+) -> TableMetaDataRecord:
     """
-    Alter metadata settings associated with a table for a database.
+    Set metadata for a table.
 
     Args:
-        table_oid: Identity of the table whose metadata we'll modify.
-        metadata_dict: The dict describing desired table metadata alterations.
+        table_oid: The PostgreSQL OID of the table.
+        metadata: A TableMetaDataBlob object describing desired table metadata to set.
         database_id: The Django id of the database containing the table.
-
-    Returns:
-        Altered metadata object.
     """
-    table_meta_data = patch_table_meta_data(table_oid, metadata_dict, database_id)
-    return TableMetaData.from_model(table_meta_data)
+    set_table_meta_data(table_oid, metadata, database_id)

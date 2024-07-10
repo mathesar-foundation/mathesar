@@ -142,8 +142,8 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        tables.metadata.patch,
-        "tables.metadata.patch",
+        tables.metadata.set_,
+        "tables.metadata.set",
         [user_is_authenticated]
     )
 ]

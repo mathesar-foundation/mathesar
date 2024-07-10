@@ -138,3 +138,11 @@ class TableMetaData(BaseModel):
                 name="unique_table_metadata"
             )
         ]
+
+
+table_metadata_fields = {
+    'import_verified',
+    'column_order',
+    'record_summary_customized',
+    'record_summary_template',
+}

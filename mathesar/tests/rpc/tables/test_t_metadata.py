@@ -29,12 +29,12 @@ def test_tables_meta_data_list(monkeypatch):
     monkeypatch.setattr(metadata, "get_tables_meta_data", mock_get_tables_meta_data)
 
     expect_metadata_list = [
-        metadata.TableMetaData(
+        metadata.TableMetaDataRecord(
             id=1, database_id=database_id, table_oid=1234,
             import_verified=True, column_order=[8, 9, 10], record_summary_customized=False,
             record_summary_template="{5555}"
         ),
-        metadata.TableMetaData(
+        metadata.TableMetaDataRecord(
             id=2, database_id=database_id, table_oid=4567,
             import_verified=False, column_order=[], record_summary_customized=True,
             record_summary_template="{5512} {1223}"
@@ -44,11 +44,11 @@ def test_tables_meta_data_list(monkeypatch):
     assert actual_metadata_list == expect_metadata_list
 
 
-def test_tables_meta_data_patch(monkeypatch):
+def test_tables_meta_data_set(monkeypatch):
     database_id = 2
-    metadata_dict = {'import_verified': True, 'column_order': [1, 4, 12]}
+    metadata_values = {'import_verified': True, 'column_order': [1, 4, 12]}
 
-    def mock_patch_tables_meta_data(table_oid, metadata_dict, _database_id):
+    def mock_set_tables_meta_data(table_oid, metadata, _database_id):
         server_model = Server(id=2, host='example.com', port=5432)
         db_model = Database(id=_database_id, name='mymathesardb', server=server_model)
         return TableMetaData(
@@ -56,12 +56,11 @@ def test_tables_meta_data_patch(monkeypatch):
             import_verified=True, column_order=[1, 4, 12], record_summary_customized=False,
             record_summary_template="{5555}"
         )
-    monkeypatch.setattr(metadata, "patch_table_meta_data", mock_patch_tables_meta_data)
+    monkeypatch.setattr(metadata, "set_table_meta_data", mock_set_tables_meta_data)
 
-    expect_metadata_object = metadata.TableMetaData(
+    expect_metadata_object = metadata.TableMetaDataRecord(
         id=1, database_id=database_id, table_oid=1234,
         import_verified=True, column_order=[1, 4, 12], record_summary_customized=False,
         record_summary_template="{5555}"
     )
-    actual_metadata_object = metadata.patch(table_oid=1234, metadata_dict=metadata_dict, database_id=2)
-    assert actual_metadata_object == expect_metadata_object
+    metadata.set_(table_oid=1234, metadata=metadata_values, database_id=2)
