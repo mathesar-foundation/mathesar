@@ -4,7 +4,7 @@ templates.
 */
 
 CREATE OR REPLACE FUNCTION
-__msar.pick_best_record_summary_column(
+msar.pick_best_record_summary_column(
   tab_id oid
 ) RETURNS smallint AS $$/*
   Given a table OID, this function returns the best singular column to use for a record summary of
@@ -63,7 +63,7 @@ msar.auto_generate_record_summary_template(
 BEGIN
   RETURN jsonb_build_array(
     jsonb_build_array(
-      __msar.pick_best_record_summary_column(tab_id)
+      msar.pick_best_record_summary_column(tab_id)
     )
   );
 END;
@@ -109,7 +109,7 @@ DECLARE
   base_alias CONSTANT text := 'base';
   expr_parts text[] := ARRAY[]::text[];
   expr text;
-  base_tab_fqn text := __msar.get_relation_name(tab_id);
+  base_tab_fqn text := msar.get_relation_name(tab_id);
   base_pk_name text := msar.get_column_name(tab_id, msar.get_pk_column(tab_id));
   template_part jsonb;
   join_clauses text[] := ARRAY[]::text[];
@@ -166,7 +166,7 @@ BEGIN
               CONTINUE template_parts_loop;
             END IF;
 
-            ref_tab_fqn := __msar.get_relation_name(ref_tab_id);
+            ref_tab_fqn := msar.get_relation_name(ref_tab_id);
             ref_col_name := msar.get_column_name(ref_tab_id, ref_col_id);
             alias := concat(prev_alias, '_', fk_col_id);
             join_clause := concat(
