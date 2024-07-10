@@ -53,9 +53,9 @@ restrictions in either way.
 */
 WITH RECURSIVE symmetric_fkeys AS (
   SELECT
-    c.oid fkey_oid,
-    c.conrelid::INTEGER left_rel,
-    c.confrelid::INTEGER right_rel,
+    c.oid::BIGINT fkey_oid,
+    c.conrelid::BIGINT left_rel,
+    c.confrelid::BIGINT right_rel,
     c.conkey[1]::INTEGER left_col,
     c.confkey[1]::INTEGER right_col,
     false multiple_results,
@@ -64,9 +64,9 @@ WITH RECURSIVE symmetric_fkeys AS (
   WHERE c.contype='f' and array_length(c.conkey, 1)=1
 UNION ALL
   SELECT
-    c.oid fkey_oid,
-    c.confrelid::INTEGER left_rel,
-    c.conrelid::INTEGER right_rel,
+    c.oid::BIGINT fkey_oid,
+    c.confrelid::BIGINT left_rel,
+    c.conrelid::BIGINT right_rel,
     c.confkey[1]::INTEGER left_col,
     c.conkey[1]::INTEGER right_col,
     true multiple_results,

@@ -293,7 +293,7 @@ def test_list_joinable(rf, monkeypatch):
                 'base': 2254329,
                 'target': 2254334,
                 'join_path': [[[2254329, 2], [2254334, 1]]],
-                'fkey_path': [['2254406', False]],
+                'fkey_path': [[2254406, False]],
                 'depth': 1,
                 'multiple_results': False
             },
@@ -301,7 +301,7 @@ def test_list_joinable(rf, monkeypatch):
                 'base': 2254329,
                 'target': 2254350,
                 'join_path': [[[2254329, 3], [2254350, 1]]],
-                'fkey_path': [['2254411', False]],
+                'fkey_path': [[2254411, False]],
                 'depth': 1,
                 'multiple_results': False
             },
@@ -309,7 +309,7 @@ def test_list_joinable(rf, monkeypatch):
                 'base': 2254329,
                 'target': 2254321,
                 'join_path': [[[2254329, 2], [2254334, 1]], [[2254334, 5], [2254321, 1]]],
-                'fkey_path': [['2254406', False], ['2254399', False]],
+                'fkey_path': [[2254406, False], [2254399, False]],
                 'depth': 2,
                 'multiple_results': False
             },
@@ -321,7 +321,7 @@ def test_list_joinable(rf, monkeypatch):
                     [[2254334, 5], [2254321, 1]],
                     [[2254321, 11], [2254358, 1]]
                 ],
-                'fkey_path': [['2254406', False], ['2254399', False], ['2254394', False]],
+                'fkey_path': [[2254406, False], [2254399, False], [2254394, False]],
                 'depth': 3,
                 'multiple_results': False
             },
@@ -333,7 +333,7 @@ def test_list_joinable(rf, monkeypatch):
                     [[2254334, 5], [2254321, 1]],
                     [[2254321, 10], [2254313, 1]]
                 ],
-                'fkey_path': [['2254406', False], ['2254399', False], ['2254389', False]],
+                'fkey_path': [[2254406, False], [2254399, False], [2254389, False]],
                 'depth': 3,
                 'multiple_results': False
             }
@@ -343,7 +343,7 @@ def test_list_joinable(rf, monkeypatch):
             'base': 2254329,
             'target': 2254334,
             'join_path': [[[2254329, 2], [2254334, 1]]],
-            'fkey_path': [['2254406', False]],
+            'fkey_path': [[2254406, False]],
             'depth': 1,
             'multiple_results': False
         },
@@ -351,7 +351,7 @@ def test_list_joinable(rf, monkeypatch):
             'base': 2254329,
             'target': 2254350,
             'join_path': [[[2254329, 3], [2254350, 1]]],
-            'fkey_path': [['2254411', False]],
+            'fkey_path': [[2254411, False]],
             'depth': 1,
             'multiple_results': False
         },
@@ -359,7 +359,7 @@ def test_list_joinable(rf, monkeypatch):
             'base': 2254329,
             'target': 2254321,
             'join_path': [[[2254329, 2], [2254334, 1]], [[2254334, 5], [2254321, 1]]],
-            'fkey_path': [['2254406', False], ['2254399', False]],
+            'fkey_path': [[2254406, False], [2254399, False]],
             'depth': 2,
             'multiple_results': False
         },
@@ -371,7 +371,7 @@ def test_list_joinable(rf, monkeypatch):
                 [[2254334, 5], [2254321, 1]],
                 [[2254321, 11], [2254358, 1]]
             ],
-            'fkey_path': [['2254406', False], ['2254399', False], ['2254394', False]],
+            'fkey_path': [[2254406, False], [2254399, False], [2254394, False]],
             'depth': 3,
             'multiple_results': False
         },
@@ -383,7 +383,7 @@ def test_list_joinable(rf, monkeypatch):
                 [[2254334, 5], [2254321, 1]],
                 [[2254321, 10], [2254313, 1]]
             ],
-            'fkey_path': [['2254406', False], ['2254399', False], ['2254389', False]],
+            'fkey_path': [[2254406, False], [2254399, False], [2254389, False]],
             'depth': 3,
             'multiple_results': False
         }
