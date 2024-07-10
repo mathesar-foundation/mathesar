@@ -12,7 +12,6 @@ from db.columns.operations.drop import drop_columns_from_table
 from db.columns.operations.select import get_column_info_for_table
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
-from mathesar.utils.columns import get_raw_display_options
 
 
 class TypeOptions(TypedDict, total=False):
@@ -131,6 +130,20 @@ class SettableColumnInfo(TypedDict):
     description: Optional[str]
 
 
+class PreviewableColumnInfo(TypedDict):
+    """
+    Information needed to preview a column.
+
+    Attributes:
+        id: The `attnum` of the column in the table.
+        type: The new type to be applied to a column.
+        type_options: The options to be applied to the column type.
+    """
+    id: int
+    type: Optional[str]
+    type_options: Optional[TypeOptions]
+
+
 class ColumnInfo(TypedDict):
     """
     Information about a column. Extends the settable fields.
@@ -171,49 +184,24 @@ class ColumnInfo(TypedDict):
         )
 
 
-class ColumnListReturn(TypedDict):
-    """
-    Information about the columns of a table.
-
-    Attributes:
-        column_info: Column information from the user's database.
-        display_options: Display metadata managed by Mathesar.
-    """
-    column_info: list[ColumnInfo]
-    display_options: list[dict]
-
-
 @rpc_method(name="columns.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, table_oid: int, database_id: int, **kwargs) -> ColumnListReturn:
+def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnInfo]:
     """
     List information about columns for a table. Exposed as `list`.
-
-    Also return display options for each column, if they're defined.
 
     Args:
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
 
     Returns:
-        A list of column details, and a separate list of display options.
+        A list of column details.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         raw_column_info = get_column_info_for_table(table_oid, conn)
-    column_info, attnums = tuple(
-        zip(
-            *[(ColumnInfo.from_dict(col), col['id']) for col in raw_column_info]
-        )
-    )
-    display_options = get_raw_display_options(
-        database_id, table_oid, attnums, user
-    )
-    return ColumnListReturn(
-        column_info=column_info,
-        display_options=display_options,
-    )
+    return [ColumnInfo.from_dict(col) for col in raw_column_info]
 
 
 @rpc_method(name="columns.add")

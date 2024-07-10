@@ -10,6 +10,8 @@ from modernrpc.auth import user_is_authenticated, user_is_superuser
 
 from mathesar.rpc import columns
 from mathesar.rpc import connections
+from mathesar.rpc import constraints
+from mathesar.rpc import roles
 from mathesar.rpc import schemas
 from mathesar.rpc import tables
 
@@ -35,6 +37,16 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        columns.metadata.list_,
+        "columns.metadata.list",
+        [user_is_authenticated]
+    ),
+    (
+        columns.metadata.patch,
+        "columns.metadata.patch",
+        [user_is_authenticated]
+    ),
+    (
         connections.add_from_known_connection,
         "connections.add_from_known_connection",
         [user_is_superuser]
@@ -48,6 +60,26 @@ METHODS = [
         connections.grant_access_to_user,
         "connections.grant_access_to_user",
         [user_is_superuser]
+    ),
+    (
+        constraints.list_,
+        "constraints.list",
+        [user_is_authenticated]
+    ),
+    (
+        constraints.add,
+        "constraints.add",
+        [user_is_authenticated]
+    ),
+    (
+        constraints.delete,
+        "constraints.delete",
+        [user_is_authenticated]
+    ),
+    (
+        roles.list_,
+        "roles.list",
+        [user_is_authenticated]
     ),
     (
         schemas.add,
@@ -92,6 +124,26 @@ METHODS = [
     (
         tables.patch,
         "tables.patch",
+        [user_is_authenticated]
+    ),
+    (
+        tables.import_,
+        "tables.import",
+        [user_is_authenticated]
+    ),
+    (
+        tables.get_import_preview,
+        "tables.get_import_preview",
+        [user_is_authenticated]
+    ),
+    (
+        tables.metadata.list_,
+        "tables.metadata.list",
+        [user_is_authenticated]
+    ),
+    (
+        tables.metadata.patch,
+        "tables.metadata.patch",
         [user_is_authenticated]
     )
 ]

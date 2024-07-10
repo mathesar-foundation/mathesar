@@ -5,6 +5,7 @@ from db.tables.operations.infer_types import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.base import create_table_from_data_file
 from mathesar.models.deprecated import Table
+from mathesar.models.base import TableMetaData
 from mathesar.state.django import reflect_columns_from_tables
 from mathesar.state import get_cached_metadata
 
@@ -83,3 +84,19 @@ def create_empty_table(name, schema, comment=None):
     table, _ = Table.current_objects.get_or_create(oid=db_table_oid, schema=schema)
     reflect_columns_from_tables([table], metadata=get_cached_metadata())
     return table
+
+
+def get_tables_meta_data(database_id):
+    return TableMetaData.objects.filter(database__id=database_id)
+
+
+def patch_table_meta_data(table_oid, metadata_dict, database_id):
+    metadata_model = TableMetaData.objects.get(database__id=database_id, table_oid=table_oid)
+    alterable_fields = (
+        'import_verified', 'column_order', 'record_summary_customized', 'record_summary_template'
+    )
+    for field, value in metadata_dict.items():
+        if field in alterable_fields:
+            setattr(metadata_model, field, value)
+    metadata_model.save()
+    return metadata_model
