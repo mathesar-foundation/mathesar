@@ -29,6 +29,7 @@ whether to travel from referrer to referant (when False) or from referant to ref
 */
 
 
+DROP TYPE IF EXISTS msar.joinable_tables CASCADE;
 CREATE TYPE msar.joinable_tables AS (
   base integer, -- The OID of the table from which the paths start
   target integer, -- The OID of the table where the paths end
