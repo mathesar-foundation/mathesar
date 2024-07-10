@@ -126,10 +126,10 @@ class ColumnMetaData(BaseModel):
 class TableMetaData(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
     table_oid = models.PositiveBigIntegerField()
-    import_verified = models.BooleanField(default=False)
-    column_order = models.JSONField(default=list)
-    record_summary_customized = models.BooleanField(default=False)
-    record_summary_template = models.CharField(max_length=255, blank=True)
+    import_verified = models.BooleanField(null=True)
+    column_order = models.JSONField(null=True)
+    record_summary_customized = models.BooleanField(null=True)
+    record_summary_template = models.CharField(max_length=255, null=True)
 
     class Meta:
         constraints = [
