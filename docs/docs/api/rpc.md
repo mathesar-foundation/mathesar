@@ -80,9 +80,9 @@ To use an RPC function:
     options:
       members:
       - list_
-      - patch
-      - TableMetaData
-      - SettableTableMetaData
+      - set_
+      - TableMetaDataBlob
+      - TableMetaDataRecord
 
 ## Columns
 
