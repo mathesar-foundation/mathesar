@@ -13,6 +13,15 @@ from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
 
 
 class TypeInfo(TypedDict):
+    """
+    Information about a type.
+
+    Attributes:
+        identifier: Specifies the type class that db_type(s) belongs to.
+        name: Specifies the UI name for a type class.
+        db_types: Specifies the name(s) of types present on the database.
+        display_options: Specifies metadata related to a type class.
+    """
     identifier: str
     name: str
     db_types: list
@@ -32,4 +41,7 @@ class TypeInfo(TypedDict):
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def list_() -> TypeInfo:
+    """
+    List information about types available on the database. Exposed as `list`.
+    """
     return [TypeInfo.from_dict(type) for type in UIType]

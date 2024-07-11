@@ -111,6 +111,14 @@ To use an RPC function:
       - ColumnMetaData
       - SettableColumnMetaData
 
+## Types
+
+::: types
+    options:
+      members:
+      - list_
+      - TypeInfo
+
 ## Constraints
 
 ::: constraints
