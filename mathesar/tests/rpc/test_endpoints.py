@@ -21,9 +21,24 @@ from mathesar.rpc import tables
 
 METHODS = [
     (
+        collaborators.add,
+        "collaborators.add",
+        [user_is_superuser]
+    ),
+    (
+        collaborators.delete,
+        "collaborators.delete",
+        [user_is_superuser]
+    ),
+    (
         collaborators.list_,
         "collaborators.list",
         [user_is_authenticated]
+    ),
+    (
+        collaborators.set_role,
+        "collaborators.set_role",
+        [user_is_superuser]
     ),
     (
         columns.delete,

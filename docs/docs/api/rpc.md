@@ -43,6 +43,9 @@ To use an RPC function:
     options:
       members:
       - list_
+      - add
+      - delete
+      - set_role
       - CollaboratorInfo
 
 ## Connections
