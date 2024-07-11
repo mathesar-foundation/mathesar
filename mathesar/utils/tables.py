@@ -5,7 +5,7 @@ from db.tables.operations.infer_types import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.base import create_table_from_data_file
 from mathesar.models.deprecated import Table
-from mathesar.models.base import Database, TableMetaData, table_metadata_fields
+from mathesar.models.base import Database, TableMetaData
 from mathesar.state.django import reflect_columns_from_tables
 from mathesar.state import get_cached_metadata
 
@@ -94,5 +94,5 @@ def set_table_meta_data(table_oid, metadata, database_id):
     TableMetaData.objects.update_or_create(
         database=Database.objects.get(id=database_id),
         table_oid=table_oid,
-        defaults={f: v for f, v in metadata.items() if f in table_metadata_fields}
+        defaults=metadata,
     )
