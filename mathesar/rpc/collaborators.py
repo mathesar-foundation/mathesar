@@ -3,7 +3,7 @@ from typing import TypedDict
 from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required, http_basic_auth_superuser_required
 
-from mathesar.models.base import UserDatabaseRoleMap, Database, Role
+from mathesar.models.base import UserDatabaseRoleMap, Database, ConfiguredRole
 from mathesar.models.users import User
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
@@ -16,7 +16,7 @@ class CollaboratorInfo(TypedDict):
         id: the Django ID of the UserDatabaseRoleMap model instance.
         user_id: The Django ID of the User model instance of the collaborator.
         database_id: the Django ID of the Database model instance for the collaborator.
-        role_id: The Django ID of the Role model instance for the collaborator.
+        role_id: The Django ID of the ConfiguredRole model instance for the collaborator.
     """
     id: int
     user_id: int
@@ -71,12 +71,12 @@ def add(
 
     Args:
         database_id: The Django id of the Database to associate with the collaborator.
-        user_id: The Django id of the User who'd be the collaborator.
-        role_id: The Django id of the Role to associate with the collaborator.
+        user_id: The Django id of the User model instance who'd be the collaborator.
+        role_id: The Django id of the ConfiguredRole model instance to associate with the collaborator.
     """
     database = Database.objects.get(id=database_id)
     user = User.objects.get(id=user_id)
-    role = Role.objects.get(id=role_id)
+    role = ConfiguredRole.objects.get(id=role_id)
     collaborator = UserDatabaseRoleMap.objects.create(
         database=database,
         user=user,
@@ -114,10 +114,10 @@ def set_role(
 
     Args:
         collaborator_id: The Django id of the UserDatabaseRoleMap model instance of the collaborator.
-        role_id: The Django id of the Role to associate with the collaborator.
+        role_id: The Django id of the ConfiguredRole model instance to associate with the collaborator.
     """
     collaborator = UserDatabaseRoleMap.objects.get(id=collaborator_id)
-    role = Role.objects.get(id=role_id)
+    role = ConfiguredRole.objects.get(id=role_id)
     collaborator.role = role
     collaborator.save()
     return CollaboratorInfo.from_model(collaborator)

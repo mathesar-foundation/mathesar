@@ -40,7 +40,7 @@ class Database(BaseModel):
         ]
 
 
-class Role(BaseModel):
+class ConfiguredRole(BaseModel):
     name = models.CharField(max_length=255)
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='roles'
@@ -61,7 +61,7 @@ class Role(BaseModel):
 class UserDatabaseRoleMap(BaseModel):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
-    role = models.ForeignKey('Role', on_delete=models.CASCADE)
+    role = models.ForeignKey('ConfiguredRole', on_delete=models.CASCADE)
     server = models.ForeignKey('Server', on_delete=models.CASCADE)
 
     class Meta:
