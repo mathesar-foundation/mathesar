@@ -73,6 +73,7 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.databases',
     'mathesar.rpc.roles',
     'mathesar.rpc.schemas',
+    'mathesar.rpc.servers',
     'mathesar.rpc.tables',
     'mathesar.rpc.tables.metadata'
 ]

@@ -15,6 +15,7 @@ from mathesar.rpc import database_setup
 from mathesar.rpc import databases
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
+from mathesar.rpc import servers
 from mathesar.rpc import tables
 
 METHODS = [
@@ -116,6 +117,11 @@ METHODS = [
     (
         schemas.patch,
         "schemas.patch",
+        [user_is_authenticated]
+    ),
+    (
+        servers.list_,
+        "servers.list",
         [user_is_authenticated]
     ),
     (

@@ -151,6 +151,14 @@ To use an RPC function:
       - RoleInfo
       - RoleMember
 
+## Servers
+
+::: servers
+    options:
+      members:
+      - list_
+      - ServerInfo
+
 ## Responses
 
 ### Success
