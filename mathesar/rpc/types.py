@@ -40,7 +40,7 @@ class TypeInfo(TypedDict):
 @rpc_method(name="types.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_() -> TypeInfo:
+def list_() -> list[TypeInfo]:
     """
     List information about types available on the database. Exposed as `list`.
     """
