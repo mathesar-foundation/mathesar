@@ -95,7 +95,7 @@ def list_(*, database_id: int, **kwargs) -> list[TableMetaDataRecord]:
 @handle_rpc_exceptions
 def set_(
     *, table_oid: int, metadata: TableMetaDataBlob, database_id: int, **kwargs
-) -> TableMetaDataRecord:
+) -> None:
     """
     Set metadata for a table.
 
