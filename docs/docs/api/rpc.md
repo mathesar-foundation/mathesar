@@ -37,6 +37,14 @@ To use an RPC function:
     }
     ```
 
+## Collaborators
+
+::: collaborators
+    options:
+      members:
+      - list_
+      - CollaboratorInfo
+
 ## Connections
 
 ::: connections

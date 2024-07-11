@@ -8,6 +8,7 @@ Fixtures:
 import pytest
 from modernrpc.auth import user_is_authenticated, user_is_superuser
 
+from mathesar.rpc import collaborators
 from mathesar.rpc import columns
 from mathesar.rpc import connections
 from mathesar.rpc import constraints
@@ -19,6 +20,11 @@ from mathesar.rpc import servers
 from mathesar.rpc import tables
 
 METHODS = [
+    (
+        collaborators.list_,
+        "collaborators.list",
+        [user_is_authenticated]
+    ),
     (
         columns.delete,
         "columns.delete",
