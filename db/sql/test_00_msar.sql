@@ -2886,10 +2886,6 @@ BEGIN
       ]
     }$j$
   );
---   SET ROLE NONE;
---   REVOKE ALL ON TABLE atable FROM intern_no_pkey;
---   SET ROLE intern_no_pkey;
---   RETURN NEXT is(msar.build_order_by_expr(rel_id, null), null);
 END;
 $$ LANGUAGE plpgsql;
 
