@@ -14,6 +14,7 @@ from mathesar.rpc import constraints
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
 from mathesar.rpc import tables
+from mathesar.rpc import types
 
 METHODS = [
     (
@@ -99,6 +100,11 @@ METHODS = [
     (
         schemas.patch,
         "schemas.patch",
+        [user_is_authenticated]
+    ),
+    (
+        types.list_,
+        "types.list",
         [user_is_authenticated]
     ),
     (
