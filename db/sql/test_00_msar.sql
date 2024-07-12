@@ -2823,5 +2823,17 @@ BEGIN
     ),
     'ORDER BY "3" ASC, "5" DESC, "1" ASC'
   );
+  CREATE ROLE intern_no_pkey;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
+  SET ROLE intern_no_pkey;
+  RETURN NEXT is(
+    msar.build_order_by_expr(rel_id, null), 'ORDER BY "2" ASC, "3" ASC, "5" ASC'
+  );
+  SET ROLE NONE;
+  REVOKE ALL ON TABLE atable FROM intern_no_pkey;
+  SET ROLE intern_no_pkey;
+  RETURN NEXT is(msar.build_order_by_expr(rel_id, null), null);
 END;
 $$ LANGUAGE plpgsql;

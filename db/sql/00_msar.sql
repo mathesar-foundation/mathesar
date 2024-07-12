@@ -3208,7 +3208,7 @@ BEGIN
     -- %1$s  This is a comma separated string of the extracted column names
     string_agg(quote_ident(col_def ->> 'name'), ', '),
     -- %2$s  This is the name of the original (remainder) table
-    __msar.get_qualified_relation_name(tab_id),
+    -- __msar.get_qualified_relation_name(tab_id),
     -- %3$s  This is the new extracted table name
     __msar.get_qualified_relation_name(extracted_table_id),
     -- %4$I  This is the name of the fkey column in the remainder table.
@@ -3258,7 +3258,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$
 WITH orderable_cte AS (
-  SELECT DISTINCT attnum
+  SELECT attnum
   FROM pg_catalog.pg_attribute
     INNER JOIN pg_catalog.pg_cast ON atttypid=castsource
     INNER JOIN pg_catalog.pg_operator ON casttarget=oprleft
@@ -3267,12 +3267,20 @@ WITH orderable_cte AS (
     AND attnum>0
     AND castcontext='i'
     AND oprname='<'
-    -- This privilege check is redundant in context, but may be useful for other callers.
-    AND has_column_privilege(tab_id, attnum, 'SELECT')
+  UNION SELECT attnum
+  FROM pg_catalog.pg_attribute
+    INNER JOIN pg_catalog.pg_operator ON atttypid=oprleft
+  WHERE
+    attrelid=tab_id
+    AND attnum>0
+    AND oprname='<'
   ORDER BY attnum
 )
 SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
-FROM orderable_cte;
+-- This privilege check is redundant in context, but may be useful for other callers.
+FROM orderable_cte
+-- This privilege check is redundant in context, but may be useful for other callers.
+WHERE has_column_privilege(tab_id, attnum, 'SELECT');
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
