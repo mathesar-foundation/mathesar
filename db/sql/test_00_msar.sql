@@ -2796,21 +2796,111 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.build_order_by_expr ------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION __setup_order_by_table() RETURNS SETOF TEXT AS $$
+-- msar.list_records_from_table --------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_list_records_table() RETURNS SETOF TEXT AS $$
 BEGIN
-  CREATE TABLE atable (id integer PRIMARY KEY, col1 integer, col2 varchar, col3 json, col4 jsonb);
+  CREATE TABLE atable (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    col1 integer,
+    col2 varchar,
+    col3 json,
+    col4 jsonb
+  );
+  INSERT INTO atable (col1, col2, col3, col4) VALUES
+    (5, 'sdflkj', '"s"', '{"a": "val"}'),
+    (34, 'sdflfflsk', null, '[1, 2, 3, 4]'),
+    (2, 'abcde', '{"k": 3242348}', 'true');
 END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.list_records_from_table(rel_id, null, null, null, null, null, null),
+    $j${
+      "count": 3,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+      ]
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id, 2, null, '[{"attnum": 2, "direction": "desc"}]', null, null, null
+    ),
+    $j${
+      "count": 3,
+      "results": [
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
+      ]
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id, null, 1, '[{"attnum": 1, "direction": "desc"}]', null, null, null
+    ),
+    $j${
+      "count": 3,
+      "results": [
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
+      ]
+    }$j$
+  );
+  CREATE ROLE intern_no_pkey;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
+  SET ROLE intern_no_pkey;
+  RETURN NEXT is(
+    msar.list_records_from_table(rel_id, null, null, null, null, null, null),
+    $j${
+      "count": 3,
+      "results": [
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true},
+        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
+      ]
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id, null, null, '[{"attnum": 3, "direction": "desc"}]', null, null, null
+    ),
+    $j${
+      "count": 3,
+      "results": [
+        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+      ]
+    }$j$
+  );
+--   SET ROLE NONE;
+--   REVOKE ALL ON TABLE atable FROM intern_no_pkey;
+--   SET ROLE intern_no_pkey;
+--   RETURN NEXT is(msar.build_order_by_expr(rel_id, null), null);
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.build_order_by_expr ------------------------------------------------------------------------
+
 CREATE OR REPLACE FUNCTION test_build_order_by_expr() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
-  order_by_expr text;
 BEGIN
-  PERFORM __setup_order_by_table();
+  PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(msar.build_order_by_expr(rel_id, null), 'ORDER BY "1" ASC');
   RETURN NEXT is(
