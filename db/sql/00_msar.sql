@@ -3207,7 +3207,8 @@ BEGIN
     $t$,
     -- %1$s  This is a comma separated string of the extracted column names
     string_agg(quote_ident(col_def ->> 'name'), ', '),
-    -- %2$s  This is the name of the original (remainder) table __msar.get_qualified_relation_name(tab_id),
+    -- %2$s  This is the name of the original (remainder) table
+    __msar.get_qualified_relation_name(tab_id),
     -- %3$s  This is the new extracted table name
     __msar.get_qualified_relation_name(extracted_table_id),
     -- %4$I  This is the name of the fkey column in the remainder table.
@@ -3249,8 +3250,9 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_pkey_order(tab_id oid) RETURNS jsonb AS $$
-SELECT jsonb_agg(jsonb_build_object('attnum', f, 'direction', 'asc'))
-FROM pg_constraint, LATERAL unnest(conkey) f WHERE contype='p' AND conrelid=tab_id;
+SELECT jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc'))
+FROM pg_constraint, LATERAL unnest(conkey) attnum
+WHERE contype='p' AND conrelid=tab_id AND has_column_privilege(tab_id, attnum, 'SELECT');
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -3260,7 +3262,13 @@ WITH orderable_cte AS (
   FROM pg_catalog.pg_attribute
     INNER JOIN pg_catalog.pg_cast ON atttypid=castsource
     INNER JOIN pg_catalog.pg_operator ON casttarget=oprleft
-  WHERE attrelid=tab_id AND attnum>0 AND castcontext='i' AND oprname='<'
+  WHERE
+    attrelid=tab_id
+    AND attnum>0
+    AND castcontext='i'
+    AND oprname='<'
+    -- This privilege check is redundant in context, but may be useful for other callers.
+    AND has_column_privilege(tab_id, attnum, 'SELECT')
   ORDER BY attnum
 )
 SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
@@ -3312,7 +3320,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_records_from_table(
+msar.list_records_from_table(
   tab_id oid,
   limit_ integer,
   offset_ integer,
