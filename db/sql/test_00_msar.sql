@@ -2794,3 +2794,34 @@ BEGIN
   RETURN NEXT ok(NOT jsonb_path_exists(msar.get_roles(), '$[*] ? (@.name == "foo")'));
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- msar.build_order_by_expr ------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_order_by_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE atable (id integer PRIMARY KEY, col1 integer, col2 varchar, col3 json, col4 jsonb);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_build_order_by_expr() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  order_by_expr text;
+BEGIN
+  PERFORM __setup_order_by_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(msar.build_order_by_expr(rel_id, null), 'ORDER BY "1" ASC');
+  RETURN NEXT is(
+    msar.build_order_by_expr(rel_id, '[{"attnum": 1, "direction": "desc"}]'),
+    'ORDER BY "1" DESC, "1" ASC'
+  );
+  RETURN NEXT is(
+    msar.build_order_by_expr(
+      rel_id, '[{"attnum": 3, "direction": "asc"}, {"attnum": 5, "direction": "DESC"}]'
+    ),
+    'ORDER BY "3" ASC, "5" DESC, "1" ASC'
+  );
+END;
+$$ LANGUAGE plpgsql;
