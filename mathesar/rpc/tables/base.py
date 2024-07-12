@@ -6,7 +6,7 @@ from typing import Optional, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.tables.operations.select import get_table_info, get_table
+from db.tables.operations.select import get_table_info, get_table, list_joinable_tables
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
 from db.tables.operations.alter import alter_table_on_database
@@ -14,7 +14,9 @@ from db.tables.operations.import_ import import_csv, get_preview
 from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.tables.metadata import TableMetaDataBlob
 from mathesar.rpc.utils import connect
+from mathesar.utils.tables import get_tables_meta_data
 
 
 class TableInfo(TypedDict):
@@ -52,6 +54,52 @@ class SettableTableInfo(TypedDict):
     name: Optional[str]
     description: Optional[str]
     columns: Optional[list[SettableColumnInfo]]
+
+
+class JoinableTableInfo(TypedDict):
+    """
+    Information about a joinable table.
+
+    Attributes:
+        base: The OID of the table from which the paths start
+        target: The OID of the table where the paths end.
+        join_path: A list describing joinable paths in the following form:
+            [
+              [[L_oid0, L_attnum0], [R_oid0, R_attnum0]],
+              [[L_oid1, L_attnum1], [R_oid1, R_attnum1]],
+              [[L_oid2, L_attnum2], [R_oid2, R_attnum2]],
+              ...
+            ]
+
+            Here, [L_oidN, L_attnumN] represents the left column of a join, and [R_oidN, R_attnumN] the right.
+        fkey_path: Same as `join_path` expressed in terms of foreign key constraints in the following form:
+            [
+                [constraint_id0, reversed],
+                [constraint_id1, reversed],
+            ]
+
+            In this form, `constraint_idN` is a foreign key constraint, and `reversed` is a boolean giving
+            whether to travel from referrer to referant (when False) or from referant to referrer (when True).
+        depth: Specifies how far to search for joinable tables.
+        multiple_results: Specifies whether the path included is reversed.
+    """
+    base: int
+    target: int
+    join_path: list
+    fkey_path: list
+    depth: int
+    multiple_results: bool
+
+    @classmethod
+    def from_dict(cls, joinables):
+        return cls(
+            base=joinables["base"],
+            target=joinables["target"],
+            join_path=joinables["join_path"],
+            fkey_path=joinables["fkey_path"],
+            depth=joinables["depth"],
+            multiple_results=joinables["multiple_results"]
+        )
 
 
 @rpc_method(name="tables.list")
@@ -231,3 +279,56 @@ def get_import_preview(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return get_preview(table_oid, columns, conn, limit)
+
+
+@rpc_method(name="tables.list_joinable")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def list_joinable(
+    *,
+    table_oid: int,
+    database_id: int,
+    max_depth: int = 3,
+    **kwargs
+) -> list[JoinableTableInfo]:
+    """
+    List details for joinable tables.
+
+    Args:
+        table_oid: Identity of the table to get joinable tables for.
+        database_id: The Django id of the database containing the table.
+        max_depth: Specifies how far to search for joinable tables.
+
+    Returns:
+        Joinable table details for a given table.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        joinables = list_joinable_tables(table_oid, conn, max_depth)
+        return [JoinableTableInfo.from_dict(joinable) for joinable in joinables]
+
+
+@rpc_method(name="tables.list_with_metadata")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def list_with_metadata(*, schema_oid: int, database_id: int, **kwargs) -> list:
+    """
+    List tables in a schema, along with the metadata associated with each table
+
+    Args:
+        schema_oid: PostgreSQL OID of the schema containing the tables.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        A list of table details.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        tables = get_table_info(schema_oid, conn)
+
+    metadata_records = get_tables_meta_data(database_id)
+    metadata_map = {
+        r.table_oid: TableMetaDataBlob.from_model(r) for r in metadata_records
+    }
+
+    return [table | {"metadata": metadata_map.get(table["oid"])} for table in tables]
