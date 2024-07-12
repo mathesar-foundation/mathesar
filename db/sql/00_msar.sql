@@ -3249,7 +3249,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_pkey_order(tab_id oid) RETURNS jsonb AS $$
-SELECT jsonb_agg(jsonb_build_object('field', f, 'direction', 'asc'))
+SELECT jsonb_agg(jsonb_build_object('attnum', f, 'direction', 'asc'))
 FROM pg_constraint, LATERAL unnest(conkey) f WHERE contype='p' AND conrelid=tab_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -3263,28 +3263,46 @@ WITH orderable_cte AS (
   WHERE attrelid=tab_id AND attnum>0 AND castcontext='i' AND oprname='<'
   ORDER BY attnum
 )
-SELECT COALESCE(jsonb_agg(jsonb_build_object('field', attnum, 'direction', 'asc')), '[]'::jsonb)
+SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
 FROM orderable_cte;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.build_order_by_expr(tab_id oid, order_ jsonb) RETURNS text AS $$/*
+Build an ORDER BY expression for the given table and order JSON.
+
+The ORDER BY expression will refer to columns by their attnum. This is designed to work together
+with `msar.build_selectable_column_expr`. It will only use the columns to which the user has access.
+Finally, this function will append either a primary key, or all columns to the produced ORDER BY so
+the resulting ordering is totally defined (i.e., deterministic).
+
+Args:
+  tab_id: The OID of the table whose columns we'll order by.
 */
-SELECT 'ORDER BY ' || string_agg(format('%I %s', field, msar.sanitize_direction(direction)), ', ')
+SELECT 'ORDER BY ' || string_agg(format('%I %s', attnum, msar.sanitize_direction(direction)), ', ')
 FROM jsonb_to_recordset(
     COALESCE(
       COALESCE(order_, '[]'::jsonb) || msar.get_pkey_order(tab_id),
       COALESCE(order_, '[]'::jsonb) || msar.get_total_order(tab_id)
     )
 )
-  AS x(field smallint, direction text)
-WHERE has_column_privilege(tab_id, field, 'SELECT');
+  AS x(attnum smallint, direction text)
+WHERE has_column_privilege(tab_id, attnum, 'SELECT');
 $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
 msar.build_selectable_column_expr(tab_id oid) RETURNS text AS $$/*
+Build an SQL select-target expression of only columns to which the user has access.
+
+Given columns with attnums 2, 3, and 4, and assuming the user has access only to columns 2 and 4,
+this function will return an expression of the form:
+
+column_name AS "2", another_column_name AS "4"
+
+Args:
+  tab_id: The OID of the table containing the columns to select.
 */
 SELECT string_agg(format('%I AS %I', attname, attnum), ', ')
 FROM pg_catalog.pg_attribute
@@ -3303,6 +3321,19 @@ msar.get_records_from_table(
   group_ jsonb,
   search_ jsonb
 ) RETURNS jsonb AS $$/*
+Get records from a table. Only columns to which the user has access are returned.
+
+Args:
+  tab_id: The OID of the table whose records we'll get
+  limit_: The maximum number of rows we'll return
+  offset_: The number of rows to skip before returning records from following rows.
+  order_: An array of ordering definition objects.
+  filter_: An array of filter definition objects.
+  group_: An array of group definition objects.
+  search_: An array of search definition objects.
+
+The order definition objects should have the form
+  {"attnum": <int>, "direction": <text>}
 */
 DECLARE
   records jsonb;
