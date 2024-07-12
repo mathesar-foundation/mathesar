@@ -88,8 +88,10 @@ To use an RPC function:
       - patch
       - import_
       - get_import_preview
+      - list_joinable
       - TableInfo
       - SettableTableInfo
+      - JoinableTableInfo
 
 ## Table Metadata
 
@@ -127,6 +129,14 @@ To use an RPC function:
       - patch
       - ColumnMetaData
       - SettableColumnMetaData
+
+## Types
+
+::: types
+    options:
+      members:
+      - list_
+      - TypeInfo
 
 ## Constraints
 
