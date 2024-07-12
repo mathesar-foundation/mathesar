@@ -107,6 +107,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        tables.list_with_metadata,
+        "tables.list_with_metadata",
+        [user_is_authenticated]
+    ),
+    (
         tables.get,
         "tables.get",
         [user_is_authenticated]
@@ -147,8 +152,8 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        tables.metadata.patch,
-        "tables.metadata.patch",
+        tables.metadata.set_,
+        "tables.metadata.set",
         [user_is_authenticated]
     )
 ]

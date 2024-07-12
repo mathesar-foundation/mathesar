@@ -14,7 +14,9 @@ from db.tables.operations.import_ import import_csv, get_preview
 from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.tables.metadata import TableMetaDataBlob
 from mathesar.rpc.utils import connect
+from mathesar.utils.tables import get_tables_meta_data
 
 
 class TableInfo(TypedDict):
@@ -288,7 +290,7 @@ def list_joinable(
     database_id: int,
     max_depth: int = 3,
     **kwargs
-) -> JoinableTableInfo:
+) -> list[JoinableTableInfo]:
     """
     List details for joinable tables.
 
@@ -304,3 +306,29 @@ def list_joinable(
     with connect(database_id, user) as conn:
         joinables = list_joinable_tables(table_oid, conn, max_depth)
         return [JoinableTableInfo.from_dict(joinable) for joinable in joinables]
+
+
+@rpc_method(name="tables.list_with_metadata")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def list_with_metadata(*, schema_oid: int, database_id: int, **kwargs) -> list:
+    """
+    List tables in a schema, along with the metadata associated with each table
+
+    Args:
+        schema_oid: PostgreSQL OID of the schema containing the tables.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        A list of table details.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        tables = get_table_info(schema_oid, conn)
+
+    metadata_records = get_tables_meta_data(database_id)
+    metadata_map = {
+        r.table_oid: TableMetaDataBlob.from_model(r) for r in metadata_records
+    }
+
+    return [table | {"metadata": metadata_map.get(table["oid"])} for table in tables]
