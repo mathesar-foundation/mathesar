@@ -90,7 +90,7 @@ def _setup_connection_models(
     database, _ = Database.objects.get_or_create(
         name=database_name, server=server
     )
-    role, _ = ConfiguredRole.objects.get_or_create(
+    configured_role, _ = ConfiguredRole.objects.get_or_create(
         name=role_name,
         server=server,
         defaults={"password": password},
@@ -98,7 +98,7 @@ def _setup_connection_models(
     return UserDatabaseRoleMap.objects.get_or_create(
         user=user,
         database=database,
-        role=role,
+        configured_role=configured_role,
         server=server
     )[0]
 
