@@ -61,7 +61,7 @@ class ConfiguredRole(BaseModel):
 class UserDatabaseRoleMap(BaseModel):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
-    role = models.ForeignKey('ConfiguredRole', on_delete=models.CASCADE)
+    configured_role = models.ForeignKey('ConfiguredRole', on_delete=models.CASCADE)
     server = models.ForeignKey('Server', on_delete=models.CASCADE)
 
     class Meta:
@@ -77,8 +77,8 @@ class UserDatabaseRoleMap(BaseModel):
             host=self.server.host,
             port=self.server.port,
             dbname=self.database.name,
-            user=self.role.name,
-            password=self.role.password,
+            user=self.configured_role.name,
+            password=self.configured_role.password,
         )
 
 

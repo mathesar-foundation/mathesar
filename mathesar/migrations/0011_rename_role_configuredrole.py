@@ -14,4 +14,9 @@ class Migration(migrations.Migration):
             old_name='Role',
             new_name='ConfiguredRole',
         ),
+        migrations.RenameField(
+            model_name='userdatabaserolemap',
+            old_name='role',
+            new_name='configured_role',
+        ),
     ]
