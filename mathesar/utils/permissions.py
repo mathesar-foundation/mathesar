@@ -95,12 +95,12 @@ def _setup_connection_models(
         server=server,
         defaults={"password": password},
     )
-    return UserDatabaseRoleMap.objects.create(
+    return UserDatabaseRoleMap.objects.get_or_create(
         user=user,
         database=database,
         role=role,
         server=server
-    )
+    )[0]
 
 
 def _load_sample_data(conn, sample_data):

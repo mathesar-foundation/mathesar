@@ -18,6 +18,7 @@ from mathesar.rpc import roles
 from mathesar.rpc import schemas
 from mathesar.rpc import servers
 from mathesar.rpc import tables
+from mathesar.rpc import types
 
 METHODS = [
     (
@@ -146,6 +147,12 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+
+        types.list_,
+        "types.list",
+        [user_is_authenticated]
+    ),
+    (
         tables.list_,
         "tables.list",
         [user_is_authenticated]
@@ -183,6 +190,11 @@ METHODS = [
     (
         tables.get_import_preview,
         "tables.get_import_preview",
+        [user_is_authenticated]
+    ),
+    (
+        tables.list_joinable,
+        "tables.list_joinable",
         [user_is_authenticated]
     ),
     (
