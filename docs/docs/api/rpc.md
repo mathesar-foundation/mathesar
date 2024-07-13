@@ -45,7 +45,24 @@ To use an RPC function:
       - add_from_known_connection
       - add_from_scratch
       - grant_access_to_user
-      - DBModelReturn
+      - ConnectionReturn
+
+## Databases
+
+::: databases
+    options:
+      members:
+      - list_
+      - DatabaseInfo
+
+## Database Setup
+
+::: database_setup
+    options:
+      members:
+      - create_new
+      - connect_existing
+      - DatabaseConnectionResult
 
 ## Schemas
 
