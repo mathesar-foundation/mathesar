@@ -34,8 +34,6 @@ export interface SchemaRole {
 export interface User extends Omit<UnsavedUser, 'password'> {
   readonly id: number;
   readonly is_superuser: boolean;
-  readonly database_roles: DatabaseRole[];
-  readonly schema_roles: SchemaRole[];
 }
 
 function list() {
@@ -74,38 +72,6 @@ function resetPassword(userId: User['id'], password: string) {
   });
 }
 
-function addDatabaseRole(
-  userId: User['id'],
-  databaseId: Database['id'],
-  role: UserRole,
-) {
-  return postAPI<DatabaseRole>('/api/ui/v0/database_roles/', {
-    user: userId,
-    database: databaseId,
-    role,
-  });
-}
-
-function deleteDatabaseRole(roleId: DatabaseRole['id']) {
-  return deleteAPI(`/api/ui/v0/database_roles/${roleId}/`);
-}
-
-function addSchemaRole(
-  userId: User['id'],
-  schemaId: SchemaEntry['id'],
-  role: UserRole,
-) {
-  return postAPI<SchemaRole>('/api/ui/v0/schema_roles/', {
-    user: userId,
-    schema: schemaId,
-    role,
-  });
-}
-
-function deleteSchemaRole(roleId: SchemaRole['id']) {
-  return deleteAPI(`/api/ui/v0/schema_roles/${roleId}/`);
-}
-
 export default {
   list,
   get,
@@ -114,8 +80,4 @@ export default {
   update,
   changePassword,
   resetPassword,
-  addDatabaseRole,
-  deleteDatabaseRole,
-  addSchemaRole,
-  deleteSchemaRole,
 };

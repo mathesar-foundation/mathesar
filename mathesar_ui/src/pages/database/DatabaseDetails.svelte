@@ -40,7 +40,6 @@
   } from '@mathesar-component-library';
 
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
-  import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaListSkeleton from './SchemaListSkeleton.svelte';
   import SchemaRow from './SchemaRow.svelte';
 
