@@ -3,7 +3,7 @@
 
   import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconEdit, iconManageAccess, iconSchema } from '@mathesar/icons';
+  import { iconEdit, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
@@ -24,7 +24,6 @@
   import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
 
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
-  import SchemaAccessControlModal from './SchemaAccessControlModal.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaTables from './SchemaTables.svelte';
@@ -42,13 +41,8 @@
   $: canEditMetadata =
     userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
     false;
-  $: canEditPermissions = userProfile?.hasPermission(
-    { database, schema },
-    'canEditPermissions',
-  );
 
   const addEditModal = modal.spawnModalController();
-  const accessControlModal = modal.spawnModalController();
 
   // NOTE: This has to be same as the name key in the paths prop of Route component
   type TabsKey = 'overview' | 'tables' | 'explorations';
@@ -92,10 +86,6 @@
 
   $: isDefault = schema.name === 'public';
 
-  function manageAccess() {
-    accessControlModal.open();
-  }
-
   logEvent('opened_schema', {
     database_name: database.nickname,
     schema_name: schema.name,
@@ -125,12 +115,6 @@
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
           <span>{$_('edit_schema')}</span>
-        </Button>
-      {/if}
-      {#if canEditPermissions}
-        <Button on:click={manageAccess} appearance="secondary">
-          <Icon {...iconManageAccess} />
-          <span>{$_('manage_access')}</span>
         </Button>
       {/if}
     </div>
@@ -191,7 +175,6 @@
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={addEditModal} {database} {schema} />
-<SchemaAccessControlModal controller={accessControlModal} {database} {schema} />
 
 <style lang="scss">
   .tab-container {

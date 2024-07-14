@@ -13,7 +13,6 @@
     iconDatabase,
     iconDeleteMajor,
     iconEdit,
-    iconManageAccess,
     iconMoreActions,
     iconRefresh,
   } from '@mathesar/icons';
@@ -46,7 +45,6 @@
   import SchemaRow from './SchemaRow.svelte';
 
   const addEditModal = modal.spawnModalController();
-  const accessControlModal = modal.spawnModalController();
   const editConnectionModal = modal.spawnModalController();
   const deleteConnectionModal = modal.spawnModalController();
 
@@ -106,10 +104,6 @@
     });
   }
 
-  function manageAccess() {
-    accessControlModal.open();
-  }
-
   function handleClearFilterQuery() {
     filterQuery = '';
   }
@@ -137,12 +131,6 @@
   <svelte:fragment slot="action">
     {#if canExecuteDDL || canEditPermissions}
       <div>
-        {#if canEditPermissions}
-          <Button on:click={manageAccess} appearance="secondary">
-            <Icon {...iconManageAccess} />
-            <span>{$_('manage_access')}</span>
-          </Button>
-        {/if}
         <DropdownMenu
           showArrow={false}
           triggerAppearance="plain"
@@ -253,8 +241,6 @@
   {database}
   schema={targetSchema}
 />
-
-<DbAccessControlModal controller={accessControlModal} {database} />
 
 <EditConnectionModal controller={editConnectionModal} connection={database} />
 <DeleteConnectionModal
