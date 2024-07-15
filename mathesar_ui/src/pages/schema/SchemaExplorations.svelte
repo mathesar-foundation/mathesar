@@ -16,8 +16,7 @@
   export let explorationsMap: Map<number, QueryInstance>;
   export let hasTablesToExplore: boolean;
 
-  $: showTutorial =
-    explorationsMap.size === 0 && hasTablesToExplore;
+  $: showTutorial = explorationsMap.size === 0 && hasTablesToExplore;
 
   let explorationsSearchQuery = '';
 

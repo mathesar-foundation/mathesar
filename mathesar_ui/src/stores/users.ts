@@ -3,12 +3,8 @@
 import { getContext, setContext } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
-import userApi, {
-  type UnsavedUser,
-  type User,
-} from '@mathesar/api/rest/users';
+import userApi, { type UnsavedUser, type User } from '@mathesar/api/rest/users';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
