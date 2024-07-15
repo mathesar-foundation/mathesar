@@ -14,7 +14,7 @@ class ConfiguredRoleInfo(TypedDict):
     Attributes:
         id: the Django ID of the ConfiguredRole model instance.
         name: The name of the role.
-        server: The Django ID of the Server model instance for the role.
+        server_id: The Django ID of the Server model instance for the role.
     """
     id: int
     name: str
@@ -64,6 +64,9 @@ def add(
         server_id: The Django id of the Server to contain the configured role.
         name: The name of the role.
         password: The password for the role.
+
+    Returns:
+        The newly configured role.
     """
     server = Server.objects.get(id=server_id)
     configured_role = ConfiguredRole.objects.create(
