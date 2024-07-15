@@ -3208,7 +3208,7 @@ BEGIN
     -- %1$s  This is a comma separated string of the extracted column names
     string_agg(quote_ident(col_def ->> 'name'), ', '),
     -- %2$s  This is the name of the original (remainder) table
-    -- __msar.get_qualified_relation_name(tab_id),
+    __msar.get_qualified_relation_name(tab_id),
     -- %3$s  This is the new extracted table name
     __msar.get_qualified_relation_name(extracted_table_id),
     -- %4$I  This is the name of the fkey column in the remainder table.
