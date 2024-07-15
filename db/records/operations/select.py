@@ -1,12 +1,56 @@
+import json
 from sqlalchemy import select
 from sqlalchemy.sql.functions import count
 
+from db import connection as db_conn
 from db.columns.base import MathesarColumn
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.types.operations.convert import get_db_type_enum_from_id
 from db.utils import execute_pg_query
 from db.transforms.operations.apply import apply_transformations_deprecated
+
+
+def list_records_from_table(
+        conn,
+        table_oid,
+        limit=None,
+        offset=None,
+        order=None,
+        filter=None,
+        group=None,
+        search=None,
+):
+    """
+    Get records from a table.
+
+    The order definition objects should have the form
+    {"attnum": <int>, "direction": <text>}
+
+    Only data from which the user is granted `SELECT` is returned.
+
+    Args:
+        tab_id: The OID of the table whose records we'll get.
+        limit: The maximum number of rows we'll return.
+        offset: The number of rows to skip before returning records from
+                 following rows.
+        order: An array of ordering definition objects.
+        filter: An array of filter definition objects.
+        group: An array of group definition objects.
+        search: An array of search definition objects.
+    """
+    result = db_conn.exec_msar_func(
+        conn,
+        'list_records_from_table',
+        table_oid,
+        limit,
+        offset,
+        json.dumps(order) if order is not None else None,
+        json.dumps(filter) if filter is not None else None,
+        json.dumps(group) if group is not None else None,
+        json.dumps(search) if search is not None else None,
+    ).fetchone()[0]
+    return result
 
 
 def get_record(table, engine, id_value):
