@@ -22,7 +22,6 @@
 
   export let database: Database;
   export let schema: SchemaEntry;
-  export let canExecuteDDL = true;
 
   let isHovered = false;
   let isFocused = false;
@@ -43,7 +42,7 @@
 
     {#if isLocked}
       <div class="lock"><Icon {...iconNotEditable} /></div>
-    {:else if canExecuteDDL}
+    {:else}
       <div class="menu-trigger">
         <DropdownMenu
           showArrow={false}

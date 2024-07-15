@@ -38,7 +38,6 @@
   export let table: TableEntry;
   export let database: Database;
   export let schema: SchemaEntry;
-  export let canExecuteDDL: boolean;
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
@@ -141,21 +140,17 @@
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           {$_('explore_table')}
         </LinkMenuItem>
-        {#if canExecuteDDL}
-          <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-            {$_('edit_table')}
-          </ButtonMenuItem>
-        {/if}
-      {/if}
-      {#if canExecuteDDL}
-        <ButtonMenuItem
-          on:click={handleDeleteTable}
-          danger
-          icon={iconDeleteMajor}
-        >
-          {$_('delete_table')}
+        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+          {$_('edit_table')}
         </ButtonMenuItem>
       {/if}
+      <ButtonMenuItem
+        on:click={handleDeleteTable}
+        danger
+        icon={iconDeleteMajor}
+      >
+        {$_('delete_table')}
+      </ButtonMenuItem>
     </DropdownMenu>
   </div>
   {#if !isTableImportConfirmationNeeded}

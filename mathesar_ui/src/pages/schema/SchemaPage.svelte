@@ -13,11 +13,7 @@
   } from '@mathesar/routes/urls';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
-  import {
-    importVerifiedTables as importVerifiedTablesStore,
-    tables as tablesStore,
-  } from '@mathesar/stores/tables';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { tables as tablesStore } from '@mathesar/stores/tables';
   import { logEvent } from '@mathesar/utils/telemetry';
   import { Button, Icon, TabContainer } from '@mathesar-component-library';
 
@@ -33,15 +29,6 @@
   export let schema: SchemaEntry;
   export let section: string;
 
-  const userProfileStore = getUserProfileStoreFromContext();
-  $: userProfile = $userProfileStore;
-
-  $: canExecuteDDL =
-    userProfile?.hasPermission({ database, schema }, 'canExecuteDDL') ?? false;
-  $: canEditMetadata =
-    userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
-    false;
-
   const addEditModal = modal.spawnModalController();
 
   // NOTE: This has to be same as the name key in the paths prop of Route component
@@ -53,7 +40,7 @@
     href: string;
   };
 
-  $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
+  $: tablesMap = $tablesStore.data;
   $: explorationsMap = $queries.data;
   $: tablesRequestStatus = $tablesStore.requestStatus;
   $: explorationsRequestStatus = $queries.requestStatus;
@@ -111,7 +98,7 @@
     }}
   >
     <div slot="action">
-      {#if !isDefault && canExecuteDDL}
+      {#if !isDefault}
         <Button on:click={handleEditSchema} appearance="secondary">
           <Icon {...iconEdit} />
           <span>{$_('edit_schema')}</span>
@@ -138,8 +125,6 @@
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
         <SchemaOverview
-          {canExecuteDDL}
-          {canEditMetadata}
           {tablesRequestStatus}
           {tablesMap}
           {explorationsMap}
@@ -153,7 +138,7 @@
         {#if tablesRequestStatus.state === 'processing'}
           <TableSkeleton numTables={schema.num_tables} />
         {:else}
-          <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
+          <SchemaTables {tablesMap} {database} {schema} />
         {/if}
       </div>
     {:else if activeTab?.id === 'explorations'}
@@ -162,7 +147,6 @@
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations
-            {canEditMetadata}
             hasTablesToExplore={!!tablesMap.size}
             {explorationsMap}
             {database}

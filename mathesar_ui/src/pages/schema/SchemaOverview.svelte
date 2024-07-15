@@ -27,16 +27,13 @@
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
 
-  export let canExecuteDDL: boolean;
-  export let canEditMetadata: boolean;
-
   export let database: Database;
   export let schema: SchemaEntry;
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
-  $: showTableCreationTutorial = !hasTables && canExecuteDDL;
-  $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
+  $: showTableCreationTutorial = !hasTables;
+  $: showExplorationTutorial = hasTables && !hasExplorations;
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
 
   // Viewers can explore, they cannot save explorations
@@ -47,9 +44,7 @@
   <div class="vertical-container tables">
     <OverviewHeader title={$_('tables')}>
       <svelte:fragment slot="action">
-        {#if canExecuteDDL}
-          <CreateNewTableButton {database} {schema} />
-        {/if}
+        <CreateNewTableButton {database} {schema} />
       </svelte:fragment>
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
@@ -75,12 +70,7 @@
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList
-        {canExecuteDDL}
-        tables={[...tablesMap.values()]}
-        {database}
-        {schema}
-      />
+      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {/if}
   </div>
   <div class="vertical-container explorations">

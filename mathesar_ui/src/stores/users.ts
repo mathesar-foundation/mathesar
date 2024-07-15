@@ -34,19 +34,6 @@ export class UserModel {
     this.displayLanguage = userDetails.display_language;
   }
 
-  hasPermission(
-    dbObject: {
-      database?: Pick<Database, 'id'>;
-      schema?: Pick<SchemaEntry, 'id'>;
-    },
-    operation: unknown,
-  ): boolean {
-    if (this.isSuperUser) {
-      return true;
-    }
-    return true;
-  }
-
   getDisplayName(): string {
     return this.username;
   }
@@ -80,10 +67,6 @@ export class AnonymousViewerUserModel extends UserModel {
       email: null,
       display_language: 'en',
     });
-  }
-
-  hasPermission() {
-    return false;
   }
 }
 

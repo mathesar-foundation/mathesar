@@ -22,7 +22,6 @@
   export let selectedRowIds: ImmutableSet<string>;
   export let recordsData: RecordsData;
   export let columnsDataStore: ColumnsDataStore;
-  export let canEditTableRecords: boolean;
 
   $: selectedRowCount = selectedRowIds.size;
   $: ({ columns } = columnsDataStore);
@@ -39,8 +38,6 @@
       return undefined;
     }
   })();
-  $: showDeleteRecordButton = canEditTableRecords;
-  $: showNullStateText = !showDeleteRecordButton && !recordPageLink;
 
   async function handleDeleteRecords() {
     void confirmDelete({
@@ -78,19 +75,12 @@
       </div>
     </AnchorButton>
   {/if}
-  {#if showDeleteRecordButton}
-    <Button on:click={handleDeleteRecords}>
-      <Icon {...iconDeleteMajor} />
-      <span>
-        {$_('delete_records', { values: { count: selectedRowCount } })}
-      </span>
-    </Button>
-  {/if}
-  {#if showNullStateText}
-    <span class="null-text">
-      {$_('no_actions_selected_record')}
+  <Button on:click={handleDeleteRecords}>
+    <Icon {...iconDeleteMajor} />
+    <span>
+      {$_('delete_records', { values: { count: selectedRowCount } })}
     </span>
-  {/if}
+  </Button>
 </div>
 
 <style lang="scss">
@@ -108,9 +98,5 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-
-  .null-text {
-    color: var(--color-text-muted);
   }
 </style>

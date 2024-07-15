@@ -46,10 +46,6 @@
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
-  $: canExecuteDDL = $userProfile?.hasPermission(
-    { database, schema },
-    'canExecuteDDL',
-  );
   $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
   $: isNormalRoutingContext = commonData.routing_context === 'normal';
 
@@ -84,17 +80,15 @@
             <span class="icon"><Icon {...iconShortcuts} /></span>
             <span class="text">{$_('shortcuts')}</span>
           </span>
-          {#if canExecuteDDL}
-            <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
-              {$_('new_table_from_scratch')}
-            </ButtonMenuItem>
-            <LinkMenuItem
-              icon={iconAddNew}
-              href={getImportPageUrl(database.id, schema.id)}
-            >
-              {$_('new_table_from_data_import')}
-            </LinkMenuItem>
-          {/if}
+          <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
+            {$_('new_table_from_scratch')}
+          </ButtonMenuItem>
+          <LinkMenuItem
+            icon={iconAddNew}
+            href={getImportPageUrl(database.id, schema.id)}
+          >
+            {$_('new_table_from_data_import')}
+          </LinkMenuItem>
           <LinkMenuItem
             icon={iconExploration}
             href={getDataExplorerPageUrl(database.id, schema.id)}

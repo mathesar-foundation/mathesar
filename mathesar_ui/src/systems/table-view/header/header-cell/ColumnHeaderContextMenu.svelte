@@ -16,25 +16,17 @@
     iconTable,
   } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
-
-  const userProfile = getUserProfileStoreFromContext();
 
   export let processedColumn: ProcessedColumn;
 
-  $: canViewLinkedEntities = !!$userProfile?.hasPermission(
-    { database: $currentDatabase, schema: $currentSchema },
-    'canViewLinkedEntities',
-  );
+  const canViewLinkedEntities = true;
 
   $: columnAllowsFiltering = processedColumn.linkFk
     ? canViewLinkedEntities
