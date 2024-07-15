@@ -34,6 +34,10 @@ class RecordListReturn(TypedDict):
     count: int
     results: list[dict]
 
+    @classmethod
+    def from_dict(cls, d):
+        return cls(count=d["count"], results=d["results"])
+
 
 @rpc_method(name="records.list")
 @http_basic_auth_login_required
@@ -72,4 +76,4 @@ def list_(
             group=group,
             search=search,
         )
-    return RecordListReturn(count=record_info["count"], results=record_info["results"])
+    return RecordListReturn.from_dict(record_info)
