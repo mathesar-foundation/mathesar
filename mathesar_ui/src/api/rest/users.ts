@@ -1,4 +1,3 @@
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 import type { Language } from '@mathesar/i18n/languages/utils';
 
 import {
@@ -15,20 +14,6 @@ export interface UnsavedUser {
   username: string;
   password: string;
   display_language: Language;
-}
-
-export type UserRole = 'viewer' | 'editor' | 'manager';
-
-export interface DatabaseRole {
-  id: number;
-  database: Database['id'];
-  role: UserRole;
-}
-
-export interface SchemaRole {
-  id: number;
-  schema: SchemaEntry['id'];
-  role: UserRole;
 }
 
 export interface User extends Omit<UnsavedUser, 'password'> {
