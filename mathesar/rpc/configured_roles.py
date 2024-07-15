@@ -52,7 +52,7 @@ def list_(*, server_id: int, **kwargs) -> list[ConfiguredRoleInfo]:
 @handle_rpc_exceptions
 def add(
         *,
-        server_id: str,
+        server_id: int,
         name: str,
         password: str,
         **kwargs
