@@ -37,6 +37,17 @@ To use an RPC function:
     }
     ```
 
+## Collaborators
+
+::: collaborators
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_role
+      - CollaboratorInfo
+
 ## Connections
 
 ::: connections
@@ -160,6 +171,14 @@ To use an RPC function:
       - list_
       - RoleInfo
       - RoleMember
+
+## Servers
+
+::: servers
+    options:
+      members:
+      - list_
+      - ServerInfo
 
 ## Responses
 
