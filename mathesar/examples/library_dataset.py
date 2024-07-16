@@ -1,29 +1,27 @@
 """This module contains functions to load the Library Management dataset."""
 
-from sqlalchemy import text
+from psycopg import sql
 from mathesar.examples.base import LIBRARY_MANAGEMENT, LIBRARY_ONE, LIBRARY_TWO
 
 
-def load_library_dataset(engine, safe_mode=False):
+def load_library_dataset(conn):
     """
     Load the library dataset into a "Library Management" schema.
 
     Args:
-        engine: an SQLAlchemy engine defining the connection to load data into.
-        safe_mode: When True, we will throw an error if the "Library Management"
-                   schema already exists instead of dropping it.
+        conn: a psycopg (3) connection for loading the data.
 
-    Uses given engine to define database to load into.
-    Destructive, and will knock out any previous "Library Management"
-    schema in the given database, unless safe_mode=True.
+    Uses given connection to define database to load into. Raises an
+    Exception if the "Library Management" schema already exists.
     """
-    drop_schema_query = text(f"""DROP SCHEMA IF EXISTS "{LIBRARY_MANAGEMENT}" CASCADE;""")
-    create_schema_query = text(f"""CREATE SCHEMA "{LIBRARY_MANAGEMENT}";""")
-    set_search_path = text(f"""SET search_path="{LIBRARY_MANAGEMENT}";""")
-    with engine.begin() as conn, open(LIBRARY_ONE) as f1, open(LIBRARY_TWO) as f2:
-        if safe_mode is False:
-            conn.execute(drop_schema_query)
+    create_schema_query = sql.SQL("CREATE SCHEMA {}").format(
+        sql.Identifier(LIBRARY_MANAGEMENT)
+    )
+    set_search_path = sql.SQL("SET search_path={}").format(
+        sql.Identifier(LIBRARY_MANAGEMENT)
+    )
+    with open(LIBRARY_ONE) as f1, open(LIBRARY_TWO) as f2:
         conn.execute(create_schema_query)
         conn.execute(set_search_path)
-        conn.execute(text(f1.read()))
-        conn.execute(text(f2.read()))
+        conn.execute(f1.read())
+        conn.execute(f2.read())

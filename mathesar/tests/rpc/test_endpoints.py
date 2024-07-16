@@ -8,14 +8,39 @@ Fixtures:
 import pytest
 from modernrpc.auth import user_is_authenticated, user_is_superuser
 
+from mathesar.rpc import collaborators
 from mathesar.rpc import columns
 from mathesar.rpc import connections
 from mathesar.rpc import constraints
+from mathesar.rpc import database_setup
+from mathesar.rpc import databases
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
+from mathesar.rpc import servers
 from mathesar.rpc import tables
+from mathesar.rpc import types
 
 METHODS = [
+    (
+        collaborators.add,
+        "collaborators.add",
+        [user_is_superuser]
+    ),
+    (
+        collaborators.delete,
+        "collaborators.delete",
+        [user_is_superuser]
+    ),
+    (
+        collaborators.list_,
+        "collaborators.list",
+        [user_is_authenticated]
+    ),
+    (
+        collaborators.set_role,
+        "collaborators.set_role",
+        [user_is_superuser]
+    ),
     (
         columns.delete,
         "columns.delete",
@@ -77,6 +102,21 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        database_setup.create_new,
+        "database_setup.create_new",
+        [user_is_superuser]
+    ),
+    (
+        database_setup.connect_existing,
+        "database_setup.connect_existing",
+        [user_is_superuser]
+    ),
+    (
+        databases.list_,
+        "databases.list",
+        [user_is_authenticated]
+    ),
+    (
         roles.list_,
         "roles.list",
         [user_is_authenticated]
@@ -99,6 +139,17 @@ METHODS = [
     (
         schemas.patch,
         "schemas.patch",
+        [user_is_authenticated]
+    ),
+    (
+        servers.list_,
+        "servers.list",
+        [user_is_authenticated]
+    ),
+    (
+
+        types.list_,
+        "types.list",
         [user_is_authenticated]
     ),
     (
@@ -139,6 +190,11 @@ METHODS = [
     (
         tables.get_import_preview,
         "tables.get_import_preview",
+        [user_is_authenticated]
+    ),
+    (
+        tables.list_joinable,
+        "tables.list_joinable",
         [user_is_authenticated]
     ),
     (

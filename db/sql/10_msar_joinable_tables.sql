@@ -29,7 +29,8 @@ whether to travel from referrer to referant (when False) or from referant to ref
 */
 
 
-CREATE TYPE mathesar_types.joinable_tables AS (
+DROP TYPE IF EXISTS msar.joinable_tables CASCADE;
+CREATE TYPE msar.joinable_tables AS (
   base integer, -- The OID of the table from which the paths start
   target integer, -- The OID of the table where the paths end
   join_path jsonb, -- A JSONB array of arrays of arrays
@@ -40,8 +41,8 @@ CREATE TYPE mathesar_types.joinable_tables AS (
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_joinable_tables(max_depth integer) RETURNS SETOF mathesar_types.joinable_tables AS $$/*
-This function returns a table of mathesar_types.joinable_tables objects, giving paths to various
+msar.get_joinable_tables(max_depth integer) RETURNS SETOF msar.joinable_tables AS $$/*
+This function returns a table of msar.joinable_tables objects, giving paths to various
 joinable tables.
 
 Args:
@@ -53,9 +54,9 @@ restrictions in either way.
 */
 WITH RECURSIVE symmetric_fkeys AS (
   SELECT
-    c.oid fkey_oid,
-    c.conrelid::INTEGER left_rel,
-    c.confrelid::INTEGER right_rel,
+    c.oid::BIGINT fkey_oid,
+    c.conrelid::BIGINT left_rel,
+    c.confrelid::BIGINT right_rel,
     c.conkey[1]::INTEGER left_col,
     c.confkey[1]::INTEGER right_col,
     false multiple_results,
@@ -64,9 +65,9 @@ WITH RECURSIVE symmetric_fkeys AS (
   WHERE c.contype='f' and array_length(c.conkey, 1)=1
 UNION ALL
   SELECT
-    c.oid fkey_oid,
-    c.confrelid::INTEGER left_rel,
-    c.conrelid::INTEGER right_rel,
+    c.oid::BIGINT fkey_oid,
+    c.confrelid::BIGINT left_rel,
+    c.conrelid::BIGINT right_rel,
     c.confkey[1]::INTEGER left_col,
     c.conkey[1]::INTEGER right_col,
     true multiple_results,
@@ -132,6 +133,6 @@ $$ LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION
 msar.get_joinable_tables(max_depth integer, table_id oid) RETURNS
-  SETOF mathesar_types.joinable_tables AS $$
+  SETOF msar.joinable_tables AS $$
   SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id
 $$ LANGUAGE sql;

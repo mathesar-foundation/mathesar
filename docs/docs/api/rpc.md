@@ -37,6 +37,17 @@ To use an RPC function:
     }
     ```
 
+## Collaborators
+
+::: collaborators
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_role
+      - CollaboratorInfo
+
 ## Connections
 
 ::: connections
@@ -45,7 +56,24 @@ To use an RPC function:
       - add_from_known_connection
       - add_from_scratch
       - grant_access_to_user
-      - DBModelReturn
+      - ConnectionReturn
+
+## Databases
+
+::: databases
+    options:
+      members:
+      - list_
+      - DatabaseInfo
+
+## Database Setup
+
+::: database_setup
+    options:
+      members:
+      - create_new
+      - connect_existing
+      - DatabaseConnectionResult
 
 ## Schemas
 
@@ -71,8 +99,10 @@ To use an RPC function:
       - patch
       - import_
       - get_import_preview
+      - list_joinable
       - TableInfo
       - SettableTableInfo
+      - JoinableTableInfo
 
 ## Table Metadata
 
@@ -111,6 +141,14 @@ To use an RPC function:
       - ColumnMetaData
       - SettableColumnMetaData
 
+## Types
+
+::: types
+    options:
+      members:
+      - list_
+      - TypeInfo
+
 ## Constraints
 
 ::: constraints
@@ -133,6 +171,14 @@ To use an RPC function:
       - list_
       - RoleInfo
       - RoleMember
+
+## Servers
+
+::: servers
+    options:
+      members:
+      - list_
+      - ServerInfo
 
 ## Responses
 

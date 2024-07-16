@@ -65,14 +65,19 @@ MIDDLEWARE = [
 ROOT_URLCONF = "config.urls"
 
 MODERNRPC_METHODS_MODULES = [
+    'mathesar.rpc.collaborators',
     'mathesar.rpc.connections',
     'mathesar.rpc.constraints',
     'mathesar.rpc.columns',
     'mathesar.rpc.columns.metadata',
+    'mathesar.rpc.database_setup',
+    'mathesar.rpc.databases',
     'mathesar.rpc.roles',
     'mathesar.rpc.schemas',
+    'mathesar.rpc.servers',
     'mathesar.rpc.tables',
-    'mathesar.rpc.tables.metadata'
+    'mathesar.rpc.tables.metadata',
+    'mathesar.rpc.types'
 ]
 
 TEMPLATES = [
