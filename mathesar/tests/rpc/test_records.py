@@ -38,7 +38,7 @@ def test_records_list(rf, monkeypatch):
             filter=None,
             group=None,
             search=None,
-        ):
+    ):
         if _table_oid != table_oid:
             raise AssertionError('incorrect parameters passed')
         return {
@@ -50,7 +50,9 @@ def test_records_list(rf, monkeypatch):
     monkeypatch.setattr(records, 'list_records_from_table', mock_list_records)
     expect_records_list = {
         "count": 50123,
-        "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}]
+        "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
+        "group": None,
+        "preview_data": []
     }
     actual_records_list = records.list_(
         table_oid=table_oid, database_id=database_id, request=request

@@ -33,10 +33,17 @@ class RecordListReturn(TypedDict):
     """
     count: int
     results: list[dict]
+    group: dict
+    preview_data: list[dict]
 
     @classmethod
     def from_dict(cls, d):
-        return cls(count=d["count"], results=d["results"])
+        return cls(
+            count=d["count"],
+            results=d["results"],
+            group=None,
+            preview_data=[],
+        )
 
 
 @rpc_method(name="records.list")
