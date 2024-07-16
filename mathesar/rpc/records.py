@@ -31,7 +31,7 @@ class RecordList(TypedDict):
     underlying records being listed. The keys of each object are the
     attnums of the retrieved columns. The values are the value for the
     given row, for the given column.
-   
+
     Attributes:
         count: The total number of records in the table.
         results: An array of record objects.
