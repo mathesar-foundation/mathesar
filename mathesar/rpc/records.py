@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table records.
 """
-from typing import TypedDict
+from typing import TypedDict, Literal
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -11,25 +11,32 @@ from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
 
-class RecordListReturn(TypedDict):
+class OrderBy(TypedDict):
+    """
+    An object defining an `ORDER BY` clause.
+
+    Attributes:
+        attnum: The attnum of the column to order by.
+        direction: The direction to order by.
+    """
+    attnum: int
+    direction: Literal["asc", "desc"]
+
+
+class RecordList(TypedDict):
     """
     Records from a table, along with some meta data
 
     The form of the objects in the `results` array is determined by the
     underlying records being listed. The keys of each object are the
     attnums of the retrieved columns. The values are the value for the
-    given row, for the given column. The general form is:
-
-    [
-        {"<attnum1>": <val1,1>, "<attnum2>": <val1,2>, "<attnum3>": <val1,3>, ...},
-        {"<attnum1>": <val2,1>, "<attnum2>": <val2,2>, "<attnum3>": <val2,3>, ...},
-        {"<attnum1>": <val3,1>, "<attnum2>": <val3,2>, "<attnum3>": <val3,3>, ...},
-        ...
-    ]
-
+    given row, for the given column.
+   
     Attributes:
         count: The total number of records in the table.
         results: An array of record objects.
+        group: Information for displaying the records grouped in some way.
+        preview_data: Information for previewing foreign key values.
     """
     count: int
     results: list[dict]
@@ -55,7 +62,7 @@ def list_(
         database_id: int,
         limit: int = None,
         offset: int = None,
-        order: list[dict] = None,
+        order: list[OrderBy] = None,
         filter: list[dict] = None,
         group: list[dict] = None,
         search: list[dict] = None,
@@ -67,6 +74,13 @@ def list_(
     Args:
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
+        limit: The maximum number of rows we'll return.
+        offset: The number of rows to skip before returning records from
+                 following rows.
+        order: An array of ordering definition objects.
+        filter: An array of filter definition objects.
+        group: An array of group definition objects.
+        search: An array of search definition objects.
 
     Returns:
         The requested records, along with some metadata.
@@ -83,4 +97,4 @@ def list_(
             group=group,
             search=search,
         )
-    return RecordListReturn.from_dict(record_info)
+    return RecordList.from_dict(record_info)
