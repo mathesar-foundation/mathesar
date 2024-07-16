@@ -152,6 +152,15 @@ To use an RPC function:
       - UniqueConstraint
       - CreatableConstraintInfo
 
+## Explorations
+
+::: explorations
+    options:
+      members:
+      - list_
+      - delete
+      - ExplorationInfo
+
 ## Roles
 
 ::: roles

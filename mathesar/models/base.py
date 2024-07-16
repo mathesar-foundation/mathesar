@@ -142,10 +142,10 @@ class TableMetaData(BaseModel):
 
 class Explorations(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
-    base_table_oid = models.PositiveBigIntegerField()
     name = models.CharField(max_length=128, unique=True)
-    description = models.CharField(null=True)
+    base_table_oid = models.PositiveBigIntegerField()
     initial_columns = models.JSONField()
     transformations = models.JSONField(null=True)
     display_options = models.JSONField(null=True)
     display_names = models.JSONField(null=False)
+    description = models.CharField(null=True)
