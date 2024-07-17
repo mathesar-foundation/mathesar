@@ -2796,6 +2796,58 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- msar.format_data --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_format_data() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(msar.format_data('3 Jan, 2021'::date), '2021-01-03 AD');
+  RETURN NEXT is(msar.format_data('3 Jan, 23 BC'::date), '0023-01-03 BC');
+  RETURN NEXT is(msar.format_data('1 day'::interval), 'P0Y0M1DT0H0M0S');
+  RETURN NEXT is(
+    msar.format_data('1 year 2 months 3 days 4 hours 5 minutes 6 seconds'::interval),
+    'P1Y2M3DT4H5M6S'
+  );
+  RETURN NEXT is(msar.format_data('1 day 3 hours ago'::interval), 'P0Y0M-1DT-3H0M0S');
+  RETURN NEXT is(msar.format_data('1 day -3 hours'::interval), 'P0Y0M1DT-3H0M0S');
+  RETURN NEXT is(
+    msar.format_data('1 year -1 month 3 days 14 hours -10 minutes 30.4 seconds'::interval),
+    'P0Y11M3DT13H50M30.4S'
+  );
+  RETURN NEXT is(
+    msar.format_data('1 year -1 month 3 days 14 hours -10 minutes 30.4 seconds ago'::interval),
+    'P0Y-11M-3DT-13H-50M-30.4S'
+  );
+  RETURN NEXT is(msar.format_data('45 hours 70 seconds'::interval), 'P0Y0M0DT45H1M10S');
+  RETURN NEXT is(
+    msar.format_data('5 decades 22 years 14 months 1 week 3 days'::interval),
+    'P73Y2M10DT0H0M0S'
+  );
+  RETURN NEXT is(msar.format_data('1 century'::interval), 'P100Y0M0DT0H0M0S');
+  RETURN NEXT is(msar.format_data('2 millennia'::interval), 'P2000Y0M0DT0H0M0S');
+  RETURN NEXT is(msar.format_data('12:30:45+05:30'::time with time zone), '12:30:45.0+05:30');
+  RETURN NEXT is(msar.format_data('12:30:45'::time with time zone), '12:30:45.0Z');
+  RETURN NEXT is(
+    msar.format_data('12:30:45.123456-08'::time with time zone), '12:30:45.123456-08:00'
+  );
+  RETURN NEXT is(msar.format_data('12:30'::time without time zone), '12:30:00.0');
+  RETURN NEXT is(
+    msar.format_data('30 July, 2000 19:15:03.65'::timestamp with time zone),
+    '2000-07-30T19:15:03.65Z AD'
+  );
+  RETURN NEXT is(
+    msar.format_data('10000-01-01 00:00:00'::timestamp with time zone),
+    '10000-01-01T00:00:00.0Z AD'
+  );
+  RETURN NEXT is(
+    msar.format_data('3 March, 25 BC, 17:30:15+01'::timestamp with time zone),
+    '0025-03-03T16:30:15.0Z BC'
+  );
+  RETURN NEXT is(
+    msar.format_data('17654-03-02 01:00:00'::timestamp without time zone),
+    '17654-03-02T01:00:00.0 AD'
+  );
+END;
+$$ LANGUAGE plpgsql;
 
 -- msar.list_records_from_table --------------------------------------------------------------------
 
