@@ -3379,24 +3379,6 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_column_expr_template(typ_id oid) RETURNS text AS $$/*
-*/
-SELECT CASE typ_id
-  WHEN 1082 THEN  -- date
-    'to_char(%1$I, ''YYYY-MM-DD AD'') AS %2$I'
-  WHEN 1083 THEN  -- time without time zone
-    'to_char(%1$I, ''HH24:MI'') || '':''
-    || to_char(date_part(''seconds'', %1$I), ''FM00.0999999999'')'
-  WHEN 1186 THEN  -- ISO 8601 formatting for intervals
-    'to_char(%1$I, ''PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'')
-    || date_part(''seconds'', %1$I)::text || ''S'' AS %2$I'
-  ELSE
-    '%1$I AS %2$I'
-  END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.build_selectable_column_expr(tab_id oid) RETURNS text AS $$/*
 Build an SQL select-target expression of only columns to which the user has access.
 
