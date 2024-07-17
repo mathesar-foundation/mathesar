@@ -3238,6 +3238,76 @@ $f$ LANGUAGE plpgsql;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+-- Data type formatting functions
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val date) RETURNS text AS $$
+SELECT to_char(val, 'YYYY-MM-DD AD');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val time without time zone) RETURNS text AS $$
+SELECT concat(to_char(val, 'HH24:MI'), ':', to_char(date_part('seconds', val), 'FM00.0999999999'));
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val time with time zone) RETURNS text AS $$
+SELECT CASE
+  WHEN date_part('timezone_hour', val) = 0 AND date_part('timezone_minute', val) = 0
+    THEN concat(
+      to_char(date_part('hour', val), 'FM00'), ':', to_char(date_part('minute', val), 'FM00'),
+      ':', to_char(date_part('seconds', val), 'FM00.0999999999'), 'Z'
+    )
+  ELSE
+    concat(
+      to_char(date_part('hour', val), 'FM00'), ':', to_char(date_part('minute', val), 'FM00'),
+      ':', to_char(date_part('seconds', val), 'FM00.0999999999'),
+      to_char(date_part('timezone_hour', val), 'S00'), ':',
+      ltrim(to_char(date_part('timezone_minute', val), '00'), '+- ')
+    )
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val timestamp without time zone) RETURNS text AS $$
+SELECT
+  concat(
+    to_char(val, 'YYYY-MM-DD"T"HH24:MI'),
+    ':', to_char(date_part('seconds', val), 'FM00.0999999999'),
+    to_char(val, ' BC')
+  );
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val timestamp with time zone) RETURNS text AS $$
+SELECT CASE
+  WHEN date_part('timezone_hour', val) = 0 AND date_part('timezone_minute', val) = 0
+    THEN concat(
+      to_char(val, 'YYYY-MM-DD"T"HH24:MI'),
+      ':', to_char(date_part('seconds', val), 'FM00.0999999999'), 'Z', to_char(val, ' BC')
+    )
+  ELSE
+    concat(
+      to_char(val, 'YYYY-MM-DD"T"HH24:MI'),
+      ':', to_char(date_part('seconds', val), 'FM00.0999999999'),
+      to_char(date_part('timezone_hour', val), 'S00'),
+      ':', ltrim(to_char(date_part('timezone_minute', val), '00'), '+- '), to_char(val, ' BC')
+    )
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val interval) returns text AS $$
+SELECT concat(
+  to_char(val, 'PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'), date_part('seconds', val), 'S'
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val anyelement) returns anyelement AS $$
+SELECT val;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
 
 CREATE OR REPLACE FUNCTION
 msar.sanitize_direction(direction text) RETURNS text AS $$/*
@@ -3309,6 +3379,24 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_column_expr_template(typ_id oid) RETURNS text AS $$/*
+*/
+SELECT CASE typ_id
+  WHEN 1082 THEN  -- date
+    'to_char(%1$I, ''YYYY-MM-DD AD'') AS %2$I'
+  WHEN 1083 THEN  -- time without time zone
+    'to_char(%1$I, ''HH24:MI'') || '':''
+    || to_char(date_part(''seconds'', %1$I), ''FM00.0999999999'')'
+  WHEN 1186 THEN  -- ISO 8601 formatting for intervals
+    'to_char(%1$I, ''PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'')
+    || date_part(''seconds'', %1$I)::text || ''S'' AS %2$I'
+  ELSE
+    '%1$I AS %2$I'
+  END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_selectable_column_expr(tab_id oid) RETURNS text AS $$/*
 Build an SQL select-target expression of only columns to which the user has access.
 
@@ -3320,7 +3408,7 @@ column_name AS "2", another_column_name AS "4"
 Args:
   tab_id: The OID of the table containing the columns to select.
 */
-SELECT string_agg(format('%I AS %I', attname, attnum), ', ')
+SELECT string_agg(format('msar.format_data(%I) AS %I', attname, attnum), ', ')
 FROM pg_catalog.pg_attribute
 WHERE
   attrelid = tab_id AND attnum > 0 AND has_column_privilege(attrelid, attnum, 'SELECT');
