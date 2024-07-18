@@ -144,6 +144,7 @@ METHODS = [
         "records.list",
         [user_is_authenticated]
     ),
+    (
         explorations.list_,
         "explorations.list",
         [user_is_authenticated]
