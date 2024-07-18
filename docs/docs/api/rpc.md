@@ -183,6 +183,15 @@ To use an RPC function:
       - OrderBy
       - RecordList
 
+## Explorations
+
+::: explorations
+    options:
+      members:
+      - list_
+      - delete
+      - ExplorationInfo
+
 ## Roles
 
 ::: roles
