@@ -10,6 +10,7 @@ from modernrpc.auth import user_is_authenticated, user_is_superuser
 
 from mathesar.rpc import collaborators
 from mathesar.rpc import columns
+from mathesar.rpc import configured_roles
 from mathesar.rpc import connections
 from mathesar.rpc import constraints
 from mathesar.rpc import database_setup
@@ -71,6 +72,26 @@ METHODS = [
         columns.metadata.patch,
         "columns.metadata.patch",
         [user_is_authenticated]
+    ),
+    (
+        configured_roles.add,
+        "configured_roles.add",
+        [user_is_superuser]
+    ),
+    (
+        configured_roles.list_,
+        "configured_roles.list",
+        [user_is_authenticated]
+    ),
+    (
+        configured_roles.delete,
+        "configured_roles.delete",
+        [user_is_superuser]
+    ),
+    (
+        configured_roles.set_password,
+        "configured_roles.set_password",
+        [user_is_superuser]
     ),
     (
         connections.add_from_known_connection,

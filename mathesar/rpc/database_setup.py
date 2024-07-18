@@ -15,23 +15,23 @@ class DatabaseConnectionResult(TypedDict):
     Info about the objects resulting from calling the setup functions.
 
     These functions will get or create an instance of the Server,
-    Database, and Role models, as well as a UserDatabaseRoleMap entry.
+    Database, and ConfiguredRole models, as well as a UserDatabaseRoleMap entry.
 
     Attributes:
         server_id: The Django ID of the Server model instance.
         database_id: The Django ID of the Database model instance.
-        role_id: The Django ID of the Role model instance.
+        configured_role_id: The Django ID of the ConfiguredRole model instance.
     """
     server_id: int
     database_id: int
-    role_id: int
+    configured_role_id: int
 
     @classmethod
     def from_model(cls, model):
         return cls(
             server_id=model.server.id,
             database_id=model.database.id,
-            role_id=model.role.id,
+            configured_role_id=model.configured_role.id,
         )
 
 

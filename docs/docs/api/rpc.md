@@ -48,6 +48,17 @@ To use an RPC function:
       - set_role
       - CollaboratorInfo
 
+## ConfiguredRoles
+
+::: configured_roles
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_password
+      - ConfiguredRoleInfo
+
 ## Connections
 
 ::: connections

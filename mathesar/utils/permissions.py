@@ -5,7 +5,7 @@ from psycopg.errors import DuplicateSchema
 from db.install import install_mathesar
 from mathesar.examples.library_dataset import load_library_dataset
 from mathesar.examples.movies_dataset import load_movies_dataset
-from mathesar.models.base import Server, Database, Role, UserDatabaseRoleMap
+from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
 from mathesar.models.deprecated import Connection
 from mathesar.models.users import User
 from mathesar.utils.connections import BadInstallationTarget
@@ -90,7 +90,7 @@ def _setup_connection_models(
     database, _ = Database.objects.get_or_create(
         name=database_name, server=server
     )
-    role, _ = Role.objects.get_or_create(
+    configured_role, _ = ConfiguredRole.objects.get_or_create(
         name=role_name,
         server=server,
         defaults={"password": password},
@@ -98,7 +98,7 @@ def _setup_connection_models(
     return UserDatabaseRoleMap.objects.get_or_create(
         user=user,
         database=database,
-        role=role,
+        configured_role=configured_role,
         server=server
     )[0]
 

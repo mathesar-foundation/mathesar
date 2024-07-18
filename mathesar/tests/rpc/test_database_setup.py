@@ -6,7 +6,7 @@ Fixtures:
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
 """
 from mathesar.models.users import User
-from mathesar.models.base import Database, Role, Server, UserDatabaseRoleMap
+from mathesar.models.base import Database, ConfiguredRole, Server, UserDatabaseRoleMap
 from mathesar.rpc import database_setup
 
 
@@ -25,9 +25,9 @@ def test_create_new(monkeypatch, rf):
             raise AssertionError("incorrect parameters passed")
         server_model = Server(id=2, host="example.com", port=5432)
         db_model = Database(id=3, name=test_database, server=server_model)
-        role_model = Role(id=4, name="matheuser", server=server_model)
+        role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
         return UserDatabaseRoleMap(
-            user=user, database=db_model, role=role_model, server=server_model
+            user=user, database=db_model, configured_role=role_model, server=server_model
         )
 
     monkeypatch.setattr(
@@ -36,7 +36,7 @@ def test_create_new(monkeypatch, rf):
         mock_set_up_new_for_user,
     )
     expect_response = database_setup.DatabaseConnectionResult(
-        server_id=2, database_id=3, role_id=4
+        server_id=2, database_id=3, configured_role_id=4
     )
 
     actual_response = database_setup.create_new(
@@ -70,9 +70,9 @@ def test_connect_existing(monkeypatch, rf):
             raise AssertionError("incorrect parameters passed")
         server_model = Server(id=2, host="example.com", port=5432)
         db_model = Database(id=3, name=test_database, server=server_model)
-        role_model = Role(id=4, name="matheuser", server=server_model)
+        role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
         return UserDatabaseRoleMap(
-            user=user, database=db_model, role=role_model, server=server_model
+            user=user, database=db_model, configured_role=role_model, server=server_model
         )
 
     monkeypatch.setattr(
@@ -81,7 +81,7 @@ def test_connect_existing(monkeypatch, rf):
         mock_set_up_preexisting_database_for_user,
     )
     expect_response = database_setup.DatabaseConnectionResult(
-        server_id=2, database_id=3, role_id=4
+        server_id=2, database_id=3, configured_role_id=4
     )
 
     actual_response = database_setup.connect_existing(
