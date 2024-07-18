@@ -35,7 +35,8 @@ import {
   patchAPI,
   postAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
-import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/AppTypes';
+import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { DBObjectEntry, Database } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
 import type { AtLeastOne } from '@mathesar/typeUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -55,11 +56,11 @@ export interface DBTablesStoreData {
 }
 
 const schemaTablesStoreMap: Map<
-  SchemaEntry['id'],
+  Schema['oid'],
   Writable<DBTablesStoreData>
 > = new Map();
 const schemaTablesRequestMap: Map<
-  SchemaEntry['id'],
+  Schema['oid'],
   CancellablePromise<PaginatedResponse<TableEntry>>
 > = new Map();
 
@@ -68,7 +69,7 @@ function sortedTableEntries(tableEntries: TableEntry[]): TableEntry[] {
 }
 
 function setSchemaTablesStore(
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
   tableEntries?: TableEntry[],
 ): Writable<DBTablesStoreData> {
   const tables: DBTablesStoreData['data'] = new Map();
@@ -93,14 +94,12 @@ function setSchemaTablesStore(
   return store;
 }
 
-export function removeTablesInSchemaTablesStore(
-  schemaId: SchemaEntry['id'],
-): void {
+export function removeTablesInSchemaTablesStore(schemaId: Schema['oid']): void {
   schemaTablesStoreMap.delete(schemaId);
 }
 
 export async function refetchTablesForSchema(
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
 ): Promise<DBTablesStoreData | undefined> {
   const store = schemaTablesStoreMap.get(schemaId);
   if (!store) {
@@ -143,7 +142,7 @@ export async function refetchTablesForSchema(
 let preload = true;
 
 export function getTablesStoreForSchema(
-  schemaId: SchemaEntry['id'],
+  schemaId: Schema['oid'],
 ): Writable<DBTablesStoreData> {
   let store = schemaTablesStoreMap.get(schemaId);
   if (!store) {
@@ -195,7 +194,7 @@ function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
 
 export function deleteTable(
   database: Database,
-  schema: SchemaEntry,
+  schema: Schema,
   tableId: TableEntry['id'],
 ): CancellablePromise<TableEntry> {
   const promise = deleteAPI<TableEntry>(`/api/db/v0/tables/${tableId}/`);
@@ -203,7 +202,7 @@ export function deleteTable(
     (resolve, reject) => {
       void promise.then((value) => {
         addCountToSchemaNumTables(database, schema, -1);
-        schemaTablesStoreMap.get(schema.id)?.update((tableStoreData) => {
+        schemaTablesStoreMap.get(schema.oid)?.update((tableStoreData) => {
           tableStoreData.data.delete(tableId);
           return {
             ...tableStoreData,
@@ -242,14 +241,14 @@ export function updateTableMetaData(
 
 export function createTable(
   database: Database,
-  schema: SchemaEntry,
+  schema: Schema,
   tableArgs: {
     name?: string;
     dataFiles?: [number, ...number[]];
   },
 ): CancellablePromise<TableEntry> {
   const promise = postAPI<TableEntry>('/api/db/v0/tables/', {
-    schema: schema.id,
+    schema: schema.oid,
     name: tableArgs.name,
     data_files: tableArgs.dataFiles,
   });
@@ -257,7 +256,7 @@ export function createTable(
     (resolve, reject) => {
       void promise.then((value) => {
         addCountToSchemaNumTables(database, schema, 1);
-        schemaTablesStoreMap.get(schema.id)?.update((existing) => {
+        schemaTablesStoreMap.get(schema.oid)?.update((existing) => {
           const tableEntryMap: DBTablesStoreData['data'] = new Map();
           sortedTableEntries([...existing.data.values(), value]).forEach(
             (entry) => {
