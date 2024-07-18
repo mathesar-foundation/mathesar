@@ -3309,6 +3309,32 @@ SELECT val;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+DROP TABLE msar.filter_templates;
+CREATE TABLE msar.filter_templates (filter_key text PRIMARY KEY, filter_template text);
+INSERT INTO msar.filter_templates VALUES
+  ('and', '%s AND %s'),
+  ('or', '%s OR %s'),
+  ('lesser', '%s < %s'),
+  ('greater', '%s > %s');
+
+
+CREATE OR REPLACE FUNCTION msar.build_filter_expr(rel_id oid, tree jsonb) RETURNS text AS $$
+SELECT CASE tree ->> 'type'
+  WHEN 'literal' THEN format('%L', tree ->> 'value')
+  WHEN 'column_id' THEN format('%I', msar.get_column_name(rel_id, (tree ->> 'value')::smallint))
+  ELSE
+    format(max(filter_template), VARIADIC array_agg(msar.build_filter_expr(rel_id, inner_tree)))
+END
+FROM jsonb_array_elements(tree -> 'args') inner_tree, msar.filter_templates
+WHERE tree ->> 'type' = filter_key
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_where_clause(rel_id oid, tree jsonb) RETURNS text AS $$
+SELECT 'WHERE ' || msar.build_filter_expr(rel_id, tree);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.sanitize_direction(direction text) RETURNS text AS $$/*
 */
@@ -3427,9 +3453,9 @@ BEGIN
   EXECUTE format(
     $q$
     WITH count_cte AS (
-      SELECT count(1) AS count FROM %2$I.%3$I
+      SELECT count(1) AS count FROM %2$I.%3$I %7$s
     ), results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I %6$s LIMIT %4$L OFFSET %5$L
+      SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
     )
     SELECT jsonb_build_object(
       'results', jsonb_agg(row_to_json(results_cte.*)),
@@ -3442,7 +3468,8 @@ BEGIN
     msar.get_relation_name(tab_id),
     limit_,
     offset_,
-    msar.build_order_by_expr(tab_id, order_)
+    msar.build_order_by_expr(tab_id, order_),
+    msar.build_where_clause(tab_id, filter_)
   ) INTO records;
   RETURN records;
 END;
