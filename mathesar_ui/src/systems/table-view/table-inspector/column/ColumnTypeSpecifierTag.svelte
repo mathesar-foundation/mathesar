@@ -12,7 +12,9 @@
   export let column: ProcessedColumn;
 
   $: linkedTableId = column.linkFk?.referent_table;
-  $: linkedTable = linkedTableId ? $tables.data.get(linkedTableId) : undefined;
+  $: linkedTable = linkedTableId
+    ? $tables.tablesMap.get(linkedTableId)
+    : undefined;
 </script>
 
 <div class="specifier-tag-container">

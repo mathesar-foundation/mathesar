@@ -25,7 +25,7 @@
   );
 
   function buildWidgetInput(joinableTable: JoinableTable) {
-    const table = $tables.data.get(joinableTable.target);
+    const table = $tables.tablesMap.get(joinableTable.target);
     if (!table) return undefined;
     const id = joinableTable.jp_path[0].slice(-1)[0];
     const name = columnNameMap.get(id) ?? `(${$_('unknown_column')})`;

@@ -60,7 +60,9 @@
   $: hasGrouping = $grouping.hasColumn(columnId);
 
   $: ({ linkFk } = processedColumn);
-  $: linkedTable = linkFk ? $tables.data.get(linkFk.referent_table) : undefined;
+  $: linkedTable = linkFk
+    ? $tables.tablesMap.get(linkFk.referent_table)
+    : undefined;
   $: linkedTableHref = linkedTable
     ? $storeToGetTablePageUrl({ tableId: linkedTable.oid })
     : undefined;

@@ -17,7 +17,7 @@
   export let tableId: number;
 
   $: $currentTableId = tableId;
-  $: table = $tables.data.get(tableId);
+  $: table = $tables.tablesMap.get(tableId);
 
   function handleUnmount() {
     $currentTableId = undefined;

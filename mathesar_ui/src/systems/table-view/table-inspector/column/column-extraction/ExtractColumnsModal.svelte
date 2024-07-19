@@ -84,7 +84,7 @@
   $: linkedTables = getLinkedTables({
     constraints,
     columns: $processedColumns,
-    tables: $tablesDataStore.data,
+    tables: $tablesDataStore.tablesMap,
   });
   $: selectedColumnsHelpText = (() => {
     if ($targetType === 'existingTable') {

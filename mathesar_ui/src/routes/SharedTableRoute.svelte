@@ -17,7 +17,7 @@
 
   $: tableId = routeSpecificData?.table_id ?? undefined;
   $: $currentTableId = tableId ?? undefined;
-  $: table = tableId ? $tables.data.get(tableId) : undefined;
+  $: table = tableId ? $tables.tablesMap.get(tableId) : undefined;
   $: shareConsumer = new ShareConsumer({
     slug,
   });

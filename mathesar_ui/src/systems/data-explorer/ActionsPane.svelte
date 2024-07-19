@@ -43,7 +43,7 @@
 
   $: ({ query, state, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table
-    ? $tablesDataStore.data.get($query.base_table)
+    ? $tablesDataStore.tablesMap.get($query.base_table)
     : undefined;
   $: isSaved = $query.isSaved();
   $: hasNoColumns = $query.initial_columns.length === 0;

@@ -31,7 +31,7 @@
     nestingLevel: controller.nestingLevel + 1,
   });
   $: ({ tableId, purpose } = controller);
-  $: table = $tableId && $tables.data.get($tableId);
+  $: table = $tableId && $tables.tablesMap.get($tableId);
   $: tabularData =
     $tableId && table
       ? new TabularData({

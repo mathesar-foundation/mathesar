@@ -47,60 +47,60 @@ import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
 
-export interface DBTablesStoreData {
-  data: Map<Table['oid'], Table>;
+type TablesMap = Map<Table['oid'], Table>;
+
+interface TablesData {
+  tablesMap: TablesMap;
   requestStatus: RequestStatus;
 }
 
-const schemaTablesStoreMap: Map<
+type TablesStore = Writable<TablesData>;
+
+const tablesStores: Map<Schema['oid'], TablesStore> = new Map();
+
+const tablesRequests: Map<
   Schema['oid'],
-  Writable<DBTablesStoreData>
-> = new Map();
-const schemaTablesRequestMap: Map<
-  Schema['oid'],
-  CancellablePromise<PaginatedResponse<Table>>
+  CancellablePromise<Table[]>
 > = new Map();
 
-function sortedTableEntries(tableEntries: Table[]): Table[] {
-  return [...tableEntries].sort((a, b) => a.name.localeCompare(b.name));
+function sortTables(tables: Iterable<Table>): Table[] {
+  return [...tables].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function setSchemaTablesStore(
-  schemaId: Schema['oid'],
-  tableEntries?: Table[],
-): Writable<DBTablesStoreData> {
-  const tables: DBTablesStoreData['data'] = new Map();
-  if (tableEntries) {
-    sortedTableEntries(tableEntries).forEach((entry) => {
-      tables.set(entry.oid, entry);
-    });
+function setTablesStore(
+  schemaOid: Schema['oid'],
+  tables?: Table[],
+): TablesStore {
+  const tablesMap: TablesMap = new Map();
+  if (tables) {
+    sortTables(tables).forEach((t) => tablesMap.set(t.oid, t));
   }
 
-  const storeValue: DBTablesStoreData = {
-    data: tables,
+  const storeValue: TablesData = {
+    tablesMap,
     requestStatus: { state: 'success' },
   };
 
-  let store = schemaTablesStoreMap.get(schemaId);
+  let store = tablesStores.get(schemaOid);
   if (!store) {
     store = writable(storeValue);
-    schemaTablesStoreMap.set(schemaId, store);
+    tablesStores.set(schemaOid, store);
   } else {
     store.set(storeValue);
   }
   return store;
 }
 
-export function removeTablesInSchemaTablesStore(schemaId: Schema['oid']): void {
-  schemaTablesStoreMap.delete(schemaId);
+export function removeTablesStore(schemaOid: Schema['oid']): void {
+  tablesStores.delete(schemaOid);
 }
 
 export async function refetchTablesForSchema(
-  schemaId: Schema['oid'],
-): Promise<DBTablesStoreData | undefined> {
-  const store = schemaTablesStoreMap.get(schemaId);
+  schemaOid: Schema['oid'],
+): Promise<TablesData | undefined> {
+  const store = tablesStores.get(schemaOid);
   if (!store) {
-    console.error(`Tables store for schema: ${schemaId} not found.`);
+    console.error(`Tables store for schema: ${schemaOid} not found.`);
     return undefined;
   }
 
@@ -110,16 +110,16 @@ export async function refetchTablesForSchema(
       requestStatus: { state: 'processing' },
     }));
 
-    schemaTablesRequestMap.get(schemaId)?.cancel();
+    tablesRequests.get(schemaOid)?.cancel();
 
     const tablesRequest = getAPI<PaginatedResponse<Table>>(
-      `/api/db/v0/tables/?schema=${schemaId}&limit=500`,
+      `/api/db/v0/tables/?schema=${schemaOid}&limit=500`,
     );
-    schemaTablesRequestMap.set(schemaId, tablesRequest);
+    tablesRequests.set(schemaOid, tablesRequest);
     const response = await tablesRequest;
     const tableEntries = response.results || [];
 
-    const schemaTablesStore = setSchemaTablesStore(schemaId, tableEntries);
+    const schemaTablesStore = setTablesStore(schemaOid, tableEntries);
 
     return get(schemaTablesStore);
   } catch (err) {
@@ -138,75 +138,63 @@ export async function refetchTablesForSchema(
 
 let preload = true;
 
-export function getTablesStoreForSchema(
-  schemaId: Schema['oid'],
-): Writable<DBTablesStoreData> {
-  let store = schemaTablesStoreMap.get(schemaId);
+function getTablesStore(schemaOid: Schema['oid']): TablesStore {
+  let store = tablesStores.get(schemaOid);
   if (!store) {
     store = writable({
       requestStatus: { state: 'processing' },
-      data: new Map(),
+      tablesMap: new Map(),
     });
-    schemaTablesStoreMap.set(schemaId, store);
-    if (preload && commonData.current_schema === schemaId) {
-      store = setSchemaTablesStore(schemaId, commonData.tables ?? []);
+    tablesStores.set(schemaOid, store);
+    if (preload && commonData.current_schema === schemaOid) {
+      store = setTablesStore(schemaOid, commonData.tables ?? []);
     } else {
-      void refetchTablesForSchema(schemaId);
+      void refetchTablesForSchema(schemaOid);
     }
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
-    void refetchTablesForSchema(schemaId);
+    void refetchTablesForSchema(schemaOid);
   }
   return store;
 }
 
-/**
- * TODO: Use a dedicated higher level Tables store and
- * remove this function.
- */
-function findSchemaStoreForTable(id: Table['oid']) {
-  return [...schemaTablesStoreMap.values()].find((entry) =>
-    get(entry).data.has(id),
-  );
+function findSchemaStoreForTable(
+  tableOid: Table['oid'],
+): TablesStore | undefined {
+  // TODO rewrite this function
+  throw new Error('Not implemented');
 }
 
-function findAndUpdateTableStore(id: Table['oid'], table: Table) {
-  findSchemaStoreForTable(id)?.update((tableStoreData) => {
-    const existingTableEntry = tableStoreData.data.get(id);
-    const updatedTableEntry = {
-      ...(existingTableEntry ?? {}),
-      ...table,
-    };
-    tableStoreData.data.set(id, updatedTableEntry);
-    const tableEntryMap: DBTablesStoreData['data'] = new Map();
-    sortedTableEntries([...tableStoreData.data.values()]).forEach((entry) => {
-      tableEntryMap.set(entry.oid, entry);
+function findAndUpdateTableStore(tableOid: Table['oid'], newTable: Table) {
+  findSchemaStoreForTable(tableOid)?.update((tablesData) => {
+    const oldTable = tablesData.tablesMap.get(tableOid);
+    tablesData.tablesMap.set(tableOid, { ...(oldTable ?? {}), ...newTable });
+    const tablesMap: TablesMap = new Map();
+    sortTables([...tablesData.tablesMap.values()]).forEach((t) => {
+      tablesMap.set(t.oid, t);
     });
-    return {
-      ...tableStoreData,
-      data: tableEntryMap,
-    };
+    return { ...tablesData, tablesMap };
   });
 }
 
 export function deleteTable(
   database: Database,
   schema: Schema,
-  tableId: Table['oid'],
+  tableOid: Table['oid'],
 ): CancellablePromise<Table> {
-  const promise = deleteAPI<Table>(`/api/db/v0/tables/${tableId}/`);
+  const promise = deleteAPI<Table>(`/api/db/v0/tables/${tableOid}/`);
   return new CancellablePromise(
     (resolve, reject) => {
-      void promise.then((value) => {
+      void promise.then((table) => {
         addCountToSchemaNumTables(database, schema, -1);
-        schemaTablesStoreMap.get(schema.oid)?.update((tableStoreData) => {
-          tableStoreData.data.delete(tableId);
+        tablesStores.get(schema.oid)?.update((tableStoreData) => {
+          tableStoreData.tablesMap.delete(tableOid);
           return {
             ...tableStoreData,
-            data: new Map(tableStoreData.data),
+            tablesMap: new Map(tableStoreData.tablesMap),
           };
         });
-        return resolve(value);
+        return resolve(table);
       }, reject);
     },
     () => {
@@ -216,15 +204,18 @@ export function deleteTable(
 }
 
 export function updateTableMetaData(
-  id: number,
+  tableOid: number,
   updatedMetaData: AtLeastOne<{ name: string; description: string }>,
 ): CancellablePromise<Table> {
-  const promise = patchAPI<Table>(`/api/db/v0/tables/${id}/`, updatedMetaData);
+  const promise = patchAPI<Table>(
+    `/api/db/v0/tables/${tableOid}/`,
+    updatedMetaData,
+  );
   return new CancellablePromise(
     (resolve, reject) => {
-      void promise.then((value) => {
-        findAndUpdateTableStore(id, value);
-        return resolve(value);
+      void promise.then((table) => {
+        findAndUpdateTableStore(tableOid, table);
+        return resolve(table);
       }, reject);
     },
     () => {
@@ -248,21 +239,18 @@ export function createTable(
   });
   return new CancellablePromise(
     (resolve, reject) => {
-      void promise.then((value) => {
+      void promise.then((table) => {
         addCountToSchemaNumTables(database, schema, 1);
-        schemaTablesStoreMap.get(schema.oid)?.update((existing) => {
-          const tableEntryMap: DBTablesStoreData['data'] = new Map();
-          sortedTableEntries([...existing.data.values(), value]).forEach(
+        tablesStores.get(schema.oid)?.update((existing) => {
+          const tablesMap: TablesMap = new Map();
+          sortTables([...existing.tablesMap.values(), table]).forEach(
             (entry) => {
-              tableEntryMap.set(entry.oid, entry);
+              tablesMap.set(entry.oid, entry);
             },
           );
-          return {
-            ...existing,
-            data: tableEntryMap,
-          };
+          return { ...existing, tablesMap };
         });
-        return resolve(value);
+        return resolve(table);
       }, reject);
     },
     () => {
@@ -272,18 +260,18 @@ export function createTable(
 }
 
 export function patchTable(
-  id: Table['oid'],
+  tableOid: Table['oid'],
   patch: {
     name?: Table['name'];
     import_verified?: Table['import_verified'];
     columns?: Table['columns'];
   },
 ): CancellablePromise<Table> {
-  const promise = patchAPI<Table>(`/api/db/v0/tables/${id}/`, patch);
+  const promise = patchAPI<Table>(`/api/db/v0/tables/${tableOid}/`, patch);
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
-        findAndUpdateTableStore(id, value);
+        findAndUpdateTableStore(tableOid, value);
         return resolve(value);
       }, reject);
     },
@@ -306,8 +294,8 @@ export function patchTable(
  * 3. Move all api-call-only functions to /api. Only keep functions that
  *    update the stores within /stores
  */
-export function getTable(id: Table['oid']): CancellablePromise<Table> {
-  return getAPI(`/api/db/v0/tables/${id}/`);
+export function getTable(tableOid: Table['oid']): CancellablePromise<Table> {
+  return getAPI(`/api/db/v0/tables/${tableOid}/`);
 }
 
 export function splitTable({
@@ -330,11 +318,11 @@ export function splitTable({
 }
 
 export function moveColumns(
-  tableId: number,
+  tableOid: number,
   idsOfColumnsToMove: number[],
   targetTableId: number,
 ): CancellablePromise<null> {
-  return postAPI(`/api/db/v0/tables/${tableId}/move_columns/`, {
+  return postAPI(`/api/db/v0/tables/${tableOid}/move_columns/`, {
     move_columns: idsOfColumnsToMove,
     target_table: targetTableId,
   });
@@ -344,32 +332,32 @@ export function moveColumns(
  * Replace getTable with this function once the above mentioned changes are done.
  */
 export function getTableFromStoreOrApi(
-  id: Table['oid'],
+  tableOid: Table['oid'],
 ): CancellablePromise<Table> {
-  const schemaStore = findSchemaStoreForTable(id);
-  if (schemaStore) {
-    const tableEntry = get(schemaStore).data.get(id);
-    if (tableEntry) {
+  const tablesStore = findSchemaStoreForTable(tableOid);
+  if (tablesStore) {
+    const table = get(tablesStore).tablesMap.get(tableOid);
+    if (table) {
       return new CancellablePromise((resolve) => {
-        resolve(tableEntry);
+        resolve(table);
       });
     }
   }
-  const promise = getTable(id);
+  const promise = getTable(tableOid);
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((table) => {
-        const store = schemaTablesStoreMap.get(table.schema);
+        const store = tablesStores.get(table.schema);
         if (store) {
           store.update((existing) => {
             const tableMap = new Map<number, Table>();
-            const tables = [...existing.data.values(), table];
-            sortedTableEntries(tables).forEach((t) => {
+            const tables = [...existing.tablesMap.values(), table];
+            sortTables(tables).forEach((t) => {
               tableMap.set(t.oid, t);
             });
             return {
               ...existing,
-              data: tableMap,
+              tablesMap: tableMap,
             };
           });
         }
@@ -407,18 +395,18 @@ export function generateTablePreview(props: {
   return postAPI(`/api/db/v0/tables/${table.oid}/previews/`, { columns });
 }
 
-export const tables: Readable<DBTablesStoreData> = derived(
+export const tables: Readable<TablesData> = derived(
   currentSchemaId,
   ($currentSchemaId, set) => {
     let unsubscribe: Unsubscriber;
 
     if (!$currentSchemaId) {
       set({
-        data: new Map(),
+        tablesMap: new Map(),
         requestStatus: { state: 'success' },
       });
     } else {
-      const store = getTablesStoreForSchema($currentSchemaId);
+      const store = getTablesStore($currentSchemaId);
       unsubscribe = store.subscribe((dbSchemasData) => {
         set(dbSchemasData);
       });
@@ -430,19 +418,18 @@ export const tables: Readable<DBTablesStoreData> = derived(
   },
 );
 
-export const importVerifiedTables: Readable<DBTablesStoreData['data']> =
-  derived(
-    tables,
-    ($tables) =>
-      new Map(
-        [...$tables.data.values()]
-          .filter((table) => !isTableImportConfirmationRequired(table))
-          .map((table) => [table.oid, table]),
-      ),
-  );
+export const importVerifiedTables: Readable<TablesMap> = derived(
+  tables,
+  ($tables) =>
+    new Map(
+      [...$tables.tablesMap.values()]
+        .filter((table) => !isTableImportConfirmationRequired(table))
+        .map((table) => [table.oid, table]),
+    ),
+);
 
 export const validateNewTableName = derived(tables, ($tables) => {
-  const names = new Set([...$tables.data.values()].map((t) => t.name));
+  const names = new Set([...$tables.tablesMap.values()].map((t) => t.name));
   return invalidIf(
     (name: string) => names.has(name),
     'A table with that name already exists.',
@@ -450,7 +437,7 @@ export const validateNewTableName = derived(tables, ($tables) => {
 });
 
 export function getTableName(id: DBObjectEntry['id']): string | undefined {
-  return get(tables).data.get(id)?.name;
+  return get(tables).tablesMap.get(id)?.name;
 }
 
 export const currentTableId = writable<number | undefined>(undefined);
@@ -460,7 +447,7 @@ export const currentTable = derived(
   ([$currentTableId, $tables]) =>
     $currentTableId === undefined
       ? undefined
-      : $tables.data.get($currentTableId),
+      : $tables.tablesMap.get($currentTableId),
 );
 
 export function getJoinableTablesResult(tableId: number, maxDepth = 1) {

@@ -60,7 +60,9 @@
     href: string;
   };
 
-  $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
+  $: tablesMap = canExecuteDDL
+    ? $tablesStore.tablesMap
+    : $importVerifiedTablesStore;
   $: explorationsMap = $queries.data;
   $: tablesRequestStatus = $tablesStore.requestStatus;
   $: explorationsRequestStatus = $queries.requestStatus;

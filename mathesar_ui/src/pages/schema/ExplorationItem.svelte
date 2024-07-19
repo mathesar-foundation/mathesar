@@ -14,7 +14,7 @@
   export let database: Database;
   export let schema: Schema;
 
-  $: baseTable = $tablesStore.data.get(exploration.base_table);
+  $: baseTable = $tablesStore.tablesMap.get(exploration.base_table);
 </script>
 
 <a

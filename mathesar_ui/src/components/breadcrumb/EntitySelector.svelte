@@ -63,7 +63,7 @@
     };
   }
 
-  $: tables = [...$tablesStore.data.values()];
+  $: tables = [...$tablesStore.tablesMap.values()];
   $: queries = [...$queriesStore.data.values()];
 
   $: selectorData = new Map<string, BreadcrumbSelectorEntry[]>([

@@ -56,7 +56,7 @@
     recordsData,
     processedColumns,
   } = tabularData);
-  $: table = $tables.data.get(tableId);
+  $: table = $tables.tablesMap.get(tableId);
   $: ({ recordSummaries, state: recordsDataState } = recordsData);
   $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
@@ -137,7 +137,7 @@
     if (!record || recordId === undefined) {
       return;
     }
-    const tableEntry = $tables.data.get(tableId);
+    const tableEntry = $tables.tablesMap.get(tableId);
     const template = tableEntry?.settings?.preview_settings?.template ?? '';
     const recordSummary = renderTransitiveRecordSummary({
       template,

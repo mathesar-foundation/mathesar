@@ -75,7 +75,7 @@
   $: existingConstraintNames = new Set(
     $constraintsDataStore.constraints.map((c) => c.name),
   );
-  $: tableName = $tables.data.get($tabularData.id)?.name ?? '';
+  $: tableName = $tables.tablesMap.get($tabularData.id)?.name ?? '';
   $: ({ processedColumns } = $tabularData);
   $: columnsInTable = Array.from($processedColumns.values());
   $: nameValidationErrors = getNameValidationErrors(

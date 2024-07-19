@@ -61,7 +61,7 @@
   // ===========================================================================
   $: singularBaseTableName = makeSingular(base.name);
   $: importVerifiedTables = [...$importVerifiedTablesStore.values()];
-  $: allTables = [...$tablesDataStore.data.values()];
+  $: allTables = [...$tablesDataStore.tablesMap.values()];
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
 

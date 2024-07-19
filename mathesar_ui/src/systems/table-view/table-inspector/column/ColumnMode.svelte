@@ -145,7 +145,7 @@
       {@const referentTable =
         referentTableId === undefined
           ? undefined
-          : $tables.data.get(referentTableId)}
+          : $tables.tablesMap.get(referentTableId)}
       {#if referentTable !== undefined}
         <Collapsible triggerAppearance="plain">
           <CollapsibleHeader

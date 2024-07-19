@@ -15,7 +15,7 @@
   <div class="update-table-description-property-container">
     <span class="label">{$_('description')}</span>
     <EditableTextWithActions
-      initialValue={$tables.data.get($tabularData.id)?.description ?? ''}
+      initialValue={$tables.tablesMap.get($tabularData.id)?.description ?? ''}
       onSubmit={(description) => onUpdate({ description })}
       isLongText
       {disabled}

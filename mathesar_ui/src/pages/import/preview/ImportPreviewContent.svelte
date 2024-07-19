@@ -69,7 +69,7 @@
   let columns: Column[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([]);
 
-  $: otherTableNames = [...$tables.data.values()]
+  $: otherTableNames = [...$tables.tablesMap.values()]
     .filter((t) => t.oid !== table.oid)
     .map((t) => t.name);
   $: customizedTableName = requiredField(table.name, [

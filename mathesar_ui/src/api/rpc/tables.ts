@@ -3,6 +3,7 @@ import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-build
 export interface Table {
   oid: number;
   name: string;
+  /** The OID of the schema containing the table */
   schema: number;
   description: string | null;
 }

@@ -12,7 +12,7 @@
   export let tableId: number;
 
   function schemaContainsTableName(name: string): boolean {
-    const allTables = [...$tables.data.values()];
+    const allTables = [...$tables.tablesMap.values()];
     const tablesUsingName = allTables.filter(
       (current) => current.name === name,
     );

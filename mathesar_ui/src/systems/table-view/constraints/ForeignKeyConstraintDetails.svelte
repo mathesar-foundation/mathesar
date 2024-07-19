@@ -14,7 +14,7 @@
 
   $: referentTable =
     constraint.type === 'foreignkey'
-      ? $tables.data.get(constraint.referent_table)
+      ? $tables.tablesMap.get(constraint.referent_table)
       : undefined;
 
   async function getReferentColumns(_constraint: Constraint) {

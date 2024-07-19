@@ -19,7 +19,7 @@
   <div class="rename-table-property-container">
     <span class="label">{$_('name')}</span>
     <EditableTextWithActions
-      initialValue={$tables.data.get($tabularData.id)?.name ?? ''}
+      initialValue={$tables.tablesMap.get($tabularData.id)?.name ?? ''}
       onSubmit={(name) => onUpdate({ name })}
       getValidationErrors={getNameValidationErrors}
       {disabled}

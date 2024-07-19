@@ -37,7 +37,7 @@
           $currentSchema.oid,
           {
             oid: $tabularData.id,
-            name: $tables.data.get($tabularData.id)?.name ?? '',
+            name: $tables.tablesMap.get($tabularData.id)?.name ?? '',
           },
         )
       : '';
