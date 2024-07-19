@@ -23,7 +23,7 @@
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
-  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
+  import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import {
     ButtonMenuItem,
     DropdownMenu,
@@ -45,8 +45,8 @@
   let isHoveringBottomButton = false;
   let isTableCardFocused = false;
 
-  $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
-  $: tablePageUrl = isTableImportConfirmationNeeded
+  $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
+  $: tablePageUrl = requiresImportConfirmation
     ? getImportPreviewPageUrl(database.id, schema.oid, table.oid, {
         useColumnTypeInference: true,
       })
@@ -87,7 +87,7 @@
   class:focus={isTableCardFocused}
   class:hovering-menu-trigger={isHoveringMenuTrigger}
   class:hovering-bottom-button={isHoveringBottomButton}
-  class:unconfirmed-import={isTableImportConfirmationNeeded}
+  class:unconfirmed-import={requiresImportConfirmation}
 >
   <a
     class="link passthrough"
@@ -114,7 +114,7 @@
       {/if}
     </div>
     <div class="bottom">
-      {#if isTableImportConfirmationNeeded}
+      {#if requiresImportConfirmation}
         {$_('needs_import_confirmation')}
       {/if}
     </div>
@@ -138,7 +138,7 @@
       icon={iconMoreActions}
       size="small"
     >
-      {#if !isTableImportConfirmationNeeded}
+      {#if !requiresImportConfirmation}
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           {$_('explore_table')}
         </LinkMenuItem>
@@ -159,7 +159,7 @@
       {/if}
     </DropdownMenu>
   </div>
-  {#if !isTableImportConfirmationNeeded}
+  {#if !requiresImportConfirmation}
     <button
       class="bottom-button passthrough"
       on:mouseenter={() => {

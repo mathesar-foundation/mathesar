@@ -18,7 +18,7 @@ interface TableWithImportVerification {
   } | null;
 }
 
-export function isTableImportConfirmationRequired(
+export function tableRequiresImportConfirmation(
   table: TableWithImportVerification,
 ): boolean {
   if (table.metadata?.import_verified === false) {
@@ -69,7 +69,7 @@ export function getLinkForTableItem(
   schemaId: number,
   table: TableWithImportVerification & { oid: Table['oid'] },
 ) {
-  if (isTableImportConfirmationRequired(table)) {
+  if (tableRequiresImportConfirmation(table)) {
     return getImportPreviewPageUrl(connectionId, schemaId, table.oid, {
       useColumnTypeInference: true,
     });

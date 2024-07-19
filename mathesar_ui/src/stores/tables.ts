@@ -29,7 +29,7 @@ import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import { TupleMap } from '@mathesar/packages/tuple-map';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
+import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
 import { connectionsStore } from './databases';
 import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 
@@ -388,7 +388,7 @@ export const importVerifiedTables: Readable<TablesMap> = derived(
   (tablesData) =>
     new Map(
       [...tablesData.tablesMap.values()]
-        .filter((table) => !isTableImportConfirmationRequired(table))
+        .filter((table) => !tableRequiresImportConfirmation(table))
         .map((table) => [table.oid, table]),
     ),
 );

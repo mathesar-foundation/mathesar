@@ -3,20 +3,20 @@
 
   import type { Table } from '@mathesar/api/rpc/tables';
   import { iconTable } from '@mathesar/icons';
-  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
+  import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
 
   import NameWithIcon from './NameWithIcon.svelte';
 
   interface $$Props extends Omit<ComponentProps<NameWithIcon>, 'icon'> {
     table: Pick<Table, 'name'> &
-      Parameters<typeof isTableImportConfirmationRequired>[0];
+      Parameters<typeof tableRequiresImportConfirmation>[0];
     isLoading?: boolean;
   }
 
   export let table: $$Props['table'];
   export let isLoading = false;
 
-  $: isNotConfirmed = isTableImportConfirmationRequired(table);
+  $: isNotConfirmed = tableRequiresImportConfirmation(table);
 </script>
 
 <NameWithIcon icon={iconTable} {isLoading} {...$$restProps}>
