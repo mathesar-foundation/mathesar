@@ -3314,6 +3314,12 @@ CREATE TABLE msar.filter_templates (filter_key text PRIMARY KEY, filter_template
 INSERT INTO msar.filter_templates VALUES
   ('and', '%s AND %s'),
   ('or', '%s OR %s'),
+  ('equal', '%s = %s'),
+  ('null', '%s IS NULL'),
+  ('not_null', '%s IS NOT NULL'),
+  ('contains_case_insensitive', '%s ILIKE ''%%'' || %s || ''%%'''),
+  ('starts_with_case_insensitive', '%s ILIKE %s || ''%%'''),
+  ('uri_scheme_equals', 'mathesar_types.uri_scheme(%s) = %s'),
   ('lesser', '%s < %s'),
   ('greater', '%s > %s');
 
