@@ -16,6 +16,7 @@ from mathesar.rpc import constraints
 from mathesar.rpc import database_setup
 from mathesar.rpc import databases
 from mathesar.rpc import explorations
+from mathesar.rpc import records
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
 from mathesar.rpc import servers
@@ -136,6 +137,11 @@ METHODS = [
     (
         databases.list_,
         "databases.list",
+        [user_is_authenticated]
+    ),
+    (
+        records.list_,
+        "records.list",
         [user_is_authenticated]
     ),
     (
