@@ -17,9 +17,9 @@
 
   async function handleCreateEmptyTable() {
     isCreatingNewTable = true;
-    const tableInfo = await createTable(database, schema, {});
+    const tableOid = await createTable(database, schema, {});
     isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.id, schema.oid, tableInfo.oid), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, tableOid), false);
   }
 </script>
 

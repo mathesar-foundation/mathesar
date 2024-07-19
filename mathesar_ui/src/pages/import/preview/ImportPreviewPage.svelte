@@ -16,6 +16,7 @@
   import ImportPreviewContent from './ImportPreviewContent.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
   import { currentConnection } from '@mathesar/stores/databases';
+  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
 
   const tableFetch = new AsyncStore(getTableFromStoreOrApi);
   const dataFileFetch = new AsyncStore(dataFilesApi.get);
@@ -39,7 +40,8 @@
     if (!table) {
       return;
     }
-    if (table.metadata.import_verified) {
+
+    if (!isTableImportConfirmationRequired(table)) {
       redirectToTablePage();
       return;
     }

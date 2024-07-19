@@ -113,13 +113,13 @@
       if (dataFileId === undefined) {
         return;
       }
-      const table = await createTable(database, schema, {
+      const tableOid = await createTable(database, schema, {
         dataFiles: [dataFileId],
       });
       const previewPage = getImportPreviewPageUrl(
         database.id,
         schema.oid,
-        table.oid,
+        tableOid,
         { useColumnTypeInference: $useColumnTypeInference },
       );
       router.goto(previewPage, true);

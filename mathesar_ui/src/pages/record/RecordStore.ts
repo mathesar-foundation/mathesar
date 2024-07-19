@@ -46,7 +46,7 @@ export default class RecordStore {
     // until after the service layer changes are made before we can implement
     // this here.
     const template =
-      this.table.metadata.record_summary_template ?? 'TODO_RS_TEMPLATE';
+      this.table.metadata?.record_summary_template ?? 'TODO_RS_TEMPLATE';
     this.summary = derived(
       [this.fieldValues, this.recordSummaries],
       ([fields, fkSummaryData]) =>

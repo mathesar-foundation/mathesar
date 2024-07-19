@@ -16,7 +16,7 @@ interface TableMetadata {
 }
 
 export interface Table extends RawTable {
-  metadata: TableMetadata;
+  metadata: TableMetadata | null;
 }
 
 export const tables = {
@@ -57,12 +57,12 @@ export const tables = {
     {
       database_id: number;
       schema_oid: number;
-      table_name: string;
-      comment: string;
+      table_name?: string;
+      comment?: string;
       /** TODO */
-      column_data_list: unknown;
+      column_data_list?: unknown;
       /** TODO */
-      constraint_data_list: unknown;
+      constraint_data_list?: unknown;
     },
     number
   >(),
@@ -83,7 +83,7 @@ export const tables = {
     {
       database_id: number;
       table_oid: number;
-      cascade: boolean;
+      cascade?: boolean;
     },
     void
   >(),

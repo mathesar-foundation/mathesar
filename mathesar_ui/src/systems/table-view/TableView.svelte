@@ -62,7 +62,7 @@
   });
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
-  $: columnOrder = table.metadata.column_order ?? [];
+  $: columnOrder = table.metadata?.column_order ?? [];
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open

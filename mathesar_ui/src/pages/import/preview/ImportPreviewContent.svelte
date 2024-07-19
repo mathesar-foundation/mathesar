@@ -125,7 +125,10 @@
   }
   $: table, useColumnTypeInference, void init();
 
-  function reload(props: { table?: Table; useColumnTypeInference?: boolean }) {
+  function reload(props: {
+    table?: Pick<Table, 'oid'>;
+    useColumnTypeInference?: boolean;
+  }) {
     const tableId = props.table?.oid ?? table.oid;
     router.goto(
       getImportPreviewPageUrl(database.id, schema.oid, tableId, {
@@ -147,7 +150,7 @@
       customizedTableName: $customizedTableName,
     });
     if (response.resolvedValue) {
-      reload({ table: response.resolvedValue });
+      reload({ table: { oid: response.resolvedValue } });
     }
   }
 
@@ -173,7 +176,7 @@
   }
 
   async function finishImport() {
-    // TODO reimplement patching tables columns with RPC API.
+    // TODO_BETA reimplement patching tables columns with RPC API.
     throw new Error('Not implemented');
 
     // try {

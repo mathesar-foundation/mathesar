@@ -41,8 +41,8 @@
   $: ({ columns } = columnsDataStore);
   $: ({ savedRecords, recordSummaries } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
-  $: initialCustomized = table.metadata.record_summary_customized ?? false;
-  $: initialTemplate = table.metadata.record_summary_template ?? '';
+  $: initialCustomized = table.metadata?.record_summary_customized ?? false;
+  $: initialTemplate = table.metadata?.record_summary_template ?? '';
   $: customized = requiredField(initialCustomized);
   $: customizedDisabled = customized.disabled;
   $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);

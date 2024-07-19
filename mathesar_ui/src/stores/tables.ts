@@ -9,6 +9,8 @@
  * sorting.
  */
 
+import { execPipe, filter, map } from 'iter-tools';
+import { _ } from 'svelte-i18n';
 import type { Readable, Writable } from 'svelte/store';
 import { derived, get, readable, writable } from 'svelte/store';
 
@@ -18,30 +20,18 @@ import {
   type RecursivePartial,
 } from '@mathesar-component-library';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
-import type {
-  SplitTableRequest,
-  SplitTableResponse,
-} from '@mathesar/api/rest/types/tables/split_table';
+import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_table';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import {
-  deleteAPI,
-  getAPI,
-  patchAPI,
-  postAPI,
-} from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type { Connection } from '@mathesar/api/rpc/connections';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
+import { TupleMap } from '@mathesar/packages/tuple-map';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
-
-import type { Connection } from '@mathesar/api/rpc/connections';
-import { TupleMap } from '@mathesar/packages/tuple-map';
 import { connectionsStore } from './databases';
 import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
-import { api } from '@mathesar/api/rpc';
-import { execPipe, filter, map } from 'iter-tools';
-import { _ } from 'svelte-i18n';
 
 const commonData = preloadCommonData();
 
@@ -129,9 +119,12 @@ export async function refetchTablesForSchema(
 
     tablesRequests.get([connection.id, schema.oid])?.cancel();
 
-    const tablesRequest = getAPI<Table[]>(
-      `/api/db/v0/tables/?schema=${schema.oid}&limit=500`,
-    );
+    const tablesRequest = api.tables
+      .list_with_metadata({
+        database_id: connection.id,
+        schema_oid: schema.oid,
+      })
+      .run();
     tablesRequests.set([connection.id, schema.oid], tablesRequest);
     const tableEntries = await tablesRequest;
 
@@ -201,11 +194,16 @@ export function deleteTable(
   connection: Connection,
   schema: Schema,
   tableOid: Table['oid'],
-): CancellablePromise<Table> {
-  const promise = deleteAPI<Table>(`/api/db/v0/tables/${tableOid}/`);
+): CancellablePromise<void> {
+  const promise = api.tables
+    .delete({
+      database_id: connection.id,
+      table_oid: tableOid,
+    })
+    .run();
   return new CancellablePromise(
     (resolve, reject) => {
-      void promise.then((table) => {
+      void promise.then(() => {
         addCountToSchemaNumTables(connection, schema, -1);
         tablesStores
           .get([connection.id, schema.oid])
@@ -216,7 +214,7 @@ export function deleteTable(
               tablesMap: new Map(tableStoreData.tablesMap),
             };
           });
-        return resolve(table);
+        return resolve();
       }, reject);
     },
     () => {
@@ -240,26 +238,42 @@ export function createTable(
     name?: string;
     dataFiles?: [number, ...number[]];
   },
-): CancellablePromise<Table> {
-  const promise = postAPI<Table>('/api/db/v0/tables/', {
-    schema: schema.oid,
-    name: tableArgs.name,
-    data_files: tableArgs.dataFiles,
-  });
+): CancellablePromise<Table['oid']> {
+  const promise = api.tables
+    .add({
+      database_id: connection.id,
+      schema_oid: schema.oid,
+      table_name: tableArgs.name ?? '',
+      // TODO_BETA
+      //
+      // Figure out how to create a table with `data_files`. We might need a
+      // separate RPC method for that.
+
+      // data_files: tableArgs.dataFiles,
+    })
+    .run();
   return new CancellablePromise(
     (resolve, reject) => {
-      void promise.then((table) => {
+      void promise.then((tableOid) => {
         addCountToSchemaNumTables(connection, schema, 1);
-        tablesStores.get([connection.id, schema.oid])?.update((existing) => {
-          const tablesMap: TablesMap = new Map();
-          sortTables([...existing.tablesMap.values(), table]).forEach(
-            (entry) => {
-              tablesMap.set(entry.oid, entry);
-            },
-          );
-          return { ...existing, tablesMap };
+        const tablesStore = tablesStores.get([connection.id, schema.oid]);
+        tablesStore?.update((tablesData) => {
+          const table: Table = {
+            oid: tableOid,
+            // TODO_3651: What happens when we create a table without passing a
+            // name. Does the RPC API support this? Should it?
+            name: tableArgs.name ?? '',
+            schema: schema.oid,
+            description: null,
+            metadata: null,
+          };
+          const tables = sortTables([...tablesData.tablesMap.values(), table]);
+          return {
+            ...tablesData,
+            tablesMap: new Map(tables.map((t) => [t.oid, t])),
+          };
         });
-        return resolve(table);
+        return resolve(tableOid);
       }, reject);
     },
     () => {
@@ -279,12 +293,14 @@ export function splitTable({
   extractedTableName: string;
   newFkColumnName?: string;
 }): CancellablePromise<SplitTableResponse> {
-  const body: SplitTableRequest = {
-    extract_columns: idsOfColumnsToExtract,
-    extracted_table_name: extractedTableName,
-    relationship_fk_column_name: newFkColumnName,
-  };
-  return postAPI(`/api/db/v0/tables/${id}/split_table/`, body);
+  throw new Error('Not implemented'); // TODO_BETA
+
+  // const body: SplitTableRequest = {
+  //   extract_columns: idsOfColumnsToExtract,
+  //   extracted_table_name: extractedTableName,
+  //   relationship_fk_column_name: newFkColumnName,
+  // };
+  // return postAPI(`/api/db/v0/tables/${id}/split_table/`, body);
 }
 
 export function moveColumns(
@@ -292,10 +308,12 @@ export function moveColumns(
   idsOfColumnsToMove: number[],
   targetTableId: number,
 ): CancellablePromise<null> {
-  return postAPI(`/api/db/v0/tables/${tableOid}/move_columns/`, {
-    move_columns: idsOfColumnsToMove,
-    target_table: targetTableId,
-  });
+  throw new Error('Not implemented'); // TODO_BETA
+
+  // return postAPI(`/api/db/v0/tables/${tableOid}/move_columns/`, {
+  //   move_columns: idsOfColumnsToMove,
+  //   target_table: targetTableId,
+  // });
 }
 
 export function getTableFromStoreOrApi({
@@ -393,10 +411,15 @@ export const currentTable = derived(
       : $tables.tablesMap.get($currentTableId),
 );
 
-export function getJoinableTablesResult(tableId: number, maxDepth = 1) {
-  return getAPI<JoinableTablesResult>(
-    `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,
-  );
+export function getJoinableTablesResult(
+  tableId: number,
+  maxDepth = 1,
+): Promise<JoinableTablesResult> {
+  throw new Error('Not implemented'); // TODO_BETA
+
+  // return getAPI<JoinableTablesResult>(
+  //   `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,
+  // );
 }
 
 export async function refetchTablesForCurrentSchema() {
