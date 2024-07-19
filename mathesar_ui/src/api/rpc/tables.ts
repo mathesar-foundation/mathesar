@@ -1,6 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-export interface Table {
+export interface RawTable {
   oid: number;
   name: string;
   /** The OID of the schema containing the table */
@@ -8,8 +8,27 @@ export interface Table {
   description: string | null;
 }
 
+interface TableMetadata {
+  import_verified: boolean | null;
+  column_order: number[] | null;
+  record_summary_customized: boolean | null;
+  record_summary_template: string | null;
+}
+
+export interface Table extends RawTable {
+  metadata: TableMetadata;
+}
+
 export const tables = {
   list: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      schema_oid: number;
+    },
+    RawTable[]
+  >(),
+
+  list_with_metadata: rpcMethodTypeContainer<
     {
       database_id: number;
       schema_oid: number;
@@ -22,7 +41,7 @@ export const tables = {
       database_id: number;
       table_oid: number;
     },
-    Table
+    RawTable
   >(),
 
   /** Returns the oid of the table created */
