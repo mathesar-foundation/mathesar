@@ -8,7 +8,7 @@ import {
 } from '@mathesar/routes/urls';
 import { type ProcessedColumn } from '@mathesar/stores/table-data';
 
-export function mergeTableMetadata(
+function mergeTableMetadata(
   a: Table['metadata'],
   b?: RecursivePartial<Table['metadata']>,
 ): Table['metadata'] {
@@ -27,6 +27,11 @@ export function mergeTableMetadata(
 }
 
 export function mergeTables(a: Table, b: RecursivePartial<Table>): Table {
+  // I don't love this function, but for now it works. It seems like we ought to
+  // have a more generic way to do this sort of thing, perhaps with a library,
+  // perhaps with JSON serialization. It's kind of hard do find a type-safe
+  // approach that's compatible with our RecursivePartial type. I'm open to more
+  // generalized ways of doing this!
   return {
     ...a,
     ...b,
