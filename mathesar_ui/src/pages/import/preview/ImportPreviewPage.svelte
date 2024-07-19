@@ -9,14 +9,14 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getTablePageUrl } from '@mathesar/routes/urls';
   import AsyncStore from '@mathesar/stores/AsyncStore';
+  import { currentConnection } from '@mathesar/stores/databases';
   import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import { Spinner } from '@mathesar-component-library';
 
   import ImportPreviewContent from './ImportPreviewContent.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
-  import { currentConnection } from '@mathesar/stores/databases';
-  import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
 
   const tableFetch = new AsyncStore(getTableFromStoreOrApi);
   const dataFileFetch = new AsyncStore(dataFilesApi.get);

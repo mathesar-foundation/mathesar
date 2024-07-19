@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { ModalController } from '@mathesar-component-library';
   import type { Table } from '@mathesar/api/rpc/tables';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
@@ -11,6 +10,7 @@
     factoryToGetTableNameValidationErrors,
     updateTable,
   } from '@mathesar/stores/tables';
+  import type { ModalController } from '@mathesar-component-library';
 
   export let table: Table;
   export let modalController: ModalController;

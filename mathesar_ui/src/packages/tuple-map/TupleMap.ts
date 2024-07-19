@@ -1,10 +1,10 @@
 import { map } from 'iter-tools';
 
-function parse(key: string) {
-  return JSON.parse(key);
+function parse<T>(key: string): T {
+  return JSON.parse(key) as T;
 }
 
-function serialize(keys: unknown[]) {
+function serialize(keys: unknown[]): string {
   return JSON.stringify(keys);
 }
 
@@ -40,7 +40,7 @@ export class TupleMap<K extends unknown[], V> {
   }
 
   keys(): IterableIterator<K> {
-    return map(parse, this.map.keys());
+    return map((k) => parse(k), this.map.keys());
   }
 
   values(): IterableIterator<V> {

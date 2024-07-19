@@ -1,12 +1,12 @@
 import { filter } from 'iter-tools';
 
 import type { Table } from '@mathesar/api/rpc/tables';
-import { type RecursivePartial } from '@mathesar/component-library';
+import type { RecursivePartial } from '@mathesar/component-library';
 import {
   getImportPreviewPageUrl,
   getTablePageUrl,
 } from '@mathesar/routes/urls';
-import { type ProcessedColumn } from '@mathesar/stores/table-data';
+import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 function mergeTableMetadata(
   a: Table['metadata'],

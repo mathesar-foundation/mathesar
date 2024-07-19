@@ -10,8 +10,8 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
     currentTable,
-    deleteTable,
     currentTablesData,
+    deleteTable,
   } from '@mathesar/stores/tables';
   import {
     constructDataExplorerUrlToSummarizeFromGroup,

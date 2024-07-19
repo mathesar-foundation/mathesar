@@ -9,8 +9,10 @@ import type {
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { connectionsStore } from '@mathesar/stores/databases';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
@@ -26,8 +28,6 @@ import {
   getColumnInformationMap,
   getTablesThatReferenceBaseTable,
 } from './utils';
-import { api } from '@mathesar/api/rpc';
-import { connectionsStore } from '@mathesar/stores/databases';
 
 export default class QueryManager extends QueryRunner {
   private undoRedoManager: QueryUndoRedoManager;

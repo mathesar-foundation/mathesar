@@ -2,14 +2,10 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import {
-    CancellablePromise,
-    CancelOrProceedButtonPair,
-    Spinner,
-  } from '@mathesar-component-library';
   import { columnsApi } from '@mathesar/api/rest/columns';
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import { getAPI, postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
   import type { Database } from '@mathesar/AppTypes';
@@ -31,11 +27,16 @@
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import { currentTables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
+  import {
+    CancelOrProceedButtonPair,
+    CancellablePromise,
+    Spinner,
+  } from '@mathesar-component-library';
 
   import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
 
-  import { getAPI, postAPI } from '@mathesar/api/rest/utils/requestUtils';
+
   import ErrorInfo from './ErrorInfo.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
   import {

@@ -23,9 +23,9 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import {
+    currentTables,
     importVerifiedTables as importVerifiedTablesStore,
     refetchTablesForCurrentSchema,
-    currentTables,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';

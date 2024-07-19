@@ -16,6 +16,7 @@
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { currentConnection } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
     getTabularDataStoreFromContext,
@@ -43,7 +44,6 @@
   import type { ExtractColumnsModalController } from './ExtractColumnsModalController';
   import SelectLinkedTable from './SelectLinkedTable.svelte';
   import SuccessToastContent from './SuccessToastContent.svelte';
-  import { currentConnection } from '@mathesar/stores/databases';
 
   const tabularData = getTabularDataStoreFromContext();
 

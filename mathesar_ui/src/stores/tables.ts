@@ -10,16 +10,10 @@
  */
 
 import { execPipe, filter, find, map } from 'iter-tools';
-import { _ } from 'svelte-i18n';
 import type { Readable, Writable } from 'svelte/store';
 import { derived, get, readable, writable } from 'svelte/store';
+import { _ } from 'svelte-i18n';
 
-import {
-  CancellablePromise,
-  collapse,
-  defined,
-  type RecursivePartial,
-} from '@mathesar-component-library';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_table';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
@@ -34,6 +28,13 @@ import {
   mergeTables,
   tableRequiresImportConfirmation,
 } from '@mathesar/utils/tables';
+import {
+  CancellablePromise,
+  type RecursivePartial,
+  collapse,
+  defined,
+} from '@mathesar-component-library';
+
 import { connectionsStore } from './databases';
 import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 
@@ -111,7 +112,7 @@ export async function refetchTablesForSchema(
     // TODO: why are we logging an error here? I would expect that we'd either
     // throw or ignore. If there's a reason for this logging, please add a code
     // comment explaining why.
-    console.error(`Tables store not found.`);
+    console.error('Tables store not found.');
     return undefined;
   }
 

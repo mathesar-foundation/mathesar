@@ -10,6 +10,7 @@
     SheetHeader,
   } from '@mathesar/components/sheet';
   import SheetOriginCell from '@mathesar/components/sheet/cells/SheetOriginCell.svelte';
+  import { currentConnection } from '@mathesar/stores/databases';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import {
     ID_ADD_NEW_COLUMN,
@@ -22,7 +23,6 @@
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
-  import { currentConnection } from '@mathesar/stores/databases';
 
   const tabularData = getTabularDataStoreFromContext();
 

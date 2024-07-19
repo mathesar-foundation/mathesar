@@ -20,7 +20,10 @@
   );
 
   async function handleSubmit(name: string) {
-    updateTable($currentConnection, { oid: $tabularData.table.oid, name });
+    await updateTable($currentConnection, {
+      oid: $tabularData.table.oid,
+      name,
+    });
   }
 </script>
 
