@@ -21,7 +21,7 @@
   );
 
   async function handleSave(name: string, description: string) {
-    updateTable($currentConnection, {
+    await updateTable($currentConnection, {
       oid: table.oid,
       name,
       description,
