@@ -2,7 +2,7 @@
   import { tick } from 'svelte';
   import { router } from 'tinro';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { focusActiveCell } from '@mathesar/components/sheet/utils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';

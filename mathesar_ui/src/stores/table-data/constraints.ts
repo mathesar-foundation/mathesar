@@ -7,7 +7,6 @@ import type {
 } from 'svelte/store';
 import { derived, get as getStoreValue, writable } from 'svelte/store';
 
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { Constraint as ApiConstraint } from '@mathesar/api/rest/types/tables/constraints';
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
@@ -18,6 +17,7 @@ import {
   getAPI,
   postAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import type { CancellablePromise } from '@mathesar-component-library';
 

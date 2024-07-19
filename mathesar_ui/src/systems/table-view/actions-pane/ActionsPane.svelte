@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconInspector, iconTable } from '@mathesar/icons';

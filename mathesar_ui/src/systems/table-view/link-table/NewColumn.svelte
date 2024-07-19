@@ -2,7 +2,7 @@
   import type { ComponentProps } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { Field, type FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
   import { Spinner } from '@mathesar-component-library';

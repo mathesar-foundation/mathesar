@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { Table } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import { getAvailableName } from '@mathesar/utils/db';
 

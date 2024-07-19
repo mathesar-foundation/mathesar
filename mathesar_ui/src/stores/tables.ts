@@ -16,7 +16,6 @@
 import type { Readable, Unsubscriber, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type {
   SplitTableRequest,
@@ -33,6 +32,7 @@ import {
   postAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
 import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { DBObjectEntry, Database } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
 import type { AtLeastOne } from '@mathesar/typeUtils';

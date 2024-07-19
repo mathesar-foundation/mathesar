@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { Icon } from '@mathesar/component-library';
   import { iconSelectRecord } from '@mathesar/icons';
 

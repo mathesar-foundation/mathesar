@@ -4,9 +4,9 @@
 
   import { columnsApi } from '@mathesar/api/rest/columns';
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import type { Database } from '@mathesar/AppTypes';
   import {
     Field,

@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';

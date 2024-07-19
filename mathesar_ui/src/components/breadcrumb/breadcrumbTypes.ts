@@ -1,6 +1,6 @@
 import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { Database } from '@mathesar/AppTypes';
 import type {
   ComponentAndProps,

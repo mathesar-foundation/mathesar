@@ -1,8 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import type { Database } from '@mathesar/AppTypes';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';

@@ -1,8 +1,8 @@
 import type { Readable } from 'svelte/store';
 
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { Constraint } from '@mathesar/api/rest/types/tables/constraints';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,

@@ -6,10 +6,10 @@ import type {
   QueryInstance,
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
 import { getTable } from '@mathesar/stores/tables';

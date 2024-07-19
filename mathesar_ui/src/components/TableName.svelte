@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { iconTable } from '@mathesar/icons';
   import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
 

@@ -3,7 +3,7 @@
   import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';

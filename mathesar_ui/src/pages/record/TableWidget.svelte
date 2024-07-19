@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {

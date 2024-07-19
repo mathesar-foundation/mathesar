@@ -5,12 +5,12 @@ import type {
   QueryResultColumn,
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   JoinableTablesResult,
   JpPath,
 } from '@mathesar/api/rest/types/tables/joinable_tables';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,

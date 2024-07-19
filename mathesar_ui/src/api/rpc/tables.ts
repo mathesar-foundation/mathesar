@@ -1,6 +1,6 @@
-import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
+import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-import type { Column } from './tables/columns';
+import type { Column } from '../rest/types/tables/columns';
 
 export interface Table {
   oid: number;
@@ -24,7 +24,12 @@ export interface Table {
   description: string | null;
 }
 
-/**
- * This is the GET response for: `/api/db/v0/tables/`
- */
-export type TablesList = PaginatedResponse<Table>;
+export const tables = {
+  list: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      schema_oid: number;
+    },
+    Table[]
+  >(),
+};

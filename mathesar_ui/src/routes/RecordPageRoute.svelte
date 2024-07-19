@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import type { Database } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import RecordPage from '@mathesar/pages/record/RecordPage.svelte';

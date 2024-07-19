@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';

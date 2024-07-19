@@ -1,6 +1,5 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   PaginatedResponse,
@@ -13,6 +12,7 @@ import {
   patchAPI,
   postAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type { Table } from '@mathesar/api/rpc/tables';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {

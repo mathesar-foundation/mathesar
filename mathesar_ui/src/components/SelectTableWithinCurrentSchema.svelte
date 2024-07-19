@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { importVerifiedTables } from '@mathesar/stores/tables';
   import type { SelectProps } from '@mathesar-component-library/types';
 

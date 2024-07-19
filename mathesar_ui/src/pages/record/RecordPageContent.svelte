@@ -1,10 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     FormSubmit,
     makeForm,

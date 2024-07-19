@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { LinksPostRequest } from '@mathesar/api/rest/types/links';
-  import type { Table } from '@mathesar/api/rest/types/tables';
   import { postAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     Field,
     FieldLayout,

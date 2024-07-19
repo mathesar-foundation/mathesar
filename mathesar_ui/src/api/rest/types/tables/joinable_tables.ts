@@ -4,7 +4,7 @@
  * endpoint: /api/db/v0/tables/<table_id>/joinable_tables/
  */
 
-import type { Table } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rpc/tables';
 
 import type { Column } from './columns';
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Table } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';

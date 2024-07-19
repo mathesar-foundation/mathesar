@@ -1,12 +1,12 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Response as ApiResponse } from '@mathesar/api/rest/types/tables/records';
 import {
   type RequestStatus,
   getAPI,
   patchAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type { Table } from '@mathesar/api/rpc/tables';
 import { WritableMap } from '@mathesar/component-library';
 import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 import {

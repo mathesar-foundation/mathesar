@@ -1,5 +1,5 @@
-import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
