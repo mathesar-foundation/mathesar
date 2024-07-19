@@ -2975,3 +2975,193 @@ BEGIN
   RETURN NEXT is(msar.build_order_by_expr(rel_id, null), null);
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- msar.build_filter_expr --------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_build_filter_expr() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'col1 = ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'lesser', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'col1 < ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'greater', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'col1 > ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'lesser_or_equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'col1 <= ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'greater_or_equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'col1 >= ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'null', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2)))),
+    'col1 IS NULL'
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'not_null', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2)))),
+    'col1 IS NOT NULL'
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'contains_case_insensitive', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 'ABc')))),
+    'col1 ILIKE ''%'' || ''ABc'' || ''%'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'starts_with_case_insensitive', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 'a''bc')))),
+    'col1 ILIKE ''a''''bc'' || ''%'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'json_array_length_equals', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'jsonb_array_length(col1::jsonb) = ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'json_array_length_greater_than', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'jsonb_array_length(col1::jsonb) > ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'json_array_length_greater_or_equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'jsonb_array_length(col1::jsonb) >= ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'json_array_length_less_than', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'jsonb_array_length(col1::jsonb) < ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'json_array_length_less_or_equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'jsonb_array_length(col1::jsonb) <= ''500'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'json_array_not_empty', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 500)))),
+    'jsonb_array_length(col1::jsonb) > 0'
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'json_array_contains', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', '"500"')))),
+    'col1 @> ''"500"'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'uri_scheme_equals', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 'https')))),
+    'mathesar_types.uri_scheme(col1) = ''https'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'uri_authority_contains', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 'google')))),
+    'mathesar_types.uri_authority(col1) LIKE ''%'' || ''google'' || ''%'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'email_domain_equals', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 'gmail.com')))),
+    'mathesar_types.email_domain_name(col1) = ''gmail.com'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'email_domain_contains', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 'mail')))),
+    'mathesar_types.email_domain_name(col1) LIKE ''%'' || ''mail'' || ''%'''
+  );
+END;
+$$ LANGUAGE plpgsql;

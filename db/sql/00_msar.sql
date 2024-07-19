@@ -3309,7 +3309,7 @@ SELECT val;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-DROP TABLE msar.filter_templates;
+DROP TABLE IF EXISTS msar.filter_templates;
 CREATE TABLE msar.filter_templates (filter_key text PRIMARY KEY, filter_template text);
 INSERT INTO msar.filter_templates VALUES
   -- basic composition operators
