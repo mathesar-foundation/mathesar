@@ -2858,8 +2858,10 @@ BEGIN
     col1 integer,
     col2 varchar,
     col3 json,
-    col4 jsonb
+    col4 jsonb,
+    coltodrop integer
   );
+  ALTER TABLE atable DROP COLUMN coltodrop;
   INSERT INTO atable (col1, col2, col3, col4) VALUES
     (5, 'sdflkj', '"s"', '{"a": "val"}'),
     (34, 'sdflfflsk', null, '[1, 2, 3, 4]'),
