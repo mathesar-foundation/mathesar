@@ -43,6 +43,7 @@
   import type { ExtractColumnsModalController } from './ExtractColumnsModalController';
   import SelectLinkedTable from './SelectLinkedTable.svelte';
   import SuccessToastContent from './SuccessToastContent.svelte';
+  import { currentConnection } from '@mathesar/stores/databases';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -164,7 +165,12 @@
           extractedTableName: newTableName,
           newFkColumnName: $newFkColumnName,
         });
-        followUps.push(getTableFromStoreOrApi(response.extracted_table));
+        followUps.push(
+          getTableFromStoreOrApi({
+            connection: $currentConnection,
+            tableOid: response.extracted_table,
+          }),
+        );
         followUps.push(
           $tabularData.refreshAfterColumnExtraction(
             extractedColumnIds,

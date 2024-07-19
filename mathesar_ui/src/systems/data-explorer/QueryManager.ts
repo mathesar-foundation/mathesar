@@ -142,7 +142,7 @@ export default class QueryManager extends QueryRunner {
       }
 
       this.baseTableFetchPromise = api.tables
-        .get({
+        .get_with_metadata({
           database_id: currentConnection.id,
           table_oid: baseTableId,
         })

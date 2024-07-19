@@ -29,7 +29,7 @@
   } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
-  import { currentTables, patchTable } from '@mathesar/stores/tables';
+  import { currentTables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
 
   import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
@@ -68,7 +68,7 @@
 
   function generateTablePreview(props: {
     table: Pick<Table, 'oid'>;
-    columns: Table['columns'];
+    columns: Column[];
   }): CancellablePromise<{
     records: Record<string, unknown>[];
   }> {
@@ -173,16 +173,19 @@
   }
 
   async function finishImport() {
-    try {
-      await patchTable(database, table.oid, {
-        name: $customizedTableName,
-        import_verified: true,
-        columns: finalizeColumns(columns, columnPropertiesMap),
-      });
-      router.goto(getTablePageUrl(database.id, schema.oid, table.oid), true);
-    } catch (err) {
-      toast.fromError(err);
-    }
+    // TODO reimplement patching tables columns with RPC API.
+    throw new Error('Not implemented');
+
+    // try {
+    //   await patchTable(database, table.oid, {
+    //     name: $customizedTableName,
+    //     import_verified: true,
+    //     columns: finalizeColumns(columns, columnPropertiesMap),
+    //   });
+    //   router.goto(getTablePageUrl(database.id, schema.oid, table.oid), true);
+    // } catch (err) {
+    //   toast.fromError(err);
+    // }
   }
 </script>
 

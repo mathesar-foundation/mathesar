@@ -101,7 +101,7 @@ export function buildColumnPropertiesMap(
 export function finalizeColumns(
   columns: Column[],
   columnPropertiesMap: ColumnPropertiesMap,
-): Table['columns'] {
+) {
   return columns
     .filter((column) => columnPropertiesMap[column.id]?.selected)
     .map((column) => ({

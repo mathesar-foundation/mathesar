@@ -181,19 +181,23 @@ export function getLinkFromColumn(
 
 export function getColumnInformationMap(
   result: JoinableTablesResult,
-  baseTable: Pick<Table, 'oid' | 'name' | 'columns'>,
+  baseTable: Pick<Table, 'oid' | 'name'>,
 ): InputColumnsStoreSubstance['inputColumnInformationMap'] {
   const map: InputColumnsStoreSubstance['inputColumnInformationMap'] =
     new Map();
-  baseTable.columns.forEach((column) => {
-    map.set(column.id, {
-      id: column.id,
-      name: column.name,
-      type: column.type,
-      tableId: baseTable.oid,
-      tableName: baseTable.name,
-    });
-  });
+
+  // TODO_BETA: figure out how to deal with the fact that our `Table` type no
+  // longer has a `columns` field.
+
+  // baseTable.columns.forEach((column) => {
+  //   map.set(column.id, {
+  //     id: column.id,
+  //     name: column.name,
+  //     type: column.type,
+  //     tableId: baseTable.oid,
+  //     tableName: baseTable.name,
+  //   });
+  // });
   Object.keys(result.tables).forEach((tableIdKey) => {
     const tableId = parseInt(tableIdKey, 10);
     const table = result.tables[tableId];
@@ -213,26 +217,32 @@ export function getColumnInformationMap(
 
 export function getBaseTableColumnsWithLinks(
   result: JoinableTablesResult,
-  baseTable: Pick<Table, 'oid' | 'name' | 'columns'>,
+  baseTable: Pick<Table, 'oid' | 'name'>,
 ): Map<ColumnWithLink['id'], ColumnWithLink> {
-  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-    baseTable.columns.map((column) => [
-      column.id,
-      {
-        id: column.id,
-        name: column.name,
-        type: column.type,
-        tableName: baseTable.name,
-        linksTo: getLinkFromColumn(result, column.id, 1),
-        producesMultipleResults: false,
-      },
-    ]);
+  // TODO_BETA: figure out how to deal with the fact that our `Table` type no
+  // longer has a `columns` field.
+
+  // const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
+  //   baseTable.columns.map((column) => [
+  //     column.id,
+  //     {
+  //       id: column.id,
+  //       name: column.name,
+  //       type: column.type,
+  //       tableName: baseTable.name,
+  //       linksTo: getLinkFromColumn(result, column.id, 1),
+  //       producesMultipleResults: false,
+  //     },
+  //   ]);
+
+  const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] = [];
+
   return new Map(columnMapEntries.sort(compareColumnByLinks));
 }
 
 export function getTablesThatReferenceBaseTable(
   result: JoinableTablesResult,
-  baseTable: Pick<Table, 'oid' | 'name' | 'columns'>,
+  baseTable: Pick<Table, 'oid' | 'name'>,
 ): ReferencedByTable[] {
   const referenceLinks = result.joinable_tables.filter(
     (entry) => entry.depth === 1 && entry.fk_path[0][1] === true,
@@ -243,10 +253,16 @@ export function getTablesThatReferenceBaseTable(
     const tableId = reference.target;
     const table = result.tables[tableId];
     const baseTableColumnId = reference.jp_path[0][0];
-    const baseTableColumn = baseTable.columns.find(
-      (column) => column.id === baseTableColumnId,
-    );
     const referenceTableColumnId = reference.jp_path[0][1];
+
+    // TODO_BETA: figure out how to deal with the fact that our `Table` type no
+    // longer has a `columns` field.
+
+    // const baseTableColumn = baseTable.columns.find(
+    //   (column) => column.id === baseTableColumnId,
+    // );
+    const baseTableColumn = undefined;
+
     if (!baseTableColumn) {
       return;
     }

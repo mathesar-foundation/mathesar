@@ -89,9 +89,14 @@
       const recordId = getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];
       const table = $currentTablesData.tablesMap.get(tableId);
-      const template = table?.settings?.preview_settings?.template;
+      const template = table?.metadata?.record_summary_template;
+      // TODO_RS_TEMPLATE
+      //
+      // We need to change the logic here to account for the fact that sometimes
+      // the record summary template actually _will_ be missing. We need to
+      // handle this on the client.
       if (!template) {
-        throw new Error('No record summary template found in API response.');
+        throw new Error('TODO_RS_TEMPLATE');
       }
       const recordSummary = renderTransitiveRecordSummary({
         inputData: buildInputData(record),

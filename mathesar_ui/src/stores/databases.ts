@@ -129,5 +129,19 @@ class ConnectionsStore {
 export const connectionsStore: MakeWritablePropertiesReadable<ConnectionsStore> =
   new ConnectionsStore();
 
+/**
+ * @throws an error when used in a context where no current connection exists.
+ * This behavior sacrifices some stability for the sake of developer ergonomics.
+ * This sacrifice seems acceptable given that such a large part of the
+ * application depends on the existence of one and only one connection.
+ */
+export const currentConnection = derived(
+  connectionsStore.currentConnection,
+  (c) => {
+    if (!c) throw new Error('No current connection');
+    return c;
+  },
+);
+
 /** @deprecated Use connectionsStore.currentConnection instead */
 export const currentDatabase = connectionsStore.currentConnection;

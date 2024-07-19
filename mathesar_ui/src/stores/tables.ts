@@ -32,7 +32,6 @@ import {
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
-import type { AtLeastOne } from '@mathesar/typeUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
 
@@ -41,6 +40,8 @@ import { TupleMap } from '@mathesar/packages/tuple-map';
 import { connectionsStore } from './databases';
 import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 import { api } from '@mathesar/api/rpc';
+import { execPipe, filter, map } from 'iter-tools';
+import { _ } from 'svelte-i18n';
 
 const commonData = preloadCommonData();
 
@@ -224,28 +225,12 @@ export function deleteTable(
   );
 }
 
-// TODO_3651: This is not actually updating metadata. Merge this function with
-// patchTable below. Separate actual metadata into a different function
-export function updateTableMetaData(
+export async function updateTable(
   connection: Pick<Connection, 'id'>,
-  tableOid: number,
-  updatedMetaData: AtLeastOne<{ name: string; description: string }>,
-): CancellablePromise<Table> {
-  const promise = patchAPI<Table>(
-    `/api/db/v0/tables/${tableOid}/`,
-    updatedMetaData,
-  );
-  return new CancellablePromise(
-    (resolve, reject) => {
-      void promise.then((table) => {
-        findAndUpdateTableStore(tableOid, table);
-        return resolve(table);
-      }, reject);
-    },
-    () => {
-      promise.cancel();
-    },
-  );
+  table: RecursivePartial<Table> & { oid: Table['oid'] },
+) {
+  // TODO_3651
+  throw new Error('Not implemented');
 }
 
 export function createTable(
@@ -275,29 +260,6 @@ export function createTable(
           return { ...existing, tablesMap };
         });
         return resolve(table);
-      }, reject);
-    },
-    () => {
-      promise.cancel();
-    },
-  );
-}
-
-export function patchTable(
-  connection: Pick<Connection, 'id'>,
-  tableOid: Table['oid'],
-  patch: {
-    name?: Table['name'];
-    import_verified?: Table['import_verified'];
-    columns?: Table['columns'];
-  },
-): CancellablePromise<Table> {
-  const promise = patchAPI<Table>(`/api/db/v0/tables/${tableOid}/`, patch);
-  return new CancellablePromise(
-    (resolve, reject) => {
-      void promise.then((value) => {
-        findAndUpdateTableStore(tableOid, value);
-        return resolve(value);
       }, reject);
     },
     () => {
@@ -336,10 +298,13 @@ export function moveColumns(
   });
 }
 
-export function getTableFromStoreOrApi(
-  connection: Pick<Connection, 'id'>,
-  tableOid: Table['oid'],
-): CancellablePromise<Table> {
+export function getTableFromStoreOrApi({
+  connection,
+  tableOid,
+}: {
+  connection: Pick<Connection, 'id'>;
+  tableOid: Table['oid'];
+}): CancellablePromise<Table> {
   const tablesStore = findSchemaStoreForTable(tableOid);
   if (tablesStore) {
     const table = get(tablesStore).tablesMap.get(tableOid);
@@ -350,7 +315,7 @@ export function getTableFromStoreOrApi(
     }
   }
   const promise = api.tables
-    .get({
+    .get_with_metadata({
       database_id: connection.id,
       table_oid: tableOid,
     })
@@ -434,42 +399,44 @@ export function getJoinableTablesResult(tableId: number, maxDepth = 1) {
   );
 }
 
-async function saveTableSettings(
-  connection: Pick<Connection, 'id'>,
-  table: Pick<Table, 'oid' | 'settings' | 'schema'>,
-  settings: RecursivePartial<Table['settings']>,
-): Promise<void> {
-  const url = `/api/db/v0/tables/${table.oid}/settings/${table.settings.id}/`;
-  await patchAPI<Table['settings']>(url, settings);
-  await refetchTablesForSchema(connection, { oid: table.schema });
-}
-
-export function saveRecordSummaryTemplate(
-  connection: Pick<Connection, 'id'>,
-  table: Pick<Table, 'oid' | 'settings' | 'schema'>,
-  previewSettings: Table['settings']['preview_settings'],
-): Promise<void> {
-  const { customized } = previewSettings;
-  return saveTableSettings(connection, table, {
-    preview_settings: customized ? previewSettings : { customized },
-  });
-}
-
-export function saveColumnOrder(
-  connection: Pick<Connection, 'id'>,
-  table: Pick<Table, 'oid' | 'settings' | 'schema'>,
-  columnOrder: Table['settings']['column_order'],
-): Promise<void> {
-  return saveTableSettings(connection, table, {
-    // Using the Set constructor to remove potential duplicates
-    column_order: [...new Set(columnOrder)],
-  });
-}
-
 export async function refetchTablesForCurrentSchema() {
   const connection = get(connectionsStore.currentConnection);
   const schemaOid = get(currentSchemaId);
   if (connection && schemaOid) {
     await refetchTablesForSchema(connection, { oid: schemaOid });
   }
+}
+
+export function factoryToGetTableNameValidationErrors(
+  connection: Pick<Connection, 'id'>,
+  table: Table,
+): Readable<(n: string) => string[]> {
+  const tablesStore = tablesStores.get([connection.id, table.schema]);
+  if (!tablesStore) throw new Error('Tables store not found');
+
+  const otherTableNames = derived(
+    tablesStore,
+    (d) =>
+      new Set(
+        execPipe(
+          d.tablesMap.values(),
+          filter((t) => t.oid !== table.oid),
+          map((t) => t.name),
+        ),
+      ),
+  );
+
+  return derived([otherTableNames, _], ([$otherTableNames, $_]) => {
+    function getNameValidationErrors(name: string): string[] {
+      if (!name.trim()) {
+        return [$_('table_name_cannot_be_empty')];
+      }
+      if ($otherTableNames.has(name)) {
+        return [$_('table_with_name_already_exists')];
+      }
+      return [];
+    }
+
+    return getNameValidationErrors;
+  });
 }

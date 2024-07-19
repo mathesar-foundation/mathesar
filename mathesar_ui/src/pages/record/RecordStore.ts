@@ -36,7 +36,17 @@ export default class RecordStore {
     this.table = table;
     this.recordPk = recordPk;
     this.url = `/api/db/v0/tables/${this.table.oid}/records/${this.recordPk}/`;
-    const { template } = this.table.settings.preview_settings;
+    // TODO_RS_TEMPLATE
+    //
+    // We need to handle the case where no record summary template is set.
+    // Previously it was the responsibility of the service layer to _always_
+    // return a record summary template, even by deriving one on the fly to send
+    // if necessary. With the changes for beta, it will be the responsibility of
+    // the client to handle the case where no template is set. We need to wait
+    // until after the service layer changes are made before we can implement
+    // this here.
+    const template =
+      this.table.metadata.record_summary_template ?? 'TODO_RS_TEMPLATE';
     this.summary = derived(
       [this.fieldValues, this.recordSummaries],
       ([fields, fkSummaryData]) =>

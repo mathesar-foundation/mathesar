@@ -37,7 +37,7 @@
   );
 
   export let context: Context = 'page';
-  export let table: Pick<Table, 'oid' | 'settings' | 'schema'>;
+  export let table: Table;
   export let sheetElement: HTMLElement | undefined = undefined;
 
   let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
@@ -62,8 +62,7 @@
   });
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
-  $: ({ settings } = table);
-  $: ({ column_order: columnOrder } = settings);
+  $: columnOrder = table.metadata.column_order ?? [];
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open

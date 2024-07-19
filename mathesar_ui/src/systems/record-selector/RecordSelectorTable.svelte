@@ -138,7 +138,15 @@
       return;
     }
     const tableEntry = $currentTablesData.tablesMap.get(tableId);
-    const template = tableEntry?.settings?.preview_settings?.template ?? '';
+    const template = table?.metadata?.record_summary_template;
+    if (!template) {
+      throw new Error('TODO_RS_TEMPLATE');
+      // TODO_RS_TEMPLATE
+      //
+      // We need to change the logic here to account for the fact that sometimes
+      // the record summary template actually _will_ be missing. We need to
+      // handle this on the client.
+    }
     const recordSummary = renderTransitiveRecordSummary({
       template,
       inputData: buildInputData(record),

@@ -8,11 +8,8 @@
   import NameWithIcon from './NameWithIcon.svelte';
 
   interface $$Props extends Omit<ComponentProps<NameWithIcon>, 'icon'> {
-    table: {
-      name: Table['name'];
-      data_files?: Table['data_files'];
-      import_verified?: Table['import_verified'];
-    };
+    table: Pick<Table, 'name'> &
+      Parameters<typeof isTableImportConfirmationRequired>[0];
     isLoading?: boolean;
   }
 

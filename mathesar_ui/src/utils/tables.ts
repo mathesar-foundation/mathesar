@@ -4,46 +4,50 @@ import {
   getTablePageUrl,
 } from '@mathesar/routes/urls';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import { filter } from 'iter-tools';
 
-export function isTableImportConfirmationRequired(
-  table: Partial<Pick<Table, 'import_verified' | 'data_files'>>,
-): boolean {
-  /**
-   * table.import_verified can be null when tables have been
-   * manually added to the db/already present in db in which
-   * case we should not ask for re-confirmation.
-   */
-  return (
-    table.import_verified === false &&
-    table.data_files !== undefined &&
-    table.data_files.length > 0
-  );
+interface TableWithColumnOrder {
+  metadata?: {
+    column_order: number[] | null;
+  } | null;
 }
 
-export function getColumnOrder(
-  processedColumns: ProcessedColumn[],
-  table: Partial<Pick<Table, 'settings'>>,
-) {
-  const allColumns = [...processedColumns.values()];
-  let completeColumnOrder: number[] = [];
-  const { settings } = table;
-  if (settings) {
-    const { column_order: columnOrder } = settings;
-    if (columnOrder) {
-      completeColumnOrder = columnOrder;
-    }
+interface TableWithImportVerification {
+  metadata?: {
+    import_verified: boolean | null;
+  } | null;
+}
+
+export function isTableImportConfirmationRequired(
+  table: TableWithImportVerification,
+): boolean {
+  if (table.metadata?.import_verified === false) {
+    return true;
   }
-  allColumns.forEach((column) => {
-    if (!completeColumnOrder.includes(column.id)) {
-      completeColumnOrder.push(column.id);
-    }
-  });
-  return completeColumnOrder;
+  return false;
+}
+
+function getColumnOrder(
+  processedColumns: ProcessedColumn[],
+  table: TableWithColumnOrder,
+): number[] {
+  /**
+   * The column ids set in metadata. Because this array comes from
+   * loosely-coupled metadata, it might contain ids of columns which no longer
+   * exist, and it might lack ids of columns that do exist.
+   */
+  const orderedIds = new Set(table.metadata?.column_order ?? []);
+  const existingIds = new Set(processedColumns.map((c) => c.id));
+
+  const orderedIdsThatExist = filter((i) => existingIds.has(i), orderedIds);
+  const existingIdsNotOrdered = filter((i) => !orderedIds.has(i), existingIds);
+
+  return [...orderedIdsThatExist, ...existingIdsNotOrdered];
 }
 
 export function orderProcessedColumns(
   processedColumns: Map<number, ProcessedColumn>,
-  table: Partial<Pick<Table, 'settings'>>,
+  table: TableWithColumnOrder,
 ): Map<number, ProcessedColumn> {
   const columns = [...processedColumns.values()];
   const orderedColumns = new Map<number, ProcessedColumn>();
@@ -63,7 +67,7 @@ export function orderProcessedColumns(
 export function getLinkForTableItem(
   connectionId: number,
   schemaId: number,
-  table: Pick<Table, 'oid' | 'import_verified' | 'data_files'>,
+  table: TableWithImportVerification & { oid: Table['oid'] },
 ) {
   if (isTableImportConfirmationRequired(table)) {
     return getImportPreviewPageUrl(connectionId, schemaId, table.oid, {

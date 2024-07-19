@@ -15,6 +15,7 @@
 
   import ImportPreviewContent from './ImportPreviewContent.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
+  import { currentConnection } from '@mathesar/stores/databases';
 
   const tableFetch = new AsyncStore(getTableFromStoreOrApi);
   const dataFileFetch = new AsyncStore(dataFilesApi.get);
@@ -29,20 +30,29 @@
   }
 
   $: void (async () => {
-    const table = (await tableFetch.run(tableId)).resolvedValue;
+    const table = (
+      await tableFetch.run({
+        connection: $currentConnection,
+        tableOid: tableId,
+      })
+    ).resolvedValue;
     if (!table) {
       return;
     }
-    if (table.import_verified) {
+    if (table.metadata.import_verified) {
       redirectToTablePage();
       return;
     }
-    const firstDataFileId = table.data_files?.[0];
-    if (firstDataFileId === undefined) {
-      redirectToTablePage();
-      return;
-    }
-    await dataFileFetch.run(firstDataFileId);
+
+    // TODO_BETA: re-implement fetching and storing of `table.data_files`
+    // metadata from RPC API or similar.
+    throw new Error('Not implemented');
+    // const firstDataFileId = table.data_files?.[0];
+    // if (firstDataFileId === undefined) {
+    //   redirectToTablePage();
+    //   return;
+    // }
+    // await dataFileFetch.run(firstDataFileId);
   })();
   $: error = $tableFetch.error ?? $dataFileFetch.error;
 </script>

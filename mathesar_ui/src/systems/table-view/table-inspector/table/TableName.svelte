@@ -2,31 +2,37 @@
   import { _ } from 'svelte-i18n';
 
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
-  import EditTableHOC from '@mathesar/components/EditTableHOC.svelte';
+  import { currentConnection } from '@mathesar/stores/databases';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { currentTablesData } from '@mathesar/stores/tables';
+  import {
+    currentTablesData,
+    factoryToGetTableNameValidationErrors,
+    updateTable,
+  } from '@mathesar/stores/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let disabled = false;
+
+  $: getNameValidationErrors = factoryToGetTableNameValidationErrors(
+    $currentConnection,
+    $tabularData.table,
+  );
+
+  async function handleSubmit(name: string) {
+    updateTable($currentConnection, { oid: $tabularData.table.oid, name });
+  }
 </script>
 
-<EditTableHOC
-  let:getNameValidationErrors
-  let:onUpdate
-  tableId={$tabularData.id}
->
-  <div class="rename-table-property-container">
-    <span class="label">{$_('name')}</span>
-    <EditableTextWithActions
-      initialValue={$currentTablesData.tablesMap.get($tabularData.id)?.name ??
-        ''}
-      onSubmit={(name) => onUpdate({ name })}
-      getValidationErrors={getNameValidationErrors}
-      {disabled}
-    />
-  </div>
-</EditTableHOC>
+<div class="rename-table-property-container">
+  <span class="label">{$_('name')}</span>
+  <EditableTextWithActions
+    initialValue={$currentTablesData.tablesMap.get($tabularData.id)?.name ?? ''}
+    onSubmit={handleSubmit}
+    getValidationErrors={$getNameValidationErrors}
+    {disabled}
+  />
+</div>
 
 <style lang="scss">
   .rename-table-property-container {

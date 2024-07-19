@@ -44,6 +44,14 @@ export const tables = {
     RawTable
   >(),
 
+  get_with_metadata: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+    },
+    Table
+  >(),
+
   /** Returns the oid of the table created */
   add: rpcMethodTypeContainer<
     {
