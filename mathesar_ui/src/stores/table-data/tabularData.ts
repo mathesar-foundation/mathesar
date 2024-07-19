@@ -1,7 +1,7 @@
 import { getContext, setContext } from 'svelte';
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
@@ -25,7 +25,7 @@ import { RecordsData } from './records';
 export interface TabularDataProps {
   id: DBObjectEntry['id'];
   abstractTypesMap: AbstractTypesMap;
-  table: TableEntry;
+  table: Table;
   meta?: Meta;
   shareConsumer?: ShareConsumer;
   /**
@@ -60,7 +60,7 @@ export class TabularData {
 
   selection: SheetSelectionStore;
 
-  table: TableEntry;
+  table: Table;
 
   shareConsumer?: ShareConsumer;
 

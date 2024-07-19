@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconInspector, iconTable } from '@mathesar/icons';
@@ -22,7 +22,7 @@
   const userProfile = getUserProfileStoreFromContext();
 
   export let context: TableActionsContext = 'page';
-  export let table: Pick<TableEntry, 'name' | 'description'>;
+  export let table: Pick<Table, 'name' | 'description'>;
 
   $: ({ id, meta, isLoading, display } = $tabularData);
   $: ({ filtering, sorting, grouping, sheetState } = meta);

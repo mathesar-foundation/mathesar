@@ -2,7 +2,7 @@
   import type { ComponentProps } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import { Field, type FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
   import { Spinner } from '@mathesar-component-library';
@@ -13,9 +13,9 @@
 
   type Which = ComponentProps<Pill>['which'];
 
-  export let base: Pick<TableEntry, 'name'>;
+  export let base: Pick<Table, 'name'>;
   export let baseWhich: Which = 'base';
-  export let target: Pick<TableEntry, 'name'>;
+  export let target: Pick<Table, 'name'>;
   export let targetWhich: Which = 'target';
   export let field: FieldStore;
   export let targetColumnsAreLoading = false;

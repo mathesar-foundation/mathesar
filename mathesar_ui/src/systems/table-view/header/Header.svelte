@@ -1,7 +1,7 @@
 <script lang="ts">
   import { first } from 'iter-tools';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import { ContextMenu } from '@mathesar/component-library';
   import {
     SheetCellResizer,
@@ -27,7 +27,7 @@
 
   export let hasNewColumnButton = false;
   export let columnOrder: number[];
-  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let table: Pick<Table, 'oid' | 'settings' | 'schema'>;
 
   $: columnOrder = columnOrder ?? [];
   $: columnOrderString = columnOrder.map(String);

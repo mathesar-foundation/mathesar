@@ -17,7 +17,7 @@
       (current) => current.name === name,
     );
 
-    return tablesUsingName.length > 0 && tablesUsingName[0].id !== tableId;
+    return tablesUsingName.length > 0 && tablesUsingName[0].oid !== tableId;
   }
 
   function getNameValidationErrors(name: string): string[] {

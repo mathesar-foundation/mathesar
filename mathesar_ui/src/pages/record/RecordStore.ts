@@ -1,6 +1,6 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Response as ApiResponse } from '@mathesar/api/rest/types/tables/records';
 import {
   type RequestStatus,
@@ -26,16 +26,16 @@ export default class RecordStore {
 
   summary: Readable<string>;
 
-  table: TableEntry;
+  table: Table;
 
   recordPk: string;
 
   private url: string;
 
-  constructor({ table, recordPk }: { table: TableEntry; recordPk: string }) {
+  constructor({ table, recordPk }: { table: Table; recordPk: string }) {
     this.table = table;
     this.recordPk = recordPk;
-    this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordPk}/`;
+    this.url = `/api/db/v0/tables/${this.table.oid}/records/${this.recordPk}/`;
     const { template } = this.table.settings.preview_settings;
     this.summary = derived(
       [this.fieldValues, this.recordSummaries],

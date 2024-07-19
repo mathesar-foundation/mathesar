@@ -54,7 +54,7 @@
       </Help>
     </h2>
     <div class="widgets">
-      {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
+      {#each tableWidgetInputs as { table, fkColumn } (`${table.oid}-${fkColumn.id}`)}
         <section class="table-widget-positioner">
           <TableWidget {recordPk} {table} {fkColumn} />
         </section>

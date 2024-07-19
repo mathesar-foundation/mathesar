@@ -62,7 +62,7 @@
   $: ({ linkFk } = processedColumn);
   $: linkedTable = linkFk ? $tables.data.get(linkFk.referent_table) : undefined;
   $: linkedTableHref = linkedTable
-    ? $storeToGetTablePageUrl({ tableId: linkedTable.id })
+    ? $storeToGetTablePageUrl({ tableId: linkedTable.oid })
     : undefined;
 
   function addFilter() {

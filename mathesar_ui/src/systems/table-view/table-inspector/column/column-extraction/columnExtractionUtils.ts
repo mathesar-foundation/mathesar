@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 import {
@@ -24,7 +24,7 @@ function getLinkedTable({
 }: {
   fkConstraint: FkConstraint;
   columns: Map<number, ProcessedColumn>;
-  tables: Map<number, TableEntry>;
+  tables: Map<number, Table>;
 }): LinkedTable | undefined {
   const table = tables.get(fkConstraint.referent_table);
   if (!table) {
@@ -46,7 +46,7 @@ export function getLinkedTables({
 }: {
   constraints: Constraint[];
   columns: Map<number, ProcessedColumn>;
-  tables: Map<number, TableEntry>;
+  tables: Map<number, Table>;
 }): LinkedTable[] {
   return constraints
     .map((c) =>

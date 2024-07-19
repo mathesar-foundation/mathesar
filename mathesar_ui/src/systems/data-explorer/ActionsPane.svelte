@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
@@ -49,9 +49,9 @@
   $: hasNoColumns = $query.initial_columns.length === 0;
   $: querySaveRequestStatus = $state.saveState?.state;
 
-  function updateBaseTable(tableEntry: TableEntry | undefined) {
+  function updateBaseTable(table: Table | undefined) {
     void queryManager.update((q) =>
-      q.withBaseTable(tableEntry ? tableEntry.id : undefined),
+      q.withBaseTable(table ? table.oid : undefined),
     );
     linkCollapsibleOpenState = {};
   }

@@ -141,7 +141,7 @@
     const extractedColumnIds = extractedColumns.map((c) => c.id);
     try {
       if ($targetType === 'existingTable') {
-        const targetTableId = $linkedTable?.table.id;
+        const targetTableId = $linkedTable?.table.oid;
         if (!targetTableId) {
           throw new Error($_('no_target_table_selected'));
         }

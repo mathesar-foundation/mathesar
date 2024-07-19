@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
@@ -22,12 +22,12 @@
   });
 
   export let recordPk: string;
-  export let table: TableEntry;
+  export let table: Table;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: tabularData = new TabularData({
-    id: table.id,
+    id: table.oid,
     abstractTypesMap,
     meta,
     contextualFilters: new Map([[fkColumn.id, recordPk]]),

@@ -1,5 +1,5 @@
 import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Database } from '@mathesar/AppTypes';
 import type {
@@ -26,7 +26,7 @@ export interface BreadcrumbItemTable {
   type: 'table';
   database: Database;
   schema: Schema;
-  table: TableEntry;
+  table: Table;
 }
 
 export interface BreadcrumbItemSimple {
@@ -40,7 +40,7 @@ export interface BreadcrumbItemRecord {
   type: 'record';
   database: Database;
   schema: Schema;
-  table: TableEntry;
+  table: Table;
   record: {
     pk: string;
     summary: string;
@@ -78,7 +78,7 @@ export interface SimpleBreadcrumbSelectorEntry
 export interface BreadcrumbSelectorEntryForTable
   extends BaseBreadcrumbSelectorEntry {
   type: 'table';
-  table: TableEntry;
+  table: Table;
 }
 
 export type BreadcrumbSelectorEntry =

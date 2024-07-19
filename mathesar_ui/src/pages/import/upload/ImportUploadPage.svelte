@@ -119,7 +119,7 @@
       const previewPage = getImportPreviewPageUrl(
         database.id,
         schema.oid,
-        table.id,
+        table.oid,
         { useColumnTypeInference: $useColumnTypeInference },
       );
       router.goto(previewPage, true);

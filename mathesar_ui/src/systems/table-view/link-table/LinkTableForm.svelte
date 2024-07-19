@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { LinksPostRequest } from '@mathesar/api/rest/types/links';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import { postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import {
     Field,
@@ -53,7 +53,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let base: TableEntry;
+  export let base: Table;
   export let close: () => void;
 
   // ===========================================================================
@@ -68,9 +68,9 @@
   // ===========================================================================
   // Fields
   // ===========================================================================
-  $: targetTable = requiredField<TableEntry | undefined>(undefined);
+  $: targetTable = requiredField<Table | undefined>(undefined);
   $: target = $targetTable;
-  $: isSelfReferential = base.id === target?.id;
+  $: isSelfReferential = base.oid === target?.oid;
   $: linkTypes = ((): LinkType[] =>
     isSelfReferential
       ? ['manyToOne', 'manyToMany']
@@ -78,7 +78,7 @@
   $: linkType = requiredField<LinkType>('manyToOne');
   $: $targetTable, linkType.reset();
   $: targetColumnsStore = target
-    ? new ColumnsDataStore({ tableId: target.id })
+    ? new ColumnsDataStore({ tableId: target.oid })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
@@ -166,17 +166,17 @@
     if ($linkType === 'oneToMany') {
       return {
         link_type: 'one-to-many',
-        reference_table: values.targetTable.id,
+        reference_table: values.targetTable.oid,
         reference_column_name: $columnNameInTarget,
-        referent_table: base.id,
+        referent_table: base.oid,
       };
     }
     if ($linkType === 'manyToOne') {
       return {
         link_type: 'one-to-many',
-        reference_table: base.id,
+        reference_table: base.oid,
         reference_column_name: $columnNameInBase,
-        referent_table: values.targetTable.id,
+        referent_table: values.targetTable.oid,
       };
     }
     if ($linkType === 'manyToMany') {
@@ -185,11 +185,11 @@
         mapping_table_name: $mappingTableName,
         referents: [
           {
-            referent_table: base.id,
+            referent_table: base.oid,
             column_name: $columnNameMappingToBase,
           },
           {
-            referent_table: values.targetTable.id,
+            referent_table: values.targetTable.oid,
             column_name: $columnNameMappingToTarget,
           },
         ],
@@ -207,7 +207,7 @@
     if (!tableWithNewColumn) {
       return;
     }
-    if (tableWithNewColumn.id === $tabularData.id) {
+    if (tableWithNewColumn.oid === $tabularData.id) {
       await $tabularData.refresh();
     }
   }

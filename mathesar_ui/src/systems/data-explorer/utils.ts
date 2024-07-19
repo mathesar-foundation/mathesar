@@ -5,7 +5,7 @@ import type {
   QueryResultColumn,
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   JoinableTablesResult,
@@ -70,10 +70,10 @@ export type ProcessedQueryOutputColumnMap = ImmutableMap<
 export interface InputColumn {
   id: Column['id'];
   name: Column['name'];
-  tableName: TableEntry['name'];
+  tableName: Table['name'];
   jpPath?: JpPath;
   type: Column['type'];
-  tableId: TableEntry['id'];
+  tableId: Table['oid'];
 }
 
 export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
@@ -83,8 +83,8 @@ export interface ColumnWithLink extends Omit<InputColumn, 'tableId'> {
 }
 
 export interface LinkedTable {
-  id: TableEntry['id'];
-  name: TableEntry['name'];
+  id: Table['oid'];
+  name: Table['name'];
   linkedToColumn: {
     id: Column['id'];
     name: Column['name'];
@@ -181,7 +181,7 @@ export function getLinkFromColumn(
 
 export function getColumnInformationMap(
   result: JoinableTablesResult,
-  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
+  baseTable: Pick<Table, 'oid' | 'name' | 'columns'>,
 ): InputColumnsStoreSubstance['inputColumnInformationMap'] {
   const map: InputColumnsStoreSubstance['inputColumnInformationMap'] =
     new Map();
@@ -190,7 +190,7 @@ export function getColumnInformationMap(
       id: column.id,
       name: column.name,
       type: column.type,
-      tableId: baseTable.id,
+      tableId: baseTable.oid,
       tableName: baseTable.name,
     });
   });
@@ -213,7 +213,7 @@ export function getColumnInformationMap(
 
 export function getBaseTableColumnsWithLinks(
   result: JoinableTablesResult,
-  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
+  baseTable: Pick<Table, 'oid' | 'name' | 'columns'>,
 ): Map<ColumnWithLink['id'], ColumnWithLink> {
   const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
     baseTable.columns.map((column) => [
@@ -232,7 +232,7 @@ export function getBaseTableColumnsWithLinks(
 
 export function getTablesThatReferenceBaseTable(
   result: JoinableTablesResult,
-  baseTable: Pick<TableEntry, 'id' | 'name' | 'columns'>,
+  baseTable: Pick<Table, 'oid' | 'name' | 'columns'>,
 ): ReferencedByTable[] {
   const referenceLinks = result.joinable_tables.filter(
     (entry) => entry.depth === 1 && entry.fk_path[0][1] === true,

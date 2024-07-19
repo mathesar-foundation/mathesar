@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Database } from '@mathesar/AppTypes';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
@@ -36,7 +36,7 @@
   const recordSelector = getRecordSelectorFromContext();
   const editTableModalController = modal.spawnModalController();
 
-  export let table: TableEntry;
+  export let table: Table;
   export let database: Database;
   export let schema: Schema;
   export let canExecuteDDL: boolean;
@@ -47,10 +47,10 @@
 
   $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
   $: tablePageUrl = isTableImportConfirmationNeeded
-    ? getImportPreviewPageUrl(database.id, schema.oid, table.id, {
+    ? getImportPreviewPageUrl(database.id, schema.oid, table.oid, {
         useColumnTypeInference: true,
       })
-    : getTablePageUrl(database.id, schema.oid, table.id);
+    : getTablePageUrl(database.id, schema.oid, table.oid);
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.id,
     schema.oid,
@@ -68,7 +68,7 @@
         },
       },
       onProceed: async () => {
-        await deleteTable(database, schema, table.id);
+        await deleteTable(database, schema, table.oid);
       },
     });
   }
@@ -78,7 +78,7 @@
   }
 
   function handleFindRecord() {
-    recordSelector.navigateToRecordPage({ tableId: table.id });
+    recordSelector.navigateToRecordPage({ tableId: table.oid });
   }
 </script>
 

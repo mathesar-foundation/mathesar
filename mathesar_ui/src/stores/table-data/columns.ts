@@ -1,6 +1,6 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   PaginatedResponse,
@@ -46,7 +46,7 @@ export class ColumnsDataStore extends EventHandler<{
   columnPatched: Partial<Column>;
   columnsFetched: Column[];
 }> {
-  private tableId: TableEntry['id'];
+  private tableId: Table['oid'];
 
   private promise: CancellablePromise<PaginatedResponse<Column>> | undefined;
 
@@ -70,7 +70,7 @@ export class ColumnsDataStore extends EventHandler<{
     hiddenColumns,
     shareConsumer,
   }: {
-    tableId: TableEntry['id'];
+    tableId: Table['oid'];
     /** Values are column ids */
     hiddenColumns?: Iterable<number>;
     shareConsumer?: ShareConsumer;

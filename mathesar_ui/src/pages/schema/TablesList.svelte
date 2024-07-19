@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Database } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
@@ -9,14 +9,14 @@
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';
 
-  export let tables: TableEntry[];
+  export let tables: Table[];
   export let database: Database;
   export let schema: Schema;
   export let canExecuteDDL: boolean;
 </script>
 
 <div class="container">
-  {#each tables as table (table.id)}
+  {#each tables as table (table.oid)}
     <TableCard {canExecuteDDL} {table} {database} {schema} />
   {:else}
     <EmptyEntity icon={iconTable}>

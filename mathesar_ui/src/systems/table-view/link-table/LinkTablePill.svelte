@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import TableName from '@mathesar/components/TableName.svelte';
 
-  export let table: Pick<TableEntry, 'name'>;
+  export let table: Pick<Table, 'name'>;
   export let which: 'base' | 'target' | 'mapping';
 </script>
 

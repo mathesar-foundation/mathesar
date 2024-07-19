@@ -1,4 +1,4 @@
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 
 /**
@@ -18,7 +18,7 @@ export function getColumnIdToFocusInitially({
   table,
   columns,
 }: {
-  table: TableEntry | undefined;
+  table: Table | undefined;
   columns: Column[];
 }): number | undefined {
   function getFromRecordSummaryTemplate() {

@@ -36,7 +36,7 @@
           $currentDatabase?.id,
           $currentSchema.oid,
           {
-            id: $tabularData.id,
+            oid: $tabularData.id,
             name: $tables.data.get($tabularData.id)?.name ?? '',
           },
         )
@@ -49,7 +49,7 @@
       $currentDatabase.id,
       $currentSchema.oid,
       {
-        baseTable: { id, name: $currentTable.name },
+        baseTable: { oid: id, name: $currentTable.name },
         columns: $columns,
         terseGrouping: $grouping.terse(),
       },

@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { DisplayColumn } from '@mathesar/components/column/types';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
@@ -35,7 +35,7 @@ export function getColumnIconProps(
 }
 
 export function getSuggestedFkColumnName(
-  targetTable: Pick<TableEntry, 'name'> | undefined,
+  targetTable: Pick<Table, 'name'> | undefined,
   existingColumns: { name: string }[] = [{ name: 'id' }],
 ): string {
   const columnNames = new Set(existingColumns.map((c) => c.name));

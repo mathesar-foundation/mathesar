@@ -3,7 +3,7 @@
   import { meta } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Database } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
@@ -26,7 +26,7 @@
   export let schema: Schema;
 
   function makeTableBreadcrumbSelectorItem(
-    table: TableEntry,
+    table: Table,
   ): BreadcrumbSelectorEntryForTable {
     return {
       type: 'table',
@@ -35,7 +35,7 @@
       href: getLinkForTableItem(database.id, schema.oid, table),
       icon: iconTable,
       isActive() {
-        return table.id === $currentTableId;
+        return table.oid === $currentTableId;
       },
     };
   }

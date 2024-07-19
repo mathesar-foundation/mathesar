@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
   import { Label, Radio, assertExhaustive } from '@mathesar-component-library';
@@ -13,8 +13,8 @@
   export let linkType: LinkType;
   export let isSelfReferential: boolean;
   export let field: FieldStore<LinkType>;
-  export let base: Pick<TableEntry, 'name'>;
-  export let target: Pick<TableEntry, 'name'>;
+  export let base: Pick<Table, 'name'>;
+  export let target: Pick<Table, 'name'>;
 
   $: checked = linkType === $field;
   $: label = (() => {

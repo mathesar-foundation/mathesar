@@ -1,6 +1,6 @@
 import type { Connection } from '@mathesar/api/rest/connections';
 import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { User } from '@mathesar/api/rest/users';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { AbstractTypeResponse } from '@mathesar/AppTypes';
@@ -8,7 +8,7 @@ import type { AbstractTypeResponse } from '@mathesar/AppTypes';
 export interface CommonData {
   connections: Connection[];
   schemas: Schema[];
-  tables: TableEntry[];
+  tables: Table[];
   queries: QueryInstance[];
   current_connection: Connection['id'] | null;
   internal_db_connection: {

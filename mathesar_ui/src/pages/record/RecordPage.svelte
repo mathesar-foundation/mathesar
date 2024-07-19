@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
@@ -13,9 +13,9 @@
 
   export let record: RecordStore;
 
-  $: table = $currentTable as TableEntry;
+  $: table = $currentTable as Table;
   $: tableStructure = new TableStructure({
-    id: table.id,
+    id: table.oid,
     abstractTypesMap: $currentDbAbstractTypes.data,
   });
   $: tableStructureIsLoading = tableStructure.isLoading;

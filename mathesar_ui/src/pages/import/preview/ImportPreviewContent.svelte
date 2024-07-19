@@ -4,7 +4,7 @@
 
   import { columnsApi } from '@mathesar/api/rest/columns';
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Database } from '@mathesar/AppTypes';
@@ -62,7 +62,7 @@
 
   export let database: Database;
   export let schema: Schema;
-  export let table: TableEntry;
+  export let table: Table;
   export let dataFile: DataFile;
   export let useColumnTypeInference = false;
 
@@ -70,7 +70,7 @@
   let columnPropertiesMap = buildColumnPropertiesMap([]);
 
   $: otherTableNames = [...$tables.data.values()]
-    .filter((t) => t.id !== table.id)
+    .filter((t) => t.oid !== table.oid)
     .map((t) => t.name);
   $: customizedTableName = requiredField(table.name, [
     uniqueWith(otherTableNames, $_('table_name_already_exists')),
@@ -82,7 +82,7 @@
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
   async function init() {
-    const columnsResponse = await columnsFetch.run(table.id);
+    const columnsResponse = await columnsFetch.run(table.oid);
     const fetchedColumns = columnsResponse?.resolvedValue?.results;
     if (!fetchedColumns) {
       return;
@@ -90,7 +90,7 @@
     columns = fetchedColumns;
     columnPropertiesMap = buildColumnPropertiesMap(columns);
     if (useColumnTypeInference) {
-      const response = await typeSuggestionsRequest.run(table.id);
+      const response = await typeSuggestionsRequest.run(table.oid);
       if (response.settlement?.state === 'resolved') {
         const typeSuggestions = response.settlement.value;
         columns = columns.map((column) => ({
@@ -103,11 +103,8 @@
   }
   $: table, useColumnTypeInference, void init();
 
-  function reload(props: {
-    table?: TableEntry;
-    useColumnTypeInference?: boolean;
-  }) {
-    const tableId = props.table?.id ?? table.id;
+  function reload(props: { table?: Table; useColumnTypeInference?: boolean }) {
+    const tableId = props.table?.oid ?? table.oid;
     router.goto(
       getImportPreviewPageUrl(database.id, schema.oid, tableId, {
         useColumnTypeInference:
@@ -155,12 +152,12 @@
 
   async function finishImport() {
     try {
-      await patchTable(table.id, {
+      await patchTable(table.oid, {
         name: $customizedTableName,
         import_verified: true,
         columns: finalizeColumns(columns, columnPropertiesMap),
       });
-      router.goto(getTablePageUrl(database.id, schema.oid, table.id), true);
+      router.goto(getTablePageUrl(database.id, schema.oid, table.oid), true);
     } catch (err) {
       toast.fromError(err);
     }

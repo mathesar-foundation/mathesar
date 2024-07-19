@@ -88,8 +88,8 @@
       const record = response.results[0];
       const recordId = getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];
-      const tableEntry = $tables.data.get(tableId);
-      const template = tableEntry?.settings?.preview_settings?.template;
+      const table = $tables.data.get(tableId);
+      const template = table?.settings?.preview_settings?.template;
       if (!template) {
         throw new Error('No record summary template found in API response.');
       }

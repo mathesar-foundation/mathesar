@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
@@ -28,7 +28,7 @@
   export let record: RecordStore;
   export let tableStructure: TableStructure;
 
-  $: table = $currentTable as TableEntry;
+  $: table = $currentTable as Table;
   $: ({ processedColumns } = tableStructure);
   $: ({ recordPk, summary, fieldValues } = record);
   $: fieldPropsObjects = [...$processedColumns.values()].map((c) => ({
@@ -88,7 +88,7 @@
     </div>
   </InsetPageLayout>
 
-  {#await getJoinableTablesResult(table.id)}
+  {#await getJoinableTablesResult(table.oid)}
     <RecordPageLoadingSpinner />
   {:then joinableTablesResult}
     <Widgets {joinableTablesResult} {recordPk} recordSummary={$summary} />

@@ -16,10 +16,7 @@
 import type { Readable, Unsubscriber, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
-import type {
-  MinimalColumnDetails,
-  TableEntry,
-} from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type {
   SplitTableRequest,
@@ -51,7 +48,7 @@ import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 const commonData = preloadCommonData();
 
 export interface DBTablesStoreData {
-  data: Map<TableEntry['id'], TableEntry>;
+  data: Map<Table['oid'], Table>;
   requestStatus: RequestStatus;
 }
 
@@ -61,21 +58,21 @@ const schemaTablesStoreMap: Map<
 > = new Map();
 const schemaTablesRequestMap: Map<
   Schema['oid'],
-  CancellablePromise<PaginatedResponse<TableEntry>>
+  CancellablePromise<PaginatedResponse<Table>>
 > = new Map();
 
-function sortedTableEntries(tableEntries: TableEntry[]): TableEntry[] {
+function sortedTableEntries(tableEntries: Table[]): Table[] {
   return [...tableEntries].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function setSchemaTablesStore(
   schemaId: Schema['oid'],
-  tableEntries?: TableEntry[],
+  tableEntries?: Table[],
 ): Writable<DBTablesStoreData> {
   const tables: DBTablesStoreData['data'] = new Map();
   if (tableEntries) {
     sortedTableEntries(tableEntries).forEach((entry) => {
-      tables.set(entry.id, entry);
+      tables.set(entry.oid, entry);
     });
   }
 
@@ -115,7 +112,7 @@ export async function refetchTablesForSchema(
 
     schemaTablesRequestMap.get(schemaId)?.cancel();
 
-    const tablesRequest = getAPI<PaginatedResponse<TableEntry>>(
+    const tablesRequest = getAPI<PaginatedResponse<Table>>(
       `/api/db/v0/tables/?schema=${schemaId}&limit=500`,
     );
     schemaTablesRequestMap.set(schemaId, tablesRequest);
@@ -167,23 +164,23 @@ export function getTablesStoreForSchema(
  * TODO: Use a dedicated higher level Tables store and
  * remove this function.
  */
-function findSchemaStoreForTable(id: TableEntry['id']) {
+function findSchemaStoreForTable(id: Table['oid']) {
   return [...schemaTablesStoreMap.values()].find((entry) =>
     get(entry).data.has(id),
   );
 }
 
-function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
+function findAndUpdateTableStore(id: Table['oid'], table: Table) {
   findSchemaStoreForTable(id)?.update((tableStoreData) => {
     const existingTableEntry = tableStoreData.data.get(id);
     const updatedTableEntry = {
       ...(existingTableEntry ?? {}),
-      ...tableEntry,
+      ...table,
     };
     tableStoreData.data.set(id, updatedTableEntry);
     const tableEntryMap: DBTablesStoreData['data'] = new Map();
     sortedTableEntries([...tableStoreData.data.values()]).forEach((entry) => {
-      tableEntryMap.set(entry.id, entry);
+      tableEntryMap.set(entry.oid, entry);
     });
     return {
       ...tableStoreData,
@@ -195,9 +192,9 @@ function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
 export function deleteTable(
   database: Database,
   schema: Schema,
-  tableId: TableEntry['id'],
-): CancellablePromise<TableEntry> {
-  const promise = deleteAPI<TableEntry>(`/api/db/v0/tables/${tableId}/`);
+  tableId: Table['oid'],
+): CancellablePromise<Table> {
+  const promise = deleteAPI<Table>(`/api/db/v0/tables/${tableId}/`);
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
@@ -221,11 +218,8 @@ export function deleteTable(
 export function updateTableMetaData(
   id: number,
   updatedMetaData: AtLeastOne<{ name: string; description: string }>,
-): CancellablePromise<TableEntry> {
-  const promise = patchAPI<TableEntry>(
-    `/api/db/v0/tables/${id}/`,
-    updatedMetaData,
-  );
+): CancellablePromise<Table> {
+  const promise = patchAPI<Table>(`/api/db/v0/tables/${id}/`, updatedMetaData);
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
@@ -246,8 +240,8 @@ export function createTable(
     name?: string;
     dataFiles?: [number, ...number[]];
   },
-): CancellablePromise<TableEntry> {
-  const promise = postAPI<TableEntry>('/api/db/v0/tables/', {
+): CancellablePromise<Table> {
+  const promise = postAPI<Table>('/api/db/v0/tables/', {
     schema: schema.oid,
     name: tableArgs.name,
     data_files: tableArgs.dataFiles,
@@ -260,7 +254,7 @@ export function createTable(
           const tableEntryMap: DBTablesStoreData['data'] = new Map();
           sortedTableEntries([...existing.data.values(), value]).forEach(
             (entry) => {
-              tableEntryMap.set(entry.id, entry);
+              tableEntryMap.set(entry.oid, entry);
             },
           );
           return {
@@ -278,14 +272,14 @@ export function createTable(
 }
 
 export function patchTable(
-  id: TableEntry['id'],
+  id: Table['oid'],
   patch: {
-    name?: TableEntry['name'];
-    import_verified?: TableEntry['import_verified'];
-    columns?: MinimalColumnDetails[];
+    name?: Table['name'];
+    import_verified?: Table['import_verified'];
+    columns?: Table['columns'];
   },
-): CancellablePromise<TableEntry> {
-  const promise = patchAPI<TableEntry>(`/api/db/v0/tables/${id}/`, patch);
+): CancellablePromise<Table> {
+  const promise = patchAPI<Table>(`/api/db/v0/tables/${id}/`, patch);
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((value) => {
@@ -312,7 +306,7 @@ export function patchTable(
  * 3. Move all api-call-only functions to /api. Only keep functions that
  *    update the stores within /stores
  */
-export function getTable(id: TableEntry['id']): CancellablePromise<TableEntry> {
+export function getTable(id: Table['oid']): CancellablePromise<Table> {
   return getAPI(`/api/db/v0/tables/${id}/`);
 }
 
@@ -350,8 +344,8 @@ export function moveColumns(
  * Replace getTable with this function once the above mentioned changes are done.
  */
 export function getTableFromStoreOrApi(
-  id: TableEntry['id'],
-): CancellablePromise<TableEntry> {
+  id: Table['oid'],
+): CancellablePromise<Table> {
   const schemaStore = findSchemaStoreForTable(id);
   if (schemaStore) {
     const tableEntry = get(schemaStore).data.get(id);
@@ -368,10 +362,10 @@ export function getTableFromStoreOrApi(
         const store = schemaTablesStoreMap.get(table.schema);
         if (store) {
           store.update((existing) => {
-            const tableMap = new Map<number, TableEntry>();
+            const tableMap = new Map<number, Table>();
             const tables = [...existing.data.values(), table];
             sortedTableEntries(tables).forEach((t) => {
-              tableMap.set(t.id, t);
+              tableMap.set(t.oid, t);
             });
             return {
               ...existing,
@@ -395,7 +389,7 @@ export function getTableFromStoreOrApi(
  * follows, that this function cannot be used where columns might have defaults.
  */
 export function getTypeSuggestionsForTable(
-  id: TableEntry['id'],
+  id: Table['oid'],
 ): CancellablePromise<Record<string, string>> {
   const optimizingQueryParam = 'columns_might_have_defaults=false';
   return getAPI(
@@ -404,13 +398,13 @@ export function getTypeSuggestionsForTable(
 }
 
 export function generateTablePreview(props: {
-  table: Pick<TableEntry, 'id'>;
-  columns: MinimalColumnDetails[];
+  table: Pick<Table, 'oid'>;
+  columns: Table['columns'];
 }): CancellablePromise<{
   records: Record<string, unknown>[];
 }> {
   const { columns, table } = props;
-  return postAPI(`/api/db/v0/tables/${table.id}/previews/`, { columns });
+  return postAPI(`/api/db/v0/tables/${table.oid}/previews/`, { columns });
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(
@@ -443,7 +437,7 @@ export const importVerifiedTables: Readable<DBTablesStoreData['data']> =
       new Map(
         [...$tables.data.values()]
           .filter((table) => !isTableImportConfirmationRequired(table))
-          .map((table) => [table.id, table]),
+          .map((table) => [table.oid, table]),
       ),
   );
 
@@ -475,19 +469,19 @@ export function getJoinableTablesResult(tableId: number, maxDepth = 1) {
   );
 }
 
-type TableSettings = TableEntry['settings'];
+type TableSettings = Table['settings'];
 
 export async function saveTableSettings(
-  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
+  table: Pick<Table, 'oid' | 'settings' | 'schema'>,
   settings: RecursivePartial<TableSettings>,
 ): Promise<void> {
-  const url = `/api/db/v0/tables/${table.id}/settings/${table.settings.id}/`;
+  const url = `/api/db/v0/tables/${table.oid}/settings/${table.settings.id}/`;
   await patchAPI<TableSettings>(url, settings);
   await refetchTablesForSchema(table.schema);
 }
 
 export function saveRecordSummaryTemplate(
-  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
+  table: Pick<Table, 'oid' | 'settings' | 'schema'>,
   previewSettings: TableSettings['preview_settings'],
 ): Promise<void> {
   const { customized } = previewSettings;
@@ -497,7 +491,7 @@ export function saveRecordSummaryTemplate(
 }
 
 export function saveColumnOrder(
-  table: Pick<TableEntry, 'id' | 'settings' | 'schema'>,
+  table: Pick<Table, 'oid' | 'settings' | 'schema'>,
   columnOrder: TableSettings['column_order'],
 ): Promise<void> {
   return saveTableSettings(table, {

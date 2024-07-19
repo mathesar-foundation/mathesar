@@ -2,13 +2,13 @@
   import { _ } from 'svelte-i18n';
 
   import tableShareApi from '@mathesar/api/rest/tableShares';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import { iconShare } from '@mathesar/icons';
   import { getSharedTablePageUrl } from '@mathesar/routes/urls';
   import ShareEntity from '@mathesar/systems/shares/ShareEntity.svelte';
   import { Dropdown, Icon } from '@mathesar-component-library';
 
-  export let id: TableEntry['id'];
+  export let id: Table['oid'];
 </script>
 
 <Dropdown

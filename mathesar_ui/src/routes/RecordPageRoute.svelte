@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Database } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
@@ -8,7 +8,7 @@
 
   export let database: Database;
   export let schema: Schema;
-  export let table: TableEntry;
+  export let table: Table;
   export let recordPk: string;
 
   $: record = new RecordStore({ table, recordPk });

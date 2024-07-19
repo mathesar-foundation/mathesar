@@ -1,4 +1,4 @@
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import {
   getImportPreviewPageUrl,
   getTablePageUrl,
@@ -6,7 +6,7 @@ import {
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 export function isTableImportConfirmationRequired(
-  table: Partial<Pick<TableEntry, 'import_verified' | 'data_files'>>,
+  table: Partial<Pick<Table, 'import_verified' | 'data_files'>>,
 ): boolean {
   /**
    * table.import_verified can be null when tables have been
@@ -22,7 +22,7 @@ export function isTableImportConfirmationRequired(
 
 export function getColumnOrder(
   processedColumns: ProcessedColumn[],
-  table: Partial<Pick<TableEntry, 'settings'>>,
+  table: Partial<Pick<Table, 'settings'>>,
 ) {
   const allColumns = [...processedColumns.values()];
   let completeColumnOrder: number[] = [];
@@ -43,7 +43,7 @@ export function getColumnOrder(
 
 export function orderProcessedColumns(
   processedColumns: Map<number, ProcessedColumn>,
-  table: Partial<Pick<TableEntry, 'settings'>>,
+  table: Partial<Pick<Table, 'settings'>>,
 ): Map<number, ProcessedColumn> {
   const columns = [...processedColumns.values()];
   const orderedColumns = new Map<number, ProcessedColumn>();
@@ -63,12 +63,12 @@ export function orderProcessedColumns(
 export function getLinkForTableItem(
   connectionId: number,
   schemaId: number,
-  table: Pick<TableEntry, 'import_verified' | 'data_files' | 'id'>,
+  table: Pick<Table, 'oid' | 'import_verified' | 'data_files'>,
 ) {
   if (isTableImportConfirmationRequired(table)) {
-    return getImportPreviewPageUrl(connectionId, schemaId, table.id, {
+    return getImportPreviewPageUrl(connectionId, schemaId, table.oid, {
       useColumnTypeInference: true,
     });
   }
-  return getTablePageUrl(connectionId, schemaId, table.id);
+  return getTablePageUrl(connectionId, schemaId, table.oid);
 }

@@ -1,4 +1,4 @@
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
@@ -24,12 +24,12 @@ export function getCellCap({
    * When the cell falls within an FK column, this value will give the id of the
    * table to which the FK points.
    */
-  fkTargetTableId?: TableEntry['id'];
+  fkTargetTableId?: Table['oid'];
   /**
    * When the cell falls within a PK column, this value will give the id of the
    * table.
    */
-  pkTargetTableId?: TableEntry['id'];
+  pkTargetTableId?: Table['oid'];
 }): ComponentAndProps {
   if (fkTargetTableId) {
     const props: LinkedRecordCellExternalProps = {
@@ -52,7 +52,7 @@ export function getCellCap({
 
 export function getDbTypeBasedInputCap(
   column: CellColumnLike,
-  fkTargetTableId?: TableEntry['id'],
+  fkTargetTableId?: Table['oid'],
   optionalCellInfo?: CellInfo,
 ): ComponentAndProps {
   if (fkTargetTableId) {
@@ -71,7 +71,7 @@ export function getDbTypeBasedInputCap(
 
 export function getInitialInputValue(
   column: CellColumnLike,
-  fkTargetTableId?: TableEntry['id'],
+  fkTargetTableId?: Table['oid'],
   optionalCellInfo?: CellInfo,
 ): unknown {
   if (fkTargetTableId) {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import {
     FormSubmit,
     makeForm,
@@ -30,7 +30,7 @@
   } from './recordSummaryTemplateUtils';
   import TemplateInput from './TemplateInput.svelte';
 
-  export let table: TableEntry;
+  export let table: Table;
   export let tabularData: TabularData;
 
   const userProfile = getUserProfileStoreFromContext();

@@ -3,7 +3,7 @@
   import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rest/types/tables';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
@@ -37,7 +37,7 @@
   );
 
   export let context: Context = 'page';
-  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let table: Pick<Table, 'oid' | 'settings' | 'schema'>;
   export let sheetElement: HTMLElement | undefined = undefined;
 
   let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
