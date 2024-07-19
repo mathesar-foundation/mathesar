@@ -3312,17 +3312,35 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 DROP TABLE msar.filter_templates;
 CREATE TABLE msar.filter_templates (filter_key text PRIMARY KEY, filter_template text);
 INSERT INTO msar.filter_templates VALUES
+  -- basic composition operators
   ('and', '%s AND %s'),
   ('or', '%s OR %s'),
+  -- general comparison operators
   ('equal', '%s = %s'),
+  ('lesser', '%s < %s'),
+  ('greater', '%s > %s'),
+  ('lesser_or_equal', '%s <= %s'),
+  ('greater_or_equal', '%s >= %s'),
   ('null', '%s IS NULL'),
   ('not_null', '%s IS NOT NULL'),
+  -- string specific filters
   ('contains_case_insensitive', '%s ILIKE ''%%'' || %s || ''%%'''),
   ('starts_with_case_insensitive', '%s ILIKE %s || ''%%'''),
+  -- json(b) filters
+  ('json_array_length_equals', 'jsonb_array_length(%s::jsonb) = %s'),
+  ('json_array_length_greater_than', 'jsonb_array_length(%s::jsonb) > %s'),
+  ('json_array_length_greater_or_equal', 'jsonb_array_length(%s::jsonb) >= %s'),
+  ('json_array_length_less_than', 'jsonb_array_length(%s::jsonb) < %s'),
+  ('json_array_length_less_or_equal', 'jsonb_array_length(%s::jsonb) <= %s'),
+  ('json_array_not_empty', 'jsonb_array_length(%s::jsonb) > 0'),
+  ('json_array_contains', '%s @> %s'),
+  -- URI filters
   ('uri_scheme_equals', 'mathesar_types.uri_scheme(%s) = %s'),
-  ('lesser', '%s < %s'),
-  ('greater', '%s > %s');
-
+  ('uri_authority_contains', 'mathesar_types.uri_authority(%s) LIKE ''%%'' || %s || ''%%'''),
+  -- Email filters
+  ('email_domain_equals', 'mathesar_types.email_domain_name(%s) = %s'),
+  ('email_domain_contains', 'mathesar_types.email_domain_name(%s) LIKE ''%%'' || %s || ''%%''')
+;
 
 CREATE OR REPLACE FUNCTION msar.build_filter_expr(rel_id oid, tree jsonb) RETURNS text AS $$
 SELECT CASE tree ->> 'type'
