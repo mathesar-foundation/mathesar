@@ -17,7 +17,6 @@ import {
   collapse,
   type RecursivePartial,
 } from '@mathesar-component-library';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type {
   SplitTableRequest,
@@ -435,22 +434,20 @@ export function getJoinableTablesResult(tableId: number, maxDepth = 1) {
   );
 }
 
-type TableSettings = Table['settings'];
-
 async function saveTableSettings(
   connection: Pick<Connection, 'id'>,
   table: Pick<Table, 'oid' | 'settings' | 'schema'>,
-  settings: RecursivePartial<TableSettings>,
+  settings: RecursivePartial<Table['settings']>,
 ): Promise<void> {
   const url = `/api/db/v0/tables/${table.oid}/settings/${table.settings.id}/`;
-  await patchAPI<TableSettings>(url, settings);
+  await patchAPI<Table['settings']>(url, settings);
   await refetchTablesForSchema(connection, { oid: table.schema });
 }
 
 export function saveRecordSummaryTemplate(
   connection: Pick<Connection, 'id'>,
   table: Pick<Table, 'oid' | 'settings' | 'schema'>,
-  previewSettings: TableSettings['preview_settings'],
+  previewSettings: Table['settings']['preview_settings'],
 ): Promise<void> {
   const { customized } = previewSettings;
   return saveTableSettings(connection, table, {
@@ -461,7 +458,7 @@ export function saveRecordSummaryTemplate(
 export function saveColumnOrder(
   connection: Pick<Connection, 'id'>,
   table: Pick<Table, 'oid' | 'settings' | 'schema'>,
-  columnOrder: TableSettings['column_order'],
+  columnOrder: Table['settings']['column_order'],
 ): Promise<void> {
   return saveTableSettings(connection, table, {
     // Using the Set constructor to remove potential duplicates
