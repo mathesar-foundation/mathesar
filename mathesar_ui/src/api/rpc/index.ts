@@ -4,6 +4,7 @@ import { buildRpcApi } from '@mathesar/packages/json-rpc-client-builder';
 
 import { connections } from './connections';
 import { schemas } from './schemas';
+import { tables } from './tables';
 
 /** Mathesar's JSON-RPC API */
 export const api = buildRpcApi({
@@ -12,5 +13,6 @@ export const api = buildRpcApi({
   methodTree: {
     connections,
     schemas,
+    tables,
   },
 });

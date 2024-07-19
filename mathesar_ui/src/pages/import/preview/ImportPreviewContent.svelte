@@ -2,6 +2,11 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
+  import {
+    CancellablePromise,
+    CancelOrProceedButtonPair,
+    Spinner,
+  } from '@mathesar-component-library';
   import { columnsApi } from '@mathesar/api/rest/columns';
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
@@ -24,21 +29,13 @@
   } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
-  import {
-    generateTablePreview,
-    getTypeSuggestionsForTable,
-    patchTable,
-    currentTables,
-  } from '@mathesar/stores/tables';
+  import { currentTables, patchTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import {
-    CancelOrProceedButtonPair,
-    Spinner,
-  } from '@mathesar-component-library';
 
   import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
 
+  import { getAPI, postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import ErrorInfo from './ErrorInfo.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
   import {
@@ -53,6 +50,31 @@
 
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
+
+  /**
+   * Note the optimizing query parameter. It asserts that the table will not have
+   * columns with default values (probably because it is currently being imported
+   * and a table produced by importing will not have column defaults). It
+   * follows, that this function cannot be used where columns might have defaults.
+   */
+  function getTypeSuggestionsForTable(
+    id: Table['oid'],
+  ): CancellablePromise<Record<string, string>> {
+    const optimizingQueryParam = 'columns_might_have_defaults=false';
+    return getAPI(
+      `/api/db/v0/tables/${id}/type_suggestions/?${optimizingQueryParam}`,
+    );
+  }
+
+  function generateTablePreview(props: {
+    table: Pick<Table, 'oid'>;
+    columns: Table['columns'];
+  }): CancellablePromise<{
+    records: Record<string, unknown>[];
+  }> {
+    const { columns, table } = props;
+    return postAPI(`/api/db/v0/tables/${table.oid}/previews/`, { columns });
+  }
 
   const columnsFetch = new AsyncStore(columnsApi.list);
   const previewRequest = new AsyncStore(generateTablePreview);
@@ -152,7 +174,7 @@
 
   async function finishImport() {
     try {
-      await patchTable(table.oid, {
+      await patchTable(database, table.oid, {
         name: $customizedTableName,
         import_verified: true,
         columns: finalizeColumns(columns, columnPropertiesMap),

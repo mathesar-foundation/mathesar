@@ -5,10 +5,9 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
-  import { getTableName } from '@mathesar/stores/tables';
-  import { currentTablesData } from '@mathesar/stores/tables';
+  import { currentTablesMap } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
-  import { Window, portal } from '@mathesar-component-library';
+  import { Window, defined, portal } from '@mathesar-component-library';
 
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
@@ -31,7 +30,7 @@
     nestingLevel: controller.nestingLevel + 1,
   });
   $: ({ tableId, purpose } = controller);
-  $: table = $tableId && $currentTablesData.tablesMap.get($tableId);
+  $: table = defined($tableId, (id) => $currentTablesMap.get(id));
   $: tabularData =
     $tableId && table
       ? new TabularData({
@@ -42,7 +41,6 @@
           table,
         })
       : undefined;
-  $: tableName = $tableId ? getTableName($tableId) : undefined;
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: marginBottom = $nestedSelectorIsOpen
     ? `calc(${nestedSelectorVerticalOffset} - ${contentHeight}px)`
@@ -96,8 +94,8 @@
             : $_('open_table_record')}
           let:slotName
         >
-          {#if slotName === 'tableName' && tableName}
-            <TableName table={{ name: tableName }} truncate={false} />
+          {#if slotName === 'tableName' && table}
+            <TableName table={{ name: table.name }} truncate={false} />
           {/if}
         </RichText>
       </span>

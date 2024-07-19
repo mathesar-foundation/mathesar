@@ -12,7 +12,6 @@ import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
-import { getTable } from '@mathesar/stores/tables';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -27,6 +26,8 @@ import {
   getColumnInformationMap,
   getTablesThatReferenceBaseTable,
 } from './utils';
+import { api } from '@mathesar/api/rpc';
+import { connectionsStore } from '@mathesar/stores/databases';
 
 export default class QueryManager extends QueryRunner {
   private undoRedoManager: QueryUndoRedoManager;
@@ -135,7 +136,18 @@ export default class QueryManager extends QueryRunner {
         inputColumnsFetchState: { state: 'processing' },
       }));
 
-      this.baseTableFetchPromise = getTable(baseTableId);
+      const currentConnection = get(connectionsStore.currentConnection);
+      if (!currentConnection) {
+        throw new Error('No current connection selected.');
+      }
+
+      this.baseTableFetchPromise = api.tables
+        .get({
+          database_id: currentConnection.id,
+          table_oid: baseTableId,
+        })
+        .run();
+
       this.joinableColumnsfetchPromise = getAPI<JoinableTablesResult>(
         `/api/db/v0/tables/${baseTableId}/joinable_tables/`,
       );

@@ -22,6 +22,7 @@
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
+  import { connectionsStore } from '@mathesar/stores/databases';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -32,6 +33,7 @@
   $: columnOrder = columnOrder ?? [];
   $: columnOrderString = columnOrder.map(String);
   $: ({ selection, processedColumns } = $tabularData);
+  $: ({ currentConnectionId } = connectionsStore);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
   let selectedColumnIdsOrdered: string[] = [];
@@ -61,6 +63,9 @@
   }
 
   function dropColumn(columnDroppedOn?: ProcessedColumn) {
+    const connectionId = $currentConnectionId;
+    if (!connectionId) throw new Error('No current connection ID');
+
     // Early exit if a column is dropped in the same place.
     // Should only be done for single column if non-continuous selection is allowed.
     if (
@@ -87,7 +92,11 @@
       newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
     }
 
-    void saveColumnOrder(table, newColumnOrder.map(Number));
+    void saveColumnOrder(
+      { id: connectionId },
+      table,
+      newColumnOrder.map(Number),
+    );
 
     // Reset drag information
     locationOfFirstDraggedColumn = undefined;

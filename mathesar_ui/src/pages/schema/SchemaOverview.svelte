@@ -61,7 +61,7 @@
         <div>
           <SpinnerButton
             onClick={async () => {
-              await refetchTablesForSchema(schema.oid);
+              await refetchTablesForSchema(database, schema);
             }}
             label={$_('retry')}
             icon={iconRefresh}

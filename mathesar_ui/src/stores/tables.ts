@@ -1,30 +1,29 @@
 /**
  * @file
  *
- * TODO This file **badly** needs to be refactored, cleaned up, and made to
- * function more consistently with the rest of the codebase.
+ * TODO This file should ideally be refactored, cleaned up, and made to function
+ * more consistently with the rest of the codebase.
  *
- * - For values of type `Writable<DBTablesStoreData>`, we seem to be using using
- *   names like `schemaStore`, `tableStore`, `tablesStore`, `schemaTablesStore`
- *   almost interchangeably which is a readability nightmare.
- *
- * - Tables need to be sorted before being stored, but that sorting happens in
- *   many different places. I suggest having a derived store that does the
- *   sorting.
+ * Also, tables need to be sorted before being stored, but that sorting happens
+ * in many different places. I suggest having a derived store that does the
+ * sorting.
  */
 
-import type { Readable, Unsubscriber, Writable } from 'svelte/store';
-import { derived, get, writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
+import { derived, get, readable, writable } from 'svelte/store';
 
+import {
+  CancellablePromise,
+  collapse,
+  type RecursivePartial,
+} from '@mathesar-component-library';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type {
   SplitTableRequest,
   SplitTableResponse,
 } from '@mathesar/api/rest/types/tables/split_table';
-import type {
-  PaginatedResponse,
-  RequestStatus,
-} from '@mathesar/api/rest/utils/requestUtils';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import {
   deleteAPI,
   getAPI,
@@ -33,17 +32,16 @@ import {
 } from '@mathesar/api/rest/utils/requestUtils';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
-import type { DBObjectEntry, Database } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
 import type { AtLeastOne } from '@mathesar/typeUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
-import {
-  CancellablePromise,
-  type RecursivePartial,
-} from '@mathesar-component-library';
 
+import type { Connection } from '@mathesar/api/rpc/connections';
+import { TupleMap } from '@mathesar/packages/tuple-map';
+import { connectionsStore } from './databases';
 import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
+import { api } from '@mathesar/api/rpc';
 
 const commonData = preloadCommonData();
 
@@ -54,21 +52,33 @@ interface TablesData {
   requestStatus: RequestStatus;
 }
 
+function makeEmptyTablesData(): TablesData {
+  return {
+    tablesMap: new Map(),
+    requestStatus: { state: 'success' },
+  };
+}
+
 type TablesStore = Writable<TablesData>;
 
-const tablesStores: Map<Schema['oid'], TablesStore> = new Map();
+/** Maps [connectionId, schemaOid] to TablesStore */
+const tablesStores = new TupleMap<
+  [Connection['id'], Schema['oid']],
+  TablesStore
+>();
 
-const tablesRequests: Map<
-  Schema['oid'],
+const tablesRequests = new TupleMap<
+  [Connection['id'], Schema['oid']],
   CancellablePromise<Table[]>
-> = new Map();
+>();
 
 function sortTables(tables: Iterable<Table>): Table[] {
   return [...tables].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function setTablesStore(
-  schemaOid: Schema['oid'],
+  connection: Pick<Connection, 'id'>,
+  schema: Pick<Schema, 'oid'>,
   tables?: Table[],
 ): TablesStore {
   const tablesMap: TablesMap = new Map();
@@ -81,26 +91,33 @@ function setTablesStore(
     requestStatus: { state: 'success' },
   };
 
-  let store = tablesStores.get(schemaOid);
+  let store = tablesStores.get([connection.id, schema.oid]);
   if (!store) {
     store = writable(storeValue);
-    tablesStores.set(schemaOid, store);
+    tablesStores.set([connection.id, schema.oid], store);
   } else {
     store.set(storeValue);
   }
   return store;
 }
 
-export function removeTablesStore(schemaOid: Schema['oid']): void {
-  tablesStores.delete(schemaOid);
+export function removeTablesStore(
+  connection: Pick<Connection, 'id'>,
+  schema: Pick<Schema, 'oid'>,
+): void {
+  tablesStores.delete([connection.id, schema.oid]);
 }
 
 export async function refetchTablesForSchema(
-  schemaOid: Schema['oid'],
+  connection: Pick<Connection, 'id'>,
+  schema: Pick<Schema, 'oid'>,
 ): Promise<TablesData | undefined> {
-  const store = tablesStores.get(schemaOid);
+  const store = tablesStores.get([connection.id, schema.oid]);
   if (!store) {
-    console.error(`Tables store for schema: ${schemaOid} not found.`);
+    // TODO: why are we logging an error here? I would expect that we'd either
+    // throw or ignore. If there's a reason for this logging, please add a code
+    // comment explaining why.
+    console.error(`Tables store not found.`);
     return undefined;
   }
 
@@ -110,16 +127,15 @@ export async function refetchTablesForSchema(
       requestStatus: { state: 'processing' },
     }));
 
-    tablesRequests.get(schemaOid)?.cancel();
+    tablesRequests.get([connection.id, schema.oid])?.cancel();
 
-    const tablesRequest = getAPI<PaginatedResponse<Table>>(
-      `/api/db/v0/tables/?schema=${schemaOid}&limit=500`,
+    const tablesRequest = getAPI<Table[]>(
+      `/api/db/v0/tables/?schema=${schema.oid}&limit=500`,
     );
-    tablesRequests.set(schemaOid, tablesRequest);
-    const response = await tablesRequest;
-    const tableEntries = response.results || [];
+    tablesRequests.set([connection.id, schema.oid], tablesRequest);
+    const tableEntries = await tablesRequest;
 
-    const schemaTablesStore = setTablesStore(schemaOid, tableEntries);
+    const schemaTablesStore = setTablesStore(connection, schema, tableEntries);
 
     return get(schemaTablesStore);
   } catch (err) {
@@ -138,22 +154,26 @@ export async function refetchTablesForSchema(
 
 let preload = true;
 
-function getTablesStore(schemaOid: Schema['oid']): TablesStore {
-  let store = tablesStores.get(schemaOid);
+function getTablesStore(
+  connection: Pick<Connection, 'id'>,
+  schema: Pick<Schema, 'oid'>,
+): TablesStore {
+  let store = tablesStores.get([connection.id, schema.oid]);
   if (!store) {
     store = writable({
       requestStatus: { state: 'processing' },
       tablesMap: new Map(),
     });
-    tablesStores.set(schemaOid, store);
-    if (preload && commonData.current_schema === schemaOid) {
-      store = setTablesStore(schemaOid, commonData.tables ?? []);
+    tablesStores.set([connection.id, schema.oid], store);
+    // TODO_3651: add condition for current connection as well as current schema
+    if (preload && commonData.current_schema === schema.oid) {
+      store = setTablesStore(connection, schema, commonData.tables ?? []);
     } else {
-      void refetchTablesForSchema(schemaOid);
+      void refetchTablesForSchema(connection, schema);
     }
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
-    void refetchTablesForSchema(schemaOid);
+    void refetchTablesForSchema(connection, schema);
   }
   return store;
 }
@@ -161,7 +181,7 @@ function getTablesStore(schemaOid: Schema['oid']): TablesStore {
 function findSchemaStoreForTable(
   tableOid: Table['oid'],
 ): TablesStore | undefined {
-  // TODO rewrite this function
+  // TODO_3651 rewrite this function
   throw new Error('Not implemented');
 }
 
@@ -178,7 +198,7 @@ function findAndUpdateTableStore(tableOid: Table['oid'], newTable: Table) {
 }
 
 export function deleteTable(
-  database: Database,
+  connection: Connection,
   schema: Schema,
   tableOid: Table['oid'],
 ): CancellablePromise<Table> {
@@ -186,14 +206,16 @@ export function deleteTable(
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((table) => {
-        addCountToSchemaNumTables(database, schema, -1);
-        tablesStores.get(schema.oid)?.update((tableStoreData) => {
-          tableStoreData.tablesMap.delete(tableOid);
-          return {
-            ...tableStoreData,
-            tablesMap: new Map(tableStoreData.tablesMap),
-          };
-        });
+        addCountToSchemaNumTables(connection, schema, -1);
+        tablesStores
+          .get([connection.id, schema.oid])
+          ?.update((tableStoreData) => {
+            tableStoreData.tablesMap.delete(tableOid);
+            return {
+              ...tableStoreData,
+              tablesMap: new Map(tableStoreData.tablesMap),
+            };
+          });
         return resolve(table);
       }, reject);
     },
@@ -203,7 +225,10 @@ export function deleteTable(
   );
 }
 
+// TODO_3651: This is not actually updating metadata. Merge this function with
+// patchTable below. Separate actual metadata into a different function
 export function updateTableMetaData(
+  connection: Pick<Connection, 'id'>,
   tableOid: number,
   updatedMetaData: AtLeastOne<{ name: string; description: string }>,
 ): CancellablePromise<Table> {
@@ -225,7 +250,7 @@ export function updateTableMetaData(
 }
 
 export function createTable(
-  database: Database,
+  connection: Connection,
   schema: Schema,
   tableArgs: {
     name?: string;
@@ -240,8 +265,8 @@ export function createTable(
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((table) => {
-        addCountToSchemaNumTables(database, schema, 1);
-        tablesStores.get(schema.oid)?.update((existing) => {
+        addCountToSchemaNumTables(connection, schema, 1);
+        tablesStores.get([connection.id, schema.oid])?.update((existing) => {
           const tablesMap: TablesMap = new Map();
           sortTables([...existing.tablesMap.values(), table]).forEach(
             (entry) => {
@@ -260,6 +285,7 @@ export function createTable(
 }
 
 export function patchTable(
+  connection: Pick<Connection, 'id'>,
   tableOid: Table['oid'],
   patch: {
     name?: Table['name'];
@@ -279,23 +305,6 @@ export function patchTable(
       promise.cancel();
     },
   );
-}
-
-/**
- * NOTE: The getTable function currently does not get data from the store.
- * We need to keep it that way for the time-being, because the components
- * that call this function expect latest data from the db, while the store
- * contains stale information.
- *
- * TODO:
- * 1. Keep stores upto-date when user performs any action to related db objects.
- * 2. Find a sync mechanism to keep the frontend stores upto-date when
- *    data in db changes.
- * 3. Move all api-call-only functions to /api. Only keep functions that
- *    update the stores within /stores
- */
-export function getTable(tableOid: Table['oid']): CancellablePromise<Table> {
-  return getAPI(`/api/db/v0/tables/${tableOid}/`);
 }
 
 export function splitTable({
@@ -328,10 +337,8 @@ export function moveColumns(
   });
 }
 
-/**
- * Replace getTable with this function once the above mentioned changes are done.
- */
 export function getTableFromStoreOrApi(
+  connection: Pick<Connection, 'id'>,
   tableOid: Table['oid'],
 ): CancellablePromise<Table> {
   const tablesStore = findSchemaStoreForTable(tableOid);
@@ -343,11 +350,16 @@ export function getTableFromStoreOrApi(
       });
     }
   }
-  const promise = getTable(tableOid);
+  const promise = api.tables
+    .get({
+      database_id: connection.id,
+      table_oid: tableOid,
+    })
+    .run();
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((table) => {
-        const store = tablesStores.get(table.schema);
+        const store = tablesStores.get([connection.id, table.schema]);
         if (store) {
           store.update((existing) => {
             const tableMap = new Map<number, Table>();
@@ -370,52 +382,19 @@ export function getTableFromStoreOrApi(
   );
 }
 
-/**
- * Note the optimizing query parameter. It asserts that the table will not have
- * columns with default values (probably because it is currently being imported
- * and a table produced by importing will not have column defaults). It
- * follows, that this function cannot be used where columns might have defaults.
- */
-export function getTypeSuggestionsForTable(
-  id: Table['oid'],
-): CancellablePromise<Record<string, string>> {
-  const optimizingQueryParam = 'columns_might_have_defaults=false';
-  return getAPI(
-    `/api/db/v0/tables/${id}/type_suggestions/?${optimizingQueryParam}`,
-  );
-}
+export const currentTablesData = collapse(
+  derived(
+    [connectionsStore.currentConnection, currentSchemaId],
+    ([connection, schemaOid]) =>
+      !connection || !schemaOid
+        ? readable(makeEmptyTablesData())
+        : getTablesStore(connection, { oid: schemaOid }),
+  ),
+);
 
-export function generateTablePreview(props: {
-  table: Pick<Table, 'oid'>;
-  columns: Table['columns'];
-}): CancellablePromise<{
-  records: Record<string, unknown>[];
-}> {
-  const { columns, table } = props;
-  return postAPI(`/api/db/v0/tables/${table.oid}/previews/`, { columns });
-}
-
-export const currentTablesData: Readable<TablesData> = derived(
-  currentSchemaId,
-  ($currentSchemaId, set) => {
-    let unsubscribe: Unsubscriber;
-
-    if (!$currentSchemaId) {
-      set({
-        tablesMap: new Map(),
-        requestStatus: { state: 'success' },
-      });
-    } else {
-      const store = getTablesStore($currentSchemaId);
-      unsubscribe = store.subscribe((dbSchemasData) => {
-        set(dbSchemasData);
-      });
-    }
-
-    return () => {
-      unsubscribe?.();
-    };
-  },
+export const currentTablesMap = derived(
+  currentTablesData,
+  (tablesData) => tablesData.tablesMap,
 );
 
 export const currentTables = derived(currentTablesData, (tablesData) =>
@@ -440,10 +419,6 @@ export const validateNewTableName = derived(currentTablesData, (tablesData) => {
   );
 });
 
-export function getTableName(id: DBObjectEntry['id']): string | undefined {
-  return get(currentTablesData).tablesMap.get(id)?.name;
-}
-
 export const currentTableId = writable<number | undefined>(undefined);
 
 export const currentTable = derived(
@@ -462,31 +437,42 @@ export function getJoinableTablesResult(tableId: number, maxDepth = 1) {
 
 type TableSettings = Table['settings'];
 
-export async function saveTableSettings(
+async function saveTableSettings(
+  connection: Pick<Connection, 'id'>,
   table: Pick<Table, 'oid' | 'settings' | 'schema'>,
   settings: RecursivePartial<TableSettings>,
 ): Promise<void> {
   const url = `/api/db/v0/tables/${table.oid}/settings/${table.settings.id}/`;
   await patchAPI<TableSettings>(url, settings);
-  await refetchTablesForSchema(table.schema);
+  await refetchTablesForSchema(connection, { oid: table.schema });
 }
 
 export function saveRecordSummaryTemplate(
+  connection: Pick<Connection, 'id'>,
   table: Pick<Table, 'oid' | 'settings' | 'schema'>,
   previewSettings: TableSettings['preview_settings'],
 ): Promise<void> {
   const { customized } = previewSettings;
-  return saveTableSettings(table, {
+  return saveTableSettings(connection, table, {
     preview_settings: customized ? previewSettings : { customized },
   });
 }
 
 export function saveColumnOrder(
+  connection: Pick<Connection, 'id'>,
   table: Pick<Table, 'oid' | 'settings' | 'schema'>,
   columnOrder: TableSettings['column_order'],
 ): Promise<void> {
-  return saveTableSettings(table, {
+  return saveTableSettings(connection, table, {
     // Using the Set constructor to remove potential duplicates
     column_order: [...new Set(columnOrder)],
   });
+}
+
+export async function refetchTablesForCurrentSchema() {
+  const connection = get(connectionsStore.currentConnection);
+  const schemaOid = get(currentSchemaId);
+  if (connection && schemaOid) {
+    await refetchTablesForSchema(connection, { oid: schemaOid });
+  }
 }

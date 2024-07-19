@@ -73,7 +73,10 @@
 
   async function save() {
     try {
-      await saveRecordSummaryTemplate(table, $form.values);
+      if (!database) {
+        throw new Error('Current database not found');
+      }
+      await saveRecordSummaryTemplate(database, table, $form.values);
     } catch (e) {
       toast.error(`${$_('unable_to_save_changes')} ${getErrorMessage(e)}`);
     }

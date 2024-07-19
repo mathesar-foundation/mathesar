@@ -1,11 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
-    refetchTablesForSchema,
+    refetchTablesForCurrentSchema,
     currentTables,
-    updateTableMetaData,
   } from '@mathesar/stores/tables';
   import type { AtLeastOne } from '@mathesar/typeUtils';
 
@@ -28,10 +26,12 @@
   async function handleTableMetaUpdate(
     data: AtLeastOne<{ name: string; description: string }>,
   ): Promise<void> {
-    await updateTableMetaData(tableId, data);
-    if ($currentSchemaId) {
-      await refetchTablesForSchema($currentSchemaId);
-    }
+    // await updateTableMetaData(tableId, data);
+
+    // TODO_3651:
+    // - Modify name and description.
+    // - Rename this function so that it doesn't mention metadata.
+    await refetchTablesForCurrentSchema();
   }
 </script>
 

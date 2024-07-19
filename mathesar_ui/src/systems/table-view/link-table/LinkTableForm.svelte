@@ -18,14 +18,13 @@
   import { RichText } from '@mathesar/components/rich-text';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     ColumnsDataStore,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import {
     importVerifiedTables as importVerifiedTablesStore,
-    refetchTablesForSchema,
+    refetchTablesForCurrentSchema,
     currentTables,
     validateNewTableName,
   } from '@mathesar/stores/tables';
@@ -198,8 +197,8 @@
   }
 
   async function reFetchOtherThingsThatChanged() {
-    if ($linkType === 'manyToMany' && $currentSchemaId !== undefined) {
-      await refetchTablesForSchema($currentSchemaId);
+    if ($linkType === 'manyToMany') {
+      await refetchTablesForCurrentSchema();
       return;
     }
     const tableWithNewColumn = $linkType === 'oneToMany' ? target : base;
