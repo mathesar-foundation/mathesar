@@ -39,15 +39,19 @@ export class TupleMap<K extends unknown[], V> {
     return this.map.size;
   }
 
-  get keys(): IterableIterator<K> {
+  keys(): IterableIterator<K> {
     return map(parse, this.map.keys());
   }
 
-  get values(): IterableIterator<V> {
+  values(): IterableIterator<V> {
     return this.map.values();
   }
 
-  get entries() {
+  entries(): IterableIterator<[K, V]> {
     return map(([key, value]) => [parse(key), value], this.map.entries());
+  }
+
+  [Symbol.iterator]() {
+    return this.entries();
   }
 }

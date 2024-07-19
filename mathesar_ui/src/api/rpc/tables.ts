@@ -72,8 +72,8 @@ export const tables = {
       database_id: number;
       table_oid: number;
       table_data_dict: {
-        name: string;
-        description: string;
+        name?: string;
+        description?: string | null;
       };
     },
     void

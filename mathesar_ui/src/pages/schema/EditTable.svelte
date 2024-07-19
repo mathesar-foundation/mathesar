@@ -33,7 +33,7 @@
   controller={modalController}
   save={handleSave}
   getNameValidationErrors={$getNameValidationErrors}
-  getInitialName={() => table.name ?? ''}
+  getInitialName={() => table.name}
   getInitialDescription={() => table.description ?? ''}
 >
   <span slot="title" let:initialName>

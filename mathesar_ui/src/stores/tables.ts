@@ -9,7 +9,7 @@
  * sorting.
  */
 
-import { execPipe, filter, map } from 'iter-tools';
+import { execPipe, filter, find, map } from 'iter-tools';
 import { _ } from 'svelte-i18n';
 import type { Readable, Writable } from 'svelte/store';
 import { derived, get, readable, writable } from 'svelte/store';
@@ -17,6 +17,7 @@ import { derived, get, readable, writable } from 'svelte/store';
 import {
   CancellablePromise,
   collapse,
+  defined,
   type RecursivePartial,
 } from '@mathesar-component-library';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
@@ -29,7 +30,10 @@ import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import { TupleMap } from '@mathesar/packages/tuple-map';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
+import {
+  mergeTables,
+  tableRequiresImportConfirmation,
+} from '@mathesar/utils/tables';
 import { connectionsStore } from './databases';
 import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 
@@ -171,23 +175,19 @@ function getTablesStore(
   return store;
 }
 
-function findSchemaStoreForTable(
+function findStoreContainingTable(
+  connection: Pick<Connection, 'id'>,
   tableOid: Table['oid'],
 ): TablesStore | undefined {
-  // TODO_3651 rewrite this function
-  throw new Error('Not implemented');
-}
-
-function findAndUpdateTableStore(tableOid: Table['oid'], newTable: Table) {
-  findSchemaStoreForTable(tableOid)?.update((tablesData) => {
-    const oldTable = tablesData.tablesMap.get(tableOid);
-    tablesData.tablesMap.set(tableOid, { ...(oldTable ?? {}), ...newTable });
-    const tablesMap: TablesMap = new Map();
-    sortTables([...tablesData.tablesMap.values()]).forEach((t) => {
-      tablesMap.set(t.oid, t);
-    });
-    return { ...tablesData, tablesMap };
-  });
+  return defined(
+    find(
+      ([[connectionId], tablesStore]) =>
+        connectionId === connection.id &&
+        get(tablesStore).tablesMap.has(tableOid),
+      tablesStores,
+    ),
+    ([, tablesStore]) => tablesStore,
+  );
 }
 
 export function deleteTable(
@@ -223,12 +223,42 @@ export function deleteTable(
   );
 }
 
+/**
+ *
+ * @throws Error if the table store is not found or if the table is not found in
+ * the store.
+ */
 export async function updateTable(
   connection: Pick<Connection, 'id'>,
   table: RecursivePartial<Table> & { oid: Table['oid'] },
-) {
-  // TODO_3651
-  throw new Error('Not implemented');
+): Promise<void> {
+  await api.tables
+    .patch({
+      database_id: connection.id,
+      table_oid: table.oid,
+      table_data_dict: {
+        name: table.name,
+        description: table.description,
+      },
+    })
+    .run();
+
+  // TODO_BETA: also run tables.metadata.patch to handle updates to
+  // `table.metadata`. Run both API calls as one RPC batch request.
+
+  const tableStore = findStoreContainingTable(connection, table.oid);
+  if (!tableStore) throw new Error('Table store not found');
+  tableStore.update((tablesData) => {
+    const oldTable = tablesData.tablesMap.get(table.oid);
+    if (!oldTable) throw new Error('Table not found within store.');
+    const newTable = mergeTables(oldTable, table);
+    tablesData.tablesMap.set(table.oid, newTable);
+    const tablesMap: TablesMap = new Map();
+    sortTables([...tablesData.tablesMap.values()]).forEach((t) => {
+      tablesMap.set(t.oid, t);
+    });
+    return { ...tablesData, tablesMap };
+  });
 }
 
 export function createTable(
@@ -323,7 +353,7 @@ export function getTableFromStoreOrApi({
   connection: Pick<Connection, 'id'>;
   tableOid: Table['oid'];
 }): CancellablePromise<Table> {
-  const tablesStore = findSchemaStoreForTable(tableOid);
+  const tablesStore = findStoreContainingTable(connection, tableOid);
   if (tablesStore) {
     const table = get(tablesStore).tablesMap.get(tableOid);
     if (table) {
