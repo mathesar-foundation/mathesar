@@ -3465,7 +3465,8 @@ BEGIN
     )
     SELECT jsonb_build_object(
       'results', jsonb_agg(row_to_json(results_cte.*)),
-      'count', max(count_cte.count)
+      'count', max(count_cte.count),
+      'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
     FROM results_cte, count_cte
     $q$,

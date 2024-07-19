@@ -50,6 +50,7 @@ class RecordList(TypedDict):
             results=d["results"],
             group=None,
             preview_data=[],
+            query=d["query"],
         )
 
 
