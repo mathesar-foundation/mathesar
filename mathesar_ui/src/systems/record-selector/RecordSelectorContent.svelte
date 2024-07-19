@@ -15,7 +15,7 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -88,7 +88,7 @@
       const record = response.results[0];
       const recordId = getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];
-      const table = $tables.tablesMap.get(tableId);
+      const table = $currentTablesData.tablesMap.get(tableId);
       const template = table?.settings?.preview_settings?.template;
       if (!template) {
         throw new Error('No record summary template found in API response.');

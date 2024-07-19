@@ -23,7 +23,7 @@
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
 
-  export let tablesMap: Map<number, Table>;
+  export let tablesMap: Map<Table['oid'], Table>;
   export let explorationsMap: Map<number, QueryInstance>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;

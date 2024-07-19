@@ -4,7 +4,7 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     refetchTablesForSchema,
-    tables,
+    currentTables,
     updateTableMetaData,
   } from '@mathesar/stores/tables';
   import type { AtLeastOne } from '@mathesar/typeUtils';
@@ -12,12 +12,7 @@
   export let tableId: number;
 
   function schemaContainsTableName(name: string): boolean {
-    const allTables = [...$tables.tablesMap.values()];
-    const tablesUsingName = allTables.filter(
-      (current) => current.name === name,
-    );
-
-    return tablesUsingName.length > 0 && tablesUsingName[0].oid !== tableId;
+    return $currentTables.some((t) => t.name === name && t.oid !== tableId);
   }
 
   function getNameValidationErrors(name: string): string[] {

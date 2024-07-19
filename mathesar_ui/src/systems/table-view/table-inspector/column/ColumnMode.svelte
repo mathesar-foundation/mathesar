@@ -4,7 +4,7 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
   import { Collapsible } from '@mathesar-component-library';
@@ -145,7 +145,7 @@
       {@const referentTable =
         referentTableId === undefined
           ? undefined
-          : $tables.tablesMap.get(referentTableId)}
+          : $currentTablesData.tablesMap.get(referentTableId)}
       {#if referentTable !== undefined}
         <Collapsible triggerAppearance="plain">
           <CollapsibleHeader

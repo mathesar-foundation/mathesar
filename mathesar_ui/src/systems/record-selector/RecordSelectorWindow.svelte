@@ -6,7 +6,7 @@
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
   import { getTableName } from '@mathesar/stores/tables';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
   import { Window, portal } from '@mathesar-component-library';
 
@@ -31,7 +31,7 @@
     nestingLevel: controller.nestingLevel + 1,
   });
   $: ({ tableId, purpose } = controller);
-  $: table = $tableId && $tables.tablesMap.get($tableId);
+  $: table = $tableId && $currentTablesData.tablesMap.get($tableId);
   $: tabularData =
     $tableId && table
       ? new TabularData({

@@ -24,7 +24,7 @@
     getTableFromStoreOrApi,
     moveColumns,
     splitTable,
-    tables as tablesDataStore,
+    currentTablesData as tablesDataStore,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';

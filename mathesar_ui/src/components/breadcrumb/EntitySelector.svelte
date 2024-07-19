@@ -9,10 +9,7 @@
   import { iconTable } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { queries as queriesStore } from '@mathesar/stores/queries';
-  import {
-    currentTableId,
-    tables as tablesStore,
-  } from '@mathesar/stores/tables';
+  import { currentTableId, currentTables } from '@mathesar/stores/tables';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
@@ -63,11 +60,10 @@
     };
   }
 
-  $: tables = [...$tablesStore.tablesMap.values()];
   $: queries = [...$queriesStore.data.values()];
 
   $: selectorData = new Map<string, BreadcrumbSelectorEntry[]>([
-    [$_('tables'), tables.map(makeTableBreadcrumbSelectorItem)],
+    [$_('tables'), $currentTables.map(makeTableBreadcrumbSelectorItem)],
     [$_('explorations'), queries.map(makeQueryBreadcrumbSelectorItem)],
   ]);
 </script>

@@ -16,7 +16,7 @@
   import { queries } from '@mathesar/stores/queries';
   import {
     importVerifiedTables as importVerifiedTablesStore,
-    tables as tablesStore,
+    currentTablesData as tablesStore,
   } from '@mathesar/stores/tables';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { logEvent } from '@mathesar/utils/telemetry';

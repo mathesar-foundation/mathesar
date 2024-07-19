@@ -28,7 +28,7 @@
     generateTablePreview,
     getTypeSuggestionsForTable,
     patchTable,
-    tables,
+    currentTables,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import {
@@ -69,7 +69,7 @@
   let columns: Column[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([]);
 
-  $: otherTableNames = [...$tables.tablesMap.values()]
+  $: otherTableNames = $currentTables
     .filter((t) => t.oid !== table.oid)
     .map((t) => t.name);
   $: customizedTableName = requiredField(table.name, [

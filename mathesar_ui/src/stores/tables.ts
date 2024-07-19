@@ -395,7 +395,7 @@ export function generateTablePreview(props: {
   return postAPI(`/api/db/v0/tables/${table.oid}/previews/`, { columns });
 }
 
-export const tables: Readable<TablesData> = derived(
+export const currentTablesData: Readable<TablesData> = derived(
   currentSchemaId,
   ($currentSchemaId, set) => {
     let unsubscribe: Unsubscriber;
@@ -418,18 +418,22 @@ export const tables: Readable<TablesData> = derived(
   },
 );
 
+export const currentTables = derived(currentTablesData, (tablesData) =>
+  sortTables(tablesData.tablesMap.values()),
+);
+
 export const importVerifiedTables: Readable<TablesMap> = derived(
-  tables,
-  ($tables) =>
+  currentTablesData,
+  (tablesData) =>
     new Map(
-      [...$tables.tablesMap.values()]
+      [...tablesData.tablesMap.values()]
         .filter((table) => !isTableImportConfirmationRequired(table))
         .map((table) => [table.oid, table]),
     ),
 );
 
-export const validateNewTableName = derived(tables, ($tables) => {
-  const names = new Set([...$tables.tablesMap.values()].map((t) => t.name));
+export const validateNewTableName = derived(currentTablesData, (tablesData) => {
+  const names = new Set([...tablesData.tablesMap.values()].map((t) => t.name));
   return invalidIf(
     (name: string) => names.has(name),
     'A table with that name already exists.',
@@ -437,13 +441,13 @@ export const validateNewTableName = derived(tables, ($tables) => {
 });
 
 export function getTableName(id: DBObjectEntry['id']): string | undefined {
-  return get(tables).tablesMap.get(id)?.name;
+  return get(currentTablesData).tablesMap.get(id)?.name;
 }
 
 export const currentTableId = writable<number | undefined>(undefined);
 
 export const currentTable = derived(
-  [currentTableId, tables],
+  [currentTableId, currentTablesData],
   ([$currentTableId, $tables]) =>
     $currentTableId === undefined
       ? undefined

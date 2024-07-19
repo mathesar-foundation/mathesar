@@ -8,7 +8,11 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { currentTable, deleteTable, tables } from '@mathesar/stores/tables';
+  import {
+    currentTable,
+    deleteTable,
+    currentTablesData,
+  } from '@mathesar/stores/tables';
   import {
     constructDataExplorerUrlToSummarizeFromGroup,
     createDataExplorerUrlToExploreATable,
@@ -37,7 +41,7 @@
           $currentSchema.oid,
           {
             oid: $tabularData.id,
-            name: $tables.tablesMap.get($tabularData.id)?.name ?? '',
+            name: $currentTablesData.tablesMap.get($tabularData.id)?.name ?? '',
           },
         )
       : '';

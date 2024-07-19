@@ -15,7 +15,7 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
@@ -56,7 +56,7 @@
     recordsData,
     processedColumns,
   } = tabularData);
-  $: table = $tables.tablesMap.get(tableId);
+  $: table = $currentTablesData.tablesMap.get(tableId);
   $: ({ recordSummaries, state: recordsDataState } = recordsData);
   $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
@@ -137,7 +137,7 @@
     if (!record || recordId === undefined) {
       return;
     }
-    const tableEntry = $tables.tablesMap.get(tableId);
+    const tableEntry = $currentTablesData.tablesMap.get(tableId);
     const template = tableEntry?.settings?.preview_settings?.template ?? '';
     const recordSummary = renderTransitiveRecordSummary({
       template,

@@ -7,7 +7,7 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import { Icon } from '@mathesar-component-library';
 
   export let exploration: QueryInstance;

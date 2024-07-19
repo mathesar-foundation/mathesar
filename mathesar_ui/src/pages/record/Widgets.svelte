@@ -8,7 +8,7 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconRecord } from '@mathesar/icons';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import { Help, isDefinedNonNullable } from '@mathesar-component-library';
 
   import TableWidget from './TableWidget.svelte';
@@ -25,7 +25,7 @@
   );
 
   function buildWidgetInput(joinableTable: JoinableTable) {
-    const table = $tables.tablesMap.get(joinableTable.target);
+    const table = $currentTablesData.tablesMap.get(joinableTable.target);
     if (!table) return undefined;
     const id = joinableTable.jp_path[0].slice(-1)[0];
     const name = columnNameMap.get(id) ?? `(${$_('unknown_column')})`;

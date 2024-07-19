@@ -26,7 +26,7 @@
   import {
     importVerifiedTables as importVerifiedTablesStore,
     refetchTablesForSchema,
-    tables as tablesDataStore,
+    currentTables,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -61,7 +61,6 @@
   // ===========================================================================
   $: singularBaseTableName = makeSingular(base.name);
   $: importVerifiedTables = [...$importVerifiedTablesStore.values()];
-  $: allTables = [...$tablesDataStore.tablesMap.values()];
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
 
@@ -93,7 +92,7 @@
     [columnNameIsAvailable($targetColumns)],
   );
   $: mappingTableName = requiredField(
-    suggestMappingTableName(base, target, allTables),
+    suggestMappingTableName(base, target, $currentTables),
     [$validateNewTableName],
   );
   $: columnNameMappingToBase = (() => {

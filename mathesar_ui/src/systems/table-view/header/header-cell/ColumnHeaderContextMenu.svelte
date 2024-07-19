@@ -23,7 +23,7 @@
     type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
 
@@ -61,7 +61,7 @@
 
   $: ({ linkFk } = processedColumn);
   $: linkedTable = linkFk
-    ? $tables.tablesMap.get(linkFk.referent_table)
+    ? $currentTablesData.tablesMap.get(linkFk.referent_table)
     : undefined;
   $: linkedTableHref = linkedTable
     ? $storeToGetTablePageUrl({ tableId: linkedTable.oid })

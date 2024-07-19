@@ -8,7 +8,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
-  import { currentTableId, tables } from '@mathesar/stores/tables';
+  import { currentTableId, currentTablesData } from '@mathesar/stores/tables';
 
   import RecordPageRoute from './RecordPageRoute.svelte';
 
@@ -17,7 +17,7 @@
   export let tableId: number;
 
   $: $currentTableId = tableId;
-  $: table = $tables.tablesMap.get(tableId);
+  $: table = $currentTablesData.tablesMap.get(tableId);
 
   function handleUnmount() {
     $currentTableId = undefined;

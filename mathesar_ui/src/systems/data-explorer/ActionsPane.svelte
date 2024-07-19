@@ -16,7 +16,7 @@
   } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
-  import { tables as tablesDataStore } from '@mathesar/stores/tables';
+  import { currentTablesData as tablesDataStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import {
     Button,

@@ -4,7 +4,7 @@
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import EditTableHOC from '@mathesar/components/EditTableHOC.svelte';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -15,7 +15,8 @@
   <div class="update-table-description-property-container">
     <span class="label">{$_('description')}</span>
     <EditableTextWithActions
-      initialValue={$tables.tablesMap.get($tabularData.id)?.description ?? ''}
+      initialValue={$currentTablesData.tablesMap.get($tabularData.id)
+        ?.description ?? ''}
       onSubmit={(description) => onUpdate({ description })}
       isLongText
       {disabled}
