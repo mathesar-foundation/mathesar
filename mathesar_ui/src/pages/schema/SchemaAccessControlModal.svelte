@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { UserRole } from '@mathesar/api/rest/users';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
@@ -19,7 +20,7 @@
 
   export let controller: ModalController;
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   const usersStore = setUsersStoreInContext();
   const { requestStatus } = usersStore;

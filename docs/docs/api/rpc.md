@@ -174,6 +174,15 @@ To use an RPC function:
       - UniqueConstraint
       - CreatableConstraintInfo
 
+## Records
+
+:::records
+    options:
+      members:
+      - list_
+      - OrderBy
+      - RecordList
+
 ## Explorations
 
 ::: explorations

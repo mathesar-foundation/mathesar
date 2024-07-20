@@ -11,7 +11,8 @@ import userApi, {
   type UserRole,
 } from '@mathesar/api/rest/users';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { Database } from '@mathesar/AppTypes';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import {
   type AccessOperation,
@@ -54,7 +55,7 @@ export class UserModel {
   hasPermission(
     dbObject: {
       database?: Pick<Database, 'id'>;
-      schema?: Pick<SchemaEntry, 'id'>;
+      schema?: Pick<Schema, 'oid'>;
     },
     operation: AccessOperation,
   ): boolean {
@@ -69,7 +70,7 @@ export class UserModel {
     }
     const roles: UserRole[] = [];
     if (schema) {
-      const userSchemaRole = this.schemaRoles.get(schema.id);
+      const userSchemaRole = this.schemaRoles.get(schema.oid);
       if (userSchemaRole) {
         roles.push(userSchemaRole.role);
       }
@@ -87,8 +88,8 @@ export class UserModel {
     return this.databaseRoles.get(database.id);
   }
 
-  getRoleForSchema(schema: Pick<SchemaEntry, 'id'>) {
-    return this.schemaRoles.get(schema.id);
+  getRoleForSchema(schema: Pick<Schema, 'oid'>) {
+    return this.schemaRoles.get(schema.oid);
   }
 
   hasDirectDbAccess(database: Pick<Database, 'id'>) {
@@ -99,14 +100,11 @@ export class UserModel {
     return this.hasDirectDbAccess(database) || this.isSuperUser;
   }
 
-  hasDirectSchemaAccess(schema: Pick<SchemaEntry, 'id'>) {
-    return this.schemaRoles.has(schema.id);
+  hasDirectSchemaAccess(schema: Pick<Schema, 'oid'>) {
+    return this.schemaRoles.has(schema.oid);
   }
 
-  hasSchemaAccess(
-    database: Pick<Database, 'id'>,
-    schema: Pick<SchemaEntry, 'id'>,
-  ) {
+  hasSchemaAccess(database: Pick<Database, 'id'>, schema: Pick<Schema, 'oid'>) {
     return this.hasDbAccess(database) || this.hasDirectSchemaAccess(schema);
   }
 
@@ -298,10 +296,10 @@ class WritableUsersStore {
 
   async addSchemaRoleForUser(
     userId: number,
-    schema: Pick<SchemaEntry, 'id'>,
+    schema: Pick<Schema, 'oid'>,
     role: UserRole,
   ) {
-    const schemaRole = await userApi.addSchemaRole(userId, schema.id, role);
+    const schemaRole = await userApi.addSchemaRole(userId, schema.oid, role);
     this.users.update((users) =>
       users.map((user) => {
         if (user.id === userId) {
@@ -313,10 +311,7 @@ class WritableUsersStore {
     void this.fetchUsersSilently();
   }
 
-  async removeSchemaAccessForUser(
-    userId: number,
-    schema: Pick<SchemaEntry, 'id'>,
-  ) {
+  async removeSchemaAccessForUser(userId: number, schema: Pick<Schema, 'oid'>) {
     const user = get(this.users).find((entry) => entry.id === userId);
     const schemaRole = user?.getRoleForSchema(schema);
     if (schemaRole) {
@@ -345,7 +340,7 @@ class WritableUsersStore {
     );
   }
 
-  getNormalUsersWithDirectSchemaRole(schema: Pick<SchemaEntry, 'id'>) {
+  getNormalUsersWithDirectSchemaRole(schema: Pick<Schema, 'oid'>) {
     return derived(this.users, ($users) =>
       $users.filter(
         (user) => !user.isSuperUser && user.hasDirectSchemaAccess(schema),
@@ -353,7 +348,7 @@ class WritableUsersStore {
     );
   }
 
-  getNormalUsersWithoutDirectSchemaRole(schema: Pick<SchemaEntry, 'id'>) {
+  getNormalUsersWithoutDirectSchemaRole(schema: Pick<Schema, 'oid'>) {
     return derived(this.users, ($users) =>
       $users.filter(
         (user) => !user.isSuperUser && !user.hasDirectSchemaAccess(schema),
@@ -363,7 +358,7 @@ class WritableUsersStore {
 
   getUsersWithAccessToSchema(
     database: Pick<Database, 'id'>,
-    schema: Pick<SchemaEntry, 'id'>,
+    schema: Pick<Schema, 'oid'>,
   ) {
     return derived(this.users, ($users) =>
       $users.filter((user) => user.hasSchemaAccess(database, schema)),
