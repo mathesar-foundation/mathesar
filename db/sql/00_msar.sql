@@ -1181,6 +1181,10 @@ Args:
   new_tab_name: unquoted, unqualified new table name
 */
 BEGIN
+  IF old_tab_name = new_tab_name THEN
+    -- Return early if the names are the same. This avoids an error from Postgres.
+    RETURN;
+  END IF;
   EXECUTE format('ALTER TABLE %I.%I RENAME TO %I', sch_name, old_tab_name, new_tab_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
