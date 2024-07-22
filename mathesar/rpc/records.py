@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table records.
 """
-from typing import TypedDict, Literal
+from typing import Any, Literal, TypedDict, Union
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -21,6 +21,45 @@ class OrderBy(TypedDict):
     """
     attnum: int
     direction: Literal["asc", "desc"]
+
+
+class FilterAttnum(TypedDict):
+    """
+    An object choosing a column for a filter.
+
+    Attributes:
+        type: Must be `"attnum"`
+        value: The attnum of the column to filter by
+    """
+    type: Literal["attnum"]
+    value: int
+
+
+class FilterLiteral(TypedDict):
+    """
+    An object defining a literal for an argument to a filter.
+
+    Attributes:
+      type: must be `"literal"`.
+      value: The value of the literal.
+    """
+    type: Literal["literal"]
+    value: Any
+
+
+class Filter(TypedDict):
+    """
+    An object defining a filter to be used in a `WHERE` clause.
+
+    For valid `type` values, see the `msar.filter_templates` table
+    defined in `mathesar/db/sql/00_msar.sql`.
+
+    Attributes:
+      type: a function or operator to be used in filtering.
+      args: The ordered arguments for the function or operator.
+    """
+    type: str
+    args: list[Union['Filter', FilterAttnum, FilterLiteral]]
 
 
 class RecordList(TypedDict):
@@ -64,7 +103,7 @@ def list_(
         limit: int = None,
         offset: int = None,
         order: list[OrderBy] = None,
-        filter: list[dict] = None,
+        filter: Filter = None,
         group: list[dict] = None,
         search: list[dict] = None,
         **kwargs

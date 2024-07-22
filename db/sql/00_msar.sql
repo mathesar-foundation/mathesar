@@ -3346,7 +3346,7 @@ INSERT INTO msar.filter_templates VALUES
 CREATE OR REPLACE FUNCTION msar.build_filter_expr(rel_id oid, tree jsonb) RETURNS text AS $$
 SELECT CASE tree ->> 'type'
   WHEN 'literal' THEN format('%L', tree ->> 'value')
-  WHEN 'column_id' THEN format('%I', msar.get_column_name(rel_id, (tree ->> 'value')::smallint))
+  WHEN 'attnum' THEN format('%I', msar.get_column_name(rel_id, (tree ->> 'value')::smallint))
   ELSE
     format(max(filter_template), VARIADIC array_agg(msar.build_filter_expr(rel_id, inner_tree)))
 END

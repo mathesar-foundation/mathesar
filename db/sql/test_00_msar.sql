@@ -3025,7 +3025,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'equal', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'col1 = ''500'''
   );
@@ -3034,7 +3034,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'lesser', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'col1 < ''500'''
   );
@@ -3043,7 +3043,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'greater', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'col1 > ''500'''
   );
@@ -3052,7 +3052,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'lesser_or_equal', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'col1 <= ''500'''
   );
@@ -3061,7 +3061,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'greater_or_equal', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'col1 >= ''500'''
   );
@@ -3070,7 +3070,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'null', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2)))),
+          jsonb_build_object('type', 'attnum', 'value', 2)))),
     'col1 IS NULL'
   );
   RETURN NEXT is(
@@ -3078,7 +3078,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'not_null', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2)))),
+          jsonb_build_object('type', 'attnum', 'value', 2)))),
     'col1 IS NOT NULL'
   );
   RETURN NEXT is(
@@ -3086,7 +3086,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'contains_case_insensitive', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 'ABc')))),
     'col1 ILIKE ''%'' || ''ABc'' || ''%'''
   );
@@ -3095,7 +3095,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'starts_with_case_insensitive', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 'a''bc')))),
     'col1 ILIKE ''a''''bc'' || ''%'''
   );
@@ -3104,7 +3104,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'json_array_length_equals', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'jsonb_array_length(col1::jsonb) = ''500'''
   );
@@ -3113,7 +3113,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'json_array_length_greater_than', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'jsonb_array_length(col1::jsonb) > ''500'''
   );
@@ -3122,7 +3122,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'json_array_length_greater_or_equal', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'jsonb_array_length(col1::jsonb) >= ''500'''
   );
@@ -3131,7 +3131,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'json_array_length_less_than', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'jsonb_array_length(col1::jsonb) < ''500'''
   );
@@ -3140,7 +3140,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'json_array_length_less_or_equal', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'jsonb_array_length(col1::jsonb) <= ''500'''
   );
@@ -3149,7 +3149,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'json_array_not_empty', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 500)))),
     'jsonb_array_length(col1::jsonb) > 0'
   );
@@ -3158,7 +3158,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'json_array_contains', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', '"500"')))),
     'col1 @> ''"500"'''
   );
@@ -3167,7 +3167,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'uri_scheme_equals', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 'https')))),
     'mathesar_types.uri_scheme(col1) = ''https'''
   );
@@ -3176,7 +3176,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'uri_authority_contains', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 'google')))),
     'mathesar_types.uri_authority(col1) LIKE ''%'' || ''google'' || ''%'''
   );
@@ -3185,7 +3185,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'email_domain_equals', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 'gmail.com')))),
     'mathesar_types.email_domain_name(col1) = ''gmail.com'''
   );
@@ -3194,7 +3194,7 @@ BEGIN
       rel_id,
       jsonb_build_object(
         'type', 'email_domain_contains', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'column_id', 'value', 2),
+          jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 'mail')))),
     'mathesar_types.email_domain_name(col1) LIKE ''%'' || ''mail'' || ''%'''
   );
@@ -3205,12 +3205,12 @@ BEGIN
         'type', 'or', 'args', jsonb_build_array(
           jsonb_build_object(
             'type', 'email_domain_contains', 'args', jsonb_build_array(
-              jsonb_build_object('type', 'column_id', 'value', 2),
+              jsonb_build_object('type', 'attnum', 'value', 2),
               jsonb_build_object('type', 'literal', 'value', 'mail'))
           ),
           jsonb_build_object(
             'type', 'equal', 'args', jsonb_build_array(
-              jsonb_build_object('type', 'column_id', 'value', 3),
+              jsonb_build_object('type', 'attnum', 'value', 3),
               jsonb_build_object('type', 'literal', 'value', 500))
           )
         )
@@ -3227,19 +3227,19 @@ BEGIN
             'type', 'and', 'args', jsonb_build_array(
               jsonb_build_object(
                 'type', 'equal', 'args', jsonb_build_array(
-                  jsonb_build_object('type', 'column_id', 'value', 3),
+                  jsonb_build_object('type', 'attnum', 'value', 3),
                   jsonb_build_object('type', 'literal', 'value', 500))
               ),
               jsonb_build_object(
                 'type', 'lesser', 'args', jsonb_build_array(
-                  jsonb_build_object('type', 'column_id', 'value', 4),
+                  jsonb_build_object('type', 'attnum', 'value', 4),
                   jsonb_build_object('type', 'literal', 'value', 'abcde'))
               )
             )
           ),
           jsonb_build_object(
             'type', 'greater', 'args', jsonb_build_array(
-              jsonb_build_object('type', 'column_id', 'value', 1),
+              jsonb_build_object('type', 'attnum', 'value', 1),
               jsonb_build_object('type', 'literal', 'value', 20))
           )
         )
