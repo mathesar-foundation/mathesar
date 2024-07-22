@@ -3218,5 +3218,34 @@ BEGIN
     ),
     '(mathesar_types.email_domain_name(col1) LIKE ''%'' || ''mail'' || ''%'') OR (col2 = ''500'')'
   );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'or', 'args', jsonb_build_array(
+          jsonb_build_object(
+            'type', 'and', 'args', jsonb_build_array(
+              jsonb_build_object(
+                'type', 'equal', 'args', jsonb_build_array(
+                  jsonb_build_object('type', 'column_id', 'value', 3),
+                  jsonb_build_object('type', 'literal', 'value', 500))
+              ),
+              jsonb_build_object(
+                'type', 'lesser', 'args', jsonb_build_array(
+                  jsonb_build_object('type', 'column_id', 'value', 4),
+                  jsonb_build_object('type', 'literal', 'value', 'abcde'))
+              )
+            )
+          ),
+          jsonb_build_object(
+            'type', 'greater', 'args', jsonb_build_array(
+              jsonb_build_object('type', 'column_id', 'value', 1),
+              jsonb_build_object('type', 'literal', 'value', 20))
+          )
+        )
+      )
+    ),
+    '((col2 = ''500'') AND (col3 < ''abcde'')) OR (id > ''20'')'
+  );
 END;
 $$ LANGUAGE plpgsql;
