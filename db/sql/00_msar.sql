@@ -3313,8 +3313,8 @@ DROP TABLE IF EXISTS msar.filter_templates;
 CREATE TABLE msar.filter_templates (filter_key text PRIMARY KEY, filter_template text);
 INSERT INTO msar.filter_templates VALUES
   -- basic composition operators
-  ('and', '%s AND %s'),
-  ('or', '%s OR %s'),
+  ('and', '(%s) AND (%s)'),
+  ('or', '(%s) OR (%s)'),
   -- general comparison operators
   ('equal', '%s = %s'),
   ('lesser', '%s < %s'),

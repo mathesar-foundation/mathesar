@@ -2885,7 +2885,14 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ]
-    }$j$
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
+        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",'
+        ' msar.format_data(col4) AS "5" FROM public.atable'
+        '  ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
+      )
+    )
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -2897,7 +2904,14 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ]
-    }$j$
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
+        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",'
+        ' msar.format_data(col4) AS "5" FROM public.atable'
+        '  ORDER BY "2" DESC, "1" ASC LIMIT ''2'' OFFSET NULL'
+      )
+    )
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -2909,7 +2923,14 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ]
-    }$j$
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
+        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",',
+        ' msar.format_data(col4) AS "5" FROM public.atable',
+        '  ORDER BY "1" DESC, "1" ASC LIMIT NULL OFFSET ''1'''
+      )
+    )
   );
   CREATE ROLE intern_no_pkey;
   GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
@@ -2925,7 +2946,13 @@ BEGIN
         {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
       ]
-    }$j$
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
+        ' msar.format_data(col3) AS "4", msar.format_data(col4) AS "5" FROM public.atable',
+        '  ORDER BY "2" ASC, "3" ASC, "5" ASC LIMIT NULL OFFSET NULL'
+      )
+    )
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -2938,7 +2965,13 @@ BEGIN
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ]
-    }$j$
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
+        ' msar.format_data(col3) AS "4", msar.format_data(col4) AS "5" FROM public.atable',
+        '  ORDER BY "3" DESC, "2" ASC, "3" ASC, "5" ASC LIMIT NULL OFFSET NULL'
+      )
+    )
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -3164,6 +3197,26 @@ BEGIN
           jsonb_build_object('type', 'column_id', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', 'mail')))),
     'mathesar_types.email_domain_name(col1) LIKE ''%'' || ''mail'' || ''%'''
+  );
+  RETURN NEXT is(
+    msar.build_filter_expr(
+      rel_id,
+      jsonb_build_object(
+        'type', 'or', 'args', jsonb_build_array(
+          jsonb_build_object(
+            'type', 'email_domain_contains', 'args', jsonb_build_array(
+              jsonb_build_object('type', 'column_id', 'value', 2),
+              jsonb_build_object('type', 'literal', 'value', 'mail'))
+          ),
+          jsonb_build_object(
+            'type', 'equal', 'args', jsonb_build_array(
+              jsonb_build_object('type', 'column_id', 'value', 3),
+              jsonb_build_object('type', 'literal', 'value', 500))
+          )
+        )
+      )
+    ),
+    '(mathesar_types.email_domain_name(col1) LIKE ''%'' || ''mail'' || ''%'') OR (col2 = ''500'')'
   );
 END;
 $$ LANGUAGE plpgsql;
