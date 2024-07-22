@@ -517,6 +517,7 @@ END;
 $$ LANGUAGE SQL;
 
 
+DROP FUNCTION IF EXISTS msar.get_constraints_for_table(oid);
 CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TABLE
 (
   oid oid,
