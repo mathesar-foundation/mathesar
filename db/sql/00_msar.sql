@@ -1171,41 +1171,9 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Rename table ------------------------------------------------------------------------------------
 
+DROP FUNCTION IF EXISTS msar.rename_table(text, text, text);
 CREATE OR REPLACE FUNCTION
-__msar.rename_table(old_tab_name text, new_tab_name text) RETURNS text AS $$/*
-Change a table's name, returning the command executed.
-
-Args:
-  old_tab_name: properly quoted, qualified table name
-  new_tab_name: properly quoted, unqualified table name
-*/
-BEGIN
-  RETURN __msar.exec_ddl(
-    'ALTER TABLE %s RENAME TO %s', old_tab_name, new_tab_name
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.rename_table(tab_id oid, new_tab_name text) RETURNS text AS $$/*
-Change a table's name, returning the command executed.
-
-Args:
-  tab_id: the OID of the table whose name we want to change
-  new_tab_name: unquoted, unqualified table name
-*/
-BEGIN
-  RETURN __msar.rename_table(
-    __msar.get_qualified_relation_name_or_null(tab_id),
-    quote_ident(new_tab_name)
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS text AS $$/*
+msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS void AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
@@ -1213,12 +1181,34 @@ Args:
   old_tab_name: unquoted, unqualified original table name
   new_tab_name: unquoted, unqualified new table name
 */
-DECLARE fullname text;
 BEGIN
-  fullname := __msar.build_qualified_name_sql(sch_name, old_tab_name);
-  RETURN __msar.rename_table(fullname, quote_ident(new_tab_name));
+  IF old_tab_name = new_tab_name THEN
+    -- Return early if the names are the same. This avoids an error from Postgres.
+    RETURN;
+  END IF;
+  EXECUTE format('ALTER TABLE %I.%I RENAME TO %I', sch_name, old_tab_name, new_tab_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+DROP FUNCTION IF EXISTS msar.rename_table(oid, text);
+CREATE OR REPLACE FUNCTION
+msar.rename_table(tab_id oid, new_tab_name text) RETURNS void AS $$/*
+Change a table's name, returning the command executed.
+
+Args:
+  tab_id: the OID of the table whose name we want to change
+  new_tab_name: unquoted, unqualified table name
+*/
+BEGIN
+  PERFORM msar.rename_table(
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    new_tab_name
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 
 -- Comment on table --------------------------------------------------------------------------------
