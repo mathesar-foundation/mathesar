@@ -1370,6 +1370,19 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_rename_table_with_same_name() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_alter_table();
+  PERFORM msar.rename_table(
+    sch_name =>'public',
+    old_tab_name => 'alter_this_table',
+    new_tab_name => 'alter_this_table'
+  );
+  RETURN NEXT has_table('alter_this_table');
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_rename_table_using_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
