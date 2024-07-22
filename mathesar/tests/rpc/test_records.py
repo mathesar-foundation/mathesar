@@ -43,8 +43,8 @@ def test_records_list(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return {
             "count": 50123,
-            "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}]
-            "query": "SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2"
+            "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
+            "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
@@ -54,7 +54,7 @@ def test_records_list(rf, monkeypatch):
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
         "group": None,
         "preview_data": [],
-        "query": "SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2"
+        "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
     actual_records_list = records.list_(
         table_oid=table_oid, database_id=database_id, request=request
