@@ -163,8 +163,11 @@ function getTablesStore(
       tablesMap: new Map(),
     });
     tablesStores.set([connection.id, schema.oid], store);
-    // TODO_3651: add condition for current connection as well as current schema
-    if (preload && commonData.current_schema === schema.oid) {
+    if (
+      preload &&
+      commonData.current_schema === schema.oid &&
+      commonData.current_connection === connection.id
+    ) {
       store = setTablesStore(connection, schema, commonData.tables ?? []);
     } else {
       void refetchTablesForSchema(connection, schema);
@@ -291,7 +294,7 @@ export function createTable(
         tablesStore?.update((tablesData) => {
           const table: Table = {
             oid: tableOid,
-            // TODO_3651: What happens when we create a table without passing a
+            // TODO_BETA: What happens when we create a table without passing a
             // name. Does the RPC API support this? Should it?
             name: tableArgs.name ?? '',
             schema: schema.oid,
