@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import { iconExploration } from '@mathesar/icons';
 
   import EmptyEntity from './EmptyEntity.svelte';
@@ -10,7 +11,7 @@
 
   export let explorations: QueryInstance[];
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let bordered = true;
 </script>
 

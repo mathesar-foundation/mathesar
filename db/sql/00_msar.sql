@@ -3383,17 +3383,19 @@ WITH orderable_cte AS (
     INNER JOIN pg_catalog.pg_cast ON atttypid=castsource
     INNER JOIN pg_catalog.pg_operator ON casttarget=oprleft
   WHERE
-    attrelid=tab_id
-    AND attnum>0
-    AND castcontext='i'
-    AND oprname='<'
+    attrelid = tab_id
+    AND attnum > 0
+    AND NOT attisdropped
+    AND castcontext = 'i'
+    AND oprname = '<'
   UNION SELECT attnum
   FROM pg_catalog.pg_attribute
     INNER JOIN pg_catalog.pg_operator ON atttypid=oprleft
   WHERE
-    attrelid=tab_id
-    AND attnum>0
-    AND oprname='<'
+    attrelid = tab_id
+    AND attnum > 0
+    AND NOT attisdropped
+    AND oprname = '<'
   ORDER BY attnum
 )
 SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
@@ -3443,7 +3445,10 @@ Args:
 SELECT string_agg(format('msar.format_data(%I) AS %I', attname, attnum), ', ')
 FROM pg_catalog.pg_attribute
 WHERE
-  attrelid = tab_id AND attnum > 0 AND has_column_privilege(attrelid, attnum, 'SELECT');
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND has_column_privilege(attrelid, attnum, 'SELECT');
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 

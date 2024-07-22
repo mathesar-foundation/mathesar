@@ -3,7 +3,8 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
@@ -12,7 +13,7 @@
   import RecordPageRoute from './RecordPageRoute.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let tableId: number;
 
   $: $currentTableId = tableId;

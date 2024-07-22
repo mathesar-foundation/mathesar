@@ -68,7 +68,7 @@ def list_(
         group: list[dict] = None,
         search: list[dict] = None,
         **kwargs
-) -> dict:
+) -> RecordList:
     """
     List records from a table, and its row count. Exposed as `list`.
 

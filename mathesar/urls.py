@@ -61,7 +61,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     re_path(
         r'^db/(?P<connection_id>\w+)/(?P<schema_id>\w+)/',
-        views.schema_home,
+        views.schemas,
         name='schema_home'
     ),
 ]

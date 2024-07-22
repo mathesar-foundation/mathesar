@@ -2,7 +2,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
@@ -17,7 +18,7 @@
 
   export let database: Database;
   export let controller: ModalController;
-  export let schema: SchemaEntry | undefined = undefined;
+  export let schema: Schema | undefined = undefined;
 
   function nameIsDuplicate(name: string) {
     // Handling the condition when the new name is equal to the current name

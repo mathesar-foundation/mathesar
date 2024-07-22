@@ -2,11 +2,12 @@ import type { Connection } from '@mathesar/api/rest/connections';
 import type { QueryInstance } from '@mathesar/api/rest/types/queries';
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { User } from '@mathesar/api/rest/users';
-import type { AbstractTypeResponse, SchemaResponse } from '@mathesar/AppTypes';
+import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { AbstractTypeResponse } from '@mathesar/AppTypes';
 
 export interface CommonData {
   connections: Connection[];
-  schemas: SchemaResponse[];
+  schemas: Schema[];
   tables: TableEntry[];
   queries: QueryInstance[];
   current_connection: Connection['id'] | null;
