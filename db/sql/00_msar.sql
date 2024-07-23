@@ -838,13 +838,16 @@ Each returned JSON object in the array will have the form:
 Args:
   sch_id: The OID or name of the schema.
 */
-SELECT jsonb_agg(
-  jsonb_build_object(
-    'oid', pgc.oid::bigint,
-    'name', pgc.relname,
-    'schema', pgc.relnamespace::bigint,
-    'description', msar.obj_description(pgc.oid, 'pg_class')
-  )
+SELECT coalesce(
+  jsonb_agg(
+    jsonb_build_object(
+      'oid', pgc.oid::bigint,
+      'name', pgc.relname,
+      'schema', pgc.relnamespace::bigint,
+      'description', msar.obj_description(pgc.oid, 'pg_class')
+    )
+  ),
+  '[]'::jsonb
 )
 FROM pg_catalog.pg_class AS pgc 
   LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
