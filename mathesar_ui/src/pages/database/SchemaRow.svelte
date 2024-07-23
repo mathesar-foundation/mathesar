@@ -2,7 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
@@ -21,12 +22,12 @@
   const dispatch = createEventDispatcher();
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   let isHovered = false;
   let isFocused = false;
 
-  $: href = getSchemaPageUrl(database.id, schema.id);
+  $: href = getSchemaPageUrl(database.id, schema.oid);
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
 </script>

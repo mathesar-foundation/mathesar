@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
   import { iconSchema } from '@mathesar/icons';
 
   import NameWithIcon from './NameWithIcon.svelte';
 
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let iconHasBox = false;
 
   $: isLocked = schema.name === 'public';

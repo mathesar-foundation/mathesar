@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
@@ -11,7 +12,7 @@
   import ShareExplorationDropdown from './ShareExplorationDropdown.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let query: QueryInstance;
   export let isInspectorOpen = true;
   export let context: 'page' | 'shared-consumer-page' = 'page';
@@ -28,7 +29,7 @@
     {#if context !== 'shared-consumer-page'}
       <a
         class="btn btn-primary"
-        href={getExplorationEditorPageUrl(database.id, schema.id, query.id)}
+        href={getExplorationEditorPageUrl(database.id, schema.oid, query.id)}
       >
         <span>{$_('edit_in_data_explorer')}</span>
       </a>

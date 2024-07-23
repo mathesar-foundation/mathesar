@@ -1,7 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconEdit, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -26,7 +27,7 @@
   import TableSkeleton from './TableSkeleton.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let section: string;
 
   const addEditModal = modal.spawnModalController();
@@ -49,19 +50,19 @@
     {
       label: $_('overview'),
       id: 'overview',
-      href: getSchemaPageUrl(database.id, schema.id),
+      href: getSchemaPageUrl(database.id, schema.oid),
     },
     {
       label: $_('tables'),
       id: 'tables',
       count: tablesMap.size,
-      href: getSchemaPageTablesSectionUrl(database.id, schema.id),
+      href: getSchemaPageTablesSectionUrl(database.id, schema.oid),
     },
     {
       label: $_('explorations'),
       id: 'explorations',
       count: explorationsMap.size,
-      href: getSchemaPageExplorationsSectionUrl(database.id, schema.id),
+      href: getSchemaPageExplorationsSectionUrl(database.id, schema.oid),
     },
   ] as TabItem[];
 
@@ -136,7 +137,7 @@
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
         {#if tablesRequestStatus.state === 'processing'}
-          <TableSkeleton numTables={schema.num_tables} />
+          <TableSkeleton numTables={schema.table_count} />
         {:else}
           <SchemaTables {tablesMap} {database} {schema} />
         {/if}

@@ -3,7 +3,8 @@
   import { router } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
@@ -19,7 +20,7 @@
   import Header from './Header.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let query: QueryInstance;
   export let shareConsumer: ShareConsumer | undefined = undefined;
 
@@ -44,7 +45,7 @@
   $: createQueryRunner(query, $currentDbAbstractTypes.data);
 
   function gotoSchemaPage() {
-    router.goto(getSchemaPageUrl(database.id, schema.id));
+    router.goto(getSchemaPageUrl(database.id, schema.oid));
   }
 </script>
 

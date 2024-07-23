@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
 
   import EmptyEntity from './EmptyEntity.svelte';
@@ -10,7 +11,7 @@
 
   export let tables: TableEntry[];
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 </script>
 
 <div class="container">

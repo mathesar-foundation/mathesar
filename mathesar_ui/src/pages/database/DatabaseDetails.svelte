@@ -3,7 +3,8 @@
   import { router } from 'tinro';
 
   import { reflectApi } from '@mathesar/api/rest/reflect';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
@@ -56,14 +57,14 @@
   $: schemasRequestStatus = $schemasStore.requestStatus;
 
   let filterQuery = '';
-  let targetSchema: SchemaEntry | undefined;
+  let targetSchema: Schema | undefined;
   let isReflectionRunning = false;
 
   function filterSchemas(
     schemaData: DBSchemaStoreData['data'],
     filter: string,
-  ): SchemaEntry[] {
-    const filtered: SchemaEntry[] = [];
+  ): Schema[] {
+    const filtered: Schema[] = [];
     schemaData.forEach((schema) => {
       if (schema.name?.toLowerCase().includes(filter.toLowerCase())) {
         filtered.push(schema);
@@ -79,20 +80,20 @@
     addEditModal.open();
   }
 
-  function editSchema(schema: SchemaEntry) {
+  function editSchema(schema: Schema) {
     targetSchema = schema;
     addEditModal.open();
   }
 
-  function deleteSchema(schema: SchemaEntry) {
+  function deleteSchema(schema: Schema) {
     void confirmDelete({
       identifierType: $_('schema'),
       identifierName: schema.name,
       body: [$_('schema_delete_warning'), $_('are_you_sure_to_proceed')],
       onProceed: async () => {
-        await deleteSchemaAPI(database.id, schema.id);
+        await deleteSchemaAPI(database.id, schema.oid);
         // TODO: Create common util to handle data clearing & sync between stores
-        removeTablesInSchemaTablesStore(schema.id);
+        removeTablesInSchemaTablesStore(schema.oid);
       },
     });
   }
@@ -198,7 +199,7 @@
     </p>
     <ul class="schema-list" slot="content">
       {#if schemasRequestStatus.state === 'success'}
-        {#each displayList as schema (schema.id)}
+        {#each displayList as schema (schema.oid)}
           <li class="schema-list-item">
             <SchemaRow
               {database}
