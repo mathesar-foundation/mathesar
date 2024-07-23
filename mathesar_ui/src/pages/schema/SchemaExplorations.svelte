@@ -16,10 +16,8 @@
   export let schema: Schema;
   export let explorationsMap: Map<number, QueryInstance>;
   export let hasTablesToExplore: boolean;
-  export let canEditMetadata: boolean;
 
-  $: showTutorial =
-    explorationsMap.size === 0 && hasTablesToExplore && canEditMetadata;
+  $: showTutorial = explorationsMap.size === 0 && hasTablesToExplore;
 
   let explorationsSearchQuery = '';
 

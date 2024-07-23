@@ -14,7 +14,6 @@
     iconDatabase,
     iconDeleteMajor,
     iconEdit,
-    iconManageAccess,
     iconMoreActions,
     iconRefresh,
   } from '@mathesar/icons';
@@ -42,12 +41,10 @@
   } from '@mathesar-component-library';
 
   import AddEditSchemaModal from './AddEditSchemaModal.svelte';
-  import DbAccessControlModal from './DbAccessControlModal.svelte';
   import SchemaListSkeleton from './SchemaListSkeleton.svelte';
   import SchemaRow from './SchemaRow.svelte';
 
   const addEditModal = modal.spawnModalController();
-  const accessControlModal = modal.spawnModalController();
   const editConnectionModal = modal.spawnModalController();
   const deleteConnectionModal = modal.spawnModalController();
 
@@ -58,12 +55,6 @@
 
   $: schemasMap = $schemasStore.data;
   $: schemasRequestStatus = $schemasStore.requestStatus;
-
-  $: canExecuteDDL = userProfile?.hasPermission({ database }, 'canExecuteDDL');
-  $: canEditPermissions = userProfile?.hasPermission(
-    { database },
-    'canEditPermissions',
-  );
 
   let filterQuery = '';
   let targetSchema: Schema | undefined;
@@ -107,10 +98,6 @@
     });
   }
 
-  function manageAccess() {
-    accessControlModal.open();
-  }
-
   function handleClearFilterQuery() {
     filterQuery = '';
   }
@@ -136,58 +123,50 @@
   }}
 >
   <svelte:fragment slot="action">
-    {#if canExecuteDDL || canEditPermissions}
-      <div>
-        {#if canEditPermissions}
-          <Button on:click={manageAccess} appearance="secondary">
-            <Icon {...iconManageAccess} />
-            <span>{$_('manage_access')}</span>
-          </Button>
-        {/if}
-        <DropdownMenu
-          showArrow={false}
-          triggerAppearance="plain"
-          label=""
-          closeOnInnerClick={false}
-          icon={iconMoreActions}
-          preferredPlacement="bottom-end"
-          menuStyle="--spacing-y:0.8em;"
+    <div>
+      <DropdownMenu
+        showArrow={false}
+        triggerAppearance="plain"
+        label=""
+        closeOnInnerClick={false}
+        icon={iconMoreActions}
+        preferredPlacement="bottom-end"
+        menuStyle="--spacing-y:0.8em;"
+      >
+        <ButtonMenuItem
+          icon={{ ...iconRefresh, spin: isReflectionRunning }}
+          disabled={isReflectionRunning}
+          on:click={reflect}
         >
+          <div class="reflect">
+            {$_('sync_external_changes')}
+            <Help>
+              <p>
+                {$_('sync_external_changes_structure_help')}
+              </p>
+              <p>
+                {$_('sync_external_changes_data_help')}
+              </p>
+            </Help>
+          </div>
+        </ButtonMenuItem>
+        {#if userProfile?.isSuperUser}
           <ButtonMenuItem
-            icon={{ ...iconRefresh, spin: isReflectionRunning }}
-            disabled={isReflectionRunning}
-            on:click={reflect}
+            icon={iconEdit}
+            on:click={() => editConnectionModal.open()}
           >
-            <div class="reflect">
-              {$_('sync_external_changes')}
-              <Help>
-                <p>
-                  {$_('sync_external_changes_structure_help')}
-                </p>
-                <p>
-                  {$_('sync_external_changes_data_help')}
-                </p>
-              </Help>
-            </div>
+            {$_('edit_connection')}
           </ButtonMenuItem>
-          {#if userProfile?.isSuperUser}
-            <ButtonMenuItem
-              icon={iconEdit}
-              on:click={() => editConnectionModal.open()}
-            >
-              {$_('edit_connection')}
-            </ButtonMenuItem>
-            <ButtonMenuItem
-              icon={iconDeleteMajor}
-              danger
-              on:click={() => deleteConnectionModal.open()}
-            >
-              {$_('delete_connection')}
-            </ButtonMenuItem>
-          {/if}
-        </DropdownMenu>
-      </div>
-    {/if}
+          <ButtonMenuItem
+            icon={iconDeleteMajor}
+            danger
+            on:click={() => deleteConnectionModal.open()}
+          >
+            {$_('delete_connection')}
+          </ButtonMenuItem>
+        {/if}
+      </DropdownMenu>
+    </div>
   </svelte:fragment>
 </AppSecondaryHeader>
 
@@ -201,12 +180,10 @@
     on:clear={handleClearFilterQuery}
   >
     <svelte:fragment slot="action">
-      {#if canExecuteDDL}
-        <Button on:click={addSchema} appearance="primary">
-          <Icon {...iconAddNew} />
-          <span>{$_('create_schema')}</span>
-        </Button>
-      {/if}
+      <Button on:click={addSchema} appearance="primary">
+        <Icon {...iconAddNew} />
+        <span>{$_('create_schema')}</span>
+      </Button>
     </svelte:fragment>
     <p slot="resultInfo">
       <RichText
@@ -227,10 +204,6 @@
             <SchemaRow
               {database}
               {schema}
-              canExecuteDDL={userProfile?.hasPermission(
-                { database, schema },
-                'canExecuteDDL',
-              )}
               on:edit={() => editSchema(schema)}
               on:delete={() => deleteSchema(schema)}
             />
@@ -254,8 +227,6 @@
   {database}
   schema={targetSchema}
 />
-
-<DbAccessControlModal controller={accessControlModal} {database} />
 
 <EditConnectionModal controller={editConnectionModal} connection={database} />
 <DeleteConnectionModal

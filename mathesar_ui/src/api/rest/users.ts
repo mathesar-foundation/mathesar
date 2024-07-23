@@ -1,5 +1,3 @@
-import type { Schema } from '@mathesar/api/rpc/schemas';
-import type { Database } from '@mathesar/AppTypes';
 import type { Language } from '@mathesar/i18n/languages/utils';
 
 import {
@@ -18,25 +16,9 @@ export interface UnsavedUser {
   display_language: Language;
 }
 
-export type UserRole = 'viewer' | 'editor' | 'manager';
-
-export interface DatabaseRole {
-  id: number;
-  database: Database['id'];
-  role: UserRole;
-}
-
-export interface SchemaRole {
-  id: number;
-  schema: Schema['oid'];
-  role: UserRole;
-}
-
 export interface User extends Omit<UnsavedUser, 'password'> {
   readonly id: number;
   readonly is_superuser: boolean;
-  readonly database_roles: DatabaseRole[];
-  readonly schema_roles: SchemaRole[];
 }
 
 function list() {
@@ -75,38 +57,6 @@ function resetPassword(userId: User['id'], password: string) {
   });
 }
 
-function addDatabaseRole(
-  userId: User['id'],
-  databaseId: Database['id'],
-  role: UserRole,
-) {
-  return postAPI<DatabaseRole>('/api/ui/v0/database_roles/', {
-    user: userId,
-    database: databaseId,
-    role,
-  });
-}
-
-function deleteDatabaseRole(roleId: DatabaseRole['id']) {
-  return deleteAPI(`/api/ui/v0/database_roles/${roleId}/`);
-}
-
-function addSchemaRole(
-  userId: User['id'],
-  schemaId: Schema['oid'],
-  role: UserRole,
-) {
-  return postAPI<SchemaRole>('/api/ui/v0/schema_roles/', {
-    user: userId,
-    schema: schemaId,
-    role,
-  });
-}
-
-function deleteSchemaRole(roleId: SchemaRole['id']) {
-  return deleteAPI(`/api/ui/v0/schema_roles/${roleId}/`);
-}
-
 export default {
   list,
   get,
@@ -115,8 +65,4 @@ export default {
   update,
   changePassword,
   resetPassword,
-  addDatabaseRole,
-  deleteDatabaseRole,
-  addSchemaRole,
-  deleteSchemaRole,
 };

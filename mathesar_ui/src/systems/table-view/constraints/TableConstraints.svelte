@@ -3,22 +3,16 @@
 
   import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
   import { States } from '@mathesar/api/rest/utils/requestUtils';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import {
     type Constraint,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { Icon, iconLoading } from '@mathesar-component-library';
 
   import ConstraintTypeSection from './ConstraintTypeSection.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
 
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
   $: constraintsDataStore = $tabularData.constraintsDataStore;
   $: state = $constraintsDataStore.state;
   $: errorMsg = $constraintsDataStore.error;
@@ -48,11 +42,6 @@
   // subsequent updates so that we can rely on the spinner used on the button
   // for the more specific update.
   $: shouldShowLoadingSpinner = isEmpty && isLoading;
-
-  $: canExecuteDDL = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canExecuteDDL',
-  );
 </script>
 
 <div class="table-constraints">
@@ -68,17 +57,14 @@
       <ConstraintTypeSection
         constraintType="primary"
         constraints={constraintsGroupedByType.get('primary') || []}
-        {canExecuteDDL}
       />
       <ConstraintTypeSection
         constraintType="foreignkey"
         constraints={constraintsGroupedByType.get('foreignkey') || []}
-        {canExecuteDDL}
       />
       <ConstraintTypeSection
         constraintType="unique"
         constraints={constraintsGroupedByType.get('unique') || []}
-        {canExecuteDDL}
       />
     </div>
   {/if}

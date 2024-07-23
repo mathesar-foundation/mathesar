@@ -15,8 +15,6 @@
   import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
   import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
   import { iconLinkToRecordPage, iconSetToNull } from '@mathesar/icons';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type CellKey,
@@ -26,7 +24,6 @@
     rowHasNewRecord,
   } from '@mathesar/stores/table-data';
   import { getRowSelectionId } from '@mathesar/stores/table-data/records';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     ButtonMenuItem,
     ContextMenu,
@@ -52,19 +49,8 @@
   export let value: unknown = undefined;
   export let rowKey: string;
 
-  const userProfile = getUserProfileStoreFromContext();
-
   $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: canEditTableRecords = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canEditTableRecords',
-  );
-  $: canViewLinkedEntities = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canViewLinkedEntities',
-  );
+  const canViewLinkedEntities = true;
   $: recordsDataState = recordsData.state;
   $: ({ recordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
@@ -77,7 +63,7 @@
   $: canSetNull = column.nullable && value !== null;
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
-  $: isEditable = !column.primary_key && canEditTableRecords;
+  $: isEditable = !column.primary_key;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
@@ -142,18 +128,16 @@
     lightText={hasError || isProcessing}
   />
   <ContextMenu>
-    {#if canEditTableRecords || showLinkedRecordHyperLink}
+    {#if showLinkedRecordHyperLink}
       <MenuHeading>{$_('cell')}</MenuHeading>
-      {#if canEditTableRecords}
-        <ButtonMenuItem
-          icon={iconSetToNull}
-          disabled={!canSetNull}
-          on:click={() => setValue(null)}
-        >
-          {$_('set_to')}
-          <Null />
-        </ButtonMenuItem>
-      {/if}
+      <ButtonMenuItem
+        icon={iconSetToNull}
+        disabled={!canSetNull}
+        on:click={() => setValue(null)}
+      >
+        {$_('set_to')}
+        <Null />
+      </ButtonMenuItem>
       {#if showLinkedRecordHyperLink && linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
           <RichText text={$_('open_named_record')} let:slotName>
@@ -171,7 +155,7 @@
     <ColumnHeaderContextMenu {processedColumn} />
 
     <!-- Row -->
-    {#if canEditTableRecords || showLinkedRecordHyperLink}
+    {#if showLinkedRecordHyperLink}
       <MenuDivider />
       <MenuHeading>{$_('row')}</MenuHeading>
       <RowContextOptions recordPk={rowKey} {recordsData} {row} />
