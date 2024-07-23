@@ -15,9 +15,8 @@
 
   export let database: Database;
   export let schema: Schema;
-  export let canExecuteDDL: boolean;
 
-  $: showTutorial = tablesMap.size === 0 && canExecuteDDL;
+  $: showTutorial = tablesMap.size === 0;
 
   let tableSearchQuery = '';
 
@@ -40,9 +39,7 @@
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
-    {#if canExecuteDDL}
-      <CreateNewTableButton {database} {schema} />
-    {/if}
+    <CreateNewTableButton {database} {schema} />
   </svelte:fragment>
   <svelte:fragment slot="resultInfo">
     <p>
@@ -62,7 +59,7 @@
     {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList {canExecuteDDL} tables={filteredTables} {database} {schema} />
+      <TablesList tables={filteredTables} {database} {schema} />
     {/if}
   </svelte:fragment>
 </EntityContainerWithFilterBar>

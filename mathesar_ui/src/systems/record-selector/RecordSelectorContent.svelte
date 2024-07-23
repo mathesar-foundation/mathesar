@@ -5,8 +5,6 @@
   import type { Response as ApiRecordsResponse } from '@mathesar/api/rest/types/tables/records';
   import { States, postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import { iconAddNew } from '@mathesar/icons';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
   import {
@@ -17,7 +15,6 @@
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { currentTablesData } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { Button, Icon, Spinner } from '@mathesar-component-library';
 
@@ -26,8 +23,6 @@
     RecordSelectorResult,
   } from './RecordSelectorController';
   import RecordSelectorTable from './RecordSelectorTable.svelte';
-
-  const userProfile = getUserProfileStoreFromContext();
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -38,11 +33,6 @@
   /** true when the user is hover on the "Create new record" button. */
   let isHoveringCreate = false;
 
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: canEditTableRecords =
-    $userProfile?.hasPermission({ database, schema }, 'canEditTableRecords') ??
-    false;
   $: ({
     constraintsDataStore,
     meta,
@@ -156,7 +146,7 @@
   {/if}
 
   <div class="footer">
-    {#if hasSearchQueries && canEditTableRecords}
+    {#if hasSearchQueries}
       <div class="button">
         <Button
           size="small"

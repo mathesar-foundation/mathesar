@@ -39,7 +39,6 @@
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
   export let isInspectorOpen: boolean;
-  export let canEditMetadata: boolean;
 
   $: ({ query, state, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table
@@ -155,37 +154,35 @@
 
     <svelte:fragment slot="actions-right">
       {#if currentTable}
-        {#if canEditMetadata}
-          <InputGroup>
-            <!-- TODO: Change disabled condition to is_valid(query) -->
-            <SpinnerButton
-              label={querySaveRequestStatus === 'processing'
-                ? $_('saving')
-                : $_('save')}
-              disabled={!$query.base_table ||
-                hasNoColumns ||
-                querySaveRequestStatus === 'processing'}
-              onClick={saveExistingOrCreateNew}
-            />
-            {#if isSaved}
-              <DropdownMenu
-                triggerAppearance="primary"
-                placements={['bottom-end']}
-                closeOnInnerClick={true}
-                icon={{
-                  ...iconExpandDown,
-                  size: '0.8em',
-                }}
-                showArrow={false}
-              >
-                <ButtonMenuItem on:click={save}>{$_('save')}</ButtonMenuItem>
-                <ButtonMenuItem on:click={saveAndClose}>
-                  {$_('save_and_close')}
-                </ButtonMenuItem>
-              </DropdownMenu>
-            {/if}
-          </InputGroup>
-        {/if}
+        <InputGroup>
+          <!-- TODO: Change disabled condition to is_valid(query) -->
+          <SpinnerButton
+            label={querySaveRequestStatus === 'processing'
+              ? $_('saving')
+              : $_('save')}
+            disabled={!$query.base_table ||
+              hasNoColumns ||
+              querySaveRequestStatus === 'processing'}
+            onClick={saveExistingOrCreateNew}
+          />
+          {#if isSaved}
+            <DropdownMenu
+              triggerAppearance="primary"
+              placements={['bottom-end']}
+              closeOnInnerClick={true}
+              icon={{
+                ...iconExpandDown,
+                size: '0.8em',
+              }}
+              showArrow={false}
+            >
+              <ButtonMenuItem on:click={save}>{$_('save')}</ButtonMenuItem>
+              <ButtonMenuItem on:click={saveAndClose}>
+                {$_('save_and_close')}
+              </ButtonMenuItem>
+            </DropdownMenu>
+          {/if}
+        </InputGroup>
 
         <InputGroup>
           <Button
