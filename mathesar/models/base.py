@@ -88,23 +88,23 @@ class ColumnMetaData(BaseModel):
     attnum = models.SmallIntegerField()
     bool_input = models.CharField(
         choices=[("dropdown", "dropdown"), ("checkbox", "checkbox")],
-        blank=True
+        null=True
     )
-    bool_true = models.CharField(default='True')
-    bool_false = models.CharField(default='False')
-    num_min_frac_digits = models.PositiveIntegerField(default=0)
-    num_max_frac_digits = models.PositiveIntegerField(default=20)
-    num_show_as_perc = models.BooleanField(default=False)
-    mon_currency_symbol = models.CharField(default="$")
+    bool_true = models.CharField(null=True)
+    bool_false = models.CharField(null=True)
+    num_min_frac_digits = models.PositiveIntegerField(null=True)
+    num_max_frac_digits = models.PositiveIntegerField(null=True)
+    num_show_as_perc = models.BooleanField(null=True)
+    mon_currency_symbol = models.CharField(null=True)
     mon_currency_location = models.CharField(
         choices=[("after-minus", "after-minus"), ("end-with-space", "end-with-space")],
-        default="after-minus"
+        null=True
     )
-    time_format = models.CharField(blank=True)
-    date_format = models.CharField(blank=True)
-    duration_min = models.CharField(max_length=255, blank=True)
-    duration_max = models.CharField(max_length=255, blank=True)
-    duration_show_units = models.BooleanField(default=True)
+    time_format = models.CharField(null=True)
+    date_format = models.CharField(null=True)
+    duration_min = models.CharField(max_length=255, null=True)
+    duration_max = models.CharField(max_length=255, null=True)
+    duration_show_units = models.BooleanField(null=True)
 
     class Meta:
         constraints = [
