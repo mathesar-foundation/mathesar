@@ -3472,8 +3472,7 @@ msar.list_records_from_table(
   offset_ integer,
   order_ jsonb,
   filter_ jsonb,
-  group_ jsonb,
-  search_ jsonb
+  group_ jsonb
 ) RETURNS jsonb AS $$/*
 Get records from a table. Only columns to which the user has access are returned.
 
@@ -3484,7 +3483,6 @@ Args:
   order_: An array of ordering definition objects.
   filter_: An array of filter definition objects.
   group_: An array of group definition objects.
-  search_: An array of search definition objects.
 
 The order definition objects should have the form
   {"attnum": <int>, "direction": <text>}

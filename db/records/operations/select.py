@@ -19,7 +19,6 @@ def list_records_from_table(
         order=None,
         filter=None,
         group=None,
-        search=None,
 ):
     """
     Get records from a table.
@@ -37,7 +36,6 @@ def list_records_from_table(
         order: An array of ordering definition objects.
         filter: An array of filter definition objects.
         group: An array of group definition objects.
-        search: An array of search definition objects.
     """
     result = db_conn.exec_msar_func(
         conn,
@@ -48,7 +46,6 @@ def list_records_from_table(
         json.dumps(order) if order is not None else None,
         json.dumps(filter) if filter is not None else None,
         json.dumps(group) if group is not None else None,
-        json.dumps(search) if search is not None else None,
     ).fetchone()[0]
     return result
 

@@ -105,7 +105,6 @@ def list_(
         order: list[OrderBy] = None,
         filter: Filter = None,
         group: list[dict] = None,
-        search: list[dict] = None,
         **kwargs
 ) -> RecordList:
     """
@@ -120,7 +119,6 @@ def list_(
         order: An array of ordering definition objects.
         filter: An array of filter definition objects.
         group: An array of group definition objects.
-        search: An array of search definition objects.
 
     Returns:
         The requested records, along with some metadata.
@@ -135,6 +133,5 @@ def list_(
             order=order,
             filter=filter,
             group=group,
-            search=search,
         )
     return RecordList.from_dict(record_info)

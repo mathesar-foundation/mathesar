@@ -2877,7 +2877,7 @@ BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.list_records_from_table(rel_id, null, null, null, null, null, null),
+    msar.list_records_from_table(rel_id, null, null, null, null, null),
     $j${
       "count": 3,
       "results": [
@@ -2896,7 +2896,7 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, 2, null, '[{"attnum": 2, "direction": "desc"}]', null, null, null
+      rel_id, 2, null, '[{"attnum": 2, "direction": "desc"}]', null, null
     ),
     $j${
       "count": 3,
@@ -2915,7 +2915,7 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, null, 1, '[{"attnum": 1, "direction": "desc"}]', null, null, null
+      rel_id, null, 1, '[{"attnum": 1, "direction": "desc"}]', null, null
     ),
     $j${
       "count": 3,
@@ -2938,7 +2938,7 @@ BEGIN
   GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
   SET ROLE intern_no_pkey;
   RETURN NEXT is(
-    msar.list_records_from_table(rel_id, null, null, null, null, null, null),
+    msar.list_records_from_table(rel_id, null, null, null, null, null),
     $j${
       "count": 3,
       "results": [
@@ -2956,7 +2956,7 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, null, null, '[{"attnum": 3, "direction": "desc"}]', null, null, null
+      rel_id, null, null, '[{"attnum": 3, "direction": "desc"}]', null, null
     ),
     $j${
       "count": 3,
