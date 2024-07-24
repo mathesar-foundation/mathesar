@@ -1,10 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { router } from 'tinro';
-
   import { reflectApi } from '@mathesar/api/rest/reflect';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
@@ -17,7 +15,6 @@
     iconMoreActions,
     iconRefresh,
   } from '@mathesar/icons';
-  import { CONNECTIONS_URL } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
@@ -28,10 +25,6 @@
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import {
-    DeleteConnectionModal,
-    EditConnectionModal,
-  } from '@mathesar/systems/connections';
   import {
     Button,
     ButtonMenuItem,
@@ -117,7 +110,7 @@
 
 <AppSecondaryHeader
   pageTitleAndMetaProps={{
-    name: database.nickname,
+    name: database.name,
     type: 'database',
     icon: iconDatabase,
   }}
@@ -226,13 +219,6 @@
   controller={addEditModal}
   {database}
   schema={targetSchema}
-/>
-
-<EditConnectionModal controller={editConnectionModal} connection={database} />
-<DeleteConnectionModal
-  controller={deleteConnectionModal}
-  connection={database}
-  on:delete={() => router.goto(CONNECTIONS_URL)}
 />
 
 <style lang="scss">

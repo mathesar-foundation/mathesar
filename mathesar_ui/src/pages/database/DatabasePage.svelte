@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Database } from '@mathesar/AppTypes';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
 
@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle(database.nickname)}</title>
+  <title>{makeSimplePageTitle(database.name)}</title>
 </svelte:head>
 
 <LayoutWithHeader

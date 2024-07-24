@@ -35,8 +35,9 @@ import {
   patchAPI,
   postAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
-import type { DBObjectEntry, Database } from '@mathesar/AppTypes';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import { invalidIf } from '@mathesar/components/form';
 import type { AtLeastOne } from '@mathesar/typeUtils';
 import { preloadCommonData } from '@mathesar/utils/preloadData';

@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import { iconExploration } from '@mathesar/icons';
 
   import EmptyEntity from './EmptyEntity.svelte';

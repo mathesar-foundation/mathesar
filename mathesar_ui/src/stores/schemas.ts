@@ -86,7 +86,7 @@ function removeSchemaInDBSchemaStore(
 }
 
 export function addCountToSchemaNumTables(
-  connection: Connection,
+  connection: Pick<Connection, 'id'>,
   schema: Schema,
   count: number,
 ) {
