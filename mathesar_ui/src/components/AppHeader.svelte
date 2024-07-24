@@ -14,7 +14,7 @@
   } from '@mathesar/icons';
   import {
     ADMIN_URL,
-    CONNECTIONS_URL,
+    HOME_URL,
     LOGOUT_URL,
     USER_PROFILE_URL,
     getDataExplorerPageUrl,
@@ -123,7 +123,7 @@
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
           <MenuDivider />
-          <LinkMenuItem icon={iconConnection} href={CONNECTIONS_URL}>
+          <LinkMenuItem icon={iconConnection} href={HOME_URL}>
             {$_('database_connections')}
           </LinkMenuItem>
           {#if $userProfile.isSuperUser}

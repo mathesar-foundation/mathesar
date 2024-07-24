@@ -3,7 +3,7 @@
 
   import type { Database } from '@mathesar/api/rpc/databases';
   import { iconConnection, iconDatabase } from '@mathesar/icons';
-  import { CONNECTIONS_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { HOME_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
@@ -35,7 +35,7 @@
     {
       type: 'simple',
       label: $_('manage_connections'),
-      href: CONNECTIONS_URL,
+      href: HOME_URL,
       icon: iconConnection,
       // TODO: Handle active states for persistent links
       isActive: () => false,
