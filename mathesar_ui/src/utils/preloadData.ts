@@ -7,12 +7,11 @@ import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { AbstractTypeResponse } from '@mathesar/AppTypes';
 
 export interface CommonData {
-  connections: Connection[];
   databases: Database[];
   schemas: Schema[];
   tables: TableEntry[];
   queries: QueryInstance[];
-  current_connection: Connection['id'] | null;
+  current_database: Database['id'] | null;
   internal_db_connection: {
     database: Connection['database'];
     host: Connection['host'];

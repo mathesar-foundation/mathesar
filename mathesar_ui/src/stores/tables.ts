@@ -194,7 +194,7 @@ function findAndUpdateTableStore(id: TableEntry['id'], tableEntry: TableEntry) {
 }
 
 export function deleteTable(
-  database: Database,
+  database: Pick<Database, 'id'>,
   schema: Schema,
   tableId: TableEntry['id'],
 ): CancellablePromise<TableEntry> {
@@ -241,7 +241,7 @@ export function updateTableMetaData(
 }
 
 export function createTable(
-  database: Database,
+  database: Pick<Database, 'id'>,
   schema: Schema,
   tableArgs: {
     name?: string;

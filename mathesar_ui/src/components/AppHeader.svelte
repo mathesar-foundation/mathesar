@@ -22,7 +22,7 @@
     getImportPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { createTable } from '@mathesar/stores/tables';
@@ -43,6 +43,7 @@
   const commonData = preloadCommonData();
   const userProfile = getUserProfileStoreFromContext();
   const releaseDataStore = getReleaseDataStoreFromContext();
+  const { currentDatabase } = databasesStore;
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -113,7 +114,7 @@
               icon={iconDatabase}
               href={getDatabasePageUrl(database.id)}
             >
-              {database.nickname}
+              {database.name}
             </LinkMenuItem>
             <MenuDivider />
           {/if}

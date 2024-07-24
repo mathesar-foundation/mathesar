@@ -3,39 +3,38 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import type { Connection } from '@mathesar/api/rest/connections';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
-  import { connectionsStore } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
 
   import SchemaRoute from './SchemaRoute.svelte';
 
-  export let connectionId: Connection['id'];
+  export let databaseId: Database['id'];
 
-  $: connectionsStore.setCurrentConnectionId(connectionId);
-  $: ({ connections } = connectionsStore);
-  $: connection = $connections.get(connectionId);
+  $: databasesStore.setCurrentDatabaseId(databaseId);
+  const { currentDatabase } = databasesStore;
 
   function handleUnmount() {
-    connectionsStore.clearCurrentConnectionId();
+    databasesStore.clearCurrentDatabaseId();
   }
 
   onMount(() => handleUnmount);
 </script>
 
-{#if connection}
-  <AppendBreadcrumb item={{ type: 'database', database: connection }} />
+{#if $currentDatabase}
+  <AppendBreadcrumb item={{ type: 'database', database: $currentDatabase }} />
 
   <Route path="/">
-    <DatabasePage database={connection} />
+    <DatabasePage database={$currentDatabase} />
   </Route>
 
   <Route path="/:schemaId/*" let:meta firstmatch>
     <SchemaRoute
-      database={connection}
+      database={$currentDatabase}
       schemaId={parseInt(meta.params.schemaId, 10)}
     />
   </Route>
@@ -43,7 +42,7 @@
   <ErrorPage>
     <RichText text={$_('database_not_found')} let:slotName>
       {#if slotName === 'connectionId'}
-        <Identifier>{connectionId}</Identifier>
+        <Identifier>{databaseId}</Identifier>
       {/if}
     </RichText>
   </ErrorPage>

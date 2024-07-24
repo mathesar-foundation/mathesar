@@ -5,10 +5,7 @@
   import type { Connection } from '@mathesar/api/rest/connections';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
-  import {
-    connectionHasUniqueDatabaseReference,
-    connectionsStore,
-  } from '@mathesar/stores/databases';
+  import { connectionsStore } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import {
@@ -19,16 +16,10 @@
     ModalController,
   } from '@mathesar-component-library';
 
-  const { connections } = connectionsStore;
   const dispatch = createEventDispatcher<{ delete: undefined }>();
 
   export let controller: ModalController;
   export let connection: Connection;
-
-  $: hasUniqueDatabaseReference = connectionHasUniqueDatabaseReference(
-    connection,
-    $connections.values(),
-  );
 
   let deleteMathesarSchemas = false;
 
@@ -69,21 +60,20 @@
     {$_('delete_connection_db_delete_info')}
   </p>
 
-  {#if hasUniqueDatabaseReference}
-    <p>
-      <LabeledInput
-        layout="inline-input-first"
-        label={$_('delete_associated_mathesar_schemas_help')}
-      >
-        <Checkbox bind:checked={deleteMathesarSchemas} />
-      </LabeledInput>
-    </p>
+  <p>
+    <LabeledInput
+      layout="inline-input-first"
+      label={$_('delete_associated_mathesar_schemas_help')}
+    >
+      <Checkbox bind:checked={deleteMathesarSchemas} />
+    </LabeledInput>
+  </p>
 
-    <!--
+  <!--
       TODO: Uncomment this when we have a docs page to link to.
       See: https://github.com/mathesar-foundation/mathesar/issues/3450
      -->
-    <!-- <p>
+  <!-- <p>
       <WarningBox>
         {$_('using_custom_types')}
         <DocsLink path="/">
@@ -91,7 +81,6 @@
         </DocsLink>
       </WarningBox>
     </p> -->
-  {/if}
 
   <CancelOrProceedButtonPair
     proceedButton={{

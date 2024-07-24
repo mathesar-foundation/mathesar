@@ -1,29 +1,29 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Connection } from '@mathesar/api/rest/connections';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import { iconConnection, iconDatabase } from '@mathesar/icons';
   import { CONNECTIONS_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
-  import { connectionsStore } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
-  const { connections, currentConnectionId } = connectionsStore;
+  const { databases, currentDatabaseId } = databasesStore;
 
   function makeBreadcrumbSelectorEntry(
-    connection: Connection,
+    database: Database,
   ): BreadcrumbSelectorEntry {
     return {
       type: 'simple',
-      label: connection.nickname,
-      href: getDatabasePageUrl(connection.id),
+      label: database.name,
+      href: getDatabasePageUrl(database.id),
       icon: iconDatabase,
-      isActive: () => connection.id === $currentConnectionId,
+      isActive: () => database.id === $currentDatabaseId,
     };
   }
 
-  $: breadcrumbEntries = [...$connections.values()].map(
+  $: breadcrumbEntries = [...$databases.values()].map(
     makeBreadcrumbSelectorEntry,
   );
 </script>
