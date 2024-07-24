@@ -278,7 +278,6 @@
   "loading_release_data": "Loading release data",
   "loading_spinner_no_progress_bar": "You will see a loading spinner but no progress bar.",
   "log_out": "Log Out",
-  "manage_access": "Manage Access",
   "manage_connections": "Manage Connections",
   "manage_database_access": "Manage [databaseName] Database Access",
   "manage_schema_access": "Manage [databaseName] Schema Access",

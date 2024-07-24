@@ -37,6 +37,28 @@ To use an RPC function:
     }
     ```
 
+## Collaborators
+
+::: collaborators
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_role
+      - CollaboratorInfo
+
+## ConfiguredRoles
+
+::: configured_roles
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_password
+      - ConfiguredRoleInfo
+
 ## Connections
 
 ::: connections
@@ -45,7 +67,24 @@ To use an RPC function:
       - add_from_known_connection
       - add_from_scratch
       - grant_access_to_user
-      - DBModelReturn
+      - ConnectionReturn
+
+## Databases
+
+::: databases
+    options:
+      members:
+      - list_
+      - DatabaseInfo
+
+## Database Setup
+
+::: database_setup
+    options:
+      members:
+      - create_new
+      - connect_existing
+      - DatabaseConnectionResult
 
 ## Schemas
 
@@ -71,8 +110,10 @@ To use an RPC function:
       - patch
       - import_
       - get_import_preview
+      - list_joinable
       - TableInfo
       - SettableTableInfo
+      - JoinableTableInfo
 
 ## Table Metadata
 
@@ -80,9 +121,9 @@ To use an RPC function:
     options:
       members:
       - list_
-      - patch
-      - TableMetaData
-      - SettableTableMetaData
+      - set_
+      - TableMetaDataBlob
+      - TableMetaDataRecord
 
 ## Columns
 
@@ -111,6 +152,14 @@ To use an RPC function:
       - ColumnMetaData
       - SettableColumnMetaData
 
+## Types
+
+::: types
+    options:
+      members:
+      - list_
+      - TypeInfo
+
 ## Constraints
 
 ::: constraints
@@ -125,6 +174,24 @@ To use an RPC function:
       - UniqueConstraint
       - CreatableConstraintInfo
 
+## Records
+
+:::records
+    options:
+      members:
+      - list_
+      - OrderBy
+      - RecordList
+
+## Explorations
+
+::: explorations
+    options:
+      members:
+      - list_
+      - delete
+      - ExplorationInfo
+
 ## Roles
 
 ::: roles
@@ -133,6 +200,14 @@ To use an RPC function:
       - list_
       - RoleInfo
       - RoleMember
+
+## Servers
+
+::: servers
+    options:
+      members:
+      - list_
+      - ServerInfo
 
 ## Responses
 

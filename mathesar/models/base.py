@@ -40,7 +40,7 @@ class Database(BaseModel):
         ]
 
 
-class Role(BaseModel):
+class ConfiguredRole(BaseModel):
     name = models.CharField(max_length=255)
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='roles'
@@ -61,7 +61,7 @@ class Role(BaseModel):
 class UserDatabaseRoleMap(BaseModel):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
-    role = models.ForeignKey('Role', on_delete=models.CASCADE)
+    configured_role = models.ForeignKey('ConfiguredRole', on_delete=models.CASCADE)
     server = models.ForeignKey('Server', on_delete=models.CASCADE)
 
     class Meta:
@@ -77,8 +77,8 @@ class UserDatabaseRoleMap(BaseModel):
             host=self.server.host,
             port=self.server.port,
             dbname=self.database.name,
-            user=self.role.name,
-            password=self.role.password,
+            user=self.configured_role.name,
+            password=self.configured_role.password,
         )
 
 
@@ -126,10 +126,10 @@ class ColumnMetaData(BaseModel):
 class TableMetaData(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
     table_oid = models.PositiveBigIntegerField()
-    import_verified = models.BooleanField(default=False)
-    column_order = models.JSONField(default=list)
-    record_summary_customized = models.BooleanField(default=False)
-    record_summary_template = models.CharField(max_length=255, blank=True)
+    import_verified = models.BooleanField(null=True)
+    column_order = models.JSONField(null=True)
+    record_summary_customized = models.BooleanField(null=True)
+    record_summary_template = models.CharField(max_length=255, null=True)
 
     class Meta:
         constraints = [
@@ -138,3 +138,14 @@ class TableMetaData(BaseModel):
                 name="unique_table_metadata"
             )
         ]
+
+
+class Explorations(BaseModel):
+    database = models.ForeignKey('Database', on_delete=models.CASCADE)
+    name = models.CharField(max_length=128, unique=True)
+    base_table_oid = models.PositiveBigIntegerField()
+    initial_columns = models.JSONField()
+    transformations = models.JSONField(null=True)
+    display_options = models.JSONField(null=True)
+    display_names = models.JSONField(null=False)
+    description = models.CharField(null=True)

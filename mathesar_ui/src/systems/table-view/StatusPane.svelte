@@ -5,10 +5,7 @@
   import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import RefreshButton from '@mathesar/components/RefreshButton.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     Button,
     Icon,
@@ -16,14 +13,6 @@
   } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
-
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: canEditTableRecords = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canEditTableRecords',
-  );
 
   export let context: 'page' | 'widget' | 'shared-consumer-page' = 'page';
 
@@ -40,7 +29,7 @@
     $columnsFetchStatus?.state === 'failure' ||
     recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
-  $: hasNewRecordButton = context !== 'widget' && canEditTableRecords;
+  $: hasNewRecordButton = context !== 'widget';
   $: refreshButtonState = (() => {
     let buttonState: 'loading' | 'error' | undefined = undefined;
     if ($isLoading) {

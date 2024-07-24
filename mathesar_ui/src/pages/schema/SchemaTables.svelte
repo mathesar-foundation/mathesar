@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
 
@@ -13,10 +14,9 @@
   export let tablesMap: Map<number, TableEntry>;
 
   export let database: Database;
-  export let schema: SchemaEntry;
-  export let canExecuteDDL: boolean;
+  export let schema: Schema;
 
-  $: showTutorial = tablesMap.size === 0 && canExecuteDDL;
+  $: showTutorial = tablesMap.size === 0;
 
   let tableSearchQuery = '';
 
@@ -42,9 +42,7 @@
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
-    {#if canExecuteDDL}
-      <CreateNewTableButton {database} {schema} />
-    {/if}
+    <CreateNewTableButton {database} {schema} />
   </svelte:fragment>
   <svelte:fragment slot="resultInfo">
     <p>
@@ -64,7 +62,7 @@
     {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList {canExecuteDDL} tables={filteredTables} {database} {schema} />
+      <TablesList tables={filteredTables} {database} {schema} />
     {/if}
   </svelte:fragment>
 </EntityContainerWithFilterBar>

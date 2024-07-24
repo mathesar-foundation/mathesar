@@ -5,6 +5,7 @@ FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 SQL_FILES = [
     '00_msar.sql',
+    '10_msar_joinable_tables.sql',
     '30_msar_custom_aggregates.sql',
 ]
 

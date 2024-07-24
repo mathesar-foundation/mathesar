@@ -11,7 +11,6 @@
 
   export let linksInThisTable: TableLink[];
   export let linksFromOtherTables: TableLink[];
-  export let canExecuteDDL: boolean;
 
   const linkTableModal = modal.spawnModalController();
   $: showNullState = !linksInThisTable.length && !linksFromOtherTables.length;
@@ -27,15 +26,13 @@
   {#if showNullState}
     <span class="null-text">{$_('table_does_not_link')}</span>
   {/if}
-  {#if canExecuteDDL}
-    <div>
-      <Button on:click={() => linkTableModal.open()} appearance="secondary">
-        <Icon {...iconAddNew} />
-        <span>{$_('create_link')}</span>
-      </Button>
-      <LinkTableModal controller={linkTableModal} />
-    </div>
-  {/if}
+  <div>
+    <Button on:click={() => linkTableModal.open()} appearance="secondary">
+      <Icon {...iconAddNew} />
+      <span>{$_('create_link')}</span>
+    </Button>
+    <LinkTableModal controller={linkTableModal} />
+  </div>
 </div>
 
 <style lang="scss">

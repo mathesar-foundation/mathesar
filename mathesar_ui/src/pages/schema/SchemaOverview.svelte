@@ -4,7 +4,8 @@
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
@@ -27,16 +28,13 @@
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
 
-  export let canExecuteDDL: boolean;
-  export let canEditMetadata: boolean;
-
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
-  $: showTableCreationTutorial = !hasTables && canExecuteDDL;
-  $: showExplorationTutorial = hasTables && !hasExplorations && canEditMetadata;
+  $: showTableCreationTutorial = !hasTables;
+  $: showExplorationTutorial = hasTables && !hasExplorations;
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
 
   // Viewers can explore, they cannot save explorations
@@ -47,20 +45,18 @@
   <div class="vertical-container tables">
     <OverviewHeader title={$_('tables')}>
       <svelte:fragment slot="action">
-        {#if canExecuteDDL}
-          <CreateNewTableButton {database} {schema} />
-        {/if}
+        <CreateNewTableButton {database} {schema} />
       </svelte:fragment>
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
-      <TableSkeleton numTables={schema.num_tables} />
+      <TableSkeleton numTables={schema.table_count} />
     {:else if tablesRequestStatus.state === 'failure'}
       <ErrorBox>
         <p>{tablesRequestStatus.errors[0]}</p>
         <div>
           <SpinnerButton
             onClick={async () => {
-              await refetchTablesForSchema(schema.id);
+              await refetchTablesForSchema(schema.oid);
             }}
             label={$_('retry')}
             icon={iconRefresh}
@@ -75,12 +71,7 @@
     {:else if showTableCreationTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList
-        {canExecuteDDL}
-        tables={[...tablesMap.values()]}
-        {database}
-        {schema}
-      />
+      <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {/if}
   </div>
   <div class="vertical-container explorations">
@@ -94,7 +85,7 @@
           <div>
             <SpinnerButton
               onClick={async () => {
-                await refetchQueriesForSchema(schema.id);
+                await refetchQueriesForSchema(schema.oid);
               }}
               label={$_('retry')}
               icon={iconRefresh}
@@ -125,7 +116,7 @@
           {$_('what_is_an_exploration_mini')}
         </span>
         <div>
-          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
+          <AnchorButton href={getDataExplorerPageUrl(database.id, schema.oid)}>
             {$_('open_data_explorer')}
           </AnchorButton>
         </div>

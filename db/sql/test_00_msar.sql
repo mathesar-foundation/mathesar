@@ -1370,6 +1370,19 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_rename_table_with_same_name() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_alter_table();
+  PERFORM msar.rename_table(
+    sch_name =>'public',
+    old_tab_name => 'alter_this_table',
+    new_tab_name => 'alter_this_table'
+  );
+  RETURN NEXT has_table('alter_this_table');
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_rename_table_using_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
@@ -2683,7 +2696,7 @@ BEGIN
 
   -- Test table info for schema 'alice' that contains no tables
   RETURN NEXT is(
-    alice_table_info, null
+    alice_table_info, '[]'::jsonb
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -2792,5 +2805,188 @@ BEGIN
   -- Drop role and ensure role is not present in response
   DROP ROLE foo;
   RETURN NEXT ok(NOT jsonb_path_exists(msar.get_roles(), '$[*] ? (@.name == "foo")'));
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.format_data --------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_format_data() RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(msar.format_data('3 Jan, 2021'::date), '2021-01-03 AD');
+  RETURN NEXT is(msar.format_data('3 Jan, 23 BC'::date), '0023-01-03 BC');
+  RETURN NEXT is(msar.format_data('1 day'::interval), 'P0Y0M1DT0H0M0S');
+  RETURN NEXT is(
+    msar.format_data('1 year 2 months 3 days 4 hours 5 minutes 6 seconds'::interval),
+    'P1Y2M3DT4H5M6S'
+  );
+  RETURN NEXT is(msar.format_data('1 day 3 hours ago'::interval), 'P0Y0M-1DT-3H0M0S');
+  RETURN NEXT is(msar.format_data('1 day -3 hours'::interval), 'P0Y0M1DT-3H0M0S');
+  RETURN NEXT is(
+    msar.format_data('1 year -1 month 3 days 14 hours -10 minutes 30.4 seconds'::interval),
+    'P0Y11M3DT13H50M30.4S'
+  );
+  RETURN NEXT is(
+    msar.format_data('1 year -1 month 3 days 14 hours -10 minutes 30.4 seconds ago'::interval),
+    'P0Y-11M-3DT-13H-50M-30.4S'
+  );
+  RETURN NEXT is(msar.format_data('45 hours 70 seconds'::interval), 'P0Y0M0DT45H1M10S');
+  RETURN NEXT is(
+    msar.format_data('5 decades 22 years 14 months 1 week 3 days'::interval),
+    'P73Y2M10DT0H0M0S'
+  );
+  RETURN NEXT is(msar.format_data('1 century'::interval), 'P100Y0M0DT0H0M0S');
+  RETURN NEXT is(msar.format_data('2 millennia'::interval), 'P2000Y0M0DT0H0M0S');
+  RETURN NEXT is(msar.format_data('12:30:45+05:30'::time with time zone), '12:30:45.0+05:30');
+  RETURN NEXT is(msar.format_data('12:30:45'::time with time zone), '12:30:45.0Z');
+  RETURN NEXT is(
+    msar.format_data('12:30:45.123456-08'::time with time zone), '12:30:45.123456-08:00'
+  );
+  RETURN NEXT is(msar.format_data('12:30'::time without time zone), '12:30:00.0');
+  RETURN NEXT is(
+    msar.format_data('30 July, 2000 19:15:03.65'::timestamp with time zone),
+    '2000-07-30T19:15:03.65Z AD'
+  );
+  RETURN NEXT is(
+    msar.format_data('10000-01-01 00:00:00'::timestamp with time zone),
+    '10000-01-01T00:00:00.0Z AD'
+  );
+  RETURN NEXT is(
+    msar.format_data('3 March, 25 BC, 17:30:15+01'::timestamp with time zone),
+    '0025-03-03T16:30:15.0Z BC'
+  );
+  RETURN NEXT is(
+    msar.format_data('17654-03-02 01:00:00'::timestamp without time zone),
+    '17654-03-02T01:00:00.0 AD'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+-- msar.list_records_from_table --------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_list_records_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE atable (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    col1 integer,
+    col2 varchar,
+    col3 json,
+    col4 jsonb,
+    coltodrop integer
+  );
+  ALTER TABLE atable DROP COLUMN coltodrop;
+  INSERT INTO atable (col1, col2, col3, col4) VALUES
+    (5, 'sdflkj', '"s"', '{"a": "val"}'),
+    (34, 'sdflfflsk', null, '[1, 2, 3, 4]'),
+    (2, 'abcde', '{"k": 3242348}', 'true');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.list_records_from_table(rel_id, null, null, null, null, null, null),
+    $j${
+      "count": 3,
+      "results": [
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+      ]
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id, 2, null, '[{"attnum": 2, "direction": "desc"}]', null, null, null
+    ),
+    $j${
+      "count": 3,
+      "results": [
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
+      ]
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id, null, 1, '[{"attnum": 1, "direction": "desc"}]', null, null, null
+    ),
+    $j${
+      "count": 3,
+      "results": [
+        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
+      ]
+    }$j$
+  );
+  CREATE ROLE intern_no_pkey;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
+  SET ROLE intern_no_pkey;
+  RETURN NEXT is(
+    msar.list_records_from_table(rel_id, null, null, null, null, null, null),
+    $j${
+      "count": 3,
+      "results": [
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true},
+        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
+      ]
+    }$j$
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id, null, null, '[{"attnum": 3, "direction": "desc"}]', null, null, null
+    ),
+    $j${
+      "count": 3,
+      "results": [
+        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+      ]
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.build_order_by_expr ------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION test_build_order_by_expr() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(msar.build_order_by_expr(rel_id, null), 'ORDER BY "1" ASC');
+  RETURN NEXT is(
+    msar.build_order_by_expr(rel_id, '[{"attnum": 1, "direction": "desc"}]'),
+    'ORDER BY "1" DESC, "1" ASC'
+  );
+  RETURN NEXT is(
+    msar.build_order_by_expr(
+      rel_id, '[{"attnum": 3, "direction": "asc"}, {"attnum": 5, "direction": "DESC"}]'
+    ),
+    'ORDER BY "3" ASC, "5" DESC, "1" ASC'
+  );
+  CREATE ROLE intern_no_pkey;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
+  SET ROLE intern_no_pkey;
+  RETURN NEXT is(
+    msar.build_order_by_expr(rel_id, null), 'ORDER BY "2" ASC, "3" ASC, "5" ASC'
+  );
+  SET ROLE NONE;
+  REVOKE ALL ON TABLE atable FROM intern_no_pkey;
+  SET ROLE intern_no_pkey;
+  RETURN NEXT is(msar.build_order_by_expr(rel_id, null), null);
 END;
 $$ LANGUAGE plpgsql;

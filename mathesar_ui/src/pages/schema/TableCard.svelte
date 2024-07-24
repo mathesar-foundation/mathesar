@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
@@ -37,8 +38,7 @@
 
   export let table: TableEntry;
   export let database: Database;
-  export let schema: SchemaEntry;
-  export let canExecuteDDL: boolean;
+  export let schema: Schema;
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
@@ -46,13 +46,13 @@
 
   $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
   $: tablePageUrl = isTableImportConfirmationNeeded
-    ? getImportPreviewPageUrl(database.id, schema.id, table.id, {
+    ? getImportPreviewPageUrl(database.id, schema.oid, table.id, {
         useColumnTypeInference: true,
       })
-    : getTablePageUrl(database.id, schema.id, table.id);
+    : getTablePageUrl(database.id, schema.oid, table.id);
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.id,
-    schema.id,
+    schema.oid,
     table,
   );
   $: description = table.description ?? '';
@@ -141,21 +141,17 @@
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           {$_('explore_table')}
         </LinkMenuItem>
-        {#if canExecuteDDL}
-          <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
-            {$_('edit_table')}
-          </ButtonMenuItem>
-        {/if}
-      {/if}
-      {#if canExecuteDDL}
-        <ButtonMenuItem
-          on:click={handleDeleteTable}
-          danger
-          icon={iconDeleteMajor}
-        >
-          {$_('delete_table')}
+        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+          {$_('edit_table')}
         </ButtonMenuItem>
       {/if}
+      <ButtonMenuItem
+        on:click={handleDeleteTable}
+        danger
+        icon={iconDeleteMajor}
+      >
+        {$_('delete_table')}
+      </ButtonMenuItem>
     </DropdownMenu>
   </div>
   {#if !isTableImportConfirmationNeeded}

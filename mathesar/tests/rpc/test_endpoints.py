@@ -8,14 +8,42 @@ Fixtures:
 import pytest
 from modernrpc.auth import user_is_authenticated, user_is_superuser
 
+from mathesar.rpc import collaborators
 from mathesar.rpc import columns
+from mathesar.rpc import configured_roles
 from mathesar.rpc import connections
 from mathesar.rpc import constraints
+from mathesar.rpc import database_setup
+from mathesar.rpc import databases
+from mathesar.rpc import explorations
+from mathesar.rpc import records
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
+from mathesar.rpc import servers
 from mathesar.rpc import tables
+from mathesar.rpc import types
 
 METHODS = [
+    (
+        collaborators.add,
+        "collaborators.add",
+        [user_is_superuser]
+    ),
+    (
+        collaborators.delete,
+        "collaborators.delete",
+        [user_is_superuser]
+    ),
+    (
+        collaborators.list_,
+        "collaborators.list",
+        [user_is_authenticated]
+    ),
+    (
+        collaborators.set_role,
+        "collaborators.set_role",
+        [user_is_superuser]
+    ),
     (
         columns.delete,
         "columns.delete",
@@ -45,6 +73,26 @@ METHODS = [
         columns.metadata.patch,
         "columns.metadata.patch",
         [user_is_authenticated]
+    ),
+    (
+        configured_roles.add,
+        "configured_roles.add",
+        [user_is_superuser]
+    ),
+    (
+        configured_roles.list_,
+        "configured_roles.list",
+        [user_is_authenticated]
+    ),
+    (
+        configured_roles.delete,
+        "configured_roles.delete",
+        [user_is_superuser]
+    ),
+    (
+        configured_roles.set_password,
+        "configured_roles.set_password",
+        [user_is_superuser]
     ),
     (
         connections.add_from_known_connection,
@@ -77,6 +125,36 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        database_setup.create_new,
+        "database_setup.create_new",
+        [user_is_superuser]
+    ),
+    (
+        database_setup.connect_existing,
+        "database_setup.connect_existing",
+        [user_is_superuser]
+    ),
+    (
+        databases.list_,
+        "databases.list",
+        [user_is_authenticated]
+    ),
+    (
+        records.list_,
+        "records.list",
+        [user_is_authenticated]
+    ),
+    (
+        explorations.list_,
+        "explorations.list",
+        [user_is_authenticated]
+    ),
+    (
+        explorations.delete,
+        "explorations.delete",
+        [user_is_authenticated]
+    ),
+    (
         roles.list_,
         "roles.list",
         [user_is_authenticated]
@@ -102,8 +180,24 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        servers.list_,
+        "servers.list",
+        [user_is_authenticated]
+    ),
+    (
+
+        types.list_,
+        "types.list",
+        [user_is_authenticated]
+    ),
+    (
         tables.list_,
         "tables.list",
+        [user_is_authenticated]
+    ),
+    (
+        tables.list_with_metadata,
+        "tables.list_with_metadata",
         [user_is_authenticated]
     ),
     (
@@ -137,13 +231,18 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        tables.list_joinable,
+        "tables.list_joinable",
+        [user_is_authenticated]
+    ),
+    (
         tables.metadata.list_,
         "tables.metadata.list",
         [user_is_authenticated]
     ),
     (
-        tables.metadata.patch,
-        "tables.metadata.patch",
+        tables.metadata.set_,
+        "tables.metadata.set",
         [user_is_authenticated]
     )
 ]

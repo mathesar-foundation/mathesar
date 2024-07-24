@@ -42,7 +42,6 @@ def main(skip_static_collection=False):
 def install_on_db_with_key(database_key, skip_confirm):
     from mathesar.models.deprecated import Connection
     db_model = Connection.create_from_settings_key(database_key)
-    db_model.save()
     try:
         install.install_mathesar(
             database_name=db_model.db_name,
@@ -55,6 +54,7 @@ def install_on_db_with_key(database_key, skip_confirm):
     except OperationalError as e:
         db_model.delete()
         raise e
+    db_model.save()
 
 
 if __name__ == "__main__":

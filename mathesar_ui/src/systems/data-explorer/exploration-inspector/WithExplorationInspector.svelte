@@ -8,7 +8,6 @@
 
   export let isInspectorOpen: boolean;
   export let queryHandler: QueryRunner | QueryManager;
-  export let canEditMetadata: boolean;
 </script>
 
 <WithPanel
@@ -18,10 +17,5 @@
   maxSizePx={600}
 >
   <slot />
-  <ExplorationInspector
-    slot="panel"
-    {queryHandler}
-    {canEditMetadata}
-    on:delete
-  />
+  <ExplorationInspector slot="panel" {queryHandler} on:delete />
 </WithPanel>

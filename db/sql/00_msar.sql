@@ -565,6 +565,7 @@ END;
 $$ LANGUAGE SQL;
 
 
+DROP FUNCTION IF EXISTS msar.get_constraints_for_table(oid);
 CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TABLE
 (
   oid oid,
@@ -885,13 +886,16 @@ Each returned JSON object in the array will have the form:
 Args:
   sch_id: The OID or name of the schema.
 */
-SELECT jsonb_agg(
-  jsonb_build_object(
-    'oid', pgc.oid::bigint,
-    'name', pgc.relname,
-    'schema', pgc.relnamespace::bigint,
-    'description', msar.obj_description(pgc.oid, 'pg_class')
-  )
+SELECT coalesce(
+  jsonb_agg(
+    jsonb_build_object(
+      'oid', pgc.oid::bigint,
+      'name', pgc.relname,
+      'schema', pgc.relnamespace::bigint,
+      'description', msar.obj_description(pgc.oid, 'pg_class')
+    )
+  ),
+  '[]'::jsonb
 )
 FROM pg_catalog.pg_class AS pgc 
   LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
@@ -1218,41 +1222,9 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Rename table ------------------------------------------------------------------------------------
 
+DROP FUNCTION IF EXISTS msar.rename_table(text, text, text);
 CREATE OR REPLACE FUNCTION
-__msar.rename_table(old_tab_name text, new_tab_name text) RETURNS text AS $$/*
-Change a table's name, returning the command executed.
-
-Args:
-  old_tab_name: properly quoted, qualified table name
-  new_tab_name: properly quoted, unqualified table name
-*/
-BEGIN
-  RETURN __msar.exec_ddl(
-    'ALTER TABLE %s RENAME TO %s', old_tab_name, new_tab_name
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.rename_table(tab_id oid, new_tab_name text) RETURNS text AS $$/*
-Change a table's name, returning the command executed.
-
-Args:
-  tab_id: the OID of the table whose name we want to change
-  new_tab_name: unquoted, unqualified table name
-*/
-BEGIN
-  RETURN __msar.rename_table(
-    __msar.get_qualified_relation_name_or_null(tab_id),
-    quote_ident(new_tab_name)
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS text AS $$/*
+msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS void AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
@@ -1260,12 +1232,34 @@ Args:
   old_tab_name: unquoted, unqualified original table name
   new_tab_name: unquoted, unqualified new table name
 */
-DECLARE fullname text;
 BEGIN
-  fullname := __msar.build_qualified_name_sql(sch_name, old_tab_name);
-  RETURN __msar.rename_table(fullname, quote_ident(new_tab_name));
+  IF old_tab_name = new_tab_name THEN
+    -- Return early if the names are the same. This avoids an error from Postgres.
+    RETURN;
+  END IF;
+  EXECUTE format('ALTER TABLE %I.%I RENAME TO %I', sch_name, old_tab_name, new_tab_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+DROP FUNCTION IF EXISTS msar.rename_table(oid, text);
+CREATE OR REPLACE FUNCTION
+msar.rename_table(tab_id oid, new_tab_name text) RETURNS void AS $$/*
+Change a table's name, returning the command executed.
+
+Args:
+  tab_id: the OID of the table whose name we want to change
+  new_tab_name: unquoted, unqualified table name
+*/
+BEGIN
+  PERFORM msar.rename_table(
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    new_tab_name
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 
 -- Comment on table --------------------------------------------------------------------------------
@@ -3276,3 +3270,227 @@ BEGIN
   RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- DQL FUNCTIONS
+--
+-- This set of functions is for getting records from python.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+-- Data type formatting functions
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val date) RETURNS text AS $$
+SELECT to_char(val, 'YYYY-MM-DD AD');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val time without time zone) RETURNS text AS $$
+SELECT concat(to_char(val, 'HH24:MI'), ':', to_char(date_part('seconds', val), 'FM00.0999999999'));
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val time with time zone) RETURNS text AS $$
+SELECT CASE
+  WHEN date_part('timezone_hour', val) = 0 AND date_part('timezone_minute', val) = 0
+    THEN concat(
+      to_char(date_part('hour', val), 'FM00'), ':', to_char(date_part('minute', val), 'FM00'),
+      ':', to_char(date_part('seconds', val), 'FM00.0999999999'), 'Z'
+    )
+  ELSE
+    concat(
+      to_char(date_part('hour', val), 'FM00'), ':', to_char(date_part('minute', val), 'FM00'),
+      ':', to_char(date_part('seconds', val), 'FM00.0999999999'),
+      to_char(date_part('timezone_hour', val), 'S00'), ':',
+      ltrim(to_char(date_part('timezone_minute', val), '00'), '+- ')
+    )
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val timestamp without time zone) RETURNS text AS $$
+SELECT
+  concat(
+    to_char(val, 'YYYY-MM-DD"T"HH24:MI'),
+    ':', to_char(date_part('seconds', val), 'FM00.0999999999'),
+    to_char(val, ' BC')
+  );
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val timestamp with time zone) RETURNS text AS $$
+SELECT CASE
+  WHEN date_part('timezone_hour', val) = 0 AND date_part('timezone_minute', val) = 0
+    THEN concat(
+      to_char(val, 'YYYY-MM-DD"T"HH24:MI'),
+      ':', to_char(date_part('seconds', val), 'FM00.0999999999'), 'Z', to_char(val, ' BC')
+    )
+  ELSE
+    concat(
+      to_char(val, 'YYYY-MM-DD"T"HH24:MI'),
+      ':', to_char(date_part('seconds', val), 'FM00.0999999999'),
+      to_char(date_part('timezone_hour', val), 'S00'),
+      ':', ltrim(to_char(date_part('timezone_minute', val), '00'), '+- '), to_char(val, ' BC')
+    )
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val interval) returns text AS $$
+SELECT concat(
+  to_char(val, 'PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'), date_part('seconds', val), 'S'
+);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.format_data(val anyelement) returns anyelement AS $$
+SELECT val;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.sanitize_direction(direction text) RETURNS text AS $$/*
+*/
+SELECT CASE lower(direction)
+  WHEN 'asc' THEN 'ASC'
+  WHEN 'desc' THEN 'DESC'
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_pkey_order(tab_id oid) RETURNS jsonb AS $$
+SELECT jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc'))
+FROM pg_constraint, LATERAL unnest(conkey) attnum
+WHERE contype='p' AND conrelid=tab_id AND has_column_privilege(tab_id, attnum, 'SELECT');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$
+WITH orderable_cte AS (
+  SELECT attnum
+  FROM pg_catalog.pg_attribute
+    INNER JOIN pg_catalog.pg_cast ON atttypid=castsource
+    INNER JOIN pg_catalog.pg_operator ON casttarget=oprleft
+  WHERE
+    attrelid = tab_id
+    AND attnum > 0
+    AND NOT attisdropped
+    AND castcontext = 'i'
+    AND oprname = '<'
+  UNION SELECT attnum
+  FROM pg_catalog.pg_attribute
+    INNER JOIN pg_catalog.pg_operator ON atttypid=oprleft
+  WHERE
+    attrelid = tab_id
+    AND attnum > 0
+    AND NOT attisdropped
+    AND oprname = '<'
+  ORDER BY attnum
+)
+SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc')), '[]'::jsonb)
+-- This privilege check is redundant in context, but may be useful for other callers.
+FROM orderable_cte
+-- This privilege check is redundant in context, but may be useful for other callers.
+WHERE has_column_privilege(tab_id, attnum, 'SELECT');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_order_by_expr(tab_id oid, order_ jsonb) RETURNS text AS $$/*
+Build an ORDER BY expression for the given table and order JSON.
+
+The ORDER BY expression will refer to columns by their attnum. This is designed to work together
+with `msar.build_selectable_column_expr`. It will only use the columns to which the user has access.
+Finally, this function will append either a primary key, or all columns to the produced ORDER BY so
+the resulting ordering is totally defined (i.e., deterministic).
+
+Args:
+  tab_id: The OID of the table whose columns we'll order by.
+*/
+SELECT 'ORDER BY ' || string_agg(format('%I %s', attnum, msar.sanitize_direction(direction)), ', ')
+FROM jsonb_to_recordset(
+    COALESCE(
+      COALESCE(order_, '[]'::jsonb) || msar.get_pkey_order(tab_id),
+      COALESCE(order_, '[]'::jsonb) || msar.get_total_order(tab_id)
+    )
+)
+  AS x(attnum smallint, direction text)
+WHERE has_column_privilege(tab_id, attnum, 'SELECT');
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_selectable_column_expr(tab_id oid) RETURNS text AS $$/*
+Build an SQL select-target expression of only columns to which the user has access.
+
+Given columns with attnums 2, 3, and 4, and assuming the user has access only to columns 2 and 4,
+this function will return an expression of the form:
+
+column_name AS "2", another_column_name AS "4"
+
+Args:
+  tab_id: The OID of the table containing the columns to select.
+*/
+SELECT string_agg(format('msar.format_data(%I) AS %I', attname, attnum), ', ')
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.list_records_from_table(
+  tab_id oid,
+  limit_ integer,
+  offset_ integer,
+  order_ jsonb,
+  filter_ jsonb,
+  group_ jsonb,
+  search_ jsonb
+) RETURNS jsonb AS $$/*
+Get records from a table. Only columns to which the user has access are returned.
+
+Args:
+  tab_id: The OID of the table whose records we'll get
+  limit_: The maximum number of rows we'll return
+  offset_: The number of rows to skip before returning records from following rows.
+  order_: An array of ordering definition objects.
+  filter_: An array of filter definition objects.
+  group_: An array of group definition objects.
+  search_: An array of search definition objects.
+
+The order definition objects should have the form
+  {"attnum": <int>, "direction": <text>}
+*/
+DECLARE
+  records jsonb;
+BEGIN
+  EXECUTE format(
+    $q$
+    WITH count_cte AS (
+      SELECT count(1) AS count FROM %2$I.%3$I
+    ), results_cte AS (
+      SELECT %1$s FROM %2$I.%3$I %6$s LIMIT %4$L OFFSET %5$L
+    )
+    SELECT jsonb_build_object(
+      'results', jsonb_agg(row_to_json(results_cte.*)),
+      'count', max(count_cte.count)
+    )
+    FROM results_cte, count_cte
+    $q$,
+    msar.build_selectable_column_expr(tab_id),
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    limit_,
+    offset_,
+    msar.build_order_by_expr(tab_id, order_)
+  ) INTO records;
+  RETURN records;
+END;
+$$ LANGUAGE plpgsql;

@@ -4,7 +4,8 @@
 
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/AppTypes';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import {
@@ -37,7 +38,7 @@
   import DataFileInput from './DataFileInput.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   interface UploadMethod {
     key: 'file' | 'url' | 'clipboard';
@@ -117,7 +118,7 @@
       });
       const previewPage = getImportPreviewPageUrl(
         database.id,
-        schema.id,
+        schema.oid,
         table.id,
         { useColumnTypeInference: $useColumnTypeInference },
       );

@@ -16,7 +16,6 @@
 
   export let constraintType: ConstraintType;
   export let constraints: Constraint[];
-  export let canExecuteDDL: boolean;
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -66,12 +65,8 @@
     });
   }
 
-  $: canAdd =
-    CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType) &&
-    canExecuteDDL;
-  $: canDrop =
-    CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType) &&
-    canExecuteDDL;
+  $: canAdd = CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType);
+  $: canDrop = CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType);
 </script>
 
 <div class="constraint-type-section">
