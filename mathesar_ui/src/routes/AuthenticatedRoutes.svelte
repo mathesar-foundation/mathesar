@@ -44,7 +44,7 @@
   <DatabaseRoute connectionId={parseInt(meta.params.connectionId, 10)} />
 </Route>
 
-<Route path="/connections">
+<Route path="/databases">
   <AppendBreadcrumb item={{ type: 'connectionList' }} />
   <ConnectionsPage />
 </Route>
