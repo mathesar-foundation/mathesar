@@ -3505,3 +3505,78 @@ BEGIN
   RETURN records;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_score_expr(tab_id oid, parameters_ jsonb) RETURNS text AS $$
+SELECT string_agg(
+  CASE WHEN pgt.typcategory = 'S' THEN
+    format(
+      $s$(CASE
+        WHEN %1$I ILIKE %2$L THEN 4
+        WHEN %1$I ILIKE %2$L || '%%' THEN 3
+        WHEN %1$I ILIKE '%%' || %2$L || '%%' THEN 2
+        ELSE 0
+      END)$s$,
+      pga.attname,
+      x.literal
+    )
+  ELSE
+    format('(CASE WHEN %1$I = %2$L THEN 4 ELSE 0 END)', pga.attname, x.literal)
+  END,
+  ' + '
+)
+FROM jsonb_to_recordset(parameters_) AS x(attnum smallint, literal text)
+  INNER JOIN pg_catalog.pg_attribute AS pga ON x.attnum = pga.attnum
+  INNER JOIN pg_catalog.pg_type AS pgt ON pga.atttypid = pgt.oid
+WHERE
+  pga.attrelid = tab_id
+  AND NOT pga.attisdropped
+  AND has_column_privilege(tab_id, x.attnum, 'SELECT')
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.search_records_from_table(
+  tab_id oid,
+  search_ jsonb,
+  limit_ integer
+) RETURNS jsonb AS $$/*
+Get records from a table, filtering and sorting according to a search specification.
+
+Only columns to which the user has access are returned.
+
+Args:
+  tab_id: The OID of the table whose records we'll get
+  search_: An array of search definition objects.
+  limit_: The maximum number of rows we'll return.
+
+The search definition objects should have the form
+  {"attnum": <int>, "literal": <any>}
+*/
+DECLARE
+  records jsonb;
+BEGIN
+  EXECUTE format(
+    $q$
+    WITH count_cte AS (
+      SELECT count(1) AS count FROM %2$I.%3$I WHERE %4$s > 0
+    ), results_cte AS (
+      SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %4$s DESC LIMIT %5$L
+    )
+    SELECT jsonb_build_object(
+      'results', jsonb_agg(row_to_json(results_cte.*)),
+      'count', max(count_cte.count),
+      'query', $iq$SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %4$s DESC LIMIT %5$L$iq$
+    )
+    FROM results_cte, count_cte
+    $q$,
+    msar.build_selectable_column_expr(tab_id),
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_score_expr(tab_id, search_),
+    limit_
+  ) INTO records;
+  RETURN records;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
