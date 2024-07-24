@@ -6,7 +6,7 @@ from typing import Any, Literal, TypedDict, Union
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.records.operations.select import list_records_from_table
+from db.records.operations import select as record_select
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -60,6 +60,18 @@ class Filter(TypedDict):
     """
     type: str
     args: list[Union['Filter', FilterAttnum, FilterLiteral]]
+
+
+class SearchParam(TypedDict):
+    """
+    Search definition for a single column.
+
+    Attributes:
+        attnum: The attnum of the column in the table.
+        literal: The literal to search for in the column.
+    """
+    attnum: int
+    literal: Any
 
 
 class RecordList(TypedDict):
@@ -125,7 +137,7 @@ def list_(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        record_info = list_records_from_table(
+        record_info = record_select.list_records_from_table(
             conn,
             table_oid,
             limit=limit,
@@ -133,5 +145,47 @@ def list_(
             order=order,
             filter=filter,
             group=group,
+        )
+    return RecordList.from_dict(record_info)
+
+
+@rpc_method(name="records.search")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def search(
+        *,
+        table_oid: int,
+        database_id: int,
+        search_params: list[SearchParam] = [],
+        limit: int = 10,
+        **kwargs
+) -> RecordList:
+    """
+    List records from a table according to `search_params`.
+
+
+    Literals will be searched for in a basic way in string-like columns,
+    but will have to match exactly in non-string-like columns.
+
+    Records are assigned a score based on how many matches, and of what
+    quality, they have with the passed search parameters.
+
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+        search_params: Results are ranked and filtered according to the
+                       objects passed here.
+        limit: The maximum number of rows we'll return.
+
+    Returns:
+        The requested records, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = record_select.search_records_from_table(
+            conn,
+            table_oid,
+            search=search_params,
+            limit=limit,
         )
     return RecordList.from_dict(record_info)

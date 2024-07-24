@@ -37,7 +37,6 @@ def test_records_list(rf, monkeypatch):
             order=None,
             filter=None,
             group=None,
-            search=None,
     ):
         if _table_oid != table_oid:
             raise AssertionError('incorrect parameters passed')
@@ -48,7 +47,7 @@ def test_records_list(rf, monkeypatch):
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
-    monkeypatch.setattr(records, 'list_records_from_table', mock_list_records)
+    monkeypatch.setattr(records.record_select, 'list_records_from_table', mock_list_records)
     expect_records_list = {
         "count": 50123,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],

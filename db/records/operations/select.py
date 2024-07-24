@@ -50,6 +50,32 @@ def list_records_from_table(
     return result
 
 
+def search_records_from_table(
+        conn,
+        table_oid,
+        search=[],
+        limit=10,
+):
+    """
+    Get records from a table, according to a search specification
+
+    Only data from which the user is granted `SELECT` is returned.
+
+    Args:
+        tab_id: The OID of the table whose records we'll get.
+        search: A list of dictionaries defining a search.
+        limit: The maximum number of rows we'll return.
+
+    The search definition objects should have the form
+    {"attnum": <int>, "direction": <text>}
+    """
+    search = search or []
+    result = db_conn.exec_msar_func(
+        conn, 'search_records_from_table', table_oid, json.dumps(search), limit
+    ).fetchone()[0]
+    return result
+
+
 def get_record(table, engine, id_value):
     primary_key_column = get_primary_key_column(table)
     pg_query = select(table).where(primary_key_column == id_value)
