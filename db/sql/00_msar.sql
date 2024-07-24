@@ -3408,6 +3408,25 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_total_order_expr(tab_id oid, order_ jsonb) RETURNS text AS $$/*
+Build a deterministic order expression for the given table and order JSON.
+Args:
+  tab_id: The OID of the table whose columns we'll order by.
+  order_: A JSONB array defining any desired ordering of columns.
+*/
+SELECT string_agg(format('%I %s', attnum, msar.sanitize_direction(direction)), ', ')
+FROM jsonb_to_recordset(
+    COALESCE(
+      COALESCE(order_, '[]'::jsonb) || msar.get_pkey_order(tab_id),
+      COALESCE(order_, '[]'::jsonb) || msar.get_total_order(tab_id)
+    )
+)
+  AS x(attnum smallint, direction text)
+WHERE has_column_privilege(tab_id, attnum, 'SELECT');
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_order_by_expr(tab_id oid, order_ jsonb) RETURNS text AS $$/*
 Build an ORDER BY expression for the given table and order JSON.
 
@@ -3418,16 +3437,9 @@ the resulting ordering is totally defined (i.e., deterministic).
 
 Args:
   tab_id: The OID of the table whose columns we'll order by.
+  order_: A JSONB array defining any desired ordering of columns.
 */
-SELECT 'ORDER BY ' || string_agg(format('%I %s', attnum, msar.sanitize_direction(direction)), ', ')
-FROM jsonb_to_recordset(
-    COALESCE(
-      COALESCE(order_, '[]'::jsonb) || msar.get_pkey_order(tab_id),
-      COALESCE(order_, '[]'::jsonb) || msar.get_total_order(tab_id)
-    )
-)
-  AS x(attnum smallint, direction text)
-WHERE has_column_privilege(tab_id, attnum, 'SELECT');
+SELECT 'ORDER BY ' || msar.build_total_order_expr(tab_id, order_)
 $$ LANGUAGE SQL;
 
 
@@ -3562,12 +3574,12 @@ BEGIN
     WITH count_cte AS (
       SELECT count(1) AS count FROM %2$I.%3$I WHERE %4$s > 0
     ), results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %4$s DESC LIMIT %5$L
+      SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %6$s LIMIT %5$L
     )
     SELECT jsonb_build_object(
       'results', jsonb_agg(row_to_json(results_cte.*)),
       'count', max(count_cte.count),
-      'query', $iq$SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %4$s DESC LIMIT %5$L$iq$
+      'query', $iq$SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %6$s LIMIT %5$L$iq$
     )
     FROM results_cte, count_cte
     $q$,
@@ -3575,7 +3587,12 @@ BEGIN
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     msar.get_score_expr(tab_id, search_),
-    limit_
+    limit_,
+    concat(
+      msar.get_score_expr(tab_id, search_),
+      ' DESC, ',
+      msar.build_total_order_expr(tab_id, null)
+    )
   ) INTO records;
   RETURN records;
 END;
