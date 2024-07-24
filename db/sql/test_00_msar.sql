@@ -2696,7 +2696,7 @@ BEGIN
 
   -- Test table info for schema 'alice' that contains no tables
   RETURN NEXT is(
-    alice_table_info, null
+    alice_table_info, '[]'::jsonb
   );
 END;
 $$ LANGUAGE plpgsql;
