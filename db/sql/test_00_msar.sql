@@ -3249,3 +3249,112 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- msar.search_records_from_table ------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_search_records_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE atable (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    col1 integer,
+    col2 varchar,
+    coltodrop integer
+  );
+  ALTER TABLE atable DROP COLUMN coltodrop;
+  INSERT INTO atable (col1, col2) VALUES
+    (1, 'bcdea'),
+    (12, 'vwxyz'),
+    (1, 'edcba'),
+    (2, 'abcde');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_search_records_from_table() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  search_result jsonb;
+BEGIN
+  PERFORM __setup_search_records_table();
+  rel_id := 'atable'::regclass::oid;
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 2, 'literal', 3)
+    ),
+    10
+  );
+  RETURN NEXT is(search_result -> 'results', jsonb_build_array());
+  RETURN NEXT is((search_result -> 'count')::integer, 0);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'bc')
+    ),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 2);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'b'),
+      jsonb_build_object('attnum', 2, 'literal', 1)
+    ),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 3);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'a'),
+      jsonb_build_object('attnum', 2, 'literal', 1)
+    ),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 3);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'a')
+    ),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde'),
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 3);
+END;
+$$ LANGUAGE plpgsql;

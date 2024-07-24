@@ -3575,8 +3575,8 @@ BEGIN
       SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %6$s LIMIT %5$L
     )
     SELECT jsonb_build_object(
-      'results', jsonb_agg(row_to_json(results_cte.*)),
-      'count', max(count_cte.count),
+      'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
+      'count', coalesce(max(count_cte.count), 0),
       'query', $iq$SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %6$s LIMIT %5$L$iq$
     )
     FROM results_cte, count_cte
