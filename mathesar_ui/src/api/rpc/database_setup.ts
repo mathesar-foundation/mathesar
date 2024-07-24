@@ -12,12 +12,13 @@ export const sampleDataOptions = [
 export type SampleDataSchemaIdentifier = (typeof sampleDataOptions)[number];
 
 export interface DatabaseConnectionResult {
-  server_id: Server['id'];
-  database_id: Database['id'];
-  configured_role_id: ConfiguredRole['id'];
+  server: Server;
+  database: Database;
+  configured_role: ConfiguredRole;
 }
 
-export const databaseSetup = {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const database_setup = {
   create_new: rpcMethodTypeContainer<
     {
       database: Database['name'];

@@ -8,7 +8,8 @@ export interface ConfiguredRole {
   name: string;
 }
 
-export const configuredRoles = {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const configured_roles = {
   list: rpcMethodTypeContainer<
     {
       server_id: ConfiguredRole['server_id'];
