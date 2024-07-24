@@ -2,9 +2,9 @@
   import { Route } from 'tinro';
 
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import ConnectionsPage from '@mathesar/pages/connections/ConnectionsPage.svelte';
+  import HomePage from '@mathesar/pages/home/HomePage.svelte';
   import WelcomePage from '@mathesar/pages/WelcomePage.svelte';
-  import { CONNECTIONS_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { HOME_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { mapExactlyOne } from '@mathesar/utils/iterUtils';
@@ -20,7 +20,7 @@
   $: rootPathRedirectUrl = mapExactlyOne($databases, {
     whenZero: undefined,
     whenOne: ([id]) => getDatabasePageUrl(id),
-    whenMany: CONNECTIONS_URL,
+    whenMany: HOME_URL,
   });
 </script>
 
@@ -44,6 +44,6 @@
 </Route>
 
 <Route path="/databases">
-  <AppendBreadcrumb item={{ type: 'connectionList' }} />
-  <ConnectionsPage />
+  <AppendBreadcrumb item={{ type: 'home' }} />
+  <HomePage />
 </Route>

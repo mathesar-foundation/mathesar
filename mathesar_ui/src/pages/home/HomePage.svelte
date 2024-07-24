@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type { Database } from '@mathesar/api/rpc/databases';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
@@ -10,11 +8,11 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import {
-    AddConnectionModal,
-    ConnectionsEmptyState,
-  } from '@mathesar/systems/connections';
+  import { DatabasesEmptyState } from '@mathesar/systems/connections';
   import { Button, Icon } from '@mathesar-component-library';
+  import { _ } from 'svelte-i18n';
+
+  import DatabaseRow from './DatabaseRow.svelte';
 
   const addConnectionModalController = modal.spawnModalController();
 
@@ -60,7 +58,7 @@
 
   <section data-identifier="connections-container">
     {#if $databases.size === 0}
-      <ConnectionsEmptyState />
+      <DatabasesEmptyState />
     {:else}
       <EntityContainerWithFilterBar
         searchPlaceholder={$_('search_database_connections')}
@@ -83,7 +81,7 @@
           <RichText
             text={$_('connections_matching_search', {
               values: {
-                count: filteredConnections.length,
+                count: filteredDatabases.length,
               },
             })}
             let:slotName
@@ -108,8 +106,7 @@
                 </thead>
                 <tbody>
                   {#each filteredDatabases as database (database.id)}
-                    <!-- <ConnectionRow {connection} /> -->
-                    {database.name}
+                    <DatabaseRow {database} />
                   {/each}
                 </tbody>
               </table>
@@ -121,7 +118,7 @@
   </section>
 </LayoutWithHeader>
 
-<AddConnectionModal controller={addConnectionModalController} />
+<!-- <AddConnectionModal controller={addConnectionModalController} /> -->
 
 <style lang="scss">
   [data-identifier='connections-header'] {

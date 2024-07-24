@@ -1,4 +1,3 @@
-import type { Connection } from '@mathesar/api/rest/connections';
 import type { QueryInstance } from '@mathesar/api/rest/types/queries';
 import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { User } from '@mathesar/api/rest/users';
@@ -13,9 +12,9 @@ export interface CommonData {
   queries: QueryInstance[];
   current_database: Database['id'] | null;
   internal_db_connection: {
-    database: Connection['database'];
-    host: Connection['host'];
-    port: Connection['port'];
+    database: string;
+    host: string;
+    port: number;
     type: string;
     user: string;
   };
