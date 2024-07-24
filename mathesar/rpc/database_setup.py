@@ -8,6 +8,9 @@ from modernrpc.auth.basic import http_basic_auth_superuser_required
 
 from mathesar.utils import permissions
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.servers import ServerInfo
+from mathesar.rpc.databases import DatabaseInfo
+from mathesar.rpc.configured_roles import ConfiguredRoleInfo
 
 
 class DatabaseConnectionResult(TypedDict):
@@ -18,20 +21,20 @@ class DatabaseConnectionResult(TypedDict):
     Database, and ConfiguredRole models, as well as a UserDatabaseRoleMap entry.
 
     Attributes:
-        server_id: The Django ID of the Server model instance.
-        database_id: The Django ID of the Database model instance.
-        configured_role_id: The Django ID of the ConfiguredRole model instance.
+        server: Information on the Server model instance.
+        database: Information on the Database model instance.
+        configured_role: Information on the ConfiguredRole model instance.
     """
-    server_id: int
-    database_id: int
-    configured_role_id: int
+    server: ServerInfo
+    database: DatabaseInfo
+    configured_role: ConfiguredRoleInfo
 
     @classmethod
     def from_model(cls, model):
         return cls(
-            server_id=model.server.id,
-            database_id=model.database.id,
-            configured_role_id=model.configured_role.id,
+            server=ServerInfo.from_model(model.server),
+            database=DatabaseInfo.from_model(model.database),
+            configured_role=ConfiguredRoleInfo.from_model(model.configured_role),
         )
 
 
