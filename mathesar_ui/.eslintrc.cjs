@@ -189,7 +189,6 @@ module.exports = {
             ts: 'never',
           },
         ],
-        'import/no-unresolved': 'off',
         'import/prefer-default-export': 'off',
         'no-void': 'off',
         'no-underscore-dangle': 'off',

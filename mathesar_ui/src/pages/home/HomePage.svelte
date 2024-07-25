@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import type { Database } from '@mathesar/api/rpc/databases';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
@@ -10,7 +12,6 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { DatabasesEmptyState } from '@mathesar/systems/connections';
   import { Button, Icon } from '@mathesar-component-library';
-  import { _ } from 'svelte-i18n';
 
   import DatabaseRow from './DatabaseRow.svelte';
 

@@ -1,3 +1,5 @@
+import { type Readable, derived, writable } from 'svelte/store';
+
 import { api } from '@mathesar/api/rpc';
 import type { Database } from '@mathesar/api/rpc/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -7,7 +9,6 @@ import {
   WritableMap,
   defined,
 } from '@mathesar-component-library';
-import { type Readable, derived, writable } from 'svelte/store';
 
 const commonData = preloadCommonData();
 

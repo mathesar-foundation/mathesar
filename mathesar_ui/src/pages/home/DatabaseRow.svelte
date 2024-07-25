@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import type { Database } from '@mathesar/api/rpc/databases';
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import { iconConnection } from '@mathesar/icons';
@@ -6,7 +8,6 @@
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { Button, Icon } from '@mathesar-component-library';
-  import { _ } from 'svelte-i18n';
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
