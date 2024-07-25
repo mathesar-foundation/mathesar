@@ -11,7 +11,6 @@
 
   export let column: ProcessedColumn;
   export let columnsDataStore: ColumnsDataStore;
-  export let canExecuteDDL: boolean;
 
   $: ({ columns } = columnsDataStore);
 
@@ -56,7 +55,6 @@
     initialValue={column.column.name}
     onSubmit={handleColumnNameChange}
     {getValidationErrors}
-    disabled={!canExecuteDDL}
   />
 </div>
 
@@ -66,7 +64,6 @@
     initialValue={column.column.description ?? ''}
     onSubmit={handleColumnDescriptionChange}
     isLongText
-    disabled={!canExecuteDDL}
   />
 </div>
 

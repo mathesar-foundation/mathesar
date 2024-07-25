@@ -23,8 +23,6 @@
 
   import TableDeleteConfirmationBody from './TableDeleteConfirmationBody.svelte';
 
-  export let canExecuteDDL: boolean;
-
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ id, columnsDataStore, meta } = $tabularData);
@@ -108,12 +106,10 @@
     {/if}
   {/if}
 
-  {#if canExecuteDDL}
-    <Button appearance="outline-primary" on:click={handleDeleteTable}>
-      <Icon {...iconDeleteMajor} />
-      <span>{$_('delete_table')}</span>
-    </Button>
-  {/if}
+  <Button appearance="outline-primary" on:click={handleDeleteTable}>
+    <Icon {...iconDeleteMajor} />
+    <span>{$_('delete_table')}</span>
+  </Button>
 </div>
 
 <style lang="scss">

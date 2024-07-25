@@ -65,13 +65,18 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        columns.list_with_metadata,
+        "columns.list_with_metadata",
+        [user_is_authenticated]
+    ),
+    (
         columns.metadata.list_,
         "columns.metadata.list",
         [user_is_authenticated]
     ),
     (
-        columns.metadata.patch,
-        "columns.metadata.patch",
+        columns.metadata.set_,
+        "columns.metadata.set",
         [user_is_authenticated]
     ),
     (
