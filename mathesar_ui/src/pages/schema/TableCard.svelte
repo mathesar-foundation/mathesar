@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import {

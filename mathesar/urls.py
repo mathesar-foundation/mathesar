@@ -56,12 +56,12 @@ urlpatterns = [
     path('administration/update/', views.admin_home, name='admin_update'),
     path('shares/tables/<slug>/', views.shared_table, name='shared_table'),
     path('shares/explorations/<slug>/', views.shared_query, name='shared_query'),
-    path('connections/', views.connections, name='connections'),
-    path('db/<connection_id>/', views.schemas, name='schemas'),
+    path('databases/', views.databases, name='databases'),
+    path('db/<database_id>/', views.schemas, name='schemas'),
     path('i18n/', include('django.conf.urls.i18n')),
     re_path(
-        r'^db/(?P<connection_id>\w+)/(?P<schema_id>\w+)/',
-        views.schemas,
+        r'^db/(?P<database_id>\w+)/(?P<schema_id>\w+)/',
+        views.schemas_home,
         name='schema_home'
     ),
 ]

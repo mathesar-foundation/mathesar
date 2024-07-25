@@ -4,8 +4,8 @@
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';

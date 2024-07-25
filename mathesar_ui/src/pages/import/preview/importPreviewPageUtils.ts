@@ -5,8 +5,8 @@ import type {
   TableEntry,
 } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
-import type { Database } from '@mathesar/AppTypes';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type {

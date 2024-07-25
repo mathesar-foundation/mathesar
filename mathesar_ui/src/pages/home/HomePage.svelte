@@ -1,22 +1,19 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Connection } from '@mathesar/api/rest/connections';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconAddNew } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import { connectionsStore } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import {
-    AddConnectionModal,
-    ConnectionsEmptyState,
-  } from '@mathesar/systems/connections';
+  import { DatabasesEmptyState } from '@mathesar/systems/connections';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import ConnectionRow from './ConnectionRow.svelte';
+  import DatabaseRow from './DatabaseRow.svelte';
 
   const addConnectionModalController = modal.spawnModalController();
 
@@ -26,23 +23,20 @@
 
   let filterQuery = '';
 
-  $: ({ connections } = connectionsStore);
+  $: ({ databases } = databasesStore);
 
-  function filterConnections(allConnections: Connection[], query: string) {
-    if (!query) return allConnections;
+  function filterDatabases(allDatabases: Database[], query: string) {
+    if (!query) return allDatabases;
     const sanitizedQuery = query.trim().toLowerCase();
     const match = (t: string) => t.toLowerCase().includes(sanitizedQuery);
-    return allConnections.filter((c) => match(c.nickname) || match(c.database));
+    return allDatabases.filter((d) => match(d.name));
   }
 
   function handleClearFilterQuery() {
     filterQuery = '';
   }
 
-  $: filteredConnections = filterConnections(
-    [...$connections.values()],
-    filterQuery,
-  );
+  $: filteredDatabases = filterDatabases([...$databases.values()], filterQuery);
 </script>
 
 <svelte:head>
@@ -59,13 +53,13 @@
   <div data-identifier="connections-header">
     <span>
       {$_('database_connections')}
-      {#if $connections.size}({$connections.size}){/if}
+      {#if $databases.size}({$databases.size}){/if}
     </span>
   </div>
 
   <section data-identifier="connections-container">
-    {#if $connections.size === 0}
-      <ConnectionsEmptyState />
+    {#if $databases.size === 0}
+      <DatabasesEmptyState />
     {:else}
       <EntityContainerWithFilterBar
         searchPlaceholder={$_('search_database_connections')}
@@ -88,7 +82,7 @@
           <RichText
             text={$_('connections_matching_search', {
               values: {
-                count: filteredConnections.length,
+                count: filteredDatabases.length,
               },
             })}
             let:slotName
@@ -100,24 +94,20 @@
         </p>
 
         <svelte:fragment slot="content">
-          {#if filteredConnections.length}
+          {#if filteredDatabases.length}
             <div data-identifier="connections-list-grid">
               <table>
                 <thead>
                   <tr>
-                    <th>{$_('connection_name')}</th>
                     <th>{$_('database_name')}</th>
-                    <th>{$_('username')}</th>
-                    <th>{$_('host')}</th>
-                    <th>{$_('port')}</th>
                     {#if isSuperUser}
                       <th>{$_('actions')}</th>
                     {/if}
                   </tr>
                 </thead>
                 <tbody>
-                  {#each filteredConnections as connection (connection.id)}
-                    <ConnectionRow {connection} />
+                  {#each filteredDatabases as database (database.id)}
+                    <DatabaseRow {database} />
                   {/each}
                 </tbody>
               </table>
@@ -129,7 +119,7 @@
   </section>
 </LayoutWithHeader>
 
-<AddConnectionModal controller={addConnectionModalController} />
+<!-- <AddConnectionModal controller={addConnectionModalController} /> -->
 
 <style lang="scss">
   [data-identifier='connections-header'] {

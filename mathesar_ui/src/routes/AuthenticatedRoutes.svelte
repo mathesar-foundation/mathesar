@@ -2,10 +2,10 @@
   import { Route } from 'tinro';
 
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import ConnectionsPage from '@mathesar/pages/connections/ConnectionsPage.svelte';
+  import HomePage from '@mathesar/pages/home/HomePage.svelte';
   import WelcomePage from '@mathesar/pages/WelcomePage.svelte';
-  import { CONNECTIONS_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
-  import { connectionsStore } from '@mathesar/stores/databases';
+  import { HOME_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { mapExactlyOne } from '@mathesar/utils/iterUtils';
 
@@ -13,15 +13,14 @@
   import DatabaseRoute from './DatabaseRoute.svelte';
   import UserProfileRoute from './UserProfileRoute.svelte';
 
+  const { databases } = databasesStore;
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
 
-  $: ({ connections } = connectionsStore);
-
-  $: rootPathRedirectUrl = mapExactlyOne($connections, {
+  $: rootPathRedirectUrl = mapExactlyOne($databases, {
     whenZero: undefined,
     whenOne: ([id]) => getDatabasePageUrl(id),
-    whenMany: CONNECTIONS_URL,
+    whenMany: HOME_URL,
   });
 </script>
 
@@ -40,11 +39,11 @@
   </Route>
 {/if}
 
-<Route path="/db/:connectionId/*" let:meta firstmatch>
-  <DatabaseRoute connectionId={parseInt(meta.params.connectionId, 10)} />
+<Route path="/db/:databaseId/*" let:meta firstmatch>
+  <DatabaseRoute databaseId={parseInt(meta.params.databaseId, 10)} />
 </Route>
 
-<Route path="/connections">
-  <AppendBreadcrumb item={{ type: 'connectionList' }} />
-  <ConnectionsPage />
+<Route path="/databases">
+  <AppendBreadcrumb item={{ type: 'home' }} />
+  <HomePage />
 </Route>
