@@ -3310,9 +3310,9 @@ SELECT val;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-DROP TABLE IF EXISTS msar.filter_templates;
-CREATE TABLE msar.filter_templates (filter_key text PRIMARY KEY, filter_template text);
-INSERT INTO msar.filter_templates VALUES
+DROP TABLE IF EXISTS msar.expr_templates;
+CREATE TABLE msar.expr_templates (expr_key text PRIMARY KEY, expr_template text);
+INSERT INTO msar.expr_templates VALUES
   -- basic composition operators
   ('and', '(%s) AND (%s)'),
   ('or', '(%s) OR (%s)'),
@@ -3329,30 +3329,30 @@ INSERT INTO msar.filter_templates VALUES
   ('starts_with_case_insensitive', 'starts_with(lower(%s), lower(%s))'),
   ('contains', 'strpos((%s), (%s))::boolean'),
   ('starts_with', 'starts_with((%s), (%s))'),
-  -- json(b) filters
+  -- json(b) filters and expressions
   ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
   ('json_array_contains', '(%s) @> (%s)'),
-  -- URI filters
+  -- URI part getters
   ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
   ('uri_authority', 'mathesar_types.uri_authority(%s)'),
-  -- Email filters
+  -- Email part getters
   ('email_domain', 'mathesar_types.email_domain_name(%s)')
 ;
 
-CREATE OR REPLACE FUNCTION msar.build_filter_expr(rel_id oid, tree jsonb) RETURNS text AS $$
+CREATE OR REPLACE FUNCTION msar.build_expr(rel_id oid, tree jsonb) RETURNS text AS $$
 SELECT CASE tree ->> 'type'
   WHEN 'literal' THEN format('%L', tree ->> 'value')
   WHEN 'attnum' THEN format('%I', msar.get_column_name(rel_id, (tree ->> 'value')::smallint))
   ELSE
-    format(max(filter_template), VARIADIC array_agg(msar.build_filter_expr(rel_id, inner_tree)))
+    format(max(expr_template), VARIADIC array_agg(msar.build_expr(rel_id, inner_tree)))
 END
-FROM jsonb_array_elements(tree -> 'args') inner_tree, msar.filter_templates
-WHERE tree ->> 'type' = filter_key
+FROM jsonb_array_elements(tree -> 'args') inner_tree, msar.expr_templates
+WHERE tree ->> 'type' = expr_key
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.build_where_clause(rel_id oid, tree jsonb) RETURNS text AS $$
-SELECT 'WHERE ' || msar.build_filter_expr(rel_id, tree);
+SELECT 'WHERE ' || msar.build_expr(rel_id, tree);
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
