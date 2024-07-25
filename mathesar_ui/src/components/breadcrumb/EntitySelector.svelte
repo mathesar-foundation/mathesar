@@ -3,9 +3,9 @@
   import { meta } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
-  import type { Database } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { queries as queriesStore } from '@mathesar/stores/queries';

@@ -195,7 +195,7 @@ function findStoreContainingTable(
 }
 
 export function deleteTable(
-  connection: Connection,
+  connection: Pick<Connection, 'id'>,
   schema: Schema,
   tableOid: Table['oid'],
 ): CancellablePromise<void> {
@@ -266,7 +266,7 @@ export async function updateTable(
 }
 
 export function createTable(
-  connection: Connection,
+  connection: Pick<Connection, 'id'>,
   schema: Schema,
   tableArgs: {
     name?: string;

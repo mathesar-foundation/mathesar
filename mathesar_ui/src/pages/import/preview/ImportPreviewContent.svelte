@@ -6,9 +6,9 @@
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import { getAPI, postAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
-  import type { Database } from '@mathesar/AppTypes';
   import {
     Field,
     FieldLayout,

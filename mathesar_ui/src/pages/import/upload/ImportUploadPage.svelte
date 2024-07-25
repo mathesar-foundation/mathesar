@@ -4,8 +4,8 @@
 
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import {

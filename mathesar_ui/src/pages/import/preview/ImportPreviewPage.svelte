@@ -3,8 +3,8 @@
   import { router } from 'tinro';
 
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getTablePageUrl } from '@mathesar/routes/urls';

@@ -3,7 +3,7 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import type { Database } from '@mathesar/AppTypes';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';

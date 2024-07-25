@@ -5,12 +5,14 @@
   import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { Button, hasProperty } from '@mathesar-component-library';
 
   import QueryManager from '../QueryManager';
   import type QueryRunner from '../QueryRunner';
+
+  const { currentDatabase } = databasesStore;
 
   export let queryHandler: QueryRunner | QueryManager;
   export let errors: ApiMultiError | string[];

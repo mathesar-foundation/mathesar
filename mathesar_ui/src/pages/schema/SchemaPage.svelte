@@ -1,8 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconEdit, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
@@ -75,7 +75,7 @@
   $: isDefault = schema.name === 'public';
 
   logEvent('opened_schema', {
-    database_name: database.nickname,
+    database_name: database.name,
     schema_name: schema.name,
     source: 'schema_page',
   });

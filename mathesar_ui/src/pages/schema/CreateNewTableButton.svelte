@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import { iconAddNew } from '@mathesar/icons';

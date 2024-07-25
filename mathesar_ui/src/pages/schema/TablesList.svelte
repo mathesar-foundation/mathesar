@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
-  import type { Database } from '@mathesar/AppTypes';
   import { iconTable } from '@mathesar/icons';
 
   import EmptyEntity from './EmptyEntity.svelte';

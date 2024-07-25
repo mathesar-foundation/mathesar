@@ -1,9 +1,9 @@
 import type { Readable, Unsubscriber, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
-import type { Connection } from '@mathesar/api/rest/connections';
 import { States, getAPI } from '@mathesar/api/rest/utils/requestUtils';
-import { currentDatabase } from '@mathesar/stores/databases';
+import type { Database } from '@mathesar/api/rpc/databases';
+import { databasesStore } from '@mathesar/stores/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -15,18 +15,19 @@ import type {
 } from './types';
 
 const commonData = preloadCommonData();
+const { currentDatabase } = databasesStore;
 
 const databasesToAbstractTypesStoreMap: Map<
-  Connection['id'],
+  Database['id'],
   Writable<AbstractTypesSubstance>
 > = new Map();
 const abstractTypesRequestMap: Map<
-  Connection['id'],
+  Database['id'],
   CancellablePromise<AbstractTypeResponse[]>
 > = new Map();
 
 export async function refetchTypesForDb(
-  databaseId: Connection['id'],
+  databaseId: Database['id'],
 ): Promise<AbstractTypesMap | undefined> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
@@ -74,18 +75,18 @@ export async function refetchTypesForDb(
  */
 let preload = true;
 
-function getTypesForConnection(
-  connection: Connection,
+function getTypesForDatabase(
+  database: Database,
 ): Writable<AbstractTypesSubstance> {
-  let store = databasesToAbstractTypesStoreMap.get(connection.id);
+  let store = databasesToAbstractTypesStoreMap.get(database.id);
   if (!store) {
     store = writable({
       state: States.Loading,
       data: new Map(),
     });
-    databasesToAbstractTypesStoreMap.set(connection.id, store);
+    databasesToAbstractTypesStoreMap.set(database.id, store);
 
-    if (preload && commonData.current_connection === connection.id) {
+    if (preload && commonData.current_database === database.id) {
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,
@@ -93,11 +94,11 @@ function getTypesForConnection(
         data: constructAbstractTypeMapFromResponse(commonData.abstract_types),
       }));
     } else {
-      void refetchTypesForDb(connection.id);
+      void refetchTypesForDb(database.id);
     }
     preload = false;
   } else if (get(store).error) {
-    void refetchTypesForDb(connection.id);
+    void refetchTypesForDb(database.id);
   }
   return store;
 }
@@ -113,7 +114,7 @@ export const currentDbAbstractTypes: Readable<AbstractTypesSubstance> = derived(
         data: new Map(),
       });
     } else {
-      const store = getTypesForConnection($currentDatabase);
+      const store = getTypesForDatabase($currentDatabase);
       unsubscribe = store.subscribe((typesData) => {
         set(typesData);
       });

@@ -5,7 +5,7 @@
   import { iconDeleteMajor, iconExploration } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
@@ -28,6 +28,7 @@
   import TableDeleteConfirmationBody from './TableDeleteConfirmationBody.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
+  const { currentDatabase } = databasesStore;
 
   $: ({ id, columnsDataStore, meta } = $tabularData);
   $: ({ grouping } = meta);
