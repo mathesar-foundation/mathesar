@@ -57,9 +57,9 @@
       return;
     }
     isCreatingNewEmptyTable = true;
-    const tableInfo = await createTable(database, schema, {});
+    const tableOid = await createTable(database, schema, {});
     isCreatingNewEmptyTable = false;
-    router.goto(getTablePageUrl(database.id, schema.oid, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, tableOid), false);
   }
 </script>
 

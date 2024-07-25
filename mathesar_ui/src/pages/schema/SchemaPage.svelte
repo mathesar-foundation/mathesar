@@ -14,7 +14,7 @@
   } from '@mathesar/routes/urls';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
-  import { tables as tablesStore } from '@mathesar/stores/tables';
+  import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import { logEvent } from '@mathesar/utils/telemetry';
   import { Button, Icon, TabContainer } from '@mathesar-component-library';
 
@@ -41,7 +41,7 @@
     href: string;
   };
 
-  $: tablesMap = $tablesStore.data;
+  $: tablesMap = $tablesStore.tablesMap;
   $: explorationsMap = $queries.data;
   $: tablesRequestStatus = $tablesStore.requestStatus;
   $: explorationsRequestStatus = $queries.requestStatus;

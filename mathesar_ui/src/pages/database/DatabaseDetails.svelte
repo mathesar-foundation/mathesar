@@ -23,7 +23,7 @@
     deleteSchema as deleteSchemaAPI,
     schemas as schemasStore,
   } from '@mathesar/stores/schemas';
-  import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
+  import { removeTablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
@@ -87,7 +87,7 @@
       onProceed: async () => {
         await deleteSchemaAPI(database.id, schema.oid);
         // TODO: Create common util to handle data clearing & sync between stores
-        removeTablesInSchemaTablesStore(schema.oid);
+        removeTablesStore(database, schema);
       },
     });
   }

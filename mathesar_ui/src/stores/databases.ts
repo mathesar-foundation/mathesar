@@ -75,3 +75,14 @@ class DatabasesStore {
 
 export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
   new DatabasesStore();
+
+/**
+ * @throws an error when used in a context where no current database exists.
+ * This behavior sacrifices some stability for the sake of developer ergonomics.
+ * This sacrifice seems acceptable given that such a large part of the
+ * application depends on the existence of one and only one database.
+ */
+export const currentDatabase = derived(databasesStore.currentDatabase, (c) => {
+  if (!c) throw new Error('No current database');
+  return c;
+});

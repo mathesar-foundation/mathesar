@@ -8,13 +8,13 @@
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Constraint } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
 
   export let constraint: Constraint;
 
   $: referentTable =
     constraint.type === 'foreignkey'
-      ? $tables.data.get(constraint.referent_table)
+      ? $currentTablesData.tablesMap.get(constraint.referent_table)
       : undefined;
 
   async function getReferentColumns(_constraint: Constraint) {

@@ -7,6 +7,7 @@ import { database_setup } from './database_setup';
 import { databases } from './databases';
 import { schemas } from './schemas';
 import { servers } from './servers';
+import { tables } from './tables';
 
 /** Mathesar's JSON-RPC API */
 export const api = buildRpcApi({
@@ -18,5 +19,6 @@ export const api = buildRpcApi({
     databases,
     schemas,
     servers,
+    tables,
   },
 });

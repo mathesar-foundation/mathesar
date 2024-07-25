@@ -4,10 +4,11 @@
 
   import { columnsApi } from '@mathesar/api/rest/columns';
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import { getAPI, postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     Field,
     FieldLayout,
@@ -24,15 +25,11 @@
   } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
-  import {
-    generateTablePreview,
-    getTypeSuggestionsForTable,
-    patchTable,
-    tables,
-  } from '@mathesar/stores/tables';
+  import { currentTables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import {
     CancelOrProceedButtonPair,
+    CancellablePromise,
     Spinner,
   } from '@mathesar-component-library';
 
@@ -54,6 +51,31 @@
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
 
+  /**
+   * Note the optimizing query parameter. It asserts that the table will not have
+   * columns with default values (probably because it is currently being imported
+   * and a table produced by importing will not have column defaults). It
+   * follows, that this function cannot be used where columns might have defaults.
+   */
+  function getTypeSuggestionsForTable(
+    id: Table['oid'],
+  ): CancellablePromise<Record<string, string>> {
+    const optimizingQueryParam = 'columns_might_have_defaults=false';
+    return getAPI(
+      `/api/db/v0/tables/${id}/type_suggestions/?${optimizingQueryParam}`,
+    );
+  }
+
+  function generateTablePreview(props: {
+    table: Pick<Table, 'oid'>;
+    columns: Column[];
+  }): CancellablePromise<{
+    records: Record<string, unknown>[];
+  }> {
+    const { columns, table } = props;
+    return postAPI(`/api/db/v0/tables/${table.oid}/previews/`, { columns });
+  }
+
   const columnsFetch = new AsyncStore(columnsApi.list);
   const previewRequest = new AsyncStore(generateTablePreview);
   const typeSuggestionsRequest = new AsyncStore(getTypeSuggestionsForTable);
@@ -62,15 +84,15 @@
 
   export let database: Database;
   export let schema: Schema;
-  export let table: TableEntry;
+  export let table: Table;
   export let dataFile: DataFile;
   export let useColumnTypeInference = false;
 
   let columns: Column[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([]);
 
-  $: otherTableNames = [...$tables.data.values()]
-    .filter((t) => t.id !== table.id)
+  $: otherTableNames = $currentTables
+    .filter((t) => t.oid !== table.oid)
     .map((t) => t.name);
   $: customizedTableName = requiredField(table.name, [
     uniqueWith(otherTableNames, $_('table_name_already_exists')),
@@ -82,7 +104,7 @@
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
   async function init() {
-    const columnsResponse = await columnsFetch.run(table.id);
+    const columnsResponse = await columnsFetch.run(table.oid);
     const fetchedColumns = columnsResponse?.resolvedValue?.results;
     if (!fetchedColumns) {
       return;
@@ -90,7 +112,7 @@
     columns = fetchedColumns;
     columnPropertiesMap = buildColumnPropertiesMap(columns);
     if (useColumnTypeInference) {
-      const response = await typeSuggestionsRequest.run(table.id);
+      const response = await typeSuggestionsRequest.run(table.oid);
       if (response.settlement?.state === 'resolved') {
         const typeSuggestions = response.settlement.value;
         columns = columns.map((column) => ({
@@ -104,10 +126,10 @@
   $: table, useColumnTypeInference, void init();
 
   function reload(props: {
-    table?: TableEntry;
+    table?: Pick<Table, 'oid'>;
     useColumnTypeInference?: boolean;
   }) {
-    const tableId = props.table?.id ?? table.id;
+    const tableId = props.table?.oid ?? table.oid;
     router.goto(
       getImportPreviewPageUrl(database.id, schema.oid, tableId, {
         useColumnTypeInference:
@@ -128,7 +150,7 @@
       customizedTableName: $customizedTableName,
     });
     if (response.resolvedValue) {
-      reload({ table: response.resolvedValue });
+      reload({ table: { oid: response.resolvedValue } });
     }
   }
 
@@ -154,16 +176,19 @@
   }
 
   async function finishImport() {
-    try {
-      await patchTable(table.id, {
-        name: $customizedTableName,
-        import_verified: true,
-        columns: finalizeColumns(columns, columnPropertiesMap),
-      });
-      router.goto(getTablePageUrl(database.id, schema.oid, table.id), true);
-    } catch (err) {
-      toast.fromError(err);
-    }
+    // TODO_BETA reimplement patching tables columns with RPC API.
+    throw new Error('Not implemented');
+
+    // try {
+    //   await patchTable(database, table.oid, {
+    //     name: $customizedTableName,
+    //     import_verified: true,
+    //     columns: finalizeColumns(columns, columnPropertiesMap),
+    //   });
+    //   router.goto(getTablePageUrl(database.id, schema.oid, table.oid), true);
+    // } catch (err) {
+    //   toast.fromError(err);
+    // }
   }
 </script>
 

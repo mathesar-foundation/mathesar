@@ -68,7 +68,7 @@
       href={getRecordPageUrl(
         item.database.id,
         item.schema.oid,
-        item.table.id,
+        item.table.oid,
         item.record.pk,
       )}
     >
