@@ -16,7 +16,7 @@
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentConnection } from '@mathesar/stores/databases';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
     getTabularDataStoreFromContext,
@@ -167,7 +167,7 @@
         });
         followUps.push(
           getTableFromStoreOrApi({
-            connection: $currentConnection,
+            database: $currentDatabase,
             tableOid: response.extracted_table,
           }),
         );

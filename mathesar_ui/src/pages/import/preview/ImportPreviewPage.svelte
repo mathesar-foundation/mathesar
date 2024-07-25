@@ -9,7 +9,7 @@
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getTablePageUrl } from '@mathesar/routes/urls';
   import AsyncStore from '@mathesar/stores/AsyncStore';
-  import { currentConnection } from '@mathesar/stores/databases';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
@@ -33,7 +33,7 @@
   $: void (async () => {
     const table = (
       await tableFetch.run({
-        connection: $currentConnection,
+        database: $currentDatabase,
         tableOid: tableId,
       })
     ).resolvedValue;

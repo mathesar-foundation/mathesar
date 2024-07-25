@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
-  import { currentConnection } from '@mathesar/stores/databases';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
     currentTablesData,
@@ -15,12 +15,12 @@
   export let disabled = false;
 
   $: getNameValidationErrors = factoryToGetTableNameValidationErrors(
-    $currentConnection,
+    $currentDatabase,
     $tabularData.table,
   );
 
   async function handleSubmit(name: string) {
-    await updateTable($currentConnection, {
+    await updateTable($currentDatabase, {
       oid: $tabularData.table.oid,
       name,
     });

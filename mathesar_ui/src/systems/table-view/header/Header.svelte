@@ -10,7 +10,7 @@
     SheetHeader,
   } from '@mathesar/components/sheet';
   import SheetOriginCell from '@mathesar/components/sheet/cells/SheetOriginCell.svelte';
-  import { currentConnection } from '@mathesar/stores/databases';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import {
     ID_ADD_NEW_COLUMN,
@@ -86,7 +86,7 @@
       newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
     }
 
-    void updateTable($currentConnection, {
+    void updateTable($currentDatabase, {
       oid: table.oid,
       metadata: { column_order: newColumnOrder },
     });

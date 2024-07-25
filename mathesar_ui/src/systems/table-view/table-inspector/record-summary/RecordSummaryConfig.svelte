@@ -13,7 +13,7 @@
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { currentConnection } from '@mathesar/stores/databases';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
   import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { updateTable } from '@mathesar/stores/tables';
@@ -59,7 +59,7 @@
 
   async function save() {
     try {
-      await updateTable($currentConnection, {
+      await updateTable($currentDatabase, {
         oid: table.oid,
         metadata: {
           record_summary_customized: $customized,

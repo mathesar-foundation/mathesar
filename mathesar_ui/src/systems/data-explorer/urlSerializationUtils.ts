@@ -51,11 +51,11 @@ function buildTableInformationHash(t: TerseSummarization): string {
 }
 
 export function createDataExplorerUrlToExploreATable(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   baseTable: BaseTable,
 ) {
-  const dataExplorerRouteUrl = getDataExplorerPageUrl(connectionId, schemaId);
+  const dataExplorerRouteUrl = getDataExplorerPageUrl(databaseId, schemaId);
   const tableInformationHash = buildTableInformationHash({
     baseTable,
     columns: [],
@@ -65,11 +65,11 @@ export function createDataExplorerUrlToExploreATable(
 }
 
 export function constructDataExplorerUrlToSummarizeFromGroup(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   terseSummarization: TerseSummarization,
 ): string | undefined {
-  const dataExplorerRouteUrl = getDataExplorerPageUrl(connectionId, schemaId);
+  const dataExplorerRouteUrl = getDataExplorerPageUrl(databaseId, schemaId);
   const { columns, terseGrouping } = terseSummarization;
 
   if (terseGrouping.length > 0 && columns.length > 0) {

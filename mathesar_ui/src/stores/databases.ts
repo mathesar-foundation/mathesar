@@ -77,15 +77,12 @@ export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
   new DatabasesStore();
 
 /**
- * @throws an error when used in a context where no current connection exists.
+ * @throws an error when used in a context where no current database exists.
  * This behavior sacrifices some stability for the sake of developer ergonomics.
  * This sacrifice seems acceptable given that such a large part of the
- * application depends on the existence of one and only one connection.
+ * application depends on the existence of one and only one database.
  */
-export const currentConnection = derived(
-  databasesStore.currentDatabase,
-  (c) => {
-    if (!c) throw new Error('No current connection');
-    return c;
-  },
-);
+export const currentDatabase = derived(databasesStore.currentDatabase, (c) => {
+  if (!c) throw new Error('No current database');
+  return c;
+});

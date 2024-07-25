@@ -35,7 +35,7 @@ import {
   defined,
 } from '@mathesar-component-library';
 
-import { currentConnection } from './databases';
+import { currentDatabase } from './databases';
 import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
@@ -56,7 +56,7 @@ function makeEmptyTablesData(): TablesData {
 
 type TablesStore = Writable<TablesData>;
 
-/** Maps [connectionId, schemaOid] to TablesStore */
+/** Maps [databaseId, schemaOid] to TablesStore */
 const tablesStores = new TupleMap<
   [Database['id'], Schema['oid']],
   TablesStore
@@ -72,7 +72,7 @@ function sortTables(tables: Iterable<Table>): Table[] {
 }
 
 function setTablesStore(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   schema: Pick<Schema, 'oid'>,
   tables?: Table[],
 ): TablesStore {
@@ -86,10 +86,10 @@ function setTablesStore(
     requestStatus: { state: 'success' },
   };
 
-  let store = tablesStores.get([connection.id, schema.oid]);
+  let store = tablesStores.get([database.id, schema.oid]);
   if (!store) {
     store = writable(storeValue);
-    tablesStores.set([connection.id, schema.oid], store);
+    tablesStores.set([database.id, schema.oid], store);
   } else {
     store.set(storeValue);
   }
@@ -97,17 +97,17 @@ function setTablesStore(
 }
 
 export function removeTablesStore(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   schema: Pick<Schema, 'oid'>,
 ): void {
-  tablesStores.delete([connection.id, schema.oid]);
+  tablesStores.delete([database.id, schema.oid]);
 }
 
 export async function refetchTablesForSchema(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   schema: Pick<Schema, 'oid'>,
 ): Promise<TablesData | undefined> {
-  const store = tablesStores.get([connection.id, schema.oid]);
+  const store = tablesStores.get([database.id, schema.oid]);
   if (!store) {
     // TODO: why are we logging an error here? I would expect that we'd either
     // throw or ignore. If there's a reason for this logging, please add a code
@@ -122,18 +122,18 @@ export async function refetchTablesForSchema(
       requestStatus: { state: 'processing' },
     }));
 
-    tablesRequests.get([connection.id, schema.oid])?.cancel();
+    tablesRequests.get([database.id, schema.oid])?.cancel();
 
     const tablesRequest = api.tables
       .list_with_metadata({
-        database_id: connection.id,
+        database_id: database.id,
         schema_oid: schema.oid,
       })
       .run();
-    tablesRequests.set([connection.id, schema.oid], tablesRequest);
+    tablesRequests.set([database.id, schema.oid], tablesRequest);
     const tableEntries = await tablesRequest;
 
-    const schemaTablesStore = setTablesStore(connection, schema, tableEntries);
+    const schemaTablesStore = setTablesStore(database, schema, tableEntries);
 
     return get(schemaTablesStore);
   } catch (err) {
@@ -153,41 +153,40 @@ export async function refetchTablesForSchema(
 let preload = true;
 
 function getTablesStore(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   schema: Pick<Schema, 'oid'>,
 ): TablesStore {
-  let store = tablesStores.get([connection.id, schema.oid]);
+  let store = tablesStores.get([database.id, schema.oid]);
   if (!store) {
     store = writable({
       requestStatus: { state: 'processing' },
       tablesMap: new Map(),
     });
-    tablesStores.set([connection.id, schema.oid], store);
+    tablesStores.set([database.id, schema.oid], store);
     if (
       preload &&
       commonData.current_schema === schema.oid &&
-      commonData.current_database === connection.id
+      commonData.current_database === database.id
     ) {
-      store = setTablesStore(connection, schema, commonData.tables ?? []);
+      store = setTablesStore(database, schema, commonData.tables ?? []);
     } else {
-      void refetchTablesForSchema(connection, schema);
+      void refetchTablesForSchema(database, schema);
     }
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
-    void refetchTablesForSchema(connection, schema);
+    void refetchTablesForSchema(database, schema);
   }
   return store;
 }
 
 function findStoreContainingTable(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   tableOid: Table['oid'],
 ): TablesStore | undefined {
   return defined(
     find(
-      ([[connectionId], tablesStore]) =>
-        connectionId === connection.id &&
-        get(tablesStore).tablesMap.has(tableOid),
+      ([[databaseId], tablesStore]) =>
+        databaseId === database.id && get(tablesStore).tablesMap.has(tableOid),
       tablesStores,
     ),
     ([, tablesStore]) => tablesStore,
@@ -195,22 +194,22 @@ function findStoreContainingTable(
 }
 
 export function deleteTable(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   schema: Schema,
   tableOid: Table['oid'],
 ): CancellablePromise<void> {
   const promise = api.tables
     .delete({
-      database_id: connection.id,
+      database_id: database.id,
       table_oid: tableOid,
     })
     .run();
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then(() => {
-        addCountToSchemaNumTables(connection, schema, -1);
+        addCountToSchemaNumTables(database, schema, -1);
         tablesStores
-          .get([connection.id, schema.oid])
+          .get([database.id, schema.oid])
           ?.update((tableStoreData) => {
             tableStoreData.tablesMap.delete(tableOid);
             return {
@@ -233,12 +232,12 @@ export function deleteTable(
  * the store.
  */
 export async function updateTable(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   table: RecursivePartial<Table> & { oid: Table['oid'] },
 ): Promise<void> {
   await api.tables
     .patch({
-      database_id: connection.id,
+      database_id: database.id,
       table_oid: table.oid,
       table_data_dict: {
         name: table.name,
@@ -250,7 +249,7 @@ export async function updateTable(
   // TODO_BETA: also run tables.metadata.patch to handle updates to
   // `table.metadata`. Run both API calls as one RPC batch request.
 
-  const tableStore = findStoreContainingTable(connection, table.oid);
+  const tableStore = findStoreContainingTable(database, table.oid);
   if (!tableStore) throw new Error('Table store not found');
   tableStore.update((tablesData) => {
     const oldTable = tablesData.tablesMap.get(table.oid);
@@ -266,7 +265,7 @@ export async function updateTable(
 }
 
 export function createTable(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   schema: Schema,
   tableArgs: {
     name?: string;
@@ -275,7 +274,7 @@ export function createTable(
 ): CancellablePromise<Table['oid']> {
   const promise = api.tables
     .add({
-      database_id: connection.id,
+      database_id: database.id,
       schema_oid: schema.oid,
       table_name: tableArgs.name ?? '',
       // TODO_BETA
@@ -289,8 +288,8 @@ export function createTable(
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((tableOid) => {
-        addCountToSchemaNumTables(connection, schema, 1);
-        const tablesStore = tablesStores.get([connection.id, schema.oid]);
+        addCountToSchemaNumTables(database, schema, 1);
+        const tablesStore = tablesStores.get([database.id, schema.oid]);
         tablesStore?.update((tablesData) => {
           const table: Table = {
             oid: tableOid,
@@ -351,13 +350,13 @@ export function moveColumns(
 }
 
 export function getTableFromStoreOrApi({
-  connection,
+  database,
   tableOid,
 }: {
-  connection: Pick<Database, 'id'>;
+  database: Pick<Database, 'id'>;
   tableOid: Table['oid'];
 }): CancellablePromise<Table> {
-  const tablesStore = findStoreContainingTable(connection, tableOid);
+  const tablesStore = findStoreContainingTable(database, tableOid);
   if (tablesStore) {
     const table = get(tablesStore).tablesMap.get(tableOid);
     if (table) {
@@ -368,14 +367,14 @@ export function getTableFromStoreOrApi({
   }
   const promise = api.tables
     .get_with_metadata({
-      database_id: connection.id,
+      database_id: database.id,
       table_oid: tableOid,
     })
     .run();
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((table) => {
-        const store = tablesStores.get([connection.id, table.schema]);
+        const store = tablesStores.get([database.id, table.schema]);
         if (store) {
           store.update((existing) => {
             const tableMap = new Map<number, Table>();
@@ -399,10 +398,10 @@ export function getTableFromStoreOrApi({
 }
 
 export const currentTablesData = collapse(
-  derived([currentConnection, currentSchemaId], ([connection, schemaOid]) =>
-    !connection || !schemaOid
+  derived([currentDatabase, currentSchemaId], ([database, schemaOid]) =>
+    !database || !schemaOid
       ? readable(makeEmptyTablesData())
-      : getTablesStore(connection, { oid: schemaOid }),
+      : getTablesStore(database, { oid: schemaOid }),
   ),
 );
 
@@ -455,18 +454,18 @@ export function getJoinableTablesResult(
 }
 
 export async function refetchTablesForCurrentSchema() {
-  const connection = get(currentConnection);
+  const database = get(currentDatabase);
   const schemaOid = get(currentSchemaId);
   if (schemaOid) {
-    await refetchTablesForSchema(connection, { oid: schemaOid });
+    await refetchTablesForSchema(database, { oid: schemaOid });
   }
 }
 
 export function factoryToGetTableNameValidationErrors(
-  connection: Pick<Database, 'id'>,
+  database: Pick<Database, 'id'>,
   table: Table,
 ): Readable<(n: string) => string[]> {
-  const tablesStore = tablesStores.get([connection.id, table.schema]);
+  const tablesStore = tablesStores.get([database.id, table.schema]);
   if (!tablesStore) throw new Error('Tables store not found');
 
   const otherTableNames = derived(

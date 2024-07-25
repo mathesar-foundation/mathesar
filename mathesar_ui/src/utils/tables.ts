@@ -98,14 +98,14 @@ export function orderProcessedColumns(
 }
 
 export function getLinkForTableItem(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   table: TableWithImportVerification & { oid: Table['oid'] },
 ) {
   if (tableRequiresImportConfirmation(table)) {
-    return getImportPreviewPageUrl(connectionId, schemaId, table.oid, {
+    return getImportPreviewPageUrl(databaseId, schemaId, table.oid, {
       useColumnTypeInference: true,
     });
   }
-  return getTablePageUrl(connectionId, schemaId, table.oid);
+  return getTablePageUrl(databaseId, schemaId, table.oid);
 }
