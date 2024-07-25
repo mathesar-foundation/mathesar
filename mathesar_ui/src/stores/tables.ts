@@ -18,7 +18,7 @@ import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joina
 import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_table';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { Connection } from '@mathesar/api/rpc/connections';
+import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
@@ -35,7 +35,7 @@ import {
   defined,
 } from '@mathesar-component-library';
 
-import { connectionsStore } from './databases';
+import { currentConnection } from './databases';
 import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
@@ -58,12 +58,12 @@ type TablesStore = Writable<TablesData>;
 
 /** Maps [connectionId, schemaOid] to TablesStore */
 const tablesStores = new TupleMap<
-  [Connection['id'], Schema['oid']],
+  [Database['id'], Schema['oid']],
   TablesStore
 >();
 
 const tablesRequests = new TupleMap<
-  [Connection['id'], Schema['oid']],
+  [Database['id'], Schema['oid']],
   CancellablePromise<Table[]>
 >();
 
@@ -72,7 +72,7 @@ function sortTables(tables: Iterable<Table>): Table[] {
 }
 
 function setTablesStore(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   schema: Pick<Schema, 'oid'>,
   tables?: Table[],
 ): TablesStore {
@@ -97,14 +97,14 @@ function setTablesStore(
 }
 
 export function removeTablesStore(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   schema: Pick<Schema, 'oid'>,
 ): void {
   tablesStores.delete([connection.id, schema.oid]);
 }
 
 export async function refetchTablesForSchema(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   schema: Pick<Schema, 'oid'>,
 ): Promise<TablesData | undefined> {
   const store = tablesStores.get([connection.id, schema.oid]);
@@ -153,7 +153,7 @@ export async function refetchTablesForSchema(
 let preload = true;
 
 function getTablesStore(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   schema: Pick<Schema, 'oid'>,
 ): TablesStore {
   let store = tablesStores.get([connection.id, schema.oid]);
@@ -166,7 +166,7 @@ function getTablesStore(
     if (
       preload &&
       commonData.current_schema === schema.oid &&
-      commonData.current_connection === connection.id
+      commonData.current_database === connection.id
     ) {
       store = setTablesStore(connection, schema, commonData.tables ?? []);
     } else {
@@ -180,7 +180,7 @@ function getTablesStore(
 }
 
 function findStoreContainingTable(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   tableOid: Table['oid'],
 ): TablesStore | undefined {
   return defined(
@@ -195,7 +195,7 @@ function findStoreContainingTable(
 }
 
 export function deleteTable(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   schema: Schema,
   tableOid: Table['oid'],
 ): CancellablePromise<void> {
@@ -233,7 +233,7 @@ export function deleteTable(
  * the store.
  */
 export async function updateTable(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   table: RecursivePartial<Table> & { oid: Table['oid'] },
 ): Promise<void> {
   await api.tables
@@ -266,7 +266,7 @@ export async function updateTable(
 }
 
 export function createTable(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   schema: Schema,
   tableArgs: {
     name?: string;
@@ -354,7 +354,7 @@ export function getTableFromStoreOrApi({
   connection,
   tableOid,
 }: {
-  connection: Pick<Connection, 'id'>;
+  connection: Pick<Database, 'id'>;
   tableOid: Table['oid'];
 }): CancellablePromise<Table> {
   const tablesStore = findStoreContainingTable(connection, tableOid);
@@ -399,12 +399,10 @@ export function getTableFromStoreOrApi({
 }
 
 export const currentTablesData = collapse(
-  derived(
-    [connectionsStore.currentConnection, currentSchemaId],
-    ([connection, schemaOid]) =>
-      !connection || !schemaOid
-        ? readable(makeEmptyTablesData())
-        : getTablesStore(connection, { oid: schemaOid }),
+  derived([currentConnection, currentSchemaId], ([connection, schemaOid]) =>
+    !connection || !schemaOid
+      ? readable(makeEmptyTablesData())
+      : getTablesStore(connection, { oid: schemaOid }),
   ),
 );
 
@@ -457,15 +455,15 @@ export function getJoinableTablesResult(
 }
 
 export async function refetchTablesForCurrentSchema() {
-  const connection = get(connectionsStore.currentConnection);
+  const connection = get(currentConnection);
   const schemaOid = get(currentSchemaId);
-  if (connection && schemaOid) {
+  if (schemaOid) {
     await refetchTablesForSchema(connection, { oid: schemaOid });
   }
 }
 
 export function factoryToGetTableNameValidationErrors(
-  connection: Pick<Connection, 'id'>,
+  connection: Pick<Database, 'id'>,
   table: Table,
 ): Readable<(n: string) => string[]> {
   const tablesStore = tablesStores.get([connection.id, table.schema]);
