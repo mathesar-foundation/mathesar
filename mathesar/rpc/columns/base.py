@@ -160,6 +160,8 @@ class ColumnInfo(TypedDict):
         default: The default value and whether it's dynamic.
         has_dependents: Whether the column has dependent objects.
         description: The description of the column.
+        valid_target_types: A list of all types to which the column can
+            be cast.
     """
     id: int
     name: str
