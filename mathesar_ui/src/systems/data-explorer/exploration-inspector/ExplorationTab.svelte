@@ -28,7 +28,6 @@
   export let queryHandler: QueryRunner | QueryManager;
   export let name: string | undefined;
   export let description: string | undefined;
-  export let canEditMetadata: boolean;
 
   $: ({ query } = queryHandler);
   $: hasManager = queryHandler instanceof QueryManager;
@@ -109,7 +108,6 @@
             aria-label={$_('name')}
             on:change={handleNameChange}
             on:input={setHasChangesToTrue}
-            disabled={!canEditMetadata}
           />
         </LabeledInput>
       </FormField>
@@ -120,12 +118,11 @@
             aria-label={$_('description')}
             on:change={handleDescriptionChange}
             on:input={setHasChangesToTrue}
-            disabled={!canEditMetadata}
           />
         </LabeledInput>
       </FormField>
 
-      {#if !hasManager && hasChanges && canEditMetadata}
+      {#if !hasManager && hasChanges}
         <FormField>
           <CancelOrProceedButtonPair
             cancelButton={{ icon: undefined }}
@@ -139,18 +136,16 @@
   </div>
 </Collapsible>
 
-{#if canEditMetadata}
-  <Collapsible isOpen triggerAppearance="plain">
-    <span slot="header">{$_('actions')}</span>
-    <div slot="content" class="section-content actions">
-      <Button
-        class="delete-button"
-        appearance="outline-primary"
-        on:click={handleDeleteExploration}
-      >
-        <Icon {...iconDeleteMajor} />
-        <span>{$_('delete_exploration')}</span>
-      </Button>
-    </div>
-  </Collapsible>
-{/if}
+<Collapsible isOpen triggerAppearance="plain">
+  <span slot="header">{$_('actions')}</span>
+  <div slot="content" class="section-content actions">
+    <Button
+      class="delete-button"
+      appearance="outline-primary"
+      on:click={handleDeleteExploration}
+    >
+      <Icon {...iconDeleteMajor} />
+      <span>{$_('delete_exploration')}</span>
+    </Button>
+  </div>
+</Collapsible>

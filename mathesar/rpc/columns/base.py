@@ -10,8 +10,10 @@ from db.columns.operations.alter import alter_columns_in_table
 from db.columns.operations.create import add_columns_to_table
 from db.columns.operations.drop import drop_columns_from_table
 from db.columns.operations.select import get_column_info_for_table
+from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
+from mathesar.utils.columns import get_columns_meta_data
 
 
 class TypeOptions(TypedDict, total=False):
@@ -282,3 +284,25 @@ def delete(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return drop_columns_from_table(table_oid, column_attnums, conn)
+
+
+@rpc_method(name="columns.list_with_metadata")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def list_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> list:
+    """
+    List information about columns for a table, along with the metadata associated with each column.
+    Args:
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+    Returns:
+        A list of column details.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        column_info = get_column_info_for_table(table_oid, conn)
+    column_metadata = get_columns_meta_data(table_oid, database_id)
+    metadata_map = {
+        c.attnum: ColumnMetaDataBlob.from_model(c) for c in column_metadata
+    }
+    return [col | {"metadata": metadata_map.get(col["id"])} for col in column_info]

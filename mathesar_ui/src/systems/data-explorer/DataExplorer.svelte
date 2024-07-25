@@ -14,7 +14,6 @@
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
-  export let canEditMetadata: boolean;
 
   $: ({ query } = queryManager);
   $: hasNoColumns = $query.initial_columns.length === 0;
@@ -25,7 +24,6 @@
 <div class="data-explorer">
   <ActionsPane
     {queryManager}
-    {canEditMetadata}
     bind:linkCollapsibleOpenState
     bind:isInspectorOpen
     on:close
@@ -59,7 +57,6 @@
           <WithExplorationInspector
             {isInspectorOpen}
             queryHandler={queryManager}
-            {canEditMetadata}
             on:delete
           >
             <ResultPane queryHandler={queryManager} />

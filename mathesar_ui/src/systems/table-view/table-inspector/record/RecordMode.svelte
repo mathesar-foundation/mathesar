@@ -1,10 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { Collapsible } from '@mathesar-component-library';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
@@ -12,15 +9,8 @@
   import RowActions from './RowActions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
 
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
   $: ({ selection, recordsData } = $tabularData);
-  $: canEditTableRecords = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canEditTableRecords',
-  );
   $: selectedRowIds = $selection.rowIds;
   $: selectedRowCount = selectedRowIds.size;
 </script>
@@ -41,7 +31,6 @@
           {selectedRowIds}
           {recordsData}
           columnsDataStore={$tabularData.columnsDataStore}
-          {canEditTableRecords}
         />
       </div>
     </Collapsible>

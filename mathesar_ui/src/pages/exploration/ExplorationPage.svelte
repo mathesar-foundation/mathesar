@@ -9,7 +9,6 @@
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     ExplorationResult,
     QueryModel,
@@ -20,16 +19,10 @@
 
   import Header from './Header.svelte';
 
-  const userProfile = getUserProfileStoreFromContext();
-
   export let database: Database;
   export let schema: Schema;
   export let query: QueryInstance;
   export let shareConsumer: ShareConsumer | undefined = undefined;
-
-  $: canEditMetadata =
-    $userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
-    false;
 
   let queryRunner: QueryRunner | undefined;
   let isInspectorOpen = true;
@@ -63,18 +56,10 @@
 <LayoutWithHeader fitViewport>
   {#if queryRunner}
     <div class="exploration-page">
-      <Header
-        bind:isInspectorOpen
-        {query}
-        {database}
-        {schema}
-        {canEditMetadata}
-        {context}
-      />
+      <Header bind:isInspectorOpen {query} {database} {schema} {context} />
       <WithExplorationInspector
         {isInspectorOpen}
         queryHandler={queryRunner}
-        {canEditMetadata}
         on:delete={gotoSchemaPage}
       >
         <ExplorationResult queryHandler={queryRunner} isExplorationPage />

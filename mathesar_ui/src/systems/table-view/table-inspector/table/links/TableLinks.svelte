@@ -6,8 +6,6 @@
   import LinksSectionContainer from './LinksSectionContainer.svelte';
   import { getTableLinks } from './utils';
 
-  export let canExecuteDDL: boolean;
-
   const tabularData = getTabularDataStoreFromContext();
 
   $: tableId = $tabularData.id;
@@ -29,7 +27,6 @@
         joinableTablesResult,
         $columns,
       )}
-      {canExecuteDDL}
     />
   {/await}
 </div>

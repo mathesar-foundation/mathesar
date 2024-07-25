@@ -134,6 +134,7 @@ To use an RPC function:
       - add
       - patch
       - delete
+      - list_with_metadata
       - ColumnInfo
       - ColumnListReturn
       - CreatableColumnInfo
@@ -148,9 +149,9 @@ To use an RPC function:
     options:
       members:
       - list_
-      - patch
-      - ColumnMetaData
-      - SettableColumnMetaData
+      - set_
+      - ColumnMetaDataRecord
+      - ColumnMetaDataBlob
 
 ## Types
 
