@@ -181,11 +181,13 @@ To use an RPC function:
     options:
       members:
       - list_
+      - search
       - RecordList
       - OrderBy
       - Filter
       - FilterAttnum
       - FilterLiteral
+      - SearchParam
 
 ## Explorations
 
