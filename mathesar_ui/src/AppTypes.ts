@@ -1,13 +1,3 @@
-/** @deprecated in favor of Connection */
-export interface Database {
-  id: number;
-  nickname: string;
-  database: string;
-  username: string;
-  host: string;
-  port: number;
-}
-
 export interface DBObjectEntry {
   id: number;
   name: string;

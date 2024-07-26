@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     type FilledFormValues,
     FormSubmit,
@@ -57,7 +57,7 @@
   );
 
   $: baseColumn = requiredField<ProcessedColumn | undefined>(undefined);
-  $: targetTable = requiredField<TableEntry | undefined>(undefined);
+  $: targetTable = requiredField<Table | undefined>(undefined);
   $: targetColumn = requiredField<ProcessedColumn | undefined>(undefined);
   $: namingStrategy = requiredField<NamingStrategy>('auto');
   $: constraintName = requiredField<string | undefined>(undefined, [
@@ -78,7 +78,7 @@
 
   $: targetTableStructure = $targetTable
     ? new TableStructure({
-        id: $targetTable.id,
+        id: $targetTable.oid,
         abstractTypesMap: $currentDbAbstractTypes.data,
       })
     : undefined;
@@ -106,7 +106,7 @@
       columns: [values.baseColumn.id],
       type: 'foreignkey',
       name: values.constraintName,
-      referent_table: values.targetTable.id,
+      referent_table: values.targetTable.oid,
       referent_columns: [values.targetColumn.id],
     });
     // Why reset before close when the form is automatically reset during

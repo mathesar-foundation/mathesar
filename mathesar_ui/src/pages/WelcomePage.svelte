@@ -5,7 +5,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getDocsLink, getWikiLink } from '@mathesar/routes/urls';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { ConnectionsEmptyState } from '@mathesar/systems/connections';
+  import { DatabasesEmptyState } from '@mathesar/systems/connections';
   import { AnchorButton, Icon } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -30,7 +30,7 @@
       <div class="header">
         {$_('database_connections')}
       </div>
-      <ConnectionsEmptyState />
+      <DatabasesEmptyState />
     </section>
     <hr />
     <section>

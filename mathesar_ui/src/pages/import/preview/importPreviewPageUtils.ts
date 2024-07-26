@@ -1,12 +1,9 @@
 import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-import type {
-  MinimalColumnDetails,
-  TableEntry,
-} from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
-import type { Database } from '@mathesar/AppTypes';
+import type { Table } from '@mathesar/api/rpc/tables';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type {
@@ -53,14 +50,14 @@ export function makeHeaderUpdateRequest() {
   interface Props {
     database: Database;
     schema: Schema;
-    table: Pick<TableEntry, 'id'>;
+    table: Pick<Table, 'oid'>;
     dataFile: Pick<DataFile, 'id'>;
     firstRowIsHeader: boolean;
     customizedTableName: string;
   }
   async function updateHeader(p: Props) {
     await Promise.all([
-      deleteTable(p.database, p.schema, p.table.id),
+      deleteTable(p.database, p.schema, p.table.oid),
       dataFilesApi.update(p.dataFile.id, { header: p.firstRowIsHeader }),
     ]);
     return createTable(p.database, p.schema, {
@@ -75,10 +72,10 @@ export function makeDeleteTableRequest() {
   interface Props {
     database: Database;
     schema: Schema;
-    table: Pick<TableEntry, 'id'>;
+    table: Pick<Table, 'oid'>;
   }
   return new AsyncStore((props: Props) =>
-    deleteTable(props.database, props.schema, props.table.id),
+    deleteTable(props.database, props.schema, props.table.oid),
   );
 }
 
@@ -104,7 +101,7 @@ export function buildColumnPropertiesMap(
 export function finalizeColumns(
   columns: Column[],
   columnPropertiesMap: ColumnPropertiesMap,
-): MinimalColumnDetails[] {
+) {
   return columns
     .filter((column) => columnPropertiesMap[column.id]?.selected)
     .map((column) => ({

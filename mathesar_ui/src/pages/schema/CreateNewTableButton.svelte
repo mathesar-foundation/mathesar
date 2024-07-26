@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import { iconAddNew } from '@mathesar/icons';
@@ -22,9 +22,9 @@
 
   async function handleCreateEmptyTable() {
     isCreatingNewTable = true;
-    const tableInfo = await createTable(database, schema, {});
+    const tableOid = await createTable(database, schema, {});
     isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.id, schema.oid, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, tableOid), false);
   }
 </script>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { first } from 'iter-tools';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { ContextMenu } from '@mathesar/component-library';
   import {
     SheetCellResizer,
@@ -10,13 +10,14 @@
     SheetHeader,
   } from '@mathesar/components/sheet';
   import SheetOriginCell from '@mathesar/components/sheet/cells/SheetOriginCell.svelte';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import type { ProcessedColumn } from '@mathesar/stores/table-data';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { saveColumnOrder } from '@mathesar/stores/tables';
+  import { updateTable } from '@mathesar/stores/tables';
 
   import { Draggable, Droppable } from './drag-and-drop';
   import ColumnHeaderContextMenu from './header-cell/ColumnHeaderContextMenu.svelte';
@@ -27,32 +28,30 @@
 
   export let hasNewColumnButton = false;
   export let columnOrder: number[];
-  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let table: Pick<Table, 'oid'>;
 
   $: columnOrder = columnOrder ?? [];
-  $: columnOrderString = columnOrder.map(String);
   $: ({ selection, processedColumns } = $tabularData);
 
   let locationOfFirstDraggedColumn: number | undefined = undefined;
-  let selectedColumnIdsOrdered: string[] = [];
-  let newColumnOrder: string[] = [];
+  let selectedColumnIdsOrdered: number[] = [];
+  let newColumnOrder: number[] = [];
 
   function dragColumn() {
     // Keep only IDs for which the column exists
     for (const columnId of $processedColumns.keys()) {
-      const columnIdString = columnId.toString();
-      columnOrderString = [...new Set(columnOrderString)];
-      if (!columnOrderString.includes(columnIdString)) {
-        columnOrderString = [...columnOrderString, columnIdString];
+      columnOrder = [...new Set(columnOrder)];
+      if (!columnOrder.includes(columnId)) {
+        columnOrder = [...columnOrder, columnId];
       }
     }
-    columnOrderString = columnOrderString;
+    columnOrder = columnOrder;
     // Remove selected column IDs and keep their order
-    for (const id of columnOrderString) {
-      if ($selection.columnIds.has(id)) {
+    for (const id of columnOrder) {
+      if ($selection.columnIds.has(String(id))) {
         selectedColumnIdsOrdered.push(id);
         if (!locationOfFirstDraggedColumn) {
-          locationOfFirstDraggedColumn = columnOrderString.indexOf(id);
+          locationOfFirstDraggedColumn = columnOrder.indexOf(id);
         }
       } else {
         newColumnOrder.push(id);
@@ -78,7 +77,7 @@
     // if that column is to the right, else insert it before
     if (columnDroppedOn) {
       newColumnOrder.splice(
-        columnOrderString.indexOf(columnDroppedOn.id.toString()),
+        columnOrder.indexOf(columnDroppedOn.id),
         0,
         ...selectedColumnIdsOrdered,
       );
@@ -87,7 +86,10 @@
       newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
     }
 
-    void saveColumnOrder(table, newColumnOrder.map(Number));
+    void updateTable($currentDatabase, {
+      oid: table.oid,
+      metadata: { column_order: newColumnOrder },
+    });
 
     // Reset drag information
     locationOfFirstDraggedColumn = undefined;
@@ -118,7 +120,7 @@
           on:drop={() => dropColumn(processedColumn)}
           on:dragover={(e) => e.preventDefault()}
           {locationOfFirstDraggedColumn}
-          columnLocation={columnOrderString.indexOf(columnId.toString())}
+          columnLocation={columnOrder.indexOf(columnId)}
           {isSelected}
         >
           <HeaderCell {processedColumn} {isSelected} />

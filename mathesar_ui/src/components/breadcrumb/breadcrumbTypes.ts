@@ -1,14 +1,14 @@
 import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
-import type { Database } from '@mathesar/AppTypes';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type {
   ComponentAndProps,
   IconProps,
 } from '@mathesar/component-library/types';
 
-export interface BreadcrumbItemConnectionList {
-  type: 'connectionList';
+export interface BreadcrumbItemHome {
+  type: 'home';
 }
 
 export interface BreadcrumbItemDatabase {
@@ -26,7 +26,7 @@ export interface BreadcrumbItemTable {
   type: 'table';
   database: Database;
   schema: Schema;
-  table: TableEntry;
+  table: Table;
 }
 
 export interface BreadcrumbItemSimple {
@@ -40,7 +40,7 @@ export interface BreadcrumbItemRecord {
   type: 'record';
   database: Database;
   schema: Schema;
-  table: TableEntry;
+  table: Table;
   record: {
     pk: string;
     summary: string;
@@ -55,7 +55,7 @@ export interface BreadcrumbItemExploration {
 }
 
 export type BreadcrumbItem =
-  | BreadcrumbItemConnectionList
+  | BreadcrumbItemHome
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
   | BreadcrumbItemTable
@@ -78,7 +78,7 @@ export interface SimpleBreadcrumbSelectorEntry
 export interface BreadcrumbSelectorEntryForTable
   extends BaseBreadcrumbSelectorEntry {
   type: 'table';
-  table: TableEntry;
+  table: Table;
 }
 
 export type BreadcrumbSelectorEntry =

@@ -16,6 +16,7 @@
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
     getTabularDataStoreFromContext,
@@ -24,7 +25,7 @@
     getTableFromStoreOrApi,
     moveColumns,
     splitTable,
-    tables as tablesDataStore,
+    currentTablesData as tablesDataStore,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -84,7 +85,7 @@
   $: linkedTables = getLinkedTables({
     constraints,
     columns: $processedColumns,
-    tables: $tablesDataStore.data,
+    tables: $tablesDataStore.tablesMap,
   });
   $: selectedColumnsHelpText = (() => {
     if ($targetType === 'existingTable') {
@@ -141,7 +142,7 @@
     const extractedColumnIds = extractedColumns.map((c) => c.id);
     try {
       if ($targetType === 'existingTable') {
-        const targetTableId = $linkedTable?.table.id;
+        const targetTableId = $linkedTable?.table.oid;
         if (!targetTableId) {
           throw new Error($_('no_target_table_selected'));
         }
@@ -164,7 +165,12 @@
           extractedTableName: newTableName,
           newFkColumnName: $newFkColumnName,
         });
-        followUps.push(getTableFromStoreOrApi(response.extracted_table));
+        followUps.push(
+          getTableFromStoreOrApi({
+            database: $currentDatabase,
+            tableOid: response.extracted_table,
+          }),
+        );
         followUps.push(
           $tabularData.refreshAfterColumnExtraction(
             extractedColumnIds,

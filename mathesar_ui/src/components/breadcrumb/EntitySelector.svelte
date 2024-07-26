@@ -3,16 +3,13 @@
   import { meta } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { iconTable } from '@mathesar/icons';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { queries as queriesStore } from '@mathesar/stores/queries';
-  import {
-    currentTableId,
-    tables as tablesStore,
-  } from '@mathesar/stores/tables';
+  import { currentTableId, currentTables } from '@mathesar/stores/tables';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
@@ -26,7 +23,7 @@
   export let schema: Schema;
 
   function makeTableBreadcrumbSelectorItem(
-    table: TableEntry,
+    table: Table,
   ): BreadcrumbSelectorEntryForTable {
     return {
       type: 'table',
@@ -35,7 +32,7 @@
       href: getLinkForTableItem(database.id, schema.oid, table),
       icon: iconTable,
       isActive() {
-        return table.id === $currentTableId;
+        return table.oid === $currentTableId;
       },
     };
   }
@@ -63,11 +60,10 @@
     };
   }
 
-  $: tables = [...$tablesStore.data.values()];
   $: queries = [...$queriesStore.data.values()];
 
   $: selectorData = new Map<string, BreadcrumbSelectorEntry[]>([
-    [$_('tables'), tables.map(makeTableBreadcrumbSelectorItem)],
+    [$_('tables'), $currentTables.map(makeTableBreadcrumbSelectorItem)],
     [$_('explorations'), queries.map(makeQueryBreadcrumbSelectorItem)],
   ]);
 </script>

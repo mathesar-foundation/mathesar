@@ -1,12 +1,12 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Response as ApiResponse } from '@mathesar/api/rest/types/tables/records';
 import {
   type RequestStatus,
   getAPI,
   patchAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type { Table } from '@mathesar/api/rpc/tables';
 import { WritableMap } from '@mathesar/component-library';
 import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
 import {
@@ -26,17 +26,27 @@ export default class RecordStore {
 
   summary: Readable<string>;
 
-  table: TableEntry;
+  table: Table;
 
   recordPk: string;
 
   private url: string;
 
-  constructor({ table, recordPk }: { table: TableEntry; recordPk: string }) {
+  constructor({ table, recordPk }: { table: Table; recordPk: string }) {
     this.table = table;
     this.recordPk = recordPk;
-    this.url = `/api/db/v0/tables/${this.table.id}/records/${this.recordPk}/`;
-    const { template } = this.table.settings.preview_settings;
+    this.url = `/api/db/v0/tables/${this.table.oid}/records/${this.recordPk}/`;
+    // TODO_RS_TEMPLATE
+    //
+    // We need to handle the case where no record summary template is set.
+    // Previously it was the responsibility of the service layer to _always_
+    // return a record summary template, even by deriving one on the fly to send
+    // if necessary. With the changes for beta, it will be the responsibility of
+    // the client to handle the case where no template is set. We need to wait
+    // until after the service layer changes are made before we can implement
+    // this here.
+    const template =
+      this.table.metadata?.record_summary_template ?? 'TODO_RS_TEMPLATE';
     this.summary = derived(
       [this.fieldValues, this.recordSummaries],
       ([fields, fkSummaryData]) =>

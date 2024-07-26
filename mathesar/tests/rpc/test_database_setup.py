@@ -7,7 +7,7 @@ Fixtures:
 """
 from mathesar.models.users import User
 from mathesar.models.base import Database, ConfiguredRole, Server, UserDatabaseRoleMap
-from mathesar.rpc import database_setup
+from mathesar.rpc import database_setup, servers, configured_roles, databases
 
 
 def test_create_new(monkeypatch, rf):
@@ -15,6 +15,9 @@ def test_create_new(monkeypatch, rf):
     test_database = "mathesar42"
     request = rf.post("/api/rpc/v0/", data={})
     request.user = User(username="alice", password="pass1234")
+    server_model = Server(id=2, host="example.com", port=5432)
+    db_model = Database(id=3, name=test_database, server=server_model)
+    role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
 
     def mock_set_up_new_for_user(database, user, sample_data=[]):
         if not (
@@ -23,9 +26,6 @@ def test_create_new(monkeypatch, rf):
                 and sample_data == test_sample_data
         ):
             raise AssertionError("incorrect parameters passed")
-        server_model = Server(id=2, host="example.com", port=5432)
-        db_model = Database(id=3, name=test_database, server=server_model)
-        role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
         return UserDatabaseRoleMap(
             user=user, database=db_model, configured_role=role_model, server=server_model
         )
@@ -36,7 +36,9 @@ def test_create_new(monkeypatch, rf):
         mock_set_up_new_for_user,
     )
     expect_response = database_setup.DatabaseConnectionResult(
-        server_id=2, database_id=3, configured_role_id=4
+        server=servers.ServerInfo.from_model(server_model),
+        database=databases.DatabaseInfo.from_model(db_model),
+        configured_role=configured_roles.ConfiguredRoleInfo.from_model(role_model)
     )
 
     actual_response = database_setup.create_new(
@@ -54,6 +56,9 @@ def test_connect_existing(monkeypatch, rf):
     test_password = "ernie1234"
     request = rf.post("/api/rpc/v0/", data={})
     request.user = User(username="alice", password="pass1234")
+    server_model = Server(id=2, host="example.com", port=5432)
+    db_model = Database(id=3, name=test_database, server=server_model)
+    role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
 
     def mock_set_up_preexisting_database_for_user(
             host, port, database_name, role_name, password, user, sample_data=[]
@@ -68,9 +73,6 @@ def test_connect_existing(monkeypatch, rf):
                 and sample_data == test_sample_data
         ):
             raise AssertionError("incorrect parameters passed")
-        server_model = Server(id=2, host="example.com", port=5432)
-        db_model = Database(id=3, name=test_database, server=server_model)
-        role_model = ConfiguredRole(id=4, name="matheuser", server=server_model)
         return UserDatabaseRoleMap(
             user=user, database=db_model, configured_role=role_model, server=server_model
         )
@@ -81,7 +83,9 @@ def test_connect_existing(monkeypatch, rf):
         mock_set_up_preexisting_database_for_user,
     )
     expect_response = database_setup.DatabaseConnectionResult(
-        server_id=2, database_id=3, configured_role_id=4
+        server=servers.ServerInfo.from_model(server_model),
+        database=databases.DatabaseInfo.from_model(db_model),
+        configured_role=configured_roles.ConfiguredRoleInfo.from_model(role_model)
     )
 
     actual_response = database_setup.connect_existing(

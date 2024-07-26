@@ -753,7 +753,8 @@ Each returned JSON object in the array will have the form:
     "primary_key": <bool>,
     "default": {"value": <str>, "is_dynamic": <bool>},
     "has_dependents": <bool>,
-    "description": <str>
+    "description": <str>,
+    "valid_target_types": [<str>, <str>, ...]
   }
 
 The `type_options` object is described in the docstring of `msar.get_type_options`. The `default`
@@ -784,7 +785,8 @@ SELECT jsonb_agg(
       jsonb_build_object()
     ),
     'has_dependents', msar.has_dependents(tab_id, attnum),
-    'description', msar.col_description(tab_id, attnum)
+    'description', msar.col_description(tab_id, attnum),
+    'valid_target_types', msar.get_valid_target_type_strings(atttypid)
   )
 )
 FROM pg_attribute pga

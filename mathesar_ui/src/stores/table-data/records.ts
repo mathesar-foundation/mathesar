@@ -7,7 +7,6 @@ import {
   writable,
 } from 'svelte/store';
 
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   GetRequestParams as ApiGetRequestParams,
@@ -25,6 +24,7 @@ import {
   patchAPI,
   postAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type { Table } from '@mathesar/api/rpc/tables';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
@@ -279,7 +279,7 @@ function preprocessRecords({
 }
 
 export class RecordsData {
-  private tableId: TableEntry['id'];
+  private tableId: Table['oid'];
 
   private url: string;
 
@@ -333,7 +333,7 @@ export class RecordsData {
     contextualFilters,
     shareConsumer,
   }: {
-    tableId: TableEntry['id'];
+    tableId: Table['oid'];
     meta: Meta;
     columnsDataStore: ColumnsDataStore;
     contextualFilters: Map<number, number | string>;

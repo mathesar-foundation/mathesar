@@ -160,6 +160,8 @@ class ColumnInfo(TypedDict):
         default: The default value and whether it's dynamic.
         has_dependents: Whether the column has dependent objects.
         description: The description of the column.
+        valid_target_types: A list of all types to which the column can
+            be cast.
     """
     id: int
     name: str
@@ -170,6 +172,7 @@ class ColumnInfo(TypedDict):
     default: ColumnDefault
     has_dependents: bool
     description: str
+    valid_target_types: list[str]
 
     @classmethod
     def from_dict(cls, col_info):
@@ -182,7 +185,8 @@ class ColumnInfo(TypedDict):
             primary_key=col_info["primary_key"],
             default=ColumnDefault.from_dict(col_info.get("default")),
             has_dependents=col_info["has_dependents"],
-            description=col_info.get("description")
+            description=col_info.get("description"),
+            valid_target_types=col_info.get("valid_target_types")
         )
 
 

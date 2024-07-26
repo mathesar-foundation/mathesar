@@ -1,49 +1,86 @@
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import { filter } from 'iter-tools';
+
+import type { Table } from '@mathesar/api/rpc/tables';
+import type { RecursivePartial } from '@mathesar/component-library';
 import {
   getImportPreviewPageUrl,
   getTablePageUrl,
 } from '@mathesar/routes/urls';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
-export function isTableImportConfirmationRequired(
-  table: Partial<Pick<TableEntry, 'import_verified' | 'data_files'>>,
-): boolean {
-  /**
-   * table.import_verified can be null when tables have been
-   * manually added to the db/already present in db in which
-   * case we should not ask for re-confirmation.
-   */
-  return (
-    table.import_verified === false &&
-    table.data_files !== undefined &&
-    table.data_files.length > 0
-  );
+function mergeTableMetadata(
+  a: Table['metadata'],
+  b?: RecursivePartial<Table['metadata']>,
+): Table['metadata'] {
+  if (!a && !b) return null;
+  if (!b) return a;
+  return {
+    column_order: b.column_order
+      ? b.column_order.map(Number)
+      : a?.column_order ?? null,
+    import_verified: a?.import_verified ?? b.import_verified ?? null,
+    record_summary_customized:
+      a?.record_summary_customized ?? b.record_summary_customized ?? null,
+    record_summary_template:
+      a?.record_summary_template ?? b.record_summary_template ?? null,
+  };
 }
 
-export function getColumnOrder(
-  processedColumns: ProcessedColumn[],
-  table: Partial<Pick<TableEntry, 'settings'>>,
-) {
-  const allColumns = [...processedColumns.values()];
-  let completeColumnOrder: number[] = [];
-  const { settings } = table;
-  if (settings) {
-    const { column_order: columnOrder } = settings;
-    if (columnOrder) {
-      completeColumnOrder = columnOrder;
-    }
+export function mergeTables(a: Table, b: RecursivePartial<Table>): Table {
+  // I don't love this function, but for now it works. It seems like we ought to
+  // have a more generic way to do this sort of thing, perhaps with a library,
+  // perhaps with JSON serialization. It's kind of hard do find a type-safe
+  // approach that's compatible with our RecursivePartial type. I'm open to more
+  // generalized ways of doing this!
+  return {
+    ...a,
+    ...b,
+    metadata: mergeTableMetadata(a.metadata, b.metadata),
+  };
+}
+
+interface TableWithImportVerification {
+  metadata?: {
+    import_verified: boolean | null;
+  } | null;
+}
+
+export function tableRequiresImportConfirmation(
+  table: TableWithImportVerification,
+): boolean {
+  if (table.metadata?.import_verified === false) {
+    return true;
   }
-  allColumns.forEach((column) => {
-    if (!completeColumnOrder.includes(column.id)) {
-      completeColumnOrder.push(column.id);
-    }
-  });
-  return completeColumnOrder;
+  return false;
+}
+
+interface TableWithColumnOrder {
+  metadata?: {
+    column_order: number[] | null;
+  } | null;
+}
+
+function getColumnOrder(
+  processedColumns: ProcessedColumn[],
+  table: TableWithColumnOrder,
+): number[] {
+  /**
+   * The column ids set in metadata. Because this array comes from
+   * loosely-coupled metadata, it might contain ids of columns which no longer
+   * exist, and it might lack ids of columns that do exist.
+   */
+  const orderedIds = new Set(table.metadata?.column_order ?? []);
+  const existingIds = new Set(processedColumns.map((c) => c.id));
+
+  const orderedIdsThatExist = filter((i) => existingIds.has(i), orderedIds);
+  const existingIdsNotOrdered = filter((i) => !orderedIds.has(i), existingIds);
+
+  return [...orderedIdsThatExist, ...existingIdsNotOrdered];
 }
 
 export function orderProcessedColumns(
   processedColumns: Map<number, ProcessedColumn>,
-  table: Partial<Pick<TableEntry, 'settings'>>,
+  table: TableWithColumnOrder,
 ): Map<number, ProcessedColumn> {
   const columns = [...processedColumns.values()];
   const orderedColumns = new Map<number, ProcessedColumn>();
@@ -61,14 +98,14 @@ export function orderProcessedColumns(
 }
 
 export function getLinkForTableItem(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
-  table: Pick<TableEntry, 'import_verified' | 'data_files' | 'id'>,
+  table: TableWithImportVerification & { oid: Table['oid'] },
 ) {
-  if (isTableImportConfirmationRequired(table)) {
-    return getImportPreviewPageUrl(connectionId, schemaId, table.id, {
+  if (tableRequiresImportConfirmation(table)) {
+    return getImportPreviewPageUrl(databaseId, schemaId, table.oid, {
       useColumnTypeInference: true,
     });
   }
-  return getTablePageUrl(connectionId, schemaId, table.id);
+  return getTablePageUrl(databaseId, schemaId, table.oid);
 }
