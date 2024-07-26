@@ -4,7 +4,7 @@
 
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { queries } from '@mathesar/stores/queries';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { preloadRouteData } from '@mathesar/utils/preloadData';
@@ -13,6 +13,7 @@
   const routeSpecificData = preloadRouteData<{ query_id: number | null }>(
     'shared_query',
   );
+  const { currentDatabase } = databasesStore;
 
   export let slug: string;
 

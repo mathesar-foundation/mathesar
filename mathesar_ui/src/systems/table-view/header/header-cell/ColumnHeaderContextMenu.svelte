@@ -21,7 +21,7 @@
     type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
 
   export let processedColumn: ProcessedColumn;
@@ -52,9 +52,11 @@
   $: hasGrouping = $grouping.hasColumn(columnId);
 
   $: ({ linkFk } = processedColumn);
-  $: linkedTable = linkFk ? $tables.data.get(linkFk.referent_table) : undefined;
+  $: linkedTable = linkFk
+    ? $currentTablesData.tablesMap.get(linkFk.referent_table)
+    : undefined;
   $: linkedTableHref = linkedTable
-    ? $storeToGetTablePageUrl({ tableId: linkedTable.id })
+    ? $storeToGetTablePageUrl({ tableId: linkedTable.oid })
     : undefined;
 
   function addFilter() {

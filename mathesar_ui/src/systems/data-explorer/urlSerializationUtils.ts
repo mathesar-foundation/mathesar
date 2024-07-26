@@ -1,13 +1,13 @@
 import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/rest/types/queries';
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Table } from '@mathesar/api/rpc/tables';
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import type { TerseGrouping } from '@mathesar/stores/table-data';
 import Url64 from '@mathesar/utils/Url64';
 
 type TerseSummarizedColumn = Pick<Column, 'id' | 'name'>;
-type BaseTable = Pick<TableEntry, 'id' | 'name'>;
+type BaseTable = Pick<Table, 'oid' | 'name'>;
 
 interface TerseSummarization {
   baseTable: BaseTable;
@@ -23,7 +23,7 @@ interface TerseSummarization {
 class Streamline {
   static baseTable(t: BaseTable): BaseTable {
     return {
-      id: t.id,
+      oid: t.oid,
       name: t.name,
     };
   }
@@ -51,11 +51,11 @@ function buildTableInformationHash(t: TerseSummarization): string {
 }
 
 export function createDataExplorerUrlToExploreATable(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   baseTable: BaseTable,
 ) {
-  const dataExplorerRouteUrl = getDataExplorerPageUrl(connectionId, schemaId);
+  const dataExplorerRouteUrl = getDataExplorerPageUrl(databaseId, schemaId);
   const tableInformationHash = buildTableInformationHash({
     baseTable,
     columns: [],
@@ -65,11 +65,11 @@ export function createDataExplorerUrlToExploreATable(
 }
 
 export function constructDataExplorerUrlToSummarizeFromGroup(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   terseSummarization: TerseSummarization,
 ): string | undefined {
-  const dataExplorerRouteUrl = getDataExplorerPageUrl(connectionId, schemaId);
+  const dataExplorerRouteUrl = getDataExplorerPageUrl(databaseId, schemaId);
   const { columns, terseGrouping } = terseSummarization;
 
   if (terseGrouping.length > 0 && columns.length > 0) {
@@ -103,7 +103,7 @@ export function constructQueryModelFromHash(
     !terseSummarization.terseGrouping?.length ||
     !terseSummarization.columns
   ) {
-    return { base_table: baseTable.id };
+    return { base_table: baseTable.oid };
   }
 
   const columnMap = new Map(
@@ -117,7 +117,7 @@ export function constructQueryModelFromHash(
     .filter((entry): entry is TerseSummarizedColumn => entry !== undefined);
 
   if (groupingColumns.length === 0) {
-    return { base_table: baseTable.id };
+    return { base_table: baseTable.oid };
   }
 
   const baseGroupingColumn = groupingColumns[0];
@@ -173,7 +173,7 @@ export function constructQueryModelFromHash(
   );
 
   return {
-    base_table: baseTable.id,
+    base_table: baseTable.oid,
     initial_columns: initialColumns,
     transformations,
     display_names: displayNames,

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
@@ -23,7 +23,7 @@
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
-  import { isTableImportConfirmationRequired } from '@mathesar/utils/tables';
+  import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import {
     ButtonMenuItem,
     DropdownMenu,
@@ -36,7 +36,7 @@
   const recordSelector = getRecordSelectorFromContext();
   const editTableModalController = modal.spawnModalController();
 
-  export let table: TableEntry;
+  export let table: Table;
   export let database: Database;
   export let schema: Schema;
 
@@ -44,12 +44,12 @@
   let isHoveringBottomButton = false;
   let isTableCardFocused = false;
 
-  $: isTableImportConfirmationNeeded = isTableImportConfirmationRequired(table);
-  $: tablePageUrl = isTableImportConfirmationNeeded
-    ? getImportPreviewPageUrl(database.id, schema.oid, table.id, {
+  $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
+  $: tablePageUrl = requiresImportConfirmation
+    ? getImportPreviewPageUrl(database.id, schema.oid, table.oid, {
         useColumnTypeInference: true,
       })
-    : getTablePageUrl(database.id, schema.oid, table.id);
+    : getTablePageUrl(database.id, schema.oid, table.oid);
   $: explorationPageUrl = createDataExplorerUrlToExploreATable(
     database.id,
     schema.oid,
@@ -67,7 +67,7 @@
         },
       },
       onProceed: async () => {
-        await deleteTable(database, schema, table.id);
+        await deleteTable(database, schema, table.oid);
       },
     });
   }
@@ -77,7 +77,7 @@
   }
 
   function handleFindRecord() {
-    recordSelector.navigateToRecordPage({ tableId: table.id });
+    recordSelector.navigateToRecordPage({ tableId: table.oid });
   }
 </script>
 
@@ -86,7 +86,7 @@
   class:focus={isTableCardFocused}
   class:hovering-menu-trigger={isHoveringMenuTrigger}
   class:hovering-bottom-button={isHoveringBottomButton}
-  class:unconfirmed-import={isTableImportConfirmationNeeded}
+  class:unconfirmed-import={requiresImportConfirmation}
 >
   <a
     class="link passthrough"
@@ -113,7 +113,7 @@
       {/if}
     </div>
     <div class="bottom">
-      {#if isTableImportConfirmationNeeded}
+      {#if requiresImportConfirmation}
         {$_('needs_import_confirmation')}
       {/if}
     </div>
@@ -137,7 +137,7 @@
       icon={iconMoreActions}
       size="small"
     >
-      {#if !isTableImportConfirmationNeeded}
+      {#if !requiresImportConfirmation}
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           {$_('explore_table')}
         </LinkMenuItem>
@@ -154,7 +154,7 @@
       </ButtonMenuItem>
     </DropdownMenu>
   </div>
-  {#if !isTableImportConfirmationNeeded}
+  {#if !requiresImportConfirmation}
     <button
       class="bottom-button passthrough"
       on:mouseenter={() => {

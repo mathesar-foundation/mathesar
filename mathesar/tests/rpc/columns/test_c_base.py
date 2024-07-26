@@ -36,7 +36,8 @@ def test_columns_list(rf, monkeypatch):
                 'default': {'value': 'identity', 'is_dynamic': True},
                 'nullable': False, 'description': None, 'primary_key': True,
                 'type_options': None,
-                'has_dependents': True
+                'has_dependents': True,
+                'valid_target_types': ['text']
             }, {
                 'id': 2, 'name': 'numcol', 'type': 'numeric',
                 'default': {'value': "'8'::numeric", 'is_dynamic': False},
@@ -44,25 +45,29 @@ def test_columns_list(rf, monkeypatch):
                 'description': 'My super numeric column',
                 'primary_key': False,
                 'type_options': {'scale': None, 'precision': None},
-                'has_dependents': False
+                'has_dependents': False,
+                'valid_target_types': ['text']
             }, {
                 'id': 4, 'name': 'numcolmod', 'type': 'numeric',
                 'default': None,
                 'nullable': True, 'description': None, 'primary_key': False,
                 'type_options': {'scale': 3, 'precision': 5},
-                'has_dependents': False
+                'has_dependents': False,
+                'valid_target_types': ['text']
             }, {
                 'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
                 'default': None,
                 'nullable': True, 'description': None, 'primary_key': False,
                 'type_options': {'fields': 'day to second'},
-                'has_dependents': False
+                'has_dependents': False,
+                'valid_target_types': ['text']
             }, {
                 'id': 10, 'name': 'arrcol', 'type': '_array',
                 'default': None,
                 'nullable': True, 'description': None, 'primary_key': False,
                 'type_options': {'item_type': 'character varying', 'length': 3},
-                'has_dependents': False
+                'has_dependents': False,
+                'valid_target_types': None
             },
         ]
 
@@ -74,7 +79,8 @@ def test_columns_list(rf, monkeypatch):
             'default': {'value': 'identity', 'is_dynamic': True},
             'nullable': False, 'description': None, 'primary_key': True,
             'type_options': None,
-            'has_dependents': True
+            'has_dependents': True,
+            'valid_target_types': ['text']
         }, {
             'id': 2, 'name': 'numcol', 'type': 'numeric',
             'default': {'value': "'8'::numeric", 'is_dynamic': False},
@@ -82,25 +88,29 @@ def test_columns_list(rf, monkeypatch):
             'description': 'My super numeric column',
             'primary_key': False,
             'type_options': None,
-            'has_dependents': False
+            'has_dependents': False,
+            'valid_target_types': ['text']
         }, {
             'id': 4, 'name': 'numcolmod', 'type': 'numeric',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'scale': 3, 'precision': 5},
-            'has_dependents': False
+            'has_dependents': False,
+            'valid_target_types': ['text']
         }, {
             'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'fields': 'day to second'},
-            'has_dependents': False
+            'has_dependents': False,
+            'valid_target_types': ['text']
         }, {
             'id': 10, 'name': 'arrcol', 'type': '_array',
             'default': None,
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'item_type': 'character varying', 'length': 3},
-            'has_dependents': False
+            'has_dependents': False,
+            'valid_target_types': None
         }
     ]
     actual_col_list = columns.list_(table_oid=23457, database_id=database_id, request=request)

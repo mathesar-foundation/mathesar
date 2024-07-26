@@ -15,7 +15,7 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
@@ -56,7 +56,7 @@
     recordsData,
     processedColumns,
   } = tabularData);
-  $: table = $tables.data.get(tableId);
+  $: table = $currentTablesData.tablesMap.get(tableId);
   $: ({ recordSummaries, state: recordsDataState } = recordsData);
   $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
@@ -137,8 +137,16 @@
     if (!record || recordId === undefined) {
       return;
     }
-    const tableEntry = $tables.data.get(tableId);
-    const template = tableEntry?.settings?.preview_settings?.template ?? '';
+    const tableEntry = $currentTablesData.tablesMap.get(tableId);
+    const template = table?.metadata?.record_summary_template;
+    if (!template) {
+      throw new Error('TODO_RS_TEMPLATE');
+      // TODO_RS_TEMPLATE
+      //
+      // We need to change the logic here to account for the fact that sometimes
+      // the record summary template actually _will_ be missing. We need to
+      // handle this on the client.
+    }
     const recordSummary = renderTransitiveRecordSummary({
       template,
       inputData: buildInputData(record),
