@@ -3324,7 +3324,7 @@ INSERT INTO msar.expr_templates VALUES
   ('starts_with', 'starts_with((%s), (%s))'),
   -- json(b) filters and expressions
   ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
-  ('json_array_contains', '(%s) @> (%s)'),
+  ('json_array_contains', '(%s)::jsonb @> (%s)::jsonb'),
   -- URI part getters
   ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
   ('uri_authority', 'mathesar_types.uri_authority(%s)'),

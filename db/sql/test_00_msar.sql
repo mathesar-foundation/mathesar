@@ -3203,7 +3203,7 @@ BEGIN
         'type', 'json_array_contains', 'args', jsonb_build_array(
           jsonb_build_object('type', 'attnum', 'value', 2),
           jsonb_build_object('type', 'literal', 'value', '"500"')))),
-    '(col1) @> (''"500"'')'
+    '(col1)::jsonb @> (''"500"'')::jsonb'
   );
   RETURN NEXT is(
     msar.build_expr(
