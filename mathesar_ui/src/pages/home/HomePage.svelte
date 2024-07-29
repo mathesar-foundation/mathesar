@@ -10,12 +10,15 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { DatabasesEmptyState } from '@mathesar/systems/connections';
+  import {
+    ConnectDatabaseModal,
+    DatabasesEmptyState,
+  } from '@mathesar/systems/databases';
   import { Button, Icon } from '@mathesar-component-library';
 
   import DatabaseRow from './DatabaseRow.svelte';
 
-  const addConnectionModalController = modal.spawnModalController();
+  const connectDbModalController = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -70,7 +73,7 @@
           {#if isSuperUser}
             <Button
               appearance="primary"
-              on:click={() => addConnectionModalController.open()}
+              on:click={() => connectDbModalController.open()}
             >
               <Icon {...iconAddNew} />
               <span>{$_('add_database_connection')}</span>
@@ -100,9 +103,6 @@
                 <thead>
                   <tr>
                     <th>{$_('database_name')}</th>
-                    {#if isSuperUser}
-                      <th>{$_('actions')}</th>
-                    {/if}
                   </tr>
                 </thead>
                 <tbody>
@@ -119,7 +119,7 @@
   </section>
 </LayoutWithHeader>
 
-<!-- <AddConnectionModal controller={addConnectionModalController} /> -->
+<ConnectDatabaseModal controller={connectDbModalController} />
 
 <style lang="scss">
   [data-identifier='connections-header'] {

@@ -5,7 +5,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getDocsLink, getWikiLink } from '@mathesar/routes/urls';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { DatabasesEmptyState } from '@mathesar/systems/connections';
+  import { DatabasesEmptyState } from '@mathesar/systems/databases';
   import { AnchorButton, Icon } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
