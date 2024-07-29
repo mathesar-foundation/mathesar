@@ -3,39 +3,23 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import type { Database } from '@mathesar/AppTypes';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
 
   import DataExplorerRoute from './DataExplorerRoute.svelte';
   import ExplorationRoute from './ExplorationRoute.svelte';
   import ImportRoute from './ImportRoute.svelte';
   import TableRoute from './TableRoute.svelte';
 
-  const userProfile = getUserProfileStoreFromContext();
-
   export let database: Database;
   export let schemaId: number;
 
   $: $currentSchemaId = schemaId;
   $: schema = $schemas.data.get(schemaId);
-  $: canExecuteDDL = $userProfile?.hasPermission(
-    { database, schema },
-    'canExecuteDDL',
-  );
-  $: canEditMetadata = $userProfile?.hasPermission(
-    { database, schema },
-    'canEditMetadata',
-  );
-
-  const newExplorationRoute = {
-    name: 'new-exploration',
-    path: '/data-explorer/',
-  };
 
   function handleUnmount() {
     $currentSchemaId = undefined;
@@ -47,11 +31,9 @@
 {#if schema}
   <AppendBreadcrumb item={{ type: 'schema', database, schema }} />
 
-  {#if canExecuteDDL}
-    <Route path="/import/*" firstmatch>
-      <ImportRoute {database} {schema} />
-    </Route>
-  {/if}
+  <Route path="/import/*" firstmatch>
+    <ImportRoute {database} {schema} />
+  </Route>
 
   <Route path="/tables/:tableId/*" let:meta firstmatch>
     <TableRoute
@@ -70,12 +52,10 @@
   </Route>
 
   <MultiPathRoute
-    paths={canEditMetadata
-      ? [
-          { name: 'edit-exploration', path: '/explorations/:queryId/edit/' },
-          newExplorationRoute,
-        ]
-      : [newExplorationRoute]}
+    paths={[
+      { name: 'edit-exploration', path: '/explorations/:queryId/edit/' },
+      { name: 'new-exploration', path: '/data-explorer/' },
+    ]}
     let:path
     let:meta
   >

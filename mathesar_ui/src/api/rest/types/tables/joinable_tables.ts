@@ -4,7 +4,7 @@
  * endpoint: /api/db/v0/tables/<table_id>/joinable_tables/
  */
 
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
+import type { Table } from '@mathesar/api/rpc/tables';
 
 import type { Column } from './columns';
 
@@ -13,7 +13,7 @@ type IsLinkReversed = boolean;
 export type JpPath = [Column['id'], Column['id']][];
 
 export interface JoinableTable {
-  target: TableEntry['id']; // baseTableId
+  target: Table['oid']; // baseTableId
   jp_path: JpPath;
   fk_path: [ForeignKeyId, IsLinkReversed][];
   depth: number;
@@ -25,7 +25,7 @@ export interface JoinableTablesResult {
   tables: Record<
     string, // tableId
     {
-      name: TableEntry['name'];
+      name: Table['name'];
       columns: Column['id'][];
     }
   >;

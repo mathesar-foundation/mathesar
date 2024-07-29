@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
@@ -13,8 +13,8 @@
   export let linkTypes: LinkType[];
   export let isSelfReferential: boolean;
   export let field: FieldStore<LinkType>;
-  export let base: Pick<TableEntry, 'name'>;
-  export let target: Pick<TableEntry, 'name'>;
+  export let base: Pick<Table, 'name'>;
+  export let target: Pick<Table, 'name'>;
 </script>
 
 <FieldLayout>

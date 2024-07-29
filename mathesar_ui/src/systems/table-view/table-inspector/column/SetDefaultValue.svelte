@@ -15,7 +15,6 @@
   } from '@mathesar-component-library';
 
   export let column: ProcessedColumn;
-  export let canExecuteDDL: boolean;
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore, recordsData } = $tabularData);
@@ -86,7 +85,7 @@
     }
   }
 
-  $: disabled = !canExecuteDDL || typeChangeState?.state === 'processing';
+  $: disabled = typeChangeState?.state === 'processing';
 </script>
 
 <div class="default-value-container">

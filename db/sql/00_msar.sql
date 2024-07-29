@@ -753,7 +753,8 @@ Each returned JSON object in the array will have the form:
     "primary_key": <bool>,
     "default": {"value": <str>, "is_dynamic": <bool>},
     "has_dependents": <bool>,
-    "description": <str>
+    "description": <str>,
+    "valid_target_types": [<str>, <str>, ...]
   }
 
 The `type_options` object is described in the docstring of `msar.get_type_options`. The `default`
@@ -784,7 +785,8 @@ SELECT jsonb_agg(
       jsonb_build_object()
     ),
     'has_dependents', msar.has_dependents(tab_id, attnum),
-    'description', msar.col_description(tab_id, attnum)
+    'description', msar.col_description(tab_id, attnum),
+    'valid_target_types', msar.get_valid_target_type_strings(atttypid)
   )
 )
 FROM pg_attribute pga
@@ -838,13 +840,16 @@ Each returned JSON object in the array will have the form:
 Args:
   sch_id: The OID or name of the schema.
 */
-SELECT jsonb_agg(
-  jsonb_build_object(
-    'oid', pgc.oid::bigint,
-    'name', pgc.relname,
-    'schema', pgc.relnamespace::bigint,
-    'description', msar.obj_description(pgc.oid, 'pg_class')
-  )
+SELECT coalesce(
+  jsonb_agg(
+    jsonb_build_object(
+      'oid', pgc.oid::bigint,
+      'name', pgc.relname,
+      'schema', pgc.relnamespace::bigint,
+      'description', msar.obj_description(pgc.oid, 'pg_class')
+    )
+  ),
+  '[]'::jsonb
 )
 FROM pg_catalog.pg_class AS pgc 
   LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
@@ -1171,41 +1176,9 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Rename table ------------------------------------------------------------------------------------
 
+DROP FUNCTION IF EXISTS msar.rename_table(text, text, text);
 CREATE OR REPLACE FUNCTION
-__msar.rename_table(old_tab_name text, new_tab_name text) RETURNS text AS $$/*
-Change a table's name, returning the command executed.
-
-Args:
-  old_tab_name: properly quoted, qualified table name
-  new_tab_name: properly quoted, unqualified table name
-*/
-BEGIN
-  RETURN __msar.exec_ddl(
-    'ALTER TABLE %s RENAME TO %s', old_tab_name, new_tab_name
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.rename_table(tab_id oid, new_tab_name text) RETURNS text AS $$/*
-Change a table's name, returning the command executed.
-
-Args:
-  tab_id: the OID of the table whose name we want to change
-  new_tab_name: unquoted, unqualified table name
-*/
-BEGIN
-  RETURN __msar.rename_table(
-    __msar.get_qualified_relation_name_or_null(tab_id),
-    quote_ident(new_tab_name)
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS text AS $$/*
+msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS void AS $$/*
 Change a table's name, returning the command executed.
 
 Args:
@@ -1213,12 +1186,34 @@ Args:
   old_tab_name: unquoted, unqualified original table name
   new_tab_name: unquoted, unqualified new table name
 */
-DECLARE fullname text;
 BEGIN
-  fullname := __msar.build_qualified_name_sql(sch_name, old_tab_name);
-  RETURN __msar.rename_table(fullname, quote_ident(new_tab_name));
+  IF old_tab_name = new_tab_name THEN
+    -- Return early if the names are the same. This avoids an error from Postgres.
+    RETURN;
+  END IF;
+  EXECUTE format('ALTER TABLE %I.%I RENAME TO %I', sch_name, old_tab_name, new_tab_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+DROP FUNCTION IF EXISTS msar.rename_table(oid, text);
+CREATE OR REPLACE FUNCTION
+msar.rename_table(tab_id oid, new_tab_name text) RETURNS void AS $$/*
+Change a table's name, returning the command executed.
+
+Args:
+  tab_id: the OID of the table whose name we want to change
+  new_tab_name: unquoted, unqualified table name
+*/
+BEGIN
+  PERFORM msar.rename_table(
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    new_tab_name
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
 
 
 -- Comment on table --------------------------------------------------------------------------------
@@ -3310,6 +3305,52 @@ SELECT val;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+DROP TABLE IF EXISTS msar.expr_templates;
+CREATE TABLE msar.expr_templates (expr_key text PRIMARY KEY, expr_template text);
+INSERT INTO msar.expr_templates VALUES
+  -- basic composition operators
+  ('and', '(%s) AND (%s)'),
+  ('or', '(%s) OR (%s)'),
+  -- general comparison operators
+  ('equal', '(%s) = (%s)'),
+  ('lesser', '(%s) < (%s)'),
+  ('greater', '(%s) > (%s)'),
+  ('lesser_or_equal', '(%s) <= (%s)'),
+  ('greater_or_equal', '(%s) >= (%s)'),
+  ('null', '(%s) IS NULL'),
+  ('not_null', '(%s) IS NOT NULL'),
+  -- string specific filters
+  ('contains_case_insensitive', 'strpos(lower(%s), lower(%s))::boolean'),
+  ('starts_with_case_insensitive', 'starts_with(lower(%s), lower(%s))'),
+  ('contains', 'strpos((%s), (%s))::boolean'),
+  ('starts_with', 'starts_with((%s), (%s))'),
+  -- json(b) filters and expressions
+  ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
+  ('json_array_contains', '(%s)::jsonb @> (%s)::jsonb'),
+  -- URI part getters
+  ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
+  ('uri_authority', 'mathesar_types.uri_authority(%s)'),
+  -- Email part getters
+  ('email_domain', 'mathesar_types.email_domain_name(%s)')
+;
+
+CREATE OR REPLACE FUNCTION msar.build_expr(rel_id oid, tree jsonb) RETURNS text AS $$
+SELECT CASE tree ->> 'type'
+  WHEN 'literal' THEN format('%L', tree ->> 'value')
+  WHEN 'attnum' THEN format('%I', msar.get_column_name(rel_id, (tree ->> 'value')::smallint))
+  ELSE
+    format(max(expr_template), VARIADIC array_agg(msar.build_expr(rel_id, inner_tree)))
+END
+FROM jsonb_array_elements(tree -> 'args') inner_tree, msar.expr_templates
+WHERE tree ->> 'type' = expr_key
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_where_clause(rel_id oid, tree jsonb) RETURNS text AS $$
+SELECT 'WHERE ' || msar.build_expr(rel_id, tree);
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.sanitize_direction(direction text) RETURNS text AS $$/*
 */
@@ -3433,13 +3474,14 @@ BEGIN
   EXECUTE format(
     $q$
     WITH count_cte AS (
-      SELECT count(1) AS count FROM %2$I.%3$I
+      SELECT count(1) AS count FROM %2$I.%3$I %7$s
     ), results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I %6$s LIMIT %4$L OFFSET %5$L
+      SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
     )
     SELECT jsonb_build_object(
       'results', jsonb_agg(row_to_json(results_cte.*)),
-      'count', max(count_cte.count)
+      'count', max(count_cte.count),
+      'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
     FROM results_cte, count_cte
     $q$,
@@ -3448,7 +3490,8 @@ BEGIN
     msar.get_relation_name(tab_id),
     limit_,
     offset_,
-    msar.build_order_by_expr(tab_id, order_)
+    msar.build_order_by_expr(tab_id, order_),
+    msar.build_where_clause(tab_id, filter_)
   ) INTO records;
   RETURN records;
 END;

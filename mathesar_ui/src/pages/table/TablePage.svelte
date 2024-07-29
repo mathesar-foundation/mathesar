@@ -2,7 +2,7 @@
   import { tick } from 'svelte';
   import { router } from 'tinro';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { focusActiveCell } from '@mathesar/components/sheet/utils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
@@ -27,7 +27,7 @@
   );
   setNewImperativeFilterControllerInContext();
 
-  export let table: TableEntry;
+  export let table: Table;
   export let shareConsumer: ShareConsumer | undefined = undefined;
 
   let sheetElement: HTMLElement;
@@ -36,7 +36,7 @@
   $: ({ query } = $router);
   $: meta = Meta.fromSerialization(query[metaSerializationQueryKey] ?? '');
   $: tabularData = new TabularData({
-    id: table.id,
+    id: table.oid,
     abstractTypesMap,
     meta,
     table,

@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
@@ -16,10 +16,8 @@
   export let schema: Schema;
   export let explorationsMap: Map<number, QueryInstance>;
   export let hasTablesToExplore: boolean;
-  export let canEditMetadata: boolean;
 
-  $: showTutorial =
-    explorationsMap.size === 0 && hasTablesToExplore && canEditMetadata;
+  $: showTutorial = explorationsMap.size === 0 && hasTablesToExplore;
 
   let explorationsSearchQuery = '';
 

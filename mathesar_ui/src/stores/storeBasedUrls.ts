@@ -12,27 +12,27 @@ import { derived } from 'svelte/store';
 
 import * as urls from '@mathesar/routes/urls';
 
-import { connectionsStore } from './databases';
+import { databasesStore } from './databases';
 import { currentSchema } from './schemas';
 import { currentTable } from './tables';
 
 export const storeToGetRecordPageUrl = derived(
-  [connectionsStore.currentConnection, currentSchema, currentTable],
-  ([connection, schema, table]) => {
+  [databasesStore.currentDatabase, currentSchema, currentTable],
+  ([database, schema, table]) => {
     function getRecordPageUrl({
-      connectionId,
+      databaseId,
       schemaId,
       tableId,
       recordId,
     }: {
-      connectionId?: number;
+      databaseId?: number;
       schemaId?: number;
       tableId?: number;
       recordId: unknown;
     }): string | undefined {
-      const d = connectionId ?? connection?.id;
+      const d = databaseId ?? database?.id;
       const s = schemaId ?? schema?.oid;
-      const t = tableId ?? table?.id;
+      const t = tableId ?? table?.oid;
       const r = recordId ?? undefined;
       if (
         d === undefined ||
@@ -49,20 +49,20 @@ export const storeToGetRecordPageUrl = derived(
 );
 
 export const storeToGetTablePageUrl = derived(
-  [connectionsStore.currentConnection, currentSchema, currentTable],
-  ([connection, schema, table]) => {
+  [databasesStore.currentDatabase, currentSchema, currentTable],
+  ([database, schema, table]) => {
     function getTablePageUrl({
-      connectionId,
+      databaseId,
       schemaId,
       tableId,
     }: {
-      connectionId?: number;
+      databaseId?: number;
       schemaId?: number;
       tableId?: number;
     }): string | undefined {
-      const d = connectionId ?? connection?.id;
+      const d = databaseId ?? database?.id;
       const s = schemaId ?? schema?.oid;
-      const t = tableId ?? table?.id;
+      const t = tableId ?? table?.oid;
       if (d === undefined || s === undefined || t === undefined) {
         return undefined;
       }

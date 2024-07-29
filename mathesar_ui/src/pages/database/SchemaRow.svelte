@@ -2,8 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
@@ -23,7 +23,6 @@
 
   export let database: Database;
   export let schema: Schema;
-  export let canExecuteDDL = true;
 
   let isHovered = false;
   let isFocused = false;
@@ -44,7 +43,7 @@
 
     {#if isLocked}
       <div class="lock"><Icon {...iconNotEditable} /></div>
-    {:else if canExecuteDDL}
+    {:else}
       <div class="menu-trigger">
         <DropdownMenu
           showArrow={false}

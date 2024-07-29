@@ -3,20 +3,17 @@
   import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { stringifyMapKeys } from '@mathesar/utils/collectionUtils';
 
   import Body from './Body.svelte';
@@ -27,24 +24,16 @@
   type Context = 'page' | 'widget' | 'shared-consumer-page';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
-
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-  $: canExecuteDDL = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canExecuteDDL',
-  );
 
   export let context: Context = 'page';
-  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let table: Table;
   export let sheetElement: HTMLElement | undefined = undefined;
 
   let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
     'table';
 
   $: usesVirtualList = context !== 'widget';
-  $: allowsDdlOperations = context !== 'widget' && canExecuteDDL;
+  $: allowsDdlOperations = context !== 'widget';
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
@@ -62,8 +51,7 @@
   });
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
-  $: ({ settings } = table);
-  $: ({ column_order: columnOrder } = settings);
+  $: columnOrder = table.metadata?.column_order ?? [];
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open

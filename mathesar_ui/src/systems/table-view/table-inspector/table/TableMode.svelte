@@ -1,11 +1,8 @@
 <script>
   import { _ } from 'svelte-i18n';
 
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
   import { Collapsible } from '@mathesar-component-library';
 
@@ -18,15 +15,6 @@
   import TableName from './TableName.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
-
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-
-  $: canExecuteDDL = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canExecuteDDL',
-  );
 </script>
 
 <div class="table-mode-container">
@@ -37,8 +25,8 @@
       isDbLevelConfiguration
     />
     <div slot="content" class="content-container">
-      <TableName disabled={!canExecuteDDL} />
-      <TableDescription disabled={!canExecuteDDL} />
+      <TableName />
+      <TableDescription />
     </div>
   </Collapsible>
 
@@ -49,7 +37,7 @@
       isDbLevelConfiguration
     />
     <div slot="content" class="content-container">
-      <TableLinks {canExecuteDDL} />
+      <TableLinks />
     </div>
   </Collapsible>
 
@@ -63,7 +51,7 @@
   <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title={$_('actions')} />
     <div slot="content" class="content-container">
-      <TableActions {canExecuteDDL} />
+      <TableActions />
     </div>
   </Collapsible>
 

@@ -1,12 +1,7 @@
-import { some } from 'iter-tools';
-import { type Readable, derived, get, writable } from 'svelte/store';
+import { type Readable, derived, writable } from 'svelte/store';
 
-import connectionsApi, {
-  type Connection,
-  type CreateWithNewUserProps,
-  type UpdatableConnectionProperties,
-} from '@mathesar/api/rest/connections';
 import { api } from '@mathesar/api/rpc';
+import type { Database } from '@mathesar/api/rpc/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import {
@@ -17,117 +12,77 @@ import {
 
 const commonData = preloadCommonData();
 
-function sortConnections(c: Iterable<Connection>): Connection[] {
-  return [...c].sort((a, b) => a.nickname.localeCompare(b.nickname));
+function sortDatabases(c: Iterable<Database>): Database[] {
+  return [...c].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/**
- * @returns true if the given connection is the only one that points to the same
- * database among all the supplied connections. Connections with the same ids
- * will not be compared.
- */
-export function connectionHasUniqueDatabaseReference(
-  connection: Connection,
-  allConnections: Iterable<Connection>,
-): boolean {
-  return !some(
-    (c) =>
-      c.id !== connection.id &&
-      c.host === connection.host &&
-      c.port === connection.port &&
-      c.database === connection.database,
-    allConnections,
-  );
-}
-
-class ConnectionsStore {
-  private readonly unsortedConnections = new WritableMap<
-    Connection['id'],
-    Connection
+class DatabasesStore {
+  private readonly unsortedDatabases = new WritableMap<
+    Database['id'],
+    Database
   >();
 
-  readonly connections: Readable<ImmutableMap<Connection['id'], Connection>>;
+  readonly databases: Readable<ImmutableMap<Database['id'], Database>>;
 
-  readonly currentConnectionId = writable<Connection['id'] | undefined>();
+  readonly currentDatabaseId = writable<Database['id'] | undefined>();
 
-  readonly currentConnection: Readable<Connection | undefined>;
+  readonly currentDatabase: Readable<Database | undefined>;
 
   constructor() {
-    this.unsortedConnections.reconstruct(
-      commonData.connections.map((c) => [c.id, c]),
+    this.unsortedDatabases.reconstruct(
+      commonData.databases.map((d) => [d.id, d]),
     );
-    this.connections = derived(
-      this.unsortedConnections,
-      (uc) =>
-        new ImmutableMap(sortConnections(uc.values()).map((c) => [c.id, c])),
+    this.databases = derived(
+      this.unsortedDatabases,
+      (ud) =>
+        new ImmutableMap(sortDatabases(ud.values()).map((d) => [d.id, d])),
     );
-    this.currentConnectionId.set(commonData.current_connection ?? undefined);
-    this.currentConnection = derived(
-      [this.connections, this.currentConnectionId],
-      ([connections, id]) => defined(id, (v) => connections.get(v)),
+    this.currentDatabaseId.set(commonData.current_database ?? undefined);
+    this.currentDatabase = derived(
+      [this.databases, this.currentDatabaseId],
+      ([databases, id]) => defined(id, (v) => databases.get(v)),
     );
   }
 
-  private addConnection(connection: Connection) {
-    this.unsortedConnections.set(connection.id, connection);
+  private addDatabase(database: Database) {
+    this.unsortedDatabases.set(database.id, database);
   }
 
-  async createFromKnownConnection(
-    props: Parameters<typeof api.connections.add_from_known_connection>[0],
+  async connectExistingDatabase(
+    props: Parameters<typeof api.database_setup.connect_existing>[0],
   ) {
-    const connection = await api.connections
-      .add_from_known_connection(props)
-      .run();
-    this.addConnection(connection);
-    return connection;
+    const { database } = await api.database_setup.connect_existing(props).run();
+    this.addDatabase(database);
+    return database;
   }
 
-  async createFromScratch(
-    props: Parameters<typeof api.connections.add_from_scratch>[0],
+  async createNewDatabase(
+    props: Parameters<typeof api.database_setup.create_new>[0],
   ) {
-    const connection = await api.connections.add_from_scratch(props).run();
-    this.addConnection(connection);
-    return connection;
+    const { database } = await api.database_setup.create_new(props).run();
+    this.addDatabase(database);
+    return database;
   }
 
-  async createWithNewUser(props: CreateWithNewUserProps) {
-    const connection = await connectionsApi.createWithNewUser(props);
-    this.addConnection(connection);
-    return connection;
+  setCurrentDatabaseId(databaseId: Database['id']) {
+    this.currentDatabaseId.set(databaseId);
   }
 
-  setCurrentConnectionId(connectionId: Connection['id']) {
-    this.currentConnectionId.set(connectionId);
-  }
-
-  clearCurrentConnectionId() {
-    this.currentConnectionId.set(undefined);
-  }
-
-  async updateConnection(
-    id: Connection['id'],
-    properties: Partial<UpdatableConnectionProperties>,
-  ): Promise<Connection> {
-    const connection = await connectionsApi.update(id, properties);
-    this.unsortedConnections.set(id, connection);
-    return connection;
-  }
-
-  async deleteConnection(id: Connection['id'], deleteMathesarSchemas = false) {
-    const connections = get(this.connections);
-    const connection = connections.get(id);
-    if (!connection) return;
-    const databaseIsUnique = connectionHasUniqueDatabaseReference(
-      connection,
-      connections.values(),
-    );
-    await connectionsApi.delete(id, deleteMathesarSchemas && databaseIsUnique);
-    this.unsortedConnections.delete(id);
+  clearCurrentDatabaseId() {
+    this.currentDatabaseId.set(undefined);
   }
 }
 
-export const connectionsStore: MakeWritablePropertiesReadable<ConnectionsStore> =
-  new ConnectionsStore();
+export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
+  new DatabasesStore();
 
-/** @deprecated Use connectionsStore.currentConnection instead */
-export const currentDatabase = connectionsStore.currentConnection;
+/**
+ * @throws an error when used in a context where no current database exists.
+ * This behavior sacrifices some stability for the sake of developer ergonomics.
+ * This sacrifice seems acceptable given that such a large part of the
+ * application depends on the existence of one and only one database.
+ */
+export const currentDatabase = derived(databasesStore.currentDatabase, (c) => {
+  if (!c) throw new Error('No current database');
+  return c;
+});

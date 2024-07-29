@@ -1,4 +1,6 @@
 """The functions in this module wrap SQL functions that use `ALTER TABLE`."""
+import json
+
 from db import constants
 from db import connection as db_conn
 from db.columns.operations.alter import batch_update_columns
@@ -66,7 +68,7 @@ def alter_table_on_database(table_oid, table_data_dict, conn):
     }
     """
     return db_conn.exec_msar_func(
-        conn, 'alter_table', table_oid, table_data_dict
+        conn, 'alter_table', table_oid, json.dumps(table_data_dict)
     ).fetchone()[0]
 
 

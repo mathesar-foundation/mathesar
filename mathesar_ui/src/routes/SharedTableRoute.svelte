@@ -5,7 +5,7 @@
 
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
-  import { currentTableId, tables } from '@mathesar/stores/tables';
+  import { currentTableId, currentTablesData } from '@mathesar/stores/tables';
   import { preloadRouteData } from '@mathesar/utils/preloadData';
   import { ShareConsumer } from '@mathesar/utils/shares';
 
@@ -17,7 +17,7 @@
 
   $: tableId = routeSpecificData?.table_id ?? undefined;
   $: $currentTableId = tableId ?? undefined;
-  $: table = tableId ? $tables.data.get(tableId) : undefined;
+  $: table = tableId ? $currentTablesData.tablesMap.get(tableId) : undefined;
   $: shareConsumer = new ShareConsumer({
     slug,
   });

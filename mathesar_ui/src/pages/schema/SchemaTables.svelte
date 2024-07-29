@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
 
@@ -11,20 +11,16 @@
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
   import TablesList from './TablesList.svelte';
 
-  export let tablesMap: Map<number, TableEntry>;
+  export let tablesMap: Map<number, Table>;
 
   export let database: Database;
   export let schema: Schema;
-  export let canExecuteDDL: boolean;
 
-  $: showTutorial = tablesMap.size === 0 && canExecuteDDL;
+  $: showTutorial = tablesMap.size === 0;
 
   let tableSearchQuery = '';
 
-  function filterTables(
-    _tablesMap: Map<number, TableEntry>,
-    searchQuery: string,
-  ) {
+  function filterTables(_tablesMap: Map<number, Table>, searchQuery: string) {
     return [..._tablesMap.values()].filter((table) =>
       table.name.toLowerCase().includes(searchQuery.trim().toLowerCase()),
     );
@@ -43,9 +39,7 @@
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
-    {#if canExecuteDDL}
-      <CreateNewTableButton {database} {schema} />
-    {/if}
+    <CreateNewTableButton {database} {schema} />
   </svelte:fragment>
   <svelte:fragment slot="resultInfo">
     <p>
@@ -65,7 +59,7 @@
     {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList {canExecuteDDL} tables={filteredTables} {database} {schema} />
+      <TablesList tables={filteredTables} {database} {schema} />
     {/if}
   </svelte:fragment>
 </EntityContainerWithFilterBar>
