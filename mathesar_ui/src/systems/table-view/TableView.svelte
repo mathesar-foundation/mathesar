@@ -3,7 +3,7 @@
   import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
@@ -26,7 +26,7 @@
   const tabularData = getTabularDataStoreFromContext();
 
   export let context: Context = 'page';
-  export let table: Pick<TableEntry, 'id' | 'settings' | 'schema'>;
+  export let table: Table;
   export let sheetElement: HTMLElement | undefined = undefined;
 
   let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
@@ -51,8 +51,7 @@
   });
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
-  $: ({ settings } = table);
-  $: ({ column_order: columnOrder } = settings);
+  $: columnOrder = table.metadata?.column_order ?? [];
   $: hasNewColumnButton = allowsDdlOperations;
   /**
    * These are separate variables for readability and also to keep the door open

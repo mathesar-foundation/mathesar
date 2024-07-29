@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { LinksPostRequest } from '@mathesar/api/rest/types/links';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import { postAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     Field,
     FieldLayout,
@@ -18,15 +18,14 @@
   import { RichText } from '@mathesar/components/rich-text';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     ColumnsDataStore,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import {
+    currentTables,
     importVerifiedTables as importVerifiedTablesStore,
-    refetchTablesForSchema,
-    tables as tablesDataStore,
+    refetchTablesForCurrentSchema,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -53,7 +52,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  export let base: TableEntry;
+  export let base: Table;
   export let close: () => void;
 
   // ===========================================================================
@@ -61,16 +60,15 @@
   // ===========================================================================
   $: singularBaseTableName = makeSingular(base.name);
   $: importVerifiedTables = [...$importVerifiedTablesStore.values()];
-  $: allTables = [...$tablesDataStore.data.values()];
   $: ({ columnsDataStore } = $tabularData);
   $: baseColumns = columnsDataStore.columns;
 
   // ===========================================================================
   // Fields
   // ===========================================================================
-  $: targetTable = requiredField<TableEntry | undefined>(undefined);
+  $: targetTable = requiredField<Table | undefined>(undefined);
   $: target = $targetTable;
-  $: isSelfReferential = base.id === target?.id;
+  $: isSelfReferential = base.oid === target?.oid;
   $: linkTypes = ((): LinkType[] =>
     isSelfReferential
       ? ['manyToOne', 'manyToMany']
@@ -78,7 +76,7 @@
   $: linkType = requiredField<LinkType>('manyToOne');
   $: $targetTable, linkType.reset();
   $: targetColumnsStore = target
-    ? new ColumnsDataStore({ tableId: target.id })
+    ? new ColumnsDataStore({ tableId: target.oid })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
@@ -93,7 +91,7 @@
     [columnNameIsAvailable($targetColumns)],
   );
   $: mappingTableName = requiredField(
-    suggestMappingTableName(base, target, allTables),
+    suggestMappingTableName(base, target, $currentTables),
     [$validateNewTableName],
   );
   $: columnNameMappingToBase = (() => {
@@ -166,17 +164,17 @@
     if ($linkType === 'oneToMany') {
       return {
         link_type: 'one-to-many',
-        reference_table: values.targetTable.id,
+        reference_table: values.targetTable.oid,
         reference_column_name: $columnNameInTarget,
-        referent_table: base.id,
+        referent_table: base.oid,
       };
     }
     if ($linkType === 'manyToOne') {
       return {
         link_type: 'one-to-many',
-        reference_table: base.id,
+        reference_table: base.oid,
         reference_column_name: $columnNameInBase,
-        referent_table: values.targetTable.id,
+        referent_table: values.targetTable.oid,
       };
     }
     if ($linkType === 'manyToMany') {
@@ -185,11 +183,11 @@
         mapping_table_name: $mappingTableName,
         referents: [
           {
-            referent_table: base.id,
+            referent_table: base.oid,
             column_name: $columnNameMappingToBase,
           },
           {
-            referent_table: values.targetTable.id,
+            referent_table: values.targetTable.oid,
             column_name: $columnNameMappingToTarget,
           },
         ],
@@ -199,15 +197,15 @@
   }
 
   async function reFetchOtherThingsThatChanged() {
-    if ($linkType === 'manyToMany' && $currentSchemaId !== undefined) {
-      await refetchTablesForSchema($currentSchemaId);
+    if ($linkType === 'manyToMany') {
+      await refetchTablesForCurrentSchema();
       return;
     }
     const tableWithNewColumn = $linkType === 'oneToMany' ? target : base;
     if (!tableWithNewColumn) {
       return;
     }
-    if (tableWithNewColumn.id === $tabularData.id) {
+    if (tableWithNewColumn.oid === $tabularData.id) {
       await $tabularData.refresh();
     }
   }

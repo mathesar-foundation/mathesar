@@ -8,7 +8,7 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconConnection, iconExploration, iconRecord } from '@mathesar/icons';
   import {
-    CONNECTIONS_URL,
+    HOME_URL,
     getDatabasePageUrl,
     getExplorationPageUrl,
     getRecordPageUrl,
@@ -29,10 +29,10 @@
   export let item: BreadcrumbItem;
 </script>
 
-{#if item.type === 'connectionList'}
+{#if item.type === 'home'}
   <DatabaseSelector />
   <div class="breadcrumb-item truncate">
-    <BreadcrumbLink href={CONNECTIONS_URL}>
+    <BreadcrumbLink href={HOME_URL}>
       <NameWithIcon icon={iconConnection}>
         {$_('connections')}
       </NameWithIcon>
@@ -68,7 +68,7 @@
       href={getRecordPageUrl(
         item.database.id,
         item.schema.oid,
-        item.table.id,
+        item.table.oid,
         item.record.pk,
       )}
     >

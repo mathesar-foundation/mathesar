@@ -3,12 +3,12 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
-  import { currentTableId, tables } from '@mathesar/stores/tables';
+  import { currentTableId, currentTablesData } from '@mathesar/stores/tables';
 
   import RecordPageRoute from './RecordPageRoute.svelte';
 
@@ -17,7 +17,7 @@
   export let tableId: number;
 
   $: $currentTableId = tableId;
-  $: table = $tables.data.get(tableId);
+  $: table = $currentTablesData.tablesMap.get(tableId);
 
   function handleUnmount() {
     $currentTableId = undefined;

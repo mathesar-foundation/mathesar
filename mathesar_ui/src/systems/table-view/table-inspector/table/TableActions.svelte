@@ -5,10 +5,14 @@
   import { iconDeleteMajor, iconExploration } from '@mathesar/icons';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { currentTable, deleteTable, tables } from '@mathesar/stores/tables';
+  import {
+    currentTable,
+    currentTablesData,
+    deleteTable,
+  } from '@mathesar/stores/tables';
   import {
     constructDataExplorerUrlToSummarizeFromGroup,
     createDataExplorerUrlToExploreATable,
@@ -24,6 +28,7 @@
   import TableDeleteConfirmationBody from './TableDeleteConfirmationBody.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
+  const { currentDatabase } = databasesStore;
 
   $: ({ id, columnsDataStore, meta } = $tabularData);
   $: ({ grouping } = meta);
@@ -34,8 +39,8 @@
           $currentDatabase?.id,
           $currentSchema.oid,
           {
-            id: $tabularData.id,
-            name: $tables.data.get($tabularData.id)?.name ?? '',
+            oid: $tabularData.id,
+            name: $currentTablesData.tablesMap.get($tabularData.id)?.name ?? '',
           },
         )
       : '';
@@ -47,7 +52,7 @@
       $currentDatabase.id,
       $currentSchema.oid,
       {
-        baseTable: { id, name: $currentTable.name },
+        baseTable: { oid: id, name: $currentTable.name },
         columns: $columns,
         terseGrouping: $grouping.terse(),
       },

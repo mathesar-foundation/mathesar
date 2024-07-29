@@ -6,13 +6,14 @@ import type {
   QueryInstance,
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { currentDatabase } from '@mathesar/stores/databases';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
-import { getTable } from '@mathesar/stores/tables';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -63,7 +64,7 @@ export default class QueryManager extends QueryRunner {
 
   // Promises
 
-  private baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
+  private baseTableFetchPromise: CancellablePromise<Table> | undefined;
 
   private joinableColumnsfetchPromise:
     | CancellablePromise<JoinableTablesResult>
@@ -135,7 +136,13 @@ export default class QueryManager extends QueryRunner {
         inputColumnsFetchState: { state: 'processing' },
       }));
 
-      this.baseTableFetchPromise = getTable(baseTableId);
+      this.baseTableFetchPromise = api.tables
+        .get_with_metadata({
+          database_id: get(currentDatabase).id,
+          table_oid: baseTableId,
+        })
+        .run();
+
       this.joinableColumnsfetchPromise = getAPI<JoinableTablesResult>(
         `/api/db/v0/tables/${baseTableId}/joinable_tables/`,
       );

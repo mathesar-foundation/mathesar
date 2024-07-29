@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Database } from '@mathesar/AppTypes';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import { iconDatabase } from '@mathesar/icons';
 
   import NameWithIcon from './NameWithIcon.svelte';
@@ -9,5 +9,5 @@
 </script>
 
 <NameWithIcon icon={iconDatabase} {iconHasBox}>
-  {database.nickname}
+  {database.name}
 </NameWithIcon>

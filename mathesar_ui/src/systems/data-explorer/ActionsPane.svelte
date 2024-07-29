@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
@@ -16,7 +16,7 @@
   } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
-  import { tables as tablesDataStore } from '@mathesar/stores/tables';
+  import { currentTablesData as tablesDataStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import {
     Button,
@@ -42,15 +42,15 @@
 
   $: ({ query, state, queryHasUnsavedChanges } = queryManager);
   $: currentTable = $query.base_table
-    ? $tablesDataStore.data.get($query.base_table)
+    ? $tablesDataStore.tablesMap.get($query.base_table)
     : undefined;
   $: isSaved = $query.isSaved();
   $: hasNoColumns = $query.initial_columns.length === 0;
   $: querySaveRequestStatus = $state.saveState?.state;
 
-  function updateBaseTable(tableEntry: TableEntry | undefined) {
+  function updateBaseTable(table: Table | undefined) {
     void queryManager.update((q) =>
-      q.withBaseTable(tableEntry ? tableEntry.id : undefined),
+      q.withBaseTable(table ? table.oid : undefined),
     );
     linkCollapsibleOpenState = {};
   }

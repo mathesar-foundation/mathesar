@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     FormSubmit,
     makeForm,
@@ -13,9 +13,10 @@
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
   import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import { saveRecordSummaryTemplate } from '@mathesar/stores/tables';
+  import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { RadioGroup, Spinner } from '@mathesar-component-library';
@@ -27,15 +28,15 @@
   } from './recordSummaryTemplateUtils';
   import TemplateInput from './TemplateInput.svelte';
 
-  export let table: TableEntry;
+  export let table: Table;
   export let tabularData: TabularData;
 
   $: ({ recordsData, columnsDataStore, isLoading } = tabularData);
   $: ({ columns } = columnsDataStore);
   $: ({ savedRecords, recordSummaries } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
-  $: initialCustomized = table.settings.preview_settings.customized ?? false;
-  $: initialTemplate = table.settings.preview_settings.template ?? '';
+  $: initialCustomized = table.metadata?.record_summary_customized ?? false;
+  $: initialTemplate = table.metadata?.record_summary_template ?? '';
   $: customized = requiredField(initialCustomized);
   $: customizedDisabled = customized.disabled;
   $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);
@@ -58,7 +59,13 @@
 
   async function save() {
     try {
-      await saveRecordSummaryTemplate(table, $form.values);
+      await updateTable($currentDatabase, {
+        oid: table.oid,
+        metadata: {
+          record_summary_customized: $customized,
+          record_summary_template: $template,
+        },
+      });
     } catch (e) {
       toast.error(`${$_('unable_to_save_changes')} ${getErrorMessage(e)}`);
     }

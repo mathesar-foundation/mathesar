@@ -2,10 +2,10 @@
   import { _ } from 'svelte-i18n';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { TableEntry } from '@mathesar/api/rest/types/tables';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/AppTypes';
+  import type { Table } from '@mathesar/api/rpc/tables';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
@@ -23,7 +23,7 @@
   import TableSkeleton from './TableSkeleton.svelte';
   import TablesList from './TablesList.svelte';
 
-  export let tablesMap: Map<number, TableEntry>;
+  export let tablesMap: Map<Table['oid'], Table>;
   export let explorationsMap: Map<number, QueryInstance>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
@@ -56,7 +56,7 @@
         <div>
           <SpinnerButton
             onClick={async () => {
-              await refetchTablesForSchema(schema.oid);
+              await refetchTablesForSchema(database, schema);
             }}
             label={$_('retry')}
             icon={iconRefresh}

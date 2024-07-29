@@ -14,7 +14,7 @@
   } from '@mathesar/icons';
   import {
     ADMIN_URL,
-    CONNECTIONS_URL,
+    HOME_URL,
     LOGOUT_URL,
     USER_PROFILE_URL,
     getDataExplorerPageUrl,
@@ -22,7 +22,7 @@
     getImportPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { createTable } from '@mathesar/stores/tables';
@@ -43,6 +43,7 @@
   const commonData = preloadCommonData();
   const userProfile = getUserProfileStoreFromContext();
   const releaseDataStore = getReleaseDataStoreFromContext();
+  const { currentDatabase } = databasesStore;
 
   $: database = $currentDatabase;
   $: schema = $currentSchema;
@@ -56,9 +57,9 @@
       return;
     }
     isCreatingNewEmptyTable = true;
-    const tableInfo = await createTable(database, schema, {});
+    const tableOid = await createTable(database, schema, {});
     isCreatingNewEmptyTable = false;
-    router.goto(getTablePageUrl(database.id, schema.oid, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, tableOid), false);
   }
 </script>
 
@@ -113,7 +114,7 @@
               icon={iconDatabase}
               href={getDatabasePageUrl(database.id)}
             >
-              {database.nickname}
+              {database.name}
             </LinkMenuItem>
             <MenuDivider />
           {/if}
@@ -122,7 +123,7 @@
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
           <MenuDivider />
-          <LinkMenuItem icon={iconConnection} href={CONNECTIONS_URL}>
+          <LinkMenuItem icon={iconConnection} href={HOME_URL}>
             {$_('database_connections')}
           </LinkMenuItem>
           {#if $userProfile.isSuperUser}

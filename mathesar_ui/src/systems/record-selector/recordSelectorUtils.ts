@@ -1,5 +1,5 @@
-import type { TableEntry } from '@mathesar/api/rest/types/tables';
 import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Table } from '@mathesar/api/rpc/tables';
 
 /**
  * - 'dataEntry' - each row is a button that submits the recordId via a Promise.
@@ -18,14 +18,22 @@ export function getColumnIdToFocusInitially({
   table,
   columns,
 }: {
-  table: TableEntry | undefined;
+  table: Table | undefined;
   columns: Column[];
 }): number | undefined {
   function getFromRecordSummaryTemplate() {
     if (!table) {
       return undefined;
     }
-    const { template } = table.settings.preview_settings;
+    const template = table?.metadata?.record_summary_template;
+    if (!template) {
+      throw new Error('TODO_RS_TEMPLATE');
+      // TODO_RS_TEMPLATE
+      //
+      // We need to change the logic here to account for the fact that sometimes
+      // the record summary template actually _will_ be missing. We need to
+      // handle this on the client.
+    }
     const match = template.match(/\{\d+\}/)?.[0] ?? undefined;
     if (!match) {
       return undefined;

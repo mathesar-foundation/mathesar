@@ -13,7 +13,7 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { Button, Icon, Spinner } from '@mathesar-component-library';
@@ -78,10 +78,15 @@
       const record = response.results[0];
       const recordId = getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];
-      const tableEntry = $tables.data.get(tableId);
-      const template = tableEntry?.settings?.preview_settings?.template;
+      const table = $currentTablesData.tablesMap.get(tableId);
+      const template = table?.metadata?.record_summary_template;
+      // TODO_RS_TEMPLATE
+      //
+      // We need to change the logic here to account for the fact that sometimes
+      // the record summary template actually _will_ be missing. We need to
+      // handle this on the client.
       if (!template) {
-        throw new Error('No record summary template found in API response.');
+        throw new Error('TODO_RS_TEMPLATE');
       }
       const recordSummary = renderTransitiveRecordSummary({
         inputData: buildInputData(record),
