@@ -27,7 +27,7 @@ def run_exploration(exploration_def, database_id, conn):
     )
     metadata = get_cached_metadata()
     base_table_oid = exploration_def["base_table_oid"]
-    initial_columns = exploration_def.get('initial_columns')
+    initial_columns = exploration_def['initial_columns']
     params = exploration_def.get('parameters', {})
     processed_initial_columns = []
     for column in initial_columns:
@@ -67,16 +67,15 @@ def run_exploration(exploration_def, database_id, conn):
         duplicate_only=params.get('duplicate_only', None)
     )
     processed_records = process_annotated_records(records)[0]
-    with conn:
-        column_metadata = _get_exploration_column_metadata(
-            exploration_def,
-            processed_initial_columns,
-            database_id,
-            db_query,
-            conn,
-            engine,
-            metadata
-        )
+    column_metadata = _get_exploration_column_metadata(
+        exploration_def,
+        processed_initial_columns,
+        database_id,
+        db_query,
+        conn,
+        engine,
+        metadata
+    )
     return {
         "query": exploration_def,
         "records": {
