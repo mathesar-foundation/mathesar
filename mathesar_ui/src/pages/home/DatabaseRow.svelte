@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type { Database } from '@mathesar/api/rpc/databases';
   import { iconConnection } from '@mathesar/icons';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';

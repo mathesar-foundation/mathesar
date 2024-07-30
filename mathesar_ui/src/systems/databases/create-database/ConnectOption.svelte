@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
   import { Button, Icon } from '@mathesar-component-library';
   import type { IconProps } from '@mathesar-component-library/types';
 

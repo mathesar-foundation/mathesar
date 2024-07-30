@@ -1,25 +1,26 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import type { Database } from '@mathesar/api/rpc/databases';
   import {
-    portalToWindowFooter,
-    PasswordInput,
-  } from '@mathesar-component-library';
-  import {
-    requiredField,
     FormSubmit,
     makeForm,
+    requiredField,
   } from '@mathesar/components/form';
+  import Field from '@mathesar/components/form/Field.svelte';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
-  import Field from '@mathesar/components/form/Field.svelte';
-  import type { Database } from '@mathesar/api/rpc/databases';
   import { databasesStore } from '@mathesar/stores/databases';
-  import InstallationSchemaSelector from './InstallationSchemaSelector.svelte';
+  import {
+    PasswordInput,
+    portalToWindowFooter,
+  } from '@mathesar-component-library';
+
   import {
     type InstallationSchema,
     getSampleSchemasFromInstallationSchemas,
   } from './createDatabaseUtils';
+  import InstallationSchemaSelector from './InstallationSchemaSelector.svelte';
 
   export let onCancel: () => void;
   export let onSuccess: (db: Database) => void;

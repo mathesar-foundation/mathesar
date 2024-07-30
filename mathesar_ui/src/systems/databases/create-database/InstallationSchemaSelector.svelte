@@ -1,12 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { CheckboxGroup } from '@mathesar-component-library';
   import {
-    sampleDataOptions,
     type SampleDataSchemaIdentifier,
+    sampleDataOptions,
   } from '@mathesar/api/rpc/database_setup';
   import type { RequiredField } from '@mathesar/components/form/field';
+  import { CheckboxGroup } from '@mathesar-component-library';
 
   type InstallationSchema = SampleDataSchemaIdentifier | 'internal';
   const installationSchemaOptions: InstallationSchema[] = [

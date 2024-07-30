@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
+
   import type { Database } from '@mathesar/api/rpc/databases';
   import { iconDatabase } from '@mathesar/icons';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
@@ -8,9 +9,10 @@
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
+
   import ConnectExistingDatabase from './ConnectExistingDatabase.svelte';
-  import CreateNewDatabase from './CreateNewDatabase.svelte';
   import ConnectOption from './ConnectOption.svelte';
+  import CreateNewDatabase from './CreateNewDatabase.svelte';
 
   export let controller: ModalController;
 
