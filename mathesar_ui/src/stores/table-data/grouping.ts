@@ -75,11 +75,11 @@ export class Grouping {
     });
   }
 
-  recordsRequestParams(): Pick<RecordsListParams, 'grouping'> {
+  recordsRequestParams(): Pick<RecordsListParams, 'group'> {
     if (!this.entries.length) {
       return {};
     }
-    const request: RecordsListParams['grouping'] = {
+    const request: RecordsListParams['group'] = {
       columns: [],
       preproc: [],
     };
@@ -91,7 +91,7 @@ export class Grouping {
       request.preproc = null;
     }
     return {
-      grouping: request,
+      group: request,
     };
   }
 

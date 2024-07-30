@@ -45,17 +45,17 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
     super(entries);
   }
 
-  private recordsRequestParams(): Pick<RecordsListParams, 'order_by'> {
+  private recordsRequestParams(): Pick<RecordsListParams, 'order'> {
     const sortingEntries: ApiSortingEntry[] = [...this].map(
       ([columnId, sortDirection]) => ({
-        field: columnId,
+        attnum: columnId,
         direction: getApiSortDirection(sortDirection),
       }),
     );
     if (!sortingEntries.length) {
       return {};
     }
-    return { order_by: sortingEntries };
+    return { order: sortingEntries };
   }
 
   /**
@@ -65,7 +65,7 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
    */
   recordsRequestParamsIncludingGrouping(
     grouping: Grouping,
-  ): Pick<RecordsListParams, 'order_by'> {
+  ): Pick<RecordsListParams, 'order'> {
     const sortingFromGrouping = new Sorting(
       grouping.entries.map((g) => [g.columnId, 'ASCENDING']),
     );

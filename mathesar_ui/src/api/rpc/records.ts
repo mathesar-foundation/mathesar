@@ -24,7 +24,7 @@ export interface Grouping {
 export type SortDirection = 'asc' | 'desc';
 export interface SortingEntry {
   /** column id */
-  field: number;
+  attnum: number;
   direction: SortDirection;
 }
 export type FilterCombination = 'and' | 'or';
@@ -43,8 +43,8 @@ export interface RecordsListParams {
   table_oid: number;
   limit?: number;
   offset?: number;
-  order_by?: SortingEntry[];
-  grouping?: Pick<Grouping, 'columns' | 'preproc'>;
+  order?: SortingEntry[];
+  group?: Pick<Grouping, 'columns' | 'preproc'>;
   filter?: FilterRequest;
   search_fuzzy?: Record<string, unknown>[];
 }
