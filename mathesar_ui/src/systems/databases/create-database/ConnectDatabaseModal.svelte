@@ -3,7 +3,7 @@
   import { router } from 'tinro';
 
   import type { Database } from '@mathesar/api/rpc/databases';
-  import { iconDatabase } from '@mathesar/icons';
+  import { iconConnectDatabase, iconCreateDatabase } from '@mathesar/icons';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import {
     ControlledModal,
@@ -55,13 +55,13 @@
   {#if view === 'base'}
     <div class="connect-db-options">
       <ConnectOption
-        icon={iconDatabase}
+        icon={iconCreateDatabase}
         header={$_('create_new_database')}
         description={$_('create_database_mathesar_internal_server')}
         changeView={() => setView('create')}
       />
       <ConnectOption
-        icon={iconDatabase}
+        icon={iconConnectDatabase}
         header={$_('connect_existing_database')}
         description={$_('provide_details_connect_existing_database')}
         changeView={() => setView('connect')}

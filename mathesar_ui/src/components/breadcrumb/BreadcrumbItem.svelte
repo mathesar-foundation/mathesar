@@ -6,7 +6,11 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { iconConnection, iconExploration, iconRecord } from '@mathesar/icons';
+  import {
+    iconConnectDatabase,
+    iconExploration,
+    iconRecord,
+  } from '@mathesar/icons';
   import {
     HOME_URL,
     getDatabasePageUrl,
@@ -33,7 +37,9 @@
   <DatabaseSelector />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={HOME_URL}>
-      {$_('databases')}
+      <NameWithIcon icon={{ ...iconConnectDatabase, size: '1.4rem' }}>
+        {$_('databases')}
+      </NameWithIcon>
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'database'}

@@ -12,7 +12,7 @@
 <Button class="option" on:click={changeView}>
   <div class="icon-holder">
     <div class="icon-circle">
-      <Icon {...icon} size="1.6rem" />
+      <Icon {...icon} size="2rem" />
     </div>
   </div>
   <div class="content-holder">
