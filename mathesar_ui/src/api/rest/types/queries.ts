@@ -1,6 +1,6 @@
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { JpPath } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 
 export type QueryColumnAlias = string;

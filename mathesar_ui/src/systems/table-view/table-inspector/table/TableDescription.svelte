@@ -4,25 +4,23 @@
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { currentTablesData, updateTable } from '@mathesar/stores/tables';
+  import { updateTable } from '@mathesar/stores/tables';
 
   const tabularData = getTabularDataStoreFromContext();
 
   export let disabled = false;
 
+  $: ({ table } = $tabularData);
+
   async function handleSave(description: string) {
-    await updateTable($currentDatabase, {
-      oid: $tabularData.table.oid,
-      description,
-    });
+    await updateTable($currentDatabase, { oid: table.oid, description });
   }
 </script>
 
 <div class="update-table-description-property-container">
   <span class="label">{$_('description')}</span>
   <EditableTextWithActions
-    initialValue={$currentTablesData.tablesMap.get($tabularData.id)
-      ?.description ?? ''}
+    initialValue={table.description ?? ''}
     onSubmit={handleSave}
     isLongText
     {disabled}

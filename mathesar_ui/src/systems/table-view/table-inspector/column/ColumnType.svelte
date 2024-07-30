@@ -18,10 +18,10 @@
   async function save(
     columnInfo: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
   ) {
-    await columnsDataStore.patch(column.id, {
+    await columnsDataStore.patch({
+      id: column.id,
       type: columnInfo.type,
       type_options: columnInfo.type_options,
-      display_options: null,
       default: null,
     });
   }

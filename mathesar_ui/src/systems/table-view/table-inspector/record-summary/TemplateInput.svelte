@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import { FormattedInput } from '@mathesar-component-library';
 
   import AppendColumn from './AppendColumn.svelte';

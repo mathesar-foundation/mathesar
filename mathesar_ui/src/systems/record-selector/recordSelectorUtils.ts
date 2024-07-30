@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { Table } from '@mathesar/api/rpc/tables';
 
 /**

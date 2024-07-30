@@ -1,3 +1,6 @@
+import type { Simplify } from 'type-fest';
+import type { SimplifyDeep } from 'type-fest/source/merge-deep';
+
 import type {
   QueryColumnMetaData,
   QueryGeneratedColumnSource,
@@ -5,11 +8,11 @@ import type {
   QueryResultColumn,
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   JoinableTablesResult,
   JpPath,
 } from '@mathesar/api/rest/types/tables/joinable_tables';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
@@ -305,6 +308,10 @@ export function getTablesThatReferenceBaseTable(
   return references;
 }
 
+// type T = SimplifyDeep<Pick<QueryColumnMetaData, 'alias'> &
+// ProcessedQueryResultColumnSource &
+// Partial<QueryColumnMetaData>>;
+
 function processColumn(
   columnInfo: Pick<QueryColumnMetaData, 'alias'> &
     ProcessedQueryResultColumnSource &
@@ -468,9 +475,14 @@ export function speculateColumnMetaData({
                 type_options:
                   aggregation.function === 'distinct_aggregate_to_array'
                     ? {
-                        type:
-                          updatedColumnsMetaData.get(aggregation.inputAlias)
-                            ?.column.type ?? 'unknown',
+                        // TODO_3704: Ask Pavish.
+                        // `Column['type_options']` was previously typed loosely
+                        // as `Record<string, unknown> | null`. Now it's more
+                        // strict and it doesn't have a `type` property.
+                        //
+                        // type:
+                        //   updatedColumnsMetaData.get(aggregation.inputAlias)
+                        //     ?.column.type ?? 'unknown',
                       }
                     : null,
                 display_options: null,

@@ -1,8 +1,8 @@
 import { getContext, setContext } from 'svelte';
 import { writable } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { Result as ApiRecord } from '@mathesar/api/rest/types/tables/records';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 
 import type { RecordSelectorPurpose } from './recordSelectorUtils';

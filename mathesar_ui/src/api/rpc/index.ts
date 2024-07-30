@@ -2,6 +2,7 @@ import Cookies from 'js-cookie';
 
 import { buildRpcApi } from '@mathesar/packages/json-rpc-client-builder';
 
+import { columns } from './columns';
 import { configured_roles } from './configured_roles';
 import { database_setup } from './database_setup';
 import { databases } from './databases';
@@ -20,5 +21,6 @@ export const api = buildRpcApi({
     schemas,
     servers,
     tables,
+    columns,
   },
 });

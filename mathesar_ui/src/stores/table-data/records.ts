@@ -7,7 +7,6 @@ import {
   writable,
 } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   GetRequestParams as ApiGetRequestParams,
   Group as ApiGroup,
@@ -24,6 +23,7 @@ import {
   patchAPI,
   postAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';

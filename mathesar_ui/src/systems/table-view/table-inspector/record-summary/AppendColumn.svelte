@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import { iconAddNew, iconConstraint, iconTableLink } from '@mathesar/icons';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {

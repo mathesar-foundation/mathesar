@@ -1,8 +1,9 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import type { Table } from '@mathesar/api/rpc/tables';
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     Meta,
     TabularData,
@@ -27,11 +28,11 @@
 
   $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: tabularData = new TabularData({
-    id: table.oid,
+    database: $currentDatabase,
+    table,
     abstractTypesMap,
     meta,
     contextualFilters: new Map([[fkColumn.id, recordPk]]),
-    table,
   });
   $: tabularDataStore.set(tabularData);
 </script>

@@ -6,11 +6,11 @@
 
 import type { Table } from '@mathesar/api/rpc/tables';
 
-import type { Column } from './columns';
-
 type ForeignKeyId = number;
 type IsLinkReversed = boolean;
-export type JpPath = [Column['id'], Column['id']][];
+
+/** [attnum, attnum][] */
+export type JpPath = [number, number][];
 
 export interface JoinableTable {
   target: Table['oid']; // baseTableId
@@ -26,14 +26,14 @@ export interface JoinableTablesResult {
     string, // tableId
     {
       name: Table['name'];
-      columns: Column['id'][];
+      columns: number[];
     }
   >;
   columns: Record<
     string, // columnId
     {
-      name: Column['name'];
-      type: Column['type'];
+      name: string;
+      type: string;
     }
   >;
 }

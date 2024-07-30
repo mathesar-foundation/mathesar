@@ -1,8 +1,8 @@
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type {
   Constraint,
   FkConstraint,
 } from '@mathesar/api/rest/types/tables/constraints';
+import type { Column } from '@mathesar/api/rpc/columns';
 
 export function constraintIsFk(c: Constraint): c is FkConstraint {
   return c.type === 'foreignkey';

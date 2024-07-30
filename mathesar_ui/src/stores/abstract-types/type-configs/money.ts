@@ -1,8 +1,10 @@
-import type {
-  Column,
-  MoneyDisplayOptions,
-  NumberFormat,
-} from '@mathesar/api/rest/types/tables/columns';
+import {
+  type Column,
+  type CurrencyLocation,
+  type NumberFormat,
+  type NumberGrouping,
+  getColumnDisplayOption,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeMoney } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
@@ -93,41 +95,43 @@ const displayForm: AbstractTypeConfigForm = {
 };
 
 interface MoneyFormValues extends Record<string, unknown> {
-  currencySymbol: MoneyDisplayOptions['currency_symbol'];
-  decimalPlaces: MoneyDisplayOptions['minimum_fraction_digits'];
-  currencySymbolLocation: MoneyDisplayOptions['currency_symbol_location'];
+  currencySymbol: string;
+  decimalPlaces: number | null;
+  currencySymbolLocation: CurrencyLocation;
   numberFormat: NumberFormat | 'none';
-  useGrouping: MoneyDisplayOptions['use_grouping'];
+  useGrouping: NumberGrouping;
 }
 
 function determineDisplayOptions(form: FormValues): Column['display_options'] {
   const f = form as MoneyFormValues;
-  const opts: Partial<MoneyDisplayOptions> = {
-    currency_symbol: f.currencySymbol,
-    currency_symbol_location: f.currencySymbolLocation,
-    number_format: f.numberFormat === 'none' ? null : f.numberFormat,
-    use_grouping: f.useGrouping,
-    minimum_fraction_digits: f.decimalPlaces ?? undefined,
-    maximum_fraction_digits: f.decimalPlaces ?? undefined,
+  const opts: Partial<Column['display_options']> = {
+    mon_currency_symbol: f.currencySymbol,
+    mon_currency_location: f.currencySymbolLocation,
+    num_format: f.numberFormat === 'none' ? null : f.numberFormat,
+    num_grouping: f.useGrouping,
+    num_min_frac_digits: f.decimalPlaces ?? undefined,
+    num_max_frac_digits: f.decimalPlaces ?? undefined,
   };
   return opts;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  displayOptions: Column['display_options'],
 ): MoneyFormValues {
-  const displayOptions = columnDisplayOpts as MoneyDisplayOptions | null;
+  const column = { display_options: displayOptions };
   const decimalPlaces = getDecimalPlaces(
-    displayOptions?.minimum_fraction_digits ?? null,
-    displayOptions?.maximum_fraction_digits ?? null,
+    displayOptions?.num_min_frac_digits ?? null,
+    displayOptions?.num_max_frac_digits ?? null,
   );
   const displayFormValues: MoneyFormValues = {
-    numberFormat: displayOptions?.number_format ?? 'none',
-    currencySymbol: displayOptions?.currency_symbol ?? '',
+    numberFormat: getColumnDisplayOption(column, 'num_format') ?? 'none',
+    currencySymbol: getColumnDisplayOption(column, 'mon_currency_symbol') ?? '',
     decimalPlaces,
-    currencySymbolLocation:
-      displayOptions?.currency_symbol_location ?? 'after-minus',
-    useGrouping: displayOptions?.use_grouping ?? 'true',
+    currencySymbolLocation: getColumnDisplayOption(
+      column,
+      'mon_currency_location',
+    ),
+    useGrouping: getColumnDisplayOption(column, 'num_grouping'),
   };
   return displayFormValues;
 }

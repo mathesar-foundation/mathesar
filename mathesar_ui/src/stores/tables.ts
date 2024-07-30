@@ -446,7 +446,12 @@ export function getJoinableTablesResult(
   tableId: number,
   maxDepth = 1,
 ): Promise<JoinableTablesResult> {
-  throw new Error('Not implemented'); // TODO_BETA
+  return Promise.resolve({
+    joinable_tables: [],
+    tables: {},
+    columns: {},
+  });
+  // TODO_BETA: re-implement this with the RPC API.
 
   // return getAPI<JoinableTablesResult>(
   //   `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,

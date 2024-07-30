@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeText } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
@@ -76,7 +76,7 @@ function determineDbTypeAndOptions(
   const dbType = determineDbType(dbFormValues, columnType);
   const typeOptions: Column['type_options'] = {};
   if (dbType === DB_TYPES.CHAR || dbType === DB_TYPES.VARCHAR) {
-    typeOptions.length = dbFormValues.length;
+    typeOptions.length = Number(dbFormValues.length);
   }
   return {
     dbType,

@@ -16,6 +16,7 @@
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
     TableStructure,
@@ -72,13 +73,14 @@
   });
 
   $: tables = [...$importVerifiedTables.values()];
-  $: baseTableName = $importVerifiedTables.get($tabularData.id)?.name ?? '';
+  $: baseTableName = $tabularData.table.name;
   $: ({ processedColumns } = $tabularData);
   $: baseTableColumns = [...$processedColumns.values()];
 
   $: targetTableStructure = $targetTable
     ? new TableStructure({
-        id: $targetTable.oid,
+        database: $currentDatabase,
+        table: $targetTable,
         abstractTypesMap: $currentDbAbstractTypes.data,
       })
     : undefined;

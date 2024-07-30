@@ -1,17 +1,13 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
 import type {
-  PaginatedResponse,
-  RequestStatus,
-} from '@mathesar/api/rest/utils/requestUtils';
-import {
-  addQueryParamsToUrl,
-  deleteAPI,
-  getAPI,
-  patchAPI,
-  postAPI,
-} from '@mathesar/api/rest/utils/requestUtils';
+  Column,
+  ColumnCreationSpec,
+  ColumnPatchSpec,
+} from '@mathesar/api/rpc/columns';
+import type { Database } from '@mathesar/api/rpc/databases';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { ShareConsumer } from '@mathesar/utils/shares';
@@ -21,36 +17,18 @@ import {
   WritableSet,
 } from '@mathesar-component-library';
 
-function api(url: string) {
-  return {
-    get(queryParams: Record<string, unknown>) {
-      const requestUrl = addQueryParamsToUrl(url, queryParams);
-      return getAPI<PaginatedResponse<Column>>(requestUrl);
-    },
-    add(columnDetails: Partial<Column>) {
-      return postAPI<Partial<Column>>(url, columnDetails);
-    },
-    remove(id: Column['id']) {
-      return deleteAPI(`${url}${id}/`);
-    },
-    update(id: Column['id'], data: Partial<Column>) {
-      return patchAPI<Partial<Column>>(`${url}${id}/`, data);
-    },
-  };
-}
-
 export class ColumnsDataStore extends EventHandler<{
-  columnRenamed: number;
-  columnAdded: Partial<Column>;
-  columnDeleted: number;
-  columnPatched: Partial<Column>;
-  columnsFetched: Column[];
+  columnRenamed: void;
+  columnAdded: void;
+  columnDeleted: Column['id'];
+  columnPatched: void;
 }> {
-  private tableId: Table['oid'];
+  private apiContext: {
+    database_id: number;
+    table_oid: Table['oid'];
+  };
 
-  private promise: CancellablePromise<PaginatedResponse<Column>> | undefined;
-
-  private api: ReturnType<typeof api>;
+  private promise: CancellablePromise<Column[]> | undefined;
 
   private fetchedColumns = writable<Column[]>([]);
 
@@ -66,19 +44,20 @@ export class ColumnsDataStore extends EventHandler<{
   readonly shareConsumer?: ShareConsumer;
 
   constructor({
-    tableId,
+    database,
+    tableOid,
     hiddenColumns,
     shareConsumer,
   }: {
-    tableId: Table['oid'];
+    database: Pick<Database, 'id'>;
+    tableOid: Table['oid'];
     /** Values are column ids */
     hiddenColumns?: Iterable<number>;
     shareConsumer?: ShareConsumer;
   }) {
     super();
-    this.tableId = tableId;
+    this.apiContext = { database_id: database.id, table_oid: tableOid };
     this.shareConsumer = shareConsumer;
-    this.api = api(`/api/db/v0/tables/${this.tableId}/columns/`);
     this.hiddenColumns = new WritableSet(hiddenColumns);
     this.columns = derived(
       [this.fetchedColumns, this.hiddenColumns],
@@ -94,15 +73,16 @@ export class ColumnsDataStore extends EventHandler<{
     try {
       this.fetchStatus.set({ state: 'processing' });
       this.promise?.cancel();
-      this.promise = this.api.get({
-        limit: 500,
-        ...this.shareConsumer?.getQueryParams(),
-      });
-      const response = await this.promise;
-      const columns = response.results;
+      // TODO_BETA: For some reason `...this.shareConsumer?.getQueryParams()`
+      // was getting passed into the API call when it was REST. I don't know
+      // why. We need to figure out if this is necessary to replicate for the
+      // RPC call.
+      this.promise = api.columns
+        .list_with_metadata({ ...this.apiContext })
+        .run();
+      const columns = await this.promise;
       this.fetchedColumns.set(columns);
       this.fetchStatus.set({ state: 'success' });
-      await this.dispatch('columnsFetched', columns);
       return columns;
     } catch (e) {
       this.fetchStatus.set({ state: 'failure', errors: [getErrorMessage(e)] });
@@ -112,33 +92,30 @@ export class ColumnsDataStore extends EventHandler<{
     }
   }
 
-  async add(columnDetails: Partial<Column>): Promise<Partial<Column>> {
-    const column = await this.api.add(columnDetails);
-    await this.dispatch('columnAdded', column);
+  async add(columnDetails: ColumnCreationSpec): Promise<void> {
+    await api.columns
+      .add({ ...this.apiContext, column_data_list: [columnDetails] })
+      .run();
+    await this.dispatch('columnAdded');
     await this.fetch();
-    return column;
   }
 
-  async rename(id: Column['id'], newName: string): Promise<void> {
-    await this.api.update(id, { name: newName });
-    await this.dispatch('columnRenamed', id);
+  async rename(id: Column['id'], name: string): Promise<void> {
+    await api.columns
+      .patch({ ...this.apiContext, column_data_list: [{ id, name }] })
+      .run();
+    await this.dispatch('columnRenamed');
   }
 
   async updateDescription(
     id: Column['id'],
     description: string | null,
   ): Promise<void> {
-    await this.api.update(id, { description });
+    await api.columns
+      .patch({ ...this.apiContext, column_data_list: [{ id, description }] })
+      .run();
     this.fetchedColumns.update((columns) =>
-      columns.map((column) => {
-        if (column.id === id) {
-          return {
-            ...column,
-            description,
-          };
-        }
-        return column;
-      }),
+      columns.map((c) => (c.id === id ? { ...c, description } : c)),
     );
   }
 
@@ -151,23 +128,24 @@ export class ColumnsDataStore extends EventHandler<{
         `Column "${column.name}" cannot allow NULL because it is a primary key.`,
       );
     }
-    await this.api.update(column.id, { nullable });
+    await api.columns
+      .patch({
+        ...this.apiContext,
+        column_data_list: [{ id: column.id, nullable }],
+      })
+      .run();
     await this.fetch();
   }
 
-  // TODO: Analyze: Might be cleaner to move following functions as a property of Column class
-  // but are the object instantiations worth it?
-
-  async patch(
-    columnId: Column['id'],
-    properties: Omit<Partial<Column>, 'id'>,
-  ): Promise<Partial<Column>> {
-    const column = await this.api.update(columnId, {
-      ...properties,
-    });
+  async patch(patchSpec: ColumnPatchSpec): Promise<void> {
+    await api.columns
+      .patch({
+        ...this.apiContext,
+        column_data_list: [patchSpec],
+      })
+      .run();
     await this.fetch();
-    await this.dispatch('columnPatched', column);
-    return column;
+    await this.dispatch('columnPatched');
   }
 
   destroy(): void {
@@ -177,7 +155,9 @@ export class ColumnsDataStore extends EventHandler<{
   }
 
   async deleteColumn(columnId: Column['id']): Promise<void> {
-    await this.api.remove(columnId);
+    await api.columns
+      .delete({ ...this.apiContext, column_attnums: [columnId] })
+      .run();
     await this.dispatch('columnDeleted', columnId);
     await this.fetch();
   }
