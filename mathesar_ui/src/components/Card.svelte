@@ -96,7 +96,7 @@
     cursor: pointer;
     overflow: hidden;
     height: 100%;
-    padding: var(--padding-v, var(--padding-v-internal)) 0;
+    padding: var(--Card__padding-v, var(--padding-v-internal)) 0;
   }
   .link:hover {
     border-color: var(--slate-500);
@@ -109,11 +109,12 @@
     height: var(--menu-trigger-size, auto);
     display: flex;
     align-items: center;
-    padding: 0 var(--padding-h, var(--padding-h-internal));
+    padding: 0 var(--Card__padding-h, var(--padding-h-internal));
   }
   .description:not(:empty) {
-    padding: var(--size-x-small) var(--padding-h, var(--padding-h-internal)) 0
-      var(--padding-h, var(--padding-h-internal));
+    padding: var(--size-x-small)
+      var(--Card__padding-h, var(--padding-h-internal)) 0
+      var(--Card__padding-h, var(--padding-h-internal));
     font-size: var(--text-size-base);
   }
 

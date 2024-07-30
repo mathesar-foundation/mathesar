@@ -11,7 +11,7 @@
 <Card
   href={getDatabasePageUrl(database.id)}
   cssVariables={{
-    '--padding-v': '1.4rem',
+    '--Card__padding-v': '1.4rem',
   }}
 >
   <div class="title">
@@ -31,7 +31,7 @@
   .title {
     display: grid;
     width: 100%;
-    grid-template-columns: 4rem 1fr;
+    grid-template-columns: 3.5rem 1fr;
   }
   .icon-holder {
     display: flex;

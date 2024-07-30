@@ -49,10 +49,9 @@
 <LayoutWithHeader
   restrictWidth
   cssVariables={{
-    '--page-padding': '0',
+    '--page-padding': 'var(--size-xx-large) var(--size-x-large)',
     '--layout-background-color': 'var(--sand-100)',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
-    '--AppSecondaryHeader__padding': 'var(--size-x-large) 0',
   }}
 >
   <div data-identifier="databases-header">
@@ -117,20 +116,19 @@
 <style lang="scss">
   [data-identifier='databases-header'] {
     display: flex;
-    padding: var(--size-x-large);
     align-items: center;
 
     span {
       flex: 1 0 0;
       color: var(--slate-800);
-      font-size: var(--size-x-large);
-      font-weight: 600;
+      font-size: var(--size-xx-large);
+      font-weight: 500;
     }
   }
 
   [data-identifier='databases-container'] {
     display: flex;
-    padding: var(--size-x-large);
+    margin-top: var(--size-x-large);
     flex-direction: column;
     align-items: stretch;
     gap: var(--size-x-small);
