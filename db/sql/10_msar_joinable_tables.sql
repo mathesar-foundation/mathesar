@@ -31,8 +31,8 @@ whether to travel from referrer to referant (when False) or from referant to ref
 
 DROP TYPE IF EXISTS msar.joinable_tables CASCADE;
 CREATE TYPE msar.joinable_tables AS (
-  base integer, -- The OID of the table from which the paths start
-  target integer, -- The OID of the table where the paths end
+  base bigint, -- The OID of the table from which the paths start
+  target bigint, -- The OID of the table where the paths end
   join_path jsonb, -- A JSONB array of arrays of arrays
   fkey_path jsonb,
   depth integer,
@@ -131,8 +131,28 @@ SELECT * FROM output_cte;
 $$ LANGUAGE sql;
 
 
+DROP FUNCTION IF EXISTS msar.get_joinable_tables(integer, oid);
 CREATE OR REPLACE FUNCTION
 msar.get_joinable_tables(max_depth integer, table_id oid) RETURNS
-  SETOF msar.joinable_tables AS $$
-  SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id
-$$ LANGUAGE sql;
+jsonb AS $$
+  WITH jt_cte AS (
+    SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id
+  ), target_cte AS (
+    SELECT jsonb_build_object(
+      pga.attrelid::text, msar.get_relation_name(pga.attrelid),
+      'columns', jsonb_agg(
+        jsonb_build_object(
+          pga.attnum::text, jsonb_build_object(
+            'name', pga.attname, 'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END
+          )
+        )
+      )
+    ) as tt
+    FROM pg_catalog.pg_attribute AS pga, jt_cte
+    WHERE pga.attrelid=jt_cte.target AND pga.attnum > 0 and NOT pga.attisdropped GROUP BY pga.attrelid
+  )
+  SELECT jsonb_build_object(
+    'joinable_tables', jsonb_agg(to_jsonb(jt_cte.*)),
+    'target_table_info', jsonb_agg(target_cte.tt)
+  ) FROM target_cte, jt_cte
+$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;

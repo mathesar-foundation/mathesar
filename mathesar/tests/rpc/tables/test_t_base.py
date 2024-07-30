@@ -288,107 +288,131 @@ def test_list_joinable(rf, monkeypatch):
     def mock_list_joinable_tables(_table_oid, conn, max_depth):
         if _table_oid != table_oid:
             raise AssertionError('incorrect parameters passed')
-        return [
-            {
-                'base': 2254329,
-                'target': 2254334,
-                'join_path': [[[2254329, 2], [2254334, 1]]],
-                'fkey_path': [[2254406, False]],
-                'depth': 1,
-                'multiple_results': False
-            },
-            {
-                'base': 2254329,
-                'target': 2254350,
-                'join_path': [[[2254329, 3], [2254350, 1]]],
-                'fkey_path': [[2254411, False]],
-                'depth': 1,
-                'multiple_results': False
-            },
-            {
-                'base': 2254329,
-                'target': 2254321,
-                'join_path': [[[2254329, 2], [2254334, 1]], [[2254334, 5], [2254321, 1]]],
-                'fkey_path': [[2254406, False], [2254399, False]],
-                'depth': 2,
-                'multiple_results': False
-            },
-            {
-                'base': 2254329,
-                'target': 2254358,
-                'join_path': [
-                    [[2254329, 2], [2254334, 1]],
-                    [[2254334, 5], [2254321, 1]],
-                    [[2254321, 11], [2254358, 1]]
-                ],
-                'fkey_path': [[2254406, False], [2254399, False], [2254394, False]],
-                'depth': 3,
-                'multiple_results': False
-            },
-            {
-                'base': 2254329,
-                'target': 2254313,
-                'join_path': [
-                    [[2254329, 2], [2254334, 1]],
-                    [[2254334, 5], [2254321, 1]],
-                    [[2254321, 10], [2254313, 1]]
-                ],
-                'fkey_path': [[2254406, False], [2254399, False], [2254389, False]],
-                'depth': 3,
-                'multiple_results': False
-            }
-        ]
-    expected_list = [
-        {
-            'base': 2254329,
-            'target': 2254334,
-            'join_path': [[[2254329, 2], [2254334, 1]]],
-            'fkey_path': [[2254406, False]],
-            'depth': 1,
-            'multiple_results': False
-        },
-        {
-            'base': 2254329,
-            'target': 2254350,
-            'join_path': [[[2254329, 3], [2254350, 1]]],
-            'fkey_path': [[2254411, False]],
-            'depth': 1,
-            'multiple_results': False
-        },
-        {
-            'base': 2254329,
-            'target': 2254321,
-            'join_path': [[[2254329, 2], [2254334, 1]], [[2254334, 5], [2254321, 1]]],
-            'fkey_path': [[2254406, False], [2254399, False]],
-            'depth': 2,
-            'multiple_results': False
-        },
-        {
-            'base': 2254329,
-            'target': 2254358,
-            'join_path': [
-                [[2254329, 2], [2254334, 1]],
-                [[2254334, 5], [2254321, 1]],
-                [[2254321, 11], [2254358, 1]]
-            ],
-            'fkey_path': [[2254406, False], [2254399, False], [2254394, False]],
-            'depth': 3,
-            'multiple_results': False
-        },
-        {
-            'base': 2254329,
-            'target': 2254313,
-            'join_path': [
-                [[2254329, 2], [2254334, 1]],
-                [[2254334, 5], [2254321, 1]],
-                [[2254321, 10], [2254313, 1]]
-            ],
-            'fkey_path': [[2254406, False], [2254399, False], [2254389, False]],
-            'depth': 3,
-            'multiple_results': False
+        return {
+            'joinable_tables': [
+                {
+                    'base': 2254329,
+                    'depth': 1,
+                    'target': 2254334,
+                    'fkey_path': [[2254406, False]],
+                    'join_path': [[[2254329, 2], [2254334, 1]]],
+                    'multiple_results': False
+                },
+                {
+                    'base': 2254329,
+                    'depth': 1,
+                    'target': 2254334,
+                    'fkey_path': [[2254406, False]],
+                    'join_path': [[[2254329, 2], [2254334, 1]]],
+                    'multiple_results': False
+                },
+                {
+                    'base': 2254329,
+                    'depth': 1,
+                    'target': 2254350,
+                    'fkey_path': [[2254411, False]],
+                    'join_path': [[[2254329, 3], [2254350, 1]]],
+                    'multiple_results': False
+                },
+                {
+                    'base': 2254329,
+                    'depth': 1,
+                    'target': 2254350,
+                    'fkey_path': [[2254411, False]],
+                    'join_path': [[[2254329, 3], [2254350, 1]]],
+                    'multiple_results': False
+                }],
+            'target_table_info': [
+                {
+                    '2254334': 'Items',
+                    'columns': [{'1': {'name': 'id', 'type': 'integer'}},
+                                {'2': {'name': 'Barcode', 'type': 'text'}},
+                                {'3': {'name': 'Acquisition Date', 'type': 'date'}},
+                                {'5': {'name': 'Book', 'type': 'integer'}}]
+                },
+                {
+                    '2254350': 'Patrons',
+                    'columns': [{'1': {'name': 'id', 'type': 'integer'}},
+                                {'2': {'name': 'First Name', 'type': 'text'}},
+                                {'3': {'name': 'Last Name', 'type': 'text'}}]
+                },
+                {
+                    '2254334': 'Items',
+                    'columns': [{'1': {'name': 'id', 'type': 'integer'}},
+                                {'2': {'name': 'Barcode', 'type': 'text'}},
+                                {'3': {'name': 'Acquisition Date', 'type': 'date'}},
+                                {'5': {'name': 'Book', 'type': 'integer'}}]
+                },
+                {
+                    '2254350': 'Patrons',
+                    'columns': [{'1': {'name': 'id', 'type': 'integer'}},
+                                {'2': {'name': 'First Name', 'type': 'text'}},
+                                {'3': {'name': 'Last Name', 'type': 'text'}}]
+                }]
         }
-    ]
+    expected_dict = {
+        'joinable_tables': [
+            {
+                'base': 2254329,
+                'depth': 1,
+                'target': 2254334,
+                'fkey_path': [[2254406, False]],
+                'join_path': [[[2254329, 2], [2254334, 1]]],
+                'multiple_results': False
+            },
+            {
+                'base': 2254329,
+                'depth': 1,
+                'target': 2254334,
+                'fkey_path': [[2254406, False]],
+                'join_path': [[[2254329, 2], [2254334, 1]]],
+                'multiple_results': False
+            },
+            {
+                'base': 2254329,
+                'depth': 1,
+                'target': 2254350,
+                'fkey_path': [[2254411, False]],
+                'join_path': [[[2254329, 3], [2254350, 1]]],
+                'multiple_results': False
+            },
+            {
+                'base': 2254329,
+                'depth': 1,
+                'target': 2254350,
+                'fkey_path': [[2254411, False]],
+                'join_path': [[[2254329, 3], [2254350, 1]]],
+                'multiple_results': False
+            }],
+        'target_table_info': [
+            {
+                '2254334': 'Items',
+                'columns': [{'1': {'name': 'id', 'type': 'integer'}},
+                            {'2': {'name': 'Barcode', 'type': 'text'}},
+                            {'3': {'name': 'Acquisition Date', 'type': 'date'}},
+                            {'5': {'name': 'Book', 'type': 'integer'}}]
+            },
+            {
+                '2254350': 'Patrons',
+                'columns': [{'1': {'name': 'id', 'type': 'integer'}},
+                            {'2': {'name': 'First Name', 'type': 'text'}},
+                            {'3': {'name': 'Last Name', 'type': 'text'}}]
+            },
+            {
+                '2254334': 'Items',
+                'columns': [{'1': {'name': 'id', 'type': 'integer'}},
+                            {'2': {'name': 'Barcode', 'type': 'text'}},
+                            {'3': {'name': 'Acquisition Date', 'type': 'date'}},
+                            {'5': {'name': 'Book', 'type': 'integer'}}]
+            },
+            {
+                '2254350': 'Patrons',
+                'columns': [{'1': {'name': 'id', 'type': 'integer'}},
+                            {'2': {'name': 'First Name', 'type': 'text'}},
+                            {'3': {'name': 'Last Name', 'type': 'text'}}]
+            }]
+    }
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
     monkeypatch.setattr(tables.base, 'list_joinable_tables', mock_list_joinable_tables)
-    actual_list = tables.list_joinable(table_oid=2254329, database_id=11, max_depth=3, request=request)
-    assert expected_list == actual_list
+    actual_dict = tables.list_joinable(table_oid=2254329, database_id=11, max_depth=1, request=request)
+    assert expected_dict == actual_dict
