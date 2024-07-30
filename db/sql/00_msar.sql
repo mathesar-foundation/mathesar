@@ -3439,6 +3439,71 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_grouping_columns_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
+SELECT string_agg(quote_ident(msar.get_column_name(tab_id, col_id::smallint)), ', ')
+FROM jsonb_array_elements_text(group_ -> 'columns') AS col_id
+WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT')
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_group_id_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
+SELECT 'dense_rank() OVER (ORDER BY ' || msar.build_grouping_columns_expr(tab_id, group_) || ')';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_group_count_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
+SELECT 'count(1) OVER (PARTITION BY ' || msar.build_grouping_columns_expr(tab_id, group_) || ')';
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_grouping_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
+SELECT concat(
+  COALESCE(msar.build_group_id_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gid, ',
+  COALESCE(msar.build_group_count_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gcount'
+);
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_results_jsonb_expr(tab_id oid, cte_name text) RETURNS TEXT AS $$
+SELECT 'coalesce(jsonb_agg(json_build_object('
+  || string_agg(format('%1$L, %2$I.%1$I', attnum, cte_name), ', ')
+  || ')), jsonb_build_array())'
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_grouping_results_jsonb_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$
+SELECT format(
+  $gj$
+    jsonb_build_object(
+      'groups', jsonb_agg(
+        DISTINCT jsonb_build_object(
+          'gid', %2$I.__mathesar_gid,
+          'gcount', %2$I.__mathesar_gcount,
+          'results_eq', jsonb_build_object(%1$s)
+        )
+      )
+    )
+  $gj$,
+  string_agg(format('%1$L, %2$I.%1$I', col_id, cte_name), ', '),
+  cte_name
+)
+FROM jsonb_array_elements_text(group_ -> 'columns') AS col_id
+WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_selectable_column_expr(tab_id oid) RETURNS text AS $$/*
 Build an SQL select-target expression of only columns to which the user has access.
 
@@ -3489,15 +3554,16 @@ BEGIN
     $q$
     WITH count_cte AS (
       SELECT count(1) AS count FROM %2$I.%3$I %7$s
-    ), results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
+    ), enriched_results_cte AS (
+      SELECT %1$s, %8$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
     )
     SELECT jsonb_build_object(
-      'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
+      'results', %9$s,
       'count', coalesce(max(count_cte.count), 0),
+      'grouping', %10$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
-    FROM results_cte, count_cte
+    FROM enriched_results_cte, count_cte
     $q$,
     msar.build_selectable_column_expr(tab_id),
     msar.get_relation_schema_name(tab_id),
@@ -3505,7 +3571,10 @@ BEGIN
     limit_,
     offset_,
     msar.build_order_by_expr(tab_id, order_),
-    msar.build_where_clause(tab_id, filter_)
+    msar.build_where_clause(tab_id, filter_),
+    msar.build_grouping_expr(tab_id, group_),
+    msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte'),
+    COALESCE(msar.build_grouping_results_jsonb_expr(tab_id, 'enriched_results_cte', group_), 'NULL')
   ) INTO records;
   RETURN records;
 END;
