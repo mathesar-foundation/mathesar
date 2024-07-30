@@ -45,18 +45,18 @@ export class ColumnsDataStore extends EventHandler<{
 
   constructor({
     database,
-    tableOid,
+    table,
     hiddenColumns,
     shareConsumer,
   }: {
     database: Pick<Database, 'id'>;
-    tableOid: Table['oid'];
+    table: Pick<Table, 'oid'>;
     /** Values are column ids */
     hiddenColumns?: Iterable<number>;
     shareConsumer?: ShareConsumer;
   }) {
     super();
-    this.apiContext = { database_id: database.id, table_oid: tableOid };
+    this.apiContext = { database_id: database.id, table_oid: table.oid };
     this.shareConsumer = shareConsumer;
     this.hiddenColumns = new WritableSet(hiddenColumns);
     this.columns = derived(

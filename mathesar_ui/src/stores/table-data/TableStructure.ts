@@ -33,11 +33,8 @@ export class TableStructure {
 
   constructor(props: TableStructureProps) {
     this.oid = props.table.oid;
-    this.columnsDataStore = new ColumnsDataStore({
-      database: props.database,
-      tableOid: this.oid,
-    });
-    this.constraintsDataStore = new ConstraintsDataStore({ tableId: this.oid });
+    this.columnsDataStore = new ColumnsDataStore(props);
+    this.constraintsDataStore = new ConstraintsDataStore(props);
     this.processedColumns = derived(
       [this.columnsDataStore.columns, this.constraintsDataStore],
       ([columns, constraintsData]) =>

@@ -70,12 +70,13 @@ export class TabularData {
     this.shareConsumer = props.shareConsumer;
     this.columnsDataStore = new ColumnsDataStore({
       database: props.database,
-      tableOid: this.table.oid,
+      table: this.table,
       hiddenColumns: contextualFilters.keys(),
       shareConsumer: this.shareConsumer,
     });
     this.constraintsDataStore = new ConstraintsDataStore({
-      tableId: this.table.oid,
+      database: props.database,
+      table: props.table,
       shareConsumer: this.shareConsumer,
     });
     this.recordsData = new RecordsData({

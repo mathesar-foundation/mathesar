@@ -1,5 +1,5 @@
-import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
 import type { Column } from '@mathesar/api/rpc/columns';
+import type { FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 import type {

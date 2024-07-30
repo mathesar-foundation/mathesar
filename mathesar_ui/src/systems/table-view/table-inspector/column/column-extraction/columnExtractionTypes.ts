@@ -1,4 +1,4 @@
-import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
+import type { FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 

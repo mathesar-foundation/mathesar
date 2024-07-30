@@ -124,7 +124,7 @@
     {/if}
 
     {#if column}
-      {@const referentTableId = column.linkFk?.referent_table}
+      {@const referentTableId = column.linkFk?.referent_table_oid}
       {@const referentTable =
         referentTableId === undefined
           ? undefined

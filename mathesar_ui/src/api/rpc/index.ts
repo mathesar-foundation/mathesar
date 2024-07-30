@@ -4,6 +4,7 @@ import { buildRpcApi } from '@mathesar/packages/json-rpc-client-builder';
 
 import { columns } from './columns';
 import { configured_roles } from './configured_roles';
+import { constraints } from './constraints';
 import { database_setup } from './database_setup';
 import { databases } from './databases';
 import { schemas } from './schemas';
@@ -22,5 +23,6 @@ export const api = buildRpcApi({
     servers,
     tables,
     columns,
+    constraints,
   },
 });

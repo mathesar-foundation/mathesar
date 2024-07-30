@@ -101,7 +101,7 @@
     try {
       await constraintsDataStore.add({
         columns: constraintColumns.map((c) => c.id),
-        type: 'unique',
+        type: 'u',
         name: constraintName,
       });
       // Why init before close when we also init on open? Because without init

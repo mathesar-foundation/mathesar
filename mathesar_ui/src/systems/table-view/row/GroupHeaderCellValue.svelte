@@ -17,7 +17,7 @@
     .get(String(columnId))
     ?.get(recordId);
   $: recordPageHref = $storeToGetRecordPageUrl({
-    tableId: processedColumnsMap?.get(columnId)?.linkFk?.referent_table,
+    tableId: processedColumnsMap?.get(columnId)?.linkFk?.referent_table_oid,
     recordId,
   });
 </script>
