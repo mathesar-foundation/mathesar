@@ -10,7 +10,6 @@
   "actions": "Actions",
   "add": "Add",
   "add_columns_to_exploration_empty_message": "This exploration does not contain any columns. Edit the exploration to add columns to it.",
-  "add_database_connection": "Add Database Connection",
   "add_filter": "Add Filter",
   "add_new_filter": "Add New Filter",
   "add_new_grouping": "Add New Grouping",

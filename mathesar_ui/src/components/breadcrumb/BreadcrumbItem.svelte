@@ -33,9 +33,7 @@
   <DatabaseSelector />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={HOME_URL}>
-      <NameWithIcon icon={iconConnection}>
-        {$_('databases')}
-      </NameWithIcon>
+      {$_('databases')}
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'database'}
