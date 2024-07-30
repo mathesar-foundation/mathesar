@@ -77,7 +77,10 @@
     label={$_('password')}
     layout="stacked"
     field={password}
-    input={{ component: PasswordInput }}
+    input={{
+      component: PasswordInput,
+      props: { autocomplete: 'new-password' },
+    }}
   />
   <FieldLayout>
     <InstallationSchemaSelector {installationSchemas} />
