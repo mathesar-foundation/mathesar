@@ -3,13 +3,12 @@
 
   import type { Database } from '@mathesar/api/rpc/databases';
   import {
+    FieldLayout,
     FormSubmit,
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
-  import Form from '@mathesar/components/Form.svelte';
-  import FormField from '@mathesar/components/FormField.svelte';
   import { databasesStore } from '@mathesar/stores/databases';
   import { portalToWindowFooter } from '@mathesar-component-library';
 
@@ -37,15 +36,11 @@
 </script>
 
 <div class="create-db-form">
-  <Form>
-    <FormField>
-      <Field label={$_('name')} layout="stacked" field={databaseName} />
-    </FormField>
+  <Field label={$_('database_name')} layout="stacked" field={databaseName} />
 
-    <FormField>
-      <InstallationSchemaSelector {installationSchemas} />
-    </FormField>
-  </Form>
+  <FieldLayout>
+    <InstallationSchemaSelector {installationSchemas} />
+  </FieldLayout>
 
   <div use:portalToWindowFooter class="footer">
     <FormSubmit
@@ -53,7 +48,7 @@
       catchErrors
       {onCancel}
       onProceed={createDatabase}
-      proceedButton={{ label: $_('add_connection') }}
+      proceedButton={{ label: $_('create_database') }}
       cancelButton={{ label: $_('cancel') }}
     />
   </div>

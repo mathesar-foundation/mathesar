@@ -3,15 +3,15 @@
 
   import type { Database } from '@mathesar/api/rpc/databases';
   import {
+    FieldLayout,
     FormSubmit,
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
-  import Form from '@mathesar/components/Form.svelte';
-  import FormField from '@mathesar/components/FormField.svelte';
   import { databasesStore } from '@mathesar/stores/databases';
   import {
+    NumberInput,
     PasswordInput,
     portalToWindowFooter,
   } from '@mathesar-component-library';
@@ -47,37 +47,41 @@
   }
 </script>
 
-<div class="create-db-form">
-  <Form>
-    <FormField>
+<div class="connect-db-form">
+  <div class="field-group-horizontal">
+    <div>
       <Field label={$_('host')} layout="stacked" field={host} />
-    </FormField>
-
-    <FormField>
-      <Field label={$_('port')} layout="stacked" field={port} />
-    </FormField>
-
-    <FormField>
-      <Field label={$_('name')} layout="stacked" field={databaseName} />
-    </FormField>
-
-    <FormField>
-      <Field label={$_('username')} layout="stacked" field={role} />
-    </FormField>
-
-    <FormField>
+    </div>
+    <div>
       <Field
-        label={$_('password')}
+        label={$_('port')}
         layout="stacked"
-        field={password}
-        input={{ component: PasswordInput }}
+        field={port}
+        input={{ component: NumberInput }}
       />
-    </FormField>
-
-    <FormField>
-      <InstallationSchemaSelector {installationSchemas} />
-    </FormField>
-  </Form>
+    </div>
+  </div>
+  <Field
+    label={$_('database_name')}
+    layout="stacked"
+    field={databaseName}
+    help={$_('make_sure_database_exists')}
+  />
+  <Field
+    label={$_('username')}
+    layout="stacked"
+    field={role}
+    help={$_('user_needs_create_connect_privileges')}
+  />
+  <Field
+    label={$_('password')}
+    layout="stacked"
+    field={password}
+    input={{ component: PasswordInput }}
+  />
+  <FieldLayout>
+    <InstallationSchemaSelector {installationSchemas} />
+  </FieldLayout>
 
   <div use:portalToWindowFooter class="footer">
     <FormSubmit
@@ -85,8 +89,17 @@
       catchErrors
       {onCancel}
       onProceed={createDatabase}
-      proceedButton={{ label: $_('add_connection') }}
+      proceedButton={{ label: $_('connect_database') }}
       cancelButton={{ label: $_('cancel') }}
     />
   </div>
 </div>
+
+<style>
+  .field-group-horizontal {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+</style>

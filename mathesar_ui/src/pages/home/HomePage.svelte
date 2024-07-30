@@ -4,7 +4,7 @@
   import type { Database } from '@mathesar/api/rpc/databases';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { iconAddNew } from '@mathesar/icons';
+  import { iconConnection } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { databasesStore } from '@mathesar/stores/databases';
@@ -65,7 +65,7 @@
       <DatabasesEmptyState />
     {:else}
       <EntityContainerWithFilterBar
-        searchPlaceholder={$_('search_database_connections')}
+        searchPlaceholder={$_('search_databases')}
         bind:searchQuery={filterQuery}
         on:clear={handleClearFilterQuery}
       >
@@ -75,8 +75,8 @@
               appearance="primary"
               on:click={() => connectDbModalController.open()}
             >
-              <Icon {...iconAddNew} />
-              <span>{$_('add_database_connection')}</span>
+              <Icon {...iconConnection} />
+              <span>{$_('connect_database')}</span>
             </Button>
           {/if}
         </svelte:fragment>
