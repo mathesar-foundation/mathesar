@@ -23,7 +23,6 @@ export interface Table extends RawTable {
 export type JoinPath = [number, number][];
 
 export interface JoinableTable {
-  base: Table['oid'];
   target: Table['oid'];
   join_path: JoinPath;
   /**
