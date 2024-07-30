@@ -85,8 +85,6 @@ def run_exploration(exploration_def, database_id, conn):
                 engine=engine,
                 filter=params.get('filter', None)
             ),
-            "grouping": None,
-            "preview_data": None,
             "results": processed_records
         },
         "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
