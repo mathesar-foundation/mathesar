@@ -3239,12 +3239,12 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION msar.format_data(val date) RETURNS text AS $$
 SELECT to_char(val, 'YYYY-MM-DD AD');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val time without time zone) RETURNS text AS $$
 SELECT concat(to_char(val, 'HH24:MI'), ':', to_char(date_part('seconds', val), 'FM00.0999999999'));
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val time with time zone) RETURNS text AS $$
@@ -3262,7 +3262,7 @@ SELECT CASE
       ltrim(to_char(date_part('timezone_minute', val), '00'), '+- ')
     )
 END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val timestamp without time zone) RETURNS text AS $$
@@ -3272,7 +3272,7 @@ SELECT
     ':', to_char(date_part('seconds', val), 'FM00.0999999999'),
     to_char(val, ' BC')
   );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val timestamp with time zone) RETURNS text AS $$
@@ -3290,19 +3290,19 @@ SELECT CASE
       ':', ltrim(to_char(date_part('timezone_minute', val), '00'), '+- '), to_char(val, ' BC')
     )
 END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val interval) returns text AS $$
 SELECT concat(
   to_char(val, 'PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'), date_part('seconds', val), 'S'
 );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val anyelement) returns anyelement AS $$
 SELECT val;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 DROP TABLE IF EXISTS msar.expr_templates;
@@ -3327,6 +3327,10 @@ INSERT INTO msar.expr_templates VALUES
   -- json(b) filters and expressions
   ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
   ('json_array_contains', '(%s)::jsonb @> (%s)::jsonb'),
+  -- date part extractors
+  ('truncate_to_year', 'to_char(%s, ''YYYY'')'),
+  ('truncate_to_month', 'to_char(%s, ''YYYY-MM'')'),
+  ('truncate_to_day', 'to_char(%s, ''YYYY-MM-DD'')'),
   -- URI part getters
   ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
   ('uri_authority', 'mathesar_types.uri_authority(%s)'),
