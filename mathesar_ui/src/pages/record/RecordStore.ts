@@ -1,11 +1,11 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
-import type { Response as ApiResponse } from '@mathesar/api/rest/types/tables/records';
 import {
   type RequestStatus,
   getAPI,
   patchAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type { RecordsResponse } from '@mathesar/api/rpc/records';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { WritableMap } from '@mathesar/component-library';
 import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
@@ -59,7 +59,7 @@ export default class RecordStore {
     void this.fetch();
   }
 
-  private updateSelfWithApiResponseData(response: ApiResponse): void {
+  private updateSelfWithApiResponseData(response: RecordsResponse): void {
     const result = response.results[0];
     this.fieldValues.reconstruct(
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),

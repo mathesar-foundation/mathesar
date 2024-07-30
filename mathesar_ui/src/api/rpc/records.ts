@@ -1,3 +1,5 @@
+import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+
 export interface Grouping {
   /** Each string is a column id */
   columns: number[];
@@ -34,11 +36,11 @@ export type FilterCondition = Record<string, FilterConditionParams>;
 type MakeFilteringOption<U> = U extends string
   ? { [k in U]: FilterRequest[] }
   : never;
-export type FilterRequest =
-  | FilterCondition
-  | MakeFilteringOption<FilterCombination>;
+type FilterRequest = FilterCondition | MakeFilteringOption<FilterCombination>;
 
-export interface GetRequestParams {
+export interface RecordsListParams {
+  database_id: number;
+  table_oid: number;
   limit?: number;
   offset?: number;
   order_by?: SortingEntry[];
@@ -117,7 +119,7 @@ export interface ApiDataForRecordSummariesInFkColumn {
   data: Record<string, ApiRecordSummaryInputData>;
 }
 
-export interface Response {
+export interface RecordsResponse {
   count: number;
   grouping: Grouping | null;
   results: Result[];
@@ -126,3 +128,7 @@ export interface Response {
    */
   preview_data: ApiDataForRecordSummariesInFkColumn[] | null;
 }
+
+export const records = {
+  list: rpcMethodTypeContainer<RecordsListParams, RecordsResponse>(),
+};

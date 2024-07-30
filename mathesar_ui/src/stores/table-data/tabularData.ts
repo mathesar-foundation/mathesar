@@ -80,7 +80,8 @@ export class TabularData {
       shareConsumer: this.shareConsumer,
     });
     this.recordsData = new RecordsData({
-      tableId: this.table.oid,
+      database: props.database,
+      table: props.table,
       meta: this.meta,
       columnsDataStore: this.columnsDataStore,
       contextualFilters,

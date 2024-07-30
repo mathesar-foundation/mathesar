@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { Response as ApiRecordsResponse } from '@mathesar/api/rest/types/tables/records';
   import { States, postAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import type { RecordsResponse } from '@mathesar/api/rpc/records';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
@@ -76,7 +76,7 @@
     const body = getDataForNewRecord();
     try {
       isSubmittingNewRecord = true;
-      const response = await postAPI<ApiRecordsResponse>(url, body);
+      const response = await postAPI<RecordsResponse>(url, body);
       const record = response.results[0];
       const recordId = getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];

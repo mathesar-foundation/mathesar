@@ -1,4 +1,4 @@
-import type { GetRequestParams } from '@mathesar/api/rest/types/tables/records';
+import type { RecordsListParams } from '@mathesar/api/rpc/records';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 
 export interface GroupEntry {
@@ -75,11 +75,11 @@ export class Grouping {
     });
   }
 
-  recordsRequestParams(): Pick<GetRequestParams, 'grouping'> {
+  recordsRequestParams(): Pick<RecordsListParams, 'grouping'> {
     if (!this.entries.length) {
       return {};
     }
-    const request: GetRequestParams['grouping'] = {
+    const request: RecordsListParams['grouping'] = {
       columns: [],
       preproc: [],
     };

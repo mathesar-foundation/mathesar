@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { FilterCombination } from '@mathesar/api/rest/types/tables/records';
+  import type { FilterCombination } from '@mathesar/api/rpc/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
   import {
     type FilterEntry,
