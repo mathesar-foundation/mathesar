@@ -34,7 +34,7 @@
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={HOME_URL}>
       <NameWithIcon icon={iconConnection}>
-        {$_('connections')}
+        {$_('databases')}
       </NameWithIcon>
     </BreadcrumbLink>
   </div>

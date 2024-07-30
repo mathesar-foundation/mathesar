@@ -17,7 +17,7 @@
         <Icon {...iconConnection} size="var(--size-super-ultra-large)" />
       </div>
       <div data-identifier="no-connections-text">
-        {$_('no_database_connections_yet')}
+        {$_('no_databases_connected')}
       </div>
       <div data-identifier="no-connections-help">
         {$_('setup_connections_help')}

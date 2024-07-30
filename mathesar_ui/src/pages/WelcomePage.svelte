@@ -28,7 +28,7 @@
   <div data-identifier="welcome-container">
     <section>
       <div class="header">
-        {$_('database_connections')}
+        {$_('databases')}
       </div>
       <DatabasesEmptyState />
     </section>

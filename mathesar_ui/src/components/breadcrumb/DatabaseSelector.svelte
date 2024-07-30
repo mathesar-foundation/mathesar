@@ -29,12 +29,12 @@
 </script>
 
 <BreadcrumbSelector
-  data={new Map([[$_('connections'), breadcrumbEntries]])}
-  triggerLabel={$_('choose_connection')}
+  data={new Map([[$_('databases'), breadcrumbEntries]])}
+  triggerLabel={$_('choose_database')}
   persistentLinks={[
     {
       type: 'simple',
-      label: $_('manage_connections'),
+      label: $_('manage_databases'),
       href: HOME_URL,
       icon: iconConnection,
       // TODO: Handle active states for persistent links
