@@ -43,24 +43,26 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($_('connections'))}</title>
+  <title>{makeSimplePageTitle($_('databases'))}</title>
 </svelte:head>
 
 <LayoutWithHeader
   restrictWidth
   cssVariables={{
     '--page-padding': '0',
+    '--layout-background-color': 'var(--sand-100)',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
+    '--AppSecondaryHeader__padding': 'var(--size-x-large) 0',
   }}
 >
-  <div data-identifier="connections-header">
+  <div data-identifier="databases-header">
     <span>
-      {$_('database_connections')}
+      {$_('databases')}
       {#if $databases.size}({$databases.size}){/if}
     </span>
   </div>
 
-  <section data-identifier="connections-container">
+  <section data-identifier="databases-container">
     {#if $databases.size === 0}
       <DatabasesEmptyState />
     {:else}
@@ -81,9 +83,9 @@
           {/if}
         </svelte:fragment>
 
-        <p slot="resultInfo">
+        <span slot="resultInfo">
           <RichText
-            text={$_('connections_matching_search', {
+            text={$_('databases_matching_search', {
               values: {
                 count: filteredDatabases.length,
               },
@@ -94,23 +96,14 @@
               <strong>{filterQuery}</strong>
             {/if}
           </RichText>
-        </p>
+        </span>
 
         <svelte:fragment slot="content">
           {#if filteredDatabases.length}
-            <div data-identifier="connections-list-grid">
-              <table>
-                <thead>
-                  <tr>
-                    <th>{$_('database_name')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {#each filteredDatabases as database (database.id)}
-                    <DatabaseRow {database} />
-                  {/each}
-                </tbody>
-              </table>
+            <div data-identifier="databases-list-grid">
+              {#each filteredDatabases as database (database.id)}
+                <DatabaseRow {database} />
+              {/each}
             </div>
           {/if}
         </svelte:fragment>
@@ -122,11 +115,10 @@
 <ConnectDatabaseModal controller={connectDbModalController} />
 
 <style lang="scss">
-  [data-identifier='connections-header'] {
+  [data-identifier='databases-header'] {
     display: flex;
     padding: var(--size-x-large);
     align-items: center;
-    border-bottom: 1px solid var(--sand-200);
 
     span {
       flex: 1 0 0;
@@ -136,37 +128,17 @@
     }
   }
 
-  [data-identifier='connections-container'] {
+  [data-identifier='databases-container'] {
     display: flex;
     padding: var(--size-x-large);
     flex-direction: column;
     align-items: stretch;
     gap: var(--size-x-small);
+  }
 
-    [data-identifier='connections-list-grid'] {
-      border: 1px solid var(--slate-200);
-      border-radius: var(--border-radius-m);
-      overflow: auto;
-
-      table {
-        border-collapse: collapse;
-        min-width: 100%;
-      }
-
-      thead {
-        border-bottom: 1px solid var(--slate-200);
-        background: var(--slate-100);
-
-        th {
-          font-weight: 500;
-          padding: var(--size-xx-small) var(--size-large);
-          text-align: left;
-        }
-      }
-
-      tbody > :global(tr:not(first-child)) {
-        border-top: 1px solid var(--slate-200);
-      }
-    }
+  [data-identifier='databases-list-grid'] {
+    display: grid;
+    gap: 1rem;
+    margin-top: var(--size-x-large);
   }
 </style>
