@@ -49,13 +49,6 @@
       ? null
       : {
           is_dynamic: !!column.column.default?.is_dynamic,
-
-          // TODO_3704:
-          //
-          // We need to check with the backend team if we should actually be
-          // stringifying `value` in this case. The API docs indicated that
-          // `value` is to only be accepted as a string. But that seems weird to
-          // me.
           value: String(value),
         };
     try {
