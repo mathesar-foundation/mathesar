@@ -4,7 +4,7 @@
   import type {
     JoinableTable,
     JoinableTablesResult,
-  } from '@mathesar/api/rest/types/tables/joinable_tables';
+  } from '@mathesar/api/rpc/tables';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconRecord } from '@mathesar/icons';
@@ -27,7 +27,7 @@
   function buildWidgetInput(joinableTable: JoinableTable) {
     const table = $currentTablesData.tablesMap.get(joinableTable.target);
     if (!table) return undefined;
-    const id = joinableTable.jp_path[0].slice(-1)[0];
+    const id = joinableTable.join_path[0].slice(-1)[0];
     const name = columnNameMap.get(id) ?? `(${$_('unknown_column')})`;
     return { table, fkColumn: { id, name } };
   }

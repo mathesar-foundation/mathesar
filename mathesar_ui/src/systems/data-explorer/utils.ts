@@ -8,12 +8,12 @@ import type {
   QueryResultColumn,
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
-import type {
-  JoinableTablesResult,
-  JpPath,
-} from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { Table } from '@mathesar/api/rpc/tables';
+import type {
+  JoinPath,
+  JoinableTablesResult,
+  Table,
+} from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
@@ -74,7 +74,7 @@ export interface InputColumn {
   id: Column['id'];
   name: Column['name'];
   tableName: Table['name'];
-  jpPath?: JpPath;
+  jpPath?: JoinPath;
   type: Column['type'];
   tableId: Table['oid'];
 }
@@ -132,9 +132,9 @@ export function getLinkFromColumn(
   const allLinksFromColumn = result.joinable_tables.filter(
     (entry) =>
       entry.depth === depth &&
-      entry.fk_path[depth - 1][1] === false &&
-      entry.jp_path[depth - 1][0] === columnId &&
-      entry.jp_path.join(',').indexOf(parentPath) === 0,
+      entry.fkey_path[depth - 1][1] === false &&
+      entry.join_path[depth - 1][0] === columnId &&
+      entry.join_path.join(',').indexOf(parentPath) === 0,
   );
   if (allLinksFromColumn.length === 0) {
     return undefined;
@@ -149,7 +149,7 @@ export function getLinkFromColumn(
     id: link.target,
     name: toTableInfo.name,
   };
-  const toColumnId = link.jp_path[depth - 1][1];
+  const toColumnId = link.join_path[depth - 1][1];
   const toColumn = {
     id: toColumnId,
     name: result.columns[toColumnId].name,
@@ -168,9 +168,9 @@ export function getLinkFromColumn(
             result,
             columnIdInLinkedTable,
             depth + 1,
-            link.jp_path.join(','),
+            link.join_path.join(','),
           ),
-          jpPath: link.jp_path,
+          jpPath: link.join_path,
           producesMultipleResults: link.multiple_results,
         },
       ];
@@ -248,15 +248,15 @@ export function getTablesThatReferenceBaseTable(
   baseTable: Pick<Table, 'oid' | 'name'>,
 ): ReferencedByTable[] {
   const referenceLinks = result.joinable_tables.filter(
-    (entry) => entry.depth === 1 && entry.fk_path[0][1] === true,
+    (entry) => entry.depth === 1 && entry.fkey_path[0][1] === true,
   );
   const references: ReferencedByTable[] = [];
 
   referenceLinks.forEach((reference) => {
     const tableId = reference.target;
     const table = result.tables[tableId];
-    const baseTableColumnId = reference.jp_path[0][0];
-    const referenceTableColumnId = reference.jp_path[0][1];
+    const baseTableColumnId = reference.join_path[0][0];
+    const referenceTableColumnId = reference.join_path[0][1];
 
     // TODO_BETA: figure out how to deal with the fact that our `Table` type no
     // longer has a `columns` field.
@@ -285,9 +285,9 @@ export function getTablesThatReferenceBaseTable(
                 result,
                 columnIdInTable,
                 2,
-                reference.jp_path.join(','),
+                reference.join_path.join(','),
               ),
-              jpPath: reference.jp_path,
+              jpPath: reference.join_path,
               producesMultipleResults: reference.multiple_results,
             },
           ];

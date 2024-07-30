@@ -1,4 +1,4 @@
-import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
+import type { JoinableTablesResult } from '@mathesar/api/rpc/tables';
 
 export const ItemsTableId = 75;
 export const CheckoutsPkColumnId = 216;
@@ -8,25 +8,25 @@ export const checkoutsJoinableTables: JoinableTablesResult = {
   joinable_tables: [
     {
       target: ItemsTableId,
-      jp_path: [[CheckoutsPkColumnId, ItemsPkColumnId]],
-      fk_path: [[188, false]],
+      join_path: [[CheckoutsPkColumnId, ItemsPkColumnId]],
+      fkey_path: [[188, false]],
       depth: 1,
       multiple_results: false,
     },
     {
       target: 72,
-      jp_path: [[217, 228]],
-      fk_path: [[189, false]],
+      join_path: [[217, 228]],
+      fkey_path: [[189, false]],
       depth: 1,
       multiple_results: false,
     },
     {
       target: 78,
-      jp_path: [
+      join_path: [
         [CheckoutsPkColumnId, ItemsPkColumnId],
         [222, 229],
       ],
-      fk_path: [
+      fkey_path: [
         [188, false],
         [192, false],
       ],
@@ -35,12 +35,12 @@ export const checkoutsJoinableTables: JoinableTablesResult = {
     },
     {
       target: 74,
-      jp_path: [
+      join_path: [
         [CheckoutsPkColumnId, ItemsPkColumnId],
         [222, 229],
         [231, 235],
       ],
-      fk_path: [
+      fkey_path: [
         [188, false],
         [192, false],
         [196, false],
@@ -50,12 +50,12 @@ export const checkoutsJoinableTables: JoinableTablesResult = {
     },
     {
       target: 77,
-      jp_path: [
+      join_path: [
         [CheckoutsPkColumnId, ItemsPkColumnId],
         [222, 229],
         [232, 211],
       ],
-      fk_path: [
+      fkey_path: [
         [188, false],
         [192, false],
         [195, false],
@@ -196,25 +196,25 @@ export const selfRefTableJoinableTables: JoinableTablesResult = {
   joinable_tables: [
     {
       target: SelfRefTableId,
-      jp_path: [[SelfRefTableFkColumnId, SelfRefTablePkColumnId]],
-      fk_path: [[2529, false]],
+      join_path: [[SelfRefTableFkColumnId, SelfRefTablePkColumnId]],
+      fkey_path: [[2529, false]],
       depth: 1,
       multiple_results: false,
     },
     {
       target: SelfRefTableId,
-      jp_path: [[SelfRefTablePkColumnId, SelfRefTableFkColumnId]],
-      fk_path: [[2529, true]],
+      join_path: [[SelfRefTablePkColumnId, SelfRefTableFkColumnId]],
+      fkey_path: [[2529, true]],
       depth: 1,
       multiple_results: true,
     },
     {
       target: SelfRefTableId,
-      jp_path: [
+      join_path: [
         [SelfRefTableFkColumnId, SelfRefTablePkColumnId],
         [SelfRefTableFkColumnId, SelfRefTablePkColumnId],
       ],
-      fk_path: [
+      fkey_path: [
         [2529, false],
         [2529, false],
       ],
@@ -223,11 +223,11 @@ export const selfRefTableJoinableTables: JoinableTablesResult = {
     },
     {
       target: SelfRefTableId,
-      jp_path: [
+      join_path: [
         [SelfRefTablePkColumnId, SelfRefTableFkColumnId],
         [SelfRefTablePkColumnId, SelfRefTableFkColumnId],
       ],
-      fk_path: [
+      fkey_path: [
         [2529, true],
         [2529, true],
       ],
@@ -236,12 +236,12 @@ export const selfRefTableJoinableTables: JoinableTablesResult = {
     },
     {
       target: SelfRefTableId,
-      jp_path: [
+      join_path: [
         [SelfRefTableFkColumnId, SelfRefTablePkColumnId],
         [SelfRefTableFkColumnId, SelfRefTablePkColumnId],
         [SelfRefTableFkColumnId, SelfRefTablePkColumnId],
       ],
-      fk_path: [
+      fkey_path: [
         [2529, false],
         [2529, false],
         [2529, false],
@@ -251,12 +251,12 @@ export const selfRefTableJoinableTables: JoinableTablesResult = {
     },
     {
       target: SelfRefTableId,
-      jp_path: [
+      join_path: [
         [SelfRefTablePkColumnId, SelfRefTableFkColumnId],
         [SelfRefTablePkColumnId, SelfRefTableFkColumnId],
         [SelfRefTablePkColumnId, SelfRefTableFkColumnId],
       ],
-      fk_path: [
+      fkey_path: [
         [2529, true],
         [2529, true],
         [2529, true],
@@ -376,25 +376,25 @@ export const groupTable: JoinableTablesResult = {
   joinable_tables: [
     {
       target: personTableId,
-      jp_path: [[groupTablePerson1ColumnId, personTablePkColumnId]],
-      fk_path: [[2765, false]],
+      join_path: [[groupTablePerson1ColumnId, personTablePkColumnId]],
+      fkey_path: [[2765, false]],
       depth: 1,
       multiple_results: false,
     },
     {
       target: personTableId,
-      jp_path: [[groupTablePerson2ColumnId, personTablePkColumnId]],
-      fk_path: [[2801, false]],
+      join_path: [[groupTablePerson2ColumnId, personTablePkColumnId]],
+      fkey_path: [[2801, false]],
       depth: 1,
       multiple_results: false,
     },
     {
       target: 1295,
-      jp_path: [
+      join_path: [
         [groupTablePerson1ColumnId, personTablePkColumnId],
         [personTablePkColumnId, groupTablePerson2ColumnId],
       ],
-      fk_path: [
+      fkey_path: [
         [2765, false],
         [2801, true],
       ],
@@ -403,11 +403,11 @@ export const groupTable: JoinableTablesResult = {
     },
     {
       target: 1295,
-      jp_path: [
+      join_path: [
         [groupTablePerson2ColumnId, personTablePkColumnId],
         [personTablePkColumnId, groupTablePerson1ColumnId],
       ],
-      fk_path: [
+      fkey_path: [
         [2801, false],
         [2765, true],
       ],
@@ -416,12 +416,12 @@ export const groupTable: JoinableTablesResult = {
     },
     {
       target: personTableId,
-      jp_path: [
+      join_path: [
         [groupTablePerson1ColumnId, personTablePkColumnId],
         [personTablePkColumnId, groupTablePerson2ColumnId],
         [groupTablePerson1ColumnId, personTablePkColumnId],
       ],
-      fk_path: [
+      fkey_path: [
         [2765, false],
         [2801, true],
         [2765, false],
@@ -431,12 +431,12 @@ export const groupTable: JoinableTablesResult = {
     },
     {
       target: personTableId,
-      jp_path: [
+      join_path: [
         [groupTablePerson2ColumnId, personTablePkColumnId],
         [personTablePkColumnId, groupTablePerson1ColumnId],
         [groupTablePerson2ColumnId, personTablePkColumnId],
       ],
-      fk_path: [
+      fkey_path: [
         [2801, false],
         [2765, true],
         [2801, false],
