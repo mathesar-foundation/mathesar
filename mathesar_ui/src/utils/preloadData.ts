@@ -1,16 +1,18 @@
 import type { QueryInstance } from '@mathesar/api/rest/types/queries';
 import type { User } from '@mathesar/api/rest/users';
-import type { Database } from '@mathesar/api/rpc/databases';
+import type { DatabaseResponse } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { Server } from '@mathesar/api/rpc/servers';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { AbstractTypeResponse } from '@mathesar/AppTypes';
 
 export interface CommonData {
-  databases: Database[];
+  databases: DatabaseResponse[];
+  servers: Server[];
   schemas: Schema[];
   tables: Table[];
   queries: QueryInstance[];
-  current_database: Database['id'] | null;
+  current_database: DatabaseResponse['id'] | null;
   internal_db_connection: {
     database: string;
     host: string;

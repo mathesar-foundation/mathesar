@@ -2,17 +2,22 @@ import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-build
 
 import type { Server } from './servers';
 
-export interface Database {
+export interface DatabaseResponse {
   id: number;
   name: string;
   server_id: Server['id'];
 }
 
+export interface Database extends DatabaseResponse {
+  server_host: Server['host'];
+  server_port: Server['port'];
+}
+
 export const databases = {
   list: rpcMethodTypeContainer<
     {
-      server_id?: Database['server_id'];
+      server_id?: DatabaseResponse['server_id'];
     },
-    Array<Database>
+    Array<DatabaseResponse>
   >(),
 };

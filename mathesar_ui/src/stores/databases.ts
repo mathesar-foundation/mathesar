@@ -29,8 +29,29 @@ class DatabasesStore {
   readonly currentDatabase: Readable<Database | undefined>;
 
   constructor() {
+    const serverMap = new Map(commonData.servers.map((s) => [s.id, s]));
     this.unsortedDatabases.reconstruct(
-      commonData.databases.map((d) => [d.id, d]),
+      commonData.databases.map((d) => {
+        const server = serverMap.get(d.server_id);
+        /**
+         * We're using a default value for host as 'unknown' when server is undefined
+         * instead of throwing an error.
+         *
+         * 1. We don't expect server to be undefined.
+         * 2. This is a runtime operation where the value is based on response from backend,
+         *    so we cannot assume server to be defined even though we expect it to be.
+         * 3. Displaying server info is not an important feature of the app,
+         *    so it's better to fail gracefully than to throw an error and crash the app.
+         */
+        return [
+          d.id,
+          {
+            ...d,
+            server_host: server?.host ?? 'unknown',
+            server_port: server?.port ?? 0,
+          },
+        ];
+      }),
     );
     this.databases = derived(
       this.unsortedDatabases,
@@ -51,17 +72,31 @@ class DatabasesStore {
   async connectExistingDatabase(
     props: Parameters<typeof api.database_setup.connect_existing>[0],
   ) {
-    const { database } = await api.database_setup.connect_existing(props).run();
-    this.addDatabase(database);
-    return database;
+    const { database, server } = await api.database_setup
+      .connect_existing(props)
+      .run();
+    const connectedDatabase: Database = {
+      ...database,
+      server_host: server.host,
+      server_port: server.port,
+    };
+    this.addDatabase(connectedDatabase);
+    return connectedDatabase;
   }
 
   async createNewDatabase(
     props: Parameters<typeof api.database_setup.create_new>[0],
   ) {
-    const { database } = await api.database_setup.create_new(props).run();
-    this.addDatabase(database);
-    return database;
+    const { database, server } = await api.database_setup
+      .create_new(props)
+      .run();
+    const connectedDatabase: Database = {
+      ...database,
+      server_host: server.host,
+      server_port: server.port,
+    };
+    this.addDatabase(connectedDatabase);
+    return connectedDatabase;
   }
 
   setCurrentDatabaseId(databaseId: Database['id']) {

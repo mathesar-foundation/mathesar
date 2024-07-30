@@ -22,7 +22,7 @@
     </div>
     <div class="content">
       <div class="name">{database.name}</div>
-      <div class="server">{database.server_id}</div>
+      <div class="server">{database.server_host}:{database.server_port}</div>
     </div>
   </div>
 </Card>
