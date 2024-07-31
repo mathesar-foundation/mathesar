@@ -9,27 +9,30 @@
   export let description: string;
 </script>
 
-<Button class="option" on:click={changeView}>
-  <div class="icon-holder">
+<Button on:click={changeView}>
+  <div class="content">
     <div class="icon-circle">
       <Icon {...icon} size="2rem" />
     </div>
-  </div>
-  <div class="content-holder">
-    <div class="header">
-      {header}
-    </div>
-    <div class="description">
-      {description}
+    <div>
+      <div class="header">
+        {header}
+      </div>
+      <div class="description">
+        {description}
+      </div>
     </div>
   </div>
 </Button>
 
 <style>
-  .icon-holder {
-    display: flex;
+  .content {
+    display: grid;
     align-items: center;
-    justify-content: center;
+    grid-template-columns: auto 1fr;
+    gap: var(--size-large);
+    text-align: left;
+    padding: var(--size-large);
   }
   .icon-circle {
     display: flex;

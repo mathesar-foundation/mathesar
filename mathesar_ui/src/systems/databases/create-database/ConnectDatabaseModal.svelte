@@ -81,13 +81,5 @@
   div.connect-db-options {
     display: grid;
     grid-gap: var(--size-xx-small);
-
-    > :global(.btn.option) {
-      display: grid;
-      width: 100%;
-      text-align: left;
-      grid-template-columns: 100px 1fr;
-      padding: var(--size-ultra-large) var(--size-large);
-    }
   }
 </style>
