@@ -3347,12 +3347,12 @@ SELECT CASE tree ->> 'type'
 END
 FROM jsonb_array_elements(tree -> 'args') inner_tree, msar.expr_templates
 WHERE tree ->> 'type' = expr_key
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.build_where_clause(rel_id oid, tree jsonb) RETURNS text AS $$
 SELECT 'WHERE ' || msar.build_expr(rel_id, tree);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3362,14 +3362,14 @@ SELECT CASE lower(direction)
   WHEN 'asc' THEN 'ASC'
   WHEN 'desc' THEN 'DESC'
 END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.get_pkey_order(tab_id oid) RETURNS jsonb AS $$
 SELECT jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc'))
 FROM pg_constraint, LATERAL unnest(conkey) attnum
 WHERE contype='p' AND conrelid=tab_id AND has_column_privilege(tab_id, attnum, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$
@@ -3399,7 +3399,7 @@ SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc
 FROM orderable_cte
 -- This privilege check is redundant in context, but may be useful for other callers.
 WHERE has_column_privilege(tab_id, attnum, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3418,7 +3418,7 @@ FROM jsonb_to_recordset(
 )
   AS x(attnum smallint, direction text)
 WHERE has_column_privilege(tab_id, attnum, 'SELECT');
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3435,7 +3435,7 @@ Args:
   order_: A JSONB array defining any desired ordering of columns.
 */
 SELECT 'ORDER BY ' || msar.build_total_order_expr(tab_id, order_)
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3451,19 +3451,19 @@ FROM msar.expr_templates RIGHT JOIN ROWS FROM(
   jsonb_array_elements_text(group_ -> 'preproc')
 ) WITH ORDINALITY AS x(col_id, preproc) ON expr_key = preproc
 WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.build_group_id_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
 SELECT 'dense_rank() OVER (ORDER BY ' || msar.build_grouping_columns_expr(tab_id, group_) || ')';
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
 msar.build_group_count_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
 SELECT 'count(1) OVER (PARTITION BY ' || msar.build_grouping_columns_expr(tab_id, group_) || ')';
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3472,7 +3472,7 @@ SELECT concat(
   COALESCE(msar.build_group_id_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gid, ',
   COALESCE(msar.build_group_count_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gcount'
 );
-$$ LANGUAGE SQL ;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3486,7 +3486,7 @@ WHERE
   AND attnum > 0
   AND NOT attisdropped
   AND has_column_privilege(attrelid, attnum, 'SELECT');
-$$ LANGUAGE SQL ;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3508,7 +3508,7 @@ SELECT format(
 )
 FROM jsonb_array_elements_text(group_ -> 'columns') AS col_id
 WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3530,7 +3530,7 @@ WHERE
   AND attnum > 0
   AND NOT attisdropped
   AND has_column_privilege(attrelid, attnum, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3586,7 +3586,7 @@ BEGIN
   ) INTO records;
   RETURN records;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql STABLE;
 
 
 CREATE OR REPLACE FUNCTION
