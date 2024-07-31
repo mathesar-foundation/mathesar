@@ -146,9 +146,8 @@ BEGIN
     SELECT pga.attrelid AS tt_oid, 
       jsonb_build_object(
         'name', msar.get_relation_name(pga.attrelid),
-        'columns', jsonb_agg(
-            jsonb_build_object(
-              'attnum', pga.attnum,
+        'columns', jsonb_object_agg(
+            pga.attnum, jsonb_build_object(
               'name', pga.attname,
               'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END
             )
