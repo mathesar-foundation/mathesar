@@ -90,11 +90,6 @@ export interface RequiredColumnDisplayOptions {
   /** When `null`, the browser's locale will be used. */
   num_format: NumberFormat | null;
 
-  /**
-   * - `null`: display grouping separators if the locale prefers it.
-   * - `true`: display grouping separators.
-   * - `false`: do not display grouping separators.
-   */
   num_grouping: NumberGrouping;
 
   /** The currency symbol to show for a money type e.g. "$", "€", "NZD", etc. */
