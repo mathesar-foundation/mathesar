@@ -135,24 +135,32 @@ DROP FUNCTION IF EXISTS msar.get_joinable_tables(integer, oid);
 CREATE OR REPLACE FUNCTION
 msar.get_joinable_tables(max_depth integer, table_id oid) RETURNS
 jsonb AS $$
-  WITH jt_cte AS (
-    SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id
-  ), target_cte AS (
-    SELECT jsonb_build_object(
-      pga.attrelid::text, msar.get_relation_name(pga.attrelid),
-      'columns', jsonb_agg(
-        jsonb_build_object(
-          pga.attnum::text, jsonb_build_object(
-            'name', pga.attname, 'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END
+DECLARE
+  joinable_tables jsonb;
+  target_table_info jsonb;
+BEGIN
+  CREATE TEMP TABLE jt_cte AS 
+    SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id;
+  SELECT jsonb_agg(to_jsonb(jt_cte.*)) INTO joinable_tables FROM jt_cte;
+  WITH target_cte AS (
+    SELECT pga.attrelid::text AS tt_oid, 
+      jsonb_build_object(
+        'name', msar.get_relation_name(pga.attrelid),
+        'columns', jsonb_object_agg(
+            pga.attnum::text, jsonb_build_object(
+              'name', pga.attname, 'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END
+            )
           )
-        )
-      )
-    ) as tt
-    FROM pg_catalog.pg_attribute AS pga, jt_cte
-    WHERE pga.attrelid=jt_cte.target AND pga.attnum > 0 and NOT pga.attisdropped GROUP BY pga.attrelid
+      ) AS tt_info
+    FROM pg_catalog.pg_attribute AS pga
+    LEFT JOIN jt_cte ON pga.attrelid = jt_cte.target
+    WHERE pga.attrelid=jt_cte.target AND pga.attnum > 0 and NOT pga.attisdropped
+    GROUP BY pga.attrelid
   )
-  SELECT jsonb_build_object(
-    'joinable_tables', jsonb_agg(to_jsonb(jt_cte.*)),
-    'target_table_info', jsonb_agg(target_cte.tt)
-  ) FROM target_cte, jt_cte
-$$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
+  SELECT jsonb_object_agg(tt_oid, tt_info) INTO target_table_info FROM target_cte;
+  RETURN jsonb_build_object(
+    'joinable_tables', joinable_tables,
+    'target_table_info', target_table_info
+  );
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
