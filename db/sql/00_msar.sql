@@ -3440,9 +3440,17 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION
 msar.build_grouping_columns_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
-SELECT string_agg(quote_ident(msar.get_column_name(tab_id, col_id::smallint)), ', ')
-FROM jsonb_array_elements_text(group_ -> 'columns') AS col_id
-WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT')
+SELECT string_agg(
+  COALESCE(
+    format(expr_template, quote_ident(msar.get_column_name(tab_id, col_id::smallint))),
+    quote_ident(msar.get_column_name(tab_id, col_id::smallint))
+  ), ', ' ORDER BY ordinality
+)
+FROM msar.expr_templates RIGHT JOIN ROWS FROM(
+  jsonb_array_elements_text(group_ -> 'columns'),
+  jsonb_array_elements_text(group_ -> 'preproc')
+) WITH ORDINALITY AS x(col_id, preproc) ON expr_key = preproc
+WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -3464,7 +3472,7 @@ SELECT concat(
   COALESCE(msar.build_group_id_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gid, ',
   COALESCE(msar.build_group_count_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gcount'
 );
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL ;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3478,7 +3486,7 @@ WHERE
   AND attnum > 0
   AND NOT attisdropped
   AND has_column_privilege(attrelid, attnum, 'SELECT');
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL ;
 
 
 CREATE OR REPLACE FUNCTION
