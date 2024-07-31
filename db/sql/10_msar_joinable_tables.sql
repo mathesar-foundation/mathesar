@@ -143,12 +143,14 @@ BEGIN
     SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id;
   SELECT jsonb_agg(to_jsonb(jt_cte.*)) INTO joinable_tables FROM jt_cte;
   WITH target_cte AS (
-    SELECT pga.attrelid::text AS tt_oid, 
+    SELECT pga.attrelid AS tt_oid, 
       jsonb_build_object(
         'name', msar.get_relation_name(pga.attrelid),
-        'columns', jsonb_object_agg(
-            pga.attnum::text, jsonb_build_object(
-              'name', pga.attname, 'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END
+        'columns', jsonb_agg(
+            jsonb_build_object(
+              'attnum', pga.attnum,
+              'name', pga.attname,
+              'type', CASE WHEN attndims>0 THEN '_array' ELSE atttypid::regtype::text END
             )
           )
       ) AS tt_info
