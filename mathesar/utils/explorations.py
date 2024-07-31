@@ -28,7 +28,6 @@ def run_exploration(exploration_def, database_id, conn):
     metadata = get_cached_metadata()
     base_table_oid = exploration_def["base_table_oid"]
     initial_columns = exploration_def['initial_columns']
-    params = exploration_def.get('parameters', {})
     processed_initial_columns = []
     for column in initial_columns:
         jp_path = column.get("join_path")
@@ -58,13 +57,13 @@ def run_exploration(exploration_def, database_id, conn):
         metadata=metadata
     )
     records = db_query.get_records(
-        limit=params.get('limit', 100),
-        offset=params.get('offset', 0),
-        filter=params.get('filter', None),
-        order_by=params.get('order_by', []),
-        group_by=GroupBy(**params.get('grouping')) if params.get('grouping', None) else None,
-        search=params.get('search', []),
-        duplicate_only=params.get('duplicate_only', None)
+        limit=exploration_def.get('limit', 100),
+        offset=exploration_def.get('offset', 0),
+        filter=exploration_def.get('filter', None),
+        order_by=exploration_def.get('order_by', []),
+        group_by=GroupBy(**exploration_def.get('grouping')) if exploration_def.get('grouping', None) else None,
+        search=exploration_def.get('search', []),
+        duplicate_only=exploration_def.get('duplicate_only', None)
     )
     processed_records = process_annotated_records(records)[0]
     column_metadata = _get_exploration_column_metadata(
@@ -82,13 +81,18 @@ def run_exploration(exploration_def, database_id, conn):
             "count": get_count(
                 table=db_query.transformed_relation,
                 engine=engine,
-                filter=params.get('filter', None)
+                filter=exploration_def.get('filter', None)
             ),
             "results": processed_records
         },
         "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
         "column_metadata": column_metadata,
-        "parameters": params,
+        "limit": exploration_def.get('limit', 100),
+        "offset": exploration_def.get('offset', 0),
+        "filter": exploration_def.get('filter', None),
+        "order_by": exploration_def.get('order_by', []),
+        "search": exploration_def.get('search', []),
+        "duplicate_only": exploration_def.get('duplicate_only', None)
     }
 
 

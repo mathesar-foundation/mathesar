@@ -60,31 +60,68 @@ class ExplorationDef(TypedDict):
         initial_columns: A list describing the columns to be included in the exploration.
         display_names: A map between the actual column names on the database and the alias to be displayed.
         transformations: A list describing the transformations to be made on the included columns.
-        parameters: A dict describing the properties to be applied while retrieving records e.g. limit, offset, filter, order_by, etc.
+        limit: Specifies the number of rows to return.(default 100)
+        offset: Specifies the number of rows to skip.(default 0)
+        filter: A dict describing filters to be applied to an exploration.
+            e.g. Here is a dict describing getting records from exploration where "col1" = NULL and "col2" = "abc"
+            ```
+            {"and": [
+                {"null": [
+                    {"column_name": ["col1"]},
+                ]},
+                {"equal": [
+                    {"to_lowercase": [
+                        {"column_name": ["col2"]},
+                    ]},
+                    {"literal": ["abc"]},
+                ]},
+            ]}
+            ```
+            Refer to db/functions/base.py for all the possible filters.
+        order_by: A list of dicts, where each dict has a `field` and `direction` field.
+                  Here the value for `field` should be column name and `direction` should be either `asc` or `desc`.
+        search: A list of dicts, where each dict has a `column` and `literal` field.
+                Here the value for `column` should be a column name and `literal` should be a string to be searched in the aforementioned column.
+        duplicate_only: A list of column names for which you want duplicate records.
     """
     base_table_oid: int
     initial_columns: list
     display_names: dict
     transformations: Optional[list]
-    parameters: Optional[dict]
+    limit: Optional[int]
+    offset: Optional[int]
+    filter: Optional[dict]
+    order_by: Optional[list[dict]]
+    search: Optional[list[dict]]
+    duplicate_only: Optional[list]
 
 
 class ExplorationResult(TypedDict):
     """
-    Result of a ran exploration.
+    Result of an exploration run.
 
     Attributes:
         query: A dict describing the exploration that ran.
         records: A dict describing the total count of records along with the contents of those records.
         output_columns: A tuple describing the names of the columns included in the exploration.
         column_metadata: A dict describing the metadata applied to included columns.
-        parameters: A dict describing the properties applied while retrieving records e.g. limit, offset, filter, order_by, etc.
+        limit: Specifies the max number of rows returned.(default 100)
+        offset: Specifies the number of rows skipped.(default 0)
+        filter: A dict describing filters applied to an exploration.
+        order_by: The ordering applied to the columns of an exploration.
+        search: Specifies a list of dicts containing column names and searched expression.
+        duplicate_only: A list of column names for which you want duplicate records.
     """
     query: dict
     records: dict
     output_columns: tuple
     column_metadata: dict
-    parameters: dict
+    limit: Optional[int]
+    offset: Optional[int]
+    filter: Optional[dict]
+    order_by: Optional[list[dict]]
+    search: Optional[list[dict]]
+    duplicate_only: Optional[list]
 
     @classmethod
     def from_dict(cls, e):
@@ -93,7 +130,12 @@ class ExplorationResult(TypedDict):
             records=e["records"],
             output_columns=e["output_columns"],
             column_metadata=e["column_metadata"],
-            parameters=e["parameters"]
+            limit=e["limit"],
+            offset=e["offset"],
+            filter=e["filter"],
+            order_by=e["order_by"],
+            search=e["search"],
+            duplicate_only=e["duplicate_only"]
         )
 
 
