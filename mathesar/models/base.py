@@ -94,10 +94,7 @@ class ColumnMetaData(BaseModel):
     bool_false = models.CharField(null=True)
     num_min_frac_digits = models.PositiveIntegerField(null=True)
     num_max_frac_digits = models.PositiveIntegerField(null=True)
-    num_grouping = models.CharField(
-        choices=[("force-yes", "force-yes"), ("force-no", "force-no")],
-        null=True
-    )
+    num_grouping = models.BooleanField(null=True)
     num_format = models.CharField(
         choices=[("english", "english"), ("german", "german"), ("french", "french"), ("hindi", "hindi"), ("swiss", "swiss")],
         null=True
