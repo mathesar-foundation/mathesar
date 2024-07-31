@@ -1,7 +1,7 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type { Database } from '@mathesar/api/rpc/databases';
+import { Database } from '@mathesar/api/rpc/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import {
@@ -32,7 +32,6 @@ class DatabasesStore {
     const serverMap = new Map(commonData.servers.map((s) => [s.id, s]));
     this.unsortedDatabases.reconstruct(
       commonData.databases.map((d) => {
-        const server = serverMap.get(d.server_id);
         /**
          * We're using a default value for host as 'unknown' when server is undefined
          * instead of throwing an error.
@@ -43,14 +42,12 @@ class DatabasesStore {
          * 3. Displaying server info is not an important feature of the app,
          *    so it's better to fail gracefully than to throw an error and crash the app.
          */
-        return [
-          d.id,
-          {
-            ...d,
-            server_host: server?.host ?? 'unknown',
-            server_port: server?.port ?? 0,
-          },
-        ];
+        const server = serverMap.get(d.server_id) ?? {
+          id: d.server_id,
+          host: 'unknown',
+          port: 0,
+        };
+        return [d.id, new Database(d, server)];
       }),
     );
     this.databases = derived(
@@ -75,11 +72,7 @@ class DatabasesStore {
     const { database, server } = await api.database_setup
       .connect_existing(props)
       .run();
-    const connectedDatabase: Database = {
-      ...database,
-      server_host: server.host,
-      server_port: server.port,
-    };
+    const connectedDatabase = new Database(database, server);
     this.addDatabase(connectedDatabase);
     return connectedDatabase;
   }
@@ -90,11 +83,7 @@ class DatabasesStore {
     const { database, server } = await api.database_setup
       .create_new(props)
       .run();
-    const connectedDatabase: Database = {
-      ...database,
-      server_host: server.host,
-      server_port: server.port,
-    };
+    const connectedDatabase = new Database(database, server);
     this.addDatabase(connectedDatabase);
     return connectedDatabase;
   }
