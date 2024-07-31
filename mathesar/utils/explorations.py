@@ -1,5 +1,4 @@
 from db.engine import create_future_engine_with_custom_types
-from db.records.operations.group import GroupBy
 from db.records.operations.select import get_count
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.tables.operations.select import get_table
@@ -61,7 +60,6 @@ def run_exploration(exploration_def, database_id, conn):
         offset=exploration_def.get('offset', 0),
         filter=exploration_def.get('filter', None),
         order_by=exploration_def.get('order_by', []),
-        group_by=GroupBy(**exploration_def.get('grouping')) if exploration_def.get('grouping', None) else None,
         search=exploration_def.get('search', []),
         duplicate_only=exploration_def.get('duplicate_only', None)
     )
