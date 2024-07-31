@@ -25,8 +25,8 @@ class ColumnMetaDataRecord(TypedDict):
         bool_false: A string to display for `false` values.
         num_min_frac_digits: Minimum digits shown after the decimal point.
         num_max_frac_digits: Maximum digits shown after the decimal point.
-        num_grouping:
-        num_format:
+        num_grouping: Specifies how grouping separators are displayed for numeric values.
+        num_format: Specifies the locale-specific format for displaying numeric values.
         mon_currency_symbol: The currency symbol shown for money value.
         mon_currency_location: Where the currency symbol should be shown.
         time_format: A string representing the format of time values.
@@ -84,8 +84,8 @@ class ColumnMetaDataBlob(TypedDict):
         bool_false: A string to display for `false` values.
         num_min_frac_digits: Minimum digits shown after the decimal point.
         num_max_frac_digits: Maximum digits shown after the decimal point.
-        num_grouping:
-        num_format:
+        num_grouping: Specifies how grouping separators are displayed for numeric values.
+        num_format: Specifies the locale-specific format for displaying numeric values.
         mon_currency_symbol: The currency symbol shown for money value.
         mon_currency_location: Where the currency symbol should be shown.
         time_format: A string representing the format of time values.
