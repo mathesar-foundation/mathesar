@@ -3498,8 +3498,8 @@ SELECT format(
       'preproc', %4$L::jsonb,
       'groups', jsonb_agg(
         DISTINCT jsonb_build_object(
-          'gid', %2$I.__mathesar_gid,
-          'gcount', %2$I.__mathesar_gcount,
+          'id', %2$I.__mathesar_gid,
+          'count', %2$I.__mathesar_gcount,
           'results_eq', jsonb_build_object(%1$s)
         )
       )

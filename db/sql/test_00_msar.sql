@@ -3070,11 +3070,11 @@ BEGIN
         "columns": [3, 2],
         "preproc": null,
         "groups": [
-          {"gid": 1, "gcount": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}},
-          {"gid": 2, "gcount": 2, "results_eq": {"2": "Aaron", "3": "Acevedo"}},
-          {"gid": 3, "gcount": 1, "results_eq": {"2": "Abigail", "3": "Acevedo"}},
-          {"gid": 4, "gcount": 1, "results_eq": {"2": "Aaron", "3": "Acosta"}},
-          {"gid": 5, "gcount": 1, "results_eq": {"2": "Abigail", "3": "Acosta"}}
+          {"id": 1, "count": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}},
+          {"id": 2, "count": 2, "results_eq": {"2": "Aaron", "3": "Acevedo"}},
+          {"id": 3, "count": 1, "results_eq": {"2": "Abigail", "3": "Acevedo"}},
+          {"id": 4, "count": 1, "results_eq": {"2": "Aaron", "3": "Acosta"}},
+          {"id": 5, "count": 1, "results_eq": {"2": "Abigail", "3": "Acosta"}}
         ]
       }
     }$j$ || jsonb_build_object(
@@ -3104,7 +3104,7 @@ BEGIN
         "columns": [3, 2],
         "preproc": null,
         "groups": [
-          {"gid": 1, "gcount": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}}
+          {"id": 1, "count": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}}
         ]
       }
     }$j$ || jsonb_build_object(
@@ -3134,8 +3134,8 @@ BEGIN
         "columns": [4],
         "preproc": ["truncate_to_month"],
         "groups": [
-          {"gid": 1, "gcount": 1, "results_eq": {"4": "2020-03 AD"}},
-          {"gid": 2, "gcount": 2, "results_eq": {"4": "2020-04 AD"}}
+          {"id": 1, "count": 1, "results_eq": {"4": "2020-03 AD"}},
+          {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}}
         ]
       }
     }$j$ || jsonb_build_object(
@@ -3166,7 +3166,7 @@ BEGIN
       "grouping": {
         "columns": [4],
         "preproc": ["truncate_to_year"],
-        "groups": [{"gid": 1, "gcount": 8, "results_eq": {"4": "2020 AD"}}]
+        "groups": [{"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}}]
       }
     }$j$ || jsonb_build_object(
       'query', concat(
