@@ -3494,6 +3494,8 @@ msar.build_grouping_results_jsonb_expr(tab_id oid, cte_name text, group_ jsonb) 
 SELECT format(
   $gj$
     jsonb_build_object(
+      'columns', %3$L::jsonb,
+      'preproc', %4$L::jsonb,
       'groups', jsonb_agg(
         DISTINCT jsonb_build_object(
           'gid', %2$I.__mathesar_gid,
@@ -3514,7 +3516,9 @@ SELECT format(
     ),
     ', ' ORDER BY ordinality
   ),
-  cte_name
+  cte_name,
+  group_ ->> 'columns',
+  group_ ->> 'preproc'
 )
 FROM msar.expr_templates RIGHT JOIN ROWS FROM(
   jsonb_array_elements_text(group_ -> 'columns'),
