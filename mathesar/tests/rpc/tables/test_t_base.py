@@ -301,54 +301,30 @@ def test_list_joinable(rf, monkeypatch):
                 {
                     'base': 2254329,
                     'depth': 1,
-                    'target': 2254334,
-                    'fkey_path': [[2254406, False]],
-                    'join_path': [[[2254329, 2], [2254334, 1]]],
-                    'multiple_results': False
-                },
-                {
-                    'base': 2254329,
-                    'depth': 1,
-                    'target': 2254350,
-                    'fkey_path': [[2254411, False]],
-                    'join_path': [[[2254329, 3], [2254350, 1]]],
-                    'multiple_results': False
-                },
-                {
-                    'base': 2254329,
-                    'depth': 1,
                     'target': 2254350,
                     'fkey_path': [[2254411, False]],
                     'join_path': [[[2254329, 3], [2254350, 1]]],
                     'multiple_results': False
                 }],
-            'target_table_info': [
-                {
-                    '2254334': 'Items',
-                    'columns': [{'1': {'name': 'id', 'type': 'integer'}},
-                                {'2': {'name': 'Barcode', 'type': 'text'}},
-                                {'3': {'name': 'Acquisition Date', 'type': 'date'}},
-                                {'5': {'name': 'Book', 'type': 'integer'}}]
+            'target_table_info': {
+                '2254334': {
+                    'name': 'Items',
+                    'columns': {
+                        '1': {'name': 'id', 'type': 'integer'},
+                        '2': {'name': 'Barcode', 'type': 'text'},
+                        '3': {'name': 'Acquisition Date', 'type': 'date'},
+                        '5': {'name': 'Book', 'type': 'integer'}
+                    }
                 },
-                {
-                    '2254350': 'Patrons',
-                    'columns': [{'1': {'name': 'id', 'type': 'integer'}},
-                                {'2': {'name': 'First Name', 'type': 'text'}},
-                                {'3': {'name': 'Last Name', 'type': 'text'}}]
-                },
-                {
-                    '2254334': 'Items',
-                    'columns': [{'1': {'name': 'id', 'type': 'integer'}},
-                                {'2': {'name': 'Barcode', 'type': 'text'}},
-                                {'3': {'name': 'Acquisition Date', 'type': 'date'}},
-                                {'5': {'name': 'Book', 'type': 'integer'}}]
-                },
-                {
-                    '2254350': 'Patrons',
-                    'columns': [{'1': {'name': 'id', 'type': 'integer'}},
-                                {'2': {'name': 'First Name', 'type': 'text'}},
-                                {'3': {'name': 'Last Name', 'type': 'text'}}]
-                }]
+                '2254350': {
+                    'name': 'Patrons',
+                    'columns': {
+                        '1': {'name': 'id', 'type': 'integer'},
+                        '2': {'name': 'First Name', 'type': 'text'},
+                        '3': {'name': 'Last Name', 'type': 'text'}
+                    }
+                }
+            }
         }
     expected_dict = {
         'joinable_tables': [
@@ -363,54 +339,30 @@ def test_list_joinable(rf, monkeypatch):
             {
                 'base': 2254329,
                 'depth': 1,
-                'target': 2254334,
-                'fkey_path': [[2254406, False]],
-                'join_path': [[[2254329, 2], [2254334, 1]]],
-                'multiple_results': False
-            },
-            {
-                'base': 2254329,
-                'depth': 1,
-                'target': 2254350,
-                'fkey_path': [[2254411, False]],
-                'join_path': [[[2254329, 3], [2254350, 1]]],
-                'multiple_results': False
-            },
-            {
-                'base': 2254329,
-                'depth': 1,
                 'target': 2254350,
                 'fkey_path': [[2254411, False]],
                 'join_path': [[[2254329, 3], [2254350, 1]]],
                 'multiple_results': False
             }],
-        'target_table_info': [
-            {
-                '2254334': 'Items',
-                'columns': [{'1': {'name': 'id', 'type': 'integer'}},
-                            {'2': {'name': 'Barcode', 'type': 'text'}},
-                            {'3': {'name': 'Acquisition Date', 'type': 'date'}},
-                            {'5': {'name': 'Book', 'type': 'integer'}}]
+        'target_table_info': {
+            '2254334': {
+                'name': 'Items',
+                'columns': {
+                    '1': {'name': 'id', 'type': 'integer'},
+                    '2': {'name': 'Barcode', 'type': 'text'},
+                    '3': {'name': 'Acquisition Date', 'type': 'date'},
+                    '5': {'name': 'Book', 'type': 'integer'}
+                }
             },
-            {
-                '2254350': 'Patrons',
-                'columns': [{'1': {'name': 'id', 'type': 'integer'}},
-                            {'2': {'name': 'First Name', 'type': 'text'}},
-                            {'3': {'name': 'Last Name', 'type': 'text'}}]
-            },
-            {
-                '2254334': 'Items',
-                'columns': [{'1': {'name': 'id', 'type': 'integer'}},
-                            {'2': {'name': 'Barcode', 'type': 'text'}},
-                            {'3': {'name': 'Acquisition Date', 'type': 'date'}},
-                            {'5': {'name': 'Book', 'type': 'integer'}}]
-            },
-            {
-                '2254350': 'Patrons',
-                'columns': [{'1': {'name': 'id', 'type': 'integer'}},
-                            {'2': {'name': 'First Name', 'type': 'text'}},
-                            {'3': {'name': 'Last Name', 'type': 'text'}}]
-            }]
+            '2254350': {
+                'name': 'Patrons',
+                'columns': {
+                    '1': {'name': 'id', 'type': 'integer'},
+                    '2': {'name': 'First Name', 'type': 'text'},
+                    '3': {'name': 'Last Name', 'type': 'text'}
+                }
+            }
+        }
     }
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
     monkeypatch.setattr(tables.base, 'list_joinable_tables', mock_list_joinable_tables)
