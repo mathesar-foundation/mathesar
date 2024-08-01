@@ -187,6 +187,9 @@ To use an RPC function:
       - Filter
       - FilterAttnum
       - FilterLiteral
+      - Grouping
+      - Group
+      - GroupingResponse
       - SearchParam
 
 ## Explorations
