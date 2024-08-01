@@ -3439,7 +3439,23 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_grouping_columns_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
+msar.build_grouping_columns_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$/*
+Build a column expression for use in grouping window functions.
+
+Args:
+  tab_id: The OID of the table whose records we're grouping
+  group_ A grouping definition.
+
+The group_ object should have the form
+    {
+      "columns": [<int>, <int>, ...]
+      "preproc": [<str>, <str>, ...]
+    }
+
+The items in the preproc array should be keys appearing in the
+`expr_templates` table. The corresponding column will be wrapped
+in the preproc function before grouping.
+*/
 SELECT string_agg(
   COALESCE(
     format(expr_template, quote_ident(msar.get_column_name(tab_id, col_id::smallint))),
@@ -3455,19 +3471,28 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_group_id_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
+msar.build_group_id_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$/*
+Build an expression to define an id value for each group.
+*/
 SELECT 'dense_rank() OVER (ORDER BY ' || msar.build_grouping_columns_expr(tab_id, group_) || ')';
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_group_count_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
+msar.build_group_count_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$/*
+Build an expression that adds a column with a count for each group.
+*/
 SELECT 'count(1) OVER (PARTITION BY ' || msar.build_grouping_columns_expr(tab_id, group_) || ')';
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_grouping_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$
+msar.build_grouping_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$/*
+Build an expression composed of an id and count for each group.
+
+A group is defined by distinct combinations of the (potentially transformed by preproc functions)
+columns passed in `group_`.
+*/
 SELECT concat(
   COALESCE(msar.build_group_id_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gid, ',
   COALESCE(msar.build_group_count_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gcount'
@@ -3476,7 +3501,10 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_results_jsonb_expr(tab_id oid, cte_name text) RETURNS TEXT AS $$
+msar.build_results_jsonb_expr(tab_id oid, cte_name text) RETURNS TEXT AS $$/*
+Build an SQL expresson string that, when added to the record listing query, produces a JSON array
+with the records resulting from the request.
+*/
 SELECT 'coalesce(jsonb_agg(json_build_object('
   || string_agg(format('%1$L, %2$I.%1$I', attnum, cte_name), ', ')
   || ')), jsonb_build_array())'
@@ -3490,7 +3518,10 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_grouping_results_jsonb_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$
+msar.build_grouping_results_jsonb_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
+Build an SQL expresson string that, when added to the record listing query, produces a JSON array
+with the groups resulting from the request.
+*/
 SELECT format(
   $gj$
     jsonb_build_object(
