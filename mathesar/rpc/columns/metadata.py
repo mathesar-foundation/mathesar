@@ -25,14 +25,14 @@ class ColumnMetaDataRecord(TypedDict):
         bool_false: A string to display for `false` values.
         num_min_frac_digits: Minimum digits shown after the decimal point.
         num_max_frac_digits: Maximum digits shown after the decimal point.
-        num_show_as_perc: Whether to show a numeric value as a percentage.
+        num_grouping: Specifies how grouping separators are displayed for numeric values.
+        num_format: Specifies the locale-specific format for displaying numeric values.
         mon_currency_symbol: The currency symbol shown for money value.
         mon_currency_location: Where the currency symbol should be shown.
         time_format: A string representing the format of time values.
         date_format: A string representing the format of date values.
         duration_min: The smallest unit for displaying durations.
         duration_max: The largest unit for displaying durations.
-        duration_show_units: Whether to show the units for durations.
     """
     database_id: int
     table_oid: int
@@ -42,14 +42,14 @@ class ColumnMetaDataRecord(TypedDict):
     bool_false: Optional[str]
     num_min_frac_digits: Optional[int]
     num_max_frac_digits: Optional[int]
-    num_show_as_perc: Optional[bool]
+    num_grouping: Optional[str]
+    num_format: Optional[str]
     mon_currency_symbol: Optional[str]
     mon_currency_location: Optional[Literal["after-minus", "end-with-space"]]
     time_format: Optional[str]
     date_format: Optional[str]
     duration_min: Optional[str]
     duration_max: Optional[str]
-    duration_show_units: Optional[bool]
 
     @classmethod
     def from_model(cls, model):
@@ -62,14 +62,14 @@ class ColumnMetaDataRecord(TypedDict):
             bool_false=model.bool_false,
             num_min_frac_digits=model.num_min_frac_digits,
             num_max_frac_digits=model.num_max_frac_digits,
-            num_show_as_perc=model.num_show_as_perc,
+            num_grouping=model.num_grouping,
+            num_format=model.num_format,
             mon_currency_symbol=model.mon_currency_symbol,
             mon_currency_location=model.mon_currency_location,
             time_format=model.time_format,
             date_format=model.date_format,
             duration_min=model.duration_min,
             duration_max=model.duration_max,
-            duration_show_units=model.duration_show_units,
         )
 
 
@@ -84,14 +84,14 @@ class ColumnMetaDataBlob(TypedDict):
         bool_false: A string to display for `false` values.
         num_min_frac_digits: Minimum digits shown after the decimal point.
         num_max_frac_digits: Maximum digits shown after the decimal point.
-        num_show_as_perc: Whether to show a numeric value as a percentage.
+        num_grouping: Specifies how grouping separators are displayed for numeric values.
+        num_format: Specifies the locale-specific format for displaying numeric values.
         mon_currency_symbol: The currency symbol shown for money value.
         mon_currency_location: Where the currency symbol should be shown.
         time_format: A string representing the format of time values.
         date_format: A string representing the format of date values.
         duration_min: The smallest unit for displaying durations.
         duration_max: The largest unit for displaying durations.
-        duration_show_units: Whether to show the units for durations.
     """
     attnum: int
     bool_input: Optional[Literal["dropdown", "checkbox"]]
@@ -99,14 +99,14 @@ class ColumnMetaDataBlob(TypedDict):
     bool_false: Optional[str]
     num_min_frac_digits: Optional[int]
     num_max_frac_digits: Optional[int]
-    num_show_as_perc: Optional[bool]
+    num_grouping: Optional[str]
+    num_format: Optional[str]
     mon_currency_symbol: Optional[str]
     mon_currency_location: Optional[Literal["after-minus", "end-with-space"]]
     time_format: Optional[str]
     date_format: Optional[str]
     duration_min: Optional[str]
     duration_max: Optional[str]
-    duration_show_units: Optional[bool]
 
     @classmethod
     def from_model(cls, model):
@@ -117,14 +117,14 @@ class ColumnMetaDataBlob(TypedDict):
             bool_false=model.bool_false,
             num_min_frac_digits=model.num_min_frac_digits,
             num_max_frac_digits=model.num_max_frac_digits,
-            num_show_as_perc=model.num_show_as_perc,
+            num_grouping=model.num_grouping,
+            num_format=model.num_format,
             mon_currency_symbol=model.mon_currency_symbol,
             mon_currency_location=model.mon_currency_location,
             time_format=model.time_format,
             date_format=model.date_format,
             duration_min=model.duration_min,
             duration_max=model.duration_max,
-            duration_show_units=model.duration_show_units
         )
 
 
