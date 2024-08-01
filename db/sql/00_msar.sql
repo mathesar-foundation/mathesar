@@ -3328,9 +3328,9 @@ INSERT INTO msar.expr_templates VALUES
   ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
   ('json_array_contains', '(%s)::jsonb @> (%s)::jsonb'),
   -- date part extractors
-  ('truncate_to_year', 'to_char(%s, ''YYYY'')'),
-  ('truncate_to_month', 'to_char(%s, ''YYYY-MM'')'),
-  ('truncate_to_day', 'to_char(%s, ''YYYY-MM-DD'')'),
+  ('truncate_to_year', 'to_char((%s)::date, ''YYYY AD'')'),
+  ('truncate_to_month', 'to_char((%s)::date, ''YYYY-MM AD'')'),
+  ('truncate_to_day', 'to_char((%s)::date, ''YYYY-MM-DD AD'')'),
   -- URI part getters
   ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
   ('uri_authority', 'mathesar_types.uri_authority(%s)'),
@@ -3503,10 +3503,23 @@ SELECT format(
       )
     )
   $gj$,
-  string_agg(format('%1$L, %2$I.%1$I', col_id, cte_name), ', '),
+  string_agg(
+    format(
+      '%1$L, %2$s',
+      col_id,
+      COALESCE(
+        format(expr_template, quote_ident(cte_name) || '.' || quote_ident(col_id)),
+        quote_ident(cte_name) || '.' || quote_ident(col_id)
+      )
+    ),
+    ', ' ORDER BY ordinality
+  ),
   cte_name
 )
-FROM jsonb_array_elements_text(group_ -> 'columns') AS col_id
+FROM msar.expr_templates RIGHT JOIN ROWS FROM(
+  jsonb_array_elements_text(group_ -> 'columns'),
+  jsonb_array_elements_text(group_ -> 'preproc')
+) WITH ORDINALITY AS x(col_id, preproc) ON expr_key = preproc
 WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
