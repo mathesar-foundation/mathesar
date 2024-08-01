@@ -40,6 +40,7 @@ CREATE TYPE msar.joinable_tables AS (
 );
 
 
+DROP FUNCTION IF EXISTS msar.get_joinable_tables(integer);
 CREATE OR REPLACE FUNCTION
 msar.get_joinable_tables(max_depth integer) RETURNS SETOF msar.joinable_tables AS $$/*
 This function returns a table of msar.joinable_tables objects, giving paths to various
@@ -128,21 +129,16 @@ UNION ALL
   FROM search_fkey_graph
 )
 SELECT * FROM output_cte;
-$$ LANGUAGE sql;
+$$ LANGUAGE SQL STABLE;
 
 
 DROP FUNCTION IF EXISTS msar.get_joinable_tables(integer, oid);
 CREATE OR REPLACE FUNCTION
 msar.get_joinable_tables(max_depth integer, table_id oid) RETURNS
 jsonb AS $$
-DECLARE
-  joinable_tables jsonb;
-  target_table_info jsonb;
-BEGIN
-  CREATE TEMP TABLE jt_cte AS 
-    SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id;
-  SELECT jsonb_agg(to_jsonb(jt_cte.*)) INTO joinable_tables FROM jt_cte;
-  WITH target_cte AS (
+  WITH jt_cte AS (
+    SELECT * FROM msar.get_joinable_tables(max_depth) WHERE base=table_id
+  ), target_cte AS (
     SELECT pga.attrelid AS tt_oid, 
       jsonb_build_object(
         'name', msar.get_relation_name(pga.attrelid),
@@ -153,15 +149,16 @@ BEGIN
             )
           )
       ) AS tt_info
-    FROM pg_catalog.pg_attribute AS pga
-    LEFT JOIN jt_cte ON pga.attrelid = jt_cte.target
+    FROM pg_catalog.pg_attribute AS pga, jt_cte
     WHERE pga.attrelid=jt_cte.target AND pga.attnum > 0 and NOT pga.attisdropped
     GROUP BY pga.attrelid
+  ), joinable_tables AS (
+    SELECT jsonb_agg(to_jsonb(jt_cte.*)) AS jt FROM jt_cte
+  ), target_table_info AS (
+    SELECT jsonb_object_agg(tt_oid, tt_info) AS tt FROM target_cte
   )
-  SELECT jsonb_object_agg(tt_oid, tt_info) INTO target_table_info FROM target_cte;
-  RETURN jsonb_build_object(
-    'joinable_tables', joinable_tables,
-    'target_table_info', target_table_info
-  );
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+  SELECT jsonb_build_object(
+    'joinable_tables', joinable_tables.jt,
+    'target_table_info', target_table_info.tt
+  ) FROM joinable_tables, target_table_info;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
