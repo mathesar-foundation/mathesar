@@ -3067,6 +3067,8 @@ BEGIN
         {"1": 2, "2": "Abigail", "3": "Acosta", "4": "2020-04-16 AD"}
       ],
       "grouping": {
+        "columns": [3, 2],
+        "preproc": null,
         "groups": [
           {"gid": 1, "gcount": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}},
           {"gid": 2, "gcount": 2, "results_eq": {"2": "Aaron", "3": "Acevedo"}},
@@ -3080,6 +3082,97 @@ BEGIN
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
         ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
         ' FROM public."Customers"  ORDER BY "3" ASC, "2" ASC, "1" ASC LIMIT ''10'' OFFSET NULL'
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id,
+      3, null,
+      '[{"attnum": 3, "direction": "asc"}, {"attnum": 2, "direction": "asc"}]',
+      null,
+      '{"columns": [3, 2]}'
+    ),
+    $j${
+      "count": 21,
+      "results": [
+        {"1": 5, "2": "Abigail", "3": "Abbott", "4": "2020-07-05 AD"},
+        {"1": 8, "2": "Abigail", "3": "Abbott", "4": "2020-10-30 AD"},
+        {"1": 15, "2": "Abigail", "3": "Abbott", "4": "2021-11-30 AD"}
+      ],
+      "grouping": {
+        "columns": [3, 2],
+        "preproc": null,
+        "groups": [
+          {"gid": 1, "gcount": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
+        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
+        ' FROM public."Customers"  ORDER BY "3" ASC, "2" ASC, "1" ASC LIMIT ''3'' OFFSET NULL'
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id,
+      3, null,
+      '[{"attnum": 4, "direction": "asc"}]',
+      null,
+      '{"columns": [4], "preproc": ["truncate_to_month"]}'
+    ),
+    $j${
+      "count": 21,
+      "results": [
+        {"1": 1, "2": "Aaron", "3": "Adams", "4": "2020-03-21 AD"},
+        {"1": 2, "2": "Abigail", "3": "Acosta", "4": "2020-04-16 AD"},
+        {"1": 3, "2": "Aaron", "3": "Adams", "4": "2020-04-29 AD"}
+      ],
+      "grouping": {
+        "columns": [4],
+        "preproc": ["truncate_to_month"],
+        "groups": [
+          {"gid": 1, "gcount": 1, "results_eq": {"4": "2020-03 AD"}},
+          {"gid": 2, "gcount": 2, "results_eq": {"4": "2020-04 AD"}}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
+        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
+        ' FROM public."Customers"  ORDER BY "4" ASC, "1" ASC LIMIT ''3'' OFFSET NULL'
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      rel_id,
+      5, null,
+      '[{"attnum": 4, "direction": "asc"}]',
+      null,
+      '{"columns": [4], "preproc": ["truncate_to_year"]}'
+    ),
+    $j${
+      "count": 21,
+      "results": [
+        {"1": 1, "2": "Aaron", "3": "Adams", "4": "2020-03-21 AD"},
+        {"1": 2, "2": "Abigail", "3": "Acosta", "4": "2020-04-16 AD"},
+        {"1": 3, "2": "Aaron", "3": "Adams", "4": "2020-04-29 AD"},
+        {"1": 4, "2": "Abigail", "3": "Adams", "4": "2020-05-29 AD"},
+        {"1": 5, "2": "Abigail", "3": "Abbott", "4": "2020-07-05 AD"}
+      ],
+      "grouping": {
+        "columns": [4],
+        "preproc": ["truncate_to_year"],
+        "groups": [{"gid": 1, "gcount": 8, "results_eq": {"4": "2020 AD"}}]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
+        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
+        ' FROM public."Customers"  ORDER BY "4" ASC, "1" ASC LIMIT ''5'' OFFSET NULL'
       )
     )
   );
