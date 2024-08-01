@@ -24,13 +24,10 @@
   $: ({ isSubmitting } = form);
 
   async function addColumn(closeDropdown: () => void) {
-    const newColumn = {
+    await columnsDataStore.add({
       name: $columnName,
       type: $columnType,
-      nullable: true,
-      primary_key: false,
-    };
-    await columnsDataStore.add(newColumn);
+    });
     closeDropdown();
   }
 </script>

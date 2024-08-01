@@ -1,7 +1,4 @@
-import type {
-  DateFormat,
-  TimeFormat,
-} from '@mathesar/api/rest/types/tables/columns';
+import type { DateFormat, TimeFormat } from '@mathesar/api/rpc/columns';
 import { DateTimeSpecification } from '@mathesar/utils/date-time';
 import { dayjs } from '@mathesar-component-library';
 

@@ -4,6 +4,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
   import { currentTablesMap } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
@@ -34,7 +35,7 @@
   $: tabularData =
     $tableId && table
       ? new TabularData({
-          id: $tableId,
+          database: $currentDatabase,
           abstractTypesMap: $currentDbAbstractTypes.data,
           meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
           hasEnhancedPrimaryKeyCell: false,

@@ -2,10 +2,10 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import { columnsApi } from '@mathesar/api/rest/columns';
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import { getAPI, postAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import { api } from '@mathesar/api/rpc';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
@@ -18,6 +18,7 @@
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import { runner } from '@mathesar/packages/json-rpc-client-builder';
   import {
     getImportPreviewPageUrl,
     getSchemaPageUrl,
@@ -25,6 +26,7 @@
   } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import { currentTables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import {
@@ -76,7 +78,7 @@
     return postAPI(`/api/db/v0/tables/${table.oid}/previews/`, { columns });
   }
 
-  const columnsFetch = new AsyncStore(columnsApi.list);
+  const columnsFetch = new AsyncStore(runner(api.columns.list_with_metadata));
   const previewRequest = new AsyncStore(generateTablePreview);
   const typeSuggestionsRequest = new AsyncStore(getTypeSuggestionsForTable);
   const headerUpdate = makeHeaderUpdateRequest();
@@ -104,8 +106,11 @@
   $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
 
   async function init() {
-    const columnsResponse = await columnsFetch.run(table.oid);
-    const fetchedColumns = columnsResponse?.resolvedValue?.results;
+    const columnsResponse = await columnsFetch.run({
+      database_id: $currentDatabase.id,
+      table_oid: table.oid,
+    });
+    const fetchedColumns = columnsResponse?.resolvedValue;
     if (!fetchedColumns) {
       return;
     }

@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { Response as ApiRecordsResponse } from '@mathesar/api/rest/types/tables/records';
   import { States, postAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import type { RecordsResponse } from '@mathesar/api/rpc/records';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
@@ -13,7 +13,6 @@
     renderTransitiveRecordSummary,
   } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
-  import { currentTablesData } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { Button, Icon, Spinner } from '@mathesar-component-library';
@@ -39,7 +38,7 @@
     isLoading,
     columnsDataStore,
     recordsData,
-    id: tableId,
+    table,
   } = tabularData);
   $: ({ purpose: rowType } = controller);
   $: ({ columns, fetchStatus } = columnsDataStore);
@@ -56,7 +55,10 @@
       controller.submit(result);
     } else if ($rowType === 'navigation') {
       const { recordId } = result;
-      const recordPageUrl = $storeToGetRecordPageUrl({ tableId, recordId });
+      const recordPageUrl = $storeToGetRecordPageUrl({
+        tableId: table.oid,
+        recordId,
+      });
       if (recordPageUrl) {
         router.goto(recordPageUrl);
         controller.cancel();
@@ -70,16 +72,15 @@
   }
 
   async function submitNewRecord() {
-    const url = `/api/db/v0/tables/${tableId}/records/`;
+    const url = `/api/db/v0/tables/${table.oid}/records/`;
     const body = getDataForNewRecord();
     try {
       isSubmittingNewRecord = true;
-      const response = await postAPI<ApiRecordsResponse>(url, body);
+      const response = await postAPI<RecordsResponse>(url, body);
       const record = response.results[0];
       const recordId = getPkValueInRecord(record, $columns);
       const previewData = response.preview_data ?? [];
-      const table = $currentTablesData.tablesMap.get(tableId);
-      const template = table?.metadata?.record_summary_template;
+      const template = table.metadata?.record_summary_template;
       // TODO_RS_TEMPLATE
       //
       // We need to change the logic here to account for the fact that sometimes

@@ -8,7 +8,6 @@
     type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { currentTablesData } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
   import { getAvailableName } from '@mathesar/utils/db';
@@ -75,7 +74,7 @@
   $: existingConstraintNames = new Set(
     $constraintsDataStore.constraints.map((c) => c.name),
   );
-  $: tableName = $currentTablesData.tablesMap.get($tabularData.id)?.name ?? '';
+  $: tableName = $tabularData.table.name;
   $: ({ processedColumns } = $tabularData);
   $: columnsInTable = Array.from($processedColumns.values());
   $: nameValidationErrors = getNameValidationErrors(
@@ -102,7 +101,7 @@
     try {
       await constraintsDataStore.add({
         columns: constraintColumns.map((c) => c.id),
-        type: 'unique',
+        type: 'u',
         name: constraintName,
       });
       // Why init before close when we also init on open? Because without init

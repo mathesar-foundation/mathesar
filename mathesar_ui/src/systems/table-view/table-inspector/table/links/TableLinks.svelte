@@ -8,12 +8,11 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: tableId = $tabularData.id;
   $: columns = $tabularData.processedColumns;
 </script>
 
 <div>
-  {#await getJoinableTablesResult(tableId)}
+  {#await getJoinableTablesResult($tabularData.table.oid)}
     <Spinner />
   {:then joinableTablesResult}
     <LinksSectionContainer

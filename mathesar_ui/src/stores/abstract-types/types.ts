@@ -1,6 +1,6 @@
 import type { QuerySummarizationFunctionId } from '@mathesar/api/rest/types/queries';
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import type { States } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import type { CellDataType } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 import type {

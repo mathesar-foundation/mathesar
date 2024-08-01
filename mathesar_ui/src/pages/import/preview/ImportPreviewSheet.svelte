@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import {
     Sheet,
