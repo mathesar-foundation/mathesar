@@ -4,6 +4,7 @@
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import { toast } from '@mathesar/stores/toast';
+  import { objectsAreDeeplyEqual } from '@mathesar/utils/objectUtils';
   import {
     CancelOrProceedButtonPair,
     createValidationContext,
@@ -13,10 +14,9 @@
 
   import AbstractTypeDBOptions from './AbstractTypeDBOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
-  import {
-    type ColumnTypeOptionsSaveArgs,
-    type ColumnWithAbstractType,
-    hasTypeOptionsChanged,
+  import type {
+    ColumnTypeOptionsSaveArgs,
+    ColumnWithAbstractType,
   } from './utils';
 
   const dispatch = createEventDispatcher();
@@ -36,7 +36,7 @@
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
-    hasTypeOptionsChanged(column.type_options ?? {}, typeOptions ?? {});
+    !objectsAreDeeplyEqual(column.type_options, typeOptions);
 
   let typeChangeState: RequestStatus;
 

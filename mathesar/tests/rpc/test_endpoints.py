@@ -165,6 +165,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        explorations.run,
+        "explorations.run",
+        [user_is_authenticated]
+    ),
+    (
         roles.list_,
         "roles.list",
         [user_is_authenticated]

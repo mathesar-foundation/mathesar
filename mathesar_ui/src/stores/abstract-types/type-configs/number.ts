@@ -1,8 +1,9 @@
-import type {
-  Column,
-  NumberDisplayOptions,
-  NumberFormat,
-} from '@mathesar/api/rest/types/tables/columns';
+import {
+  type Column,
+  type NumberFormat,
+  type NumberGrouping,
+  getColumnDisplayOption,
+} from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeNumber } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
@@ -148,10 +149,10 @@ function determineDbTypeAndOptions(
 
   if (dbType === DB_TYPES.DECIMAL || dbType === DB_TYPES.NUMERIC) {
     if (dbFormValues.maxDigits !== null) {
-      typeOptions.precision = dbFormValues.maxDigits;
+      typeOptions.precision = Number(dbFormValues.maxDigits);
     }
     if (dbFormValues.decimalPlaces !== null) {
-      typeOptions.scale = dbFormValues.decimalPlaces;
+      typeOptions.scale = Number(dbFormValues.decimalPlaces);
     }
   }
 
@@ -257,17 +258,15 @@ function determineDisplayOptions(
   formValues: FormValues,
 ): Column['display_options'] {
   const decimalPlaces = formValues.decimalPlaces as number | null;
-  const opts: Partial<NumberDisplayOptions> = {
-    number_format:
+  const opts: Partial<Column['display_options']> = {
+    num_format:
       formValues.numberFormat === 'none'
         ? undefined
         : (formValues.numberFormat as NumberFormat),
-    use_grouping:
-      (formValues.useGrouping as
-        | NumberDisplayOptions['use_grouping']
-        | undefined) ?? 'false',
-    minimum_fraction_digits: decimalPlaces ?? undefined,
-    maximum_fraction_digits: decimalPlaces ?? undefined,
+    num_grouping:
+      (formValues.useGrouping as NumberGrouping | undefined) ?? 'auto',
+    num_min_frac_digits: decimalPlaces ?? undefined,
+    num_max_frac_digits: decimalPlaces ?? undefined,
   };
   return opts;
 }
@@ -289,16 +288,16 @@ export function getDecimalPlaces(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  displayOptions: Column['display_options'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
+  const column = { display_options: displayOptions };
   const decimalPlaces = getDecimalPlaces(
-    displayOptions?.minimum_fraction_digits ?? null,
-    displayOptions?.maximum_fraction_digits ?? null,
+    displayOptions?.num_min_frac_digits ?? null,
+    displayOptions?.num_max_frac_digits ?? null,
   );
   const formValues: FormValues = {
-    numberFormat: displayOptions?.number_format ?? 'none',
-    useGrouping: displayOptions?.use_grouping ?? 'false',
+    numberFormat: getColumnDisplayOption(column, 'num_format'),
+    useGrouping: getColumnDisplayOption(column, 'num_grouping'),
     decimalPlaces,
   };
   return formValues;

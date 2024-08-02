@@ -37,9 +37,11 @@
   async function save() {
     typeChangeState = { state: 'processing' };
     try {
-      await columnsDataStore.patch(column.id, {
-        display_options: displayOptions,
-      });
+      // TODO_BETA: fix this
+      //
+      // await columnsDataStore.patch(column.id, {
+      //   display_options: displayOptions,
+      // });
       actionButtonsVisible = false;
       typeChangeState = { state: 'success' };
     } catch (err) {

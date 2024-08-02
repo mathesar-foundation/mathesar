@@ -19,6 +19,48 @@ export interface Table extends RawTable {
   metadata: TableMetadata | null;
 }
 
+/** [table oid, column attnum][] */
+export type JoinPath = [number, number][];
+
+export interface JoinableTable {
+  target: Table['oid'];
+  join_path: JoinPath;
+  /**
+   * [Constraint OID, is_reversed]
+   *
+   * When is_reversed is `false`, following the join path constitutes following
+   * a foreign key relationship from the base table to the target table. For
+   * example, following a join from `books` to `authors` when one book has one
+   * author.
+   *
+   * When is_reversed is `true`, following the join path constitutes following
+   * a foreign key relationship from the target table to the base table. For
+   * example, following a join from `authors` to `books` when one author has
+   * many books.
+   */
+  fkey_path: [number, boolean][];
+  depth: number;
+  multiple_results: boolean;
+}
+
+export interface JoinableTablesResult {
+  joinable_tables: JoinableTable[];
+  tables: Record<
+    string, // stringified table_oid
+    {
+      name: Table['name'];
+      columns: number[];
+    }
+  >;
+  columns: Record<
+    string, // stringified column_oid
+    {
+      name: string;
+      type: string;
+    }
+  >;
+}
+
 export const tables = {
   list: rpcMethodTypeContainer<
     {
@@ -86,5 +128,13 @@ export const tables = {
       cascade?: boolean;
     },
     void
+  >(),
+
+  list_joinable: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      schema_oid: number;
+    },
+    JoinableTablesResult
   >(),
 };

@@ -1,10 +1,10 @@
 import { getContext, setContext } from 'svelte';
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import { States } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rpc/columns';
+import type { Database } from '@mathesar/api/rpc/databases';
 import type { Table } from '@mathesar/api/rpc/tables';
-import type { DBObjectEntry } from '@mathesar/AppTypes';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
@@ -23,9 +23,9 @@ import type { TableRecordsData } from './records';
 import { RecordsData } from './records';
 
 export interface TabularDataProps {
-  id: DBObjectEntry['id'];
-  abstractTypesMap: AbstractTypesMap;
+  database: Pick<Database, 'id'>;
   table: Table;
+  abstractTypesMap: AbstractTypesMap;
   meta?: Meta;
   shareConsumer?: ShareConsumer;
   /**
@@ -42,7 +42,7 @@ export interface TabularDataProps {
 }
 
 export class TabularData {
-  id: DBObjectEntry['id'];
+  table: Table;
 
   meta: Meta;
 
@@ -60,27 +60,28 @@ export class TabularData {
 
   selection: SheetSelectionStore;
 
-  table: Table;
-
   shareConsumer?: ShareConsumer;
 
   constructor(props: TabularDataProps) {
     const contextualFilters =
       props.contextualFilters ?? new Map<number, string | number>();
-    this.id = props.id;
+    this.table = props.table;
     this.meta = props.meta ?? new Meta();
     this.shareConsumer = props.shareConsumer;
     this.columnsDataStore = new ColumnsDataStore({
-      tableId: this.id,
+      database: props.database,
+      table: this.table,
       hiddenColumns: contextualFilters.keys(),
       shareConsumer: this.shareConsumer,
     });
     this.constraintsDataStore = new ConstraintsDataStore({
-      tableId: this.id,
+      database: props.database,
+      table: props.table,
       shareConsumer: this.shareConsumer,
     });
     this.recordsData = new RecordsData({
-      tableId: this.id,
+      database: props.database,
+      table: props.table,
       meta: this.meta,
       columnsDataStore: this.columnsDataStore,
       contextualFilters,
@@ -102,7 +103,7 @@ export class TabularData {
             columns.map((column, columnIndex) => [
               column.id,
               processColumn({
-                tableId: this.id,
+                tableId: this.table.oid,
                 column,
                 columnIndex,
                 constraints: constraintsData.constraints,

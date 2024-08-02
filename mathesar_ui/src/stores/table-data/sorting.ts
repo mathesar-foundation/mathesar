@@ -1,8 +1,8 @@
 import type {
   SortDirection as ApiSortDirection,
   SortingEntry as ApiSortingEntry,
-  GetRequestParams,
-} from '@mathesar/api/rest/types/tables/records';
+  RecordsListParams,
+} from '@mathesar/api/rpc/records';
 import {
   type SortDirection,
   allowedSortDirections,
@@ -45,17 +45,17 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
     super(entries);
   }
 
-  private recordsRequestParams(): Pick<GetRequestParams, 'order_by'> {
+  private recordsRequestParams(): Pick<RecordsListParams, 'order'> {
     const sortingEntries: ApiSortingEntry[] = [...this].map(
       ([columnId, sortDirection]) => ({
-        field: columnId,
+        attnum: columnId,
         direction: getApiSortDirection(sortDirection),
       }),
     );
     if (!sortingEntries.length) {
       return {};
     }
-    return { order_by: sortingEntries };
+    return { order: sortingEntries };
   }
 
   /**
@@ -65,7 +65,7 @@ export class Sorting extends ImmutableMap<number, SortDirection> {
    */
   recordsRequestParamsIncludingGrouping(
     grouping: Grouping,
-  ): Pick<GetRequestParams, 'order_by'> {
+  ): Pick<RecordsListParams, 'order'> {
     const sortingFromGrouping = new Sorting(
       grouping.entries.map((g) => [g.columnId, 'ASCENDING']),
     );

@@ -1,8 +1,8 @@
-import type {
-  Column,
-  TimeDisplayOptions,
-  TimeFormat,
-} from '@mathesar/api/rest/types/tables/columns';
+import {
+  type Column,
+  type TimeFormat,
+  getColumnDisplayOption,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
@@ -80,22 +80,20 @@ const displayForm: AbstractTypeConfigForm = {
 };
 
 function determineDisplayOptions(
-  dispFormValues: FormValues,
+  formValues: FormValues,
 ): Column['display_options'] {
-  const displayOptions: TimeDisplayOptions = {
-    format: dispFormValues.format as TimeFormat,
+  return {
+    time_format: formValues.format as TimeFormat,
   };
-  return displayOptions;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  displayOptions: Column['display_options'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as TimeDisplayOptions | null;
-  const dispFormValues: FormValues = {
-    format: displayOptions?.format ?? '24hr',
+  const column = { display_options: displayOptions };
+  return {
+    format: getColumnDisplayOption(column, 'time_format'),
   };
-  return dispFormValues;
 }
 
 const timeType: AbstractTypeConfiguration = {

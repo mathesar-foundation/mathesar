@@ -1,4 +1,4 @@
-import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
+import type { JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import { assertExhaustive } from '@mathesar-component-library';
 
@@ -16,7 +16,7 @@ export function getTableLinks(
   switch (type) {
     case 'in_this_table': {
       const linkedTables = joinableTablesResult.joinable_tables.filter(
-        (table) => !table.fk_path[0][1],
+        (table) => !table.fkey_path[0][1],
       );
       const links: TableLink[] = linkedTables.map((table) => ({
         table: {
@@ -24,17 +24,17 @@ export function getTableLinks(
           name: joinableTablesResult.tables[table.target].name,
         },
         column: {
-          id: table.jp_path[0][0],
+          id: table.join_path[0][0],
           // The joinable_tables API will not contain the columns from the current table
           name:
-            currentTableColumns.get(table.jp_path[0][0])?.column.name || '--',
+            currentTableColumns.get(table.join_path[0][0])?.column.name || '--',
         },
       }));
       return links;
     }
     case 'from_other_tables': {
       const linkedTables = joinableTablesResult.joinable_tables.filter(
-        (table) => table.fk_path[0][1],
+        (table) => table.fkey_path[0][1],
       );
       const links: TableLink[] = linkedTables.map((table) => ({
         table: {
@@ -42,8 +42,8 @@ export function getTableLinks(
           name: joinableTablesResult.tables[table.target].name,
         },
         column: {
-          id: table.jp_path[0][1],
-          name: joinableTablesResult.columns[table.jp_path[0][1]].name,
+          id: table.join_path[0][1],
+          name: joinableTablesResult.columns[table.join_path[0][1]].name,
         },
       }));
       return links;

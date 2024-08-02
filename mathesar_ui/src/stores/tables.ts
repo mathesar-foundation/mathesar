@@ -14,13 +14,12 @@ import type { Readable, Writable } from 'svelte/store';
 import { derived, get, readable, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { JoinableTablesResult } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_table';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
-import type { Table } from '@mathesar/api/rpc/tables';
+import type { JoinableTablesResult, Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import { TupleMap } from '@mathesar/packages/tuple-map';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -446,7 +445,12 @@ export function getJoinableTablesResult(
   tableId: number,
   maxDepth = 1,
 ): Promise<JoinableTablesResult> {
-  throw new Error('Not implemented'); // TODO_BETA
+  return Promise.resolve({
+    joinable_tables: [],
+    tables: {},
+    columns: {},
+  });
+  // TODO_BETA: re-implement this with the RPC API.
 
   // return getAPI<JoinableTablesResult>(
   //   `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,
