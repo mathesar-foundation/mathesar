@@ -3367,6 +3367,54 @@ BEGIN
     jsonb_build_array(
       jsonb_build_object('attnum', 3, 'literal', 'bc')
     ),
+    null
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 2);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 2, '2', 12, '3', 'vwxyz'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 4);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    null,
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 2, '2', 12, '3', 'vwxyz'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 4);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'bc')
+    ),
     10
   );
   RETURN NEXT is(
