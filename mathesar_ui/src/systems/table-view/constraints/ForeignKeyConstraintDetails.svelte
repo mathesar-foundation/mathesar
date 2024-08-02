@@ -1,27 +1,27 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
   import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { Constraint } from '@mathesar/api/rpc/constraints';
   import { Icon, Spinner, iconError } from '@mathesar/component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import type { Constraint } from '@mathesar/stores/table-data';
   import { currentTablesData } from '@mathesar/stores/tables';
 
   export let constraint: Constraint;
 
   $: referentTable =
     constraint.type === 'foreignkey'
-      ? $currentTablesData.tablesMap.get(constraint.referent_table)
+      ? $currentTablesData.tablesMap.get(constraint.referent_table_oid)
       : undefined;
 
   async function getReferentColumns(_constraint: Constraint) {
     if (_constraint.type !== 'foreignkey') {
       return [];
     }
-    const tableId = _constraint.referent_table;
+    const tableId = _constraint.referent_table_oid;
     const url = `/api/db/v0/tables/${tableId}/columns/?limit=500`;
     const referentTableColumns = await getAPI<PaginatedResponse<Column>>(url);
     return referentTableColumns.results.filter((c) =>

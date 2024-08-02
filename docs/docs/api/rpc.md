@@ -195,7 +195,10 @@ To use an RPC function:
       members:
       - list_
       - delete
+      - run
       - ExplorationInfo
+      - ExplorationDef
+      - ExplorationResult
 
 ## Roles
 

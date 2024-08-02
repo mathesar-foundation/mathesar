@@ -137,3 +137,18 @@ export function batchSend<T extends RpcRequest<unknown>[]>(
   // TODO implement batch sending
   throw new Error('Not implemented');
 }
+
+/**
+ * A factory function to builds a function that directly runs a specific RPC
+ * request. The built function will then accept all the props of the RPC method
+ * and run the request without needing to call `.run()` on it.
+ *
+ * This utility is useful when you want to define a function that runs a
+ * specific RPC method without having to spell out the type of the method
+ * parameters.
+ */
+export function runner<P, R>(
+  method: (props: P) => RpcRequest<R>,
+): (props: P) => CancellablePromise<R> {
+  return (props) => method(props).run();
+}

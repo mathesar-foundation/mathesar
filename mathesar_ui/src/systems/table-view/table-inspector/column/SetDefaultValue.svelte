@@ -49,10 +49,11 @@
       ? null
       : {
           is_dynamic: !!column.column.default?.is_dynamic,
-          value,
+          value: String(value),
         };
     try {
-      await columnsDataStore.patch(column.id, {
+      await columnsDataStore.patch({
+        id: column.id,
         default: defaultRequest,
       });
       typeChangeState = { state: 'success' };

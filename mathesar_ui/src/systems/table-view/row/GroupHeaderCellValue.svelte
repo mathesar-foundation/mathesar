@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ResultValue } from '@mathesar/api/rest/types/tables/records';
+  import type { ResultValue } from '@mathesar/api/rpc/records';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
@@ -17,7 +17,7 @@
     .get(String(columnId))
     ?.get(recordId);
   $: recordPageHref = $storeToGetRecordPageUrl({
-    tableId: processedColumnsMap?.get(columnId)?.linkFk?.referent_table,
+    tableId: processedColumnsMap?.get(columnId)?.linkFk?.referent_table_oid,
     recordId,
   });
 </script>

@@ -5,7 +5,6 @@
   import { currentDatabase } from '@mathesar/stores/databases';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
-    currentTablesData,
     factoryToGetTableNameValidationErrors,
     updateTable,
   } from '@mathesar/stores/tables';
@@ -14,14 +13,15 @@
 
   export let disabled = false;
 
+  $: ({ table } = $tabularData);
   $: getNameValidationErrors = factoryToGetTableNameValidationErrors(
     $currentDatabase,
-    $tabularData.table,
+    table,
   );
 
   async function handleSubmit(name: string) {
     await updateTable($currentDatabase, {
-      oid: $tabularData.table.oid,
+      oid: table.oid,
       name,
     });
   }
@@ -30,7 +30,7 @@
 <div class="rename-table-property-container">
   <span class="label">{$_('name')}</span>
   <EditableTextWithActions
-    initialValue={$currentTablesData.tablesMap.get($tabularData.id)?.name ?? ''}
+    initialValue={table.name}
     onSubmit={handleSubmit}
     getValidationErrors={$getNameValidationErrors}
     {disabled}

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
   import { States } from '@mathesar/api/rest/utils/requestUtils';
-  import {
-    type Constraint,
-    getTabularDataStoreFromContext,
-  } from '@mathesar/stores/table-data';
+  import type {
+    Constraint,
+    ConstraintType,
+  } from '@mathesar/api/rpc/constraints';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { Icon, iconLoading } from '@mathesar-component-library';
 
   import ConstraintTypeSection from './ConstraintTypeSection.svelte';

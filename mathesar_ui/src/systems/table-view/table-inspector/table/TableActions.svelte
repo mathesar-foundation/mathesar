@@ -8,11 +8,7 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { currentSchema } from '@mathesar/stores/schemas';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import {
-    currentTable,
-    currentTablesData,
-    deleteTable,
-  } from '@mathesar/stores/tables';
+  import { deleteTable } from '@mathesar/stores/tables';
   import {
     constructDataExplorerUrlToSummarizeFromGroup,
     createDataExplorerUrlToExploreATable,
@@ -30,7 +26,7 @@
   const tabularData = getTabularDataStoreFromContext();
   const { currentDatabase } = databasesStore;
 
-  $: ({ id, columnsDataStore, meta } = $tabularData);
+  $: ({ table, columnsDataStore, meta } = $tabularData);
   $: ({ grouping } = meta);
   $: ({ columns } = columnsDataStore);
   $: explorationPageUrl =
@@ -38,21 +34,18 @@
       ? createDataExplorerUrlToExploreATable(
           $currentDatabase?.id,
           $currentSchema.oid,
-          {
-            oid: $tabularData.id,
-            name: $currentTablesData.tablesMap.get($tabularData.id)?.name ?? '',
-          },
+          table,
         )
       : '';
   $: summarizationUrl = (() => {
-    if (!$currentTable || !$currentDatabase || !$currentSchema) {
+    if (!$currentDatabase || !$currentSchema) {
       return undefined;
     }
     return constructDataExplorerUrlToSummarizeFromGroup(
       $currentDatabase.id,
       $currentSchema.oid,
       {
-        baseTable: { oid: id, name: $currentTable.name },
+        baseTable: table,
         columns: $columns,
         terseGrouping: $grouping.terse(),
       },
@@ -65,7 +58,7 @@
       body: {
         component: TableDeleteConfirmationBody,
         props: {
-          tableName: $currentTable?.name,
+          tableName: table.name,
         },
       },
       onProceed: async () => {
@@ -74,7 +67,7 @@
         const database = $currentDatabase;
         const schema = $currentSchema;
         if (database && schema) {
-          await deleteTable(database, schema, $tabularData.id);
+          await deleteTable(database, schema, table.oid);
           router.goto(getSchemaPageUrl(database.id, schema.oid), true);
         }
       },

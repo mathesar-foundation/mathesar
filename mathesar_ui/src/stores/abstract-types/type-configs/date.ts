@@ -1,8 +1,8 @@
-import type {
-  Column,
-  DateDisplayOptions,
-  DateFormat,
-} from '@mathesar/api/rest/types/tables/columns';
+import {
+  type Column,
+  type DateFormat,
+  getColumnDisplayOption,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeDate } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
@@ -35,22 +35,21 @@ const displayForm: AbstractTypeConfigForm = {
 };
 
 function determineDisplayOptions(
-  dispFormValues: FormValues,
+  formValues: FormValues,
 ): Column['display_options'] {
-  const displayOptions: DateDisplayOptions = {
-    format: dispFormValues.format as DateFormat,
+  return {
+    date_format: formValues.format as DateFormat,
   };
-  return displayOptions;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  displayOptions: Column['display_options'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as DateDisplayOptions | null;
-  const dispFormValues: FormValues = {
-    format: displayOptions?.format ?? 'none',
+  const column = { display_options: displayOptions };
+  const formValues: FormValues = {
+    format: getColumnDisplayOption(column, 'date_format'),
   };
-  return dispFormValues;
+  return formValues;
 }
 
 const dateType: AbstractTypeConfiguration = {

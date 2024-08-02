@@ -1,5 +1,5 @@
 import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/rest/types/queries';
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';

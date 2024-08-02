@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconInspector, iconTable } from '@mathesar/icons';
@@ -18,9 +17,8 @@
   const tabularData = getTabularDataStoreFromContext();
 
   export let context: TableActionsContext = 'page';
-  export let table: Pick<Table, 'name' | 'description'>;
 
-  $: ({ id, meta, isLoading, display } = $tabularData);
+  $: ({ table, meta, isLoading, display } = $tabularData);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
 
@@ -50,7 +48,7 @@
 
   <div class="aux-actions" slot="actions-right">
     {#if context === 'page'}
-      <ShareTableDropdown {id} />
+      <ShareTableDropdown id={table.oid} />
 
       <Button
         appearance="secondary"
