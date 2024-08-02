@@ -3399,6 +3399,25 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_total_order_expr(tab_id oid, order_ jsonb) RETURNS text AS $$/*
+Build a deterministic order expression for the given table and order JSON.
+Args:
+  tab_id: The OID of the table whose columns we'll order by.
+  order_: A JSONB array defining any desired ordering of columns.
+*/
+SELECT string_agg(format('%I %s', attnum, msar.sanitize_direction(direction)), ', ')
+FROM jsonb_to_recordset(
+    COALESCE(
+      COALESCE(order_, '[]'::jsonb) || msar.get_pkey_order(tab_id),
+      COALESCE(order_, '[]'::jsonb) || msar.get_total_order(tab_id)
+    )
+)
+  AS x(attnum smallint, direction text)
+WHERE has_column_privilege(tab_id, attnum, 'SELECT');
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_order_by_expr(tab_id oid, order_ jsonb) RETURNS text AS $$/*
 Build an ORDER BY expression for the given table and order JSON.
 
@@ -3409,16 +3428,9 @@ the resulting ordering is totally defined (i.e., deterministic).
 
 Args:
   tab_id: The OID of the table whose columns we'll order by.
+  order_: A JSONB array defining any desired ordering of columns.
 */
-SELECT 'ORDER BY ' || string_agg(format('%I %s', attnum, msar.sanitize_direction(direction)), ', ')
-FROM jsonb_to_recordset(
-    COALESCE(
-      COALESCE(order_, '[]'::jsonb) || msar.get_pkey_order(tab_id),
-      COALESCE(order_, '[]'::jsonb) || msar.get_total_order(tab_id)
-    )
-)
-  AS x(attnum smallint, direction text)
-WHERE has_column_privilege(tab_id, attnum, 'SELECT');
+SELECT 'ORDER BY ' || msar.build_total_order_expr(tab_id, order_)
 $$ LANGUAGE SQL;
 
 
@@ -3451,8 +3463,7 @@ msar.list_records_from_table(
   offset_ integer,
   order_ jsonb,
   filter_ jsonb,
-  group_ jsonb,
-  search_ jsonb
+  group_ jsonb
 ) RETURNS jsonb AS $$/*
 Get records from a table. Only columns to which the user has access are returned.
 
@@ -3463,7 +3474,6 @@ Args:
   order_: An array of ordering definition objects.
   filter_: An array of filter definition objects.
   group_: An array of group definition objects.
-  search_: An array of search definition objects.
 
 The order definition objects should have the form
   {"attnum": <int>, "direction": <text>}
@@ -3479,8 +3489,8 @@ BEGIN
       SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
     )
     SELECT jsonb_build_object(
-      'results', jsonb_agg(row_to_json(results_cte.*)),
-      'count', max(count_cte.count),
+      'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
+      'count', coalesce(max(count_cte.count), 0),
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
     FROM results_cte, count_cte
@@ -3492,6 +3502,85 @@ BEGIN
     offset_,
     msar.build_order_by_expr(tab_id, order_),
     msar.build_where_clause(tab_id, filter_)
+  ) INTO records;
+  RETURN records;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_score_expr(tab_id oid, parameters_ jsonb) RETURNS text AS $$
+SELECT string_agg(
+  CASE WHEN pgt.typcategory = 'S' THEN
+    format(
+      $s$(CASE
+        WHEN %1$I ILIKE %2$L THEN 4
+        WHEN %1$I ILIKE %2$L || '%%' THEN 3
+        WHEN %1$I ILIKE '%%' || %2$L || '%%' THEN 2
+        ELSE 0
+      END)$s$,
+      pga.attname,
+      x.literal
+    )
+  ELSE
+    format('(CASE WHEN %1$I = %2$L THEN 4 ELSE 0 END)', pga.attname, x.literal)
+  END,
+  ' + '
+)
+FROM jsonb_to_recordset(parameters_) AS x(attnum smallint, literal text)
+  INNER JOIN pg_catalog.pg_attribute AS pga ON x.attnum = pga.attnum
+  INNER JOIN pg_catalog.pg_type AS pgt ON pga.atttypid = pgt.oid
+WHERE
+  pga.attrelid = tab_id
+  AND NOT pga.attisdropped
+  AND has_column_privilege(tab_id, x.attnum, 'SELECT')
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.search_records_from_table(
+  tab_id oid,
+  search_ jsonb,
+  limit_ integer
+) RETURNS jsonb AS $$/*
+Get records from a table, filtering and sorting according to a search specification.
+
+Only columns to which the user has access are returned.
+
+Args:
+  tab_id: The OID of the table whose records we'll get
+  search_: An array of search definition objects.
+  limit_: The maximum number of rows we'll return.
+
+The search definition objects should have the form
+  {"attnum": <int>, "literal": <any>}
+*/
+DECLARE
+  records jsonb;
+BEGIN
+  EXECUTE format(
+    $q$
+    WITH count_cte AS (
+      SELECT count(1) AS count FROM %2$I.%3$I %4$s
+    ), results_cte AS (
+      SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L
+    )
+    SELECT jsonb_build_object(
+      'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
+      'count', coalesce(max(count_cte.count), 0),
+      'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
+    )
+    FROM results_cte, count_cte
+    $q$,
+    msar.build_selectable_column_expr(tab_id),
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    'WHERE ' || msar.get_score_expr(tab_id, search_) || ' > 0',
+    limit_,
+    concat(
+      msar.get_score_expr(tab_id, search_) || ' DESC, ',
+      msar.build_total_order_expr(tab_id, null)
+    )
   ) INTO records;
   RETURN records;
 END;

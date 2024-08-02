@@ -19,7 +19,6 @@ def list_records_from_table(
         order=None,
         filter=None,
         group=None,
-        search=None,
 ):
     """
     Get records from a table.
@@ -37,7 +36,6 @@ def list_records_from_table(
         order: An array of ordering definition objects.
         filter: An array of filter definition objects.
         group: An array of group definition objects.
-        search: An array of search definition objects.
     """
     result = db_conn.exec_msar_func(
         conn,
@@ -48,7 +46,32 @@ def list_records_from_table(
         json.dumps(order) if order is not None else None,
         json.dumps(filter) if filter is not None else None,
         json.dumps(group) if group is not None else None,
-        json.dumps(search) if search is not None else None,
+    ).fetchone()[0]
+    return result
+
+
+def search_records_from_table(
+        conn,
+        table_oid,
+        search=[],
+        limit=10,
+):
+    """
+    Get records from a table, according to a search specification
+
+    Only data from which the user is granted `SELECT` is returned.
+
+    Args:
+        tab_id: The OID of the table whose records we'll get.
+        search: A list of dictionaries defining a search.
+        limit: The maximum number of rows we'll return.
+
+    The search definition objects should have the form
+    {"attnum": <int>, "literal": <text>}
+    """
+    search = search or []
+    result = db_conn.exec_msar_func(
+        conn, 'search_records_from_table', table_oid, json.dumps(search), limit
     ).fetchone()[0]
     return result
 
