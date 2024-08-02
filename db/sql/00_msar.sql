@@ -3534,7 +3534,7 @@ WHERE
   pga.attrelid = tab_id
   AND NOT pga.attisdropped
   AND has_column_privilege(tab_id, x.attnum, 'SELECT')
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3561,28 +3561,27 @@ BEGIN
   EXECUTE format(
     $q$
     WITH count_cte AS (
-      SELECT count(1) AS count FROM %2$I.%3$I WHERE %4$s > 0
+      SELECT count(1) AS count FROM %2$I.%3$I %4$s
     ), results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %6$s LIMIT %5$L
+      SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L
     )
     SELECT jsonb_build_object(
       'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
       'count', coalesce(max(count_cte.count), 0),
-      'query', $iq$SELECT %1$s FROM %2$I.%3$I WHERE %4$s >0 ORDER BY %6$s LIMIT %5$L$iq$
+      'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
     )
     FROM results_cte, count_cte
     $q$,
     msar.build_selectable_column_expr(tab_id),
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
-    msar.get_score_expr(tab_id, search_),
+    'WHERE ' || msar.get_score_expr(tab_id, search_) || ' > 0',
     limit_,
     concat(
-      msar.get_score_expr(tab_id, search_),
-      ' DESC, ',
+      msar.get_score_expr(tab_id, search_) || ' DESC, ',
       msar.build_total_order_expr(tab_id, null)
     )
   ) INTO records;
   RETURN records;
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
