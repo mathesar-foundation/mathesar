@@ -3,7 +3,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
-from db.connection import exec_msar_func, select_from_msar_func
+from db.connection import exec_msar_func
 from db.utils import execute_statement, get_pg_catalog_table
 
 BASE = 'base'
@@ -60,7 +60,7 @@ def get_table_info(schema, conn):
 
 
 def list_joinable_tables(table_oid, conn, max_depth):
-    return select_from_msar_func(conn, 'get_joinable_tables', max_depth, table_oid)
+    return exec_msar_func(conn, 'get_joinable_tables', max_depth, table_oid).fetchone()[0]
 
 
 def reflect_table(name, schema, engine, metadata, connection_to_use=None, keep_existing=False):

@@ -113,6 +113,7 @@ To use an RPC function:
       - list_joinable
       - TableInfo
       - SettableTableInfo
+      - JoinableTableRecord
       - JoinableTableInfo
 
 ## Table Metadata
