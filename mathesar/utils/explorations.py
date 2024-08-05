@@ -98,6 +98,19 @@ def run_exploration(exploration_def, database_id, conn):
     }
 
 
+def run_saved_exploration(exploration_id, limit, offset, database_id, conn):
+    exp_model = Explorations.objects.get(id=exploration_id)
+    exploration_def = {
+        "base_table_oid": exp_model["base_table_oid"],
+        "initial_columns": exp_model["initial_columns"],
+        "display_names": exp_model["display_names"],
+        "transformations": exp_model["transformations"],
+        "limit": limit,
+        "offset": offset
+    }
+    return run_exploration(exploration_def, database_id, conn)
+
+
 def _get_exploration_column_metadata(
     exploration_def,
     processed_initial_columns,
