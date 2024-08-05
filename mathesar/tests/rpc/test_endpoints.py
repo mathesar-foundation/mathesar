@@ -160,6 +160,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        explorations.get,
+        "explorations.get",
+        [user_is_authenticated]
+    ),
+    (
         explorations.delete,
         "explorations.delete",
         [user_is_authenticated]

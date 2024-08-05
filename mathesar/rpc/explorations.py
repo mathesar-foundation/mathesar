@@ -9,7 +9,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 from mathesar.models.base import Explorations
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
-from mathesar.utils.explorations import get_explorations, delete_exploration, run_exploration
+from mathesar.utils.explorations import list_explorations, get_exploration, delete_exploration, run_exploration
 
 
 class ExplorationInfo(TypedDict):
@@ -153,8 +153,25 @@ def list_(*, database_id: int, **kwargs) -> list[ExplorationInfo]:
     Returns:
         A list of exploration details.
     """
-    explorations = get_explorations(database_id)
+    explorations = list_explorations(database_id)
     return [ExplorationInfo.from_model(exploration) for exploration in explorations]
+
+
+@rpc_method(name="explorations.get")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get(*, exploration_id: int, **kwargs) -> ExplorationInfo:
+    """
+    List information about an exploration.
+
+    Args:
+        exploration_id: The Django id of the exploration.
+
+    Returns:
+        Exploration details for a given exploration_id.
+    """
+    exploration = get_exploration(exploration_id)
+    return ExplorationInfo.from_model(exploration)
 
 
 @rpc_method(name="explorations.delete")

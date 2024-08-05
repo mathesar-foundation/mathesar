@@ -74,7 +74,7 @@ def test_explorations_list(rf, monkeypatch):
                 description=None
             )
         ]
-    monkeypatch.setattr(explorations, 'get_explorations', mock_exploration_info)
+    monkeypatch.setattr(explorations, 'list_explorations', mock_exploration_info)
     expect_explorations_list = [
         {
             'id': 2,

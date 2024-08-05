@@ -8,8 +8,12 @@ from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
 from mathesar.state import get_cached_metadata
 
 
-def get_explorations(database_id):
+def list_explorations(database_id):
     return Explorations.objects.filter(database__id=database_id)
+
+
+def get_exploration(exploration_id):
+    return Explorations.objects.get(id=exploration_id)
 
 
 def delete_exploration(exploration_id):
