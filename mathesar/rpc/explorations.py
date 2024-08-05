@@ -6,6 +6,7 @@ from typing import Optional, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
+from mathesar.models.base import Explorations
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 from mathesar.utils.explorations import get_explorations, delete_exploration, run_exploration
@@ -181,6 +182,24 @@ def run(*, exploration_def: ExplorationDef, database_id: int, **kwargs) -> Explo
         database_id: The Django id of the database containing the base table for the exploration.
     """
     user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        exploration_result = run_exploration(exploration_def, database_id, conn)
+    return ExplorationResult.from_dict(exploration_result)
+
+
+@rpc_method(name='explorations.run_saved')
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def run_saved(*, exploration_id: int, **kwargs) -> ExplorationResult:
+    """
+    Run a saved exploration.
+
+    Args:
+        exploration_id: The Django id of the exploration to run.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    exploration_def = ExplorationInfo.from_model(Explorations.objects.get(id=exploration_id))
+    database_id = exploration_def["database_id"]
     with connect(database_id, user) as conn:
         exploration_result = run_exploration(exploration_def, database_id, conn)
     return ExplorationResult.from_dict(exploration_result)

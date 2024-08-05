@@ -198,6 +198,7 @@ To use an RPC function:
       - list_
       - delete
       - run
+      - run_saved
       - ExplorationInfo
       - ExplorationDef
       - ExplorationResult
