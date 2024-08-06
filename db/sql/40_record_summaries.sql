@@ -109,16 +109,13 @@ DECLARE
   base_alias CONSTANT text := 'base';
   expr_parts text[] := ARRAY[]::text[];
   expr text;
-  base_tab_fqn text := msar.get_relation_name(tab_id);
+  base_sch_name text := msar.get_relation_schema_name(tab_id);
+  base_tab_name text := msar.get_relation_name(tab_id);
   base_pk_name text := msar.get_column_name(tab_id, msar.get_pk_column(tab_id));
   template_part jsonb;
   join_clauses text[] := ARRAY[]::text[];
   join_section text;
 BEGIN
-  IF base_tab_fqn IS NULL THEN
-    -- TODO: the test above won't work because `get_relation_name` returns a stringified number if the table doesn't exist
-    RAISE EXCEPTION 'Unable to find table with oid %.', tab_id;
-  END IF;
   IF base_pk_name IS NULL THEN
     RAISE EXCEPTION 'Unable to find primary key column for table with oid %.', tab_id;
   END IF;
@@ -145,7 +142,8 @@ BEGIN
             fk_col_name text := msar.get_column_name(contextual_tab_id, fk_col_id);
             ref_tab_id oid;
             ref_col_id smallint;
-            ref_tab_fqn text;
+            ref_sch_name text;
+            ref_tab_name text;
             ref_col_name text;
             alias text;
             join_clause text;
@@ -166,12 +164,18 @@ BEGIN
               CONTINUE template_parts_loop;
             END IF;
 
-            ref_tab_fqn := msar.get_relation_name(ref_tab_id);
+            ref_tab_name := msar.get_relation_name(ref_tab_id);
+            ref_sch_name := msar.get_relation_schema_name(ref_tab_id);
             ref_col_name := msar.get_column_name(ref_tab_id, ref_col_id);
             alias := concat(prev_alias, '_', fk_col_id);
             join_clause := concat(
-              'LEFT JOIN ',  ref_tab_fqn, ' AS ', alias,
-              ' ON ', alias, '.', ref_col_name, ' = ', prev_alias, '.', fk_col_name
+              'LEFT JOIN ',
+              quote_ident(ref_sch_name), '.', quote_ident(ref_tab_name),
+              ' AS ', alias,
+              ' ON ',
+              alias, '.', quote_ident(ref_col_name),
+              ' = ',
+              prev_alias, '.', quote_ident(fk_col_name)
             );
 
             IF NOT join_clauses @> ARRAY[join_clause] THEN
@@ -186,7 +190,7 @@ BEGIN
         IF ref_column_name IS NOT NULL THEN
           expr_parts := array_append(
             expr_parts,
-            concat('cast(', prev_alias,'.', ref_column_name, ' AS text)')
+            concat('cast(', prev_alias,'.', quote_ident(ref_column_name), ' AS text)')
           );
         END IF;
 
@@ -213,9 +217,11 @@ BEGIN
 
   RETURN concat(
     'SELECT ', chr(10),
-    '  ', base_alias, '.', base_pk_name, ' AS id, ', chr(10),
+    '  ', base_alias, '.', quote_ident(base_pk_name), ' AS id, ', chr(10),
     '  ', expr, ' AS record_summary', chr(10),
-    'FROM ', base_tab_fqn, ' AS ', base_alias,
+    'FROM ',
+    quote_ident(base_sch_name), '.', quote_ident(base_tab_name),
+    ' AS ', base_alias,
     join_section
   );
 
