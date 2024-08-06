@@ -74,6 +74,46 @@ class SearchParam(TypedDict):
     literal: Any
 
 
+class Grouping(TypedDict):
+    """
+    Grouping definition.
+
+    Attributes:
+        columns: The columns to be grouped by.
+        preproc: The preprocessing funtions to apply (if any).
+    """
+    columns: list[int]
+    preproc: list[str]
+
+
+class Group(TypedDict):
+    """
+    Group definition.
+
+    Attributes:
+        id: The id of the group. Consistent for same input.
+        count: The number of items in the group.
+        results_eq: The value the results of the group equal.
+    """
+    id: int
+    count: int
+    results_eq: list[dict]
+
+
+class GroupingResponse(TypedDict):
+    """
+    Grouping response object. Extends Grouping with actual groups.
+
+    Attributes:
+        columns: The columns to be grouped by.
+        preproc: The preprocessing funtions to apply (if any).
+        groups: The groups applicable to the records being returned.
+    """
+    columns: list[int]
+    preproc: list[str]
+    groups: list[Group]
+
+
 class RecordList(TypedDict):
     """
     Records from a table, along with some meta data
@@ -86,12 +126,12 @@ class RecordList(TypedDict):
     Attributes:
         count: The total number of records in the table.
         results: An array of record objects.
-        group: Information for displaying the records grouped in some way.
+        grouping: Information for displaying grouped records.
         preview_data: Information for previewing foreign key values.
     """
     count: int
     results: list[dict]
-    group: dict
+    grouping: GroupingResponse
     preview_data: list[dict]
 
     @classmethod
@@ -99,7 +139,7 @@ class RecordList(TypedDict):
         return cls(
             count=d["count"],
             results=d["results"],
-            group=None,
+            grouping=d.get("grouping"),
             preview_data=[],
             query=d["query"],
         )
@@ -116,7 +156,7 @@ def list_(
         offset: int = None,
         order: list[OrderBy] = None,
         filter: Filter = None,
-        group: list[dict] = None,
+        grouping: Grouping = None,
         **kwargs
 ) -> RecordList:
     """
@@ -130,7 +170,7 @@ def list_(
                  following rows.
         order: An array of ordering definition objects.
         filter: An array of filter definition objects.
-        group: An array of group definition objects.
+        grouping: An array of group definition objects.
 
     Returns:
         The requested records, along with some metadata.
@@ -144,7 +184,7 @@ def list_(
             offset=offset,
             order=order,
             filter=filter,
-            group=group,
+            group=grouping,
         )
     return RecordList.from_dict(record_info)
 

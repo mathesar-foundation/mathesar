@@ -44,6 +44,12 @@ def test_records_list(rf, monkeypatch):
             "count": 50123,
             "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
             "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
+            "grouping": {
+                "columns": [2],
+                "groups": [
+                    {"id": 3, "count": 8, "results_eq": {"1": "lsfj", "2": 3422}}
+                ]
+            }
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
@@ -51,7 +57,12 @@ def test_records_list(rf, monkeypatch):
     expect_records_list = {
         "count": 50123,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
-        "group": None,
+        "grouping": {
+            "columns": [2],
+            "groups": [
+                {"id": 3, "count": 8, "results_eq": {"1": "lsfj", "2": 3422}}
+            ]
+        },
         "preview_data": [],
         "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
@@ -98,7 +109,7 @@ def test_records_search(rf, monkeypatch):
     expect_records_list = {
         "count": 50123,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
-        "group": None,
+        "grouping": None,
         "preview_data": [],
         "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
