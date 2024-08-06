@@ -67,7 +67,7 @@ def search_records_from_table(
         limit: The maximum number of rows we'll return.
 
     The search definition objects should have the form
-    {"attnum": <int>, "direction": <text>}
+    {"attnum": <int>, "literal": <text>}
     """
     search = search or []
     result = db_conn.exec_msar_func(

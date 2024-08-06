@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';

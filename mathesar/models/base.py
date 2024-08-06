@@ -94,7 +94,14 @@ class ColumnMetaData(BaseModel):
     bool_false = models.CharField(null=True)
     num_min_frac_digits = models.PositiveIntegerField(null=True)
     num_max_frac_digits = models.PositiveIntegerField(null=True)
-    num_show_as_perc = models.BooleanField(null=True)
+    num_grouping = models.CharField(
+        choices=[("always", "always"), ("auto", "auto"), ("never", "never")],
+        null=True
+    )
+    num_format = models.CharField(
+        choices=[("english", "english"), ("german", "german"), ("french", "french"), ("hindi", "hindi"), ("swiss", "swiss")],
+        null=True
+    )
     mon_currency_symbol = models.CharField(null=True)
     mon_currency_location = models.CharField(
         choices=[("after-minus", "after-minus"), ("end-with-space", "end-with-space")],
@@ -104,7 +111,6 @@ class ColumnMetaData(BaseModel):
     date_format = models.CharField(null=True)
     duration_min = models.CharField(max_length=255, null=True)
     duration_max = models.CharField(max_length=255, null=True)
-    duration_show_units = models.BooleanField(null=True)
 
     class Meta:
         constraints = [

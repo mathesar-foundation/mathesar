@@ -20,18 +20,18 @@ def test_columns_meta_data_list(monkeypatch):
             ColumnMetaData(
                 database=db_model, table_oid=_table_oid, attnum=2,
                 bool_input="dropdown", bool_true="TRUE", bool_false="FALSE",
-                num_min_frac_digits=5, num_max_frac_digits=10, num_show_as_perc=False,
+                num_min_frac_digits=5, num_max_frac_digits=10, num_grouping="force-yes",
                 mon_currency_symbol="EUR", mon_currency_location="end-with-space",
                 time_format=None, date_format=None,
-                duration_min=None, duration_max=None, duration_show_units=True,
+                duration_min=None, duration_max=None, num_format="english",
             ),
             ColumnMetaData(
                 database=db_model, table_oid=_table_oid, attnum=8,
                 bool_input="checkbox", bool_true="true", bool_false="false",
-                num_min_frac_digits=2, num_max_frac_digits=8, num_show_as_perc=True,
+                num_min_frac_digits=2, num_max_frac_digits=8, num_grouping="force-no",
                 mon_currency_symbol="$", mon_currency_location="after-minus",
                 time_format=None, date_format=None,
-                duration_min=None, duration_max=None, duration_show_units=True,
+                duration_min=None, duration_max=None, num_format="german",
             )
         ]
 
@@ -41,18 +41,18 @@ def test_columns_meta_data_list(monkeypatch):
         metadata.ColumnMetaDataRecord(
             database_id=database_id, table_oid=table_oid, attnum=2,
             bool_input="dropdown", bool_true="TRUE", bool_false="FALSE",
-            num_min_frac_digits=5, num_max_frac_digits=10, num_show_as_perc=False,
+            num_min_frac_digits=5, num_max_frac_digits=10, num_grouping="force-yes",
             mon_currency_symbol="EUR", mon_currency_location="end-with-space",
             time_format=None, date_format=None,
-            duration_min=None, duration_max=None, duration_show_units=True,
+            duration_min=None, duration_max=None, num_format="english",
         ),
         metadata.ColumnMetaDataRecord(
             database_id=database_id, table_oid=table_oid, attnum=8,
             bool_input="checkbox", bool_true="true", bool_false="false",
-            num_min_frac_digits=2, num_max_frac_digits=8, num_show_as_perc=True,
+            num_min_frac_digits=2, num_max_frac_digits=8, num_grouping="force-no",
             mon_currency_symbol="$", mon_currency_location="after-minus",
             time_format=None, date_format=None,
-            duration_min=None, duration_max=None, duration_show_units=True,
+            duration_min=None, duration_max=None, num_format="german",
         ),
     ]
     actual_metadata_list = metadata.list_(table_oid=table_oid, database_id=database_id)

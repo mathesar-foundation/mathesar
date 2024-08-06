@@ -3,6 +3,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { displayRecordSummaryAsPlainText } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { currentTable } from '@mathesar/stores/tables';
@@ -15,7 +16,8 @@
 
   $: table = $currentTable as Table;
   $: tableStructure = new TableStructure({
-    id: table.oid,
+    database: $currentDatabase,
+    table,
     abstractTypesMap: $currentDbAbstractTypes.data,
   });
   $: tableStructureIsLoading = tableStructure.isLoading;

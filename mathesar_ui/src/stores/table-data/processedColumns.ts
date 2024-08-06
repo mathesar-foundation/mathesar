@@ -1,7 +1,7 @@
 import type { Readable } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
-import type { Constraint } from '@mathesar/api/rest/types/tables/constraints';
+import type { Column } from '@mathesar/api/rpc/columns';
+import type { Constraint } from '@mathesar/api/rpc/constraints';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
@@ -87,7 +87,7 @@ export function processColumn({
   );
   const linkFk = findFkConstraintsForColumn(exclusiveConstraints, column.id)[0];
   const isPk = (hasEnhancedPrimaryKeyCell ?? true) && column.primary_key;
-  const fkTargetTableId = linkFk ? linkFk.referent_table : undefined;
+  const fkTargetTableId = linkFk ? linkFk.referent_table_oid : undefined;
   return {
     id: column.id,
     column,

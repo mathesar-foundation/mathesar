@@ -7,30 +7,25 @@ import {
   writable,
 } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
+import { States } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type { Column } from '@mathesar/api/rpc/columns';
+import type { Database } from '@mathesar/api/rpc/databases';
 import type {
-  GetRequestParams as ApiGetRequestParams,
   Group as ApiGroup,
   Grouping as ApiGrouping,
   Result as ApiRecord,
-  Response as ApiRecordsResponse,
   GroupingMode,
-} from '@mathesar/api/rest/types/tables/records';
-import {
-  States,
-  deleteAPI,
-  getAPI,
-  getQueryStringFromParams,
-  patchAPI,
-  postAPI,
-} from '@mathesar/api/rest/utils/requestUtils';
+  RecordsListParams,
+  RecordsResponse,
+} from '@mathesar/api/rpc/records';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
-  type CancellablePromise,
+  CancellablePromise,
   getGloballyUniqueId,
   isDefinedNonNullable,
 } from '@mathesar-component-library';
@@ -52,25 +47,6 @@ export interface RecordsRequestParamsData {
   grouping: GroupingRequest;
   filtering: Filtering;
   searchFuzzy: SearchFuzzy;
-}
-
-interface RecordsFetchQueryParamsData extends RecordsRequestParamsData {
-  shareConsumer?: ShareConsumer;
-}
-
-function buildFetchQueryString(data: RecordsFetchQueryParamsData): string {
-  const params: ApiGetRequestParams = {
-    ...data.pagination.recordsRequestParams(),
-    ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
-    ...data.grouping.recordsRequestParams(),
-    ...data.filtering.recordsRequestParams(),
-    ...data.searchFuzzy.recordsRequestParams(),
-  };
-  const paramsWithShareConsumer = {
-    ...params,
-    ...data.shareConsumer?.getQueryParams(),
-  };
-  return getQueryStringFromParams(paramsWithShareConsumer);
 }
 
 export interface RecordGroup {
@@ -279,9 +255,10 @@ function preprocessRecords({
 }
 
 export class RecordsData {
-  private tableId: Table['oid'];
-
-  private url: string;
+  private apiContext: {
+    database_id: number;
+    table_oid: Table['oid'];
+  };
 
   private meta: Meta;
 
@@ -306,7 +283,7 @@ export class RecordsData {
   /** Keys are row selection ids */
   selectableRowsMap: Readable<Map<string, RecordRow>>;
 
-  private promise: CancellablePromise<ApiRecordsResponse> | undefined;
+  private promise: CancellablePromise<RecordsResponse> | undefined;
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private createPromises: Map<unknown, CancellablePromise<unknown>>;
@@ -327,19 +304,21 @@ export class RecordsData {
   readonly shareConsumer?: ShareConsumer;
 
   constructor({
-    tableId,
+    database,
+    table,
     meta,
     columnsDataStore,
     contextualFilters,
     shareConsumer,
   }: {
-    tableId: Table['oid'];
+    database: Pick<Database, 'id'>;
+    table: Pick<Table, 'oid'>;
     meta: Meta;
     columnsDataStore: ColumnsDataStore;
     contextualFilters: Map<number, number | string>;
     shareConsumer?: ShareConsumer;
   }) {
-    this.tableId = tableId;
+    this.apiContext = { database_id: database.id, table_oid: table.oid };
     this.shareConsumer = shareConsumer;
     this.state = writable(States.Loading);
     this.savedRecordRowsWithGroupHeaders = writable([]);
@@ -358,7 +337,6 @@ export class RecordsData {
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.contextualFilters = contextualFilters;
-    this.url = `/api/db/v0/tables/${this.tableId}/records/`;
     void this.fetch();
 
     this.selectableRowsMap = derived(
@@ -410,12 +388,24 @@ export class RecordsData {
       const contextualFilterEntries = [...this.contextualFilters].map(
         ([columnId, value]) => ({ columnId, conditionId: 'equal', value }),
       );
-      const queryString = buildFetchQueryString({
-        ...params,
-        filtering: params.filtering.withEntries(contextualFilterEntries),
-        shareConsumer: this.shareConsumer,
-      });
-      this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${queryString}`);
+
+      const recordsListParams: RecordsListParams = {
+        ...this.apiContext,
+        ...params.pagination.recordsRequestParams(),
+        ...params.sorting.recordsRequestParamsIncludingGrouping(
+          params.grouping,
+        ),
+        ...params.grouping.recordsRequestParams(),
+        ...params.filtering
+          .withEntries(contextualFilterEntries)
+          .recordsRequestParams(),
+        ...params.searchFuzzy.recordsRequestParams(),
+        // TODO_BETA Do we need shareConsumer here? Previously we had been
+        // passing `...this.shareConsumer?.getQueryParams()`
+      };
+
+      this.promise = api.records.list(recordsListParams).run();
+
       const response = await this.promise;
       const totalCount = response.count || 0;
       const grouping = response.grouping
@@ -494,9 +484,9 @@ export class RecordsData {
     let shouldReFetchRecords = successRowKeys.size > 0;
     if (keysToDelete.length > 0) {
       const recordIds = [...keysToDelete];
-      const bulkDeleteURL = `/api/ui/v0/tables/${this.tableId}/records/delete/`;
       try {
-        await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
+        throw new Error('Not implemented'); // TODO_BETA
+        // await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
         keysToDelete.forEach((key) => successRowKeys.add(key));
       } catch (error) {
         failures.set(keysToDelete.join(','), getErrorMessage(error));
@@ -580,33 +570,36 @@ export class RecordsData {
     const cellKey = getCellKey(rowKey, column.id);
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
-    const promise = patchAPI<ApiRecordsResponse>(
-      `${this.url}${String(primaryKeyValue)}/`,
-      { [column.id]: record[column.id] },
-    );
-    if (!this.updatePromises) {
-      this.updatePromises = new Map();
-    }
-    this.updatePromises.set(cellKey, promise);
 
-    try {
-      const result = await promise;
-      this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
-      return {
-        ...row,
-        record: result.results[0],
-      };
-    } catch (err) {
-      this.meta.cellModificationStatus.set(cellKey, {
-        state: 'failure',
-        errors: [`Unable to save cell. ${getErrorMessage(err)}`],
-      });
-    } finally {
-      if (this.updatePromises.get(cellKey) === promise) {
-        this.updatePromises.delete(cellKey);
-      }
-    }
-    return row;
+    throw new Error('Not implemented'); // TODO_BETA
+    // const promise = patchAPI<RecordsResponse>(
+    //   `${this.url}${String(primaryKeyValue)}/`,
+    //   { [column.id]: record[column.id] },
+    // );
+
+    // if (!this.updatePromises) {
+    //   this.updatePromises = new Map();
+    // }
+    // this.updatePromises.set(cellKey, promise);
+
+    // try {
+    //   const result = await promise;
+    //   this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
+    //   return {
+    //     ...row,
+    //     record: result.results[0],
+    //   };
+    // } catch (err) {
+    //   this.meta.cellModificationStatus.set(cellKey, {
+    //     state: 'failure',
+    //     errors: [`Unable to save cell. ${getErrorMessage(err)}`],
+    //   });
+    // } finally {
+    //   if (this.updatePromises.get(cellKey) === promise) {
+    //     this.updatePromises.delete(cellKey);
+    //   }
+    // }
+    // return row;
   }
 
   getNewEmptyRecord(): NewRecordRow {
@@ -654,48 +647,51 @@ export class RecordsData {
       ...Object.fromEntries(this.contextualFilters),
       ...row.record,
     };
-    const promise = postAPI<ApiRecordsResponse>(this.url, requestRecord);
-    if (!this.createPromises) {
-      this.createPromises = new Map();
-    }
-    this.createPromises.set(rowKeyOfBlankRow, promise);
 
-    try {
-      const response = await promise;
-      const record = response.results[0];
-      let newRow: NewRecordRow = {
-        ...row,
-        record,
-      };
-      if (isPlaceholderRow(newRow)) {
-        const { isAddPlaceholder, ...newRecordRow } = newRow;
-        newRow = newRecordRow;
-      }
+    throw new Error('Not implemented'); // TODO_BETA
 
-      const rowKeyWithRecord = getRowKey(newRow, pkColumn?.id);
-      this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
-      this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
-      this.newRecords.update((existing) =>
-        existing.map((entry) => {
-          if (entry.identifier === row.identifier) {
-            return newRow;
-          }
-          return entry;
-        }),
-      );
-      this.totalCount.update((count) => (count ?? 0) + 1);
-      return newRow;
-    } catch (err) {
-      this.meta.rowCreationStatus.set(rowKeyOfBlankRow, {
-        state: 'failure',
-        errors: [getErrorMessage(err)],
-      });
-    } finally {
-      if (this.createPromises.get(rowKeyOfBlankRow) === promise) {
-        this.createPromises.delete(rowKeyOfBlankRow);
-      }
-    }
-    return row;
+    // const promise = postAPI<RecordsResponse>(this.url, requestRecord);
+    // if (!this.createPromises) {
+    //   this.createPromises = new Map();
+    // }
+    // this.createPromises.set(rowKeyOfBlankRow, promise);
+
+    // try {
+    //   const response = await promise;
+    //   const record = response.results[0];
+    //   let newRow: NewRecordRow = {
+    //     ...row,
+    //     record,
+    //   };
+    //   if (isPlaceholderRow(newRow)) {
+    //     const { isAddPlaceholder, ...newRecordRow } = newRow;
+    //     newRow = newRecordRow;
+    //   }
+
+    //   const rowKeyWithRecord = getRowKey(newRow, pkColumn?.id);
+    //   this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
+    //   this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
+    //   this.newRecords.update((existing) =>
+    //     existing.map((entry) => {
+    //       if (entry.identifier === row.identifier) {
+    //         return newRow;
+    //       }
+    //       return entry;
+    //     }),
+    //   );
+    //   this.totalCount.update((count) => (count ?? 0) + 1);
+    //   return newRow;
+    // } catch (err) {
+    //   this.meta.rowCreationStatus.set(rowKeyOfBlankRow, {
+    //     state: 'failure',
+    //     errors: [getErrorMessage(err)],
+    //   });
+    // } finally {
+    //   if (this.createPromises.get(rowKeyOfBlankRow) === promise) {
+    //     this.createPromises.delete(rowKeyOfBlankRow);
+    //   }
+    // }
+    // return row;
   }
 
   async createOrUpdateRecord(

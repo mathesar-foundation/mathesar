@@ -1,4 +1,4 @@
-import type { DurationDisplayOptions } from '@mathesar/api/rest/types/tables/columns';
+import type { Column } from '@mathesar/api/rpc/columns';
 import {
   DurationFormatter,
   DurationSpecification,
@@ -14,16 +14,12 @@ import type {
 
 import FormattedInputCell from './components/formatted-input/FormattedInputCell.svelte';
 import type { FormattedInputCellExternalProps } from './components/typeDefinitions';
-import type { CellColumnLike, CellComponentFactory } from './typeDefinitions';
+import type { CellComponentFactory } from './typeDefinitions';
 
-export interface DurationLikeColumn extends CellColumnLike {
-  display_options: Partial<DurationDisplayOptions> | null;
-}
-
-function getProps(column: DurationLikeColumn): FormattedInputCellExternalProps {
+function getProps(column: Column): FormattedInputCellExternalProps {
   const defaults = DurationSpecification.getDefaults();
-  const max = column.display_options?.max ?? defaults.max;
-  const min = column.display_options?.min ?? defaults.min;
+  const max = column.display_options?.duration_max ?? defaults.max;
+  const min = column.display_options?.duration_min ?? defaults.min;
   const durationSpecification = new DurationSpecification({ max, min });
   const formatter = new DurationFormatter(durationSpecification);
   return {
@@ -42,18 +38,18 @@ function getProps(column: DurationLikeColumn): FormattedInputCellExternalProps {
 
 const durationType: CellComponentFactory = {
   get: (
-    column: DurationLikeColumn,
+    column: Column,
   ): ComponentAndProps<FormattedInputCellExternalProps> => ({
     component: FormattedInputCell,
     props: getProps(column),
   }),
   getInput: (
-    column: DurationLikeColumn,
+    column: Column,
   ): ComponentAndProps<FormattedInputProps<string>> => ({
     component: FormattedInput,
     props: getProps(column),
   }),
-  getDisplayFormatter(column: DurationLikeColumn) {
+  getDisplayFormatter(column: Column) {
     return (v) => getProps(column).formatForDisplay(String(v));
   },
 };

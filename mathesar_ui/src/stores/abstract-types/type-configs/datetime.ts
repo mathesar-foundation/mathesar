@@ -1,9 +1,9 @@
-import type {
-  Column,
-  DateFormat,
-  TimeFormat,
-  TimeStampDisplayOptions,
-} from '@mathesar/api/rest/types/tables/columns';
+import {
+  type Column,
+  type DateFormat,
+  type TimeFormat,
+  getColumnDisplayOption,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeDateTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
@@ -94,7 +94,7 @@ const displayForm: AbstractTypeConfigForm = {
 function determineDisplayOptions(
   dispFormValues: FormValues,
 ): Column['display_options'] {
-  const displayOptions: TimeStampDisplayOptions = {
+  const displayOptions: Column['display_options'] = {
     date_format: dispFormValues.dateFormat as DateFormat,
     time_format: dispFormValues.timeFormat as TimeFormat,
   };
@@ -102,14 +102,14 @@ function determineDisplayOptions(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  displayOptions: Column['display_options'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as TimeStampDisplayOptions | null;
-  const dispFormValues: FormValues = {
-    dateFormat: displayOptions?.date_format ?? 'none',
-    timeFormat: displayOptions?.time_format ?? '24hr',
+  const column = { display_options: displayOptions };
+  const formValues: FormValues = {
+    dateFormat: getColumnDisplayOption(column, 'date_format'),
+    timeFormat: getColumnDisplayOption(column, 'time_format'),
   };
-  return dispFormValues;
+  return formValues;
 }
 
 const dateTimeType: AbstractTypeConfiguration = {

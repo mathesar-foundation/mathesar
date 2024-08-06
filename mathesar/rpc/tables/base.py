@@ -56,9 +56,9 @@ class SettableTableInfo(TypedDict):
     columns: Optional[list[SettableColumnInfo]]
 
 
-class JoinableTableInfo(TypedDict):
+class JoinableTableRecord(TypedDict):
     """
-    Information about a joinable table.
+    Information about a singular joinable table.
 
     Attributes:
         base: The OID of the table from which the paths start
@@ -99,6 +99,25 @@ class JoinableTableInfo(TypedDict):
             fkey_path=joinables["fkey_path"],
             depth=joinables["depth"],
             multiple_results=joinables["multiple_results"]
+        )
+
+
+class JoinableTableInfo(TypedDict):
+    """
+    Information about joinable table(s).
+
+    Attributes:
+        joinable_tables: List of reachable joinable table(s) from a base table.
+        target_table_info: Additional info about target table(s) and its column(s).
+    """
+    joinable_tables: list[JoinableTableRecord]
+    target_table_info: list
+
+    @classmethod
+    def from_dict(cls, joinable_dict):
+        return cls(
+            joinable_tables=[JoinableTableRecord.from_dict(j) for j in joinable_dict["joinable_tables"]],
+            target_table_info=joinable_dict["target_table_info"]
         )
 
 
@@ -290,7 +309,7 @@ def list_joinable(
     database_id: int,
     max_depth: int = 3,
     **kwargs
-) -> list[JoinableTableInfo]:
+) -> JoinableTableInfo:
     """
     List details for joinable tables.
 
@@ -304,8 +323,8 @@ def list_joinable(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        joinables = list_joinable_tables(table_oid, conn, max_depth)
-        return [JoinableTableInfo.from_dict(joinable) for joinable in joinables]
+        joinable_dict = list_joinable_tables(table_oid, conn, max_depth)
+        return JoinableTableInfo.from_dict(joinable_dict)
 
 
 @rpc_method(name="tables.list_with_metadata")
