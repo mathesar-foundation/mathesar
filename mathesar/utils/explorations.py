@@ -8,8 +8,12 @@ from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
 from mathesar.state import get_cached_metadata
 
 
-def get_explorations(database_id):
+def list_explorations(database_id):
     return Explorations.objects.filter(database__id=database_id)
+
+
+def get_exploration(exploration_id):
+    return Explorations.objects.get(id=exploration_id)
 
 
 def delete_exploration(exploration_id):
@@ -92,6 +96,19 @@ def run_exploration(exploration_def, database_id, conn):
         "search": exploration_def.get('search', []),
         "duplicate_only": exploration_def.get('duplicate_only', None)
     }
+
+
+def run_saved_exploration(exploration_id, limit, offset, database_id, conn):
+    exp_model = Explorations.objects.get(id=exploration_id)
+    exploration_def = {
+        "base_table_oid": exp_model["base_table_oid"],
+        "initial_columns": exp_model["initial_columns"],
+        "display_names": exp_model["display_names"],
+        "transformations": exp_model["transformations"],
+        "limit": limit,
+        "offset": offset
+    }
+    return run_exploration(exploration_def, database_id, conn)
 
 
 def _get_exploration_column_metadata(

@@ -150,8 +150,18 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        records.search,
+        "records.search",
+        [user_is_authenticated]
+    ),
+    (
         explorations.list_,
         "explorations.list",
+        [user_is_authenticated]
+    ),
+    (
+        explorations.get,
+        "explorations.get",
         [user_is_authenticated]
     ),
     (
@@ -162,6 +172,11 @@ METHODS = [
     (
         explorations.run,
         "explorations.run",
+        [user_is_authenticated]
+    ),
+    (
+        explorations.run_saved,
+        "explorations.run_saved",
         [user_is_authenticated]
     ),
     (

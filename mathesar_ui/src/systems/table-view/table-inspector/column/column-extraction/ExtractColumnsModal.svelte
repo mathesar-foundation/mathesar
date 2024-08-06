@@ -146,7 +146,11 @@
         if (!targetTableId) {
           throw new Error($_('no_target_table_selected'));
         }
-        await moveColumns($tabularData.id, extractedColumnIds, targetTableId);
+        await moveColumns(
+          $tabularData.table.oid,
+          extractedColumnIds,
+          targetTableId,
+        );
         const fkColumns = $linkedTable?.columns ?? [];
         let fkColumnId: number | undefined = undefined;
         if (fkColumns.length === 1) {
@@ -160,7 +164,7 @@
         );
       } else {
         const response = await splitTable({
-          id: $tabularData.id,
+          id: $tabularData.table.oid,
           idsOfColumnsToExtract: extractedColumnIds,
           extractedTableName: newTableName,
           newFkColumnName: $newFkColumnName,

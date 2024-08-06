@@ -1,7 +1,7 @@
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
-import type { JpPath } from '@mathesar/api/rest/types/tables/joinable_tables';
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rpc/columns';
 import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { JoinPath } from '@mathesar/api/rpc/tables';
 
 export type QueryColumnAlias = string;
 
@@ -12,7 +12,7 @@ export type QueryColumnAlias = string;
 export interface QueryInstanceInitialColumn {
   alias: QueryColumnAlias;
   id: Column['id'];
-  jp_path?: JpPath;
+  jp_path?: JoinPath;
 }
 
 // TODO: Extend this to support more complicated filters

@@ -26,7 +26,15 @@
 
   $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     column.type,
-    column.valid_target_types ?? [],
+
+    // TODO_BETA
+    //
+    // We need to find another way to get the valid target types for a column
+    // since the RPC API no longer returns this.
+
+    // column.valid_target_types ?? [],
+    [],
+
     $currentDbAbstractTypes.data,
   ).filter((item) => !['jsonlist', 'map'].includes(item.identifier));
 

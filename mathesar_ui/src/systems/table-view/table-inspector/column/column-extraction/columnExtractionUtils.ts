@@ -1,7 +1,7 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { FkConstraint } from '@mathesar/api/rest/types/tables/constraints';
+import type { Constraint, FkConstraint } from '@mathesar/api/rpc/constraints';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 import {
@@ -10,7 +10,6 @@ import {
   valid,
 } from '@mathesar/components/form';
 import {
-  type Constraint,
   type ProcessedColumn,
   constraintIsFk,
 } from '@mathesar/stores/table-data';
@@ -26,7 +25,7 @@ function getLinkedTable({
   columns: Map<number, ProcessedColumn>;
   tables: Map<number, Table>;
 }): LinkedTable | undefined {
-  const table = tables.get(fkConstraint.referent_table);
+  const table = tables.get(fkConstraint.referent_table_oid);
   if (!table) {
     return undefined;
   }

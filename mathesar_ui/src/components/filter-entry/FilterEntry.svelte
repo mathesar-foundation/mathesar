@@ -2,7 +2,7 @@
   import { createEventDispatcher, onDestroy } from 'svelte';
   import { readable } from 'svelte/store';
 
-  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
+  import type { ConstraintType } from '@mathesar/api/rpc/constraints';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';

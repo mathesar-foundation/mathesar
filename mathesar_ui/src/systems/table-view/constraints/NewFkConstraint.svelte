@@ -16,6 +16,7 @@
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
     TableStructure,
@@ -72,13 +73,14 @@
   });
 
   $: tables = [...$importVerifiedTables.values()];
-  $: baseTableName = $importVerifiedTables.get($tabularData.id)?.name ?? '';
+  $: baseTableName = $tabularData.table.name;
   $: ({ processedColumns } = $tabularData);
   $: baseTableColumns = [...$processedColumns.values()];
 
   $: targetTableStructure = $targetTable
     ? new TableStructure({
-        id: $targetTable.oid,
+        database: $currentDatabase,
+        table: $targetTable,
         abstractTypesMap: $currentDbAbstractTypes.data,
       })
     : undefined;
@@ -104,10 +106,10 @@
   async function handleSave(values: FilledFormValues<typeof form>) {
     await constraintsDataStore.add({
       columns: [values.baseColumn.id],
-      type: 'foreignkey',
+      type: 'f',
       name: values.constraintName,
-      referent_table: values.targetTable.oid,
-      referent_columns: [values.targetColumn.id],
+      fkey_relation_id: values.targetTable.oid,
+      fkey_columns: [values.targetColumn.id],
     });
     // Why reset before close when the form is automatically reset during
     // mount? Because without reset here, there's a weird UI state during the

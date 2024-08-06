@@ -66,7 +66,7 @@
   $: isEditable = !column.primary_key;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
-    ? getRecordPageUrl({ tableId: linkFk.referent_table, recordId: value })
+    ? getRecordPageUrl({ tableId: linkFk.referent_table_oid, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
   $: recordSummary = $recordSummaries

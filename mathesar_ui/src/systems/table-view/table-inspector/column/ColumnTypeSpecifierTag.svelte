@@ -11,7 +11,7 @@
   export let type: 'primaryKey' | 'foreignKey';
   export let column: ProcessedColumn;
 
-  $: linkedTableId = column.linkFk?.referent_table;
+  $: linkedTableId = column.linkFk?.referent_table_oid;
   $: linkedTable = linkedTableId
     ? $currentTablesData.tablesMap.get(linkedTableId)
     : undefined;

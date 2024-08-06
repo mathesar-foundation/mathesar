@@ -8,7 +8,13 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
-from mathesar.utils.explorations import get_explorations, delete_exploration, run_exploration
+from mathesar.utils.explorations import (
+    list_explorations,
+    get_exploration,
+    delete_exploration,
+    run_exploration,
+    run_saved_exploration
+)
 
 
 class ExplorationInfo(TypedDict):
@@ -152,8 +158,25 @@ def list_(*, database_id: int, **kwargs) -> list[ExplorationInfo]:
     Returns:
         A list of exploration details.
     """
-    explorations = get_explorations(database_id)
+    explorations = list_explorations(database_id)
     return [ExplorationInfo.from_model(exploration) for exploration in explorations]
+
+
+@rpc_method(name="explorations.get")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get(*, exploration_id: int, **kwargs) -> ExplorationInfo:
+    """
+    List information about an exploration.
+
+    Args:
+        exploration_id: The Django id of the exploration.
+
+    Returns:
+        Exploration details for a given exploration_id.
+    """
+    exploration = get_exploration(exploration_id)
+    return ExplorationInfo.from_model(exploration)
 
 
 @rpc_method(name="explorations.delete")
@@ -183,4 +206,23 @@ def run(*, exploration_def: ExplorationDef, database_id: int, **kwargs) -> Explo
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         exploration_result = run_exploration(exploration_def, database_id, conn)
+    return ExplorationResult.from_dict(exploration_result)
+
+
+@rpc_method(name='explorations.run_saved')
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def run_saved(*, exploration_id: int, database_id: int, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
+    """
+    Run a saved exploration.
+
+    Args:
+        exploration_id: The Django id of the exploration to run.
+        database_id: The Django id of the database containing the base table for the exploration.
+        limit: The max number of rows to return.(default 100)
+        offset: The number of rows to skip.(default 0)
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        exploration_result = run_saved_exploration(exploration_id, limit, offset, database_id, conn)
     return ExplorationResult.from_dict(exploration_result)

@@ -2,8 +2,8 @@ import type {
   FilterCombination,
   FilterCondition,
   FilterConditionParams,
-  GetRequestParams,
-} from '@mathesar/api/rest/types/tables/records';
+  RecordsListParams,
+} from '@mathesar/api/rpc/records';
 
 export interface FilterEntry {
   readonly columnId: number;
@@ -117,7 +117,7 @@ export class Filtering {
     return true;
   }
 
-  recordsRequestParams(): Pick<GetRequestParams, 'filter'> {
+  recordsRequestParams(): Pick<RecordsListParams, 'filter'> {
     if (!this.entries.length) {
       return {};
     }

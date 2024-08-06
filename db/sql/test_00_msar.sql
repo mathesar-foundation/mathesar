@@ -2890,6 +2890,42 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_customers_table() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE "Customers" (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  "First Name" text,
+  "Last Name" text,
+  "Subscription Date" date,
+  "dropmeee 1" text
+);
+ALTER TABLE "Customers" DROP COLUMN "dropmeee 1";
+INSERT INTO "Customers" ("First Name", "Last Name", "Subscription Date") VALUES
+  ('Aaron', 'Adams', '2020-03-21'),
+  ('Abigail', 'Acosta', '2020-04-16'),
+  ('Aaron', 'Adams', '2020-04-29'),
+  ('Abigail', 'Adams', '2020-05-29'),
+  ('Abigail', 'Abbott', '2020-07-05'),
+  ('Aaron', 'Adkins', '2020-08-16'),
+  ('Aaron', 'Acevedo', '2020-10-29'),
+  ('Abigail', 'Abbott', '2020-10-30'),
+  ('Abigail', 'Adams', '2021-02-14'),
+  ('Abigail', 'Acevedo', '2021-03-29'),
+  ('Aaron', 'Acosta', '2021-04-13'),
+  ('Aaron', 'Adams', '2021-06-30'),
+  ('Abigail', 'Adkins', '2021-09-12'),
+  ('Aaron', 'Adams', '2021-11-11'),
+  ('Abigail', 'Abbott', '2021-11-30'),
+  ('Aaron', 'Acevedo', '2022-02-04'),
+  ('Aaron', 'Adkins', '2022-03-10'),
+  ('Abigail', 'Abbott', '2022-03-23'),
+  ('Abigail', 'Adkins', '2022-03-27'),
+  ('Abigail', 'Abbott', '2022-04-29'),
+  ('Abigail', 'Adams', '2022-05-24');
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -2897,14 +2933,22 @@ BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.list_records_from_table(rel_id, null, null, null, null, null, null),
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
     $j${
       "count": 3,
       "results": [
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
-      ]
+      ],
+      "grouping": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -2916,14 +2960,20 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, 2, null, '[{"attnum": 2, "direction": "desc"}]', null, null, null
+      tab_id => rel_id,
+      limit_ => 2,
+      offset_ => null,
+      order_ => '[{"attnum": 2, "direction": "desc"}]',
+      filter_ => null,
+      group_ => null
     ),
     $j${
       "count": 3,
       "results": [
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
-      ]
+      ],
+      "grouping": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -2935,14 +2985,20 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, null, 1, '[{"attnum": 1, "direction": "desc"}]', null, null, null
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => 1,
+      order_ => '[{"attnum": 1, "direction": "desc"}]',
+      filter_ => null,
+      group_ => null
     ),
     $j${
       "count": 3,
       "results": [
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
-      ]
+      ],
+      "grouping": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -2958,14 +3014,22 @@ BEGIN
   GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
   SET ROLE intern_no_pkey;
   RETURN NEXT is(
-    msar.list_records_from_table(rel_id, null, null, null, null, null, null),
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
     $j${
       "count": 3,
       "results": [
         {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true},
         {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
-      ]
+      ],
+      "grouping": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -2976,7 +3040,12 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, null, null, '[{"attnum": 3, "direction": "desc"}]', null, null, null
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => '[{"attnum": 3, "direction": "desc"}]',
+      filter_ => null,
+      group_ => null
     ),
     $j${
       "count": 3,
@@ -2984,12 +3053,159 @@ BEGIN
         {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
-      ]
+      ],
+      "grouping": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
         ' msar.format_data(col3) AS "4", msar.format_data(col4) AS "5" FROM public.atable',
         '  ORDER BY "3" DESC, "2" ASC, "3" ASC, "5" ASC LIMIT NULL OFFSET NULL'
+      )
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_with_grouping() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_customers_table();
+  rel_id := '"Customers"'::regclass::oid;
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 10,
+      offset_ => null,
+      order_ => '[{"attnum": 3, "direction": "asc"}, {"attnum": 2, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [3, 2]}'
+    ),
+    $j${
+      "count": 21,
+      "results": [
+        {"1": 5, "2": "Abigail", "3": "Abbott", "4": "2020-07-05 AD"},
+        {"1": 8, "2": "Abigail", "3": "Abbott", "4": "2020-10-30 AD"},
+        {"1": 15, "2": "Abigail", "3": "Abbott", "4": "2021-11-30 AD"},
+        {"1": 18, "2": "Abigail", "3": "Abbott", "4": "2022-03-23 AD"},
+        {"1": 20, "2": "Abigail", "3": "Abbott", "4": "2022-04-29 AD"},
+        {"1": 7, "2": "Aaron", "3": "Acevedo", "4": "2020-10-29 AD"},
+        {"1": 16, "2": "Aaron", "3": "Acevedo", "4": "2022-02-04 AD"},
+        {"1": 10, "2": "Abigail", "3": "Acevedo", "4": "2021-03-29 AD"},
+        {"1": 11, "2": "Aaron", "3": "Acosta", "4": "2021-04-13 AD"},
+        {"1": 2, "2": "Abigail", "3": "Acosta", "4": "2020-04-16 AD"}
+      ],
+      "grouping": {
+        "columns": [3, 2],
+        "preproc": null,
+        "groups": [
+          {"id": 1, "count": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}},
+          {"id": 2, "count": 2, "results_eq": {"2": "Aaron", "3": "Acevedo"}},
+          {"id": 3, "count": 1, "results_eq": {"2": "Abigail", "3": "Acevedo"}},
+          {"id": 4, "count": 1, "results_eq": {"2": "Aaron", "3": "Acosta"}},
+          {"id": 5, "count": 1, "results_eq": {"2": "Abigail", "3": "Acosta"}}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
+        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
+        ' FROM public."Customers"  ORDER BY "3" ASC, "2" ASC, "1" ASC LIMIT ''10'' OFFSET NULL'
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 3,
+      offset_ => null,
+      order_ => '[{"attnum": 3, "direction": "asc"}, {"attnum": 2, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [3, 2]}'
+    ),
+    $j${
+      "count": 21,
+      "results": [
+        {"1": 5, "2": "Abigail", "3": "Abbott", "4": "2020-07-05 AD"},
+        {"1": 8, "2": "Abigail", "3": "Abbott", "4": "2020-10-30 AD"},
+        {"1": 15, "2": "Abigail", "3": "Abbott", "4": "2021-11-30 AD"}
+      ],
+      "grouping": {
+        "columns": [3, 2],
+        "preproc": null,
+        "groups": [
+          {"id": 1, "count": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
+        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
+        ' FROM public."Customers"  ORDER BY "3" ASC, "2" ASC, "1" ASC LIMIT ''3'' OFFSET NULL'
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 3,
+      offset_ => null,
+      order_ => '[{"attnum": 4, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [4], "preproc": ["truncate_to_month"]}'
+    ),
+    $j${
+      "count": 21,
+      "results": [
+        {"1": 1, "2": "Aaron", "3": "Adams", "4": "2020-03-21 AD"},
+        {"1": 2, "2": "Abigail", "3": "Acosta", "4": "2020-04-16 AD"},
+        {"1": 3, "2": "Aaron", "3": "Adams", "4": "2020-04-29 AD"}
+      ],
+      "grouping": {
+        "columns": [4],
+        "preproc": ["truncate_to_month"],
+        "groups": [
+          {"id": 1, "count": 1, "results_eq": {"4": "2020-03 AD"}},
+          {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
+        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
+        ' FROM public."Customers"  ORDER BY "4" ASC, "1" ASC LIMIT ''3'' OFFSET NULL'
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 5,
+      offset_ => null,
+      order_ => '[{"attnum": 4, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [4], "preproc": ["truncate_to_year"]}'
+    ),
+    $j${
+      "count": 21,
+      "results": [
+        {"1": 1, "2": "Aaron", "3": "Adams", "4": "2020-03-21 AD"},
+        {"1": 2, "2": "Abigail", "3": "Acosta", "4": "2020-04-16 AD"},
+        {"1": 3, "2": "Aaron", "3": "Adams", "4": "2020-04-29 AD"},
+        {"1": 4, "2": "Abigail", "3": "Adams", "4": "2020-05-29 AD"},
+        {"1": 5, "2": "Abigail", "3": "Abbott", "4": "2020-07-05 AD"}
+      ],
+      "grouping": {
+        "columns": [4],
+        "preproc": ["truncate_to_year"],
+        "groups": [{"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}}]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
+        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
+        ' FROM public."Customers"  ORDER BY "4" ASC, "1" ASC LIMIT ''5'' OFFSET NULL'
       )
     )
   );
@@ -3032,7 +3248,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.build_expr --------------------------------------------------------------------------
+-- msar.build_expr ---------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_build_expr() RETURNS SETOF TEXT AS $$
 DECLARE
@@ -3321,5 +3537,162 @@ BEGIN
     ),
     '(((col2) = (''500'')) AND ((col3) < (''abcde''))) OR ((id) > (''20''))'
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.search_records_from_table ------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_search_records_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE atable (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    col1 integer,
+    col2 varchar,
+    coltodrop integer
+  );
+  ALTER TABLE atable DROP COLUMN coltodrop;
+  INSERT INTO atable (col1, col2) VALUES
+    (1, 'bcdea'),
+    (12, 'vwxyz'),
+    (1, 'edcba'),
+    (2, 'abcde');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_search_records_from_table() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  search_result jsonb;
+BEGIN
+  PERFORM __setup_search_records_table();
+  rel_id := 'atable'::regclass::oid;
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 2, 'literal', 3)
+    ),
+    10
+  );
+  RETURN NEXT is(search_result -> 'results', jsonb_build_array());
+  RETURN NEXT is((search_result -> 'count')::integer, 0);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'bc')
+    ),
+    null
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 2);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 2, '2', 12, '3', 'vwxyz'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 4);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    null,
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 2, '2', 12, '3', 'vwxyz'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 4);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'bc')
+    ),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 2);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'b'),
+      jsonb_build_object('attnum', 2, 'literal', 1)
+    ),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 3);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'a'),
+      jsonb_build_object('attnum', 2, 'literal', 1)
+    ),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba'),
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 3);
+
+  search_result := msar.search_records_from_table(
+    rel_id,
+    jsonb_build_array(
+      jsonb_build_object('attnum', 3, 'literal', 'a')
+    ),
+    10
+  );
+  RETURN NEXT is(
+    search_result -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('1', 4, '2', 2, '3', 'abcde'),
+      jsonb_build_object('1', 1, '2', 1, '3', 'bcdea'),
+      jsonb_build_object('1', 3, '2', 1, '3', 'edcba')
+    )
+  );
+  RETURN NEXT is((search_result -> 'count')::integer, 3);
 END;
 $$ LANGUAGE plpgsql;

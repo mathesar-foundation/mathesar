@@ -18,6 +18,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     ColumnsDataStore,
     getTabularDataStoreFromContext,
@@ -76,7 +77,7 @@
   $: linkType = requiredField<LinkType>('manyToOne');
   $: $targetTable, linkType.reset();
   $: targetColumnsStore = target
-    ? new ColumnsDataStore({ tableId: target.oid })
+    ? new ColumnsDataStore({ database: $currentDatabase, table: target })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
@@ -205,7 +206,7 @@
     if (!tableWithNewColumn) {
       return;
     }
-    if (tableWithNewColumn.oid === $tabularData.id) {
+    if (tableWithNewColumn.oid === $tabularData.table.oid) {
       await $tabularData.refresh();
     }
   }

@@ -1,4 +1,4 @@
-import type { GetRequestParams } from '@mathesar/api/rest/types/tables/records';
+import type { RecordsListParams } from '@mathesar/api/rpc/records';
 import { ImmutableMap } from '@mathesar/component-library';
 
 /**
@@ -18,7 +18,7 @@ export class SearchFuzzy extends ImmutableMap<number, unknown> {
     this.valueIsValid = valueIsSearchable;
   }
 
-  recordsRequestParams(): Pick<GetRequestParams, 'search_fuzzy'> {
+  recordsRequestParams(): Pick<RecordsListParams, 'search_fuzzy'> {
     if (this.size === 0) {
       return {};
     }

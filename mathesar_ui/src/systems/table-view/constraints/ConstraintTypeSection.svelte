@@ -1,11 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
+  import type {
+    Constraint,
+    ConstraintType,
+  } from '@mathesar/api/rpc/constraints';
   import { Button, Collapsible, Help, Icon } from '@mathesar/component-library';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import type { Constraint } from '@mathesar/stores/table-data';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
 
   import ConstraintCollapseHeader from './ConstraintCollapseHeader.svelte';
@@ -61,7 +63,7 @@
       identifierType: $_('constraint'),
       identifierName: constraint.name,
       body: [$_('are_you_sure_to_proceed')],
-      onProceed: () => constraintsDataStore.remove(constraint.id),
+      onProceed: () => constraintsDataStore.remove(constraint.oid),
     });
   }
 
@@ -90,7 +92,7 @@
       {/if}
     </div>
   {/if}
-  {#each constraints as constraint (constraint.id)}
+  {#each constraints as constraint (constraint.oid)}
     <Collapsible triggerAppearance="ghost">
       <span slot="header">
         <ConstraintCollapseHeader {constraint} />
