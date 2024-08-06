@@ -28,34 +28,44 @@ export interface SortingEntry {
   direction: SortDirection;
 }
 
-export type SqlExpr =
-  | {
-      type:
-        | 'and'
-        | 'or'
-        | 'equal'
-        | 'lesser'
-        | 'greater'
-        | 'lesser_or_equal'
-        | 'greater_or_equal'
-        | 'contains_case_insensitive'
-        | 'contains'
-        | 'starts_with'
-        | 'json_array_contains';
-      args: [SqlExpr, SqlExpr];
-    }
-  | {
-      type:
-        | 'null'
-        | 'not_null'
-        | 'json_array_length'
-        | 'uri_scheme'
-        | 'uri_authority'
-        | 'email_domain';
-      args: [SqlExpr];
-    }
-  | { type: 'literal'; value: string | number | null }
-  | { type: 'attnum'; value: number };
+export interface SqlComparison {
+  type:
+    | 'and'
+    | 'or'
+    | 'equal'
+    | 'lesser'
+    | 'greater'
+    | 'lesser_or_equal'
+    | 'greater_or_equal'
+    | 'contains_case_insensitive'
+    | 'contains'
+    | 'starts_with'
+    | 'json_array_contains';
+  args: [SqlExpr, SqlExpr];
+}
+
+export interface SqlFunction {
+  type:
+    | 'null'
+    | 'not_null'
+    | 'json_array_length'
+    | 'uri_scheme'
+    | 'uri_authority'
+    | 'email_domain';
+  args: [SqlExpr];
+}
+
+export interface SqlLiteral {
+  type: 'literal';
+  value: string | number | null;
+}
+
+export interface SqlColumn {
+  type: 'attnum';
+  value: number;
+}
+
+export type SqlExpr = SqlComparison | SqlFunction | SqlLiteral | SqlColumn;
 
 export interface RecordsListParams {
   database_id: number;

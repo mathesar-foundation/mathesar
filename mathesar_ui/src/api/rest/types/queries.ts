@@ -2,6 +2,7 @@ import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { JoinPath } from '@mathesar/api/rpc/tables';
+import type { FilterId } from '@mathesar/stores/abstract-types/types';
 
 export type QueryColumnAlias = string;
 
@@ -21,7 +22,7 @@ type FilterConditionParams = [
   { column_name: [string] },
   ...{ literal: [unknown] }[],
 ];
-type FilterCondition = Record<string, FilterConditionParams>;
+type FilterCondition = Partial<Record<FilterId, FilterConditionParams>>;
 
 export interface QueryInstanceFilterTransformation {
   type: 'filter';
