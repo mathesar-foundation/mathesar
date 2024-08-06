@@ -2933,7 +2933,14 @@ BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
-    msar.list_records_from_table(rel_id, null, null, null, null, null),
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
     $j${
       "count": 3,
       "results": [
@@ -2953,7 +2960,12 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, 2, null, '[{"attnum": 2, "direction": "desc"}]', null, null
+      tab_id => rel_id,
+      limit_ => 2,
+      offset_ => null,
+      order_ => '[{"attnum": 2, "direction": "desc"}]',
+      filter_ => null,
+      group_ => null
     ),
     $j${
       "count": 3,
@@ -2973,7 +2985,12 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, null, 1, '[{"attnum": 1, "direction": "desc"}]', null, null
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => 1,
+      order_ => '[{"attnum": 1, "direction": "desc"}]',
+      filter_ => null,
+      group_ => null
     ),
     $j${
       "count": 3,
@@ -2997,7 +3014,14 @@ BEGIN
   GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
   SET ROLE intern_no_pkey;
   RETURN NEXT is(
-    msar.list_records_from_table(rel_id, null, null, null, null, null),
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
     $j${
       "count": 3,
       "results": [
@@ -3016,7 +3040,12 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id, null, null, '[{"attnum": 3, "direction": "desc"}]', null, null
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => '[{"attnum": 3, "direction": "desc"}]',
+      filter_ => null,
+      group_ => null
     ),
     $j${
       "count": 3,
@@ -3046,11 +3075,12 @@ BEGIN
   rel_id := '"Customers"'::regclass::oid;
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id,
-      10, null,
-      '[{"attnum": 3, "direction": "asc"}, {"attnum": 2, "direction": "asc"}]',
-      null,
-      '{"columns": [3, 2]}'
+      tab_id => rel_id,
+      limit_ => 10,
+      offset_ => null,
+      order_ => '[{"attnum": 3, "direction": "asc"}, {"attnum": 2, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [3, 2]}'
     ),
     $j${
       "count": 21,
@@ -3087,11 +3117,12 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id,
-      3, null,
-      '[{"attnum": 3, "direction": "asc"}, {"attnum": 2, "direction": "asc"}]',
-      null,
-      '{"columns": [3, 2]}'
+      tab_id => rel_id,
+      limit_ => 3,
+      offset_ => null,
+      order_ => '[{"attnum": 3, "direction": "asc"}, {"attnum": 2, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [3, 2]}'
     ),
     $j${
       "count": 21,
@@ -3117,11 +3148,12 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id,
-      3, null,
-      '[{"attnum": 4, "direction": "asc"}]',
-      null,
-      '{"columns": [4], "preproc": ["truncate_to_month"]}'
+      tab_id => rel_id,
+      limit_ => 3,
+      offset_ => null,
+      order_ => '[{"attnum": 4, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [4], "preproc": ["truncate_to_month"]}'
     ),
     $j${
       "count": 21,
@@ -3148,11 +3180,12 @@ BEGIN
   );
   RETURN NEXT is(
     msar.list_records_from_table(
-      rel_id,
-      5, null,
-      '[{"attnum": 4, "direction": "asc"}]',
-      null,
-      '{"columns": [4], "preproc": ["truncate_to_year"]}'
+      tab_id => rel_id,
+      limit_ => 5,
+      offset_ => null,
+      order_ => '[{"attnum": 4, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [4], "preproc": ["truncate_to_year"]}'
     ),
     $j${
       "count": 21,
