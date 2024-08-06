@@ -1,0 +1,36 @@
+Some high level thoughts I'd like to ensure we follow and develop patterns around them to guide contributors into following these:
+
+- Preload reasonable amount of data while initially opening a page.
+  - reduces wait time for the user to get started.
+  - avoids requests after the DOM loads.
+  - improves performance.
+- Do not have duplicate sources of data in imported stores.
+  - avoids needing to update and maintain the same information in multiple locations.
+- Prefer batching requests. Architect in a way batching is possible for all/most requests needed to render a view.
+  - eg., when loading a table, batch columns, constraints, and the first set of records.
+  - reduces amount of requests sent from the frontend.
+  - simplifies state management for empty states, loading, & errors.
+- Do not persist a property in imported stores if it's not required on other pages.
+  - avoids cluttering of the stores and helps with maintenance.
+  - simplifies regular stale state checking to keep entities upto date.
+  - Eg., filtering, grouping etc., can be persisted on the component context instead of an imported Table store.
+  - Eg., roles are not required anywhere else except the database page, consider storing them in the database page instead of an imported store.
+- Clear the memory of stores when not in use, pay good attention to memory usage, however small.
+  - memory issues/leaks start at the point when we start thinking this wouldn't take a lot of memory. It's easier to prevent than to identify the cause when there are a number of tiny areas contributing to it.
+  - Eg., when moving out of the table page, clear the stores containing columns, constraints etc.,
+- All cached entities should have a cache timeout, especially entities in imported stores.
+  - Requests should not be sent immediately when the timeout reaches.
+  - Requests should only be sent again **when the data is required** and the timeout had already been reached.
+  - ensures that data is reasonably upto-date
+- Focus on how stores would be used on the frontend, the UX, and the API more than how it's stored on the database.
+  - Eg., listing roles on a db server requires the database id inorder to be queried. Even though roles technically belong under a server, it cannot be queried using just the server id. It might make sense to place it under a database or have a separate type for such entities instead of placing them within Server.
+- In imported stores, keep exposed writable svelte stores to a minimum.
+  - `name` within databases/schemas being a writable store leads to usage like `bind:name={$name}` from contributors.
+  - These are propreties that require sending a request to patch. We should use callbacks to do this, and not binds, where `name` is a readable store and the value is set via a class method.
+  - We already have a pattern to make such stores Publicly readable and privately writable: `MakeWritablePropertiesReadable`.
+- Be weary of automatic requests due to derived stores. It's a good approach to have granular control on when requests are made to avoid unwanted/duplicate requests.
+- Never make requests in class constructors for the same entity
+  - eg., do not request `table.get` within the `Table` constructor.
+  - If an entity needs to be fetched, it should be fetched in the parent and a class object for that entity should be returned.
+- Interconnected/dependent properties should be grouped and treated as a separate entity (eg., ProcessedColumn, depends on Column, Constraints, Database Types) instead of placing the properties within the base entity (eg., Column).
+  - This keeps the base entity cleaner, and accessible without having to fetch the other connected entities.

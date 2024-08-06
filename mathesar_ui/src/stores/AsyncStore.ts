@@ -103,27 +103,34 @@ export default class AsyncStore<Props, T>
 
   private getError: (caughtValue: unknown) => string;
 
-  private value: Writable<AsyncStoreValue<T, string>> = writable(
-    new AsyncStoreValue({ isLoading: false }),
-  );
+  private value: Writable<AsyncStoreValue<T, string>>;
 
   private promise: Promise<T> | CancellablePromise<T> | undefined = undefined;
 
   constructor(
     run: (props: Props) => Promise<T> | CancellablePromise<T>,
     getError: (caughtValue: unknown) => string = getErrorMessage,
+    initialValue?: T,
   ) {
     this.runFn = run;
     this.getError = getError;
+    this.value = initialValue
+      ? writable(
+          new AsyncStoreValue<T, string>({
+            isLoading: false,
+            settlement: { state: 'resolved', value: initialValue },
+          }),
+        )
+      : writable(new AsyncStoreValue<T, string>({ isLoading: false }));
   }
 
   subscribe(
-    run: Subscriber<AsyncStoreValue<T, string>>,
+    subscriber: Subscriber<AsyncStoreValue<T, string>>,
     invalidate?:
       | ((value?: AsyncStoreValue<T, string> | undefined) => void)
       | undefined,
   ): Unsubscriber {
-    return this.value.subscribe(run, invalidate);
+    return this.value.subscribe(subscriber, invalidate);
   }
 
   async run(props: Props): Promise<AsyncStoreValue<T, string>> {
@@ -147,6 +154,18 @@ export default class AsyncStore<Props, T>
       );
       return get(this.value);
     }
+  }
+
+  async runIfNotSettled(props: Props): Promise<AsyncStoreValue<T, string>> {
+    const currentValue = get(this.value);
+    if (currentValue.isOk) {
+      return currentValue;
+    }
+    return this.run(props);
+  }
+
+  async batchRunner() {
+    throw new Error('Not implemented yet');
   }
 
   /**
