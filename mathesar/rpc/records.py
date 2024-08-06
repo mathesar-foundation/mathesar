@@ -131,7 +131,7 @@ class RecordList(TypedDict):
     """
     count: int
     results: list[dict]
-    grouping: dict
+    grouping: GroupingResponse
     preview_data: list[dict]
 
     @classmethod
