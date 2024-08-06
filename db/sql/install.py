@@ -7,6 +7,7 @@ SQL_FILES = [
     '00_msar.sql',
     '10_msar_joinable_tables.sql',
     '30_msar_custom_aggregates.sql',
+    '40_record_summaries.sql',
 ]
 
 
