@@ -199,8 +199,10 @@ To use an RPC function:
     options:
       members:
       - list_
+      - get
       - delete
       - run
+      - run_saved
       - ExplorationInfo
       - ExplorationDef
       - ExplorationResult
