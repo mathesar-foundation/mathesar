@@ -9,64 +9,7 @@ export interface DatabaseResponse {
 }
 
 /**
- * TODO: Figure out a better place to move classes like these.
- * Perhaps `@mathesar/models/database`.
- *
- * Model classes should follow these rules:
- * - The class should be immutable.
- * - There should not be `undefined` properties.
- * - All properties should be readonly.
- *    - All properties should be initialized in the constructor.
- *    - If a property has to be changed, we should return a new class.
- * - Svelte stores should not be used inside Model classes.
- *    - The Model classes themselves can be contained in a Svelte store.
- *
- * Good:
- * ```
- * export class Model {
- *  readonly proprety: string;
- *
- *  constructor(value: string) {
- *    this.proprety = value;
- *  }
- *
- *  fetchAnotherProperty(): string {
- *    const anotherProperty = api.model.getAnotherProp();
- *    return anotherProperty;
- *  }
- *
- *  changeProperty(newValue: string): Model {
- *    return new Model(newValue);
- *  }
- * }
- * ```
- *
- * Bad:
- * ```
- * export class Model {
- *  // All properties should be readonly
- *  proprety: string;
- *
- *  // Do not have undefined properties
- *  anotherProp: string | undefined = undefined;
- *
- *  constructor(prop: string) {
- *    this.proprety = prop;
- *  }
- *
- *  fetchAnotherProperty(): string {
- *    // Do not cache here
- *    this.anotherProp = api.model.getAnotherProp();
- *    return this.anotherProp;
- *  }
- *
- *  changeProperty(newValue: string): Model {
- *    // Do not mutate propreties
- *    this.property = newValue;
- *    return this;
- *  }
- * }
- * ```
+ * TODO_BETA: Modify after store discussion is resolved
  */
 export class Database implements DatabaseResponse {
   readonly id: number;
