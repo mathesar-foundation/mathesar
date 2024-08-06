@@ -200,7 +200,9 @@ To use an RPC function:
       members:
       - list_
       - get
+      - add
       - delete
+      - replace
       - run
       - run_saved
       - ExplorationInfo
