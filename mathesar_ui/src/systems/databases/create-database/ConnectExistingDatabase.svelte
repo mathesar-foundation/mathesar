@@ -31,7 +31,14 @@
   const role = requiredField('');
   const password = requiredField('');
   const installationSchemas = requiredField<InstallationSchema[]>(['internal']);
-  const form = makeForm({ databaseName, installationSchemas });
+  const form = makeForm({
+    databaseName,
+    host,
+    port,
+    role,
+    password,
+    installationSchemas,
+  });
 
   async function createDatabase() {
     const newDatabase = await databasesStore.connectExistingDatabase({
