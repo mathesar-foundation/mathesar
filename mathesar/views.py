@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from mathesar.rpc.databases import list_ as databases_list
 from mathesar.rpc.schemas import list_ as schemas_list
+from mathesar.rpc.servers import list_ as get_servers_list
 from mathesar.api.serializers.databases import TypeSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
@@ -83,6 +84,7 @@ def _get_base_data_all_routes(request, database_id=None, schema_id=None):
         'current_schema': schema_id,
         'current_release_tag_name': __version__,
         'databases': get_database_list(request),
+        'servers': get_servers_list(),
         'internal_db_connection': _get_internal_db_meta(),
         'is_authenticated': not request.user.is_anonymous,
         'queries': [],

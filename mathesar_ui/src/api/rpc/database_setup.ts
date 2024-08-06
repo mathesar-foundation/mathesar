@@ -1,7 +1,7 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { ConfiguredRole } from './configured_roles';
-import type { Database } from './databases';
+import type { DatabaseResponse } from './databases';
 import type { Server } from './servers';
 
 export const sampleDataOptions = [
@@ -13,7 +13,7 @@ export type SampleDataSchemaIdentifier = (typeof sampleDataOptions)[number];
 
 export interface DatabaseConnectionResult {
   server: Server;
-  database: Database;
+  database: DatabaseResponse;
   configured_role: ConfiguredRole;
 }
 
@@ -21,7 +21,7 @@ export interface DatabaseConnectionResult {
 export const database_setup = {
   create_new: rpcMethodTypeContainer<
     {
-      database: Database['name'];
+      database: DatabaseResponse['name'];
       sample_data?: SampleDataSchemaIdentifier[];
     },
     DatabaseConnectionResult
@@ -31,7 +31,7 @@ export const database_setup = {
     {
       host: Server['host'];
       port: Server['port'];
-      database: Database['name'];
+      database: DatabaseResponse['name'];
       role: ConfiguredRole['name'];
       password: string;
       sample_data?: SampleDataSchemaIdentifier[];
