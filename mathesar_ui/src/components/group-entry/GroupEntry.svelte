@@ -2,7 +2,7 @@
   import { createEventDispatcher, tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
+  import type { ConstraintType } from '@mathesar/api/rpc/constraints';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { ReadableMapLike } from '@mathesar/typeUtils';

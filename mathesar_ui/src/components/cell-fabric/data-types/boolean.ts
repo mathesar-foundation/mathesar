@@ -1,4 +1,4 @@
-import type { BooleanDisplayOptions } from '@mathesar/api/rest/types/tables/columns';
+import { type Column, getColumnDisplayOption } from '@mathesar/api/rpc/columns';
 import { Select, isDefinedNonNullable } from '@mathesar-component-library';
 import type {
   ComponentAndProps,
@@ -11,37 +11,38 @@ import type {
   CheckBoxCellExternalProps,
   SingleSelectCellExternalProps,
 } from './components/typeDefinitions';
-import type { CellColumnLike, CellComponentFactory } from './typeDefinitions';
-
-export interface BooleanLikeColumn extends CellColumnLike {
-  display_options: Partial<BooleanDisplayOptions> | null;
-}
+import type { CellComponentFactory } from './typeDefinitions';
 
 type Props =
   | CheckBoxCellExternalProps
   | SingleSelectCellExternalProps<boolean | null>;
 
-function getLabels(
-  displayOptions?: BooleanLikeColumn['display_options'],
-): [string, string] {
-  const customLabels = displayOptions?.custom_labels ?? undefined;
-  return [customLabels?.TRUE ?? 'true', customLabels?.FALSE ?? 'false'];
+interface BooleanLabels {
+  true: string;
+  false: string;
+}
+
+function getLabels(column: Column): BooleanLabels {
+  return {
+    true: getColumnDisplayOption(column, 'bool_true'),
+    false: getColumnDisplayOption(column, 'bool_false'),
+  };
 }
 
 function getFormattedValue(
-  labels: [string, string],
+  labels: BooleanLabels,
   value?: boolean | null,
 ): string {
   if (isDefinedNonNullable(value)) {
-    return value ? labels[0] : labels[1];
+    return value ? labels.true : labels.false;
   }
   return '';
 }
 
 function getProps(
-  column: BooleanLikeColumn,
+  column: Column,
 ): SingleSelectCellExternalProps<boolean | null> {
-  const labels = getLabels(column.display_options);
+  const labels = getLabels(column);
   return {
     options: [null, true, false],
     getLabel: (value?: boolean | null) => getFormattedValue(labels, value),
@@ -50,9 +51,9 @@ function getProps(
 
 const booleanType: CellComponentFactory = {
   initialInputValue: null,
-  get: (column: BooleanLikeColumn): ComponentAndProps<Props> => {
+  get: (column: Column): ComponentAndProps<Props> => {
     const displayOptions = column.display_options ?? undefined;
-    if (displayOptions && displayOptions.input === 'dropdown') {
+    if (displayOptions && displayOptions.bool_input === 'dropdown') {
       return {
         component: SingleSelectCell,
         props: getProps(column),
@@ -61,13 +62,13 @@ const booleanType: CellComponentFactory = {
     return { component: CheckboxCell, props: {} };
   },
   getInput: (
-    column: BooleanLikeColumn,
+    column: Column,
   ): ComponentAndProps<SelectProps<boolean | null>> => ({
     component: Select,
     props: getProps(column),
   }),
-  getDisplayFormatter(column: BooleanLikeColumn) {
-    const labels = getLabels(column.display_options);
+  getDisplayFormatter(column: Column) {
+    const labels = getLabels(column);
     return (value: unknown) => {
       if (value === null || value === undefined || typeof value === 'boolean') {
         return getFormattedValue(labels, value);

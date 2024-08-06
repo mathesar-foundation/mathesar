@@ -1,7 +1,7 @@
 import type {
   ApiDataForRecordSummariesInFkColumn,
   ApiRecordSummaryInputData,
-} from '@mathesar/api/rest/types/tables/records';
+} from '@mathesar/api/rpc/records';
 import { escapeHtml } from '@mathesar/utils/stringUtils';
 import { ImmutableMap } from '@mathesar-component-library';
 

@@ -53,7 +53,7 @@
 
   $: ({ linkFk } = processedColumn);
   $: linkedTable = linkFk
-    ? $currentTablesData.tablesMap.get(linkFk.referent_table)
+    ? $currentTablesData.tablesMap.get(linkFk.referent_table_oid)
     : undefined;
   $: linkedTableHref = linkedTable
     ? $storeToGetTablePageUrl({ tableId: linkedTable.oid })

@@ -1,4 +1,4 @@
-import type { ConstraintType } from '@mathesar/api/rest/types/tables/constraints';
+import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import type { CellColumnLike } from '@mathesar/components/cell-fabric/data-types/typeDefinitions';
 
 // Since the ColumnName component is being used

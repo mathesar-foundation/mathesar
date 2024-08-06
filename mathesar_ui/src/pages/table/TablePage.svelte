@@ -7,6 +7,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     Meta,
     TabularData,
@@ -36,10 +37,10 @@
   $: ({ query } = $router);
   $: meta = Meta.fromSerialization(query[metaSerializationQueryKey] ?? '');
   $: tabularData = new TabularData({
-    id: table.oid,
+    database: $currentDatabase,
+    table,
     abstractTypesMap,
     meta,
-    table,
     shareConsumer,
   });
   $: ({ isLoading, selection } = tabularData);
@@ -73,7 +74,7 @@
 
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
-    <ActionsPane {table} {context} />
+    <ActionsPane {context} />
     <TableView {table} {context} bind:sheetElement />
   </div>
 </LayoutWithHeader>

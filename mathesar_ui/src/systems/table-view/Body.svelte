@@ -21,7 +21,8 @@
 
   export let usesVirtualList = false;
 
-  $: ({ id, display, columnsDataStore } = $tabularData);
+  $: ({ table, display, columnsDataStore } = $tabularData);
+  $: ({ oid } = table);
   $: ({ displayableRecords } = display);
   $: ({ pkColumn } = columnsDataStore);
 
@@ -49,7 +50,7 @@
   }
 </script>
 
-{#key id}
+{#key oid}
   {#if usesVirtualList}
     <SheetVirtualRows
       itemCount={$displayableRecords.length}

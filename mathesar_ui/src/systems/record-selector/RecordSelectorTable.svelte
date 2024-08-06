@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
 
-  import type { Column } from '@mathesar/api/rest/types/tables/columns';
   import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import type { Column } from '@mathesar/api/rpc/columns';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type RecordRow,
@@ -52,11 +52,10 @@
     constraintsDataStore,
     meta,
     columnsDataStore,
-    id: tableId,
+    table,
     recordsData,
     processedColumns,
   } = tabularData);
-  $: table = $currentTablesData.tablesMap.get(tableId);
   $: ({ recordSummaries, state: recordsDataState } = recordsData);
   $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
@@ -123,7 +122,7 @@
     if (!recordId) {
       return undefined;
     }
-    return $storeToGetRecordPageUrl({ tableId, recordId });
+    return $storeToGetRecordPageUrl({ tableId: table.oid, recordId });
   }
 
   function submitIndex(index: number) {
@@ -137,8 +136,7 @@
     if (!record || recordId === undefined) {
       return;
     }
-    const tableEntry = $currentTablesData.tablesMap.get(tableId);
-    const template = table?.metadata?.record_summary_template;
+    const template = table.metadata?.record_summary_template;
     if (!template) {
       throw new Error('TODO_RS_TEMPLATE');
       // TODO_RS_TEMPLATE

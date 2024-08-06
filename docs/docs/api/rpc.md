@@ -113,6 +113,7 @@ To use an RPC function:
       - list_joinable
       - TableInfo
       - SettableTableInfo
+      - JoinableTableRecord
       - JoinableTableInfo
 
 ## Table Metadata
@@ -181,11 +182,13 @@ To use an RPC function:
     options:
       members:
       - list_
+      - search
       - RecordList
       - OrderBy
       - Filter
       - FilterAttnum
       - FilterLiteral
+      - SearchParam
 
 ## Explorations
 
@@ -194,7 +197,10 @@ To use an RPC function:
       members:
       - list_
       - delete
+      - run
       - ExplorationInfo
+      - ExplorationDef
+      - ExplorationResult
 
 ## Roles
 

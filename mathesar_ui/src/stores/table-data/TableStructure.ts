@@ -1,8 +1,10 @@
 import type { Readable } from 'svelte/store';
 import { derived } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rest/types/tables/columns';
 import { States } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rpc/columns';
+import type { Database } from '@mathesar/api/rpc/databases';
+import type { Table } from '@mathesar/api/rpc/tables';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 
@@ -13,12 +15,13 @@ import type { ProcessedColumnsStore } from './processedColumns';
 import { processColumn } from './processedColumns';
 
 export interface TableStructureProps {
-  id: DBObjectEntry['id'];
+  database: Pick<Database, 'id'>;
+  table: Pick<Table, 'oid'>;
   abstractTypesMap: AbstractTypesMap;
 }
 
 export class TableStructure {
-  id: DBObjectEntry['id'];
+  oid: DBObjectEntry['id'];
 
   columnsDataStore: ColumnsDataStore;
 
@@ -29,9 +32,9 @@ export class TableStructure {
   isLoading: Readable<boolean>;
 
   constructor(props: TableStructureProps) {
-    this.id = props.id;
-    this.columnsDataStore = new ColumnsDataStore({ tableId: this.id });
-    this.constraintsDataStore = new ConstraintsDataStore({ tableId: this.id });
+    this.oid = props.table.oid;
+    this.columnsDataStore = new ColumnsDataStore(props);
+    this.constraintsDataStore = new ConstraintsDataStore(props);
     this.processedColumns = derived(
       [this.columnsDataStore.columns, this.constraintsDataStore],
       ([columns, constraintsData]) =>
@@ -39,7 +42,7 @@ export class TableStructure {
           columns.map((column, columnIndex) => [
             column.id,
             processColumn({
-              tableId: this.id,
+              tableId: this.oid,
               column,
               columnIndex,
               constraints: constraintsData.constraints,
