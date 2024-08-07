@@ -13,7 +13,9 @@ from mathesar.utils.explorations import (
     get_exploration,
     delete_exploration,
     run_exploration,
-    run_saved_exploration
+    run_saved_exploration,
+    replace_exploration,
+    create_exploration
 )
 
 
@@ -28,7 +30,7 @@ class ExplorationInfo(TypedDict):
         base_table_oid: The OID of the base table of the exploration on the database.
         initial_columns: A list describing the columns to be included in the exploration.
         transformations: A list describing the transformations to be made on the included columns.
-        display_options: A list desrcibing metadata for the columns in the explorations.
+        display_options: A list describing metadata for the columns in the explorations.
         display_names: A map between the actual column names on the database and the alias to be displayed(if any).
         description: The description of the exploration.
     """
@@ -62,44 +64,23 @@ class ExplorationDef(TypedDict):
     Definition about a runnable exploration.
 
     Attributes:
+        database_id: The Django id of the database containing the exploration.
+        name: The name of the exploration.
         base_table_oid: The OID of the base table of the exploration on the database.
         initial_columns: A list describing the columns to be included in the exploration.
-        display_names: A map between the actual column names on the database and the alias to be displayed.
         transformations: A list describing the transformations to be made on the included columns.
-        limit: Specifies the number of rows to return.(default 100)
-        offset: Specifies the number of rows to skip.(default 0)
-        filter: A dict describing filters to be applied to an exploration.
-            e.g. Here is a dict describing getting records from exploration where "col1" = NULL and "col2" = "abc"
-            ```
-            {"and": [
-                {"null": [
-                    {"column_name": ["col1"]},
-                ]},
-                {"equal": [
-                    {"to_lowercase": [
-                        {"column_name": ["col2"]},
-                    ]},
-                    {"literal": ["abc"]},
-                ]},
-            ]}
-            ```
-            Refer to db/functions/base.py for all the possible filters.
-        order_by: A list of dicts, where each dict has a `field` and `direction` field.
-                  Here the value for `field` should be column name and `direction` should be either `asc` or `desc`.
-        search: A list of dicts, where each dict has a `column` and `literal` field.
-                Here the value for `column` should be a column name and `literal` should be a string to be searched in the aforementioned column.
-        duplicate_only: A list of column names for which you want duplicate records.
+        display_options: A list describing metadata for the columns in the explorations.
+        display_names: A map between the actual column names on the database and the alias to be displayed(if any).
+        description: The description of the exploration.
     """
+    database_id: int
+    name: str
     base_table_oid: int
     initial_columns: list
-    display_names: dict
     transformations: Optional[list]
-    limit: Optional[int]
-    offset: Optional[int]
-    filter: Optional[dict]
-    order_by: Optional[list[dict]]
-    search: Optional[list[dict]]
-    duplicate_only: Optional[list]
+    display_options: Optional[list]
+    display_names: Optional[dict]
+    description: Optional[str]
 
 
 class ExplorationResult(TypedDict):
@@ -195,7 +176,7 @@ def delete(*, exploration_id: int, **kwargs) -> None:
 @rpc_method(name="explorations.run")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def run(*, exploration_def: ExplorationDef, database_id: int, **kwargs) -> ExplorationResult:
+def run(*, exploration_def: ExplorationDef, database_id: int, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
     """
     Run an exploration.
 
@@ -205,7 +186,7 @@ def run(*, exploration_def: ExplorationDef, database_id: int, **kwargs) -> Explo
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        exploration_result = run_exploration(exploration_def, database_id, conn)
+        exploration_result = run_exploration(exploration_def, database_id, conn, limit, offset)
     return ExplorationResult.from_dict(exploration_result)
 
 
@@ -226,3 +207,31 @@ def run_saved(*, exploration_id: int, database_id: int, limit: int = 100, offset
     with connect(database_id, user) as conn:
         exploration_result = run_saved_exploration(exploration_id, limit, offset, database_id, conn)
     return ExplorationResult.from_dict(exploration_result)
+
+
+@rpc_method(name='explorations.replace')
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def replace(*, new_exploration: ExplorationInfo) -> ExplorationInfo:
+    """
+    Replace a saved exploration.
+
+    Args:
+        new_exploration: A dict describing the exploration to replace, including the updated fields.
+    """
+    replaced_exp_model = replace_exploration(new_exploration)
+    return ExplorationInfo.from_model(replaced_exp_model)
+
+
+@rpc_method(name='explorations.add')
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def add(*, exploration_def: ExplorationDef) -> ExplorationInfo:
+    """
+    Add a new exploration.
+
+    Args:
+        exploration_def: A dict describing the exploration to create.
+    """
+    exp_model = create_exploration(exploration_def)
+    return ExplorationInfo.from_model(exp_model)
