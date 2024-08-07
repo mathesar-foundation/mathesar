@@ -571,7 +571,7 @@ Return the first column attnum in the primary key of a given relation (e.g., tab
 Args:
   rel_id: The OID of the relation.
 */
-SELECT conkey[1]
+SELECT CASE WHEN array_length(conkey, 1) = 1 THEN conkey[1] END
 FROM pg_constraint
 WHERE contype='p'
 AND conrelid=rel_id;
@@ -586,7 +586,7 @@ Args:
   sch_name: The schema of the relation, unquoted.
   rel_name: The name of the relation, unqualified and unquoted.
 */
-SELECT conkey[1]
+SELECT CASE WHEN array_length(conkey, 1) = 1 THEN conkey[1] END
 FROM pg_constraint
 WHERE contype='p'
 AND conrelid=msar.get_relation_oid(sch_name, rel_name);
@@ -3579,6 +3579,29 @@ WHERE
   AND NOT attisdropped
   AND has_column_privilege(attrelid, attnum, 'SELECT');
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_record_from_table(tab_id oid, rec_id anyelement) RETURNS jsonb AS $$/*
+Get single record from a table. Only columns to which the user has access are returned.
+
+Args:
+  tab_id: The OID of the table whose record we'll get.
+  rec_id: The id value of the record.
+
+The table must have a single primary key column.
+*/
+SELECT msar.list_records_from_table(
+  tab_id, null, null, null,
+  jsonb_build_object(
+    'type', 'equal', 'args', jsonb_build_array(
+      jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id)),
+      jsonb_build_object('type', 'literal', 'value', rec_id)
+    )
+  ),
+  null
+)
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
 
 
 CREATE OR REPLACE FUNCTION
