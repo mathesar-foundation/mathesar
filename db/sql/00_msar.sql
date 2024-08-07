@@ -3716,7 +3716,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION msar.get_record_from_table(tab_id oid, rec_id anyelement) RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION
+msar.get_record_from_table(tab_id oid, rec_id anyelement) RETURNS jsonb AS $$/*
 Get single record from a table. Only columns to which the user has access are returned.
 
 Args:
