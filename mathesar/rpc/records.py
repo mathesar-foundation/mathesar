@@ -200,7 +200,7 @@ def get(
         **kwargs
 ) -> RecordList:
     """
-    List records from a table, and its row count. Exposed as `list`.
+    Get single record from a table by its primary key.
 
     Args:
         record_id: The primary key value of the record to be gotten.
