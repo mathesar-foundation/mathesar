@@ -21,7 +21,7 @@
         <Spinner />
       {:else}
         {#each icons as innerIcon}
-          <Icon {...innerIcon} size="min(1em, 0.75em + 0.25rem)" />
+          <Icon size="min(1em, 0.75em + 0.25rem)" {...innerIcon} />
         {/each}
       {/if}
     </span>&nbsp;<span class="name">
@@ -44,6 +44,7 @@
   .icon {
     color: var(--icon-color, currentcolor);
     opacity: var(--NameWithIcon__icon-opacity, 0.75);
+    vertical-align: middle;
   }
   .icon > :global(.fa-icon + .fa-icon) {
     margin-left: 0.2em;
@@ -60,5 +61,6 @@
   }
   .name {
     color: var(--name-color, currentcolor);
+    vertical-align: middle;
   }
 </style>

@@ -17,6 +17,7 @@ import {
 vi.mock('@mathesar/utils/preloadData', () => ({
   preloadCommonData: () => ({
     databases: [],
+    servers: [],
   }),
 }));
 

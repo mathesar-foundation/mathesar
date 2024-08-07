@@ -5,7 +5,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getDocsLink, getWikiLink } from '@mathesar/routes/urls';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { DatabasesEmptyState } from '@mathesar/systems/connections';
+  import { DatabasesEmptyState } from '@mathesar/systems/databases';
   import { AnchorButton, Icon } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -13,8 +13,10 @@
 </script>
 
 <LayoutWithHeader
+  restrictWidth={true}
   cssVariables={{
     '--page-padding': '0',
+    '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
   <div data-identifier="welcome-header">
@@ -28,7 +30,7 @@
   <div data-identifier="welcome-container">
     <section>
       <div class="header">
-        {$_('database_connections')}
+        {$_('databases')}
       </div>
       <DatabasesEmptyState />
     </section>
@@ -123,6 +125,8 @@
         border: 1px solid var(--sand-300);
         border-radius: var(--border-radius-l);
         padding: var(--size-large);
+        display: flex;
+        flex-direction: column;
 
         > .header {
           font-weight: 500;
@@ -131,7 +135,8 @@
           margin-top: var(--size-x-small);
         }
         > .footer {
-          margin-top: var(--size-x-large);
+          padding-top: var(--size-x-large);
+          margin-top: auto;
         }
       }
     }

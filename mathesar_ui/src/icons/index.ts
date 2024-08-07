@@ -78,6 +78,8 @@ import type { IconProps } from '@mathesar-component-library/types';
 
 import {
   arrayIcon,
+  connectDatabaseIcon,
+  createDatabaseIcon,
   explorationIcon,
   outcomeIcon,
   tableIcon,
@@ -103,10 +105,12 @@ export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
+export const iconConnectDatabase = { data: connectDatabaseIcon };
 export const iconCopyMajor: IconProps = { data: faCopy };
 /** TODO: use faBinary once it's available (via newer FontAwesome version) */
 export const iconCopyRawContent: IconProps = { data: faCopy };
 export const iconCopyFormattedContent: IconProps = { data: faCopy };
+export const iconCreateDatabase = { data: createDatabaseIcon };
 /** When you're deleting something significant or difficult to recover */
 export const iconDeleteMajor: IconProps = { data: faTrashAlt };
 /** When you're deleting something smaller or more ephemeral */
