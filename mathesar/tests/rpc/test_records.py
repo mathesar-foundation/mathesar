@@ -120,6 +120,43 @@ def test_records_get(rf, monkeypatch):
     assert actual_record == expect_record
 
 
+def test_records_delete(rf, monkeypatch):
+    username = 'alice'
+    password = 'pass1234'
+    table_oid = 23457
+    database_id = 2
+    record_ids = [2342, 321]
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username=username, password=password)
+
+    @contextmanager
+    def mock_connect(_database_id, user):
+        if _database_id == database_id and user.username == username:
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_delete_records(
+            conn,
+            _record_ids,
+            _table_oid,
+    ):
+        if _table_oid != table_oid or _record_ids != record_ids:
+            raise AssertionError('incorrect parameters passed')
+        return 2
+
+    monkeypatch.setattr(records, 'connect', mock_connect)
+    monkeypatch.setattr(records.record_delete, 'delete_records_from_table', mock_delete_records)
+    expect_result = 2
+    actual_result = records.delete(
+        record_ids=record_ids, table_oid=table_oid, database_id=database_id, request=request
+    )
+    assert actual_result == expect_result
+
+
 def test_records_search(rf, monkeypatch):
     username = 'alice'
     password = 'pass1234'
