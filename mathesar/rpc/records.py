@@ -189,6 +189,37 @@ def list_(
     return RecordList.from_dict(record_info)
 
 
+@rpc_method(name="records.get")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get(
+        *,
+        record_id: Any,
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> RecordList:
+    """
+    Get single record from a table by its primary key.
+
+    Args:
+        record_id: The primary key value of the record to be gotten.
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The requested record, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = record_select.get_record_from_table(
+            conn,
+            record_id,
+            table_oid,
+        )
+    return RecordList.from_dict(record_info)
+
+
 @rpc_method(name="records.search")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
