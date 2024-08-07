@@ -3327,6 +3327,7 @@ INSERT INTO msar.expr_templates VALUES
   -- json(b) filters and expressions
   ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
   ('json_array_contains', '(%s)::jsonb @> (%s)::jsonb'),
+  ('convert_to_json', 'to_jsonb(%s)'),
   -- date part extractors
   ('truncate_to_year', 'to_char((%s)::date, ''YYYY AD'')'),
   ('truncate_to_month', 'to_char((%s)::date, ''YYYY-MM AD'')'),
@@ -3737,3 +3738,41 @@ SELECT msar.list_records_from_table(
   null
 )
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS integer AS $$/*
+Delete records from table by id.
+
+Args:
+  tab_id: The OID of the table whose record we'll get.
+  rec_ids: An array of primary keys
+
+The table must have a single primary key column.
+*/
+DECLARE
+  num_deleted integer;
+BEGIN
+  EXECUTE format(
+    $d$
+    WITH delete_cte AS (DELETE FROM %1$I.%2$I %3$s RETURNING *)
+    SELECT count(1) FROM delete_cte
+    $d$,
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.build_where_clause(
+      tab_id, jsonb_build_object(
+        'type', 'json_array_contains', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'literal', 'value', rec_ids),
+          jsonb_build_object(
+            'type', 'convert_to_json', 'args', jsonb_build_array(
+              jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
+            )
+          )
+        )
+      )
+    )
+  ) INTO num_deleted;
+  RETURN num_deleted;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
