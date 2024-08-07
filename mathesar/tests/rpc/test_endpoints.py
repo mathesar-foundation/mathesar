@@ -155,6 +155,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        records.delete,
+        "records.delete",
+        [user_is_authenticated]
+    ),
+    (
         records.search,
         "records.search",
         [user_is_authenticated]
