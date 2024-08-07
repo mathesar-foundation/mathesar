@@ -236,7 +236,7 @@ def delete(
 
     Args:
         record_ids: The primary key values of the records to be deleted.
-        table_oid: Identity of the table in the user's database.
+        table_oid: The identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
 
     Returns:
