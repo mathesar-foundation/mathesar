@@ -3745,8 +3745,8 @@ msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS integer AS $$/
 Delete records from table by id.
 
 Args:
-  tab_id: The OID of the table whose record we'll get.
-  rec_ids: An array of primary keys
+  tab_id: The OID of the table whose record we'll delete.
+  rec_ids: An array of primary key values
 
 The table must have a single primary key column.
 */
