@@ -180,8 +180,18 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        explorations.add,
+        "explorations.add",
+        [user_is_authenticated]
+    ),
+    (
         explorations.delete,
         "explorations.delete",
+        [user_is_authenticated]
+    ),
+    (
+        explorations.replace,
+        "explorations.replace",
         [user_is_authenticated]
     ),
     (
