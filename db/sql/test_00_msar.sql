@@ -3738,3 +3738,132 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_delete_records_from_table_single() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  delete_result integer;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  delete_result := msar.delete_records_from_table(
+    rel_id,
+    '[2]'
+  );
+  RETURN NEXT is(delete_result, 1);
+  RETURN NEXT results_eq(
+    'SELECT id FROM atable ORDER BY id',
+    $v$VALUES ('1'::integer), ('3'::integer)$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_delete_records_from_table_null() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  delete_result integer;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  delete_result := msar.delete_records_from_table(
+    rel_id,
+    null
+  );
+  RETURN NEXT is(delete_result, null);
+  RETURN NEXT results_eq(
+    'SELECT id FROM atable ORDER BY id',
+    $v$VALUES ('1'::integer), ('2'::integer), ('3'::integer)$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_delete_records_from_table_empty() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  delete_result integer;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  delete_result := msar.delete_records_from_table(
+    rel_id,
+    '[]'
+  );
+  RETURN NEXT is(delete_result, 0);
+  RETURN NEXT results_eq(
+    'SELECT id FROM atable ORDER BY id',
+    $v$VALUES ('1'::integer), ('2'::integer), ('3'::integer)$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_delete_records_from_table_multi() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  delete_result integer;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  delete_result := msar.delete_records_from_table(
+    rel_id,
+    '[1, 2]'
+  );
+  RETURN NEXT is(delete_result, 2);
+  RETURN NEXT results_eq(
+    'SELECT id FROM atable ORDER BY id',
+    $v$VALUES ('3'::integer)$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_delete_records_from_table_multi_nonexist() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  delete_result integer;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  delete_result := msar.delete_records_from_table(
+    rel_id,
+    '[1, 2, 342]'
+  );
+  RETURN NEXT is(delete_result, 2);
+  RETURN NEXT results_eq(
+    'SELECT id FROM atable ORDER BY id',
+    $v$VALUES ('3'::integer)$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_delete_records_from_table_no_pkey() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  delete_result integer;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  CREATE ROLE intern_no_pkey;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO INTERN_no_pkey;
+  GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
+  SET ROLE intern_no_pkey;
+  RETURN NEXT throws_ok(
+    format('SELECT msar.delete_records_from_table(%s, ''[2, 3]'')', rel_id),
+    '42501',
+    'permission denied for table atable',
+    'Throw error when trying to delete without permission'
+  );
+  SET ROLE NONE;
+  RETURN NEXT results_eq(
+    'SELECT id FROM atable ORDER BY id',
+    $v$VALUES ('1'::integer), ('2'::integer), ('3'::integer)$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+

@@ -98,8 +98,50 @@ export interface AbstractTypesSubstance {
   error?: string;
 }
 
+/**
+ * These filter ids represent the filter functions used for the _old_ filtering
+ * system (circa 2023). The UI is still designed around these filter functions
+ * which is why we still have code for it within the front end.
+ *
+ * In 2024 we moved filtering logic from the service layer into the DB layer and
+ * introduced a new filtering system that is more flexible. The new filtering
+ * system is much more flexible and can handle complex filtering expressions
+ * with arbitrary nesting.
+ *
+ * Elsewhere in the front end codebase, we have a compatibility layer that
+ * translates between the old filtering system and the new filtering system.
+ * Search for `filterEntryToSqlExpr` to find that compatibility layer.
+ *
+ * If at some point we decide to design a more flexible user-facing filtering
+ * UI, then we could model that UI (and the resulting front end data structures)
+ * around the `SqlExpr` data structure. This would allow us to avoid the need to
+ * maintain the type below because we would be able to directly support the
+ * filtering expressions that the API expects.
+ */
+export type FilterId =
+  | 'contains_case_insensitive'
+  | 'email_domain_contains'
+  | 'email_domain_equals'
+  | 'equal'
+  | 'greater_or_equal'
+  | 'greater'
+  | 'json_array_contains'
+  | 'json_array_length_equals'
+  | 'json_array_length_greater_or_equal'
+  | 'json_array_length_greater_than'
+  | 'json_array_length_less_or_equal'
+  | 'json_array_length_less_than'
+  | 'json_array_not_empty'
+  | 'lesser_or_equal'
+  | 'lesser'
+  | 'not_null'
+  | 'null'
+  | 'starts_with_case_insensitive'
+  | 'uri_authority_contains'
+  | 'uri_scheme_equals';
+
 export interface AbstractTypeFilterDefinitionResponse {
-  id: string;
+  id: FilterId;
   name: string;
   aliases?: Record<AbstractTypeCategoryIdentifier, string>;
   uiTypeParameterMap: Partial<

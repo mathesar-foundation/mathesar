@@ -7,7 +7,10 @@
   import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
+  import type {
+    AbstractTypeFilterDefinition,
+    FilterId,
+  } from '@mathesar/stores/abstract-types/types';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import type { RecordSummariesForColumn } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import type { ReadableMapLike } from '@mathesar/typeUtils';
@@ -37,7 +40,7 @@
   ) => ConstraintType[] | undefined = () => undefined;
 
   export let columnIdentifier: ColumnLikeType['id'] | undefined;
-  export let conditionIdentifier: string | undefined;
+  export let conditionIdentifier: FilterId | undefined;
   export let value: unknown | undefined;
 
   export let layout: 'horizontal' | 'vertical' = 'horizontal';
@@ -106,7 +109,7 @@
     return undefined;
   }
 
-  function getConditionName(_conditionId?: string) {
+  function getConditionName(_conditionId?: FilterId) {
     if (_conditionId) {
       return selectedColumnFiltersMap.get(_conditionId)?.name ?? '';
     }
@@ -166,7 +169,7 @@
     dispatch('update');
   }
 
-  function onConditionChange(_conditionId?: string) {
+  function onConditionChange(_conditionId?: FilterId) {
     if (!_conditionId) {
       return;
     }

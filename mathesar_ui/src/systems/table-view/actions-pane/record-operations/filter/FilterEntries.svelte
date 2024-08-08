@@ -2,7 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { FilterCombination } from '@mathesar/api/rpc/records';
   import { FilterEntry as FilterEntryComponent } from '@mathesar/components/filter-entry';
   import {
     type FilterEntry,
@@ -10,6 +9,7 @@
     defaultFilterCombination,
     filterCombinations,
   } from '@mathesar/stores/table-data';
+  import type { FilterCombination } from '@mathesar/stores/table-data/filtering';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
   import { InputGroupText, Select } from '@mathesar-component-library';
