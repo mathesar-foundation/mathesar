@@ -4,18 +4,21 @@
   import type { Database } from '@mathesar/api/rpc/databases';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { iconAddNew } from '@mathesar/icons';
+  import { iconConnection } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { DatabasesEmptyState } from '@mathesar/systems/connections';
+  import {
+    ConnectDatabaseModal,
+    DatabasesEmptyState,
+  } from '@mathesar/systems/databases';
   import { Button, Icon } from '@mathesar-component-library';
 
   import DatabaseRow from './DatabaseRow.svelte';
 
-  const addConnectionModalController = modal.spawnModalController();
+  const connectDbModalController = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
@@ -40,29 +43,30 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($_('connections'))}</title>
+  <title>{makeSimplePageTitle($_('databases'))}</title>
 </svelte:head>
 
 <LayoutWithHeader
   restrictWidth
   cssVariables={{
-    '--page-padding': '0',
+    '--page-padding': 'var(--size-xx-large) var(--size-x-large)',
+    '--layout-background-color': 'var(--sand-100)',
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
   }}
 >
-  <div data-identifier="connections-header">
+  <div data-identifier="databases-header">
     <span>
-      {$_('database_connections')}
+      {$_('databases')}
       {#if $databases.size}({$databases.size}){/if}
     </span>
   </div>
 
-  <section data-identifier="connections-container">
+  <section data-identifier="databases-container">
     {#if $databases.size === 0}
       <DatabasesEmptyState />
     {:else}
       <EntityContainerWithFilterBar
-        searchPlaceholder={$_('search_database_connections')}
+        searchPlaceholder={$_('search_databases')}
         bind:searchQuery={filterQuery}
         on:clear={handleClearFilterQuery}
       >
@@ -70,17 +74,17 @@
           {#if isSuperUser}
             <Button
               appearance="primary"
-              on:click={() => addConnectionModalController.open()}
+              on:click={() => connectDbModalController.open()}
             >
-              <Icon {...iconAddNew} />
-              <span>{$_('add_database_connection')}</span>
+              <Icon {...iconConnection} />
+              <span>{$_('connect_database')}</span>
             </Button>
           {/if}
         </svelte:fragment>
 
-        <p slot="resultInfo">
+        <span slot="resultInfo">
           <RichText
-            text={$_('connections_matching_search', {
+            text={$_('databases_matching_search', {
               values: {
                 count: filteredDatabases.length,
               },
@@ -91,26 +95,14 @@
               <strong>{filterQuery}</strong>
             {/if}
           </RichText>
-        </p>
+        </span>
 
         <svelte:fragment slot="content">
           {#if filteredDatabases.length}
-            <div data-identifier="connections-list-grid">
-              <table>
-                <thead>
-                  <tr>
-                    <th>{$_('database_name')}</th>
-                    {#if isSuperUser}
-                      <th>{$_('actions')}</th>
-                    {/if}
-                  </tr>
-                </thead>
-                <tbody>
-                  {#each filteredDatabases as database (database.id)}
-                    <DatabaseRow {database} />
-                  {/each}
-                </tbody>
-              </table>
+            <div data-identifier="databases-list-grid">
+              {#each filteredDatabases as database (database.id)}
+                <DatabaseRow {database} />
+              {/each}
             </div>
           {/if}
         </svelte:fragment>
@@ -119,54 +111,32 @@
   </section>
 </LayoutWithHeader>
 
-<!-- <AddConnectionModal controller={addConnectionModalController} /> -->
+<ConnectDatabaseModal controller={connectDbModalController} />
 
 <style lang="scss">
-  [data-identifier='connections-header'] {
+  [data-identifier='databases-header'] {
     display: flex;
-    padding: var(--size-x-large);
     align-items: center;
-    border-bottom: 1px solid var(--sand-200);
 
     span {
       flex: 1 0 0;
       color: var(--slate-800);
-      font-size: var(--size-x-large);
-      font-weight: 600;
+      font-size: var(--size-xx-large);
+      font-weight: 500;
     }
   }
 
-  [data-identifier='connections-container'] {
+  [data-identifier='databases-container'] {
     display: flex;
-    padding: var(--size-x-large);
+    margin-top: var(--size-x-large);
     flex-direction: column;
     align-items: stretch;
     gap: var(--size-x-small);
+  }
 
-    [data-identifier='connections-list-grid'] {
-      border: 1px solid var(--slate-200);
-      border-radius: var(--border-radius-m);
-      overflow: auto;
-
-      table {
-        border-collapse: collapse;
-        min-width: 100%;
-      }
-
-      thead {
-        border-bottom: 1px solid var(--slate-200);
-        background: var(--slate-100);
-
-        th {
-          font-weight: 500;
-          padding: var(--size-xx-small) var(--size-large);
-          text-align: left;
-        }
-      }
-
-      tbody > :global(tr:not(first-child)) {
-        border-top: 1px solid var(--slate-200);
-      }
-    }
+  [data-identifier='databases-list-grid'] {
+    display: grid;
+    gap: 1rem;
+    margin-top: var(--size-x-large);
   }
 </style>

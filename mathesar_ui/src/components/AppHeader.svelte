@@ -124,7 +124,7 @@
           </LinkMenuItem>
           <MenuDivider />
           <LinkMenuItem icon={iconConnection} href={HOME_URL}>
-            {$_('database_connections')}
+            {$_('databases')}
           </LinkMenuItem>
           {#if $userProfile.isSuperUser}
             <LinkMenuItem

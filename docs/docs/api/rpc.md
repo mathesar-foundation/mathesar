@@ -182,12 +182,17 @@ To use an RPC function:
     options:
       members:
       - list_
+      - get
+      - delete
       - search
       - RecordList
       - OrderBy
       - Filter
       - FilterAttnum
       - FilterLiteral
+      - Grouping
+      - Group
+      - GroupingResponse
       - SearchParam
 
 ## Explorations
@@ -196,8 +201,12 @@ To use an RPC function:
     options:
       members:
       - list_
+      - get
+      - add
       - delete
+      - replace
       - run
+      - run_saved
       - ExplorationInfo
       - ExplorationDef
       - ExplorationResult
