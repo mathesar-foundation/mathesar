@@ -1,11 +1,12 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table records.
 """
-from typing import Any, Literal, TypedDict, Union
+from typing import Any, Literal, Optional, TypedDict, Union
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
+from db.records.operations import delete as record_delete
 from db.records.operations import select as record_select
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
@@ -218,6 +219,37 @@ def get(
             table_oid,
         )
     return RecordList.from_dict(record_info)
+
+
+@rpc_method(name="records.delete")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def delete(
+        *,
+        record_ids: list[Any],
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> Optional[int]:
+    """
+    Delete records from a table by primary key.
+
+    Args:
+        record_ids: The primary key values of the records to be deleted.
+        table_oid: The identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The number of records deleted.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        num_deleted = record_delete.delete_records_from_table(
+            conn,
+            record_ids,
+            table_oid,
+        )
+    return num_deleted
 
 
 @rpc_method(name="records.search")
