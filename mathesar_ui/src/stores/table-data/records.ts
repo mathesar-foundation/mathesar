@@ -31,7 +31,7 @@ import {
 } from '@mathesar-component-library';
 
 import type { ColumnsDataStore } from './columns';
-import type { Filtering } from './filtering';
+import type { FilterEntry, Filtering } from './filtering';
 import type { Grouping as GroupingRequest } from './grouping';
 import type { Meta } from './meta';
 import RecordSummaryStore from './record-summaries/RecordSummaryStore';
@@ -385,9 +385,9 @@ export class RecordsData {
 
     try {
       const params = get(this.meta.recordsRequestParamsData);
-      const contextualFilterEntries = [...this.contextualFilters].map(
-        ([columnId, value]) => ({ columnId, conditionId: 'equal', value }),
-      );
+      const contextualFilterEntries: FilterEntry[] = [
+        ...this.contextualFilters,
+      ].map(([columnId, value]) => ({ columnId, conditionId: 'equal', value }));
 
       const recordsListParams: RecordsListParams = {
         ...this.apiContext,
