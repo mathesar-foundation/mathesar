@@ -133,7 +133,7 @@ export function getLinkFromColumn(
     (entry) =>
       entry.depth === depth &&
       entry.fkey_path[depth - 1][1] === false &&
-      entry.join_path[depth - 1][0] === columnId &&
+      entry.join_path[depth - 1][0][1] === columnId &&
       entry.join_path.join(',').indexOf(parentPath) === 0,
   );
   if (allLinksFromColumn.length === 0) {
@@ -144,19 +144,19 @@ export function getLinkFromColumn(
     throw new Error(`Multiple links present for the same column: ${columnId}`);
   }
   const link = allLinksFromColumn[0];
-  const toTableInfo = result.tables[link.target];
+  const toTableInfo = result.target_table_info[link.target];
   const toTable = {
     id: link.target,
     name: toTableInfo.name,
   };
-  const toColumnId = link.join_path[depth - 1][1];
+  const toColumnId = link.join_path[depth - 1][1][1];
   const toColumn = {
     id: toColumnId,
-    name: result.columns[toColumnId].name,
+    name: toTableInfo.columns[toColumnId].name,
   };
   const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-    toTableInfo.columns.map((columnIdInLinkedTable) => {
-      const columnInLinkedTable = result.columns[columnIdInLinkedTable];
+    Object.entries(toTableInfo.columns).map(([id, columnInLinkedTable]) => {
+      const columnIdInLinkedTable = parseInt(id, 10);
       return [
         columnIdInLinkedTable,
         {
@@ -201,11 +201,10 @@ export function getColumnInformationMap(
   //     tableName: baseTable.name,
   //   });
   // });
-  Object.keys(result.tables).forEach((tableIdKey) => {
+  for (const [tableIdKey, table] of Object.entries(result.target_table_info)) {
     const tableId = parseInt(tableIdKey, 10);
-    const table = result.tables[tableId];
-    table.columns.forEach((columnId) => {
-      const column = result.columns[columnId];
+    for (const [columnIdKey, column] of Object.entries(table.columns)) {
+      const columnId = parseInt(columnIdKey, 10);
       map.set(columnId, {
         id: columnId,
         name: column.name,
@@ -213,8 +212,8 @@ export function getColumnInformationMap(
         tableId,
         tableName: table.name,
       });
-    });
-  });
+    }
+  }
   return map;
 }
 
@@ -254,9 +253,9 @@ export function getTablesThatReferenceBaseTable(
 
   referenceLinks.forEach((reference) => {
     const tableId = reference.target;
-    const table = result.tables[tableId];
+    const table = result.target_table_info[tableId];
     const baseTableColumnId = reference.join_path[0][0];
-    const referenceTableColumnId = reference.join_path[0][1];
+    const referenceTableColumnId = reference.join_path[0][1][1];
 
     // TODO_BETA: figure out how to deal with the fact that our `Table` type no
     // longer has a `columns` field.
@@ -269,24 +268,21 @@ export function getTablesThatReferenceBaseTable(
     if (!baseTableColumn) {
       return;
     }
+    // const table = 0;
     const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-      result.tables[reference.target].columns
-        .filter((columnId) => columnId !== referenceTableColumnId)
-        .map((columnIdInTable) => {
-          const columnInTable = result.columns[columnIdInTable];
+      Object.entries(table.columns)
+        .filter(([columnId]) => columnId !== String(referenceTableColumnId))
+        .map(([columnIdKey, column]) => {
+          const columnId = parseInt(columnIdKey, 10);
+          const parentPath = reference.join_path.join(',');
           return [
-            columnIdInTable,
+            columnId,
             {
-              id: columnIdInTable,
-              name: columnInTable.name,
-              type: columnInTable.type,
+              id: columnId,
+              name: column.name,
+              type: column.type,
               tableName: table.name,
-              linksTo: getLinkFromColumn(
-                result,
-                columnIdInTable,
-                2,
-                reference.join_path.join(','),
-              ),
+              linksTo: getLinkFromColumn(result, columnId, 2, parentPath),
               jpPath: reference.join_path,
               producesMultipleResults: reference.multiple_results,
             },
@@ -298,7 +294,7 @@ export function getTablesThatReferenceBaseTable(
       name: table.name,
       referencedViaColumn: {
         id: referenceTableColumnId,
-        ...result.columns[referenceTableColumnId],
+        ...table.columns[referenceTableColumnId],
       },
       linkedToColumn: baseTableColumn,
       columns: new Map(columnMapEntries.sort(compareColumnByLinks)),

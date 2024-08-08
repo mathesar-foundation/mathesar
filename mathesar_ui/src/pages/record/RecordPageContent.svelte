@@ -2,8 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
-  import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
-  import type { JoinableTablesResult } from '@mathesar/api/rpc/tables';
+  import { api } from '@mathesar/api/rpc';
   import type { Table } from '@mathesar/api/rpc/tables';
   import {
     FormSubmit,
@@ -17,6 +16,7 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
 
@@ -41,9 +41,12 @@
   $: form = makeForm(formFields);
 
   function getJoinableTablesResult(tableId: number) {
-    return getAPI<JoinableTablesResult>(
-      `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=1`,
-    );
+    return api.tables
+      .list_joinable({
+        database_id: $currentDatabase.id,
+        table_oid: tableId,
+      })
+      .run();
   }
 </script>
 

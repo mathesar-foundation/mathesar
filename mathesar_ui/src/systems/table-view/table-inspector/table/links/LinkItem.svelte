@@ -17,13 +17,15 @@
   <span class="table-name">
     <TableName table={link.table} truncate={false} />
   </span>
-  <span class="sub-text">
-    <RichText text={$_('linked_via_column')} let:slotName>
-      {#if slotName === 'columnName'}
-        <strong>{link.column.name}</strong>
-      {/if}
-    </RichText>
-  </span>
+  {#if link.column}
+    <span class="sub-text">
+      <RichText text={$_('linked_via_column')} let:slotName>
+        {#if slotName === 'columnName'}
+          <strong>{link.column.name}</strong>
+        {/if}
+      </RichText>
+    </span>
+  {/if}
 </a>
 
 <style lang="scss">
@@ -38,9 +40,6 @@
 
     &:hover {
       background: var(--slate-100);
-      .table-name {
-        text-decoration: underline;
-      }
     }
 
     > :global(* + *) {
