@@ -7,6 +7,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.records.operations import delete as record_delete
+from db.records.operations import insert as record_insert
 from db.records.operations import select as record_select
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
@@ -146,6 +147,32 @@ class RecordList(TypedDict):
         )
 
 
+class RecordAdded(TypedDict):
+    """
+    Record from a table, along with some meta data
+
+    The form of the object in the `results` array is determined by the
+    underlying records being listed. The keys of each object are the
+    attnums of the retrieved columns. The values are the value for the
+    given row, for the given column.
+
+    Attributes:
+        results: An array of a single record objects (the one added).
+        preview_data: Information for previewing foreign key values.
+    """
+    count: int
+    results: list[dict]
+    grouping: GroupingResponse
+    preview_data: list[dict]
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            results=d["results"],
+            preview_data=[],
+        )
+
+
 @rpc_method(name="records.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
@@ -219,6 +246,44 @@ def get(
             table_oid,
         )
     return RecordList.from_dict(record_info)
+
+
+@rpc_method(name="records.add")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def add(
+        *,
+        record_def: dict,
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> RecordAdded:
+    """
+    Add a single record to a table.
+
+    The form of the `record_def` is determined by the underlying table.
+    Keys should be attnums, and values should be the desired value for
+    that column in the created record. Missing keys will use default
+    values (if set on the DB), and explicit `null` values will set null
+    for that value regardless of default (with obvious exceptions where
+    that would violate some constraint)
+
+    Args:
+        record_def: An object representing the record to be added.
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The created record, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = record_insert.add_record_to_table(
+            conn,
+            record_def,
+            table_oid,
+        )
+    return RecordAdded.from_dict(record_info)
 
 
 @rpc_method(name="records.delete")
