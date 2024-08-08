@@ -100,13 +100,13 @@ class DatabasesStore {
 export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
   new DatabasesStore();
 
-/**
- * @throws an error when used in a context where no current database exists.
- * This behavior sacrifices some stability for the sake of developer ergonomics.
- * This sacrifice seems acceptable given that such a large part of the
- * application depends on the existence of one and only one database.
+/** ⚠️ This readable store contains a type assertion designed to sacrifice type
+ * safety for the benefit of convenience.
+ *
+ * We need to access `currentDatabase` like EVERYWHERE throughout the app, and
+ * we'd like to avoid checking if it's defined every time. So we assert that it
+ * is defined, and we'll just have to be careful to **never use the value from
+ * this store within a context where no database is set.**
  */
-export const currentDatabase = derived(databasesStore.currentDatabase, (c) => {
-  if (!c) throw new Error('No current database');
-  return c;
-});
+export const currentDatabase =
+  databasesStore.currentDatabase as Readable<Database>;
