@@ -1,11 +1,12 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table records.
 """
-from typing import Any, Literal, TypedDict, Union
+from typing import Any, Literal, Optional, TypedDict, Union
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
+from db.records.operations import delete as record_delete
 from db.records.operations import select as record_select
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
@@ -74,6 +75,46 @@ class SearchParam(TypedDict):
     literal: Any
 
 
+class Grouping(TypedDict):
+    """
+    Grouping definition.
+
+    Attributes:
+        columns: The columns to be grouped by.
+        preproc: The preprocessing funtions to apply (if any).
+    """
+    columns: list[int]
+    preproc: list[str]
+
+
+class Group(TypedDict):
+    """
+    Group definition.
+
+    Attributes:
+        id: The id of the group. Consistent for same input.
+        count: The number of items in the group.
+        results_eq: The value the results of the group equal.
+    """
+    id: int
+    count: int
+    results_eq: list[dict]
+
+
+class GroupingResponse(TypedDict):
+    """
+    Grouping response object. Extends Grouping with actual groups.
+
+    Attributes:
+        columns: The columns to be grouped by.
+        preproc: The preprocessing funtions to apply (if any).
+        groups: The groups applicable to the records being returned.
+    """
+    columns: list[int]
+    preproc: list[str]
+    groups: list[Group]
+
+
 class RecordList(TypedDict):
     """
     Records from a table, along with some meta data
@@ -86,12 +127,12 @@ class RecordList(TypedDict):
     Attributes:
         count: The total number of records in the table.
         results: An array of record objects.
-        group: Information for displaying the records grouped in some way.
+        grouping: Information for displaying grouped records.
         preview_data: Information for previewing foreign key values.
     """
     count: int
     results: list[dict]
-    group: dict
+    grouping: GroupingResponse
     preview_data: list[dict]
 
     @classmethod
@@ -99,7 +140,7 @@ class RecordList(TypedDict):
         return cls(
             count=d["count"],
             results=d["results"],
-            group=None,
+            grouping=d.get("grouping"),
             preview_data=[],
             query=d["query"],
         )
@@ -116,7 +157,7 @@ def list_(
         offset: int = None,
         order: list[OrderBy] = None,
         filter: Filter = None,
-        group: list[dict] = None,
+        grouping: Grouping = None,
         **kwargs
 ) -> RecordList:
     """
@@ -130,7 +171,7 @@ def list_(
                  following rows.
         order: An array of ordering definition objects.
         filter: An array of filter definition objects.
-        group: An array of group definition objects.
+        grouping: An array of group definition objects.
 
     Returns:
         The requested records, along with some metadata.
@@ -144,9 +185,71 @@ def list_(
             offset=offset,
             order=order,
             filter=filter,
-            group=group,
+            group=grouping,
         )
     return RecordList.from_dict(record_info)
+
+
+@rpc_method(name="records.get")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get(
+        *,
+        record_id: Any,
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> RecordList:
+    """
+    Get single record from a table by its primary key.
+
+    Args:
+        record_id: The primary key value of the record to be gotten.
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The requested record, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = record_select.get_record_from_table(
+            conn,
+            record_id,
+            table_oid,
+        )
+    return RecordList.from_dict(record_info)
+
+
+@rpc_method(name="records.delete")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def delete(
+        *,
+        record_ids: list[Any],
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> Optional[int]:
+    """
+    Delete records from a table by primary key.
+
+    Args:
+        record_ids: The primary key values of the records to be deleted.
+        table_oid: The identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The number of records deleted.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        num_deleted = record_delete.delete_records_from_table(
+            conn,
+            record_ids,
+            table_oid,
+        )
+    return num_deleted
 
 
 @rpc_method(name="records.search")

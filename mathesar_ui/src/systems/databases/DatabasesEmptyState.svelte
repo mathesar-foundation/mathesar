@@ -5,9 +5,9 @@
   import { modal } from '@mathesar/stores/modal';
   import { Button, Icon, Tutorial } from '@mathesar-component-library';
 
-  // import AddConnectionModal from './AddConnectionModal.svelte';
+  import ConnectDatabaseModal from './create-database/ConnectDatabaseModal.svelte';
 
-  const addDatabaseModalController = modal.spawnModalController();
+  const connectDatabaseModalController = modal.spawnModalController();
 </script>
 
 <div class="content" data-identifier="connection-empty-text">
@@ -17,7 +17,7 @@
         <Icon {...iconConnection} size="var(--size-super-ultra-large)" />
       </div>
       <div data-identifier="no-connections-text">
-        {$_('no_database_connections_yet')}
+        {$_('no_databases_connected')}
       </div>
       <div data-identifier="no-connections-help">
         {$_('setup_connections_help')}
@@ -26,15 +26,15 @@
     <Button
       slot="footer"
       appearance="primary"
-      on:click={() => addDatabaseModalController.open()}
+      on:click={() => connectDatabaseModalController.open()}
     >
       <Icon {...iconAddNew} />
-      <span>{$_('add_database_connection')}</span>
+      <span>{$_('connect_database')}</span>
     </Button>
   </Tutorial>
 </div>
 
-<!-- <AddConnectionModal controller={addDatabaseModalController} /> -->
+<ConnectDatabaseModal controller={connectDatabaseModalController} />
 
 <style lang="scss">
   [data-identifier='connection-empty-text'] {
