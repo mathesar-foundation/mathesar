@@ -3821,3 +3821,57 @@ BEGIN
   RETURN rec_created;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_update_expr(tab_id oid, rec_def jsonb) RETURNS TEXT AS $$
+SELECT
+  format(
+    'UPDATE %I.%I SET (%s) = ROW(%s)',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    string_agg(format('%I', msar.get_column_name(tab_id, key::smallint)), ', '),
+    string_agg(format('%L', value), ', ')
+  )
+FROM jsonb_each_text(rec_def);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.patch_record_in_table(tab_id oid, rec_id anyelement, rec_def jsonb) RETURNS jsonb AS $$/*
+Modify (update/patch) a record in a table.
+
+Args:
+  tab_id: The OID of the table whose record we'll delete.
+  rec_id: The primary key value of the record we'll modify.
+  rec_patch: A JSON object defining the parts of the record to patch.
+
+Only tables with a single primary key column are supported.
+
+The `rec_def` object's form is defined by the record being updated.  It should have keys
+corresponding to the attnums of desired columns and values corresponding to values we should set.
+*/
+DECLARE
+  rec_modified jsonb;
+BEGIN
+  EXECUTE format(
+    $i$
+    WITH update_cte AS (%1$s %2$s RETURNING %3$s)
+    SELECT jsonb_build_object('results', %4$s)
+    FROM update_cte
+    $i$,
+    msar.build_update_expr(tab_id, rec_def),
+    msar.build_where_clause(
+      tab_id, jsonb_build_object(
+        'type', 'equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'literal', 'value', rec_id),
+          jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
+        )
+      )
+    ),
+    msar.build_selectable_column_expr(tab_id),
+    msar.build_results_jsonb_expr(tab_id, 'update_cte')
+  ) INTO rec_modified;
+  RETURN rec_modified;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
