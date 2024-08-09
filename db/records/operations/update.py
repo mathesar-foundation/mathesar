@@ -10,6 +10,7 @@ from db.records.exceptions import InvalidDate, InvalidDateFormat
 def patch_record_in_table(conn, record_def, record_id, table_oid):
     """Update a record in a table."""
     result = db_conn.exec_msar_func(
+        conn,
         'patch_record_in_table',
         table_oid,
         record_id,

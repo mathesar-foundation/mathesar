@@ -9,6 +9,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 from db.records.operations import delete as record_delete
 from db.records.operations import insert as record_insert
 from db.records.operations import select as record_select
+from db.records.operations import update as record_update
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -281,6 +282,45 @@ def add(
         record_info = record_insert.add_record_to_table(
             conn,
             record_def,
+            table_oid,
+        )
+    return RecordAdded.from_dict(record_info)
+
+
+@rpc_method(name="records.patch")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def patch(
+        *,
+        record_def: dict,
+        record_id: Any,
+        table_oid: int,
+        database_id: int,
+        **kwargs
+) -> RecordAdded:
+    """
+    Modify a record in a table.
+
+    The form of the `record_def` is determined by the underlying table.  Keys
+    should be attnums, and values should be the desired value for that column in
+    the modified record. Explicit `null` values will set null for that value
+    (with obvious exceptions where that would violate some constraint).
+
+    Args:
+        record_def: An object representing the record to be added.
+        record_id: The primary key value of the record to modify.
+        table_oid: Identity of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The modified record, along with some metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        record_info = record_update.patch_record_in_table(
+            conn,
+            record_def,
+            record_id,
             table_oid,
         )
     return RecordAdded.from_dict(record_info)

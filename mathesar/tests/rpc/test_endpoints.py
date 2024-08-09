@@ -160,6 +160,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        records.patch,
+        "records.patch",
+        [user_is_authenticated]
+    ),
+    (
         records.delete,
         "records.delete",
         [user_is_authenticated]
