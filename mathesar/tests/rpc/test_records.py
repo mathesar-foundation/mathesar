@@ -162,7 +162,7 @@ def test_records_add(rf, monkeypatch):
     assert actual_record == expect_record
 
 
-def test_records_add(rf, monkeypatch):
+def test_records_patch(rf, monkeypatch):
     username = 'alice'
     password = 'pass1234'
     record_id = 243
