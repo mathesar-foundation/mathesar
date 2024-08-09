@@ -28,7 +28,7 @@ class DBPrivileges(TypedDict):
         )
 
 
-@rpc_method('database_privileges.list_direct')
+@rpc_method(name="database_privileges.list_direct")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def list_direct(*, database_id: int, **kwargs) -> list[DBPrivileges]:
