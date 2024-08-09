@@ -27,16 +27,45 @@ export interface SortingEntry {
   attnum: number;
   direction: SortDirection;
 }
-export type FilterCombination = 'and' | 'or';
-export type FilterConditionParams = [
-  { column_id: [number] },
-  ...{ literal: [unknown] }[],
-];
-export type FilterCondition = Record<string, FilterConditionParams>;
-type MakeFilteringOption<U> = U extends string
-  ? { [k in U]: FilterRequest[] }
-  : never;
-type FilterRequest = FilterCondition | MakeFilteringOption<FilterCombination>;
+
+export interface SqlComparison {
+  type:
+    | 'and'
+    | 'or'
+    | 'equal'
+    | 'lesser'
+    | 'greater'
+    | 'lesser_or_equal'
+    | 'greater_or_equal'
+    | 'contains_case_insensitive'
+    | 'contains'
+    | 'starts_with'
+    | 'json_array_contains';
+  args: [SqlExpr, SqlExpr];
+}
+
+export interface SqlFunction {
+  type:
+    | 'null'
+    | 'not_null'
+    | 'json_array_length'
+    | 'uri_scheme'
+    | 'uri_authority'
+    | 'email_domain';
+  args: [SqlExpr];
+}
+
+export interface SqlLiteral {
+  type: 'literal';
+  value: string | number | null;
+}
+
+export interface SqlColumn {
+  type: 'attnum';
+  value: number;
+}
+
+export type SqlExpr = SqlComparison | SqlFunction | SqlLiteral | SqlColumn;
 
 export interface RecordsListParams {
   database_id: number;
@@ -45,7 +74,7 @@ export interface RecordsListParams {
   offset?: number;
   order?: SortingEntry[];
   group?: Pick<Grouping, 'columns' | 'preproc'>;
-  filter?: FilterRequest;
+  filter?: SqlExpr;
   search_fuzzy?: Record<string, unknown>[];
 }
 

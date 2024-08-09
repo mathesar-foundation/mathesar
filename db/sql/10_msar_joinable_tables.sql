@@ -158,7 +158,7 @@ jsonb AS $$
     SELECT jsonb_object_agg(tt_oid, tt_info) AS tt FROM target_cte
   )
   SELECT jsonb_build_object(
-    'joinable_tables', joinable_tables.jt,
-    'target_table_info', target_table_info.tt
+    'joinable_tables', COALESCE(joinable_tables.jt, '[]'::jsonb),
+    'target_table_info', COALESCE(target_table_info.tt, '{}'::jsonb)
   ) FROM joinable_tables, target_table_info;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;

@@ -4,7 +4,6 @@
   import { type Writable, writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type { FilterCombination } from '@mathesar/api/rpc/records';
   import type { LinkedRecordInputElement } from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordUtils';
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import { FILTER_INPUT_CLASS } from '@mathesar/components/filter-entry/utils';
@@ -14,6 +13,7 @@
     Filtering,
     ProcessedColumns,
   } from '@mathesar/stores/table-data';
+  import type { FilterCombination } from '@mathesar/stores/table-data/filtering';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
   import { Button, Icon } from '@mathesar-component-library';
 
