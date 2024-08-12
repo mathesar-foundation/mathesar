@@ -3502,13 +3502,16 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_results_jsonb_expr(tab_id oid, cte_name text) RETURNS TEXT AS $$/*
+msar.build_results_jsonb_expr(tab_id oid, cte_name text, order_ jsonb) RETURNS TEXT AS $$/*
 Build an SQL expresson string that, when added to the record listing query, produces a JSON array
 with the records resulting from the request.
 */
-SELECT 'coalesce(jsonb_agg(json_build_object('
+SELECT format(
+  'coalesce(jsonb_agg(json_build_object('
   || string_agg(format('%1$L, %2$I.%1$I', attnum, cte_name), ', ')
-  || ')), jsonb_build_array())'
+  || ') %1$s), jsonb_build_array())',
+  msar.build_order_by_expr(tab_id, order_)
+)
 FROM pg_catalog.pg_attribute
 WHERE
   attrelid = tab_id
@@ -3519,23 +3522,16 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_grouping_results_jsonb_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
-Build an SQL expresson string that, when added to the record listing query, produces a JSON array
-with the groups resulting from the request.
+msar.build_groups_cte_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
 */
 SELECT format(
   $gj$
-    jsonb_build_object(
-      'columns', %3$L::jsonb,
-      'preproc', %4$L::jsonb,
-      'groups', jsonb_agg(
-        DISTINCT jsonb_build_object(
-          'id', %2$I.__mathesar_gid,
-          'count', %2$I.__mathesar_gcount,
-          'results_eq', jsonb_build_object(%1$s)
-        )
-      )
-    )
+    __mathesar_gid AS id,
+    __mathesar_gcount AS count,
+    jsonb_build_object(%1$s) AS results_eq,
+    jsonb_agg(%2$I) AS result_indices
+  FROM %3$I
+  GROUP BY id, count, results_eq
   $gj$,
   string_agg(
     format(
@@ -3548,15 +3544,41 @@ SELECT format(
     ),
     ', ' ORDER BY ordinality
   ),
-  cte_name,
-  group_ ->> 'columns',
-  group_ ->> 'preproc'
+  msar.get_pk_column(tab_id),
+  cte_name
 )
 FROM msar.expr_templates RIGHT JOIN ROWS FROM(
   jsonb_array_elements_text(group_ -> 'columns'),
   jsonb_array_elements_text(group_ -> 'preproc')
 ) WITH ORDINALITY AS x(col_id, preproc) ON expr_key = preproc
 WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_grouping_results_jsonb_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
+Build an SQL expresson string that, when added to the record listing query, produces a JSON array
+with the groups resulting from the request.
+*/
+SELECT format(
+  $gj$
+  jsonb_build_object(
+    'columns', %2$L::jsonb,
+    'preproc', %3$L::jsonb,
+    'groups', jsonb_agg(
+      DISTINCT jsonb_build_object(
+        'id', %1$I.id,
+        'count', %1$I.count,
+        'results_eq', %1$I.results_eq,
+        'result_indices', %1$I.result_indices
+      )
+    )
+  )
+  $gj$,
+  cte_name,
+  group_ ->> 'columns',
+  group_ ->> 'preproc'
+)
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -3613,6 +3635,8 @@ BEGIN
       SELECT count(1) AS count FROM %2$I.%3$I %7$s
     ), enriched_results_cte AS (
       SELECT %1$s, %8$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
+    ), groups_cte as (
+      SELECT %11$s
     )
     SELECT jsonb_build_object(
       'results', %9$s,
@@ -3620,7 +3644,9 @@ BEGIN
       'grouping', %10$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
-    FROM enriched_results_cte, count_cte
+    FROM enriched_results_cte
+      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id
+      CROSS JOIN count_cte
     $q$,
     msar.build_selectable_column_expr(tab_id),
     msar.get_relation_schema_name(tab_id),
@@ -3630,8 +3656,9 @@ BEGIN
     msar.build_order_by_expr(tab_id, order_),
     msar.build_where_clause(tab_id, filter_),
     msar.build_grouping_expr(tab_id, group_),
-    msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte'),
-    COALESCE(msar.build_grouping_results_jsonb_expr(tab_id, 'enriched_results_cte', group_), 'NULL')
+    msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_),
+    COALESCE(msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_), 'NULL'),
+    COALESCE(msar.build_groups_cte_expr(tab_id, 'enriched_results_cte', group_), 'NULL AS id')
   ) INTO records;
   RETURN records;
 END;
@@ -3816,7 +3843,7 @@ BEGIN
     $i$,
     msar.build_single_insert_expr(tab_id, rec_def),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'insert_cte')
+    msar.build_results_jsonb_expr(tab_id, 'insert_cte', null)
   ) INTO rec_created;
   RETURN rec_created;
 END;
@@ -3870,7 +3897,7 @@ BEGIN
       )
     ),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'update_cte')
+    msar.build_results_jsonb_expr(tab_id, 'update_cte', null)
   ) INTO rec_modified;
   RETURN rec_modified;
 END;
