@@ -153,15 +153,6 @@ Wraps the `?` jsonb operator for improved readability.
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION msar.get_db_oid(db_name text) RETURNS oid AS $$/*
-Given a database name, returns its oid.
-*/
-  SELECT pgd.oid
-  FROM pg_catalog.pg_database pgd
-  WHERE pgd.datname=db_name;
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.schema_exists(schema_name text) RETURNS boolean AS $$/*
 Return true if the schema exists, false otherwise.
 
@@ -976,7 +967,7 @@ WITH priv_cte AS (
     pg_catalog.pg_roles AS pgr,
     pg_catalog.pg_database AS pgd,
     aclexplode(COALESCE(pgd.datacl, acldefault('d', pgd.datdba))) AS acl
-  WHERE pgd.oid=msar.get_db_oid(db_name) AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_'
+  WHERE pgd.datname = db_name AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_'
   GROUP BY pgr.oid, pgd.oid
 )
 SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
