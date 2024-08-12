@@ -14,8 +14,8 @@ import type {
   Constraint,
   ConstraintRecipe,
 } from '@mathesar/api/rpc/constraints';
-import type { Database } from '@mathesar/api/rpc/databases';
 import type { Table } from '@mathesar/api/rpc/tables';
+import type { Database } from '@mathesar/models/databases';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import type { CancellablePromise } from '@mathesar-component-library';
 

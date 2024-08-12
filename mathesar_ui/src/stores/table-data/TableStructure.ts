@@ -3,9 +3,9 @@ import { derived } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { Database } from '@mathesar/api/rpc/databases';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
+import type { Database } from '@mathesar/models/databases';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 
 import { ColumnsDataStore } from './columns';

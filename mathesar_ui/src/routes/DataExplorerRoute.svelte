@@ -4,11 +4,11 @@
   import { router } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { CancellablePromise } from '@mathesar/component-library';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconEdit, iconExploration } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/databases';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import {

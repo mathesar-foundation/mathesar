@@ -3,9 +3,9 @@
   import { router } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/databases';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Database } from '@mathesar/api/rpc/databases';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import {
     iconDatabase,
@@ -9,6 +8,7 @@
     iconMoreActions,
   } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/databases';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     getDatabasePageSchemasSectionUrl,
@@ -61,7 +61,7 @@
     pageTitleAndMetaProps={{
       name: database.name,
       icon: iconDatabase,
-      description: `DB server: ${database.server_host}:${database.server_port}`,
+      description: `DB server: ${database.server.host}:${database.server.port}`,
     }}
   >
     <div slot="action">

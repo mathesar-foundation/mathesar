@@ -4,7 +4,6 @@
 
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
@@ -21,6 +20,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import { iconPaste, iconUrl } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/databases';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import { createTable } from '@mathesar/stores/tables';

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Database } from '@mathesar/api/rpc/databases';
   import Card from '@mathesar/components/Card.svelte';
   import { iconDatabase } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/databases';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import { Icon } from '@mathesar-component-library';
 
@@ -22,7 +22,7 @@
     </div>
     <div class="content">
       <div class="name">{database.name}</div>
-      <div class="server">{database.server_host}:{database.server_port}</div>
+      <div class="server">{database.server.host}:{database.server.port}</div>
     </div>
   </div>
 </Card>

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import { iconSchema } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/databases';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import {
     currentSchemaId,

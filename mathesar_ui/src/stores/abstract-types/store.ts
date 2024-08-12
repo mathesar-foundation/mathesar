@@ -2,7 +2,7 @@ import type { Readable, Unsubscriber, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
 import { States, getAPI } from '@mathesar/api/rest/utils/requestUtils';
-import type { Database } from '@mathesar/api/rpc/databases';
+import type { Database } from '@mathesar/models/databases';
 import { databasesStore } from '@mathesar/stores/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { CancellablePromise } from '@mathesar-component-library';

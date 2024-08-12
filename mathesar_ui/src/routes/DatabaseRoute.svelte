@@ -3,11 +3,11 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import type { Database } from '@mathesar/api/rpc/databases';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
+  import type { Database } from '@mathesar/models/databases';
   import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databasesStore } from '@mathesar/stores/databases';

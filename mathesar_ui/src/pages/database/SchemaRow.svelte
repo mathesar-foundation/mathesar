@@ -2,7 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
@@ -14,6 +13,7 @@
     iconMoreActions,
     iconNotEditable,
   } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/databases';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { ButtonMenuItem, Icon } from '@mathesar-component-library';
 

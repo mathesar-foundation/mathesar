@@ -17,10 +17,10 @@ import { _ } from 'svelte-i18n';
 import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_table';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { JoinableTablesResult, Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
+import type { Database } from '@mathesar/models/databases';
 import { TupleMap } from '@mathesar/packages/tuple-map';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import {

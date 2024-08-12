@@ -1,11 +1,11 @@
 import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type {
   ComponentAndProps,
   IconProps,
 } from '@mathesar/component-library/types';
+import type { Database } from '@mathesar/models/databases';
 
 export interface BreadcrumbItemHome {
   type: 'home';

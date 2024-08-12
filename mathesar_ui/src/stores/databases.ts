@@ -1,7 +1,8 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import { Database } from '@mathesar/api/rpc/databases';
+import { Database } from '@mathesar/models/databases';
+import { Server } from '@mathesar/models/servers';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import {
@@ -29,7 +30,9 @@ class DatabasesStore {
   readonly currentDatabase: Readable<Database | undefined>;
 
   constructor() {
-    const serverMap = new Map(commonData.servers.map((s) => [s.id, s]));
+    const serverMap = new Map(
+      commonData.servers.map((s) => [s.id, new Server({ rawServer: s })]),
+    );
     this.unsortedDatabases.reconstruct(
       commonData.databases.map((d) => {
         /**
@@ -47,7 +50,7 @@ class DatabasesStore {
           host: 'unknown',
           port: 0,
         };
-        return [d.id, new Database(d, server)];
+        return [d.id, new Database({ rawDatabase: d, server })];
       }),
     );
     this.databases = derived(
@@ -72,7 +75,10 @@ class DatabasesStore {
     const { database, server } = await api.database_setup
       .connect_existing(props)
       .run();
-    const connectedDatabase = new Database(database, server);
+    const connectedDatabase = new Database({
+      rawDatabase: database,
+      server: new Server({ rawServer: server }),
+    });
     this.addDatabase(connectedDatabase);
     return connectedDatabase;
   }
@@ -83,7 +89,10 @@ class DatabasesStore {
     const { database, server } = await api.database_setup
       .create_new(props)
       .run();
-    const connectedDatabase = new Database(database, server);
+    const connectedDatabase = new Database({
+      rawDatabase: database,
+      server: new Server({ rawServer: server }),
+    });
     this.addDatabase(connectedDatabase);
     return connectedDatabase;
   }
