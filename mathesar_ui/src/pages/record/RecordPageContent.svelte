@@ -45,6 +45,7 @@
       .list_joinable({
         database_id: $currentDatabase.id,
         table_oid: tableId,
+        max_depth: 1,
       })
       .run();
   }
