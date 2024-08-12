@@ -91,10 +91,8 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    theme="light"
     pageTitleAndMetaProps={{
       name: schema.name,
-      type: 'schema',
       icon: iconSchema,
     }}
   >

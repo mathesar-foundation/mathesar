@@ -34,7 +34,6 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    theme="light"
     pageTitleAndMetaProps={{
       name: $_('administration'),
       icon: iconSettingsMajor,

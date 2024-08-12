@@ -7,6 +7,7 @@
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
   import DatabasePage from '@mathesar/pages/database/DatabasePage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databasesStore } from '@mathesar/stores/databases';
@@ -28,11 +29,19 @@
 {#if $currentDatabase}
   <AppendBreadcrumb item={{ type: 'database', database: $currentDatabase }} />
 
-  <Route path="/">
-    <DatabasePage database={$currentDatabase} />
-  </Route>
+  <Route path="/" redirect="schemas/"></Route>
 
-  <Route path="/:schemaId/*" let:meta firstmatch>
+  <MultiPathRoute
+    paths={[
+      { name: 'schemas', path: '/schemas/' },
+      { name: 'settings', path: '/settings/' },
+    ]}
+    let:path
+  >
+    <DatabasePage database={$currentDatabase} section={path} />
+  </MultiPathRoute>
+
+  <Route path="/schemas/:schemaId/*" let:meta firstmatch>
     <SchemaRoute
       database={$currentDatabase}
       schemaId={parseInt(meta.params.schemaId, 10)}
