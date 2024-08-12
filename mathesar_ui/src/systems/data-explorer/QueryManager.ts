@@ -7,7 +7,6 @@ import type {
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { JoinableTablesResult, Table } from '@mathesar/api/rpc/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
@@ -65,7 +64,7 @@ export default class QueryManager extends QueryRunner {
 
   private baseTableFetchPromise: CancellablePromise<Table> | undefined;
 
-  private joinableColumnsfetchPromise:
+  private joinableColumnsFetchPromise:
     | CancellablePromise<JoinableTablesResult>
     | undefined;
 
@@ -127,8 +126,9 @@ export default class QueryManager extends QueryRunner {
     }
 
     try {
+      const database = get(currentDatabase);
       this.baseTableFetchPromise?.cancel();
-      this.joinableColumnsfetchPromise?.cancel();
+      this.joinableColumnsFetchPromise?.cancel();
 
       this.state.update((state) => ({
         ...state,
@@ -137,17 +137,20 @@ export default class QueryManager extends QueryRunner {
 
       this.baseTableFetchPromise = api.tables
         .get_with_metadata({
-          database_id: get(currentDatabase).id,
+          database_id: database.id,
           table_oid: baseTableId,
         })
         .run();
 
-      this.joinableColumnsfetchPromise = getAPI<JoinableTablesResult>(
-        `/api/db/v0/tables/${baseTableId}/joinable_tables/`,
-      );
+      this.joinableColumnsFetchPromise = api.tables
+        .list_joinable({
+          database_id: database.id,
+          table_oid: baseTableId,
+        })
+        .run();
       const [baseTableResult, joinableColumnsResult] = await Promise.all([
         this.baseTableFetchPromise,
-        this.joinableColumnsfetchPromise,
+        this.joinableColumnsFetchPromise,
       ]);
       const baseTableColumns = getBaseTableColumnsWithLinks(
         joinableColumnsResult,
@@ -381,7 +384,7 @@ export default class QueryManager extends QueryRunner {
   destroy(): void {
     super.destroy();
     this.baseTableFetchPromise?.cancel();
-    this.joinableColumnsfetchPromise?.cancel();
+    this.joinableColumnsFetchPromise?.cancel();
     this.querySavePromise?.cancel();
   }
 }
