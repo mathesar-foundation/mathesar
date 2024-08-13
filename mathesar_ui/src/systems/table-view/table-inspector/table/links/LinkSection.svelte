@@ -1,39 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import {
-    iconLinksFromOtherTables,
-    iconLinksInThisTable,
-  } from '@mathesar/icons';
-  import { Icon, assertExhaustive } from '@mathesar-component-library';
+  import type { IconProps } from '@mathesar/component-library/types';
+  import { Icon } from '@mathesar-component-library';
 
   import LinkItem from './LinkItem.svelte';
-  import type { TableLink, TableLinkType } from './utils';
+  import type { TableLink } from './utils';
 
+  export let icon: IconProps;
+  export let title: string;
   export let links: TableLink[];
-  export let type: TableLinkType;
-
-  $: icon = (() => {
-    switch (type) {
-      case 'in_this_table':
-        return iconLinksInThisTable;
-      case 'from_other_tables':
-        return iconLinksFromOtherTables;
-      default:
-        return assertExhaustive(type);
-    }
-  })();
-
-  $: title = (() => {
-    switch (type) {
-      case 'in_this_table':
-        return $_('in_this_table');
-      case 'from_other_tables':
-        return $_('from_other_tables');
-      default:
-        return assertExhaustive(type);
-    }
-  })();
 </script>
 
 <div class="link-section-container">
