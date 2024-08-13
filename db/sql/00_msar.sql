@@ -3776,3 +3776,48 @@ BEGIN
   RETURN num_deleted;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_single_insert_expr(tab_id oid, rec_def jsonb) RETURNS TEXT AS $$
+SELECT
+  format(
+    'INSERT INTO %I.%I (%s) VALUES (%s)',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    string_agg(format('%I', msar.get_column_name(tab_id, key::smallint)), ', '),
+    string_agg(format('%L', value), ', ')
+  )
+FROM jsonb_each_text(rec_def);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_record_to_table(tab_id oid, rec_def jsonb) RETURNS jsonb AS $$/*
+Add a record to a table.
+
+Args:
+  tab_id: The OID of the table whose record we'll delete.
+  rec_def: A JSON object defining the record.
+
+The `rec_def` object's form is defined by the record being inserted.  It should have keys
+corresponding to the attnums of desired columns and values corresponding to values we should
+insert.
+
+*/
+DECLARE
+  rec_created jsonb;
+BEGIN
+  EXECUTE format(
+    $i$
+    WITH insert_cte AS (%1$s RETURNING %2$s)
+    SELECT jsonb_build_object('results', %3$s)
+    FROM insert_cte
+    $i$,
+    msar.build_single_insert_expr(tab_id, rec_def),
+    msar.build_selectable_column_expr(tab_id),
+    msar.build_results_jsonb_expr(tab_id, 'insert_cte')
+  ) INTO rec_created;
+  RETURN rec_created;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

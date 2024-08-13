@@ -3867,3 +3867,96 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION __setup_add_record_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_list_records_table();
+  ALTER TABLE atable ADD UNIQUE (col2);
+  ALTER TABLE atable ALTER COLUMN col1 SET DEFAULT 200;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_all() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
+    ),
+    '{"results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_stringified_json() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": "{\"key2\": \"val2\"}"}'
+    ),
+    '{"results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_use_default() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
+    ),
+    '{"results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_null_default() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
+    ),
+    '{"results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_nonobj_json() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"2": null, "3": "ab234", "4": 3, "5": "\"234\""}'
+    ),
+    '{"results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;

@@ -183,9 +183,11 @@ To use an RPC function:
       members:
       - list_
       - get
+      - add
       - delete
       - search
       - RecordList
+      - RecordAdded
       - OrderBy
       - Filter
       - FilterAttnum
