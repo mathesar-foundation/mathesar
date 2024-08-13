@@ -20,7 +20,7 @@ export interface Table extends RawTable {
 }
 
 /** [table oid, column attnum][] */
-export type JoinPath = [number, number][];
+export type JoinPath = [number, number][][];
 
 export interface JoinableTable {
   target: Table['oid'];
@@ -45,18 +45,19 @@ export interface JoinableTable {
 
 export interface JoinableTablesResult {
   joinable_tables: JoinableTable[];
-  tables: Record<
-    string, // stringified table_oid
+  /** Keys are stringified table OID values */
+  target_table_info: Record<
+    string,
     {
       name: Table['name'];
-      columns: number[];
-    }
-  >;
-  columns: Record<
-    string, // stringified column_oid
-    {
-      name: string;
-      type: string;
+      /** Keys are stringified column attnum values */
+      columns: Record<
+        string,
+        {
+          name: string;
+          type: string;
+        }
+      >;
     }
   >;
 }
@@ -133,7 +134,8 @@ export const tables = {
   list_joinable: rpcMethodTypeContainer<
     {
       database_id: number;
-      schema_oid: number;
+      table_oid: number;
+      max_depth?: number;
     },
     JoinableTablesResult
   >(),

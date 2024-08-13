@@ -17,19 +17,13 @@
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
 
-  $: columnNameMap = new Map(
-    Object.entries(joinableTablesResult.columns).map(([columnId, column]) => [
-      parseInt(columnId, 10),
-      column.name,
-    ]),
-  );
-
   function buildWidgetInput(joinableTable: JoinableTable) {
     const table = $currentTablesData.tablesMap.get(joinableTable.target);
     if (!table) return undefined;
-    const id = joinableTable.join_path[0].slice(-1)[0];
-    const name = columnNameMap.get(id) ?? `(${$_('unknown_column')})`;
-    return { table, fkColumn: { id, name } };
+    const fkColumnId = joinableTable.join_path[0].slice(-1)[0][1];
+    const { name } =
+      joinableTablesResult.target_table_info[table.oid].columns[fkColumnId];
+    return { table, fkColumn: { id: fkColumnId, name } };
   }
 
   $: tableWidgetInputs = joinableTablesResult.joinable_tables

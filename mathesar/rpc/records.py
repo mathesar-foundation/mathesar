@@ -170,9 +170,7 @@ class RecordAdded(TypedDict):
         results: An array of a single record objects (the one added).
         preview_data: Information for previewing foreign key values.
     """
-    count: int
     results: list[dict]
-    grouping: GroupingResponse
     preview_data: list[dict]
 
     @classmethod

@@ -19,7 +19,7 @@ import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { Database } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
-import type { JoinableTablesResult, Table } from '@mathesar/api/rpc/tables';
+import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import { TupleMap } from '@mathesar/packages/tuple-map';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -440,22 +440,6 @@ export const currentTable = derived(
       ? undefined
       : $tables.tablesMap.get($currentTableId),
 );
-
-export function getJoinableTablesResult(
-  tableId: number,
-  maxDepth = 1,
-): Promise<JoinableTablesResult> {
-  return Promise.resolve({
-    joinable_tables: [],
-    tables: {},
-    columns: {},
-  });
-  // TODO_BETA: re-implement this with the RPC API.
-
-  // return getAPI<JoinableTablesResult>(
-  //   `/api/db/v0/tables/${tableId}/joinable_tables/?max_depth=${maxDepth}`,
-  // );
-}
 
 export async function refetchTablesForCurrentSchema() {
   const database = get(currentDatabase);
