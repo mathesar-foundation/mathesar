@@ -571,35 +571,39 @@ export class RecordsData {
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
 
-    throw new Error('Not implemented'); // TODO_BETA
-    // const promise = patchAPI<RecordsResponse>(
-    //   `${this.url}${String(primaryKeyValue)}/`,
-    //   { [column.id]: record[column.id] },
-    // );
+    const promise = api.records
+      .patch({
+        ...this.apiContext,
+        record_id: primaryKeyValue,
+        record_def: {
+          [String(column.id)]: record[column.id],
+        },
+      })
+      .run();
 
-    // if (!this.updatePromises) {
-    //   this.updatePromises = new Map();
-    // }
-    // this.updatePromises.set(cellKey, promise);
+    if (!this.updatePromises) {
+      this.updatePromises = new Map();
+    }
+    this.updatePromises.set(cellKey, promise);
 
-    // try {
-    //   const result = await promise;
-    //   this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
-    //   return {
-    //     ...row,
-    //     record: result.results[0],
-    //   };
-    // } catch (err) {
-    //   this.meta.cellModificationStatus.set(cellKey, {
-    //     state: 'failure',
-    //     errors: [`Unable to save cell. ${getErrorMessage(err)}`],
-    //   });
-    // } finally {
-    //   if (this.updatePromises.get(cellKey) === promise) {
-    //     this.updatePromises.delete(cellKey);
-    //   }
-    // }
-    // return row;
+    try {
+      const result = await promise;
+      this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
+      return {
+        ...row,
+        record: result.results[0],
+      };
+    } catch (err) {
+      this.meta.cellModificationStatus.set(cellKey, {
+        state: 'failure',
+        errors: [`Unable to save cell. ${getErrorMessage(err)}`],
+      });
+    } finally {
+      if (this.updatePromises.get(cellKey) === promise) {
+        this.updatePromises.delete(cellKey);
+      }
+    }
+    return row;
   }
 
   getNewEmptyRecord(): NewRecordRow {

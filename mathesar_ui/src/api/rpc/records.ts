@@ -169,5 +169,16 @@ export const records = {
     Pick<RecordsResponse, 'results' | 'preview_data'>
   >(),
 
+  patch: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      record_id: ResultValue;
+      /** Keys are stringified attnums */
+      record_def: Record<string, ResultValue>;
+    },
+    Pick<RecordsResponse, 'results' | 'preview_data'>
+  >(),
+
   list: rpcMethodTypeContainer<RecordsListParams, RecordsResponse>(),
 };
