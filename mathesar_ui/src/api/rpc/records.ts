@@ -159,5 +159,15 @@ export interface RecordsResponse {
 }
 
 export const records = {
+  add: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      /** Keys are stringified attnums */
+      record_def: Record<string, ResultValue>;
+    },
+    Pick<RecordsResponse, 'results' | 'preview_data'>
+  >(),
+
   list: rpcMethodTypeContainer<RecordsListParams, RecordsResponse>(),
 };

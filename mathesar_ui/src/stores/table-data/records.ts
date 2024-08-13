@@ -643,55 +643,58 @@ export class RecordsData {
     const rowKeyOfBlankRow = getRowKey(row, pkColumn?.id);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
-    const requestRecord = {
-      ...Object.fromEntries(this.contextualFilters),
-      ...row.record,
-    };
 
-    throw new Error('Not implemented'); // TODO_BETA
+    const promise = api.records
+      .add({
+        ...this.apiContext,
+        record_def: {
+          ...Object.fromEntries(this.contextualFilters),
+          ...row.record,
+        },
+      })
+      .run();
 
-    // const promise = postAPI<RecordsResponse>(this.url, requestRecord);
-    // if (!this.createPromises) {
-    //   this.createPromises = new Map();
-    // }
-    // this.createPromises.set(rowKeyOfBlankRow, promise);
+    if (!this.createPromises) {
+      this.createPromises = new Map();
+    }
+    this.createPromises.set(rowKeyOfBlankRow, promise);
 
-    // try {
-    //   const response = await promise;
-    //   const record = response.results[0];
-    //   let newRow: NewRecordRow = {
-    //     ...row,
-    //     record,
-    //   };
-    //   if (isPlaceholderRow(newRow)) {
-    //     const { isAddPlaceholder, ...newRecordRow } = newRow;
-    //     newRow = newRecordRow;
-    //   }
+    try {
+      const response = await promise;
+      const record = response.results[0];
+      let newRow: NewRecordRow = {
+        ...row,
+        record,
+      };
+      if (isPlaceholderRow(newRow)) {
+        const { isAddPlaceholder, ...newRecordRow } = newRow;
+        newRow = newRecordRow;
+      }
 
-    //   const rowKeyWithRecord = getRowKey(newRow, pkColumn?.id);
-    //   this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
-    //   this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
-    //   this.newRecords.update((existing) =>
-    //     existing.map((entry) => {
-    //       if (entry.identifier === row.identifier) {
-    //         return newRow;
-    //       }
-    //       return entry;
-    //     }),
-    //   );
-    //   this.totalCount.update((count) => (count ?? 0) + 1);
-    //   return newRow;
-    // } catch (err) {
-    //   this.meta.rowCreationStatus.set(rowKeyOfBlankRow, {
-    //     state: 'failure',
-    //     errors: [getErrorMessage(err)],
-    //   });
-    // } finally {
-    //   if (this.createPromises.get(rowKeyOfBlankRow) === promise) {
-    //     this.createPromises.delete(rowKeyOfBlankRow);
-    //   }
-    // }
-    // return row;
+      const rowKeyWithRecord = getRowKey(newRow, pkColumn?.id);
+      this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
+      this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
+      this.newRecords.update((existing) =>
+        existing.map((entry) => {
+          if (entry.identifier === row.identifier) {
+            return newRow;
+          }
+          return entry;
+        }),
+      );
+      this.totalCount.update((count) => (count ?? 0) + 1);
+      return newRow;
+    } catch (err) {
+      this.meta.rowCreationStatus.set(rowKeyOfBlankRow, {
+        state: 'failure',
+        errors: [getErrorMessage(err)],
+      });
+    } finally {
+      if (this.createPromises.get(rowKeyOfBlankRow) === promise) {
+        this.createPromises.delete(rowKeyOfBlankRow);
+      }
+    }
+    return row;
   }
 
   async createOrUpdateRecord(
