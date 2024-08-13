@@ -444,7 +444,8 @@ export class RecordsData {
     return undefined;
   }
 
-  async deleteSelected(rowSelectionIds: Iterable<string>): Promise<void> {
+  /** @returns the number of selected rows deleted */
+  async deleteSelected(rowSelectionIds: Iterable<string>): Promise<number> {
     const ids =
       typeof rowSelectionIds === 'string' ? [rowSelectionIds] : rowSelectionIds;
     const pkColumn = get(this.columnsDataStore.pkColumn);
@@ -464,7 +465,7 @@ export class RecordsData {
     const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
     if (rowKeys.length === 0) {
-      return;
+      return 0;
     }
 
     this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
@@ -547,6 +548,8 @@ export class RecordsData {
       const apiMsg = [...failures.values()].join('\n');
       throw new Error(`${uiMsg} ${apiMsg}`);
     }
+
+    return primaryKeysOfSavedRows.length + identifiersOfUnsavedRows.length;
   }
 
   // TODO: It would be better to throw errors instead of silently failing
