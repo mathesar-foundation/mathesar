@@ -81,6 +81,8 @@ class Grouping(TypedDict):
     """
     Grouping definition.
 
+    The table involved must have a single column primary key.
+
     Attributes:
         columns: The columns to be grouped by.
         preproc: The preprocessing funtions to apply (if any).
@@ -93,14 +95,22 @@ class Group(TypedDict):
     """
     Group definition.
 
+    Note that the `count` is over all rows in the group, whether returned
+    or not. However, `result_indices` is restricted to only the rows
+    returned. This is to avoid potential problems if there are many rows
+    in the group (e.g., the whole table), but we only return a few.
+
     Attributes:
         id: The id of the group. Consistent for same input.
         count: The number of items in the group.
         results_eq: The value the results of the group equal.
+        result_indices: The 0-indexed positions of group members in the
+            results array.
     """
     id: int
     count: int
     results_eq: list[dict]
+    result_indices: list[int]
 
 
 class GroupingResponse(TypedDict):
