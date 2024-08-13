@@ -485,8 +485,13 @@ export class RecordsData {
     if (keysToDelete.length > 0) {
       const recordIds = [...keysToDelete];
       try {
-        throw new Error('Not implemented'); // TODO_BETA
-        // await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
+        await api.records
+          .delete({
+            database_id: this.apiContext.database_id,
+            table_oid: this.apiContext.table_oid,
+            record_ids: recordIds,
+          })
+          .run();
         keysToDelete.forEach((key) => successRowKeys.add(key));
       } catch (error) {
         failures.set(keysToDelete.join(','), getErrorMessage(error));

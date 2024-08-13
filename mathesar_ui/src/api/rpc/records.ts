@@ -181,4 +181,9 @@ export const records = {
   >(),
 
   list: rpcMethodTypeContainer<RecordsListParams, RecordsResponse>(),
+
+  delete: rpcMethodTypeContainer<
+    { database_id: number; table_oid: number; record_ids: ResultValue[] },
+    void
+  >(),
 };
