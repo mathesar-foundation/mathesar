@@ -3353,6 +3353,7 @@ INSERT INTO msar.expr_templates VALUES
   -- json(b) filters and expressions
   ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
   ('json_array_contains', '(%s)::jsonb @> (%s)::jsonb'),
+  ('element_in_json_array_untyped', '(%s)::text IN (SELECT jsonb_array_elements_text(%s))'),
   ('convert_to_json', 'to_jsonb(%s)'),
   -- date part extractors
   ('truncate_to_year', 'to_char((%s)::date, ''YYYY AD'')'),
@@ -3362,7 +3363,9 @@ INSERT INTO msar.expr_templates VALUES
   ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
   ('uri_authority', 'mathesar_types.uri_authority(%s)'),
   -- Email part getters
-  ('email_domain', 'mathesar_types.email_domain_name(%s)')
+  ('email_domain', 'mathesar_types.email_domain_name(%s)'),
+  -- Data formatter which is sometimes useful in comparison
+  ('format_data', 'msar.format_data(%s)')
 ;
 
 CREATE OR REPLACE FUNCTION msar.build_expr(rel_id oid, tree jsonb) RETURNS text AS $$
@@ -3816,13 +3819,13 @@ BEGIN
     msar.get_relation_name(tab_id),
     msar.build_where_clause(
       tab_id, jsonb_build_object(
-        'type', 'json_array_contains', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'literal', 'value', rec_ids),
+        'type', 'element_in_json_array_untyped', 'args', jsonb_build_array(
           jsonb_build_object(
-            'type', 'convert_to_json', 'args', jsonb_build_array(
+            'type', 'format_data', 'args', jsonb_build_array(
               jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
             )
-          )
+          ),
+          jsonb_build_object('type', 'literal', 'value', rec_ids)
         )
       )
     )
