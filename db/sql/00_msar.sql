@@ -3337,7 +3337,9 @@ INSERT INTO msar.expr_templates VALUES
   ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
   ('uri_authority', 'mathesar_types.uri_authority(%s)'),
   -- Email part getters
-  ('email_domain', 'mathesar_types.email_domain_name(%s)')
+  ('email_domain', 'mathesar_types.email_domain_name(%s)'),
+  -- Data formatter which is sometimes useful in comparison
+  ('format_data', 'msar.format_data(%s)')
 ;
 
 CREATE OR REPLACE FUNCTION msar.build_expr(rel_id oid, tree jsonb) RETURNS text AS $$
@@ -3792,7 +3794,11 @@ BEGIN
     msar.build_where_clause(
       tab_id, jsonb_build_object(
         'type', 'element_in_json_array_untyped', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id)),
+          jsonb_build_object(
+            'type', 'format_data', 'args', jsonb_build_array(
+              jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
+            )
+          ),
           jsonb_build_object('type', 'literal', 'value', rec_ids)
         )
       )
