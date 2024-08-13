@@ -25,6 +25,7 @@
   $: ({ oid } = table);
   $: ({ displayableRecords } = display);
   $: ({ pkColumn } = columnsDataStore);
+  $: canEditTableRecords = true; // TODO_BETA: Implement permissions here
 
   function getItemSizeFromRow(row: RowType) {
     if (isHelpTextRow(row)) {
@@ -62,7 +63,7 @@
     >
       <ScrollAndResetHandler {api} />
       {#each items as item (item.key)}
-        {#if $displayableRecords[item.index] && !isPlaceholderRow($displayableRecords[item.index])}
+        {#if $displayableRecords[item.index] && !(isPlaceholderRow($displayableRecords[item.index]) && !canEditTableRecords)}
           <Row style={item.style} bind:row={$displayableRecords[item.index]} />
         {/if}
       {/each}
