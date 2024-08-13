@@ -3960,3 +3960,47 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_single() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
+    '{"results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_multi() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
+    '{"results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_leaves_other_rows() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  patch_result jsonb;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  PERFORM msar.patch_record_in_table( rel_id, 2, '{"2": 10}');
+  RETURN NEXT results_eq(
+    'SELECT id, col1 FROM atable ORDER BY id',
+    'VALUES (1, 5), (2, 10), (3, 2)'
+  );
+END;
+$$ LANGUAGE plpgsql;

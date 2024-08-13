@@ -184,6 +184,7 @@ To use an RPC function:
       - list_
       - get
       - add
+      - patch
       - delete
       - search
       - RecordList
