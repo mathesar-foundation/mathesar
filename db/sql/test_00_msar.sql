@@ -3104,31 +3104,31 @@ BEGIN
             "id": 1,
             "count": 5,
             "results_eq": {"2": "Abigail", "3": "Abbott"},
-            "result_indices": [5, 8, 15, 18, 20]
+            "result_indices": [0, 1, 2, 3, 4]
           },
           {
             "id": 2,
             "count": 2,
             "results_eq": {"2": "Aaron", "3": "Acevedo"},
-            "result_indices": [7, 16]
+            "result_indices": [5, 6]
           },
           {
             "id": 3,
             "count": 1,
             "results_eq": {"2": "Abigail", "3": "Acevedo"},
-            "result_indices": [10]
+            "result_indices": [7]
           },
           {
             "id": 4,
             "count": 1,
             "results_eq": {"2": "Aaron", "3": "Acosta"},
-            "result_indices": [11]
+            "result_indices": [8]
           },
           {
             "id": 5,
             "count": 1,
             "results_eq": {"2": "Abigail", "3": "Acosta"},
-            "result_indices": [2]
+            "result_indices": [9]
           }
         ]
       }
@@ -3164,7 +3164,7 @@ BEGIN
             "id": 1,
             "count": 5,
             "results_eq": {"2": "Abigail", "3": "Abbott"},
-            "result_indices": [5, 8, 15]
+            "result_indices": [0, 1, 2]
           }
         ]
       }
@@ -3196,8 +3196,8 @@ BEGIN
         "columns": [4],
         "preproc": ["truncate_to_month"],
         "groups": [
-          {"id": 1, "count": 1, "results_eq": {"4": "2020-03 AD"}, "result_indices": [1]},
-          {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}, "result_indices": [2, 3]}
+          {"id": 1, "count": 1, "results_eq": {"4": "2020-03 AD"}, "result_indices": [0]},
+          {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}, "result_indices": [1, 2]}
         ]
       }
     }$j$ || jsonb_build_object(
@@ -3230,7 +3230,7 @@ BEGIN
         "columns": [4],
         "preproc": ["truncate_to_year"],
         "groups": [
-          {"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}, "result_indices": [1, 2, 3, 4, 5]}
+          {"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}, "result_indices": [0, 1, 2, 3, 4]}
         ]
       }
     }$j$ || jsonb_build_object(

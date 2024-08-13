@@ -3529,8 +3529,8 @@ SELECT format(
     __mathesar_gid AS id,
     __mathesar_gcount AS count,
     jsonb_build_object(%1$s) AS results_eq,
-    jsonb_agg(%2$I) AS result_indices
-  FROM %3$I
+    jsonb_agg(__mathesar_result_idx) AS result_indices
+  FROM %2$I
   GROUP BY id, count, results_eq
   $gj$,
   string_agg(
@@ -3544,7 +3544,6 @@ SELECT format(
     ),
     ', ' ORDER BY ordinality
   ),
-  msar.get_pk_column(tab_id),
   cte_name
 )
 FROM msar.expr_templates RIGHT JOIN ROWS FROM(
@@ -3635,7 +3634,9 @@ BEGIN
       SELECT count(1) AS count FROM %2$I.%3$I %7$s
     ), enriched_results_cte AS (
       SELECT %1$s, %8$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
-    ), groups_cte as (
+    ), results_ranked_cte AS (
+      SELECT *, row_number() OVER (%6$s) - 1 AS __mathesar_result_idx FROM enriched_results_cte
+    ), groups_cte AS (
       SELECT %11$s
     )
     SELECT jsonb_build_object(
@@ -3658,7 +3659,7 @@ BEGIN
     msar.build_grouping_expr(tab_id, group_),
     msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_),
     COALESCE(msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_), 'NULL'),
-    COALESCE(msar.build_groups_cte_expr(tab_id, 'enriched_results_cte', group_), 'NULL AS id')
+    COALESCE(msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_), 'NULL AS id')
   ) INTO records;
   RETURN records;
 END;
