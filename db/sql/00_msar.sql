@@ -974,6 +974,35 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_curr_role_db_priv(db_name text) RETURNS jsonb AS $$/*
+Given a database name, returns a json object with database owner oid and database privileges
+for the role executing the function.
+
+The returned JSON object has the form:
+  {
+    "owner_oid": <int>,
+    "current_role_db_priv" [<str>]
+  }
+*/
+WITH priv_cte AS (
+  SELECT unnest(
+    ARRAY[
+      CASE WHEN has_database_privilege(pgd.oid, 'CREATE') THEN 'CREATE' END,
+      CASE WHEN has_database_privilege(pgd.oid, 'TEMPORARY') THEN 'TEMPORARY' END,
+      CASE WHEN has_database_privilege(pgd.oid, 'CONNECT') THEN 'CONNECT' END
+    ]
+  ) AS p 
+  FROM pg_catalog.pg_database AS pgd WHERE pgd.datname = db_name
+)
+SELECT jsonb_build_object(
+  'owner_oid', pgd.datdba,
+  'current_role_db_priv', COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb)
+) FROM pg_catalog.pg_database AS pgd, priv_cte
+WHERE pgd.datname = db_name AND priv_cte.p IS NOT NULL
+GROUP BY pgd.datdba;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ROLE MANIPULATION FUNCTIONS
