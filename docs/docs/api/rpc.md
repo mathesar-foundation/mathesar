@@ -83,7 +83,9 @@ To use an RPC function:
     options:
       members:
       - list_direct
+      - get_curr_role_priv
       - DBPrivileges
+      - CurrentDBPrivileges
 
 ## Database Setup
 
