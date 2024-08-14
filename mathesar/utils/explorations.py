@@ -3,20 +3,51 @@ from db.records.operations.select import get_count
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.tables.operations.select import get_table
 from mathesar.api.utils import process_annotated_records
-from mathesar.models.base import Explorations, ColumnMetaData
+from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
 from mathesar.state import get_cached_metadata
 
 
-def get_explorations(database_id):
+def list_explorations(database_id):
     return Explorations.objects.filter(database__id=database_id)
+
+
+def get_exploration(exploration_id):
+    return Explorations.objects.get(id=exploration_id)
 
 
 def delete_exploration(exploration_id):
     Explorations.objects.get(id=exploration_id).delete()
 
 
-def run_exploration(exploration_def, database_id, conn):
+def replace_exploration(new_exploration):
+    Explorations.objects.filter(id=new_exploration["id"]).update(
+        database=Database.objects.get(id=new_exploration["database_id"]),
+        name=new_exploration["name"],
+        base_table_oid=new_exploration["base_table_oid"],
+        initial_columns=new_exploration["initial_columns"],
+        transformations=new_exploration.get("transformations"),
+        display_options=new_exploration.get("display_options"),
+        display_names=new_exploration.get("display_names", {}),
+        description=new_exploration.get("description")
+    )
+    return get_exploration(new_exploration["id"])
+
+
+def create_exploration(exploration_def):
+    return Explorations.objects.create(
+        database=Database.objects.get(id=exploration_def["database_id"]),
+        name=exploration_def["name"],
+        base_table_oid=exploration_def["base_table_oid"],
+        initial_columns=exploration_def["initial_columns"],
+        transformations=exploration_def.get("transformations"),
+        display_options=exploration_def.get("display_options"),
+        display_names=exploration_def.get("display_names", {}),
+        description=exploration_def.get("description")
+    )
+
+
+def run_exploration(exploration_def, database_id, conn, limit=100, offset=0):
     engine = create_future_engine_with_custom_types(
         conn.info.user,
         conn.info.password,
@@ -56,12 +87,8 @@ def run_exploration(exploration_def, database_id, conn):
         metadata=metadata
     )
     records = db_query.get_records(
-        limit=exploration_def.get('limit', 100),
-        offset=exploration_def.get('offset', 0),
-        filter=exploration_def.get('filter', None),
-        order_by=exploration_def.get('order_by', []),
-        search=exploration_def.get('search', []),
-        duplicate_only=exploration_def.get('duplicate_only', None)
+        limit=limit,
+        offset=offset
     )
     processed_records = process_annotated_records(records)[0]
     column_metadata = _get_exploration_column_metadata(
@@ -85,13 +112,20 @@ def run_exploration(exploration_def, database_id, conn):
         },
         "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
         "column_metadata": column_metadata,
-        "limit": exploration_def.get('limit', 100),
-        "offset": exploration_def.get('offset', 0),
-        "filter": exploration_def.get('filter', None),
-        "order_by": exploration_def.get('order_by', []),
-        "search": exploration_def.get('search', []),
-        "duplicate_only": exploration_def.get('duplicate_only', None)
+        "limit": limit,
+        "offset": offset
     }
+
+
+def run_saved_exploration(exploration_id, limit, offset, database_id, conn):
+    exp_model = Explorations.objects.get(id=exploration_id)
+    exploration_def = {
+        "base_table_oid": exp_model["base_table_oid"],
+        "initial_columns": exp_model["initial_columns"],
+        "display_names": exp_model["display_names"],
+        "transformations": exp_model["transformations"]
+    }
+    return run_exploration(exploration_def, database_id, conn, limit, offset)
 
 
 def _get_exploration_column_metadata(

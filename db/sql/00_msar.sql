@@ -619,7 +619,7 @@ Return the first column attnum in the primary key of a given relation (e.g., tab
 Args:
   rel_id: The OID of the relation.
 */
-SELECT conkey[1]
+SELECT CASE WHEN array_length(conkey, 1) = 1 THEN conkey[1] END
 FROM pg_constraint
 WHERE contype='p'
 AND conrelid=rel_id;
@@ -634,7 +634,7 @@ Args:
   sch_name: The schema of the relation, unquoted.
   rel_name: The name of the relation, unqualified and unquoted.
 */
-SELECT conkey[1]
+SELECT CASE WHEN array_length(conkey, 1) = 1 THEN conkey[1] END
 FROM pg_constraint
 WHERE contype='p'
 AND conrelid=msar.get_relation_oid(sch_name, rel_name);
@@ -942,7 +942,7 @@ FROM (
     s.oid,
     s.nspname
 ) AS schema_data;
-$$ LANGUAGE sql;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION msar.get_roles() RETURNS jsonb AS $$/*
@@ -993,7 +993,33 @@ FROM (
     LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid
   WHERE r.rolname NOT LIKE 'pg_%'
 ) AS role_data;
-$$ LANGUAGE sql;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.list_db_priv(db_name text) RETURNS jsonb AS $$/*
+Given a database name, returns a json array of objects with database privileges for non-inherited roles.
+
+Each returned JSON object in the array has the form:
+  {
+    "role_oid": <int>,
+    "direct" [<str>]
+  }
+*/
+WITH priv_cte AS (
+  SELECT
+    jsonb_build_object(
+      'role_oid', pgr.oid,
+      'direct',  jsonb_agg(acl.privilege_type)
+    ) AS p
+  FROM
+    pg_catalog.pg_roles AS pgr,
+    pg_catalog.pg_database AS pgd,
+    aclexplode(COALESCE(pgd.datacl, acldefault('d', pgd.datdba))) AS acl
+  WHERE pgd.datname = db_name AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_'
+  GROUP BY pgr.oid, pgd.oid
+)
+SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -3287,12 +3313,12 @@ $f$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION msar.format_data(val date) RETURNS text AS $$
 SELECT to_char(val, 'YYYY-MM-DD AD');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val time without time zone) RETURNS text AS $$
 SELECT concat(to_char(val, 'HH24:MI'), ':', to_char(date_part('seconds', val), 'FM00.0999999999'));
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val time with time zone) RETURNS text AS $$
@@ -3310,7 +3336,7 @@ SELECT CASE
       ltrim(to_char(date_part('timezone_minute', val), '00'), '+- ')
     )
 END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val timestamp without time zone) RETURNS text AS $$
@@ -3320,7 +3346,7 @@ SELECT
     ':', to_char(date_part('seconds', val), 'FM00.0999999999'),
     to_char(val, ' BC')
   );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val timestamp with time zone) RETURNS text AS $$
@@ -3338,19 +3364,19 @@ SELECT CASE
       ':', ltrim(to_char(date_part('timezone_minute', val), '00'), '+- '), to_char(val, ' BC')
     )
 END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val interval) returns text AS $$
 SELECT concat(
   to_char(val, 'PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'), date_part('seconds', val), 'S'
 );
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.format_data(val anyelement) returns anyelement AS $$
 SELECT val;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 DROP TABLE IF EXISTS msar.expr_templates;
@@ -3375,11 +3401,19 @@ INSERT INTO msar.expr_templates VALUES
   -- json(b) filters and expressions
   ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
   ('json_array_contains', '(%s)::jsonb @> (%s)::jsonb'),
+  ('element_in_json_array_untyped', '(%s)::text IN (SELECT jsonb_array_elements_text(%s))'),
+  ('convert_to_json', 'to_jsonb(%s)'),
+  -- date part extractors
+  ('truncate_to_year', 'to_char((%s)::date, ''YYYY AD'')'),
+  ('truncate_to_month', 'to_char((%s)::date, ''YYYY-MM AD'')'),
+  ('truncate_to_day', 'to_char((%s)::date, ''YYYY-MM-DD AD'')'),
   -- URI part getters
   ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
   ('uri_authority', 'mathesar_types.uri_authority(%s)'),
   -- Email part getters
-  ('email_domain', 'mathesar_types.email_domain_name(%s)')
+  ('email_domain', 'mathesar_types.email_domain_name(%s)'),
+  -- Data formatter which is sometimes useful in comparison
+  ('format_data', 'msar.format_data(%s)')
 ;
 
 CREATE OR REPLACE FUNCTION msar.build_expr(rel_id oid, tree jsonb) RETURNS text AS $$
@@ -3391,12 +3425,12 @@ SELECT CASE tree ->> 'type'
 END
 FROM jsonb_array_elements(tree -> 'args') inner_tree, msar.expr_templates
 WHERE tree ->> 'type' = expr_key
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.build_where_clause(rel_id oid, tree jsonb) RETURNS text AS $$
 SELECT 'WHERE ' || msar.build_expr(rel_id, tree);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3406,14 +3440,14 @@ SELECT CASE lower(direction)
   WHEN 'asc' THEN 'ASC'
   WHEN 'desc' THEN 'DESC'
 END;
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
 CREATE OR REPLACE FUNCTION msar.get_pkey_order(tab_id oid) RETURNS jsonb AS $$
 SELECT jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc'))
 FROM pg_constraint, LATERAL unnest(conkey) attnum
 WHERE contype='p' AND conrelid=tab_id AND has_column_privilege(tab_id, attnum, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_total_order(tab_id oid) RETURNS jsonb AS $$
@@ -3443,7 +3477,7 @@ SELECT COALESCE(jsonb_agg(jsonb_build_object('attnum', attnum, 'direction', 'asc
 FROM orderable_cte
 -- This privilege check is redundant in context, but may be useful for other callers.
 WHERE has_column_privilege(tab_id, attnum, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3462,7 +3496,7 @@ FROM jsonb_to_recordset(
 )
   AS x(attnum smallint, direction text)
 WHERE has_column_privilege(tab_id, attnum, 'SELECT');
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3479,7 +3513,149 @@ Args:
   order_: A JSONB array defining any desired ordering of columns.
 */
 SELECT 'ORDER BY ' || msar.build_total_order_expr(tab_id, order_)
-$$ LANGUAGE SQL;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_grouping_columns_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$/*
+Build a column expression for use in grouping window functions.
+
+Args:
+  tab_id: The OID of the table whose records we're grouping
+  group_ A grouping definition.
+
+The group_ object should have the form
+    {
+      "columns": [<int>, <int>, ...]
+      "preproc": [<str>, <str>, ...]
+    }
+
+The items in the preproc array should be keys appearing in the
+`expr_templates` table. The corresponding column will be wrapped
+in the preproc function before grouping.
+*/
+SELECT string_agg(
+  COALESCE(
+    format(expr_template, quote_ident(msar.get_column_name(tab_id, col_id::smallint))),
+    quote_ident(msar.get_column_name(tab_id, col_id::smallint))
+  ), ', ' ORDER BY ordinality
+)
+FROM msar.expr_templates RIGHT JOIN ROWS FROM(
+  jsonb_array_elements_text(group_ -> 'columns'),
+  jsonb_array_elements_text(group_ -> 'preproc')
+) WITH ORDINALITY AS x(col_id, preproc) ON expr_key = preproc
+WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_group_id_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$/*
+Build an expression to define an id value for each group.
+*/
+SELECT 'dense_rank() OVER (ORDER BY ' || msar.build_grouping_columns_expr(tab_id, group_) || ')';
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_group_count_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$/*
+Build an expression that adds a column with a count for each group.
+*/
+SELECT 'count(1) OVER (PARTITION BY ' || msar.build_grouping_columns_expr(tab_id, group_) || ')';
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_grouping_expr(tab_id oid, group_ jsonb) RETURNS TEXT AS $$/*
+Build an expression composed of an id and count for each group.
+
+A group is defined by distinct combinations of the (potentially transformed by preproc functions)
+columns passed in `group_`.
+*/
+SELECT concat(
+  COALESCE(msar.build_group_id_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gid, ',
+  COALESCE(msar.build_group_count_expr(tab_id, group_), 'NULL'), ' AS __mathesar_gcount'
+);
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_results_jsonb_expr(tab_id oid, cte_name text, order_ jsonb) RETURNS TEXT AS $$/*
+Build an SQL expresson string that, when added to the record listing query, produces a JSON array
+with the records resulting from the request.
+*/
+SELECT format(
+  'coalesce(jsonb_agg(json_build_object('
+  || string_agg(format('%1$L, %2$I.%1$I', attnum, cte_name), ', ')
+  || ') %1$s), jsonb_build_array())',
+  msar.build_order_by_expr(tab_id, order_)
+)
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_groups_cte_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
+*/
+SELECT format(
+  $gj$
+    __mathesar_gid AS id,
+    __mathesar_gcount AS count,
+    jsonb_build_object(%1$s) AS results_eq,
+    jsonb_agg(__mathesar_result_idx) AS result_indices
+  FROM %2$I
+  GROUP BY id, count, results_eq
+  $gj$,
+  string_agg(
+    format(
+      '%1$L, %2$s',
+      col_id,
+      COALESCE(
+        format(expr_template, quote_ident(cte_name) || '.' || quote_ident(col_id)),
+        quote_ident(cte_name) || '.' || quote_ident(col_id)
+      )
+    ),
+    ', ' ORDER BY ordinality
+  ),
+  cte_name
+)
+FROM msar.expr_templates RIGHT JOIN ROWS FROM(
+  jsonb_array_elements_text(group_ -> 'columns'),
+  jsonb_array_elements_text(group_ -> 'preproc')
+) WITH ORDINALITY AS x(col_id, preproc) ON expr_key = preproc
+WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_grouping_results_jsonb_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
+Build an SQL expresson string that, when added to the record listing query, produces a JSON array
+with the groups resulting from the request.
+*/
+SELECT format(
+  $gj$
+  jsonb_build_object(
+    'columns', %2$L::jsonb,
+    'preproc', %3$L::jsonb,
+    'groups', jsonb_agg(
+      DISTINCT jsonb_build_object(
+        'id', %1$I.id,
+        'count', %1$I.count,
+        'results_eq', %1$I.results_eq,
+        'result_indices', %1$I.result_indices
+      )
+    )
+  )
+  $gj$,
+  cte_name,
+  group_ ->> 'columns',
+  group_ ->> 'preproc'
+)
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3501,7 +3677,7 @@ WHERE
   AND attnum > 0
   AND NOT attisdropped
   AND has_column_privilege(attrelid, attnum, 'SELECT');
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3533,15 +3709,22 @@ BEGIN
     $q$
     WITH count_cte AS (
       SELECT count(1) AS count FROM %2$I.%3$I %7$s
-    ), results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
+    ), enriched_results_cte AS (
+      SELECT %1$s, %8$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
+    ), results_ranked_cte AS (
+      SELECT *, row_number() OVER (%6$s) - 1 AS __mathesar_result_idx FROM enriched_results_cte
+    ), groups_cte AS (
+      SELECT %11$s
     )
     SELECT jsonb_build_object(
-      'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
+      'results', %9$s,
       'count', coalesce(max(count_cte.count), 0),
+      'grouping', %10$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
-    FROM results_cte, count_cte
+    FROM enriched_results_cte
+      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id
+      CROSS JOIN count_cte
     $q$,
     msar.build_selectable_column_expr(tab_id),
     msar.get_relation_schema_name(tab_id),
@@ -3549,11 +3732,15 @@ BEGIN
     limit_,
     offset_,
     msar.build_order_by_expr(tab_id, order_),
-    msar.build_where_clause(tab_id, filter_)
+    msar.build_where_clause(tab_id, filter_),
+    msar.build_grouping_expr(tab_id, group_),
+    msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_),
+    COALESCE(msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_), 'NULL'),
+    COALESCE(msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_), 'NULL AS id')
   ) INTO records;
   RETURN records;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql STABLE;
 
 
 CREATE OR REPLACE FUNCTION
@@ -3633,3 +3820,163 @@ BEGIN
   RETURN records;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_record_from_table(tab_id oid, rec_id anyelement) RETURNS jsonb AS $$/*
+Get single record from a table. Only columns to which the user has access are returned.
+
+Args:
+  tab_id: The OID of the table whose record we'll get.
+  rec_id: The id value of the record.
+
+The table must have a single primary key column.
+*/
+SELECT msar.list_records_from_table(
+  tab_id, null, null, null,
+  jsonb_build_object(
+    'type', 'equal', 'args', jsonb_build_array(
+      jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id)),
+      jsonb_build_object('type', 'literal', 'value', rec_id)
+    )
+  ),
+  null
+)
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS integer AS $$/*
+Delete records from table by id.
+
+Args:
+  tab_id: The OID of the table whose record we'll delete.
+  rec_ids: An array of primary key values
+
+The table must have a single primary key column.
+*/
+DECLARE
+  num_deleted integer;
+BEGIN
+  EXECUTE format(
+    $d$
+    WITH delete_cte AS (DELETE FROM %1$I.%2$I %3$s RETURNING *)
+    SELECT count(1) FROM delete_cte
+    $d$,
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.build_where_clause(
+      tab_id, jsonb_build_object(
+        'type', 'element_in_json_array_untyped', 'args', jsonb_build_array(
+          jsonb_build_object(
+            'type', 'format_data', 'args', jsonb_build_array(
+              jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
+            )
+          ),
+          jsonb_build_object('type', 'literal', 'value', rec_ids)
+        )
+      )
+    )
+  ) INTO num_deleted;
+  RETURN num_deleted;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_single_insert_expr(tab_id oid, rec_def jsonb) RETURNS TEXT AS $$
+SELECT
+  format(
+    'INSERT INTO %I.%I (%s) VALUES (%s)',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    string_agg(format('%I', msar.get_column_name(tab_id, key::smallint)), ', '),
+    string_agg(format('%L', value), ', ')
+  )
+FROM jsonb_each_text(rec_def);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.add_record_to_table(tab_id oid, rec_def jsonb) RETURNS jsonb AS $$/*
+Add a record to a table.
+
+Args:
+  tab_id: The OID of the table whose record we'll delete.
+  rec_def: A JSON object defining the record.
+
+The `rec_def` object's form is defined by the record being inserted.  It should have keys
+corresponding to the attnums of desired columns and values corresponding to values we should
+insert.
+
+*/
+DECLARE
+  rec_created jsonb;
+BEGIN
+  EXECUTE format(
+    $i$
+    WITH insert_cte AS (%1$s RETURNING %2$s)
+    SELECT jsonb_build_object('results', %3$s)
+    FROM insert_cte
+    $i$,
+    msar.build_single_insert_expr(tab_id, rec_def),
+    msar.build_selectable_column_expr(tab_id),
+    msar.build_results_jsonb_expr(tab_id, 'insert_cte', null)
+  ) INTO rec_created;
+  RETURN rec_created;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_update_expr(tab_id oid, rec_def jsonb) RETURNS TEXT AS $$
+SELECT
+  format(
+    'UPDATE %I.%I SET (%s) = ROW(%s)',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    string_agg(format('%I', msar.get_column_name(tab_id, key::smallint)), ', '),
+    string_agg(format('%L', value), ', ')
+  )
+FROM jsonb_each_text(rec_def);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.patch_record_in_table(tab_id oid, rec_id anyelement, rec_def jsonb) RETURNS jsonb AS $$/*
+Modify (update/patch) a record in a table.
+
+Args:
+  tab_id: The OID of the table whose record we'll delete.
+  rec_id: The primary key value of the record we'll modify.
+  rec_patch: A JSON object defining the parts of the record to patch.
+
+Only tables with a single primary key column are supported.
+
+The `rec_def` object's form is defined by the record being updated.  It should have keys
+corresponding to the attnums of desired columns and values corresponding to values we should set.
+*/
+DECLARE
+  rec_modified jsonb;
+BEGIN
+  EXECUTE format(
+    $i$
+    WITH update_cte AS (%1$s %2$s RETURNING %3$s)
+    SELECT jsonb_build_object('results', %4$s)
+    FROM update_cte
+    $i$,
+    msar.build_update_expr(tab_id, rec_def),
+    msar.build_where_clause(
+      tab_id, jsonb_build_object(
+        'type', 'equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'literal', 'value', rec_id),
+          jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
+        )
+      )
+    ),
+    msar.build_selectable_column_expr(tab_id),
+    msar.build_results_jsonb_expr(tab_id, 'update_cte', null)
+  ) INTO rec_modified;
+  RETURN rec_modified;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

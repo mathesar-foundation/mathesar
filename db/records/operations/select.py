@@ -50,6 +50,29 @@ def list_records_from_table(
     return result
 
 
+def get_record_from_table(
+        conn,
+        record_id,
+        table_oid,
+):
+    """
+    Get single record from a table by its primary key
+
+    Only data from which the user is granted `SELECT` is returned.
+
+    Args:
+        record_id: The primary key value of the record.
+        table_id: The OID of the table whose record we'll get.
+    """
+    result = db_conn.exec_msar_func(
+        conn,
+        'get_record_from_table',
+        table_oid,
+        record_id,
+    ).fetchone()[0]
+    return result
+
+
 def search_records_from_table(
         conn,
         table_oid,
