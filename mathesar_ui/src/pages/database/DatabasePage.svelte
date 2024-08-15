@@ -21,8 +21,8 @@
     TabContainer,
   } from '@mathesar-component-library';
 
-  import SchemasSection from './SchemasSection.svelte';
-  import SettingsSection from './SettingsSection.svelte';
+  import SchemasSection from './schemas/SchemasSection.svelte';
+  import SettingsSection from './settings/SettingsSection.svelte';
 
   export let database: Database;
   export let section: string;
@@ -87,10 +87,18 @@
   </AppSecondaryHeader>
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
-    {#if activeTab?.id === 'schemas'}
-      <SchemasSection {database} />
-    {:else if activeTab?.id === 'settings'}
-      <SettingsSection />
-    {/if}
+    <div class="tab-content">
+      {#if activeTab?.id === 'schemas'}
+        <SchemasSection {database} />
+      {:else if activeTab?.id === 'settings'}
+        <SettingsSection />
+      {/if}
+    </div>
   </TabContainer>
 </LayoutWithHeader>
+
+<style>
+  .tab-content {
+    padding: 1rem 0;
+  }
+</style>

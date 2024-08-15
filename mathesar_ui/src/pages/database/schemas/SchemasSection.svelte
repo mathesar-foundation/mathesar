@@ -15,9 +15,9 @@
     schemas as schemasStore,
   } from '@mathesar/stores/schemas';
   import { removeTablesStore } from '@mathesar/stores/tables';
+  import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import SchemaListSkeleton from './SchemaListSkeleton.svelte';
   import SchemaRow from './SchemaRow.svelte';
 

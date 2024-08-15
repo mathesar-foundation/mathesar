@@ -1,4 +1,3 @@
-<!-- TODO: Shouldn't this be inside the schema page instead? -->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
