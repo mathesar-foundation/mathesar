@@ -136,8 +136,8 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        database_privileges.get_curr_role_priv,
-        "database_privileges.get_curr_role_priv",
+        database_privileges.get_owner_oid_and_curr_role_db_priv,
+        "database_privileges.get_owner_oid_and_curr_role_db_priv",
         [user_is_authenticated]
     ),
     (

@@ -67,10 +67,11 @@ def list_direct(*, database_id: int, **kwargs) -> list[DBPrivileges]:
     return [DBPrivileges.from_dict(i) for i in raw_db_priv]
 
 
-@rpc_method(name="database_privileges.get_curr_role_priv")
+# TODO: Think of something concise for the endpoint name.
+@rpc_method(name="database_privileges.get_owner_oid_and_curr_role_db_priv")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def get_curr_role_priv(*, database_id: int, **kwargs) -> CurrentDBPrivileges:
+def get_owner_oid_and_curr_role_db_priv(*, database_id: int, **kwargs) -> CurrentDBPrivileges:
     """
     Get database privileges for the current user.
 
