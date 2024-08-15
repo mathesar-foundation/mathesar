@@ -30,7 +30,7 @@
       {/if}
     </span>
   </slot>
-  <Menu slot="content" style="--min-width: 100%;{menuStyle}">
+  <Menu slot="content" style="--Menu__min-width: 100%;{menuStyle}">
     <slot />
   </Menu>
 </Dropdown>

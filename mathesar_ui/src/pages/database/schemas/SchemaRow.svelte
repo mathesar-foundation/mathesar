@@ -50,7 +50,7 @@
           triggerAppearance="plain"
           preferredPlacement="bottom-end"
           icon={iconMoreActions}
-          menuStyle="--spacing-y:0.8em;"
+          menuStyle="--Menu__padding-x:0.8em;"
         >
           <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}>
             {$_('edit_schema')}

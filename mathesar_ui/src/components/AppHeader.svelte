@@ -103,7 +103,7 @@
           triggerAppearance="ghost"
           size="small"
           closeOnInnerClick={true}
-          menuStyle="--spacing-x: 0.3em;"
+          menuStyle="--Menu__padding-x: 0.3em;"
         >
           <div class="user-switcher" slot="trigger">
             <Icon {...iconSettingsMajor} hasNotificationDot={upgradable} />
