@@ -3849,13 +3849,15 @@ BEGIN
       SELECT count(1) AS count FROM %2$I.%3$I %4$s
     ), results_cte AS (
       SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L
-    )
+    )%7$s
     SELECT jsonb_build_object(
       'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
       'count', coalesce(max(count_cte.count), 0),
+      'preview_data', %9$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
     )
-    FROM results_cte, count_cte
+    FROM results_cte %8$s
+      CROSS JOIN count_cte
     $q$,
     msar.build_selectable_column_expr(tab_id),
     msar.get_relation_schema_name(tab_id),
@@ -3865,7 +3867,10 @@ BEGIN
     concat(
       msar.get_score_expr(tab_id, search_) || ' DESC, ',
       msar.build_total_order_expr(tab_id, null)
-    )
+    ),
+    msar.build_summary_cte_expr_for_table(tab_id),
+    msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
   ) INTO records;
   RETURN records;
 END;
