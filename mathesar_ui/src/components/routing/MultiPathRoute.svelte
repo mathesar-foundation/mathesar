@@ -37,8 +37,8 @@
 {#each paths as rp (rp.name)}
   <EventfulRoute
     path={rp.path}
-    on:load={(e) => setPath(rp, e.detail)}
-    on:unload={() => clearPath(rp)}
+    onLoad={(meta) => setPath(rp, meta)}
+    onUnload={() => clearPath(rp)}
     firstmatch
   />
 {/each}

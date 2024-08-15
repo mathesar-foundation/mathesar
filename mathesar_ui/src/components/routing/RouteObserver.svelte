@@ -1,33 +1,21 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { onMount } from 'svelte';
   import type { TinroRouteMeta } from 'tinro';
 
-  const dispatch = createEventDispatcher<{
-    load: TinroRouteMeta;
-    update: TinroRouteMeta;
-    unload: undefined;
-  }>();
-
-  export let meta: TinroRouteMeta | undefined = undefined;
+  export let meta: TinroRouteMeta;
+  export let onLoad: (metaInfo: TinroRouteMeta) => void = () => {};
+  export let onUnload: () => void = () => {};
 
   onMount(() => {
-    if (meta?.subscribe) {
-      const unsubsriber = meta.subscribe((metaInfo) => {
-        if (metaInfo) {
-          dispatch('load', metaInfo);
-        }
-      });
-
-      return () => {
-        unsubsriber();
-        dispatch('unload');
-      };
-    }
-
-    dispatch('load');
+    const unsubsriber = meta.subscribe((metaInfo) => {
+      if (metaInfo) {
+        onLoad(metaInfo);
+      }
+    });
 
     return () => {
-      dispatch('unload');
+      unsubsriber();
+      onUnload();
     };
   });
 </script>
