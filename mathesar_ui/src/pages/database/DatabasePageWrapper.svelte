@@ -21,11 +21,10 @@
     TabContainer,
   } from '@mathesar-component-library';
 
-  import SchemasSection from './schemas/SchemasSection.svelte';
-  import SettingsSection from './settings/SettingsSection.svelte';
-
   export let database: Database;
-  export let section: string;
+
+  type Section = 'schemas' | 'settings';
+  let section: Section = 'schemas';
 
   $: tabs = [
     {
@@ -39,10 +38,10 @@
       href: getDatabasePageSettingsSectionUrl(database.id),
     },
   ];
-  $: activeTab = tabs.find((tab) => tab.id === section) ?? tabs[0];
+  $: activeTab = tabs.find((tab) => tab.id === section);
 
-  function openPermissionsModal() {
-    //
+  export function setSection(_section: Section) {
+    section = _section;
   }
 </script>
 
@@ -65,7 +64,7 @@
     }}
   >
     <div slot="action">
-      <Button on:click={openPermissionsModal} appearance="secondary">
+      <Button appearance="secondary">
         <span>{$_('database_permissions')}</span>
       </Button>
 
@@ -88,11 +87,7 @@
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div class="tab-content">
-      {#if activeTab?.id === 'schemas'}
-        <SchemasSection {database} />
-      {:else if activeTab?.id === 'settings'}
-        <SettingsSection />
-      {/if}
+      <slot {setSection} />
     </div>
   </TabContainer>
 </LayoutWithHeader>

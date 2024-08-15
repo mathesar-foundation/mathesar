@@ -10,6 +10,18 @@ export function getDatabasePageSettingsSectionUrl(databaseId: number): string {
   return `/db/${databaseId}/settings/`;
 }
 
+export function getDatabaseRoleConfigurationUrl(databaseId: number): string {
+  return `${getDatabasePageSettingsSectionUrl(databaseId)}role-configuration/`;
+}
+
+export function getDatabaseCollaboratorsUrl(databaseId: number): string {
+  return `${getDatabasePageSettingsSectionUrl(databaseId)}collaborators/`;
+}
+
+export function getDatabaseRolesUrl(databaseId: number): string {
+  return `${getDatabasePageSettingsSectionUrl(databaseId)}roles/`;
+}
+
 export function getSchemaPageUrl(databaseId: number, schemaId: number): string {
   return `${getDatabasePageSchemasSectionUrl(databaseId)}${schemaId}/`;
 }
