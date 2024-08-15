@@ -13,6 +13,7 @@ from mathesar.rpc import columns
 from mathesar.rpc import configured_roles
 from mathesar.rpc import connections
 from mathesar.rpc import constraints
+from mathesar.rpc import database_privileges
 from mathesar.rpc import database_setup
 from mathesar.rpc import databases
 from mathesar.rpc import explorations
@@ -130,6 +131,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        database_privileges.list_direct,
+        "database_privileges.list_direct",
+        [user_is_authenticated]
+    ),
+    (
         database_setup.create_new,
         "database_setup.create_new",
         [user_is_superuser]
@@ -152,6 +158,16 @@ METHODS = [
     (
         records.get,
         "records.get",
+        [user_is_authenticated]
+    ),
+    (
+        records.add,
+        "records.add",
+        [user_is_authenticated]
+    ),
+    (
+        records.patch,
+        "records.patch",
         [user_is_authenticated]
     ),
     (

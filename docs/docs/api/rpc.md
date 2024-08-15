@@ -77,6 +77,14 @@ To use an RPC function:
       - list_
       - DatabaseInfo
 
+## Database Privileges
+
+::: database_privileges
+    options:
+      members:
+      - list_direct
+      - DBPrivileges
+
 ## Database Setup
 
 ::: database_setup
@@ -183,9 +191,12 @@ To use an RPC function:
       members:
       - list_
       - get
+      - add
+      - patch
       - delete
       - search
       - RecordList
+      - RecordAdded
       - OrderBy
       - Filter
       - FilterAttnum

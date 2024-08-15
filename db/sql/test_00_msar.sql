@@ -2901,27 +2901,27 @@ CREATE TABLE "Customers" (
 );
 ALTER TABLE "Customers" DROP COLUMN "dropmeee 1";
 INSERT INTO "Customers" ("First Name", "Last Name", "Subscription Date") VALUES
-  ('Aaron', 'Adams', '2020-03-21'),
-  ('Abigail', 'Acosta', '2020-04-16'),
-  ('Aaron', 'Adams', '2020-04-29'),
-  ('Abigail', 'Adams', '2020-05-29'),
-  ('Abigail', 'Abbott', '2020-07-05'),
-  ('Aaron', 'Adkins', '2020-08-16'),
-  ('Aaron', 'Acevedo', '2020-10-29'),
-  ('Abigail', 'Abbott', '2020-10-30'),
-  ('Abigail', 'Adams', '2021-02-14'),
-  ('Abigail', 'Acevedo', '2021-03-29'),
-  ('Aaron', 'Acosta', '2021-04-13'),
-  ('Aaron', 'Adams', '2021-06-30'),
-  ('Abigail', 'Adkins', '2021-09-12'),
-  ('Aaron', 'Adams', '2021-11-11'),
-  ('Abigail', 'Abbott', '2021-11-30'),
-  ('Aaron', 'Acevedo', '2022-02-04'),
-  ('Aaron', 'Adkins', '2022-03-10'),
-  ('Abigail', 'Abbott', '2022-03-23'),
-  ('Abigail', 'Adkins', '2022-03-27'),
-  ('Abigail', 'Abbott', '2022-04-29'),
-  ('Abigail', 'Adams', '2022-05-24');
+  ('Aaron', 'Adams', '2020-03-21'),     --  1
+  ('Abigail', 'Acosta', '2020-04-16'),  --  2
+  ('Aaron', 'Adams', '2020-04-29'),     --  3
+  ('Abigail', 'Adams', '2020-05-29'),   --  4
+  ('Abigail', 'Abbott', '2020-07-05'),  --  5
+  ('Aaron', 'Adkins', '2020-08-16'),    --  6
+  ('Aaron', 'Acevedo', '2020-10-29'),   --  7
+  ('Abigail', 'Abbott', '2020-10-30'),  --  8
+  ('Abigail', 'Adams', '2021-02-14'),   --  9
+  ('Abigail', 'Acevedo', '2021-03-29'), -- 10
+  ('Aaron', 'Acosta', '2021-04-13'),    -- 11
+  ('Aaron', 'Adams', '2021-06-30'),     -- 12
+  ('Abigail', 'Adkins', '2021-09-12'),  -- 13
+  ('Aaron', 'Adams', '2021-11-11'),     -- 14
+  ('Abigail', 'Abbott', '2021-11-30'),  -- 15
+  ('Aaron', 'Acevedo', '2022-02-04'),   -- 16
+  ('Aaron', 'Adkins', '2022-03-10'),    -- 17
+  ('Abigail', 'Abbott', '2022-03-23'),  -- 18
+  ('Abigail', 'Adkins', '2022-03-27'),  -- 19
+  ('Abigail', 'Abbott', '2022-04-29'),  -- 20
+  ('Abigail', 'Adams', '2022-05-24');   -- 21
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3100,11 +3100,36 @@ BEGIN
         "columns": [3, 2],
         "preproc": null,
         "groups": [
-          {"id": 1, "count": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}},
-          {"id": 2, "count": 2, "results_eq": {"2": "Aaron", "3": "Acevedo"}},
-          {"id": 3, "count": 1, "results_eq": {"2": "Abigail", "3": "Acevedo"}},
-          {"id": 4, "count": 1, "results_eq": {"2": "Aaron", "3": "Acosta"}},
-          {"id": 5, "count": 1, "results_eq": {"2": "Abigail", "3": "Acosta"}}
+          {
+            "id": 1,
+            "count": 5,
+            "results_eq": {"2": "Abigail", "3": "Abbott"},
+            "result_indices": [0, 1, 2, 3, 4]
+          },
+          {
+            "id": 2,
+            "count": 2,
+            "results_eq": {"2": "Aaron", "3": "Acevedo"},
+            "result_indices": [5, 6]
+          },
+          {
+            "id": 3,
+            "count": 1,
+            "results_eq": {"2": "Abigail", "3": "Acevedo"},
+            "result_indices": [7]
+          },
+          {
+            "id": 4,
+            "count": 1,
+            "results_eq": {"2": "Aaron", "3": "Acosta"},
+            "result_indices": [8]
+          },
+          {
+            "id": 5,
+            "count": 1,
+            "results_eq": {"2": "Abigail", "3": "Acosta"},
+            "result_indices": [9]
+          }
         ]
       }
     }$j$ || jsonb_build_object(
@@ -3135,7 +3160,12 @@ BEGIN
         "columns": [3, 2],
         "preproc": null,
         "groups": [
-          {"id": 1, "count": 5, "results_eq": {"2": "Abigail", "3": "Abbott"}}
+          {
+            "id": 1,
+            "count": 5,
+            "results_eq": {"2": "Abigail", "3": "Abbott"},
+            "result_indices": [0, 1, 2]
+          }
         ]
       }
     }$j$ || jsonb_build_object(
@@ -3166,8 +3196,8 @@ BEGIN
         "columns": [4],
         "preproc": ["truncate_to_month"],
         "groups": [
-          {"id": 1, "count": 1, "results_eq": {"4": "2020-03 AD"}},
-          {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}}
+          {"id": 1, "count": 1, "results_eq": {"4": "2020-03 AD"}, "result_indices": [0]},
+          {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}, "result_indices": [1, 2]}
         ]
       }
     }$j$ || jsonb_build_object(
@@ -3199,7 +3229,9 @@ BEGIN
       "grouping": {
         "columns": [4],
         "preproc": ["truncate_to_year"],
-        "groups": [{"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}}]
+        "groups": [
+          {"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}, "result_indices": [0, 1, 2, 3, 4]}
+        ]
       }
     }$j$ || jsonb_build_object(
       'query', concat(
@@ -3867,3 +3899,160 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION test_delete_records_from_table_stringy_pkey() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  delete_result integer;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  delete_result := msar.delete_records_from_table(
+    rel_id,
+    '["1", "2"]'
+  );
+  RETURN NEXT is(delete_result, 2);
+  RETURN NEXT results_eq(
+    'SELECT id FROM atable ORDER BY id',
+    $v$VALUES ('3'::integer)$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_add_record_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_list_records_table();
+  ALTER TABLE atable ADD UNIQUE (col2);
+  ALTER TABLE atable ALTER COLUMN col1 SET DEFAULT 200;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_all() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
+    ),
+    '{"results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_stringified_json() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": "{\"key2\": \"val2\"}"}'
+    ),
+    '{"results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_use_default() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
+    ),
+    '{"results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_null_default() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
+    ),
+    '{"results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_nonobj_json() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{"2": null, "3": "ab234", "4": 3, "5": "\"234\""}'
+    ),
+    '{"results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_single() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
+    '{"results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_multi() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
+    '{"results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}]}'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_leaves_other_rows() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  patch_result jsonb;
+BEGIN
+  PERFORM __setup_add_record_table();
+  rel_id := 'atable'::regclass::oid;
+  PERFORM msar.patch_record_in_table( rel_id, 2, '{"2": 10}');
+  RETURN NEXT results_eq(
+    'SELECT id, col1 FROM atable ORDER BY id',
+    'VALUES (1, 5), (2, 10), (3, 2)'
+  );
+END;
+$$ LANGUAGE plpgsql;
