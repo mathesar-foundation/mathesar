@@ -13,7 +13,7 @@
     iconMoreActions,
     iconNotEditable,
   } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { ButtonMenuItem, Icon } from '@mathesar-component-library';
 

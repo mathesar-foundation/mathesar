@@ -5,7 +5,7 @@
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getTablePageUrl } from '@mathesar/routes/urls';
   import AsyncStore from '@mathesar/stores/AsyncStore';

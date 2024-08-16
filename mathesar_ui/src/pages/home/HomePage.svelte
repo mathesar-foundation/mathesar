@@ -5,7 +5,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import { iconConnection } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';

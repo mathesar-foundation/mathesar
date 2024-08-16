@@ -5,7 +5,7 @@
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';

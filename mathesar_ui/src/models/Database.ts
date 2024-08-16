@@ -1,6 +1,6 @@
 import type { RawDatabase } from '@mathesar/api/rpc/databases';
 
-import type { Server } from './servers';
+import type { Server } from './Server';
 
 export class Database {
   readonly id: number;

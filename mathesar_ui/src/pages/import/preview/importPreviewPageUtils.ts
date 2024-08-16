@@ -4,7 +4,7 @@ import type { Column } from '@mathesar/api/rpc/columns';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
-import type { Database } from '@mathesar/models/databases';
+import type { Database } from '@mathesar/models/Database';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,

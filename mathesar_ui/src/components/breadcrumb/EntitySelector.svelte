@@ -6,7 +6,7 @@
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
   import { iconTable } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { queries as queriesStore } from '@mathesar/stores/queries';
   import { currentTableId, currentTables } from '@mathesar/stores/tables';

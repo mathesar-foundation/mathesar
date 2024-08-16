@@ -17,7 +17,7 @@
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { runner } from '@mathesar/packages/json-rpc-client-builder';
   import {
     getImportPreviewPageUrl,

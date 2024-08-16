@@ -5,7 +5,7 @@
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconEdit, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     getSchemaPageExplorationsSectionUrl,

@@ -12,7 +12,7 @@
     iconMoreActions,
     iconSelectRecord,
   } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import {
     getImportPreviewPageUrl,
     getTablePageUrl,

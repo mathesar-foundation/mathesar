@@ -4,7 +4,7 @@
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import { iconExploration } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
 
   import EmptyEntity from './EmptyEntity.svelte';
   import ExplorationItem from './ExplorationItem.svelte';

@@ -3,7 +3,7 @@
 
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import ExplorationPage from '@mathesar/pages/exploration/ExplorationPage.svelte';
   import { queries } from '@mathesar/stores/queries';

@@ -6,7 +6,7 @@
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import {
     createSchema,
     schemas,

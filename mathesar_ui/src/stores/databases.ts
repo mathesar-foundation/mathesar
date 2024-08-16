@@ -1,8 +1,8 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import { Database } from '@mathesar/models/databases';
-import { Server } from '@mathesar/models/servers';
+import { Database } from '@mathesar/models/Database';
+import { Server } from '@mathesar/models/Server';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import {

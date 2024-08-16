@@ -8,7 +8,7 @@
   import type { CancellablePromise } from '@mathesar/component-library';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconEdit, iconExploration } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import {

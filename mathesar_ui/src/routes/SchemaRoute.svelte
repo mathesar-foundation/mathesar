@@ -5,7 +5,7 @@
 
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import MultiPathRoute from '@mathesar/components/routing/MultiPathRoute.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import SchemaPage from '@mathesar/pages/schema/SchemaPage.svelte';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';

@@ -4,7 +4,7 @@
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
   import { iconTable } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
 
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';

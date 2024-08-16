@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import { iconConnectDatabase, iconDatabase } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { HOME_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
 

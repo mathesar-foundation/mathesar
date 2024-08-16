@@ -6,7 +6,7 @@
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
   import { createTable } from '@mathesar/stores/tables';
   import {

@@ -7,7 +7,7 @@ import type { Table } from '@mathesar/api/rpc/tables';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
-import type { Database } from '@mathesar/models/databases';
+import type { Database } from '@mathesar/models/Database';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';

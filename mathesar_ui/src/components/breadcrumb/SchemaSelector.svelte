@@ -3,7 +3,7 @@
 
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import { iconSchema } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import {
     currentSchemaId,

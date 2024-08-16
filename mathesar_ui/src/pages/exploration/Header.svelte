@@ -5,7 +5,7 @@
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import { Button, Icon } from '@mathesar-component-library';
 

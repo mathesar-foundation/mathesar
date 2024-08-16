@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
-  import { Database } from '@mathesar/models/databases';
+  import { Database } from '@mathesar/models/Database';
   import {
     getDatabaseCollaboratorsUrl,
     getDatabaseRoleConfigurationUrl,

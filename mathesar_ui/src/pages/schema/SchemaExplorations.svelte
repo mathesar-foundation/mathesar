@@ -5,7 +5,7 @@
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { AnchorButton } from '@mathesar-component-library';
 

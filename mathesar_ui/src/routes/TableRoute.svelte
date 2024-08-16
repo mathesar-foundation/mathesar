@@ -5,7 +5,7 @@
 
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
   import { currentTableId, currentTablesData } from '@mathesar/stores/tables';

@@ -5,7 +5,7 @@
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import { Icon } from '@mathesar-component-library';

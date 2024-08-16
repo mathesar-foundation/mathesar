@@ -5,7 +5,7 @@
   import type { Table } from '@mathesar/api/rpc/tables';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
 
   import CreateNewTableButton from './CreateNewTableButton.svelte';
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';

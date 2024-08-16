@@ -8,7 +8,7 @@
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';
   import { refetchTablesForSchema } from '@mathesar/stores/tables';

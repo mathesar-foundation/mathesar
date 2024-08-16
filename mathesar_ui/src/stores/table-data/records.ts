@@ -19,7 +19,7 @@ import type {
   RecordsResponse,
 } from '@mathesar/api/rpc/records';
 import type { Table } from '@mathesar/api/rpc/tables';
-import type { Database } from '@mathesar/models/databases';
+import type { Database } from '@mathesar/models/Database';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';

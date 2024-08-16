@@ -1,6 +1,6 @@
 <script lang="ts">
   import { iconDatabase } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
 
   import NameWithIcon from './NameWithIcon.svelte';
 

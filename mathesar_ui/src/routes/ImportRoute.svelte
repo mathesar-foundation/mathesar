@@ -5,7 +5,7 @@
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconImportData } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import ImportPreviewPage from '@mathesar/pages/import/preview/ImportPreviewPage.svelte';
   import ImportUploadPage from '@mathesar/pages/import/upload/ImportUploadPage.svelte';
 

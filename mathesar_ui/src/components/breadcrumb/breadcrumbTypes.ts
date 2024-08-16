@@ -5,7 +5,7 @@ import type {
   ComponentAndProps,
   IconProps,
 } from '@mathesar/component-library/types';
-import type { Database } from '@mathesar/models/databases';
+import type { Database } from '@mathesar/models/Database';
 
 export interface BreadcrumbItemHome {
   type: 'home';

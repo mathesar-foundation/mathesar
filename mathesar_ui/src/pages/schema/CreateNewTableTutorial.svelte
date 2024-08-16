@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getImportPageUrl } from '@mathesar/routes/urls';
   import { AnchorButton, Tutorial } from '@mathesar-component-library';
 

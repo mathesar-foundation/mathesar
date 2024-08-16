@@ -8,7 +8,7 @@
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { databasesStore } from '@mathesar/stores/databases';
   import { portalToWindowFooter } from '@mathesar-component-library';
 

@@ -7,7 +7,7 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import EventfulRoute from '@mathesar/components/routing/EventfulRoute.svelte';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import DatabasePageWrapper from '@mathesar/pages/database/DatabasePageWrapper.svelte';
   import DatabasePageSchemasSection from '@mathesar/pages/database/schemas/SchemasSection.svelte';
   import DatabaseCollaborators from '@mathesar/pages/database/settings/Collaborators.svelte';

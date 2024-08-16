@@ -1,7 +1,7 @@
 <script lang="ts">
   import Card from '@mathesar/components/Card.svelte';
   import { iconDatabase } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import { Icon } from '@mathesar-component-library';
 

@@ -6,7 +6,7 @@
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconAddNew } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/databases';
+  import type { Database } from '@mathesar/models/Database';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
