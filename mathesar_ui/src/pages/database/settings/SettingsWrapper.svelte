@@ -10,7 +10,10 @@
   } from '@mathesar/routes/urls';
   import { LinkMenuItem, Menu, MenuHeading } from '@mathesar-component-library';
 
+  import { setDatabaseSettingsContext } from './databaseSettingsUtils';
+
   export let database: Database;
+  $: setDatabaseSettingsContext(database);
 
   type Section = 'roleConfiguration' | 'collaborators' | 'roles';
   let section = 'roleConfiguration';
@@ -63,6 +66,7 @@
     --Menu__item-active-background: var(--sand-200);
     --Menu__item-active-hover-background: var(--sand-200);
     --Menu__item-focus-outline-color: var(--sand-300);
+    padding: var(--size-x-small) 0;
 
     .heading {
       font-size: var(--text-size-small);
