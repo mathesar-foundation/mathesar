@@ -10,7 +10,10 @@ import {
 } from 'svelte/store';
 
 import { getErrorMessage } from '@mathesar/utils/errors';
-import type { CancellablePromise } from '@mathesar-component-library';
+import {
+  type CancellablePromise,
+  hasProperty,
+} from '@mathesar-component-library';
 
 export type AsyncStoreSettlement<T, E> =
   | { state: 'resolved'; value: T }
@@ -111,19 +114,30 @@ export default class AsyncStore<Props, T>
 
   constructor(
     run: (props: Props) => Promise<T> | CancellablePromise<T>,
-    getError: (caughtValue: unknown) => string = getErrorMessage,
+    options?: Partial<{
+      getError: (caughtValue: unknown) => string;
+      initialValue: T;
+    }>,
   ) {
     this.runFn = run;
-    this.getError = getError;
+    this.getError = options?.getError ?? getErrorMessage;
+    if (hasProperty(options, 'initialValue')) {
+      this.value = writable(
+        new AsyncStoreValue<T, string>({
+          isLoading: false,
+          settlement: { state: 'resolved', value: options.initialValue as T },
+        }),
+      );
+    }
   }
 
   subscribe(
-    run: Subscriber<AsyncStoreValue<T, string>>,
+    subscriber: Subscriber<AsyncStoreValue<T, string>>,
     invalidate?:
       | ((value?: AsyncStoreValue<T, string> | undefined) => void)
       | undefined,
   ): Unsubscriber {
-    return this.value.subscribe(run, invalidate);
+    return this.value.subscribe(subscriber, invalidate);
   }
 
   async run(props: Props): Promise<AsyncStoreValue<T, string>> {
@@ -164,6 +178,26 @@ export default class AsyncStore<Props, T>
   reset() {
     this.cancel();
     this.value.set(new AsyncStoreValue({ isLoading: false }));
+  }
+
+  setResolvedValue(value: T) {
+    this.cancel();
+    this.value.set(
+      new AsyncStoreValue({
+        isLoading: false,
+        settlement: { state: 'resolved', value },
+      }),
+    );
+  }
+
+  setRejectedError(error: unknown) {
+    this.cancel();
+    this.value.set(
+      new AsyncStoreValue({
+        settlement: { state: 'rejected', error: this.getError(error) },
+        isLoading: false,
+      }),
+    );
   }
 }
 
