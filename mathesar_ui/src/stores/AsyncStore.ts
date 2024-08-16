@@ -106,7 +106,7 @@ export default class AsyncStore<Props, T>
 
   private getError: (caughtValue: unknown) => string;
 
-  private value: Writable<AsyncStoreValue<T, string>> = writable(
+  protected value: Writable<AsyncStoreValue<T, string>> = writable(
     new AsyncStoreValue({ isLoading: false }),
   );
 
@@ -141,26 +141,23 @@ export default class AsyncStore<Props, T>
   }
 
   async run(props: Props): Promise<AsyncStoreValue<T, string>> {
-    this.cancel();
-    this.value.update((v) => new AsyncStoreValue({ ...v, isLoading: true }));
+    this.beforeRun();
     this.promise = this.runFn(props);
     try {
-      this.value.set(
-        new AsyncStoreValue({
-          settlement: { state: 'resolved', value: await this.promise },
-          isLoading: false,
-        }),
-      );
+      this.setResolvedValue(await this.promise);
       return get(this.value);
     } catch (error) {
-      this.value.set(
-        new AsyncStoreValue({
-          settlement: { state: 'rejected', error: this.getError(error) },
-          isLoading: false,
-        }),
-      );
+      this.setRejectedError(error);
       return get(this.value);
     }
+  }
+
+  async runIfNotInitialized(props: Props): Promise<AsyncStoreValue<T, string>> {
+    const value = get(this.value);
+    if (!value.hasInitialized) {
+      return this.run(props);
+    }
+    return value;
   }
 
   /**
@@ -180,6 +177,11 @@ export default class AsyncStore<Props, T>
     this.value.set(new AsyncStoreValue({ isLoading: false }));
   }
 
+  protected beforeRun() {
+    this.cancel();
+    this.value.update((v) => new AsyncStoreValue({ ...v, isLoading: true }));
+  }
+
   setResolvedValue(value: T) {
     this.cancel();
     this.value.set(
@@ -190,7 +192,7 @@ export default class AsyncStore<Props, T>
     );
   }
 
-  setRejectedError(error: unknown) {
+  protected setRejectedError(error: unknown) {
     this.cancel();
     this.value.set(
       new AsyncStoreValue({

@@ -1,3 +1,5 @@
+import { get } from 'svelte/store';
+
 import { CancellablePromise } from '@mathesar/component-library';
 import {
   type RpcRequest,
@@ -5,7 +7,14 @@ import {
   batchSend,
 } from '@mathesar/packages/json-rpc-client-builder';
 
-import AsyncStore from './AsyncStore';
+import AsyncStore, { AsyncStoreValue } from './AsyncStore';
+
+type BatchRunner<T = any, U = any> = {
+  send: RpcRequest<T>;
+  beforeRequest: () => void;
+  onResponse: (response: RpcResponse<T>) => void;
+  getValue: () => AsyncStoreValue<U, string>;
+};
 
 export default class AsyncRpcApiStore<Props, T, U> extends AsyncStore<
   Props,
@@ -41,29 +50,42 @@ export default class AsyncRpcApiStore<Props, T, U> extends AsyncStore<
     this.postProcess = postProcess;
   }
 
-  batchRunner(
-    props: Props,
-  ): [RpcRequest<T>, (response: RpcResponse<T>) => void] {
-    const onReponse = (response: RpcResponse<T>) => {
+  batchRunner(props: Props): BatchRunner<T, U> {
+    const onResponse = (response: RpcResponse<T>) => {
       if (response.status === 'ok') {
         this.setResolvedValue(this.postProcess(response.value));
       } else {
         this.setRejectedError(response);
       }
     };
-    return [this.apiRpcFn(props), onReponse];
+    const beforeRequest = () => {
+      this.beforeRun();
+    };
+    return {
+      send: this.apiRpcFn(props),
+      beforeRequest,
+      onResponse,
+      getValue: () => get(this.value),
+    };
   }
 
   static async runBatched(
-    batchRunners: [
-      RpcRequest<unknown>,
-      (response: RpcResponse<unknown>) => void,
-    ][],
+    batchRunners: BatchRunner[],
+    options?: Partial<{
+      onlyRunIfNotInitialized: boolean;
+    }>,
   ) {
-    const requests = batchRunners.map((runner) => runner[0]);
-    const results = await batchSend(requests);
-    batchRunners.forEach((runner, index) => {
-      runner[1](results[index]);
-    });
+    const toRun = options?.onlyRunIfNotInitialized
+      ? batchRunners.filter((runner) => !runner.getValue().hasInitialized)
+      : batchRunners;
+    if (toRun.length > 0) {
+      toRun.forEach((runner) => {
+        runner.beforeRequest();
+      });
+      const results = await batchSend(toRun.map((runner) => runner.send));
+      toRun.forEach((runner, index) => {
+        runner.onResponse(results[index]);
+      });
+    }
   }
 }
