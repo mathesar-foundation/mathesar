@@ -8,6 +8,7 @@ import { constraints } from './constraints';
 import { database_setup } from './database_setup';
 import { databases } from './databases';
 import { records } from './records';
+import { roles } from './roles';
 import { schemas } from './schemas';
 import { servers } from './servers';
 import { tables } from './tables';
@@ -21,6 +22,7 @@ export const api = buildRpcApi({
     database_setup,
     databases,
     records,
+    roles,
     schemas,
     servers,
     tables,
