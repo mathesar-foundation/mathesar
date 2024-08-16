@@ -2,6 +2,7 @@ import Cookies from 'js-cookie';
 
 import { buildRpcApi } from '@mathesar/packages/json-rpc-client-builder';
 
+import { collaborators } from './collaborators';
 import { columns } from './columns';
 import { configured_roles } from './configured_roles';
 import { constraints } from './constraints';
@@ -18,6 +19,7 @@ export const api = buildRpcApi({
   endpoint: '/api/rpc/v0/',
   getHeaders: () => ({ 'X-CSRFToken': Cookies.get('csrftoken') }),
   methodTree: {
+    collaborators,
     configured_roles,
     database_setup,
     databases,
