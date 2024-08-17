@@ -1,8 +1,9 @@
 import { api } from '@mathesar/api/rpc';
 import type { RawDatabase } from '@mathesar/api/rpc/databases';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-import { SortedImmutableMap } from '@mathesar-component-library';
+import { ImmutableMap, SortedImmutableMap } from '@mathesar-component-library';
 
+import { Collaborator } from './Collaborator';
 import { ConfiguredRole } from './ConfiguredRole';
 import { Role } from './Role';
 import type { Server } from './Server';
@@ -41,6 +42,18 @@ export class Database {
           rawRoles.map((rawRole) => [
             rawRole.oid,
             new Role({ database: this, rawRole }),
+          ]),
+        ),
+    });
+  }
+
+  fetchCollaborators() {
+    return new AsyncRpcApiStore(api.collaborators.list, {
+      postProcess: (rawCollaborators) =>
+        new ImmutableMap(
+          rawCollaborators.map((rawCollaborator) => [
+            rawCollaborator.id,
+            new Collaborator({ database: this, rawCollaborator }),
           ]),
         ),
     });
