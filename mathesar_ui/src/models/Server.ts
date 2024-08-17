@@ -12,4 +12,8 @@ export class Server {
     this.host = props.rawServer.host;
     this.port = props.rawServer.port;
   }
+
+  getConnectionString() {
+    return `${this.host}:${this.port}`;
+  }
 }

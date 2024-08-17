@@ -177,12 +177,20 @@ export default class AsyncStore<Props, T>
     this.value.set(new AsyncStoreValue({ isLoading: false }));
   }
 
+  updateResolvedValue(updater: (resolvedValue: T) => T) {
+    const value = get(this.value);
+    if (value.isOk && value.resolvedValue) {
+      const updatedValue = updater(value.resolvedValue);
+      this.setResolvedValue(updatedValue);
+    }
+  }
+
   protected beforeRun() {
     this.cancel();
     this.value.update((v) => new AsyncStoreValue({ ...v, isLoading: true }));
   }
 
-  setResolvedValue(value: T) {
+  protected setResolvedValue(value: T) {
     this.cancel();
     this.value.set(
       new AsyncStoreValue({

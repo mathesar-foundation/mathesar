@@ -11,7 +11,7 @@
   import DatabasePageWrapper from '@mathesar/pages/database/DatabasePageWrapper.svelte';
   import DatabasePageSchemasSection from '@mathesar/pages/database/schemas/SchemasSection.svelte';
   import DatabaseCollaborators from '@mathesar/pages/database/settings/Collaborators.svelte';
-  import DatabaseRoleConfiguration from '@mathesar/pages/database/settings/RoleConfiguration.svelte';
+  import DatabaseRoleConfiguration from '@mathesar/pages/database/settings/role-configuration/RoleConfiguration.svelte';
   import DatabaseRoles from '@mathesar/pages/database/settings/Roles.svelte';
   import DatabasePageSettingsWrapper from '@mathesar/pages/database/settings/SettingsWrapper.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';

@@ -53,7 +53,7 @@
   restrictWidth
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
-    '--layout-background-color': 'var(--sand-50)'
+    '--layout-background-color': 'var(--sand-50)',
   }}
 >
   <AppSecondaryHeader
@@ -61,7 +61,9 @@
     pageTitleAndMetaProps={{
       name: database.name,
       icon: iconDatabase,
-      description: `DB server: ${database.server.host}:${database.server.port}`,
+      description: `${$_(
+        'db_server',
+      )}: ${database.server.getConnectionString()}`,
     }}
   >
     <div slot="action">

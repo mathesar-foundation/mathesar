@@ -1,5 +1,8 @@
+import { api } from '@mathesar/api/rpc';
 import type { RawRole, RawRoleMember } from '@mathesar/api/rpc/roles';
+import { CancellablePromise } from '@mathesar/component-library';
 
+import { ConfiguredRole } from './ConfiguredRole';
 import type { Database } from './Database';
 
 export class Role {
@@ -34,5 +37,33 @@ export class Role {
     this.description = props.rawRole.description;
     this.members = props.rawRole.members;
     this.database = props.database;
+  }
+
+  configure(password: string): CancellablePromise<ConfiguredRole> {
+    const promise = api.configured_roles
+      .add({
+        server_id: this.database.server.id,
+        name: this.name,
+        password,
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then(
+            (rawConfiguredRole) =>
+              resolve(
+                new ConfiguredRole({
+                  database: this.database,
+                  rawConfiguredRole,
+                }),
+              ),
+            reject,
+          )
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
   }
 }

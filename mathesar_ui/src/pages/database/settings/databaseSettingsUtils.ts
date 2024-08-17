@@ -7,6 +7,12 @@ import { Role } from '@mathesar/models/Role';
 
 const contextKey = Symbol('database settings store');
 
+export type CombinedLoginRole = {
+  name: string;
+  role?: Role;
+  configuredRole?: ConfiguredRole;
+};
+
 class DatabaseSettingsContext {
   database: Database;
 
@@ -14,15 +20,15 @@ class DatabaseSettingsContext {
 
   roles;
 
-  combinedRoles: Readable<
-    { name: string; role?: Role; configuredRole?: ConfiguredRole }[]
-  >;
+  combinedLoginRoles: Readable<CombinedLoginRole[]>;
+
+  collaborators;
 
   constructor(database: Database) {
     this.database = database;
     this.configuredRoles = database.fetchConfiguredRoles();
     this.roles = database.fetchRoles();
-    this.combinedRoles = derived(
+    this.combinedLoginRoles = derived(
       [this.roles, this.configuredRoles],
       ([$roles, $configuredRoles]) => {
         const isLoading = $configuredRoles.isLoading || $roles.isLoading;
@@ -30,12 +36,14 @@ class DatabaseSettingsContext {
           return [];
         }
         const isStable = $configuredRoles.isStable && $roles.isStable;
-        const roles = $roles.resolvedValue;
+        const loginRoles = $roles.resolvedValue?.filterValues(
+          (value) => value.login,
+        );
         const configuredRoles = $configuredRoles.resolvedValue?.mapKeys(
           (cr) => cr.name,
         );
-        if (isStable && roles && configuredRoles) {
-          return [...roles.values()].map((role) => ({
+        if (isStable && loginRoles && configuredRoles) {
+          return [...loginRoles.values()].map((role) => ({
             name: role.name,
             role,
             configuredRole: configuredRoles.get(role.name),
@@ -49,6 +57,29 @@ class DatabaseSettingsContext {
         }
         return [];
       },
+    );
+    this.collaborators = database.fetchCollaborators();
+  }
+
+  async configureRole(combinedLoginRole: CombinedLoginRole, password: string) {
+    if (combinedLoginRole.configuredRole) {
+      return combinedLoginRole.configuredRole.setPassword(password);
+    }
+
+    if (combinedLoginRole.role) {
+      const configuredRole = await combinedLoginRole.role.configure(password);
+      this.configuredRoles.updateResolvedValue((configuredRoles) =>
+        configuredRoles.with(configuredRole.id, configuredRole),
+      );
+    }
+
+    return undefined;
+  }
+
+  async removeConfiguredRole(configuredRole: ConfiguredRole) {
+    await configuredRole.delete();
+    this.configuredRoles.updateResolvedValue((configuredRoles) =>
+      configuredRoles.without(configuredRole.id),
     );
   }
 }
