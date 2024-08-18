@@ -8,6 +8,7 @@
   import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
 
   export let collaborator: Collaborator;
+  export let editRoleForCollaborator: (collaborator: Collaborator) => void;
 
   const databaseContext = getDatabaseSettingsContext();
   $: ({ configuredRoles, users } = $databaseContext);
@@ -38,7 +39,10 @@
       {/if}
     </div>
     <div class="actions">
-      <Button appearance="secondary">
+      <Button
+        appearance="secondary"
+        on:click={() => editRoleForCollaborator(collaborator)}
+      >
         <Icon {...iconEdit} size="0.8em" />
       </Button>
     </div>

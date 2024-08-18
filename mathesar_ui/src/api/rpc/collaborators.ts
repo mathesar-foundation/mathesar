@@ -25,4 +25,11 @@ export const collaborators = {
     },
     RawCollaborator
   >(),
+  set_role: rpcMethodTypeContainer<
+    {
+      collaborator_id: RawCollaborator['id'];
+      configured_role_id: RawConfiguredRole['id'];
+    },
+    RawCollaborator
+  >(),
 };

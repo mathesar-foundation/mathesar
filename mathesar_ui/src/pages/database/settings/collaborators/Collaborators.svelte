@@ -6,6 +6,7 @@
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import { iconAddNew } from '@mathesar/icons';
+  import { Collaborator } from '@mathesar/models/Collaborator';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
   import { isDefined } from '@mathesar/utils/language';
@@ -16,9 +17,11 @@
 
   import AddCollaboratorModel from './AddCollaboratorModal.svelte';
   import CollaboratorRow from './CollaboratorRow.svelte';
+  import EditRoleForCollaboratorModal from './EditRoleForCollaboratorModal.svelte';
 
   const databaseContext = getDatabaseSettingsContext();
   const addCollaboratorModal = modal.spawnModalController();
+  const editCollaboratorRoleModal = modal.spawnModalController();
 
   $: ({ database, configuredRoles, collaborators, users } = $databaseContext);
 
@@ -38,6 +41,13 @@
     $configuredRoles.error,
     $users.error,
   ].filter((entry): entry is string => isDefined(entry));
+
+  let targetCollaborator: Collaborator | undefined;
+
+  function editRoleForCollaborator(collaborator: Collaborator) {
+    targetCollaborator = collaborator;
+    editCollaboratorRoleModal.open();
+  }
 </script>
 
 <SettingsContentLayout>
@@ -61,7 +71,7 @@
         <GridTableCell header>{$_('role')}</GridTableCell>
         <GridTableCell header>{$_('actions')}</GridTableCell>
         {#each [...($collaborators.resolvedValue?.values() ?? [])] as collaborator (collaborator.id)}
-          <CollaboratorRow {collaborator} />
+          <CollaboratorRow {collaborator} {editRoleForCollaborator} />
         {/each}
       </GridTable>
     </div>
@@ -76,6 +86,15 @@
     usersMap={$users.resolvedValue}
     configuredRolesMap={$configuredRoles.resolvedValue}
     collaboratorsMap={$collaborators.resolvedValue}
+  />
+{/if}
+
+{#if $configuredRoles.resolvedValue && $users.resolvedValue && targetCollaborator}
+  <EditRoleForCollaboratorModal
+    collaborator={targetCollaborator}
+    usersMap={$users.resolvedValue}
+    controller={editCollaboratorRoleModal}
+    configuredRolesMap={$configuredRoles.resolvedValue}
   />
 {/if}
 

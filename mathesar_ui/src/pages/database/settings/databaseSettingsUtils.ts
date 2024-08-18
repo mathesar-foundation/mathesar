@@ -2,6 +2,7 @@ import { getContext, setContext } from 'svelte';
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import userApi, { type User } from '@mathesar/api/rest/users';
+import { Collaborator } from '@mathesar/models/Collaborator';
 import { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
 import type { Database } from '@mathesar/models/Database';
 import { Role } from '@mathesar/models/Role';
@@ -118,6 +119,17 @@ class DatabaseSettingsContext {
     );
     this.collaborators.updateResolvedValue((collaborators) =>
       collaborators.with(newCollaborator.id, newCollaborator),
+    );
+  }
+
+  async updateRoleForCollaborator(
+    collaborator: Collaborator,
+    configuredRoleId: ConfiguredRole['id'],
+  ) {
+    const updatedCollaborator =
+      await collaborator.setConfiguredRole(configuredRoleId);
+    this.collaborators.updateResolvedValue((collaborators) =>
+      collaborators.with(updatedCollaborator.id, updatedCollaborator),
     );
   }
 }
