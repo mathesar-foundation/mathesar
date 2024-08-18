@@ -50,4 +50,8 @@ export class Collaborator {
       () => promise.cancel(),
     );
   }
+
+  delete() {
+    return api.collaborators.delete({ collaborator_id: this.id }).run();
+  }
 }

@@ -132,6 +132,11 @@ class DatabaseSettingsContext {
       collaborators.with(updatedCollaborator.id, updatedCollaborator),
     );
   }
+
+  async deleteCollaborator(collaborator: Collaborator) {
+    await collaborator.delete();
+    this.collaborators.updateResolvedValue((c) => c.without(collaborator.id));
+  }
 }
 
 export function getDatabaseSettingsContext(): Readable<DatabaseSettingsContext> {

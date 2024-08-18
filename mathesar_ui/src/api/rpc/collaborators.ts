@@ -32,4 +32,10 @@ export const collaborators = {
     },
     RawCollaborator
   >(),
+  delete: rpcMethodTypeContainer<
+    {
+      collaborator_id: RawCollaborator['id'];
+    },
+    void
+  >(),
 };

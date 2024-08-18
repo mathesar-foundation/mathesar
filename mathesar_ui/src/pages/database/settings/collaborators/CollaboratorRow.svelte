@@ -1,9 +1,12 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import { Collaborator } from '@mathesar/models/Collaborator';
-  import { Button } from '@mathesar-component-library';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { Button, SpinnerButton } from '@mathesar-component-library';
 
   import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
 
@@ -17,12 +20,13 @@
   $: configuredRole = $configuredRoles.resolvedValue?.get(
     collaborator.configured_role_id,
   );
+  $: userName = user ? user.full_name || user.username : '';
 </script>
 
 <GridTableCell>
   <div>
     {#if user}
-      <div>{user.full_name || user.username}</div>
+      <div>{userName}</div>
       <div>{user.email}</div>
     {:else}
       {collaborator.user_id}
@@ -49,9 +53,17 @@
   </div>
 </GridTableCell>
 <GridTableCell>
-  <Button appearance="secondary">
-    <Icon {...iconDeleteMajor} size="0.8em" />
-  </Button>
+  <SpinnerButton
+    confirm={() =>
+      confirmDelete({
+        identifierName: userName,
+        identifierType: $_('collaborator'),
+      })}
+    onClick={() => $databaseContext.deleteCollaborator(collaborator)}
+    icon={{ ...iconDeleteMajor, size: '0.8em' }}
+    label=""
+    appearance="secondary"
+  />
 </GridTableCell>
 
 <style lang="scss">
