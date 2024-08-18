@@ -8,12 +8,12 @@
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
-  import { Collaborator } from '@mathesar/models/Collaborator';
-  import { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
+  import type { Collaborator } from '@mathesar/models/Collaborator';
+  import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
   import { toast } from '@mathesar/stores/toast';
   import {
     ControlledModal,
-    ImmutableMap,
+    type ImmutableMap,
     type ModalController,
     Select,
     portalToWindowFooter,

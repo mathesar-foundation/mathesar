@@ -2,10 +2,10 @@ import { getContext, setContext } from 'svelte';
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import userApi, { type User } from '@mathesar/api/rest/users';
-import { Collaborator } from '@mathesar/models/Collaborator';
-import { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
+import type { Collaborator } from '@mathesar/models/Collaborator';
+import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
 import type { Database } from '@mathesar/models/Database';
-import { Role } from '@mathesar/models/Role';
+import type { Role } from '@mathesar/models/Role';
 import AsyncStore from '@mathesar/stores/AsyncStore';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 

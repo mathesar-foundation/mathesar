@@ -13,7 +13,7 @@
     Checkbox,
     ControlledModal,
     LabeledInput,
-    ModalController,
+    type ModalController,
     PasswordInput,
     portalToWindowFooter,
   } from '@mathesar-component-library';

@@ -2,7 +2,7 @@ import { api } from '@mathesar/api/rpc';
 import type { RawCollaborator } from '@mathesar/api/rpc/collaborators';
 import { CancellablePromise } from '@mathesar/component-library';
 
-import { ConfiguredRole } from './ConfiguredRole';
+import type { ConfiguredRole } from './ConfiguredRole';
 import type { Database } from './Database';
 
 export class Collaborator {

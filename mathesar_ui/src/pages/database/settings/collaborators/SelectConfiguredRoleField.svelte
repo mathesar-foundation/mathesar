@@ -1,10 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { type RequiredField } from '@mathesar/components/form';
+  import type { RequiredField } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
-  import { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
-  import { ImmutableMap, Select } from '@mathesar-component-library';
+  import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
+  import { type ImmutableMap, Select } from '@mathesar-component-library';
 
   const SelectConfiguredRole = Select<ConfiguredRole['id']>;
 

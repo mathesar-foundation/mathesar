@@ -6,7 +6,7 @@
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import { iconAddNew } from '@mathesar/icons';
-  import { Collaborator } from '@mathesar/models/Collaborator';
+  import type { Collaborator } from '@mathesar/models/Collaborator';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
   import { isDefined } from '@mathesar/utils/language';

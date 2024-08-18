@@ -4,7 +4,7 @@
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
-  import { Collaborator } from '@mathesar/models/Collaborator';
+  import type { Collaborator } from '@mathesar/models/Collaborator';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { Button, SpinnerButton } from '@mathesar-component-library';
 

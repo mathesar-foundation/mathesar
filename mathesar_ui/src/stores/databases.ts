@@ -45,11 +45,15 @@ class DatabasesStore {
          * 3. Displaying server info is not an important feature of the app,
          *    so it's better to fail gracefully than to throw an error and crash the app.
          */
-        const server = serverMap.get(d.server_id) ?? {
-          id: d.server_id,
-          host: 'unknown',
-          port: 0,
-        };
+        const server =
+          serverMap.get(d.server_id) ??
+          new Server({
+            rawServer: {
+              id: d.server_id,
+              host: 'unknown',
+              port: 0,
+            },
+          });
         return [d.id, new Database({ rawDatabase: d, server })];
       }),
     );
