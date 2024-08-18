@@ -459,6 +459,7 @@
   "role_configured_all_databases_in_server": "This role will be configured for all databases on DB Server ''{server}''",
   "role_configured_successfully": "Role configured successfully",
   "role_configured_successfully_new_password": "Role configured successfully with new password",
+  "role_name": "Role Name",
   "roles": "Roles",
   "row": "Row",
   "running_latest_version": "You are running the latest version",

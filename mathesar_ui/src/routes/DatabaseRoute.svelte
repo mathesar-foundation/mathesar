@@ -12,7 +12,7 @@
   import DatabasePageSchemasSection from '@mathesar/pages/database/schemas/SchemasSection.svelte';
   import DatabaseCollaborators from '@mathesar/pages/database/settings/collaborators/Collaborators.svelte';
   import DatabaseRoleConfiguration from '@mathesar/pages/database/settings/role-configuration/RoleConfiguration.svelte';
-  import DatabaseRoles from '@mathesar/pages/database/settings/Roles.svelte';
+  import DatabaseRoles from '@mathesar/pages/database/settings/roles/Roles.svelte';
   import DatabasePageSettingsWrapper from '@mathesar/pages/database/settings/SettingsWrapper.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databasesStore } from '@mathesar/stores/databases';
