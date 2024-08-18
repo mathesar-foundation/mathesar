@@ -1,9 +1,12 @@
 import { getContext, setContext } from 'svelte';
 import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
+import userApi, { type User } from '@mathesar/api/rest/users';
 import { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
 import type { Database } from '@mathesar/models/Database';
 import { Role } from '@mathesar/models/Role';
+import AsyncStore from '@mathesar/stores/AsyncStore';
+import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 
 const contextKey = Symbol('database settings store');
 
@@ -11,6 +14,25 @@ export type CombinedLoginRole = {
   name: string;
   role?: Role;
   configuredRole?: ConfiguredRole;
+};
+
+// TODO: Make CancellablePromise chainable
+const getUsersPromise = () => {
+  const promise = userApi.list();
+  return new CancellablePromise<ImmutableMap<User['id'], User>>(
+    (resolve, reject) => {
+      promise
+        .then(
+          (response) =>
+            resolve(
+              new ImmutableMap(response.results.map((user) => [user.id, user])),
+            ),
+          (err) => reject(err),
+        )
+        .catch((err) => reject(err));
+    },
+    () => promise.cancel(),
+  );
 };
 
 class DatabaseSettingsContext {
@@ -23,6 +45,8 @@ class DatabaseSettingsContext {
   combinedLoginRoles: Readable<CombinedLoginRole[]>;
 
   collaborators;
+
+  users: AsyncStore<void, ImmutableMap<User['id'], User>>;
 
   constructor(database: Database) {
     this.database = database;
@@ -59,6 +83,7 @@ class DatabaseSettingsContext {
       },
     );
     this.collaborators = database.fetchCollaborators();
+    this.users = new AsyncStore(getUsersPromise);
   }
 
   async configureRole(combinedLoginRole: CombinedLoginRole, password: string) {

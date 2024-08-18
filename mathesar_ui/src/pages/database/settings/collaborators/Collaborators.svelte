@@ -2,26 +2,38 @@
   import { _ } from 'svelte-i18n';
 
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
+  import Errors from '@mathesar/components/Errors.svelte';
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
-  import { iconDeleteMajor } from '@mathesar/icons';
+  import { iconAddNew } from '@mathesar/icons';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+  import { isDefined } from '@mathesar/utils/language';
   import { Button, Spinner } from '@mathesar-component-library';
 
   import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
+  import CollaboratorRow from './CollaboratorRow.svelte';
+
   const databaseContext = getDatabaseSettingsContext();
-  $: ({ database, roles, collaborators } = $databaseContext);
+  $: ({ database, configuredRoles, collaborators, users } = $databaseContext);
 
   $: void AsyncRpcApiStore.runBatched(
     [
       collaborators.batchRunner({ database_id: database.id }),
-      roles.batchRunner({ database_id: database.id }),
+      configuredRoles.batchRunner({ server_id: database.server.id }),
     ],
     { onlyRunIfNotInitialized: true },
   );
-  $: isLoading = $collaborators.isLoading || $roles.isLoading;
+  $: void users.runIfNotInitialized();
+  $: isLoading =
+    $collaborators.isLoading || $configuredRoles.isLoading || $users.isLoading;
+  $: isSuccess = $collaborators.isOk && $configuredRoles.isOk && $users.isOk;
+  $: errors = [
+    $collaborators.error,
+    $configuredRoles.error,
+    $users.error,
+  ].filter((entry): entry is string => isDefined(entry));
 </script>
 
 <SettingsContentLayout>
@@ -30,32 +42,25 @@
   </svelte:fragment>
   <svelte:fragment slot="actions">
     <Button appearance="primary">
-      {$_('add_collaborator')}
+      <Icon {...iconAddNew} />
+      <span>{$_('add_collaborator')}</span>
     </Button>
   </svelte:fragment>
   {#if isLoading}
     <Spinner />
-  {:else if $collaborators.isOk}
+  {:else if isSuccess}
     <div class="collaborators-table">
       <GridTable>
         <GridTableCell header>{$_('mathesar_user')}</GridTableCell>
         <GridTableCell header>{$_('role')}</GridTableCell>
         <GridTableCell header>{$_('actions')}</GridTableCell>
         {#each [...($collaborators.resolvedValue?.values() ?? [])] as collaborator (collaborator.id)}
-          <GridTableCell>{collaborator.user_id}</GridTableCell>
-          <GridTableCell>
-            {collaborator.configured_role_id}
-          </GridTableCell>
-          <GridTableCell>
-            <Button appearance="secondary">
-              <Icon {...iconDeleteMajor} />
-            </Button>
-          </GridTableCell>
+          <CollaboratorRow {collaborator} />
         {/each}
       </GridTable>
     </div>
-  {:else if $roles.error}
-    {$roles.error}
+  {:else}
+    <Errors {errors} />
   {/if}
 </SettingsContentLayout>
 

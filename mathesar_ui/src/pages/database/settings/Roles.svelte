@@ -3,6 +3,7 @@
 
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { Button, Spinner } from '@mathesar-component-library';
 
   import { getDatabaseSettingsContext } from './databaseSettingsUtils';
@@ -55,7 +56,9 @@
       </GridTable>
     </div>
   {:else if $roles.error}
-    {$roles.error}
+    <ErrorBox fullWidth>
+      {$roles.error}
+    </ErrorBox>
   {/if}
 </SettingsContentLayout>
 
