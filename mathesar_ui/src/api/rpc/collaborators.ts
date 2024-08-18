@@ -17,4 +17,12 @@ export const collaborators = {
     },
     Array<RawCollaborator>
   >(),
+  add: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+      user_id: number;
+      configured_role_id: RawConfiguredRole['id'];
+    },
+    RawCollaborator
+  >(),
 };

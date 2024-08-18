@@ -7,15 +7,19 @@
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+  import { modal } from '@mathesar/stores/modal';
   import { isDefined } from '@mathesar/utils/language';
   import { Button, Spinner } from '@mathesar-component-library';
 
   import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
+  import AddCollaboratorModel from './AddCollaboratorModal.svelte';
   import CollaboratorRow from './CollaboratorRow.svelte';
 
   const databaseContext = getDatabaseSettingsContext();
+  const addCollaboratorModal = modal.spawnModalController();
+
   $: ({ database, configuredRoles, collaborators, users } = $databaseContext);
 
   $: void AsyncRpcApiStore.runBatched(
@@ -41,10 +45,12 @@
     {$_('collaborators')}
   </svelte:fragment>
   <svelte:fragment slot="actions">
-    <Button appearance="primary">
-      <Icon {...iconAddNew} />
-      <span>{$_('add_collaborator')}</span>
-    </Button>
+    {#if isSuccess}
+      <Button appearance="primary" on:click={() => addCollaboratorModal.open()}>
+        <Icon {...iconAddNew} />
+        <span>{$_('add_collaborator')}</span>
+      </Button>
+    {/if}
   </svelte:fragment>
   {#if isLoading}
     <Spinner />
@@ -63,6 +69,15 @@
     <Errors {errors} />
   {/if}
 </SettingsContentLayout>
+
+{#if $users.resolvedValue && $configuredRoles.resolvedValue && $collaborators.resolvedValue}
+  <AddCollaboratorModel
+    controller={addCollaboratorModal}
+    usersMap={$users.resolvedValue}
+    configuredRolesMap={$configuredRoles.resolvedValue}
+    collaboratorsMap={$collaborators.resolvedValue}
+  />
+{/if}
 
 <style lang="scss">
   .collaborators-table {

@@ -1,7 +1,11 @@
 import { api } from '@mathesar/api/rpc';
 import type { RawDatabase } from '@mathesar/api/rpc/databases';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-import { ImmutableMap, SortedImmutableMap } from '@mathesar-component-library';
+import {
+  CancellablePromise,
+  ImmutableMap,
+  SortedImmutableMap,
+} from '@mathesar-component-library';
 
 import { Collaborator } from './Collaborator';
 import { ConfiguredRole } from './ConfiguredRole';
@@ -57,5 +61,36 @@ export class Database {
           ]),
         ),
     });
+  }
+
+  addCollaborator(
+    userId: number,
+    configuredRoleId: ConfiguredRole['id'],
+  ): CancellablePromise<Collaborator> {
+    const promise = api.collaborators
+      .add({
+        database_id: this.id,
+        user_id: userId,
+        configured_role_id: configuredRoleId,
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then(
+            (rawCollaborator) =>
+              resolve(
+                new Collaborator({
+                  database: this,
+                  rawCollaborator,
+                }),
+              ),
+            reject,
+          )
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
   }
 }

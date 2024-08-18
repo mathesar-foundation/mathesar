@@ -21,7 +21,7 @@
 <GridTableCell>
   <div>
     {#if user}
-      <div>{user.full_name ?? user.username}</div>
+      <div>{user.full_name || user.username}</div>
       <div>{user.email}</div>
     {:else}
       {collaborator.user_id}

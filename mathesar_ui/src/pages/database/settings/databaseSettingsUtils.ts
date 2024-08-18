@@ -107,6 +107,19 @@ class DatabaseSettingsContext {
       configuredRoles.without(configuredRole.id),
     );
   }
+
+  async addCollaborator(
+    userId: User['id'],
+    configuredRoleId: ConfiguredRole['id'],
+  ) {
+    const newCollaborator = await this.database.addCollaborator(
+      userId,
+      configuredRoleId,
+    );
+    this.collaborators.updateResolvedValue((collaborators) =>
+      collaborators.with(newCollaborator.id, newCollaborator),
+    );
+  }
 }
 
 export function getDatabaseSettingsContext(): Readable<DatabaseSettingsContext> {
