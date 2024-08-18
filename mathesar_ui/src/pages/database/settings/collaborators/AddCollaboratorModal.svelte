@@ -21,6 +21,8 @@
 
   import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
 
+  import SelectConfiguredRoleField from './SelectConfiguredRoleField.svelte';
+
   const databaseContext = getDatabaseSettingsContext();
 
   export let controller: ModalController;
@@ -33,7 +35,6 @@
   const form = makeForm({ userId, configuredRoleId });
 
   const SelectUser = Select<User['id']>;
-  const SelectConfiguredRole = Select<ConfiguredRole['id']>;
 
   $: addedUsers = new Set(
     [...collaboratorsMap.values()].map((cbr) => cbr.user_id),
@@ -75,24 +76,7 @@
         },
       }}
     />
-    <Field
-      label={$_('role')}
-      layout="stacked"
-      field={configuredRoleId}
-      input={{
-        component: SelectConfiguredRole,
-        props: {
-          options: [...configuredRolesMap.values()].map((r) => r.id),
-          getLabel: (option) => {
-            if (option) {
-              return configuredRolesMap.get(option)?.name ?? String(option);
-            }
-            return $_('select_role');
-          },
-          autoSelect: 'none',
-        },
-      }}
-    />
+    <SelectConfiguredRoleField {configuredRoleId} {configuredRolesMap} />
   </div>
   <div use:portalToWindowFooter class="footer">
     <FormSubmit

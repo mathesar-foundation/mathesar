@@ -7,7 +7,6 @@
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
-  import Field from '@mathesar/components/form/Field.svelte';
   import { Collaborator } from '@mathesar/models/Collaborator';
   import { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
   import { toast } from '@mathesar/stores/toast';
@@ -15,11 +14,12 @@
     ControlledModal,
     ImmutableMap,
     type ModalController,
-    Select,
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
   import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
+
+  import SelectConfiguredRoleField from './SelectConfiguredRoleField.svelte';
 
   const databaseContext = getDatabaseSettingsContext();
 
@@ -34,8 +34,6 @@
   $: userName =
     usersMap.get(collaborator.user_id)?.username ??
     String(collaborator.user_id);
-
-  const SelectConfiguredRole = Select<ConfiguredRole['id']>;
 
   async function updateRoleForCollaborator() {
     await $databaseContext.updateRoleForCollaborator(
@@ -57,24 +55,7 @@
     })}
   </span>
   <div>
-    <Field
-      label={$_('role')}
-      layout="stacked"
-      field={configuredRoleId}
-      input={{
-        component: SelectConfiguredRole,
-        props: {
-          options: [...configuredRolesMap.values()].map((r) => r.id),
-          getLabel: (option) => {
-            if (option) {
-              return configuredRolesMap.get(option)?.name ?? String(option);
-            }
-            return $_('select_role');
-          },
-          autoSelect: 'none',
-        },
-      }}
-    />
+    <SelectConfiguredRoleField {configuredRoleId} {configuredRolesMap} />
   </div>
   <div use:portalToWindowFooter class="footer">
     <FormSubmit

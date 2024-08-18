@@ -55,6 +55,7 @@
   "clear": "Clear",
   "clear_value": "Clear value",
   "collaborator_added_successfully": "Collaborator added successfully",
+  "collaborator_role_help": "This role determines permissions for this collaborator. Mathesar will use this PostgreSQL role for all database interactions by this user.",
   "collaborator_role_updated_successfully": "Role updated successfully for collaborator.",
   "collaborators": "Collaborators",
   "column": "Column",
