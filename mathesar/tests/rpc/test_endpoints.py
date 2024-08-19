@@ -136,6 +136,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        database_privileges.get_owner_oid_and_curr_role_db_priv,
+        "database_privileges.get_owner_oid_and_curr_role_db_priv",
+        [user_is_authenticated]
+    ),
+    (
         database_setup.create_new,
         "database_setup.create_new",
         [user_is_superuser]
