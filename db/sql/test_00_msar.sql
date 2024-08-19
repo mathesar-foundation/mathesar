@@ -4299,3 +4299,21 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_search_records_in_table_with_preview() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+  RETURN NEXT is(
+    msar.search_records_from_table(
+      '"Students"'::regclass::oid,
+      '[{"attnum": 4, "literal": "k"}]',
+      2
+    ) -> 'preview_data',
+    $a${
+      "2": [{"key": 1.234, "summary": "Alice Alison"}, {"key": 2.345, "summary": "Bob Bobinson"}],
+      "3": [{"key": 3, "summary": "Eve Evilson"}]
+    }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
