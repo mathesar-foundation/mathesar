@@ -2948,7 +2948,8 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -2973,7 +2974,8 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -2998,7 +3000,8 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -3029,7 +3032,8 @@ BEGIN
         {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -3054,7 +3058,8 @@ BEGIN
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -3131,7 +3136,8 @@ BEGIN
             "result_indices": [9]
           }
         ]
-      }
+      },
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3167,7 +3173,8 @@ BEGIN
             "result_indices": [0, 1, 2]
           }
         ]
-      }
+      },
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3199,7 +3206,8 @@ BEGIN
           {"id": 1, "count": 1, "results_eq": {"4": "2020-03 AD"}, "result_indices": [0]},
           {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}, "result_indices": [1, 2]}
         ]
-      }
+      },
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3232,7 +3240,8 @@ BEGIN
         "groups": [
           {"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}, "result_indices": [0, 1, 2, 3, 4]}
         ]
-      }
+      },
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3743,7 +3752,8 @@ BEGIN
       "results": [
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -3758,7 +3768,8 @@ BEGIN
     $j${
       "count": 0,
       "results": [],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
