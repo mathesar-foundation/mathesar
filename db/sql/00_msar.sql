@@ -3657,8 +3657,16 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION msar.get_fkey_map_cte(tab_id oid)
   RETURNS TABLE (target_oid oid, conkey smallint, confkey smallint)
 AS $$/*
+Generate a table mapping foreign key values from refererrer to referant tables.
+
+Given an input table (identified by OID), we return a table with each row representing a foreign key
+constraint on that table. We return only single-column foreign keys, and only one per foreign key
+column.
+
+Args:
+  tab_id: The OID of the table containing the foreign key columns to map.
 */
-SELECT pgc.confrelid AS target_oid, x.conkey AS conkey, min(y.confkey) AS confkey
+SELECT DISTINCT ON (conkey) pgc.confrelid AS target_oid, x.conkey AS conkey, y.confkey AS confkey
 FROM pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
 WHERE
   pgc.conrelid = tab_id
@@ -3666,7 +3674,7 @@ WHERE
   AND cardinality(pgc.confkey) = 1
   AND has_column_privilege(tab_id, x.conkey, 'SELECT')
   AND has_column_privilege(pgc.confrelid, y.confkey, 'SELECT')
-GROUP BY pgc.confrelid, x.conkey
+ORDER BY conkey, target_oid, confkey;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
