@@ -3679,6 +3679,12 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.build_summary_cte_expr_for_table(tab_id oid) RETURNS TEXT AS $$/*
+Build an SQL text expression defining a sequence of CTEs that give summaries for linked records.
+
+This summary amounts to just the first string-like column value for that linked record.
+
+Args:
+  tab_oid: The table for whose fkey values' linked records we'll get summaries.
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
 SELECT ', ' || string_agg(
@@ -3702,6 +3708,11 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.build_summary_join_expr_for_table(tab_id oid, cte_name text) RETURNS TEXT AS $$/*
+Build an SQL expression to join the summary CTEs to the main CTE along fkey values.
+
+Args:
+  tab_oid: The table defining the columns of the main CTE.
+  cte_name: The name of the main CTE we'll join the summary CTEs to.
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
 SELECT string_agg(
@@ -3718,6 +3729,10 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.build_summary_json_expr_for_table(tab_id oid) RETURNS TEXT AS $$/*
+Build a JSON object with the results of summarizing linked records.
+
+Args:
+  tab_oid: The OID of the table for which we're getting linked record summaries.
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
