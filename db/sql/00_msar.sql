@@ -4022,9 +4022,12 @@ DECLARE
 BEGIN
   EXECUTE format(
     $i$
-    WITH update_cte AS (%1$s %2$s RETURNING %3$s)
-    SELECT jsonb_build_object('results', %4$s)
-    FROM update_cte
+    WITH update_cte AS (%1$s %2$s RETURNING %3$s)%5$s
+    SELECT jsonb_build_object(
+      'results', %4$s,
+      'preview_data', %7$s
+    )
+    FROM update_cte %6$s
     $i$,
     msar.build_update_expr(tab_id, rec_def),
     msar.build_where_clause(
@@ -4036,7 +4039,10 @@ BEGIN
       )
     ),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'update_cte', null)
+    msar.build_results_jsonb_expr(tab_id, 'update_cte', null),
+    msar.build_summary_cte_expr_for_table(tab_id),
+    msar.build_summary_join_expr_for_table(tab_id, 'update_cte'),
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
   ) INTO rec_modified;
   RETURN rec_modified;
 END;

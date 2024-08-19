@@ -4048,7 +4048,10 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
-    '{"results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}]}'
+    $p${
+      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}],
+      "preview_data": null
+    }$p$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4062,7 +4065,10 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
-    '{"results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}]}'
+    $p${
+      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}],
+      "preview_data": null
+    }$p$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4263,12 +4269,31 @@ BEGIN
         {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
       ],
       "preview_data": {
-        "2": [
-          {"key": 2.345, "summary": "Bob Bobinson"}
-        ],
-        "3": [
-          {"key": 1, "summary": "Carol Carlson"}
-        ]
+        "2": [{"key": 2.345, "summary": "Bob Bobinson"}],
+        "3": [{"key": 1, "summary": "Carol Carlson"}]
+      }
+    }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_with_preview() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+  RETURN NEXT is(
+    msar.patch_record_in_table(
+      '"Students"'::regclass::oid,
+      2,
+      '{"2": 2.345, "3": 2, "5": 85}'
+    ),
+    $a${
+      "results": [
+        {"1": 2, "2": 2.345, "3": 2, "4": "Gabby Gabberson", "5": 85, "6": "ggabberson@example.edu"}
+      ],
+      "preview_data": {
+        "2": [{"key": 2.345, "summary": "Bob Bobinson"}],
+        "3": [{"key": 2, "summary": "Dave Davidson"}]
       }
     }$a$
   );
