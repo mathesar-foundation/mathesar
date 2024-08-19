@@ -894,7 +894,7 @@ FROM (
     s.oid,
     s.nspname
 ) AS schema_data;
-$$ LANGUAGE sql;
+$$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION msar.get_roles() RETURNS jsonb AS $$/*
@@ -945,7 +945,57 @@ FROM (
     LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid
   WHERE r.rolname NOT LIKE 'pg_%'
 ) AS role_data;
-$$ LANGUAGE sql;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.list_db_priv(db_name text) RETURNS jsonb AS $$/*
+Given a database name, returns a json array of objects with database privileges for non-inherited roles.
+
+Each returned JSON object in the array has the form:
+  {
+    "role_oid": <int>,
+    "direct" [<str>]
+  }
+*/
+WITH priv_cte AS (
+  SELECT
+    jsonb_build_object(
+      'role_oid', pgr.oid,
+      'direct',  jsonb_agg(acl.privilege_type)
+    ) AS p
+  FROM
+    pg_catalog.pg_roles AS pgr,
+    pg_catalog.pg_database AS pgd,
+    aclexplode(COALESCE(pgd.datacl, acldefault('d', pgd.datdba))) AS acl
+  WHERE pgd.datname = db_name AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_'
+  GROUP BY pgr.oid, pgd.oid
+)
+SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_owner_oid_and_curr_role_db_priv(db_name text) RETURNS jsonb AS $$/*
+Given a database name, returns a json object with database owner oid and database privileges
+for the role executing the function.
+
+The returned JSON object has the form:
+  {
+    "owner_oid": <int>,
+    "current_role_db_priv" [<str>]
+  }
+*/
+SELECT jsonb_build_object(
+  'owner_oid', pgd.datdba,
+  'current_role_db_priv', array_remove(
+    ARRAY[
+      CASE WHEN has_database_privilege(pgd.oid, 'CREATE') THEN 'CREATE' END,
+      CASE WHEN has_database_privilege(pgd.oid, 'TEMPORARY') THEN 'TEMPORARY' END,
+      CASE WHEN has_database_privilege(pgd.oid, 'CONNECT') THEN 'CONNECT' END
+    ], NULL
+  )
+) FROM pg_catalog.pg_database AS pgd
+WHERE pgd.datname = db_name;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -3327,6 +3377,7 @@ INSERT INTO msar.expr_templates VALUES
   -- json(b) filters and expressions
   ('json_array_length', 'jsonb_array_length((%s)::jsonb)'),
   ('json_array_contains', '(%s)::jsonb @> (%s)::jsonb'),
+  ('element_in_json_array_untyped', '(%s)::text IN (SELECT jsonb_array_elements_text(%s))'),
   ('convert_to_json', 'to_jsonb(%s)'),
   -- date part extractors
   ('truncate_to_year', 'to_char((%s)::date, ''YYYY AD'')'),
@@ -3336,7 +3387,9 @@ INSERT INTO msar.expr_templates VALUES
   ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
   ('uri_authority', 'mathesar_types.uri_authority(%s)'),
   -- Email part getters
-  ('email_domain', 'mathesar_types.email_domain_name(%s)')
+  ('email_domain', 'mathesar_types.email_domain_name(%s)'),
+  -- Data formatter which is sometimes useful in comparison
+  ('format_data', 'msar.format_data(%s)')
 ;
 
 CREATE OR REPLACE FUNCTION msar.build_expr(rel_id oid, tree jsonb) RETURNS text AS $$
@@ -3790,13 +3843,13 @@ BEGIN
     msar.get_relation_name(tab_id),
     msar.build_where_clause(
       tab_id, jsonb_build_object(
-        'type', 'json_array_contains', 'args', jsonb_build_array(
-          jsonb_build_object('type', 'literal', 'value', rec_ids),
+        'type', 'element_in_json_array_untyped', 'args', jsonb_build_array(
           jsonb_build_object(
-            'type', 'convert_to_json', 'args', jsonb_build_array(
+            'type', 'format_data', 'args', jsonb_build_array(
               jsonb_build_object('type', 'attnum', 'value', msar.get_pk_column(tab_id))
             )
-          )
+          ),
+          jsonb_build_object('type', 'literal', 'value', rec_ids)
         )
       )
     )

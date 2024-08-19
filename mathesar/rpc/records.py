@@ -104,12 +104,13 @@ class Group(TypedDict):
         id: The id of the group. Consistent for same input.
         count: The number of items in the group.
         results_eq: The value the results of the group equal.
-        result_indices: The primary key values of group members.
+        result_indices: The 0-indexed positions of group members in the
+            results array.
     """
     id: int
     count: int
     results_eq: list[dict]
-    result_indices: list[Any]
+    result_indices: list[int]
 
 
 class GroupingResponse(TypedDict):

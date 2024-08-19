@@ -71,6 +71,7 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.constraints',
     'mathesar.rpc.columns',
     'mathesar.rpc.columns.metadata',
+    'mathesar.rpc.database_privileges',
     'mathesar.rpc.database_setup',
     'mathesar.rpc.databases',
     'mathesar.rpc.records',

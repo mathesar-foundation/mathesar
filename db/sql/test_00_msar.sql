@@ -3900,6 +3900,26 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_delete_records_from_table_stringy_pkey() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+  delete_result integer;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+  delete_result := msar.delete_records_from_table(
+    rel_id,
+    '["1", "2"]'
+  );
+  RETURN NEXT is(delete_result, 2);
+  RETURN NEXT results_eq(
+    'SELECT id FROM atable ORDER BY id',
+    $v$VALUES ('3'::integer)$v$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __setup_add_record_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_list_records_table();

@@ -77,6 +77,16 @@ To use an RPC function:
       - list_
       - DatabaseInfo
 
+## Database Privileges
+
+::: database_privileges
+    options:
+      members:
+      - list_direct
+      - get_owner_oid_and_curr_role_db_priv
+      - DBPrivileges
+      - CurrentDBPrivileges
+
 ## Database Setup
 
 ::: database_setup

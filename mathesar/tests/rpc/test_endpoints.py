@@ -13,6 +13,7 @@ from mathesar.rpc import columns
 from mathesar.rpc import configured_roles
 from mathesar.rpc import connections
 from mathesar.rpc import constraints
+from mathesar.rpc import database_privileges
 from mathesar.rpc import database_setup
 from mathesar.rpc import databases
 from mathesar.rpc import explorations
@@ -127,6 +128,16 @@ METHODS = [
     (
         constraints.delete,
         "constraints.delete",
+        [user_is_authenticated]
+    ),
+    (
+        database_privileges.list_direct,
+        "database_privileges.list_direct",
+        [user_is_authenticated]
+    ),
+    (
+        database_privileges.get_owner_oid_and_curr_role_db_priv,
+        "database_privileges.get_owner_oid_and_curr_role_db_priv",
         [user_is_authenticated]
     ),
     (
