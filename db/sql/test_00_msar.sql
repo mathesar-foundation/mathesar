@@ -4157,5 +4157,79 @@ BEGIN
       )
     )
   );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      limit_ => 3,
+      offset_ => 1,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 6,
+      "results": [
+        {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
+        {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"},
+        {"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"}
+      ],
+      "grouping": null,
+      "preview_data": {
+        "2": [
+          {"key": 1.234, "summary": "Alice Alison"},
+          {"key": 2.345, "summary": "Bob Bobinson"}
+        ],
+        "3": [
+          {"key": 1, "summary": "Carol Carlson"},
+          {"key": 2, "summary": "Dave Davidson"}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
+        ' msar.format_data("Teacher") AS "3", msar.format_data("Name") AS "4",',
+        ' msar.format_data("Grade") AS "5", msar.format_data("Email") AS "6"',
+        ' FROM public."Students"  ORDER BY "1" ASC LIMIT ''3'' OFFSET ''1'''
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      limit_ => 2,
+      offset_ => null,
+      order_ => '[{"attnum": 2, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [2]}'
+    ),
+    $j${
+      "count": 6,
+      "results": [
+        {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
+        {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"}
+      ],
+      "grouping": {
+        "columns": [2],
+        "preproc": null,
+        "groups": [{"id": 1, "count": 3, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
+      },
+      "preview_data": {
+        "2": [
+          {"key": 1.234, "summary": "Alice Alison"}
+        ],
+        "3": [
+          {"key": 1, "summary": "Carol Carlson"},
+          {"key": 2, "summary": "Dave Davidson"}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
+        ' msar.format_data("Teacher") AS "3", msar.format_data("Name") AS "4",',
+        ' msar.format_data("Grade") AS "5", msar.format_data("Email") AS "6"',
+        ' FROM public."Students"  ORDER BY "2" ASC, "1" ASC LIMIT ''2'' OFFSET NULL'
+      )
+    )
+  );
 END;
 $$ LANGUAGE plpgsql;
