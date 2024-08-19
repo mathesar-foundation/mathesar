@@ -49,7 +49,8 @@ def test_records_list(rf, monkeypatch):
                 "groups": [
                     {"id": 3, "count": 8, "results_eq": {"1": "lsfj", "2": 3422}}
                 ]
-            }
+            },
+            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
@@ -63,7 +64,7 @@ def test_records_list(rf, monkeypatch):
                 {"id": 3, "count": 8, "results_eq": {"1": "lsfj", "2": 3422}}
             ]
         },
-        "preview_data": [],
+        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
         "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
     actual_records_list = records.list_(
@@ -103,6 +104,7 @@ def test_records_get(rf, monkeypatch):
             "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
             "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
             "grouping": None,
+            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
@@ -111,7 +113,7 @@ def test_records_get(rf, monkeypatch):
         "count": 1,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
         "grouping": None,
-        "preview_data": [],
+        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
         "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
     actual_record = records.get(
@@ -148,13 +150,14 @@ def test_records_add(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return {
             "results": [_record_def],
+            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
     monkeypatch.setattr(records.record_insert, 'add_record_to_table', mock_add_record)
     expect_record = {
         "results": [record_def],
-        "preview_data": [],
+        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
     }
     actual_record = records.add(
         record_def=record_def, table_oid=table_oid, database_id=database_id, request=request
@@ -192,13 +195,14 @@ def test_records_patch(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return {
             "results": [_record_def | {"3": "another"}],
+            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
     monkeypatch.setattr(records.record_update, 'patch_record_in_table', mock_patch_record)
     expect_record = {
         "results": [record_def | {"3": "another"}],
-        "preview_data": [],
+        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
     }
     actual_record = records.patch(
         record_def=record_def,
@@ -276,6 +280,7 @@ def test_records_search(rf, monkeypatch):
         return {
             "count": 50123,
             "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
+            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
             "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
         }
 
@@ -285,7 +290,7 @@ def test_records_search(rf, monkeypatch):
         "count": 50123,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
         "grouping": None,
-        "preview_data": [],
+        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
         "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
     actual_records_list = records.search(

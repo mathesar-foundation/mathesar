@@ -127,6 +127,18 @@ class GroupingResponse(TypedDict):
     groups: list[Group]
 
 
+class PreviewEntry(TypedDict):
+    """
+    Preview entry object. Maps a foreign key to a text summary.
+
+    Attributes:
+        key: The foreign key value.
+        summary: The summary of the referenced record.
+    """
+    key: Any
+    summary: str
+
+
 class RecordList(TypedDict):
     """
     Records from a table, along with some meta data
@@ -145,7 +157,7 @@ class RecordList(TypedDict):
     count: int
     results: list[dict]
     grouping: GroupingResponse
-    preview_data: list[dict]
+    preview_data: dict[str, list[PreviewEntry]]
 
     @classmethod
     def from_dict(cls, d):
@@ -153,7 +165,7 @@ class RecordList(TypedDict):
             count=d["count"],
             results=d["results"],
             grouping=d.get("grouping"),
-            preview_data=[],
+            preview_data=d.get("preview_data"),
             query=d["query"],
         )
 
@@ -172,13 +184,13 @@ class RecordAdded(TypedDict):
         preview_data: Information for previewing foreign key values.
     """
     results: list[dict]
-    preview_data: list[dict]
+    preview_data: dict[str, list[PreviewEntry]]
 
     @classmethod
     def from_dict(cls, d):
         return cls(
             results=d["results"],
-            preview_data=[],
+            preview_data=d.get("preview_data"),
         )
 
 
