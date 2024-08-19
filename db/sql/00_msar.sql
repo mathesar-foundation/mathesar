@@ -3970,13 +3970,19 @@ DECLARE
 BEGIN
   EXECUTE format(
     $i$
-    WITH insert_cte AS (%1$s RETURNING %2$s)
-    SELECT jsonb_build_object('results', %3$s)
-    FROM insert_cte
+    WITH insert_cte AS (%1$s RETURNING %2$s)%4$s
+    SELECT jsonb_build_object(
+      'results', %3$s,
+      'preview_data', %6$s
+    )
+    FROM insert_cte %5$s
     $i$,
     msar.build_single_insert_expr(tab_id, rec_def),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'insert_cte', null)
+    msar.build_results_jsonb_expr(tab_id, 'insert_cte', null),
+    msar.build_summary_cte_expr_for_table(tab_id),
+    msar.build_summary_join_expr_for_table(tab_id, 'insert_cte'),
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
   ) INTO rec_created;
   RETURN rec_created;
 END;

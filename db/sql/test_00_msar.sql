@@ -3951,7 +3951,10 @@ BEGIN
       rel_id,
       '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
-    '{"results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+    $a${
+      "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -3968,7 +3971,10 @@ BEGIN
       rel_id,
       '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": "{\"key2\": \"val2\"}"}'
     ),
-    '{"results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+    $a${
+      "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -3985,7 +3991,10 @@ BEGIN
       rel_id,
       '{"3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
-    '{"results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+    $a${
+      "results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4002,7 +4011,10 @@ BEGIN
       rel_id,
       '{"2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
-    '{"results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+    $a${
+      "results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4019,7 +4031,10 @@ BEGIN
       rel_id,
       '{"2": null, "3": "ab234", "4": 3, "5": "\"234\""}'
     ),
-    '{"results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}]}'
+    $a${
+      "results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4230,6 +4245,32 @@ BEGIN
         ' FROM public."Students"  ORDER BY "2" ASC, "1" ASC LIMIT ''2'' OFFSET NULL'
       )
     )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_with_preview() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      '"Students"'::regclass::oid,
+      '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}'
+    ),
+    $a${
+      "results": [
+        {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
+      ],
+      "preview_data": {
+        "2": [
+          {"key": 2.345, "summary": "Bob Bobinson"}
+        ],
+        "3": [
+          {"key": 1, "summary": "Carol Carlson"}
+        ]
+      }
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
