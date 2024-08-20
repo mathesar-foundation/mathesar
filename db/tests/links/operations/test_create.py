@@ -1,3 +1,4 @@
+import json
 import pytest
 from unittest.mock import patch
 import db.links.operations.create as link_create
@@ -40,7 +41,7 @@ def test_many_to_many_link(engine_with_schema):
     assert call_args[1] == "add_mapping_table"
     assert call_args[2] == 2200
     assert call_args[3] == "movies_actors"
-    assert call_args[4] == [
+    assert json.loads(call_args[4]) == [
         {"column_name": "movie_id", "referent_table_oid": 12345},
         {"column_name": "actor_id", "referent_table_oid": 54321}
     ]
