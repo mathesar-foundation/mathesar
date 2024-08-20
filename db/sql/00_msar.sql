@@ -3168,27 +3168,25 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.create_many_to_many_link(
+msar.add_mapping_table(
   sch_id oid,
   tab_name text,
-  from_rel_ids oid[],
-  col_names text[]
-) RETURNS oid AS $$/* 
+  mapping_columns jsonb
+) RETURNS oid AS $$/*
 Create a many-to-many link between tables, returning the oid of the newly created table.
 
 Args:
   sch_id: The OID of the schema in which new referrer table is to be created.
   tab_name: Name of the referrer table to be created.
-  from_rel_ids: The OIDs of the referent tables.
+  referent_tab_ids: The OIDs of the referent tables.
   col_names: Names of the new column to be created in the referrer table, unqoted.
 */
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, tab_name , NULL, NULL, NULL);
-  PERFORM msar.add_foreign_key_column(b.col_name, added_table_id, a.rel_id)
-  FROM unnest(from_rel_ids) WITH ORDINALITY AS a(rel_id, idx)
-  JOIN unnest(col_names) WITH ORDINALITY AS b(col_name, idx) USING (idx);
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL);
+  PERFORM msar.add_foreign_key_column(column_name, added_table_id, referent_table_oid)
+  FROM jsonb_to_recordset(mapping_columns) AS x(column_name text, referent_table_oid oid);
   RETURN added_table_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

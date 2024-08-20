@@ -1,3 +1,5 @@
+import json
+
 from db.connection import execute_msar_func_with_engine, exec_msar_func
 
 
@@ -83,9 +85,16 @@ def create_many_to_many_link(engine, schema_oid, map_table_name, referents_dict)
     """
     return execute_msar_func_with_engine(
         engine,
-        'create_many_to_many_link',
+        'add_mapping_table',
         schema_oid,
         map_table_name,
-        referents_dict['referent_table_oids'],
-        referents_dict['column_names']
+        json.dumps(
+            [
+                {"column_name": c, "referent_table_oid": i}
+                for c, i in zip(
+                        referents_dict['column_names'],
+                        referents_dict['referent_table_oids'],
+                )
+             ]
+        )
     ).fetchone()[0]
