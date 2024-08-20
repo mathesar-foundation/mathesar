@@ -20,6 +20,17 @@ def add_foreign_key_column(
         database_id: int,
         **kwargs
 ) -> None:
+    """
+    Add a foreign key column to a table.
+
+    The foreign key column will be newly created, and will reference the
+    `id` column of the referent table.
+
+    Args:
+        column_name: The name of the column to create.
+        referrer_table_oid: The OID of the table getting the new column.
+        referent_table_oid: The OID of the table being referenced.
+    """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         links_create.add_foreign_key_column(
