@@ -1,4 +1,4 @@
-from db.connection import execute_msar_func_with_engine
+from db.connection import execute_msar_func_with_engine, exec_msar_func
 
 
 def create_foreign_key_link(
@@ -27,6 +27,38 @@ def create_foreign_key_link(
         engine,
         'add_foreign_key_column',
         referrer_column_name,
+        referrer_table_oid,
+        referent_table_oid,
+        unique_link
+    ).fetchone()[0]
+
+
+def add_foreign_key_column(
+        conn,
+        column_name,
+        referrer_table_oid,
+        referent_table_oid,
+        unique_link=False
+):
+    """
+    Creates a Many-to-One or One-to-One link.
+
+    Args:
+        conn: psycopg3 conneciton object.
+        column_name: Name of the new column to be created in the referrer
+                     table.
+        referrer_table_oid: The OID of the referrer table.
+        referent_table_oid: The OID of the referent table.
+        unique_link: Whether to make the link one-to-one
+                     instead of many-to-one.
+
+    Returns:
+        Returns the attnum of the newly created column.
+    """
+    return execute_msar_func(
+        conn,
+        'add_foreign_key_column',
+        column_name,
         referrer_table_oid,
         referent_table_oid,
         unique_link
