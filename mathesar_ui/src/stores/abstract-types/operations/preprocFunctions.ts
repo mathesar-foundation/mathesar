@@ -26,19 +26,19 @@ const preprocFunctionsResponse: AbstractTypePreprocFunctionsResponse[] = [
     returns: abstractTypeCategory.Text,
   },
   {
-    id: 'extract_uri_scheme',
+    id: 'uri_scheme',
     name: 'URI scheme',
     appliesTo: [abstractTypeCategory.Uri],
     returns: abstractTypeCategory.Text,
   },
   {
-    id: 'extract_uri_authority',
+    id: 'uri_authority',
     name: 'URI Authority',
     appliesTo: [abstractTypeCategory.Uri],
     returns: abstractTypeCategory.Text,
   },
   {
-    id: 'extract_email_domain',
+    id: 'email_domain',
     name: 'Domain',
     appliesTo: [abstractTypeCategory.Email],
     returns: abstractTypeCategory.Text,
