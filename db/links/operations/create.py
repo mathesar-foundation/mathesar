@@ -55,14 +55,14 @@ def add_foreign_key_column(
     Returns:
         Returns the attnum of the newly created column.
     """
-    return execute_msar_func(
+    exec_msar_func(
         conn,
         'add_foreign_key_column',
         column_name,
         referrer_table_oid,
         referent_table_oid,
         unique_link
-    ).fetchone()[0]
+    )
 
 
 def create_many_to_many_link(engine, schema_oid, map_table_name, referents_dict):

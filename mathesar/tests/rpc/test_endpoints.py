@@ -13,6 +13,7 @@ from mathesar.rpc import columns
 from mathesar.rpc import configured_roles
 from mathesar.rpc import connections
 from mathesar.rpc import constraints
+from mathesar.rpc import data_modeling
 from mathesar.rpc import database_privileges
 from mathesar.rpc import database_setup
 from mathesar.rpc import databases
@@ -128,6 +129,11 @@ METHODS = [
     (
         constraints.delete,
         "constraints.delete",
+        [user_is_authenticated]
+    ),
+    (
+        data_modeling.add_foreign_key_column,
+        "data_modeling.add_foreign_key_column",
         [user_is_authenticated]
     ),
     (
