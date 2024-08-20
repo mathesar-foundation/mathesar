@@ -247,6 +247,8 @@ To use an RPC function:
     options:
       members:
       - add_foreign_key_column
+      - add_mapping_table
+      - MappingColumn
 
 ## Responses
 

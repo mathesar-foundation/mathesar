@@ -3178,8 +3178,11 @@ Create a many-to-many link between tables, returning the oid of the newly create
 Args:
   sch_id: The OID of the schema in which new referrer table is to be created.
   tab_name: Name of the referrer table to be created.
-  referent_tab_ids: The OIDs of the referent tables.
-  col_names: Names of the new column to be created in the referrer table, unqoted.
+  mapping_columns: An array of objects giving the foreign key columns for the new table.
+
+The elements of the mapping_columns array must have the form
+  {"column_name": <str>, "referent_table_oid": <int>}
+
 */
 DECLARE
   added_table_id oid;
