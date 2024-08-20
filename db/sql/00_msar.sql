@@ -948,6 +948,54 @@ FROM (
 $$ LANGUAGE SQL STABLE;
 
 
+CREATE OR REPLACE FUNCTION msar.get_role(rolename text) RETURNS jsonb AS $$/*
+Given a rolename, return a JSON object describing the role in a database server.
+
+The returned JSON object has the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "super": <bool>
+    "inherits": <bool>
+    "create_role": <bool>
+    "create_db": <bool>
+    "login": <bool>
+    "description": <str|null>
+    "members": <[
+        { "oid": <int>, "admin": <bool> }
+      ]|null>
+  }
+*/
+WITH rolemembers as (
+  SELECT
+    pgr.oid AS oid,
+    jsonb_agg(
+      jsonb_build_object(
+        'oid', pgm.member::bigint,
+        'admin', pgm.admin_option
+      )
+    ) AS members
+  FROM pg_catalog.pg_roles pgr
+    INNER JOIN pg_catalog.pg_auth_members pgm ON pgr.oid=pgm.roleid
+  GROUP BY pgr.oid
+)
+SELECT jsonb_build_object(
+  'oid', r.oid::bigint,
+  'name', r.rolname,
+  'super', r.rolsuper,
+  'inherits', r.rolinherit,
+  'create_role', r.rolcreaterole,
+  'create_db', r.rolcreatedb,
+  'login', r.rolcanlogin,
+  'description', pg_catalog.shobj_description(r.oid, 'pg_authid'),
+  'members', rolemembers.members
+)
+FROM pg_catalog.pg_roles r
+  LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid
+WHERE r.rolname = rolename;
+$$ LANGUAGE SQL STABLE;
+
+
 CREATE OR REPLACE FUNCTION msar.list_db_priv(db_name text) RETURNS jsonb AS $$/*
 Given a database name, returns a json array of objects with database privileges for non-inherited roles.
 
@@ -1014,9 +1062,6 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.create_basic_mathesar_user(username text, password_ text) RETURNS TEXT AS $$/*
 */
-DECLARE
-  sch_name text;
-  mathesar_schemas text[] := ARRAY['mathesar_types', '__msar', 'msar'];
 BEGIN
   PERFORM __msar.exec_ddl('CREATE USER %I WITH PASSWORD %L', username, password_);
   PERFORM __msar.exec_ddl(
@@ -1024,17 +1069,51 @@ BEGIN
     current_database()::text,
     username
   );
+  PERFORM msar.grant_usage_on_mathesar_schemas(username);
+  RETURN username;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.grant_usage_on_mathesar_schemas(rolename text) RETURNS void AS $$
+DECLARE
+  sch_name text;
+  mathesar_schemas text[] := ARRAY['mathesar_types', '__msar', 'msar'];
+BEGIN
   FOREACH sch_name IN ARRAY mathesar_schemas LOOP
     BEGIN
-      PERFORM __msar.exec_ddl('GRANT USAGE ON SCHEMA %I TO %I', sch_name, username);
+      PERFORM __msar.exec_ddl('GRANT USAGE ON SCHEMA %I TO %I', sch_name, rolename);
     EXCEPTION
       WHEN invalid_schema_name THEN
         RAISE NOTICE 'Schema % does not exist', sch_name;
     END;
   END LOOP;
-  RETURN username;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.create_role(rolename text, password_ text, login_ boolean) RETURNS jsonb AS $$/*
+*/
+DECLARE
+  sch_name text;
+  mathesar_schemas text[] := ARRAY['mathesar_types', '__msar', 'msar'];
+BEGIN
+  CASE WHEN login_ THEN
+    PERFORM create_basic_mathesar_user(rolename, password_);
+  ELSE
+    PERFORM __msar.exec_ddl('CREATE ROLE %I', rolename);
+    PERFORM __msar.exec_ddl(
+      'GRANT CREATE, TEMP ON DATABASE %I TO %I',
+      current_database()::text,
+      rolename
+    );
+    PERFORM msar.grant_usage_on_mathesar_schemas(rolename);
+  END CASE;
+  RETURN msar.get_role(rolename);
+END;
+$$ LANGUAGE plpgsql;
 
 
 ----------------------------------------------------------------------------------------------------
