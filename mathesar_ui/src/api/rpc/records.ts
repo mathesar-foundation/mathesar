@@ -1,25 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-export interface Grouping {
-  /** Each string is a column id */
-  columns: number[];
-  mode: GroupingMode;
-  /**
-   * Preproc needs to contain id of a preproc function.
-   * The number of preproc functions should match the
-   * number of columns, or it should be null.
-   */
-  preproc: (string | null)[] | null;
-  /**
-   * When `mode` === 'distinct', `num_groups` will always be `null`.
-   *
-   * When `mode` === 'percentile', `num_groups` will give the number of groups,
-   * as specified in the request params.
-   */
-  num_groups: number | null;
-  ranged: boolean;
-  groups: Group[] | null;
-}
+export type ResultValue = string | number | boolean | null;
 
 export type SortDirection = 'asc' | 'desc';
 export interface SortingEntry {
@@ -43,7 +24,6 @@ export interface SqlComparison {
     | 'json_array_contains';
   args: [SqlExpr, SqlExpr];
 }
-
 export interface SqlFunction {
   type:
     | 'null'
@@ -54,36 +34,15 @@ export interface SqlFunction {
     | 'email_domain';
   args: [SqlExpr];
 }
-
 export interface SqlLiteral {
   type: 'literal';
   value: string | number | null;
 }
-
 export interface SqlColumn {
   type: 'attnum';
   value: number;
 }
-
 export type SqlExpr = SqlComparison | SqlFunction | SqlLiteral | SqlColumn;
-
-export interface RecordsListParams {
-  database_id: number;
-  table_oid: number;
-  limit?: number;
-  offset?: number;
-  order?: SortingEntry[];
-  group?: Pick<Grouping, 'columns' | 'preproc'>;
-  filter?: SqlExpr;
-  search_fuzzy?: Record<string, unknown>[];
-}
-
-export type ResultValue = string | number | boolean | null;
-
-/** keys are stringified column ids */
-export type Result = Record<string, ResultValue>;
-
-export type GroupingMode = 'distinct' | 'percentile';
 
 export interface Group {
   /**
@@ -92,26 +51,34 @@ export interface Group {
    */
   count: number;
   /**
-   * eq_value will contain preprocessed value when grouping contains preproc
-   * functions. In other cases, it will be identical to first_value.
+   * Keys are stringified column attnums. Values are the values of those
+   * columns _after_ the preproc functions have been applied.
    */
-  eq_value: Result;
-  first_value: Result;
-  /**
-   * When GroupingMode is 'distinct', then `first_value` and `last_value` will
-   * be identical. Separate first and last values are useful when GroupingMode
-   * is 'percentile'. In that case, the first and last values refer to the
-   * values in the order used for window function in the ranged grouping (which
-   * may not be the same as the order used to sort the result set).
-   */
-  last_value: Result;
-  /**
-   * Each number refers to the index of a record in the response result. This
-   * array will only indices for records returned on the page. If the page is
-   * too small to show all the records, some indices will be missing here.
-   */
+  results_eq: Record<string, ResultValue>;
   result_indices: number[];
 }
+export interface Grouping {
+  /** Each value is a column attnum */
+  columns: number[];
+  preproc: (string | null)[];
+}
+export interface GroupingResponse extends Grouping {
+  groups: Group[] | null;
+}
+
+export interface RecordsListParams {
+  database_id: number;
+  table_oid: number;
+  limit?: number;
+  offset?: number;
+  order?: SortingEntry[];
+  grouping?: Grouping;
+  filter?: SqlExpr;
+  search_fuzzy?: Record<string, unknown>[];
+}
+
+/** keys are stringified column ids */
+export type Result = Record<string, ResultValue>;
 
 /**
  * Provides the data necessary to render one Record Summary, given a summary
@@ -127,7 +94,7 @@ export interface Group {
  * value to be rendered within the template. Because record summaries can be
  * transitive, the value may lie within a column several tables away. The alias
  * needs to represent the full path so that we avoid collisions between two FK
- * columns which point to the same table. The front end does not need to parse
+ * columns whitttch point to the same table. The front end does not need to parse
  * the column alias -- it just needs to match aliases within templates to
  * aliases within sets of input data.
  *
@@ -150,7 +117,7 @@ export interface ApiDataForRecordSummariesInFkColumn {
 
 export interface RecordsResponse {
   count: number;
-  grouping: Grouping | null;
+  grouping: GroupingResponse | null;
   results: Result[];
   /**
    * Each item in this array can be matched to each FK column in the table.
