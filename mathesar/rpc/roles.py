@@ -9,6 +9,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 from db.roles.operations.select import get_roles
+from db.roles.operations.create import create_role
 
 
 class RoleMember(TypedDict):
@@ -53,6 +54,10 @@ class RoleInfo(TypedDict):
     description: Optional[str]
     members: Optional[list[RoleMember]]
 
+    @classmethod
+    def from_dict(cls, d):
+        return cls
+
 
 @rpc_method(name="roles.list")
 @http_basic_auth_login_required
@@ -71,5 +76,14 @@ def list_(*, database_id: int, **kwargs) -> list[RoleInfo]:
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         roles = get_roles(conn)
+    return [RoleInfo.from_dict(role) for role in roles]
 
-    return roles
+
+@rpc_method(name="roles.add")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def add(*, rolename: str, database_id: int, password: str, login: bool, **kwargs) -> RoleInfo:
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        role = create_role(rolename, password, login, conn)
+    return RoleInfo.from_dict(role)
