@@ -89,10 +89,10 @@ def create_many_to_many_link(engine, schema_oid, map_table_name, referents_dict)
             [
                 {"column_name": c, "referent_table_oid": i}
                 for c, i in zip(
-                        referents_dict['column_names'],
-                        referents_dict['referent_table_oids'],
+                    referents_dict['column_names'],
+                    referents_dict['referent_table_oids'],
                 )
-             ]
+            ]
         )
     ).fetchone()[0]
 
@@ -120,6 +120,6 @@ def add_mapping_table(
         conn,
         'add_mapping_table',
         schema_oid,
-        map_table_name,
+        table_name,
         json.dumps(mapping_columns)
     )
