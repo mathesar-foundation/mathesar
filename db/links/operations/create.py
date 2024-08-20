@@ -25,10 +25,10 @@ def create_foreign_key_link(
     """
     return execute_msar_func_with_engine(
         engine,
-        'create_many_to_one_link',
-        referent_table_oid,
-        referrer_table_oid,
+        'add_foreign_key_column',
         referrer_column_name,
+        referrer_table_oid,
+        referent_table_oid,
         unique_link
     ).fetchone()[0]
 

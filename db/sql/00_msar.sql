@@ -3112,19 +3112,19 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.create_many_to_one_link(
-  frel_id oid,
-  rel_id oid,
+msar.add_foreign_key_column(
   col_name text,
+  rel_id oid,
+  frel_id oid,
   unique_link boolean DEFAULT false
 ) RETURNS smallint AS $$/* 
 Create a many-to-one or a one-to-one link between tables, returning the attnum of the newly created
 column, returning the attnum of the added column.
 
 Args:
-  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
-  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
   col_name: Name of the new column to be created in the referrer table, unquoted.
+  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
+  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
   unique_link: Whether to make the link one-to-one instead of many-to-one.
 */
 DECLARE
@@ -3186,7 +3186,7 @@ DECLARE
   added_table_id oid;
 BEGIN
   added_table_id := msar.add_mathesar_table(sch_id, tab_name , NULL, NULL, NULL);
-  PERFORM msar.create_many_to_one_link(a.rel_id, added_table_id, b.col_name)
+  PERFORM msar.add_foreign_key_column(b.col_name, added_table_id, a.rel_id)
   FROM unnest(from_rel_ids) WITH ORDINALITY AS a(rel_id, idx)
   JOIN unnest(col_names) WITH ORDINALITY AS b(col_name, idx) USING (idx);
   RETURN added_table_id;
@@ -3236,7 +3236,7 @@ BEGIN
     format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
   );
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
-  fkey_attnum := msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
+  fkey_attnum := msar.add_foreign_key_column(fkey_name, tab_id, extracted_table_id);
   -- Insert the data from the original table's columns into the extracted columns, and add
   -- appropriate fkey values to the new fkey column in the original table to give the proper
   -- mapping.

@@ -1129,10 +1129,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_create_many_to_one_link() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_add_foreign_key_column() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_link_tables();
-  PERFORM msar.create_many_to_one_link(
+  PERFORM msar.add_foreign_key_column(
     frel_id => 'actors'::regclass::oid,
     rel_id => 'movies'::regclass::oid,
     col_name => 'act_id'
@@ -1147,7 +1147,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_one_to_one_link() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_link_tables();
-  PERFORM msar.create_many_to_one_link(
+  PERFORM msar.add_foreign_key_column(
     frel_id => 'actors'::regclass::oid,
     rel_id => 'movies'::regclass::oid,
     col_name => 'act_id',
