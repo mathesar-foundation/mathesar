@@ -75,23 +75,15 @@ export class Grouping {
     });
   }
 
-  recordsRequestParams(): Pick<RecordsListParams, 'group'> {
+  recordsRequestParams(): Pick<RecordsListParams, 'grouping'> {
     if (!this.entries.length) {
       return {};
     }
-    const request: RecordsListParams['group'] = {
-      columns: [],
-      preproc: [],
-    };
-    this.entries.forEach((entry) => {
-      request.columns.push(entry.columnId);
-      request.preproc?.push(entry.preprocFnId ?? null);
-    });
-    if (request.preproc?.every((entry) => !isDefinedNonNullable(entry))) {
-      request.preproc = null;
-    }
     return {
-      group: request,
+      grouping: {
+        columns: this.entries.map((e) => e.columnId),
+        preproc: this.entries.map((e) => e.preprocFnId ?? null),
+      },
     };
   }
 
