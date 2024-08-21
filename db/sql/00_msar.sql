@@ -2773,7 +2773,16 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.infer_column_data_type(tab_id regclass, col_id smallint) RETURNS regtype AS $$
+msar.infer_column_data_type(tab_id regclass, col_id smallint) RETURNS regtype AS $$/*
+Infer the best type for a given column.
+
+Note that we currently only try for `text` columns, since we only do this at import. I.e.,
+if the column is some other type we just return that original type.
+
+Args:
+  tab_id: The OID of the table of the column whose type we're inferring.
+  col_id: The attnum of the column whose type we're inferring.
+*/
 DECLARE
   inferred_type regtype;
   infer_sequence_raw text[] := ARRAY[
@@ -2833,8 +2842,20 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.infer_table_column_data_types(tab_id regclass) RETURNS jsonb AS $$
-SELECT jsonb_object_agg(attnum, msar.infer_column_data_type(attrelid, attnum))
+msar.infer_table_column_data_types(tab_id regclass) RETURNS jsonb AS $$/*
+Infer the best type for each column in the table.
+
+Currently we only suggest different types for columns which originate as type `text`.
+
+Args:
+  tab_id: The OID of the table whose columns we're inferring types for.
+
+The response JSON will have attnum keys, and values will be the result of `format_type`
+for the inferred type of each column. Restricted to columns to which the user has access.
+*/
+SELECT jsonb_object_agg(
+  attnum, pg_catalog.format_type(msar.infer_column_data_type(attrelid, attnum), null)
+)
 FROM pg_catalog.pg_attribute
 WHERE
   attrelid = tab_id
