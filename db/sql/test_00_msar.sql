@@ -1129,10 +1129,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_create_many_to_one_link() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_add_foreign_key_column() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_link_tables();
-  PERFORM msar.create_many_to_one_link(
+  PERFORM msar.add_foreign_key_column(
     frel_id => 'actors'::regclass::oid,
     rel_id => 'movies'::regclass::oid,
     col_name => 'act_id'
@@ -1147,7 +1147,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_one_to_one_link() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_link_tables();
-  PERFORM msar.create_many_to_one_link(
+  PERFORM msar.add_foreign_key_column(
     frel_id => 'actors'::regclass::oid,
     rel_id => 'movies'::regclass::oid,
     col_name => 'act_id',
@@ -1161,14 +1161,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_create_many_to_many_link() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_add_mapping_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_link_tables();
-  PERFORM msar.create_many_to_many_link(
+  PERFORM msar.add_mapping_table(
     sch_id => 'public'::regnamespace::oid,
     tab_name => 'movies_actors',
-    from_rel_ids => '{}'::oid[] || 'movies'::regclass::oid || 'actors'::regclass::oid,
-    col_names => '{"movie_id", "actor_id"}'::text[]
+    mapping_columns => jsonb_build_array(
+      jsonb_build_object('column_name', 'movie_id', 'referent_table_oid', 'movies'::regclass::oid),
+      jsonb_build_object('column_name', 'actor_id', 'referent_table_oid', 'actors'::regclass::oid)
+    )
   );
   RETURN NEXT has_table('public'::name, 'movies_actors'::name);
   RETURN NEXT has_column('movies_actors', 'movie_id');

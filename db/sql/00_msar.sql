@@ -3112,19 +3112,19 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.create_many_to_one_link(
-  frel_id oid,
-  rel_id oid,
+msar.add_foreign_key_column(
   col_name text,
+  rel_id oid,
+  frel_id oid,
   unique_link boolean DEFAULT false
 ) RETURNS smallint AS $$/* 
 Create a many-to-one or a one-to-one link between tables, returning the attnum of the newly created
 column, returning the attnum of the added column.
 
 Args:
-  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
-  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
   col_name: Name of the new column to be created in the referrer table, unquoted.
+  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
+  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
   unique_link: Whether to make the link one-to-one instead of many-to-one.
 */
 DECLARE
@@ -3168,27 +3168,28 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.create_many_to_many_link(
+msar.add_mapping_table(
   sch_id oid,
   tab_name text,
-  from_rel_ids oid[],
-  col_names text[]
-) RETURNS oid AS $$/* 
+  mapping_columns jsonb
+) RETURNS oid AS $$/*
 Create a many-to-many link between tables, returning the oid of the newly created table.
 
 Args:
   sch_id: The OID of the schema in which new referrer table is to be created.
   tab_name: Name of the referrer table to be created.
-  from_rel_ids: The OIDs of the referent tables.
-  col_names: Names of the new column to be created in the referrer table, unqoted.
+  mapping_columns: An array of objects giving the foreign key columns for the new table.
+
+The elements of the mapping_columns array must have the form
+  {"column_name": <str>, "referent_table_oid": <int>}
+
 */
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, tab_name , NULL, NULL, NULL);
-  PERFORM msar.create_many_to_one_link(a.rel_id, added_table_id, b.col_name)
-  FROM unnest(from_rel_ids) WITH ORDINALITY AS a(rel_id, idx)
-  JOIN unnest(col_names) WITH ORDINALITY AS b(col_name, idx) USING (idx);
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL);
+  PERFORM msar.add_foreign_key_column(column_name, added_table_id, referent_table_oid)
+  FROM jsonb_to_recordset(mapping_columns) AS x(column_name text, referent_table_oid oid);
   RETURN added_table_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -3236,7 +3237,7 @@ BEGIN
     format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
   );
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
-  fkey_attnum := msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
+  fkey_attnum := msar.add_foreign_key_column(fkey_name, tab_id, extracted_table_id);
   -- Insert the data from the original table's columns into the extracted columns, and add
   -- appropriate fkey values to the new fkey column in the original table to give the proper
   -- mapping.
