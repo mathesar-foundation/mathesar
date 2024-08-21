@@ -7,6 +7,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.links.operations import create as links_create
+from db.tables.operations import infer_types
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -80,3 +81,26 @@ def add_mapping_table(
         links_create.add_mapping_table(
             conn, schema_oid, table_name, mapping_columns
         )
+
+
+@rpc_method(name="data_modeling.suggest_types")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> None:
+    """
+    Infer the best type for each column in the table.
+
+    Currently we only suggest different types for columns which originate
+    as type `text`.
+
+    Args:
+        tab_id: The OID of the table whose columns we're inferring types for.
+        database_id: The Django id of the database containing the table.
+
+    The response JSON will have attnum keys, and values will be the
+    result of `format_type` for the inferred type of each column, i.e., the
+    canonical string referring to the type.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        return infer_types.infer_table_column_data_types(conn, table_oid)
