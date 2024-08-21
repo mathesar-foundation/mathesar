@@ -2748,6 +2748,103 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_cast_expr(tab_id regclass, col_id smallint, typ_id regtype) RETURNS text AS $$/*
+Build an expression for casting a column in Mathesar, returning the text of that expression.
+
+We fall back silently to default casting behavior if the mathesar_types namespace is missing.
+However, we do throw an error in cases where the schema exists, but the type casting function
+doesn't. This is assumed to be an error the user should know about.
+
+Args:
+  tab_id: The OID of the table whose column we're casting.
+  col_id: The attnum of the column in the table.
+  typ_id: The OID of the type we will cast to.
+*/
+SELECT CASE
+  WHEN msar.schema_exists('mathesar_types') THEN
+    msar.get_cast_function_name(typ_id)
+    || '('
+    || format('%I', msar.get_column_name(tab_id, col_id))
+    || ')'
+  ELSE
+    format('%I', msar.get_column_name(tab_id, col_id)) || '::' || typ_id::text
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.infer_column_data_type(tab_id regclass, col_id smallint) RETURNS regtype AS $$
+DECLARE
+  inferred_type regtype;
+  infer_sequence_raw text[] := ARRAY[
+    'boolean',
+    'date',
+    'numeric',
+    'mathesar_types.mathesar_money',
+    'timestamp without time zone',
+    'timestamp with time zone',
+    'time without time zone',
+    'interval',
+    'mathesar_types.email',
+    'mathesar_types.mathesar_json_array',
+    'mathesar_types.mathesar_json_object',
+    'mathesar_types.uri'
+  ];
+  infer_sequence regtype[];
+  column_nonempty boolean;
+  test_type regtype;
+BEGIN
+  infer_sequence := array_agg(pg_catalog.to_regtype(t))
+    FILTER (WHERE pg_catalog.to_regtype(t) IS NOT NULL)
+    FROM unnest(infer_sequence_raw) AS x(t);
+  EXECUTE format(
+    'SELECT EXISTS (SELECT 1 FROM %1$I.%2$I WHERE %3$I IS NOT NULL)',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id)
+  ) INTO column_nonempty;
+  inferred_type := atttypid FROM pg_catalog.pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+  IF inferred_type = 'text'::regtype AND column_nonempty THEN
+    FOREACH test_type IN ARRAY infer_sequence
+      LOOP
+        BEGIN
+          EXECUTE format(
+            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I',
+            msar.build_cast_expr(tab_id, col_id, test_type),
+            msar.get_relation_schema_name(tab_id),
+            msar.get_relation_name(tab_id)
+          );
+          inferred_type := test_type;
+          EXIT;
+        EXCEPTION WHEN OTHERS THEN
+          RAISE NOTICE 'Test failed: %', format(
+            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I',
+            msar.build_cast_expr(tab_id, col_id, test_type),
+            msar.get_relation_schema_name(tab_id),
+            msar.get_relation_name(tab_id)
+          );
+          -- do nothing, just try the next type.
+        END;
+      END LOOP;
+    END IF;
+  RETURN inferred_type;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.infer_table_column_data_types(tab_id regclass) RETURNS jsonb AS $$
+SELECT jsonb_object_agg(attnum, msar.infer_column_data_type(attrelid, attnum))
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 __msar.build_col_drop_default_expr(tab_id oid, col_id integer, new_type text, new_default jsonb)
   RETURNS TEXT AS $$/*
 Build an expression for dropping a column's default, returning the text of that expression.
