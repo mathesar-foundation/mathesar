@@ -1061,6 +1061,12 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.create_basic_mathesar_user(username text, password_ text) RETURNS TEXT AS $$/*
+Given the username and password_, creates a user on the database server.
+Additionally, grants CREATE, CONNECT and TEMP on the current database to the created user.
+
+Args:
+  username: The name of the user to be created, unquoted.
+  password_: The password for the user to set, unquoted.
 */
 BEGIN
   PERFORM __msar.exec_ddl('CREATE USER %I WITH PASSWORD %L', username, password_);
@@ -1095,6 +1101,28 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.create_role(rolename text, password_ text, login_ boolean) RETURNS jsonb AS $$/*
+Creates a login/non-login role, depending on whether the login_ flag is set.
+Only the rolename field is required, the password field is required only if login_ is set to true.
+
+Returns a JSON object describing the created role in the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "super": <bool>
+    "inherits": <bool>
+    "create_role": <bool>
+    "create_db": <bool>
+    "login": <bool>
+    "description": <str|null>
+    "members": <[
+        { "oid": <int>, "admin": <bool> }
+      ]|null>
+  }
+
+Args:
+  rolename: The name of the role to be created, unquoted.
+  password_: The password for the rolename to set, unquoted.
+  login_: Specify whether the role to be created could login.
 */
 DECLARE
   sch_name text;

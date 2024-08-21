@@ -68,7 +68,7 @@ def list_(*, database_id: int, **kwargs) -> list[RoleInfo]:
     Requires a database id inorder to connect to the server.
 
     Args:
-        database_id: The Django id of the database containing the table.
+        database_id: The Django id of the database.
 
     Returns:
         A list of roles present on the database server.
@@ -82,7 +82,26 @@ def list_(*, database_id: int, **kwargs) -> list[RoleInfo]:
 @rpc_method(name="roles.add")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def add(*, rolename: str, database_id: int, password: str, login: bool, **kwargs) -> RoleInfo:
+def add(
+    *,
+    rolename: str,
+    database_id: int,
+    password: str = None,
+    login: bool = None,
+    **kwargs
+) -> RoleInfo:
+    """
+    Add a new login/non-login role on a database server.
+
+    Args:
+        rolename: The name of the role to be created.
+        database_id: The Django id of the database.
+        password: The password for the rolename to set.
+        login: Whether the role to be created could login.
+
+    Returns:
+        A dict describing the created role.
+    """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         role = create_role(rolename, password, login, conn)
