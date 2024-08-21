@@ -94,7 +94,7 @@ def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> None:
     as type `text`.
 
     Args:
-        tab_id: The OID of the table whose columns we're inferring types for.
+        tab_oid: The OID of the table whose columns we're inferring types for.
         database_id: The Django id of the database containing the table.
 
     The response JSON will have attnum keys, and values will be the
