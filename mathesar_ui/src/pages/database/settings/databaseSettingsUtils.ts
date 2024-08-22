@@ -51,8 +51,8 @@ class DatabaseSettingsContext {
 
   constructor(database: Database) {
     this.database = database;
-    this.configuredRoles = database.fetchConfiguredRoles();
-    this.roles = database.fetchRoles();
+    this.configuredRoles = database.constructConfiguredRolesStore();
+    this.roles = database.constructRolesStore();
     this.combinedLoginRoles = derived(
       [this.roles, this.configuredRoles],
       ([$roles, $configuredRoles]) => {
@@ -75,7 +75,7 @@ class DatabaseSettingsContext {
           }));
         }
         if ($configuredRoles.isStable && configuredRoles) {
-          [...configuredRoles.values()].map((configuredRole) => ({
+          return [...configuredRoles.values()].map((configuredRole) => ({
             name: configuredRole.name,
             configuredRole,
           }));
@@ -83,7 +83,7 @@ class DatabaseSettingsContext {
         return [];
       },
     );
-    this.collaborators = database.fetchCollaborators();
+    this.collaborators = database.constructCollaboratorsStore();
     this.users = new AsyncStore(getUsersPromise);
   }
 

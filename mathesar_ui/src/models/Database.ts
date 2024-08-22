@@ -25,7 +25,7 @@ export class Database {
     this.server = props.server;
   }
 
-  fetchConfiguredRoles() {
+  constructConfiguredRolesStore() {
     return new AsyncRpcApiStore(api.configured_roles.list, {
       postProcess: (rawConfiguredRoles) =>
         new SortedImmutableMap(
@@ -38,7 +38,7 @@ export class Database {
     });
   }
 
-  fetchRoles() {
+  constructRolesStore() {
     return new AsyncRpcApiStore(api.roles.list, {
       postProcess: (rawRoles) =>
         new SortedImmutableMap(
@@ -51,7 +51,7 @@ export class Database {
     });
   }
 
-  fetchCollaborators() {
+  constructCollaboratorsStore() {
     return new AsyncRpcApiStore(api.collaborators.list, {
       postProcess: (rawCollaborators) =>
         new ImmutableMap(
