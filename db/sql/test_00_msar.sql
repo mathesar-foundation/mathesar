@@ -2760,18 +2760,18 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_get_roles() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_list_roles() RETURNS SETOF TEXT AS $$
 DECLARE
   initial_role_count int;
   foo_role jsonb;
   bar_role jsonb;
 BEGIN
-  SELECT jsonb_array_length(msar.get_roles()) INTO initial_role_count;
+  SELECT jsonb_array_length(msar.list_roles()) INTO initial_role_count;
 
   -- Create role and check if role is present in response & count is increased
   CREATE ROLE foo;
-  RETURN NEXT is(jsonb_array_length(msar.get_roles()), initial_role_count + 1);
-  SELECT jsonb_path_query(msar.get_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
+  RETURN NEXT is(jsonb_array_length(msar.list_roles()), initial_role_count + 1);
+  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
 
   -- Check if role has expected properties
   RETURN NEXT is(jsonb_typeof(foo_role), 'object');
@@ -2785,7 +2785,7 @@ BEGIN
 
   -- Modify properties and check role again
   ALTER ROLE foo WITH CREATEDB CREATEROLE LOGIN NOINHERIT;
-  SELECT jsonb_path_query(msar.get_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
+  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
   RETURN NEXT is((foo_role->>'super')::boolean, false);
   RETURN NEXT is((foo_role->>'inherits')::boolean, false);
   RETURN NEXT is((foo_role->>'create_role')::boolean, true);
@@ -2794,15 +2794,15 @@ BEGIN
 
   -- Add comment and check if comment is present
   COMMENT ON ROLE foo IS 'A test role';
-  SELECT jsonb_path_query(msar.get_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
+  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
   RETURN NEXT is(foo_role->'description'#>>'{}', 'A test role');
 
   -- Add members and check result
   CREATE ROLE bar;
   GRANT foo TO bar;
-  RETURN NEXT is(jsonb_array_length(msar.get_roles()), initial_role_count + 2);
-  SELECT jsonb_path_query(msar.get_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
-  SELECT jsonb_path_query(msar.get_roles(), '$[*] ? (@.name == "bar")') INTO bar_role;
+  RETURN NEXT is(jsonb_array_length(msar.list_roles()), initial_role_count + 2);
+  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "foo")') INTO foo_role;
+  SELECT jsonb_path_query(msar.list_roles(), '$[*] ? (@.name == "bar")') INTO bar_role;
   RETURN NEXT is(jsonb_typeof(foo_role->'members'), 'array');
   RETURN NEXT is(
     foo_role->'members'->0->>'oid', bar_role->>'oid'
@@ -2811,7 +2811,7 @@ BEGIN
 
   -- Drop role and ensure role is not present in response
   DROP ROLE foo;
-  RETURN NEXT ok(NOT jsonb_path_exists(msar.get_roles(), '$[*] ? (@.name == "foo")'));
+  RETURN NEXT ok(NOT jsonb_path_exists(msar.list_roles(), '$[*] ? (@.name == "foo")'));
 END;
 $$ LANGUAGE plpgsql;
 

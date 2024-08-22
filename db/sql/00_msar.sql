@@ -897,7 +897,49 @@ FROM (
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION msar.get_roles() RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
+(
+  oid oid,
+  name name,
+  super boolean,
+  inherits boolean,
+  create_role boolean,
+  create_db boolean,
+  login boolean,
+  description text,
+  members jsonb
+) AS $$/*
+Returns a table describing all the roles present on the database server.
+*/
+WITH rolemembers as (
+  SELECT
+    pgr.oid AS oid,
+    jsonb_agg(
+      jsonb_build_object(
+        'oid', pgm.member::bigint,
+        'admin', pgm.admin_option
+      )
+    ) AS members
+    FROM pg_catalog.pg_roles pgr
+      INNER JOIN pg_catalog.pg_auth_members pgm ON pgr.oid=pgm.roleid
+    GROUP BY pgr.oid
+)
+SELECT
+  r.oid::bigint AS oid,
+  r.rolname AS name,
+  r.rolsuper AS super,
+  r.rolinherit AS inherits,
+  r.rolcreaterole AS create_role,
+  r.rolcreatedb AS create_db,
+  r.rolcanlogin AS login,
+  pg_catalog.shobj_description(r.oid, 'pg_authid') AS description,
+  rolemembers.members AS members
+FROM pg_catalog.pg_roles r
+LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.list_roles() RETURNS jsonb AS $$/*
 Return a json array of objects with the list of roles in a database server,
 excluding pg system roles.
 
@@ -916,35 +958,9 @@ Each returned JSON object in the array has the form:
       ]|null>
   }
 */
-WITH rolemembers as (
-  SELECT
-    pgr.oid AS oid,
-    jsonb_agg(
-      jsonb_build_object(
-        'oid', pgm.member::bigint,
-        'admin', pgm.admin_option
-      )
-    ) AS members
-    FROM pg_catalog.pg_roles pgr
-      INNER JOIN pg_catalog.pg_auth_members pgm ON pgr.oid=pgm.roleid
-    GROUP BY pgr.oid
-)
 SELECT jsonb_agg(role_data)
-FROM (
-  SELECT
-    r.oid::bigint AS oid,
-    r.rolname AS name,
-    r.rolsuper AS super,
-    r.rolinherit AS inherits,
-    r.rolcreaterole AS create_role,
-    r.rolcreatedb AS create_db,
-    r.rolcanlogin AS login,
-    pg_catalog.shobj_description(r.oid, 'pg_authid') AS description,
-    rolemembers.members AS members
-  FROM pg_catalog.pg_roles r
-    LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid
-  WHERE r.rolname NOT LIKE 'pg_%'
-) AS role_data;
+FROM msar.role_info_table() AS role_data
+WHERE role_data.name NOT LIKE 'pg_%';
 $$ LANGUAGE SQL STABLE;
 
 
@@ -966,33 +982,9 @@ The returned JSON object has the form:
       ]|null>
   }
 */
-WITH rolemembers as (
-  SELECT
-    pgr.oid AS oid,
-    jsonb_agg(
-      jsonb_build_object(
-        'oid', pgm.member::bigint,
-        'admin', pgm.admin_option
-      )
-    ) AS members
-  FROM pg_catalog.pg_roles pgr
-    INNER JOIN pg_catalog.pg_auth_members pgm ON pgr.oid=pgm.roleid
-  GROUP BY pgr.oid
-)
-SELECT jsonb_build_object(
-  'oid', r.oid::bigint,
-  'name', r.rolname,
-  'super', r.rolsuper,
-  'inherits', r.rolinherit,
-  'create_role', r.rolcreaterole,
-  'create_db', r.rolcreatedb,
-  'login', r.rolcanlogin,
-  'description', pg_catalog.shobj_description(r.oid, 'pg_authid'),
-  'members', rolemembers.members
-)
-FROM pg_catalog.pg_roles r
-  LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid
-WHERE r.rolname = rolename;
+SELECT to_jsonb(role_data)
+FROM msar.role_info_table() AS role_data
+WHERE role_data.name = rolename;
 $$ LANGUAGE SQL STABLE;
 
 
@@ -1069,8 +1061,8 @@ Args:
   password_: The password for the user to set, unquoted.
 */
 BEGIN
-  PERFORM __msar.exec_ddl('CREATE USER %I WITH PASSWORD %L', username, password_);
-  PERFORM __msar.exec_ddl(
+  EXECUTE format('CREATE USER %I WITH PASSWORD %L', username, password_);
+  EXECUTE format(
     'GRANT CREATE, CONNECT, TEMP ON DATABASE %I TO %I',
     current_database()::text,
     username
@@ -1129,10 +1121,10 @@ DECLARE
   mathesar_schemas text[] := ARRAY['mathesar_types', '__msar', 'msar'];
 BEGIN
   CASE WHEN login_ THEN
-    PERFORM create_basic_mathesar_user(rolename, password_);
+    PERFORM msar.create_basic_mathesar_user(rolename, password_);
   ELSE
-    PERFORM __msar.exec_ddl('CREATE ROLE %I', rolename);
-    PERFORM __msar.exec_ddl(
+    EXECUTE format('CREATE ROLE %I', rolename);
+    EXECUTE format(
       'GRANT CREATE, TEMP ON DATABASE %I TO %I',
       current_database()::text,
       rolename
