@@ -56,15 +56,15 @@
     --color-text-muted: #6b7280;
     --color-substring-match: rgb(254, 221, 72);
     --color-substring-match-light: rgba(254, 221, 72, 0.2);
-    --text-size-xx-small: var(--size-xx-small); // 8px
-    --text-size-x-small: var(--size-x-small); // 10px
-    --text-size-small: var(--size-small); // 12px
-    --text-size-base: var(--size-base); // 14px
-    --text-size-large: var(--size-large); // 16px
-    --text-size-x-large: var(--size-x-large); // 18px
-    --text-size-xx-large: var(--size-xx-large); // 20px
-    --text-size-ultra-large: var(--size-ultra-large); // 24px
-    --text-size-super-ultra-large: var(--size-super-ultra-large); // 32px
+    --text-size-xx-small: var(--size-xx-small);
+    --text-size-x-small: var(--size-x-small);
+    --text-size-small: var(--size-small);
+    --text-size-base: var(--size-base);
+    --text-size-large: var(--size-large);
+    --text-size-x-large: var(--size-x-large);
+    --text-size-xx-large: var(--size-xx-large);
+    --text-size-ultra-large: var(--size-ultra-large);
+    --text-size-super-ultra-large: var(--size-super-ultra-large);
 
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;

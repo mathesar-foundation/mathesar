@@ -10,7 +10,6 @@ import {
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { Database } from '@mathesar/api/rpc/databases';
 import type {
   Group as ApiGroup,
   GroupingResponse as ApiGroupingResponse,
@@ -19,6 +18,7 @@ import type {
   RecordsResponse,
 } from '@mathesar/api/rpc/records';
 import type { Table } from '@mathesar/api/rpc/tables';
+import type { Database } from '@mathesar/models/Database';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';

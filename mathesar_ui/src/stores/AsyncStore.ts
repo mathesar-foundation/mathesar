@@ -10,7 +10,10 @@ import {
 } from 'svelte/store';
 
 import { getErrorMessage } from '@mathesar/utils/errors';
-import type { CancellablePromise } from '@mathesar-component-library';
+import {
+  type CancellablePromise,
+  hasProperty,
+} from '@mathesar-component-library';
 
 export type AsyncStoreSettlement<T, E> =
   | { state: 'resolved'; value: T }
@@ -103,7 +106,7 @@ export default class AsyncStore<Props, T>
 
   private getError: (caughtValue: unknown) => string;
 
-  private value: Writable<AsyncStoreValue<T, string>> = writable(
+  protected value: Writable<AsyncStoreValue<T, string>> = writable(
     new AsyncStoreValue({ isLoading: false }),
   );
 
@@ -111,42 +114,50 @@ export default class AsyncStore<Props, T>
 
   constructor(
     run: (props: Props) => Promise<T> | CancellablePromise<T>,
-    getError: (caughtValue: unknown) => string = getErrorMessage,
+    options?: Partial<{
+      getError: (caughtValue: unknown) => string;
+      initialValue: T;
+    }>,
   ) {
     this.runFn = run;
-    this.getError = getError;
+    this.getError = options?.getError ?? getErrorMessage;
+    if (hasProperty(options, 'initialValue')) {
+      this.value = writable(
+        new AsyncStoreValue<T, string>({
+          isLoading: false,
+          settlement: { state: 'resolved', value: options.initialValue as T },
+        }),
+      );
+    }
   }
 
   subscribe(
-    run: Subscriber<AsyncStoreValue<T, string>>,
+    subscriber: Subscriber<AsyncStoreValue<T, string>>,
     invalidate?:
       | ((value?: AsyncStoreValue<T, string> | undefined) => void)
       | undefined,
   ): Unsubscriber {
-    return this.value.subscribe(run, invalidate);
+    return this.value.subscribe(subscriber, invalidate);
   }
 
   async run(props: Props): Promise<AsyncStoreValue<T, string>> {
-    this.cancel();
-    this.value.update((v) => new AsyncStoreValue({ ...v, isLoading: true }));
+    this.beforeRun();
     this.promise = this.runFn(props);
     try {
-      this.value.set(
-        new AsyncStoreValue({
-          settlement: { state: 'resolved', value: await this.promise },
-          isLoading: false,
-        }),
-      );
+      this.setResolvedValue(await this.promise);
       return get(this.value);
     } catch (error) {
-      this.value.set(
-        new AsyncStoreValue({
-          settlement: { state: 'rejected', error: this.getError(error) },
-          isLoading: false,
-        }),
-      );
+      this.setRejectedError(error);
       return get(this.value);
     }
+  }
+
+  async runIfNotInitialized(props: Props): Promise<AsyncStoreValue<T, string>> {
+    const value = get(this.value);
+    if (!value.hasInitialized) {
+      return this.run(props);
+    }
+    return value;
   }
 
   /**
@@ -164,6 +175,39 @@ export default class AsyncStore<Props, T>
   reset() {
     this.cancel();
     this.value.set(new AsyncStoreValue({ isLoading: false }));
+  }
+
+  updateResolvedValue(updater: (resolvedValue: T) => T) {
+    const value = get(this.value);
+    if (value.isOk && value.resolvedValue) {
+      const updatedValue = updater(value.resolvedValue);
+      this.setResolvedValue(updatedValue);
+    }
+  }
+
+  protected beforeRun() {
+    this.cancel();
+    this.value.update((v) => new AsyncStoreValue({ ...v, isLoading: true }));
+  }
+
+  protected setResolvedValue(value: T) {
+    this.cancel();
+    this.value.set(
+      new AsyncStoreValue({
+        isLoading: false,
+        settlement: { state: 'resolved', value },
+      }),
+    );
+  }
+
+  protected setRejectedError(error: unknown) {
+    this.cancel();
+    this.value.set(
+      new AsyncStoreValue({
+        settlement: { state: 'rejected', error: this.getError(error) },
+        isLoading: false,
+      }),
+    );
   }
 }
 

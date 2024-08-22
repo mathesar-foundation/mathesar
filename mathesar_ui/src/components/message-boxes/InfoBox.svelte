@@ -18,7 +18,4 @@
     --MessageBox__border: solid 1px var(--sky-300);
     --MessageBox__icon-color: var(--sky-800);
   }
-  .info-box:not(.full-width) {
-    max-width: max-content;
-  }
 </style>

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { router } from 'tinro';
 
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Database } from '@mathesar/models/Database';
   import { getTablePageUrl } from '@mathesar/routes/urls';
   import { createTable } from '@mathesar/stores/tables';
   import { Button, Spinner } from '@mathesar-component-library';

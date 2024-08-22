@@ -2,10 +2,11 @@
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
 
   export let errors: string[];
+  export let fullWidth = false;
 </script>
 
 {#if errors.length}
-  <ErrorBox>
+  <ErrorBox {fullWidth}>
     {#if errors.length === 1}
       {errors[0]}
     {:else}
