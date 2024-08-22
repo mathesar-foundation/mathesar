@@ -101,3 +101,34 @@ def test_data_modeling_add_mapping_table(rf, monkeypatch):
         database_id=_database_id,
         request=request,
     )
+
+
+def test_data_modeling_suggest_types(rf, monkeypatch):
+    _username = 'alice'
+    _password = 'pass1234'
+    _table_oid = 12345
+    _database_id = 2
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username=_username, password=_password)
+
+    @contextmanager
+    def mock_connect(database_id, user):
+        if database_id == _database_id and user.username == _username:
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_suggest_types(conn, table_oid):
+        if table_oid != _table_oid:
+            raise AssertionError('incorrect parameters passed')
+
+    monkeypatch.setattr(data_modeling, 'connect', mock_connect)
+    monkeypatch.setattr(data_modeling.infer_types, 'infer_table_column_data_types', mock_suggest_types)
+    data_modeling.suggest_types(
+        table_oid=_table_oid,
+        database_id=_database_id,
+        request=request,
+    )
