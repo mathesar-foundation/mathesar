@@ -14,7 +14,7 @@ from db.roles.operations.create import create_role
 
 class RoleMember(TypedDict):
     """
-    Information about a member role of an inherited role.
+    Information about a member role of a directly inherited role.
 
     Attributes:
         oid: The OID of the member role.
@@ -37,7 +37,7 @@ class RoleInfo(TypedDict):
         create_db: Whether the role has CREATEDB attribute.
         login: Whether the role has LOGIN attribute.
         description: A description of the role
-        members: The member roles that inherit the role.
+        members: The member roles that directly inherit the role.
 
     Refer PostgreSQL documenation on:
         - [pg_roles table](https://www.postgresql.org/docs/current/view-pg-roles.html).
