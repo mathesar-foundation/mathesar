@@ -67,7 +67,7 @@
     }}
   >
     <div slot="action">
-      <Button appearance="secondary">
+      <!-- <Button appearance="secondary">
         <span>{$_('database_permissions')}</span>
       </Button>
 
@@ -84,7 +84,7 @@
         <ButtonMenuItem icon={iconDeleteMajor} danger>
           {$_('delete_database')}
         </ButtonMenuItem>
-      </DropdownMenu>
+      </DropdownMenu> -->
     </div>
   </AppSecondaryHeader>
 
