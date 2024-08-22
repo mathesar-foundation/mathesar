@@ -2273,16 +2273,16 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_create_basic_mathesar_user() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_create_role() RETURNS SETOF TEXT AS $$
 BEGIN
-  PERFORM msar.create_basic_mathesar_user('testuser', 'mypass1234');
+  PERFORM msar.create_role('testuser', 'mypass1234', true);
   RETURN NEXT database_privs_are (
     'mathesar_testing', 'testuser', ARRAY['CREATE', 'CONNECT', 'TEMPORARY']
   );
   RETURN NEXT schema_privs_are ('msar', 'testuser', ARRAY['USAGE']);
   RETURN NEXT schema_privs_are ('__msar', 'testuser', ARRAY['USAGE']);
-  PERFORM msar.create_basic_mathesar_user(
-    'Ro"\bert''); DROP SCHEMA public;', 'my''pass1234"; DROP SCHEMA public;'
+  PERFORM msar.create_role(
+    'Ro"\bert''); DROP SCHEMA public;', 'my''pass1234"; DROP SCHEMA public;', true
   );
   RETURN NEXT has_schema('public');
   RETURN NEXT has_user('Ro"\bert''); DROP SCHEMA public;');

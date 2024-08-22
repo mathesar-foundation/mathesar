@@ -1048,49 +1048,6 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 
 
--- Create mathesar user ----------------------------------------------------------------------------
-
-
-CREATE OR REPLACE FUNCTION
-msar.create_basic_mathesar_user(username text, password_ text) RETURNS TEXT AS $$/*
-Given the username and password_, creates a user on the database server.
-Additionally, grants CREATE, CONNECT and TEMP on the current database to the created user.
-
-Args:
-  username: The name of the user to be created, unquoted.
-  password_: The password for the user to set, unquoted.
-*/
-BEGIN
-  EXECUTE format('CREATE USER %I WITH PASSWORD %L', username, password_);
-  EXECUTE format(
-    'GRANT CREATE, CONNECT, TEMP ON DATABASE %I TO %I',
-    current_database()::text,
-    username
-  );
-  PERFORM msar.grant_usage_on_mathesar_schemas(username);
-  RETURN username;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.grant_usage_on_mathesar_schemas(rolename text) RETURNS void AS $$
-DECLARE
-  sch_name text;
-  mathesar_schemas text[] := ARRAY['mathesar_types', '__msar', 'msar'];
-BEGIN
-  FOREACH sch_name IN ARRAY mathesar_schemas LOOP
-    BEGIN
-      PERFORM __msar.exec_ddl('GRANT USAGE ON SCHEMA %I TO %I', sch_name, rolename);
-    EXCEPTION
-      WHEN invalid_schema_name THEN
-        RAISE NOTICE 'Schema % does not exist', sch_name;
-    END;
-  END LOOP;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION
 msar.create_role(rolename text, password_ text, login_ boolean) RETURNS jsonb AS $$/*
 Creates a login/non-login role, depending on whether the login_ flag is set.
@@ -1116,20 +1073,11 @@ Args:
   password_: The password for the rolename to set, unquoted.
   login_: Specify whether the role to be created could login.
 */
-DECLARE
-  sch_name text;
-  mathesar_schemas text[] := ARRAY['mathesar_types', '__msar', 'msar'];
 BEGIN
   CASE WHEN login_ THEN
-    PERFORM msar.create_basic_mathesar_user(rolename, password_);
+    EXECUTE format('CREATE USER %I WITH PASSWORD %L', rolename, password_);
   ELSE
     EXECUTE format('CREATE ROLE %I', rolename);
-    EXECUTE format(
-      'GRANT CREATE, TEMP ON DATABASE %I TO %I',
-      current_database()::text,
-      rolename
-    );
-    PERFORM msar.grant_usage_on_mathesar_schemas(rolename);
   END CASE;
   RETURN msar.get_role(rolename);
 END;
