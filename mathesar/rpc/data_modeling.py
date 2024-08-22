@@ -86,7 +86,7 @@ def add_mapping_table(
 @rpc_method(name="data_modeling.suggest_types")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> None:
+def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> dict:
     """
     Infer the best type for each column in the table.
 
