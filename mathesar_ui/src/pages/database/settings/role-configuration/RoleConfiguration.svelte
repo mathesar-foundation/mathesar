@@ -59,7 +59,7 @@
         );
         toast.success($_('role_configuration_removed'));
       } catch (err) {
-        toast.success(getErrorMessage(err));
+        toast.error(getErrorMessage(err));
       }
     }
   }

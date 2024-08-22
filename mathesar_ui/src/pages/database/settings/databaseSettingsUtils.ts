@@ -137,6 +137,11 @@ class DatabaseSettingsContext {
     await collaborator.delete();
     this.collaborators.updateResolvedValue((c) => c.without(collaborator.id));
   }
+
+  async deleteRole(role: Role) {
+    await role.delete();
+    this.roles.updateResolvedValue((r) => r.without(role.oid));
+  }
 }
 
 export function getDatabaseSettingsContext(): Readable<DatabaseSettingsContext> {
