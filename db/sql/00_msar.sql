@@ -899,15 +899,15 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
-  oid oid,
-  name name,
-  super boolean,
-  inherits boolean,
-  create_role boolean,
-  create_db boolean,
-  login boolean,
-  description text,
-  members jsonb
+  oid oid, -- The OID of the role.
+  name name, -- Name of the role.
+  super boolean, -- Whether the role has SUPERUSER status.
+  inherits boolean, -- Whether the role has INHERIT attribute.
+  create_role boolean, -- Whether the role has CREATEROLE attribute.
+  create_db boolean, -- Whether the role has CREATEDB attribute.
+  login boolean, -- Whether the role has LOGIN attribute.
+  description text, -- A description of the role
+  members jsonb -- The member roles that *directly* inherit the role.
 ) AS $$/*
 Returns a table describing all the roles present on the database server.
 */
