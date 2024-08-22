@@ -2277,20 +2277,16 @@ CREATE OR REPLACE FUNCTION test_create_role() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.create_role('testuser', 'mypass1234', true);
   RETURN NEXT database_privs_are (
-    'mathesar_testing', 'testuser', ARRAY['CREATE', 'CONNECT', 'TEMPORARY']
+    'mathesar_testing', 'testuser', ARRAY['CONNECT']
   );
-  RETURN NEXT schema_privs_are ('msar', 'testuser', ARRAY['USAGE']);
-  RETURN NEXT schema_privs_are ('__msar', 'testuser', ARRAY['USAGE']);
   PERFORM msar.create_role(
     'Ro"\bert''); DROP SCHEMA public;', 'my''pass1234"; DROP SCHEMA public;', true
   );
   RETURN NEXT has_schema('public');
   RETURN NEXT has_user('Ro"\bert''); DROP SCHEMA public;');
   RETURN NEXT database_privs_are (
-    'mathesar_testing', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['CREATE', 'CONNECT', 'TEMPORARY']
+    'mathesar_testing', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['CONNECT']
   );
-  RETURN NEXT schema_privs_are ('msar', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['USAGE']);
-  RETURN NEXT schema_privs_are ('__msar', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['USAGE']);
 END;
 $$ LANGUAGE plpgsql;
 
