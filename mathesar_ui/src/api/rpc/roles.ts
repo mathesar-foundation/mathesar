@@ -26,4 +26,31 @@ export const roles = {
     },
     Array<RawRole>
   >(),
+
+  add: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+      rolename: RawRole['name'];
+      login: boolean;
+      password?: string;
+    },
+    RawRole
+  >(),
+
+  set_members: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+      role_oid: RawRole['oid'];
+      members: RawRole['oid'][];
+    },
+    RawRole
+  >(),
+
+  delete: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+      role_oid: RawRole['oid'];
+    },
+    void
+  >(),
 };
