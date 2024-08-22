@@ -93,4 +93,37 @@ export class Database {
       () => promise.cancel(),
     );
   }
+
+  addRole(
+    roleName: string,
+    login: boolean,
+    password?: string,
+  ): CancellablePromise<Role> {
+    const promise = api.roles
+      .add({
+        database_id: this.id,
+        rolename: roleName,
+        login,
+        password,
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then(
+            (rawRole) =>
+              resolve(
+                new Role({
+                  database: this,
+                  rawRole,
+                }),
+              ),
+            reject,
+          )
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
+  }
 }

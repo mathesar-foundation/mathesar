@@ -145,6 +145,23 @@ class DatabaseSettingsContext {
     this.collaborators.updateResolvedValue((c) => c.without(collaborator.id));
   }
 
+  async addRole(
+    props:
+      | {
+          roleName: Role['name'];
+          login: false;
+          password?: never;
+        }
+      | { roleName: Role['name']; login: true; password: string },
+  ) {
+    const newRole = await this.database.addRole(
+      props.roleName,
+      props.login,
+      props.password,
+    );
+    this.roles.updateResolvedValue((r) => r.with(newRole.oid, newRole));
+  }
+
   async deleteRole(role: Role) {
     await role.delete();
     this.roles.updateResolvedValue((r) => r.without(role.oid));

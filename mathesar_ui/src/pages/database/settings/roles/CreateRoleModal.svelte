@@ -9,6 +9,7 @@
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
+  import { toast } from '@mathesar/stores/toast';
   import {
     Checkbox,
     ControlledModal,
@@ -17,6 +18,10 @@
     PasswordInput,
     portalToWindowFooter,
   } from '@mathesar-component-library';
+
+  import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
+
+  const databaseContext = getDatabaseSettingsContext();
 
   export let controller: ModalController;
 
@@ -43,8 +48,20 @@
   ]);
   $: login, password.reset(), confirmPassword.reset();
 
-  function createRole() {
-    //
+  async function createRole() {
+    if (login) {
+      await $databaseContext.addRole({
+        roleName: $roleName,
+        login: true,
+        password: $password,
+      });
+    } else {
+      await $databaseContext.addRole({
+        roleName: $roleName,
+        login: false,
+      });
+    }
+    toast.success('role_created_successfully');
   }
 </script>
 
