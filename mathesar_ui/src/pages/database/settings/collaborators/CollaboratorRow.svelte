@@ -17,9 +17,8 @@
   $: ({ configuredRoles, users } = $databaseContext);
 
   $: user = $users.resolvedValue?.get(collaborator.user_id);
-  $: configuredRole = $configuredRoles.resolvedValue?.get(
-    collaborator.configured_role_id,
-  );
+  $: configuredRoleId = collaborator.configured_role_id;
+  $: configuredRole = $configuredRoles.resolvedValue?.get($configuredRoleId);
   $: userName = user ? user.full_name || user.username : '';
 </script>
 
@@ -39,7 +38,7 @@
       {#if configuredRole}
         {configuredRole.name}
       {:else}
-        {collaborator.configured_role_id}
+        {$configuredRoleId}
       {/if}
     </div>
     <div class="actions">

@@ -129,17 +129,6 @@ class DatabaseSettingsContext {
     );
   }
 
-  async updateRoleForCollaborator(
-    collaborator: Collaborator,
-    configuredRoleId: ConfiguredRole['id'],
-  ) {
-    const updatedCollaborator =
-      await collaborator.setConfiguredRole(configuredRoleId);
-    this.collaborators.updateResolvedValue((collaborators) =>
-      collaborators.with(updatedCollaborator.id, updatedCollaborator),
-    );
-  }
-
   async deleteCollaborator(collaborator: Collaborator) {
     await collaborator.delete();
     this.collaborators.updateResolvedValue((c) => c.without(collaborator.id));

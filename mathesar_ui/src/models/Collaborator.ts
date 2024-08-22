@@ -1,3 +1,5 @@
+import { type Readable, type Writable, writable } from 'svelte/store';
+
 import { api } from '@mathesar/api/rpc';
 import type { RawCollaborator } from '@mathesar/api/rpc/collaborators';
 import { CancellablePromise } from '@mathesar/component-library';
@@ -10,15 +12,20 @@ export class Collaborator {
 
   readonly user_id;
 
-  // TODO: Use a store for configured_role_id
-  readonly configured_role_id;
+  readonly _configured_role_id: Writable<ConfiguredRole['id']>;
+
+  get configured_role_id(): Readable<ConfiguredRole['id']> {
+    return this._configured_role_id;
+  }
 
   readonly database;
 
   constructor(props: { database: Database; rawCollaborator: RawCollaborator }) {
     this.id = props.rawCollaborator.id;
     this.user_id = props.rawCollaborator.user_id;
-    this.configured_role_id = props.rawCollaborator.configured_role_id;
+    this._configured_role_id = writable(
+      props.rawCollaborator.configured_role_id,
+    );
     this.database = props.database;
   }
 
@@ -35,16 +42,10 @@ export class Collaborator {
     return new CancellablePromise(
       (resolve, reject) => {
         promise
-          .then(
-            (rawCollaborator) =>
-              resolve(
-                new Collaborator({
-                  database: this.database,
-                  rawCollaborator,
-                }),
-              ),
-            reject,
-          )
+          .then((rawCollaborator) => {
+            this._configured_role_id.set(rawCollaborator.configured_role_id);
+            return resolve(this);
+          }, reject)
           .catch(reject);
       },
       () => promise.cancel(),

@@ -17,18 +17,15 @@
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
-  import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
-
   import SelectConfiguredRoleField from './SelectConfiguredRoleField.svelte';
-
-  const databaseContext = getDatabaseSettingsContext();
 
   export let controller: ModalController;
   export let collaborator: Collaborator;
   export let configuredRolesMap: ImmutableMap<number, ConfiguredRole>;
   export let usersMap: ImmutableMap<number, User>;
 
-  $: configuredRoleId = requiredField<number>(collaborator.configured_role_id);
+  $: savedConfiguredRoleId = collaborator.configured_role_id;
+  $: configuredRoleId = requiredField<number>($savedConfiguredRoleId);
   $: form = makeForm({ configuredRoleId });
 
   $: userName =
@@ -36,13 +33,9 @@
     String(collaborator.user_id);
 
   async function updateRoleForCollaborator() {
-    await $databaseContext.updateRoleForCollaborator(
-      collaborator,
-      $configuredRoleId,
-    );
+    await collaborator.setConfiguredRole($configuredRoleId);
     controller.close();
     toast.success($_('collaborator_role_updated_successfully'));
-    form.reset();
   }
 </script>
 
@@ -62,7 +55,6 @@
       {form}
       catchErrors
       onCancel={() => {
-        form.reset();
         controller.close();
       }}
       onProceed={updateRoleForCollaborator}
