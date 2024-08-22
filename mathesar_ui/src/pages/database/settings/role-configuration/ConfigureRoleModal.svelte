@@ -39,7 +39,6 @@
     } else {
       toast.success($_('role_configured_successfully'));
     }
-    form.reset();
   }
 </script>
 
@@ -74,7 +73,6 @@
       {form}
       catchErrors
       onCancel={() => {
-        form.reset();
         controller.close();
       }}
       onProceed={configureRole}

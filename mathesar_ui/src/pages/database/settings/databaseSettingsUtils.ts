@@ -107,6 +107,13 @@ class DatabaseSettingsContext {
     this.configuredRoles.updateResolvedValue((configuredRoles) =>
       configuredRoles.without(configuredRole.id),
     );
+    /**
+     * When a configured role is removed from the Role Configuration page,
+     * Collaborators list needs to be reset, since the drop statement cascades.
+     *
+     * TODO_BETA: Discuss on whether we should cascade or throw error?
+     */
+    this.collaborators.reset();
   }
 
   async addCollaborator(
@@ -141,6 +148,9 @@ class DatabaseSettingsContext {
   async deleteRole(role: Role) {
     await role.delete();
     this.roles.updateResolvedValue((r) => r.without(role.oid));
+    // When a role is deleted, both Collaborators & ConfiguredRoles needs to be reset
+    this.configuredRoles.reset();
+    this.collaborators.reset();
   }
 }
 
