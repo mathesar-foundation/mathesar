@@ -142,6 +142,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        data_modeling.suggest_types,
+        "data_modeling.suggest_types",
+        [user_is_authenticated]
+    ),
+    (
         database_privileges.list_direct,
         "database_privileges.list_direct",
         [user_is_authenticated]
