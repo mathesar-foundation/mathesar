@@ -2276,17 +2276,17 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_role() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.create_role('testuser', 'mypass1234', true);
-  RETURN NEXT database_privs_are (
-    'mathesar_testing', 'testuser', ARRAY['CONNECT']
-  );
+  RETURN NEXT database_privs_are('mathesar_testing', 'testuser', ARRAY['CONNECT', 'TEMPORARY']);
   PERFORM msar.create_role(
     'Ro"\bert''); DROP SCHEMA public;', 'my''pass1234"; DROP SCHEMA public;', true
   );
   RETURN NEXT has_schema('public');
   RETURN NEXT has_user('Ro"\bert''); DROP SCHEMA public;');
   RETURN NEXT database_privs_are (
-    'mathesar_testing', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['CONNECT']
+    'mathesar_testing', 'Ro"\bert''); DROP SCHEMA public;', ARRAY['CONNECT', 'TEMPORARY']
   );
+  PERFORM msar.create_role('testnopass', null, null);
+  RETURN NEXT database_privs_are('mathesar_testing', 'testnopass', ARRAY['CONNECT', 'TEMPORARY']);
 END;
 $$ LANGUAGE plpgsql;
 
