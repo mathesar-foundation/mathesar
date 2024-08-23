@@ -4098,3 +4098,31 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- msar.replace_database_privileges_for_roles ------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION test_replace_database_privileges_for_roles() RETURNS SETOF TEXT AS $$
+DECLARE
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE ROLE "Alice";
+  CREATE ROLE "Bob";
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := '"Bob"'::regrole::oid;
+
+  RETURN NEXT ok(
+    msar.replace_database_privileges_for_roles(
+      jsonb_build_array(
+        jsonb_build_object(
+          'role_oid', alice_id, 'privileges', jsonb_build_array('CONNECT', 'CREATE')
+        )
+      )
+    ) @> jsonb_build_array(
+      jsonb_build_object('direct', jsonb_build_array('CONNECT', 'CREATE'), 'role_oid', alice_id::text)
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;

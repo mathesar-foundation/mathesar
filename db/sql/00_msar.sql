@@ -497,6 +497,28 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_role_name(rol_oid oid) RETURNS TEXT AS $$/*
+Return the UNQUOTED name of a given role.
+
+If the role does not exist, an exception will be raised.
+
+Args:
+  rol_oid: The OID of the role.
+*/
+DECLARE rol_name text;
+BEGIN
+  SELECT rolname INTO rol_name FROM pg_roles WHERE oid=rol_oid;
+
+  IF rol_name IS NULL THEN
+    RAISE EXCEPTION 'Role with OID % does not exist', rol_oid
+    USING ERRCODE = '42704'; -- undefined_object
+  END IF;
+
+  RETURN rol_name;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_constraint_type_api_code(contype char) RETURNS TEXT AS $$/*
 This function returns a string that represents the constraint type code used to describe
 constraints when listing them within the Mathesar API.
@@ -1096,7 +1118,7 @@ SELECT string_agg(
     ),
     val,
     current_database(),
-    rol_id
+    msar.get_role_name(rol_id)
   ),
   E';\n'
 ) || E';\n'
