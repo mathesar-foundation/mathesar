@@ -1,7 +1,8 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import { Database } from '@mathesar/api/rpc/databases';
+import { Database } from '@mathesar/models/Database';
+import { Server } from '@mathesar/models/Server';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import {
@@ -29,7 +30,9 @@ class DatabasesStore {
   readonly currentDatabase: Readable<Database | undefined>;
 
   constructor() {
-    const serverMap = new Map(commonData.servers.map((s) => [s.id, s]));
+    const serverMap = new Map(
+      commonData.servers.map((s) => [s.id, new Server({ rawServer: s })]),
+    );
     this.unsortedDatabases.reconstruct(
       commonData.databases.map((d) => {
         /**
@@ -42,12 +45,16 @@ class DatabasesStore {
          * 3. Displaying server info is not an important feature of the app,
          *    so it's better to fail gracefully than to throw an error and crash the app.
          */
-        const server = serverMap.get(d.server_id) ?? {
-          id: d.server_id,
-          host: 'unknown',
-          port: 0,
-        };
-        return [d.id, new Database(d, server)];
+        const server =
+          serverMap.get(d.server_id) ??
+          new Server({
+            rawServer: {
+              id: d.server_id,
+              host: 'unknown',
+              port: 0,
+            },
+          });
+        return [d.id, new Database({ rawDatabase: d, server })];
       }),
     );
     this.databases = derived(
@@ -72,7 +79,10 @@ class DatabasesStore {
     const { database, server } = await api.database_setup
       .connect_existing(props)
       .run();
-    const connectedDatabase = new Database(database, server);
+    const connectedDatabase = new Database({
+      rawDatabase: database,
+      server: new Server({ rawServer: server }),
+    });
     this.addDatabase(connectedDatabase);
     return connectedDatabase;
   }
@@ -83,7 +93,10 @@ class DatabasesStore {
     const { database, server } = await api.database_setup
       .create_new(props)
       .run();
-    const connectedDatabase = new Database(database, server);
+    const connectedDatabase = new Database({
+      rawDatabase: database,
+      server: new Server({ rawServer: server }),
+    });
     this.addDatabase(connectedDatabase);
     return connectedDatabase;
   }

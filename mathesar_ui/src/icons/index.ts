@@ -105,6 +105,7 @@ export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
+export const iconConfigurePassword = { data: faKey };
 export const iconConnectDatabase = { data: connectDatabaseIcon };
 export const iconCopyMajor: IconProps = { data: faCopy };
 /** TODO: use faBinary once it's available (via newer FontAwesome version) */

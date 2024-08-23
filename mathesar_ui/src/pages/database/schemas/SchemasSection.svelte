@@ -1,21 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { reflectApi } from '@mathesar/api/rest/reflect';
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import {
-    iconAddNew,
-    iconDatabase,
-    iconDeleteMajor,
-    iconEdit,
-    iconMoreActions,
-    iconRefresh,
-  } from '@mathesar/icons';
+  import { iconAddNew } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
@@ -24,26 +15,13 @@
     schemas as schemasStore,
   } from '@mathesar/stores/schemas';
   import { removeTablesStore } from '@mathesar/stores/tables';
-  import { toast } from '@mathesar/stores/toast';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import {
-    Button,
-    ButtonMenuItem,
-    DropdownMenu,
-    Help,
-    Icon,
-  } from '@mathesar-component-library';
+  import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
+  import { Button, Icon } from '@mathesar-component-library';
 
-  import AddEditSchemaModal from './AddEditSchemaModal.svelte';
   import SchemaListSkeleton from './SchemaListSkeleton.svelte';
   import SchemaRow from './SchemaRow.svelte';
 
   const addEditModal = modal.spawnModalController();
-  const editConnectionModal = modal.spawnModalController();
-  const deleteConnectionModal = modal.spawnModalController();
-
-  const userProfileStore = getUserProfileStoreFromContext();
-  $: userProfile = $userProfileStore;
 
   export let database: Database;
 
@@ -52,7 +30,6 @@
 
   let filterQuery = '';
   let targetSchema: Schema | undefined;
-  let isReflectionRunning = false;
 
   function filterSchemas(
     schemaData: DBSchemaStoreData['data'],
@@ -95,74 +72,7 @@
   function handleClearFilterQuery() {
     filterQuery = '';
   }
-
-  async function reflect() {
-    try {
-      isReflectionRunning = true;
-      await reflectApi.reflect();
-      window.location.reload();
-    } catch (e) {
-      toast.fromError(e);
-    } finally {
-      isReflectionRunning = false;
-    }
-  }
 </script>
-
-<AppSecondaryHeader
-  pageTitleAndMetaProps={{
-    name: database.name,
-    type: 'database',
-    icon: iconDatabase,
-  }}
->
-  <svelte:fragment slot="action">
-    <div>
-      <DropdownMenu
-        showArrow={false}
-        triggerAppearance="plain"
-        label=""
-        closeOnInnerClick={false}
-        icon={iconMoreActions}
-        preferredPlacement="bottom-end"
-        menuStyle="--spacing-y:0.8em;"
-      >
-        <ButtonMenuItem
-          icon={{ ...iconRefresh, spin: isReflectionRunning }}
-          disabled={isReflectionRunning}
-          on:click={reflect}
-        >
-          <div class="reflect">
-            {$_('sync_external_changes')}
-            <Help>
-              <p>
-                {$_('sync_external_changes_structure_help')}
-              </p>
-              <p>
-                {$_('sync_external_changes_data_help')}
-              </p>
-            </Help>
-          </div>
-        </ButtonMenuItem>
-        {#if userProfile?.isSuperUser}
-          <ButtonMenuItem
-            icon={iconEdit}
-            on:click={() => editConnectionModal.open()}
-          >
-            {$_('edit_connection')}
-          </ButtonMenuItem>
-          <ButtonMenuItem
-            icon={iconDeleteMajor}
-            danger
-            on:click={() => deleteConnectionModal.open()}
-          >
-            {$_('delete_connection')}
-          </ButtonMenuItem>
-        {/if}
-      </DropdownMenu>
-    </div>
-  </svelte:fragment>
-</AppSecondaryHeader>
 
 <div class="schema-list-wrapper">
   <div class="schema-list-title-container">

@@ -6,7 +6,6 @@
   import { getAPI, postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import { api } from '@mathesar/api/rpc';
   import type { Column } from '@mathesar/api/rpc/columns';
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
   import {
@@ -18,6 +17,7 @@
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
   import { runner } from '@mathesar/packages/json-rpc-client-builder';
   import {
     getImportPreviewPageUrl,
