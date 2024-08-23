@@ -1,11 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Database } from '@mathesar/api/rpc/databases';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconConnection } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/Database';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';

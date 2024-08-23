@@ -241,6 +241,16 @@ To use an RPC function:
       - list_
       - ServerInfo
 
+## Data Modeling
+
+:::data_modeling
+    options:
+      members:
+      - add_foreign_key_column
+      - add_mapping_table
+      - suggest_types
+      - MappingColumn
+
 ## Responses
 
 ### Success

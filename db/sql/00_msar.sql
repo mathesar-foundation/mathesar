@@ -2748,6 +2748,124 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_cast_expr(tab_id regclass, col_id smallint, typ_id regtype) RETURNS text AS $$/*
+Build an expression for casting a column in Mathesar, returning the text of that expression.
+
+We fall back silently to default casting behavior if the mathesar_types namespace is missing.
+However, we do throw an error in cases where the schema exists, but the type casting function
+doesn't. This is assumed to be an error the user should know about.
+
+Args:
+  tab_id: The OID of the table whose column we're casting.
+  col_id: The attnum of the column in the table.
+  typ_id: The OID of the type we will cast to.
+*/
+SELECT CASE
+  WHEN msar.schema_exists('mathesar_types') THEN
+    msar.get_cast_function_name(typ_id)
+    || '('
+    || format('%I', msar.get_column_name(tab_id, col_id))
+    || ')'
+  ELSE
+    format('%I', msar.get_column_name(tab_id, col_id)) || '::' || typ_id::text
+END;
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.infer_column_data_type(tab_id regclass, col_id smallint) RETURNS regtype AS $$/*
+Infer the best type for a given column.
+
+Note that we currently only try for `text` columns, since we only do this at import. I.e.,
+if the column is some other type we just return that original type.
+
+Args:
+  tab_id: The OID of the table of the column whose type we're inferring.
+  col_id: The attnum of the column whose type we're inferring.
+*/
+DECLARE
+  inferred_type regtype;
+  infer_sequence_raw text[] := ARRAY[
+    'boolean',
+    'date',
+    'numeric',
+    'mathesar_types.mathesar_money',
+    'timestamp without time zone',
+    'timestamp with time zone',
+    'time without time zone',
+    'interval',
+    'mathesar_types.email',
+    'mathesar_types.mathesar_json_array',
+    'mathesar_types.mathesar_json_object',
+    'mathesar_types.uri'
+  ];
+  infer_sequence regtype[];
+  column_nonempty boolean;
+  test_type regtype;
+BEGIN
+  infer_sequence := array_agg(pg_catalog.to_regtype(t))
+    FILTER (WHERE pg_catalog.to_regtype(t) IS NOT NULL)
+    FROM unnest(infer_sequence_raw) AS x(t);
+  EXECUTE format(
+    'SELECT EXISTS (SELECT 1 FROM %1$I.%2$I WHERE %3$I IS NOT NULL)',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_column_name(tab_id, col_id)
+  ) INTO column_nonempty;
+  inferred_type := atttypid FROM pg_catalog.pg_attribute WHERE attrelid=tab_id AND attnum=col_id;
+  IF inferred_type = 'text'::regtype AND column_nonempty THEN
+    FOREACH test_type IN ARRAY infer_sequence
+      LOOP
+        BEGIN
+          EXECUTE format(
+            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I',
+            msar.build_cast_expr(tab_id, col_id, test_type),
+            msar.get_relation_schema_name(tab_id),
+            msar.get_relation_name(tab_id)
+          );
+          inferred_type := test_type;
+          EXIT;
+        EXCEPTION WHEN OTHERS THEN
+          RAISE NOTICE 'Test failed: %', format(
+            'EXPLAIN ANALYZE SELECT %1$s FROM %2$I.%3$I',
+            msar.build_cast_expr(tab_id, col_id, test_type),
+            msar.get_relation_schema_name(tab_id),
+            msar.get_relation_name(tab_id)
+          );
+          -- do nothing, just try the next type.
+        END;
+      END LOOP;
+    END IF;
+  RETURN inferred_type;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.infer_table_column_data_types(tab_id regclass) RETURNS jsonb AS $$/*
+Infer the best type for each column in the table.
+
+Currently we only suggest different types for columns which originate as type `text`.
+
+Args:
+  tab_id: The OID of the table whose columns we're inferring types for.
+
+The response JSON will have attnum keys, and values will be the result of `format_type`
+for the inferred type of each column. Restricted to columns to which the user has access.
+*/
+SELECT jsonb_object_agg(
+  attnum, pg_catalog.format_type(msar.infer_column_data_type(attrelid, attnum), null)
+)
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 __msar.build_col_drop_default_expr(tab_id oid, col_id integer, new_type text, new_default jsonb)
   RETURNS TEXT AS $$/*
 Build an expression for dropping a column's default, returning the text of that expression.
@@ -3112,19 +3230,19 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION
-msar.create_many_to_one_link(
-  frel_id oid,
-  rel_id oid,
+msar.add_foreign_key_column(
   col_name text,
+  rel_id oid,
+  frel_id oid,
   unique_link boolean DEFAULT false
 ) RETURNS smallint AS $$/* 
 Create a many-to-one or a one-to-one link between tables, returning the attnum of the newly created
 column, returning the attnum of the added column.
 
 Args:
-  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
-  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
   col_name: Name of the new column to be created in the referrer table, unquoted.
+  rel_id: The OID of the referrer table, named for conrelid in the pg_attribute table.
+  frel_id: The OID of the referent table, named for confrelid in the pg_attribute table.
   unique_link: Whether to make the link one-to-one instead of many-to-one.
 */
 DECLARE
@@ -3168,27 +3286,28 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.create_many_to_many_link(
+msar.add_mapping_table(
   sch_id oid,
   tab_name text,
-  from_rel_ids oid[],
-  col_names text[]
-) RETURNS oid AS $$/* 
+  mapping_columns jsonb
+) RETURNS oid AS $$/*
 Create a many-to-many link between tables, returning the oid of the newly created table.
 
 Args:
   sch_id: The OID of the schema in which new referrer table is to be created.
   tab_name: Name of the referrer table to be created.
-  from_rel_ids: The OIDs of the referent tables.
-  col_names: Names of the new column to be created in the referrer table, unqoted.
+  mapping_columns: An array of objects giving the foreign key columns for the new table.
+
+The elements of the mapping_columns array must have the form
+  {"column_name": <str>, "referent_table_oid": <int>}
+
 */
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, tab_name , NULL, NULL, NULL);
-  PERFORM msar.create_many_to_one_link(a.rel_id, added_table_id, b.col_name)
-  FROM unnest(from_rel_ids) WITH ORDINALITY AS a(rel_id, idx)
-  JOIN unnest(col_names) WITH ORDINALITY AS b(col_name, idx) USING (idx);
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL);
+  PERFORM msar.add_foreign_key_column(column_name, added_table_id, referent_table_oid)
+  FROM jsonb_to_recordset(mapping_columns) AS x(column_name text, referent_table_oid oid);
   RETURN added_table_id;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -3236,7 +3355,7 @@ BEGIN
     format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
   );
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
-  fkey_attnum := msar.create_many_to_one_link(extracted_table_id, tab_id, fkey_name);
+  fkey_attnum := msar.add_foreign_key_column(fkey_name, tab_id, extracted_table_id);
   -- Insert the data from the original table's columns into the extracted columns, and add
   -- appropriate fkey values to the new fkey column in the original table to give the proper
   -- mapping.

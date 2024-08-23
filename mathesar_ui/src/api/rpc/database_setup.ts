@@ -1,8 +1,8 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-import type { ConfiguredRole } from './configured_roles';
-import type { DatabaseResponse } from './databases';
-import type { Server } from './servers';
+import type { RawConfiguredRole } from './configured_roles';
+import type { RawDatabase } from './databases';
+import type { RawServer } from './servers';
 
 export const sampleDataOptions = [
   'library_management',
@@ -12,16 +12,16 @@ export const sampleDataOptions = [
 export type SampleDataSchemaIdentifier = (typeof sampleDataOptions)[number];
 
 export interface DatabaseConnectionResult {
-  server: Server;
-  database: DatabaseResponse;
-  configured_role: ConfiguredRole;
+  server: RawServer;
+  database: RawDatabase;
+  configured_role: RawConfiguredRole;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const database_setup = {
   create_new: rpcMethodTypeContainer<
     {
-      database: DatabaseResponse['name'];
+      database: RawDatabase['name'];
       sample_data?: SampleDataSchemaIdentifier[];
     },
     DatabaseConnectionResult
@@ -29,10 +29,10 @@ export const database_setup = {
 
   connect_existing: rpcMethodTypeContainer<
     {
-      host: Server['host'];
-      port: Server['port'];
-      database: DatabaseResponse['name'];
-      role: ConfiguredRole['name'];
+      host: RawServer['host'];
+      port: RawServer['port'];
+      database: RawDatabase['name'];
+      role: RawConfiguredRole['name'];
       password: string;
       sample_data?: SampleDataSchemaIdentifier[];
     },

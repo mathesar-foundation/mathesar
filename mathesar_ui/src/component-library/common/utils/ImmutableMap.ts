@@ -19,7 +19,7 @@ export default class ImmutableMap<Key, Value> {
    * know.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private getNewInstance(...args: any[]): this {
+  protected getNewInstance(...args: any[]): this {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
     return new (this.constructor as any)(...args) as this;
   }
@@ -131,6 +131,12 @@ export default class ImmutableMap<Key, Value> {
   ): ImmutableMap<Key, NewValue> {
     return new ImmutableMap(
       [...this.entries()].map(([key, value]) => [key, fn(value)]),
+    );
+  }
+
+  mapKeys<NewKey>(fn: (value: Value) => NewKey): ImmutableMap<NewKey, Value> {
+    return new ImmutableMap(
+      [...this.values()].map((value) => [fn(value), value]),
     );
   }
 

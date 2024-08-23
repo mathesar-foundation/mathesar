@@ -48,6 +48,9 @@ module.exports = {
     'array-bracket-spacing': 'off',
     'no-restricted-syntax': 0,
     '@typescript-eslint/require-await': 'off',
+    // TODO_BETA: Add following eslint rules
+    // '@typescript-eslint/consistent-type-imports': 'error',
+    // 'no-duplicate-imports': 'error',
     'class-methods-use-this': 'off',
     'no-multiple-empty-lines': 1,
     'import/order': [

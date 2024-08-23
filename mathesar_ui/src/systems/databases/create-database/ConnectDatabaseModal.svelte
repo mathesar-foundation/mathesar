@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { Database } from '@mathesar/api/rpc/databases';
   import { iconConnectDatabase, iconCreateDatabase } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
   import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import {
     ControlledModal,
