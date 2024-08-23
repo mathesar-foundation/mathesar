@@ -1084,6 +1084,50 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION
+msar.build_database_privilege_replace_expr(rol_id regrole, privileges_ jsonb) RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    concat(
+      CASE WHEN privileges_ ? val THEN 'GRANT' ELSE 'REVOKE' END,
+      ' %1$s ON DATABASE %2$I ',
+      CASE WHEN privileges_ ? val THEN 'TO' ELSE 'FROM' END,
+      ' %3$I'
+    ),
+    val,
+    current_database(),
+    rol_id
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(ARRAY['CONNECT', 'CREATE', 'TEMPORARY']) as x(val);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.replace_database_privileges_for_roles(priv_spec jsonb) RETURNS jsonb AS $$/*
+Grant/Revoke privileges for a set of roles on the current database.
+
+Args:
+  priv_spec: An array defining the privileges to grant or revoke for each role.
+
+Each object in the priv_spec should have the form:
+{role_oid: <int>, privileges: SET<"CONNECT"|"CREATE"|"TEMPORARY">}
+
+Any privilege that exists in the privileges subarray will be granted. Any which is missing will be
+revoked.
+*/
+BEGIN
+EXECUTE string_agg(
+  msar.build_database_privilege_replace_expr(role_oid, privileges),
+  E';\n'
+) || ';'
+FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, privileges jsonb);
+RETURN msar.list_db_priv(current_database());
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ALTER SCHEMA FUNCTIONS
