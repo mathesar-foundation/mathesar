@@ -203,6 +203,7 @@ To use an RPC function:
       - Filter
       - FilterAttnum
       - FilterLiteral
+      - PreviewEntry
       - Grouping
       - Group
       - GroupingResponse
