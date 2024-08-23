@@ -27,9 +27,9 @@
       </Route>
     </Route>
 
-    <Route fallback>
+    <Route fallback let:meta>
       <!--Reload page to let server routing take over-->
-      <RouteObserver on:load={() => window.location.reload()} />
+      <RouteObserver {meta} on:load={() => window.location.reload()} />
     </Route>
   </Route>
 {:else}
@@ -38,9 +38,9 @@
       <AuthenticatedRoutes />
     {/if}
 
-    <Route path="/shares/*">
+    <Route path="/shares/*" let:meta>
       <!--Reload page to let server routing take over-->
-      <RouteObserver on:load={() => window.location.reload()} />
+      <RouteObserver {meta} on:load={() => window.location.reload()} />
     </Route>
 
     <Route fallback>

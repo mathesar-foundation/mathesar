@@ -57,11 +57,15 @@ urlpatterns = [
     path('shares/tables/<slug>/', views.shared_table, name='shared_table'),
     path('shares/explorations/<slug>/', views.shared_query, name='shared_query'),
     path('databases/', views.databases, name='databases'),
-    path('db/<database_id>/', views.schemas, name='schemas'),
     path('i18n/', include('django.conf.urls.i18n')),
     re_path(
-        r'^db/(?P<database_id>\w+)/(?P<schema_id>\w+)/',
+        r'^db/(?P<database_id>\w+)/schemas/(?P<schema_id>\w+)/',
         views.schemas_home,
         name='schema_home'
+    ),
+    re_path(
+        r'^db/(?P<database_id>\w+)/((schemas|settings)/)?',
+        views.schemas,
+        name='schemas'
     ),
 ]

@@ -7,8 +7,8 @@ import type {
   ColumnCreationSpec,
   ColumnPatchSpec,
 } from '@mathesar/api/rpc/columns';
-import type { Database } from '@mathesar/api/rpc/databases';
 import type { Table } from '@mathesar/api/rpc/tables';
+import type { Database } from '@mathesar/models/Database';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {

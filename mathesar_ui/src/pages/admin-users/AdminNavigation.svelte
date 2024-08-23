@@ -46,7 +46,7 @@
 <style lang="scss">
   .admin-navigation {
     font-size: var(--text-size-base);
-    --min-width: 100%;
+    --Menu__min-width: 100%;
     --Menu__item-border-radius: var(--border-radius-m);
     --Menu__item-hover-background: var(--sand-100);
     --Menu__item-active-background: var(--sand-200);

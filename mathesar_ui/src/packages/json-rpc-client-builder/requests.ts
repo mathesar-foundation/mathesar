@@ -26,6 +26,15 @@ function cancellableFetch(
   );
 }
 
+function getRpcRequestBody(request: RpcRequest<unknown>, id = 0) {
+  return {
+    jsonrpc,
+    id,
+    method: request.method,
+    params: request.params,
+  };
+}
+
 function makeRpcResponse<T = unknown>(value: unknown): RpcResponse<T> {
   if (hasProperty(value, 'result')) {
     const response: RpcResult<T> = {
@@ -44,12 +53,7 @@ function send<T>(request: RpcRequest<T>): CancellablePromise<RpcResponse<T>> {
       ...request.getHeaders(),
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      jsonrpc,
-      id: 0,
-      method: request.method,
-      params: request.params,
-    }),
+    body: JSON.stringify(getRpcRequestBody(request)),
   });
   return new CancellablePromise(
     (resolve) =>
@@ -63,6 +67,47 @@ function send<T>(request: RpcRequest<T>): CancellablePromise<RpcResponse<T>> {
           (rejectionReason) => resolve(RpcError.fromAnything(rejectionReason)),
         )
         .then((json) => resolve(makeRpcResponse(json))),
+    () => fetch.cancel(),
+  );
+}
+
+function makeRpcBatchResponse<T extends RpcRequest<unknown>[]>(
+  values: unknown,
+): RpcBatchResponse<T> {
+  if (!Array.isArray(values)) {
+    throw new Error('Response is not an array');
+  }
+  return values.map((value) => makeRpcResponse(value)) as RpcBatchResponse<T>;
+}
+
+function sendBatchRequest<T extends RpcRequest<unknown>[]>(
+  endpoint: string,
+  headers: Record<string, string | undefined>,
+  requests: T,
+): CancellablePromise<RpcBatchResponse<T>> {
+  const fetch = cancellableFetch(endpoint, {
+    method: 'POST',
+    headers: {
+      ...headers,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(
+      requests.map((request, index) => getRpcRequestBody(request, index)),
+    ),
+  });
+  return new CancellablePromise(
+    (resolve) =>
+      void fetch
+        .then(
+          (response) => response.json(),
+          (rejectionReason) =>
+            resolve(
+              requests.map(() =>
+                RpcError.fromAnything(rejectionReason),
+              ) as RpcBatchResponse<T>,
+            ),
+        )
+        .then((json) => resolve(makeRpcBatchResponse(json))),
     () => fetch.cancel(),
   );
 }
@@ -126,16 +171,23 @@ export class RpcRequest<T> {
   }
 }
 
-export type RpcBatchResponse<T extends RpcRequest<unknown>[]> =
-  CancellablePromise<{
-    [K in keyof T]: T[K] extends RpcRequest<infer R> ? RpcResponse<R> : never;
-  }>;
+export type RpcBatchResponse<T extends RpcRequest<unknown>[]> = {
+  [K in keyof T]: T[K] extends RpcRequest<infer R> ? RpcResponse<R> : never;
+};
 
 export function batchSend<T extends RpcRequest<unknown>[]>(
-  ...requests: T
-): RpcBatchResponse<T> {
-  // TODO implement batch sending
-  throw new Error('Not implemented');
+  requests: T,
+): CancellablePromise<RpcBatchResponse<T>> {
+  if (requests.length === 0) {
+    throw new Error('There must be atleast one request');
+  }
+  const [firstRequest, ...rest] = requests;
+  const { endpoint } = firstRequest;
+  if (rest.some((request) => request.endpoint !== endpoint)) {
+    throw new Error('Only RPC requests to the same endpoint can be batched');
+  }
+  // TODO: Decide if headers need to be merged
+  return sendBatchRequest(endpoint, firstRequest.getHeaders(), requests);
 }
 
 /**

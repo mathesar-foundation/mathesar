@@ -10,16 +10,15 @@ import {
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { Database } from '@mathesar/api/rpc/databases';
 import type {
   Group as ApiGroup,
-  Grouping as ApiGrouping,
+  GroupingResponse as ApiGroupingResponse,
   Result as ApiRecord,
-  GroupingMode,
   RecordsListParams,
   RecordsResponse,
 } from '@mathesar/api/rpc/records';
 import type { Table } from '@mathesar/api/rpc/tables';
+import type { Database } from '@mathesar/models/Database';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
@@ -51,34 +50,28 @@ export interface RecordsRequestParamsData {
 
 export interface RecordGroup {
   count: number;
-  eqValue: ApiGroup['eq_value'];
-  firstValue: ApiGroup['first_value'];
-  lastValue: ApiGroup['last_value'];
+  eqValue: ApiGroup['results_eq'];
   resultIndices: number[];
 }
 
 export interface RecordGrouping {
   columnIds: number[];
   preprocIds: (string | null)[];
-  mode: GroupingMode;
   groups: RecordGroup[];
 }
 
 function buildGroup(apiGroup: ApiGroup): RecordGroup {
   return {
     count: apiGroup.count,
-    eqValue: apiGroup.eq_value,
-    firstValue: apiGroup.first_value,
-    lastValue: apiGroup.last_value,
+    eqValue: apiGroup.results_eq,
     resultIndices: apiGroup.result_indices,
   };
 }
 
-function buildGrouping(apiGrouping: ApiGrouping): RecordGrouping {
+function buildGrouping(apiGrouping: ApiGroupingResponse): RecordGrouping {
   return {
     columnIds: apiGrouping.columns,
     preprocIds: apiGrouping.preproc ?? [],
-    mode: apiGrouping.mode,
     groups: (apiGrouping.groups ?? []).map(buildGroup),
   };
 }
@@ -98,7 +91,7 @@ export interface NewRecordRow extends RecordRow {
 
 export interface GroupHeaderRow extends BaseRow {
   group: RecordGroup;
-  groupValues: ApiGroup['first_value'];
+  groupValues: ApiGroup['results_eq'];
 }
 
 export interface HelpTextRow extends BaseRow {
@@ -230,7 +223,7 @@ function preprocessRecords({
         if (group.eqValue[columnId] !== undefined) {
           groupValues[columnId] = group.eqValue[columnId];
         } else {
-          groupValues[columnId] = group.firstValue[columnId];
+          groupValues[columnId] = group.eqValue[columnId];
         }
       });
       combinedRecords.push({

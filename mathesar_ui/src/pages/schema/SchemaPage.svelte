@@ -1,11 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Database } from '@mathesar/api/rpc/databases';
   import type { Schema } from '@mathesar/api/rpc/schemas';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconEdit, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/Database';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     getSchemaPageExplorationsSectionUrl,
@@ -15,10 +15,9 @@
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
+  import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import { logEvent } from '@mathesar/utils/telemetry';
   import { Button, Icon, TabContainer } from '@mathesar-component-library';
-
-  import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
 
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
@@ -91,10 +90,8 @@
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    theme="light"
     pageTitleAndMetaProps={{
       name: schema.name,
-      type: 'schema',
       icon: iconSchema,
     }}
   >
