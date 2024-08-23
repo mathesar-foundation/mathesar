@@ -3821,13 +3821,26 @@ ORDER BY conkey, target_oid, confkey;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.build_summary_expr(tab_id oid) RETURNS TEXT AS $$/*
+Given a table, return an SQL expression that will build a summary for each row of the table.
+
+Args:
+  tab_id: The OID of the table being summarized.
+*/
+SELECT format(
+  'msar.format_data(%I)::text',
+  msar.get_column_name(tab_id, msar.get_default_summary_column(tab_id))
+);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.build_summary_cte_expr_for_table(tab_id oid) RETURNS TEXT AS $$/*
 Build an SQL text expression defining a sequence of CTEs that give summaries for linked records.
 
 This summary amounts to just the first string-like column value for that linked record.
 
 Args:
-  tab_oid: The table for whose fkey values' linked records we'll get summaries.
+  tab_id: The table for whose fkey values' linked records we'll get summaries.
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
 SELECT ', ' || string_agg(
@@ -3835,12 +3848,12 @@ SELECT ', ' || string_agg(
     $c$summary_cte_%1$s AS (
       SELECT
         msar.format_data(%2$I) AS key,
-        msar.format_data(%3$I)::text AS summary
+        %3$s AS summary
       FROM %4$I.%5$I
     )$c$,
     conkey,
     msar.get_column_name(target_oid, confkey),
-    msar.get_column_name(target_oid, msar.get_default_summary_column(target_oid)),
+    msar.build_summary_expr(target_oid),
     msar.get_relation_schema_name(target_oid),
     msar.get_relation_name(target_oid)
   ), ', '
