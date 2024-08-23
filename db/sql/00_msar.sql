@@ -897,7 +897,49 @@ FROM (
 $$ LANGUAGE SQL;
 
 
-CREATE OR REPLACE FUNCTION msar.get_roles() RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
+(
+  oid oid, -- The OID of the role.
+  name name, -- Name of the role.
+  super boolean, -- Whether the role has SUPERUSER status.
+  inherits boolean, -- Whether the role has INHERIT attribute.
+  create_role boolean, -- Whether the role has CREATEROLE attribute.
+  create_db boolean, -- Whether the role has CREATEDB attribute.
+  login boolean, -- Whether the role has LOGIN attribute.
+  description text, -- A description of the role
+  members jsonb -- The member roles that *directly* inherit the role.
+) AS $$/*
+Returns a table describing all the roles present on the database server.
+*/
+WITH rolemembers as (
+  SELECT
+    pgr.oid AS oid,
+    jsonb_agg(
+      jsonb_build_object(
+        'oid', pgm.member::bigint,
+        'admin', pgm.admin_option
+      )
+    ) AS members
+    FROM pg_catalog.pg_roles pgr
+      INNER JOIN pg_catalog.pg_auth_members pgm ON pgr.oid=pgm.roleid
+    GROUP BY pgr.oid
+)
+SELECT
+  r.oid::bigint AS oid,
+  r.rolname AS name,
+  r.rolsuper AS super,
+  r.rolinherit AS inherits,
+  r.rolcreaterole AS create_role,
+  r.rolcreatedb AS create_db,
+  r.rolcanlogin AS login,
+  pg_catalog.shobj_description(r.oid, 'pg_authid') AS description,
+  rolemembers.members AS members
+FROM pg_catalog.pg_roles r
+LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.list_roles() RETURNS jsonb AS $$/*
 Return a json array of objects with the list of roles in a database server,
 excluding pg system roles.
 
@@ -916,35 +958,33 @@ Each returned JSON object in the array has the form:
       ]|null>
   }
 */
-WITH rolemembers as (
-  SELECT
-    pgr.oid AS oid,
-    jsonb_agg(
-      jsonb_build_object(
-        'oid', pgm.member::bigint,
-        'admin', pgm.admin_option
-      )
-    ) AS members
-    FROM pg_catalog.pg_roles pgr
-      INNER JOIN pg_catalog.pg_auth_members pgm ON pgr.oid=pgm.roleid
-    GROUP BY pgr.oid
-)
 SELECT jsonb_agg(role_data)
-FROM (
-  SELECT
-    r.oid::bigint AS oid,
-    r.rolname AS name,
-    r.rolsuper AS super,
-    r.rolinherit AS inherits,
-    r.rolcreaterole AS create_role,
-    r.rolcreatedb AS create_db,
-    r.rolcanlogin AS login,
-    pg_catalog.shobj_description(r.oid, 'pg_authid') AS description,
-    rolemembers.members AS members
-  FROM pg_catalog.pg_roles r
-    LEFT OUTER JOIN rolemembers ON r.oid = rolemembers.oid
-  WHERE r.rolname NOT LIKE 'pg_%'
-) AS role_data;
+FROM msar.role_info_table() AS role_data
+WHERE role_data.name NOT LIKE 'pg_%';
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.get_role(rolename text) RETURNS jsonb AS $$/*
+Given a rolename, return a JSON object describing the role in a database server.
+
+The returned JSON object has the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "super": <bool>
+    "inherits": <bool>
+    "create_role": <bool>
+    "create_db": <bool>
+    "login": <bool>
+    "description": <str|null>
+    "members": <[
+        { "oid": <int>, "admin": <bool> }
+      ]|null>
+  }
+*/
+SELECT to_jsonb(role_data)
+FROM msar.role_info_table() AS role_data
+WHERE role_data.name = rolename;
 $$ LANGUAGE SQL STABLE;
 
 
@@ -1008,33 +1048,40 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 
 
--- Create mathesar user ----------------------------------------------------------------------------
-
-
 CREATE OR REPLACE FUNCTION
-msar.create_basic_mathesar_user(username text, password_ text) RETURNS TEXT AS $$/*
+msar.create_role(rolename text, password_ text, login_ boolean) RETURNS jsonb AS $$/*
+Creates a login/non-login role, depending on whether the login_ flag is set.
+Only the rolename field is required, the password field is required only if login_ is set to true.
+
+Returns a JSON object describing the created role in the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "super": <bool>
+    "inherits": <bool>
+    "create_role": <bool>
+    "create_db": <bool>
+    "login": <bool>
+    "description": <str|null>
+    "members": <[
+        { "oid": <int>, "admin": <bool> }
+      ]|null>
+  }
+
+Args:
+  rolename: The name of the role to be created, unquoted.
+  password_: The password for the rolename to set, unquoted.
+  login_: Specify whether the role to be created could login.
 */
-DECLARE
-  sch_name text;
-  mathesar_schemas text[] := ARRAY['mathesar_types', '__msar', 'msar'];
 BEGIN
-  PERFORM __msar.exec_ddl('CREATE USER %I WITH PASSWORD %L', username, password_);
-  PERFORM __msar.exec_ddl(
-    'GRANT CREATE, CONNECT, TEMP ON DATABASE %I TO %I',
-    current_database()::text,
-    username
-  );
-  FOREACH sch_name IN ARRAY mathesar_schemas LOOP
-    BEGIN
-      PERFORM __msar.exec_ddl('GRANT USAGE ON SCHEMA %I TO %I', sch_name, username);
-    EXCEPTION
-      WHEN invalid_schema_name THEN
-        RAISE NOTICE 'Schema % does not exist', sch_name;
-    END;
-  END LOOP;
-  RETURN username;
+  CASE WHEN login_ THEN
+    EXECUTE format('CREATE USER %I WITH PASSWORD %L', rolename, password_);
+  ELSE
+    EXECUTE format('CREATE ROLE %I', rolename);
+  END CASE;
+  RETURN msar.get_role(rolename);
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
 
 
 ----------------------------------------------------------------------------------------------------
