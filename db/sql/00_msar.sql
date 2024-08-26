@@ -1022,7 +1022,7 @@ Each returned JSON object in the array has the form:
 WITH priv_cte AS (
   SELECT
     jsonb_build_object(
-      'role_oid', pgr.oid,
+      'role_oid', pgr.oid::bigint,
       'direct',  jsonb_agg(acl.privilege_type)
     ) AS p
   FROM
