@@ -52,10 +52,10 @@
       ],
       onProceed: () => recordsData.deleteSelected(selectedRowIds),
       onError: (e) => toast.fromError(e),
-      onSuccess: () => {
+      onSuccess: (count) => {
         toast.success({
           title: $_('count_records_deleted_successfully', {
-            values: { count: selectedRowCount },
+            values: { count },
           }),
         });
       },

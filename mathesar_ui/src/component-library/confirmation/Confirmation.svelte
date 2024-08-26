@@ -29,8 +29,8 @@
   async function handleProceedButton() {
     try {
       allowClose = false;
-      await onProceed();
-      onSuccess();
+      const result = await onProceed();
+      onSuccess(result);
       $resolve(true);
       modal.close();
     } catch (error) {
