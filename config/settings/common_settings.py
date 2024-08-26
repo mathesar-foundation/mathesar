@@ -81,6 +81,7 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.schema_privileges',
     'mathesar.rpc.servers',
     'mathesar.rpc.tables',
+    'mathesar.rpc.table_privileges',
     'mathesar.rpc.tables.metadata',
     'mathesar.rpc.types',
     'mathesar.rpc.explorations'

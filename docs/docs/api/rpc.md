@@ -134,6 +134,14 @@ To use an RPC function:
       - JoinableTableRecord
       - JoinableTableInfo
 
+## Table Privileges
+
+::: table_privileges
+    options:
+      members:
+      - list_direct
+      - TablePrivileges
+
 ## Table Metadata
 
 ::: tables.metadata

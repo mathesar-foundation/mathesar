@@ -2830,6 +2830,41 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_list_table_privileges_basic() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE restricted_table();
+RETURN NEXT is(
+  msar.list_table_privileges('restricted_table'::regclass),
+  format(
+    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %s}]',
+    'mathesar'::regrole::oid
+  )::jsonb,
+  'Initially, only privileges for creator'
+);
+CREATE USER "Alice";
+RETURN NEXT is(
+  msar.list_table_privileges('restricted_table'::regclass),
+  format(
+    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %s}]',
+    'mathesar'::regrole::oid
+  )::jsonb,
+  'Alice should not have any privileges on restricted_table'
+);
+GRANT SELECT, DELETE ON TABLE restricted_table TO "Alice";
+RETURN NEXT is(
+  msar.list_table_privileges('restricted_table'::regclass),
+  format(
+    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %1$s},
+    {"direct": ["SELECT", "DELETE"], "role_oid": %2$s}]',
+    'mathesar'::regrole::oid,
+    '"Alice"'::regrole::oid
+  )::jsonb,
+  'Alice should have SELECT & DELETE privileges on restricted_table'
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_list_roles() RETURNS SETOF TEXT AS $$
 DECLARE
   initial_role_count int;
