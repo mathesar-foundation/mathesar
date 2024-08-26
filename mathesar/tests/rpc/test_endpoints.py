@@ -24,6 +24,7 @@ from mathesar.rpc import schemas
 from mathesar.rpc import schema_privileges
 from mathesar.rpc import servers
 from mathesar.rpc import tables
+from mathesar.rpc import table_privileges
 from mathesar.rpc import types
 
 METHODS = [
@@ -326,6 +327,11 @@ METHODS = [
     (
         tables.list_joinable,
         "tables.list_joinable",
+        [user_is_authenticated]
+    ),
+    (
+        table_privileges.list_direct,
+        "table_privileges.list_direct",
         [user_is_authenticated]
     ),
     (
