@@ -21,6 +21,7 @@ from mathesar.rpc import explorations
 from mathesar.rpc import records
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
+from mathesar.rpc import schema_privileges
 from mathesar.rpc import servers
 from mathesar.rpc import tables
 from mathesar.rpc import types
