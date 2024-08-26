@@ -267,6 +267,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        schema_privileges.list_direct,
+        "schema_privileges.list_direct",
+        [user_is_authenticated]
+    ),
+    (
         servers.list_,
         "servers.list",
         [user_is_authenticated]
