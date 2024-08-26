@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 from db.roles.operations import update as rupdate
 
@@ -8,6 +9,6 @@ def test_replace_database_privileges_for_roles():
         mock_exec.return_value.fetchone = lambda: ('a', 'b')
         result = rupdate.replace_database_privileges_for_roles('conn', priv_spec)
     mock_exec.assert_called_once_with(
-        'conn', 'replace_database_privileges_for_roles', priv_spec
+        'conn', 'replace_database_privileges_for_roles', json.dumps(priv_spec)
     )
     assert result == 'a'
