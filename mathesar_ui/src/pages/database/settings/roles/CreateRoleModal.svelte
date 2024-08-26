@@ -61,6 +61,7 @@
       });
     }
     toast.success('role_created_successfully');
+    controller.close();
   }
 </script>
 
