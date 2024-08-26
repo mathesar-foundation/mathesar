@@ -2990,7 +2990,8 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -3015,7 +3016,8 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -3040,7 +3042,8 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -3071,7 +3074,8 @@ BEGIN
         {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -3096,7 +3100,8 @@ BEGIN
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
         {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -3173,7 +3178,8 @@ BEGIN
             "result_indices": [9]
           }
         ]
-      }
+      },
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3209,7 +3215,8 @@ BEGIN
             "result_indices": [0, 1, 2]
           }
         ]
-      }
+      },
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3241,7 +3248,8 @@ BEGIN
           {"id": 1, "count": 1, "results_eq": {"4": "2020-03 AD"}, "result_indices": [0]},
           {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}, "result_indices": [1, 2]}
         ]
-      }
+      },
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3274,7 +3282,8 @@ BEGIN
         "groups": [
           {"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}, "result_indices": [0, 1, 2, 3, 4]}
         ]
-      }
+      },
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3785,7 +3794,8 @@ BEGIN
       "results": [
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
       ],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -3800,7 +3810,8 @@ BEGIN
     $j${
       "count": 0,
       "results": [],
-      "grouping": null
+      "grouping": null,
+      "preview_data": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -3982,7 +3993,10 @@ BEGIN
       rel_id,
       '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
-    '{"results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+    $a${
+      "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -3999,7 +4013,10 @@ BEGIN
       rel_id,
       '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": "{\"key2\": \"val2\"}"}'
     ),
-    '{"results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+    $a${
+      "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4016,7 +4033,10 @@ BEGIN
       rel_id,
       '{"3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
-    '{"results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+    $a${
+      "results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4033,7 +4053,10 @@ BEGIN
       rel_id,
       '{"2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'
     ),
-    '{"results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}]}'
+    $a${
+      "results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4050,7 +4073,10 @@ BEGIN
       rel_id,
       '{"2": null, "3": "ab234", "4": 3, "5": "\"234\""}'
     ),
-    '{"results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}]}'
+    $a${
+      "results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}],
+      "preview_data": null
+    }$a$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4064,7 +4090,10 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
-    '{"results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}]}'
+    $p${
+      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}],
+      "preview_data": null
+    }$p$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4078,7 +4107,10 @@ BEGIN
   rel_id := 'atable'::regclass::oid;
   RETURN NEXT is(
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
-    '{"results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}]}'
+    $p${
+      "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}],
+      "preview_data": null
+    }$p$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -4100,8 +4132,236 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- msar.replace_database_privileges_for_roles ------------------------------------------------------
+CREATE OR REPLACE FUNCTION __setup_preview_fkey_cols() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE "Counselors" (
+    coid numeric UNIQUE,
+    "Name" text,
+    "Email" text
+);
+CREATE TABLE "Teachers" (
+    id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    "Counselor" numeric REFERENCES "Counselors" (coid),
+    "Name" text,
+    "Email" text
+);
+CREATE TABLE "Students" (
+    id integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+    "Counselor" numeric REFERENCES "Counselors" (coid),
+    "Teacher" integer REFERENCES "Teachers" (id),
+    "Name" text,
+    "Grade" integer,
+    "Email" text
+);
 
+INSERT INTO "Counselors" VALUES
+  (1.234, 'Alice Alison', 'aalison@example.edu'),
+  (2.345, 'Bob Bobinson', 'bbobinson@example.edu');
+
+INSERT INTO "Teachers" ("Counselor", "Name", "Email") VALUES
+  (1.234, 'Carol Carlson', 'ccarlson@example.edu'),
+  (2.345, 'Dave Davidson', 'ddavison@example.edu'),
+  (1.234, 'Eve Evilson', 'eevilson@example.edu');
+
+INSERT INTO "Students" ("Counselor", "Teacher", "Name", "Grade", "Email") VALUES
+  (2.345, 3, 'Fred Fredrickson', 95, 'ffredrickson@example.edu'),
+  (1.234, 1, 'Gabby Gabberson', 100, 'ggabberson@example.edu'),
+  (1.234, 2, 'Hank Hankson', 75, 'hhankson@example.edu'),
+  (2.345, 1, 'Ida Idalia', 90, 'iidalia@example.edu'),
+  (2.345, 2, 'James Jameson', 80, 'jjameson@example.edu'),
+  (1.234, 3, 'Kelly Kellison', 80, 'kkellison@example.edu');
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_with_preview() RETURNS SETOF TEXT AS $$
+DECLARE
+  list_result jsonb;
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 6,
+      "results": [
+        {"1": 1, "2": 2.345, "3": 3, "4": "Fred Fredrickson", "5": 95, "6": "ffredrickson@example.edu"},
+        {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
+        {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"},
+        {"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"},
+        {"1": 5, "2": 2.345, "3": 2, "4": "James Jameson", "5": 80, "6": "jjameson@example.edu"},
+        {"1": 6, "2": 1.234, "3": 3, "4": "Kelly Kellison", "5": 80, "6": "kkellison@example.edu"}
+      ],
+      "grouping": null,
+      "preview_data": {
+        "2": [
+          {"key": 1.234, "summary": "Alice Alison"},
+          {"key": 2.345, "summary": "Bob Bobinson"}
+        ],
+        "3": [
+          {"key": 1, "summary": "Carol Carlson"},
+          {"key": 2, "summary": "Dave Davidson"},
+          {"key": 3, "summary": "Eve Evilson"}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
+        ' msar.format_data("Teacher") AS "3", msar.format_data("Name") AS "4",',
+        ' msar.format_data("Grade") AS "5", msar.format_data("Email") AS "6"',
+        ' FROM public."Students"  ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      limit_ => 3,
+      offset_ => 1,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 6,
+      "results": [
+        {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
+        {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"},
+        {"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"}
+      ],
+      "grouping": null,
+      "preview_data": {
+        "2": [
+          {"key": 1.234, "summary": "Alice Alison"},
+          {"key": 2.345, "summary": "Bob Bobinson"}
+        ],
+        "3": [
+          {"key": 1, "summary": "Carol Carlson"},
+          {"key": 2, "summary": "Dave Davidson"}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
+        ' msar.format_data("Teacher") AS "3", msar.format_data("Name") AS "4",',
+        ' msar.format_data("Grade") AS "5", msar.format_data("Email") AS "6"',
+        ' FROM public."Students"  ORDER BY "1" ASC LIMIT ''3'' OFFSET ''1'''
+      )
+    )
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      limit_ => 2,
+      offset_ => null,
+      order_ => '[{"attnum": 2, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [2]}'
+    ),
+    $j${
+      "count": 6,
+      "results": [
+        {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
+        {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"}
+      ],
+      "grouping": {
+        "columns": [2],
+        "preproc": null,
+        "groups": [{"id": 1, "count": 3, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
+      },
+      "preview_data": {
+        "2": [
+          {"key": 1.234, "summary": "Alice Alison"}
+        ],
+        "3": [
+          {"key": 1, "summary": "Carol Carlson"},
+          {"key": 2, "summary": "Dave Davidson"}
+        ]
+      }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
+        ' msar.format_data("Teacher") AS "3", msar.format_data("Name") AS "4",',
+        ' msar.format_data("Grade") AS "5", msar.format_data("Email") AS "6"',
+        ' FROM public."Students"  ORDER BY "2" ASC, "1" ASC LIMIT ''2'' OFFSET NULL'
+      )
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_with_preview() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      '"Students"'::regclass::oid,
+      '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}'
+    ),
+    $a${
+      "results": [
+        {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
+      ],
+      "preview_data": {
+        "2": [{"key": 2.345, "summary": "Bob Bobinson"}],
+        "3": [{"key": 1, "summary": "Carol Carlson"}]
+      }
+    }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_patch_record_in_table_with_preview() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+  RETURN NEXT is(
+    msar.patch_record_in_table(
+      '"Students"'::regclass::oid,
+      2,
+      '{"2": 2.345, "3": 2, "5": 85}'
+    ),
+    $a${
+      "results": [
+        {"1": 2, "2": 2.345, "3": 2, "4": "Gabby Gabberson", "5": 85, "6": "ggabberson@example.edu"}
+      ],
+      "preview_data": {
+        "2": [{"key": 2.345, "summary": "Bob Bobinson"}],
+        "3": [{"key": 2, "summary": "Dave Davidson"}]
+      }
+    }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_search_records_in_table_with_preview() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+  RETURN NEXT is(
+    msar.search_records_from_table(
+      '"Students"'::regclass::oid,
+      '[{"attnum": 4, "literal": "k"}]',
+      2
+    ) -> 'preview_data',
+    $a${
+      "2": [{"key": 1.234, "summary": "Alice Alison"}, {"key": 2.345, "summary": "Bob Bobinson"}],
+      "3": [{"key": 3, "summary": "Eve Evilson"}]
+    }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.replace_database_privileges_for_roles ------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
 test_replace_database_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
