@@ -203,6 +203,7 @@ To use an RPC function:
       - Filter
       - FilterAttnum
       - FilterLiteral
+      - PreviewEntry
       - Grouping
       - Group
       - GroupingResponse
@@ -230,6 +231,7 @@ To use an RPC function:
     options:
       members:
       - list_
+      - add
       - RoleInfo
       - RoleMember
 

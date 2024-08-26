@@ -47,9 +47,10 @@ def create_connection_with_new_user(
     conn_model.save()
     dbconn.execute_msar_func_with_engine(
         engine,
-        'create_basic_mathesar_user',
+        'create_role',
         conn_model.username,
-        conn_model.password
+        conn_model.password,
+        True
     )
     _load_sample_data(conn_model._sa_engine, sample_data)
     return conn_model
