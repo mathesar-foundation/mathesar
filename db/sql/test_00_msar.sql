@@ -4120,7 +4120,7 @@ BEGIN
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
         msar.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
-          'role_oid', %1$s, 'privileges', jsonb_build_array('CONNECT', 'CREATE')))))
+          'role_oid', %1$s, 'direct', jsonb_build_array('CONNECT', 'CREATE')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t1$,
       alice_id
@@ -4140,7 +4140,7 @@ BEGIN
     format(
       $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
         msar.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
-              'role_oid', %1$s, 'privileges', jsonb_build_array('CONNECT')))))
+              'role_oid', %1$s, 'direct', jsonb_build_array('CONNECT')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t2$,
       bob_id
@@ -4194,8 +4194,8 @@ BEGIN
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
         msar.replace_database_privileges_for_roles(jsonb_build_array(
-          jsonb_build_object('role_oid', %1$s, 'privileges', jsonb_build_array('CONNECT')),
-          jsonb_build_object('role_oid', %2$s, 'privileges', jsonb_build_array('CONNECT', 'CREATE')))))
+          jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('CONNECT')),
+          jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('CONNECT', 'CREATE')))))
         AS x(direct jsonb, role_oid regrole)
       WHERE role_oid=%1$s $t1$,
       alice_id,

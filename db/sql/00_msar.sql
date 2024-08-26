@@ -1141,10 +1141,10 @@ revoked.
 */
 BEGIN
 EXECUTE string_agg(
-  msar.build_database_privilege_replace_expr(role_oid, privileges),
+  msar.build_database_privilege_replace_expr(role_oid, direct),
   E';\n'
 ) || ';'
-FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, privileges jsonb);
+FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
 RETURN msar.list_db_priv(current_database());
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
