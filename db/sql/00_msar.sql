@@ -919,9 +919,10 @@ FROM (
 $$ LANGUAGE SQL;
 
 
+DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
-  oid oid, -- The OID of the role.
+  oid bigint, -- The OID of the role.
   name name, -- Name of the role.
   super boolean, -- Whether the role has SUPERUSER status.
   inherits boolean, -- Whether the role has INHERIT attribute.
@@ -1047,7 +1048,7 @@ The returned JSON object has the form:
   }
 */
 SELECT jsonb_build_object(
-  'owner_oid', pgd.datdba,
+  'owner_oid', pgd.datdba::bigint,
   'current_role_db_priv', array_remove(
     ARRAY[
       CASE WHEN has_database_privilege(pgd.oid, 'CREATE') THEN 'CREATE' END,
