@@ -437,7 +437,8 @@ export class RecordsData {
     return undefined;
   }
 
-  async deleteSelected(rowSelectionIds: Iterable<string>): Promise<void> {
+  /** @returns the number of selected rows deleted */
+  async deleteSelected(rowSelectionIds: Iterable<string>): Promise<number> {
     const ids =
       typeof rowSelectionIds === 'string' ? [rowSelectionIds] : rowSelectionIds;
     const pkColumn = get(this.columnsDataStore.pkColumn);
@@ -457,7 +458,7 @@ export class RecordsData {
     const rowKeys = [...primaryKeysOfSavedRows, ...identifiersOfUnsavedRows];
 
     if (rowKeys.length === 0) {
-      return;
+      return 0;
     }
 
     this.meta.rowDeletionStatus.setMultiple(rowKeys, { state: 'processing' });
@@ -478,8 +479,13 @@ export class RecordsData {
     if (keysToDelete.length > 0) {
       const recordIds = [...keysToDelete];
       try {
-        throw new Error('Not implemented'); // TODO_BETA
-        // await deleteAPI<RowKey>(bulkDeleteURL, { pks: recordIds });
+        await api.records
+          .delete({
+            database_id: this.apiContext.database_id,
+            table_oid: this.apiContext.table_oid,
+            record_ids: recordIds,
+          })
+          .run();
         keysToDelete.forEach((key) => successRowKeys.add(key));
       } catch (error) {
         failures.set(keysToDelete.join(','), getErrorMessage(error));
@@ -535,6 +541,8 @@ export class RecordsData {
       const apiMsg = [...failures.values()].join('\n');
       throw new Error(`${uiMsg} ${apiMsg}`);
     }
+
+    return primaryKeysOfSavedRows.length + identifiersOfUnsavedRows.length;
   }
 
   // TODO: It would be better to throw errors instead of silently failing
@@ -564,35 +572,39 @@ export class RecordsData {
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
 
-    throw new Error('Not implemented'); // TODO_BETA
-    // const promise = patchAPI<RecordsResponse>(
-    //   `${this.url}${String(primaryKeyValue)}/`,
-    //   { [column.id]: record[column.id] },
-    // );
+    const promise = api.records
+      .patch({
+        ...this.apiContext,
+        record_id: primaryKeyValue,
+        record_def: {
+          [String(column.id)]: record[column.id],
+        },
+      })
+      .run();
 
-    // if (!this.updatePromises) {
-    //   this.updatePromises = new Map();
-    // }
-    // this.updatePromises.set(cellKey, promise);
+    if (!this.updatePromises) {
+      this.updatePromises = new Map();
+    }
+    this.updatePromises.set(cellKey, promise);
 
-    // try {
-    //   const result = await promise;
-    //   this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
-    //   return {
-    //     ...row,
-    //     record: result.results[0],
-    //   };
-    // } catch (err) {
-    //   this.meta.cellModificationStatus.set(cellKey, {
-    //     state: 'failure',
-    //     errors: [`Unable to save cell. ${getErrorMessage(err)}`],
-    //   });
-    // } finally {
-    //   if (this.updatePromises.get(cellKey) === promise) {
-    //     this.updatePromises.delete(cellKey);
-    //   }
-    // }
-    // return row;
+    try {
+      const result = await promise;
+      this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
+      return {
+        ...row,
+        record: result.results[0],
+      };
+    } catch (err) {
+      this.meta.cellModificationStatus.set(cellKey, {
+        state: 'failure',
+        errors: [`Unable to save cell. ${getErrorMessage(err)}`],
+      });
+    } finally {
+      if (this.updatePromises.get(cellKey) === promise) {
+        this.updatePromises.delete(cellKey);
+      }
+    }
+    return row;
   }
 
   getNewEmptyRecord(): NewRecordRow {
@@ -636,55 +648,58 @@ export class RecordsData {
     const rowKeyOfBlankRow = getRowKey(row, pkColumn?.id);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
     this.createPromises?.get(rowKeyOfBlankRow)?.cancel();
-    const requestRecord = {
-      ...Object.fromEntries(this.contextualFilters),
-      ...row.record,
-    };
 
-    throw new Error('Not implemented'); // TODO_BETA
+    const promise = api.records
+      .add({
+        ...this.apiContext,
+        record_def: {
+          ...Object.fromEntries(this.contextualFilters),
+          ...row.record,
+        },
+      })
+      .run();
 
-    // const promise = postAPI<RecordsResponse>(this.url, requestRecord);
-    // if (!this.createPromises) {
-    //   this.createPromises = new Map();
-    // }
-    // this.createPromises.set(rowKeyOfBlankRow, promise);
+    if (!this.createPromises) {
+      this.createPromises = new Map();
+    }
+    this.createPromises.set(rowKeyOfBlankRow, promise);
 
-    // try {
-    //   const response = await promise;
-    //   const record = response.results[0];
-    //   let newRow: NewRecordRow = {
-    //     ...row,
-    //     record,
-    //   };
-    //   if (isPlaceholderRow(newRow)) {
-    //     const { isAddPlaceholder, ...newRecordRow } = newRow;
-    //     newRow = newRecordRow;
-    //   }
+    try {
+      const response = await promise;
+      const record = response.results[0];
+      let newRow: NewRecordRow = {
+        ...row,
+        record,
+      };
+      if (isPlaceholderRow(newRow)) {
+        const { isAddPlaceholder, ...newRecordRow } = newRow;
+        newRow = newRecordRow;
+      }
 
-    //   const rowKeyWithRecord = getRowKey(newRow, pkColumn?.id);
-    //   this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
-    //   this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
-    //   this.newRecords.update((existing) =>
-    //     existing.map((entry) => {
-    //       if (entry.identifier === row.identifier) {
-    //         return newRow;
-    //       }
-    //       return entry;
-    //     }),
-    //   );
-    //   this.totalCount.update((count) => (count ?? 0) + 1);
-    //   return newRow;
-    // } catch (err) {
-    //   this.meta.rowCreationStatus.set(rowKeyOfBlankRow, {
-    //     state: 'failure',
-    //     errors: [getErrorMessage(err)],
-    //   });
-    // } finally {
-    //   if (this.createPromises.get(rowKeyOfBlankRow) === promise) {
-    //     this.createPromises.delete(rowKeyOfBlankRow);
-    //   }
-    // }
-    // return row;
+      const rowKeyWithRecord = getRowKey(newRow, pkColumn?.id);
+      this.meta.rowCreationStatus.delete(rowKeyOfBlankRow);
+      this.meta.rowCreationStatus.set(rowKeyWithRecord, { state: 'success' });
+      this.newRecords.update((existing) =>
+        existing.map((entry) => {
+          if (entry.identifier === row.identifier) {
+            return newRow;
+          }
+          return entry;
+        }),
+      );
+      this.totalCount.update((count) => (count ?? 0) + 1);
+      return newRow;
+    } catch (err) {
+      this.meta.rowCreationStatus.set(rowKeyOfBlankRow, {
+        state: 'failure',
+        errors: [getErrorMessage(err)],
+      });
+    } finally {
+      if (this.createPromises.get(rowKeyOfBlankRow) === promise) {
+        this.createPromises.delete(rowKeyOfBlankRow);
+      }
+    }
+    return row;
   }
 
   async createOrUpdateRecord(

@@ -897,6 +897,32 @@ FROM (
 $$ LANGUAGE SQL;
 
 
+CREATE OR REPLACE FUNCTION msar.list_schema_privileges(sch_id regnamespace) RETURNS jsonb AS $$/*
+Given a schema, returns a json array of objects with direct, non-default schema privileges
+
+Each returned JSON object in the array has the form:
+  {
+    "role_oid": <int>,
+    "direct" [<str>]
+  }
+*/
+WITH priv_cte AS (
+  SELECT
+    jsonb_build_object(
+      'role_oid', pgr.oid::bigint,
+      'direct',  jsonb_agg(acl.privilege_type)
+    ) AS p
+  FROM
+    pg_catalog.pg_roles AS pgr,
+    pg_catalog.pg_namespace AS pgn,
+    aclexplode(COALESCE(pgn.nspacl, acldefault('n', pgn.nspowner))) AS acl
+  WHERE pgn.oid = sch_id AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_'
+  GROUP BY pgr.oid, pgn.oid
+)
+SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
   oid oid, -- The OID of the role.

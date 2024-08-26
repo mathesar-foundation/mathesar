@@ -108,6 +108,14 @@ To use an RPC function:
       - SchemaInfo
       - SchemaPatch
 
+## Schema Privileges
+
+::: schema_privileges
+    options:
+      members:
+      - list_direct
+      - SchemaPrivileges
+
 ## Tables
 
 ::: tables
