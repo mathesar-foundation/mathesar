@@ -19,7 +19,7 @@ class DBPrivileges(TypedDict):
         direct: A list of database privileges for the afforementioned role_oid.
     """
     role_oid: int
-    direct: list[Literal['CONNECT' | 'CREATE' | 'TEMPORARY']]
+    direct: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]
 
     @classmethod
     def from_dict(cls, d):
