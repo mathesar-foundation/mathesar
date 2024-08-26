@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -19,7 +19,7 @@ class DBPrivileges(TypedDict):
         direct: A list of database privileges for the afforementioned role_oid.
     """
     role_oid: int
-    direct: list[str]
+    direct: list[Literal['CONNECT' | 'CREATE' | 'TEMPORARY']]
 
     @classmethod
     def from_dict(cls, d):
@@ -96,13 +96,23 @@ def replace_for_roles(
         *, privileges: list[DBPrivileges], database_id: int, **kwargs
 ) -> list[DBPrivileges]:
     """
-    List database privileges for non-inherited roles.
+    Replace direct database privileges for roles.
+
+    Possible privileges are `CONNECT`, `CREATE`, and `TEMPORARY`.
+
+    Only roles which are included in a passed `DBPrivileges` object are
+    affected.
+
+    WARNING: Any privilege included in the `direct` list for a role
+    is GRANTed, and any privilege not included is REVOKEd.
 
     Args:
+        privileges: The new privilege sets for roles.
         database_id: The Django id of the database.
 
     Returns:
-        A list of database privileges.
+        A list of all non-default privileges on the database after the
+        operation.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
