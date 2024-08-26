@@ -4103,26 +4103,122 @@ $$ LANGUAGE plpgsql;
 -- msar.replace_database_privileges_for_roles ------------------------------------------------------
 
 
-CREATE OR REPLACE FUNCTION test_replace_database_privileges_for_roles() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION
+test_replace_database_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
+Happy path, smoke test.
+*/
 DECLARE
   alice_id oid;
   bob_id oid;
 BEGIN
   CREATE ROLE "Alice";
-  CREATE ROLE "Bob";
+  CREATE ROLE bob;
   alice_id := '"Alice"'::regrole::oid;
-  bob_id := '"Bob"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
 
-  RETURN NEXT ok(
-    msar.replace_database_privileges_for_roles(
-      jsonb_build_array(
-        jsonb_build_object(
-          'role_oid', alice_id, 'privileges', jsonb_build_array('CONNECT', 'CREATE')
-        )
-      )
-    ) @> jsonb_build_array(
-      jsonb_build_object('direct', jsonb_build_array('CONNECT', 'CREATE'), 'role_oid', alice_id::text)
-    )
+  RETURN NEXT set_eq(
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
+          'role_oid', %1$s, 'privileges', jsonb_build_array('CONNECT', 'CREATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id
+    ),
+    ARRAY['CONNECT', 'CREATE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['CONNECT', 'CREATE'],
+    'Privileges should be updated for actual database properly'
+  );
+  RETURN NEXT set_eq(
+    format(
+      $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
+              'role_oid', %1$s, 'privileges', jsonb_build_array('CONNECT')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t2$,
+      bob_id
+    ),
+    ARRAY['CONNECT'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['CONNECT', 'CREATE'],
+    'Alice''s privileges should be left alone properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['CONNECT'],
+    'Privileges should be updated for actual database properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_alice_and_bob_preloaded() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE ROLE "Alice";
+  GRANT CONNECT, CREATE ON DATABASE mathesar_testing TO "Alice";
+  CREATE ROLE bob;
+  GRANT CONNECT ON DATABASE mathesar_testing TO bob;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+test_replace_database_privileges_for_roles_multi_ops() RETURNS SETOF TEXT AS $$/*
+Test that we can add/revoke multiple privileges to/from multiple roles simultaneously.
+*/
+DECLARE
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  PERFORM __setup_alice_and_bob_preloaded();
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+  RETURN NEXT set_eq(
+    -- Revoke CREATE from Alice, Grant CREATE to Bob.
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_database_privileges_for_roles(jsonb_build_array(
+          jsonb_build_object('role_oid', %1$s, 'privileges', jsonb_build_array('CONNECT')),
+          jsonb_build_object('role_oid', %2$s, 'privileges', jsonb_build_array('CONNECT', 'CREATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      bob_id
+    ),
+    ARRAY['CONNECT'], -- This only checks form of Alice's info in response.
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['CONNECT'],
+    'Alice''s privileges should be updated for actual database properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['CONNECT', 'CREATE'],
+    'Bob''s privileges should be updated for actual database properly'
   );
 END;
 $$ LANGUAGE plpgsql;
