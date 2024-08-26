@@ -159,6 +159,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        database_privileges.replace_for_roles,
+        "database_privileges.replace_for_roles",
+        [user_is_authenticated]
+    ),
+    (
         database_setup.create_new,
         "database_setup.create_new",
         [user_is_superuser]

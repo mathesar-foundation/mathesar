@@ -1,9 +1,10 @@
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.roles.operations.select import list_db_priv, get_curr_role_db_priv
+from db.roles.operations.update import replace_database_privileges_for_roles
 from mathesar.rpc.utils import connect
 from mathesar.models.base import Database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -18,7 +19,7 @@ class DBPrivileges(TypedDict):
         direct: A list of database privileges for the afforementioned role_oid.
     """
     role_oid: int
-    direct: list[str]
+    direct: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]
 
     @classmethod
     def from_dict(cls, d):
@@ -86,3 +87,36 @@ def get_owner_oid_and_curr_role_db_priv(*, database_id: int, **kwargs) -> Curren
         db_name = Database.objects.get(id=database_id).name
         curr_role_db_priv = get_curr_role_db_priv(db_name, conn)
     return CurrentDBPrivileges.from_dict(curr_role_db_priv)
+
+
+@rpc_method(name="database_privileges.replace_for_roles")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def replace_for_roles(
+        *, privileges: list[DBPrivileges], database_id: int, **kwargs
+) -> list[DBPrivileges]:
+    """
+    Replace direct database privileges for roles.
+
+    Possible privileges are `CONNECT`, `CREATE`, and `TEMPORARY`.
+
+    Only roles which are included in a passed `DBPrivileges` object are
+    affected.
+
+    WARNING: Any privilege included in the `direct` list for a role
+    is GRANTed, and any privilege not included is REVOKEd.
+
+    Args:
+        privileges: The new privilege sets for roles.
+        database_id: The Django id of the database.
+
+    Returns:
+        A list of all non-default privileges on the database after the
+        operation.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        raw_db_priv = replace_database_privileges_for_roles(
+            conn, [DBPrivileges.from_dict(i) for i in privileges]
+        )
+    return [DBPrivileges.from_dict(i) for i in raw_db_priv]

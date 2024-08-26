@@ -84,6 +84,7 @@ To use an RPC function:
       members:
       - list_direct
       - get_owner_oid_and_curr_role_db_priv
+      - replace_for_roles
       - DBPrivileges
       - CurrentDBPrivileges
 
