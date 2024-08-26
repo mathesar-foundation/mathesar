@@ -2802,6 +2802,34 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_list_schema_privileges_basic() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE SCHEMA restricted;
+RETURN NEXT is(
+  msar.list_schema_privileges('restricted'::regnamespace),
+  format('[{"direct": ["USAGE", "CREATE"], "role_oid": %s}]', 'mathesar'::regrole::oid)::jsonb,
+  'Initially, only privileges for creator'
+);
+CREATE USER "Alice";
+RETURN NEXT is(
+  msar.list_schema_privileges('restricted'::regnamespace),
+  format('[{"direct": ["USAGE", "CREATE"], "role_oid": %s}]', 'mathesar'::regrole::oid)::jsonb,
+  'Alice should not have any privileges'
+);
+GRANT USAGE ON SCHEMA restricted TO "Alice";
+RETURN NEXT is(
+  msar.list_schema_privileges('restricted'::regnamespace),
+  format(
+    '[{"direct": ["USAGE", "CREATE"], "role_oid": %1$s}, {"direct": ["USAGE"], "role_oid": %2$s}]',
+    'mathesar'::regrole::oid,
+    '"Alice"'::regrole::oid
+  )::jsonb,
+  'Alice should have her schema new privileges'
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_list_roles() RETURNS SETOF TEXT AS $$
 DECLARE
   initial_role_count int;
