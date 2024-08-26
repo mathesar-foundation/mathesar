@@ -21,8 +21,10 @@ from mathesar.rpc import explorations
 from mathesar.rpc import records
 from mathesar.rpc import roles
 from mathesar.rpc import schemas
+from mathesar.rpc import schema_privileges
 from mathesar.rpc import servers
 from mathesar.rpc import tables
+from mathesar.rpc import table_privileges
 from mathesar.rpc import types
 
 METHODS = [
@@ -272,6 +274,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        schema_privileges.list_direct,
+        "schema_privileges.list_direct",
+        [user_is_authenticated]
+    ),
+    (
         servers.list_,
         "servers.list",
         [user_is_authenticated]
@@ -325,6 +332,11 @@ METHODS = [
     (
         tables.list_joinable,
         "tables.list_joinable",
+        [user_is_authenticated]
+    ),
+    (
+        table_privileges.list_direct,
+        "table_privileges.list_direct",
         [user_is_authenticated]
     ),
     (

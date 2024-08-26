@@ -15,15 +15,15 @@ export const { confirm, confirmationController } = makeConfirm({
   confirmationModal,
 });
 
-interface ConfirmDeleteProps extends Partial<ConfirmationProps> {
+interface ConfirmDeleteProps<T> extends Partial<ConfirmationProps<T>> {
   /** e.g. the name of the table, column, etc */
   identifierName?: string;
   /** the "thing" you're deleting, e.g. 'column', 'table', 'tables', '3 rows' etc. */
   identifierType: string;
 }
 
-export function confirmDelete(
-  props: ConfirmDeleteProps,
+export function confirmDelete<T>(
+  props: ConfirmDeleteProps<T>,
 ): ReturnType<typeof confirm> {
   const type = props.identifierType;
 
