@@ -3,18 +3,17 @@
 
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
+  import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { Button, SpinnerButton } from '@mathesar-component-library';
 
-  import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
-
   export let collaborator: Collaborator;
   export let editRoleForCollaborator: (collaborator: Collaborator) => void;
 
-  const databaseContext = getDatabaseSettingsContext();
-  $: ({ configuredRoles, users } = $databaseContext);
+  const routeContext = DatabaseSettingsRouteContext.get();
+  $: ({ configuredRoles, users } = $routeContext);
 
   $: user = $users.resolvedValue?.get(collaborator.user_id);
   $: configuredRoleId = collaborator.configured_role_id;
@@ -58,7 +57,7 @@
         identifierName: userName,
         identifierType: $_('collaborator'),
       })}
-    onClick={() => $databaseContext.deleteCollaborator(collaborator)}
+    onClick={() => $routeContext.deleteCollaborator(collaborator)}
     icon={{ ...iconDeleteMajor, size: '0.8em' }}
     label=""
     appearance="secondary"

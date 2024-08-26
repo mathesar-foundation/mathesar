@@ -9,6 +9,10 @@
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import {
+    type CombinedLoginRole,
+    DatabaseSettingsRouteContext,
+  } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { toast } from '@mathesar/stores/toast';
   import {
     ControlledModal,
@@ -17,12 +21,7 @@
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
-  import {
-    type CombinedLoginRole,
-    getDatabaseSettingsContext,
-  } from '../databaseSettingsUtils';
-
-  const databaseContext = getDatabaseSettingsContext();
+  const databaseContext = DatabaseSettingsRouteContext.get();
   $: ({ database } = $databaseContext);
 
   export let controller: ModalController;

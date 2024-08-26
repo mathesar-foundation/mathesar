@@ -1,5 +1,4 @@
-import { getContext, setContext } from 'svelte';
-import { type Readable, type Writable, derived, writable } from 'svelte/store';
+import { type Readable, derived } from 'svelte/store';
 
 import userApi, { type User } from '@mathesar/api/rest/users';
 import type { Collaborator } from '@mathesar/models/Collaborator';
@@ -9,7 +8,10 @@ import type { Role } from '@mathesar/models/Role';
 import AsyncStore from '@mathesar/stores/AsyncStore';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 
-const contextKey = Symbol('database settings store');
+import type { DatabaseRouteContext } from './DatabaseRouteContext';
+import { getRouteContext, setRouteContext } from './utils';
+
+const contextKey = Symbol('database settings route store');
 
 export type CombinedLoginRole = {
   name: string;
@@ -36,12 +38,12 @@ const getUsersPromise = () => {
   );
 };
 
-class DatabaseSettingsContext {
+export class DatabaseSettingsRouteContext {
+  databaseRouteContext: DatabaseRouteContext;
+
   database: Database;
 
   configuredRoles;
-
-  roles;
 
   combinedLoginRoles: Readable<CombinedLoginRole[]>;
 
@@ -49,12 +51,12 @@ class DatabaseSettingsContext {
 
   users: AsyncStore<void, ImmutableMap<User['id'], User>>;
 
-  constructor(database: Database) {
-    this.database = database;
-    this.configuredRoles = database.constructConfiguredRolesStore();
-    this.roles = database.constructRolesStore();
+  constructor(databaseRouteContext: DatabaseRouteContext) {
+    this.databaseRouteContext = databaseRouteContext;
+    this.database = this.databaseRouteContext.database;
+    this.configuredRoles = this.database.constructConfiguredRolesStore();
     this.combinedLoginRoles = derived(
-      [this.roles, this.configuredRoles],
+      [this.databaseRouteContext.roles, this.configuredRoles],
       ([$roles, $configuredRoles]) => {
         const isLoading = $configuredRoles.isLoading || $roles.isLoading;
         if (isLoading) {
@@ -83,7 +85,7 @@ class DatabaseSettingsContext {
         return [];
       },
     );
-    this.collaborators = database.constructCollaboratorsStore();
+    this.collaborators = this.database.constructCollaboratorsStore();
     this.users = new AsyncStore(getUsersPromise);
   }
 
@@ -134,50 +136,21 @@ class DatabaseSettingsContext {
     this.collaborators.updateResolvedValue((c) => c.without(collaborator.id));
   }
 
-  async addRole(
-    props:
-      | {
-          roleName: Role['name'];
-          login: false;
-          password?: never;
-        }
-      | { roleName: Role['name']; login: true; password: string },
-  ) {
-    const newRole = await this.database.addRole(
-      props.roleName,
-      props.login,
-      props.password,
-    );
-    this.roles.updateResolvedValue((r) => r.with(newRole.oid, newRole));
-  }
-
-  async deleteRole(role: Role) {
-    await role.delete();
-    this.roles.updateResolvedValue((r) => r.without(role.oid));
-    // When a role is deleted, both Collaborators & ConfiguredRoles needs to be reset
+  async deleteRoleAndResetDependents(role: Role) {
+    await this.databaseRouteContext.deleteRole(role);
+    // When a role is deleted, both Collaborators & ConfiguredRoles need to be reset
     this.configuredRoles.reset();
     this.collaborators.reset();
   }
-}
 
-export function getDatabaseSettingsContext(): Readable<DatabaseSettingsContext> {
-  const store = getContext<Writable<DatabaseSettingsContext>>(contextKey);
-  if (store === undefined) {
-    throw Error('Database settings context has not been set');
+  static construct(databaseRouteContext: DatabaseRouteContext) {
+    return setRouteContext(
+      contextKey,
+      new DatabaseSettingsRouteContext(databaseRouteContext),
+    );
   }
-  return store;
-}
 
-export function setDatabaseSettingsContext(
-  database: Database,
-): Readable<DatabaseSettingsContext> {
-  let store = getContext<Writable<DatabaseSettingsContext>>(contextKey);
-  const databaseSettingsContext = new DatabaseSettingsContext(database);
-  if (store !== undefined) {
-    store.set(databaseSettingsContext);
-    return store;
+  static get() {
+    return getRouteContext<DatabaseSettingsRouteContext>(contextKey);
   }
-  store = writable(databaseSettingsContext);
-  setContext(contextKey, store);
-  return store;
 }

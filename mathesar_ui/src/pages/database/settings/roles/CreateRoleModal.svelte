@@ -9,6 +9,7 @@
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
+  import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { toast } from '@mathesar/stores/toast';
   import {
     Checkbox,
@@ -19,9 +20,7 @@
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
-  import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
-
-  const databaseContext = getDatabaseSettingsContext();
+  const routeContext = DatabaseSettingsRouteContext.get();
 
   export let controller: ModalController;
 
@@ -50,13 +49,13 @@
 
   async function createRole() {
     if (login) {
-      await $databaseContext.addRole({
+      await $routeContext.databaseRouteContext.addRole({
         roleName: $roleName,
         login: true,
         password: $password,
       });
     } else {
-      await $databaseContext.addRole({
+      await $routeContext.databaseRouteContext.addRole({
         roleName: $roleName,
         login: false,
       });
