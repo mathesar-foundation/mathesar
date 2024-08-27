@@ -186,6 +186,7 @@ class ColumnInfo(TypedDict):
             default=ColumnDefault.from_dict(col_info.get("default")),
             has_dependents=col_info["has_dependents"],
             description=col_info.get("description"),
+            current_role_priv=col_info["current_role_priv"],
             valid_target_types=col_info.get("valid_target_types")
         )
 

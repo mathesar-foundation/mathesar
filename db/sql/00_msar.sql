@@ -776,6 +776,7 @@ Each returned JSON object in the array will have the form:
     "default": {"value": <str>, "is_dynamic": <bool>},
     "has_dependents": <bool>,
     "description": <str>,
+    "current_role_priv": [<str>, <str>, ...],
     "valid_target_types": [<str>, <str>, ...]
   }
 
@@ -808,6 +809,15 @@ SELECT jsonb_agg(
     ),
     'has_dependents', msar.has_dependents(tab_id, attnum),
     'description', msar.col_description(tab_id, attnum),
+    'current_role_priv', array_remove(
+      ARRAY[
+        CASE WHEN pg_catalog.has_column_privilege(tab_id, attnum, 'SELECT') THEN 'SELECT' END,
+        CASE WHEN pg_catalog.has_column_privilege(tab_id, attnum, 'INSERT') THEN 'INSERT' END,
+        CASE WHEN pg_catalog.has_column_privilege(tab_id, attnum, 'UPDATE') THEN 'UPDATE' END,
+        CASE WHEN pg_catalog.has_column_privilege(tab_id, attnum, 'REFERENCES') THEN 'REFERENCES' END
+      ],
+      NULL
+    ),
     'valid_target_types', msar.get_valid_target_type_strings(atttypid)
   )
 )
