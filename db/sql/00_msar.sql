@@ -893,6 +893,9 @@ Each returned JSON object in the array will have the form:
     "oid": <int>
     "name": <str>
     "description": <str|null>
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>,
     "table_count": <int>
   }
 */
@@ -902,6 +905,15 @@ FROM (
     s.oid::bigint AS oid,
     s.nspname AS name,
     pg_catalog.obj_description(s.oid) AS description,
+    s.nspowner::bigint AS owner_oid,
+    array_remove(
+      ARRAY[
+        CASE WHEN pg_catalog.has_schema_privilege(s.oid, 'USAGE') THEN 'USAGE' END,
+        CASE WHEN pg_catalog.has_schema_privilege(s.oid, 'CREATE') THEN 'CREATE' END
+      ],
+      NULL
+    ) AS current_role_priv,
+    pg_catalog.pg_has_role(s.nspowner, 'USAGE') AS current_role_owns,
     COALESCE(count(c.oid), 0) AS table_count
   FROM pg_catalog.pg_namespace s
   LEFT JOIN pg_catalog.pg_class c ON
@@ -914,7 +926,8 @@ FROM (
     s.nspname NOT LIKE 'pg_%'
   GROUP BY
     s.oid,
-    s.nspname
+    s.nspname,
+    s.nspowner
 ) AS schema_data;
 $$ LANGUAGE SQL;
 
@@ -1063,26 +1076,27 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_self_database_privileges() RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION msar.get_current_role_database_privileges() RETURNS jsonb AS $$/*
 Given a database name, returns a json object with database owner oid and database privileges
 for the role executing the function.
 
 The returned JSON object has the form:
   {
     "owner_oid": <int>,
-    "current_role_db_priv" [<str>]
+    "current_role_priv": [<str>],
+    "current_role_owner": <bool>
   }
 */
 SELECT jsonb_build_object(
   'owner_oid', pgd.datdba::bigint,
-  'current_role_db_priv', array_remove(
+  'current_role_priv', array_remove(
     ARRAY[
       CASE WHEN has_database_privilege(pgd.oid, 'CREATE') THEN 'CREATE' END,
       CASE WHEN has_database_privilege(pgd.oid, 'TEMPORARY') THEN 'TEMPORARY' END,
       CASE WHEN has_database_privilege(pgd.oid, 'CONNECT') THEN 'CONNECT' END
     ], NULL
   ),
-  'current_role_owner', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
+  'current_role_owns', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
 ) FROM pg_catalog.pg_database AS pgd
 WHERE pgd.datname = current_database();
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
