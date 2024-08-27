@@ -844,6 +844,20 @@ SELECT jsonb_build_object(
   'name', relname,
   'schema', relnamespace::bigint,
   'description', msar.obj_description(oid, 'pg_class')
+  'owner_oid', relowner,
+  'current_role_priv', array_remove(
+    ARRAY[
+      CASE WHEN pg_catalog.has_table_privilege(oid, 'SELECT') THEN 'SELECT' END,
+      CASE WHEN pg_catalog.has_table_privilege(oid, 'INSERT') THEN 'INSERT' END,
+      CASE WHEN pg_catalog.has_table_privilege(oid, 'UPDATE') THEN 'UPDATE' END,
+      CASE WHEN pg_catalog.has_table_privilege(oid, 'DELETE') THEN 'DELETE' END,
+      CASE WHEN pg_catalog.has_table_privilege(oid, 'TRUNCATE') THEN 'TRUNCATE' END,
+      CASE WHEN pg_catalog.has_table_privilege(oid, 'REFERENCES') THEN 'REFERENCES' END,
+      CASE WHEN pg_catalog.has_table_privilege(oid, 'TRIGGER') THEN 'TRIGGER' END
+    ],
+    NULL
+  ),
+  'current_role_owns', pg_catalog.pg_has_role(relowner, 'USAGE')
 ) FROM pg_catalog.pg_class WHERE oid = tab_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -856,7 +870,10 @@ Each returned JSON object in the array will have the form:
     "oid": <int>,
     "name": <str>,
     "schema": <int>,
-    "description": <str>
+    "description": <str>,
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>
   }
 
 Args:
@@ -868,7 +885,21 @@ SELECT coalesce(
       'oid', pgc.oid::bigint,
       'name', pgc.relname,
       'schema', pgc.relnamespace::bigint,
-      'description', msar.obj_description(pgc.oid, 'pg_class')
+      'description', msar.obj_description(pgc.oid, 'pg_class'),
+      'owner_oid', pgc.relowner,
+      'current_role_priv', array_remove(
+        ARRAY[
+          CASE WHEN pg_catalog.has_table_privilege(pgc.oid, 'SELECT') THEN 'SELECT' END,
+          CASE WHEN pg_catalog.has_table_privilege(pgc.oid, 'INSERT') THEN 'INSERT' END,
+          CASE WHEN pg_catalog.has_table_privilege(pgc.oid, 'UPDATE') THEN 'UPDATE' END,
+          CASE WHEN pg_catalog.has_table_privilege(pgc.oid, 'DELETE') THEN 'DELETE' END,
+          CASE WHEN pg_catalog.has_table_privilege(pgc.oid, 'TRUNCATE') THEN 'TRUNCATE' END,
+          CASE WHEN pg_catalog.has_table_privilege(pgc.oid, 'REFERENCES') THEN 'REFERENCES' END,
+          CASE WHEN pg_catalog.has_table_privilege(pgc.oid, 'TRIGGER') THEN 'TRIGGER' END
+        ],
+        NULL
+      ),
+      'current_role_owns', pg_catalog.pg_has_role(pgc.relowner, 'USAGE')
     )
   ),
   '[]'::jsonb
