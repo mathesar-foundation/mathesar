@@ -10,22 +10,20 @@ import type { Database } from './Database';
 export class Collaborator {
   readonly id;
 
-  readonly user_id;
+  readonly userId;
 
-  readonly _configured_role_id: Writable<ConfiguredRole['id']>;
+  readonly _configuredRoleId: Writable<ConfiguredRole['id']>;
 
-  get configured_role_id(): Readable<ConfiguredRole['id']> {
-    return this._configured_role_id;
+  get configuredRoleId(): Readable<ConfiguredRole['id']> {
+    return this._configuredRoleId;
   }
 
   readonly database;
 
   constructor(props: { database: Database; rawCollaborator: RawCollaborator }) {
     this.id = props.rawCollaborator.id;
-    this.user_id = props.rawCollaborator.user_id;
-    this._configured_role_id = writable(
-      props.rawCollaborator.configured_role_id,
-    );
+    this.userId = props.rawCollaborator.user_id;
+    this._configuredRoleId = writable(props.rawCollaborator.configured_role_id);
     this.database = props.database;
   }
 
@@ -43,7 +41,7 @@ export class Collaborator {
       (resolve, reject) => {
         promise
           .then((rawCollaborator) => {
-            this._configured_role_id.set(rawCollaborator.configured_role_id);
+            this._configuredRoleId.set(rawCollaborator.configured_role_id);
             return resolve(this);
           }, reject)
           .catch(reject);

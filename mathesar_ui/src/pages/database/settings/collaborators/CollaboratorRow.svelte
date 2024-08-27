@@ -15,8 +15,8 @@
   const routeContext = DatabaseSettingsRouteContext.get();
   $: ({ configuredRoles, users } = $routeContext);
 
-  $: user = $users.resolvedValue?.get(collaborator.user_id);
-  $: configuredRoleId = collaborator.configured_role_id;
+  $: user = $users.resolvedValue?.get(collaborator.userId);
+  $: configuredRoleId = collaborator.configuredRoleId;
   $: configuredRole = $configuredRoles.resolvedValue?.get($configuredRoleId);
   $: userName = user ? user.full_name || user.username : '';
 </script>
@@ -27,7 +27,7 @@
       <div>{userName}</div>
       <div>{user.email}</div>
     {:else}
-      {collaborator.user_id}
+      {collaborator.userId}
     {/if}
   </div>
 </GridTableCell>

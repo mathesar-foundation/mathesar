@@ -36,7 +36,7 @@
   const SelectUser = Select<User['id']>;
 
   $: addedUsers = new Set(
-    [...collaboratorsMap.values()].map((cbr) => cbr.user_id),
+    [...collaboratorsMap.values()].map((cbr) => cbr.userId),
   );
   $: usersNotAdded = [...usersMap.values()].filter(
     (user) => !addedUsers.has(user.id),
