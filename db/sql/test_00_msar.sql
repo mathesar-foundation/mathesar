@@ -2597,6 +2597,7 @@ BEGIN
         "primary_key": true,
         "type_options": null,
         "has_dependents": true,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2612,6 +2613,7 @@ BEGIN
           "precision": null
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2626,6 +2628,7 @@ BEGIN
           "length": 128
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2641,6 +2644,7 @@ BEGIN
         "primary_key": false,
         "type_options": null,
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": ["numeric", "text"]
       },
       {
@@ -2658,6 +2662,7 @@ BEGIN
           "precision": null
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2672,6 +2677,7 @@ BEGIN
           "item_type": "integer"
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2688,6 +2694,7 @@ BEGIN
           "precision": 15
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       }
     ]$j$::jsonb
