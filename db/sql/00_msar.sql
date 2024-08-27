@@ -497,6 +497,28 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_role_name(rol_oid oid) RETURNS TEXT AS $$/*
+Return the UNQUOTED name of a given role.
+
+If the role does not exist, an exception will be raised.
+
+Args:
+  rol_oid: The OID of the role.
+*/
+DECLARE rol_name text;
+BEGIN
+  SELECT rolname INTO rol_name FROM pg_roles WHERE oid=rol_oid;
+
+  IF rol_name IS NULL THEN
+    RAISE EXCEPTION 'Role with OID % does not exist', rol_oid
+    USING ERRCODE = '42704'; -- undefined_object
+  END IF;
+
+  RETURN rol_name;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_constraint_type_api_code(contype char) RETURNS TEXT AS $$/*
 This function returns a string that represents the constraint type code used to describe
 constraints when listing them within the Mathesar API.
@@ -897,6 +919,7 @@ FROM (
 $$ LANGUAGE SQL;
 
 
+DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.list_schema_privileges(sch_id regnamespace) RETURNS jsonb AS $$/*
 Given a schema, returns a json array of objects with direct, non-default schema privileges
 
@@ -916,7 +939,7 @@ WITH priv_cte AS (
     pg_catalog.pg_roles AS pgr,
     pg_catalog.pg_namespace AS pgn,
     aclexplode(COALESCE(pgn.nspacl, acldefault('n', pgn.nspowner))) AS acl
-  WHERE pgn.oid = sch_id AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_'
+  WHERE pgn.oid = sch_id AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
   GROUP BY pgr.oid, pgn.oid
 )
 SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
@@ -925,7 +948,7 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
-  oid oid, -- The OID of the role.
+  oid bigint, -- The OID of the role.
   name name, -- Name of the role.
   super boolean, -- Whether the role has SUPERUSER status.
   inherits boolean, -- Whether the role has INHERIT attribute.
@@ -1026,14 +1049,14 @@ Each returned JSON object in the array has the form:
 WITH priv_cte AS (
   SELECT
     jsonb_build_object(
-      'role_oid', pgr.oid,
+      'role_oid', pgr.oid::bigint,
       'direct',  jsonb_agg(acl.privilege_type)
     ) AS p
   FROM
     pg_catalog.pg_roles AS pgr,
     pg_catalog.pg_database AS pgd,
     aclexplode(COALESCE(pgd.datacl, acldefault('d', pgd.datdba))) AS acl
-  WHERE pgd.datname = db_name AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_'
+  WHERE pgd.datname = db_name AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
   GROUP BY pgr.oid, pgd.oid
 )
 SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
@@ -1051,7 +1074,7 @@ The returned JSON object has the form:
   }
 */
 SELECT jsonb_build_object(
-  'owner_oid', pgd.datdba,
+  'owner_oid', pgd.datdba::bigint,
   'current_role_db_priv', array_remove(
     ARRAY[
       CASE WHEN has_database_privilege(pgd.oid, 'CREATE') THEN 'CREATE' END,
@@ -1061,6 +1084,32 @@ SELECT jsonb_build_object(
   )
 ) FROM pg_catalog.pg_database AS pgd
 WHERE pgd.datname = db_name;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.list_table_privileges(tab_id regclass) RETURNS jsonb AS $$/*
+Given a table, returns a json array of objects with direct, non-default table privileges.
+
+Each returned JSON object in the array has the form:
+  {
+    "role_oid": <int>,
+    "direct" [<str>]
+  }
+*/
+WITH priv_cte AS (
+  SELECT
+    jsonb_build_object(
+      'role_oid', pgr.oid::bigint,
+      'direct',  jsonb_agg(acl.privilege_type)
+    ) AS p
+  FROM
+    pg_catalog.pg_roles AS pgr,
+    pg_catalog.pg_class AS pgc,
+    aclexplode(COALESCE(pgc.relacl, acldefault('r', pgc.relowner))) AS acl
+  WHERE pgc.oid = tab_id AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
+  GROUP BY pgr.oid, pgc.oid
+)
+SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -1108,6 +1157,50 @@ BEGIN
   RETURN msar.get_role(rolename);
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_database_privilege_replace_expr(rol_id regrole, privileges_ jsonb) RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    concat(
+      CASE WHEN privileges_ ? val THEN 'GRANT' ELSE 'REVOKE' END,
+      ' %1$s ON DATABASE %2$I ',
+      CASE WHEN privileges_ ? val THEN 'TO' ELSE 'FROM' END,
+      ' %3$I'
+    ),
+    val,
+    current_database(),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(ARRAY['CONNECT', 'CREATE', 'TEMPORARY']) as x(val);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.replace_database_privileges_for_roles(priv_spec jsonb) RETURNS jsonb AS $$/*
+Grant/Revoke privileges for a set of roles on the current database.
+
+Args:
+  priv_spec: An array defining the privileges to grant or revoke for each role.
+
+Each object in the priv_spec should have the form:
+{role_oid: <int>, privileges: SET<"CONNECT"|"CREATE"|"TEMPORARY">}
+
+Any privilege that exists in the privileges subarray will be granted. Any which is missing will be
+revoked.
+*/
+BEGIN
+EXECUTE string_agg(
+  msar.build_database_privilege_replace_expr(role_oid, direct),
+  E';\n'
+) || ';'
+FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
+RETURN msar.list_db_priv(current_database());
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------

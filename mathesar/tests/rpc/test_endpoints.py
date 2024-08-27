@@ -24,6 +24,7 @@ from mathesar.rpc import schemas
 from mathesar.rpc import schema_privileges
 from mathesar.rpc import servers
 from mathesar.rpc import tables
+from mathesar.rpc import table_privileges
 from mathesar.rpc import types
 
 METHODS = [
@@ -155,6 +156,11 @@ METHODS = [
     (
         database_privileges.get_owner_oid_and_curr_role_db_priv,
         "database_privileges.get_owner_oid_and_curr_role_db_priv",
+        [user_is_authenticated]
+    ),
+    (
+        database_privileges.replace_for_roles,
+        "database_privileges.replace_for_roles",
         [user_is_authenticated]
     ),
     (
@@ -326,6 +332,11 @@ METHODS = [
     (
         tables.list_joinable,
         "tables.list_joinable",
+        [user_is_authenticated]
+    ),
+    (
+        table_privileges.list_direct,
+        "table_privileges.list_direct",
         [user_is_authenticated]
     ),
     (

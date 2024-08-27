@@ -84,6 +84,7 @@ To use an RPC function:
       members:
       - list_direct
       - get_owner_oid_and_curr_role_db_priv
+      - replace_for_roles
       - DBPrivileges
       - CurrentDBPrivileges
 
@@ -133,6 +134,14 @@ To use an RPC function:
       - SettableTableInfo
       - JoinableTableRecord
       - JoinableTableInfo
+
+## Table Privileges
+
+::: table_privileges
+    options:
+      members:
+      - list_direct
+      - TablePrivileges
 
 ## Table Metadata
 
