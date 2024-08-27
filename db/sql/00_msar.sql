@@ -1063,7 +1063,7 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_owner_oid_and_curr_role_db_priv(db_name text) RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION msar.get_self_database_privileges() RETURNS jsonb AS $$/*
 Given a database name, returns a json object with database owner oid and database privileges
 for the role executing the function.
 
@@ -1081,9 +1081,10 @@ SELECT jsonb_build_object(
       CASE WHEN has_database_privilege(pgd.oid, 'TEMPORARY') THEN 'TEMPORARY' END,
       CASE WHEN has_database_privilege(pgd.oid, 'CONNECT') THEN 'CONNECT' END
     ], NULL
-  )
+  ),
+  'current_role_owner', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
 ) FROM pg_catalog.pg_database AS pgd
-WHERE pgd.datname = db_name;
+WHERE pgd.datname = current_database();
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 

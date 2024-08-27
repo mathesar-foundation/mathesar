@@ -17,5 +17,5 @@ def list_table_privileges(table_oid, conn):
     return exec_msar_func(conn, 'list_table_privileges', table_oid).fetchone()[0]
 
 
-def get_curr_role_db_priv(db_name, conn):
-    return exec_msar_func(conn, 'get_owner_oid_and_curr_role_db_priv', db_name).fetchone()[0]
+def get_curr_role_db_priv(conn):
+    return exec_msar_func(conn, 'get_self_database_privileges').fetchone()[0]

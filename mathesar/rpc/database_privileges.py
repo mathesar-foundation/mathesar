@@ -36,15 +36,18 @@ class CurrentDBPrivileges(TypedDict):
     Attributes:
         owner_oid: The `oid` of the owner of the database.
         current_role_db_priv: A list of database privileges for the current user.
+        current_role_owner: Whether the current role is an owner of the database.
     """
     owner_oid: int
-    current_role_db_priv: list[str]
+    current_role_db_priv: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]
+    current_role_owner: bool
 
     @classmethod
     def from_dict(cls, d):
         return cls(
             owner_oid=d["owner_oid"],
-            current_role_db_priv=d["current_role_db_priv"]
+            current_role_db_priv=d["current_role_db_priv"],
+            current_role_owner=d["current_role_owner"]
         )
 
 
@@ -69,10 +72,10 @@ def list_direct(*, database_id: int, **kwargs) -> list[DBPrivileges]:
 
 
 # TODO: Think of something concise for the endpoint name.
-@rpc_method(name="database_privileges.get_owner_oid_and_curr_role_db_priv")
+@rpc_method(name="database_privileges.get_self")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def get_owner_oid_and_curr_role_db_priv(*, database_id: int, **kwargs) -> CurrentDBPrivileges:
+def get_self(*, database_id: int, **kwargs) -> CurrentDBPrivileges:
     """
     Get database privileges for the current user.
 
@@ -84,8 +87,7 @@ def get_owner_oid_and_curr_role_db_priv(*, database_id: int, **kwargs) -> Curren
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        db_name = Database.objects.get(id=database_id).name
-        curr_role_db_priv = get_curr_role_db_priv(db_name, conn)
+        curr_role_db_priv = get_curr_role_db_priv(conn)
     return CurrentDBPrivileges.from_dict(curr_role_db_priv)
 
 
