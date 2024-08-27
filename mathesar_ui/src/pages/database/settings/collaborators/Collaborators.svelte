@@ -10,8 +10,11 @@
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
-  import { isDefined } from '@mathesar/utils/language';
-  import { Button, Spinner } from '@mathesar-component-library';
+  import {
+    Button,
+    Spinner,
+    isDefinedNonNullable,
+  } from '@mathesar-component-library';
 
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
@@ -40,7 +43,7 @@
     $collaborators.error,
     $configuredRoles.error,
     $users.error,
-  ].filter((entry): entry is string => isDefined(entry));
+  ].filter((entry): entry is string => isDefinedNonNullable(entry));
 
   let targetCollaborator: Collaborator | undefined;
 
