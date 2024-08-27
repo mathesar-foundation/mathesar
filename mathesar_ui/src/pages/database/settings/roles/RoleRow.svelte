@@ -3,6 +3,7 @@
 
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
+  import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
   import { confirm } from '@mathesar/stores/confirmation';
@@ -15,9 +16,7 @@
     SpinnerButton,
   } from '@mathesar-component-library';
 
-  import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
-
-  const databaseContext = getDatabaseSettingsContext();
+  const routeContext = DatabaseSettingsRouteContext.get();
 
   export let role: Role;
   export let rolesMap: ImmutableMap<number, Role>;
@@ -27,7 +26,7 @@
 
   async function dropRole() {
     try {
-      await $databaseContext.deleteRole(role);
+      await $routeContext.deleteRoleAndResetDependents(role);
       toast.success($_('role_dropped_successfully'));
     } catch (err) {
       toast.error(getErrorMessage(err));

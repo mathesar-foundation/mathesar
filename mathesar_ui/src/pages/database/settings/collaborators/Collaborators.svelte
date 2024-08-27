@@ -5,6 +5,7 @@
   import Errors from '@mathesar/components/Errors.svelte';
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
+  import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
@@ -12,18 +13,17 @@
   import { isDefined } from '@mathesar/utils/language';
   import { Button, Spinner } from '@mathesar-component-library';
 
-  import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
   import AddCollaboratorModel from './AddCollaboratorModal.svelte';
   import CollaboratorRow from './CollaboratorRow.svelte';
   import EditRoleForCollaboratorModal from './EditRoleForCollaboratorModal.svelte';
 
-  const databaseContext = getDatabaseSettingsContext();
+  const routeContext = DatabaseSettingsRouteContext.get();
   const addCollaboratorModal = modal.spawnModalController();
   const editCollaboratorRoleModal = modal.spawnModalController();
 
-  $: ({ database, configuredRoles, collaborators, users } = $databaseContext);
+  $: ({ database, configuredRoles, collaborators, users } = $routeContext);
 
   $: void AsyncRpcApiStore.runBatched(
     [
