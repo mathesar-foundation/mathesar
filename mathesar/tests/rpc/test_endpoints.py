@@ -279,6 +279,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        schema_privileges.replace_for_roles,
+        "schema_privileges.replace_for_roles",
+        [user_is_authenticated]
+    ),
+    (
         servers.list_,
         "servers.list",
         [user_is_authenticated]
