@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table columns.
 """
-from typing import Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -160,6 +160,7 @@ class ColumnInfo(TypedDict):
         default: The default value and whether it's dynamic.
         has_dependents: Whether the column has dependent objects.
         description: The description of the column.
+        current_role_priv: The privileges of the user for the column.
         valid_target_types: A list of all types to which the column can
             be cast.
     """
@@ -172,6 +173,7 @@ class ColumnInfo(TypedDict):
     default: ColumnDefault
     has_dependents: bool
     description: str
+    current_role_priv: list[Literal['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']]
     valid_target_types: list[str]
 
     @classmethod

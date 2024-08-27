@@ -856,7 +856,7 @@ SELECT jsonb_build_object(
   'oid', oid::bigint,
   'name', relname,
   'schema', relnamespace::bigint,
-  'description', msar.obj_description(oid, 'pg_class')
+  'description', msar.obj_description(oid, 'pg_class'),
   'owner_oid', relowner,
   'current_role_priv', array_remove(
     ARRAY[
