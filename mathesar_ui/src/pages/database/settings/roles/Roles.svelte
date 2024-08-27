@@ -4,23 +4,23 @@
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
   import { modal } from '@mathesar/stores/modal';
   import { Button, Icon, Spinner } from '@mathesar-component-library';
 
-  import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
   import CreateRoleModal from './CreateRoleModal.svelte';
   import ModifyRoleMembers from './ModifyRoleMembers.svelte';
   import RoleRow from './RoleRow.svelte';
 
-  const databaseContext = getDatabaseSettingsContext();
+  const routeContext = DatabaseSettingsRouteContext.get();
   const createRoleModalController = modal.spawnModalController();
   const modifyRoleMembersModalController = modal.spawnModalController();
 
-  $: ({ database, roles } = $databaseContext);
+  $: ({ database, roles } = $routeContext.databaseRouteContext);
 
   $: void roles.runIfNotInitialized({ database_id: database.id });
   $: roleList = [...($roles.resolvedValue?.values() ?? [])];

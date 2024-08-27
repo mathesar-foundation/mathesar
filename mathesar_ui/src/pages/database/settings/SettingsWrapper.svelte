@@ -1,8 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
-  import type { Database } from '@mathesar/models/Database';
   import {
     getDatabaseCollaboratorsUrl,
     getDatabaseRoleConfigurationUrl,
@@ -10,10 +10,8 @@
   } from '@mathesar/routes/urls';
   import { LinkMenuItem, Menu, MenuHeading } from '@mathesar-component-library';
 
-  import { setDatabaseSettingsContext } from './databaseSettingsUtils';
-
-  export let database: Database;
-  $: setDatabaseSettingsContext(database);
+  const databaseSettingsContext = DatabaseSettingsRouteContext.get();
+  $: ({ database } = $databaseSettingsContext);
 
   type Section = 'roleConfiguration' | 'collaborators' | 'roles';
   let section = 'roleConfiguration';
