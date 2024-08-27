@@ -4768,7 +4768,8 @@ BEGIN
   GRANT INSERT, UPDATE ON TABLE "test Multiops table" TO bob;
 
   RETURN NEXT set_eq(
-    -- Revoke CREATE from Alice, Grant CREATE to Bob.
+    -- Grant INSERT, SELECT and UPDATE to Alice, Revoke DELETE.
+    -- Grant SELECT and DELETE to Bob, Revoke INSERT and UPDATE.
     format(
       $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
         msar.replace_table_privileges_for_roles(%3$s, jsonb_build_array(
