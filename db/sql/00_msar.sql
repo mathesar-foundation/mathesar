@@ -833,7 +833,10 @@ Each returned JSON object will have the form:
     "oid": <int>,
     "name": <str>,
     "schema": <int>,
-    "description": <str>
+    "description": <str>,
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>
   }
 
 Args:

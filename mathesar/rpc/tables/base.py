@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing tables in a database.
 """
-from typing import Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -28,11 +28,27 @@ class TableInfo(TypedDict):
         name: The name of the table.
         schema: The `oid` of the schema where the table lives.
         description: The description of the table.
+        owner_oid: The OID of the direct owner of the table.
+        current_role_priv: The privileges held by the user on the table.
+        current_role_owns: Whether the current role owns the table.
     """
     oid: int
     name: str
     schema: int
     description: Optional[str]
+    owner_oid: int
+    current_role_priv: list[
+        Literal[
+            'SELECT',
+            'INSERT',
+            'UPDATE',
+            'DELETE',
+            'TRUNCATE',
+            'REFERENCES',
+            'TRIGGER'
+        ]
+    ]
+    current_role_owns: bool
 
 
 class SettableTableInfo(TypedDict):
