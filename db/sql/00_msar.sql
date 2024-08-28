@@ -844,7 +844,7 @@ FROM
   unnest(
     ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']
   ) AS x(privilege),
-  has_table_privilege(tab_id, privilege) as has_privilege
+  pg_catalog.has_table_privilege(tab_id, privilege) as has_privilege
 WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -915,6 +915,20 @@ WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.list_schema_privileges_for_current_role(sch_id regnamespace) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed schema.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(
+    ARRAY['USAGE', 'CREATE']
+  ) AS x(privilege),
+  pg_catalog.has_schema_privilege(sch_id, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_schemas() RETURNS jsonb AS $$/*
 Return a json array of objects describing the user-defined schemas in the database.
 
@@ -942,13 +956,7 @@ FROM (
     s.nspname AS name,
     pg_catalog.obj_description(s.oid) AS description,
     s.nspowner::bigint AS owner_oid,
-    array_remove(
-      ARRAY[
-        CASE WHEN pg_catalog.has_schema_privilege(s.oid, 'USAGE') THEN 'USAGE' END,
-        CASE WHEN pg_catalog.has_schema_privilege(s.oid, 'CREATE') THEN 'CREATE' END
-      ],
-      NULL
-    ) AS current_role_priv,
+    msar.list_schema_privileges_for_current_role(s.oid) AS current_role_priv,
     pg_catalog.pg_has_role(s.nspowner, 'USAGE') AS current_role_owns,
     COALESCE(count(c.oid), 0) AS table_count
   FROM pg_catalog.pg_namespace s
@@ -968,7 +976,6 @@ FROM (
 $$ LANGUAGE SQL;
 
 
-DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.list_schema_privileges(sch_id regnamespace) RETURNS jsonb AS $$/*
 Given a schema, returns a json array of objects with direct, non-default schema privileges
 
@@ -995,6 +1002,7 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
   oid bigint, -- The OID of the role.
@@ -1112,26 +1120,37 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_current_role_database_privileges() RETURNS jsonb AS $$/*
-Given a database name, returns a json object with database owner oid and database privileges
-for the role executing the function.
+CREATE OR REPLACE FUNCTION
+msar.list_database_privileges_for_current_role(dat_id oid) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed database.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(
+    ARRAY['CONNECT', 'CREATE', 'TEMPORARY']
+  ) AS x(privilege),
+  pg_catalog.has_database_privilege(dat_id, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_current_database_info() RETURNS jsonb AS $$/*
+Return information about the current database.
 
 The returned JSON object has the form:
   {
-    "owner_oid": <int>,
+    "oid": <bigint>,
+    "name": <str>,
+    "owner_oid": <bigint>,
     "current_role_priv": [<str>],
     "current_role_owner": <bool>
   }
 */
 SELECT jsonb_build_object(
+  'oid', pgd.oid::bigint,
+  'name', pgd.datname,
   'owner_oid', pgd.datdba::bigint,
-  'current_role_priv', array_remove(
-    ARRAY[
-      CASE WHEN has_database_privilege(pgd.oid, 'CREATE') THEN 'CREATE' END,
-      CASE WHEN has_database_privilege(pgd.oid, 'TEMPORARY') THEN 'TEMPORARY' END,
-      CASE WHEN has_database_privilege(pgd.oid, 'CONNECT') THEN 'CONNECT' END
-    ], NULL
-  ),
+  'current_role_priv', msar.list_database_privileges_for_current_role(pgd.oid),
   'current_role_owns', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
 ) FROM pg_catalog.pg_database AS pgd
 WHERE pgd.datname = current_database();

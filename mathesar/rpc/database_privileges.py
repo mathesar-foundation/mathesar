@@ -46,8 +46,8 @@ class CurrentDBPrivileges(TypedDict):
     def from_dict(cls, d):
         return cls(
             owner_oid=d["owner_oid"],
-            current_role_db_priv=d["current_role_db_priv"],
-            current_role_owner=d["current_role_owner"]
+            current_role_priv=d["current_role_priv"],
+            current_role_owns=d["current_role_owns"]
         )
 
 
