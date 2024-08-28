@@ -39,8 +39,8 @@ class CurrentDBPrivileges(TypedDict):
         current_role_owner: Whether the current role is an owner of the database.
     """
     owner_oid: int
-    current_role_db_priv: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]
-    current_role_owner: bool
+    current_role_priv: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]
+    current_role_owns: bool
 
     @classmethod
     def from_dict(cls, d):
