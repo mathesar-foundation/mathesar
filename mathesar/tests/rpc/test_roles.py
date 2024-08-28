@@ -108,3 +108,52 @@ def test_roles_add(rf, monkeypatch):
     monkeypatch.setattr(roles, 'connect', mock_connect)
     monkeypatch.setattr(roles, 'create_role', mock_create_role)
     roles.add(rolename=_username, database_id=_database_id, password=_password, login=True, request=request)
+
+
+def test_get_current_role(rf, monkeypatch):
+    _username = 'alice'
+    _password = 'pass1234'
+    _database_id = 2
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username=_username, password=_password)
+
+    @contextmanager
+    def mock_connect(database_id, user):
+        if database_id == _database_id and user.username == _username:
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_get_current_role(conn):
+        return {
+            "current_role": {
+                'oid': '2573031',
+                'name': 'inherit_msar',
+                'login': True,
+                'super': False,
+                'members': None,
+                'inherits': True,
+                'create_db': False,
+                'create_role': False,
+                'description': None
+            },
+            "parent_roles": [
+                {
+                    'oid': '10',
+                    'name': 'mathesar',
+                    'login': True,
+                    'super': True,
+                    'members': [{'oid': 2573031, 'admin': False}],
+                    'inherits': True,
+                    'create_db': True,
+                    'create_role': True,
+                    'description': None
+                }
+            ]
+        }
+    monkeypatch.setattr(roles, 'connect', mock_connect)
+    monkeypatch.setattr(roles, 'get_current_role_from_db', mock_get_current_role)
+    roles.get_current_role(database_id=_database_id, request=request)

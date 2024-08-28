@@ -919,7 +919,6 @@ FROM (
 $$ LANGUAGE SQL;
 
 
-DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.list_schema_privileges(sch_id regnamespace) RETURNS jsonb AS $$/*
 Given a schema, returns a json array of objects with direct, non-default schema privileges
 
@@ -946,6 +945,7 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
   oid bigint, -- The OID of the role.
@@ -1034,6 +1034,26 @@ The returned JSON object has the form:
 SELECT to_jsonb(role_data)
 FROM msar.role_info_table() AS role_data
 WHERE role_data.name = rolename;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_current_role() RETURNS jsonb AS $$/*
+Returns a JSON object describing the current_role and the parent role(s) whose
+privileges are immediately available to current_role without doing SET ROLE.
+*/
+SELECT jsonb_build_object(
+  'current_role', msar.get_role(current_role),
+  'parent_roles', array_remove(
+    array_agg(
+      CASE WHEN pg_has_role(role_data.name, current_role, 'USAGE')
+      THEN msar.get_role(role_data.name) END
+    ), NULL
+  )
+)
+FROM msar.role_info_table() AS role_data
+WHERE role_data.name NOT LIKE 'pg_%'
+AND role_data.name != current_role;
 $$ LANGUAGE SQL STABLE;
 
 
