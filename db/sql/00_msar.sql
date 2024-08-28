@@ -762,6 +762,18 @@ SELECT EXISTS (
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.list_column_privileges_for_current_role(tab_id regclass, attnum smallint) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed table.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']) AS x(privilege),
+  pg_catalog.has_column_privilege(tab_id, attnum, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return an array of objects describing the columns of the table.
 
@@ -776,6 +788,7 @@ Each returned JSON object in the array will have the form:
     "default": {"value": <str>, "is_dynamic": <bool>},
     "has_dependents": <bool>,
     "description": <str>,
+    "current_role_priv": [<str>, <str>, ...],
     "valid_target_types": [<str>, <str>, ...]
   }
 
@@ -808,6 +821,7 @@ SELECT jsonb_agg(
     ),
     'has_dependents', msar.has_dependents(tab_id, attnum),
     'description', msar.col_description(tab_id, attnum),
+    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum),
     'valid_target_types', msar.get_valid_target_type_strings(atttypid)
   )
 )
@@ -825,6 +839,20 @@ SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.list_table_privileges_for_current_role(tab_id regclass) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed table.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(
+    ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']
+  ) AS x(privilege),
+  pg_catalog.has_table_privilege(tab_id, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_table(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return a JSON object describing the table.
 
@@ -833,7 +861,10 @@ Each returned JSON object will have the form:
     "oid": <int>,
     "name": <str>,
     "schema": <int>,
-    "description": <str>
+    "description": <str>,
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>
   }
 
 Args:
@@ -843,7 +874,10 @@ SELECT jsonb_build_object(
   'oid', oid::bigint,
   'name', relname,
   'schema', relnamespace::bigint,
-  'description', msar.obj_description(oid, 'pg_class')
+  'description', msar.obj_description(oid, 'pg_class'),
+  'owner_oid', relowner,
+  'current_role_priv', msar.list_table_privileges_for_current_role(tab_id),
+  'current_role_owns', pg_catalog.pg_has_role(relowner, 'USAGE')
 ) FROM pg_catalog.pg_class WHERE oid = tab_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -856,7 +890,10 @@ Each returned JSON object in the array will have the form:
     "oid": <int>,
     "name": <str>,
     "schema": <int>,
-    "description": <str>
+    "description": <str>,
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>
   }
 
 Args:
@@ -868,7 +905,10 @@ SELECT coalesce(
       'oid', pgc.oid::bigint,
       'name', pgc.relname,
       'schema', pgc.relnamespace::bigint,
-      'description', msar.obj_description(pgc.oid, 'pg_class')
+      'description', msar.obj_description(pgc.oid, 'pg_class'),
+      'owner_oid', pgc.relowner,
+      'current_role_priv', msar.list_table_privileges_for_current_role(pgc.oid),
+      'current_role_owns', pg_catalog.pg_has_role(pgc.relowner, 'USAGE')
     )
   ),
   '[]'::jsonb
@@ -877,6 +917,20 @@ FROM pg_catalog.pg_class AS pgc
   LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
 WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.list_schema_privileges_for_current_role(sch_id regnamespace) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed schema.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(
+    ARRAY['USAGE', 'CREATE']
+  ) AS x(privilege),
+  pg_catalog.has_schema_privilege(sch_id, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_schemas() RETURNS jsonb AS $$/*
@@ -893,6 +947,9 @@ Each returned JSON object in the array will have the form:
     "oid": <int>
     "name": <str>
     "description": <str|null>
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>,
     "table_count": <int>
   }
 */
@@ -902,6 +959,9 @@ FROM (
     s.oid::bigint AS oid,
     s.nspname AS name,
     pg_catalog.obj_description(s.oid) AS description,
+    s.nspowner::bigint AS owner_oid,
+    msar.list_schema_privileges_for_current_role(s.oid) AS current_role_priv,
+    pg_catalog.pg_has_role(s.nspowner, 'USAGE') AS current_role_owns,
     COALESCE(count(c.oid), 0) AS table_count
   FROM pg_catalog.pg_namespace s
   LEFT JOIN pg_catalog.pg_class c ON
@@ -914,7 +974,8 @@ FROM (
     s.nspname NOT LIKE 'pg_%'
   GROUP BY
     s.oid,
-    s.nspname
+    s.nspname,
+    s.nspowner
 ) AS schema_data;
 $$ LANGUAGE SQL;
 
@@ -1083,27 +1144,40 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_owner_oid_and_curr_role_db_priv(db_name text) RETURNS jsonb AS $$/*
-Given a database name, returns a json object with database owner oid and database privileges
-for the role executing the function.
+CREATE OR REPLACE FUNCTION
+msar.list_database_privileges_for_current_role(dat_id oid) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed database.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(
+    ARRAY['CONNECT', 'CREATE', 'TEMPORARY']
+  ) AS x(privilege),
+  pg_catalog.has_database_privilege(dat_id, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_current_database_info() RETURNS jsonb AS $$/*
+Return information about the current database.
 
 The returned JSON object has the form:
   {
-    "owner_oid": <int>,
-    "current_role_db_priv" [<str>]
+    "oid": <bigint>,
+    "name": <str>,
+    "owner_oid": <bigint>,
+    "current_role_priv": [<str>],
+    "current_role_owner": <bool>
   }
 */
 SELECT jsonb_build_object(
+  'oid', pgd.oid::bigint,
+  'name', pgd.datname,
   'owner_oid', pgd.datdba::bigint,
-  'current_role_db_priv', array_remove(
-    ARRAY[
-      CASE WHEN has_database_privilege(pgd.oid, 'CREATE') THEN 'CREATE' END,
-      CASE WHEN has_database_privilege(pgd.oid, 'TEMPORARY') THEN 'TEMPORARY' END,
-      CASE WHEN has_database_privilege(pgd.oid, 'CONNECT') THEN 'CONNECT' END
-    ], NULL
-  )
+  'current_role_priv', msar.list_database_privileges_for_current_role(pgd.oid),
+  'current_role_owns', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
 ) FROM pg_catalog.pg_database AS pgd
-WHERE pgd.datname = db_name;
+WHERE pgd.datname = current_database();
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
