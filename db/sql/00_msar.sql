@@ -1249,6 +1249,53 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.build_table_privilege_replace_expr(tab_id regclass, rol_id regrole, privileges_ jsonb)
+  RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    concat(
+      CASE WHEN privileges_ ? val THEN 'GRANT' ELSE 'REVOKE' END,
+      ' %1$s ON TABLE %2$I.%3$I ',
+      CASE WHEN privileges_ ? val THEN 'TO' ELSE 'FROM' END,
+      ' %4$I'
+    ),
+    val,
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(ARRAY['INSERT', 'SELECT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']) as x(val);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.replace_table_privileges_for_roles(tab_id regclass, priv_spec jsonb) RETURNS jsonb AS $$/*
+Grant/Revoke privileges for a set of roles on the given table.
+
+Args:
+  tab_id The OID of the table for which we're setting privileges for roles.
+  priv_spec: An array defining the privileges to grant or revoke for each role.
+
+Each object in the priv_spec should have the form:
+{role_oid: <int>, privileges: SET<"INSERT"|"SELECT"|"UPDATE"|"DELETE"|"TRUNCATE"|"REFERENCES"|"TRIGGER">}
+
+Any privilege that exists in the privileges subarray will be granted. Any which is missing will be
+revoked.
+*/
+BEGIN
+EXECUTE string_agg(
+  msar.build_table_privilege_replace_expr(tab_id, role_oid, direct),
+  E';\n'
+) || ';'
+FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
+RETURN msar.list_table_privileges(tab_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ALTER SCHEMA FUNCTIONS

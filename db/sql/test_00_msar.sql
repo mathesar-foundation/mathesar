@@ -4673,3 +4673,132 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- msar.replace_table_privileges_for_roles --------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+test_replace_table_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
+Happy path, smoke test.
+*/
+DECLARE
+  table_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE TABLE restricted_table();
+  table_id := 'restricted_table'::regclass::oid;
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  RETURN NEXT set_eq(
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+          'role_oid', %1$s, 'direct', jsonb_build_array('SELECT', 'UPDATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      table_id
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Privileges should be updated for actual table properly'
+  );
+  RETURN NEXT set_eq(
+    format(
+      $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+              'role_oid', %1$s, 'direct', jsonb_build_array('INSERT', 'SELECT', 'DELETE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t2$,
+      bob_id,
+      table_id
+    ),
+    ARRAY['INSERT', 'SELECT', 'DELETE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Alice''s privileges should be left alone properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['INSERT', 'SELECT', 'DELETE'],
+    'Privileges should be updated for actual table properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+test_replace_table_privileges_for_roles_multi_ops() RETURNS SETOF TEXT AS $$/*
+Test that we can add/revoke multiple privileges to/from multiple roles simultaneously.
+*/
+DECLARE
+  table_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE TABLE "test Multiops table"();
+  table_id := '"test Multiops table"'::regclass::oid;
+
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  GRANT SELECT, DELETE ON TABLE "test Multiops table" TO "Alice";
+  GRANT INSERT, UPDATE ON TABLE "test Multiops table" TO bob;
+
+  RETURN NEXT set_eq(
+    -- Grant INSERT, SELECT and UPDATE to Alice, Revoke DELETE.
+    -- Grant SELECT and DELETE to Bob, Revoke INSERT and UPDATE.
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%3$s, jsonb_build_array(
+          jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('INSERT', 'SELECT', 'UPDATE')),
+          jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('SELECT', 'DELETE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      bob_id,
+      table_id
+    ),
+    ARRAY['INSERT', 'SELECT', 'UPDATE'], -- This only checks form of Alice's info in response.
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['INSERT', 'SELECT', 'UPDATE'],
+    'Alice''s privileges should be updated for actual table properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['SELECT', 'DELETE'],
+    'Bob''s privileges should be updated for actual table properly'
+  );
+END;
+$$ LANGUAGE plpgsql;

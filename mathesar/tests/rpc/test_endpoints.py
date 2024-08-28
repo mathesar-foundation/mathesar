@@ -345,6 +345,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        table_privileges.replace_for_roles,
+        "table_privileges.replace_for_roles",
+        [user_is_authenticated]
+    ),
+    (
         tables.metadata.list_,
         "tables.metadata.list",
         [user_is_authenticated]

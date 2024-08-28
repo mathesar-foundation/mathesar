@@ -13,3 +13,10 @@ def replace_schema_privileges_for_roles(conn, schema_oid, privileges):
         conn, 'replace_schema_privileges_for_roles',
         schema_oid, json.dumps(privileges)
     ).fetchone()[0]
+
+
+def replace_table_privileges_for_roles(conn, table_oid, privileges):
+    return exec_msar_func(
+        conn, 'replace_table_privileges_for_roles',
+        table_oid, json.dumps(privileges)
+    ).fetchone()[0]

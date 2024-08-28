@@ -142,6 +142,7 @@ To use an RPC function:
     options:
       members:
       - list_direct
+      - replace_for_roles
       - TablePrivileges
 
 ## Table Metadata
