@@ -762,6 +762,18 @@ SELECT EXISTS (
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.list_column_privileges_for_current_role(tab_id regclass, attnum smallint) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed table.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']) AS x(privilege),
+  pg_catalog.has_column_privilege(tab_id, attnum, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return an array of objects describing the columns of the table.
 
@@ -809,15 +821,7 @@ SELECT jsonb_agg(
     ),
     'has_dependents', msar.has_dependents(tab_id, attnum),
     'description', msar.col_description(tab_id, attnum),
-    'current_role_priv', array_remove(
-      ARRAY[
-        CASE WHEN pg_catalog.has_column_privilege(tab_id, attnum, 'SELECT') THEN 'SELECT' END,
-        CASE WHEN pg_catalog.has_column_privilege(tab_id, attnum, 'INSERT') THEN 'INSERT' END,
-        CASE WHEN pg_catalog.has_column_privilege(tab_id, attnum, 'UPDATE') THEN 'UPDATE' END,
-        CASE WHEN pg_catalog.has_column_privilege(tab_id, attnum, 'REFERENCES') THEN 'REFERENCES' END
-      ],
-      NULL
-    ),
+    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum),
     'valid_target_types', msar.get_valid_target_type_strings(atttypid)
   )
 )
