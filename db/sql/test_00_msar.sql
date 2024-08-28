@@ -4552,3 +4552,137 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_column_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid;
+BEGIN
+CREATE TABLE mytab (col1 varchar, col2 varchar);
+tab_id := 'mytab'::regclass::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT SELECT, INSERT (col1) ON TABLE mytab TO test_intern1;
+GRANT SELECT (col2) ON TABLE mytab TO test_intern1;
+GRANT UPDATE (col1) ON TABLE mytab TO test_intern2;
+GRANT UPDATE, REFERENCES (col2) ON TABLE mytab TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["SELECT", "INSERT", "UPDATE", "REFERENCES"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["SELECT", "INSERT", "UPDATE", "REFERENCES"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["SELECT", "INSERT"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["SELECT"]'
+);
+
+SET ROLE test_intern2;
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["UPDATE"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["UPDATE", "REFERENCES"]'
+);
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_schema_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  sch_id oid;
+BEGIN
+CREATE SCHEMA restricted;
+sch_id := 'restricted'::regnamespace::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT USAGE ON SCHEMA restricted TO test_intern1;
+GRANT USAGE, CREATE ON SCHEMA restricted TO test_intern2;
+
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
+
+SET ROLE test_intern1;
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE"]');
+
+SET ROLE test_intern2;
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_table_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid;
+BEGIN
+CREATE TABLE mytab (col1 varchar);
+tab_id := 'mytab'::regclass::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+
+GRANT SELECT, INSERT, UPDATE ON TABLE mytab TO test_intern1;
+GRANT DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE mytab TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["SELECT", "INSERT", "UPDATE"]'
+);
+
+SET ROLE test_intern2;
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_database_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  dat_id oid := oid FROM pg_database WHERE datname=current_database();
+BEGIN
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+
+REVOKE ALL ON DATABASE mathesar_testing FROM PUBLIC;
+GRANT CONNECT, CREATE ON DATABASE mathesar_testing TO test_intern1;
+GRANT CONNECT, TEMPORARY ON DATABASE mathesar_testing TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_database_privileges_for_current_role(dat_id),
+  '["CONNECT", "CREATE", "TEMPORARY"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "CREATE"]');
+
+SET ROLE test_intern2;
+RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "TEMPORARY"]');
+END;
+$$ LANGUAGE plpgsql;
