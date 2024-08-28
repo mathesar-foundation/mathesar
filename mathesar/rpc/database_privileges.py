@@ -35,8 +35,8 @@ class CurrentDBPrivileges(TypedDict):
 
     Attributes:
         owner_oid: The `oid` of the owner of the database.
-        current_role_db_priv: A list of database privileges for the current user.
-        current_role_owner: Whether the current role is an owner of the database.
+        current_role_priv: A list of privileges available to the user.
+        current_role_owns: Whether the user is an owner of the database.
     """
     owner_oid: int
     current_role_priv: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]

@@ -160,7 +160,7 @@ class ColumnInfo(TypedDict):
         default: The default value and whether it's dynamic.
         has_dependents: Whether the column has dependent objects.
         description: The description of the column.
-        current_role_priv: The privileges of the user for the column.
+        current_role_priv: The privileges available to the user for the column.
         valid_target_types: A list of all types to which the column can
             be cast.
     """

@@ -29,7 +29,7 @@ class TableInfo(TypedDict):
         schema: The `oid` of the schema where the table lives.
         description: The description of the table.
         owner_oid: The OID of the direct owner of the table.
-        current_role_priv: The privileges held by the user on the table.
+        current_role_priv: The privileges available to the user on the table.
         current_role_owns: Whether the current role owns the table.
     """
     oid: int
