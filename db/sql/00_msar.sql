@@ -1098,6 +1098,26 @@ WHERE role_data.name = rolename;
 $$ LANGUAGE SQL STABLE;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_current_role() RETURNS jsonb AS $$/*
+Returns a JSON object describing the current_role and the parent role(s) whose
+privileges are immediately available to current_role without doing SET ROLE.
+*/
+SELECT jsonb_build_object(
+  'current_role', msar.get_role(current_role),
+  'parent_roles', array_remove(
+    array_agg(
+      CASE WHEN pg_has_role(role_data.name, current_role, 'USAGE')
+      THEN msar.get_role(role_data.name) END
+    ), NULL
+  )
+)
+FROM msar.role_info_table() AS role_data
+WHERE role_data.name NOT LIKE 'pg_%'
+AND role_data.name != current_role;
+$$ LANGUAGE SQL STABLE;
+
+
 CREATE OR REPLACE FUNCTION msar.list_db_priv(db_name text) RETURNS jsonb AS $$/*
 Given a database name, returns a json array of objects with database privileges for non-inherited roles.
 

@@ -251,6 +251,7 @@ To use an RPC function:
       members:
       - list_
       - add
+      - get_current_role
       - RoleInfo
       - RoleMember
 

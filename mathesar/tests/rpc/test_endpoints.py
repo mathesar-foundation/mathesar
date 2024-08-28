@@ -254,6 +254,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        roles.get_current_role,
+        "roles.get_current_role",
+        [user_is_authenticated]
+    ),
+    (
         schemas.add,
         "schemas.add",
         [user_is_authenticated]
