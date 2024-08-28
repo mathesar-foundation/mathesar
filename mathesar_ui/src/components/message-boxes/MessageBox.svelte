@@ -31,7 +31,7 @@
     border-radius: var(--border-radius-m);
     margin: var(--MessageBox__margin);
     background: var(--MessageBox__background);
-    border: var(--MessageBox__border);
+    border-left: var(--MessageBox__border);
   }
   .message-box:not(.full-width) {
     max-width: max-content;

@@ -21,6 +21,7 @@
   ) => string | ComponentWithProps<C> | undefined = () => undefined;
   export let getCheckboxDisabled: (value: Option | undefined) => boolean = () =>
     false;
+  export let boxed = false;
   /**
    * By default, options will be compared by equality. If you're using objects as
    * options, you can supply a custom function here to compare them.
@@ -53,6 +54,7 @@
   {label}
   {ariaLabel}
   {disabled}
+  {boxed}
   let:option
   let:disabled={innerDisabled}
   on:change

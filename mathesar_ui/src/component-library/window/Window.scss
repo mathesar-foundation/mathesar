@@ -3,6 +3,7 @@
   border-radius: 0.4em;
   min-height: var(--window-min-height, 7em);
   width: var(--window-width, 100%);
+  min-width: var(--window-min-width, 40em);
   overflow: hidden;
   display: grid;
   grid-template: auto 1fr auto / auto;
@@ -15,14 +16,16 @@
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
+    padding: 1rem;
+    border-bottom: 1px solid var(--slate-200);
     .title {
       &:empty {
         display: none;
       }
       flex: 1 1 100%;
-      padding: 1rem 1rem 0.5rem 1rem;
+      margin: auto;
       font-weight: 500;
-      font-size: var(--text-size-large);
+      font-size: var(--text-size-x-large);
     }
   }
 

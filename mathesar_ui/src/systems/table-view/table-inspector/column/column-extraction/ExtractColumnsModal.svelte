@@ -300,10 +300,10 @@
           text={targetTableName
             ? $_('columns_removed_from_table_added_to_target', {
                 values: { count: $columns.length },
-              })
+              }) + ' A link column will be created to maintain the relationship between records.'
             : $_('columns_removed_from_table_added_to_new_table', {
                 values: { count: $columns.length },
-              })}
+              }) + ' A link column will be created to maintain the relationship between records.'}
           let:slotName
         >
           {#if slotName === 'tableName'}
@@ -318,14 +318,16 @@
         </RichText>
       </p>
       {#if $targetType === 'newTable'}
-        <p>
-          <RichText text={$_('new_column_added_to_table')} let:slotName>
-            {#if slotName === 'tableName'}
-              <TableName table={currentTable} truncate={false} bold />
-            {/if}
-          </RichText>
-        </p>
-        <Field field={newFkColumnName} label={$_('column_name')} />
+        
+        <Field layout="stacked" field={newFkColumnName} label='Name of Link Column'>
+          <span slot="help">
+            <RichText text={$_('new_column_added_to_table')} let:slotName>
+              {#if slotName === 'tableName'}
+                <TableName table={currentTable} truncate={false} bold />
+              {/if}
+            </RichText>
+          </span>
+          </Field>
       {/if}
     </OutcomeBox>
   </FieldLayout>

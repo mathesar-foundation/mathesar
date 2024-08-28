@@ -60,12 +60,14 @@
   getInitialName={() => schema?.name ?? ''}
   getInitialDescription={() => schema?.description ?? ''}
   saveButtonLabel={schema ? $_('save') : $_('create_new_schema')}
+  namePlaceholder='Eg. Personal Finances, Movies'
 >
   <svelte:fragment slot="helpText">
+    
     {#if !schema}
-      <InfoBox>
-        {$_('name_your_schema_help')}
-      </InfoBox>
+      <span class="description">
+        Use schemas to organize related tables into logical groups within your database.
+      </span>
     {/if}
   </svelte:fragment>
 
@@ -81,3 +83,10 @@
     {/if}
   </span>
 </NameAndDescInputModalForm>
+
+<style>
+  .description {
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+</style>

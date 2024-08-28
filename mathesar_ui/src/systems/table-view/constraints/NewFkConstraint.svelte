@@ -121,7 +121,6 @@
 </script>
 
 <div class="add-new-fk-constraint">
-  <span class="title">{$_('new_foreign_key_constraint')}</span>
 
   <Field
     field={baseColumn}
@@ -130,8 +129,13 @@
       props: { columns: baseTableColumns },
     }}
     layout="stacked"
-    label={$_('column_references_target_table')}
-  />
+    label="Referencing Column"
+
+  >
+    <span slot="help">
+      {$_('column_references_target_table')}
+    </span>
+  </Field>
 
   <Field
     field={targetTable}
@@ -190,7 +194,7 @@
     onProceed={handleSave}
     onCancel={onClose}
     size="small"
-    proceedButton={{ label: $_('add') }}
+    proceedButton={{ label: $_('Add Foreign Key Constraint') }}
   />
 </div>
 
@@ -201,6 +205,11 @@
 
     > :global(* + *) {
       margin-top: 1rem;
+    }
+
+    .title {
+      font-weight: var(--font-weight-medium);
+      font-size: var(--text-size-large);
     }
   }
 </style>

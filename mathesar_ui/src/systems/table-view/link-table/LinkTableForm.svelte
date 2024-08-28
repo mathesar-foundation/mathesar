@@ -219,6 +219,10 @@
   }
 </script>
 
+<div class="description">
+  Use Links to connect related tables in your database together.
+</div>
+
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
@@ -339,5 +343,8 @@
   .form.self-referential {
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);
+  }
+  .description {
+    margin-bottom: 1rem;
   }
 </style>

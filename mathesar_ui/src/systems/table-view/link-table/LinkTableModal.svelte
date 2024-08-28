@@ -13,7 +13,7 @@
 </script>
 
 {#if $currentTable}
-  <ControlledModal {controller} size="large" title={$_('create_link')}>
+  <ControlledModal {controller} size="large" title={$_('create_link')}>  
     <LinkTableForm base={$currentTable} close={() => controller.close()} />
   </ControlledModal>
 {/if}

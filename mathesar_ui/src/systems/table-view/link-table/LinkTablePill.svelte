@@ -19,10 +19,11 @@
   .table-pill {
     border-radius: 500px;
     padding: 0 0.5em;
+    margin: 0 0.1em;
     max-width: 100%;
     display: inline-block;
-    vertical-align: -17%;
-    line-height: 1.3em;
+    vertical-align: -20%;
+    line-height: 1.2em;
   }
   .base {
     background: var(--base-fill);

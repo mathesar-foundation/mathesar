@@ -9,7 +9,7 @@
 
   import Pill from './LinkTablePill.svelte';
 
-  const label = 'Column Name';
+  const label = 'Name of New Column';
 
   type Which = ComponentProps<Pill>['which'];
 
