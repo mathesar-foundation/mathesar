@@ -1038,14 +1038,15 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_current_role() RETURNS TEXT AS $$/*
-Returns a JSON object describing the current_role and the parent role(s) it inherits from.
+msar.get_current_role() RETURNS jsonb AS $$/*
+Returns a JSON object describing the current_role and the parent role(s) whose
+privileges are immediately available to current_role without doing SET ROLE.
 */
 SELECT jsonb_build_object(
   'current_role', msar.get_role(current_role),
   'parent_roles', array_remove(
     array_agg(
-      CASE WHEN pg_has_role(role_data.name, current_role, 'MEMBER')
+      CASE WHEN pg_has_role(role_data.name, current_role, 'USAGE')
       THEN msar.get_role(role_data.name) END
     ), NULL
   )

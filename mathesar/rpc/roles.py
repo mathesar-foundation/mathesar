@@ -123,8 +123,8 @@ def add(
 @handle_rpc_exceptions
 def get_current_role(*, database_id: int, **kwargs) -> dict:
     """
-    Get information about the current role and all the parent role(s) it inherits from.
-    Requires a database id inorder to connect to the server.
+    Get information about the current role and all the parent role(s) whose
+    privileges are immediately available to current role without doing SET ROLE.
 
     Args:
         database_id: The Django id of the database.
