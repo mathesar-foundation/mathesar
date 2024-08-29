@@ -154,8 +154,8 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        database_privileges.get_owner_oid_and_curr_role_db_priv,
-        "database_privileges.get_owner_oid_and_curr_role_db_priv",
+        database_privileges.get_self,
+        "database_privileges.get_self",
         [user_is_authenticated]
     ),
     (
@@ -254,6 +254,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        roles.get_current_role,
+        "roles.get_current_role",
+        [user_is_authenticated]
+    ),
+    (
         schemas.add,
         "schemas.add",
         [user_is_authenticated]
@@ -276,6 +281,11 @@ METHODS = [
     (
         schema_privileges.list_direct,
         "schema_privileges.list_direct",
+        [user_is_authenticated]
+    ),
+    (
+        schema_privileges.replace_for_roles,
+        "schema_privileges.replace_for_roles",
         [user_is_authenticated]
     ),
     (
@@ -337,6 +347,11 @@ METHODS = [
     (
         table_privileges.list_direct,
         "table_privileges.list_direct",
+        [user_is_authenticated]
+    ),
+    (
+        table_privileges.replace_for_roles,
+        "table_privileges.replace_for_roles",
         [user_is_authenticated]
     ),
     (

@@ -33,6 +33,7 @@ def get_column_info_for_table(table, conn):
             "valid_target_types": [<str>, <str>, ..., <str>]
             "default": {"value": <str>, "is_dynamic": <bool>},
             "has_dependents": <bool>,
+            "current_role_priv": [<str>, <str>, ...],
             "description": <str>
         }
 

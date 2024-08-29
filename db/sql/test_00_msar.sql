@@ -2597,6 +2597,7 @@ BEGIN
         "primary_key": true,
         "type_options": null,
         "has_dependents": true,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2612,6 +2613,7 @@ BEGIN
           "precision": null
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2626,6 +2628,7 @@ BEGIN
           "length": 128
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2641,6 +2644,7 @@ BEGIN
         "primary_key": false,
         "type_options": null,
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": ["numeric", "text"]
       },
       {
@@ -2658,6 +2662,7 @@ BEGIN
           "precision": null
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2672,6 +2677,7 @@ BEGIN
           "item_type": "integer"
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2688,6 +2694,7 @@ BEGIN
           "precision": 15
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       }
     ]$j$::jsonb
@@ -4543,5 +4550,394 @@ BEGIN
     ARRAY['CONNECT', 'CREATE'],
     'Bob''s privileges should be updated for actual database properly'
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.replace_schema_privileges_for_roles --------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+test_replace_schema_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
+Happy path, smoke test.
+*/
+DECLARE
+  schema_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE SCHEMA restricted_test;
+  schema_id := 'restricted_test'::regnamespace::oid;
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  RETURN NEXT set_eq(
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_schema_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+          'role_oid', %1$s, 'direct', jsonb_build_array('USAGE', 'CREATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      schema_id
+    ),
+    ARRAY['USAGE', 'CREATE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['USAGE', 'CREATE'],
+    'Privileges should be updated for actual schema properly'
+  );
+  RETURN NEXT set_eq(
+    format(
+      $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_schema_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+              'role_oid', %1$s, 'direct', jsonb_build_array('USAGE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t2$,
+      bob_id,
+      schema_id
+    ),
+    ARRAY['USAGE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['USAGE', 'CREATE'],
+    'Alice''s privileges should be left alone properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['USAGE'],
+    'Privileges should be updated for actual schema properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+test_replace_schema_privileges_for_roles_multi_ops() RETURNS SETOF TEXT AS $$/*
+Test that we can add/revoke multiple privileges to/from multiple roles simultaneously.
+*/
+DECLARE
+  schema_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE SCHEMA "test Multiops";
+  schema_id := '"test Multiops"'::regnamespace::oid;
+
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  GRANT USAGE, CREATE ON SCHEMA "test Multiops" TO "Alice";
+  GRANT USAGE ON SCHEMA "test Multiops" TO bob;
+
+  RETURN NEXT set_eq(
+    -- Revoke CREATE from Alice, Grant CREATE to Bob.
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_schema_privileges_for_roles(%3$s, jsonb_build_array(
+          jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('USAGE')),
+          jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('USAGE', 'CREATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      bob_id,
+      schema_id
+    ),
+    ARRAY['USAGE'], -- This only checks form of Alice's info in response.
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['USAGE'],
+    'Alice''s privileges should be updated for actual schema properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['USAGE', 'CREATE'],
+    'Bob''s privileges should be updated for actual schema properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.replace_table_privileges_for_roles --------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+test_replace_table_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
+Happy path, smoke test.
+*/
+DECLARE
+  table_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE TABLE restricted_table();
+  table_id := 'restricted_table'::regclass::oid;
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  RETURN NEXT set_eq(
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+          'role_oid', %1$s, 'direct', jsonb_build_array('SELECT', 'UPDATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      table_id
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Privileges should be updated for actual table properly'
+  );
+  RETURN NEXT set_eq(
+    format(
+      $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+              'role_oid', %1$s, 'direct', jsonb_build_array('INSERT', 'SELECT', 'DELETE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t2$,
+      bob_id,
+      table_id
+    ),
+    ARRAY['INSERT', 'SELECT', 'DELETE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Alice''s privileges should be left alone properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['INSERT', 'SELECT', 'DELETE'],
+    'Privileges should be updated for actual table properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+test_replace_table_privileges_for_roles_multi_ops() RETURNS SETOF TEXT AS $$/*
+Test that we can add/revoke multiple privileges to/from multiple roles simultaneously.
+*/
+DECLARE
+  table_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE TABLE "test Multiops table"();
+  table_id := '"test Multiops table"'::regclass::oid;
+
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  GRANT SELECT, DELETE ON TABLE "test Multiops table" TO "Alice";
+  GRANT INSERT, UPDATE ON TABLE "test Multiops table" TO bob;
+
+  RETURN NEXT set_eq(
+    -- Grant INSERT, SELECT and UPDATE to Alice, Revoke DELETE.
+    -- Grant SELECT and DELETE to Bob, Revoke INSERT and UPDATE.
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%3$s, jsonb_build_array(
+          jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('INSERT', 'SELECT', 'UPDATE')),
+          jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('SELECT', 'DELETE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      bob_id,
+      table_id
+    ),
+    ARRAY['INSERT', 'SELECT', 'UPDATE'], -- This only checks form of Alice's info in response.
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['INSERT', 'SELECT', 'UPDATE'],
+    'Alice''s privileges should be updated for actual table properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['SELECT', 'DELETE'],
+    'Bob''s privileges should be updated for actual table properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_column_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid;
+BEGIN
+CREATE TABLE mytab (col1 varchar, col2 varchar);
+tab_id := 'mytab'::regclass::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT SELECT, INSERT (col1) ON TABLE mytab TO test_intern1;
+GRANT SELECT (col2) ON TABLE mytab TO test_intern1;
+GRANT UPDATE (col1) ON TABLE mytab TO test_intern2;
+GRANT UPDATE, REFERENCES (col2) ON TABLE mytab TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["SELECT", "INSERT", "UPDATE", "REFERENCES"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["SELECT", "INSERT", "UPDATE", "REFERENCES"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["SELECT", "INSERT"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["SELECT"]'
+);
+
+SET ROLE test_intern2;
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["UPDATE"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["UPDATE", "REFERENCES"]'
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_schema_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  sch_id oid;
+BEGIN
+CREATE SCHEMA restricted;
+sch_id := 'restricted'::regnamespace::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT USAGE ON SCHEMA restricted TO test_intern1;
+GRANT USAGE, CREATE ON SCHEMA restricted TO test_intern2;
+
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
+
+SET ROLE test_intern1;
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE"]');
+
+SET ROLE test_intern2;
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_table_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid;
+BEGIN
+CREATE TABLE mytab (col1 varchar);
+tab_id := 'mytab'::regclass::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+
+GRANT SELECT, INSERT, UPDATE ON TABLE mytab TO test_intern1;
+GRANT DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE mytab TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["SELECT", "INSERT", "UPDATE"]'
+);
+
+SET ROLE test_intern2;
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_database_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  dat_id oid := oid FROM pg_database WHERE datname=current_database();
+BEGIN
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+
+REVOKE ALL ON DATABASE mathesar_testing FROM PUBLIC;
+GRANT CONNECT, CREATE ON DATABASE mathesar_testing TO test_intern1;
+GRANT CONNECT, TEMPORARY ON DATABASE mathesar_testing TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_database_privileges_for_current_role(dat_id),
+  '["CONNECT", "CREATE", "TEMPORARY"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "CREATE"]');
+
+SET ROLE test_intern2;
+RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "TEMPORARY"]');
 END;
 $$ LANGUAGE plpgsql;

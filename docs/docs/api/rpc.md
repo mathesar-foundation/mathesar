@@ -115,6 +115,7 @@ To use an RPC function:
     options:
       members:
       - list_direct
+      - replace_for_roles
       - SchemaPrivileges
 
 ## Tables
@@ -141,6 +142,7 @@ To use an RPC function:
     options:
       members:
       - list_direct
+      - replace_for_roles
       - TablePrivileges
 
 ## Table Metadata
@@ -249,6 +251,7 @@ To use an RPC function:
       members:
       - list_
       - add
+      - get_current_role
       - RoleInfo
       - RoleMember
 

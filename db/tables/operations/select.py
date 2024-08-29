@@ -22,15 +22,6 @@ def get_table(table, conn):
     The `table` can be given as either a "qualified name", or an OID.
     The OID is the preferred identifier, since it's much more robust.
 
-    The returned dictionary is of the following form:
-
-        {
-            "oid": <int>,
-            "name": <str>,
-            "schema": <int>,
-            "description": <str>
-        }
-
     Args:
         table: The table for which we want table info.
     """
@@ -43,15 +34,6 @@ def get_table_info(schema, conn):
 
     The `schema` can be given as either a "qualified name", or an OID.
     The OID is the preferred identifier, since it's much more robust.
-
-    The returned list contains dictionaries of the following form:
-
-        {
-            "oid": <int>,
-            "name": <str>,
-            "schema": <int>,
-            "description": <str>
-        }
 
     Args:
         schema: The schema for which we want table info.
