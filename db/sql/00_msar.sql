@@ -1118,7 +1118,7 @@ AND role_data.name != current_role;
 $$ LANGUAGE SQL STABLE;
 
 
-CREATE OR REPLACE FUNCTION msar.list_db_priv(db_name text) RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION msar.list_db_priv() RETURNS jsonb AS $$/*
 Given a database name, returns a json array of objects with database privileges for non-inherited roles.
 
 Each returned JSON object in the array has the form:
@@ -1137,7 +1137,8 @@ WITH priv_cte AS (
     pg_catalog.pg_roles AS pgr,
     pg_catalog.pg_database AS pgd,
     aclexplode(COALESCE(pgd.datacl, acldefault('d', pgd.datdba))) AS acl
-  WHERE pgd.datname = db_name AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
+  WHERE pgd.datname = pg_catalog.current_database()
+    AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
   GROUP BY pgr.oid, pgd.oid
 )
 SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
@@ -1292,7 +1293,7 @@ EXECUTE string_agg(
   E';\n'
 ) || ';'
 FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
-RETURN msar.list_db_priv(current_database());
+RETURN msar.list_db_priv();
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 

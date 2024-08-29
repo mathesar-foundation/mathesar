@@ -44,8 +44,7 @@ def list_direct(*, database_id: int, **kwargs) -> list[DBPrivileges]:
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        db_name = Database.objects.get(id=database_id).name
-        raw_db_priv = list_db_priv(db_name, conn)
+        raw_db_priv = list_db_priv(conn)
     return [DBPrivileges.from_dict(i) for i in raw_db_priv]
 
 
