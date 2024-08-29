@@ -1,7 +1,7 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-import type { RawConfiguredRole } from './configured_roles';
 import type { RawDatabase } from './databases';
+import type { RawConfiguredRole } from './roles';
 import type { RawServer } from './servers';
 
 export const sampleDataOptions = [
