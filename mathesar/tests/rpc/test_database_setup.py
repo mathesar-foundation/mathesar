@@ -7,7 +7,10 @@ Fixtures:
 """
 from mathesar.models.users import User
 from mathesar.models.base import Database, ConfiguredRole, Server, UserDatabaseRoleMap
-from mathesar.rpc import database_setup, servers, configured_roles, databases
+from mathesar.rpc.databases import configured as configured_databases
+from mathesar.rpc.databases import setup as database_setup
+from mathesar.rpc.roles import configured as configured_roles
+from mathesar.rpc.servers import configured as configured_servers
 
 
 def test_create_new(monkeypatch, rf):
@@ -36,8 +39,8 @@ def test_create_new(monkeypatch, rf):
         mock_set_up_new_for_user,
     )
     expect_response = database_setup.DatabaseConnectionResult(
-        server=servers.ServerInfo.from_model(server_model),
-        database=databases.DatabaseInfo.from_model(db_model),
+        server=configured_servers.ServerInfo.from_model(server_model),
+        database=configured_databases.DatabaseInfo.from_model(db_model),
         configured_role=configured_roles.ConfiguredRoleInfo.from_model(role_model)
     )
 
@@ -83,8 +86,8 @@ def test_connect_existing(monkeypatch, rf):
         mock_set_up_preexisting_database_for_user,
     )
     expect_response = database_setup.DatabaseConnectionResult(
-        server=servers.ServerInfo.from_model(server_model),
-        database=databases.DatabaseInfo.from_model(db_model),
+        server=configured_servers.ServerInfo.from_model(server_model),
+        database=configured_databases.DatabaseInfo.from_model(db_model),
         configured_role=configured_roles.ConfiguredRoleInfo.from_model(role_model)
     )
 
