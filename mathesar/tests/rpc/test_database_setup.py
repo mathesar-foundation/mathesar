@@ -40,7 +40,7 @@ def test_create_new(monkeypatch, rf):
     )
     expect_response = database_setup.DatabaseConnectionResult(
         server=configured_servers.ServerInfo.from_model(server_model),
-        database=configured_databases.DatabaseInfo.from_model(db_model),
+        database=configured_databases.ConfiguredDatabaseInfo.from_model(db_model),
         configured_role=configured_roles.ConfiguredRoleInfo.from_model(role_model)
     )
 
@@ -87,7 +87,7 @@ def test_connect_existing(monkeypatch, rf):
     )
     expect_response = database_setup.DatabaseConnectionResult(
         server=configured_servers.ServerInfo.from_model(server_model),
-        database=configured_databases.DatabaseInfo.from_model(db_model),
+        database=configured_databases.ConfiguredDatabaseInfo.from_model(db_model),
         configured_role=configured_roles.ConfiguredRoleInfo.from_model(role_model)
     )
 

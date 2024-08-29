@@ -72,7 +72,7 @@ To use an RPC function:
     options:
       members:
       - list_
-      - DatabaseInfo
+      - ConfiguredDatabaseInfo
 
 ## Database Privileges
 

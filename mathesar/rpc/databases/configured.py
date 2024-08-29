@@ -7,7 +7,7 @@ from mathesar.models.base import Database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
-class DatabaseInfo(TypedDict):
+class ConfiguredDatabaseInfo(TypedDict):
     """
     Information about a database.
 
@@ -32,7 +32,7 @@ class DatabaseInfo(TypedDict):
 @rpc_method(name="databases.configured.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, server_id: int = None, **kwargs) -> list[DatabaseInfo]:
+def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
     """
     List information about databases for a server. Exposed as `list`.
 
@@ -49,4 +49,4 @@ def list_(*, server_id: int = None, **kwargs) -> list[DatabaseInfo]:
     else:
         database_qs = Database.objects.all()
 
-    return [DatabaseInfo.from_model(db_model) for db_model in database_qs]
+    return [ConfiguredDatabaseInfo.from_model(db_model) for db_model in database_qs]
