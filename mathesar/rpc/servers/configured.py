@@ -29,7 +29,7 @@ class ServerInfo(TypedDict):
         )
 
 
-@rpc_method(name="servers.list")
+@rpc_method(name="servers.configured.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def list_() -> list[ServerInfo]:
