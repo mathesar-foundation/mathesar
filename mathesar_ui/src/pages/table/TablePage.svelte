@@ -6,7 +6,7 @@
   import { focusActiveCell } from '@mathesar/components/sheet/utils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import { currentDatabase } from '@mathesar/stores/databases';
   import {
     Meta,
@@ -33,7 +33,6 @@
 
   let sheetElement: HTMLElement;
 
-  $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: ({ query } = $router);
   $: meta = Meta.fromSerialization(query[metaSerializationQueryKey] ?? '');
   $: tabularData = new TabularData({
