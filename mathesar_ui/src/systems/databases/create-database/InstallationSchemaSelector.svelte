@@ -4,7 +4,7 @@
   import {
     type SampleDataSchemaIdentifier,
     sampleDataOptions,
-  } from '@mathesar/api/rpc/database_setup';
+  } from '@mathesar/api/rpc/databases';
   import type { RequiredField } from '@mathesar/components/form/field';
   import { CheckboxGroup } from '@mathesar-component-library';
 

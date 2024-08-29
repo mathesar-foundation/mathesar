@@ -74,9 +74,9 @@ class DatabasesStore {
   }
 
   async connectExistingDatabase(
-    props: Parameters<typeof api.database_setup.connect_existing>[0],
+    props: Parameters<typeof api.databases.setup.connect_existing>[0],
   ) {
-    const { database, server } = await api.database_setup
+    const { database, server } = await api.databases.setup
       .connect_existing(props)
       .run();
     const connectedDatabase = new Database({
@@ -88,9 +88,9 @@ class DatabasesStore {
   }
 
   async createNewDatabase(
-    props: Parameters<typeof api.database_setup.create_new>[0],
+    props: Parameters<typeof api.databases.setup.create_new>[0],
   ) {
-    const { database, server } = await api.database_setup
+    const { database, server } = await api.databases.setup
       .create_new(props)
       .run();
     const connectedDatabase = new Database({
