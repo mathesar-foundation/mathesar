@@ -7,7 +7,7 @@ from mathesar.models.base import Server
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
-class ServerInfo(TypedDict):
+class ConfiguredServerInfo(TypedDict):
     """
     Information about a database server.
 
@@ -32,7 +32,7 @@ class ServerInfo(TypedDict):
 @rpc_method(name="servers.configured.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_() -> list[ServerInfo]:
+def list_() -> list[ConfiguredServerInfo]:
     """
     List information about servers. Exposed as `list`.
 
@@ -41,4 +41,4 @@ def list_() -> list[ServerInfo]:
     """
     server_qs = Server.objects.all()
 
-    return [ServerInfo.from_model(db_model) for db_model in server_qs]
+    return [ConfiguredServerInfo.from_model(db_model) for db_model in server_qs]

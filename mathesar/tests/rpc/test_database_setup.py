@@ -39,7 +39,7 @@ def test_create_new(monkeypatch, rf):
         mock_set_up_new_for_user,
     )
     expect_response = database_setup.DatabaseConnectionResult(
-        server=configured_servers.ServerInfo.from_model(server_model),
+        server=configured_servers.ConfiguredServerInfo.from_model(server_model),
         database=configured_databases.ConfiguredDatabaseInfo.from_model(db_model),
         configured_role=configured_roles.ConfiguredRoleInfo.from_model(role_model)
     )
@@ -86,7 +86,7 @@ def test_connect_existing(monkeypatch, rf):
         mock_set_up_preexisting_database_for_user,
     )
     expect_response = database_setup.DatabaseConnectionResult(
-        server=configured_servers.ServerInfo.from_model(server_model),
+        server=configured_servers.ConfiguredServerInfo.from_model(server_model),
         database=configured_databases.ConfiguredDatabaseInfo.from_model(db_model),
         configured_role=configured_roles.ConfiguredRoleInfo.from_model(role_model)
     )

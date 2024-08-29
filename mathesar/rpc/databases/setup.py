@@ -8,7 +8,7 @@ from modernrpc.auth.basic import http_basic_auth_superuser_required
 
 from mathesar.utils import permissions
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.rpc.servers.configured import ServerInfo
+from mathesar.rpc.servers.configured import ConfiguredServerInfo
 from mathesar.rpc.databases.configured import ConfiguredDatabaseInfo
 from mathesar.rpc.roles.configured import ConfiguredRoleInfo
 
@@ -25,14 +25,14 @@ class DatabaseConnectionResult(TypedDict):
         database: Information on the Database model instance.
         configured_role: Information on the ConfiguredRole model instance.
     """
-    server: ServerInfo
+    server: ConfiguredServerInfo
     database: ConfiguredDatabaseInfo
     configured_role: ConfiguredRoleInfo
 
     @classmethod
     def from_model(cls, model):
         return cls(
-            server=ServerInfo.from_model(model.server),
+            server=ConfiguredServerInfo.from_model(model.server),
             database=ConfiguredDatabaseInfo.from_model(model.database),
             configured_role=ConfiguredRoleInfo.from_model(model.configured_role),
         )

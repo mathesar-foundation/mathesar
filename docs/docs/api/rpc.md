@@ -267,7 +267,7 @@ To use an RPC function:
     options:
       members:
       - list_
-      - ServerInfo
+      - ConfiguredServerInfo
 
 ## Data Modeling
 
