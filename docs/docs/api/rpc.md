@@ -48,17 +48,6 @@ To use an RPC function:
       - set_role
       - CollaboratorInfo
 
-## ConfiguredRoles
-
-::: configured_roles
-    options:
-      members:
-      - list_
-      - add
-      - delete
-      - set_password
-      - ConfiguredRoleInfo
-
 ## Connections
 
 ::: connections
@@ -74,23 +63,29 @@ To use an RPC function:
 ::: databases
     options:
       members:
+      - get
+      - CurrentDBPrivileges
+
+## Configured Databases
+
+::: databases.configured
+    options:
+      members:
       - list_
       - DatabaseInfo
 
 ## Database Privileges
 
-::: database_privileges
+::: databases.privileges
     options:
       members:
       - list_direct
-      - get_owner_oid_and_curr_role_db_priv
       - replace_for_roles
       - DBPrivileges
-      - CurrentDBPrivileges
 
 ## Database Setup
 
-::: database_setup
+::: databases.setup
     options:
       members:
       - create_new
@@ -111,7 +106,7 @@ To use an RPC function:
 
 ## Schema Privileges
 
-::: schema_privileges
+::: schemas.privileges
     options:
       members:
       - list_direct
@@ -138,7 +133,7 @@ To use an RPC function:
 
 ## Table Privileges
 
-::: table_privileges
+::: tables.privileges
     options:
       members:
       - list_direct
@@ -254,6 +249,17 @@ To use an RPC function:
       - get_current_role
       - RoleInfo
       - RoleMember
+
+## Configured Roles
+
+::: roles.configured
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_password
+      - ConfiguredRoleInfo
 
 ## Servers
 
