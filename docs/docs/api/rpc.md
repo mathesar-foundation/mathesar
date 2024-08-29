@@ -64,7 +64,7 @@ To use an RPC function:
     options:
       members:
       - get
-      - CurrentDBPrivileges
+      - DatabaseInfo
 
 ## Configured Databases
 
