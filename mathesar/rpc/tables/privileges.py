@@ -27,7 +27,7 @@ class TablePrivileges(TypedDict):
         )
 
 
-@rpc_method(name="table_privileges.list_direct")
+@rpc_method(name="tables.privileges.list_direct")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def list_direct(
@@ -47,7 +47,7 @@ def list_direct(
     return [TablePrivileges.from_dict(i) for i in raw_priv]
 
 
-@rpc_method(name="table_privileges.replace_for_roles")
+@rpc_method(name="tables.privileges.replace_for_roles")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def replace_for_roles(

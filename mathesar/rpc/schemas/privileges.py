@@ -28,7 +28,7 @@ class SchemaPrivileges(TypedDict):
         )
 
 
-@rpc_method(name="schema_privileges.list_direct")
+@rpc_method(name="schemas.privileges.list_direct")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def list_direct(
@@ -50,7 +50,7 @@ def list_direct(
     return [SchemaPrivileges.from_dict(i) for i in raw_priv]
 
 
-@rpc_method(name="schema_privileges.replace_for_roles")
+@rpc_method(name="schemas.privileges.replace_for_roles")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def replace_for_roles(

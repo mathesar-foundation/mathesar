@@ -65,8 +65,8 @@ def test_roles_list(rf, monkeypatch):
             },
         ]
 
-    monkeypatch.setattr(roles, 'connect', mock_connect)
-    monkeypatch.setattr(roles, 'list_roles', mock_list_roles)
+    monkeypatch.setattr(roles.base, 'connect', mock_connect)
+    monkeypatch.setattr(roles.base, 'list_roles', mock_list_roles)
     roles.list_(database_id=_database_id, request=request)
 
 
@@ -105,8 +105,8 @@ def test_roles_add(rf, monkeypatch):
             'description': None
         }
 
-    monkeypatch.setattr(roles, 'connect', mock_connect)
-    monkeypatch.setattr(roles, 'create_role', mock_create_role)
+    monkeypatch.setattr(roles.base, 'connect', mock_connect)
+    monkeypatch.setattr(roles.base, 'create_role', mock_create_role)
     roles.add(rolename=_username, database_id=_database_id, password=_password, login=True, request=request)
 
 
@@ -154,6 +154,6 @@ def test_get_current_role(rf, monkeypatch):
                 }
             ]
         }
-    monkeypatch.setattr(roles, 'connect', mock_connect)
-    monkeypatch.setattr(roles, 'get_current_role_from_db', mock_get_current_role)
+    monkeypatch.setattr(roles.base, 'connect', mock_connect)
+    monkeypatch.setattr(roles.base, 'get_current_role_from_db', mock_get_current_role)
     roles.get_current_role(database_id=_database_id, request=request)

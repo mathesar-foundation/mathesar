@@ -26,7 +26,7 @@ export class Database {
   }
 
   constructConfiguredRolesStore() {
-    return new AsyncRpcApiStore(api.configured_roles.list, {
+    return new AsyncRpcApiStore(api.roles.configured.list, {
       postProcess: (rawConfiguredRoles) =>
         new SortedImmutableMap(
           (v) => [...v].sort(([, a], [, b]) => a.name.localeCompare(b.name)),

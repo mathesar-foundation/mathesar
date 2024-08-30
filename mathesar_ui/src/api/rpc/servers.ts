@@ -7,5 +7,7 @@ export interface RawServer {
 }
 
 export const servers = {
-  list: rpcMethodTypeContainer<void, Array<RawServer>>(),
+  configured: {
+    list: rpcMethodTypeContainer<void, Array<RawServer>>(),
+  },
 };
