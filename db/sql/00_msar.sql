@@ -4173,8 +4173,8 @@ WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
-    %1$L, jsonb_agg(
-      DISTINCT jsonb_build_object(summary_cte_%1$s.fkey, summary_cte_%1$s.summary)
+    %1$L, jsonb_object_agg(
+      summary_cte_%1$s.fkey, summary_cte_%1$s.summary
     )
     $j$,
     conkey
