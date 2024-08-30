@@ -7,9 +7,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from mathesar.rpc.databases import list_ as databases_list
+from mathesar.rpc.databases.configured import list_ as databases_list
 from mathesar.rpc.schemas import list_ as schemas_list
-from mathesar.rpc.servers import list_ as get_servers_list
+from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.api.serializers.databases import TypeSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer

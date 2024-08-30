@@ -1,5 +1,5 @@
 import { api } from '@mathesar/api/rpc';
-import type { RawConfiguredRole } from '@mathesar/api/rpc/configured_roles';
+import type { RawConfiguredRole } from '@mathesar/api/rpc/roles';
 
 import type { Database } from './Database';
 
@@ -20,7 +20,7 @@ export class ConfiguredRole {
   }
 
   setPassword(password: string) {
-    return api.configured_roles
+    return api.roles.configured
       .set_password({
         configured_role_id: this.id,
         password,
@@ -29,6 +29,6 @@ export class ConfiguredRole {
   }
 
   delete() {
-    return api.configured_roles.delete({ configured_role_id: this.id }).run();
+    return api.roles.configured.delete({ configured_role_id: this.id }).run();
   }
 }

@@ -1,52 +1,55 @@
-from typing import TypedDict
+from typing import Literal, TypedDict
 
-from modernrpc.core import rpc_method
+from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from mathesar.models.base import Database
+from mathesar.rpc.utils import connect
+from db.databases.operations.select import get_database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
 class DatabaseInfo(TypedDict):
     """
-    Information about a database.
+    Information about a database current user privileges on it.
 
     Attributes:
-        id: the Django ID of the database model instance.
+        oid: The `oid` of the database on the server.
         name: The name of the database on the server.
-        server_id: the Django ID of the server model instance for the database.
+        owner_oid: The `oid` of the owner of the database.
+        current_role_priv: A list of privileges available to the user.
+        current_role_owns: Whether the user is an owner of the database.
     """
-    id: int
+    oid: int
     name: str
-    server_id: int
+    owner_oid: int
+    current_role_priv: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]
+    current_role_owns: bool
 
     @classmethod
-    def from_model(cls, model):
+    def from_dict(cls, d):
         return cls(
-            id=model.id,
-            name=model.name,
-            server_id=model.server.id
+            oid=d["oid"],
+            name=d["name"],
+            owner_oid=d["owner_oid"],
+            current_role_priv=d["current_role_priv"],
+            current_role_owns=d["current_role_owns"]
         )
 
 
-@rpc_method(name="databases.list")
+@rpc_method(name="databases.get")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, server_id: int = None, **kwargs) -> list[DatabaseInfo]:
+def get(*, database_id: int, **kwargs) -> DatabaseInfo:
     """
-    List information about databases for a server. Exposed as `list`.
-
-    If called with no `server_id`, all databases for all servers are listed.
+    Get information about a database.
 
     Args:
-        server_id: The Django id of the server containing the databases.
+        database_id: The Django id of the database.
 
     Returns:
-        A list of database details.
+        Information about the database, and the current user privileges.
     """
-    if server_id is not None:
-        database_qs = Database.objects.filter(server__id=server_id)
-    else:
-        database_qs = Database.objects.all()
-
-    return [DatabaseInfo.from_model(db_model) for db_model in database_qs]
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        db_info = get_database(conn)
+    return DatabaseInfo.from_dict(db_info)
