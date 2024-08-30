@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing schemas.
 """
-from typing import Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -23,11 +23,19 @@ class SchemaInfo(TypedDict):
         oid: The OID of the schema
         name: The name of the schema
         description: A description of the schema
+        owner_oid: The OID of the owner of the schema
+        current_role_priv: All privileges available to the calling role
+            on the schema.
+        current_role_owns: Whether the current role is the owner of the
+            schema (even indirectly).
         table_count: The number of tables in the schema
     """
     oid: int
     name: str
     description: Optional[str]
+    owner_oid: int
+    current_role_priv: list[Literal['USAGE', 'CREATE']]
+    current_role_owns: bool
     table_count: int
 
 

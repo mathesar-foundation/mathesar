@@ -66,25 +66,26 @@ ROOT_URLCONF = "config.urls"
 
 MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.collaborators',
-    'mathesar.rpc.configured_roles',
-    'mathesar.rpc.connections',
-    'mathesar.rpc.constraints',
     'mathesar.rpc.columns',
     'mathesar.rpc.columns.metadata',
+    'mathesar.rpc.connections',
+    'mathesar.rpc.constraints',
     'mathesar.rpc.data_modeling',
-    'mathesar.rpc.database_privileges',
-    'mathesar.rpc.database_setup',
     'mathesar.rpc.databases',
+    'mathesar.rpc.databases.configured',
+    'mathesar.rpc.databases.privileges',
+    'mathesar.rpc.databases.setup',
+    'mathesar.rpc.explorations',
     'mathesar.rpc.records',
     'mathesar.rpc.roles',
+    'mathesar.rpc.roles.configured',
     'mathesar.rpc.schemas',
-    'mathesar.rpc.schema_privileges',
-    'mathesar.rpc.servers',
+    'mathesar.rpc.schemas.privileges',
+    'mathesar.rpc.servers.configured',
     'mathesar.rpc.tables',
-    'mathesar.rpc.table_privileges',
     'mathesar.rpc.tables.metadata',
+    'mathesar.rpc.tables.privileges',
     'mathesar.rpc.types',
-    'mathesar.rpc.explorations'
 ]
 
 TEMPLATES = [

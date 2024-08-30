@@ -37,6 +37,7 @@ def test_columns_list(rf, monkeypatch):
                 'nullable': False, 'description': None, 'primary_key': True,
                 'type_options': None,
                 'has_dependents': True,
+                'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
                 'valid_target_types': ['text']
             }, {
                 'id': 2, 'name': 'numcol', 'type': 'numeric',
@@ -46,6 +47,7 @@ def test_columns_list(rf, monkeypatch):
                 'primary_key': False,
                 'type_options': {'scale': None, 'precision': None},
                 'has_dependents': False,
+                'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
                 'valid_target_types': ['text']
             }, {
                 'id': 4, 'name': 'numcolmod', 'type': 'numeric',
@@ -53,6 +55,7 @@ def test_columns_list(rf, monkeypatch):
                 'nullable': True, 'description': None, 'primary_key': False,
                 'type_options': {'scale': 3, 'precision': 5},
                 'has_dependents': False,
+                'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
                 'valid_target_types': ['text']
             }, {
                 'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
@@ -60,6 +63,7 @@ def test_columns_list(rf, monkeypatch):
                 'nullable': True, 'description': None, 'primary_key': False,
                 'type_options': {'fields': 'day to second'},
                 'has_dependents': False,
+                'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
                 'valid_target_types': ['text']
             }, {
                 'id': 10, 'name': 'arrcol', 'type': '_array',
@@ -67,6 +71,7 @@ def test_columns_list(rf, monkeypatch):
                 'nullable': True, 'description': None, 'primary_key': False,
                 'type_options': {'item_type': 'character varying', 'length': 3},
                 'has_dependents': False,
+                'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
                 'valid_target_types': None
             },
         ]
@@ -80,6 +85,7 @@ def test_columns_list(rf, monkeypatch):
             'nullable': False, 'description': None, 'primary_key': True,
             'type_options': None,
             'has_dependents': True,
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
             'valid_target_types': ['text']
         }, {
             'id': 2, 'name': 'numcol', 'type': 'numeric',
@@ -89,6 +95,7 @@ def test_columns_list(rf, monkeypatch):
             'primary_key': False,
             'type_options': None,
             'has_dependents': False,
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
             'valid_target_types': ['text']
         }, {
             'id': 4, 'name': 'numcolmod', 'type': 'numeric',
@@ -96,6 +103,7 @@ def test_columns_list(rf, monkeypatch):
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'scale': 3, 'precision': 5},
             'has_dependents': False,
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
             'valid_target_types': ['text']
         }, {
             'id': 8, 'name': 'ivlcolmod', 'type': 'interval',
@@ -103,6 +111,7 @@ def test_columns_list(rf, monkeypatch):
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'fields': 'day to second'},
             'has_dependents': False,
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
             'valid_target_types': ['text']
         }, {
             'id': 10, 'name': 'arrcol', 'type': '_array',
@@ -110,6 +119,7 @@ def test_columns_list(rf, monkeypatch):
             'nullable': True, 'description': None, 'primary_key': False,
             'type_options': {'item_type': 'character varying', 'length': 3},
             'has_dependents': False,
+            'current_role_priv': ['SELECT', 'INSERT', 'UPDATE'],
             'valid_target_types': None
         }
     ]

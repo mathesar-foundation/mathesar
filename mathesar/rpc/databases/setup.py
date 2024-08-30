@@ -8,9 +8,9 @@ from modernrpc.auth.basic import http_basic_auth_superuser_required
 
 from mathesar.utils import permissions
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.rpc.servers import ServerInfo
-from mathesar.rpc.databases import DatabaseInfo
-from mathesar.rpc.configured_roles import ConfiguredRoleInfo
+from mathesar.rpc.servers.configured import ConfiguredServerInfo
+from mathesar.rpc.databases.configured import ConfiguredDatabaseInfo
+from mathesar.rpc.roles.configured import ConfiguredRoleInfo
 
 
 class DatabaseConnectionResult(TypedDict):
@@ -25,20 +25,20 @@ class DatabaseConnectionResult(TypedDict):
         database: Information on the Database model instance.
         configured_role: Information on the ConfiguredRole model instance.
     """
-    server: ServerInfo
-    database: DatabaseInfo
+    server: ConfiguredServerInfo
+    database: ConfiguredDatabaseInfo
     configured_role: ConfiguredRoleInfo
 
     @classmethod
     def from_model(cls, model):
         return cls(
-            server=ServerInfo.from_model(model.server),
-            database=DatabaseInfo.from_model(model.database),
+            server=ConfiguredServerInfo.from_model(model.server),
+            database=ConfiguredDatabaseInfo.from_model(model.database),
             configured_role=ConfiguredRoleInfo.from_model(model.configured_role),
         )
 
 
-@rpc_method(name='database_setup.create_new')
+@rpc_method(name='databases.setup.create_new')
 @http_basic_auth_superuser_required
 @handle_rpc_exceptions
 def create_new(
@@ -66,7 +66,7 @@ def create_new(
     return DatabaseConnectionResult.from_model(result)
 
 
-@rpc_method(name='database_setup.connect_existing')
+@rpc_method(name='databases.setup.connect_existing')
 @http_basic_auth_superuser_required
 @handle_rpc_exceptions
 def connect_existing(

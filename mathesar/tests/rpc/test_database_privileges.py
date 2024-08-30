@@ -7,7 +7,7 @@ Fixtures:
 """
 from contextlib import contextmanager
 
-from mathesar.rpc import database_privileges
+from mathesar.rpc.databases import privileges
 from mathesar.models.users import User
 
 
@@ -37,9 +37,9 @@ def test_database_privileges_set_for_roles(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
         return _privileges + [{"role_oid": 67890, "direct": ["CONNECT", "TEMPORARY"]}]
 
-    monkeypatch.setattr(database_privileges, 'connect', mock_connect)
+    monkeypatch.setattr(privileges, 'connect', mock_connect)
     monkeypatch.setattr(
-        database_privileges,
+        privileges,
         'replace_database_privileges_for_roles',
         mock_replace_privileges
     )
@@ -47,7 +47,7 @@ def test_database_privileges_set_for_roles(rf, monkeypatch):
         {"role_oid": 12345, "direct": ["CONNECT"]},
         {"role_oid": 67890, "direct": ["CONNECT", "TEMPORARY"]}
     ]
-    actual_response = database_privileges.replace_for_roles(
+    actual_response = privileges.replace_for_roles(
         privileges=_privileges, database_id=_database_id, request=request
     )
     assert actual_response == expect_response
