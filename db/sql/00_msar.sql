@@ -4126,7 +4126,7 @@ SELECT ', ' || string_agg(
   format(
     $c$summary_cte_%1$s AS (
       SELECT
-        msar.format_data(%2$I) AS key,
+        msar.format_data(%2$I) AS fkey,
         %3$s AS summary
       FROM %4$I.%5$I
     )$c$,
@@ -4153,7 +4153,7 @@ WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
 SELECT string_agg(
   format(
     $j$
-    LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.key$j$,
+    LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.fkey$j$,
     conkey,
     cte_name
   ), ' '
@@ -4174,7 +4174,7 @@ SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
     %1$L, jsonb_agg(
-      DISTINCT jsonb_build_object('key', summary_cte_%1$s.key, 'summary', summary_cte_%1$s.summary)
+      DISTINCT jsonb_build_object(summary_cte_%1$s.fkey, summary_cte_%1$s.summary)
     )
     $j$,
     conkey
