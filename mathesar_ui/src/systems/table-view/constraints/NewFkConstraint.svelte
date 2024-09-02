@@ -15,7 +15,7 @@
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import { currentDatabase } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
@@ -81,7 +81,7 @@
     ? new TableStructure({
         database: $currentDatabase,
         table: $targetTable,
-        abstractTypesMap: $currentDbAbstractTypes.data,
+        abstractTypesMap,
       })
     : undefined;
   $: targetTableStructureIsLoading = ensureReadable(
