@@ -4,7 +4,7 @@
 
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
-    currentDbAbstractTypes,
+    abstractTypesMap,
     getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
   } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
@@ -35,7 +35,7 @@
     // column.valid_target_types ?? [],
     [],
 
-    $currentDbAbstractTypes.data,
+    abstractTypesMap,
   ).filter((item) => !['jsonlist', 'map'].includes(item.identifier));
 
   function selectAbstractType(

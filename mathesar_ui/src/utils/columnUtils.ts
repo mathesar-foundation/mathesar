@@ -1,11 +1,9 @@
-import { get } from 'svelte/store';
-
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { DisplayColumn } from '@mathesar/components/column/types';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
 import {
-  currentDbAbstractTypes,
+  abstractTypesMap,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
@@ -25,10 +23,7 @@ export function getColumnIconProps(
     return iconTableLink;
   }
 
-  return getAbstractTypeForDbType(
-    _column.type,
-    get(currentDbAbstractTypes)?.data,
-  ).getIcon({
+  return getAbstractTypeForDbType(_column.type, abstractTypesMap).getIcon({
     dbType: _column.type,
     typeOptions: _column.type_options,
   });
