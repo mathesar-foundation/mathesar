@@ -7,7 +7,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.links.operations import create as links_create
-from db.tables.operations import infer_types
+from db.tables.operations import infer_types, split
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -104,3 +104,35 @@ def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> dict:
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         return infer_types.infer_table_column_data_types(conn, table_oid)
+
+
+@rpc_method(name="data_modeling.split_table")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def split_table(
+    *,
+    table_oid: int,
+    column_attnums: list,
+    extracted_table_name: str,
+    relationship_fk_column_name: str,
+    database_id: int,
+    **kwargs
+) -> None:
+    """
+    Extract columns from a table to create a new table, linked by a foreign key.
+
+    Args:
+        table_oid: The OID of the table whose columns we'll extract.
+        column_attnums: A list of the attnums of the columns to extract.
+        extracted_table_name: The name of the new table to be made from the extracted columns.
+        relationship_fk_column_name: The name to give the new foreign key column in the remainder table (optional)
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        split.split_table(
+            conn,
+            table_oid,
+            column_attnums,
+            extracted_table_name,
+            relationship_fk_column_name
+        )
