@@ -146,7 +146,7 @@ class RecordList(TypedDict):
     count: int
     results: list[dict]
     grouping: GroupingResponse
-    preview_data: dict[str, dict[Any, str]]
+    preview_data: dict[str, dict[str, str]]
 
     @classmethod
     def from_dict(cls, d):
@@ -174,7 +174,7 @@ class RecordAdded(TypedDict):
             provides a map of foreign key to a text summary.
     """
     results: list[dict]
-    preview_data: dict[str, dict[Any, str]]
+    preview_data: dict[str, dict[str, str]]
 
     @classmethod
     def from_dict(cls, d):
