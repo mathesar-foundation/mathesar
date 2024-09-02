@@ -8,7 +8,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
-from db.roles.operations.select import list_roles
+from db.roles.operations.select import list_roles, get_current_role_from_db
 from db.roles.operations.create import create_role
 
 
@@ -116,3 +116,26 @@ def add(
     with connect(database_id, user) as conn:
         role = create_role(rolename, password, login, conn)
     return RoleInfo.from_dict(role)
+
+
+@rpc_method(name="roles.get_current_role")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get_current_role(*, database_id: int, **kwargs) -> dict:
+    """
+    Get information about the current role and all the parent role(s) whose
+    privileges are immediately available to current role without doing SET ROLE.
+
+    Args:
+        database_id: The Django id of the database.
+
+    Returns:
+        A dict describing the current role.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        current_role = get_current_role_from_db(conn)
+    return {
+        "current_role": RoleInfo.from_dict(current_role["current_role"]),
+        "parent_roles": [RoleInfo.from_dict(role) for role in current_role["parent_roles"]]
+    }

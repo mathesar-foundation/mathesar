@@ -54,7 +54,7 @@ export class Role {
   }
 
   configure(password: string): CancellablePromise<ConfiguredRole> {
-    const promise = api.configured_roles
+    const promise = api.roles.configured
       .add({
         server_id: this.database.server.id,
         name: this.name,

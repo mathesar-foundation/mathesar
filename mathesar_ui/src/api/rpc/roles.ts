@@ -1,6 +1,7 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { RawDatabase } from './databases';
+import type { RawServer } from './servers';
 
 export interface RawRoleMember {
   oid: number;
@@ -17,6 +18,12 @@ export interface RawRole {
   login: boolean;
   description?: string;
   members?: RawRoleMember[];
+}
+
+export interface RawConfiguredRole {
+  id: number;
+  server_id: RawServer['id'];
+  name: string;
 }
 
 export const roles = {
@@ -53,4 +60,37 @@ export const roles = {
     },
     void
   >(),
+
+  configured: {
+    list: rpcMethodTypeContainer<
+      {
+        server_id: RawConfiguredRole['server_id'];
+      },
+      Array<RawConfiguredRole>
+    >(),
+
+    add: rpcMethodTypeContainer<
+      {
+        server_id: RawConfiguredRole['server_id'];
+        name: RawConfiguredRole['name'];
+        password: string;
+      },
+      RawConfiguredRole
+    >(),
+
+    delete: rpcMethodTypeContainer<
+      {
+        configured_role_id: RawConfiguredRole['id'];
+      },
+      void
+    >(),
+
+    set_password: rpcMethodTypeContainer<
+      {
+        configured_role_id: RawConfiguredRole['id'];
+        password: string;
+      },
+      void
+    >(),
+  },
 };
