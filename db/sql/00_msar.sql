@@ -762,6 +762,30 @@ SELECT EXISTS (
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_fkey_map_table(tab_id oid)
+  RETURNS TABLE (target_oid oid, conkey smallint, confkey smallint)
+AS $$/*
+Generate a table mapping foreign key values from refererrer to referant tables.
+
+Given an input table (identified by OID), we return a table with each row representing a foreign key
+constraint on that table. We return only single-column foreign keys, and only one per foreign key
+column.
+
+Args:
+  tab_id: The OID of the table containing the foreign key columns to map.
+*/
+SELECT DISTINCT ON (conkey) pgc.confrelid AS target_oid, x.conkey AS conkey, y.confkey AS confkey
+FROM pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
+WHERE
+  pgc.conrelid = tab_id
+  AND pgc.contype='f'
+  AND cardinality(pgc.confkey) = 1
+  AND has_column_privilege(tab_id, x.conkey, 'SELECT')
+  AND has_column_privilege(pgc.confrelid, y.confkey, 'SELECT')
+ORDER BY conkey, target_oid, confkey;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.list_column_privileges_for_current_role(tab_id regclass, attnum smallint) RETURNS jsonb AS $$/*
 Return a JSONB array of all privileges current_user holds on the passed table.
@@ -3859,20 +3883,23 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.move_columns_between_tables(
+msar.move_columns_to_referenced_table(
   source_tab_id regclass,
   target_tab_id regclass,
-  move_col_ids smallint[],
-  source_join_col_id smallint,
-  target_join_col_id smallint
+  move_col_ids smallint[]
 ) RETURNS void AS $$
 DECLARE
+  source_join_col_id smallint;
+  target_join_col_id smallint;
   preexisting_col_expr CONSTANT text := msar.build_all_columns_expr(target_tab_id);
   move_col_expr CONSTANT text := msar.build_columns_expr(source_tab_id, move_col_ids);
   move_col_defs CONSTANT jsonb := msar.get_extracted_col_def_jsonb(source_tab_id, move_col_ids);
   move_con_defs CONSTANT jsonb := msar.get_extracted_con_def_jsonb(source_tab_id, move_col_ids);
   added_col_ids smallint[];
 BEGIN
+  SELECT conkey, confkey INTO source_join_col_id, target_join_col_id
+    FROM msar.get_fkey_map_table(source_tab_id)
+    WHERE target_oid = target_tab_id;
   IF move_col_ids @> ARRAY[source_join_col_id] THEN
     RAISE EXCEPTION 'The joining column cannot be moved.';
   END IF;
@@ -3888,7 +3915,7 @@ BEGIN
       UPDATE %6$I.%7$I SET (%9$s) = (
         SELECT %9$s
         FROM row_numbered_cte
-        WHERE row_numbered_cte.%8$s=%6$I.%7$I.%8$I
+        WHERE row_numbered_cte.%8$I=%6$I.%7$I.%8$I
         AND __msar_row_number = 1
       )
       RETURNING *
@@ -3919,10 +3946,10 @@ BEGIN
     ),
     msar.build_source_update_move_cols_equal_expr(source_tab_id, move_col_ids, 'insert_cte')
   );
+  PERFORM msar.drop_columns(source_tab_id, variadic move_col_ids);
 END;
 $$ LANGUAGE plpgsql;
 
--- mathesar=# with join_cte AS (SELECT DISTINCT "Books"."Favorite Number" AS L1, "Authors".*  FROM "Books" JOIN "Authors" ON "Books"."Author"="Authors".id) SELECT *, row_number() OVER (PARTITION BY id ORDER BY l1) FROM join_cte;
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -4326,30 +4353,6 @@ LIMIT 1;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_fkey_map_cte(tab_id oid)
-  RETURNS TABLE (target_oid oid, conkey smallint, confkey smallint)
-AS $$/*
-Generate a table mapping foreign key values from refererrer to referant tables.
-
-Given an input table (identified by OID), we return a table with each row representing a foreign key
-constraint on that table. We return only single-column foreign keys, and only one per foreign key
-column.
-
-Args:
-  tab_id: The OID of the table containing the foreign key columns to map.
-*/
-SELECT DISTINCT ON (conkey) pgc.confrelid AS target_oid, x.conkey AS conkey, y.confkey AS confkey
-FROM pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
-WHERE
-  pgc.conrelid = tab_id
-  AND pgc.contype='f'
-  AND cardinality(pgc.confkey) = 1
-  AND has_column_privilege(tab_id, x.conkey, 'SELECT')
-  AND has_column_privilege(pgc.confrelid, y.confkey, 'SELECT')
-ORDER BY conkey, target_oid, confkey;
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.build_summary_expr(tab_id oid) RETURNS TEXT AS $$/*
 Given a table, return an SQL expression that will build a summary for each row of the table.
 
@@ -4371,7 +4374,7 @@ This summary amounts to just the first string-like column value for that linked 
 Args:
   tab_id: The table for whose fkey values' linked records we'll get summaries.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT ', ' || string_agg(
   format(
     $c$summary_cte_%1$s AS (
@@ -4399,7 +4402,7 @@ Args:
   tab_oid: The table defining the columns of the main CTE.
   cte_name: The name of the main CTE we'll join the summary CTEs to.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT string_agg(
   format(
     $j$
@@ -4419,7 +4422,7 @@ Build a JSON object with the results of summarizing linked records.
 Args:
   tab_oid: The OID of the table for which we're getting linked record summaries.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
