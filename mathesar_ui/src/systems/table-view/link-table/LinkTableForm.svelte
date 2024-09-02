@@ -220,12 +220,13 @@
 </script>
 
 <div class="description">
-  Use Links to connect related tables in your database together.
+  Use links to connect related tables in your database, automatically setting up the necessary foreign key columns.
 </div>
 
 <div class="form" class:self-referential={isSelfReferential}>
+
   <FieldLayout>
-    <InfoBox>
+    <InfoBox fullWidth={true}>
       {$_('links_info')}
     </InfoBox>
   </FieldLayout>
@@ -258,43 +259,89 @@
     <FieldLayout>
       <OutcomeBox>
         {#if $linkType === 'oneToMany'}
+        
           <NewColumn
             base={target}
             target={base}
             field={columnNameInTarget}
             {targetColumnsAreLoading}
+
           />
         {:else if $linkType === 'manyToOne'}
+        
           <NewColumn {base} {target} field={columnNameInBase} />
         {:else if $linkType === 'manyToMany'}
           {#if isSelfReferential}
-            <p>{$_('we_will_create_a_new_table')}</p>
-            <Field field={mappingTableName} label={$_('table_name')} />
+          <p>
+            <RichText
+              text={'We will create a new table [mappingTable].'}
+              let:slotName
+            >
+              {#if slotName === 'mappingTable'}
+                <Pill table={{ name: $mappingTableName }} which="mapping" />
+              {:else if slotName === 'targetTable'}
+                <Pill table={target} which="target" />
+              {:else if slotName === 'baseTable'}
+                <Pill table={base} which="base" />
+              {/if}
+            </RichText>
+          </p>
+            <Field
+              field={mappingTableName}
+              label={'Name of New Table'}
+              layout="stacked"
+            >
+              <span slot="help">
+                The table that will store the many-to-many relationship between records of this table.
+              </span>
+            </Field>
+            {#if $mappingTableName}
+          
+              <Field
+                field={columnNameMappingToBase}
+                label={$_('Name of New Column {number}', { values: { number: 1 } })}
+                layout="stacked"
+              >
+                <span slot="help">
+                  The column in <Pill table={{ name: $mappingTableName }} which="mapping" /> that will link to <Pill table={base} which="base" />.
+                </span>
+              </Field>
+              <Field
+                field={columnNameMappingToTarget}
+                label={$_('Name of New Column {number}', { values: { number: 2 } })}
+                layout="stacked"
+              >
+                <span slot="help">
+                  The column in <Pill table={{ name: $mappingTableName }} which="mapping" /> that will link to <Pill table={target} which="target" />.
+                </span>
+              </Field>
+            {/if}
+          {:else}
             {#if $mappingTableName}
               <p>
                 <RichText
-                  text={$_('we_will_add_two_columns_in_x_to_y')}
+                  text={'We will create a new table [mappingTable].'}
                   let:slotName
                 >
                   {#if slotName === 'mappingTable'}
                     <Pill table={{ name: $mappingTableName }} which="mapping" />
                   {:else if slotName === 'targetTable'}
                     <Pill table={target} which="target" />
+                  {:else if slotName === 'baseTable'}
+                    <Pill table={base} which="base" />
                   {/if}
                 </RichText>
               </p>
-              <Field
-                field={columnNameMappingToBase}
-                label={$_('column_number_name', { values: { number: 1 } })}
-              />
-              <Field
-                field={columnNameMappingToTarget}
-                label={$_('column_number_name', { values: { number: 2 } })}
-              />
             {/if}
-          {:else}
-            <p>{$_('we_will_create_a_new_table')}</p>
-            <Field field={mappingTableName} label={$_('table_name')} />
+            <Field
+              field={mappingTableName}
+              label={'Name of New Table'}
+              layout="stacked"
+            >
+              <span slot="help">
+                The table that will store the many-to-many relationship between records of the two tables.
+              </span>
+            </Field>
             {#if $mappingTableName}
               <NewColumn
                 base={{ name: $mappingTableName }}

@@ -6,10 +6,11 @@
   import MessageBox from './MessageBox.svelte';
 
   type $$Props = ComponentProps<MessageBox>;
+  export let fullWidth = true;
 </script>
 
 <div class="info-box">
-  <MessageBox icon={iconInfo} {...$$restProps}><slot /></MessageBox>
+  <MessageBox icon={iconInfo} {...$$restProps} fullWidth><slot /></MessageBox>
 </div>
 
 <style>
