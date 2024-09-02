@@ -15,10 +15,3 @@ export interface FilterConfiguration {
     };
   }[];
 }
-
-export interface AbstractTypeResponse {
-  name: string;
-  identifier: string;
-  db_types: DbType[];
-  filters?: FilterConfiguration;
-}

@@ -5,7 +5,7 @@ export {
   getDefaultDbTypeOfAbstractType,
 } from './abstractTypeCategories';
 export { getAbstractTypeForDbType } from './utils';
-export { currentDbAbstractTypes, refetchTypesForDb } from './store';
+export { abstractTypesMap } from './abstractTypesMap';
 export {
   filterDefinitionMap,
   getEqualityFiltersForAbstractType,
