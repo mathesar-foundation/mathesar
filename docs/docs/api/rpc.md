@@ -276,6 +276,7 @@ To use an RPC function:
       - add_foreign_key_column
       - add_mapping_table
       - suggest_types
+      - split_table
       - MappingColumn
 
 ## Responses
