@@ -7,7 +7,7 @@ import {
   batchSend,
 } from '@mathesar/packages/json-rpc-client-builder';
 
-import AsyncStore, { AsyncStoreValue } from './AsyncStore';
+import AsyncStore, { type AsyncStoreValue } from './AsyncStore';
 
 type BatchRunner<T = any, U = any> = {
   send: RpcRequest<T>;
@@ -16,7 +16,7 @@ type BatchRunner<T = any, U = any> = {
   getValue: () => AsyncStoreValue<U, string>;
 };
 
-export default class AsyncRpcApiStore<Props, T, U> extends AsyncStore<
+export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
   Props,
   U
 > {

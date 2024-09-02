@@ -1,12 +1,24 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+import { ImmutableSet } from '@mathesar-component-library';
 
-import type { RawConfiguredRole } from './roles';
+import type { RawConfiguredRole, RawRole } from './roles';
 import type { RawServer } from './servers';
 
 export interface RawDatabase {
   id: number;
   name: string;
   server_id: RawServer['id'];
+}
+
+export const databasePrivileges = ['CREATE', 'CONNECT', 'TEMPORARY'] as const;
+export type DatabasePrivilege = (typeof databasePrivileges)[number];
+
+export interface RawUnderlyingDatabase {
+  oid: number;
+  name: string;
+  owner_oid: RawRole['oid'];
+  current_role_priv: DatabasePrivilege[];
+  current_role_owns: boolean;
 }
 
 export const sampleDataOptions = [
@@ -22,7 +34,18 @@ export interface DatabaseConnectionResult {
   configured_role: RawConfiguredRole;
 }
 
+export interface RawDatabasePrivilegesForRole {
+  role_oid: RawRole['oid'];
+  direct: DatabasePrivilege[];
+}
+
 export const databases = {
+  get: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+    },
+    RawUnderlyingDatabase
+  >(),
   configured: {
     list: rpcMethodTypeContainer<
       {
@@ -49,6 +72,21 @@ export const databases = {
         sample_data?: SampleDataSchemaIdentifier[];
       },
       DatabaseConnectionResult
+    >(),
+  },
+  privileges: {
+    list_direct: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+      },
+      Array<RawDatabasePrivilegesForRole>
+    >(),
+    replace_for_roles: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        privileges: Array<RawDatabasePrivilegesForRole>;
+      },
+      Array<RawDatabasePrivilegesForRole>
     >(),
   },
 };

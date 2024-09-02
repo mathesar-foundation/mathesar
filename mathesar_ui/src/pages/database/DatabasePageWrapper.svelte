@@ -14,12 +14,17 @@
     getDatabasePageSchemasSectionUrl,
     getDatabasePageSettingsSectionUrl,
   } from '@mathesar/routes/urls';
+  import { modal } from '@mathesar/stores/modal';
   import {
     Button,
     ButtonMenuItem,
     DropdownMenu,
     TabContainer,
   } from '@mathesar-component-library';
+
+  import DatabasePermissionsModal from './permissions/DatabasePermissionsModal.svelte';
+
+  const permissionsModal = modal.spawnModalController();
 
   export let database: Database;
 
@@ -67,7 +72,7 @@
     }}
   >
     <div slot="action">
-      <!-- <Button appearance="secondary">
+      <Button appearance="secondary" on:click={() => permissionsModal.open()}>
         <span>{$_('database_permissions')}</span>
       </Button>
 
@@ -84,7 +89,7 @@
         <ButtonMenuItem icon={iconDeleteMajor} danger>
           {$_('delete_database')}
         </ButtonMenuItem>
-      </DropdownMenu> -->
+      </DropdownMenu>
     </div>
   </AppSecondaryHeader>
 
@@ -94,6 +99,8 @@
     </div>
   </TabContainer>
 </LayoutWithHeader>
+
+<DatabasePermissionsModal controller={permissionsModal} />
 
 <style>
   .tab-content {
