@@ -3946,6 +3946,7 @@ BEGIN
     ),
     msar.build_source_update_move_cols_equal_expr(source_tab_id, move_col_ids, 'insert_cte')
   );
+  PERFORM msar.add_constraints(target_tab_id, move_con_defs);
   PERFORM msar.drop_columns(source_tab_id, variadic move_col_ids);
 END;
 $$ LANGUAGE plpgsql;
