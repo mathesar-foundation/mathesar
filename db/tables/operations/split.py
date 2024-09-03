@@ -21,7 +21,7 @@ def split_table(
     old_table_oid,
     extracted_column_attnums,
     extracted_table_name,
-    relationship_fk_column_name
+    relationship_fk_column_name=None
 ):
     exec_msar_func(
         conn,

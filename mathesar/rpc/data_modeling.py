@@ -114,8 +114,8 @@ def split_table(
     table_oid: int,
     column_attnums: list,
     extracted_table_name: str,
-    relationship_fk_column_name: str,
     database_id: int,
+    relationship_fk_column_name: str = None,
     **kwargs
 ) -> None:
     """
