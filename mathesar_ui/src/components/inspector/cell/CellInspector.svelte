@@ -47,7 +47,7 @@
 
 <style>
   .cell-inspector {
-    padding: var(--size-x-small);
+    padding: var(--size-ultra-large);
   }
   .header {
     font-weight: 500;

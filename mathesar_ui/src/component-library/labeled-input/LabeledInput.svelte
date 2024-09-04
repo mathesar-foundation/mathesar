@@ -6,6 +6,7 @@
   export let label: string | undefined = undefined;
   export let help: string | undefined = undefined;
   export let layout: LabeledInputLayout = 'inline';
+  export let description: string | undefined = undefined;
 </script>
 
 <div
@@ -23,7 +24,11 @@
       -->
       <span class="label">{label ?? ''}<slot name="label" /></span>
       <span class="input"><slot /></span>
+
       <span class="help">{help ?? ''}<slot name="help" /></span>
+    </span>
+    <span class="description">
+      <slot name="description" />
     </span>
   </Label>
 </div>

@@ -34,7 +34,7 @@
   }
 </script>
 
-<DropdownMenu label={$_('append_column')} icon={iconAddNew} {disabled}>
+<DropdownMenu label={$_('append_column')} icon={iconAddNew} {disabled} size="small" appearance="secondary">
   {#each columns as column (column.id)}
     <ButtonMenuItem
       label={column.name}

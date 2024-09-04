@@ -76,30 +76,31 @@
   {#if $isLoading}
     <Spinner />
   {:else}
-    {#if previewRecordSummary}
-      <div class="heading">{$_('preview')}</div>
-      <div class="content">
-        <div class="help">
-          <RichText text={$_('record_summary_help')} let:slotName>
-            {#if slotName === 'tableName'}
-              <Identifier>{table.name}</Identifier>
-            {/if}
-          </RichText>
-        </div>
-        <LinkedRecord recordSummary={previewRecordSummary} />
-      </div>
-    {/if}
-
-    <div class="heading">{$_('template')}</div>
     <div class="content">
       <RadioGroup
         options={[false, true]}
-        getRadioLabel={(v) => (v ? $_('custom') : $_('default'))}
+        getRadioLabel={(v) => (v ? $_('use_custom_template') : $_('use_default'))}
         ariaLabel={$_('template_type')}
         isInline
         bind:value={$customized}
         disabled={$customizedDisabled}
       />
+
+      {#if previewRecordSummary}
+        <div class="preview">
+          <div class="preview-record-summary">
+            <LinkedRecord recordSummary={previewRecordSummary} />
+          </div>
+          <div class="help">
+            <RichText text={$_('record_summary_help')} let:slotName>
+              {#if slotName === 'tableName'}
+                <Identifier>{table.name}</Identifier>
+              {/if}
+            </RichText>
+          </div>
+          
+        </div>
+      {/if}
 
       {#if $customized}
         <Field
@@ -134,33 +135,45 @@
         {/if}
       {/if}
 
-      <FormSubmit
-        {form}
-        onProceed={save}
-        onCancel={form.reset}
-        proceedButton={{ label: $_('save') }}
-        initiallyHidden
-        size="small"
-      />
+      {#if $customized !== initialCustomized || $template !== initialTemplate}
+        <FormSubmit
+          {form}
+          onProceed={save}
+          onCancel={form.reset}
+          proceedButton={{ label: $_('save') }}
+          initiallyHidden
+          size="small"
+        />
+      {/if}
+      {#if !previewRecordSummary}
+      <span class="null-text">{$_('no_record_summary_available')}</span>
+    {/if}
     </div>
-
-    <span class="null-text">{$_('no_record_summary_available')}</span>
+   
   {/if}
 </div>
 
 <style>
   .heading {
-    margin-block: 0.75rem 0.5rem;
+    margin-block: 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-size-small);
   }
   .content > :global(* + *) {
-    margin-top: 0.5rem;
-  }
-  .content {
-    margin-left: 0.5rem;
+    margin-top: 1rem;
   }
   .help {
     font-size: var(--text-size-small);
     color: var(--color-text-muted);
+    margin-top: 0.5rem;
+  }
+  .preview-record-summary {
+    border: 1px solid var(--slate-200);
+    padding: 0.4rem;
+    width: 100%;
+    border-radius: 0.25rem;
+    background-color: var(--slate-50);
+    margin-top: 0.5rem;
   }
   .nonconformant-columns > :global(:first-child) {
     margin-top: 0;
@@ -173,5 +186,6 @@
   }
   .null-text {
     color: var(--color-text-muted);
+    display: block;
   }
 </style>
