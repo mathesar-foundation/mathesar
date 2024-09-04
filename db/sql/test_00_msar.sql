@@ -4941,3 +4941,154 @@ SET ROLE test_intern2;
 RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "TEMPORARY"]');
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_move_columns() RETURNS SETOF TEXT AS $$
+BEGIN
+-- Authors -----------------------------------------------------------------------------------------
+CREATE TABLE "Authors" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "First Name" text,
+    "Last Name" text,
+    "Website" text
+);
+INSERT INTO "Authors" OVERRIDING SYSTEM VALUE VALUES
+  (1, 'Edwin A.', 'Abbott', NULL),
+  (2, 'M.A.S.', 'Abdel Haleem', NULL),
+  (3, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/'),
+  (4, 'Daniel', 'Abraham', 'https://www.danielabraham.com/'),
+  (5, NULL, 'Abu''l-Fazl', NULL);
+PERFORM setval(pg_get_serial_sequence('"Authors"', 'id'), (SELECT max(id) FROM "Authors"));
+-- colors ------------------------------------------------------------------------------------------
+CREATE TABLE colors (id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, name text);
+INSERT INTO colors (name) VALUES ('red'), ('blue');
+-- fav_combos --------------------------------------------------------------------------------------
+CREATE TABLE fav_combos (number integer, color integer);
+ALTER TABLE fav_combos ADD UNIQUE (number, color);
+INSERT INTO fav_combos VALUES (5, 1), (5, 2), (10, 1), (10, 2);
+-- Books -------------------------------------------------------------------------------------------
+CREATE TABLE "Books" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "Title" text,
+    "Publication Year" date,
+    "ISBN" text,
+    "Dewey Decimal" text,
+    "Author" integer REFERENCES "Authors"(id),
+    "Publisher" integer,
+    "Favorite Number" integer,
+    "Favorite Color" integer REFERENCES colors(id)
+);
+ALTER TABLE "Books" DROP COLUMN "Publication Year";
+INSERT INTO "Books" OVERRIDING SYSTEM VALUE VALUES
+  (1059, 'The History of Akbar, Volume 7', '06-742-4416-8', NULL, 5, 116, 5, 1),
+  (960, 'The Dragon''s Path', '978-68173-11-59-3', '813.6', 4, 167, 5, 1),
+  (419, 'Half a King', '0007-55-020-0', '823.92', 3, 113, 5, 1),
+  (1047, 'The Heroes', '0-3-1604498-9', '823.92', 3, 167, 5, 1),
+  (103, 'Best Served Cold', '031604-49-5-4', '823.92', 3, 167, 5, 1),
+  (1302, 'The Widow''s House', '0-31-620398-X', '813.6', 4, 167, 5, NULL),
+  (99, 'Before They Are Hanged', '1-5910-2641-5', '823.92', 3, 195, 5, 2),
+  (530, 'Last Argument of Kings', '1591-02-690-3', '823.92', 3, 195, NULL, 1),
+  (104, 'Best Served Cold', '978-9552-8856-8-1', '823.92', 3, 167, 5, 1),
+  (1185, 'The Qur''an', '0-19-957071-X', '297.122521', 2, 171, 5, 1),
+  (1053, 'The History of Akbar, Volume 1', '0-674-42775-0', '954.02', 5, 116, 5, 1),
+  (959, 'The Dragon''s Path', '978-0-316080-68-2', '813.6', 4, 167, 5, 1),
+  (1056, 'The History of Akbar, Volume 4', '0-67497-503-0', NULL, 5, 116, 5, 1),
+  (69, 'A Shadow in Summer', '07-6-531340-5', '813.6', 4, 243, 5, 2),
+  (907, 'The Blade Itself', '978-1984-1-1636-1', '823.92', 3, 195, 5, 1),
+  (1086, 'The King''s Blood', '978-03-1608-077-4', '813.6', 4, 167, 5, 1),
+  (1060, 'The History of Akbar, Volume 8', '0-674-24417-6', NULL, 5, 116, 5, 1),
+  (70, 'A Shadow in Summer', '978-9-5-7802049-0', '813.6', 4, 243, 5, 2),
+  (1278, 'The Tyrant''s Law', '0-316-08070-5', '813.6', 4, 167, 5, 1),
+  (1054, 'The History of Akbar, Volume 2', '0-67-450494-1', NULL, 5, 116, 10, 1),
+  (1057, 'The History of Akbar, Volume 5', '0-6-7498395-5', NULL, 5, 116, 5, 1),
+  (351, 'Flatland: A Romance of Many Dimensions', '0-486-27263-X', '530.11', 1, 71, 5, 1),
+  (729, 'Red Country', '03161-87-20-8', '823.92', 3, 167, 5, 1),
+  (906, 'The Blade Itself', '1-591-02594-X', '823.92', 3, 195, 5, 1),
+  (1058, 'The History of Akbar, Volume 6', '067-4-98613-X', NULL, 5, 116, 10, 1),
+  (1055, 'The History of Akbar, Volume 3', '0-6-7465982-1', NULL, 5, 116, 5, 1);
+PERFORM setval(pg_get_serial_sequence('"Books"', 'id'), (SELECT max(id) FROM "Books"));
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_move_columns_nodata() RETURNS SETOF TEXT AS $$
+BEGIN
+-- Authors -----------------------------------------------------------------------------------------
+CREATE TABLE "Authors" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "First Name" text,
+    "Last Name" text,
+    "Website" text
+);
+-- colors ------------------------------------------------------------------------------------------
+CREATE TABLE colors (id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, name text);
+-- fav_combos --------------------------------------------------------------------------------------
+CREATE TABLE fav_combos (number integer, color integer);
+ALTER TABLE fav_combos ADD UNIQUE (number, color);
+-- Books -------------------------------------------------------------------------------------------
+CREATE TABLE "Books" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "Title" text,
+    "Publication Year" date,
+    "ISBN" text,
+    "Dewey Decimal" text,
+    "Author" integer REFERENCES "Authors"(id),
+    "Publisher" integer,
+    "Favorite Number" integer UNIQUE,
+    "Favorite Color" integer REFERENCES colors(id)
+);
+ALTER TABLE "Books" DROP COLUMN "Publication Year";
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_to_referenced_table_nodata() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns_nodata();
+  PERFORM msar.move_columns_to_referenced_table(
+    '"Books"'::regclass, '"Authors"'::regclass, ARRAY[8, 9]::smallint[]
+  );
+  RETURN NEXT columns_are(
+    'Authors',
+    ARRAY['id', 'First Name', 'Last Name', 'Website', 'Favorite Number', 'Favorite Color']
+  );
+  RETURN NEXT columns_are(
+    'Books',
+    ARRAY['id', 'Title', 'ISBN', 'Dewey Decimal', 'Author', 'Publisher']
+  );
+  RETURN NEXT col_is_unique('Authors', 'Favorite Number');
+  RETURN NEXT fk_ok('Authors', 'Favorite Color', 'colors', 'id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_to_referenced_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns();
+  PERFORM msar.move_columns_to_referenced_table(
+    '"Books"'::regclass, '"Authors"'::regclass, ARRAY[8, 9]::smallint[]
+  );
+  RETURN NEXT columns_are(
+    'Authors',
+    ARRAY['id', 'First Name', 'Last Name', 'Website', 'Favorite Number', 'Favorite Color']
+  );
+  RETURN NEXT columns_are(
+    'Books',
+    ARRAY['id', 'Title', 'ISBN', 'Dewey Decimal', 'Author', 'Publisher']
+  );
+  RETURN NEXT fk_ok('Authors', 'Favorite Color', 'colors', 'id');
+  RETURN NEXT results_eq(
+    $h$SELECT * FROM "Authors" ORDER BY id;$h$,
+    $w$VALUES
+      (1, 'Edwin A.', 'Abbott', NULL, 5, 1),
+      (2, 'M.A.S.', 'Abdel Haleem', NULL, 5, 1),
+      (3, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/', 5, 1),
+      (4, 'Daniel', 'Abraham', 'https://www.danielabraham.com/', 5, 1),
+      (5, NULL, 'Abu''l-Fazl', NULL, 5, 1),
+      (6, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/', 5, 2),
+      (7, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/',NULL,1),
+      (8, 'Daniel', 'Abraham', 'https://www.danielabraham.com/', 5, 2);
+    $w$
+  );
+END;
+$$ LANGUAGE plpgsql;
