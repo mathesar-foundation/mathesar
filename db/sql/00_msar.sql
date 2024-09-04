@@ -2695,7 +2695,7 @@ SELECT jsonb_agg(
     'columns', ARRAY[attname],
     'deferrable', condeferrable,
     'fkey_relation_id', confrelid::bigint,
-    'fkey_columns', confkey,
+    'fkey_columns', coalesce(confkey, ARRAY[]::smallint[]),
     'fkey_update_action', confupdtype,
     'fkey_delete_action', confdeltype,
     'fkey_match_type', confmatchtype
