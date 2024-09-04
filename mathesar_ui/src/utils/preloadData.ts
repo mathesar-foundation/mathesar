@@ -4,7 +4,6 @@ import type { RawDatabase } from '@mathesar/api/rpc/databases';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { RawServer } from '@mathesar/api/rpc/servers';
 import type { Table } from '@mathesar/api/rpc/tables';
-import type { AbstractTypeResponse } from '@mathesar/AppTypes';
 
 export interface CommonData {
   databases: RawDatabase[];
@@ -21,7 +20,6 @@ export interface CommonData {
     user: string;
   };
   current_schema: number | null;
-  abstract_types: AbstractTypeResponse[];
   user: User;
   current_release_tag_name: string;
   supported_languages: Record<string, string>;

@@ -132,3 +132,51 @@ def test_data_modeling_suggest_types(rf, monkeypatch):
         database_id=_database_id,
         request=request,
     )
+
+
+def test_data_modeling_split_table(rf, monkeypatch):
+    _username = 'alice'
+    _password = 'pass1234'
+    _table_oid = 12345
+    _database_id = 2
+    _column_attnums = [2, 3, 4]
+    _extracted_table_name = 'extracted_table'
+    _relationship_fk_column_name = 'fk_col'
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username=_username, password=_password)
+
+    @contextmanager
+    def mock_connect(database_id, user):
+        if database_id == _database_id and user.username == _username:
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_split_table(
+        conn,
+        table_oid,
+        column_attnums,
+        extracted_table_name,
+        relationship_fk_column_name
+    ):
+        if (
+            table_oid != _table_oid
+            and column_attnums != _column_attnums
+            and extracted_table_name != _extracted_table_name
+            and relationship_fk_column_name != _relationship_fk_column_name
+        ):
+            raise AssertionError('incorrect parameters passed')
+
+    monkeypatch.setattr(data_modeling, 'connect', mock_connect)
+    monkeypatch.setattr(data_modeling.split, 'split_table', mock_split_table)
+    data_modeling.split_table(
+        table_oid=_table_oid,
+        column_attnums=_column_attnums,
+        extracted_table_name=_extracted_table_name,
+        relationship_fk_column_name=_relationship_fk_column_name,
+        database_id=_database_id,
+        request=request
+    )

@@ -4271,15 +4271,15 @@ BEGIN
       ],
       "grouping": null,
       "preview_data": {
-        "2": [
-          {"key": 1.234, "summary": "Alice Alison"},
-          {"key": 2.345, "summary": "Bob Bobinson"}
-        ],
-        "3": [
-          {"key": 1, "summary": "Carol Carlson"},
-          {"key": 2, "summary": "Dave Davidson"},
-          {"key": 3, "summary": "Eve Evilson"}
-        ]
+        "2": {
+          "1.234": "Alice Alison",
+          "2.345": "Bob Bobinson"
+        },
+        "3": {
+          "1": "Carol Carlson",
+          "2": "Dave Davidson",
+          "3": "Eve Evilson"
+        }
       }
     }$j$ || jsonb_build_object(
       'query', concat(
@@ -4308,14 +4308,14 @@ BEGIN
       ],
       "grouping": null,
       "preview_data": {
-        "2": [
-          {"key": 1.234, "summary": "Alice Alison"},
-          {"key": 2.345, "summary": "Bob Bobinson"}
-        ],
-        "3": [
-          {"key": 1, "summary": "Carol Carlson"},
-          {"key": 2, "summary": "Dave Davidson"}
-        ]
+        "2": {
+          "1.234": "Alice Alison",
+          "2.345": "Bob Bobinson"
+        },
+        "3": {
+          "1": "Carol Carlson",
+          "2": "Dave Davidson"
+        }
       }
     }$j$ || jsonb_build_object(
       'query', concat(
@@ -4347,13 +4347,13 @@ BEGIN
         "groups": [{"id": 1, "count": 3, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
       },
       "preview_data": {
-        "2": [
-          {"key": 1.234, "summary": "Alice Alison"}
-        ],
-        "3": [
-          {"key": 1, "summary": "Carol Carlson"},
-          {"key": 2, "summary": "Dave Davidson"}
-        ]
+        "2": {
+          "1.234": "Alice Alison"
+        },
+        "3": {
+          "1": "Carol Carlson",
+          "2": "Dave Davidson"
+        }
       }
     }$j$ || jsonb_build_object(
       'query', concat(
@@ -4381,8 +4381,8 @@ BEGIN
         {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
       ],
       "preview_data": {
-        "2": [{"key": 2.345, "summary": "Bob Bobinson"}],
-        "3": [{"key": 1, "summary": "Carol Carlson"}]
+        "2": {"2.345": "Bob Bobinson"},
+        "3": {"1": "Carol Carlson"}
       }
     }$a$
   );
@@ -4404,8 +4404,8 @@ BEGIN
         {"1": 2, "2": 2.345, "3": 2, "4": "Gabby Gabberson", "5": 85, "6": "ggabberson@example.edu"}
       ],
       "preview_data": {
-        "2": [{"key": 2.345, "summary": "Bob Bobinson"}],
-        "3": [{"key": 2, "summary": "Dave Davidson"}]
+        "2": {"2.345": "Bob Bobinson"},
+        "3": {"2": "Dave Davidson"}
       }
     }$a$
   );
@@ -4423,8 +4423,8 @@ BEGIN
       2
     ) -> 'preview_data',
     $a${
-      "2": [{"key": 1.234, "summary": "Alice Alison"}, {"key": 2.345, "summary": "Bob Bobinson"}],
-      "3": [{"key": 3, "summary": "Eve Evilson"}]
+      "2": {"1.234": "Alice Alison", "2.345": "Bob Bobinson"},
+      "3": {"3": "Eve Evilson"}
     }$a$
   );
 END;

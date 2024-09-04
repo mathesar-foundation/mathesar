@@ -2,7 +2,7 @@
   import type { Table } from '@mathesar/api/rpc/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { displayRecordSummaryAsPlainText } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
@@ -18,7 +18,7 @@
   $: tableStructure = new TableStructure({
     database: $currentDatabase,
     table,
-    abstractTypesMap: $currentDbAbstractTypes.data,
+    abstractTypesMap,
   });
   $: tableStructureIsLoading = tableStructure.isLoading;
   $: recordStoreFetchRequest = record.fetchRequest;

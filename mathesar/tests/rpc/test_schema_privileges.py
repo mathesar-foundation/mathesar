@@ -7,7 +7,7 @@ Fixtures:
 """
 from contextlib import contextmanager
 
-from mathesar.rpc import schema_privileges
+from mathesar.rpc.schemas import privileges as schema_privileges
 from mathesar.models.users import User
 
 

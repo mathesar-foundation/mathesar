@@ -1142,7 +1142,7 @@ AND role_data.name != current_role;
 $$ LANGUAGE SQL STABLE;
 
 
-CREATE OR REPLACE FUNCTION msar.list_db_priv(db_name text) RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION msar.list_db_priv() RETURNS jsonb AS $$/*
 Given a database name, returns a json array of objects with database privileges for non-inherited roles.
 
 Each returned JSON object in the array has the form:
@@ -1161,7 +1161,8 @@ WITH priv_cte AS (
     pg_catalog.pg_roles AS pgr,
     pg_catalog.pg_database AS pgd,
     aclexplode(COALESCE(pgd.datacl, acldefault('d', pgd.datdba))) AS acl
-  WHERE pgd.datname = db_name AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
+  WHERE pgd.datname = pg_catalog.current_database()
+    AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
   GROUP BY pgr.oid, pgd.oid
 )
 SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
@@ -1316,7 +1317,7 @@ EXECUTE string_agg(
   E';\n'
 ) || ';'
 FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
-RETURN msar.list_db_priv(current_database());
+RETURN msar.list_db_priv();
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -4383,7 +4384,7 @@ SELECT ', ' || string_agg(
   format(
     $c$summary_cte_%1$s AS (
       SELECT
-        msar.format_data(%2$I) AS key,
+        msar.format_data(%2$I) AS fkey,
         %3$s AS summary
       FROM %4$I.%5$I
     )$c$,
@@ -4410,7 +4411,7 @@ WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT string_agg(
   format(
     $j$
-    LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.key$j$,
+    LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.fkey$j$,
     conkey,
     cte_name
   ), ' '
@@ -4430,8 +4431,8 @@ WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
-    %1$L, jsonb_agg(
-      DISTINCT jsonb_build_object('key', summary_cte_%1$s.key, 'summary', summary_cte_%1$s.summary)
+    %1$L, jsonb_object_agg(
+      summary_cte_%1$s.fkey, summary_cte_%1$s.summary
     )
     $j$,
     conkey

@@ -63,16 +63,6 @@ export function constructAbstractTypeMapFromResponse(
   > & { factory: AbstractTypeConfigurationFactory })[] = [];
 
   abstractTypesResponse.forEach((entry) => {
-    if (entry.identifier === 'other') {
-      /**
-       * Ignore "Other" type sent in response.
-       * This is a failsafe to ensure that the frontend does not
-       * break when the "Other" type does not contain db_types which
-       * are either the type or valid_target_type for any column.
-       */
-      return;
-    }
-
     const partialAbstractType = {
       identifier: entry.identifier,
       name: entry.name,

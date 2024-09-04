@@ -24,7 +24,7 @@
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { currentTables } from '@mathesar/stores/tables';
@@ -103,7 +103,7 @@
   $: records = $previewRequest.resolvedValue?.records ?? getSkeletonRecords();
   $: formInputsAreDisabled = !$previewRequest.isOk;
   $: canProceed = $previewRequest.isOk && $form.canSubmit;
-  $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
+  $: processedColumns = processColumns(columns, abstractTypesMap);
 
   async function init() {
     const columnsResponse = await columnsFetch.run({

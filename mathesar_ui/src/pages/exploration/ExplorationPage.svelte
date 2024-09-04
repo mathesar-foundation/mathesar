@@ -7,7 +7,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import {
     ExplorationResult,
@@ -42,7 +42,7 @@
 
   let context: 'shared-consumer-page' | 'page' = 'page';
   $: context = shareConsumer ? 'shared-consumer-page' : 'page';
-  $: createQueryRunner(query, $currentDbAbstractTypes.data);
+  $: createQueryRunner(query, abstractTypesMap);
 
   function gotoSchemaPage() {
     router.goto(getSchemaPageUrl(database.id, schema.oid));
