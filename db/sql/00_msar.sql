@@ -3845,6 +3845,7 @@ CREATE OR REPLACE FUNCTION msar.build_source_update_move_cols_equal_expr(
 ) RETURNS text AS $$
 SELECT string_agg(
   format(
+    -- TODO should be IS NOT DISTINCT FROM
     '%1$I.%2$I.%3$I = %4$I.%3$I',
     msar.get_relation_schema_name(source_tab_id),
     msar.get_relation_name(source_tab_id),
@@ -3947,6 +3948,8 @@ BEGIN
     msar.build_source_update_move_cols_equal_expr(source_tab_id, move_col_ids, 'insert_cte')
   );
   PERFORM msar.add_constraints(target_tab_id, move_con_defs);
+  -- TODO make sure no multi-col fkeys reference the moved columns
+  -- TODO just throw error if _any_ multicol constraint references the moved columns.
   PERFORM msar.drop_columns(source_tab_id, variadic move_col_ids);
 END;
 $$ LANGUAGE plpgsql;
