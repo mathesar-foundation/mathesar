@@ -18,7 +18,7 @@ drf-nested-routers==0.93.3
 psycopg==3.1.18
 psycopg-binary==3.1.18
 psycopg2-binary==2.9.7
-python-decouple==3.4
+python-decouple==3.8
 requests==2.32.0
 SQLAlchemy==1.4.26
 responses==0.22.0
