@@ -2887,7 +2887,7 @@ BEGIN
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
   RETURN jsonb_build_object(
-    'oid', created_table_id,
+    'oid', created_table_id::bigint,
     'name', created_table_id::regclass::text
   );
 END;
@@ -2960,7 +2960,7 @@ BEGIN
   copy_sql := format('COPY %I.%I (%s) FROM STDIN CSV %s', sch_name, rel_name, col_names_sql, options_sql);
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
-    'table_oid', rel_id,
+    'table_oid', rel_id::bigint,
     'table_name', rel_id::regclass::text
   );
 END;

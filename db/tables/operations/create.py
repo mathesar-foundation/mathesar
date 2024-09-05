@@ -30,7 +30,7 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
         json.dumps(columns),
         json.dumps(constraints),
         comment
-    ).fetchone()[0]
+    ).fetchone()[0]["oid"]
 
 
 def create_table_on_database(
@@ -52,7 +52,7 @@ def create_table_on_database(
         comment: The comment for the new table. (optional)
 
     Returns:
-        Returns the OID of the created table.
+        Returns the OID and name of the created table.
     """
     return exec_msar_func(
         conn,
