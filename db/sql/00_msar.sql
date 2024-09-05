@@ -4551,7 +4551,11 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_record_to_table(tab_id oid, rec_def jsonb) RETURNS jsonb AS $$/*
+msar.add_record_to_table(
+  tab_id oid,
+  rec_def jsonb,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Add a record to a table.
 
 Args:
@@ -4571,7 +4575,8 @@ BEGIN
     WITH insert_cte AS (%1$s RETURNING %2$s)%4$s
     SELECT jsonb_build_object(
       'results', %3$s,
-      'preview_data', %6$s
+      'linked_record_summaries', %6$s,
+      'record_summaries', %7$s
     )
     FROM insert_cte %5$s
     $i$,
@@ -4580,7 +4585,11 @@ BEGIN
     msar.build_results_jsonb_expr(tab_id, 'insert_cte', null),
     msar.build_summary_cte_expr_for_table(tab_id),
     msar.build_summary_join_expr_for_table(tab_id, 'insert_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    COALESCE(
+      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
+      'NULL'
+    )
   ) INTO rec_created;
   RETURN rec_created;
 END;

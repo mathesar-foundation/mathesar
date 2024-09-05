@@ -4102,7 +4102,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4122,7 +4123,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4142,7 +4144,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4162,7 +4165,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4182,7 +4186,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4420,10 +4425,11 @@ BEGIN
       "results": [
         {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
       ],
-      "preview_data": {
+      "linked_record_summaries": {
         "2": {"2.345": "Bob Bobinson"},
         "3": {"1": "Carol Carlson"}
-      }
+      },
+      "record_summaries": null
     }$a$
   );
 END;
