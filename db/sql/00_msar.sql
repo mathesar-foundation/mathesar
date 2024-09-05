@@ -2888,8 +2888,8 @@ BEGIN
   PERFORM msar.comment_on_table(created_table_id, comment_);
   RETURN jsonb_build_object(
     'oid', created_table_id::bigint,
-    'name', created_table_id::regclass::text
-  );
+    'name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = created_table_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2961,8 +2961,8 @@ BEGIN
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
     'table_oid', rel_id::bigint,
-    'table_name', rel_id::regclass::text
-  );
+    'table_name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
 
