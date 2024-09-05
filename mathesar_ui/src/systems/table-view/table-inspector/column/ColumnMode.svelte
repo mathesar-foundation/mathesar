@@ -159,7 +159,7 @@
   }
 
   .no-cell-selected {
-    padding: 2rem;
+    padding: var(--size-ultra-large);
   }
 
   .content-container {

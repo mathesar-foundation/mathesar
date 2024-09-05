@@ -53,7 +53,7 @@
   }
 
   .records-selected-count {
-    padding: 1rem;
+    padding: var(--size-large);
   }
 
   .content-container {
