@@ -77,7 +77,7 @@
 
 <div class="actions-container">
   {#if $currentDatabase && $currentSchema}
-    <AnchorButton href={explorationPageUrl}>
+    <AnchorButton href={explorationPageUrl} appearance="secondary">
       <div class="action-item">
         <div>
           <Icon {...iconExploration} /> <span>{$_('explore_data')}</span>
@@ -89,7 +89,7 @@
       </div>
     </AnchorButton>
     {#if summarizationUrl}
-      <AnchorButton href={summarizationUrl}>
+      <AnchorButton href={summarizationUrl} appearance="secondary">
         <div class="action-item">
           <div>
             <Icon {...iconExploration} />

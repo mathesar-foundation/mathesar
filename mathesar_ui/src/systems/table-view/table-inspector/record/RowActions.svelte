@@ -65,7 +65,7 @@
 
 <div class="actions-container">
   {#if recordPageLink}
-    <AnchorButton href={recordPageLink}>
+    <AnchorButton href={recordPageLink} appearance="secondary">
       <div class="action-item">
         <div>
           <Icon {...iconRecord} />
@@ -75,7 +75,7 @@
       </div>
     </AnchorButton>
   {/if}
-  <Button on:click={handleDeleteRecords}>
+  <Button on:click={handleDeleteRecords} appearance="secondary">
     <Icon {...iconDeleteMajor} />
     <span>
       {$_('delete_records', { values: { count: selectedRowCount } })}
