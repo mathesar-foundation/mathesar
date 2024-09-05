@@ -416,14 +416,20 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_pkey_attnum(rel_id regclass) RETURNS smallint AS $$/*
+msar.get_selectable_pkey_attnum(rel_id regclass) RETURNS smallint AS $$/*
 Get the attnum of the single-column primary key for a relation if it has one. If not, return null.
+
+The attnum will only be returned if the current user has SELECT on that column.
 
 Args:
   rel_id:  The OID of the relation.
 */
 SELECT conkey[1] FROM pg_constraint
-WHERE cardinality(conkey) = 1 AND conrelid=rel_id AND contype='p';
+WHERE
+  conrelid = rel_id
+  AND cardinality(conkey) = 1
+  AND contype='p'
+  AND has_column_privilege(rel_id, conkey[1], 'SELECT');
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -4214,7 +4220,7 @@ SELECT ', '
   || NULLIF(
     concat_ws(', ',
       'summary_cte_self AS (SELECT msar.format_data('
-        || quote_ident(msar.get_column_name(tab_id, msar.get_pkey_attnum(tab_id)))
+        || quote_ident(msar.get_column_name(tab_id, msar.get_selectable_pkey_attnum(tab_id)))
         || format(
           ') AS key, %1$s AS summary FROM %2$I.%3$I)',
           msar.build_summary_expr(tab_id),
@@ -4254,7 +4260,7 @@ Args:
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
 SELECT concat(
   format(E'\nLEFT JOIN summary_cte_self ON %1$I.', cte_name)
-  || quote_ident(msar.get_pkey_attnum(tab_id)::text)
+  || quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text)
   || ' = summary_cte_self.key' ,
   string_agg(
     format(
@@ -4294,7 +4300,7 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.build_self_summary_json_expr(tab_id oid) RETURNS TEXT AS $$/*
 */
-SELECT CASE WHEN quote_ident(msar.get_pkey_attnum(tab_id)::text) IS NOT NULL THEN
+SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS NOT NULL THEN
   'jsonb_object_agg(summary_cte_self.key, summary_cte_self.summary)'
 END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
@@ -4407,7 +4413,8 @@ CREATE OR REPLACE FUNCTION
 msar.search_records_from_table(
   tab_id oid,
   search_ jsonb,
-  limit_ integer
+  limit_ integer,
+  return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get records from a table, filtering and sorting according to a search specification.
 
@@ -4434,7 +4441,8 @@ BEGIN
     SELECT jsonb_build_object(
       'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
       'count', coalesce(max(count_cte.count), 0),
-      'preview_data', %9$s,
+      'linked_record_summaries', %9$s,
+      'record_summaries', %10$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
     )
     FROM results_cte %8$s
@@ -4451,7 +4459,11 @@ BEGIN
     ),
     msar.build_summary_cte_expr_for_table(tab_id),
     msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    COALESCE(
+      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
+      'NULL'
+    )
   ) INTO records;
   RETURN records;
 END;
@@ -4459,7 +4471,11 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_record_from_table(tab_id oid, rec_id anyelement) RETURNS jsonb AS $$/*
+msar.get_record_from_table(
+  tab_id oid,
+  rec_id anyelement,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Get single record from a table. Only columns to which the user has access are returned.
 
 Args:
@@ -4476,7 +4492,8 @@ SELECT msar.list_records_from_table(
       jsonb_build_object('type', 'literal', 'value', rec_id)
     )
   ),
-  null
+  null,
+  return_record_summaries
 )
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 

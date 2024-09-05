@@ -4461,7 +4461,7 @@ BEGIN
       '"Students"'::regclass::oid,
       '[{"attnum": 4, "literal": "k"}]',
       2
-    ) -> 'preview_data',
+    ) -> 'linked_record_summaries',
     $a${
       "2": {"1.234": "Alice Alison", "2.345": "Bob Bobinson"},
       "3": {"3": "Eve Evilson"}
