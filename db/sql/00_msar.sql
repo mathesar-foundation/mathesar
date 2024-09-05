@@ -2918,7 +2918,7 @@ Each returned JSON object will have the form:
 
 Args:
   sch_id: The OID of the schema where the table will be created.
-  tab_name: The unquoted name for the new table.
+  tab_name (optional): The unquoted name for the new table.
   col_defs: The columns for the new table, in order.
   header: Whether or not the file contains a header line with the names of each column in the file.
   delimiter: The character that separates columns within each row (line) of the file.
