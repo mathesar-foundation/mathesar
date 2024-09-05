@@ -4568,30 +4568,21 @@ insert.
 
 */
 DECLARE
+  rec_created_id text;
   rec_created jsonb;
 BEGIN
   EXECUTE format(
-    $i$
-    WITH insert_cte AS (%1$s RETURNING %2$s)%4$s
-    SELECT jsonb_build_object(
-      'results', %3$s,
-      'linked_record_summaries', %6$s,
-      'record_summaries', %7$s
-    )
-    FROM insert_cte %5$s
-    $i$,
+    'WITH insert_cte AS (%1$s RETURNING %2$s) SELECT msar.format_data(%3$I)::text FROM insert_cte',
     msar.build_single_insert_expr(tab_id, rec_def),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'insert_cte', null),
-    msar.build_summary_cte_expr_for_table(tab_id),
-    msar.build_summary_join_expr_for_table(tab_id, 'insert_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
-    COALESCE(
-      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
-      'NULL'
-    )
-  ) INTO rec_created;
-  RETURN rec_created;
+    msar.get_pk_column(tab_id)
+  ) INTO rec_created_id;
+  rec_created := msar.get_record_from_table(tab_id, rec_created_id, return_record_summaries);
+  RETURN jsonb_build_object(
+    'results', rec_created -> 'results',
+    'record_summaries', rec_created -> 'record_summaries',
+    'linked_record_summaries', rec_created -> 'linked_record_summaries'
+  );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -4630,18 +4621,14 @@ The `rec_def` object's form is defined by the record being updated.  It should h
 corresponding to the attnums of desired columns and values corresponding to values we should set.
 */
 DECLARE
+  rec_modified_id integer;
   rec_modified jsonb;
 BEGIN
   EXECUTE format(
-    $i$
-    WITH update_cte AS (%1$s %2$s RETURNING %3$s)%5$s
-    SELECT jsonb_build_object(
-      'results', %4$s,
-      'linked_record_summaries', %7$s,
-      'record_summaries', %8$s
-    )
-    FROM update_cte %6$s
-    $i$,
+    $p$
+    WITH update_cte AS (%1$s %2$s RETURNING %3$s)
+    SELECT msar.format_data(%4$I)::text FROM update_cte
+    $p$,
     msar.build_update_expr(tab_id, rec_def),
     msar.build_where_clause(
       tab_id, jsonb_build_object(
@@ -4652,15 +4639,13 @@ BEGIN
       )
     ),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'update_cte', null),
-    msar.build_summary_cte_expr_for_table(tab_id),
-    msar.build_summary_join_expr_for_table(tab_id, 'update_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
-    COALESCE(
-      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
-      'NULL'
-    )
-  ) INTO rec_modified;
-  RETURN rec_modified;
+    msar.get_pk_column(tab_id)
+  ) INTO rec_modified_id;
+  rec_modified := msar.get_record_from_table(tab_id, rec_modified_id, return_record_summaries);
+  RETURN jsonb_build_object(
+    'results', rec_modified -> 'results',
+    'record_summaries', rec_modified -> 'record_summaries',
+    'linked_record_summaries', rec_modified -> 'linked_record_summaries'
+  );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

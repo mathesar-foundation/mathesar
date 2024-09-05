@@ -4301,7 +4301,8 @@ BEGIN
       offset_ => null,
       order_ => null,
       filter_ => null,
-      group_ => null
+      group_ => null,
+      return_record_summaries => true
     ),
     $j${
       "count": 6,
@@ -4325,7 +4326,14 @@ BEGIN
           "3": "Eve Evilson"
         }
       },
-      "record_summaries": null
+      "record_summaries":  {
+        "1": "Fred Fredrickson",
+        "2": "Gabby Gabberson",
+        "3": "Hank Hankson",
+        "4": "Ida Idalia",
+        "5": "James Jameson",
+        "6": "Kelly Kellison"
+      }
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
@@ -4421,7 +4429,8 @@ BEGIN
   RETURN NEXT is(
     msar.add_record_to_table(
       '"Students"'::regclass::oid,
-      '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}'
+      '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}',
+      true
     ),
     $a${
       "results": [
@@ -4431,7 +4440,7 @@ BEGIN
         "2": {"2.345": "Bob Bobinson"},
         "3": {"1": "Carol Carlson"}
       },
-      "record_summaries": null
+      "record_summaries": {"7": "Larry Laurelson"}
     }$a$
   );
 END;
