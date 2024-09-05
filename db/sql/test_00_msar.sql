@@ -4204,7 +4204,8 @@ BEGIN
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
     $p${
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$p$
   );
 END;
@@ -4221,7 +4222,8 @@ BEGIN
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
     $p${
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$p$
   );
 END;
@@ -4449,10 +4451,11 @@ BEGIN
       "results": [
         {"1": 2, "2": 2.345, "3": 2, "4": "Gabby Gabberson", "5": 85, "6": "ggabberson@example.edu"}
       ],
-      "preview_data": {
+      "linked_record_summaries": {
         "2": {"2.345": "Bob Bobinson"},
         "3": {"2": "Dave Davidson"}
-      }
+      },
+      "record_summaries": null
     }$a$
   );
 END;

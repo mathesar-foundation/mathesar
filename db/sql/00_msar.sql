@@ -4611,7 +4611,12 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.patch_record_in_table(tab_id oid, rec_id anyelement, rec_def jsonb) RETURNS jsonb AS $$/*
+msar.patch_record_in_table(
+  tab_id oid,
+  rec_id anyelement,
+  rec_def jsonb,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Modify (update/patch) a record in a table.
 
 Args:
@@ -4632,7 +4637,8 @@ BEGIN
     WITH update_cte AS (%1$s %2$s RETURNING %3$s)%5$s
     SELECT jsonb_build_object(
       'results', %4$s,
-      'preview_data', %7$s
+      'linked_record_summaries', %7$s,
+      'record_summaries', %8$s
     )
     FROM update_cte %6$s
     $i$,
@@ -4649,7 +4655,11 @@ BEGIN
     msar.build_results_jsonb_expr(tab_id, 'update_cte', null),
     msar.build_summary_cte_expr_for_table(tab_id),
     msar.build_summary_join_expr_for_table(tab_id, 'update_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    COALESCE(
+      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
+      'NULL'
+    )
   ) INTO rec_modified;
   RETURN rec_modified;
 END;
