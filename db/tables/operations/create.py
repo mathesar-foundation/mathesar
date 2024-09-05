@@ -122,7 +122,8 @@ def prepare_table_for_import(
     ).fetchone()[0]
     return (
         import_info['copy_sql'],
-        import_info['table_oid']
+        import_info['table_oid'],
+        import_info['table_name']
     )
 
 
