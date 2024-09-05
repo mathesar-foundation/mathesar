@@ -416,6 +416,18 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_pkey_attnum(rel_id regclass) RETURNS smallint AS $$/*
+Get the attnum of the single-column primary key for a relation if it has one. If not, return null.
+
+Args:
+  rel_id:  The OID of the relation.
+*/
+SELECT conkey[1] FROM pg_constraint
+WHERE cardinality(conkey) = 1 AND conrelid=rel_id AND contype='p';
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.is_default_possibly_dynamic(tab_id oid, col_id integer) RETURNS boolean AS $$/*
 Determine whether the default value for the given column is an expression or constant.
 
@@ -4260,6 +4272,21 @@ FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.build_self_summary_expr(tab_id oid) RETURNS TEXT AS $$/*
+*/
+SELECT CONCAT(msar.build_summary_expr(tab_id), ' AS __mathesar_summary');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_self_summary_json_expr(tab_id oid, cte_name text) RETURNS TEXT AS $$/*
+*/
+SELECT format('jsonb_object_agg(%1$I.', cte_name)
+  || quote_ident(msar.get_pkey_attnum(tab_id)::text)
+  || ', __mathesar_summary)'
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.list_records_from_table(
   tab_id oid,
@@ -4267,7 +4294,8 @@ msar.list_records_from_table(
   offset_ integer,
   order_ jsonb,
   filter_ jsonb,
-  group_ jsonb
+  group_ jsonb,
+  return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get records from a table. Only columns to which the user has access are returned.
 
@@ -4278,6 +4306,7 @@ Args:
   order_: An array of ordering definition objects.
   filter_: An array of filter definition objects.
   group_: An array of group definition objects.
+  return_record_summaries : Whether to return a summary for each record listed.
 
 The order definition objects should have the form
   {"attnum": <int>, "direction": <text>}
@@ -4290,7 +4319,7 @@ BEGIN
     WITH count_cte AS (
       SELECT count(1) AS count FROM %2$I.%3$I %7$s
     ), enriched_results_cte AS (
-      SELECT %1$s, %8$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
+      SELECT %1$s, %8$s, %15$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
     ), results_ranked_cte AS (
       SELECT *, row_number() OVER (%6$s) - 1 AS __mathesar_result_idx FROM enriched_results_cte
     ), groups_cte AS (
@@ -4300,7 +4329,8 @@ BEGIN
       'results', %9$s,
       'count', coalesce(max(count_cte.count), 0),
       'grouping', %10$s,
-      'preview_data', %14$s,
+      'linked_record_summaries', %14$s,
+      'record_summaries', %16$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
     FROM enriched_results_cte
@@ -4320,7 +4350,14 @@ BEGIN
     COALESCE(msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_), 'NULL AS id'),
     msar.build_summary_cte_expr_for_table(tab_id),
     msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    msar.build_self_summary_expr(tab_id),
+    COALESCE(
+      CASE WHEN return_record_summaries THEN
+        msar.build_self_summary_json_expr(tab_id, 'enriched_results_cte')
+      END,
+      'NULL'
+    )
   ) INTO records;
   RETURN records;
 END;
