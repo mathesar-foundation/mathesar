@@ -2907,12 +2907,13 @@ msar.prepare_table_for_import(
   comment_ text
 ) RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning a JSON object containing
-a properly formatted SQL statement to carry out `COPY FROM` and also contains table_oid of the created table.
+a properly formatted SQL statement to carry out `COPY FROM`, table_oid & table_name of the created table.
 
 Each returned JSON object will have the form:
   {
     "copy_sql": <str>,
-    "table_oid": <int>
+    "table_oid": <int>,
+    "table_name": <str>
   }
 
 Args:
