@@ -3899,6 +3899,9 @@ DECLARE
   move_con_defs CONSTANT jsonb := msar.get_extracted_con_def_jsonb(source_tab_id, move_col_ids);
   added_col_ids smallint[];
 BEGIN
+  -- TODO test to make sure no multi-col fkeys reference the moved columns
+  -- TODO just throw error if _any_ multicol constraint references the moved columns.
+  -- TODO check behavior if one of the moving columns is referenced by another table (should raise)
   SELECT conkey, confkey INTO source_join_col_id, target_join_col_id
     FROM msar.get_fkey_map_table(source_tab_id)
     WHERE target_oid = target_tab_id;
@@ -3949,8 +3952,6 @@ BEGIN
     msar.build_source_update_move_cols_equal_expr(source_tab_id, move_col_ids, 'insert_cte')
   );
   PERFORM msar.add_constraints(target_tab_id, move_con_defs);
-  -- TODO make sure no multi-col fkeys reference the moved columns
-  -- TODO just throw error if _any_ multicol constraint references the moved columns.
   PERFORM msar.drop_columns(source_tab_id, variadic move_col_ids);
 END;
 $$ LANGUAGE plpgsql;
