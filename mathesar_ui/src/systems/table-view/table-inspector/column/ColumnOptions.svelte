@@ -104,10 +104,11 @@
   <LabeledInput layout="inline-input-first">
     <span slot="label">
       {$_('restrict_to_unique')}
+      <Help>
+        {$_('restrict_to_unique_help')}
+      </Help>
     </span>
-    <span slot="description">
-      {$_('restrict_to_unique_help')}
-    </span>
+    
     {#if isRequestingToggleAllowDuplicates}
       <Icon class="opt" {...iconLoading} />
     {:else}
@@ -126,9 +127,9 @@
           <span class="null">NULL</span>
         {/if}
       </RichText>
-    </span>
-    <span slot="description">
-      {$_('disallow_null_values_help')}
+      <Help>
+        {$_('disallow_null_values_help')}
+      </Help>
     </span>
     {#if isRequestingToggleAllowNull}
       <Icon class="opt" {...iconLoading} />
