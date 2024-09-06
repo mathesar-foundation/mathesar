@@ -2273,6 +2273,32 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_is_pkey_col_tests() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE simple_pkey (col1 text, col2 text PRIMARY KEY, col3 integer);
+  CREATE TABLE multi_pkey (col1 text, col2 text, col3 integer);
+  ALTER TABLE multi_pkey ADD PRIMARY KEY (col1, col2);
+  CREATE TABLE no_pkey (col1 text, col2 text, col3 integer);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_is_pkey_col() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_is_pkey_col_tests();
+  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 1), false);
+  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 2), true);
+  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 3), false);
+  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 1), true);
+  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 2), true);
+  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 3), false);
+  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 1), false);
+  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 2), false);
+  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 3), false);
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_create_role() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.create_role('testuser', 'mypass1234', true);

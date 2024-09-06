@@ -408,10 +408,11 @@ Args:
   rel_id:  The OID of the relation.
   col_id:  The attnum of the column in the relation.
 */
-BEGIN
-  RETURN ARRAY[col_id::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id and contype='p';
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+SELECT EXISTS (
+  SELECT 1 FROM pg_constraint WHERE
+    ARRAY[col_id::smallint] <@ conkey AND conrelid=rel_id AND contype='p'
+);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
