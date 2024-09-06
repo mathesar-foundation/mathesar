@@ -3899,9 +3899,10 @@ DECLARE
   move_con_defs CONSTANT jsonb := msar.get_extracted_con_def_jsonb(source_tab_id, move_col_ids);
   added_col_ids smallint[];
 BEGIN
-  -- TODO test to make sure no multi-col fkeys reference the moved columns
-  -- TODO just throw error if _any_ multicol constraint references the moved columns.
-  -- TODO check behavior if one of the moving columns is referenced by another table (should raise)
+  -- TODO Add a custom validator that throws pretty errors in these scenario:
+    -- test to make sure no multi-col fkeys reference the moved columns
+    -- just throw error if _any_ multicol constraint references the moved columns.
+    -- check behavior if one of the moving columns is referenced by another table (should raise)
   SELECT conkey, confkey INTO source_join_col_id, target_join_col_id
     FROM msar.get_fkey_map_table(source_tab_id)
     WHERE target_oid = target_tab_id;

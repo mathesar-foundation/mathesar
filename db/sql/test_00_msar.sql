@@ -5087,8 +5087,121 @@ BEGIN
       (5, NULL, 'Abu''l-Fazl', NULL, 5, 1),
       (6, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/', 5, 2),
       (7, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/',NULL,1),
-      (8, 'Daniel', 'Abraham', 'https://www.danielabraham.com/', 5, 2);
+      (8, 'Daniel', 'Abraham', 'https://www.danielabraham.com/', 5, 2),
+      (9, 'Daniel', 'Abraham', 'https://www.danielabraham.com/', 5, NULL),
+      (10, NULL, 'Abu''l-Fazl', NULL, 10, 1);
     $w$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_move_columns_multicol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE target_table(
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  x text,
+  y integer
+);
+CREATE TABLE source_table(
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  c1 integer,
+  c2 integer,
+  c3 integer,
+  c4 integer REFERENCES target_table(id),
+  UNIQUE (c1, c2)
+);
+CREATE TABLE t1 (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  a integer,
+  b integer,
+  c integer,
+  FOREIGN KEY (b, c) REFERENCES source_table (c1, c2)
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_not_referenced_by_multicol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns_multicol_fk();
+  PERFORM msar.move_columns_to_referenced_table(
+    'source_table'::regclass, 'target_table'::regclass, ARRAY[4]::smallint[]
+  );
+  RETURN NEXT columns_are(
+    'source_table',
+    ARRAY['id', 'c1', 'c2', 'c4']
+  );
+  RETURN NEXT columns_are(
+    'target_table',
+    ARRAY['id', 'x', 'y', 'c3']
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_referenced_by_multicol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns_multicol_fk();
+  RETURN NEXT throws_ok(
+    $w$SELECT msar.move_columns_to_referenced_table(
+      'source_table'::regclass, 'target_table'::regclass, ARRAY[2, 3, 4]::smallint[]
+    );$w$,
+    '2BP01',
+    'cannot drop column c1 of table source_table because other objects depend on it'
+  );
+  RETURN NEXT columns_are(
+    'source_table',
+    ARRAY['id', 'c1', 'c2', 'c3', 'c4']
+  );
+  RETURN NEXT columns_are(
+    'target_table',
+    ARRAY['id', 'x', 'y']
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_move_columns_singlecol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE target_table(
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  x text,
+  y integer
+);
+CREATE TABLE source_table(
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  c1 integer,
+  c2 integer REFERENCES target_table(id),
+  UNIQUE (c1)
+);
+CREATE TABLE t1 (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  a integer,
+  b integer,
+  FOREIGN KEY (b) REFERENCES source_table (c1)
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_referenced_by_singlecol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns_singlecol_fk();
+  RETURN NEXT throws_ok(
+    $w$SELECT msar.move_columns_to_referenced_table(
+      'source_table'::regclass, 'target_table'::regclass, ARRAY[2]::smallint[]
+    );$w$,
+    '2BP01',
+    'cannot drop column c1 of table source_table because other objects depend on it'
+  );
+  RETURN NEXT columns_are(
+    'source_table',
+    ARRAY['id', 'c1', 'c2']
+  );
+  RETURN NEXT columns_are(
+    'target_table',
+    ARRAY['id', 'x', 'y']
   );
 END;
 $$ LANGUAGE plpgsql;
