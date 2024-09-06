@@ -140,13 +140,16 @@ class RecordList(TypedDict):
         count: The total number of records in the table.
         results: An array of record objects.
         grouping: Information for displaying grouped records.
-        preview_data: Information for previewing foreign key values,
-            provides a map of foreign key to a text summary.
+        linked_record_smmaries: Information for previewing foreign key
+            values, provides a map of foreign key to a text summary.
+        record_summaries: Information for previewing returned records.
     """
     count: int
     results: list[dict]
     grouping: GroupingResponse
-    preview_data: dict[str, dict[str, str]]
+    linked_record_summaries: dict[str, dict[str, str]]
+    record_summaries: dict[str, str]
+    query: str
 
     @classmethod
     def from_dict(cls, d):
@@ -154,7 +157,8 @@ class RecordList(TypedDict):
             count=d["count"],
             results=d["results"],
             grouping=d.get("grouping"),
-            preview_data=d.get("preview_data"),
+            linked_record_summaries=d.get("linked_record_summaries"),
+            record_summaries=d.get("record_summaries"),
             query=d["query"],
         )
 
@@ -170,17 +174,20 @@ class RecordAdded(TypedDict):
 
     Attributes:
         results: An array of a single record objects (the one added).
-        preview_data: Information for previewing foreign key values,
-            provides a map of foreign key to a text summary.
+        linked_record_summaries: Information for previewing foreign key
+            values, provides a map of foreign key to a text summary.
+        record_summaries: Information for previewing an added record.
     """
     results: list[dict]
-    preview_data: dict[str, dict[str, str]]
+    linked_record_summaries: dict[str, dict[str, str]]
+    record_summaries: dict[str, str]
 
     @classmethod
     def from_dict(cls, d):
         return cls(
             results=d["results"],
-            preview_data=d.get("preview_data"),
+            linked_record_summaries=d.get("linked_record_summaries"),
+            record_summaries=d.get("record_summaries"),
         )
 
 
@@ -196,6 +203,7 @@ def list_(
         order: list[OrderBy] = None,
         filter: Filter = None,
         grouping: Grouping = None,
+        return_record_summaries: bool = False,
         **kwargs
 ) -> RecordList:
     """
@@ -206,10 +214,12 @@ def list_(
         database_id: The Django id of the database containing the table.
         limit: The maximum number of rows we'll return.
         offset: The number of rows to skip before returning records from
-                 following rows.
+            following rows.
         order: An array of ordering definition objects.
         filter: An array of filter definition objects.
         grouping: An array of group definition objects.
+        return_record_summaries: Whether to return summaries of retrieved
+            records.
 
     Returns:
         The requested records, along with some metadata.
@@ -224,6 +234,7 @@ def list_(
             order=order,
             filter=filter,
             group=grouping,
+            return_record_summaries=return_record_summaries,
         )
     return RecordList.from_dict(record_info)
 
@@ -236,6 +247,7 @@ def get(
         record_id: Any,
         table_oid: int,
         database_id: int,
+        return_record_summaries: bool = False,
         **kwargs
 ) -> RecordList:
     """
@@ -245,6 +257,8 @@ def get(
         record_id: The primary key value of the record to be gotten.
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
+        return_record_summaries: Whether to return summaries of the
+            retrieved record.
 
     Returns:
         The requested record, along with some metadata.
@@ -255,6 +269,7 @@ def get(
             conn,
             record_id,
             table_oid,
+            return_record_summaries=return_record_summaries
         )
     return RecordList.from_dict(record_info)
 
@@ -267,6 +282,7 @@ def add(
         record_def: dict,
         table_oid: int,
         database_id: int,
+        return_record_summaries: bool = False,
         **kwargs
 ) -> RecordAdded:
     """
@@ -283,6 +299,8 @@ def add(
         record_def: An object representing the record to be added.
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
+        return_record_summaries: Whether to return summaries of the added
+            record.
 
     Returns:
         The created record, along with some metadata.
@@ -293,6 +311,7 @@ def add(
             conn,
             record_def,
             table_oid,
+            return_record_summaries=return_record_summaries,
         )
     return RecordAdded.from_dict(record_info)
 
@@ -306,21 +325,25 @@ def patch(
         record_id: Any,
         table_oid: int,
         database_id: int,
+        return_record_summaries: bool = False,
         **kwargs
 ) -> RecordAdded:
     """
     Modify a record in a table.
 
-    The form of the `record_def` is determined by the underlying table.  Keys
-    should be attnums, and values should be the desired value for that column in
-    the modified record. Explicit `null` values will set null for that value
-    (with obvious exceptions where that would violate some constraint).
+    The form of the `record_def` is determined by the underlying table.
+    Keys should be attnums, and values should be the desired value for
+    that column in the modified record. Explicit `null` values will set
+    null for that value (with obvious exceptions where that would violate
+    some constraint).
 
     Args:
         record_def: An object representing the record to be added.
         record_id: The primary key value of the record to modify.
         table_oid: Identity of the table in the user's database.
         database_id: The Django id of the database containing the table.
+        return_record_summaries: Whether to return summaries of the
+            modified record.
 
     Returns:
         The modified record, along with some metadata.
@@ -332,6 +355,7 @@ def patch(
             record_def,
             record_id,
             table_oid,
+            return_record_summaries=return_record_summaries,
         )
     return RecordAdded.from_dict(record_info)
 
@@ -376,6 +400,7 @@ def search(
         database_id: int,
         search_params: list[SearchParam] = [],
         limit: int = 10,
+        return_record_summaries: bool = False,
         **kwargs
 ) -> RecordList:
     """
@@ -405,5 +430,6 @@ def search(
             table_oid,
             search=search_params,
             limit=limit,
+            return_record_summaries=return_record_summaries,
         )
     return RecordList.from_dict(record_info)
