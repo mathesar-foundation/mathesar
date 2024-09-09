@@ -63,10 +63,9 @@
   namePlaceholder='Eg. Personal Finances, Movies'
 >
   <svelte:fragment slot="helpText">
-    
     {#if !schema}
       <span class="description">
-        Use schemas to organize related tables into logical groups within your database.
+        {$_('schema_description')}
       </span>
     {/if}
   </svelte:fragment>

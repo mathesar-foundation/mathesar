@@ -289,7 +289,6 @@
             <Field
               field={mappingTableName}
               label={'Name of New Table'}
-              layout="stacked"
             >
               <span slot="help">
                 The table that will store the many-to-many relationship between records of this table.
@@ -300,7 +299,6 @@
               <Field
                 field={columnNameMappingToBase}
                 label={$_('Name of New Column {number}', { values: { number: 1 } })}
-                layout="stacked"
               >
                 <span slot="help">
                   The column in <Pill table={{ name: $mappingTableName }} which="mapping" /> that will link to <Pill table={base} which="base" />.
@@ -309,7 +307,6 @@
               <Field
                 field={columnNameMappingToTarget}
                 label={$_('Name of New Column {number}', { values: { number: 2 } })}
-                layout="stacked"
               >
                 <span slot="help">
                   The column in <Pill table={{ name: $mappingTableName }} which="mapping" /> that will link to <Pill table={target} which="target" />.
@@ -336,7 +333,6 @@
             <Field
               field={mappingTableName}
               label={'Name of New Table'}
-              layout="stacked"
             >
               <span slot="help">
                 The table that will store the many-to-many relationship between records of the two tables.
@@ -393,5 +389,14 @@
   }
   .description {
     margin-bottom: 1rem;
+  }
+  :global(.form .outcome-box .labeled-input.layout-inline .label-content) {
+    align-items: flex-start;
+  }
+  :global(.form .outcome-box .label) {
+    width: 12rem;
+  }
+  :global(.form .outcome-box .label-content .input) {
+    flex-grow: 1; 
   }
 </style>

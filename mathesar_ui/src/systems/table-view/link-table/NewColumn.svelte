@@ -41,7 +41,7 @@
   {label}
   <Spinner />
 {:else}
-  <Field {field} {label} layout="stacked" >
+  <Field {field} {label}>
     <span slot="help">
       The column in <Pill table={base} which={baseWhich} /> that will link to the <Pill table={target} which={targetWhich} /> table.
     </span>

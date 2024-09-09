@@ -16,6 +16,7 @@
   font-weight: inherit;
   position: relative;
   padding: var(--input-padding);
+  box-sizing: border-box;
 
   > * + * {
     margin-left: 0.25em;

@@ -201,7 +201,7 @@
 <style lang="scss">
   .add-new-fk-constraint {
     display: flex;
-    flex-direction: column;
+    flex-direction: column;   
 
     > :global(* + *) {
       margin-top: 1rem;

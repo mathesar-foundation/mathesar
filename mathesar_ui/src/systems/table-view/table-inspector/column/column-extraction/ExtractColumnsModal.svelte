@@ -269,7 +269,6 @@
       field={linkedTable}
       input={{ component: SelectLinkedTable, props: { linkedTables } }}
       label={$_('linked_table')}
-      layout="stacked"
     />
   {/if}
 
@@ -319,7 +318,7 @@
       </p>
       {#if $targetType === 'newTable'}
         
-        <Field layout="stacked" field={newFkColumnName} label='Name of Link Column'>
+        <Field field={newFkColumnName} label='Name of Link Column'>
           <span slot="help">
             <RichText text={$_('new_column_added_to_table')} let:slotName>
               {#if slotName === 'tableName'}
@@ -340,3 +339,12 @@
     onCancel={() => controller.close()}
   />
 </ControlledModal>
+
+<style>
+  :global(.outcome-box .labeled-input.layout-inline .label-content) {
+    align-items: flex-start;
+  }
+  :global(.outcome-box .label-content .input) {
+    flex-grow: 1; 
+  }
+</style>

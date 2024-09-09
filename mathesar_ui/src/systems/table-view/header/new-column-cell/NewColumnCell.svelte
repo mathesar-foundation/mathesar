@@ -53,7 +53,6 @@
       field={columnType}
       input={{ component: ColumnTypeSelector }}
       label={$_('select_type')}
-      layout="stacked"
     />
     <div class="submit">
       <FormSubmit

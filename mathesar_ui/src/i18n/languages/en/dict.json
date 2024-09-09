@@ -290,6 +290,7 @@
   "learn_implications_deleting_mathesar_schemas": "Learn more about the implications of deleting Mathesar schemas.",
   "link_copied": "Link copied",
   "link_successfully_regenerated": "The link has been successfully regenerated",
+  "link_table_description": "Use links to connect related tables in your database, automatically setting up the necessary foreign key columns.",
   "link_table_to": "Create link between [tablePill] and",
   "linked_from_base_table": "Linked from Base Table",
   "linked_record_summary": "Linked Record Summary",
@@ -501,7 +502,6 @@
   "select_columns_cells_view_properties": "Select one or more columns or cells to view the associated column properties and actions.",
   "select_columns_extract": "Select the columns you want to extract",
   "select_columns_extract_into_table": "Select the columns you want to extract into [targetTableName]",
-  "select_columns_for_exploration_help": "Select the columns that will be used for the exploration. Columns are limited to those from the base table and its linked tables.",
   "select_columns_move": "Select the columns you want to move",
   "select_columns_move_into_table": "Select the columns you want to move into [targetTableName]",
   "select_columns_to_hide": "Select Columns to Hide",
@@ -640,5 +640,6 @@
   "window_remains_open_mathesar_unusable": "This window will remain open but all features within Mathesar will be unusable.",
   "yes": "Yes",
   "yes_summarize_as_list": "Yes, summarize as a list",
-  "yesterday": "Yesterday"
+  "yesterday": "Yesterday",
+  "schema_description": "Use schemas to organize related tables into logical groups within your database."
 }

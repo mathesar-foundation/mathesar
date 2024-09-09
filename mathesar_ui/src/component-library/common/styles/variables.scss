@@ -90,5 +90,5 @@
   --border-radius-l: 0.571rem; //8px
   --border-radius-xl: 1.142rem; //16px
 
-  --input-padding: 0.5em;
+  --input-padding: var(--size-ultra-small);
 }
