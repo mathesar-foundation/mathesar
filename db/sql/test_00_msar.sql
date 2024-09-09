@@ -3087,7 +3087,8 @@ BEGIN
         {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -3113,7 +3114,8 @@ BEGIN
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -3139,7 +3141,8 @@ BEGIN
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -3171,7 +3174,8 @@ BEGIN
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -3197,7 +3201,8 @@ BEGIN
         {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -3275,7 +3280,8 @@ BEGIN
           }
         ]
       },
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3312,7 +3318,8 @@ BEGIN
           }
         ]
       },
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3345,7 +3352,8 @@ BEGIN
           {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}, "result_indices": [1, 2]}
         ]
       },
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3379,7 +3387,8 @@ BEGIN
           {"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}, "result_indices": [0, 1, 2, 3, 4]}
         ]
       },
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3891,7 +3900,8 @@ BEGIN
         {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -3907,7 +3917,8 @@ BEGIN
       "count": 0,
       "results": [],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -4091,7 +4102,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4111,7 +4123,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4131,7 +4144,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4151,7 +4165,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4171,7 +4186,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4188,7 +4204,8 @@ BEGIN
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
     $p${
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$p$
   );
 END;
@@ -4205,7 +4222,8 @@ BEGIN
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
     $p${
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$p$
   );
 END;
@@ -4283,7 +4301,8 @@ BEGIN
       offset_ => null,
       order_ => null,
       filter_ => null,
-      group_ => null
+      group_ => null,
+      return_record_summaries => true
     ),
     $j${
       "count": 6,
@@ -4296,7 +4315,7 @@ BEGIN
         {"1": 6, "2": 1.234, "3": 3, "4": "Kelly Kellison", "5": 80, "6": "kkellison@example.edu"}
       ],
       "grouping": null,
-      "preview_data": {
+      "linked_record_summaries": {
         "2": {
           "1.234": "Alice Alison",
           "2.345": "Bob Bobinson"
@@ -4306,6 +4325,14 @@ BEGIN
           "2": "Dave Davidson",
           "3": "Eve Evilson"
         }
+      },
+      "record_summaries":  {
+        "1": "Fred Fredrickson",
+        "2": "Gabby Gabberson",
+        "3": "Hank Hankson",
+        "4": "Ida Idalia",
+        "5": "James Jameson",
+        "6": "Kelly Kellison"
       }
     }$j$ || jsonb_build_object(
       'query', concat(
@@ -4333,7 +4360,7 @@ BEGIN
         {"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"}
       ],
       "grouping": null,
-      "preview_data": {
+      "linked_record_summaries": {
         "2": {
           "1.234": "Alice Alison",
           "2.345": "Bob Bobinson"
@@ -4342,7 +4369,8 @@ BEGIN
           "1": "Carol Carlson",
           "2": "Dave Davidson"
         }
-      }
+      },
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
@@ -4372,7 +4400,7 @@ BEGIN
         "preproc": null,
         "groups": [{"id": 1, "count": 3, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
       },
-      "preview_data": {
+      "linked_record_summaries": {
         "2": {
           "1.234": "Alice Alison"
         },
@@ -4380,7 +4408,8 @@ BEGIN
           "1": "Carol Carlson",
           "2": "Dave Davidson"
         }
-      }
+      },
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
@@ -4400,16 +4429,18 @@ BEGIN
   RETURN NEXT is(
     msar.add_record_to_table(
       '"Students"'::regclass::oid,
-      '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}'
+      '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}',
+      true
     ),
     $a${
       "results": [
         {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
       ],
-      "preview_data": {
+      "linked_record_summaries": {
         "2": {"2.345": "Bob Bobinson"},
         "3": {"1": "Carol Carlson"}
-      }
+      },
+      "record_summaries": {"7": "Larry Laurelson"}
     }$a$
   );
 END;
@@ -4429,10 +4460,11 @@ BEGIN
       "results": [
         {"1": 2, "2": 2.345, "3": 2, "4": "Gabby Gabberson", "5": 85, "6": "ggabberson@example.edu"}
       ],
-      "preview_data": {
+      "linked_record_summaries": {
         "2": {"2.345": "Bob Bobinson"},
         "3": {"2": "Dave Davidson"}
-      }
+      },
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4447,7 +4479,7 @@ BEGIN
       '"Students"'::regclass::oid,
       '[{"attnum": 4, "literal": "k"}]',
       2
-    ) -> 'preview_data',
+    ) -> 'linked_record_summaries',
     $a${
       "2": {"1.234": "Alice Alison", "2.345": "Bob Bobinson"},
       "3": {"3": "Eve Evilson"}
