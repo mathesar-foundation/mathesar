@@ -128,6 +128,11 @@ METHODS = [
         "data_modeling.suggest_types",
         [user_is_authenticated]
     ),
+    (
+        data_modeling.split_table,
+        "data_modeling.split_table",
+        [user_is_authenticated]
+    ),
 
     (
         databases.get,

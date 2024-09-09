@@ -217,7 +217,6 @@ To use an RPC function:
       - Filter
       - FilterAttnum
       - FilterLiteral
-      - PreviewEntry
       - Grouping
       - Group
       - GroupingResponse
@@ -277,6 +276,7 @@ To use an RPC function:
       - add_foreign_key_column
       - add_mapping_table
       - suggest_types
+      - split_table
       - MappingColumn
 
 ## Responses
