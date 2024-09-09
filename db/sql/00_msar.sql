@@ -781,6 +781,30 @@ SELECT EXISTS (
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_fkey_map_table(tab_id oid)
+  RETURNS TABLE (target_oid oid, conkey smallint, confkey smallint)
+AS $$/*
+Generate a table mapping foreign key values from refererrer to referant tables.
+
+Given an input table (identified by OID), we return a table with each row representing a foreign key
+constraint on that table. We return only single-column foreign keys, and only one per foreign key
+column.
+
+Args:
+  tab_id: The OID of the table containing the foreign key columns to map.
+*/
+SELECT DISTINCT ON (conkey) pgc.confrelid AS target_oid, x.conkey AS conkey, y.confkey AS confkey
+FROM pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
+WHERE
+  pgc.conrelid = tab_id
+  AND pgc.contype='f'
+  AND cardinality(pgc.confkey) = 1
+  AND has_column_privilege(tab_id, x.conkey, 'SELECT')
+  AND has_column_privilege(pgc.confrelid, y.confkey, 'SELECT')
+ORDER BY conkey, target_oid, confkey;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.list_column_privileges_for_current_role(tab_id regclass, attnum smallint) RETURNS jsonb AS $$/*
 Return a JSONB array of all privileges current_user holds on the passed table.
@@ -2690,7 +2714,7 @@ SELECT jsonb_agg(
     'columns', ARRAY[attname],
     'deferrable', condeferrable,
     'fkey_relation_id', confrelid::bigint,
-    'fkey_columns', confkey,
+    'fkey_columns', coalesce(confkey, ARRAY[]::smallint[]),
     'fkey_update_action', confupdtype,
     'fkey_delete_action', confdeltype,
     'fkey_match_type', confmatchtype
@@ -2856,8 +2880,8 @@ DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
 msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
-  RETURNS oid AS $$/*
-Add a table, with a default id column, returning the OID of the created table.
+  RETURNS jsonb AS $$/*
+Add a table, with a default id column, returning the OID & name of the created table.
 
 Args:
   sch_id: The OID of the schema where the table will be created.
@@ -2904,7 +2928,10 @@ BEGIN
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
-  RETURN created_table_id;
+  RETURN jsonb_build_object(
+    'oid', created_table_id::bigint,
+    'name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = created_table_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2922,17 +2949,18 @@ msar.prepare_table_for_import(
   comment_ text
 ) RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning a JSON object containing
-a properly formatted SQL statement to carry out `COPY FROM` and also contains table_oid of the created table.
+a properly formatted SQL statement to carry out `COPY FROM`, table_oid & table_name of the created table.
 
 Each returned JSON object will have the form:
   {
     "copy_sql": <str>,
-    "table_oid": <int>
+    "table_oid": <int>,
+    "table_name": <str>
   }
 
 Args:
   sch_id: The OID of the schema where the table will be created.
-  tab_name: The unquoted name for the new table.
+  tab_name (optional): The unquoted name for the new table.
   col_defs: The columns for the new table, in order.
   header: Whether or not the file contains a header line with the names of each column in the file.
   delimiter: The character that separates columns within each row (line) of the file.
@@ -2950,7 +2978,7 @@ DECLARE
   copy_sql text;
 BEGIN
   -- Create string table
-  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_);
+  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_) ->> 'oid';
   -- Get unquoted schema and table name for the created table
   SELECT nspname, relname INTO sch_name, rel_name
   FROM pg_catalog.pg_class AS pgc
@@ -2974,8 +3002,9 @@ BEGIN
   copy_sql := format('COPY %I.%I (%s) FROM STDIN CSV %s', sch_name, rel_name, col_names_sql, options_sql);
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
-    'table_oid', rel_id
-  );
+    'table_oid', rel_id::bigint,
+    'table_name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3678,7 +3707,7 @@ The elements of the mapping_columns array must have the form
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL);
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL) ->> 'oid';
   PERFORM msar.add_foreign_key_column(column_name, added_table_id, referent_table_oid)
   FROM jsonb_to_recordset(mapping_columns) AS x(column_name text, referent_table_oid oid);
   RETURN added_table_id;
@@ -3726,7 +3755,7 @@ BEGIN
     extracted_col_defs,
     extracted_con_defs,
     format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
-  );
+  ) ->> 'oid';
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
   fkey_attnum := msar.add_foreign_key_column(fkey_name, tab_id, extracted_table_id);
   -- Insert the data from the original table's columns into the extracted columns, and add
@@ -3766,6 +3795,191 @@ BEGIN
   RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- COLUMN MOVING FUNCTIONS
+--
+-- Functions to move columns between linked tables
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+msar.build_all_columns_expr(tab_id regclass) RETURNS text AS $$/*
+*/
+SELECT string_agg(
+  format(
+    '%1$I.%2$I.%3$I AS %3$I',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    attname
+  ), ', '
+)
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_columns_expr(tab_id regclass, col_ids smallint[]) RETURNS text AS $$/*
+*/
+SELECT string_agg(
+  format(
+    '%1$I.%2$I.%3$I AS %3$I',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    attname
+  ), ', '
+)
+FROM pg_catalog.pg_attribute JOIN unnest(col_ids) x(a) ON attnum = x.a
+WHERE
+  attrelid = tab_id;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unqualified_columns_expr(tab_id regclass, col_ids smallint[]) RETURNS text AS $$/*
+*/
+SELECT string_agg(format('%I', attname), ', ')
+FROM pg_catalog.pg_attribute JOIN unnest(col_ids) x(a) ON attnum = x.a
+WHERE
+  attrelid = tab_id;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_other_column_ids(tab_id regclass, col_ids smallint[]) RETURNS smallint[] AS $$
+SELECT array_agg(attnum)
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND attnum <> all(col_ids);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_source_update_move_cols_equal_expr(
+  source_tab_id regclass,
+  move_col_ids smallint[],
+  cte_name text
+) RETURNS text AS $$
+SELECT string_agg(
+  format(
+    -- TODO should be IS NOT DISTINCT FROM
+    '%1$I.%2$I.%3$I = %4$I.%3$I',
+    msar.get_relation_schema_name(source_tab_id),
+    msar.get_relation_name(source_tab_id),
+    attname,
+    cte_name
+  ), ' AND '
+)
+FROM pg_catalog.pg_attribute JOIN unnest(move_col_ids) x(a) ON attnum = x.a
+WHERE
+  attrelid = source_tab_id;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_source_update_cte_join_condition_expr(
+  target_tab_id regclass,
+  target_join_col_id smallint,
+  added_col_ids smallint[],
+  update_target_cte_name text,
+  insert_cte_name text
+) RETURNS text AS $$
+SELECT 'ON ' || string_agg(
+  format(
+    '%1$I.%3$I IS NOT DISTINCT FROM %2$I.%3$I',
+    update_target_cte_name,
+    insert_cte_name,
+    attname
+  ), ' AND '
+)
+FROM
+  pg_catalog.pg_attribute
+  JOIN unnest(msar.get_other_column_ids(target_tab_id, added_col_ids || target_join_col_id)) x(a)
+  ON attnum = x.a
+WHERE
+  attrelid = target_tab_id;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.move_columns_to_referenced_table(
+  source_tab_id regclass,
+  target_tab_id regclass,
+  move_col_ids smallint[]
+) RETURNS void AS $$
+DECLARE
+  source_join_col_id smallint;
+  target_join_col_id smallint;
+  preexisting_col_expr CONSTANT text := msar.build_all_columns_expr(target_tab_id);
+  move_col_expr CONSTANT text := msar.build_columns_expr(source_tab_id, move_col_ids);
+  move_col_defs CONSTANT jsonb := msar.get_extracted_col_def_jsonb(source_tab_id, move_col_ids);
+  move_con_defs CONSTANT jsonb := msar.get_extracted_con_def_jsonb(source_tab_id, move_col_ids);
+  added_col_ids smallint[];
+BEGIN
+  -- TODO Add a custom validator that throws pretty errors in these scenario:
+    -- test to make sure no multi-col fkeys reference the moved columns
+    -- just throw error if _any_ multicol constraint references the moved columns.
+    -- check behavior if one of the moving columns is referenced by another table (should raise)
+  SELECT conkey, confkey INTO source_join_col_id, target_join_col_id
+    FROM msar.get_fkey_map_table(source_tab_id)
+    WHERE target_oid = target_tab_id;
+  IF move_col_ids @> ARRAY[source_join_col_id] THEN
+    RAISE EXCEPTION 'The joining column cannot be moved.';
+  END IF;
+  added_col_ids := msar.add_columns(target_tab_id, move_col_defs, true);
+  EXECUTE format(
+    $q$WITH merged_cte AS (
+      SELECT DISTINCT %1$s, %2$s
+      FROM %3$I.%4$I JOIN %6$I.%7$I ON %3$I.%4$I.%5$I = %6$I.%7$I.%8$I
+    ), row_numbered_cte AS (
+      SELECT *, row_number() OVER (PARTITION BY %8$I ORDER BY %9$s) AS __msar_row_number
+      FROM merged_cte
+    ), update_target_cte AS (
+      UPDATE %6$I.%7$I SET (%9$s) = (
+        SELECT %9$s
+        FROM row_numbered_cte
+        WHERE row_numbered_cte.%8$I=%6$I.%7$I.%8$I
+        AND __msar_row_number = 1
+      )
+      RETURNING *
+    ), insert_cte AS (
+      INSERT INTO %6$I.%7$I (%10$s)
+      SELECT %10$s FROM row_numbered_cte
+      WHERE __msar_row_number <> 1
+      RETURNING *
+    )
+    UPDATE %3$I.%4$I SET %5$I = insert_cte.%8$I
+    FROM update_target_cte JOIN insert_cte %11$s
+    WHERE %3$I.%4$I.%5$I = update_target_cte.%8$I AND %12$s
+    $q$,
+    preexisting_col_expr,
+    move_col_expr,
+    msar.get_relation_schema_name(source_tab_id),
+    msar.get_relation_name(source_tab_id),
+    msar.get_column_name(source_tab_id, source_join_col_id),
+    msar.get_relation_schema_name(target_tab_id),
+    msar.get_relation_name(target_tab_id),
+    msar.get_column_name(target_tab_id, target_join_col_id),
+    msar.build_unqualified_columns_expr(source_tab_id, move_col_ids),
+    msar.build_unqualified_columns_expr(
+      target_tab_id, msar.get_other_column_ids(target_tab_id, ARRAY[target_join_col_id])
+    ),
+    msar.build_source_update_cte_join_condition_expr(
+      target_tab_id, target_join_col_id, added_col_ids, 'update_target_cte', 'insert_cte'
+    ),
+    msar.build_source_update_move_cols_equal_expr(source_tab_id, move_col_ids, 'insert_cte')
+  );
+  PERFORM msar.add_constraints(target_tab_id, move_con_defs);
+  PERFORM msar.drop_columns(source_tab_id, variadic move_col_ids);
+END;
+$$ LANGUAGE plpgsql;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -4170,30 +4384,6 @@ LIMIT 1;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_fkey_map_cte(tab_id oid)
-  RETURNS TABLE (target_oid oid, conkey smallint, confkey smallint)
-AS $$/*
-Generate a table mapping foreign key values from refererrer to referant tables.
-
-Given an input table (identified by OID), we return a table with each row representing a foreign key
-constraint on that table. We return only single-column foreign keys, and only one per foreign key
-column.
-
-Args:
-  tab_id: The OID of the table containing the foreign key columns to map.
-*/
-SELECT DISTINCT ON (conkey) pgc.confrelid AS target_oid, x.conkey AS conkey, y.confkey AS confkey
-FROM pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
-WHERE
-  pgc.conrelid = tab_id
-  AND pgc.contype='f'
-  AND cardinality(pgc.confkey) = 1
-  AND has_column_privilege(tab_id, x.conkey, 'SELECT')
-  AND has_column_privilege(pgc.confrelid, y.confkey, 'SELECT')
-ORDER BY conkey, target_oid, confkey;
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.build_summary_expr(tab_id oid) RETURNS TEXT AS $$/*
 Given a table, return an SQL expression that will build a summary for each row of the table.
 
@@ -4215,7 +4405,7 @@ This summary amounts to just the first string-like column value for that linked 
 Args:
   tab_id: The table for whose fkey values' linked records we'll get summaries.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT ', '
   || NULLIF(
     concat_ws(', ',
@@ -4257,7 +4447,7 @@ Args:
   tab_oid: The table defining the columns of the main CTE.
   cte_name: The name of the main CTE we'll join the summary CTEs to.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT concat(
   format(E'\nLEFT JOIN summary_cte_self ON %1$I.', cte_name)
   || quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text)
@@ -4282,7 +4472,7 @@ Build a JSON object with the results of summarizing linked records.
 Args:
   tab_oid: The OID of the table for which we're getting linked record summaries.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
