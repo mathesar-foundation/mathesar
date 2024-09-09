@@ -2862,8 +2862,8 @@ DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
 msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
-  RETURNS oid AS $$/*
-Add a table, with a default id column, returning the OID of the created table.
+  RETURNS jsonb AS $$/*
+Add a table, with a default id column, returning the OID & name of the created table.
 
 Args:
   sch_id: The OID of the schema where the table will be created.
@@ -2910,7 +2910,10 @@ BEGIN
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
-  RETURN created_table_id;
+  RETURN jsonb_build_object(
+    'oid', created_table_id::bigint,
+    'name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = created_table_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2928,17 +2931,18 @@ msar.prepare_table_for_import(
   comment_ text
 ) RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning a JSON object containing
-a properly formatted SQL statement to carry out `COPY FROM` and also contains table_oid of the created table.
+a properly formatted SQL statement to carry out `COPY FROM`, table_oid & table_name of the created table.
 
 Each returned JSON object will have the form:
   {
     "copy_sql": <str>,
-    "table_oid": <int>
+    "table_oid": <int>,
+    "table_name": <str>
   }
 
 Args:
   sch_id: The OID of the schema where the table will be created.
-  tab_name: The unquoted name for the new table.
+  tab_name (optional): The unquoted name for the new table.
   col_defs: The columns for the new table, in order.
   header: Whether or not the file contains a header line with the names of each column in the file.
   delimiter: The character that separates columns within each row (line) of the file.
@@ -2956,7 +2960,7 @@ DECLARE
   copy_sql text;
 BEGIN
   -- Create string table
-  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_);
+  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_) ->> 'oid';
   -- Get unquoted schema and table name for the created table
   SELECT nspname, relname INTO sch_name, rel_name
   FROM pg_catalog.pg_class AS pgc
@@ -2980,8 +2984,9 @@ BEGIN
   copy_sql := format('COPY %I.%I (%s) FROM STDIN CSV %s', sch_name, rel_name, col_names_sql, options_sql);
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
-    'table_oid', rel_id
-  );
+    'table_oid', rel_id::bigint,
+    'table_name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3684,7 +3689,7 @@ The elements of the mapping_columns array must have the form
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL);
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL) ->> 'oid';
   PERFORM msar.add_foreign_key_column(column_name, added_table_id, referent_table_oid)
   FROM jsonb_to_recordset(mapping_columns) AS x(column_name text, referent_table_oid oid);
   RETURN added_table_id;
@@ -3732,7 +3737,7 @@ BEGIN
     extracted_col_defs,
     extracted_con_defs,
     format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
-  );
+  ) ->> 'oid';
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
   fkey_attnum := msar.add_foreign_key_column(fkey_name, tab_id, extracted_table_id);
   -- Insert the data from the original table's columns into the extracted columns, and add
