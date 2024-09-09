@@ -30,13 +30,14 @@
 
 <style lang="scss">
   .link-item-container {
-    border: 1px solid var(--slate-300);
+    border-left: 4px solid var(--yellow-300);
     background-color: var(--white);
     padding: 0.5rem;
     border-radius: var(--border-radius-m);
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 
     &:hover {
       background: var(--slate-100);
@@ -48,6 +49,7 @@
 
     .sub-text {
       font-size: var(--text-size-small);
+      color: var(--color-text-muted);
     }
   }
 </style>

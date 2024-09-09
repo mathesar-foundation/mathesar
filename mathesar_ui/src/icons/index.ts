@@ -183,8 +183,8 @@ export const iconCurrentlyInstalledVersion: IconProps = { data: faCheck };
 export const iconUser: IconProps = { data: faUser };
 export const iconMultipleUsers: IconProps = { data: faUsers };
 export const iconAdminUser: IconProps = { data: faUserGear };
-export const iconLinksInThisTable: IconProps = { data: faCircleArrowRight };
-export const iconLinksFromOtherTables: IconProps = { data: faCircleArrowLeft };
+export const iconLinksInThisTable: IconProps = { data: faArrowRight };
+export const iconLinksFromOtherTables: IconProps = { data: faArrowLeft };
 export const iconForwardSeparator: IconProps = { data: faSlash };
 export const iconUrl: IconProps = { data: faLink };
 
