@@ -15,7 +15,7 @@
       .collapsible-header-title {
         flex-grow: 1;
         overflow: hidden;
-        font-weight: 600;
+        font-weight: var(--Collapsible_header-font-weight, 600);
       }
       svg {
         flex-shrink: 0;

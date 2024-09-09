@@ -1,5 +1,4 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
-import { ImmutableSet } from '@mathesar-component-library';
 
 import type { RawConfiguredRole, RawRole } from './roles';
 import type { RawServer } from './servers';
@@ -10,8 +9,12 @@ export interface RawDatabase {
   server_id: RawServer['id'];
 }
 
-export const databasePrivileges = ['CREATE', 'CONNECT', 'TEMPORARY'] as const;
-export type DatabasePrivilege = (typeof databasePrivileges)[number];
+export const allDatabasePrivileges = [
+  'CREATE',
+  'CONNECT',
+  'TEMPORARY',
+] as const;
+export type DatabasePrivilege = (typeof allDatabasePrivileges)[number];
 
 export interface RawUnderlyingDatabase {
   oid: number;

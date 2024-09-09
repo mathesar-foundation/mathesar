@@ -1,7 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { RawDatabasePrivilegesForRole } from '@mathesar/api/rpc/databases';
+  import {
+    type DatabasePrivilege,
+    allDatabasePrivileges,
+  } from '@mathesar/api/rpc/databases';
   import Errors from '@mathesar/components/Errors.svelte';
   import {
     FormSubmit,
@@ -10,6 +13,7 @@
   } from '@mathesar/components/form';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Database } from '@mathesar/models/Database';
+  import type { Role } from '@mathesar/models/Role';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import {
     ImmutableMap,
@@ -20,6 +24,11 @@
   } from '@mathesar-component-library';
 
   import DirectPrivilegeRow from './DirectPrivilegeRow.svelte';
+  import {
+    type RoleAccessLevelAndPrivileges,
+    dbAccessLevelConfigs,
+    getDbAccessPrivilegeMap,
+  } from './utils';
 
   export let controller: ModalController;
   export let databasePrivileges: ReturnType<
@@ -49,15 +58,28 @@
     $underlyingDatabase.error,
   ].filter((entry): entry is string => isDefinedNonNullable(entry));
 
-  $: dbPrivilegesMap =
-    $databasePrivileges.resolvedValue ??
-    new ImmutableMap<
-      RawDatabasePrivilegesForRole['role_oid'],
-      RawDatabasePrivilegesForRole
-    >();
-  $: dbPrivilegesLocalMap = new ImmutableMap(dbPrivilegesMap);
-  $: dbPrivileges = requiredField(dbPrivilegesLocalMap);
+  $: dbPrivileges = requiredField(
+    getDbAccessPrivilegeMap(
+      $databasePrivileges.resolvedValue ?? new ImmutableMap(),
+    ),
+  );
   $: form = makeForm({ dbPrivileges });
+  $: dbPrivilegesWithAccess = [...$dbPrivileges.values()].filter((entry) =>
+    isDefinedNonNullable(entry.accessLevel),
+  );
+
+  function setRoleAccessLevelAndPrivileges(
+    roleOid: Role['oid'],
+    accessLevelPrivileges: RoleAccessLevelAndPrivileges<
+      string,
+      DatabasePrivilege
+    >,
+  ) {
+    console.log(accessLevelPrivileges);
+    dbPrivileges.update((dbPrivMap) =>
+      dbPrivMap.with(roleOid, accessLevelPrivileges),
+    );
+  }
 
   function savePermissions() {}
 </script>
@@ -73,11 +95,14 @@
     <div class="section granted-access-section">
       <div class="title">{$_('granted_access')}</div>
       <div class="content">
-        {#each [...dbPrivilegesMap.values()] as dbPrivilegeForRole (dbPrivilegeForRole)}
+        {#each dbPrivilegesWithAccess as roleAccessLevelAndPrivileges (roleAccessLevelAndPrivileges.roleOid)}
           <div class="privilege-row">
             <DirectPrivilegeRow
               rolesMap={$roles.resolvedValue}
-              {dbPrivilegeForRole}
+              privileges={[...allDatabasePrivileges]}
+              accessLevels={dbAccessLevelConfigs}
+              {roleAccessLevelAndPrivileges}
+              {setRoleAccessLevelAndPrivileges}
             />
           </div>
         {/each}

@@ -38,7 +38,7 @@
   <span slot="title">
     {$_('database_permissions')}
   </span>
-  <div>
+  <div class="tabs">
     <TabContainer
       bind:activeTab
       {tabs}
@@ -55,3 +55,9 @@
     </TabContainer>
   </div>
 </ControlledModal>
+
+<style lang="scss">
+  .tabs {
+    --Tab_margin-right: var(--size-small);
+  }
+</style>

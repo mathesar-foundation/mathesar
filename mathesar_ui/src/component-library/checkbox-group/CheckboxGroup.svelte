@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SvelteComponent } from 'svelte';
+  import { type SvelteComponent, createEventDispatcher } from 'svelte';
 
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
   import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
@@ -8,6 +8,10 @@
   import type { ComponentWithProps } from '../types';
 
   type Option = $$Generic;
+
+  const dispatch = createEventDispatcher<{
+    artificialChange: Option[];
+  }>();
 
   export let values: Option[] = [];
   export let isInline = false;
@@ -44,6 +48,7 @@
     } else {
       values = values.filter((value) => !valuesAreEqual(value, option));
     }
+    dispatch('artificialChange', values);
   }
 </script>
 
