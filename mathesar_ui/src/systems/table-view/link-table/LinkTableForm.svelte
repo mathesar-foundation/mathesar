@@ -281,10 +281,13 @@
               {/if}
             </RichText>
           </p>
-          <Field field={mappingTableName} label={'Name of New Table'}>
+          <Field field={mappingTableName} label={$_('Name of New Table')}>
             <span slot="help">
-              The table that will store the many-to-many relationship between
-              records of {isSelfReferential ? 'this table' : 'the two tables'}.
+              {$_('mapping_table_description', {
+                values: {
+                  count: isSelfReferential ? 1 : 2,
+                },
+              })}
             </span>
           </Field>
           {#if $mappingTableName}

@@ -322,6 +322,7 @@
   "many_to_many_self_referential_link_description": "Multiple [baseTable] records can link to each other through a new [mapping]",
   "many_to_one": "Many to One",
   "many_to_one_link_description": "Multiple [baseTable] records can link to the same [targetTable] record.",
+  "mapping_table_description": "The table that will store the many-to-many relationship between records of {count, plural, one {this table} other {the two tables}}.",
   "mathesar": "Mathesar",
   "mathesar_user": "Mathesar User",
   "max_time_unit": "Max Time Unit",
