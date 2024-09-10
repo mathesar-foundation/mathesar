@@ -125,9 +125,9 @@
 <div class="add-new-unique-constraint">
   <Form>
     <FormField>
-      <LabeledInput label="Columns" layout="stacked">
+      <LabeledInput label={$_('columns')} layout="stacked">
         <span slot="help">
-          The columns in this table that should contain unique values.
+          {$_('columns_unique_values_help')}
         </span>
         <MultiSelect
           bind:values={constraintColumns}

@@ -319,7 +319,7 @@
       {#if $targetType === 'newTable'}
         <Field
           field={newFkColumnName}
-          label="Name of Link Column"
+          label={$_('name_of_link_column')}
           layout="stacked"
         >
           <span slot="help">

@@ -29,7 +29,6 @@
   export let getInitialName: () => string = () => '';
   export let getInitialDescription: () => string = () => '';
   export let save: (name: string, description: string) => Promise<void>;
-  //export name and description placeholders
   export let namePlaceholder = $_('name');
   export let descriptionPlaceholder = $_('description');
 

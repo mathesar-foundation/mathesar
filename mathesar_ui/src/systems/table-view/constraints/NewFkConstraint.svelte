@@ -128,7 +128,7 @@
       props: { columns: baseTableColumns },
     }}
     layout="stacked"
-    label="Referencing Column"
+    label={$_('referencing_column')}
   >
     <span slot="help">
       {$_('column_references_target_table')}
