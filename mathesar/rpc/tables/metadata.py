@@ -66,6 +66,16 @@ class TableMetaDataBlob(TypedDict):
     record_summary_customized: Optional[bool]
     record_summary_template: Optional[str]
 
+    @classmethod
+    def from_model(cls, model):
+        return cls(
+            data_file_id=model.data_file.id if model.data_file is not None else None,
+            import_verified=model.import_verified,
+            column_order=model.column_order,
+            record_summary_customized=model.record_summary_customized,
+            record_summary_template=model.record_summary_template,
+        )
+
 
 @rpc_method(name="tables.metadata.list")
 @http_basic_auth_login_required
