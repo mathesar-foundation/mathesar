@@ -641,5 +641,8 @@
   "yes": "Yes",
   "yes_summarize_as_list": "Yes, summarize as a list",
   "yesterday": "Yesterday",
-  "schema_description": "Use schemas to organize related tables into logical groups within your database."
+  "schema_description": "Use schemas to organize related tables into logical groups within your database.",
+  "many_to_many_link_base_help": "The column in [mappingTable] that will link to [baseTable].",
+  "many_to_many_link_target_help": "The column in [mappingTable] that will link to [targetTable].",
+  "new_column_link_help": "The column in [baseTable] that will link to the [targetTable] table."
 }

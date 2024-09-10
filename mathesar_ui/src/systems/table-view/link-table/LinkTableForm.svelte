@@ -220,7 +220,7 @@
 </script>
 
 <div class="description">
-  Use links to connect related tables in your database, automatically setting up the necessary foreign key columns.
+  {$_('link_table_description')}
 </div>
 
 <div class="form" class:self-referential={isSelfReferential}>
@@ -258,20 +258,16 @@
 
     <FieldLayout>
       <OutcomeBox>
-        {#if $linkType === 'oneToMany'}
-        
+        {#if $linkType === 'oneToMany'}  
           <NewColumn
             base={target}
             target={base}
             field={columnNameInTarget}
             {targetColumnsAreLoading}
-
           />
-        {:else if $linkType === 'manyToOne'}
-        
+        {:else if $linkType === 'manyToOne'}  
           <NewColumn {base} {target} field={columnNameInBase} />
         {:else if $linkType === 'manyToMany'}
-          {#if isSelfReferential}
           <p>
             <RichText
               text={'We will create a new table [mappingTable].'}
@@ -286,73 +282,31 @@
               {/if}
             </RichText>
           </p>
-            <Field
-              field={mappingTableName}
-              label={'Name of New Table'}
-            >
-              <span slot="help">
-                The table that will store the many-to-many relationship between records of this table.
-              </span>
-            </Field>
-            {#if $mappingTableName}
-          
-              <Field
-                field={columnNameMappingToBase}
-                label={$_('Name of New Column {number}', { values: { number: 1 } })}
-              >
-                <span slot="help">
-                  The column in <Pill table={{ name: $mappingTableName }} which="mapping" /> that will link to <Pill table={base} which="base" />.
-                </span>
-              </Field>
-              <Field
-                field={columnNameMappingToTarget}
-                label={$_('Name of New Column {number}', { values: { number: 2 } })}
-              >
-                <span slot="help">
-                  The column in <Pill table={{ name: $mappingTableName }} which="mapping" /> that will link to <Pill table={target} which="target" />.
-                </span>
-              </Field>
-            {/if}
-          {:else}
-            {#if $mappingTableName}
-              <p>
-                <RichText
-                  text={'We will create a new table [mappingTable].'}
-                  let:slotName
-                >
-                  {#if slotName === 'mappingTable'}
-                    <Pill table={{ name: $mappingTableName }} which="mapping" />
-                  {:else if slotName === 'targetTable'}
-                    <Pill table={target} which="target" />
-                  {:else if slotName === 'baseTable'}
-                    <Pill table={base} which="base" />
-                  {/if}
-                </RichText>
-              </p>
-            {/if}
-            <Field
-              field={mappingTableName}
-              label={'Name of New Table'}
-            >
-              <span slot="help">
-                The table that will store the many-to-many relationship between records of the two tables.
-              </span>
-            </Field>
-            {#if $mappingTableName}
-              <NewColumn
-                base={{ name: $mappingTableName }}
-                baseWhich="mapping"
-                target={base}
-                targetWhich="base"
-                field={columnNameMappingToBase}
-              />
-              <NewColumn
-                base={{ name: $mappingTableName }}
-                baseWhich="mapping"
-                {target}
-                field={columnNameMappingToTarget}
-              />
-            {/if}
+          <Field
+            field={mappingTableName}
+            label={'Name of New Table'}
+          >
+            <span slot="help">
+              The table that will store the many-to-many relationship between records of {isSelfReferential ? 'this table' : 'the two tables'}.
+            </span>
+          </Field>
+          {#if $mappingTableName}
+            <NewColumn
+              base={{ name: $mappingTableName }}
+              baseWhich="mapping"
+              target={base}
+              targetWhich="base"
+              field={columnNameMappingToBase}
+              label={$_('Name of New Column {number}', { values: { number: 1 } })}
+            />
+            <NewColumn
+              base={{ name: $mappingTableName }}
+              baseWhich="mapping"
+              target={isSelfReferential ? base : target}
+              targetWhich={isSelfReferential ? "base" : "target"}
+              field={columnNameMappingToTarget}
+              label={$_('Name of New Column {number}', { values: { number: 2 } })}
+            />
           {/if}
         {:else}
           {assertExhaustive($linkType)}

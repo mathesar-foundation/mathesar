@@ -9,7 +9,7 @@
 
   import Pill from './LinkTablePill.svelte';
 
-  const label = 'Name of New Column';
+  export let label = 'Name of New Column';
 
   type Which = ComponentProps<Pill>['which'];
 
@@ -19,15 +19,25 @@
   export let targetWhich: Which = 'target';
   export let field: FieldStore;
   export let targetColumnsAreLoading = false;
+
+  // The formattedHelpText reactive statement has been removed
 </script>
 
 {#if baseWhich !== 'mapping'}
 <p>
-  <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
+  <RichText
+    text={$_('we_will_add_a_column_in_x_to_y', {
+      baseTable: base.name,
+      targetTable: target.name
+    })}
+    let:slotName
+  >
     {#if slotName === 'baseTable'}
       <Pill table={base} which={baseWhich} />
     {:else if slotName === 'targetTable'}
       <Pill table={target} which={targetWhich} />
+    {:else if slotName === 'mappingTable'}
+      <Pill table={base} which={baseWhich} />
     {/if}
   </RichText>
 </p>
@@ -43,7 +53,13 @@
 {:else}
   <Field {field} {label}>
     <span slot="help">
-      The column in <Pill table={base} which={baseWhich} /> that will link to the <Pill table={target} which={targetWhich} /> table.
+      <RichText text={$_('new_column_link_help')} let:slotName>
+        {#if slotName === 'baseTable'}
+          <Pill table={base} which={baseWhich} />
+        {:else if slotName === 'targetTable'}
+          <Pill table={target} which={targetWhich} />
+        {/if}
+      </RichText>
     </span>
   </Field>
 {/if}
