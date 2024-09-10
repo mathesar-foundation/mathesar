@@ -20,18 +20,11 @@
   export let field: FieldStore;
   export let targetColumnsAreLoading = false;
 
-  // The formattedHelpText reactive statement has been removed
 </script>
 
 {#if baseWhich !== 'mapping'}
 <p>
-  <RichText
-    text={$_('we_will_add_a_column_in_x_to_y', {
-      baseTable: base.name,
-      targetTable: target.name
-    })}
-    let:slotName
-  >
+  <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
     {#if slotName === 'baseTable'}
       <Pill table={base} which={baseWhich} />
     {:else if slotName === 'targetTable'}
