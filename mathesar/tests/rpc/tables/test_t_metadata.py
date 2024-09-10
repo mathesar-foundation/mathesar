@@ -5,6 +5,7 @@ Fixtures:
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
 """
 from mathesar.models.base import TableMetaData, Database, Server
+from mathesar.models.deprecated import DataFile
 from mathesar.rpc.tables import metadata
 
 
@@ -16,12 +17,12 @@ def test_tables_meta_data_list(monkeypatch):
         db_model = Database(id=_database_id, name='mymathesardb', server=server_model)
         return [
             TableMetaData(
-                id=1, database=db_model, table_oid=1234,
+                id=1, database=db_model, table_oid=1234, data_file=None,
                 import_verified=True, column_order=[8, 9, 10], record_summary_customized=False,
                 record_summary_template="{5555}"
             ),
             TableMetaData(
-                id=2, database=db_model, table_oid=4567,
+                id=2, database=db_model, table_oid=4567, data_file=DataFile(id=11),
                 import_verified=False, column_order=[], record_summary_customized=True,
                 record_summary_template="{5512} {1223}"
             )
@@ -30,12 +31,12 @@ def test_tables_meta_data_list(monkeypatch):
 
     expect_metadata_list = [
         metadata.TableMetaDataRecord(
-            id=1, database_id=database_id, table_oid=1234,
+            id=1, database_id=database_id, table_oid=1234, data_file_id=None,
             import_verified=True, column_order=[8, 9, 10], record_summary_customized=False,
             record_summary_template="{5555}"
         ),
         metadata.TableMetaDataRecord(
-            id=2, database_id=database_id, table_oid=4567,
+            id=2, database_id=database_id, table_oid=4567, data_file_id=11,
             import_verified=False, column_order=[], record_summary_customized=True,
             record_summary_template="{5512} {1223}"
         )

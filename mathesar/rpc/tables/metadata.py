@@ -20,6 +20,7 @@ class TableMetaDataRecord(TypedDict):
         id: The Django id of the TableMetaData object.
         database_id: The Django id of the database containing the table.
         table_oid: The OID of the table in the database.
+        data_file_id: Specifies the DataFile model id used for the import.
         import_verified: Specifies whether a file has been successfully imported into a table.
         column_order: The order in which columns of a table are displayed.
         record_summary_customized: Specifies whether the record summary has been customized.
@@ -28,6 +29,7 @@ class TableMetaDataRecord(TypedDict):
     id: int
     database_id: int
     table_oid: int
+    data_file_id: Optional[int]
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
     record_summary_customized: Optional[bool]
@@ -39,6 +41,7 @@ class TableMetaDataRecord(TypedDict):
             id=model.id,
             database_id=model.database.id,
             table_oid=model.table_oid,
+            data_file_id=model.data_file.id if model.data_file is not None else None,
             import_verified=model.import_verified,
             column_order=model.column_order,
             record_summary_customized=model.record_summary_customized,
@@ -51,24 +54,17 @@ class TableMetaDataBlob(TypedDict):
     The metadata fields which can be set on a table
 
     Attributes:
+        data_file_id: Specifies the DataFile model id used for the import.
         import_verified: Specifies whether a file has been successfully imported into a table.
         column_order: The order in which columns of a table are displayed.
         record_summary_customized: Specifies whether the record summary has been customized.
         record_summary_template: Record summary template for a referent column.
     """
+    data_file_id: Optional[int]
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
     record_summary_customized: Optional[bool]
     record_summary_template: Optional[str]
-
-    @classmethod
-    def from_model(cls, model):
-        return cls(
-            import_verified=model.import_verified,
-            column_order=model.column_order,
-            record_summary_customized=model.record_summary_customized,
-            record_summary_template=model.record_summary_template,
-        )
 
 
 @rpc_method(name="tables.metadata.list")
