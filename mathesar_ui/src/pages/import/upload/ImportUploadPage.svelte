@@ -122,11 +122,14 @@
         dataFile: { id: dataFileId },
       });
 
-      await updateTable(database, {
-        oid: table.oid,
-        metadata: {
-          import_verified: false,
-          data_file_id: dataFileId,
+      await updateTable({
+        database,
+        table: {
+          oid: table.oid,
+          metadata: {
+            import_verified: false,
+            data_file_id: dataFileId,
+          },
         },
       });
 

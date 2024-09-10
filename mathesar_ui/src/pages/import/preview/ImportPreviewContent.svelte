@@ -169,13 +169,19 @@
 
   async function finishImport() {
     try {
-      await updateTable(database, {
-        oid: table.oid,
-        name: $customizedTableName,
-        columns: finalizeColumns(columns, columnPropertiesMap),
-        metadata: {
-          import_verified: true,
+      await updateTable({
+        database,
+        table: {
+          oid: table.oid,
+          name: $customizedTableName,
+          metadata: {
+            import_verified: true,
+          },
         },
+        columnPatchSpecs: finalizeColumns(columns, columnPropertiesMap),
+        columnsToDelete: Object.entries(columnPropertiesMap)
+          .filter(([, { selected }]) => !selected)
+          .map(([id]) => parseInt(id, 10)),
       });
       router.goto(getTablePageUrl(database.id, schema.oid, table.oid), true);
     } catch (err) {

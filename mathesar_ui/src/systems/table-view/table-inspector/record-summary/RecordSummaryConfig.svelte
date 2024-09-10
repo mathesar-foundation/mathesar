@@ -59,11 +59,14 @@
 
   async function save() {
     try {
-      await updateTable($currentDatabase, {
-        oid: table.oid,
-        metadata: {
-          record_summary_customized: $customized,
-          record_summary_template: $template,
+      await updateTable({
+        database: $currentDatabase,
+        table: {
+          oid: table.oid,
+          metadata: {
+            record_summary_customized: $customized,
+            record_summary_template: $template,
+          },
         },
       });
     } catch (e) {

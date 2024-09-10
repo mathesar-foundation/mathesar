@@ -235,12 +235,17 @@ export function deleteTable(
  * @throws Error if the table store is not found or if the table is not found in
  * the store.
  */
-export async function updateTable(
-  database: Pick<Database, 'id'>,
-  table: RecursivePartial<Table> & { oid: Table['oid'] } & {
-    columns?: ColumnPatchSpec[];
-  },
-): Promise<void> {
+export async function updateTable({
+  database,
+  table,
+  columnPatchSpecs,
+  columnsToDelete,
+}: {
+  database: Pick<Database, 'id'>;
+  table: RecursivePartial<Table> & { oid: Table['oid'] };
+  columnPatchSpecs?: ColumnPatchSpec[];
+  columnsToDelete?: number[];
+}): Promise<void> {
   const requests: RpcRequest<void>[] = [];
   if (table.name || table.description) {
     requests.push(
@@ -254,12 +259,12 @@ export async function updateTable(
       }),
     );
   }
-  if (table.columns) {
+  if (columnPatchSpecs) {
     requests.push(
       api.columns.patch({
         database_id: database.id,
         table_oid: table.oid,
-        column_data_list: table.columns,
+        column_data_list: columnPatchSpecs,
       }),
     );
   }
@@ -269,6 +274,15 @@ export async function updateTable(
         database_id: database.id,
         table_oid: table.oid,
         metadata: table.metadata,
+      }),
+    );
+  }
+  if (columnsToDelete?.length) {
+    requests.push(
+      api.columns.delete({
+        database_id: database.id,
+        table_oid: table.oid,
+        column_attnums: columnsToDelete,
       }),
     );
   }
