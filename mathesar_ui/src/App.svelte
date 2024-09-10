@@ -143,11 +143,7 @@
     overflow: hidden;
     height: 100vh;
   }
-
-  p {
-    line-height: 1.5;
-  }
-
+  
   h1 {
     margin: 0 0 1rem 0;
     font-size: var(--size-xx-large);

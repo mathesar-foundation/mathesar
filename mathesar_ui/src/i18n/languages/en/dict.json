@@ -339,7 +339,7 @@
   "navigate_to_table_record": "Navigate to a {tableName} record",
   "needs_import_confirmation": "Needs Import Confirmation",
   "new_column": "New Column",
-  "new_column_added_to_table": "The new column that will be added to [tableName]",
+  "new_column_added_to_table": "The new column that will be added to [tableName].",
   "new_foreign_key_constraint": "New Foreign Key Constraint",
   "new_link_wont_work_once_regenerated": "Once you regenerate a new link, the old link will no longer work.",
   "new_password": "New Password",

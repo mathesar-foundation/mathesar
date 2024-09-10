@@ -299,10 +299,10 @@
           text={targetTableName
             ? $_('columns_removed_from_table_added_to_target', {
                 values: { count: $columns.length },
-              }) + ' A link column will be created to maintain the relationship between records.'
+              })
             : $_('columns_removed_from_table_added_to_new_table', {
                 values: { count: $columns.length },
-              }) + ' A link column will be created to maintain the relationship between records.'}
+              })}
           let:slotName
         >
           {#if slotName === 'tableName'}
@@ -318,7 +318,7 @@
       </p>
       {#if $targetType === 'newTable'}
         
-        <Field field={newFkColumnName} label='Name of Link Column'>
+        <Field field={newFkColumnName} label='Name of Link Column' layout="stacked">
           <span slot="help">
             <RichText text={$_('new_column_added_to_table')} let:slotName>
               {#if slotName === 'tableName'}
@@ -340,11 +340,3 @@
   />
 </ControlledModal>
 
-<style>
-  :global(.outcome-box .labeled-input.layout-inline .label-content) {
-    align-items: flex-start;
-  }
-  :global(.outcome-box .label-content .input) {
-    flex-grow: 1; 
-  }
-</style>
