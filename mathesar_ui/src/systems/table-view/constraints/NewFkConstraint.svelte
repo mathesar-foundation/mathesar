@@ -204,10 +204,5 @@
     > :global(* + *) {
       margin-top: 1rem;
     }
-
-    .title {
-      font-weight: var(--font-weight-medium);
-      font-size: var(--text-size-large);
-    }
   }
 </style>
