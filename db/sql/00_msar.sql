@@ -416,6 +416,24 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.get_selectable_pkey_attnum(rel_id regclass) RETURNS smallint AS $$/*
+Get the attnum of the single-column primary key for a relation if it has one. If not, return null.
+
+The attnum will only be returned if the current user has SELECT on that column.
+
+Args:
+  rel_id:  The OID of the relation.
+*/
+SELECT conkey[1] FROM pg_constraint
+WHERE
+  conrelid = rel_id
+  AND cardinality(conkey) = 1
+  AND contype='p'
+  AND has_column_privilege(rel_id, conkey[1], 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.is_default_possibly_dynamic(tab_id oid, col_id integer) RETURNS boolean AS $$/*
 Determine whether the default value for the given column is an expression or constant.
 
@@ -2862,8 +2880,8 @@ DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
 msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
-  RETURNS oid AS $$/*
-Add a table, with a default id column, returning the OID of the created table.
+  RETURNS jsonb AS $$/*
+Add a table, with a default id column, returning the OID & name of the created table.
 
 Args:
   sch_id: The OID of the schema where the table will be created.
@@ -2910,7 +2928,10 @@ BEGIN
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
-  RETURN created_table_id;
+  RETURN jsonb_build_object(
+    'oid', created_table_id::bigint,
+    'name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = created_table_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2928,17 +2949,18 @@ msar.prepare_table_for_import(
   comment_ text
 ) RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning a JSON object containing
-a properly formatted SQL statement to carry out `COPY FROM` and also contains table_oid of the created table.
+a properly formatted SQL statement to carry out `COPY FROM`, table_oid & table_name of the created table.
 
 Each returned JSON object will have the form:
   {
     "copy_sql": <str>,
-    "table_oid": <int>
+    "table_oid": <int>,
+    "table_name": <str>
   }
 
 Args:
   sch_id: The OID of the schema where the table will be created.
-  tab_name: The unquoted name for the new table.
+  tab_name (optional): The unquoted name for the new table.
   col_defs: The columns for the new table, in order.
   header: Whether or not the file contains a header line with the names of each column in the file.
   delimiter: The character that separates columns within each row (line) of the file.
@@ -2956,7 +2978,7 @@ DECLARE
   copy_sql text;
 BEGIN
   -- Create string table
-  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_);
+  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_) ->> 'oid';
   -- Get unquoted schema and table name for the created table
   SELECT nspname, relname INTO sch_name, rel_name
   FROM pg_catalog.pg_class AS pgc
@@ -2980,8 +3002,9 @@ BEGIN
   copy_sql := format('COPY %I.%I (%s) FROM STDIN CSV %s', sch_name, rel_name, col_names_sql, options_sql);
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
-    'table_oid', rel_id
-  );
+    'table_oid', rel_id::bigint,
+    'table_name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3684,7 +3707,7 @@ The elements of the mapping_columns array must have the form
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL);
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL) ->> 'oid';
   PERFORM msar.add_foreign_key_column(column_name, added_table_id, referent_table_oid)
   FROM jsonb_to_recordset(mapping_columns) AS x(column_name text, referent_table_oid oid);
   RETURN added_table_id;
@@ -3732,7 +3755,7 @@ BEGIN
     extracted_col_defs,
     extracted_con_defs,
     format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
-  );
+  ) ->> 'oid';
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
   fkey_attnum := msar.add_foreign_key_column(fkey_name, tab_id, extracted_table_id);
   -- Insert the data from the original table's columns into the extracted columns, and add
@@ -4383,21 +4406,35 @@ Args:
   tab_id: The table for whose fkey values' linked records we'll get summaries.
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
-SELECT ', ' || string_agg(
-  format(
-    $c$summary_cte_%1$s AS (
-      SELECT
-        msar.format_data(%2$I) AS fkey,
-        %3$s AS summary
-      FROM %4$I.%5$I
-    )$c$,
-    conkey,
-    msar.get_column_name(target_oid, confkey),
-    msar.build_summary_expr(target_oid),
-    msar.get_relation_schema_name(target_oid),
-    msar.get_relation_name(target_oid)
-  ), ', '
-)
+SELECT ', '
+  || NULLIF(
+    concat_ws(', ',
+      'summary_cte_self AS (SELECT msar.format_data('
+        || quote_ident(msar.get_column_name(tab_id, msar.get_selectable_pkey_attnum(tab_id)))
+        || format(
+          ') AS key, %1$s AS summary FROM %2$I.%3$I)',
+          msar.build_summary_expr(tab_id),
+          msar.get_relation_schema_name(tab_id),
+          msar.get_relation_name(tab_id)
+        ),
+      string_agg(
+        format(
+          $c$summary_cte_%1$s AS (
+            SELECT
+              msar.format_data(%2$I) AS fkey,
+              %3$s AS summary
+            FROM %4$I.%5$I
+          )$c$,
+          conkey,
+          msar.get_column_name(target_oid, confkey),
+          msar.build_summary_expr(target_oid),
+          msar.get_relation_schema_name(target_oid),
+          msar.get_relation_name(target_oid)
+        ), ', '
+      )
+    ),
+    ''
+  )
 FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -4411,13 +4448,18 @@ Args:
   cte_name: The name of the main CTE we'll join the summary CTEs to.
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
-SELECT string_agg(
-  format(
-    $j$
-    LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.fkey$j$,
-    conkey,
-    cte_name
-  ), ' '
+SELECT concat(
+  format(E'\nLEFT JOIN summary_cte_self ON %1$I.', cte_name)
+  || quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text)
+  || ' = summary_cte_self.key' ,
+  string_agg(
+    format(
+      $j$
+      LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.fkey$j$,
+      conkey,
+      cte_name
+    ), ' '
+  )
 )
 FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
@@ -4446,13 +4488,23 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_self_summary_json_expr(tab_id oid) RETURNS TEXT AS $$/*
+*/
+SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS NOT NULL THEN
+  'jsonb_object_agg(summary_cte_self.key, summary_cte_self.summary)'
+END;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.list_records_from_table(
   tab_id oid,
   limit_ integer,
   offset_ integer,
   order_ jsonb,
   filter_ jsonb,
-  group_ jsonb
+  group_ jsonb,
+  return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get records from a table. Only columns to which the user has access are returned.
 
@@ -4463,6 +4515,7 @@ Args:
   order_: An array of ordering definition objects.
   filter_: An array of filter definition objects.
   group_: An array of group definition objects.
+  return_record_summaries : Whether to return a summary for each record listed.
 
 The order definition objects should have the form
   {"attnum": <int>, "direction": <text>}
@@ -4485,7 +4538,8 @@ BEGIN
       'results', %9$s,
       'count', coalesce(max(count_cte.count), 0),
       'grouping', %10$s,
-      'preview_data', %14$s,
+      'linked_record_summaries', %14$s,
+      'record_summaries', %15$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
     FROM enriched_results_cte
@@ -4505,7 +4559,11 @@ BEGIN
     COALESCE(msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_), 'NULL AS id'),
     msar.build_summary_cte_expr_for_table(tab_id),
     msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    COALESCE(
+      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
+      'NULL'
+    )
   ) INTO records;
   RETURN records;
 END;
@@ -4545,7 +4603,8 @@ CREATE OR REPLACE FUNCTION
 msar.search_records_from_table(
   tab_id oid,
   search_ jsonb,
-  limit_ integer
+  limit_ integer,
+  return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get records from a table, filtering and sorting according to a search specification.
 
@@ -4572,7 +4631,8 @@ BEGIN
     SELECT jsonb_build_object(
       'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
       'count', coalesce(max(count_cte.count), 0),
-      'preview_data', %9$s,
+      'linked_record_summaries', %9$s,
+      'record_summaries', %10$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
     )
     FROM results_cte %8$s
@@ -4589,7 +4649,11 @@ BEGIN
     ),
     msar.build_summary_cte_expr_for_table(tab_id),
     msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    COALESCE(
+      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
+      'NULL'
+    )
   ) INTO records;
   RETURN records;
 END;
@@ -4597,7 +4661,11 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_record_from_table(tab_id oid, rec_id anyelement) RETURNS jsonb AS $$/*
+msar.get_record_from_table(
+  tab_id oid,
+  rec_id anyelement,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Get single record from a table. Only columns to which the user has access are returned.
 
 Args:
@@ -4614,7 +4682,8 @@ SELECT msar.list_records_from_table(
       jsonb_build_object('type', 'literal', 'value', rec_id)
     )
   ),
-  null
+  null,
+  return_record_summaries
 )
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -4672,7 +4741,11 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_record_to_table(tab_id oid, rec_def jsonb) RETURNS jsonb AS $$/*
+msar.add_record_to_table(
+  tab_id oid,
+  rec_def jsonb,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Add a record to a table.
 
 Args:
@@ -4685,25 +4758,21 @@ insert.
 
 */
 DECLARE
+  rec_created_id text;
   rec_created jsonb;
 BEGIN
   EXECUTE format(
-    $i$
-    WITH insert_cte AS (%1$s RETURNING %2$s)%4$s
-    SELECT jsonb_build_object(
-      'results', %3$s,
-      'preview_data', %6$s
-    )
-    FROM insert_cte %5$s
-    $i$,
+    'WITH insert_cte AS (%1$s RETURNING %2$s) SELECT msar.format_data(%3$I)::text FROM insert_cte',
     msar.build_single_insert_expr(tab_id, rec_def),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'insert_cte', null),
-    msar.build_summary_cte_expr_for_table(tab_id),
-    msar.build_summary_join_expr_for_table(tab_id, 'insert_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
-  ) INTO rec_created;
-  RETURN rec_created;
+    msar.get_pk_column(tab_id)
+  ) INTO rec_created_id;
+  rec_created := msar.get_record_from_table(tab_id, rec_created_id, return_record_summaries);
+  RETURN jsonb_build_object(
+    'results', rec_created -> 'results',
+    'record_summaries', rec_created -> 'record_summaries',
+    'linked_record_summaries', rec_created -> 'linked_record_summaries'
+  );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -4723,7 +4792,12 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.patch_record_in_table(tab_id oid, rec_id anyelement, rec_def jsonb) RETURNS jsonb AS $$/*
+msar.patch_record_in_table(
+  tab_id oid,
+  rec_id anyelement,
+  rec_def jsonb,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Modify (update/patch) a record in a table.
 
 Args:
@@ -4737,17 +4811,14 @@ The `rec_def` object's form is defined by the record being updated.  It should h
 corresponding to the attnums of desired columns and values corresponding to values we should set.
 */
 DECLARE
+  rec_modified_id integer;
   rec_modified jsonb;
 BEGIN
   EXECUTE format(
-    $i$
-    WITH update_cte AS (%1$s %2$s RETURNING %3$s)%5$s
-    SELECT jsonb_build_object(
-      'results', %4$s,
-      'preview_data', %7$s
-    )
-    FROM update_cte %6$s
-    $i$,
+    $p$
+    WITH update_cte AS (%1$s %2$s RETURNING %3$s)
+    SELECT msar.format_data(%4$I)::text FROM update_cte
+    $p$,
     msar.build_update_expr(tab_id, rec_def),
     msar.build_where_clause(
       tab_id, jsonb_build_object(
@@ -4758,11 +4829,13 @@ BEGIN
       )
     ),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'update_cte', null),
-    msar.build_summary_cte_expr_for_table(tab_id),
-    msar.build_summary_join_expr_for_table(tab_id, 'update_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
-  ) INTO rec_modified;
-  RETURN rec_modified;
+    msar.get_pk_column(tab_id)
+  ) INTO rec_modified_id;
+  rec_modified := msar.get_record_from_table(tab_id, rec_modified_id, return_record_summaries);
+  RETURN jsonb_build_object(
+    'results', rec_modified -> 'results',
+    'record_summaries', rec_modified -> 'record_summaries',
+    'linked_record_summaries', rec_modified -> 'linked_record_summaries'
+  );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

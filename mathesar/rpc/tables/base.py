@@ -51,6 +51,18 @@ class TableInfo(TypedDict):
     current_role_owns: bool
 
 
+class AddedTableInfo(TypedDict):
+    """
+    Information about a newly created table.
+
+    Attributes:
+        oid: The `oid` of the table in the schema.
+        name: The name of the table.
+    """
+    oid: int
+    name: str
+
+
 class SettableTableInfo(TypedDict):
     """
     Information about a table, restricted to settable fields.
@@ -191,7 +203,7 @@ def add(
     constraint_data_list: list[CreatableConstraintInfo] = [],
     comment: str = None,
     **kwargs
-) -> int:
+) -> AddedTableInfo:
     """
     Add a table with a default id column.
 
@@ -204,7 +216,7 @@ def add(
         comment: The comment for the new table.
 
     Returns:
-        The `oid` of the created table.
+        The `oid` & `name` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -264,24 +276,24 @@ def patch(
 def import_(
     *,
     data_file_id: int,
-    table_name: str,
     schema_oid: int,
     database_id: int,
+    table_name: str = None,
     comment: str = None,
     **kwargs
-) -> int:
+) -> AddedTableInfo:
     """
     Import a CSV/TSV into a table.
 
     Args:
         data_file_id: The Django id of the DataFile containing desired CSV/TSV.
-        table_name: Name of the table to be imported.
         schema_oid: Identity of the schema in the user's database.
         database_id: The Django id of the database containing the table.
+        table_name: Name of the table to be imported.
         comment: The comment for the new table.
 
     Returns:
-        The `oid` of the created table.
+        The `oid` and `name` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:

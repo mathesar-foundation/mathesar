@@ -127,6 +127,7 @@ To use an RPC function:
       - get_import_preview
       - list_joinable
       - TableInfo
+      - AddedTableInfo
       - SettableTableInfo
       - JoinableTableRecord
       - JoinableTableInfo

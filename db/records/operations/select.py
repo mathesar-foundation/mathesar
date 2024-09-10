@@ -19,6 +19,7 @@ def list_records_from_table(
         order=None,
         filter=None,
         group=None,
+        return_record_summaries=False
 ):
     """
     Get records from a table.
@@ -46,6 +47,7 @@ def list_records_from_table(
         json.dumps(order) if order is not None else None,
         json.dumps(filter) if filter is not None else None,
         json.dumps(group) if group is not None else None,
+        return_record_summaries
     ).fetchone()[0]
     return result
 
@@ -54,6 +56,7 @@ def get_record_from_table(
         conn,
         record_id,
         table_oid,
+        return_record_summaries=False
 ):
     """
     Get single record from a table by its primary key
@@ -69,6 +72,7 @@ def get_record_from_table(
         'get_record_from_table',
         table_oid,
         record_id,
+        return_record_summaries,
     ).fetchone()[0]
     return result
 
@@ -78,6 +82,7 @@ def search_records_from_table(
         table_oid,
         search=[],
         limit=10,
+        return_record_summaries=False,
 ):
     """
     Get records from a table, according to a search specification
@@ -94,7 +99,8 @@ def search_records_from_table(
     """
     search = search or []
     result = db_conn.exec_msar_func(
-        conn, 'search_records_from_table', table_oid, json.dumps(search), limit
+        conn, 'search_records_from_table',
+        table_oid, json.dumps(search), limit, return_record_summaries
     ).fetchone()[0]
     return result
 
