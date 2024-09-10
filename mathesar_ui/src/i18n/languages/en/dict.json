@@ -18,6 +18,7 @@
   "add_new_sort_condition": "Add new sort condition",
   "add_tables_to_new_schema": "You've created a new schema, now add tables to it.",
   "add_transformation_step": "Add transformation step",
+  "add_foreign_key_constraint": "Add Foreign Key Constraint",
   "add_user": "Add User",
   "admin": "Admin",
   "admin_access": "Admin Access",

@@ -194,7 +194,7 @@
     onProceed={handleSave}
     onCancel={onClose}
     size="small"
-    proceedButton={{ label: $_('Add Foreign Key Constraint') }}
+    proceedButton={{ label: $_('add_foreign_key_constraint') }}
   />
 </div>
 
