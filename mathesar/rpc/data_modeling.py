@@ -7,7 +7,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.links.operations import create as links_create
-from db.tables.operations import infer_types, split
+from db.tables.operations import infer_types, split, move_columns as move_cols
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -125,6 +125,7 @@ def split_table(
         table_oid: The OID of the table whose columns we'll extract.
         column_attnums: A list of the attnums of the columns to extract.
         extracted_table_name: The name of the new table to be made from the extracted columns.
+        database_id: The Django id of the database containing the table.
         relationship_fk_column_name: The name to give the new foreign key column in the remainder table (optional)
     """
     user = kwargs.get(REQUEST_KEY).user
@@ -135,4 +136,34 @@ def split_table(
             column_attnums,
             extracted_table_name,
             relationship_fk_column_name
+        )
+
+
+@rpc_method(name="data_modeling.move_columns")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def move_columns(
+    *,
+    source_table_oid: int,
+    target_table_oid: int,
+    move_column_attnums: list[int],
+    database_id: int,
+    **kwargs
+) -> None:
+    """
+    Extract columns from a table to a referent table, linked by a foreign key.
+
+    Args:
+        source_table_oid: The OID of the source table whose column(s) we'll extract.
+        target_table_oid: The OID of the target table where the extracted column(s) will be added.
+        move_column_attnums: The list of attnum(s) to move from source table to the target table.
+        database_id: The Django id of the database containing the table.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        move_cols.move_columns_to_referenced_table(
+            conn,
+            source_table_oid,
+            target_table_oid,
+            move_column_attnums
         )
