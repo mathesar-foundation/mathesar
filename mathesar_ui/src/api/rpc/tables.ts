@@ -1,4 +1,7 @@
+import type { RecursivePartial } from '@mathesar/component-library';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+
+import type { ColumnTypeOptions } from './columns';
 
 export interface RawTable {
   oid: number;
@@ -9,6 +12,16 @@ export interface RawTable {
 }
 
 interface TableMetadata {
+  /** The id of the data file used during import while creating the table */
+  data_file_id: number | null;
+  /**
+   * When `true` or `null`, the table has been imported from a data file and the
+   * data has been verified to be correct, with the data types customized by the
+   * user.
+   *
+   * When false, the table still requires import verification before it can be
+   * viewed in the table page.
+   */
   import_verified: boolean | null;
   column_order: number[] | null;
   record_summary_customized: boolean | null;
@@ -62,6 +75,17 @@ export interface JoinableTablesResult {
   >;
 }
 
+/**
+ * The parameters needed for one column in order to generate an import preview.
+ */
+export interface ColumnPreviewSpec {
+  /** Column attnum */
+  id: number;
+  /** The new type to be applied to the column */
+  type?: string;
+  type_options?: ColumnTypeOptions | null;
+}
+
 export const tables = {
   list: rpcMethodTypeContainer<
     {
@@ -107,7 +131,25 @@ export const tables = {
       /** TODO */
       constraint_data_list?: unknown;
     },
-    number
+    {
+      oid: number;
+      name: string;
+    }
+  >(),
+
+  /** Returns the oid of the table created */
+  import: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      schema_oid: number;
+      table_name?: string;
+      comment?: string;
+      data_file_id: number;
+    },
+    {
+      oid: number;
+      name: string;
+    }
   >(),
 
   patch: rpcMethodTypeContainer<
@@ -139,4 +181,28 @@ export const tables = {
     },
     JoinableTablesResult
   >(),
+
+  get_import_preview: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      columns: ColumnPreviewSpec[];
+      /** The upper limit for the number of records to return. Defaults to 20 */
+      limit?: number;
+    },
+    Record<string, unknown>[]
+  >(),
+
+  metadata: {
+    list: rpcMethodTypeContainer<{ database_id: number }, TableMetadata[]>(),
+
+    set: rpcMethodTypeContainer<
+      {
+        database_id: number;
+        table_oid: number;
+        metadata: RecursivePartial<TableMetadata>;
+      },
+      void
+    >(),
+  },
 };

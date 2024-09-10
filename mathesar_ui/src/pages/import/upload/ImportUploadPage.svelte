@@ -23,7 +23,10 @@
   import type { Database } from '@mathesar/models/Database';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
-  import { createTable } from '@mathesar/stores/tables';
+  import {
+    createTableFromDataFile,
+    updateTable,
+  } from '@mathesar/stores/tables';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import {
     RadioGroup,
@@ -113,13 +116,24 @@
       if (dataFileId === undefined) {
         return;
       }
-      const tableOid = await createTable(database, schema, {
-        dataFiles: [dataFileId],
+      const table = await createTableFromDataFile({
+        database,
+        schema,
+        dataFile: { id: dataFileId },
       });
+
+      await updateTable(database, {
+        oid: table.oid,
+        metadata: {
+          import_verified: false,
+          data_file_id: dataFileId,
+        },
+      });
+
       const previewPage = getImportPreviewPageUrl(
         database.id,
         schema.oid,
-        tableOid,
+        table.oid,
         { useColumnTypeInference: $useColumnTypeInference },
       );
       router.goto(previewPage, true);

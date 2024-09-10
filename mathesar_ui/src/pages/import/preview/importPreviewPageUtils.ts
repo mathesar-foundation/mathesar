@@ -11,7 +11,7 @@ import type {
   AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
 import AsyncStore from '@mathesar/stores/AsyncStore';
-import { createTable, deleteTable } from '@mathesar/stores/tables';
+import { createTableFromDataFile, deleteTable } from '@mathesar/stores/tables';
 
 /**
  * This is to improve loading experience by seeding the table with empty
@@ -48,8 +48,8 @@ export function processColumns(
 
 export function makeHeaderUpdateRequest() {
   interface Props {
-    database: Database;
-    schema: Schema;
+    database: Pick<Database, 'id'>;
+    schema: Pick<Schema, 'oid'>;
     table: Pick<Table, 'oid'>;
     dataFile: Pick<DataFile, 'id'>;
     firstRowIsHeader: boolean;
@@ -60,10 +60,7 @@ export function makeHeaderUpdateRequest() {
       deleteTable(p.database, p.schema, p.table.oid),
       dataFilesApi.update(p.dataFile.id, { header: p.firstRowIsHeader }),
     ]);
-    return createTable(p.database, p.schema, {
-      name: p.customizedTableName,
-      dataFiles: [p.dataFile.id],
-    });
+    return createTableFromDataFile(p);
   }
   return new AsyncStore(updateHeader);
 }
