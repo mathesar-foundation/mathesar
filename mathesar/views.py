@@ -80,8 +80,8 @@ def _get_internal_db_meta():
 def _get_base_data_all_routes(request, database_id=None, schema_id=None):
     return {
         'abstract_types': get_ui_type_list(request, database_id),
-        'current_database': database_id,
-        'current_schema': schema_id,
+        'current_database': int(database_id) if database_id else None,
+        'current_schema': int(schema_id) if schema_id else None,
         'current_release_tag_name': __version__,
         'databases': get_database_list(request),
         'servers': get_servers_list(),
