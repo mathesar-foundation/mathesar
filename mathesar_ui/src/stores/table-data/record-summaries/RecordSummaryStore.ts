@@ -8,7 +8,7 @@ import {
 } from './recordSummaryUtils';
 
 /**
- * Stores the record summaries needed for one sheet.
+ * Stores the linked record summaries needed for one sheet.
  *
  * - Writing to this store is done via the imperative methods. You can either
  *   write a whole set of record summary data, as fetched from the records API;

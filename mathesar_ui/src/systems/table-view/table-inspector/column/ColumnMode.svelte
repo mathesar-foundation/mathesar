@@ -123,7 +123,8 @@
       </Collapsible>
     {/if}
 
-    {#if column}
+    <!-- TODO_BETA: Re-enable this once we make the record summary configurable -->
+    <!-- {#if column}
       {@const referentTableId = column.linkFk?.referent_table_oid}
       {@const referentTable =
         referentTableId === undefined
@@ -140,7 +141,7 @@
           </div>
         </Collapsible>
       {/if}
-    {/if}
+    {/if} -->
 
     <Collapsible isOpen triggerAppearance="plain">
       <CollapsibleHeader slot="header" title={$_('actions')} />
