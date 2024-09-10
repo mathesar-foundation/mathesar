@@ -121,3 +121,15 @@ export const connectDatabaseIcon: IconProps['data'] = {
     ],
   ],
 };
+
+export const treeChildNodeArrowIcon: IconProps['data'] = {
+  icon: [
+    9,
+    10,
+    [],
+    '',
+    [
+      'M0.5 5V0H1.5V5C1.5 6.933 3.067 8.5 5 8.5H9V9.5H5C2.51472 9.5 0.5 7.48528 0.5 5Z',
+    ],
+  ],
+};

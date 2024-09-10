@@ -28,13 +28,10 @@
 
   $: ({ database, configuredRoles, collaborators, users } = $routeContext);
 
-  $: void AsyncRpcApiStore.runBatched(
-    [
-      collaborators.batchRunner({ database_id: database.id }),
-      configuredRoles.batchRunner({ server_id: database.server.id }),
-    ],
-    { onlyRunIfNotInitialized: true },
-  );
+  $: void AsyncRpcApiStore.runBatched([
+    collaborators.batchRunner({ database_id: database.id }),
+    configuredRoles.batchRunner({ server_id: database.server.id }),
+  ]);
   $: void users.runIfNotInitialized();
   $: isLoading =
     $collaborators.isLoading || $configuredRoles.isLoading || $users.isLoading;

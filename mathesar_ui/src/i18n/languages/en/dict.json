@@ -49,6 +49,7 @@
   "change_password": "Change Password",
   "check_for_updates": "Check for Updates",
   "child_roles": "Child Roles",
+  "child_roles_count": "{count, plural, one {{count} child role} other {{count} child roles}}",
   "child_roles_saved_successfully": "The Child Roles have been successfully saved.",
   "choose_database": "Choose a Database",
   "choose_schema": "Choose a Schema",

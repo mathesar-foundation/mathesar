@@ -1,20 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import {
-    type DatabasePrivilege,
-    allDatabasePrivileges,
-  } from '@mathesar/api/rpc/databases';
   import Errors from '@mathesar/components/Errors.svelte';
   import {
     FormSubmit,
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
-  import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
-  import type { Database } from '@mathesar/models/Database';
   import type { Role } from '@mathesar/models/Role';
-  import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import {
     ImmutableMap,
     type ModalController,
@@ -24,83 +17,83 @@
   } from '@mathesar-component-library';
 
   import DirectPrivilegeRow from './DirectPrivilegeRow.svelte';
+  import RoleWithChildren from './RoleWithChildren.svelte';
   import {
+    type AccessLevelConfig,
+    type AsyncStoresValues,
     type RoleAccessLevelAndPrivileges,
-    dbAccessLevelConfigs,
-    getDbAccessPrivilegeMap,
+    getObjectAccessPrivilegeMap,
   } from './utils';
 
-  export let controller: ModalController;
-  export let databasePrivileges: ReturnType<
-    Database['constructDatabasePrivilegesStore']
-  >;
+  type AccessLevel = $$Generic;
+  type Privilege = $$Generic;
 
-  const databaseContext = DatabaseRouteContext.get();
-  $: ({ database, roles, underlyingDatabase } = $databaseContext);
-  $: void AsyncRpcApiStore.runBatched(
-    [
-      roles.batchRunner({ database_id: database.id }),
-      databasePrivileges.batchRunner({ database_id: database.id }),
-      underlyingDatabase.batchRunner({ database_id: database.id }),
-    ],
-    { onlyRunIfNotInitialized: true },
-  );
+  export let controller: ModalController;
+  export let accessLevelConfig: AccessLevelConfig<AccessLevel, Privilege>[];
+  export let getAsyncStores: () => AsyncStoresValues<Privilege>;
+  export let allPrivileges: Privilege[];
+  export let savePermissions: () => void;
+
+  $: ({ roles, objectPrivileges, objectOwnerAndCurrentRolePrivileges } =
+    getAsyncStores());
 
   $: isLoading =
     $roles.isLoading ||
-    $databasePrivileges.isLoading ||
-    $underlyingDatabase.isLoading;
+    $objectPrivileges.isLoading ||
+    $objectOwnerAndCurrentRolePrivileges.isLoading;
   $: isSuccess =
-    $roles.isOk && $databasePrivileges.isOk && $underlyingDatabase.isOk;
+    $roles.isOk &&
+    $objectPrivileges.isOk &&
+    $objectOwnerAndCurrentRolePrivileges.isOk;
   $: errors = [
     $roles.error,
-    $databasePrivileges.error,
-    $underlyingDatabase.error,
+    $objectPrivileges.error,
+    $objectOwnerAndCurrentRolePrivileges.error,
   ].filter((entry): entry is string => isDefinedNonNullable(entry));
 
-  $: dbPrivileges = requiredField(
-    getDbAccessPrivilegeMap(
-      $databasePrivileges.resolvedValue ?? new ImmutableMap(),
+  $: objectPrivilegesField = requiredField(
+    getObjectAccessPrivilegeMap(
+      accessLevelConfig,
+      $objectPrivileges.resolvedValue ?? new ImmutableMap(),
     ),
   );
-  $: form = makeForm({ dbPrivileges });
-  $: dbPrivilegesWithAccess = [...$dbPrivileges.values()].filter((entry) =>
-    isDefinedNonNullable(entry.accessLevel),
+  $: form = makeForm({ objectPrivilegesField });
+  $: objectPrivilegesWithAccess = [...$objectPrivilegesField.values()].filter(
+    (entry) => isDefinedNonNullable(entry.accessLevel),
   );
 
   function setRoleAccessLevelAndPrivileges(
     roleOid: Role['oid'],
-    accessLevelPrivileges: RoleAccessLevelAndPrivileges<
-      string,
-      DatabasePrivilege
-    >,
+    accessLevelPrivileges: RoleAccessLevelAndPrivileges<AccessLevel, Privilege>,
   ) {
-    console.log(accessLevelPrivileges);
-    dbPrivileges.update((dbPrivMap) =>
+    objectPrivilegesField.update((dbPrivMap) =>
       dbPrivMap.with(roleOid, accessLevelPrivileges),
     );
   }
-
-  function savePermissions() {}
 </script>
 
 <div class="privileges">
   {#if isLoading}
     <Spinner />
-  {:else if isSuccess && $roles.resolvedValue}
+  {:else if isSuccess && $roles.resolvedValue && $objectOwnerAndCurrentRolePrivileges.resolvedValue}
     <div class="section owner-section">
       <div class="title">{$_('owner')}</div>
-      <div class="content"></div>
+      <div class="content">
+        <RoleWithChildren
+          rolesMap={$roles.resolvedValue}
+          roleOid={$objectOwnerAndCurrentRolePrivileges.resolvedValue.owner_oid}
+        />
+      </div>
     </div>
     <div class="section granted-access-section">
       <div class="title">{$_('granted_access')}</div>
       <div class="content">
-        {#each dbPrivilegesWithAccess as roleAccessLevelAndPrivileges (roleAccessLevelAndPrivileges.roleOid)}
+        {#each objectPrivilegesWithAccess as roleAccessLevelAndPrivileges (roleAccessLevelAndPrivileges.roleOid)}
           <div class="privilege-row">
             <DirectPrivilegeRow
               rolesMap={$roles.resolvedValue}
-              privileges={[...allDatabasePrivileges]}
-              accessLevels={dbAccessLevelConfigs}
+              privileges={allPrivileges}
+              accessLevels={accessLevelConfig}
               {roleAccessLevelAndPrivileges}
               {setRoleAccessLevelAndPrivileges}
             />
@@ -130,17 +123,27 @@
 <style lang="scss">
   .privileges {
     .section {
-      padding: var(--size-base) 0;
+      margin-top: var(--size-base);
 
       .title {
         font-weight: 600;
         border-bottom: 1px solid var(--slate-200);
         padding: var(--size-extreme-small) 0;
       }
+
+      &.owner-section {
+        .content {
+          padding: var(--size-base) 0 var(--size-ultra-small) 0;
+        }
+      }
     }
     .granted-access-section {
       .privilege-row {
         padding: var(--size-base) 0;
+
+        &:last-child {
+          padding-bottom: 0;
+        }
 
         & + .privilege-row {
           border-top: 1px solid var(--slate-100);

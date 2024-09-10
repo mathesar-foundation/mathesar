@@ -1,63 +1,50 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { allDatabasePrivileges } from '@mathesar/api/rpc/databases';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
-  import {
-    ControlledModal,
-    type ModalController,
-    TabContainer,
-  } from '@mathesar-component-library';
-
-  import PrivilegesSection from './PrivilegesSection.svelte';
-  import TransferOwnershipSection from './TransferOwnershipSection.svelte';
+  import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+  import PermissionsModal from '@mathesar/systems/permissions/PermissionsModal.svelte';
+  import PrivilegesSection from '@mathesar/systems/permissions/PrivilegesSection.svelte';
+  import TransferOwnershipSection from '@mathesar/systems/permissions/TransferOwnershipSection.svelte';
+  import type { ModalController } from '@mathesar-component-library';
 
   export let controller: ModalController;
 
   const databaseContext = DatabaseRouteContext.get();
-  $: ({ database } = $databaseContext);
+  $: ({ database, roles, underlyingDatabase } = $databaseContext);
   $: databasePrivileges = database.constructDatabasePrivilegesStore();
 
-  const tabs = [
-    {
-      id: 'share',
-      label: $_('share'),
-    },
-    {
-      id: 'transfer_ownership',
-      label: $_('transfer_ownership'),
-    },
-  ];
-  let activeTab = tabs[0];
-
-  function onModalClose() {
-    [activeTab] = tabs;
+  function getAsyncStores() {
+    void AsyncRpcApiStore.runBatched([
+      databasePrivileges.batchRunner({ database_id: database.id }),
+      roles.batchRunner({ database_id: database.id }),
+      underlyingDatabase.batchRunner({ database_id: database.id }),
+    ]);
+    return {
+      roles,
+      objectPrivileges: databasePrivileges,
+      objectOwnerAndCurrentRolePrivileges: underlyingDatabase,
+    };
   }
+
+  function savePermissions() {}
 </script>
 
-<ControlledModal {controller} on:close={onModalClose}>
+<PermissionsModal {controller} onClose={() => databasePrivileges.reset()}>
   <span slot="title">
     {$_('database_permissions')}
   </span>
-  <div class="tabs">
-    <TabContainer
-      bind:activeTab
-      {tabs}
-      uniformTabWidth={false}
-      tabStyle="compact"
-    >
-      <div class="tab-content">
-        {#if activeTab.id === 'share'}
-          <PrivilegesSection {controller} {databasePrivileges} />
-        {:else}
-          <TransferOwnershipSection {controller} />
-        {/if}
-      </div>
-    </TabContainer>
-  </div>
-</ControlledModal>
-
-<style lang="scss">
-  .tabs {
-    --Tab_margin-right: var(--size-small);
-  }
-</style>
+  <PrivilegesSection
+    slot="privileges"
+    {controller}
+    accessLevelConfig={[
+      { id: 'connect', privileges: new Set(['CONNECT']) },
+      { id: 'connect_and_create', privileges: new Set(['CONNECT', 'CREATE']) },
+    ]}
+    allPrivileges={[...allDatabasePrivileges]}
+    {getAsyncStores}
+    {savePermissions}
+  />
+  <TransferOwnershipSection slot="transfer-ownership" {controller} />
+</PermissionsModal>

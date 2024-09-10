@@ -12,14 +12,19 @@
     Select,
   } from '@mathesar-component-library';
 
-  import { type RoleAccessLevelAndPrivileges, customAccess } from './utils';
+  import RoleWithChildren from './RoleWithChildren.svelte';
+  import {
+    type AccessLevelConfig,
+    type RoleAccessLevelAndPrivileges,
+    customAccess,
+  } from './utils';
 
   type AccessLevel = $$Generic;
   type Privilege = $$Generic;
 
   export let rolesMap: ImmutableMap<Role['oid'], Role>;
   export let privileges: Privilege[];
-  export let accessLevels: { id: AccessLevel; privileges: Set<Privilege> }[];
+  export let accessLevels: AccessLevelConfig<AccessLevel, Privilege>[];
 
   export let roleAccessLevelAndPrivileges: RoleAccessLevelAndPrivileges<
     AccessLevel,
@@ -31,9 +36,6 @@
   ) => void;
 
   let isRolePermissionsOpen = false;
-
-  $: role = rolesMap.get(roleAccessLevelAndPrivileges.roleOid);
-  $: members = role?.members;
 
   function removeAccess() {
     setRoleAccessLevelAndPrivileges(
@@ -71,18 +73,7 @@
 </script>
 
 <div class="access-selection-section">
-  <div class="name-and-members">
-    {#if role}
-      <div class="name">
-        <span>{role.name}</span>
-      </div>
-      <div>
-        {#if $members?.size}
-          + {$members.size}
-        {/if}
-      </div>
-    {/if}
-  </div>
+  <RoleWithChildren {rolesMap} roleOid={roleAccessLevelAndPrivileges.roleOid} />
   <div>
     <Select
       options={[...accessLevels.map((entry) => entry.id), customAccess]}
@@ -120,20 +111,9 @@
     display: grid;
     grid-template-columns: 2fr 1fr auto;
     gap: var(--size-ultra-small);
-
-    .name-and-members {
-      .name {
-        span {
-          padding: var(--size-extreme-small) var(--size-xx-small);
-          background: var(--slate-100);
-          border-radius: var(--border-radius-xl);
-          font-weight: 500;
-        }
-      }
-    }
   }
   .role-permissions-section {
-    margin-top: var(--size-super-ultra-small);
+    margin-top: var(--size-xx-small);
     --Collapsible_trigger-padding: var(--size-extreme-small) 0;
     --Collapsible_header-font-weight: 400;
 
