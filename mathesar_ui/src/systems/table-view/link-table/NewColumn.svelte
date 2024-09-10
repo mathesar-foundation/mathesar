@@ -19,21 +19,20 @@
   export let targetWhich: Which = 'target';
   export let field: FieldStore;
   export let targetColumnsAreLoading = false;
-
 </script>
 
 {#if baseWhich !== 'mapping'}
-<p>
-  <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
-    {#if slotName === 'baseTable'}
-      <Pill table={base} which={baseWhich} />
-    {:else if slotName === 'targetTable'}
-      <Pill table={target} which={targetWhich} />
-    {:else if slotName === 'mappingTable'}
-      <Pill table={base} which={baseWhich} />
-    {/if}
-  </RichText>
-</p>
+  <p>
+    <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
+      {#if slotName === 'baseTable'}
+        <Pill table={base} which={baseWhich} />
+      {:else if slotName === 'targetTable'}
+        <Pill table={target} which={targetWhich} />
+      {:else if slotName === 'mappingTable'}
+        <Pill table={base} which={baseWhich} />
+      {/if}
+    </RichText>
+  </p>
 {/if}
 
 {#if targetColumnsAreLoading}

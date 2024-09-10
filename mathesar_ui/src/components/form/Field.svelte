@@ -40,10 +40,10 @@
         {...inputComponentProps}
       />
       {#if !isStacked && (help || $$slots.help)}
-      <FieldHelp>
-        <slot name="help">{help}</slot>
-      </FieldHelp>
-    {/if}
+        <FieldHelp>
+          <slot name="help">{help}</slot>
+        </FieldHelp>
+      {/if}
     </LabeledInput>
   {:else}
     <svelte:component
@@ -56,12 +56,12 @@
       <slot />
     </svelte:component>
   {/if}
-  
+
   {#if isStacked && (help || $$slots.help)}
     <FieldHelp>
       <slot name="help">{help}</slot>
     </FieldHelp>
   {/if}
-  
+
   <FieldErrors {field} />
 </FieldLayout>

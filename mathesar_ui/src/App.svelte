@@ -143,7 +143,7 @@
     overflow: hidden;
     height: 100vh;
   }
-  
+
   h1 {
     margin: 0 0 1rem 0;
     font-size: var(--size-xx-large);
@@ -224,5 +224,4 @@
     justify-content: center;
     display: flex;
   }
-  
 </style>

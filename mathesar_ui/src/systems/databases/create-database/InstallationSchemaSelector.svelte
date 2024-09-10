@@ -41,5 +41,3 @@
     getCheckboxDisabled={(o) => o === 'internal'}
   />
 </div>
-
-

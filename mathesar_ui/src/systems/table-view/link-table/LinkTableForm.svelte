@@ -224,7 +224,6 @@
 </div>
 
 <div class="form" class:self-referential={isSelfReferential}>
-
   <FieldLayout>
     <InfoBox fullWidth={true}>
       {$_('links_info')}
@@ -258,14 +257,14 @@
 
     <FieldLayout>
       <OutcomeBox>
-        {#if $linkType === 'oneToMany'}  
+        {#if $linkType === 'oneToMany'}
           <NewColumn
             base={target}
             target={base}
             field={columnNameInTarget}
             {targetColumnsAreLoading}
           />
-        {:else if $linkType === 'manyToOne'}  
+        {:else if $linkType === 'manyToOne'}
           <NewColumn {base} {target} field={columnNameInBase} />
         {:else if $linkType === 'manyToMany'}
           <p>
@@ -282,12 +281,10 @@
               {/if}
             </RichText>
           </p>
-          <Field
-            field={mappingTableName}
-            label={'Name of New Table'}
-          >
+          <Field field={mappingTableName} label={'Name of New Table'}>
             <span slot="help">
-              The table that will store the many-to-many relationship between records of {isSelfReferential ? 'this table' : 'the two tables'}.
+              The table that will store the many-to-many relationship between
+              records of {isSelfReferential ? 'this table' : 'the two tables'}.
             </span>
           </Field>
           {#if $mappingTableName}
@@ -297,15 +294,19 @@
               target={base}
               targetWhich="base"
               field={columnNameMappingToBase}
-              label={$_('Name of New Column {number}', { values: { number: 1 } })}
+              label={$_('Name of New Column {number}', {
+                values: { number: 1 },
+              })}
             />
             <NewColumn
               base={{ name: $mappingTableName }}
               baseWhich="mapping"
               target={isSelfReferential ? base : target}
-              targetWhich={isSelfReferential ? "base" : "target"}
+              targetWhich={isSelfReferential ? 'base' : 'target'}
               field={columnNameMappingToTarget}
-              label={$_('Name of New Column {number}', { values: { number: 2 } })}
+              label={$_('Name of New Column {number}', {
+                values: { number: 2 },
+              })}
             />
           {/if}
         {:else}
@@ -351,6 +352,6 @@
     width: 12rem;
   }
   :global(.form .outcome-box .label-content .input) {
-    flex-grow: 1; 
+    flex-grow: 1;
   }
 </style>

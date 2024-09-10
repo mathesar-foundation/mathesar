@@ -121,7 +121,6 @@
 </script>
 
 <div class="add-new-fk-constraint">
-
   <Field
     field={baseColumn}
     input={{
@@ -130,7 +129,6 @@
     }}
     layout="stacked"
     label="Referencing Column"
-
   >
     <span slot="help">
       {$_('column_references_target_table')}
@@ -201,7 +199,7 @@
 <style lang="scss">
   .add-new-fk-constraint {
     display: flex;
-    flex-direction: column;   
+    flex-direction: column;
 
     > :global(* + *) {
       margin-top: 1rem;

@@ -317,8 +317,11 @@
         </RichText>
       </p>
       {#if $targetType === 'newTable'}
-        
-        <Field field={newFkColumnName} label='Name of Link Column' layout="stacked">
+        <Field
+          field={newFkColumnName}
+          label="Name of Link Column"
+          layout="stacked"
+        >
           <span slot="help">
             <RichText text={$_('new_column_added_to_table')} let:slotName>
               {#if slotName === 'tableName'}
@@ -326,7 +329,7 @@
               {/if}
             </RichText>
           </span>
-          </Field>
+        </Field>
       {/if}
     </OutcomeBox>
   </FieldLayout>
@@ -339,4 +342,3 @@
     onCancel={() => controller.close()}
   />
 </ControlledModal>
-

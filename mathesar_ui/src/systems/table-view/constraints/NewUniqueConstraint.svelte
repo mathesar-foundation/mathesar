@@ -128,7 +128,6 @@
       <LabeledInput label="Columns" layout="stacked">
         <span slot="help">
           The columns in this table that should contain unique values.
-
         </span>
         <MultiSelect
           bind:values={constraintColumns}
