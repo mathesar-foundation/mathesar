@@ -58,6 +58,7 @@
       config={accessControlConfig}
       roles={rolesValue}
       privilegesForRoles={privilegesForRolesValue}
+      permissionsMetaData={permissionsMetaDataValue}
       {savePrivilegesForRoles}
     />
   {:else}

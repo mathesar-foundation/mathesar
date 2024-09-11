@@ -22,6 +22,7 @@
   import { RoleAccessLevelAndPrivileges } from './RoleAccessLevelAndPrivileges';
   import {
     type AccessControlConfig,
+    type PermissionsMetaData,
     type RolePrivileges,
     getObjectAccessPrivilegeMap,
   } from './utils';
@@ -36,14 +37,17 @@
     number,
     RolePrivileges<Privilege>
   >;
-  // export let permissionsMetaData: PermissionsMetaData<Privilege>;
+  export let permissionsMetaData: PermissionsMetaData<Privilege>;
 
   export let savePrivilegesForRoles: (
     rp: RolePrivileges<Privilege>[],
   ) => Promise<void>;
 
+  $: modifiablePrivileges = privilegesForRoles.filterValues(
+    (pr) => pr.role_oid !== permissionsMetaData.owner_oid,
+  );
   $: roleAccessField = requiredField(
-    getObjectAccessPrivilegeMap(config.access.levels, privilegesForRoles),
+    getObjectAccessPrivilegeMap(config.access.levels, modifiablePrivileges),
   );
   $: form = makeForm({ roleAccessField });
 
@@ -76,19 +80,21 @@
   }
 
   async function save() {
-    const rolesWithAccessRemoved = [...privilegesForRoles.keys()]
+    const rolesWithAccessRemoved = [...modifiablePrivileges.keys()]
       .filter((roleOid) => !$roleAccessField.has(roleOid))
       .map((roleOid) => ({
         role_oid: roleOid,
         direct: [],
       }));
-    const newAndUpdatedAccess = [...$roleAccessField.values()].map((entry) => ({
-      role_oid: entry.roleOid,
-      direct: entry.privileges.valuesArray(),
-    }));
+    const rolesWithNewOrUpdatedAccess = [...$roleAccessField.values()].map(
+      (entry) => ({
+        role_oid: entry.roleOid,
+        direct: entry.privileges.valuesArray(),
+      }),
+    );
     await savePrivilegesForRoles([
       ...rolesWithAccessRemoved,
-      ...newAndUpdatedAccess,
+      ...rolesWithNewOrUpdatedAccess,
     ]);
   }
 </script>
