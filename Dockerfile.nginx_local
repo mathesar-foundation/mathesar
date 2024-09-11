@@ -16,7 +16,6 @@ RUN apt-get update && \
 RUN mkdir -p /etc/nginx/ssl
 RUN mkdir -p /etc/nginx/
 
-#COPY conf.d /etc/nginx/conf.d
 COPY nginx.conf /etc/nginx/nginx.conf
 
 WORKDIR /etc/nginx/ssl

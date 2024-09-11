@@ -25,3 +25,5 @@ For **Linux**: Copy the CA to **/usr/local/share/ca-certificates/** and **run su
 ## Steps to build the docker image of nginx for mathesar service is as follows (Production environment)
 
 Generate the certs using any standard format. Once available, pls. update the Dockerfile.nginx with cert location from where they have to be copied on to docker volume and update the relative paths in the nginx.conf if you wish so. 
+
+> **Note:** Proxy_pass has to be updated to DOMAIN
