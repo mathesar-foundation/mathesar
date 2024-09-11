@@ -11,7 +11,6 @@
   } from '@mathesar/components/form';
   import FormStatus from '@mathesar/components/form/FormStatus.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import RecordSummary from '@mathesar/components/RecordSummary.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
@@ -55,9 +54,7 @@
   <InsetPageLayout>
     <div slot="header" class="header">
       <h1 class="title">
-        <NameWithIcon icon={iconRecord}>
-          <RecordSummary recordSummary={$summary} />
-        </NameWithIcon>
+        <NameWithIcon icon={iconRecord}>{$summary}</NameWithIcon>
       </h1>
       <div class="table-name">
         <RichText text={$_('record_in_table')} let:slotName>

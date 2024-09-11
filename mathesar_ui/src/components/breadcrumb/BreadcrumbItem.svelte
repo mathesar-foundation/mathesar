@@ -20,8 +20,6 @@
   } from '@mathesar/routes/urls';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
 
-  import RecordSummary from '../RecordSummary.svelte';
-
   import BreadcrumbLink from './BreadcrumbLink.svelte';
   import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
   import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
@@ -76,9 +74,7 @@
         item.record.pk,
       )}
     >
-      <NameWithIcon icon={iconRecord}>
-        <RecordSummary recordSummary={item.record.summary} />
-      </NameWithIcon>
+      <NameWithIcon icon={iconRecord}>{item.record.summary}</NameWithIcon>
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'exploration'}
