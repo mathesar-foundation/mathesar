@@ -1,0 +1,30 @@
+# Useful when we need to build a single dockerfile to run a complete webservice
+ARG BASE_IMAGE=python:3.9-buster
+FROM $BASE_IMAGE as base_image
+
+ENV PORT=8000
+
+RUN apt-get update && \
+    apt-get install -y nginx libnss3-tools curl && \
+    # Install mkcert
+    curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" && \
+    chmod +x mkcert-v* && \
+    mv mkcert-v* /usr/local/bin/mkcert && \
+    mkcert -install
+
+
+RUN mkdir -p /etc/nginx/ssl
+RUN mkdir -p /etc/nginx/
+
+#COPY conf.d /etc/nginx/conf.d
+COPY nginx.conf /etc/nginx/nginx.conf
+
+WORKDIR /etc/nginx/ssl
+RUN mkcert localhost
+
+RUN ls -lrt
+
+EXPOSE 80
+EXPOSE 443
+
+CMD ["nginx", "-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
