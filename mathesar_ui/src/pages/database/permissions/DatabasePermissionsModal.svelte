@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { api } from '@mathesar/api/rpc';
   import {
     type DatabasePrivilege,
     type RawDatabasePrivilegesForRole,
@@ -8,13 +9,17 @@
   } from '@mathesar/api/rpc/databases';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+  import { toast } from '@mathesar/stores/toast';
   import {
     type AccessControlConfig,
     PermissionsModal,
     PermissionsOverview,
     TransferOwnership,
   } from '@mathesar/systems/permissions';
-  import type { ModalController } from '@mathesar-component-library';
+  import {
+    ImmutableMap,
+    type ModalController,
+  } from '@mathesar-component-library';
 
   export let controller: ModalController;
 
@@ -55,7 +60,13 @@
   async function savePrivilegesForRoles(
     privileges: RawDatabasePrivilegesForRole[],
   ) {
-    //
+    const response = await api.databases.privileges
+      .replace_for_roles({ database_id: database.id, privileges })
+      .run();
+    databasePrivileges.updateResolvedValue(
+      () => new ImmutableMap(response.map((pr) => [pr.role_oid, pr])),
+    );
+    toast.success($_('access_for_roles_saved_successfully'));
   }
 </script>
 

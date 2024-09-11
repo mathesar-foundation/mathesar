@@ -1,4 +1,5 @@
 {
+  "access_for_roles_saved_successfully": "Access for roles have been saved successfully.",
   "access_level_cannot_remove_warning": "This access level cannot be removed.",
   "access_level_inheritance_help": "This access level is inherited from the {aclObject} permissions.",
   "access_level_inheritance_is_overridden_help": "This access level is inherited from the {aclObject} permissions and is overridden by the {comparedAclObject} permissions.",
