@@ -93,9 +93,6 @@ def get_tables_meta_data(database_id):
 def set_table_meta_data(table_oid, metadata, database_id):
     TableMetaData.objects.update_or_create(
         database=Database.objects.get(id=database_id),
-        data_file=DataFile.objects.get(
-            id=metadata.pop('data_file_id')
-        ) if metadata.get('data_file_id') is not None else None,
         table_oid=table_oid,
         defaults=metadata,
     )
