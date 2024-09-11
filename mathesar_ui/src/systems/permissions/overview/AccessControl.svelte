@@ -127,7 +127,11 @@
     triggerAppearance="plain-primary"
   >
     {#each [...roles.values()] as role (role.oid)}
-      <ButtonMenuItem on:click={() => addAccess(role.oid)}>
+      <ButtonMenuItem
+        on:click={() => addAccess(role.oid)}
+        disabled={$roleAccessField.has(role.oid) ||
+          role.oid === permissionsMetaData.owner_oid}
+      >
         {role.name}
       </ButtonMenuItem>
     {/each}

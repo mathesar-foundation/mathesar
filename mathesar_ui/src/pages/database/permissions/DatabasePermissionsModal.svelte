@@ -2,9 +2,9 @@
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
-  import {
-    type DatabasePrivilege,
-    type RawDatabasePrivilegesForRole,
+  import type {
+    DatabasePrivilege,
+    RawDatabasePrivilegesForRole,
   } from '@mathesar/api/rpc/databases';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
