@@ -26,7 +26,11 @@
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentTables, updateTable } from '@mathesar/stores/tables';
+  import {
+    currentTables,
+    deleteTable,
+    updateTable,
+  } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import {
     CancelOrProceedButtonPair,
@@ -42,7 +46,6 @@
     buildColumnPropertiesMap,
     finalizeColumns,
     getSkeletonRecords,
-    makeDeleteTableRequest,
     makeHeaderUpdateRequest,
     processColumns,
   } from './importPreviewPageUtils';
@@ -50,9 +53,6 @@
 
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
-
-  const headerUpdate = makeHeaderUpdateRequest();
-  const cancelationRequest = makeDeleteTableRequest();
 
   export let database: Database;
   export let schema: Schema;
@@ -71,6 +71,15 @@
   ]);
   $: form = makeForm({ customizedTableName });
 
+  $: headerUpdateRequest = makeHeaderUpdateRequest({
+    database,
+    schema,
+    table,
+    dataFile,
+  });
+  $: cancelationRequest = new AsyncStore(() =>
+    deleteTable(database, schema, table.oid),
+  );
   $: typeSuggestionsRequest = new AsyncStore(() =>
     api.data_modeling
       .suggest_types({ table_oid: table.oid, database_id: database.id })
@@ -133,12 +142,8 @@
 
   async function toggleHeader() {
     previewRequest.reset();
-    const response = await headerUpdate.run({
-      database,
-      dataFile,
+    const response = await headerUpdateRequest.run({
       firstRowIsHeader: !dataFile.header,
-      schema,
-      table,
       customizedTableName: $customizedTableName,
     });
     if (response.resolvedValue) {
@@ -159,7 +164,7 @@
   }
 
   async function cancel() {
-    const response = await cancelationRequest.run({ database, schema, table });
+    const response = await cancelationRequest.run();
     if (response.isOk) {
       router.goto(getSchemaPageUrl(database.id, schema.oid), true);
     } else {
@@ -231,9 +236,9 @@
           on:retry={init}
           on:delete={cancel}
         />
-      {:else if $headerUpdate.error}
+      {:else if $headerUpdateRequest.error}
         <ErrorInfo
-          error={$headerUpdate.error}
+          error={$headerUpdateRequest.error}
           on:retry={init}
           on:delete={cancel}
         />
