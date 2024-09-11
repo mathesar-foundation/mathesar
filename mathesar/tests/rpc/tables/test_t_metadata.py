@@ -12,7 +12,7 @@ from mathesar.rpc.tables import metadata
 def test_tables_meta_data_list(monkeypatch):
     database_id = 2
 
-    def mock_get_tables_meta_data(_database_id):
+    def mock_list_tables_meta_data(_database_id):
         server_model = Server(id=2, host='example.com', port=5432)
         db_model = Database(id=_database_id, name='mymathesardb', server=server_model)
         return [
@@ -27,7 +27,7 @@ def test_tables_meta_data_list(monkeypatch):
                 record_summary_template="{5512} {1223}"
             )
         ]
-    monkeypatch.setattr(metadata, "get_tables_meta_data", mock_get_tables_meta_data)
+    monkeypatch.setattr(metadata, "list_tables_meta_data", mock_list_tables_meta_data)
 
     expect_metadata_list = [
         metadata.TableMetaDataRecord(

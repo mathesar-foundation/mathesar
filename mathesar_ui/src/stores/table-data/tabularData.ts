@@ -39,9 +39,19 @@ export interface TabularDataProps {
   hasEnhancedPrimaryKeyCell?: Parameters<
     typeof processColumn
   >[0]['hasEnhancedPrimaryKeyCell'];
+  /**
+   * When true, load the record summaries associated directly with each record
+   * in the table. These are *not* the record summaries associated with linked
+   * records. Instead they are the summaries of the records themselves. By
+   * default, we don't load these summaries because it's a performance hit. But
+   * we need them for the records within the record selector.
+   */
+  loadIntrinsicRecordSummaries?: boolean;
 }
 
 export class TabularData {
+  database: Pick<Database, 'id'>;
+
   table: Table;
 
   meta: Meta;
@@ -63,6 +73,7 @@ export class TabularData {
   shareConsumer?: ShareConsumer;
 
   constructor(props: TabularDataProps) {
+    this.database = props.database;
     const contextualFilters =
       props.contextualFilters ?? new Map<number, string | number>();
     this.table = props.table;
@@ -86,6 +97,7 @@ export class TabularData {
       columnsDataStore: this.columnsDataStore,
       contextualFilters,
       shareConsumer: this.shareConsumer,
+      loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
     this.display = new Display(
       this.meta,
