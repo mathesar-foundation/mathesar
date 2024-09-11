@@ -15,7 +15,6 @@
   import { RichText } from '@mathesar/components/rich-text';
   import { currentDatabase } from '@mathesar/stores/databases';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
-  import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -33,7 +32,7 @@
 
   $: ({ recordsData, columnsDataStore, isLoading } = tabularData);
   $: ({ columns } = columnsDataStore);
-  $: ({ savedRecords, recordSummaries } = recordsData);
+  $: ({ savedRecords, linkedRecordSummaries: recordSummaries } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
   $: initialCustomized = table.metadata?.record_summary_customized ?? false;
   $: initialTemplate = table.metadata?.record_summary_template ?? '';
@@ -50,11 +49,17 @@
       return undefined;
     }
     const { record } = firstRow;
-    return renderRecordSummaryForRow({
-      template: $template,
-      record,
-      transitiveData: $recordSummaries,
-    });
+
+    // TODO: Fully re-implement record summary previews across the stack, now
+    // with a new backend-centric approach since we're no longer rendering the
+    // record summary on the front end.
+
+    // return renderRecordSummaryForRow({
+    //   template: $template,
+    //   record,
+    //   transitiveData: $recordSummaries,
+    // });
+    return '';
   })();
 
   async function save() {

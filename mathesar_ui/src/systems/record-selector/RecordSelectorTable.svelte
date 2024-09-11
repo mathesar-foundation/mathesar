@@ -10,12 +10,7 @@
     constraintIsFk,
     setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
-  import {
-    buildInputData,
-    renderTransitiveRecordSummary,
-  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
-  import { currentTablesData } from '@mathesar/stores/tables';
   import overflowObserver, {
     makeOverflowDetails,
   } from '@mathesar/utils/overflowObserver';
@@ -31,7 +26,6 @@
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
   import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
-  import { getColumnIdToFocusInitially } from './recordSelectorUtils';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -56,7 +50,11 @@
     recordsData,
     processedColumns,
   } = tabularData);
-  $: ({ recordSummaries, state: recordsDataState } = recordsData);
+  $: ({
+    recordSummaries,
+    linkedRecordSummaries,
+    state: recordsDataState,
+  } = recordsData);
   $: recordsDataIsLoading = $recordsDataState === States.Loading;
   $: ({ constraints } = $constraintsDataStore);
   $: nestedSelectorIsOpen = nestedController.isOpen;
@@ -136,20 +134,9 @@
     if (!record || recordId === undefined) {
       return;
     }
-    const template = table.metadata?.record_summary_template;
-    if (!template) {
-      throw new Error('TODO_RS_TEMPLATE');
-      // TODO_RS_TEMPLATE
-      //
-      // We need to change the logic here to account for the fact that sometimes
-      // the record summary template actually _will_ be missing. We need to
-      // handle this on the client.
-    }
-    const recordSummary = renderTransitiveRecordSummary({
-      template,
-      inputData: buildInputData(record),
-      transitiveData: $recordSummaries,
-    });
+
+    const recordSummary = $recordSummaries.get(String(recordId)) ?? '';
+
     submitResult({ recordId, recordSummary, record });
   }
 
@@ -202,7 +189,7 @@
   });
 
   onMount(async () => {
-    const columnId = getColumnIdToFocusInitially({ table, columns: $columns });
+    const columnId = $columns.find((c) => !c.primary_key)?.id;
     if (columnId === undefined) {
       return;
     }
@@ -246,7 +233,7 @@
               {overflowDetails}
               {processedColumn}
               {searchFuzzy}
-              recordSummaryStore={recordSummaries}
+              recordSummaryStore={linkedRecordSummaries}
               on:focus={() => handleInputFocus(column)}
               on:blur={() => handleInputBlur()}
               on:recordSelectorOpen={() => {
@@ -294,7 +281,7 @@
               <RecordSelectorDataCell
                 {row}
                 {processedColumn}
-                {recordSummaries}
+                {linkedRecordSummaries}
                 {searchFuzzy}
                 isLoading={recordsDataIsLoading}
               />

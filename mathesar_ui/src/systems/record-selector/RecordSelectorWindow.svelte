@@ -40,6 +40,7 @@
           meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
           hasEnhancedPrimaryKeyCell: false,
           table,
+          loadIntrinsicRecordSummaries: true,
         })
       : undefined;
   $: nestedSelectorIsOpen = nestedController.isOpen;

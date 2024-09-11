@@ -2,16 +2,11 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import { States, postAPI } from '@mathesar/api/rest/utils/requestUtils';
-  import type { RecordsResponse } from '@mathesar/api/rpc/records';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import { api } from '@mathesar/api/rpc';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
-  import {
-    buildInputData,
-    buildRecordSummariesForSheet,
-    renderTransitiveRecordSummary,
-  } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -33,6 +28,7 @@
   let isHoveringCreate = false;
 
   $: ({
+    database,
     constraintsDataStore,
     meta,
     isLoading,
@@ -66,34 +62,27 @@
     }
   }
 
-  function getDataForNewRecord(): Record<number, unknown> {
+  function getDataForNewRecord(): Record<string, unknown> {
     const pkColumnIds = $columns.filter((c) => c.primary_key).map((c) => c.id);
     return Object.fromEntries($searchFuzzy.without(pkColumnIds));
   }
 
   async function submitNewRecord() {
-    const url = `/api/db/v0/tables/${table.oid}/records/`;
-    const body = getDataForNewRecord();
     try {
       isSubmittingNewRecord = true;
-      const response = await postAPI<RecordsResponse>(url, body);
+      const response = await api.records
+        .add({
+          database_id: database.id,
+          table_oid: table.oid,
+          record_def: getDataForNewRecord(),
+          return_record_summaries: true,
+        })
+        .run();
       const record = response.results[0];
       const recordId = getPkValueInRecord(record, $columns);
-      const previewData = response.preview_data ?? [];
-      const template = table.metadata?.record_summary_template;
-      // TODO_RS_TEMPLATE
-      //
-      // We need to change the logic here to account for the fact that sometimes
-      // the record summary template actually _will_ be missing. We need to
-      // handle this on the client.
-      if (!template) {
-        throw new Error('TODO_RS_TEMPLATE');
-      }
-      const recordSummary = renderTransitiveRecordSummary({
-        inputData: buildInputData(record),
-        template,
-        transitiveData: buildRecordSummariesForSheet(previewData),
-      });
+
+      const recordSummary = response.record_summaries?.[recordId] ?? '';
+
       submitResult({ recordId, recordSummary, record });
     } catch (err) {
       toast.error(getErrorMessage(err));

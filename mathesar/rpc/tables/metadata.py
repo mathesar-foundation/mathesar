@@ -7,7 +7,7 @@ from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.utils.tables import get_tables_meta_data, set_table_meta_data
+from mathesar.utils.tables import list_tables_meta_data, set_table_meta_data
 
 
 class TableMetaDataRecord(TypedDict):
@@ -90,7 +90,7 @@ def list_(*, database_id: int, **kwargs) -> list[TableMetaDataRecord]:
     Returns:
         Metadata object for a given table oid.
     """
-    table_meta_data = get_tables_meta_data(database_id)
+    table_meta_data = list_tables_meta_data(database_id)
     return [
         TableMetaDataRecord.from_model(model) for model in table_meta_data
     ]
