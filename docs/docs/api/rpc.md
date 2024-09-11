@@ -126,6 +126,8 @@ To use an RPC function:
       - import_
       - get_import_preview
       - list_joinable
+      - list_with_metadata
+      - get_with_metadata
       - TableInfo
       - AddedTableInfo
       - SettableTableInfo

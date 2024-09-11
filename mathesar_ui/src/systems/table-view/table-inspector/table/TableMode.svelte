@@ -41,12 +41,13 @@
     </div>
   </Collapsible>
 
-  <Collapsible triggerAppearance="plain">
+  <!-- TODO_BETA: re-enable this once we make the record summary template configurable -->
+  <!-- <Collapsible triggerAppearance="plain">
     <CollapsibleHeader slot="header" title={$_('record_summary')} />
     <div slot="content" class="content-container">
       <RecordSummaryConfig table={$currentTable} tabularData={$tabularData} />
     </div>
-  </Collapsible>
+  </Collapsible> -->
 
   <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title={$_('actions')} />
