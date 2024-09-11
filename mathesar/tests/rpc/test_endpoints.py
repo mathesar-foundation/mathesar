@@ -133,6 +133,11 @@ METHODS = [
         "data_modeling.split_table",
         [user_is_authenticated]
     ),
+    (
+        data_modeling.move_columns,
+        "data_modeling.move_columns",
+        [user_is_authenticated]
+    ),
 
     (
         databases.get,

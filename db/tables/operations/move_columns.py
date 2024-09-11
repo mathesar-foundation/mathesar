@@ -2,12 +2,23 @@ from sqlalchemy import exists, func, literal, select
 from sqlalchemy.dialects.postgresql import insert
 
 from db import constants
+from db.connection import exec_msar_func
 from db.columns.base import MathesarColumn
 from db.columns.operations.alter import batch_alter_table_drop_columns
 from db.columns.operations.create import bulk_create_mathesar_column
 from db.columns.operations.select import get_column_names_from_attnums
 from db.tables.operations.select import reflect_table_from_oid
 from db.metadata import get_empty_metadata
+
+
+def move_columns_to_referenced_table(conn, source_table_oid, target_table_oid, move_column_attnums):
+    exec_msar_func(
+        conn,
+        'move_columns_to_referenced_table',
+        source_table_oid,
+        target_table_oid,
+        move_column_attnums
+    )
 
 
 def move_columns_between_related_tables(
