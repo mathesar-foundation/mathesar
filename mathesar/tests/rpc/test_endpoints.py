@@ -161,6 +161,11 @@ METHODS = [
         "databases.privileges.replace_for_roles",
         [user_is_authenticated]
     ),
+    (
+        databases.privileges.transfer_ownership,
+        "databases.privileges.transfer_ownership",
+        [user_is_authenticated]
+    ),
 
     (
         databases.setup.create_new,
