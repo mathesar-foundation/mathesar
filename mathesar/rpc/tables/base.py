@@ -16,7 +16,7 @@ from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.tables.metadata import TableMetaDataBlob
 from mathesar.rpc.utils import connect
-from mathesar.utils.tables import get_tables_meta_data
+from mathesar.utils.tables import list_tables_meta_data, get_table_meta_data
 
 
 class TableInfo(TypedDict):
@@ -367,15 +367,37 @@ def list_with_metadata(*, schema_oid: int, database_id: int, **kwargs) -> list:
         database_id: The Django id of the database containing the table.
 
     Returns:
-        A list of table details.
+        A list of table details along with metadata.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         tables = get_table_info(schema_oid, conn)
 
-    metadata_records = get_tables_meta_data(database_id)
+    metadata_records = list_tables_meta_data(database_id)
     metadata_map = {
         r.table_oid: TableMetaDataBlob.from_model(r) for r in metadata_records
     }
 
     return [table | {"metadata": metadata_map.get(table["oid"])} for table in tables]
+
+
+@rpc_method(name="tables.get_with_metadata")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> dict:
+    """
+    Get information about a table in a schema, along with the associated table metadata.
+
+    Args:
+        table_oid: The OID of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        A dict describing table details along with its metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        table = get_table(table_oid, conn)
+
+    raw_metadata = get_table_meta_data(table_oid, database_id)
+    return TableInfo(table) | {"metadata": TableMetaDataBlob.from_model(raw_metadata)}
