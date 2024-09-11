@@ -41,7 +41,7 @@ class TableMetaDataRecord(TypedDict):
             id=model.id,
             database_id=model.database.id,
             table_oid=model.table_oid,
-            data_file_id=model.data_file.id if model.data_file is not None else None,
+            data_file_id=model.data_file_id,
             import_verified=model.import_verified,
             column_order=model.column_order,
             record_summary_customized=model.record_summary_customized,
@@ -69,7 +69,7 @@ class TableMetaDataBlob(TypedDict):
     @classmethod
     def from_model(cls, model):
         return cls(
-            data_file_id=model.data_file.id if model.data_file is not None else None,
+            data_file_id=model.data_file_id,
             import_verified=model.import_verified,
             column_order=model.column_order,
             record_summary_customized=model.record_summary_customized,
