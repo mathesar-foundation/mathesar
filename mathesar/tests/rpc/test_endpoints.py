@@ -363,6 +363,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        tables.get_with_metadata,
+        "tables.get_with_metadata",
+        [user_is_authenticated]
+    ),
+    (
         tables.patch,
         "tables.patch",
         [user_is_authenticated]
