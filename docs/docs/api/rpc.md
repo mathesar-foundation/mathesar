@@ -278,6 +278,7 @@ To use an RPC function:
       - add_mapping_table
       - suggest_types
       - split_table
+      - move_columns
       - MappingColumn
 
 ## Responses
