@@ -12,92 +12,73 @@
     Select,
   } from '@mathesar-component-library';
 
-  import RoleWithChildren from './RoleWithChildren.svelte';
   import {
-    type AccessLevelConfig,
     type RoleAccessLevelAndPrivileges,
     customAccess,
-  } from './utils';
+  } from './RoleAccessLevelAndPrivileges';
+  import RoleWithChildren from './RoleWithChildren.svelte';
+  import { type AccessControlConfig } from './utils';
 
   type AccessLevel = $$Generic;
   type Privilege = $$Generic;
 
   export let rolesMap: ImmutableMap<Role['oid'], Role>;
-  export let privileges: Privilege[];
-  export let accessLevels: AccessLevelConfig<AccessLevel, Privilege>[];
+  export let config: AccessControlConfig<AccessLevel, Privilege>;
+  export let roleAccess: RoleAccessLevelAndPrivileges<AccessLevel, Privilege>;
 
-  export let roleAccessLevelAndPrivileges: RoleAccessLevelAndPrivileges<
-    AccessLevel,
-    Privilege
-  >;
-  export let setRoleAccessLevelAndPrivileges: (
+  export let setAccess: (
     roleOid: Role['oid'],
-    accessLevelPrivileges: RoleAccessLevelAndPrivileges<AccessLevel, Privilege>,
+    access: RoleAccessLevelAndPrivileges<AccessLevel, Privilege>,
   ) => void;
+  export let removeAccess: (roleOid: Role['oid']) => void;
 
   let isRolePermissionsOpen = false;
 
-  function removeAccess() {
-    setRoleAccessLevelAndPrivileges(
-      roleAccessLevelAndPrivileges.roleOid,
-      roleAccessLevelAndPrivileges.withAccessRemoved(),
-    );
-  }
-
   function setCustomPrivileges(pr: Privilege[]) {
-    setRoleAccessLevelAndPrivileges(
-      roleAccessLevelAndPrivileges.roleOid,
-      roleAccessLevelAndPrivileges.withCustomAccess(pr),
-    );
+    setAccess(roleAccess.roleOid, roleAccess.withCustomAccess(pr));
   }
 
   function changeAccess(option?: AccessLevel | typeof customAccess) {
-    switch (option) {
-      case customAccess:
-        setRoleAccessLevelAndPrivileges(
-          roleAccessLevelAndPrivileges.roleOid,
-          roleAccessLevelAndPrivileges.withCustomAccess(),
-        );
+    if (option) {
+      if (option === customAccess) {
+        setAccess(roleAccess.roleOid, roleAccess.withCustomAccess());
         isRolePermissionsOpen = true;
-        break;
-      case undefined:
-        removeAccess();
-        break;
-      default:
-        setRoleAccessLevelAndPrivileges(
-          roleAccessLevelAndPrivileges.roleOid,
-          roleAccessLevelAndPrivileges.withAccess(option),
-        );
+      } else {
+        setAccess(roleAccess.roleOid, roleAccess.withAccess(option));
+      }
     }
   }
 </script>
 
-<div class="access-selection-section">
-  <RoleWithChildren {rolesMap} roleOid={roleAccessLevelAndPrivileges.roleOid} />
+<div class="access-selection">
+  <RoleWithChildren {rolesMap} roleOid={roleAccess.roleOid} />
   <div>
     <Select
-      options={[...accessLevels.map((entry) => entry.id), customAccess]}
-      value={roleAccessLevelAndPrivileges.accessLevel}
+      options={[...config.access.levels.map((entry) => entry.id), customAccess]}
+      value={roleAccess.accessLevel}
       on:change={(e) => changeAccess(e.detail)}
     />
   </div>
   <div>
-    <Button appearance="secondary" on:click={removeAccess}>
+    <Button
+      appearance="secondary"
+      on:click={() => removeAccess(roleAccess.roleOid)}
+    >
       <Icon {...iconDeleteMinor} />
     </Button>
   </div>
 </div>
-{#if roleAccessLevelAndPrivileges.accessLevel === customAccess}
-  <div class="role-permissions-section">
+{#if roleAccess.accessLevel === customAccess}
+  <div class="role-permissions">
     <Collapsible bind:isOpen={isRolePermissionsOpen} triggerAppearance="plain">
       <div slot="header">
         {$_('role_permissions')}
       </div>
       <div class="content" slot="content">
         <CheckboxGroup
-          values={roleAccessLevelAndPrivileges.privileges.valuesArray()}
+          values={roleAccess.privileges.valuesArray()}
           on:artificialChange={(e) => setCustomPrivileges(e.detail)}
-          options={privileges}
+          options={config.allPrivileges}
           getCheckboxLabel={(o) => String(o)}
           getCheckboxHelp={(o) => String(o)}
         />
@@ -107,12 +88,12 @@
 {/if}
 
 <style lang="scss">
-  .access-selection-section {
+  .access-selection {
     display: grid;
     grid-template-columns: 2fr 1fr auto;
     gap: var(--size-ultra-small);
   }
-  .role-permissions-section {
+  .role-permissions {
     margin-top: var(--size-xx-small);
     --Collapsible_trigger-padding: var(--size-extreme-small) 0;
     --Collapsible_header-font-weight: 400;

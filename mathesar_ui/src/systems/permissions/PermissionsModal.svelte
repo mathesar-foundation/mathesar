@@ -39,7 +39,7 @@
     >
       <div class="tab-content">
         {#if activeTab.id === 'share'}
-          <slot name="privileges" {controller} />
+          <slot name="share" {controller} />
         {:else}
           <slot name="transfer-ownership" {controller} />
         {/if}
@@ -51,5 +51,9 @@
 <style lang="scss">
   .tabs {
     --Tab_margin-right: var(--size-small);
+
+    .tab-content {
+      margin-top: var(--size-base);
+    }
   }
 </style>

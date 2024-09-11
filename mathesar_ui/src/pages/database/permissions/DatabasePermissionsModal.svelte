@@ -1,12 +1,19 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { allDatabasePrivileges } from '@mathesar/api/rpc/databases';
+  import {
+    type DatabasePrivilege,
+    type RawDatabasePrivilegesForRole,
+    allDatabasePrivileges,
+  } from '@mathesar/api/rpc/databases';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-  import PermissionsModal from '@mathesar/systems/permissions/PermissionsModal.svelte';
-  import PrivilegesSection from '@mathesar/systems/permissions/PrivilegesSection.svelte';
-  import TransferOwnershipSection from '@mathesar/systems/permissions/TransferOwnershipSection.svelte';
+  import {
+    type AccessControlConfig,
+    PermissionsModal,
+    PermissionsOverview,
+    TransferOwnership,
+  } from '@mathesar/systems/permissions';
   import type { ModalController } from '@mathesar-component-library';
 
   export let controller: ModalController;
@@ -15,7 +22,24 @@
   $: ({ database, roles, underlyingDatabase } = $databaseContext);
   $: databasePrivileges = database.constructDatabasePrivilegesStore();
 
-  function getAsyncStores() {
+  const accessControlConfig: AccessControlConfig<
+    'connect' | 'connect_and_create',
+    DatabasePrivilege
+  > = {
+    allPrivileges: allDatabasePrivileges,
+    access: {
+      levels: [
+        { id: 'connect', privileges: new Set(['CONNECT']) },
+        {
+          id: 'connect_and_create',
+          privileges: new Set(['CONNECT', 'CREATE']),
+        },
+      ],
+      default: 'connect',
+    },
+  };
+
+  function getAsyncStoresForPermissions() {
     void AsyncRpcApiStore.runBatched([
       databasePrivileges.batchRunner({ database_id: database.id }),
       roles.batchRunner({ database_id: database.id }),
@@ -23,28 +47,28 @@
     ]);
     return {
       roles,
-      objectPrivileges: databasePrivileges,
-      objectOwnerAndCurrentRolePrivileges: underlyingDatabase,
+      privilegesForRoles: databasePrivileges,
+      permissionsMetaData: underlyingDatabase,
     };
   }
 
-  function savePermissions() {}
+  async function savePrivilegesForRoles(
+    privileges: RawDatabasePrivilegesForRole[],
+  ) {
+    //
+  }
 </script>
 
 <PermissionsModal {controller} onClose={() => databasePrivileges.reset()}>
   <span slot="title">
     {$_('database_permissions')}
   </span>
-  <PrivilegesSection
-    slot="privileges"
+  <PermissionsOverview
+    slot="share"
     {controller}
-    accessLevelConfig={[
-      { id: 'connect', privileges: new Set(['CONNECT']) },
-      { id: 'connect_and_create', privileges: new Set(['CONNECT', 'CREATE']) },
-    ]}
-    allPrivileges={[...allDatabasePrivileges]}
-    {getAsyncStores}
-    {savePermissions}
+    {accessControlConfig}
+    getAsyncStores={getAsyncStoresForPermissions}
+    {savePrivilegesForRoles}
   />
-  <TransferOwnershipSection slot="transfer-ownership" {controller} />
+  <TransferOwnership slot="transfer-ownership" {controller} />
 </PermissionsModal>

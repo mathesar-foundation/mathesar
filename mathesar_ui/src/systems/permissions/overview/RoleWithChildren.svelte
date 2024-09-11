@@ -45,6 +45,9 @@
       font-weight: 500;
       display: inline-block;
     }
+    .member-count {
+      font-size: var(--text-size-small);
+    }
     .members {
       .member {
         margin: var(--size-xx-small) var(--size-large);
