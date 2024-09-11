@@ -17,7 +17,7 @@
     customAccess,
   } from './RoleAccessLevelAndPrivileges';
   import RoleWithChildren from './RoleWithChildren.svelte';
-  import { type AccessControlConfig } from './utils';
+  import type { AccessControlConfig } from './utils';
 
   type AccessLevel = $$Generic;
   type Privilege = $$Generic;

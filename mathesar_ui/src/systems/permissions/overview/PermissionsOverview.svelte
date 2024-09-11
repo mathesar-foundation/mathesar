@@ -11,10 +11,10 @@
 
   import AccessControl from './AccessControl.svelte';
   import Owner from './Owner.svelte';
-  import {
-    type AccessControlConfig,
-    type PermissionsAsyncStores,
-    type RolePrivileges,
+  import type {
+    AccessControlConfig,
+    PermissionsAsyncStores,
+    RolePrivileges,
   } from './utils';
 
   type AccessLevel = $$Generic;

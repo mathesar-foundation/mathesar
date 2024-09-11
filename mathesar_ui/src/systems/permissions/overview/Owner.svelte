@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { Role } from '@mathesar/models/Role';
-  import { type ImmutableMap } from '@mathesar-component-library';
+  import type { ImmutableMap } from '@mathesar-component-library';
 
   import OverviewSection from './OverviewSection.svelte';
   import RoleWithChildren from './RoleWithChildren.svelte';
