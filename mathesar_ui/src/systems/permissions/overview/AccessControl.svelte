@@ -69,6 +69,7 @@
   $: accessLevelsInfoMap = new Map(
     accessLevelsInfoWithCustom.map((e) => [e.id, e]),
   );
+  $: privilegeInfoMap = new Map(config.allPrivileges.map((pr) => [pr.id, pr]));
 
   function addAccess(roleOid: Role['oid']) {
     const newRalp = new RoleAccessLevelAndPrivileges({
@@ -136,7 +137,7 @@
       <AccessControlRow
         rolesMap={roles}
         {accessLevelsInfoMap}
-        allPrivileges={config.allPrivileges}
+        {privilegeInfoMap}
         {roleAccess}
         {setAccess}
         {removeAccess}

@@ -30,7 +30,13 @@
       help: string;
     }
   >;
-  export let allPrivileges: readonly Privilege[];
+  export let privilegeInfoMap: Map<
+    Privilege,
+    {
+      id: Privilege;
+      help: string;
+    }
+  >;
   export let roleAccess: RoleAccessLevelAndPrivileges<AccessLevel, Privilege>;
 
   export let setAccess: (
@@ -96,9 +102,9 @@
         <CheckboxGroup
           values={roleAccess.privileges.valuesArray()}
           on:artificialChange={(e) => setCustomPrivileges(e.detail)}
-          options={allPrivileges}
+          options={[...privilegeInfoMap.keys()]}
           getCheckboxLabel={(o) => String(o)}
-          getCheckboxHelp={(o) => String(o)}
+          getCheckboxHelp={(o) => privilegeInfoMap.get(o)?.help ?? ''}
         />
       </div>
     </Collapsible>

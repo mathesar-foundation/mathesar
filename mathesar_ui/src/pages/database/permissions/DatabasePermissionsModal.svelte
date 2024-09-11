@@ -5,7 +5,6 @@
   import {
     type DatabasePrivilege,
     type RawDatabasePrivilegesForRole,
-    allDatabasePrivileges,
   } from '@mathesar/api/rpc/databases';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
@@ -31,7 +30,20 @@
     'connect' | 'connect_and_create',
     DatabasePrivilege
   > = {
-    allPrivileges: allDatabasePrivileges,
+    allPrivileges: [
+      {
+        id: 'CONNECT',
+        help: $_('database_privilege_connect_help'),
+      },
+      {
+        id: 'CREATE',
+        help: $_('database_privilege_create_help'),
+      },
+      {
+        id: 'TEMPORARY',
+        help: $_('database_privilege_temporary_help'),
+      },
+    ],
     access: {
       levels: [
         {

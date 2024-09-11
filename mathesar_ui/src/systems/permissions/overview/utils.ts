@@ -15,7 +15,10 @@ export interface RolePrivileges<Privilege> {
 }
 
 export interface AccessControlConfig<AccessLevel, Privilege> {
-  allPrivileges: readonly Privilege[];
+  allPrivileges: {
+    id: Privilege;
+    help: string;
+  }[];
   access: {
     levels: readonly AccessLevelConfig<AccessLevel, Privilege>[];
     default: AccessLevel;
