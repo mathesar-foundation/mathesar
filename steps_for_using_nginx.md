@@ -5,9 +5,11 @@
 **docker build -f Dockerfile.nginx_local -t nginx .**
 
 we are opening ports 443 for HTTPS and 80 for HTTP which will help redirect the requests
-
-**docker run -d -p 443:443 -p 80:80 -e DOMAIN=localhost nginx**
-
+```
+docker run -d -p 443:443 -p 80:80 -e DOMAIN=localhost nginx
+                    or
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up dev_service_secured
+```
 
 Since the certs are being built on the local and not universal trusted, we need to follow extra steps of moving the root CA from docker image to development host and whitelist the same under the truststore. 
 
