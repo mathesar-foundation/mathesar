@@ -15,10 +15,10 @@
       id: 'share',
       label: $_('share'),
     },
-    {
-      id: 'transfer_ownership',
-      label: $_('transfer_ownership'),
-    },
+    // {
+    //   id: 'transfer_ownership',
+    //   label: $_('transfer_ownership'),
+    // },
   ];
   let activeTab = tabs[0];
 

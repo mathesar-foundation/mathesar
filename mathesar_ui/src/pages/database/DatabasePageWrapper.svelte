@@ -76,7 +76,7 @@
         <span>{$_('database_permissions')}</span>
       </Button>
 
-      <DropdownMenu
+      <!-- <DropdownMenu
         showArrow={false}
         triggerAppearance="plain"
         closeOnInnerClick={false}
@@ -89,7 +89,7 @@
         <ButtonMenuItem icon={iconDeleteMajor} danger>
           {$_('delete_database')}
         </ButtonMenuItem>
-      </DropdownMenu>
+      </DropdownMenu> -->
     </div>
   </AppSecondaryHeader>
 
