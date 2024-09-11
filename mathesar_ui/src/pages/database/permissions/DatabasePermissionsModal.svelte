@@ -34,10 +34,17 @@
     allPrivileges: allDatabasePrivileges,
     access: {
       levels: [
-        { id: 'connect', privileges: new Set(['CONNECT']) },
+        {
+          id: 'connect',
+          privileges: new Set(['CONNECT']),
+          name: $_('connect'),
+          help: $_('database_access_connect_help'),
+        },
         {
           id: 'connect_and_create',
           privileges: new Set(['CONNECT', 'CREATE']),
+          name: $_('create'),
+          help: $_('database_access_create_help'),
         },
       ],
       default: 'connect',

@@ -19,7 +19,10 @@
 
   import AccessControlRow from './AccessControlRow.svelte';
   import OverviewSection from './OverviewSection.svelte';
-  import { RoleAccessLevelAndPrivileges } from './RoleAccessLevelAndPrivileges';
+  import {
+    RoleAccessLevelAndPrivileges,
+    customAccess,
+  } from './RoleAccessLevelAndPrivileges';
   import {
     type AccessControlConfig,
     type PermissionsMetaData,
@@ -50,6 +53,22 @@
     getObjectAccessPrivilegeMap(config.access.levels, modifiablePrivileges),
   );
   $: form = makeForm({ roleAccessField });
+
+  $: accessLevelsInfoWithCustom = [
+    ...config.access.levels.map((aL) => ({
+      id: aL.id,
+      name: aL.name,
+      help: aL.help,
+    })),
+    {
+      id: customAccess,
+      name: $_('custom'),
+      help: $_('access_custom_help'),
+    },
+  ];
+  $: accessLevelsInfoMap = new Map(
+    accessLevelsInfoWithCustom.map((e) => [e.id, e]),
+  );
 
   function addAccess(roleOid: Role['oid']) {
     const newRalp = new RoleAccessLevelAndPrivileges({
@@ -116,7 +135,8 @@
     <div class="access-control-row">
       <AccessControlRow
         rolesMap={roles}
-        {config}
+        {accessLevelsInfoMap}
+        allPrivileges={config.allPrivileges}
         {roleAccess}
         {setAccess}
         {removeAccess}

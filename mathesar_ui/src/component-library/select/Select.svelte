@@ -163,7 +163,9 @@
     on:blur
   >
     <svelte:fragment slot="trigger">
-      {#if $$slots.default}
+      {#if $$slots.trigger}
+        <slot name="trigger" option={value} label={getLabel(value)} />
+      {:else if $$slots.default}
         <slot option={value} label={getLabel(value)} />
       {:else}
         <StringOrComponent arg={getLabel(value)} />

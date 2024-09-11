@@ -1,7 +1,12 @@
 import type { Role } from '@mathesar/models/Role';
 import { ImmutableSet } from '@mathesar-component-library';
 
-export type AccessLevelConfig<A, P> = { id: A; privileges: Set<P> };
+export type AccessLevelConfig<A, P> = {
+  id: A;
+  privileges: Set<P>;
+  name: string;
+  help: string;
+};
 
 export const customAccess = 'custom' as const;
 

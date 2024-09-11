@@ -17,13 +17,20 @@
     customAccess,
   } from './RoleAccessLevelAndPrivileges';
   import RoleWithChildren from './RoleWithChildren.svelte';
-  import type { AccessControlConfig } from './utils';
 
   type AccessLevel = $$Generic;
   type Privilege = $$Generic;
 
   export let rolesMap: ImmutableMap<Role['oid'], Role>;
-  export let config: AccessControlConfig<AccessLevel, Privilege>;
+  export let accessLevelsInfoMap: Map<
+    AccessLevel | typeof customAccess,
+    {
+      id: AccessLevel | typeof customAccess;
+      name: string;
+      help: string;
+    }
+  >;
+  export let allPrivileges: readonly Privilege[];
   export let roleAccess: RoleAccessLevelAndPrivileges<AccessLevel, Privilege>;
 
   export let setAccess: (
@@ -54,10 +61,21 @@
   <RoleWithChildren {rolesMap} roleOid={roleAccess.roleOid} />
   <div>
     <Select
-      options={[...config.access.levels.map((entry) => entry.id), customAccess]}
+      options={[...accessLevelsInfoMap.keys()]}
       value={roleAccess.accessLevel}
       on:change={(e) => changeAccess(e.detail)}
-    />
+      let:option
+    >
+      <div slot="trigger">
+        {accessLevelsInfoMap.get(option)?.name ?? ''}
+      </div>
+      {#if option}
+        <div class="access-selection-option">
+          <div class="name">{accessLevelsInfoMap.get(option)?.name ?? ''}</div>
+          <div class="help">{accessLevelsInfoMap.get(option)?.help ?? ''}</div>
+        </div>
+      {/if}
+    </Select>
   </div>
   <div>
     <Button
@@ -78,7 +96,7 @@
         <CheckboxGroup
           values={roleAccess.privileges.valuesArray()}
           on:artificialChange={(e) => setCustomPrivileges(e.detail)}
-          options={config.allPrivileges}
+          options={allPrivileges}
           getCheckboxLabel={(o) => String(o)}
           getCheckboxHelp={(o) => String(o)}
         />
@@ -92,6 +110,17 @@
     display: grid;
     grid-template-columns: 2fr 1fr auto;
     gap: var(--size-ultra-small);
+  }
+  .access-selection-option {
+    .name {
+      font-weight: 500;
+    }
+    .help {
+      margin-top: var(--size-extreme-small);
+      font-size: var(--text-size-small);
+      white-space: normal;
+      max-width: 15rem;
+    }
   }
   .role-permissions {
     margin-top: var(--size-xx-small);
