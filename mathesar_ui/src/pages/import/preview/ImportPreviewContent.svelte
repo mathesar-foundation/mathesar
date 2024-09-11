@@ -85,14 +85,15 @@
       .suggest_types({ table_oid: table.oid, database_id: database.id })
       .run(),
   );
-  $: previewRequest = new AsyncStore((columns: ColumnPreviewSpec[]) =>
-    api.tables
-      .get_import_preview({
-        database_id: database.id,
-        table_oid: table.oid,
-        columns,
-      })
-      .run(),
+  $: previewRequest = new AsyncStore(
+    (columnPreviewSpecs: ColumnPreviewSpec[]) =>
+      api.tables
+        .get_import_preview({
+          database_id: database.id,
+          table_oid: table.oid,
+          columns: columnPreviewSpecs,
+        })
+        .run(),
   );
   $: columnsFetch = new AsyncStore(runner(api.columns.list_with_metadata));
 
@@ -147,7 +148,7 @@
       customizedTableName: $customizedTableName,
     });
     if (response.resolvedValue) {
-      reload({ table: response.resolvedValue });
+      reload({ table: response.resolvedValue, useColumnTypeInference });
     }
   }
 

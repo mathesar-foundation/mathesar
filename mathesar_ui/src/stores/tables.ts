@@ -245,7 +245,7 @@ export async function updateTable({
   table: RecursivePartial<Table> & { oid: Table['oid'] };
   columnPatchSpecs?: ColumnPatchSpec[];
   columnsToDelete?: number[];
-}): Promise<void> {
+}): Promise<Table> {
   const requests: RpcRequest<void>[] = [];
   if (table.name || table.description) {
     requests.push(
@@ -288,12 +288,13 @@ export async function updateTable({
   }
   await batchSend(requests);
 
+  let newTable: Table | undefined;
   const tableStore = findStoreContainingTable(database, table.oid);
   if (!tableStore) throw new Error('Table store not found');
   tableStore.update((tablesData) => {
     const oldTable = tablesData.tablesMap.get(table.oid);
     if (!oldTable) throw new Error('Table not found within store.');
-    const newTable = mergeTables(oldTable, table);
+    newTable = mergeTables(oldTable, table);
     tablesData.tablesMap.set(table.oid, newTable);
     const tablesMap: TablesMap = new Map();
     sortTables([...tablesData.tablesMap.values()]).forEach((t) => {
@@ -301,6 +302,8 @@ export async function updateTable({
     });
     return { ...tablesData, tablesMap };
   });
+  if (!newTable) throw new Error('Table not updated.');
+  return newTable;
 }
 
 function addTableToStore({
@@ -356,36 +359,42 @@ export function createTable({
   );
 }
 
-export function createTableFromDataFile({
-  database,
-  schema,
-  dataFile,
-  name,
-}: {
+export async function createTableFromDataFile(props: {
   database: Pick<Database, 'id'>;
   schema: Pick<Schema, 'oid'>;
   dataFile: Pick<DataFile, 'id'>;
   name?: string;
-}): CancellablePromise<Table> {
-  const promise = api.tables
+}): Promise<Table> {
+  const created = await api.tables
     .import({
-      database_id: database.id,
-      schema_oid: schema.oid,
-      table_name: name ?? '',
-      data_file_id: dataFile.id,
+      database_id: props.database.id,
+      schema_oid: props.schema.oid,
+      table_name: props.name,
+      data_file_id: props.dataFile.id,
     })
     .run();
-  return new CancellablePromise(
-    (resolve, reject) => {
-      void promise.then(
-        (table) => resolve(addTableToStore({ database, schema, table })),
-        reject,
-      );
+
+  const basicTable = addTableToStore({
+    database: props.database,
+    schema: props.schema,
+    table: {
+      oid: created.oid,
+      name: created.name,
+      schema: props.schema.oid,
     },
-    () => {
-      promise.cancel();
+  });
+
+  const fullTable = await updateTable({
+    database: props.database,
+    table: {
+      ...basicTable,
+      metadata: {
+        import_verified: false,
+        data_file_id: props.dataFile.id,
+      },
     },
-  );
+  });
+  return fullTable;
 }
 
 export function splitTable({
