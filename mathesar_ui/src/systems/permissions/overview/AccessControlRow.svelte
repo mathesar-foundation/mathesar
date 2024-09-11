@@ -17,11 +17,14 @@
     customAccess,
   } from './RoleAccessLevelAndPrivileges';
   import RoleWithChildren from './RoleWithChildren.svelte';
+  import type { PermissionsMetaData } from './utils';
 
   type AccessLevel = $$Generic;
   type Privilege = $$Generic;
 
   export let rolesMap: ImmutableMap<Role['oid'], Role>;
+  export let permissionsMetaData: PermissionsMetaData<Privilege>;
+
   export let accessLevelsInfoMap: Map<
     AccessLevel | typeof customAccess,
     {
@@ -66,31 +69,43 @@
 <div class="access-selection">
   <RoleWithChildren {rolesMap} roleOid={roleAccess.roleOid} />
   <div>
-    <Select
-      options={[...accessLevelsInfoMap.keys()]}
-      value={roleAccess.accessLevel}
-      on:change={(e) => changeAccess(e.detail)}
-      let:option
-    >
-      <div slot="trigger">
-        {accessLevelsInfoMap.get(option)?.name ?? ''}
-      </div>
-      {#if option}
-        <div class="access-selection-option">
-          <div class="name">{accessLevelsInfoMap.get(option)?.name ?? ''}</div>
-          <div class="help">{accessLevelsInfoMap.get(option)?.help ?? ''}</div>
+    {#if permissionsMetaData.current_role_owns}
+      <Select
+        options={[...accessLevelsInfoMap.keys()]}
+        value={roleAccess.accessLevel}
+        on:change={(e) => changeAccess(e.detail)}
+        let:option
+      >
+        <div slot="trigger">
+          {accessLevelsInfoMap.get(option)?.name ?? ''}
         </div>
-      {/if}
-    </Select>
+        {#if option}
+          <div class="access-selection-option">
+            <div class="name">
+              {accessLevelsInfoMap.get(option)?.name ?? ''}
+            </div>
+            <div class="help">
+              {accessLevelsInfoMap.get(option)?.help ?? ''}
+            </div>
+          </div>
+        {/if}
+      </Select>
+    {:else}
+      <div class="access-level-static">
+        {accessLevelsInfoMap.get(roleAccess.accessLevel)?.name ?? ''}
+      </div>
+    {/if}
   </div>
-  <div>
-    <Button
-      appearance="secondary"
-      on:click={() => removeAccess(roleAccess.roleOid)}
-    >
-      <Icon {...iconDeleteMinor} />
-    </Button>
-  </div>
+  {#if permissionsMetaData.current_role_owns}
+    <div>
+      <Button
+        appearance="secondary"
+        on:click={() => removeAccess(roleAccess.roleOid)}
+      >
+        <Icon {...iconDeleteMinor} />
+      </Button>
+    </div>
+  {/if}
 </div>
 {#if roleAccess.accessLevel === customAccess}
   <div class="role-permissions">
@@ -127,6 +142,10 @@
       white-space: normal;
       max-width: 15rem;
     }
+  }
+  .access-level-static {
+    text-align: right;
+    font-weight: 500;
   }
   .role-permissions {
     margin-top: var(--size-xx-small);

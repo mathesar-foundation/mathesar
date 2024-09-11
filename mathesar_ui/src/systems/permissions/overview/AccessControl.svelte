@@ -120,26 +120,31 @@
 </script>
 
 <OverviewSection title={$_('granted_access')}>
-  <DropdownMenu
-    slot="actions"
-    label={$_('add_roles')}
-    icon={iconAddNew}
-    triggerAppearance="plain-primary"
-  >
-    {#each [...roles.values()] as role (role.oid)}
-      <ButtonMenuItem
-        on:click={() => addAccess(role.oid)}
-        disabled={$roleAccessField.has(role.oid) ||
-          role.oid === permissionsMetaData.owner_oid}
+  <svelte:fragment slot="actions">
+    {#if permissionsMetaData.current_role_owns}
+      <DropdownMenu
+        label={$_('add_roles')}
+        icon={iconAddNew}
+        triggerAppearance="plain-primary"
       >
-        {role.name}
-      </ButtonMenuItem>
-    {/each}
-  </DropdownMenu>
+        {#each [...roles.values()] as role (role.oid)}
+          <ButtonMenuItem
+            on:click={() => addAccess(role.oid)}
+            disabled={$roleAccessField.has(role.oid) ||
+              role.oid === permissionsMetaData.owner_oid}
+          >
+            {role.name}
+          </ButtonMenuItem>
+        {/each}
+      </DropdownMenu>
+    {/if}
+  </svelte:fragment>
+
   {#each [...$roleAccessField.values()] as roleAccess (roleAccess.roleOid)}
     <div class="access-control-row">
       <AccessControlRow
         rolesMap={roles}
+        {permissionsMetaData}
         {accessLevelsInfoMap}
         {privilegeInfoMap}
         {roleAccess}
@@ -156,19 +161,21 @@
   {/each}
 </OverviewSection>
 
-<div use:portalToWindowFooter class="footer">
-  <FormSubmit
-    {form}
-    canProceed={$form.hasChanges}
-    catchErrors
-    onCancel={() => {
-      controller.close();
-    }}
-    onProceed={save}
-    proceedButton={{ label: $_('save') }}
-    cancelButton={{ label: $_('cancel') }}
-  />
-</div>
+{#if permissionsMetaData.current_role_owns}
+  <div use:portalToWindowFooter class="footer">
+    <FormSubmit
+      {form}
+      canProceed={$form.hasChanges}
+      catchErrors
+      onCancel={() => {
+        controller.close();
+      }}
+      onProceed={save}
+      proceedButton={{ label: $_('save') }}
+      cancelButton={{ label: $_('cancel') }}
+    />
+  </div>
+{/if}
 
 <style lang="scss">
   .access-control-row {
