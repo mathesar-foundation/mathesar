@@ -57,6 +57,7 @@ def test_excel_upload(data_file, engine_with_schema):
     )
 
 
+@pytest.mark.skip(reason="msar.add_mathesar_table no longer raises an exception if a table with the same name already exists in the database.")
 def test_excel_upload_with_duplicate_table_name(data_file, engine_with_schema):
     table_name = "NASA 2"
 
