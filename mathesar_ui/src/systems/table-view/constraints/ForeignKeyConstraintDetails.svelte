@@ -1,13 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-  import { getAPI } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Column } from '@mathesar/api/rpc/columns';
+  import { api } from '@mathesar/api/rpc';
   import type { Constraint } from '@mathesar/api/rpc/constraints';
   import { Icon, Spinner, iconError } from '@mathesar/component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
+  import { currentDatabase } from '@mathesar/stores/databases';
   import { currentTablesData } from '@mathesar/stores/tables';
 
   export let constraint: Constraint;
@@ -21,10 +20,13 @@
     if (_constraint.type !== 'foreignkey') {
       return [];
     }
-    const tableId = _constraint.referent_table_oid;
-    const url = `/api/db/v0/tables/${tableId}/columns/?limit=500`;
-    const referentTableColumns = await getAPI<PaginatedResponse<Column>>(url);
-    return referentTableColumns.results.filter((c) =>
+    const referentTableColumns = await api.columns
+      .list({
+        database_id: $currentDatabase.id,
+        table_oid: _constraint.referent_table_oid,
+      })
+      .run();
+    return referentTableColumns.filter((c) =>
       _constraint.referent_columns.includes(c.id),
     );
   }
