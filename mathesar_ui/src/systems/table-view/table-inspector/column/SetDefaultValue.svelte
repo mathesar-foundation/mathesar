@@ -18,7 +18,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
   $: ({ columnsDataStore, recordsData } = $tabularData);
-  $: ({ recordSummaries } = recordsData);
+  $: ({ linkedRecordSummaries } = recordsData);
 
   $: initialValue = column.column.default?.value ?? column.initialInputValue;
   $: value = initialValue;
@@ -33,7 +33,7 @@
     return String(value) !== String(initialValue);
   })();
 
-  $: recordSummary = $recordSummaries
+  $: recordSummary = $linkedRecordSummaries
     .get(String(column.id))
     ?.get(String(value));
 
@@ -77,8 +77,8 @@
   }
 
   function setRecordSummary(recordId: string, _recordSummary: string) {
-    if (recordSummaries) {
-      recordSummaries.addBespokeRecordSummary({
+    if (linkedRecordSummaries) {
+      linkedRecordSummaries.addBespokeRecordSummary({
         columnId: String(column.id),
         recordId,
         recordSummary: _recordSummary,

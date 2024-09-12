@@ -408,10 +408,29 @@ Args:
   rel_id:  The OID of the relation.
   col_id:  The attnum of the column in the relation.
 */
-BEGIN
-  RETURN ARRAY[col_id::smallint] <@ conkey FROM pg_constraint WHERE conrelid=rel_id and contype='p';
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+SELECT EXISTS (
+  SELECT 1 FROM pg_constraint WHERE
+    ARRAY[col_id::smallint] <@ conkey AND conrelid=rel_id AND contype='p'
+);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_selectable_pkey_attnum(rel_id regclass) RETURNS smallint AS $$/*
+Get the attnum of the single-column primary key for a relation if it has one. If not, return null.
+
+The attnum will only be returned if the current user has SELECT on that column.
+
+Args:
+  rel_id:  The OID of the relation.
+*/
+SELECT conkey[1] FROM pg_constraint
+WHERE
+  conrelid = rel_id
+  AND cardinality(conkey) = 1
+  AND contype='p'
+  AND has_column_privilege(rel_id, conkey[1], 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
@@ -493,6 +512,28 @@ BEGIN
   FROM unspacer
   INTO target_type_prepped;
   RETURN format('mathesar_types.cast_to_%s', target_type_prepped);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_role_name(rol_oid oid) RETURNS TEXT AS $$/*
+Return the UNQUOTED name of a given role.
+
+If the role does not exist, an exception will be raised.
+
+Args:
+  rol_oid: The OID of the role.
+*/
+DECLARE rol_name text;
+BEGIN
+  SELECT rolname INTO rol_name FROM pg_roles WHERE oid=rol_oid;
+
+  IF rol_name IS NULL THEN
+    RAISE EXCEPTION 'Role with OID % does not exist', rol_oid
+    USING ERRCODE = '42704'; -- undefined_object
+  END IF;
+
+  RETURN rol_name;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -740,6 +781,42 @@ SELECT EXISTS (
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_fkey_map_table(tab_id oid)
+  RETURNS TABLE (target_oid oid, conkey smallint, confkey smallint)
+AS $$/*
+Generate a table mapping foreign key values from refererrer to referant tables.
+
+Given an input table (identified by OID), we return a table with each row representing a foreign key
+constraint on that table. We return only single-column foreign keys, and only one per foreign key
+column.
+
+Args:
+  tab_id: The OID of the table containing the foreign key columns to map.
+*/
+SELECT DISTINCT ON (conkey) pgc.confrelid AS target_oid, x.conkey AS conkey, y.confkey AS confkey
+FROM pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
+WHERE
+  pgc.conrelid = tab_id
+  AND pgc.contype='f'
+  AND cardinality(pgc.confkey) = 1
+  AND has_column_privilege(tab_id, x.conkey, 'SELECT')
+  AND has_column_privilege(pgc.confrelid, y.confkey, 'SELECT')
+ORDER BY conkey, target_oid, confkey;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.list_column_privileges_for_current_role(tab_id regclass, attnum smallint) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed table.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']) AS x(privilege),
+  pg_catalog.has_column_privilege(tab_id, attnum, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return an array of objects describing the columns of the table.
 
@@ -754,6 +831,7 @@ Each returned JSON object in the array will have the form:
     "default": {"value": <str>, "is_dynamic": <bool>},
     "has_dependents": <bool>,
     "description": <str>,
+    "current_role_priv": [<str>, <str>, ...],
     "valid_target_types": [<str>, <str>, ...]
   }
 
@@ -786,6 +864,7 @@ SELECT jsonb_agg(
     ),
     'has_dependents', msar.has_dependents(tab_id, attnum),
     'description', msar.col_description(tab_id, attnum),
+    'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum),
     'valid_target_types', msar.get_valid_target_type_strings(atttypid)
   )
 )
@@ -803,6 +882,20 @@ SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=tab_id AND attname=col_
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.list_table_privileges_for_current_role(tab_id regclass) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed table.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(
+    ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']
+  ) AS x(privilege),
+  pg_catalog.has_table_privilege(tab_id, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_table(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return a JSON object describing the table.
 
@@ -811,7 +904,10 @@ Each returned JSON object will have the form:
     "oid": <int>,
     "name": <str>,
     "schema": <int>,
-    "description": <str>
+    "description": <str>,
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>
   }
 
 Args:
@@ -821,7 +917,10 @@ SELECT jsonb_build_object(
   'oid', oid::bigint,
   'name', relname,
   'schema', relnamespace::bigint,
-  'description', msar.obj_description(oid, 'pg_class')
+  'description', msar.obj_description(oid, 'pg_class'),
+  'owner_oid', relowner,
+  'current_role_priv', msar.list_table_privileges_for_current_role(tab_id),
+  'current_role_owns', pg_catalog.pg_has_role(relowner, 'USAGE')
 ) FROM pg_catalog.pg_class WHERE oid = tab_id;
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
@@ -834,7 +933,10 @@ Each returned JSON object in the array will have the form:
     "oid": <int>,
     "name": <str>,
     "schema": <int>,
-    "description": <str>
+    "description": <str>,
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>
   }
 
 Args:
@@ -846,7 +948,10 @@ SELECT coalesce(
       'oid', pgc.oid::bigint,
       'name', pgc.relname,
       'schema', pgc.relnamespace::bigint,
-      'description', msar.obj_description(pgc.oid, 'pg_class')
+      'description', msar.obj_description(pgc.oid, 'pg_class'),
+      'owner_oid', pgc.relowner,
+      'current_role_priv', msar.list_table_privileges_for_current_role(pgc.oid),
+      'current_role_owns', pg_catalog.pg_has_role(pgc.relowner, 'USAGE')
     )
   ),
   '[]'::jsonb
@@ -855,6 +960,20 @@ FROM pg_catalog.pg_class AS pgc
   LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
 WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.list_schema_privileges_for_current_role(sch_id regnamespace) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed schema.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(
+    ARRAY['USAGE', 'CREATE']
+  ) AS x(privilege),
+  pg_catalog.has_schema_privilege(sch_id, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_schemas() RETURNS jsonb AS $$/*
@@ -871,6 +990,9 @@ Each returned JSON object in the array will have the form:
     "oid": <int>
     "name": <str>
     "description": <str|null>
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>,
     "table_count": <int>
   }
 */
@@ -880,6 +1002,9 @@ FROM (
     s.oid::bigint AS oid,
     s.nspname AS name,
     pg_catalog.obj_description(s.oid) AS description,
+    s.nspowner::bigint AS owner_oid,
+    msar.list_schema_privileges_for_current_role(s.oid) AS current_role_priv,
+    pg_catalog.pg_has_role(s.nspowner, 'USAGE') AS current_role_owns,
     COALESCE(count(c.oid), 0) AS table_count
   FROM pg_catalog.pg_namespace s
   LEFT JOIN pg_catalog.pg_class c ON
@@ -892,14 +1017,42 @@ FROM (
     s.nspname NOT LIKE 'pg_%'
   GROUP BY
     s.oid,
-    s.nspname
+    s.nspname,
+    s.nspowner
 ) AS schema_data;
 $$ LANGUAGE SQL;
 
 
+CREATE OR REPLACE FUNCTION msar.list_schema_privileges(sch_id regnamespace) RETURNS jsonb AS $$/*
+Given a schema, returns a json array of objects with direct, non-default schema privileges
+
+Each returned JSON object in the array has the form:
+  {
+    "role_oid": <int>,
+    "direct" [<str>]
+  }
+*/
+WITH priv_cte AS (
+  SELECT
+    jsonb_build_object(
+      'role_oid', pgr.oid::bigint,
+      'direct',  jsonb_agg(acl.privilege_type)
+    ) AS p
+  FROM
+    pg_catalog.pg_roles AS pgr,
+    pg_catalog.pg_namespace AS pgn,
+    aclexplode(COALESCE(pgn.nspacl, acldefault('n', pgn.nspowner))) AS acl
+  WHERE pgn.oid = sch_id AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
+  GROUP BY pgr.oid, pgn.oid
+)
+SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
-  oid oid, -- The OID of the role.
+  oid bigint, -- The OID of the role.
   name name, -- Name of the role.
   super boolean, -- Whether the role has SUPERUSER status.
   inherits boolean, -- Whether the role has INHERIT attribute.
@@ -988,7 +1141,27 @@ WHERE role_data.name = rolename;
 $$ LANGUAGE SQL STABLE;
 
 
-CREATE OR REPLACE FUNCTION msar.list_db_priv(db_name text) RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION
+msar.get_current_role() RETURNS jsonb AS $$/*
+Returns a JSON object describing the current_role and the parent role(s) whose
+privileges are immediately available to current_role without doing SET ROLE.
+*/
+SELECT jsonb_build_object(
+  'current_role', msar.get_role(current_role),
+  'parent_roles', array_remove(
+    array_agg(
+      CASE WHEN pg_has_role(role_data.name, current_role, 'USAGE')
+      THEN msar.get_role(role_data.name) END
+    ), NULL
+  )
+)
+FROM msar.role_info_table() AS role_data
+WHERE role_data.name NOT LIKE 'pg_%'
+AND role_data.name != current_role;
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.list_db_priv() RETURNS jsonb AS $$/*
 Given a database name, returns a json array of objects with database privileges for non-inherited roles.
 
 Each returned JSON object in the array has the form:
@@ -1000,41 +1173,81 @@ Each returned JSON object in the array has the form:
 WITH priv_cte AS (
   SELECT
     jsonb_build_object(
-      'role_oid', pgr.oid,
+      'role_oid', pgr.oid::bigint,
       'direct',  jsonb_agg(acl.privilege_type)
     ) AS p
   FROM
     pg_catalog.pg_roles AS pgr,
     pg_catalog.pg_database AS pgd,
     aclexplode(COALESCE(pgd.datacl, acldefault('d', pgd.datdba))) AS acl
-  WHERE pgd.datname = db_name AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_'
+  WHERE pgd.datname = pg_catalog.current_database()
+    AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
   GROUP BY pgr.oid, pgd.oid
 )
 SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_owner_oid_and_curr_role_db_priv(db_name text) RETURNS jsonb AS $$/*
-Given a database name, returns a json object with database owner oid and database privileges
-for the role executing the function.
+CREATE OR REPLACE FUNCTION
+msar.list_database_privileges_for_current_role(dat_id oid) RETURNS jsonb AS $$/*
+Return a JSONB array of all privileges current_user holds on the passed database.
+*/
+SELECT coalesce(jsonb_agg(privilege), '[]'::jsonb)
+FROM
+  unnest(
+    ARRAY['CONNECT', 'CREATE', 'TEMPORARY']
+  ) AS x(privilege),
+  pg_catalog.has_database_privilege(dat_id, privilege) as has_privilege
+WHERE has_privilege;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.get_current_database_info() RETURNS jsonb AS $$/*
+Return information about the current database.
 
 The returned JSON object has the form:
   {
-    "owner_oid": <int>,
-    "current_role_db_priv" [<str>]
+    "oid": <bigint>,
+    "name": <str>,
+    "owner_oid": <bigint>,
+    "current_role_priv": [<str>],
+    "current_role_owner": <bool>
   }
 */
 SELECT jsonb_build_object(
-  'owner_oid', pgd.datdba,
-  'current_role_db_priv', array_remove(
-    ARRAY[
-      CASE WHEN has_database_privilege(pgd.oid, 'CREATE') THEN 'CREATE' END,
-      CASE WHEN has_database_privilege(pgd.oid, 'TEMPORARY') THEN 'TEMPORARY' END,
-      CASE WHEN has_database_privilege(pgd.oid, 'CONNECT') THEN 'CONNECT' END
-    ], NULL
-  )
+  'oid', pgd.oid::bigint,
+  'name', pgd.datname,
+  'owner_oid', pgd.datdba::bigint,
+  'current_role_priv', msar.list_database_privileges_for_current_role(pgd.oid),
+  'current_role_owns', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
 ) FROM pg_catalog.pg_database AS pgd
-WHERE pgd.datname = db_name;
+WHERE pgd.datname = current_database();
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.list_table_privileges(tab_id regclass) RETURNS jsonb AS $$/*
+Given a table, returns a json array of objects with direct, non-default table privileges.
+
+Each returned JSON object in the array has the form:
+  {
+    "role_oid": <int>,
+    "direct" [<str>]
+  }
+*/
+WITH priv_cte AS (
+  SELECT
+    jsonb_build_object(
+      'role_oid', pgr.oid::bigint,
+      'direct',  jsonb_agg(acl.privilege_type)
+    ) AS p
+  FROM
+    pg_catalog.pg_roles AS pgr,
+    pg_catalog.pg_class AS pgc,
+    aclexplode(COALESCE(pgc.relacl, acldefault('r', pgc.relowner))) AS acl
+  WHERE pgc.oid = tab_id AND pgr.oid = acl.grantee AND pgr.rolname NOT LIKE 'pg_%'
+  GROUP BY pgr.oid, pgc.oid
+)
+SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -1082,6 +1295,143 @@ BEGIN
   RETURN msar.get_role(rolename);
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_database_privilege_replace_expr(rol_id regrole, privileges_ jsonb) RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    concat(
+      CASE WHEN privileges_ ? val THEN 'GRANT' ELSE 'REVOKE' END,
+      ' %1$s ON DATABASE %2$I ',
+      CASE WHEN privileges_ ? val THEN 'TO' ELSE 'FROM' END,
+      ' %3$I'
+    ),
+    val,
+    current_database(),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(ARRAY['CONNECT', 'CREATE', 'TEMPORARY']) as x(val);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.replace_database_privileges_for_roles(priv_spec jsonb) RETURNS jsonb AS $$/*
+Grant/Revoke privileges for a set of roles on the current database.
+
+Args:
+  priv_spec: An array defining the privileges to grant or revoke for each role.
+
+Each object in the priv_spec should have the form:
+{role_oid: <int>, privileges: SET<"CONNECT"|"CREATE"|"TEMPORARY">}
+
+Any privilege that exists in the privileges subarray will be granted. Any which is missing will be
+revoked.
+*/
+BEGIN
+EXECUTE string_agg(
+  msar.build_database_privilege_replace_expr(role_oid, direct),
+  E';\n'
+) || ';'
+FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
+RETURN msar.list_db_priv();
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_schema_privilege_replace_expr(sch_id regnamespace, rol_id regrole, privileges_ jsonb)
+  RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    concat(
+      CASE WHEN privileges_ ? val THEN 'GRANT' ELSE 'REVOKE' END,
+      ' %1$s ON SCHEMA %2$I ',
+      CASE WHEN privileges_ ? val THEN 'TO' ELSE 'FROM' END,
+      ' %3$I'
+    ),
+    val,
+    msar.get_schema_name(sch_id),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(ARRAY['USAGE', 'CREATE']) as x(val);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.replace_schema_privileges_for_roles(sch_id regnamespace, priv_spec jsonb) RETURNS jsonb AS $$/*
+Grant/Revoke privileges for a set of roles on the given schema.
+
+Args:
+  sch_id The OID of the schema for which we're setting privileges for roles.
+  priv_spec: An array defining the privileges to grant or revoke for each role.
+
+Each object in the priv_spec should have the form:
+{role_oid: <int>, privileges: SET<"USAGE"|"CREATE">}
+
+Any privilege that exists in the privileges subarray will be granted. Any which is missing will be
+revoked.
+*/
+BEGIN
+EXECUTE string_agg(
+  msar.build_schema_privilege_replace_expr(sch_id, role_oid, direct),
+  E';\n'
+) || ';'
+FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
+RETURN msar.list_schema_privileges(sch_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_table_privilege_replace_expr(tab_id regclass, rol_id regrole, privileges_ jsonb)
+  RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    concat(
+      CASE WHEN privileges_ ? val THEN 'GRANT' ELSE 'REVOKE' END,
+      ' %1$s ON TABLE %2$I.%3$I ',
+      CASE WHEN privileges_ ? val THEN 'TO' ELSE 'FROM' END,
+      ' %4$I'
+    ),
+    val,
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(ARRAY['INSERT', 'SELECT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']) as x(val);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.replace_table_privileges_for_roles(tab_id regclass, priv_spec jsonb) RETURNS jsonb AS $$/*
+Grant/Revoke privileges for a set of roles on the given table.
+
+Args:
+  tab_id The OID of the table for which we're setting privileges for roles.
+  priv_spec: An array defining the privileges to grant or revoke for each role.
+
+Each object in the priv_spec should have the form:
+{role_oid: <int>, privileges: SET<"INSERT"|"SELECT"|"UPDATE"|"DELETE"|"TRUNCATE"|"REFERENCES"|"TRIGGER">}
+
+Any privilege that exists in the privileges subarray will be granted. Any which is missing will be
+revoked.
+*/
+BEGIN
+EXECUTE string_agg(
+  msar.build_table_privilege_replace_expr(tab_id, role_oid, direct),
+  E';\n'
+) || ';'
+FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
+RETURN msar.list_table_privileges(tab_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -2364,7 +2714,7 @@ SELECT jsonb_agg(
     'columns', ARRAY[attname],
     'deferrable', condeferrable,
     'fkey_relation_id', confrelid::bigint,
-    'fkey_columns', confkey,
+    'fkey_columns', coalesce(confkey, ARRAY[]::smallint[]),
     'fkey_update_action', confupdtype,
     'fkey_delete_action', confdeltype,
     'fkey_match_type', confmatchtype
@@ -2530,8 +2880,8 @@ DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
 msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
-  RETURNS oid AS $$/*
-Add a table, with a default id column, returning the OID of the created table.
+  RETURNS jsonb AS $$/*
+Add a table, with a default id column, returning the OID & name of the created table.
 
 Args:
   sch_id: The OID of the schema where the table will be created.
@@ -2578,7 +2928,10 @@ BEGIN
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
-  RETURN created_table_id;
+  RETURN jsonb_build_object(
+    'oid', created_table_id::bigint,
+    'name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = created_table_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2596,17 +2949,18 @@ msar.prepare_table_for_import(
   comment_ text
 ) RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning a JSON object containing
-a properly formatted SQL statement to carry out `COPY FROM` and also contains table_oid of the created table.
+a properly formatted SQL statement to carry out `COPY FROM`, table_oid & table_name of the created table.
 
 Each returned JSON object will have the form:
   {
     "copy_sql": <str>,
-    "table_oid": <int>
+    "table_oid": <int>,
+    "table_name": <str>
   }
 
 Args:
   sch_id: The OID of the schema where the table will be created.
-  tab_name: The unquoted name for the new table.
+  tab_name (optional): The unquoted name for the new table.
   col_defs: The columns for the new table, in order.
   header: Whether or not the file contains a header line with the names of each column in the file.
   delimiter: The character that separates columns within each row (line) of the file.
@@ -2624,7 +2978,7 @@ DECLARE
   copy_sql text;
 BEGIN
   -- Create string table
-  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_);
+  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_) ->> 'oid';
   -- Get unquoted schema and table name for the created table
   SELECT nspname, relname INTO sch_name, rel_name
   FROM pg_catalog.pg_class AS pgc
@@ -2648,8 +3002,9 @@ BEGIN
   copy_sql := format('COPY %I.%I (%s) FROM STDIN CSV %s', sch_name, rel_name, col_names_sql, options_sql);
   RETURN jsonb_build_object(
     'copy_sql', copy_sql,
-    'table_oid', rel_id
-  );
+    'table_oid', rel_id::bigint,
+    'table_name', relname
+  ) FROM pg_catalog.pg_class WHERE oid = rel_id;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3352,7 +3707,7 @@ The elements of the mapping_columns array must have the form
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL);
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL) ->> 'oid';
   PERFORM msar.add_foreign_key_column(column_name, added_table_id, referent_table_oid)
   FROM jsonb_to_recordset(mapping_columns) AS x(column_name text, referent_table_oid oid);
   RETURN added_table_id;
@@ -3400,7 +3755,7 @@ BEGIN
     extracted_col_defs,
     extracted_con_defs,
     format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
-  );
+  ) ->> 'oid';
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
   fkey_attnum := msar.add_foreign_key_column(fkey_name, tab_id, extracted_table_id);
   -- Insert the data from the original table's columns into the extracted columns, and add
@@ -3440,6 +3795,191 @@ BEGIN
   RETURN jsonb_build_array(extracted_table_id, fkey_attnum);
 END;
 $f$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- COLUMN MOVING FUNCTIONS
+--
+-- Functions to move columns between linked tables
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+msar.build_all_columns_expr(tab_id regclass) RETURNS text AS $$/*
+*/
+SELECT string_agg(
+  format(
+    '%1$I.%2$I.%3$I AS %3$I',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    attname
+  ), ', '
+)
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_columns_expr(tab_id regclass, col_ids smallint[]) RETURNS text AS $$/*
+*/
+SELECT string_agg(
+  format(
+    '%1$I.%2$I.%3$I AS %3$I',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    attname
+  ), ', '
+)
+FROM pg_catalog.pg_attribute JOIN unnest(col_ids) x(a) ON attnum = x.a
+WHERE
+  attrelid = tab_id;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_unqualified_columns_expr(tab_id regclass, col_ids smallint[]) RETURNS text AS $$/*
+*/
+SELECT string_agg(format('%I', attname), ', ')
+FROM pg_catalog.pg_attribute JOIN unnest(col_ids) x(a) ON attnum = x.a
+WHERE
+  attrelid = tab_id;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_other_column_ids(tab_id regclass, col_ids smallint[]) RETURNS smallint[] AS $$
+SELECT array_agg(attnum)
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND attnum <> all(col_ids);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_source_update_move_cols_equal_expr(
+  source_tab_id regclass,
+  move_col_ids smallint[],
+  cte_name text
+) RETURNS text AS $$
+SELECT string_agg(
+  format(
+    -- TODO should be IS NOT DISTINCT FROM
+    '%1$I.%2$I.%3$I = %4$I.%3$I',
+    msar.get_relation_schema_name(source_tab_id),
+    msar.get_relation_name(source_tab_id),
+    attname,
+    cte_name
+  ), ' AND '
+)
+FROM pg_catalog.pg_attribute JOIN unnest(move_col_ids) x(a) ON attnum = x.a
+WHERE
+  attrelid = source_tab_id;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_source_update_cte_join_condition_expr(
+  target_tab_id regclass,
+  target_join_col_id smallint,
+  added_col_ids smallint[],
+  update_target_cte_name text,
+  insert_cte_name text
+) RETURNS text AS $$
+SELECT 'ON ' || string_agg(
+  format(
+    '%1$I.%3$I IS NOT DISTINCT FROM %2$I.%3$I',
+    update_target_cte_name,
+    insert_cte_name,
+    attname
+  ), ' AND '
+)
+FROM
+  pg_catalog.pg_attribute
+  JOIN unnest(msar.get_other_column_ids(target_tab_id, added_col_ids || target_join_col_id)) x(a)
+  ON attnum = x.a
+WHERE
+  attrelid = target_tab_id;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.move_columns_to_referenced_table(
+  source_tab_id regclass,
+  target_tab_id regclass,
+  move_col_ids smallint[]
+) RETURNS void AS $$
+DECLARE
+  source_join_col_id smallint;
+  target_join_col_id smallint;
+  preexisting_col_expr CONSTANT text := msar.build_all_columns_expr(target_tab_id);
+  move_col_expr CONSTANT text := msar.build_columns_expr(source_tab_id, move_col_ids);
+  move_col_defs CONSTANT jsonb := msar.get_extracted_col_def_jsonb(source_tab_id, move_col_ids);
+  move_con_defs CONSTANT jsonb := msar.get_extracted_con_def_jsonb(source_tab_id, move_col_ids);
+  added_col_ids smallint[];
+BEGIN
+  -- TODO Add a custom validator that throws pretty errors in these scenario:
+    -- test to make sure no multi-col fkeys reference the moved columns
+    -- just throw error if _any_ multicol constraint references the moved columns.
+    -- check behavior if one of the moving columns is referenced by another table (should raise)
+  SELECT conkey, confkey INTO source_join_col_id, target_join_col_id
+    FROM msar.get_fkey_map_table(source_tab_id)
+    WHERE target_oid = target_tab_id;
+  IF move_col_ids @> ARRAY[source_join_col_id] THEN
+    RAISE EXCEPTION 'The joining column cannot be moved.';
+  END IF;
+  added_col_ids := msar.add_columns(target_tab_id, move_col_defs, true);
+  EXECUTE format(
+    $q$WITH merged_cte AS (
+      SELECT DISTINCT %1$s, %2$s
+      FROM %3$I.%4$I JOIN %6$I.%7$I ON %3$I.%4$I.%5$I = %6$I.%7$I.%8$I
+    ), row_numbered_cte AS (
+      SELECT *, row_number() OVER (PARTITION BY %8$I ORDER BY %9$s) AS __msar_row_number
+      FROM merged_cte
+    ), update_target_cte AS (
+      UPDATE %6$I.%7$I SET (%9$s) = (
+        SELECT %9$s
+        FROM row_numbered_cte
+        WHERE row_numbered_cte.%8$I=%6$I.%7$I.%8$I
+        AND __msar_row_number = 1
+      )
+      RETURNING *
+    ), insert_cte AS (
+      INSERT INTO %6$I.%7$I (%10$s)
+      SELECT %10$s FROM row_numbered_cte
+      WHERE __msar_row_number <> 1
+      RETURNING *
+    )
+    UPDATE %3$I.%4$I SET %5$I = insert_cte.%8$I
+    FROM update_target_cte JOIN insert_cte %11$s
+    WHERE %3$I.%4$I.%5$I = update_target_cte.%8$I AND %12$s
+    $q$,
+    preexisting_col_expr,
+    move_col_expr,
+    msar.get_relation_schema_name(source_tab_id),
+    msar.get_relation_name(source_tab_id),
+    msar.get_column_name(source_tab_id, source_join_col_id),
+    msar.get_relation_schema_name(target_tab_id),
+    msar.get_relation_name(target_tab_id),
+    msar.get_column_name(target_tab_id, target_join_col_id),
+    msar.build_unqualified_columns_expr(source_tab_id, move_col_ids),
+    msar.build_unqualified_columns_expr(
+      target_tab_id, msar.get_other_column_ids(target_tab_id, ARRAY[target_join_col_id])
+    ),
+    msar.build_source_update_cte_join_condition_expr(
+      target_tab_id, target_join_col_id, added_col_ids, 'update_target_cte', 'insert_cte'
+    ),
+    msar.build_source_update_move_cols_equal_expr(source_tab_id, move_col_ids, 'insert_cte')
+  );
+  PERFORM msar.add_constraints(target_tab_id, move_con_defs);
+  PERFORM msar.drop_columns(source_tab_id, variadic move_col_ids);
+END;
+$$ LANGUAGE plpgsql;
 
 
 ----------------------------------------------------------------------------------------------------
@@ -3844,30 +4384,6 @@ LIMIT 1;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_fkey_map_cte(tab_id oid)
-  RETURNS TABLE (target_oid oid, conkey smallint, confkey smallint)
-AS $$/*
-Generate a table mapping foreign key values from refererrer to referant tables.
-
-Given an input table (identified by OID), we return a table with each row representing a foreign key
-constraint on that table. We return only single-column foreign keys, and only one per foreign key
-column.
-
-Args:
-  tab_id: The OID of the table containing the foreign key columns to map.
-*/
-SELECT DISTINCT ON (conkey) pgc.confrelid AS target_oid, x.conkey AS conkey, y.confkey AS confkey
-FROM pg_constraint pgc, LATERAL unnest(conkey) x(conkey), LATERAL unnest(confkey) y(confkey)
-WHERE
-  pgc.conrelid = tab_id
-  AND pgc.contype='f'
-  AND cardinality(pgc.confkey) = 1
-  AND has_column_privilege(tab_id, x.conkey, 'SELECT')
-  AND has_column_privilege(pgc.confrelid, y.confkey, 'SELECT')
-ORDER BY conkey, target_oid, confkey;
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.build_summary_expr(tab_id oid) RETURNS TEXT AS $$/*
 Given a table, return an SQL expression that will build a summary for each row of the table.
 
@@ -3889,22 +4405,36 @@ This summary amounts to just the first string-like column value for that linked 
 Args:
   tab_id: The table for whose fkey values' linked records we'll get summaries.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
-SELECT ', ' || string_agg(
-  format(
-    $c$summary_cte_%1$s AS (
-      SELECT
-        msar.format_data(%2$I) AS key,
-        %3$s AS summary
-      FROM %4$I.%5$I
-    )$c$,
-    conkey,
-    msar.get_column_name(target_oid, confkey),
-    msar.build_summary_expr(target_oid),
-    msar.get_relation_schema_name(target_oid),
-    msar.get_relation_name(target_oid)
-  ), ', '
-)
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
+SELECT ', '
+  || NULLIF(
+    concat_ws(', ',
+      'summary_cte_self AS (SELECT msar.format_data('
+        || quote_ident(msar.get_column_name(tab_id, msar.get_selectable_pkey_attnum(tab_id)))
+        || format(
+          ') AS key, %1$s AS summary FROM %2$I.%3$I)',
+          msar.build_summary_expr(tab_id),
+          msar.get_relation_schema_name(tab_id),
+          msar.get_relation_name(tab_id)
+        ),
+      string_agg(
+        format(
+          $c$summary_cte_%1$s AS (
+            SELECT
+              msar.format_data(%2$I) AS fkey,
+              %3$s AS summary
+            FROM %4$I.%5$I
+          )$c$,
+          conkey,
+          msar.get_column_name(target_oid, confkey),
+          msar.build_summary_expr(target_oid),
+          msar.get_relation_schema_name(target_oid),
+          msar.get_relation_name(target_oid)
+        ), ', '
+      )
+    ),
+    ''
+  )
 FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -3917,14 +4447,19 @@ Args:
   tab_oid: The table defining the columns of the main CTE.
   cte_name: The name of the main CTE we'll join the summary CTEs to.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
-SELECT string_agg(
-  format(
-    $j$
-    LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.key$j$,
-    conkey,
-    cte_name
-  ), ' '
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
+SELECT concat(
+  format(E'\nLEFT JOIN summary_cte_self ON %1$I.', cte_name)
+  || quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text)
+  || ' = summary_cte_self.key' ,
+  string_agg(
+    format(
+      $j$
+      LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.fkey$j$,
+      conkey,
+      cte_name
+    ), ' '
+  )
 )
 FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
@@ -3937,12 +4472,12 @@ Build a JSON object with the results of summarizing linked records.
 Args:
   tab_oid: The OID of the table for which we're getting linked record summaries.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_cte(tab_id))
+WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
-    %1$L, jsonb_agg(
-      DISTINCT jsonb_build_object('key', summary_cte_%1$s.key, 'summary', summary_cte_%1$s.summary)
+    %1$L, jsonb_object_agg(
+      summary_cte_%1$s.fkey, summary_cte_%1$s.summary
     )
     $j$,
     conkey
@@ -3953,13 +4488,23 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_self_summary_json_expr(tab_id oid) RETURNS TEXT AS $$/*
+*/
+SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS NOT NULL THEN
+  'jsonb_object_agg(summary_cte_self.key, summary_cte_self.summary)'
+END;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.list_records_from_table(
   tab_id oid,
   limit_ integer,
   offset_ integer,
   order_ jsonb,
   filter_ jsonb,
-  group_ jsonb
+  group_ jsonb,
+  return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get records from a table. Only columns to which the user has access are returned.
 
@@ -3970,6 +4515,7 @@ Args:
   order_: An array of ordering definition objects.
   filter_: An array of filter definition objects.
   group_: An array of group definition objects.
+  return_record_summaries : Whether to return a summary for each record listed.
 
 The order definition objects should have the form
   {"attnum": <int>, "direction": <text>}
@@ -3992,7 +4538,8 @@ BEGIN
       'results', %9$s,
       'count', coalesce(max(count_cte.count), 0),
       'grouping', %10$s,
-      'preview_data', %14$s,
+      'linked_record_summaries', %14$s,
+      'record_summaries', %15$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
     FROM enriched_results_cte
@@ -4012,7 +4559,11 @@ BEGIN
     COALESCE(msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_), 'NULL AS id'),
     msar.build_summary_cte_expr_for_table(tab_id),
     msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    COALESCE(
+      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
+      'NULL'
+    )
   ) INTO records;
   RETURN records;
 END;
@@ -4052,7 +4603,8 @@ CREATE OR REPLACE FUNCTION
 msar.search_records_from_table(
   tab_id oid,
   search_ jsonb,
-  limit_ integer
+  limit_ integer,
+  return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get records from a table, filtering and sorting according to a search specification.
 
@@ -4079,7 +4631,8 @@ BEGIN
     SELECT jsonb_build_object(
       'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
       'count', coalesce(max(count_cte.count), 0),
-      'preview_data', %9$s,
+      'linked_record_summaries', %9$s,
+      'record_summaries', %10$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
     )
     FROM results_cte %8$s
@@ -4096,7 +4649,11 @@ BEGIN
     ),
     msar.build_summary_cte_expr_for_table(tab_id),
     msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
+    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    COALESCE(
+      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
+      'NULL'
+    )
   ) INTO records;
   RETURN records;
 END;
@@ -4104,7 +4661,11 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_record_from_table(tab_id oid, rec_id anyelement) RETURNS jsonb AS $$/*
+msar.get_record_from_table(
+  tab_id oid,
+  rec_id anyelement,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Get single record from a table. Only columns to which the user has access are returned.
 
 Args:
@@ -4121,7 +4682,8 @@ SELECT msar.list_records_from_table(
       jsonb_build_object('type', 'literal', 'value', rec_id)
     )
   ),
-  null
+  null,
+  return_record_summaries
 )
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -4179,7 +4741,11 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.add_record_to_table(tab_id oid, rec_def jsonb) RETURNS jsonb AS $$/*
+msar.add_record_to_table(
+  tab_id oid,
+  rec_def jsonb,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Add a record to a table.
 
 Args:
@@ -4192,25 +4758,21 @@ insert.
 
 */
 DECLARE
+  rec_created_id text;
   rec_created jsonb;
 BEGIN
   EXECUTE format(
-    $i$
-    WITH insert_cte AS (%1$s RETURNING %2$s)%4$s
-    SELECT jsonb_build_object(
-      'results', %3$s,
-      'preview_data', %6$s
-    )
-    FROM insert_cte %5$s
-    $i$,
+    'WITH insert_cte AS (%1$s RETURNING %2$s) SELECT msar.format_data(%3$I)::text FROM insert_cte',
     msar.build_single_insert_expr(tab_id, rec_def),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'insert_cte', null),
-    msar.build_summary_cte_expr_for_table(tab_id),
-    msar.build_summary_join_expr_for_table(tab_id, 'insert_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
-  ) INTO rec_created;
-  RETURN rec_created;
+    msar.get_pk_column(tab_id)
+  ) INTO rec_created_id;
+  rec_created := msar.get_record_from_table(tab_id, rec_created_id, return_record_summaries);
+  RETURN jsonb_build_object(
+    'results', rec_created -> 'results',
+    'record_summaries', rec_created -> 'record_summaries',
+    'linked_record_summaries', rec_created -> 'linked_record_summaries'
+  );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -4230,7 +4792,12 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.patch_record_in_table(tab_id oid, rec_id anyelement, rec_def jsonb) RETURNS jsonb AS $$/*
+msar.patch_record_in_table(
+  tab_id oid,
+  rec_id anyelement,
+  rec_def jsonb,
+  return_record_summaries boolean DEFAULT false
+) RETURNS jsonb AS $$/*
 Modify (update/patch) a record in a table.
 
 Args:
@@ -4244,17 +4811,14 @@ The `rec_def` object's form is defined by the record being updated.  It should h
 corresponding to the attnums of desired columns and values corresponding to values we should set.
 */
 DECLARE
+  rec_modified_id integer;
   rec_modified jsonb;
 BEGIN
   EXECUTE format(
-    $i$
-    WITH update_cte AS (%1$s %2$s RETURNING %3$s)%5$s
-    SELECT jsonb_build_object(
-      'results', %4$s,
-      'preview_data', %7$s
-    )
-    FROM update_cte %6$s
-    $i$,
+    $p$
+    WITH update_cte AS (%1$s %2$s RETURNING %3$s)
+    SELECT msar.format_data(%4$I)::text FROM update_cte
+    $p$,
     msar.build_update_expr(tab_id, rec_def),
     msar.build_where_clause(
       tab_id, jsonb_build_object(
@@ -4265,11 +4829,13 @@ BEGIN
       )
     ),
     msar.build_selectable_column_expr(tab_id),
-    msar.build_results_jsonb_expr(tab_id, 'update_cte', null),
-    msar.build_summary_cte_expr_for_table(tab_id),
-    msar.build_summary_join_expr_for_table(tab_id, 'update_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL')
-  ) INTO rec_modified;
-  RETURN rec_modified;
+    msar.get_pk_column(tab_id)
+  ) INTO rec_modified_id;
+  rec_modified := msar.get_record_from_table(tab_id, rec_modified_id, return_record_summaries);
+  RETURN jsonb_build_object(
+    'results', rec_modified -> 'results',
+    'record_summaries', rec_modified -> 'record_summaries',
+    'linked_record_summaries', rec_modified -> 'linked_record_summaries'
+  );
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;

@@ -6,6 +6,10 @@
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
   import {
+    type CombinedLoginRole,
+    DatabaseSettingsRouteContext,
+  } from '@mathesar/contexts/DatabaseSettingsRouteContext';
+  import {
     iconConfigurePassword,
     iconDeleteMajor,
     iconEdit,
@@ -22,19 +26,16 @@
     SpinnerButton,
   } from '@mathesar-component-library';
 
-  import {
-    type CombinedLoginRole,
-    getDatabaseSettingsContext,
-  } from '../databaseSettingsUtils';
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
   import ConfigureRoleModal from './ConfigureRoleModal.svelte';
 
-  const databaseContext = getDatabaseSettingsContext();
+  const routeContext = DatabaseSettingsRouteContext.get();
   const configureRoleModalController = modal.spawnModalController();
 
-  $: ({ database, configuredRoles, roles, combinedLoginRoles } =
-    $databaseContext);
+  $: ({ database, databaseRouteContext, configuredRoles, combinedLoginRoles } =
+    $routeContext);
+  $: ({ roles } = databaseRouteContext);
   $: void AsyncRpcApiStore.runBatched(
     [
       configuredRoles.batchRunner({ server_id: database.server.id }),
@@ -54,7 +55,7 @@
   async function removeConfiguredRole(combinedLoginRole: CombinedLoginRole) {
     if (combinedLoginRole.configuredRole) {
       try {
-        await $databaseContext.removeConfiguredRole(
+        await $routeContext.removeConfiguredRole(
           combinedLoginRole.configuredRole,
         );
         toast.success($_('role_configuration_removed'));

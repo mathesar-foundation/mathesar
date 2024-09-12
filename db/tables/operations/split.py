@@ -1,4 +1,4 @@
-from db.connection import execute_msar_func_with_engine
+from db.connection import execute_msar_func_with_engine, exec_msar_func
 
 
 def extract_columns_from_table(
@@ -14,3 +14,20 @@ def extract_columns_from_table(
     )
     extracted_table_oid, new_fkey_attnum = curr.fetchone()[0]
     return extracted_table_oid, old_table_oid, new_fkey_attnum
+
+
+def split_table(
+    conn,
+    old_table_oid,
+    extracted_column_attnums,
+    extracted_table_name,
+    relationship_fk_column_name=None
+):
+    exec_msar_func(
+        conn,
+        'extract_columns_from_table',
+        old_table_oid,
+        extracted_column_attnums,
+        extracted_table_name,
+        relationship_fk_column_name
+    )

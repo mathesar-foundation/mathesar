@@ -75,56 +75,66 @@ export interface RecordsListParams {
   grouping?: Grouping;
   filter?: SqlExpr;
   search_fuzzy?: Record<string, unknown>[];
+  return_record_summaries?: boolean;
 }
 
 /** keys are stringified column ids */
 export type Result = Record<string, ResultValue>;
 
-/**
- * Provides the data necessary to render one Record Summary, given a summary
- * template. The template will contain column aliases enclosed in curly braces
- * as in the following example template which contains only one column alias.
- *
- * ```
- * {65__66__col__67}
- * ```
- *
- * The column alias, "65__66__col__67" is a unique serialization of the full
- * path traversed through foreign keys to find the column which contains the
- * value to be rendered within the template. Because record summaries can be
- * transitive, the value may lie within a column several tables away. The alias
- * needs to represent the full path so that we avoid collisions between two FK
- * columns whitttch point to the same table. The front end does not need to parse
- * the column alias -- it just needs to match aliases within templates to
- * aliases within sets of input data.
- *
- * The keys in this type below are column aliases. The values are the data to be
- * rendered for that column.
- */
-export type ApiRecordSummaryInputData = Record<string, ResultValue>;
-
-export interface ApiDataForRecordSummariesInFkColumn {
-  column: number;
-  template: string;
-  /**
-   * Keys represent the record ids. Values represent the data necessary to
-   * render the record summary for the record having that PK value. All key
-   * values are string. If the PK values as stored in the database is a number,
-   * then it will be stringified for transmission through the API.
-   */
-  data: Record<string, ApiRecordSummaryInputData>;
-}
+/** Keys are stringified FK cell values. Values are record summaries. */
+export type RecordSummaryColumnData = Record<string, string>;
 
 export interface RecordsResponse {
   count: number;
   grouping: GroupingResponse | null;
   results: Result[];
-  /**
-   * Each item in this array can be matched to each FK column in the table.
-   */
-  preview_data: ApiDataForRecordSummariesInFkColumn[] | null;
+  /** Keys are attnums. */
+  linked_record_summaries: Record<string, RecordSummaryColumnData> | null;
+  record_summaries: Record<string, string> | null;
 }
 
 export const records = {
+  add: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      /** Keys are stringified attnums */
+      record_def: Record<string, unknown>;
+      return_record_summaries?: boolean;
+    },
+    RecordsResponse
+  >(),
+
+  patch: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      record_id: ResultValue;
+      /** Keys are stringified attnums */
+      record_def: Record<string, unknown>;
+      return_record_summaries?: boolean;
+    },
+    RecordsResponse
+  >(),
+
+  get: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      record_id: ResultValue;
+      return_record_summaries?: boolean;
+    },
+    RecordsResponse
+  >(),
+
   list: rpcMethodTypeContainer<RecordsListParams, RecordsResponse>(),
+
+  delete: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      record_ids: ResultValue[];
+    },
+    void
+  >(),
 };

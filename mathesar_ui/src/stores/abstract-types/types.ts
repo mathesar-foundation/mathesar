@@ -92,12 +92,6 @@ export type AbstractTypeConfigurationFactory = (
   map: AbstractTypesMap,
 ) => AbstractTypeConfiguration;
 
-export interface AbstractTypesSubstance {
-  state: States;
-  data: AbstractTypesMap;
-  error?: string;
-}
-
 /**
  * These filter ids represent the filter functions used for the _old_ filtering
  * system (circa 2023). The UI is still designed around these filter functions

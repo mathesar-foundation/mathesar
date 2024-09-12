@@ -15,7 +15,7 @@
     getDataExplorerPageUrl,
     getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
   import { getQuery } from '@mathesar/stores/queries';
   import {
@@ -38,7 +38,7 @@
     queryManager?.destroy();
     queryManager = new QueryManager({
       query: new QueryModel(queryInstance),
-      abstractTypeMap: $currentDbAbstractTypes.data,
+      abstractTypeMap: abstractTypesMap,
       onSave: async (instance) => {
         try {
           const url = getExplorationEditorPageUrl(

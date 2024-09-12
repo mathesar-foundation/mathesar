@@ -7,22 +7,24 @@
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import EventfulRoute from '@mathesar/components/routing/EventfulRoute.svelte';
+  import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Database } from '@mathesar/models/Database';
   import DatabasePageWrapper from '@mathesar/pages/database/DatabasePageWrapper.svelte';
   import DatabasePageSchemasSection from '@mathesar/pages/database/schemas/SchemasSection.svelte';
-  import DatabaseCollaborators from '@mathesar/pages/database/settings/collaborators/Collaborators.svelte';
-  import DatabaseRoleConfiguration from '@mathesar/pages/database/settings/role-configuration/RoleConfiguration.svelte';
-  import DatabaseRoles from '@mathesar/pages/database/settings/roles/Roles.svelte';
-  import DatabasePageSettingsWrapper from '@mathesar/pages/database/settings/SettingsWrapper.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import { databasesStore } from '@mathesar/stores/databases';
 
+  import DatabaseSettingsRoute from './DatabaseSettingsRoute.svelte';
   import SchemaRoute from './SchemaRoute.svelte';
 
   export let databaseId: Database['id'];
 
   $: databasesStore.setCurrentDatabaseId(databaseId);
   const { currentDatabase } = databasesStore;
+
+  $: if ($currentDatabase) {
+    DatabaseRouteContext.construct($currentDatabase);
+  }
 
   function handleUnmount() {
     databasesStore.clearCurrentDatabaseId();
@@ -53,30 +55,7 @@
         onLoad={() => setSection('settings')}
         firstmatch
       >
-        <DatabasePageSettingsWrapper
-          database={$currentDatabase}
-          let:setSection={setSettingsSection}
-        >
-          <Route path="/" redirect="role-configuration/" />
-          <EventfulRoute
-            path="/role-configuration"
-            onLoad={() => setSettingsSection('roleConfiguration')}
-          >
-            <DatabaseRoleConfiguration />
-          </EventfulRoute>
-          <EventfulRoute
-            path="/collaborators"
-            onLoad={() => setSettingsSection('collaborators')}
-          >
-            <DatabaseCollaborators />
-          </EventfulRoute>
-          <EventfulRoute
-            path="/roles"
-            onLoad={() => setSettingsSection('roles')}
-          >
-            <DatabaseRoles />
-          </EventfulRoute>
-        </DatabasePageSettingsWrapper>
+        <DatabaseSettingsRoute />
       </EventfulRoute>
     </DatabasePageWrapper>
   </Route>

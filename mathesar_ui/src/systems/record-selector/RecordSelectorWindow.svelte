@@ -3,7 +3,7 @@
 
   import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import { currentDatabase } from '@mathesar/stores/databases';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
   import { currentTablesMap } from '@mathesar/stores/tables';
@@ -36,10 +36,11 @@
     $tableId && table
       ? new TabularData({
           database: $currentDatabase,
-          abstractTypesMap: $currentDbAbstractTypes.data,
+          abstractTypesMap,
           meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
           hasEnhancedPrimaryKeyCell: false,
           table,
+          loadIntrinsicRecordSummaries: true,
         })
       : undefined;
   $: nestedSelectorIsOpen = nestedController.isOpen;
