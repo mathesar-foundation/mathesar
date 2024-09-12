@@ -1434,8 +1434,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+DROP FUNCTION IF EXISTS msar.transfer_database_ownership(regrole);
 CREATE OR REPLACE FUNCTION
-msar.transfer_database_ownership(new_owner_oid regrole) RETURNS void AS $$/*
+msar.transfer_database_ownership(new_owner_oid regrole) RETURNS jsonb AS $$/*
 Transfers ownership of the current database to a new owner.
 
 Args:
@@ -1453,6 +1454,7 @@ BEGIN
     pg_catalog.current_database(),
     msar.get_role_name(new_owner_oid)
   );
+  RETURN msar.get_current_database_info();
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
