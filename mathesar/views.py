@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from mathesar.rpc.databases.configured import list_ as databases_list
 from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
+from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.api.serializers.databases import TypeSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
@@ -33,13 +34,19 @@ def get_database_list(request):
     return databases_list(request=request)
 
 
-def get_table_list(request, schema_id):
-    # TODO: Fill this method
-    return []
+def get_table_list(request, database_id, schema_oid):
+    if database_id is not None and schema_oid is not None:
+        return tables_list(
+            request=request,
+            database_id=database_id,
+            schema_oid=schema_oid
+        )
+    else:
+        return []
 
 
 def get_queries_list(request, schema_id):
-    # TODO: Fill this method
+    # TODO_BETA: Fill this method
     return []
 
 
@@ -80,8 +87,8 @@ def _get_internal_db_meta():
 def _get_base_data_all_routes(request, database_id=None, schema_id=None):
     return {
         'abstract_types': get_ui_type_list(request, database_id),
-        'current_database': database_id,
-        'current_schema': schema_id,
+        'current_database': int(database_id) if database_id else None,
+        'current_schema': int(schema_id) if schema_id else None,
         'current_release_tag_name': __version__,
         'databases': get_database_list(request),
         'servers': get_servers_list(),
@@ -98,7 +105,7 @@ def _get_base_data_all_routes(request, database_id=None, schema_id=None):
 def get_common_data(request, database_id=None, schema_id=None):
     return {
         **_get_base_data_all_routes(request, database_id, schema_id),
-        'tables': get_table_list(request, schema_id),
+        'tables': get_table_list(request, database_id, schema_id),
         'queries': get_queries_list(request, schema_id),
         'routing_context': 'normal',
     }

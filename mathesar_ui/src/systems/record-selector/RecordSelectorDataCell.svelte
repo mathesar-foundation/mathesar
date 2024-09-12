@@ -14,14 +14,14 @@
 
   export let row: RecordRow;
   export let processedColumn: ProcessedColumn;
-  export let recordSummaries: RecordSummaryStore;
+  export let linkedRecordSummaries: RecordSummaryStore;
   export let searchFuzzy: Writable<SearchFuzzy>;
   export let isLoading = false;
 
   $: ({ column } = processedColumn);
   $: searchValue = $searchFuzzy.get(column.id);
   $: value = row?.record?.[column.id];
-  $: recordSummary = $recordSummaries
+  $: recordSummary = $linkedRecordSummaries
     .get(String(column.id))
     ?.get(String(value));
 </script>

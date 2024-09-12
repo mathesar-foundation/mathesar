@@ -25,7 +25,7 @@
       border-radius: 2px 2px 0px 0px;
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
-      margin-right: 2rem;
+      margin-right: var(--Tab_margin-right, 2rem);
       font-size: var(--text-size-large);
 
       > div,
@@ -113,7 +113,7 @@
       > li.tab {
         font-size: var(--text-size-base);
         text-align: center;
-        margin-right: 0;
+        margin-right: var(--Tab_margin-right, 0);
         > div {
           padding: 0.5rem 0;
         }

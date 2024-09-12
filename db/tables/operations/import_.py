@@ -15,6 +15,8 @@ def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
     data_file = DataFile.objects.get(id=data_file_id)
     file_path = data_file.file.path
     header = data_file.header
+    if table_name is None or table_name == '':
+        table_name = data_file.base_name
     dialect = csv.dialect.SimpleDialect(
         data_file.delimiter,
         data_file.quotechar,
@@ -25,7 +27,7 @@ def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
     with open(file_path, 'rb') as csv_file:
         csv_reader = get_sv_reader(csv_file, header, dialect)
         column_names = process_column_names(csv_reader.fieldnames)
-    copy_sql, table_oid, table_name = prepare_table_for_import(
+    copy_sql, table_oid, db_table_name = prepare_table_for_import(
         table_name,
         schema_oid,
         column_names,
@@ -44,7 +46,7 @@ def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
         conversion_encoding,
         conn
     )
-    return {"oid": table_oid, "name": table_name}
+    return {"oid": table_oid, "name": db_table_name}
 
 
 def insert_csv_records(

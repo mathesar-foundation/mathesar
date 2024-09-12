@@ -82,9 +82,6 @@
               type: $processedColumns.get(column.id)?.column.type ?? '',
               type_options:
                 $processedColumns.get(column.id)?.column.type_options ?? null,
-              display_options:
-                $processedColumns.get(column.id)?.column.display_options ??
-                null,
               constraintsType: getColumnConstraintTypeByColumnId(
                 column.id,
                 $processedColumns,

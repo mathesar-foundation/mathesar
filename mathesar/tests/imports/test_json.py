@@ -67,6 +67,7 @@ def test_json_upload(data_file, schema):
     )
 
 
+@pytest.mark.skip(reason="msar.add_mathesar_table no longer raises an exception if a table with the same name already exists in the database.")
 def test_json_upload_with_duplicate_table_name(data_file, schema):
     table_name = "NASA 2"
 

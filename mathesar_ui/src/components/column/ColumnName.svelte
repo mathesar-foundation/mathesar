@@ -4,13 +4,11 @@
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { getColumnIconProps } from '@mathesar/utils/columnUtils';
 
-  import type { DisplayColumn } from './types';
-
   interface $$Props extends Omit<ComponentProps<NameWithIcon>, 'icon'> {
-    column: DisplayColumn;
+    column: { name: string } & Parameters<typeof getColumnIconProps>[0];
   }
 
-  export let column: DisplayColumn;
+  export let column: $$Props['column'];
 
   $: icon = getColumnIconProps(column);
 </script>
