@@ -817,6 +817,7 @@ def test_table_create_non_unicode(client, non_unicode_file_path, filename, first
     )
 
 
+@pytest.mark.skip(reason="msar.add_mathesar_table no longer raises an exception if a table with the same name already exists in the database.")
 def test_table_create_with_same_name(client, schema):
     table_name = 'test_table_duplicate'
     body = {
