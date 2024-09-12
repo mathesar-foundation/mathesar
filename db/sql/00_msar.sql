@@ -2924,6 +2924,7 @@ table will always have our default 'id' column as its first column.
 DECLARE
   schema_name text;
   table_count integer;
+  prefix text;
   uq_table_name text;
   fq_table_name text;
   created_table_id oid;
@@ -2931,20 +2932,29 @@ DECLARE
   constraint_defs __msar.con_def[];
 BEGIN
   schema_name := msar.get_schema_name(sch_id);
-  IF NULLIF(tab_name, '') IS NOT NULL THEN
+  IF NULLIF(tab_name, '') IS NOT NULL AND NOT EXISTS(
+      SELECT oid FROM pg_catalog.pg_class WHERE relname = tab_name AND relnamespace = sch_id
+    )
+  THEN
     fq_table_name := format('%I.%I', schema_name, tab_name);
   ELSE
+    -- determine what prefix to use for table name generation
+    IF NULLIF(tab_name, '') IS NOT NULL THEN
+      prefix := tab_name || ' ';
+    ELSE
+      prefix := 'Table ';
+    END IF;
     -- generate a table name if one doesn't exist
     SELECT COUNT(*) + 1 INTO table_count
     FROM pg_catalog.pg_class
     WHERE relkind = 'r' AND relnamespace = sch_id;
-    uq_table_name := 'Table ' || table_count;
+    uq_table_name := prefix || table_count;
     -- avoid name collisions
     WHILE EXISTS (
       SELECT oid FROM pg_catalog.pg_class WHERE relname = uq_table_name AND relnamespace = sch_id
     ) LOOP
       table_count := table_count + 1;
-      uq_table_name := 'Table ' || table_count;
+      uq_table_name := prefix || table_count;
     END LOOP;
     fq_table_name := format('%I.%I', schema_name, uq_table_name);
   END IF;

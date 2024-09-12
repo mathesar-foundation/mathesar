@@ -43,7 +43,7 @@
         map(([k, r]) => [k, r.record], get(recordsData.selectableRowsMap)),
       ),
       columnsMap: stringifyMapKeys(get(processedColumns)),
-      recordSummaries: get(recordsData.recordSummaries),
+      recordSummaries: get(recordsData.linkedRecordSummaries),
       selectedRowIds: get(selection).rowIds,
       selectedColumnIds: get(selection).columnIds,
     }),

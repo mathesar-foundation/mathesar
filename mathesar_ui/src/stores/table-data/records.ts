@@ -25,6 +25,7 @@ import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
   CancellablePromise,
+  WritableMap,
   getGloballyUniqueId,
   isDefinedNonNullable,
 } from '@mathesar-component-library';
@@ -265,7 +266,9 @@ export class RecordsData {
 
   newRecords: Writable<NewRecordRow[]>;
 
-  recordSummaries = new RecordSummaryStore();
+  recordSummaries = new WritableMap<string, string>();
+
+  linkedRecordSummaries = new RecordSummaryStore();
 
   grouping: Writable<RecordGrouping | undefined>;
 
@@ -296,6 +299,8 @@ export class RecordsData {
 
   readonly shareConsumer?: ShareConsumer;
 
+  private loadIntrinsicRecordSummaries?: boolean;
+
   constructor({
     database,
     table,
@@ -303,6 +308,7 @@ export class RecordsData {
     columnsDataStore,
     contextualFilters,
     shareConsumer,
+    loadIntrinsicRecordSummaries,
   }: {
     database: Pick<Database, 'id'>;
     table: Pick<Table, 'oid'>;
@@ -310,6 +316,7 @@ export class RecordsData {
     columnsDataStore: ColumnsDataStore;
     contextualFilters: Map<number, number | string>;
     shareConsumer?: ShareConsumer;
+    loadIntrinsicRecordSummaries?: boolean;
   }) {
     this.apiContext = { database_id: database.id, table_oid: table.oid };
     this.shareConsumer = shareConsumer;
@@ -330,6 +337,7 @@ export class RecordsData {
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.contextualFilters = contextualFilters;
+    this.loadIntrinsicRecordSummaries = loadIntrinsicRecordSummaries;
     void this.fetch();
 
     this.selectableRowsMap = derived(
@@ -393,6 +401,7 @@ export class RecordsData {
           .withEntries(contextualFilterEntries)
           .recordsRequestParams(),
         ...params.searchFuzzy.recordsRequestParams(),
+        return_record_summaries: this.loadIntrinsicRecordSummaries,
         // TODO_BETA Do we need shareConsumer here? Previously we had been
         // passing `...this.shareConsumer?.getQueryParams()`
       };
@@ -404,9 +413,14 @@ export class RecordsData {
       const grouping = response.grouping
         ? buildGrouping(response.grouping)
         : undefined;
-      if (response.preview_data) {
-        this.recordSummaries.setFetchedSummaries(
-          buildRecordSummariesForSheet(response.preview_data),
+      if (response.linked_record_summaries) {
+        this.linkedRecordSummaries.setFetchedSummaries(
+          buildRecordSummariesForSheet(response.linked_record_summaries),
+        );
+      }
+      if (response.record_summaries) {
+        this.recordSummaries.reconstruct(
+          Object.entries(response.record_summaries),
         );
       }
       const records = preprocessRecords({

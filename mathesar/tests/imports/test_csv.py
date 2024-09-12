@@ -143,6 +143,7 @@ def test_col_headers_empty_csv(col_headers_empty_data_file, schema):
     )
 
 
+@pytest.mark.skip(reason="msar.add_mathesar_table no longer raises an exception if a table with the same name already exists in the database.")
 def test_csv_upload_with_duplicate_table_name(data_file, schema):
     table_name = "NASA 2"
 

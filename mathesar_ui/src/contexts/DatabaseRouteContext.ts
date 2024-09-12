@@ -10,9 +10,12 @@ export class DatabaseRouteContext {
 
   roles;
 
+  underlyingDatabase;
+
   constructor(database: Database) {
     this.database = database;
     this.roles = database.constructRolesStore();
+    this.underlyingDatabase = database.constructUnderlyingDatabaseStore();
   }
 
   /**

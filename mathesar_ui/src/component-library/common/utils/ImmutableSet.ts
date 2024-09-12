@@ -54,6 +54,10 @@ export default class ImmutableSet<T> {
     return this.set.has(item);
   }
 
+  equals(other: Iterable<T> & { size: number }): boolean {
+    return this.size === other.size && this.union(other).size === this.size;
+  }
+
   get size(): number {
     return this.set.size;
   }

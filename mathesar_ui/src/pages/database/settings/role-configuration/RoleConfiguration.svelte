@@ -36,13 +36,10 @@
   $: ({ database, databaseRouteContext, configuredRoles, combinedLoginRoles } =
     $routeContext);
   $: ({ roles } = databaseRouteContext);
-  $: void AsyncRpcApiStore.runBatched(
-    [
-      configuredRoles.batchRunner({ server_id: database.server.id }),
-      roles.batchRunner({ database_id: database.id }),
-    ],
-    { onlyRunIfNotInitialized: true },
-  );
+  $: void AsyncRpcApiStore.runBatched([
+    configuredRoles.batchRunner({ server_id: database.server.id }),
+    roles.batchRunner({ database_id: database.id }),
+  ]);
   $: isLoading = $configuredRoles.isLoading || $roles.isLoading;
 
   let targetCombinedLoginRole: CombinedLoginRole | undefined;
