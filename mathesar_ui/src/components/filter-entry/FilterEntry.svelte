@@ -222,7 +222,6 @@
           name: getColumnName(option),
           type: columnInfo?.column.type ?? 'unknown',
           type_options: columnInfo?.column.type_options ?? null,
-          display_options: columnInfo?.column.display_options ?? null,
           constraintsType: getColumnConstraintTypeFromColumnId(option),
         }}
       />

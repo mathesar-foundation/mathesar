@@ -1,5 +1,6 @@
+import type { Column } from '@mathesar/api/rpc/columns';
+import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import type { Table } from '@mathesar/api/rpc/tables';
-import type { DisplayColumn } from '@mathesar/components/column/types';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
 import {
@@ -12,20 +13,22 @@ import type { IconProps } from '@mathesar-component-library/types';
 
 import { makeSingular } from './languageUtils';
 
-export function getColumnIconProps(
-  _column: DisplayColumn,
-): IconProps | IconProps[] {
-  if (_column.constraintsType?.includes('primary')) {
+export function getColumnIconProps(column: {
+  type: Column['type'];
+  type_options: Column['type_options'];
+  constraintsType?: ConstraintType[];
+}): IconProps | IconProps[] {
+  if (column.constraintsType?.includes('primary')) {
     return iconConstraint;
   }
 
-  if (_column.constraintsType?.includes('foreignkey')) {
+  if (column.constraintsType?.includes('foreignkey')) {
     return iconTableLink;
   }
 
-  return getAbstractTypeForDbType(_column.type, abstractTypesMap).getIcon({
-    dbType: _column.type,
-    typeOptions: _column.type_options,
+  return getAbstractTypeForDbType(column.type, abstractTypesMap).getIcon({
+    dbType: column.type,
+    typeOptions: column.type_options,
   });
 }
 
