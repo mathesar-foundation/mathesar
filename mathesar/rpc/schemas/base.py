@@ -8,7 +8,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.constants import INTERNAL_SCHEMAS
 from db.schemas.operations.create import create_schema
-from db.schemas.operations.select import get_schemas
+from db.schemas.operations.select import list_schemas
 from db.schemas.operations.drop import drop_schema_via_oid
 from db.schemas.operations.alter import patch_schema
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -93,7 +93,7 @@ def list_(*, database_id: int, **kwargs) -> list[SchemaInfo]:
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        schemas = get_schemas(conn)
+        schemas = list_schemas(conn)
 
     return [s for s in schemas if s['name'] not in INTERNAL_SCHEMAS]
 
