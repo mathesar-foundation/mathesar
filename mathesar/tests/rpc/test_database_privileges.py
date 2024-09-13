@@ -77,6 +77,13 @@ def test_transfer_db_ownership(rf, monkeypatch):
     ):
         if new_owner_oid != _new_owner_oid:
             raise AssertionError('incorrect parameters passed')
+        return {
+            'oid': 1988103,
+            'name': 'mathesar',
+            'owner_oid': new_owner_oid,
+            'current_role_priv': ['CONNECT', 'CREATE', 'TEMPORARY'],
+            'current_role_owns': True
+        }
 
     monkeypatch.setattr(privileges, 'connect', mock_connect)
     monkeypatch.setattr(
