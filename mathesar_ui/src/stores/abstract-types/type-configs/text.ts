@@ -3,17 +3,12 @@ import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeText } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
+import { DB_TYPES } from '../dbTypes';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
   AbstractTypeDbConfig,
 } from '../types';
-
-export const DB_TYPES = {
-  VARCHAR: 'character varying',
-  CHAR: 'character',
-  TEXT: 'text',
-};
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {
@@ -61,10 +56,12 @@ function determineDbType(dbFormValues: FormValues, columnType: DbType): DbType {
       const integerValueOfLength =
         typeof length === 'string' ? parseInt(length, 10) : length;
       if (integerValueOfLength > 255) {
-        return DB_TYPES.VARCHAR;
+        return DB_TYPES.CHARACTER_VARYING;
       }
     }
-    return columnType === DB_TYPES.CHAR ? DB_TYPES.CHAR : DB_TYPES.VARCHAR;
+    return columnType === DB_TYPES.CHARACTER
+      ? DB_TYPES.CHARACTER
+      : DB_TYPES.CHARACTER_VARYING;
   }
   return DB_TYPES.TEXT;
 }
@@ -75,7 +72,7 @@ function determineDbTypeAndOptions(
 ): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
   const dbType = determineDbType(dbFormValues, columnType);
   const typeOptions: Column['type_options'] = {};
-  if (dbType === DB_TYPES.CHAR || dbType === DB_TYPES.VARCHAR) {
+  if (dbType === DB_TYPES.CHARACTER || dbType === DB_TYPES.CHARACTER_VARYING) {
     typeOptions.length = Number(dbFormValues.length);
   }
   return {
@@ -89,8 +86,8 @@ function constructDbFormValuesFromTypeOptions(
   typeOptions: Column['type_options'],
 ): FormValues {
   switch (columnType) {
-    case DB_TYPES.CHAR:
-    case DB_TYPES.VARCHAR:
+    case DB_TYPES.CHARACTER:
+    case DB_TYPES.CHARACTER_VARYING:
       return {
         length: (typeOptions?.length as number) ?? null,
         restrictFieldSize: true,
@@ -104,14 +101,14 @@ function constructDbFormValuesFromTypeOptions(
 
 const textType: AbstractTypeConfiguration = {
   getIcon: () => ({ ...iconUiTypeText, label: 'Text' }),
-  defaultDbType: DB_TYPES.VARCHAR,
+  defaultDbType: DB_TYPES.CHARACTER_VARYING,
   cellInfo: {
     type: 'string',
     config: {
       multiLine: true,
     },
     conditionalConfig: {
-      [DB_TYPES.CHAR]: {
+      [DB_TYPES.CHARACTER]: {
         multiLine: false,
       },
     },
