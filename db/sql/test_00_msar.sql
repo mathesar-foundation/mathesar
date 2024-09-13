@@ -3064,6 +3064,26 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_table_with_self_referential_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE categories (
+  id serial primary key,
+  name TEXT,
+  parent INT REFERENCES categories(id)
+);
+INSERT INTO categories (id, parent, name) VALUES
+( 1,  NULL, 'Tools'),
+( 2,  1   , 'Power tools'),
+( 3,  1   , 'Hand tools'),
+( 4,  2   , 'Drills'),
+( 5,  3   , 'Screwdrivers'),
+( 6,  3   , 'Wrenches');
+-- Reset sequence:
+PERFORM setval('categories_id_seq', (SELECT max(id) FROM categories));
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -3394,6 +3414,51 @@ BEGIN
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
         ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
         ' FROM public."Customers"  ORDER BY "4" ASC, "1" ASC LIMIT ''5'' OFFSET NULL'
+      )
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_for_table_with_self_referential_fk() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_table_with_self_referential_fk();
+  rel_id := 'categories'::regclass::oid;
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 10,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+     "count": 6,
+     "results": [
+        {"1": 1, "2": "Tools", "3": null},
+        {"1": 2, "2": "Power tools", "3": 1},
+        {"1": 3, "2": "Hand tools", "3": 1},
+        {"1": 4, "2": "Drills", "3": 2},
+        {"1": 5, "2": "Screwdrivers", "3": 3},
+        {"1": 6, "2": "Wrenches", "3": 3}
+     ],
+     "grouping": null,
+     "record_summaries": null,
+     "linked_record_summaries": {
+        "3": {
+          "1": "Tools",
+          "2": "Power tools",
+          "3": "Hand tools"
+        }
+     }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data(name) AS "2",'
+        ' msar.format_data(parent) AS "3" FROM public.categories  ORDER BY "1" ASC LIMIT ''10'' OFFSET NULL'
       )
     )
   );
