@@ -3,10 +3,12 @@ from typing import Literal, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
+from db.roles.operations.ownership import transfer_table_ownership
 from db.roles.operations.select import list_table_privileges
 from db.roles.operations.update import replace_table_privileges_for_roles
 from mathesar.rpc.utils import connect
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.tables.base import TableInfo
 
 
 class TablePrivileges(TypedDict):
@@ -81,3 +83,29 @@ def replace_for_roles(
             conn, table_oid, [TablePrivileges.from_dict(i) for i in privileges]
         )
     return [TablePrivileges.from_dict(i) for i in raw_priv]
+
+
+@rpc_method(name="tables.privileges.transfer_ownership")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def transfer_ownership(*, table_oid: int, new_owner_oid: int, database_id: int, **kwargs) -> TableInfo:
+    """
+    Transfers ownership of a given table to a new owner.
+
+    Args:
+        tab_id: The OID of the table to transfer.
+        new_owner_oid: The OID of the role whom we want to be the new owner of the table.
+
+    Note: To successfully transfer ownership of a table to a new owner the current user must:
+        - Be a Superuser/Owner of the table.
+        - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+          to the new owning role.
+        - Have `CREATE` privilege on the table's schema.
+
+    Returns:
+        Information about the table, and the current user privileges.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        table_info = transfer_table_ownership(table_oid, new_owner_oid, conn)
+    return TableInfo(table_info)
