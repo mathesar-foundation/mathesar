@@ -14,12 +14,17 @@
     getDatabasePageSchemasSectionUrl,
     getDatabasePageSettingsSectionUrl,
   } from '@mathesar/routes/urls';
+  import { modal } from '@mathesar/stores/modal';
   import {
     Button,
     ButtonMenuItem,
     DropdownMenu,
     TabContainer,
   } from '@mathesar-component-library';
+
+  import DatabasePermissionsModal from './permissions/DatabasePermissionsModal.svelte';
+
+  const permissionsModal = modal.spawnModalController();
 
   export let database: Database;
 
@@ -67,11 +72,11 @@
     }}
   >
     <div slot="action">
-      <!-- <Button appearance="secondary">
+      <Button appearance="secondary" on:click={() => permissionsModal.open()}>
         <span>{$_('database_permissions')}</span>
       </Button>
 
-      <DropdownMenu
+      <!-- <DropdownMenu
         showArrow={false}
         triggerAppearance="plain"
         closeOnInnerClick={false}
@@ -94,6 +99,8 @@
     </div>
   </TabContainer>
 </LayoutWithHeader>
+
+<DatabasePermissionsModal controller={permissionsModal} />
 
 <style>
   .tab-content {

@@ -63,6 +63,22 @@ export class Database {
     });
   }
 
+  constructDatabasePrivilegesStore() {
+    return new AsyncRpcApiStore(api.databases.privileges.list_direct, {
+      postProcess: (rawDbPrivilegesForRoles) =>
+        new ImmutableMap(
+          rawDbPrivilegesForRoles.map((rawDatabasePrivilegesForRole) => [
+            rawDatabasePrivilegesForRole.role_oid,
+            rawDatabasePrivilegesForRole,
+          ]),
+        ),
+    });
+  }
+
+  constructUnderlyingDatabaseStore() {
+    return new AsyncRpcApiStore(api.databases.get);
+  }
+
   addCollaborator(
     userId: number,
     configuredRoleId: ConfiguredRole['id'],

@@ -4488,7 +4488,7 @@ SELECT 'jsonb_build_object(' || string_agg(
     $j$
     %1$L, jsonb_object_agg(
       summary_cte_%1$s.fkey, summary_cte_%1$s.summary
-    )
+    ) FILTER (WHERE summary_cte_%1$s.fkey IS NOT NULL)
     $j$,
     conkey
   ), ', '
@@ -4501,7 +4501,7 @@ CREATE OR REPLACE FUNCTION
 msar.build_self_summary_json_expr(tab_id oid) RETURNS TEXT AS $$/*
 */
 SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS NOT NULL THEN
-  'jsonb_object_agg(summary_cte_self.key, summary_cte_self.summary)'
+  'jsonb_object_agg(summary_cte_self.key, summary_cte_self.summary) FILTER (WHERE summary_cte_self.key IS NOT NULL)'
 END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 

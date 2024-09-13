@@ -10,8 +10,11 @@
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
-  import { isDefined } from '@mathesar/utils/language';
-  import { Button, Spinner } from '@mathesar-component-library';
+  import {
+    Button,
+    Spinner,
+    isDefinedNonNullable,
+  } from '@mathesar-component-library';
 
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
@@ -25,13 +28,10 @@
 
   $: ({ database, configuredRoles, collaborators, users } = $routeContext);
 
-  $: void AsyncRpcApiStore.runBatched(
-    [
-      collaborators.batchRunner({ database_id: database.id }),
-      configuredRoles.batchRunner({ server_id: database.server.id }),
-    ],
-    { onlyRunIfNotInitialized: true },
-  );
+  $: void AsyncRpcApiStore.runBatched([
+    collaborators.batchRunner({ database_id: database.id }),
+    configuredRoles.batchRunner({ server_id: database.server.id }),
+  ]);
   $: void users.runIfNotInitialized();
   $: isLoading =
     $collaborators.isLoading || $configuredRoles.isLoading || $users.isLoading;
@@ -40,7 +40,7 @@
     $collaborators.error,
     $configuredRoles.error,
     $users.error,
-  ].filter((entry): entry is string => isDefined(entry));
+  ].filter((entry): entry is string => isDefinedNonNullable(entry));
 
   let targetCollaborator: Collaborator | undefined;
 

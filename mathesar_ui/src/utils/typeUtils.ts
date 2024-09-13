@@ -1,6 +1,6 @@
 import type { Readable, Writable } from 'svelte/store';
 
-type ChangeWritableToReadable<T> = T extends Writable<infer U>
+export type ChangeWritableToReadable<T> = T extends Writable<infer U>
   ? Readable<U>
   : T;
 
