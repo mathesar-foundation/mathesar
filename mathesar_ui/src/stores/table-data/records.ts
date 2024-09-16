@@ -17,14 +17,14 @@ import type {
   RecordsListParams,
   RecordsResponse,
 } from '@mathesar/api/rpc/records';
-import type { Table } from '@mathesar/api/rpc/tables';
 import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { pluralize } from '@mathesar/utils/languageUtils';
 import type Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
-  CancellablePromise,
+  type CancellablePromise,
   WritableMap,
   getGloballyUniqueId,
   isDefinedNonNullable,
@@ -38,8 +38,7 @@ import RecordSummaryStore from './record-summaries/RecordSummaryStore';
 import { buildRecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 import type { SearchFuzzy } from './searchFuzzy';
 import type { Sorting } from './sorting';
-import type { RowKey } from './utils';
-import { getCellKey, validateRow } from './utils';
+import { type RowKey, getCellKey, validateRow } from './utils';
 
 export interface RecordsRequestParamsData {
   pagination: Pagination;

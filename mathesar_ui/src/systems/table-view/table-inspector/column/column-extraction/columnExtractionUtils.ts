@@ -2,13 +2,13 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { Constraint, FkConstraint } from '@mathesar/api/rpc/constraints';
-import type { Table } from '@mathesar/api/rpc/tables';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 import {
   type ValidationOutcome,
   invalid,
   valid,
 } from '@mathesar/components/form';
+import type { Table } from '@mathesar/models/Table';
 import {
   type ProcessedColumn,
   constraintIsFk,

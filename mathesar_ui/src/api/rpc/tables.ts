@@ -28,7 +28,7 @@ interface TableMetadata {
   record_summary_template: string | null;
 }
 
-export interface Table extends RawTable {
+export interface RawTableWithMetadata extends RawTable {
   metadata: TableMetadata | null;
 }
 
@@ -36,7 +36,7 @@ export interface Table extends RawTable {
 export type JoinPath = [number, number][][];
 
 export interface JoinableTable {
-  target: Table['oid'];
+  target: RawTableWithMetadata['oid'];
   join_path: JoinPath;
   /**
    * [Constraint OID, is_reversed]
@@ -62,7 +62,7 @@ export interface JoinableTablesResult {
   target_table_info: Record<
     string,
     {
-      name: Table['name'];
+      name: RawTableWithMetadata['name'];
       /** Keys are stringified column attnum values */
       columns: Record<
         string,
@@ -100,7 +100,7 @@ export const tables = {
       database_id: number;
       schema_oid: number;
     },
-    Table[]
+    RawTableWithMetadata[]
   >(),
 
   get: rpcMethodTypeContainer<
@@ -116,7 +116,7 @@ export const tables = {
       database_id: number;
       table_oid: number;
     },
-    Table
+    RawTableWithMetadata
   >(),
 
   /** Returns the oid of the table created */

@@ -21,7 +21,7 @@
 
   async function handleSubmit(name: string) {
     await updateTable({
-      database: $currentDatabase,
+      schema: table.schema,
       table: {
         oid: table.oid,
         name,

@@ -3,7 +3,6 @@
 
   import { getDetailedRecordsErrors } from '@mathesar/api/rest/utils/recordUtils';
   import { api } from '@mathesar/api/rpc';
-  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     FormSubmit,
     makeForm,
@@ -15,6 +14,7 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import type { Table } from '@mathesar/models/Table';
   import { currentDatabase } from '@mathesar/stores/databases';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';

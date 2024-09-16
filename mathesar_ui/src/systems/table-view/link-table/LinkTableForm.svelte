@@ -3,7 +3,6 @@
 
   import type { LinksPostRequest } from '@mathesar/api/rest/types/links';
   import { postAPI } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     Field,
     FieldLayout,
@@ -18,6 +17,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
   import { currentDatabase } from '@mathesar/stores/databases';
   import {
     ColumnsDataStore,

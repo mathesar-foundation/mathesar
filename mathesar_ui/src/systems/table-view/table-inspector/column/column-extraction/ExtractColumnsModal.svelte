@@ -16,7 +16,6 @@
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
     getTabularDataStoreFromContext,
@@ -146,11 +145,7 @@
         if (!targetTableId) {
           throw new Error($_('no_target_table_selected'));
         }
-        await moveColumns(
-          $tabularData.table.oid,
-          extractedColumnIds,
-          targetTableId,
-        );
+        await moveColumns(currentTable.oid, extractedColumnIds, targetTableId);
         const fkColumns = $linkedTable?.columns ?? [];
         let fkColumnId: number | undefined = undefined;
         if (fkColumns.length === 1) {
@@ -164,14 +159,14 @@
         );
       } else {
         const response = await splitTable({
-          id: $tabularData.table.oid,
+          id: currentTable.oid,
           idsOfColumnsToExtract: extractedColumnIds,
           extractedTableName: newTableName,
           newFkColumnName: $newFkColumnName,
         });
         followUps.push(
           getTableFromStoreOrApi({
-            database: $currentDatabase,
+            schema: currentTable.schema,
             tableOid: response.extracted_table,
           }),
         );

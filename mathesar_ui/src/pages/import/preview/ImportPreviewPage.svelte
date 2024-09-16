@@ -30,7 +30,7 @@
   }
 
   $: void (async () => {
-    const table = (await tableFetch.run({ database, tableOid: tableId }))
+    const table = (await tableFetch.run({ schema, tableOid: tableId }))
       .resolvedValue;
     if (!table) {
       return;

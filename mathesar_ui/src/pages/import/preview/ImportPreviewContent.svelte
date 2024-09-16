@@ -5,7 +5,7 @@
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import { api } from '@mathesar/api/rpc';
   import type { Column } from '@mathesar/api/rpc/columns';
-  import type { ColumnPreviewSpec, Table } from '@mathesar/api/rpc/tables';
+  import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
   import {
     Field,
     FieldLayout,
@@ -15,8 +15,8 @@
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
+  import type { Table } from '@mathesar/models/Table';
   import { runner } from '@mathesar/packages/json-rpc-client-builder';
   import {
     getImportPreviewPageUrl,
@@ -171,7 +171,7 @@
   async function finishImport() {
     try {
       await updateTable({
-        database: schema.database,
+        schema,
         table: {
           oid: table.oid,
           name: $customizedTableName,

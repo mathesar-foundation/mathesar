@@ -3,11 +3,11 @@
   import type { ComponentProps } from 'svelte';
   import { get } from 'svelte/store';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import { ImmutableMap, Spinner } from '@mathesar/component-library';
   import { Sheet } from '@mathesar/components/sheet';
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
+  import type { Table } from '@mathesar/models/Table';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
