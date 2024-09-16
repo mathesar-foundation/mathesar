@@ -32,10 +32,7 @@
 
   $: void (async () => {
     const table = (
-      await tableFetch.run({
-        database: $currentDatabase,
-        tableOid: tableId,
-      })
+      await tableFetch.run({ database: $currentDatabase, tableOid: tableId })
     ).resolvedValue;
     if (!table) {
       return;
@@ -45,16 +42,12 @@
       redirectToTablePage();
       return;
     }
-
-    // TODO_BETA: re-implement fetching and storing of `table.data_files`
-    // metadata from RPC API or similar.
-    throw new Error('Not implemented');
-    // const firstDataFileId = table.data_files?.[0];
-    // if (firstDataFileId === undefined) {
-    //   redirectToTablePage();
-    //   return;
-    // }
-    // await dataFileFetch.run(firstDataFileId);
+    const dataFileId = table.metadata?.data_file_id ?? undefined;
+    if (dataFileId === undefined) {
+      redirectToTablePage();
+      return;
+    }
+    await dataFileFetch.run(dataFileId);
   })();
   $: error = $tableFetch.error ?? $dataFileFetch.error;
 </script>

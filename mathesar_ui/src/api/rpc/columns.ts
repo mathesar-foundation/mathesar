@@ -47,7 +47,7 @@ export type TimeFormat = '24hr' | '12hr' | '24hrLong' | '12hrLong';
  *
  * [1]: https://www.postgresql.org/docs/current/datatype-numeric.html
  */
-interface ColumnTypeOptions {
+export interface ColumnTypeOptions {
   /**
    * For numeric types, the number of significant digits. For date/time types,
    * the number of fractional digits.

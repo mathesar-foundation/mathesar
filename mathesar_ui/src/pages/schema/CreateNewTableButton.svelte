@@ -22,9 +22,9 @@
 
   async function handleCreateEmptyTable() {
     isCreatingNewTable = true;
-    const tableOid = await createTable(database, schema, {});
+    const table = await createTable({ database, schema });
     isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.id, schema.oid, tableOid), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, table.oid), false);
   }
 </script>
 
