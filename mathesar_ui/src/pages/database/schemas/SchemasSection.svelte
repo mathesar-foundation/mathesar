@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
@@ -37,7 +38,7 @@
   ): Schema[] {
     const filtered: Schema[] = [];
     schemaData.forEach((schema) => {
-      if (schema.name?.toLowerCase().includes(filter.toLowerCase())) {
+      if (get(schema.name).toLowerCase().includes(filter.toLowerCase())) {
         filtered.push(schema);
       }
     });
@@ -59,7 +60,7 @@
   function deleteSchema(schema: Schema) {
     void confirmDelete({
       identifierType: $_('schema'),
-      identifierName: schema.name,
+      identifierName: get(schema.name),
       body: [$_('schema_delete_warning'), $_('are_you_sure_to_proceed')],
       onProceed: async () => {
         await deleteSchemaAPI(schema);

@@ -89,27 +89,6 @@ function removeSchemaInDBSchemaStore(database: Database, schema: Schema) {
   }
 }
 
-export function addCountToSchemaNumTables(
-  database: Pick<Database, 'id'>,
-  schema: Pick<Schema, 'oid'>,
-  count: number,
-) {
-  const store = dbSchemaStoreMap.get(database.id);
-  if (store) {
-    store.update((value) => {
-      const schemaToModify = value.data.get(schema.oid);
-      if (schemaToModify) {
-        schemaToModify.table_count += count;
-        value.data.set(schema.oid, schemaToModify);
-      }
-      return {
-        ...value,
-        data: new Map(value.data),
-      };
-    });
-  }
-}
-
 async function refetchSchemasForDB(
   database: Database,
 ): Promise<DBSchemaStoreData | undefined> {
@@ -173,8 +152,8 @@ function getSchemasStoreForDB(database: Database): Writable<DBSchemaStoreData> {
 export async function createSchema(
   database: Database,
   props: {
-    name: Schema['name'];
-    description: Schema['description'];
+    name: string;
+    description: string | null;
   },
 ): Promise<void> {
   const schemaOid = await api.schemas
@@ -194,17 +173,6 @@ export async function createSchema(
     throw new Error('Schema not found');
   }
   updateSchemaInDBSchemaStore(database.id, new Schema({ database, rawSchema }));
-}
-
-export async function updateSchema(
-  schema: Schema,
-  patch: {
-    name: Schema['name'];
-    description: Schema['description'];
-  },
-): Promise<void> {
-  await schema.updateNameAndDescription(patch);
-  updateSchemaInDBSchemaStore(schema.database.id, schema);
 }
 
 export async function deleteSchema(schema: Schema): Promise<void> {

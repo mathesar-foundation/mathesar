@@ -47,13 +47,11 @@ export function processColumns(
 }
 
 export function makeHeaderUpdateRequest({
-  database,
   schema,
   table,
   dataFile,
 }: {
-  database: Pick<Database, 'id'>;
-  schema: Pick<Schema, 'oid'>;
+  schema: Schema;
   table: Pick<Table, 'oid'>;
   dataFile: Pick<DataFile, 'id'>;
 }) {
@@ -65,13 +63,12 @@ export function makeHeaderUpdateRequest({
     customizedTableName: string;
   }) {
     await Promise.all([
-      deleteTable(database, schema, table.oid),
+      deleteTable(schema, table.oid),
       dataFilesApi.update(dataFile.id, {
         header: firstRowIsHeader,
       }),
     ]);
     return createTableFromDataFile({
-      database,
       schema,
       dataFile,
       name: customizedTableName,

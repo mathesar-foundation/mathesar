@@ -67,7 +67,7 @@
         },
       },
       onProceed: async () => {
-        await deleteTable(database, schema, table.oid);
+        await deleteTable(schema, table.oid);
       },
     });
   }

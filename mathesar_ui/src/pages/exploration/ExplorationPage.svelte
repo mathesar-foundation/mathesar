@@ -24,6 +24,8 @@
   export let query: QueryInstance;
   export let shareConsumer: ShareConsumer | undefined = undefined;
 
+  $: schemaName = schema.name;
+
   let queryRunner: QueryRunner | undefined;
   let isInspectorOpen = true;
 
@@ -50,7 +52,7 @@
 </script>
 
 <svelte:head>
-  <title>{query.name} | {schema.name} | {$_('mathesar')}</title>
+  <title>{query.name} | {$schemaName} | {$_('mathesar')}</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>

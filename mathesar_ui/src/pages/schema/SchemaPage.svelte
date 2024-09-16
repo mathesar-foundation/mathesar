@@ -71,16 +71,17 @@
     addEditModal.open();
   }
 
-  $: isDefault = schema.name === 'public';
+  $: ({ name, description, tableCount } = schema);
+  $: isDefault = $name === 'public';
 
   logEvent('opened_schema', {
     database_name: database.name,
-    schema_name: schema.name,
+    schema_name: $name,
     source: 'schema_page',
   });
 </script>
 
-<svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
+<svelte:head><title>{makeSimplePageTitle($name)}</title></svelte:head>
 
 <LayoutWithHeader
   restrictWidth
@@ -91,7 +92,7 @@
   <AppSecondaryHeader
     slot="secondary-header"
     pageTitleAndMetaProps={{
-      name: schema.name,
+      name: $name,
       icon: iconSchema,
     }}
   >
@@ -105,9 +106,9 @@
     </div>
 
     <svelte:fragment slot="bottom">
-      {#if schema.description}
+      {#if $description}
         <span class="description">
-          {schema.description}
+          {$description}
         </span>
       {/if}
     </svelte:fragment>
@@ -134,7 +135,7 @@
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
         {#if tablesRequestStatus.state === 'processing'}
-          <TableSkeleton numTables={schema.table_count} />
+          <TableSkeleton numTables={$tableCount} />
         {:else}
           <SchemaTables {tablesMap} {database} {schema} />
         {/if}

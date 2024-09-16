@@ -7,12 +7,13 @@
   export let schema: Schema;
   export let iconHasBox = false;
 
-  $: isLocked = schema.name === 'public';
+  $: ({ name, isPublicSchema } = schema);
+  $: isLocked = $isPublicSchema;
 </script>
 
 <span class="schema-name" class:is-locked={isLocked}>
   <NameWithIcon icon={iconSchema} {iconHasBox}>
-    {schema.name}
+    {$name}
   </NameWithIcon>
 </span>
 

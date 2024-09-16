@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -7,11 +8,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
-  import {
-    createSchema,
-    schemas,
-    updateSchema,
-  } from '@mathesar/stores/schemas';
+  import { createSchema, schemas } from '@mathesar/stores/schemas';
   import { toast } from '@mathesar/stores/toast';
   import type { ModalController } from '@mathesar-component-library';
 
@@ -19,14 +16,17 @@
   export let controller: ModalController;
   export let schema: Schema | undefined = undefined;
 
+  $: schemaName = schema?.name;
+  $: schemaDescription = schema?.description;
+
   function nameIsDuplicate(name: string) {
     // Handling the condition when the new name is equal to the current name
     // But the user has made sone key down events
-    if (schema && name.trim() === schema.name) {
+    if (schema && name.trim() === $schemaName) {
       return false;
     }
     return Array.from($schemas?.data || []).some(
-      ([, s]) => s.name.toLowerCase().trim() === name.trim(),
+      ([, s]) => get(s.name).toLowerCase().trim() === $schemaName?.trim(),
     );
   }
 
@@ -43,7 +43,7 @@
   async function save(name: string, description: string) {
     try {
       if (schema) {
-        await updateSchema(schema, { name, description });
+        await schema.updateNameAndDescription({ name, description });
       } else {
         await createSchema(database, { name, description });
       }
@@ -57,8 +57,8 @@
   {controller}
   {save}
   {getNameValidationErrors}
-  getInitialName={() => schema?.name ?? ''}
-  getInitialDescription={() => schema?.description ?? ''}
+  getInitialName={() => $schemaName ?? ''}
+  getInitialDescription={() => $schemaDescription ?? ''}
   saveButtonLabel={schema ? $_('save') : $_('create_new_schema')}
 >
   <svelte:fragment slot="helpText">

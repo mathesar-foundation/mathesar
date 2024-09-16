@@ -1,17 +1,31 @@
+import { type Readable, derived, writable } from 'svelte/store';
+
 import { api } from '@mathesar/api/rpc';
 import type { RawSchema, SchemaPrivilege } from '@mathesar/api/rpc/schemas';
-import type { CancellablePromise } from '@mathesar-component-library';
+import { CancellablePromise } from '@mathesar-component-library';
 
 import type { Database } from './Database';
 
 export class Schema {
   readonly oid: number;
 
-  readonly name: string;
+  private _name;
 
-  readonly description: RawSchema['description'];
+  get name(): Readable<RawSchema['name']> {
+    return this._name;
+  }
 
-  table_count: number;
+  private _description;
+
+  get description(): Readable<RawSchema['description']> {
+    return this._description;
+  }
+
+  private _tableCount;
+
+  get tableCount(): Readable<RawSchema['table_count']> {
+    return this._tableCount;
+  }
 
   readonly owner_oid: number;
 
@@ -19,13 +33,15 @@ export class Schema {
 
   readonly current_role_owns: boolean;
 
+  readonly isPublicSchema = derived(this.name, ($name) => $name === 'public');
+
   readonly database: Database;
 
   constructor(props: { database: Database; rawSchema: RawSchema }) {
     this.oid = props.rawSchema.oid;
-    this.name = props.rawSchema.name;
-    this.description = props.rawSchema.description;
-    this.table_count = props.rawSchema.table_count;
+    this._name = writable(props.rawSchema.name);
+    this._description = writable(props.rawSchema.description);
+    this._tableCount = writable(props.rawSchema.table_count);
     this.owner_oid = props.rawSchema.owner_oid;
     this.current_role_priv = props.rawSchema.current_role_priv;
     this.current_role_owns = props.rawSchema.current_role_owns;
@@ -34,18 +50,32 @@ export class Schema {
 
   updateNameAndDescription(props: {
     name: string;
-    description?: RawSchema['description'];
-  }): CancellablePromise<void> {
-    return api.schemas
+    description: RawSchema['description'];
+  }): CancellablePromise<Schema> {
+    const promise = api.schemas
       .patch({
         database_id: this.database.id,
         schema_oid: this.oid,
-        patch: {
-          name: props.name,
-          description: props.description,
-        },
+        patch: props,
       })
       .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then(() => {
+            this._name.set(props.name);
+            this._description.set(props.description);
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
+  }
+
+  updateTableCount(count: number) {
+    this._tableCount.set(count);
   }
 
   delete(): CancellablePromise<void> {

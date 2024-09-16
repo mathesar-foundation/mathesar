@@ -72,14 +72,11 @@
   $: form = makeForm({ customizedTableName });
 
   $: headerUpdateRequest = makeHeaderUpdateRequest({
-    database,
     schema,
     table,
     dataFile,
   });
-  $: cancelationRequest = new AsyncStore(() =>
-    deleteTable(database, schema, table.oid),
-  );
+  $: cancelationRequest = new AsyncStore(() => deleteTable(schema, table.oid));
   $: typeSuggestionsRequest = new AsyncStore(() =>
     api.data_modeling
       .suggest_types({ table_oid: table.oid, database_id: database.id })

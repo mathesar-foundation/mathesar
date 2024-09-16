@@ -24,12 +24,14 @@
   export let database: Database;
   export let schema: Schema;
 
+  $: ({ name, description, isPublicSchema } = schema);
+
   let isHovered = false;
   let isFocused = false;
 
   $: href = getSchemaPageUrl(database.id, schema.oid);
-  $: isDefault = schema.name === 'public';
-  $: isLocked = schema.name === 'public';
+  $: isDefault = $isPublicSchema;
+  $: isLocked = $isPublicSchema;
 </script>
 
 <div
@@ -68,9 +70,9 @@
     {/if}
   </div>
 
-  {#if schema.description}
-    <p class="description" title={schema.description}>
-      {schema.description}
+  {#if $description}
+    <p class="description" title={$description}>
+      {$description}
     </p>
   {/if}
 
@@ -86,7 +88,7 @@
   <a
     {href}
     class="hyperlink-overlay"
-    aria-label={schema.name}
+    aria-label={$name}
     on:mouseenter={() => {
       isHovered = true;
     }}

@@ -114,7 +114,6 @@
         return;
       }
       const table = await createTableFromDataFile({
-        database,
         schema,
         dataFile: { id: dataFileId },
       });

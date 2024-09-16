@@ -36,6 +36,7 @@
   $: showTableCreationTutorial = !hasTables;
   $: showExplorationTutorial = hasTables && !hasExplorations;
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
+  $: ({ tableCount } = schema);
 
   // Viewers can explore, they cannot save explorations
   $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
@@ -49,7 +50,7 @@
       </svelte:fragment>
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
-      <TableSkeleton numTables={schema.table_count} />
+      <TableSkeleton numTables={$tableCount} />
     {:else if tablesRequestStatus.state === 'failure'}
       <ErrorBox>
         <p>{tablesRequestStatus.errors[0]}</p>
