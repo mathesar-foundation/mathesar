@@ -7,7 +7,6 @@
   import type { Table } from '@mathesar/models/Table';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     Meta,
     TabularData,
@@ -36,7 +35,7 @@
   $: ({ query } = $router);
   $: meta = Meta.fromSerialization(query[metaSerializationQueryKey] ?? '');
   $: tabularData = new TabularData({
-    database: $currentDatabase,
+    database: table.schema.database,
     table,
     abstractTypesMap,
     meta,

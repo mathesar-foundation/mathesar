@@ -18,7 +18,6 @@
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     ColumnsDataStore,
     getTabularDataStoreFromContext,
@@ -26,7 +25,7 @@
   import {
     currentTables,
     importVerifiedTables as importVerifiedTablesStore,
-    refetchTablesForCurrentSchema,
+    refetchTablesForSchema,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -77,7 +76,7 @@
   $: linkType = requiredField<LinkType>('manyToOne');
   $: $targetTable, linkType.reset();
   $: targetColumnsStore = target
-    ? new ColumnsDataStore({ database: $currentDatabase, table: target })
+    ? new ColumnsDataStore({ database: target.schema.database, table: target })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
@@ -199,7 +198,7 @@
 
   async function reFetchOtherThingsThatChanged() {
     if ($linkType === 'manyToMany') {
-      await refetchTablesForCurrentSchema();
+      await refetchTablesForSchema(base.schema);
       return;
     }
     const tableWithNewColumn = $linkType === 'oneToMany' ? target : base;

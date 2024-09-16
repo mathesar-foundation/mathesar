@@ -3,7 +3,6 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Table } from '@mathesar/models/Table';
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     Meta,
     TabularData,
@@ -27,7 +26,7 @@
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
   $: tabularData = new TabularData({
-    database: $currentDatabase,
+    database: table.schema.database,
     table,
     abstractTypesMap,
     meta,

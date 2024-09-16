@@ -5,7 +5,6 @@
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Table } from '@mathesar/models/Table';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     factoryToGetTableNameValidationErrors,
     updateTable,
@@ -15,10 +14,7 @@
   export let table: Table;
   export let modalController: ModalController;
 
-  $: getNameValidationErrors = factoryToGetTableNameValidationErrors(
-    $currentDatabase,
-    table,
-  );
+  $: getNameValidationErrors = factoryToGetTableNameValidationErrors(table);
 
   async function handleSave(name: string, description: string) {
     await updateTable({

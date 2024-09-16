@@ -99,11 +99,8 @@ function setTablesStore(schema: Schema, tables: Table[]): TablesStore {
   return store;
 }
 
-export function removeTablesStore(
-  database: Pick<Database, 'id'>,
-  schema: Pick<Schema, 'oid'>,
-): void {
-  tablesStores.delete([database.id, schema.oid]);
+export function removeTablesStore(schema: Schema): void {
+  tablesStores.delete([schema.database.id, schema.oid]);
 }
 
 export async function refetchTablesForSchema(
@@ -520,18 +517,13 @@ export const currentTable = derived(
       : $tables.tablesMap.get($currentTableId),
 );
 
-export async function refetchTablesForCurrentSchema() {
-  const schema = get(currentSchema);
-  if (schema) {
-    await refetchTablesForSchema(schema);
-  }
-}
-
 export function factoryToGetTableNameValidationErrors(
-  database: Pick<Database, 'id'>,
   table: Table,
 ): Readable<(n: string) => string[]> {
-  const tablesStore = tablesStores.get([database.id, table.schema.oid]);
+  const tablesStore = tablesStores.get([
+    table.schema.database.id,
+    table.schema.oid,
+  ]);
   if (!tablesStore) throw new Error('Tables store not found');
 
   const otherTableNames = derived(

@@ -15,7 +15,6 @@
   import { iconRecord, iconSave, iconUndo } from '@mathesar/icons';
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import type { Table } from '@mathesar/models/Table';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import type { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
 
@@ -42,7 +41,7 @@
   function getJoinableTablesResult(tableId: number) {
     return api.tables
       .list_joinable({
-        database_id: $currentDatabase.id,
+        database_id: table.schema.database.id,
         table_oid: tableId,
         max_depth: 1,
       })

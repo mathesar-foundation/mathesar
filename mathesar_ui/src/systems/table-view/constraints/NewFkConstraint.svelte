@@ -16,7 +16,6 @@
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Table } from '@mathesar/models/Table';
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
     TableStructure,
@@ -79,7 +78,7 @@
 
   $: targetTableStructure = $targetTable
     ? new TableStructure({
-        database: $currentDatabase,
+        database: $targetTable.schema.database,
         table: $targetTable,
         abstractTypesMap,
       })

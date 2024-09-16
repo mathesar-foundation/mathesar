@@ -13,7 +13,6 @@
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Table } from '@mathesar/models/Table';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
   import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
