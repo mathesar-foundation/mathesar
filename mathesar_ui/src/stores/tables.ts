@@ -10,8 +10,14 @@
  */
 
 import { execPipe, filter, find, map } from 'iter-tools';
-import type { Readable, Writable } from 'svelte/store';
-import { derived, get, readable, writable } from 'svelte/store';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  readable,
+  writable,
+} from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
@@ -19,10 +25,10 @@ import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_t
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { ColumnPatchSpec } from '@mathesar/api/rpc/columns';
-import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import type { Database } from '@mathesar/models/Database';
+import type { Schema } from '@mathesar/models/Schema';
 import {
   type RpcRequest,
   batchSend,

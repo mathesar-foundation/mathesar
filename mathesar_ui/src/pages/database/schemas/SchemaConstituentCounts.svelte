@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Schema } from '@mathesar/models/Schema';
 
   export let schema: Schema;
 </script>

@@ -1,10 +1,10 @@
 import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type { Database } from '@mathesar/models/Database';
+import type { Schema } from '@mathesar/models/Schema';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,

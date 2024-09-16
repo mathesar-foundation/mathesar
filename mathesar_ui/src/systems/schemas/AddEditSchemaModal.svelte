@@ -1,12 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import {
     createSchema,
     schemas,
@@ -45,7 +45,7 @@
       if (schema) {
         await updateSchema(database.id, { ...schema, name, description });
       } else {
-        await createSchema(database.id, name, description);
+        await createSchema(database, name, description);
       }
     } catch (err) {
       toast.fromError(err);

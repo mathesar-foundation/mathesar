@@ -1,8 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { AnchorButton, Tutorial } from '@mathesar-component-library';
 

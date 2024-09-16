@@ -1,11 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconEdit, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     getSchemaPageExplorationsSectionUrl,

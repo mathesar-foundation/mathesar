@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import { iconSchema } from '@mathesar/icons';
+  import type { Schema } from '@mathesar/models/Schema';
 
   import NameWithIcon from './NameWithIcon.svelte';
 

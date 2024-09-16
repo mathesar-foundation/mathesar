@@ -1,10 +1,18 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-export interface Schema {
+import type { RawRole } from './roles';
+
+export const allSchemaPrivileges = ['USAGE', 'CREATE'] as const;
+export type SchemaPrivilege = (typeof allSchemaPrivileges)[number];
+
+export interface RawSchema {
   oid: number;
   name: string;
   description: string;
   table_count: number;
+  owner_oid: RawRole['oid'];
+  current_role_priv: SchemaPrivilege[];
+  current_role_owns: boolean;
 }
 
 export const schemas = {
@@ -12,7 +20,7 @@ export const schemas = {
     {
       database_id: number;
     },
-    Schema[]
+    RawSchema[]
   >(),
 
   /** Returns the OID of the newly-created schema */

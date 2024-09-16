@@ -32,8 +32,14 @@
  * to having us use the currentSchemaId store directly.
  */
 
-import type { Readable, Unsubscriber, Writable } from 'svelte/store';
-import { derived, get, writable } from 'svelte/store';
+import {
+  type Readable,
+  type Unsubscriber,
+  type Writable,
+  derived,
+  get,
+  writable,
+} from 'svelte/store';
 
 import type {
   QueryGetResponse,
@@ -42,21 +48,19 @@ import type {
   QueryRunRequest,
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
-import type {
-  PaginatedResponse,
-  RequestStatus,
-} from '@mathesar/api/rest/utils/requestUtils';
 import {
+  type PaginatedResponse,
+  type RequestStatus,
   addQueryParamsToUrl,
   deleteAPI,
   getAPI,
   postAPI,
   putAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
-import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { Schema } from '@mathesar/models/Schema';
 import CacheManager from '@mathesar/utils/CacheManager';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
+import type { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
 import { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';
