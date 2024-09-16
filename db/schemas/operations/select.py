@@ -10,6 +10,10 @@ def list_schemas(conn):
     return exec_msar_func(conn, 'list_schemas').fetchone()[0]
 
 
+def get_schema(schema_oid, conn):
+    return exec_msar_func(conn, 'get_schema').fetchone()[0]
+
+
 def reflect_schema(engine, name=None, oid=None, metadata=None):
     # If we have both arguments, the behavior is undefined.
     try:
