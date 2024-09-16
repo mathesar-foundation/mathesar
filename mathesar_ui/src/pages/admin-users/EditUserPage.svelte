@@ -15,10 +15,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import type { UserModel } from '@mathesar/stores/users';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
-  import {
-    PasswordChangeForm,
-    UserDetailsForm,
-  } from '@mathesar/systems/users-and-permissions';
+  import { PasswordChangeForm, UserDetailsForm } from '@mathesar/systems/users';
   import { Icon, SpinnerButton } from '@mathesar-component-library';
 
   const userProfileStore = getUserProfileStoreFromContext();
