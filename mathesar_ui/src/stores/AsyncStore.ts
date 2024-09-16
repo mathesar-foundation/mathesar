@@ -99,7 +99,7 @@ export class AsyncStoreValue<T, E> {
   }
 }
 
-export default class AsyncStore<Props, T>
+export default class AsyncStore<Props = void, T = unknown>
   implements Readable<AsyncStoreValue<T, string>>
 {
   private runFn: (props: Props) => Promise<T> | CancellablePromise<T>;
