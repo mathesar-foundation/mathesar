@@ -1221,7 +1221,7 @@ SELECT jsonb_build_object(
   'current_role_priv', msar.list_database_privileges_for_current_role(pgd.oid),
   'current_role_owns', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
 ) FROM pg_catalog.pg_database AS pgd
-WHERE pgd.datname = current_database();
+WHERE pgd.datname = pg_catalog.current_database();
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -1308,7 +1308,7 @@ SELECT string_agg(
       ' %3$I'
     ),
     val,
-    current_database(),
+    pg_catalog.current_database(),
     msar.get_role_name(rol_id)
   ),
   E';\n'
@@ -1430,6 +1430,31 @@ EXECUTE string_agg(
 ) || ';'
 FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
 RETURN msar.list_table_privileges(tab_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+DROP FUNCTION IF EXISTS msar.transfer_database_ownership(regrole);
+CREATE OR REPLACE FUNCTION
+msar.transfer_database_ownership(new_owner_oid regrole) RETURNS jsonb AS $$/*
+Transfers ownership of the current database to a new owner.
+
+Args:
+  new_owner_oid: The OID of the role whom we want to be the new owner of the current database.
+
+NOTE: To successfully transfer ownership of a database to a new owner the current user must:
+  - Be a Superuser/Owner of the current database.
+  - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+    to the new owning role.
+  - Have `CREATEDB` privilege.
+*/
+BEGIN
+  EXECUTE format(
+    'ALTER DATABASE %I OWNER TO %I',
+    pg_catalog.current_database(),
+    msar.get_role_name(new_owner_oid)
+  );
+  RETURN msar.get_current_database_info();
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
