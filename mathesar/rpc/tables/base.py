@@ -201,6 +201,7 @@ def add(
     table_name: str = None,
     column_data_list: list[CreatableColumnInfo] = [],
     constraint_data_list: list[CreatableConstraintInfo] = [],
+    owner_oid: int = None,
     comment: str = None,
     **kwargs
 ) -> AddedTableInfo:
@@ -213,6 +214,8 @@ def add(
         table_name: Name of the table to be created.
         column_data_list: A list describing columns to be created for the new table, in order.
         constraint_data_list: A list describing constraints to be created for the new table.
+        owner_oid: The OID of the role who will own the new table.
+            If owner_oid is None, the current role will be the owner of the new table.
         comment: The comment for the new table.
 
     Returns:
@@ -221,7 +224,7 @@ def add(
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         created_table_oid = create_table_on_database(
-            table_name, schema_oid, conn, column_data_list, constraint_data_list, comment
+            table_name, schema_oid, conn, column_data_list, constraint_data_list, owner_oid, comment
         )
     return created_table_oid
 
