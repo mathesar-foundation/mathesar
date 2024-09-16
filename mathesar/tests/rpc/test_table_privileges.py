@@ -116,3 +116,58 @@ def test_table_privileges_replace_for_roles(rf, monkeypatch):
         request=request
     )
     assert actual_response == expect_response
+
+
+def test_transfer_table_ownership(rf, monkeypatch):
+    _username = 'alice'
+    _password = 'pass1234'
+    _database_id = 2
+    _new_owner_oid = 443123
+    _table_oid = 2573196
+    request = rf.post('/api/rpc/v0/', data={})
+    request.user = User(username=_username, password=_password)
+
+    @contextmanager
+    def mock_connect(database_id, user):
+        if database_id == _database_id and user.username == _username:
+            try:
+                yield True
+            finally:
+                pass
+        else:
+            raise AssertionError('incorrect parameters passed')
+
+    def mock_tansfer_table_ownership(
+            table_oid,
+            new_owner_oid,
+            conn
+    ):
+        if table_oid != _table_oid and new_owner_oid != _new_owner_oid:
+            raise AssertionError('incorrect parameters passed')
+        return {
+            'oid': table_oid,
+            'name': 'x',
+            'schema': 2200,
+            'owner_oid': 2573031,
+            'description': None,
+            'current_role_owns': True,
+            'current_role_priv': [
+                'SELECT',
+                'INSERT',
+                'UPDATE',
+                'DELETE',
+                'TRUNCATE',
+                'REFERENCES',
+                'TRIGGER'
+            ]
+        }
+
+    monkeypatch.setattr(table_privileges, 'connect', mock_connect)
+    monkeypatch.setattr(
+        table_privileges,
+        'transfer_table_ownership',
+        mock_tansfer_table_ownership
+    )
+    table_privileges.transfer_ownership(
+        table_oid=_table_oid, new_owner_oid=_new_owner_oid, database_id=_database_id, request=request
+    )

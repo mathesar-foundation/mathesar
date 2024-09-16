@@ -112,6 +112,7 @@ To use an RPC function:
       members:
       - list_direct
       - replace_for_roles
+      - transfer_ownership
       - SchemaPrivileges
 
 ## Tables
@@ -142,6 +143,7 @@ To use an RPC function:
       members:
       - list_direct
       - replace_for_roles
+      - transfer_ownership
       - TablePrivileges
 
 ## Table Metadata
