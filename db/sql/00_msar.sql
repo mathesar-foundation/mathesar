@@ -918,7 +918,7 @@ SELECT jsonb_build_object(
   'name', relname,
   'schema', relnamespace::bigint,
   'description', msar.obj_description(oid, 'pg_class'),
-  'owner_oid', relowner,
+  'owner_oid', relowner::bigint,
   'current_role_priv', msar.list_table_privileges_for_current_role(tab_id),
   'current_role_owns', pg_catalog.pg_has_role(relowner, 'USAGE')
 ) FROM pg_catalog.pg_class WHERE oid = tab_id;
@@ -949,7 +949,7 @@ SELECT coalesce(
       'name', pgc.relname,
       'schema', pgc.relnamespace::bigint,
       'description', msar.obj_description(pgc.oid, 'pg_class'),
-      'owner_oid', pgc.relowner,
+      'owner_oid', pgc.relowner::bigint,
       'current_role_priv', msar.list_table_privileges_for_current_role(pgc.oid),
       'current_role_owns', pg_catalog.pg_has_role(pgc.relowner, 'USAGE')
     )
