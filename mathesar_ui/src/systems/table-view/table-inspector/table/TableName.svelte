@@ -20,9 +20,12 @@
   );
 
   async function handleSubmit(name: string) {
-    await updateTable($currentDatabase, {
-      oid: table.oid,
-      name,
+    await updateTable({
+      database: $currentDatabase,
+      table: {
+        oid: table.oid,
+        name,
+      },
     });
   }
 </script>

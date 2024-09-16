@@ -87,7 +87,7 @@ function removeSchemaInDBSchemaStore(
 
 export function addCountToSchemaNumTables(
   database: Pick<Database, 'id'>,
-  schema: Schema,
+  schema: Pick<Schema, 'oid'>,
   count: number,
 ) {
   const store = dbSchemaStoreMap.get(database.id);

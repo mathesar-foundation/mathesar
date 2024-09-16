@@ -86,9 +86,12 @@
       newColumnOrder.splice(0, 0, ...selectedColumnIdsOrdered);
     }
 
-    void updateTable($currentDatabase, {
-      oid: table.oid,
-      metadata: { column_order: newColumnOrder },
+    void updateTable({
+      database: $currentDatabase,
+      table: {
+        oid: table.oid,
+        metadata: { column_order: newColumnOrder },
+      },
     });
 
     // Reset drag information
