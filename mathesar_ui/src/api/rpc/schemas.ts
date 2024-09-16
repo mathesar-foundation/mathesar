@@ -1,5 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
+import type { RawDatabase } from './databases';
 import type { RawRole } from './roles';
 
 export const allSchemaPrivileges = ['USAGE', 'CREATE'] as const;
@@ -13,6 +14,11 @@ export interface RawSchema {
   owner_oid: RawRole['oid'];
   current_role_priv: SchemaPrivilege[];
   current_role_owns: boolean;
+}
+
+export interface RawSchemaPrivilegesForRole {
+  role_oid: RawRole['oid'];
+  direct: SchemaPrivilege[];
 }
 
 export const schemas = {
@@ -52,4 +58,23 @@ export const schemas = {
     },
     void
   >(),
+
+  privileges: {
+    list_direct: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        schema_oid: RawSchema['oid'];
+      },
+      Array<RawSchemaPrivilegesForRole>
+    >(),
+
+    replace_for_roles: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        schema_oid: RawSchema['oid'];
+        privileges: Array<RawSchemaPrivilegesForRole>;
+      },
+      Array<RawSchemaPrivilegesForRole>
+    >(),
+  },
 };

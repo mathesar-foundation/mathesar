@@ -2,7 +2,8 @@ import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
 import type { RawSchema, SchemaPrivilege } from '@mathesar/api/rpc/schemas';
-import { CancellablePromise } from '@mathesar-component-library';
+import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 
 import type { Database } from './Database';
 
@@ -85,5 +86,17 @@ export class Schema {
         schema_oid: this.oid,
       })
       .run();
+  }
+
+  constructSchemaPrivilegesStore() {
+    return new AsyncRpcApiStore(api.schemas.privileges.list_direct, {
+      postProcess: (rawSchemaPrivilegesForRoles) =>
+        new ImmutableMap(
+          rawSchemaPrivilegesForRoles.map((rawSchemaPrivilegesForRole) => [
+            rawSchemaPrivilegesForRole.role_oid,
+            rawSchemaPrivilegesForRole,
+          ]),
+        ),
+    });
   }
 }

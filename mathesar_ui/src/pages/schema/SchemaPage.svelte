@@ -22,6 +22,7 @@
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
+  import SchemaPermissionsModal from './SchemaPermissionsModal.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
 
@@ -30,6 +31,7 @@
   export let section: string;
 
   const addEditModal = modal.spawnModalController();
+  const permissionsModal = modal.spawnModalController();
 
   // NOTE: This has to be same as the name key in the paths prop of Route component
   type TabsKey = 'overview' | 'tables' | 'explorations';
@@ -103,6 +105,9 @@
           <span>{$_('edit_schema')}</span>
         </Button>
       {/if}
+      <Button appearance="secondary" on:click={() => permissionsModal.open()}>
+        <span>{$_('schema_permissions')}</span>
+      </Button>
     </div>
 
     <svelte:fragment slot="bottom">
@@ -158,6 +163,8 @@
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={addEditModal} {database} {schema} />
+
+<SchemaPermissionsModal controller={permissionsModal} {schema} />
 
 <style lang="scss">
   .tab-container {
