@@ -8,7 +8,7 @@ export type SchemaPrivilege = (typeof allSchemaPrivileges)[number];
 export interface RawSchema {
   oid: number;
   name: string;
-  description: string;
+  description: string | null;
   table_count: number;
   owner_oid: RawRole['oid'];
   current_role_priv: SchemaPrivilege[];
@@ -27,8 +27,8 @@ export const schemas = {
   add: rpcMethodTypeContainer<
     {
       database_id: number;
-      name: string;
-      description?: string;
+      name: RawSchema['name'];
+      description?: RawSchema['description'];
     },
     number
   >(),
@@ -38,8 +38,8 @@ export const schemas = {
       database_id: number;
       schema_oid: number;
       patch: {
-        name?: string;
-        description?: string;
+        name?: RawSchema['name'];
+        description?: RawSchema['description'];
       };
     },
     void

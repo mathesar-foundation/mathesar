@@ -43,9 +43,9 @@
   async function save(name: string, description: string) {
     try {
       if (schema) {
-        await updateSchema(database.id, { ...schema, name, description });
+        await updateSchema(schema, { name, description });
       } else {
-        await createSchema(database, name, description);
+        await createSchema(database, { name, description });
       }
     } catch (err) {
       toast.fromError(err);

@@ -62,7 +62,7 @@
       identifierName: schema.name,
       body: [$_('schema_delete_warning'), $_('are_you_sure_to_proceed')],
       onProceed: async () => {
-        await deleteSchemaAPI(database.id, schema.oid);
+        await deleteSchemaAPI(schema);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesStore(database, schema);
       },

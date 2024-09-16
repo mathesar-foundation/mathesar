@@ -76,14 +76,11 @@ function updateSchemaInDBSchemaStore(
   }
 }
 
-function removeSchemaInDBSchemaStore(
-  databaseId: Database['id'],
-  schemaId: Schema['oid'],
-) {
-  const store = dbSchemaStoreMap.get(databaseId);
+function removeSchemaInDBSchemaStore(database: Database, schema: Schema) {
+  const store = dbSchemaStoreMap.get(database.id);
   if (store) {
     store.update((value) => {
-      value.data?.delete(schemaId);
+      value.data?.delete(schema.oid);
       return {
         ...value,
         data: new Map(value.data),
@@ -175,14 +172,16 @@ function getSchemasStoreForDB(database: Database): Writable<DBSchemaStoreData> {
 
 export async function createSchema(
   database: Database,
-  name: Schema['name'],
-  description: Schema['description'],
+  props: {
+    name: Schema['name'];
+    description: Schema['description'];
+  },
 ): Promise<void> {
   const schemaOid = await api.schemas
     .add({
       database_id: database.id,
-      name,
-      description,
+      name: props.name,
+      description: props.description,
     })
     .run();
   /**
@@ -198,33 +197,19 @@ export async function createSchema(
 }
 
 export async function updateSchema(
-  databaseId: Database['id'],
   schema: Schema,
+  patch: {
+    name: Schema['name'];
+    description: Schema['description'];
+  },
 ): Promise<void> {
-  await api.schemas
-    .patch({
-      database_id: databaseId,
-      schema_oid: schema.oid,
-      patch: {
-        name: schema.name,
-        description: schema.description,
-      },
-    })
-    .run();
-  updateSchemaInDBSchemaStore(databaseId, schema);
+  await schema.updateNameAndDescription(patch);
+  updateSchemaInDBSchemaStore(schema.database.id, schema);
 }
 
-export async function deleteSchema(
-  databaseId: Database['id'],
-  schemaId: Schema['oid'],
-): Promise<void> {
-  await api.schemas
-    .delete({
-      database_id: databaseId,
-      schema_oid: schemaId,
-    })
-    .run();
-  removeSchemaInDBSchemaStore(databaseId, schemaId);
+export async function deleteSchema(schema: Schema): Promise<void> {
+  await schema.delete();
+  removeSchemaInDBSchemaStore(schema.database, schema);
 }
 
 export const schemas: Readable<DBSchemaStoreData> = derived(

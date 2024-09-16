@@ -1,4 +1,6 @@
+import { api } from '@mathesar/api/rpc';
 import type { RawSchema, SchemaPrivilege } from '@mathesar/api/rpc/schemas';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 import type { Database } from './Database';
 
@@ -7,7 +9,7 @@ export class Schema {
 
   readonly name: string;
 
-  readonly description: string;
+  readonly description: RawSchema['description'];
 
   table_count: number;
 
@@ -28,5 +30,30 @@ export class Schema {
     this.current_role_priv = props.rawSchema.current_role_priv;
     this.current_role_owns = props.rawSchema.current_role_owns;
     this.database = props.database;
+  }
+
+  updateNameAndDescription(props: {
+    name: string;
+    description?: RawSchema['description'];
+  }): CancellablePromise<void> {
+    return api.schemas
+      .patch({
+        database_id: this.database.id,
+        schema_oid: this.oid,
+        patch: {
+          name: props.name,
+          description: props.description,
+        },
+      })
+      .run();
+  }
+
+  delete(): CancellablePromise<void> {
+    return api.schemas
+      .delete({
+        database_id: this.database.id,
+        schema_oid: this.oid,
+      })
+      .run();
   }
 }
