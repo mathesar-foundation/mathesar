@@ -48,11 +48,9 @@ export interface AbstractTypeDbConfig {
 
 export interface AbstractTypeDisplayConfig {
   form: AbstractTypeConfigForm;
-  determineDisplayOptions: (
-    dbFormValues: FormValues,
-  ) => Column['display_options'];
+  determineDisplayOptions: (dbFormValues: FormValues) => Column['metadata'];
   constructDisplayFormValuesFromDisplayOptions: (
-    displayOptions: Column['display_options'],
+    displayOptions: Column['metadata'],
   ) => FormValues;
 }
 

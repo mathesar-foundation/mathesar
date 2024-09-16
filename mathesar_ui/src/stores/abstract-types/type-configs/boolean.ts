@@ -1,7 +1,7 @@
 import {
   type BooleanInputType,
   type Column,
-  getColumnDisplayOption,
+  getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import { iconUiTypeBoolean } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
@@ -84,10 +84,8 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(
-  formValues: FormValues,
-): Column['display_options'] {
-  const displayOptions: Column['display_options'] = {
+function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
+  const displayOptions: Column['metadata'] = {
     bool_input: formValues.displayAs as BooleanInputType,
   };
   if (formValues.displayAs === 'dropdown' && formValues.useCustomLabels) {
@@ -98,16 +96,16 @@ function determineDisplayOptions(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  displayOptions: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const column = { display_options: displayOptions };
+  const column = { metadata };
   const formValues: FormValues = {
-    displayAs: getColumnDisplayOption(column, 'bool_input'),
+    displayAs: getColumnMetadataValue(column, 'bool_input'),
   };
-  if (displayOptions?.bool_true || displayOptions?.bool_false) {
+  if (metadata?.bool_true || metadata?.bool_false) {
     formValues.useCustomLabels = true;
-    formValues.trueLabel = getColumnDisplayOption(column, 'bool_true');
-    formValues.falseLabel = getColumnDisplayOption(column, 'bool_false');
+    formValues.trueLabel = getColumnMetadataValue(column, 'bool_true');
+    formValues.falseLabel = getColumnMetadataValue(column, 'bool_false');
   }
   return formValues;
 }
