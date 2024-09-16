@@ -14,13 +14,19 @@ import type { Readable, Writable } from 'svelte/store';
 import { derived, get, readable, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
+import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
 import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_table';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
+import type { ColumnPatchSpec } from '@mathesar/api/rpc/columns';
 import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import type { Database } from '@mathesar/models/Database';
+import {
+  type RpcRequest,
+  batchSend,
+} from '@mathesar/packages/json-rpc-client-builder';
 import { TupleMap } from '@mathesar/packages/tuple-map';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import {
@@ -194,7 +200,7 @@ function findStoreContainingTable(
 
 export function deleteTable(
   database: Pick<Database, 'id'>,
-  schema: Schema,
+  schema: Pick<Schema, 'oid'>,
   tableOid: Table['oid'],
 ): CancellablePromise<void> {
   const promise = api.tables
@@ -226,34 +232,69 @@ export function deleteTable(
 }
 
 /**
- *
  * @throws Error if the table store is not found or if the table is not found in
  * the store.
  */
-export async function updateTable(
-  database: Pick<Database, 'id'>,
-  table: RecursivePartial<Table> & { oid: Table['oid'] },
-): Promise<void> {
-  await api.tables
-    .patch({
-      database_id: database.id,
-      table_oid: table.oid,
-      table_data_dict: {
-        name: table.name,
-        description: table.description,
-      },
-    })
-    .run();
+export async function updateTable({
+  database,
+  table,
+  columnPatchSpecs,
+  columnsToDelete,
+}: {
+  database: Pick<Database, 'id'>;
+  table: RecursivePartial<Table> & { oid: Table['oid'] };
+  columnPatchSpecs?: ColumnPatchSpec[];
+  columnsToDelete?: number[];
+}): Promise<Table> {
+  const requests: RpcRequest<void>[] = [];
+  if (table.name || table.description) {
+    requests.push(
+      api.tables.patch({
+        database_id: database.id,
+        table_oid: table.oid,
+        table_data_dict: {
+          name: table.name,
+          description: table.description,
+        },
+      }),
+    );
+  }
+  if (columnPatchSpecs) {
+    requests.push(
+      api.columns.patch({
+        database_id: database.id,
+        table_oid: table.oid,
+        column_data_list: columnPatchSpecs,
+      }),
+    );
+  }
+  if (table.metadata) {
+    requests.push(
+      api.tables.metadata.set({
+        database_id: database.id,
+        table_oid: table.oid,
+        metadata: table.metadata,
+      }),
+    );
+  }
+  if (columnsToDelete?.length) {
+    requests.push(
+      api.columns.delete({
+        database_id: database.id,
+        table_oid: table.oid,
+        column_attnums: columnsToDelete,
+      }),
+    );
+  }
+  await batchSend(requests);
 
-  // TODO_BETA: also run tables.metadata.patch to handle updates to
-  // `table.metadata`. Run both API calls as one RPC batch request.
-
+  let newTable: Table | undefined;
   const tableStore = findStoreContainingTable(database, table.oid);
   if (!tableStore) throw new Error('Table store not found');
   tableStore.update((tablesData) => {
     const oldTable = tablesData.tablesMap.get(table.oid);
     if (!oldTable) throw new Error('Table not found within store.');
-    const newTable = mergeTables(oldTable, table);
+    newTable = mergeTables(oldTable, table);
     tablesData.tablesMap.set(table.oid, newTable);
     const tablesMap: TablesMap = new Map();
     sortTables([...tablesData.tablesMap.values()]).forEach((t) => {
@@ -261,57 +302,99 @@ export async function updateTable(
     });
     return { ...tablesData, tablesMap };
   });
+  if (!newTable) throw new Error('Table not updated.');
+  return newTable;
 }
 
-export function createTable(
-  database: Pick<Database, 'id'>,
-  schema: Schema,
-  tableArgs: {
-    name?: string;
-    dataFiles?: [number, ...number[]];
-  },
-): CancellablePromise<Table['oid']> {
+function addTableToStore({
+  database,
+  schema,
+  table,
+}: {
+  database: Pick<Database, 'id'>;
+  schema: Pick<Schema, 'oid'>;
+  table: Partial<Table> & Pick<Table, 'oid' | 'name'>;
+}): Table {
+  addCountToSchemaNumTables(database, schema, 1);
+  const fullTable: Table = {
+    description: null,
+    metadata: null,
+    schema: schema.oid,
+    ...table,
+  };
+  const tablesStore = tablesStores.get([database.id, schema.oid]);
+  tablesStore?.update((tablesData) => {
+    const tables = sortTables([...tablesData.tablesMap.values(), fullTable]);
+    return {
+      ...tablesData,
+      tablesMap: new Map(tables.map((t) => [t.oid, t])),
+    };
+  });
+  return fullTable;
+}
+
+export function createTable({
+  database,
+  schema,
+}: {
+  database: Pick<Database, 'id'>;
+  schema: Pick<Schema, 'oid'>;
+}): CancellablePromise<Table> {
   const promise = api.tables
     .add({
       database_id: database.id,
       schema_oid: schema.oid,
-      table_name: tableArgs.name ?? '',
-      // TODO_BETA
-      //
-      // Figure out how to create a table with `data_files`. We might need a
-      // separate RPC method for that.
-
-      // data_files: tableArgs.dataFiles,
     })
     .run();
   return new CancellablePromise(
     (resolve, reject) => {
-      void promise.then((tableOid) => {
-        addCountToSchemaNumTables(database, schema, 1);
-        const tablesStore = tablesStores.get([database.id, schema.oid]);
-        tablesStore?.update((tablesData) => {
-          const table: Table = {
-            oid: tableOid,
-            // TODO_BETA: What happens when we create a table without passing a
-            // name. Does the RPC API support this? Should it?
-            name: tableArgs.name ?? '',
-            schema: schema.oid,
-            description: null,
-            metadata: null,
-          };
-          const tables = sortTables([...tablesData.tablesMap.values(), table]);
-          return {
-            ...tablesData,
-            tablesMap: new Map(tables.map((t) => [t.oid, t])),
-          };
-        });
-        return resolve(tableOid);
-      }, reject);
+      void promise.then(
+        (table) => resolve(addTableToStore({ database, schema, table })),
+        reject,
+      );
     },
     () => {
       promise.cancel();
     },
   );
+}
+
+export async function createTableFromDataFile(props: {
+  database: Pick<Database, 'id'>;
+  schema: Pick<Schema, 'oid'>;
+  dataFile: Pick<DataFile, 'id'>;
+  name?: string;
+}): Promise<Table> {
+  const created = await api.tables
+    .import({
+      database_id: props.database.id,
+      schema_oid: props.schema.oid,
+      table_name: props.name,
+      data_file_id: props.dataFile.id,
+    })
+    .run();
+
+  const basicTable = addTableToStore({
+    database: props.database,
+    schema: props.schema,
+    table: {
+      oid: created.oid,
+      name: created.name,
+      schema: props.schema.oid,
+    },
+  });
+
+  const fullTable = await updateTable({
+    database: props.database,
+    table: {
+      ...basicTable,
+      metadata: {
+        import_verified: false,
+        data_file_id: props.dataFile.id,
+      },
+    },
+  });
+  return fullTable;
 }
 
 export function splitTable({

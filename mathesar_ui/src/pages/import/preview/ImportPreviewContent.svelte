@@ -3,11 +3,10 @@
   import { router } from 'tinro';
 
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-  import { getAPI, postAPI } from '@mathesar/api/rest/utils/requestUtils';
   import { api } from '@mathesar/api/rpc';
   import type { Column } from '@mathesar/api/rpc/columns';
   import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Table } from '@mathesar/api/rpc/tables';
+  import type { ColumnPreviewSpec, Table } from '@mathesar/api/rpc/tables';
   import {
     Field,
     FieldLayout,
@@ -27,11 +26,14 @@
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
   import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentTables } from '@mathesar/stores/tables';
+  import {
+    currentTables,
+    deleteTable,
+    updateTable,
+  } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import {
     CancelOrProceedButtonPair,
-    CancellablePromise,
     Spinner,
   } from '@mathesar-component-library';
 
@@ -44,7 +46,6 @@
     buildColumnPropertiesMap,
     finalizeColumns,
     getSkeletonRecords,
-    makeDeleteTableRequest,
     makeHeaderUpdateRequest,
     processColumns,
   } from './importPreviewPageUtils';
@@ -52,37 +53,6 @@
 
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
-
-  /**
-   * Note the optimizing query parameter. It asserts that the table will not have
-   * columns with default values (probably because it is currently being imported
-   * and a table produced by importing will not have column defaults). It
-   * follows, that this function cannot be used where columns might have defaults.
-   */
-  function getTypeSuggestionsForTable(
-    id: Table['oid'],
-  ): CancellablePromise<Record<string, string>> {
-    const optimizingQueryParam = 'columns_might_have_defaults=false';
-    return getAPI(
-      `/api/db/v0/tables/${id}/type_suggestions/?${optimizingQueryParam}`,
-    );
-  }
-
-  function generateTablePreview(props: {
-    table: Pick<Table, 'oid'>;
-    columns: Column[];
-  }): CancellablePromise<{
-    records: Record<string, unknown>[];
-  }> {
-    const { columns, table } = props;
-    return postAPI(`/api/db/v0/tables/${table.oid}/previews/`, { columns });
-  }
-
-  const columnsFetch = new AsyncStore(runner(api.columns.list_with_metadata));
-  const previewRequest = new AsyncStore(generateTablePreview);
-  const typeSuggestionsRequest = new AsyncStore(getTypeSuggestionsForTable);
-  const headerUpdate = makeHeaderUpdateRequest();
-  const cancelationRequest = makeDeleteTableRequest();
 
   export let database: Database;
   export let schema: Schema;
@@ -100,7 +70,34 @@
     uniqueWith(otherTableNames, $_('table_name_already_exists')),
   ]);
   $: form = makeForm({ customizedTableName });
-  $: records = $previewRequest.resolvedValue?.records ?? getSkeletonRecords();
+
+  $: headerUpdateRequest = makeHeaderUpdateRequest({
+    database,
+    schema,
+    table,
+    dataFile,
+  });
+  $: cancelationRequest = new AsyncStore(() =>
+    deleteTable(database, schema, table.oid),
+  );
+  $: typeSuggestionsRequest = new AsyncStore(() =>
+    api.data_modeling
+      .suggest_types({ table_oid: table.oid, database_id: database.id })
+      .run(),
+  );
+  $: previewRequest = new AsyncStore(
+    (columnPreviewSpecs: ColumnPreviewSpec[]) =>
+      api.tables
+        .get_import_preview({
+          database_id: database.id,
+          table_oid: table.oid,
+          columns: columnPreviewSpecs,
+        })
+        .run(),
+  );
+  $: columnsFetch = new AsyncStore(runner(api.columns.list_with_metadata));
+
+  $: records = $previewRequest.resolvedValue ?? getSkeletonRecords();
   $: formInputsAreDisabled = !$previewRequest.isOk;
   $: canProceed = $previewRequest.isOk && $form.canSubmit;
   $: processedColumns = processColumns(columns, abstractTypesMap);
@@ -117,16 +114,16 @@
     columns = fetchedColumns;
     columnPropertiesMap = buildColumnPropertiesMap(columns);
     if (useColumnTypeInference) {
-      const response = await typeSuggestionsRequest.run(table.oid);
+      const response = await typeSuggestionsRequest.run();
       if (response.settlement?.state === 'resolved') {
         const typeSuggestions = response.settlement.value;
         columns = columns.map((column) => ({
           ...column,
-          type: typeSuggestions[column.name] ?? column.type,
+          type: typeSuggestions[column.id] ?? column.type,
         }));
       }
     }
-    await previewRequest.run({ table, columns });
+    await previewRequest.run(columns);
   }
   $: table, useColumnTypeInference, void init();
 
@@ -146,16 +143,12 @@
 
   async function toggleHeader() {
     previewRequest.reset();
-    const response = await headerUpdate.run({
-      database,
-      dataFile,
+    const response = await headerUpdateRequest.run({
       firstRowIsHeader: !dataFile.header,
-      schema,
-      table,
       customizedTableName: $customizedTableName,
     });
     if (response.resolvedValue) {
-      reload({ table: { oid: response.resolvedValue } });
+      reload({ table: response.resolvedValue, useColumnTypeInference });
     }
   }
 
@@ -168,11 +161,11 @@
     columns = columns.map((c) =>
       c.id === updatedColumn.id ? updatedColumn : c,
     );
-    return previewRequest.run({ table, columns });
+    return previewRequest.run(columns);
   }
 
   async function cancel() {
-    const response = await cancelationRequest.run({ database, schema, table });
+    const response = await cancelationRequest.run();
     if (response.isOk) {
       router.goto(getSchemaPageUrl(database.id, schema.oid), true);
     } else {
@@ -181,19 +174,25 @@
   }
 
   async function finishImport() {
-    // TODO_BETA reimplement patching tables columns with RPC API.
-    throw new Error('Not implemented');
-
-    // try {
-    //   await patchTable(database, table.oid, {
-    //     name: $customizedTableName,
-    //     import_verified: true,
-    //     columns: finalizeColumns(columns, columnPropertiesMap),
-    //   });
-    //   router.goto(getTablePageUrl(database.id, schema.oid, table.oid), true);
-    // } catch (err) {
-    //   toast.fromError(err);
-    // }
+    try {
+      await updateTable({
+        database,
+        table: {
+          oid: table.oid,
+          name: $customizedTableName,
+          metadata: {
+            import_verified: true,
+          },
+        },
+        columnPatchSpecs: finalizeColumns(columns, columnPropertiesMap),
+        columnsToDelete: Object.entries(columnPropertiesMap)
+          .filter(([, { selected }]) => !selected)
+          .map(([id]) => parseInt(id, 10)),
+      });
+      router.goto(getTablePageUrl(database.id, schema.oid, table.oid), true);
+    } catch (err) {
+      toast.fromError(err);
+    }
   }
 </script>
 
@@ -238,9 +237,9 @@
           on:retry={init}
           on:delete={cancel}
         />
-      {:else if $headerUpdate.error}
+      {:else if $headerUpdateRequest.error}
         <ErrorInfo
-          error={$headerUpdate.error}
+          error={$headerUpdateRequest.error}
           on:retry={init}
           on:delete={cancel}
         />
