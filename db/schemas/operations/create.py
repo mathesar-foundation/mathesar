@@ -16,7 +16,7 @@ def create_schema_via_sql_alchemy(schema_name, engine, description=None):
         The integer oid of the newly created schema.
     """
     return execute_msar_func_with_engine(
-        engine, 'create_schema', schema_name, description
+        engine, 'create_schema', schema_name, None, description
     ).fetchone()[0]
 
 
@@ -36,18 +36,19 @@ def create_schema_if_not_exists_via_sql_alchemy(schema_name, engine):
     ).fetchone()[0]
 
 
-def create_schema(schema_name, conn, description=None):
+def create_schema(schema_name, conn, owner_oid, description=None):
     """
     Create a schema using a psycopg connection.
 
     Args:
         schema_name: Name of the schema to create.
         conn: a psycopg connection
-        description: A new description to set on the schema.
+        owner_oid: The OID of the role who will own the new schema.(optional)
+        description: A new description to set on the schema.(optional)
 
     If a schema already exists with the given name, this function will raise an error.
 
     Returns:
         The SchemaInfo describing the user-defined schema in the database.
     """
-    return exec_msar_func(conn, 'create_schema', schema_name, description).fetchone()[0]
+    return exec_msar_func(conn, 'create_schema', schema_name, owner_oid, description).fetchone()[0]
