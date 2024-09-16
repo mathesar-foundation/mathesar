@@ -10,8 +10,14 @@
  */
 
 import { execPipe, filter, find, map } from 'iter-tools';
-import type { Readable, Writable } from 'svelte/store';
-import { derived, get, readable, writable } from 'svelte/store';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  readable,
+  writable,
+} from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
@@ -19,10 +25,10 @@ import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_t
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { ColumnPatchSpec } from '@mathesar/api/rpc/columns';
-import type { Schema } from '@mathesar/api/rpc/schemas';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import type { Database } from '@mathesar/models/Database';
+import type { Schema } from '@mathesar/models/Schema';
 import {
   type RpcRequest,
   batchSend,
@@ -41,7 +47,7 @@ import {
 } from '@mathesar-component-library';
 
 import { currentDatabase } from './databases';
-import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
+import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
 
@@ -199,22 +205,21 @@ function findStoreContainingTable(
 }
 
 export function deleteTable(
-  database: Pick<Database, 'id'>,
-  schema: Pick<Schema, 'oid'>,
+  schema: Schema,
   tableOid: Table['oid'],
 ): CancellablePromise<void> {
   const promise = api.tables
     .delete({
-      database_id: database.id,
+      database_id: schema.database.id,
       table_oid: tableOid,
     })
     .run();
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then(() => {
-        addCountToSchemaNumTables(database, schema, -1);
+        schema.updateTableCount(get(schema.tableCount) - 1);
         tablesStores
-          .get([database.id, schema.oid])
+          .get([schema.database.id, schema.oid])
           ?.update((tableStoreData) => {
             tableStoreData.tablesMap.delete(tableOid);
             return {
@@ -307,22 +312,20 @@ export async function updateTable({
 }
 
 function addTableToStore({
-  database,
   schema,
   table,
 }: {
-  database: Pick<Database, 'id'>;
-  schema: Pick<Schema, 'oid'>;
+  schema: Schema;
   table: Partial<Table> & Pick<Table, 'oid' | 'name'>;
 }): Table {
-  addCountToSchemaNumTables(database, schema, 1);
+  schema.updateTableCount(get(schema.tableCount) + 1);
   const fullTable: Table = {
     description: null,
     metadata: null,
     schema: schema.oid,
     ...table,
   };
-  const tablesStore = tablesStores.get([database.id, schema.oid]);
+  const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
   tablesStore?.update((tablesData) => {
     const tables = sortTables([...tablesData.tablesMap.values(), fullTable]);
     return {
@@ -334,22 +337,20 @@ function addTableToStore({
 }
 
 export function createTable({
-  database,
   schema,
 }: {
-  database: Pick<Database, 'id'>;
-  schema: Pick<Schema, 'oid'>;
+  schema: Schema;
 }): CancellablePromise<Table> {
   const promise = api.tables
     .add({
-      database_id: database.id,
+      database_id: schema.database.id,
       schema_oid: schema.oid,
     })
     .run();
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then(
-        (table) => resolve(addTableToStore({ database, schema, table })),
+        (table) => resolve(addTableToStore({ schema, table })),
         reject,
       );
     },
@@ -360,14 +361,13 @@ export function createTable({
 }
 
 export async function createTableFromDataFile(props: {
-  database: Pick<Database, 'id'>;
-  schema: Pick<Schema, 'oid'>;
+  schema: Schema;
   dataFile: Pick<DataFile, 'id'>;
   name?: string;
 }): Promise<Table> {
   const created = await api.tables
     .import({
-      database_id: props.database.id,
+      database_id: props.schema.database.id,
       schema_oid: props.schema.oid,
       table_name: props.name,
       data_file_id: props.dataFile.id,
@@ -375,7 +375,6 @@ export async function createTableFromDataFile(props: {
     .run();
 
   const basicTable = addTableToStore({
-    database: props.database,
     schema: props.schema,
     table: {
       oid: created.oid,
@@ -385,7 +384,7 @@ export async function createTableFromDataFile(props: {
   });
 
   const fullTable = await updateTable({
-    database: props.database,
+    database: props.schema.database,
     table: {
       ...basicTable,
       metadata: {

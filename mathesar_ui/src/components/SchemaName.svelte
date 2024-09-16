@@ -1,18 +1,19 @@
 <script lang="ts">
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import { iconSchema } from '@mathesar/icons';
+  import type { Schema } from '@mathesar/models/Schema';
 
   import NameWithIcon from './NameWithIcon.svelte';
 
   export let schema: Schema;
   export let iconHasBox = false;
 
-  $: isLocked = schema.name === 'public';
+  $: ({ name, isPublicSchema } = schema);
+  $: isLocked = $isPublicSchema;
 </script>
 
 <span class="schema-name" class:is-locked={isLocked}>
   <NameWithIcon icon={iconSchema} {iconHasBox}>
-    {schema.name}
+    {$name}
   </NameWithIcon>
 </span>
 

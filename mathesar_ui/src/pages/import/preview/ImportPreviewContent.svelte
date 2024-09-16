@@ -5,7 +5,6 @@
   import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
   import { api } from '@mathesar/api/rpc';
   import type { Column } from '@mathesar/api/rpc/columns';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { ColumnPreviewSpec, Table } from '@mathesar/api/rpc/tables';
   import {
     Field,
@@ -17,6 +16,7 @@
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { runner } from '@mathesar/packages/json-rpc-client-builder';
   import {
     getImportPreviewPageUrl,
@@ -25,7 +25,6 @@
   } from '@mathesar/routes/urls';
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     currentTables,
     deleteTable,
@@ -54,7 +53,6 @@
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
 
-  export let database: Database;
   export let schema: Schema;
   export let table: Table;
   export let dataFile: DataFile;
@@ -72,24 +70,21 @@
   $: form = makeForm({ customizedTableName });
 
   $: headerUpdateRequest = makeHeaderUpdateRequest({
-    database,
     schema,
     table,
     dataFile,
   });
-  $: cancelationRequest = new AsyncStore(() =>
-    deleteTable(database, schema, table.oid),
-  );
+  $: cancelationRequest = new AsyncStore(() => deleteTable(schema, table.oid));
   $: typeSuggestionsRequest = new AsyncStore(() =>
     api.data_modeling
-      .suggest_types({ table_oid: table.oid, database_id: database.id })
+      .suggest_types({ table_oid: table.oid, database_id: schema.database.id })
       .run(),
   );
   $: previewRequest = new AsyncStore(
     (columnPreviewSpecs: ColumnPreviewSpec[]) =>
       api.tables
         .get_import_preview({
-          database_id: database.id,
+          database_id: schema.database.id,
           table_oid: table.oid,
           columns: columnPreviewSpecs,
         })
@@ -104,7 +99,7 @@
 
   async function init() {
     const columnsResponse = await columnsFetch.run({
-      database_id: $currentDatabase.id,
+      database_id: schema.database.id,
       table_oid: table.oid,
     });
     const fetchedColumns = columnsResponse?.resolvedValue;
@@ -133,7 +128,7 @@
   }) {
     const tableId = props.table?.oid ?? table.oid;
     router.goto(
-      getImportPreviewPageUrl(database.id, schema.oid, tableId, {
+      getImportPreviewPageUrl(schema.database.id, schema.oid, tableId, {
         useColumnTypeInference:
           props.useColumnTypeInference ?? useColumnTypeInference,
       }),
@@ -167,7 +162,7 @@
   async function cancel() {
     const response = await cancelationRequest.run();
     if (response.isOk) {
-      router.goto(getSchemaPageUrl(database.id, schema.oid), true);
+      router.goto(getSchemaPageUrl(schema.database.id, schema.oid), true);
     } else {
       toast.fromError(response.error);
     }
@@ -176,7 +171,7 @@
   async function finishImport() {
     try {
       await updateTable({
-        database,
+        database: schema.database,
         table: {
           oid: table.oid,
           name: $customizedTableName,
@@ -189,7 +184,10 @@
           .filter(([, { selected }]) => !selected)
           .map(([id]) => parseInt(id, 10)),
       });
-      router.goto(getTablePageUrl(database.id, schema.oid, table.oid), true);
+      router.goto(
+        getTablePageUrl(schema.database.id, schema.oid, table.oid),
+        true,
+      );
     } catch (err) {
       toast.fromError(err);
     }

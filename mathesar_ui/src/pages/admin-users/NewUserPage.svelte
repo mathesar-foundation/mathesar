@@ -11,7 +11,7 @@
     getEditUsersPageUrl,
   } from '@mathesar/routes/urls';
   import { getUsersStoreFromContext } from '@mathesar/stores/users';
-  import { UserDetailsForm } from '@mathesar/systems/users-and-permissions';
+  import { UserDetailsForm } from '@mathesar/systems/users';
   import { Icon } from '@mathesar-component-library';
 
   const usersStore = getUsersStoreFromContext();
