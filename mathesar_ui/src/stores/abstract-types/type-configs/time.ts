@@ -6,6 +6,7 @@ import {
 import { iconUiTypeTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
+import { DB_TYPES } from '../dbTypes';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -13,11 +14,6 @@ import type {
 } from '../types';
 
 import { getTimeFormatOptions } from './utils';
-
-const DB_TYPES = {
-  TIME_WITH_TZ: 'time with time zone',
-  TIME_WITHOUT_TZ: 'time without time zone',
-};
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {
