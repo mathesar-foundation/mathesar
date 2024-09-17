@@ -1,14 +1,11 @@
 import { iconUiTypeUri } from '@mathesar/icons';
 
+import { DB_TYPES } from '../dbTypes';
 import type { AbstractTypeConfiguration } from '../types';
-
-const DB_TYPES = {
-  MATHESAR_TYPES__URI: 'mathesar_types.uri',
-};
 
 const uriType: AbstractTypeConfiguration = {
   getIcon: () => iconUiTypeUri,
-  defaultDbType: DB_TYPES.MATHESAR_TYPES__URI,
+  defaultDbType: DB_TYPES.MSAR__URI,
   cellInfo: {
     type: 'uri',
   },

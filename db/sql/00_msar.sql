@@ -976,7 +976,36 @@ WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_schemas() RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION msar.schema_info_table() RETURNS TABLE
+(
+  oid bigint, -- The OID of the schema.
+  name name, -- Name of the role.
+  description text, -- The description of the schema on the database.
+  owner_oid bigint, -- The owner of the schema.
+  current_role_priv jsonb, -- Privileges of the current role on the schema.
+  current_role_owns boolean, -- Whether the current role owns the schema.
+  table_count integer -- The number of tables in the schema.
+) AS $$
+SELECT 
+  s.oid::bigint AS oid,
+  s.nspname AS name,
+  pg_catalog.obj_description(s.oid) AS description,
+  s.nspowner::bigint AS owner_oid,
+  msar.list_schema_privileges_for_current_role(s.oid) AS current_role_priv,
+  pg_catalog.pg_has_role(s.nspowner, 'USAGE') AS current_role_owns,
+  COALESCE(count(c.oid), 0) AS table_count
+FROM pg_catalog.pg_namespace s
+LEFT JOIN pg_catalog.pg_class c ON c.relnamespace = s.oid AND c.relkind = 'r'
+GROUP BY
+  s.oid,
+  s.nspname,
+  s.nspowner;
+-- Filter on relkind so that we only count tables. This must be done in the ON clause so that
+-- we still get a row for schemas with no tables.
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.list_schemas() RETURNS jsonb AS $$/*
 Return a json array of objects describing the user-defined schemas in the database.
 
 PostgreSQL system schemas are ignored.
@@ -997,30 +1026,30 @@ Each returned JSON object in the array will have the form:
   }
 */
 SELECT jsonb_agg(schema_data)
-FROM (
-  SELECT 
-    s.oid::bigint AS oid,
-    s.nspname AS name,
-    pg_catalog.obj_description(s.oid) AS description,
-    s.nspowner::bigint AS owner_oid,
-    msar.list_schema_privileges_for_current_role(s.oid) AS current_role_priv,
-    pg_catalog.pg_has_role(s.nspowner, 'USAGE') AS current_role_owns,
-    COALESCE(count(c.oid), 0) AS table_count
-  FROM pg_catalog.pg_namespace s
-  LEFT JOIN pg_catalog.pg_class c ON
-    c.relnamespace = s.oid AND
-    -- Filter on relkind so that we only count tables. This must be done in the ON clause so that
-    -- we still get a row for schemas with no tables.
-    c.relkind = 'r'
-  WHERE
-    s.nspname <> 'information_schema' AND
-    s.nspname NOT LIKE 'pg_%'
-  GROUP BY
-    s.oid,
-    s.nspname,
-    s.nspowner
-) AS schema_data;
-$$ LANGUAGE SQL;
+FROM msar.schema_info_table() AS schema_data
+WHERE schema_data.name <> 'information_schema'
+AND schema_data.name NOT LIKE 'pg_%';
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.get_schema(sch_id regnamespace) RETURNS jsonb AS $$/*
+Return a json object describing the user-defined schema in the database.
+
+Each returned JSON object will have the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "description": <str|null>
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>,
+    "table_count": <int>
+  }
+*/
+SELECT to_jsonb(schema_data)
+FROM msar.schema_info_table() AS schema_data
+WHERE schema_data.oid = sch_id;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION msar.list_schema_privileges(sch_id regnamespace) RETURNS jsonb AS $$/*
@@ -1221,7 +1250,7 @@ SELECT jsonb_build_object(
   'current_role_priv', msar.list_database_privileges_for_current_role(pgd.oid),
   'current_role_owns', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
 ) FROM pg_catalog.pg_database AS pgd
-WHERE pgd.datname = current_database();
+WHERE pgd.datname = pg_catalog.current_database();
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -1308,7 +1337,7 @@ SELECT string_agg(
       ' %3$I'
     ),
     val,
-    current_database(),
+    pg_catalog.current_database(),
     msar.get_role_name(rol_id)
   ),
   E';\n'
@@ -1430,6 +1459,82 @@ EXECUTE string_agg(
 ) || ';'
 FROM jsonb_to_recordset(priv_spec) AS x(role_oid regrole, direct jsonb);
 RETURN msar.list_table_privileges(tab_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+DROP FUNCTION IF EXISTS msar.transfer_database_ownership(regrole);
+CREATE OR REPLACE FUNCTION
+msar.transfer_database_ownership(new_owner_oid regrole) RETURNS jsonb AS $$/*
+Transfers ownership of the current database to a new owner.
+
+Args:
+  new_owner_oid: The OID of the role whom we want to be the new owner of the current database.
+
+NOTE: To successfully transfer ownership of a database to a new owner the current user must:
+  - Be a Superuser/Owner of the current database.
+  - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+    to the new owning role.
+  - Have `CREATEDB` privilege.
+*/
+BEGIN
+  EXECUTE format(
+    'ALTER DATABASE %I OWNER TO %I',
+    pg_catalog.current_database(),
+    msar.get_role_name(new_owner_oid)
+  );
+  RETURN msar.get_current_database_info();
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.transfer_schema_ownership(sch_id regnamespace, new_owner_oid regrole) RETURNS jsonb AS $$/*
+Transfers ownership of a given schema to a new owner.
+
+Args:
+  sch_id: The OID of the schema to transfer.
+  new_owner_oid: The OID of the role whom we want to be the new owner of the schema.
+
+NOTE: To successfully transfer ownership of a schema to a new owner the current user must:
+  - Be a Superuser/Owner of the schema.
+  - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+    to the new owning role.
+  - Have `CREATE` privilege for the database.
+*/
+BEGIN
+  EXECUTE format(
+    'ALTER SCHEMA %I OWNER TO %I',
+    msar.get_schema_name(sch_id),
+    msar.get_role_name(new_owner_oid)
+  );
+  RETURN msar.get_schema(sch_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.transfer_table_ownership(tab_id regclass, new_owner_oid regrole) RETURNS jsonb AS $$/*
+Transfers ownership of a given table to a new owner.
+
+Args:
+  tab_id: The OID of the table to transfer.
+  new_owner_oid: The OID of the role whom we want to be the new owner of the table.
+
+NOTE: To successfully transfer ownership of a table to a new owner the current user must:
+  - Be a Superuser/Owner of the table.
+  - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+    to the new owning role.
+  - Have `CREATE` privilege on the table's schema.
+*/
+BEGIN
+  EXECUTE format(
+    'ALTER TABLE %I.%I OWNER TO %I',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_role_name(new_owner_oid)
+  );
+  RETURN msar.get_table(tab_id);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 

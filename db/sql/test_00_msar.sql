@@ -2784,20 +2784,20 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_get_schemas() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_list_schemas() RETURNS SETOF TEXT AS $$
 DECLARE
   initial_schema_count int;
   foo_schema jsonb;
 BEGIN
   -- Get the initial schema count
-  SELECT jsonb_array_length(msar.get_schemas()) INTO initial_schema_count;
+  SELECT jsonb_array_length(msar.list_schemas()) INTO initial_schema_count;
 
   -- Create a schema
   CREATE SCHEMA foo;
   -- We should now have one additional schema
-  RETURN NEXT is(jsonb_array_length(msar.get_schemas()), initial_schema_count + 1);
+  RETURN NEXT is(jsonb_array_length(msar.list_schemas()), initial_schema_count + 1);
   -- Reflect the "foo" schema
-  SELECT jsonb_path_query(msar.get_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- We should have a foo schema object
   RETURN NEXT is(jsonb_typeof(foo_schema), 'object');
   -- It should have no description
@@ -2811,7 +2811,7 @@ BEGIN
   CREATE TABLE foo.test_table_1 (id serial PRIMARY KEY);
   CREATE TABLE foo.test_table_2 (id serial PRIMARY KEY);
   -- Reflect again
-  SELECT jsonb_path_query(msar.get_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- We should see the description we set
   RETURN NEXT is(foo_schema->'description'#>>'{}', 'A test schema');
   -- We should see two tables
@@ -2821,16 +2821,16 @@ BEGIN
   DROP TABLE foo.test_table_1;
   DROP TABLE foo.test_table_2;
   -- Reflect the "foo" schema
-  SELECT jsonb_path_query(msar.get_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- The "foo" schema should now have no tables
   RETURN NEXT is((foo_schema->'table_count')::int, 0);
 
   -- Drop the "foo" schema
   DROP SCHEMA foo;
   -- We should now have no "foo" schema
-  RETURN NEXT ok(NOT jsonb_path_exists(msar.get_schemas(), '$[*] ? (@.name == "foo")'));
+  RETURN NEXT ok(NOT jsonb_path_exists(msar.list_schemas(), '$[*] ? (@.name == "foo")'));
   -- We should see the initial schema count again
-  RETURN NEXT is(jsonb_array_length(msar.get_schemas()), initial_schema_count);
+  RETURN NEXT is(jsonb_array_length(msar.list_schemas()), initial_schema_count);
 END;
 $$ LANGUAGE plpgsql;
 
