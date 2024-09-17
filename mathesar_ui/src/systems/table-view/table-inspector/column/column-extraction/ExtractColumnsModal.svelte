@@ -3,6 +3,7 @@
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
+  import { api } from '@mathesar/api/rpc';
   import {
     Field,
     FormSubmit,
@@ -23,8 +24,6 @@
   } from '@mathesar/stores/table-data';
   import {
     getTableFromStoreOrApi,
-    moveColumns,
-    splitTable,
     currentTablesData as tablesDataStore,
     validateNewTableName,
   } from '@mathesar/stores/tables';
@@ -146,11 +145,14 @@
         if (!targetTableId) {
           throw new Error($_('no_target_table_selected'));
         }
-        await moveColumns(
-          $tabularData.table.oid,
-          extractedColumnIds,
-          targetTableId,
-        );
+        await api.data_modeling
+          .move_columns({
+            database_id: $currentDatabase.id,
+            source_table_oid: $tabularData.table.oid,
+            move_column_attnums: extractedColumnIds,
+            target_table_oid: targetTableId,
+          })
+          .run();
         const fkColumns = $linkedTable?.columns ?? [];
         let fkColumnId: number | undefined = undefined;
         if (fkColumns.length === 1) {
@@ -163,12 +165,15 @@
           ),
         );
       } else {
-        const response = await splitTable({
-          id: $tabularData.table.oid,
-          idsOfColumnsToExtract: extractedColumnIds,
-          extractedTableName: newTableName,
-          newFkColumnName: $newFkColumnName,
-        });
+        const response = await api.data_modeling
+          .split_table({
+            database_id: $currentDatabase.id,
+            table_oid: $tabularData.table.oid,
+            column_attnums: extractedColumnIds,
+            extracted_table_name: newTableName,
+            relationship_fk_column_name: $newFkColumnName,
+          })
+          .run();
         followUps.push(
           getTableFromStoreOrApi({
             database: $currentDatabase,
