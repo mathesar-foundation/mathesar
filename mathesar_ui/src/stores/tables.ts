@@ -21,7 +21,6 @@ import {
 import { _ } from 'svelte-i18n';
 
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
-import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_table';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type { ColumnPatchSpec } from '@mathesar/api/rpc/columns';
@@ -367,40 +366,6 @@ export async function createTableFromDataFile(props: {
     },
   });
   return fullTable;
-}
-
-export function splitTable({
-  id,
-  idsOfColumnsToExtract,
-  extractedTableName,
-  newFkColumnName,
-}: {
-  id: number;
-  idsOfColumnsToExtract: number[];
-  extractedTableName: string;
-  newFkColumnName?: string;
-}): CancellablePromise<SplitTableResponse> {
-  throw new Error('Not implemented'); // TODO_BETA
-
-  // const body: SplitTableRequest = {
-  //   extract_columns: idsOfColumnsToExtract,
-  //   extracted_table_name: extractedTableName,
-  //   relationship_fk_column_name: newFkColumnName,
-  // };
-  // return postAPI(`/api/db/v0/tables/${id}/split_table/`, body);
-}
-
-export function moveColumns(
-  tableOid: number,
-  idsOfColumnsToMove: number[],
-  targetTableId: number,
-): CancellablePromise<null> {
-  throw new Error('Not implemented'); // TODO_BETA
-
-  // return postAPI(`/api/db/v0/tables/${tableOid}/move_columns/`, {
-  //   move_columns: idsOfColumnsToMove,
-  //   target_table: targetTableId,
-  // });
 }
 
 export function getTableFromStoreOrApi({
