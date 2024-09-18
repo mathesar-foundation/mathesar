@@ -60,7 +60,7 @@
   getInitialName={() => schema?.name ?? ''}
   getInitialDescription={() => schema?.description ?? ''}
   saveButtonLabel={schema ? $_('save') : $_('create_new_schema')}
-  namePlaceholder="Eg. Personal Finances, Movies"
+  namePlaceholder={$_('schema_name_placeholder')}
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
