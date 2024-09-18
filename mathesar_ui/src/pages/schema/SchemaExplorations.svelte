@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';

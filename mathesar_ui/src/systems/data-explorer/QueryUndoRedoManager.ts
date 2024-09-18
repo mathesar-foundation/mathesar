@@ -1,4 +1,4 @@
-import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+import type { UnsavedQueryInstance } from '@mathesar/api/rpc/explorations';
 
 import QueryListEntry from './QueryListEntry';
 import QueryModel from './QueryModel';

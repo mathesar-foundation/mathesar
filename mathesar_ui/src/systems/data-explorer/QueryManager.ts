@@ -2,12 +2,12 @@ import type { Writable } from 'svelte/store';
 import { get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
 import type {
   QueryInstance,
   QueryRunResponse,
-} from '@mathesar/api/rest/types/queries';
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
+} from '@mathesar/api/rpc/explorations';
 import type { JoinableTablesResult, Table } from '@mathesar/api/rpc/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { currentDatabase } from '@mathesar/stores/databases';
@@ -98,7 +98,7 @@ export default class QueryManager extends QueryRunner {
   }
 
   private async calculateInputColumnTree(): Promise<void> {
-    const baseTableId = get(this.query).base_table;
+    const baseTableId = get(this.query).base_table_oid;
     if (!baseTableId) {
       this.inputColumns.set({
         baseTableColumns: new Map(),

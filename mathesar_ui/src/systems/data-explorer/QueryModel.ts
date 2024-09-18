@@ -3,8 +3,8 @@ import type {
   QueryInstanceInitialColumn,
   QueryInstanceTransformation,
   QueryRunRequest,
-} from '@mathesar/api/rest/types/queries';
-import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+  UnsavedQueryInstance,
+} from '@mathesar/api/rpc/explorations';
 import { assertExhaustive } from '@mathesar-component-library';
 
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
@@ -49,9 +49,9 @@ function getTransformationModel(
 }
 
 function validate(
-  queryModel: Pick<QueryModel, 'base_table' | 'transformationModels'>,
+  queryModel: Pick<QueryModel, 'base_table_oid' | 'transformationModels'>,
 ): { isValid: boolean; isRunnable: boolean } {
-  if (queryModel.base_table === undefined) {
+  if (queryModel.base_table_oid === undefined) {
     return { isValid: false, isRunnable: false };
   }
   const isValid = queryModel.transformationModels.every((transformation) =>
@@ -61,7 +61,7 @@ function validate(
 }
 
 export default class QueryModel {
-  readonly base_table: UnsavedQueryInstance['base_table'];
+  readonly base_table_oid: UnsavedQueryInstance['base_table_oid'];
 
   readonly id: UnsavedQueryInstance['id'];
 
@@ -80,7 +80,7 @@ export default class QueryModel {
   readonly isRunnable: boolean;
 
   constructor(model?: UnsavedQueryInstance | QueryModel) {
-    this.base_table = model?.base_table;
+    this.base_table_oid = model?.base_table_oid;
     this.id = model?.id;
     this.name = model?.name;
     this.description = model?.description;
@@ -95,7 +95,7 @@ export default class QueryModel {
     this.transformationModels = transformationModels;
     this.display_names = model?.display_names ?? {};
     const validationResult = validate({
-      base_table: model?.base_table,
+      base_table_oid: model?.base_table_oid,
       transformationModels,
     });
     this.isValid = validationResult.isValid;
@@ -104,7 +104,7 @@ export default class QueryModel {
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
     const model = new QueryModel({
-      base_table,
+      base_table_oid: base_table,
       id: this.id,
       name: this.name,
     });
@@ -112,7 +112,7 @@ export default class QueryModel {
       model,
       type: 'baseTable',
       diff: {
-        base_table,
+        base_table_oid: base_table,
       },
     };
   }
@@ -433,7 +433,7 @@ export default class QueryModel {
   }
 
   toRunRequestJson(): Omit<QueryRunRequest, 'parameters'> {
-    if (this.base_table === undefined) {
+    if (this.base_table_oid === undefined) {
       throw new Error(
         'Cannot formulate run request since base_table is undefined',
       );
@@ -442,7 +442,7 @@ export default class QueryModel {
       ? this.transformationModels
       : this.transformationModels.filter((transform) => transform.isValid());
     return {
-      base_table: this.base_table,
+      base_table: this.base_table_oid,
       initial_columns: this.initial_columns,
       transformations: transformations.map((entry) => entry.toJson()),
       display_names: this.display_names,
@@ -458,7 +458,7 @@ export default class QueryModel {
       id: this.id,
       name: this.name,
       description: this.description,
-      base_table: this.base_table,
+      base_table_oid: this.base_table_oid,
       initial_columns: this.initial_columns,
       transformations: this.transformationModels.map((entry) => entry.toJson()),
       display_names: this.display_names,

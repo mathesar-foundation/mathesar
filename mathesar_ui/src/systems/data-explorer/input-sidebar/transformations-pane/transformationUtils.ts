@@ -1,4 +1,4 @@
-import type { QueryInstanceInitialColumn } from '@mathesar/api/rest/types/queries';
+import type { QueryInstanceInitialColumn } from '@mathesar/api/rpc/explorations';
 
 import type { QueryTransformationModel } from '../../QueryModel';
 import {

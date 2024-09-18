@@ -1,14 +1,13 @@
 import type { Readable, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
+import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import type {
   QueryColumnMetaData,
   QueryResultRecord,
-  QueryResultsResponse,
   QueryRunResponse,
-} from '@mathesar/api/rest/types/queries';
-import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
-import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+} from '@mathesar/api/rpc/explorations';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
@@ -72,13 +71,13 @@ export default class QueryRunner {
 
   inspector: QueryInspector;
 
-  private runPromise: CancellablePromise<QueryResultsResponse> | undefined;
+  private runPromise: CancellablePromise<QueryRunResponse> | undefined;
 
   private runMode: QueryRunMode;
 
   private onRunWithObjectCallback?: (results: QueryRunResponse) => unknown;
 
-  private onRunWithIdCallback?: (results: QueryResultsResponse) => unknown;
+  private onRunWithIdCallback?: (results: QueryRunResponse) => unknown;
 
   private shareConsumer?: ShareConsumer;
 
@@ -94,7 +93,7 @@ export default class QueryRunner {
     abstractTypeMap: AbstractTypesMap;
     runMode?: QueryRunMode;
     onRunWithObject?: (instance: QueryRunResponse) => unknown;
-    onRunWithId?: (instance: QueryResultsResponse) => unknown;
+    onRunWithId?: (instance: QueryRunResponse) => unknown;
     shareConsumer?: ShareConsumer;
   }) {
     this.abstractTypeMap = abstractTypeMap;
@@ -149,11 +148,11 @@ export default class QueryRunner {
     );
   }
 
-  async run(): Promise<QueryResultsResponse | undefined> {
+  async run(): Promise<QueryRunResponse | undefined> {
     this.runPromise?.cancel();
     const queryModel = this.getQueryModel();
 
-    if (queryModel.base_table === undefined) {
+    if (queryModel.base_table_oid === undefined) {
       const rowsData = { totalCount: 0, rows: [] };
       this.columnsMetaData.set(new ImmutableMap());
       this.processedColumns.set(new ImmutableMap());
@@ -162,7 +161,7 @@ export default class QueryRunner {
       return undefined;
     }
 
-    let response: QueryResultsResponse;
+    let response: QueryRunResponse;
     let triggerCallback: () => unknown;
     try {
       const paginationParams = get(this.pagination).recordsRequestParams();

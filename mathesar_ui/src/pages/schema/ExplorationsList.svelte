@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
   import { iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';

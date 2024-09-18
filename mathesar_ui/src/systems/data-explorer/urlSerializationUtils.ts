@@ -1,8 +1,10 @@
-import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/rest/types/queries';
 import type { Column } from '@mathesar/api/rpc/columns';
+import type {
+  QueryInstanceSummarizationTransformation,
+  UnsavedQueryInstance,
+} from '@mathesar/api/rpc/explorations';
 import type { Table } from '@mathesar/api/rpc/tables';
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import type { TerseGrouping } from '@mathesar/stores/table-data';
 import Url64 from '@mathesar/utils/Url64';
 
@@ -103,7 +105,7 @@ export function constructQueryModelFromHash(
     !terseSummarization.terseGrouping?.length ||
     !terseSummarization.columns
   ) {
-    return { base_table: baseTable.oid };
+    return { base_table_oid: baseTable.oid };
   }
 
   const columnMap = new Map(
@@ -117,7 +119,7 @@ export function constructQueryModelFromHash(
     .filter((entry): entry is TerseSummarizedColumn => entry !== undefined);
 
   if (groupingColumns.length === 0) {
-    return { base_table: baseTable.oid };
+    return { base_table_oid: baseTable.oid };
   }
 
   const baseGroupingColumn = groupingColumns[0];
@@ -173,7 +175,7 @@ export function constructQueryModelFromHash(
   );
 
   return {
-    base_table: baseTable.oid,
+    base_table_oid: baseTable.oid,
     initial_columns: initialColumns,
     transformations,
     display_names: displayNames,

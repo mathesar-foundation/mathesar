@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import queryShareApi from '@mathesar/api/rest/queryShares';
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
   import { iconShare } from '@mathesar/icons';
   import { getSharedExplorationPageUrl } from '@mathesar/routes/urls';
   import ShareEntity from '@mathesar/systems/shares/ShareEntity.svelte';

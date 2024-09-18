@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -14,7 +14,7 @@
   export let database: Database;
   export let schema: Schema;
 
-  $: baseTable = $tablesStore.tablesMap.get(exploration.base_table);
+  $: baseTable = $tablesStore.tablesMap.get(exploration.base_table_oid);
 </script>
 
 <a

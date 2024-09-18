@@ -1,14 +1,11 @@
-import type { Simplify } from 'type-fest';
-import type { SimplifyDeep } from 'type-fest/source/merge-deep';
-
+import type { Column } from '@mathesar/api/rpc/columns';
 import type {
   QueryColumnMetaData,
   QueryGeneratedColumnSource,
   QueryInitialColumnSource,
   QueryResultColumn,
   QueryRunResponse,
-} from '@mathesar/api/rest/types/queries';
-import type { Column } from '@mathesar/api/rpc/columns';
+} from '@mathesar/api/rpc/explorations';
 import type {
   JoinPath,
   JoinableTablesResult,

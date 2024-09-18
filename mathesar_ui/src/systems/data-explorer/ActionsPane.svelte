@@ -41,8 +41,8 @@
   export let isInspectorOpen: boolean;
 
   $: ({ query, state, queryHasUnsavedChanges } = queryManager);
-  $: currentTable = $query.base_table
-    ? $tablesDataStore.tablesMap.get($query.base_table)
+  $: currentTable = $query.base_table_oid
+    ? $tablesDataStore.tablesMap.get($query.base_table_oid)
     : undefined;
   $: isSaved = $query.isSaved();
   $: hasNoColumns = $query.initial_columns.length === 0;
@@ -160,7 +160,7 @@
             label={querySaveRequestStatus === 'processing'
               ? $_('saving')
               : $_('save')}
-            disabled={!$query.base_table ||
+            disabled={!$query.base_table_oid ||
               hasNoColumns ||
               querySaveRequestStatus === 'processing'}
             onClick={saveExistingOrCreateNew}

@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';

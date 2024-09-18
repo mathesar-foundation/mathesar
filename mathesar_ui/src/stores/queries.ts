@@ -41,13 +41,6 @@ import {
   writable,
 } from 'svelte/store';
 
-import type {
-  QueryGetResponse,
-  QueryInstance,
-  QueryResultsResponse,
-  QueryRunRequest,
-  QueryRunResponse,
-} from '@mathesar/api/rest/types/queries';
 import {
   type PaginatedResponse,
   type RequestStatus,
@@ -57,6 +50,13 @@ import {
   postAPI,
   putAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type {
+  QueryGetResponse,
+  QueryInstance,
+  QueryRunRequest,
+  QueryRunResponse,
+  UnsavedQueryInstance,
+} from '@mathesar/api/rpc/explorations';
 import type { Schema } from '@mathesar/models/Schema';
 import CacheManager from '@mathesar/utils/CacheManager';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -66,8 +66,6 @@ import { CancellablePromise } from '@mathesar-component-library';
 import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
-
-export type UnsavedQueryInstance = Partial<QueryInstance>;
 
 export interface QueriesStoreSubstance {
   schemaId: Schema['oid'];
@@ -291,7 +289,7 @@ export function fetchQueryResults(
     offset: number;
     [SHARED_LINK_UUID_QUERY_PARAM]?: string;
   },
-): CancellablePromise<QueryResultsResponse> {
+): CancellablePromise<QueryRunResponse> {
   const url = addQueryParamsToUrl(
     `/api/db/v0/queries/${queryId}/results/`,
     params,

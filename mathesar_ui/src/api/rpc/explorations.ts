@@ -1,14 +1,11 @@
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { Column, ColumnMetadata } from '@mathesar/api/rpc/columns';
 import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { JoinPath } from '@mathesar/api/rpc/tables';
+import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
 
-export type QueryColumnAlias = string;
-
-/**
- * endpoint: /api/db/v0/queries/<query_id>/
- */
+type QueryColumnAlias = string;
 
 export interface QueryInstanceInitialColumn {
   alias: QueryColumnAlias;
@@ -16,8 +13,6 @@ export interface QueryInstanceInitialColumn {
   jp_path?: JoinPath;
 }
 
-// TODO: Extend this to support more complicated filters
-// Requires UX reconsideration
 type FilterConditionParams = [
   { column_name: [string] },
   ...{ literal: [unknown] }[],
@@ -29,8 +24,6 @@ export interface QueryInstanceFilterTransformation {
   spec: FilterCondition;
 }
 
-// This is defined as a value instead of a type because we have a need to
-// iterate over it.
 export const querySummarizationFunctionIds = [
   'distinct_aggregate_to_array',
   'count',
@@ -86,32 +79,43 @@ export type QueryInstanceTransformation =
   | QueryInstanceHideTransformation
   | QueryInstanceSortTransformation;
 
+/** Called `ExplorationInfo` in Python docs */
 export interface QueryInstance {
   readonly id: number;
+  readonly database_id: number;
   readonly name: string;
   readonly description?: string;
-  readonly base_table: number;
+  readonly base_table_oid: number;
   readonly initial_columns?: QueryInstanceInitialColumn[];
   readonly transformations?: QueryInstanceTransformation[];
   readonly display_names: Record<string, string> | null;
+  readonly display_options?: unknown[];
 }
+
+export type UnsavedQueryInstance = Partial<QueryInstance>;
 
 export interface QueryGetResponse extends QueryInstance {
   readonly schema: number;
 }
 
 /**
- * endpoint: /api/db/v0/queries/
+ * TODO: refactor this to match:
+ *
+ * ```ts
+ * interface ExplorationDef {
+ *   database_id: number;
+ *   name: string;
+ *   base_table_oid: number;
+ *   initial_columns: unknown[];
+ *   transformations?: unknown[];
+ *   display_options?: unknown[];
+ *   display_names?: Record<string, unknown>;
+ *   description?: string;
+ * }
+ * ```
  */
-
-export type QueriesList = PaginatedResponse<QueryInstance>;
-
-/**
- * endpoint: /api/db/v0/queries/<query_id>/run/
- */
-
 export interface QueryRunRequest {
-  base_table: QueryInstance['base_table'];
+  base_table: QueryInstance['base_table_oid'];
   initial_columns: QueryInstanceInitialColumn[];
   transformations?: QueryInstanceTransformation[];
   display_names: QueryInstance['display_names'];
@@ -130,7 +134,7 @@ export interface QueryResultColumn {
   display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
-  metadata: Column['metadata'];
+  display_options: ColumnMetadata;
 }
 
 export interface QueryInitialColumnSource {
@@ -145,15 +149,11 @@ export interface QueryGeneratedColumnSource {
   input_alias: string;
 }
 
-export type QueryColumnSource =
-  | QueryInitialColumnSource
-  | QueryGeneratedColumnSource;
-
-export interface QueryInitialColumnMetaData
+interface QueryInitialColumnMetaData
   extends QueryResultColumn,
     QueryInitialColumnSource {}
 
-export interface QueryVirtualColumnMetaData
+interface QueryVirtualColumnMetaData
   extends QueryResultColumn,
     QueryGeneratedColumnSource {}
 
@@ -161,31 +161,68 @@ export type QueryColumnMetaData =
   | QueryInitialColumnMetaData
   | QueryVirtualColumnMetaData;
 
-/**
- *  TODO: The API always returns empty array for table results,
- * however for queries it returns null. Remove the union once
- * the API is made consistent.
- *
- * Tracked in https://github.com/centerofci/mathesar/issues/1716
- */
-
 export type QueryResultRecord = Record<string, unknown>;
 
 type QueryResultRecords =
   | PaginatedResponse<QueryResultRecord>
   | { count: 0; results: null };
 
-export interface QueryResultsResponse {
+/** Called `ExplorationResult` in Python docs */
+export interface QueryRunResponse {
   records: QueryResultRecords;
   output_columns: QueryColumnAlias[];
   column_metadata: Record<string, QueryColumnMetaData>;
-}
-
-export interface QueryRunResponse extends QueryResultsResponse {
   query: {
     schema: RawSchema['oid'];
-    base_table: QueryInstance['base_table'];
+    base_table: QueryInstance['base_table_oid'];
     initial_columns: QueryInstanceInitialColumn[];
     transformations?: QueryInstanceTransformation[];
   };
+  limit: unknown;
+  offset: unknown;
+  filter: unknown;
+  order_by: unknown;
+  /** Specifies a list of dicts containing column names and searched expression. */
+  search: unknown;
+  /** A list of column names for which you want duplicate records. */
+  duplicate_only: unknown;
 }
+
+// =============================================================================
+
+interface ExplorationDef {
+  database_id: number;
+  name: string;
+  base_table_oid: number;
+  initial_columns: unknown[];
+  transformations?: unknown[];
+  display_options?: unknown[];
+  display_names?: Record<string, unknown>;
+  description?: string;
+}
+
+export const explorations = {
+  list: rpcMethodTypeContainer<{ database_id: number }, QueryInstance[]>(),
+
+  get: rpcMethodTypeContainer<{ exploration_id: number }, QueryInstance>(),
+
+  add: rpcMethodTypeContainer<ExplorationDef, void>(),
+
+  delete: rpcMethodTypeContainer<{ exploration_id: number }, void>(),
+
+  replace: rpcMethodTypeContainer<{ new_exploration: QueryInstance }, void>(),
+
+  run: rpcMethodTypeContainer<
+    { exploration_def: ExplorationDef },
+    QueryRunResponse
+  >(),
+
+  run_saved: rpcMethodTypeContainer<
+    {
+      exploration_id: number;
+      limit: number;
+      offset: number;
+    },
+    QueryRunResponse
+  >(),
+};

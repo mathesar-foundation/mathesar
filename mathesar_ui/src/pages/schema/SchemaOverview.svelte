@@ -1,8 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
   import type { Table } from '@mathesar/api/rpc/tables';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';

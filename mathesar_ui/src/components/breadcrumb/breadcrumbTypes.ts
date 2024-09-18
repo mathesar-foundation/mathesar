@@ -1,4 +1,4 @@
-import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+import type { QueryInstance } from '@mathesar/api/rpc/explorations';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type {
   ComponentAndProps,

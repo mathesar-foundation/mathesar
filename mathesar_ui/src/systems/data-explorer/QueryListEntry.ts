@@ -1,4 +1,4 @@
-import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+import type { UnsavedQueryInstance } from '@mathesar/api/rpc/explorations';
 
 export default class QueryListEntry {
   queryJSON: UnsavedQueryInstance;

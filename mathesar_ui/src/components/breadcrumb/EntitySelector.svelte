@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { meta } from 'tinro';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
   import type { Table } from '@mathesar/api/rpc/tables';
   import { iconTable } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
