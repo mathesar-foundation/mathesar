@@ -4777,9 +4777,6 @@ $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement);
 DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement, boolean);
-DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, text, boolean);
-DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, numeric, boolean);
-DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anycompatible, boolean);
 CREATE OR REPLACE FUNCTION
 msar.get_record_from_table(
   tab_id oid,
