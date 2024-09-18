@@ -176,7 +176,7 @@
   <CancelOrProceedButtonPair
     onProceed={handleSave}
     onCancel={handleCancel}
-    proceedButton={{ label: $_('Add Unique Constraint') }}
+    proceedButton={{ label: $_('add_unique_constraint') }}
     {canProceed}
     size="small"
   />
