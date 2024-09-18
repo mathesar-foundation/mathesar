@@ -9,7 +9,7 @@
 
   import Pill from './LinkTablePill.svelte';
 
-  export let label = 'Name of New Column';
+  const label = 'Column Name';
 
   type Which = ComponentProps<Pill>['which'];
 
@@ -21,20 +21,15 @@
   export let targetColumnsAreLoading = false;
 </script>
 
-{#if baseWhich !== 'mapping'}
-  <p>
-    <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
-      {#if slotName === 'baseTable'}
-        <Pill table={base} which={baseWhich} />
-      {:else if slotName === 'targetTable'}
-        <Pill table={target} which={targetWhich} />
-      {:else if slotName === 'mappingTable'}
-        <Pill table={base} which={baseWhich} />
-      {/if}
-    </RichText>
-  </p>
-{/if}
-
+<p>
+  <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
+    {#if slotName === 'baseTable'}
+      <Pill table={base} which={baseWhich} />
+    {:else if slotName === 'targetTable'}
+      <Pill table={target} which={targetWhich} />
+    {/if}
+  </RichText>
+</p>
 {#if targetColumnsAreLoading}
   <!--
     We need to wait for the columns to load because we can't suggest a valid
@@ -43,15 +38,5 @@
   {label}
   <Spinner />
 {:else}
-  <Field {field} {label}>
-    <span slot="help">
-      <RichText text={$_('new_column_link_help')} let:slotName>
-        {#if slotName === 'baseTable'}
-          <Pill table={base} which={baseWhich} />
-        {:else if slotName === 'targetTable'}
-          <Pill table={target} which={targetWhich} />
-        {/if}
-      </RichText>
-    </span>
-  </Field>
+  <Field {field} {label} />
 {/if}
