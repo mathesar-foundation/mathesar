@@ -117,12 +117,12 @@ class ExplorationResult(TypedDict):
             records=e["records"],
             output_columns=e["output_columns"],
             column_metadata=e["column_metadata"],
-            limit=e["limit"],
-            offset=e["offset"],
-            filter=e["filter"],
-            order_by=e["order_by"],
-            search=e["search"],
-            duplicate_only=e["duplicate_only"]
+            limit=e.get("limit", None),
+            offset=e.get("offset", None),
+            filter=e.get("filter", None),
+            order_by=e.get("order_by", None),
+            search=e.get("search", None),
+            duplicate_only=e.get("duplicate_only", None),
         )
 
 
