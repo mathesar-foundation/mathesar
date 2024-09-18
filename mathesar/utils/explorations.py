@@ -148,9 +148,10 @@ def _get_exploration_column_metadata(
         ).first() if initial_column else None
         input_table_name = get_table(initial_column.reloid, conn)["name"] if initial_column else None
         input_column_name = initial_column.get_name(engine, metadata) if initial_column else None
+        display_names = exploration_def.get("display_names", None)
         exploration_column_metadata[alias] = {
             "alias": alias,
-            "display_name": exploration_def["display_names"].get(alias),
+            "display_name": display_names.get(alias) if display_names is not None else None,
             "type": sa_col.db_type.id,
             "type_options": sa_col.type_options,
             "metadata": ColumnMetaDataRecord.from_model(column_metadata) if column_metadata else None,

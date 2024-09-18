@@ -154,5 +154,5 @@ class Explorations(BaseModel):
     initial_columns = models.JSONField()
     transformations = models.JSONField(null=True)
     display_options = models.JSONField(null=True)
-    display_names = models.JSONField(null=False)
+    display_names = models.JSONField(null=True)
     description = models.CharField(null=True)
