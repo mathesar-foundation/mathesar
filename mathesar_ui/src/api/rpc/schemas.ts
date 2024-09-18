@@ -29,14 +29,13 @@ export const schemas = {
     RawSchema[]
   >(),
 
-  /** Returns the OID of the newly-created schema */
   add: rpcMethodTypeContainer<
     {
       database_id: number;
       name: RawSchema['name'];
       description?: RawSchema['description'];
     },
-    number
+    RawSchema
   >(),
 
   patch: rpcMethodTypeContainer<
@@ -48,7 +47,7 @@ export const schemas = {
         description?: RawSchema['description'];
       };
     },
-    void
+    RawSchema
   >(),
 
   delete: rpcMethodTypeContainer<
