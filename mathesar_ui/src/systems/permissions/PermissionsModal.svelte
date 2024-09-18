@@ -4,56 +4,38 @@
   import {
     ControlledModal,
     type ModalController,
-    TabContainer,
   } from '@mathesar-component-library';
 
-  export let controller: ModalController;
-  export let onClose: () => void = () => {};
+  import PermissionsModalContent from './PermissionsModalContent.svelte';
+  import type { PermissionsAsyncStores } from './permissionsUtils';
 
-  const tabs = [
-    {
-      id: 'share',
-      label: $_('share'),
-    },
-    // {
-    //   id: 'transfer_ownership',
-    //   label: $_('transfer_ownership'),
-    // },
-  ];
-  let activeTab = tabs[0];
+  type Privilege = $$Generic;
 
-  function onModalClose() {
-    [activeTab] = tabs;
-    onClose();
+  interface $$Slots {
+    title: Record<never, never>;
+    share: {
+      asyncStores: PermissionsAsyncStores<Privilege, string>;
+    };
+    'transfer-ownership': {
+      asyncStores: PermissionsAsyncStores<Privilege, string>;
+    };
   }
+
+  export let controller: ModalController;
+  export let getAsyncStores: () => PermissionsAsyncStores<Privilege>;
+  export let onClose: () => void = () => {};
 </script>
 
-<ControlledModal {controller} on:close={onModalClose}>
+<ControlledModal {controller} on:close={() => onClose()}>
   <slot name="title" slot="title" />
-  <div class="tabs">
-    <TabContainer
-      bind:activeTab
-      {tabs}
-      uniformTabWidth={false}
-      tabStyle="compact"
-    >
-      <div class="tab-content">
-        {#if activeTab.id === 'share'}
-          <slot name="share" {controller} />
-        {:else}
-          <slot name="transfer-ownership" {controller} />
-        {/if}
-      </div>
-    </TabContainer>
-  </div>
+
+  <PermissionsModalContent {getAsyncStores}>
+    <slot slot="share" name="share" let:asyncStores {asyncStores} />
+    <slot
+      slot="transfer-ownership"
+      name="transfer-ownership"
+      let:asyncStores
+      {asyncStores}
+    />
+  </PermissionsModalContent>
 </ControlledModal>
-
-<style lang="scss">
-  .tabs {
-    --Tab_margin-right: var(--size-small);
-
-    .tab-content {
-      margin-top: var(--size-base);
-    }
-  }
-</style>

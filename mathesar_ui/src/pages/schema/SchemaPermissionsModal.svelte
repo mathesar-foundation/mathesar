@@ -104,7 +104,11 @@
   }
 </script>
 
-<PermissionsModal {controller} onClose={() => schemaPrivileges.reset()}>
+<PermissionsModal
+  {controller}
+  getAsyncStores={getAsyncStoresForPermissions}
+  onClose={() => schemaPrivileges.reset()}
+>
   <span slot="title">
     {$_('schema_permissions')}
   </span>
@@ -112,7 +116,8 @@
     slot="share"
     {controller}
     {accessControlConfig}
-    getAsyncStores={getAsyncStoresForPermissions}
+    let:asyncStores
+    {asyncStores}
     {savePrivilegesForRoles}
   />
   <TransferOwnership slot="transfer-ownership" {controller} />

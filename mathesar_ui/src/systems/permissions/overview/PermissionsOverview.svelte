@@ -23,12 +23,12 @@
 
   export let controller: ModalController;
   export let accessControlConfig: AccessControlConfig<AccessLevel, Privilege>;
-  export let getAsyncStores: () => PermissionsAsyncStores<Privilege>;
   export let savePrivilegesForRoles: (
     privileges: RolePrivileges<Privilege>[],
   ) => Promise<void>;
 
-  $: ({ roles, privilegesForRoles, permissionsMetaData } = getAsyncStores());
+  export let asyncStores: PermissionsAsyncStores<Privilege>;
+  $: ({ roles, privilegesForRoles, permissionsMetaData } = asyncStores);
 
   $: isLoading =
     $roles.isLoading ||

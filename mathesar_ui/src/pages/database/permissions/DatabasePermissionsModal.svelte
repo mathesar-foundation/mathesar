@@ -89,7 +89,11 @@
   }
 </script>
 
-<PermissionsModal {controller} onClose={() => databasePrivileges.reset()}>
+<PermissionsModal
+  {controller}
+  getAsyncStores={getAsyncStoresForPermissions}
+  onClose={() => databasePrivileges.reset()}
+>
   <span slot="title">
     {$_('database_permissions')}
   </span>
@@ -97,7 +101,8 @@
     slot="share"
     {controller}
     {accessControlConfig}
-    getAsyncStores={getAsyncStoresForPermissions}
+    let:asyncStores
+    {asyncStores}
     {savePrivilegesForRoles}
   />
   <TransferOwnership slot="transfer-ownership" {controller} />

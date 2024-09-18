@@ -130,7 +130,11 @@
   </Button>
 </div>
 
-<PermissionsModal {controller} onClose={() => tablePrivileges.reset()}>
+<PermissionsModal
+  {controller}
+  getAsyncStores={getAsyncStoresForPermissions}
+  onClose={() => tablePrivileges.reset()}
+>
   <span slot="title">
     {$_('table_permissions')}
   </span>
@@ -138,7 +142,8 @@
     slot="share"
     {controller}
     {accessControlConfig}
-    getAsyncStores={getAsyncStoresForPermissions}
+    let:asyncStores
+    {asyncStores}
     {savePrivilegesForRoles}
   />
   <TransferOwnership slot="transfer-ownership" {controller} />
