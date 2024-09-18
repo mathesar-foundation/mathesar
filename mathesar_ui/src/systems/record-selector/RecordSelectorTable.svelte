@@ -38,6 +38,7 @@
   let columnWithFocus: Column | undefined = undefined;
   /** It will be undefined if we're loading data, for example. */
   let selectionIndex: number | undefined = undefined;
+  let tableElement: HTMLElement;
 
   $: setRecordSelectorControllerInContext(nestedController);
   $: ({ columnWithNestedSelectorOpen, purpose } = controller);
@@ -181,6 +182,21 @@
     }
   }
 
+  function findBestColumnIdToFocus(): number {
+    const firstNonPkColumn = $columns.find((c) => c.primary_key === false);
+    return firstNonPkColumn?.id ?? $columns[0].id;
+  }
+
+  async function focusBestInput() {
+    const columnId = findBestColumnIdToFocus();
+    await tick();
+    const selector = `.record-selector-input.column-${columnId}`;
+    const input = tableElement.querySelector<HTMLElement>(selector);
+    if (input) {
+      input.focus();
+    }
+  }
+
   onMount(() => {
     window.addEventListener('keydown', handleKeydown, { capture: true });
     return () => {
@@ -188,18 +204,7 @@
     };
   });
 
-  onMount(async () => {
-    const columnId = $columns.find((c) => !c.primary_key)?.id;
-    if (columnId === undefined) {
-      return;
-    }
-    await tick();
-    const selector = `.record-selector-input.column-${columnId}`;
-    const input = document.querySelector<HTMLElement>(selector);
-    if (input) {
-      input.focus();
-    }
-  });
+  onMount(focusBestInput);
 
   const overflowDetails = makeOverflowDetails();
   const {
@@ -216,6 +221,7 @@
   class:has-overflow-right={$hasOverflowRight}
   class:has-overflow-bottom={$hasOverflowBottom}
   class:has-overflow-left={$hasOverflowLeft}
+  bind:this={tableElement}
 >
   <div class="scroll-container" use:overflowObserver={overflowDetails}>
     <div class="table">
