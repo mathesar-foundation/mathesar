@@ -57,6 +57,6 @@
     slot="content"
     {filtering}
     processedColumns={processedColumnsToShow}
-    recordSummaries={recordsData.recordSummaries}
+    recordSummaries={recordsData.linkedRecordSummaries}
   />
 </Dropdown>

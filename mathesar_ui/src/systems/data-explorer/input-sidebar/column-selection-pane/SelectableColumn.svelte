@@ -23,7 +23,6 @@
           type_options: column.producesMultipleResults
             ? { item_type: column.type }
             : null,
-          display_options: null,
         }}
       />
     </div>

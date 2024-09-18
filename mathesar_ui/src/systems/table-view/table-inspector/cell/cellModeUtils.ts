@@ -12,7 +12,7 @@ export function getSelectedCellData(
   selection: SheetSelection,
   selectableRowsMap: Map<string, RecordRow>,
   processedColumns: ProcessedColumns,
-  recordSummaries: RecordSummariesForSheet,
+  linkedRecordSummaries: RecordSummariesForSheet,
 ): SelectedCellData {
   const { activeCellId } = selection;
   const selectionData = {
@@ -27,7 +27,7 @@ export function getSelectedCellData(
   const column = processedColumns.get(Number(columnId));
   const recordSummary = defined(
     value,
-    (v) => recordSummaries.get(columnId)?.get(String(v)),
+    (v) => linkedRecordSummaries.get(columnId)?.get(String(v)),
   );
   return {
     activeCellData: column && {

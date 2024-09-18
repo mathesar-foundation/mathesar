@@ -1,7 +1,7 @@
 import {
   type SampleDataSchemaIdentifier,
   sampleDataOptions,
-} from '@mathesar/api/rpc/database_setup';
+} from '@mathesar/api/rpc/databases';
 
 export type InstallationSchema = SampleDataSchemaIdentifier | 'internal';
 

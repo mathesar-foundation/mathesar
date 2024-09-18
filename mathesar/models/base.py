@@ -132,6 +132,7 @@ class ColumnMetaData(BaseModel):
 class TableMetaData(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
     table_oid = models.PositiveBigIntegerField()
+    data_file = models.ForeignKey("DataFile", on_delete=models.SET_NULL, null=True)
     import_verified = models.BooleanField(null=True)
     column_order = models.JSONField(null=True)
     record_summary_customized = models.BooleanField(null=True)

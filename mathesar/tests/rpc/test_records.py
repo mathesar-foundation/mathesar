@@ -37,8 +37,9 @@ def test_records_list(rf, monkeypatch):
             order=None,
             filter=None,
             group=None,
+            return_record_summaries=False,
     ):
-        if _table_oid != table_oid:
+        if _table_oid != table_oid or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
         return {
             "count": 50123,
@@ -50,7 +51,8 @@ def test_records_list(rf, monkeypatch):
                     {"id": 3, "count": 8, "results_eq": {"1": "lsfj", "2": 3422}}
                 ]
             },
-            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+            "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+            "record_summaries": {"3": "abcde"}
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
@@ -64,11 +66,15 @@ def test_records_list(rf, monkeypatch):
                 {"id": 3, "count": 8, "results_eq": {"1": "lsfj", "2": 3422}}
             ]
         },
-        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+        "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+        "record_summaries": {"3": "abcde"},
         "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
     actual_records_list = records.list_(
-        table_oid=table_oid, database_id=database_id, request=request
+        table_oid=table_oid,
+        database_id=database_id,
+        return_record_summaries=True,
+        request=request
     )
     assert actual_records_list == expect_records_list
 
@@ -96,15 +102,17 @@ def test_records_get(rf, monkeypatch):
             conn,
             _record_id,
             _table_oid,
+            return_record_summaries=False,
     ):
-        if _table_oid != table_oid or _record_id != record_id:
+        if _table_oid != table_oid or _record_id != record_id or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
         return {
             "count": 1,
             "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
             "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
             "grouping": None,
-            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+            "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+            "record_summaries": {"3": "abcde"},
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
@@ -113,11 +121,16 @@ def test_records_get(rf, monkeypatch):
         "count": 1,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
         "grouping": None,
-        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+        "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+        "record_summaries": {"3": "abcde"},
         "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
     actual_record = records.get(
-        record_id=record_id, table_oid=table_oid, database_id=database_id, request=request
+        record_id=record_id,
+        table_oid=table_oid,
+        database_id=database_id,
+        return_record_summaries=True,
+        request=request
     )
     assert actual_record == expect_record
 
@@ -145,22 +158,29 @@ def test_records_add(rf, monkeypatch):
             conn,
             _record_def,
             _table_oid,
+            return_record_summaries=False,
     ):
-        if _table_oid != table_oid or _record_def != record_def:
+        if _table_oid != table_oid or _record_def != record_def or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
         return {
             "results": [_record_def],
-            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+            "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+            "record_summaries": {"3": "abcde"},
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
     monkeypatch.setattr(records.record_insert, 'add_record_to_table', mock_add_record)
     expect_record = {
         "results": [record_def],
-        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+        "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+        "record_summaries": {"3": "abcde"},
     }
     actual_record = records.add(
-        record_def=record_def, table_oid=table_oid, database_id=database_id, request=request
+        record_def=record_def,
+        table_oid=table_oid,
+        database_id=database_id,
+        return_record_summaries=True,
+        request=request
     )
     assert actual_record == expect_record
 
@@ -190,25 +210,34 @@ def test_records_patch(rf, monkeypatch):
             _record_def,
             _record_id,
             _table_oid,
+            return_record_summaries=False,
     ):
-        if _table_oid != table_oid or _record_def != record_def or _record_id != record_id:
+        if (
+                _table_oid != table_oid
+                or _record_def != record_def
+                or _record_id != record_id
+                or return_record_summaries is False
+        ):
             raise AssertionError('incorrect parameters passed')
         return {
             "results": [_record_def | {"3": "another"}],
-            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+            "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+            "record_summaries": {"3": "abcde"},
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
     monkeypatch.setattr(records.record_update, 'patch_record_in_table', mock_patch_record)
     expect_record = {
         "results": [record_def | {"3": "another"}],
-        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+        "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+        "record_summaries": {"3": "abcde"},
     }
     actual_record = records.patch(
         record_def=record_def,
         record_id=record_id,
         table_oid=table_oid,
         database_id=database_id,
+        return_record_summaries=True,
         request=request
     )
     assert actual_record == expect_record
@@ -274,13 +303,15 @@ def test_records_search(rf, monkeypatch):
             _table_oid,
             search=[],
             limit=10,
+            return_record_summaries=False,
     ):
-        if _table_oid != table_oid:
+        if _table_oid != table_oid or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
         return {
             "count": 50123,
             "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
-            "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+            "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+            "record_summaries": {"3": "abcde"},
             "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
         }
 
@@ -290,10 +321,14 @@ def test_records_search(rf, monkeypatch):
         "count": 50123,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
         "grouping": None,
-        "preview_data": {"2": [{"key": 12345, "summary": "blkjdfslkj"}]},
+        "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
+        "record_summaries": {"3": "abcde"},
         "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
     actual_records_list = records.search(
-        table_oid=table_oid, database_id=database_id, request=request
+        table_oid=table_oid,
+        database_id=database_id,
+        return_record_summaries=True,
+        request=request
     )
     assert actual_records_list == expect_records_list

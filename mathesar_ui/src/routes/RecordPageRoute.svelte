@@ -11,7 +11,7 @@
   export let table: Table;
   export let recordPk: string;
 
-  $: record = new RecordStore({ table, recordPk });
+  $: record = new RecordStore({ database, table, recordPk });
   $: ({ summary, fetchRequest } = record);
 </script>
 

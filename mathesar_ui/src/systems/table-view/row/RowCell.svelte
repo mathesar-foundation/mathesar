@@ -52,7 +52,7 @@
   $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
   const canViewLinkedEntities = true;
   $: recordsDataState = recordsData.state;
-  $: ({ recordSummaries } = recordsData);
+  $: ({ linkedRecordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
   $: columnId = column.id;
   $: modificationStatus = $modificationStatusMap.get(key);
@@ -69,7 +69,7 @@
     ? getRecordPageUrl({ tableId: linkFk.referent_table_oid, recordId: value })
     : undefined;
   $: showLinkedRecordHyperLink = linkedRecordHref && canViewLinkedEntities;
-  $: recordSummary = $recordSummaries
+  $: recordSummary = $linkedRecordSummaries
     .get(String(column.id))
     ?.get(String(value));
 
@@ -114,7 +114,7 @@
     {canViewLinkedEntities}
     {recordSummary}
     setRecordSummary={(recordId, rs) =>
-      recordSummaries.addBespokeRecordSummary({
+      linkedRecordSummaries.addBespokeRecordSummary({
         columnId: String(columnId),
         recordId,
         recordSummary: rs,

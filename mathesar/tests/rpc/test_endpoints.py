@@ -10,12 +10,9 @@ from modernrpc.auth import user_is_authenticated, user_is_superuser
 
 from mathesar.rpc import collaborators
 from mathesar.rpc import columns
-from mathesar.rpc import configured_roles
 from mathesar.rpc import connections
 from mathesar.rpc import constraints
 from mathesar.rpc import data_modeling
-from mathesar.rpc import database_privileges
-from mathesar.rpc import database_setup
 from mathesar.rpc import databases
 from mathesar.rpc import explorations
 from mathesar.rpc import records
@@ -46,6 +43,12 @@ METHODS = [
         "collaborators.set_role",
         [user_is_superuser]
     ),
+
+    (
+        columns.add,
+        "columns.add",
+        [user_is_authenticated]
+    ),
     (
         columns.delete,
         "columns.delete",
@@ -57,20 +60,16 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        columns.patch,
-        "columns.patch",
-        [user_is_authenticated]
-    ),
-    (
-        columns.add,
-        "columns.add",
-        [user_is_authenticated]
-    ),
-    (
         columns.list_with_metadata,
         "columns.list_with_metadata",
         [user_is_authenticated]
     ),
+    (
+        columns.patch,
+        "columns.patch",
+        [user_is_authenticated]
+    ),
+
     (
         columns.metadata.list_,
         "columns.metadata.list",
@@ -81,26 +80,7 @@ METHODS = [
         "columns.metadata.set",
         [user_is_authenticated]
     ),
-    (
-        configured_roles.add,
-        "configured_roles.add",
-        [user_is_superuser]
-    ),
-    (
-        configured_roles.list_,
-        "configured_roles.list",
-        [user_is_authenticated]
-    ),
-    (
-        configured_roles.delete,
-        "configured_roles.delete",
-        [user_is_superuser]
-    ),
-    (
-        configured_roles.set_password,
-        "configured_roles.set_password",
-        [user_is_superuser]
-    ),
+
     (
         connections.add_from_known_connection,
         "connections.add_from_known_connection",
@@ -116,6 +96,7 @@ METHODS = [
         "connections.grant_access_to_user",
         [user_is_superuser]
     ),
+
     (
         constraints.list_,
         "constraints.list",
@@ -131,6 +112,7 @@ METHODS = [
         "constraints.delete",
         [user_is_authenticated]
     ),
+
     (
         data_modeling.add_foreign_key_column,
         "data_modeling.add_foreign_key_column",
@@ -147,70 +129,50 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        database_privileges.list_direct,
-        "database_privileges.list_direct",
+        data_modeling.split_table,
+        "data_modeling.split_table",
         [user_is_authenticated]
     ),
     (
-        database_privileges.get_owner_oid_and_curr_role_db_priv,
-        "database_privileges.get_owner_oid_and_curr_role_db_priv",
+        data_modeling.move_columns,
+        "data_modeling.move_columns",
+        [user_is_authenticated]
+    ),
+
+    (
+        databases.get,
+        "databases.get",
+        [user_is_authenticated]
+    ),
+
+    (
+        databases.configured.list_,
+        "databases.configured.list",
+        [user_is_authenticated]
+    ),
+
+    (
+        databases.privileges.list_direct,
+        "databases.privileges.list_direct",
         [user_is_authenticated]
     ),
     (
-        database_setup.create_new,
-        "database_setup.create_new",
+        databases.privileges.replace_for_roles,
+        "databases.privileges.replace_for_roles",
+        [user_is_authenticated]
+    ),
+
+    (
+        databases.setup.create_new,
+        "databases.setup.create_new",
         [user_is_superuser]
     ),
     (
-        database_setup.connect_existing,
-        "database_setup.connect_existing",
+        databases.setup.connect_existing,
+        "databases.setup.connect_existing",
         [user_is_superuser]
     ),
-    (
-        databases.list_,
-        "databases.list",
-        [user_is_authenticated]
-    ),
-    (
-        records.list_,
-        "records.list",
-        [user_is_authenticated]
-    ),
-    (
-        records.get,
-        "records.get",
-        [user_is_authenticated]
-    ),
-    (
-        records.add,
-        "records.add",
-        [user_is_authenticated]
-    ),
-    (
-        records.patch,
-        "records.patch",
-        [user_is_authenticated]
-    ),
-    (
-        records.delete,
-        "records.delete",
-        [user_is_authenticated]
-    ),
-    (
-        records.search,
-        "records.search",
-        [user_is_authenticated]
-    ),
-    (
-        explorations.list_,
-        "explorations.list",
-        [user_is_authenticated]
-    ),
-    (
-        explorations.get,
-        "explorations.get",
-        [user_is_authenticated]
-    ),
+
     (
         explorations.add,
         "explorations.add",
@@ -219,6 +181,16 @@ METHODS = [
     (
         explorations.delete,
         "explorations.delete",
+        [user_is_authenticated]
+    ),
+    (
+        explorations.get,
+        "explorations.get",
+        [user_is_authenticated]
+    ),
+    (
+        explorations.list_,
+        "explorations.list",
         [user_is_authenticated]
     ),
     (
@@ -236,6 +208,38 @@ METHODS = [
         "explorations.run_saved",
         [user_is_authenticated]
     ),
+
+    (
+        records.add,
+        "records.add",
+        [user_is_authenticated]
+    ),
+    (
+        records.delete,
+        "records.delete",
+        [user_is_authenticated]
+    ),
+    (
+        records.get,
+        "records.get",
+        [user_is_authenticated]
+    ),
+    (
+        records.list_,
+        "records.list",
+        [user_is_authenticated]
+    ),
+    (
+        records.patch,
+        "records.patch",
+        [user_is_authenticated]
+    ),
+    (
+        records.search,
+        "records.search",
+        [user_is_authenticated]
+    ),
+
     (
         roles.list_,
         "roles.list",
@@ -247,13 +251,35 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        schemas.add,
-        "schemas.add",
+        roles.get_current_role,
+        "roles.get_current_role",
+        [user_is_authenticated]
+    ),
+
+    (
+        roles.configured.add,
+        "roles.configured.add",
+        [user_is_superuser]
+    ),
+    (
+        roles.configured.delete,
+        "roles.configured.delete",
+        [user_is_superuser]
+    ),
+    (
+        roles.configured.list_,
+        "roles.configured.list",
         [user_is_authenticated]
     ),
     (
-        schemas.list_,
-        "schemas.list",
+        roles.configured.set_password,
+        "roles.configured.set_password",
+        [user_is_superuser]
+    ),
+
+    (
+        schemas.add,
+        "schemas.add",
         [user_is_authenticated]
     ),
     (
@@ -262,36 +288,40 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        schemas.list_,
+        "schemas.list",
+        [user_is_authenticated]
+    ),
+    (
         schemas.patch,
         "schemas.patch",
         [user_is_authenticated]
     ),
+
     (
-        servers.list_,
-        "servers.list",
+        schemas.privileges.list_direct,
+        "schemas.privileges.list_direct",
         [user_is_authenticated]
     ),
+    (
+        schemas.privileges.replace_for_roles,
+        "schemas.privileges.replace_for_roles",
+        [user_is_authenticated]
+    ),
+
+    (
+        servers.configured.list_,
+        "servers.configured.list",
+        [user_is_authenticated]
+    ),
+
     (
 
         types.list_,
         "types.list",
         [user_is_authenticated]
     ),
-    (
-        tables.list_,
-        "tables.list",
-        [user_is_authenticated]
-    ),
-    (
-        tables.list_with_metadata,
-        "tables.list_with_metadata",
-        [user_is_authenticated]
-    ),
-    (
-        tables.get,
-        "tables.get",
-        [user_is_authenticated]
-    ),
+
     (
         tables.add,
         "tables.add",
@@ -303,13 +333,8 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        tables.patch,
-        "tables.patch",
-        [user_is_authenticated]
-    ),
-    (
-        tables.import_,
-        "tables.import",
+        tables.get,
+        "tables.get",
         [user_is_authenticated]
     ),
     (
@@ -318,10 +343,47 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        tables.import_,
+        "tables.import",
+        [user_is_authenticated]
+    ),
+    (
+        tables.list_,
+        "tables.list",
+        [user_is_authenticated]
+    ),
+    (
         tables.list_joinable,
         "tables.list_joinable",
         [user_is_authenticated]
     ),
+    (
+        tables.list_with_metadata,
+        "tables.list_with_metadata",
+        [user_is_authenticated]
+    ),
+    (
+        tables.get_with_metadata,
+        "tables.get_with_metadata",
+        [user_is_authenticated]
+    ),
+    (
+        tables.patch,
+        "tables.patch",
+        [user_is_authenticated]
+    ),
+
+    (
+        tables.privileges.list_direct,
+        "tables.privileges.list_direct",
+        [user_is_authenticated]
+    ),
+    (
+        tables.privileges.replace_for_roles,
+        "tables.privileges.replace_for_roles",
+        [user_is_authenticated]
+    ),
+
     (
         tables.metadata.list_,
         "tables.metadata.list",
