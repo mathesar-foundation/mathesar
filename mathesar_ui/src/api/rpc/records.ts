@@ -74,7 +74,14 @@ export interface RecordsListParams {
   order?: SortingEntry[];
   grouping?: Grouping;
   filter?: SqlExpr;
-  search_fuzzy?: Record<string, unknown>[];
+  return_record_summaries?: boolean;
+}
+
+export interface RecordsSearchParams {
+  database_id: number;
+  table_oid: number;
+  search_params: { attnum: number; literal: unknown }[];
+  limit?: number;
   return_record_summaries?: boolean;
 }
 
@@ -128,6 +135,8 @@ export const records = {
   >(),
 
   list: rpcMethodTypeContainer<RecordsListParams, RecordsResponse>(),
+
+  search: rpcMethodTypeContainer<RecordsSearchParams, RecordsResponse>(),
 
   delete: rpcMethodTypeContainer<
     {
