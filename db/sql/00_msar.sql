@@ -4781,10 +4781,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement);
+DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement, boolean);
 CREATE OR REPLACE FUNCTION
 msar.get_record_from_table(
   tab_id oid,
-  rec_id anyelement,
+  rec_id anycompatible,
   return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get single record from a table. Only columns to which the user has access are returned.
