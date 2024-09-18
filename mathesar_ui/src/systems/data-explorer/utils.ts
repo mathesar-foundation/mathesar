@@ -311,7 +311,7 @@ function processColumn(
     Partial<QueryColumnMetaData>,
   abstractTypeMap: AbstractTypesMap,
 ): ProcessedQueryResultColumn {
-  const column = {
+  const column: QueryResultColumn = {
     alias: columnInfo.alias,
     display_name: columnInfo.display_name ?? columnInfo.alias,
     type: columnInfo.type ?? 'unknown',

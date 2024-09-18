@@ -155,7 +155,7 @@ def _get_exploration_column_metadata(
             "display_name": exploration_def["display_names"].get(alias),
             "type": sa_col.db_type.id,
             "type_options": sa_col.type_options,
-            "display_options": ColumnMetaDataRecord.from_model(column_metadata) if column_metadata else None,
+            "metadata": ColumnMetaDataRecord.from_model(column_metadata) if column_metadata else None,
             "is_initial_column": True if initial_column else False,
             "input_column_name": input_column_name,
             "input_table_name": input_table_name,

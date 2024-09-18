@@ -134,7 +134,7 @@ export interface QueryResultColumn {
   display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
-  display_options: ColumnMetadata;
+  metadata: ColumnMetadata | null;
 }
 
 export interface QueryInitialColumnSource {
