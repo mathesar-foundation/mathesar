@@ -285,6 +285,7 @@ To use an RPC function:
       - split_table
       - move_columns
       - MappingColumn
+      - SplitTableInfo
 
 ## Responses
 

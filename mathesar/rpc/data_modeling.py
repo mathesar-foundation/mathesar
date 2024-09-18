@@ -106,6 +106,19 @@ def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> dict:
         return infer_types.infer_table_column_data_types(conn, table_oid)
 
 
+class SplitTableInfo(TypedDict):
+    """
+    Information about a table, created from column extraction.
+
+    Attributes:
+        extracted_table_oid: The OID of the table that is created from column extraction.
+        new_fkey_attnum: The attnum of the newly created foreign key column
+          referring the extracted_table on the original table.
+    """
+    extracted_table_oid: int
+    new_fkey_attnum: int
+
+
 @rpc_method(name="data_modeling.split_table")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
@@ -117,7 +130,7 @@ def split_table(
     database_id: int,
     relationship_fk_column_name: str = None,
     **kwargs
-) -> None:
+) -> SplitTableInfo:
     """
     Extract columns from a table to create a new table, linked by a foreign key.
 
@@ -127,10 +140,13 @@ def split_table(
         extracted_table_name: The name of the new table to be made from the extracted columns.
         database_id: The Django id of the database containing the table.
         relationship_fk_column_name: The name to give the new foreign key column in the remainder table (optional)
+
+    Returns:
+        The SplitTableInfo object describing the details for the created table as a result of column extraction.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        split.split_table(
+        return split.split_table(
             conn,
             table_oid,
             column_attnums,
