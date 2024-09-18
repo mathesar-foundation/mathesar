@@ -8,7 +8,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.constants import INTERNAL_SCHEMAS
 from db.schemas.operations.create import create_schema
-from db.schemas.operations.select import list_schemas
+from db.schemas.operations.select import list_schemas, get_schema
 from db.schemas.operations.drop import drop_schema_via_oid
 from db.schemas.operations.alter import patch_schema
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -58,7 +58,7 @@ def add(
     database_id: int,
     description: Optional[str] = None,
     **kwargs,
-) -> int:
+) -> SchemaInfo:
     """
     Add a schema
 
@@ -68,7 +68,7 @@ def add(
         description: A description of the schema
 
     Returns:
-        The integer OID of the schema created
+        The SchemaInfo describing the user-defined schema in the database.
     """
     with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
         return create_schema(
@@ -98,6 +98,26 @@ def list_(*, database_id: int, **kwargs) -> list[SchemaInfo]:
     return [s for s in schemas if s['name'] not in INTERNAL_SCHEMAS]
 
 
+@rpc_method(name="schemas.get")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get(*, schema_oid: int, database_id: int, **kwargs) -> SchemaInfo:
+    """
+    Get information about a schema in a database.
+
+    Args:
+        schema_oid: The OID of the schema to get.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        The SchemaInfo describing the user-defined schema in the database.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        schema_info = get_schema(conn)
+    return schema_info
+
+
 @rpc_method(name="schemas.delete")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
@@ -116,7 +136,7 @@ def delete(*, schema_oid: int, database_id: int, **kwargs) -> None:
 @rpc_method(name="schemas.patch")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def patch(*, schema_oid: int, database_id: int, patch: SchemaPatch, **kwargs) -> None:
+def patch(*, schema_oid: int, database_id: int, patch: SchemaPatch, **kwargs) -> SchemaInfo:
     """
     Patch a schema, given its OID.
 
@@ -124,6 +144,9 @@ def patch(*, schema_oid: int, database_id: int, patch: SchemaPatch, **kwargs) ->
         schema_oid: The OID of the schema to delete.
         database_id: The Django id of the database containing the schema.
         patch: A SchemaPatch object containing the fields to update.
+
+    Returns:
+        The SchemaInfo describing the user-defined schema in the database.
     """
     with connect(database_id, kwargs.get(REQUEST_KEY).user) as conn:
-        patch_schema(schema_oid, conn, patch)
+        return patch_schema(schema_oid, conn, patch)

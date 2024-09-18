@@ -26,7 +26,7 @@
       return false;
     }
     return Array.from($schemas?.data || []).some(
-      ([, s]) => get(s.name).toLowerCase().trim() === $schemaName?.trim(),
+      ([, s]) => get(s.name).toLowerCase().trim() === name?.trim(),
     );
   }
 

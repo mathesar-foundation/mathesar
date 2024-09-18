@@ -2,7 +2,7 @@ import {
   type Column,
   type DateFormat,
   type TimeFormat,
-  getColumnDisplayOption,
+  getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import { iconUiTypeDateTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
@@ -89,8 +89,8 @@ const displayForm: AbstractTypeConfigForm = {
 
 function determineDisplayOptions(
   dispFormValues: FormValues,
-): Column['display_options'] {
-  const displayOptions: Column['display_options'] = {
+): Column['metadata'] {
+  const displayOptions: Column['metadata'] = {
     date_format: dispFormValues.dateFormat as DateFormat,
     time_format: dispFormValues.timeFormat as TimeFormat,
   };
@@ -98,12 +98,12 @@ function determineDisplayOptions(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  displayOptions: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const column = { display_options: displayOptions };
+  const column = { metadata };
   const formValues: FormValues = {
-    dateFormat: getColumnDisplayOption(column, 'date_format'),
-    timeFormat: getColumnDisplayOption(column, 'time_format'),
+    dateFormat: getColumnMetadataValue(column, 'date_format'),
+    timeFormat: getColumnMetadataValue(column, 'time_format'),
   };
   return formValues;
 }
