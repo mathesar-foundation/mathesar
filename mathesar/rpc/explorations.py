@@ -6,6 +6,7 @@ from typing import Optional, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
+from mathesar.models.base import Explorations
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 from mathesar.utils.explorations import (
@@ -176,36 +177,35 @@ def delete(*, exploration_id: int, **kwargs) -> None:
 @rpc_method(name="explorations.run")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def run(*, exploration_def: ExplorationDef, database_id: int, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
+def run(*, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
     """
     Run an exploration.
 
     Args:
         exploration_def: A dict describing an exploration to run.
-        database_id: The Django id of the database containing the base table for the exploration.
     """
     user = kwargs.get(REQUEST_KEY).user
-    with connect(database_id, user) as conn:
-        exploration_result = run_exploration(exploration_def, database_id, conn, limit, offset)
+    with connect(exploration_def['database_id'], user) as conn:
+        exploration_result = run_exploration(exploration_def, conn, limit, offset)
     return ExplorationResult.from_dict(exploration_result)
 
 
 @rpc_method(name='explorations.run_saved')
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def run_saved(*, exploration_id: int, database_id: int, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
+def run_saved(*, exploration_id: int, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
     """
     Run a saved exploration.
 
     Args:
         exploration_id: The Django id of the exploration to run.
-        database_id: The Django id of the database containing the base table for the exploration.
         limit: The max number of rows to return.(default 100)
         offset: The number of rows to skip.(default 0)
     """
     user = kwargs.get(REQUEST_KEY).user
-    with connect(database_id, user) as conn:
-        exploration_result = run_saved_exploration(exploration_id, limit, offset, database_id, conn)
+    exp_model = Explorations.objects.get(id=exploration_id)
+    with connect(exp_model.database.id, user) as conn:
+        exploration_result = run_saved_exploration(exp_model, limit, offset, conn)
     return ExplorationResult.from_dict(exploration_result)
 
 

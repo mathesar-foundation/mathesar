@@ -47,7 +47,7 @@ def create_exploration(exploration_def):
     )
 
 
-def run_exploration(exploration_def, database_id, conn, limit=100, offset=0):
+def run_exploration(exploration_def, conn, limit=100, offset=0):
     engine = create_future_engine_with_custom_types(
         conn.info.user,
         conn.info.password,
@@ -94,7 +94,6 @@ def run_exploration(exploration_def, database_id, conn, limit=100, offset=0):
     column_metadata = _get_exploration_column_metadata(
         exploration_def,
         processed_initial_columns,
-        database_id,
         db_query,
         conn,
         engine,
@@ -117,21 +116,20 @@ def run_exploration(exploration_def, database_id, conn, limit=100, offset=0):
     }
 
 
-def run_saved_exploration(exploration_id, limit, offset, database_id, conn):
-    exp_model = Explorations.objects.get(id=exploration_id)
+def run_saved_exploration(exp_model, limit, offset, conn):
     exploration_def = {
-        "base_table_oid": exp_model["base_table_oid"],
-        "initial_columns": exp_model["initial_columns"],
-        "display_names": exp_model["display_names"],
-        "transformations": exp_model["transformations"]
+        "database_id": exp_model.database.id,
+        "base_table_oid": exp_model.base_table_oid,
+        "initial_columns": exp_model.initial_columns,
+        "display_names": exp_model.display_names,
+        "transformations": exp_model.transformations,
     }
-    return run_exploration(exploration_def, database_id, conn, limit, offset)
+    return run_exploration(exploration_def, conn, limit, offset)
 
 
 def _get_exploration_column_metadata(
     exploration_def,
     processed_initial_columns,
-    database_id,
     db_query,
     conn,
     engine,
@@ -144,7 +142,7 @@ def _get_exploration_column_metadata(
             if alias == col.alias:
                 initial_column = col
         column_metadata = ColumnMetaData.objects.filter(
-            database__id=database_id,
+            database__id=exploration_def["database_id"],
             table_oid=initial_column.reloid,
             attnum=sa_col.column_attnum
         ).first() if initial_column else None
