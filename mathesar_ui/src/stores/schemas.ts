@@ -156,22 +156,13 @@ export async function createSchema(
     description: string | null;
   },
 ): Promise<void> {
-  const schemaOid = await api.schemas
+  const rawSchema = await api.schemas
     .add({
       database_id: database.id,
       name: props.name,
       description: props.description,
     })
     .run();
-  /**
-   * TODO_BETA: Update the following once
-   * https://github.com/mathesar-foundation/mathesar/issues/3834 is done.
-   */
-  const schemaList = await api.schemas.list({ database_id: database.id }).run();
-  const rawSchema = schemaList.find((rs) => rs.oid === schemaOid);
-  if (!rawSchema) {
-    throw new Error('Schema not found');
-  }
   updateSchemaInDBSchemaStore(database.id, new Schema({ database, rawSchema }));
 }
 

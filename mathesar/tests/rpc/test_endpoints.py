@@ -298,6 +298,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        schemas.get,
+        "schemas.get",
+        [user_is_authenticated]
+    ),
+    (
         schemas.patch,
         "schemas.patch",
         [user_is_authenticated]

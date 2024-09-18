@@ -99,6 +99,7 @@ To use an RPC function:
     options:
       members:
       - list_
+      - get
       - add
       - delete
       - patch
