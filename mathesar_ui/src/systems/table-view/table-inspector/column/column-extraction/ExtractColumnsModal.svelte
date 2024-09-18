@@ -17,7 +17,6 @@
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import {
     type ProcessedColumn,
     getTabularDataStoreFromContext,
@@ -147,8 +146,8 @@
         }
         await api.data_modeling
           .move_columns({
-            database_id: $currentDatabase.id,
-            source_table_oid: $tabularData.table.oid,
+            database_id: currentTable.schema.database.id,
+            source_table_oid: currentTable.oid,
             move_column_attnums: extractedColumnIds,
             target_table_oid: targetTableId,
           })
@@ -167,8 +166,8 @@
       } else {
         const response = await api.data_modeling
           .split_table({
-            database_id: $currentDatabase.id,
-            table_oid: $tabularData.table.oid,
+            database_id: currentTable.schema.database.id,
+            table_oid: currentTable.oid,
             column_attnums: extractedColumnIds,
             extracted_table_name: newTableName,
             relationship_fk_column_name: $newFkColumnName,
@@ -176,7 +175,7 @@
           .run();
         followUps.push(
           getTableFromStoreOrApi({
-            database: $currentDatabase,
+            schema: currentTable.schema,
             tableOid: response.extracted_table_oid,
           }),
         );

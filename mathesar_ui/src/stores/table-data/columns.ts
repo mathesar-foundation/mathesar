@@ -8,8 +8,8 @@ import type {
   ColumnMetadata,
   ColumnPatchSpec,
 } from '@mathesar/api/rpc/columns';
-import type { Table } from '@mathesar/api/rpc/tables';
 import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {

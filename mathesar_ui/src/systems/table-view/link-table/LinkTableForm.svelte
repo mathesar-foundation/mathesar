@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
-  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     Field,
     FieldLayout,
@@ -17,7 +16,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import type { Table } from '@mathesar/models/Table';
   import {
     ColumnsDataStore,
     getTabularDataStoreFromContext,
@@ -25,7 +24,7 @@
   import {
     currentTables,
     importVerifiedTables as importVerifiedTablesStore,
-    refetchTablesForCurrentSchema,
+    refetchTablesForSchema,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -77,7 +76,7 @@
   $: linkType = requiredField<LinkType>('manyToOne');
   $: $targetTable, linkType.reset();
   $: targetColumnsStore = target
-    ? new ColumnsDataStore({ database: $currentDatabase, table: target })
+    ? new ColumnsDataStore({ database: target.schema.database, table: target })
     : undefined;
   $: targetColumns = ensureReadable(targetColumnsStore?.columns ?? []);
   $: targetColumnsFetchStatus = ensureReadable(targetColumnsStore?.fetchStatus);
@@ -161,7 +160,7 @@
 
   async function reFetchOtherThingsThatChanged() {
     if ($linkType === 'manyToMany') {
-      await refetchTablesForCurrentSchema();
+      await refetchTablesForSchema(base.schema);
       return;
     }
     const tableWithNewColumn = $linkType === 'oneToMany' ? target : base;
@@ -178,7 +177,7 @@
       if ($linkType === 'oneToMany') {
         await api.data_modeling
           .add_foreign_key_column({
-            database_id: $currentDatabase.id,
+            database_id: base.schema.database.id,
             referrer_table_oid: values.targetTable.oid,
             referent_table_oid: base.oid,
             column_name: $columnNameInTarget,
@@ -187,7 +186,7 @@
       } else if ($linkType === 'manyToOne') {
         await api.data_modeling
           .add_foreign_key_column({
-            database_id: $currentDatabase.id,
+            database_id: base.schema.database.id,
             referrer_table_oid: base.oid,
             referent_table_oid: values.targetTable.oid,
             column_name: $columnNameInBase,
@@ -196,8 +195,8 @@
       } else if ($linkType === 'manyToMany') {
         await api.data_modeling
           .add_mapping_table({
-            database_id: $currentDatabase.id,
-            schema_oid: base.schema,
+            database_id: base.schema.database.id,
+            schema_oid: base.schema.oid,
             table_name: $mappingTableName,
             mapping_columns: [
               {

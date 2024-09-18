@@ -1,6 +1,3 @@
-import type { Simplify } from 'type-fest';
-import type { SimplifyDeep } from 'type-fest/source/merge-deep';
-
 import type {
   QueryColumnMetaData,
   QueryGeneratedColumnSource,
@@ -9,11 +6,7 @@ import type {
   QueryRunResponse,
 } from '@mathesar/api/rest/types/queries';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type {
-  JoinPath,
-  JoinableTablesResult,
-  Table,
-} from '@mathesar/api/rpc/tables';
+import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
@@ -21,6 +14,7 @@ import {
   getDisplayFormatter,
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
+import type { Table } from '@mathesar/models/Table';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,

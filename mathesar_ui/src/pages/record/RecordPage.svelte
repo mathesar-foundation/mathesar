@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type { Table } from '@mathesar/api/rpc/tables';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Table } from '@mathesar/models/Table';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
 
@@ -15,7 +14,7 @@
 
   $: table = $currentTable as Table;
   $: tableStructure = new TableStructure({
-    database: $currentDatabase,
+    database: table.schema.database,
     table,
     abstractTypesMap,
   });

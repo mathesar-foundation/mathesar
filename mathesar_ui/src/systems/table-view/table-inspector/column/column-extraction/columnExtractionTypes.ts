@@ -1,5 +1,5 @@
 import type { FkConstraint } from '@mathesar/api/rpc/constraints';
-import type { Table } from '@mathesar/api/rpc/tables';
+import type { Table } from '@mathesar/models/Table';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 export type ColumnExtractionTargetType = 'newTable' | 'existingTable';
