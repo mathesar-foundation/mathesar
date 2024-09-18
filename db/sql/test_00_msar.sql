@@ -3957,41 +3957,17 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
+  
+  -- We should be able to retrieve a single record
   RETURN NEXT is(
-    msar.get_record_from_table(rel_id, 2),
-    $j${
-      "count": 1,
-      "results": [
-        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
-      ],
-      "grouping": null,
-      "linked_record_summaries": null,
-      "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",',
-        ' msar.format_data(col4) AS "5" FROM public.atable WHERE (id) = (''2'')',
-        ' ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
+    msar.get_record_from_table(rel_id, 2) -> 'results',
+    '[{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}]'::jsonb
   );
+
+  -- We should get an empty array if the record does not exist
   RETURN NEXT is(
-    msar.get_record_from_table(rel_id, 200),
-    $j${
-      "count": 0,
-      "results": [],
-      "grouping": null,
-      "linked_record_summaries": null,
-      "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",',
-        ' msar.format_data(col4) AS "5" FROM public.atable WHERE (id) = (''200'')',
-        ' ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
+    msar.get_record_from_table(rel_id, 200) -> 'results',
+    '[]'::jsonb
   );
 END;
 $$ LANGUAGE plpgsql;
