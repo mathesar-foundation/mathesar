@@ -1,4 +1,4 @@
-import { type Column, getColumnDisplayOption } from '@mathesar/api/rpc/columns';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import {
   DateTimeFormatter,
   DateTimeSpecification,
@@ -12,7 +12,7 @@ import type { DateTimeCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
 
 function getProps(column: Column): DateTimeCellExternalProps {
-  const format = getColumnDisplayOption(column, 'date_format');
+  const format = getColumnMetadataValue(column, 'date_format');
   const specification = new DateTimeSpecification({
     type: 'date',
     dateFormat: format,

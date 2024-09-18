@@ -1,8 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { LinksPostRequest } from '@mathesar/api/rest/types/links';
-  import { postAPI } from '@mathesar/api/rest/utils/requestUtils';
+  import { api } from '@mathesar/api/rpc';
   import {
     Field,
     FieldLayout,
@@ -34,6 +33,7 @@
     getSuggestedFkColumnName,
   } from '@mathesar/utils/columnUtils';
   import { getAvailableName } from '@mathesar/utils/db';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import { makeSingular } from '@mathesar/utils/languageUtils';
   import {
     assertExhaustive,
@@ -158,44 +158,6 @@
   // Saving
   // ===========================================================================
 
-  function getRequestBody(
-    values: FilledFormValues<typeof form>,
-  ): LinksPostRequest {
-    if ($linkType === 'oneToMany') {
-      return {
-        link_type: 'one-to-many',
-        reference_table: values.targetTable.oid,
-        reference_column_name: $columnNameInTarget,
-        referent_table: base.oid,
-      };
-    }
-    if ($linkType === 'manyToOne') {
-      return {
-        link_type: 'one-to-many',
-        reference_table: base.oid,
-        reference_column_name: $columnNameInBase,
-        referent_table: values.targetTable.oid,
-      };
-    }
-    if ($linkType === 'manyToMany') {
-      return {
-        link_type: 'many-to-many',
-        mapping_table_name: $mappingTableName,
-        referents: [
-          {
-            referent_table: base.oid,
-            column_name: $columnNameMappingToBase,
-          },
-          {
-            referent_table: values.targetTable.oid,
-            column_name: $columnNameMappingToTarget,
-          },
-        ],
-      };
-    }
-    return assertExhaustive($linkType);
-  }
-
   async function reFetchOtherThingsThatChanged() {
     if ($linkType === 'manyToMany') {
       await refetchTablesForSchema(base.schema);
@@ -211,10 +173,52 @@
   }
 
   async function handleSave(values: FilledFormValues<typeof form>) {
-    await postAPI('/api/db/v0/links/', getRequestBody(values));
-    toast.success('The link has been created successfully');
-    await reFetchOtherThingsThatChanged();
-    close();
+    try {
+      if ($linkType === 'oneToMany') {
+        await api.data_modeling
+          .add_foreign_key_column({
+            database_id: base.schema.database.id,
+            referrer_table_oid: values.targetTable.oid,
+            referent_table_oid: base.oid,
+            column_name: $columnNameInTarget,
+          })
+          .run();
+      } else if ($linkType === 'manyToOne') {
+        await api.data_modeling
+          .add_foreign_key_column({
+            database_id: base.schema.database.id,
+            referrer_table_oid: base.oid,
+            referent_table_oid: values.targetTable.oid,
+            column_name: $columnNameInBase,
+          })
+          .run();
+      } else if ($linkType === 'manyToMany') {
+        await api.data_modeling
+          .add_mapping_table({
+            database_id: base.schema.database.id,
+            schema_oid: base.schema.oid,
+            table_name: $mappingTableName,
+            mapping_columns: [
+              {
+                referent_table_oid: base.oid,
+                column_name: $columnNameMappingToBase,
+              },
+              {
+                referent_table_oid: values.targetTable.oid,
+                column_name: $columnNameMappingToTarget,
+              },
+            ],
+          })
+          .run();
+      } else {
+        assertExhaustive($linkType);
+      }
+      toast.success('The link has been created successfully');
+      await reFetchOtherThingsThatChanged();
+      close();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
   }
 </script>
 

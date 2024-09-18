@@ -1,4 +1,4 @@
-import { type Column, getColumnDisplayOption } from '@mathesar/api/rpc/columns';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import {
   DateTimeFormatter,
   DateTimeSpecification,
@@ -15,8 +15,8 @@ function getProps(
   column: Column,
   supportTimeZone: boolean,
 ): DateTimeCellExternalProps {
-  const dateFormat = getColumnDisplayOption(column, 'date_format');
-  const timeFormat = getColumnDisplayOption(column, 'time_format');
+  const dateFormat = getColumnMetadataValue(column, 'date_format');
+  const timeFormat = getColumnMetadataValue(column, 'time_format');
   const specification = new DateTimeSpecification({
     type: supportTimeZone ? 'timestampWithTZ' : 'timestamp',
     dateFormat,

@@ -9,10 +9,7 @@ import type {
   SelectProps,
 } from '@mathesar-component-library/types';
 
-export type CellColumnLike = Pick<
-  Column,
-  'type' | 'type_options' | 'display_options'
->;
+export type CellColumnLike = Pick<Column, 'type' | 'type_options' | 'metadata'>;
 
 export interface CellColumnFabric {
   id: string | number;
