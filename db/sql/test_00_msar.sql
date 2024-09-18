@@ -3954,21 +3954,27 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_record_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
+  record_2_results jsonb := '[
+    {
+      "1": 2,
+      "2": 34,
+      "3": "sdflfflsk",
+      "4": null,
+      "5": [1, 2, 3, 4]
+    }
+  ]'::jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
   
   -- We should be able to retrieve a single record
-  RETURN NEXT is(
-    msar.get_record_from_table(rel_id, 2) -> 'results',
-    '[{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}]'::jsonb
-  );
+  RETURN NEXT is(msar.get_record_from_table(rel_id, 2) -> 'results', record_2_results);
+
+  -- We should be able to retrieve a record via stringified primary key
+  RETURN NEXT is(msar.get_record_from_table(rel_id, '2') -> 'results', record_2_results);
 
   -- We should get an empty array if the record does not exist
-  RETURN NEXT is(
-    msar.get_record_from_table(rel_id, 200) -> 'results',
-    '[]'::jsonb
-  );
+  RETURN NEXT is(msar.get_record_from_table(rel_id, 200) -> 'results', '[]'::jsonb);
 END;
 $$ LANGUAGE plpgsql;
 
