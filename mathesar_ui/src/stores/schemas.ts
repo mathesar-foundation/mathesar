@@ -1,10 +1,17 @@
-import type { Readable, Unsubscriber, Writable } from 'svelte/store';
-import { derived, get, writable } from 'svelte/store';
+import {
+  type Readable,
+  type Unsubscriber,
+  type Writable,
+  derived,
+  get,
+  writable,
+} from 'svelte/store';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { Database } from '@mathesar/models/Database';
+import { Schema } from '@mathesar/models/Schema';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -27,26 +34,26 @@ const dbSchemaStoreMap: Map<
 > = new Map();
 const dbSchemasRequestMap: Map<
   Database['id'],
-  CancellablePromise<Schema[]>
+  CancellablePromise<RawSchema[]>
 > = new Map();
 
 function setDBSchemaStore(
-  databaseId: Database['id'],
-  schemas: Schema[],
+  database: Database,
+  rawSchemas: RawSchema[],
 ): Writable<DBSchemaStoreData> {
   const schemaMap: DBSchemaStoreData['data'] = new Map();
-  schemas.forEach((schema) => {
-    schemaMap.set(schema.oid, schema);
+  rawSchemas.forEach((rawSchema) => {
+    schemaMap.set(rawSchema.oid, new Schema({ database, rawSchema }));
   });
   const storeValue: DBSchemaStoreData = {
     requestStatus: { state: 'success' },
     data: schemaMap,
   };
 
-  let store = dbSchemaStoreMap.get(databaseId);
+  let store = dbSchemaStoreMap.get(database.id);
   if (!store) {
     store = writable(storeValue);
-    dbSchemaStoreMap.set(databaseId, store);
+    dbSchemaStoreMap.set(database.id, store);
   } else {
     store.set(storeValue);
   }
@@ -69,35 +76,11 @@ function updateSchemaInDBSchemaStore(
   }
 }
 
-function removeSchemaInDBSchemaStore(
-  databaseId: Database['id'],
-  schemaId: Schema['oid'],
-) {
-  const store = dbSchemaStoreMap.get(databaseId);
-  if (store) {
-    store.update((value) => {
-      value.data?.delete(schemaId);
-      return {
-        ...value,
-        data: new Map(value.data),
-      };
-    });
-  }
-}
-
-export function addCountToSchemaNumTables(
-  database: Pick<Database, 'id'>,
-  schema: Pick<Schema, 'oid'>,
-  count: number,
-) {
+function removeSchemaInDBSchemaStore(database: Database, schema: Schema) {
   const store = dbSchemaStoreMap.get(database.id);
   if (store) {
     store.update((value) => {
-      const schemaToModify = value.data.get(schema.oid);
-      if (schemaToModify) {
-        schemaToModify.table_count += count;
-        value.data.set(schema.oid, schemaToModify);
-      }
+      value.data?.delete(schema.oid);
       return {
         ...value,
         data: new Map(value.data),
@@ -107,11 +90,11 @@ export function addCountToSchemaNumTables(
 }
 
 async function refetchSchemasForDB(
-  databaseId: Database['id'],
+  database: Database,
 ): Promise<DBSchemaStoreData | undefined> {
-  const store = dbSchemaStoreMap.get(databaseId);
+  const store = dbSchemaStoreMap.get(database.id);
   if (!store) {
-    console.error(`DB Schemas store for database: ${databaseId} not found.`);
+    console.error(`DB Schemas store for database: ${database.id} not found.`);
     return undefined;
   }
 
@@ -121,13 +104,13 @@ async function refetchSchemasForDB(
       requestStatus: { state: 'processing' },
     }));
 
-    dbSchemasRequestMap.get(databaseId)?.cancel();
+    dbSchemasRequestMap.get(database.id)?.cancel();
 
-    const schemaRequest = api.schemas.list({ database_id: databaseId }).run();
-    dbSchemasRequestMap.set(databaseId, schemaRequest);
+    const schemaRequest = api.schemas.list({ database_id: database.id }).run();
+    dbSchemasRequestMap.set(database.id, schemaRequest);
     const schemas = await schemaRequest;
 
-    const dbSchemasStore = setDBSchemaStore(databaseId, schemas);
+    const dbSchemasStore = setDBSchemaStore(database, schemas);
 
     return get(dbSchemasStore);
   } catch (err) {
@@ -146,101 +129,69 @@ async function refetchSchemasForDB(
 
 let preload = true;
 
-function getSchemasStoreForDB(
-  databaseId: Database['id'],
-): Writable<DBSchemaStoreData> {
-  let store = dbSchemaStoreMap.get(databaseId);
+function getSchemasStoreForDB(database: Database): Writable<DBSchemaStoreData> {
+  let store = dbSchemaStoreMap.get(database.id);
   if (!store) {
     store = writable({
       requestStatus: { state: 'processing' },
       data: new Map(),
     });
-    dbSchemaStoreMap.set(databaseId, store);
-    if (preload && commonData.current_database === databaseId) {
-      store = setDBSchemaStore(databaseId, commonData.schemas ?? []);
+    dbSchemaStoreMap.set(database.id, store);
+    if (preload && commonData.current_database === database.id) {
+      store = setDBSchemaStore(database, commonData.schemas ?? []);
     } else {
-      void refetchSchemasForDB(databaseId);
+      void refetchSchemasForDB(database);
     }
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
-    void refetchSchemasForDB(databaseId);
+    void refetchSchemasForDB(database);
   }
   return store;
 }
 
-export function getSchemaInfo(
-  databaseId: Database['id'],
-  schemaId: Schema['oid'],
-): Schema | undefined {
-  const store = dbSchemaStoreMap.get(databaseId);
-  if (!store) {
-    return undefined;
-  }
-  return get(store).data.get(schemaId);
-}
-
 export async function createSchema(
-  databaseId: Database['id'],
-  name: Schema['name'],
-  description: Schema['description'],
+  database: Database,
+  props: {
+    name: string;
+    description: string | null;
+  },
 ): Promise<void> {
   const schemaOid = await api.schemas
     .add({
-      database_id: databaseId,
-      name,
-      description,
+      database_id: database.id,
+      name: props.name,
+      description: props.description,
     })
     .run();
-  updateSchemaInDBSchemaStore(databaseId, {
-    oid: schemaOid,
-    name,
-    description,
-    table_count: 0,
-  });
+  /**
+   * TODO_BETA: Update the following once
+   * https://github.com/mathesar-foundation/mathesar/issues/3834 is done.
+   */
+  const schemaList = await api.schemas.list({ database_id: database.id }).run();
+  const rawSchema = schemaList.find((rs) => rs.oid === schemaOid);
+  if (!rawSchema) {
+    throw new Error('Schema not found');
+  }
+  updateSchemaInDBSchemaStore(database.id, new Schema({ database, rawSchema }));
 }
 
-export async function updateSchema(
-  databaseId: Database['id'],
-  schema: Schema,
-): Promise<void> {
-  await api.schemas
-    .patch({
-      database_id: databaseId,
-      schema_oid: schema.oid,
-      patch: {
-        name: schema.name,
-        description: schema.description,
-      },
-    })
-    .run();
-  updateSchemaInDBSchemaStore(databaseId, schema);
-}
-
-export async function deleteSchema(
-  databaseId: Database['id'],
-  schemaId: Schema['oid'],
-): Promise<void> {
-  await api.schemas
-    .delete({
-      database_id: databaseId,
-      schema_oid: schemaId,
-    })
-    .run();
-  removeSchemaInDBSchemaStore(databaseId, schemaId);
+export async function deleteSchema(schema: Schema): Promise<void> {
+  await schema.delete();
+  removeSchemaInDBSchemaStore(schema.database, schema);
 }
 
 export const schemas: Readable<DBSchemaStoreData> = derived(
-  databasesStore.currentDatabaseId,
-  ($currentDatabaseId, set) => {
+  databasesStore.currentDatabase,
+  ($currentDatabase, set) => {
     let unsubscribe: Unsubscriber;
 
-    if (!$currentDatabaseId) {
+    if (!$currentDatabase) {
       set({
         requestStatus: { state: 'success' },
         data: new Map(),
       });
     } else {
-      const store = getSchemasStoreForDB($currentDatabaseId);
+      const store = getSchemasStoreForDB($currentDatabase);
       unsubscribe = store.subscribe((dbSchemasData) => {
         set(dbSchemasData);
       });

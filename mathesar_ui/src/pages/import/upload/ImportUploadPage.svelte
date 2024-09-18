@@ -4,7 +4,6 @@
 
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import {
@@ -21,6 +20,7 @@
   import { iconPaste, iconUrl } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
   import { createTableFromDataFile } from '@mathesar/stores/tables';
@@ -114,7 +114,6 @@
         return;
       }
       const table = await createTableFromDataFile({
-        database,
         schema,
         dataFile: { id: dataFileId },
       });

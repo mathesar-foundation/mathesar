@@ -2,11 +2,11 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
   import { createTable } from '@mathesar/stores/tables';
   import {
@@ -22,7 +22,7 @@
 
   async function handleCreateEmptyTable() {
     isCreatingNewTable = true;
-    const table = await createTable({ database, schema });
+    const table = await createTable({ schema });
     isCreatingNewTable = false;
     router.goto(getTablePageUrl(database.id, schema.oid, table.oid), false);
   }

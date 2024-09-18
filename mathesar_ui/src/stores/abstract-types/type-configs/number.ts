@@ -8,21 +8,12 @@ import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeNumber } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
+import { DB_TYPES } from '../dbTypes';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
   AbstractTypeDbConfig,
 } from '../types';
-
-const DB_TYPES = {
-  DECIMAL: 'decimal',
-  NUMERIC: 'numeric',
-  INTEGER: 'integer',
-  SMALLINT: 'smallint',
-  BIGINT: 'bigint',
-  REAL: 'real',
-  DOUBLE_PRECISION: 'double precision',
-};
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {

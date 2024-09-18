@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getEditUsersPageUrl } from '@mathesar/routes/urls';
   import type { UserModel } from '@mathesar/stores/users';
-  import { getUserTypeInfoFromUserModel } from '@mathesar/systems/users-and-permissions';
+  import { getUserTypeInfoFromUserModel } from '@mathesar/systems/users';
   import { Icon } from '@mathesar-component-library';
 
   export let user: UserModel;

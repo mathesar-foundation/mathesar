@@ -3,9 +3,9 @@
   import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import TablePage from '@mathesar/pages/table/TablePage.svelte';
   import { currentTableId, currentTablesData } from '@mathesar/stores/tables';

@@ -1,16 +1,17 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconAddNew } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
-  import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import {
+    type DBSchemaStoreData,
     deleteSchema as deleteSchemaAPI,
     schemas as schemasStore,
   } from '@mathesar/stores/schemas';
@@ -37,7 +38,7 @@
   ): Schema[] {
     const filtered: Schema[] = [];
     schemaData.forEach((schema) => {
-      if (schema.name?.toLowerCase().includes(filter.toLowerCase())) {
+      if (get(schema.name).toLowerCase().includes(filter.toLowerCase())) {
         filtered.push(schema);
       }
     });
@@ -59,10 +60,10 @@
   function deleteSchema(schema: Schema) {
     void confirmDelete({
       identifierType: $_('schema'),
-      identifierName: schema.name,
+      identifierName: get(schema.name),
       body: [$_('schema_delete_warning'), $_('are_you_sure_to_proceed')],
       onProceed: async () => {
-        await deleteSchemaAPI(database.id, schema.oid);
+        await deleteSchemaAPI(schema);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesStore(database, schema);
       },

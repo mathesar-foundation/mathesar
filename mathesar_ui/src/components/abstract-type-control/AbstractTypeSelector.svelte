@@ -7,6 +7,7 @@
     abstractTypesMap,
     getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
   } from '@mathesar/stores/abstract-types';
+  import { typeCastMap } from '@mathesar/stores/abstract-types/typeCastMap';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import { LabeledInput, Select } from '@mathesar-component-library';
 
@@ -26,15 +27,7 @@
 
   $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     column.type,
-
-    // TODO_BETA
-    //
-    // We need to find another way to get the valid target types for a column
-    // since the RPC API no longer returns this.
-
-    // column.valid_target_types ?? [],
-    [],
-
+    typeCastMap[column.type] ?? [],
     abstractTypesMap,
   ).filter((item) => !['jsonlist', 'map'].includes(item.identifier));
 

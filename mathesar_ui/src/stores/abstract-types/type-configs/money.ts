@@ -8,17 +8,13 @@ import {
 import { iconUiTypeMoney } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
+import { DB_TYPES } from '../dbTypes';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
 
 import { getDecimalPlaces } from './number';
-
-const DB_TYPES = {
-  MONEY: 'MONEY',
-  MATHESAR_TYPES__MATHESAR_MONEY: 'MATHESAR_TYPES.MATHESAR_MONEY',
-};
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
@@ -141,7 +137,7 @@ const moneyType: AbstractTypeConfiguration = {
   cellInfo: {
     type: 'money',
   },
-  defaultDbType: DB_TYPES.MATHESAR_TYPES__MATHESAR_MONEY,
+  defaultDbType: DB_TYPES.MSAR__MATHESAR_MONEY,
   getDisplayConfig: () => ({
     form: displayForm,
     determineDisplayOptions,
