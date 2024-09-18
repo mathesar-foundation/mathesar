@@ -4591,9 +4591,11 @@ WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
-    %1$L, jsonb_object_agg(
-      summary_cte_%1$s.fkey, COALESCE(summary_cte_%1$s.summary, '{}'::jsonb)
-    ) FILTER (WHERE summary_cte_%1$s.fkey IS NOT NULL)
+    %1$L, COALESCE(
+      jsonb_object_agg(
+        summary_cte_%1$s.fkey, summary_cte_%1$s.summary
+      ) FILTER (WHERE summary_cte_%1$s.fkey IS NOT NULL), '{}'::jsonb
+    )
     $j$,
     conkey
   ), ', '
@@ -4607,9 +4609,11 @@ msar.build_self_summary_json_expr(tab_id oid) RETURNS TEXT AS $$/*
 */
 SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS NOT NULL THEN
   $j$
-  jsonb_object_agg(
-    summary_cte_self.key, COALESCE(summary_cte_self.summary, '{}'::jsonb)
-  ) FILTER (WHERE summary_cte_self.key IS NOT NULL)
+  COALESCE(
+    jsonb_object_agg(
+      summary_cte_self.key, summary_cte_self.summary
+    ) FILTER (WHERE summary_cte_self.key IS NOT NULL), '{}'::jsonb
+  )
   $j$
 END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
