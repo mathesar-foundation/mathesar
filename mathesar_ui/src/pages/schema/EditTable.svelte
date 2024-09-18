@@ -21,10 +21,13 @@
   );
 
   async function handleSave(name: string, description: string) {
-    await updateTable($currentDatabase, {
-      oid: table.oid,
-      name,
-      description,
+    await updateTable({
+      database: $currentDatabase,
+      table: {
+        oid: table.oid,
+        name,
+        description,
+      },
     });
   }
 </script>

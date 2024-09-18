@@ -15,14 +15,14 @@ import DurationConfiguration from './config-components/DurationConfiguration.sve
 export interface ColumnWithAbstractType
   extends Pick<
     Column,
-    'id' | 'type' | 'type_options' | 'display_options' | 'valid_target_types'
+    'id' | 'type' | 'type_options' | 'metadata' | 'valid_target_types'
   > {
   abstractType: AbstractType;
 }
 
 export type ColumnTypeOptionsSaveArgs = Pick<
   ColumnWithAbstractType,
-  'type' | 'type_options' | 'display_options'
+  'type' | 'type_options' | 'metadata'
 >;
 
 export function getFormValueStore(
@@ -79,7 +79,7 @@ export function constructDisplayForm(
     const displayFormValues =
       column.type === selectedDbType
         ? displayOptionsConfig.constructDisplayFormValuesFromDisplayOptions(
-            column.display_options,
+            column.metadata,
           )
         : {};
     displayForm = makeForm(displayOptionsConfig.form, displayFormValues, {

@@ -16,6 +16,7 @@ import type {
   Result as ApiRecord,
   RecordsListParams,
   RecordsResponse,
+  RecordsSearchParams,
 } from '@mathesar/api/rpc/records';
 import type { Table } from '@mathesar/api/rpc/tables';
 import type { Database } from '@mathesar/models/Database';
@@ -400,13 +401,20 @@ export class RecordsData {
         ...params.filtering
           .withEntries(contextualFilterEntries)
           .recordsRequestParams(),
-        ...params.searchFuzzy.recordsRequestParams(),
         return_record_summaries: this.loadIntrinsicRecordSummaries,
         // TODO_BETA Do we need shareConsumer here? Previously we had been
         // passing `...this.shareConsumer?.getQueryParams()`
       };
 
-      this.promise = api.records.list(recordsListParams).run();
+      const fuzzySearchParams = params.searchFuzzy.getSearchParams();
+      const recordSearchParams: RecordsSearchParams = {
+        ...this.apiContext,
+        search_params: fuzzySearchParams,
+      };
+
+      this.promise = fuzzySearchParams.length
+        ? api.records.search(recordSearchParams).run()
+        : api.records.list(recordsListParams).run();
 
       const response = await this.promise;
       const totalCount = response.count || 0;

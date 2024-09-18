@@ -2,10 +2,10 @@
   import { _ } from 'svelte-i18n';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getExplorationPageUrl } from '@mathesar/routes/urls';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import { Icon } from '@mathesar-component-library';

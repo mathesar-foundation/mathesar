@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
@@ -13,6 +12,7 @@
     iconSelectRecord,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import {
     getImportPreviewPageUrl,
     getTablePageUrl,
@@ -67,7 +67,7 @@
         },
       },
       onProceed: async () => {
-        await deleteTable(database, schema, table.oid);
+        await deleteTable(schema, table.oid);
       },
     });
   }

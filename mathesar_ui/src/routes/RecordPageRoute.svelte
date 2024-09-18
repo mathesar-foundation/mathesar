@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Table } from '@mathesar/api/rpc/tables';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import RecordPage from '@mathesar/pages/record/RecordPage.svelte';
   import RecordStore from '@mathesar/pages/record/RecordStore';
 

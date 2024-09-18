@@ -13,7 +13,10 @@
   $: ({ table } = $tabularData);
 
   async function handleSave(description: string) {
-    await updateTable($currentDatabase, { oid: table.oid, description });
+    await updateTable({
+      database: $currentDatabase,
+      table: { oid: table.oid, description },
+    });
   }
 </script>
 

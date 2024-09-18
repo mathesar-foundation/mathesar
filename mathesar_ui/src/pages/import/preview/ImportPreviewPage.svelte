@@ -3,13 +3,12 @@
   import { router } from 'tinro';
 
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getTablePageUrl } from '@mathesar/routes/urls';
   import AsyncStore from '@mathesar/stores/AsyncStore';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import { getTableFromStoreOrApi } from '@mathesar/stores/tables';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
@@ -31,12 +30,8 @@
   }
 
   $: void (async () => {
-    const table = (
-      await tableFetch.run({
-        database: $currentDatabase,
-        tableOid: tableId,
-      })
-    ).resolvedValue;
+    const table = (await tableFetch.run({ database, tableOid: tableId }))
+      .resolvedValue;
     if (!table) {
       return;
     }
@@ -45,16 +40,12 @@
       redirectToTablePage();
       return;
     }
-
-    // TODO_BETA: re-implement fetching and storing of `table.data_files`
-    // metadata from RPC API or similar.
-    throw new Error('Not implemented');
-    // const firstDataFileId = table.data_files?.[0];
-    // if (firstDataFileId === undefined) {
-    //   redirectToTablePage();
-    //   return;
-    // }
-    // await dataFileFetch.run(firstDataFileId);
+    const dataFileId = table.metadata?.data_file_id ?? undefined;
+    if (dataFileId === undefined) {
+      redirectToTablePage();
+      return;
+    }
+    await dataFileFetch.run(dataFileId);
   })();
   $: error = $tableFetch.error ?? $dataFileFetch.error;
 </script>
@@ -63,7 +54,6 @@
 
 {#if $tableFetch.resolvedValue && $dataFileFetch.resolvedValue}
   <ImportPreviewContent
-    {database}
     {schema}
     table={$tableFetch.resolvedValue}
     dataFile={$dataFileFetch.resolvedValue}

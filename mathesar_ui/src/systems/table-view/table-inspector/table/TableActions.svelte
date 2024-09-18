@@ -67,7 +67,7 @@
         const database = $currentDatabase;
         const schema = $currentSchema;
         if (database && schema) {
-          await deleteTable(database, schema, table.oid);
+          await deleteTable(schema, table.oid);
           router.goto(getSchemaPageUrl(database.id, schema.oid), true);
         }
       },
