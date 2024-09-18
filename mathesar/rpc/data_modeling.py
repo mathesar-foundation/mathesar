@@ -113,7 +113,7 @@ class SplitTableInfo(TypedDict):
     Attributes:
         extracted_table_oid: The OID of the table that is created from column extraction.
         new_fkey_attnum: The attnum of the newly created foreign key column
-          referring the extracted_table on the original table.
+                         referring the extracted_table on the original table.
     """
     extracted_table_oid: int
     new_fkey_attnum: int
