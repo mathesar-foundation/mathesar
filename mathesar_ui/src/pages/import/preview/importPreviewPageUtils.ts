@@ -107,6 +107,6 @@ export function finalizeColumns(
       name: columnPropertiesMap[column.id]?.displayName ?? '',
       type: column.type,
       type_options: column.type_options,
-      display_options: column.display_options,
+      metadata: column.metadata,
     }));
 }

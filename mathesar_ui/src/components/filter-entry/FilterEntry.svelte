@@ -157,7 +157,7 @@
     return getDbTypeBasedInputCap({
       type: parameterTypeId,
       type_options: {},
-      display_options: {},
+      metadata: {},
     });
   }
 
