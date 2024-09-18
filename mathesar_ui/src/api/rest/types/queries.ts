@@ -130,7 +130,7 @@ export interface QueryResultColumn {
   display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
-  display_options: Column['display_options'];
+  metadata: Column['metadata'];
 }
 
 export interface QueryInitialColumnSource {

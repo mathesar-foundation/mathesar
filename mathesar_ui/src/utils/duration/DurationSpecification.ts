@@ -1,7 +1,7 @@
 import {
   type DurationUnit,
   allDurationUnits,
-  defaultColumnDisplayOptions,
+  defaultColumnMetadata,
 } from '@mathesar/api/rpc/columns';
 
 export interface DurationConfig {
@@ -10,8 +10,8 @@ export interface DurationConfig {
 }
 
 const defaults: DurationConfig = {
-  max: defaultColumnDisplayOptions.duration_max,
-  min: defaultColumnDisplayOptions.duration_min,
+  max: defaultColumnMetadata.duration_max,
+  min: defaultColumnMetadata.duration_min,
 };
 
 const formattingTokens: Record<DurationUnit, string> = {
