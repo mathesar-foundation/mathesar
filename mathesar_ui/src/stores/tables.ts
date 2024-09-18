@@ -206,7 +206,7 @@ export function deleteTable(
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then(() => {
-        schema.updateTableCount(get(schema.tableCount) - 1);
+        schema.setTableCount(get(schema.tableCount) - 1);
         tablesStores
           .get([schema.database.id, schema.oid])
           ?.update((tableStoreData) => {
@@ -225,10 +225,31 @@ export function deleteTable(
   );
 }
 
-/**
- * @throws Error if the table store is not found or if the table is not found in
- * the store.
- */
+function updateTableStoreIfPresent({
+  schema,
+  rawTableWithMetadata,
+}: {
+  schema: Schema;
+  rawTableWithMetadata: RawTableWithMetadata;
+}): Table {
+  const fullTable: Table = new Table({
+    schema,
+    rawTableWithMetadata,
+  });
+  const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
+  if (tablesStore) {
+    tablesStore.update((tablesData) => {
+      const tables = sortTables([...tablesData.tablesMap.values(), fullTable]);
+      return {
+        ...tablesData,
+        tablesMap: new Map(tables.map((t) => [t.oid, t])),
+      };
+    });
+    schema.setTableCount(get(tablesStore).tablesMap.size);
+  }
+  return fullTable;
+}
+
 export async function updateTable({
   schema,
   table: rawPartialTable,
@@ -284,75 +305,38 @@ export async function updateTable({
   }
   await batchSend(requests);
 
-  let newTable: Table | undefined;
-  const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
-  if (!tablesStore) throw new Error('Table store not found');
-  tablesStore.update((tablesData) => {
-    const oldTable = tablesData.tablesMap.get(rawPartialTable.oid);
-    if (!oldTable) throw new Error('Table not found within store.');
-    newTable = oldTable.withProperties(rawPartialTable);
-    tablesData.tablesMap.set(rawPartialTable.oid, newTable);
-    const tablesMap: TablesMap = new Map();
-    sortTables([...tablesData.tablesMap.values()]).forEach((t) => {
-      tablesMap.set(t.oid, t);
-    });
-    return { ...tablesData, tablesMap };
-  });
-  if (!newTable) throw new Error('Table not updated.');
-  return newTable;
+  // TODO: Remove once tables.patch_with_metadata response provides RawTableWithMetadata
+  const rawTableWithMetadata = await api.tables
+    .get_with_metadata({
+      database_id: schema.database.id,
+      table_oid: rawPartialTable.oid,
+    })
+    .run();
+  return updateTableStoreIfPresent({ schema, rawTableWithMetadata });
 }
 
-function addTableToStore({
-  schema,
-  rawTable,
-}: {
-  schema: Schema;
-  rawTable: Partial<RawTableWithMetadata> &
-    Pick<RawTableWithMetadata, 'oid' | 'name'>;
-}): Table {
-  schema.updateTableCount(get(schema.tableCount) + 1);
-  const fullTable: Table = new Table({
-    schema,
-    rawTableWithMetadata: {
-      description: null,
-      metadata: null,
-      schema: schema.oid,
-      ...rawTable,
-    },
-  });
-  const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
-  tablesStore?.update((tablesData) => {
-    const tables = sortTables([...tablesData.tablesMap.values(), fullTable]);
-    return {
-      ...tablesData,
-      tablesMap: new Map(tables.map((t) => [t.oid, t])),
-    };
-  });
-  return fullTable;
-}
-
-export function createTable({
+export async function createTable({
   schema,
 }: {
   schema: Schema;
-}): CancellablePromise<Table> {
-  const promise = api.tables
+}): Promise<Table> {
+  const created = await api.tables
     .add({
       database_id: schema.database.id,
       schema_oid: schema.oid,
     })
     .run();
-  return new CancellablePromise(
-    (resolve, reject) => {
-      void promise.then(
-        (rawTable) => resolve(addTableToStore({ schema, rawTable })),
-        reject,
-      );
-    },
-    () => {
-      promise.cancel();
-    },
-  );
+
+  // TODO: Remove once tables.patch response provides RawTable
+  const rawTableWithMetadata = await api.tables
+    .get_with_metadata({
+      database_id: schema.database.id,
+      table_oid: created.oid,
+    })
+    .run();
+
+  schema.setTableCount(get(schema.tableCount) + 1);
+  return updateTableStoreIfPresent({ schema, rawTableWithMetadata });
 }
 
 export async function createTableFromDataFile(props: {
@@ -360,28 +344,22 @@ export async function createTableFromDataFile(props: {
   dataFile: Pick<DataFile, 'id'>;
   name?: string;
 }): Promise<Table> {
+  const { schema } = props;
+
   const created = await api.tables
     .import({
-      database_id: props.schema.database.id,
-      schema_oid: props.schema.oid,
+      database_id: schema.database.id,
+      schema_oid: schema.oid,
       table_name: props.name,
       data_file_id: props.dataFile.id,
     })
     .run();
 
-  const basicTable = addTableToStore({
-    schema: props.schema,
-    rawTable: {
-      oid: created.oid,
-      name: created.name,
-      schema: props.schema.oid,
-    },
-  });
-
+  schema.setTableCount(get(schema.tableCount) + 1);
   const fullTable = await updateTable({
-    schema: props.schema,
+    schema,
     table: {
-      oid: basicTable.oid,
+      oid: created.oid,
       metadata: {
         import_verified: false,
         data_file_id: props.dataFile.id,

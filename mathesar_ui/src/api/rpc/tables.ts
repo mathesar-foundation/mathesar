@@ -2,6 +2,19 @@ import type { RecursivePartial } from '@mathesar/component-library';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { ColumnTypeOptions } from './columns';
+import type { RawDatabase } from './databases';
+import type { RawRole } from './roles';
+
+export const allTablePrivileges = [
+  'SELECT',
+  'INSERT',
+  'UPDATE',
+  'DELETE',
+  'TRUNCATE',
+  'REFERENCES',
+  'TRIGGER',
+] as const;
+export type TablePrivilege = (typeof allTablePrivileges)[number];
 
 export interface RawTable {
   oid: number;
@@ -9,6 +22,14 @@ export interface RawTable {
   /** The OID of the schema containing the table */
   schema: number;
   description: string | null;
+  owner_oid: RawRole['oid'];
+  current_role_priv: TablePrivilege[];
+  current_role_owns: boolean;
+}
+
+export interface RawTablePrivilegesForRole {
+  role_oid: RawRole['oid'];
+  direct: TablePrivilege[];
 }
 
 interface TableMetadata {
@@ -203,6 +224,25 @@ export const tables = {
         metadata: RecursivePartial<TableMetadata>;
       },
       void
+    >(),
+  },
+
+  privileges: {
+    list_direct: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        table_oid: RawTable['oid'];
+      },
+      Array<RawTablePrivilegesForRole>
+    >(),
+
+    replace_for_roles: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        table_oid: RawTable['oid'];
+        privileges: Array<RawTablePrivilegesForRole>;
+      },
+      Array<RawTablePrivilegesForRole>
     >(),
   },
 };

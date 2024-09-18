@@ -1,7 +1,9 @@
-import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
-import { mergeTableMetadata } from '@mathesar/utils/tables';
-import type { RecursivePartial } from '@mathesar-component-library';
+import type {
+  RawTableWithMetadata,
+  TablePrivilege,
+} from '@mathesar/api/rpc/tables';
 
+import type { Role } from './Role';
 import type { Schema } from './Schema';
 
 export class Table {
@@ -15,6 +17,12 @@ export class Table {
 
   schema;
 
+  owner_oid: Role['oid'];
+
+  current_role_priv: TablePrivilege[];
+
+  current_role_owns: boolean;
+
   constructor(props: {
     schema: Schema;
     rawTableWithMetadata: RawTableWithMetadata;
@@ -23,28 +31,9 @@ export class Table {
     this.name = props.rawTableWithMetadata.name;
     this.description = props.rawTableWithMetadata.description;
     this.metadata = props.rawTableWithMetadata.metadata;
+    this.owner_oid = props.rawTableWithMetadata.owner_oid;
+    this.current_role_priv = props.rawTableWithMetadata.current_role_priv;
+    this.current_role_owns = props.rawTableWithMetadata.current_role_owns;
     this.schema = props.schema;
-  }
-
-  // TODO_BETA: Replace this with an update method that updates
-  // the same table object
-  // @deprecated
-  withProperties(
-    _rawTableWithMetadata: RecursivePartial<RawTableWithMetadata>,
-  ) {
-    return new Table({
-      schema: this.schema,
-      rawTableWithMetadata: {
-        oid: this.oid,
-        name: this.name,
-        description: this.description,
-        schema: this.schema.oid,
-        ..._rawTableWithMetadata,
-        metadata: mergeTableMetadata(
-          this.metadata,
-          _rawTableWithMetadata.metadata,
-        ),
-      },
-    });
   }
 }

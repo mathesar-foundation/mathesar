@@ -76,7 +76,7 @@ export class Schema {
     );
   }
 
-  updateTableCount(count: number) {
+  setTableCount(count: number) {
     this._tableCount.set(count);
   }
 
