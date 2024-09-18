@@ -17,18 +17,21 @@
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
+  import type {
+    PermissionsMetaData,
+    RolePrivileges,
+  } from '../permissionsUtils';
+
   import AccessControlRow from './AccessControlRow.svelte';
   import OverviewSection from './OverviewSection.svelte';
+  import {
+    type AccessControlConfig,
+    getObjectAccessPrivilegeMap,
+  } from './overviewUtils';
   import {
     RoleAccessLevelAndPrivileges,
     customAccess,
   } from './RoleAccessLevelAndPrivileges';
-  import {
-    type AccessControlConfig,
-    type PermissionsMetaData,
-    type RolePrivileges,
-    getObjectAccessPrivilegeMap,
-  } from './utils';
 
   type AccessLevel = $$Generic;
   type Privilege = $$Generic;

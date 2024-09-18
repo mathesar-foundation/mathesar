@@ -9,13 +9,14 @@
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
-  import AccessControl from './AccessControl.svelte';
-  import Owner from './Owner.svelte';
   import type {
-    AccessControlConfig,
     PermissionsAsyncStores,
     RolePrivileges,
-  } from './utils';
+  } from '../permissionsUtils';
+
+  import AccessControl from './AccessControl.svelte';
+  import type { AccessControlConfig } from './overviewUtils';
+  import Owner from './Owner.svelte';
 
   type AccessLevel = $$Generic;
   type Privilege = $$Generic;

@@ -12,12 +12,13 @@
     Select,
   } from '@mathesar-component-library';
 
+  import type { PermissionsMetaData } from '../permissionsUtils';
+
   import {
     type RoleAccessLevelAndPrivileges,
     customAccess,
   } from './RoleAccessLevelAndPrivileges';
   import RoleWithChildren from './RoleWithChildren.svelte';
-  import type { PermissionsMetaData } from './utils';
 
   type AccessLevel = $$Generic;
   type Privilege = $$Generic;
