@@ -1,7 +1,7 @@
 import {
   type Column,
   type NumberFormat,
-  getColumnDisplayOption,
+  getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import {
   StringifiedNumberFormatter,
@@ -31,22 +31,22 @@ function ColumnIsInteger(column: Column): boolean {
 function getFormatterOptions(
   column: Column,
 ): MoneyCellExternalProps['formatterOptions'] {
-  const format = getColumnDisplayOption(column, 'num_format');
+  const format = getColumnMetadataValue(column, 'num_format');
   return {
     locale: (format && localeMap.get(format)) ?? undefined,
     useGrouping: getUseGrouping(column),
     allowFloat: !ColumnIsInteger(column),
     allowNegative: true,
-    minimumFractionDigits: getColumnDisplayOption(
+    minimumFractionDigits: getColumnMetadataValue(
       column,
       'num_min_frac_digits',
     ),
-    maximumFractionDigits: getColumnDisplayOption(
+    maximumFractionDigits: getColumnMetadataValue(
       column,
       'num_max_frac_digits',
     ),
-    currencySymbol: getColumnDisplayOption(column, 'mon_currency_symbol'),
-    currencySymbolLocation: getColumnDisplayOption(
+    currencySymbol: getColumnMetadataValue(column, 'mon_currency_symbol'),
+    currencySymbolLocation: getColumnMetadataValue(
       column,
       'mon_currency_location',
     ),

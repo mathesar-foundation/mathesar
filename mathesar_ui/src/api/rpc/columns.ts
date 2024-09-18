@@ -68,10 +68,10 @@ export interface ColumnTypeOptions {
 }
 
 /**
- * The column display options values, typed as we need in order to render them
- * in the UI.
+ * The column metadata values, typed as we need in order to render them in the
+ * UI.
  */
-export interface RequiredColumnDisplayOptions {
+export interface RequiredColumnMetadata {
   /** The type of input used for boolean values */
   bool_input: BooleanInputType;
 
@@ -104,18 +104,14 @@ export interface RequiredColumnDisplayOptions {
   duration_min: DurationUnit;
 
   duration_max: DurationUnit;
-
-  duration_show_units: boolean;
 }
 
-/** The column display options values, types as we get them from the API. */
-type ColumnDisplayOptions = {
-  [K in keyof RequiredColumnDisplayOptions]?:
-    | RequiredColumnDisplayOptions[K]
-    | null;
+/** The column metadata values, types as we get them from the API. */
+export type ColumnMetadata = {
+  [K in keyof RequiredColumnMetadata]?: RequiredColumnMetadata[K] | null;
 };
 
-export const defaultColumnDisplayOptions: RequiredColumnDisplayOptions = {
+export const defaultColumnMetadata: RequiredColumnMetadata = {
   bool_input: 'checkbox',
   bool_true: 'true',
   bool_false: 'false',
@@ -129,17 +125,16 @@ export const defaultColumnDisplayOptions: RequiredColumnDisplayOptions = {
   date_format: 'none',
   duration_min: 's',
   duration_max: 'm',
-  duration_show_units: true,
 };
 
 /**
- * Gets a display option value from a column, if present. Otherwise returns the
- * default value for that display option.
+ * Gets a metadata value from a column, if present. Otherwise returns the
+ * default value for that metadata value.
  */
-export function getColumnDisplayOption<
-  Option extends keyof RequiredColumnDisplayOptions,
->(column: Pick<Column, 'display_options'>, opt: Option) {
-  return column.display_options?.[opt] ?? defaultColumnDisplayOptions[opt];
+export function getColumnMetadataValue<
+  Key extends keyof RequiredColumnMetadata,
+>(column: Pick<Column, 'metadata'>, k: Key) {
+  return column.metadata?.[k] ?? defaultColumnMetadata[k];
 }
 
 interface ColumnDefault {
@@ -167,7 +162,7 @@ interface RawColumn {
  * The raw column data from the user database combined with Mathesar's metadata
  */
 export interface Column extends RawColumn {
-  display_options: ColumnDisplayOptions | null;
+  metadata: ColumnMetadata | null;
 }
 
 export interface ColumnCreationSpec {
@@ -188,6 +183,8 @@ export interface ColumnPatchSpec {
   nullable?: boolean;
   default?: ColumnDefault | null;
 }
+
+type ColumnMetadataBlob = ColumnMetadata & { attnum: number };
 
 export const columns = {
   list: rpcMethodTypeContainer<
@@ -233,4 +230,15 @@ export const columns = {
     },
     void
   >(),
+
+  metadata: {
+    set: rpcMethodTypeContainer<
+      {
+        database_id: number;
+        table_oid: number;
+        column_meta_data_list: ColumnMetadataBlob[];
+      },
+      void
+    >(),
+  },
 };
