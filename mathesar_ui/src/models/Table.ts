@@ -1,7 +1,10 @@
+import { api } from '@mathesar/api/rpc';
 import type {
   RawTableWithMetadata,
   TablePrivilege,
 } from '@mathesar/api/rpc/tables';
+import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
+import { ImmutableMap } from '@mathesar-component-library';
 
 import type { Role } from './Role';
 import type { Schema } from './Schema';
@@ -35,5 +38,17 @@ export class Table {
     this.current_role_priv = props.rawTableWithMetadata.current_role_priv;
     this.current_role_owns = props.rawTableWithMetadata.current_role_owns;
     this.schema = props.schema;
+  }
+
+  constructTablePrivilegesStore() {
+    return new AsyncRpcApiStore(api.tables.privileges.list_direct, {
+      postProcess: (rawTablePrivilegesForRoles) =>
+        new ImmutableMap(
+          rawTablePrivilegesForRoles.map((rawTablePrivilegesForRole) => [
+            rawTablePrivilegesForRole.role_oid,
+            rawTablePrivilegesForRole,
+          ]),
+        ),
+    });
   }
 }
