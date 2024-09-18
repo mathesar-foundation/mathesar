@@ -4779,10 +4779,11 @@ DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement);
 DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement, boolean);
 DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, text, boolean);
 DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, numeric, boolean);
+DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anycompatible, boolean);
 CREATE OR REPLACE FUNCTION
 msar.get_record_from_table(
   tab_id oid,
-  rec_id text,
+  rec_id anycompatible,
   return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get single record from a table. Only columns to which the user has access are returned.
@@ -4806,14 +4807,6 @@ SELECT msar.list_records_from_table(
 )
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION
-msar.get_record_from_table(
-  tab_id oid,
-  rec_id numeric,
-  return_record_summaries boolean DEFAULT false
-) RETURNS jsonb AS $$
-SELECT msar.get_record_from_table(tab_id, rec_id::text, return_record_summaries);
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.delete_records_from_table(tab_id oid, rec_ids jsonb) RETURNS integer AS $$/*
