@@ -20,6 +20,10 @@ export interface PermissionsStoreValues<Privilege> {
   roles: ImmutableMap<Role['oid'], Role>;
   privilegesForRoles: ImmutableMap<number, RolePrivileges<Privilege>>;
   permissionsMetaData: PermissionsMetaData<Privilege>;
+  currentRole: {
+    currentRoleOid: Role['oid'];
+    parentRoleOids: Role['oid'][];
+  };
 }
 
 export interface PermissionsAsyncStores<Privilege, E = string> {
@@ -31,6 +35,9 @@ export interface PermissionsAsyncStores<Privilege, E = string> {
   >;
   permissionsMetaData: Readable<
     AsyncStoreValue<PermissionsStoreValues<Privilege>['permissionsMetaData'], E>
+  >;
+  currentRole: Readable<
+    AsyncStoreValue<PermissionsStoreValues<Privilege>['currentRole'], E>
   >;
 }
 

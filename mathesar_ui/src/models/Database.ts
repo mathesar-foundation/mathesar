@@ -79,6 +79,15 @@ export class Database {
     return new AsyncRpcApiStore(api.databases.get);
   }
 
+  constructCurrentRoleStore() {
+    return new AsyncRpcApiStore(api.roles.get_current_role, {
+      postProcess: (currentRole) => ({
+        currentRoleOid: currentRole.current_role.oid,
+        parentRoleOids: currentRole.parent_roles.map((pr) => pr.oid),
+      }),
+    });
+  }
+
   addCollaborator(
     userId: number,
     configuredRoleId: ConfiguredRole['id'],

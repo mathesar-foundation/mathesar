@@ -29,7 +29,7 @@
   $: tablePrivileges = table.constructTablePrivilegesStore();
 
   const databaseContext = DatabaseRouteContext.get();
-  $: ({ roles } = $databaseContext);
+  $: ({ roles, currentRole } = $databaseContext);
 
   const accessControlConfig: AccessControlConfig<
     'read' | 'write',
@@ -91,6 +91,7 @@
         table_oid: table.oid,
       }),
       roles.batchRunner({ database_id: table.schema.database.id }),
+      currentRole.batchRunner({ database_id: table.schema.database.id }),
     ]);
     return {
       roles,
@@ -104,6 +105,7 @@
           },
         }),
       ),
+      currentRole,
     };
   }
 

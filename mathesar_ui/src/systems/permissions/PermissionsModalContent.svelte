@@ -20,18 +20,24 @@
   export let getAsyncStores: () => PermissionsAsyncStores<Privilege>;
 
   $: asyncStores = getAsyncStores();
-  $: ({ roles, privilegesForRoles, permissionsMetaData } = asyncStores);
+  $: ({ roles, privilegesForRoles, permissionsMetaData, currentRole } =
+    asyncStores);
 
   $: isLoading =
     $roles.isLoading ||
     $privilegesForRoles.isLoading ||
-    $permissionsMetaData.isLoading;
+    $permissionsMetaData.isLoading ||
+    $currentRole.isLoading;
   $: isSuccess =
-    $roles.isOk && $privilegesForRoles.isOk && $permissionsMetaData.isOk;
+    $roles.isOk &&
+    $privilegesForRoles.isOk &&
+    $permissionsMetaData.isOk &&
+    $currentRole.isOk;
   $: errors = [
     $roles.error,
     $privilegesForRoles.error,
     $permissionsMetaData.error,
+    $currentRole.error,
   ].filter((entry): entry is string => isDefinedNonNullable(entry));
 
   $: rolesValue = new ImmutableMap($roles.resolvedValue);
@@ -39,12 +45,14 @@
   $: privilegesForRolesValue = new ImmutableMap(
     $privilegesForRoles.resolvedValue,
   );
+  $: currentRoleValue = $currentRole.resolvedValue;
   $: storeValues =
-    isSuccess && permissionsMetaDataValue
+    isSuccess && permissionsMetaDataValue && currentRoleValue
       ? {
           roles: rolesValue,
           permissionsMetaData: permissionsMetaDataValue,
           privilegesForRoles: privilegesForRolesValue,
+          currentRole: currentRoleValue,
         }
       : undefined;
 

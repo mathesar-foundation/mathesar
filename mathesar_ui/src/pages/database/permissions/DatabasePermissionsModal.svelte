@@ -23,7 +23,7 @@
   export let controller: ModalController;
 
   const databaseContext = DatabaseRouteContext.get();
-  $: ({ database, roles, underlyingDatabase } = $databaseContext);
+  $: ({ database, roles, underlyingDatabase, currentRole } = $databaseContext);
   $: databasePrivileges = database.constructDatabasePrivilegesStore();
 
   const accessControlConfig: AccessControlConfig<
@@ -68,11 +68,13 @@
       databasePrivileges.batchRunner({ database_id: database.id }),
       roles.batchRunner({ database_id: database.id }),
       underlyingDatabase.batchRunner({ database_id: database.id }),
+      currentRole.batchRunner({ database_id: database.id }),
     ]);
     return {
       roles,
       privilegesForRoles: databasePrivileges,
       permissionsMetaData: underlyingDatabase,
+      currentRole,
     };
   }
 

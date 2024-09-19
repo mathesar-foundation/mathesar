@@ -29,7 +29,7 @@
   $: schemaPrivileges = schema.constructSchemaPrivilegesStore();
 
   const databaseContext = DatabaseRouteContext.get();
-  $: ({ roles } = $databaseContext);
+  $: ({ roles, currentRole } = $databaseContext);
 
   const accessControlConfig: AccessControlConfig<
     'read' | 'read_and_create',
@@ -71,6 +71,7 @@
         schema_oid: schema.oid,
       }),
       roles.batchRunner({ database_id: schema.database.id }),
+      currentRole.batchRunner({ database_id: schema.database.id }),
     ]);
     return {
       roles,
@@ -84,6 +85,7 @@
           },
         }),
       ),
+      currentRole,
     };
   }
 
