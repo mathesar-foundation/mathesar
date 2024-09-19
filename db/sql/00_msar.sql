@@ -1743,6 +1743,21 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.drop_database(dat_name text) RETURNS void AS $$/*
+Drop a database
+
+If no database exists with the given name, an exception will be raised.
+
+Args:
+  dat_id: An unqoted name of the database to be dropped.
+*/
+BEGIN
+  EXECUTE format('DROP DATABASE %I', dat_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- DROP SCHEMA FUNCTIONS
