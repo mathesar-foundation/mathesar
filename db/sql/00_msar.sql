@@ -1745,9 +1745,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.drop_database_query(dat_name text) RETURNS text AS $$/*
-Drop a database
-
-If no database exists with the given name, an exception will be raised.
+Return the SQL query to drop a database.
 
 Args:
   dat_id: An unqoted name of the database to be dropped.
