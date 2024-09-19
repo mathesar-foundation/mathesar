@@ -26,12 +26,16 @@
   <slot name="title" slot="title" />
 
   <PermissionsModalContent {getAsyncStores}>
-    <slot slot="share" name="share" let:storeValues {storeValues} />
-    <slot
-      slot="transfer-ownership"
-      name="transfer-ownership"
-      let:storeValues
-      {storeValues}
-    />
+    <!--
+      -- `<slot name="share" let:storeValues {storeValues} />` seems
+      -- to result in a error when performing typecheck even though
+      -- it works.
+    -->
+    <svelte:fragment slot="share" let:storeValues>
+      <slot name="share" {storeValues} />
+    </svelte:fragment>
+    <svelte:fragment slot="transfer-ownership" let:storeValues>
+      <slot name="transfer-ownership" {storeValues} />
+    </svelte:fragment>
   </PermissionsModalContent>
 </ControlledModal>
