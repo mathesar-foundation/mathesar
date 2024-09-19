@@ -13,8 +13,10 @@
 
   export let roles: ImmutableMap<Role['oid'], Role>;
   export let permissionsMetaData: PermissionsMetaData<Privilege>;
+
+  $: ownerOid = permissionsMetaData.ownerOid;
 </script>
 
 <OverviewSection title={$_('owner')}>
-  <RoleWithChildren rolesMap={roles} roleOid={permissionsMetaData.owner_oid} />
+  <RoleWithChildren rolesMap={roles} roleOid={$ownerOid} />
 </OverviewSection>

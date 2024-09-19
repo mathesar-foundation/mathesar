@@ -7,6 +7,7 @@
     RawDatabasePrivilegesForRole,
   } from '@mathesar/api/rpc/databases';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import type { Role } from '@mathesar/models/Role';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { toast } from '@mathesar/stores/toast';
   import {
@@ -89,6 +90,14 @@
     );
     toast.success($_('access_for_roles_saved_successfully'));
   }
+
+  async function transferOwnership(newOwner: Role['oid']) {
+    if (!$underlyingDatabase.resolvedValue) {
+      throw new Error('Database has not been stored');
+    }
+    await $underlyingDatabase.resolvedValue.updateOwner(newOwner);
+    toast.success($_('database_ownership_updated_successfully'));
+  }
 </script>
 
 <PermissionsModal
@@ -110,6 +119,7 @@
   <TransferOwnership
     slot="transfer-ownership"
     {controller}
+    {transferOwnership}
     let:storeValues
     {storeValues}
   />

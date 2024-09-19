@@ -49,8 +49,9 @@
     rp: RolePrivileges<Privilege>[],
   ) => Promise<void>;
 
+  $: ({ ownerOid, currentRoleOwns } = permissionsMetaData);
   $: modifiablePrivileges = privilegesForRoles.filterValues(
-    (pr) => pr.role_oid !== permissionsMetaData.owner_oid,
+    (pr) => pr.role_oid !== $ownerOid,
   );
   $: roleAccessField = requiredField(
     getObjectAccessPrivilegeMap(config.access.levels, modifiablePrivileges),
@@ -119,12 +120,13 @@
       ...rolesWithAccessRemoved,
       ...rolesWithNewOrUpdatedAccess,
     ]);
+    controller.close();
   }
 </script>
 
 <OverviewSection title={$_('granted_access')}>
   <svelte:fragment slot="actions">
-    {#if permissionsMetaData.current_role_owns}
+    {#if $currentRoleOwns}
       <DropdownMenu
         label={$_('add_roles')}
         icon={iconAddNew}
@@ -133,8 +135,7 @@
         {#each [...roles.values()] as role (role.oid)}
           <ButtonMenuItem
             on:click={() => addAccess(role.oid)}
-            disabled={$roleAccessField.has(role.oid) ||
-              role.oid === permissionsMetaData.owner_oid}
+            disabled={$roleAccessField.has(role.oid) || role.oid === $ownerOid}
           >
             {role.name}
           </ButtonMenuItem>
@@ -164,7 +165,7 @@
   {/each}
 </OverviewSection>
 
-{#if permissionsMetaData.current_role_owns}
+{#if $currentRoleOwns}
   <div use:portalToWindowFooter class="footer">
     <FormSubmit
       {form}

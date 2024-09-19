@@ -51,6 +51,8 @@
 
   let isRolePermissionsOpen = false;
 
+  $: currentRoleOwns = permissionsMetaData.currentRoleOwns;
+
   function setCustomPrivileges(pr: Privilege[]) {
     setAccess(roleAccess.roleOid, roleAccess.withCustomAccess(pr));
   }
@@ -70,7 +72,7 @@
 <div class="access-selection">
   <RoleWithChildren {rolesMap} roleOid={roleAccess.roleOid} />
   <div>
-    {#if permissionsMetaData.current_role_owns}
+    {#if $currentRoleOwns}
       <Select
         options={[...accessLevelsInfoMap.keys()]}
         value={roleAccess.accessLevel}
@@ -97,7 +99,7 @@
       </div>
     {/if}
   </div>
-  {#if permissionsMetaData.current_role_owns}
+  {#if $currentRoleOwns}
     <div>
       <Button
         appearance="secondary"

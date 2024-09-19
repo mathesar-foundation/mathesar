@@ -11,9 +11,9 @@ export interface RolePrivileges<Privilege> {
 
 export interface PermissionsMetaData<Privilege> {
   oid: number;
-  owner_oid: Role['oid'];
-  current_role_priv: Privilege[];
-  current_role_owns: boolean;
+  ownerOid: Readable<Role['oid']>;
+  currentRolePrivileges: Readable<Privilege[]>;
+  currentRoleOwns: Readable<boolean>;
 }
 
 export interface PermissionsStoreValues<Privilege> {
