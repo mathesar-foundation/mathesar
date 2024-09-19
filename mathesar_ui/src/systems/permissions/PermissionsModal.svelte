@@ -7,18 +7,14 @@
   } from '@mathesar-component-library';
 
   import PermissionsModalContent from './PermissionsModalContent.svelte';
-  import type { PermissionsAsyncStores } from './permissionsUtils';
+  import type {
+    PermissionsAsyncStores,
+    PermissionsModalSlots,
+  } from './permissionsUtils';
 
   type Privilege = $$Generic;
-
-  interface $$Slots {
+  interface $$Slots extends PermissionsModalSlots<Privilege> {
     title: Record<never, never>;
-    share: {
-      asyncStores: PermissionsAsyncStores<Privilege, string>;
-    };
-    'transfer-ownership': {
-      asyncStores: PermissionsAsyncStores<Privilege, string>;
-    };
   }
 
   export let controller: ModalController;
@@ -30,12 +26,12 @@
   <slot name="title" slot="title" />
 
   <PermissionsModalContent {getAsyncStores}>
-    <slot slot="share" name="share" let:asyncStores {asyncStores} />
+    <slot slot="share" name="share" let:storeValues {storeValues} />
     <slot
       slot="transfer-ownership"
       name="transfer-ownership"
-      let:asyncStores
-      {asyncStores}
+      let:storeValues
+      {storeValues}
     />
   </PermissionsModalContent>
 </ControlledModal>

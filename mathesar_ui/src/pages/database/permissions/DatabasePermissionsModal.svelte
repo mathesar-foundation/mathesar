@@ -101,9 +101,14 @@
     slot="share"
     {controller}
     {accessControlConfig}
-    let:asyncStores
-    {asyncStores}
+    let:storeValues
+    {storeValues}
     {savePrivilegesForRoles}
   />
-  <TransferOwnership slot="transfer-ownership" {controller} />
+  <TransferOwnership
+    slot="transfer-ownership"
+    {controller}
+    let:storeValues
+    {storeValues}
+  />
 </PermissionsModal>

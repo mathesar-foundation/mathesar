@@ -2,16 +2,51 @@
   import { _ } from 'svelte-i18n';
 
   import Errors from '@mathesar/components/Errors.svelte';
-  import { Spinner, TabContainer } from '@mathesar-component-library';
+  import {
+    ImmutableMap,
+    Spinner,
+    TabContainer,
+    isDefinedNonNullable,
+  } from '@mathesar-component-library';
 
-  import type { PermissionsAsyncStores } from './permissionsUtils';
+  import type {
+    PermissionsAsyncStores,
+    PermissionsModalSlots,
+  } from './permissionsUtils';
 
   type Privilege = $$Generic;
+  type $$Slots = PermissionsModalSlots<Privilege>;
 
   export let getAsyncStores: () => PermissionsAsyncStores<Privilege>;
 
   $: asyncStores = getAsyncStores();
-  $: ({ permissionsMetaData } = asyncStores);
+  $: ({ roles, privilegesForRoles, permissionsMetaData } = asyncStores);
+
+  $: isLoading =
+    $roles.isLoading ||
+    $privilegesForRoles.isLoading ||
+    $permissionsMetaData.isLoading;
+  $: isSuccess =
+    $roles.isOk && $privilegesForRoles.isOk && $permissionsMetaData.isOk;
+  $: errors = [
+    $roles.error,
+    $privilegesForRoles.error,
+    $permissionsMetaData.error,
+  ].filter((entry): entry is string => isDefinedNonNullable(entry));
+
+  $: rolesValue = new ImmutableMap($roles.resolvedValue);
+  $: permissionsMetaDataValue = $permissionsMetaData.resolvedValue;
+  $: privilegesForRolesValue = new ImmutableMap(
+    $privilegesForRoles.resolvedValue,
+  );
+  $: storeValues =
+    isSuccess && permissionsMetaDataValue
+      ? {
+          roles: rolesValue,
+          permissionsMetaData: permissionsMetaDataValue,
+          privilegesForRoles: privilegesForRolesValue,
+        }
+      : undefined;
 
   const tabs = [
     {
@@ -31,9 +66,9 @@
 </script>
 
 <div class="content">
-  {#if $permissionsMetaData.isLoading}
+  {#if isLoading}
     <Spinner />
-  {:else if $permissionsMetaData.resolvedValue}
+  {:else if isSuccess && storeValues}
     <div class="tabs">
       <TabContainer
         tabs={displayedTabs}
@@ -43,15 +78,15 @@
       >
         <div class="tab-content">
           {#if activeTab?.id === 'share'}
-            <slot name="share" {asyncStores} />
+            <slot name="share" {storeValues} />
           {:else if activeTab?.id === 'transfer_ownership'}
-            <slot name="transfer-ownership" {asyncStores} />
+            <slot name="transfer-ownership" {storeValues} />
           {/if}
         </div>
       </TabContainer>
     </div>
-  {:else if $permissionsMetaData.error}
-    <Errors errors={[$permissionsMetaData.error]} fullWidth />
+  {:else}
+    <Errors {errors} fullWidth />
   {/if}
 </div>
 

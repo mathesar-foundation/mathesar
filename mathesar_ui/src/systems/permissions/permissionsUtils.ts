@@ -16,12 +16,29 @@ export interface PermissionsMetaData<Privilege> {
   current_role_owns: boolean;
 }
 
+export interface PermissionsStoreValues<Privilege> {
+  roles: ImmutableMap<Role['oid'], Role>;
+  privilegesForRoles: ImmutableMap<number, RolePrivileges<Privilege>>;
+  permissionsMetaData: PermissionsMetaData<Privilege>;
+}
+
 export interface PermissionsAsyncStores<Privilege, E = string> {
-  roles: Readable<AsyncStoreValue<ImmutableMap<Role['oid'], Role>, E>>;
+  roles: Readable<
+    AsyncStoreValue<PermissionsStoreValues<Privilege>['roles'], E>
+  >;
   privilegesForRoles: Readable<
-    AsyncStoreValue<ImmutableMap<number, RolePrivileges<Privilege>>, E>
+    AsyncStoreValue<PermissionsStoreValues<Privilege>['privilegesForRoles'], E>
   >;
   permissionsMetaData: Readable<
-    AsyncStoreValue<PermissionsMetaData<Privilege>, E>
+    AsyncStoreValue<PermissionsStoreValues<Privilege>['permissionsMetaData'], E>
   >;
+}
+
+export interface PermissionsModalSlots<Privilege> {
+  share: {
+    storeValues: PermissionsStoreValues<Privilege>;
+  };
+  'transfer-ownership': {
+    storeValues: PermissionsStoreValues<Privilege>;
+  };
 }

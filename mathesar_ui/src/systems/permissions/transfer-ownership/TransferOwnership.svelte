@@ -7,7 +7,13 @@
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
+  import type { PermissionsStoreValues } from '../permissionsUtils';
+
+  type Privilege = $$Generic;
+
   export let controller: ModalController;
+  export let storeValues: PermissionsStoreValues<Privilege>;
+  $: ({ roles, permissionsMetaData } = storeValues);
 
   const form = makeForm({});
 
@@ -15,6 +21,7 @@
 </script>
 
 <div use:portalToWindowFooter class="footer">
+  <div></div>
   <FormSubmit
     {form}
     canProceed={$form.hasChanges}

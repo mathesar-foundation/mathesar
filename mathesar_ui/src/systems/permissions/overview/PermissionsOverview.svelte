@@ -1,16 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import Errors from '@mathesar/components/Errors.svelte';
-  import {
-    ImmutableMap,
-    type ModalController,
-    Spinner,
-    isDefinedNonNullable,
-  } from '@mathesar-component-library';
+  import { type ModalController } from '@mathesar-component-library';
 
   import type {
-    PermissionsAsyncStores,
+    PermissionsStoreValues,
     RolePrivileges,
   } from '../permissionsUtils';
 
@@ -27,42 +21,18 @@
     privileges: RolePrivileges<Privilege>[],
   ) => Promise<void>;
 
-  export let asyncStores: PermissionsAsyncStores<Privilege>;
-  $: ({ roles, privilegesForRoles, permissionsMetaData } = asyncStores);
-
-  $: isLoading =
-    $roles.isLoading ||
-    $privilegesForRoles.isLoading ||
-    $permissionsMetaData.isLoading;
-  $: isSuccess =
-    $roles.isOk && $privilegesForRoles.isOk && $permissionsMetaData.isOk;
-  $: errors = [
-    $roles.error,
-    $privilegesForRoles.error,
-    $permissionsMetaData.error,
-  ].filter((entry): entry is string => isDefinedNonNullable(entry));
-
-  $: rolesValue = new ImmutableMap($roles.resolvedValue);
-  $: permissionsMetaDataValue = $permissionsMetaData.resolvedValue;
-  $: privilegesForRolesValue = new ImmutableMap(
-    $privilegesForRoles.resolvedValue,
-  );
+  export let storeValues: PermissionsStoreValues<Privilege>;
+  $: ({ roles, privilegesForRoles, permissionsMetaData } = storeValues);
 </script>
 
 <div class="permissions-overview">
-  {#if isLoading}
-    <Spinner />
-  {:else if isSuccess && permissionsMetaDataValue}
-    <Owner roles={rolesValue} permissionsMetaData={permissionsMetaDataValue} />
-    <AccessControl
-      {controller}
-      config={accessControlConfig}
-      roles={rolesValue}
-      privilegesForRoles={privilegesForRolesValue}
-      permissionsMetaData={permissionsMetaDataValue}
-      {savePrivilegesForRoles}
-    />
-  {:else}
-    <Errors {errors} fullWidth />
-  {/if}
+  <Owner {roles} {permissionsMetaData} />
+  <AccessControl
+    {controller}
+    config={accessControlConfig}
+    {roles}
+    {privilegesForRoles}
+    {permissionsMetaData}
+    {savePrivilegesForRoles}
+  />
 </div>
