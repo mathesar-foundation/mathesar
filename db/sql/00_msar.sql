@@ -1585,7 +1585,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS void AS $$/*
+DROP FUNCTION IF EXISTS msar.patch_schema(oid, jsonb);
+CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS jsonb AS $$/*
 Modify a schema according to the given patch.
 
 Args:
@@ -1594,11 +1595,15 @@ Args:
     - name: (optional) The new name of the schema
     - description: (optional) The new description of the schema. To remove a description, pass an
       empty string or NULL.
+
+Returns:
+  A json object describing the user-defined schema in the database.
 */
 BEGIN
   PERFORM msar.rename_schema(sch_id, patch->>'name');
   PERFORM CASE WHEN patch ? 'description'
   THEN msar.set_schema_description(sch_id, patch->>'description') END;
+  RETURN msar.get_schema(sch_id);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1645,10 +1650,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+DROP FUNCTION IF EXISTS msar.create_schema(text, text);
 CREATE OR REPLACE FUNCTION msar.create_schema(
   sch_name text,
   description text DEFAULT ''
-) RETURNS oid AS $$/*
+) RETURNS jsonb AS $$/*
 Create a schema, possibly with a description.
 
 If a schema with the given name already exists, an exception will be raised.
@@ -1658,7 +1664,7 @@ Args:
   description: (optional) A description for the schema, UNQUOTED.
 
 Returns:
-  The integer OID of the schema
+  A json object describing the user-defined schema in the database.
 
 Note: This function does not support IF NOT EXISTS because it's simpler that way. I originally tried
 to support descriptions and if_not_exists in the same function, but as I discovered more edge cases
@@ -1669,7 +1675,7 @@ BEGIN
   EXECUTE 'CREATE SCHEMA ' || quote_ident(sch_name);
   schema_oid := msar.get_schema_oid(sch_name);
   PERFORM msar.set_schema_description(schema_oid, description);
-  RETURN schema_oid;
+  RETURN msar.get_schema(schema_oid);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -4591,9 +4597,11 @@ WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
-    %1$L, jsonb_object_agg(
-      summary_cte_%1$s.fkey, summary_cte_%1$s.summary
-    ) FILTER (WHERE summary_cte_%1$s.fkey IS NOT NULL)
+    %1$L, COALESCE(
+      jsonb_object_agg(
+        summary_cte_%1$s.fkey, summary_cte_%1$s.summary
+      ) FILTER (WHERE summary_cte_%1$s.fkey IS NOT NULL), '{}'::jsonb
+    )
     $j$,
     conkey
   ), ', '
@@ -4606,7 +4614,13 @@ CREATE OR REPLACE FUNCTION
 msar.build_self_summary_json_expr(tab_id oid) RETURNS TEXT AS $$/*
 */
 SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS NOT NULL THEN
-  'jsonb_object_agg(summary_cte_self.key, summary_cte_self.summary) FILTER (WHERE summary_cte_self.key IS NOT NULL)'
+  $j$
+  COALESCE(
+    jsonb_object_agg(
+      summary_cte_self.key, summary_cte_self.summary
+    ) FILTER (WHERE summary_cte_self.key IS NOT NULL), '{}'::jsonb
+  )
+  $j$
 END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -4775,10 +4789,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement);
+DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement, boolean);
 CREATE OR REPLACE FUNCTION
 msar.get_record_from_table(
   tab_id oid,
-  rec_id anyelement,
+  rec_id anycompatible,
   return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get single record from a table. Only columns to which the user has access are returned.

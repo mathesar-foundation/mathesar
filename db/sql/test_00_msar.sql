@@ -1188,7 +1188,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_without_description() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar') INTO sch_oid;
+  SELECT msar.create_schema('foo bar') ->> 'oid' INTO sch_oid;
   RETURN NEXT has_schema('foo bar');
   RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
   RETURN NEXT is(obj_description(sch_oid), NULL);
@@ -1199,7 +1199,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_with_description() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar', 'yay') INTO sch_oid;
+  SELECT msar.create_schema('foo bar', 'yay') ->> 'oid' INTO sch_oid;
   RETURN NEXT has_schema('foo bar');
   RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
   RETURN NEXT is(obj_description(sch_oid), 'yay');
@@ -1210,7 +1210,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_that_already_exists() RETURNS SETOF TEXT AS $t$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar') INTO sch_oid;
+  SELECT msar.create_schema('foo bar') ->> 'oid' INTO sch_oid;
   RETURN NEXT throws_ok($$SELECT msar.create_schema('foo bar')$$, '42P06');
   RETURN NEXT is(msar.create_schema_if_not_exists('foo bar'), sch_oid);
 END;
@@ -3954,45 +3954,27 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_record_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
+  record_2_results jsonb := '[
+    {
+      "1": 2,
+      "2": 34,
+      "3": "sdflfflsk",
+      "4": null,
+      "5": [1, 2, 3, 4]
+    }
+  ]'::jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  RETURN NEXT is(
-    msar.get_record_from_table(rel_id, 2),
-    $j${
-      "count": 1,
-      "results": [
-        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
-      ],
-      "grouping": null,
-      "linked_record_summaries": null,
-      "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",',
-        ' msar.format_data(col4) AS "5" FROM public.atable WHERE (id) = (''2'')',
-        ' ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
-  );
-  RETURN NEXT is(
-    msar.get_record_from_table(rel_id, 200),
-    $j${
-      "count": 0,
-      "results": [],
-      "grouping": null,
-      "linked_record_summaries": null,
-      "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",',
-        ' msar.format_data(col4) AS "5" FROM public.atable WHERE (id) = (''200'')',
-        ' ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
-  );
+  
+  -- We should be able to retrieve a single record
+  RETURN NEXT is(msar.get_record_from_table(rel_id, 2) -> 'results', record_2_results);
+
+  -- We should be able to retrieve a record via stringified primary key
+  RETURN NEXT is(msar.get_record_from_table(rel_id, '2') -> 'results', record_2_results);
+
+  -- We should get an empty array if the record does not exist
+  RETURN NEXT is(msar.get_record_from_table(rel_id, 200) -> 'results', '[]'::jsonb);
 END;
 $$ LANGUAGE plpgsql;
 

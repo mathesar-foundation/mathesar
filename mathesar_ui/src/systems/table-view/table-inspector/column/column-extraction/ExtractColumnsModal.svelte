@@ -3,6 +3,7 @@
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
+  import { api } from '@mathesar/api/rpc';
   import {
     Field,
     FormSubmit,
@@ -22,8 +23,6 @@
   } from '@mathesar/stores/table-data';
   import {
     getTableFromStoreOrApi,
-    moveColumns,
-    splitTable,
     currentTablesData as tablesDataStore,
     validateNewTableName,
   } from '@mathesar/stores/tables';
@@ -145,7 +144,14 @@
         if (!targetTableId) {
           throw new Error($_('no_target_table_selected'));
         }
-        await moveColumns(currentTable.oid, extractedColumnIds, targetTableId);
+        await api.data_modeling
+          .move_columns({
+            database_id: currentTable.schema.database.id,
+            source_table_oid: currentTable.oid,
+            move_column_attnums: extractedColumnIds,
+            target_table_oid: targetTableId,
+          })
+          .run();
         const fkColumns = $linkedTable?.columns ?? [];
         let fkColumnId: number | undefined = undefined;
         if (fkColumns.length === 1) {
@@ -158,22 +164,25 @@
           ),
         );
       } else {
-        const response = await splitTable({
-          id: currentTable.oid,
-          idsOfColumnsToExtract: extractedColumnIds,
-          extractedTableName: newTableName,
-          newFkColumnName: $newFkColumnName,
-        });
+        const response = await api.data_modeling
+          .split_table({
+            database_id: currentTable.schema.database.id,
+            table_oid: currentTable.oid,
+            column_attnums: extractedColumnIds,
+            extracted_table_name: newTableName,
+            relationship_fk_column_name: $newFkColumnName,
+          })
+          .run();
         followUps.push(
           getTableFromStoreOrApi({
             schema: currentTable.schema,
-            tableOid: response.extracted_table,
+            tableOid: response.extracted_table_oid,
           }),
         );
         followUps.push(
           $tabularData.refreshAfterColumnExtraction(
             extractedColumnIds,
-            response.fk_column,
+            response.new_fkey_attnum,
           ),
         );
       }
