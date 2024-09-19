@@ -505,6 +505,7 @@
   "schema_name_already_exists": "A schema with that name already exists.",
   "schema_name_cannot_be_empty": "Schema name cannot be empty",
   "schema_not_found": "Schema not found.",
+  "schema_ownership_updated_successfully": "Schema ownership has been updated successfully.",
   "schema_permissions": "Schema Permissions",
   "schema_privilege_create_help": "Allow creation of objects within the schema.",
   "schema_privilege_usage_help": "Allow usage of the schema.",

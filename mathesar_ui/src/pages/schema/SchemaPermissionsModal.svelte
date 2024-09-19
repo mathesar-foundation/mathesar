@@ -8,6 +8,7 @@
     SchemaPrivilege,
   } from '@mathesar/api/rpc/schemas';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import type { Role } from '@mathesar/models/Role';
   import type { Schema } from '@mathesar/models/Schema';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
@@ -104,6 +105,11 @@
     );
     toast.success($_('access_for_roles_saved_successfully'));
   }
+
+  async function transferOwnership(newOwner: Role['oid']) {
+    await schema.updateOwner(newOwner);
+    toast.success($_('schema_ownership_updated_successfully'));
+  }
 </script>
 
 <PermissionsModal
@@ -125,6 +131,7 @@
   <TransferOwnership
     slot="transfer-ownership"
     {controller}
+    {transferOwnership}
     let:storeValues
     {storeValues}
   />
