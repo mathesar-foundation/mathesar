@@ -29,8 +29,6 @@
   export let getInitialName: () => string = () => '';
   export let getInitialDescription: () => string = () => '';
   export let save: (name: string, description: string) => Promise<void>;
-  export let namePlaceholder = $_('name');
-  export let descriptionPlaceholder = $_('description');
 
   /**
    * NOTE: This is NOT a feature
@@ -102,7 +100,7 @@
             nameHasChanged = true;
           }}
           disabled={isSubmitting}
-          placeholder={namePlaceholder}
+          placeholder={$_('name')}
           id="name"
         />
         {#if nameHasChanged && nameValidationErrors.length}
@@ -120,7 +118,7 @@
             bind:value={description}
             aria-label={$_('description')}
             disabled={isSubmitting}
-            placeholder={descriptionPlaceholder}
+            placeholder={$_('description')}
           />
         </LabeledInput>
       </div>
@@ -148,7 +146,7 @@
     flex-direction: column;
 
     > :global(* + *) {
-      margin-top: 0.25rem;
+      margin-top: 1rem;
     }
   }
 

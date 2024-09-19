@@ -48,7 +48,6 @@
   }
   legend {
     margin-bottom: 0.5rem;
-    font-weight: var(--font-weight-medium);
   }
   .options {
     display: grid;

@@ -137,7 +137,7 @@
     }
 
     :global(.collapsible-content) {
-      padding-left: var(--size-x-large);
+      padding-left: 1rem;
     }
 
     .null {
@@ -150,14 +150,14 @@
     justify-content: space-between;
     align-items: center;
     font-size: var(--text-size-large);
-    font-weight: var(--font-weight-medium);
+
     border-bottom: 1px solid var(--slate-200);
-    min-height: 2.5rem;
-    margin-bottom: var(--size-xx-small);
+    padding: 0.25rem;
+    margin-bottom: 0.5rem;
   }
 
   .add-constraint {
-    padding: var(--size-base);
+    padding: 0.5rem;
     border: 1px solid var(--slate-300);
     border-radius: var(--border-radius-m);
   }

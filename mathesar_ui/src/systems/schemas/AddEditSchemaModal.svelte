@@ -60,13 +60,12 @@
   getInitialName={() => $schemaName ?? ''}
   getInitialDescription={() => $schemaDescription ?? ''}
   saveButtonLabel={schema ? $_('save') : $_('create_new_schema')}
-  namePlaceholder="Eg. Personal Finances, Movies"
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
-      <span class="description">
-        {$_('schema_description')}
-      </span>
+      <InfoBox>
+        {$_('name_your_schema_help')}
+      </InfoBox>
     {/if}
   </svelte:fragment>
 
@@ -82,10 +81,3 @@
     {/if}
   </span>
 </NameAndDescInputModalForm>
-
-<style>
-  .description {
-    display: inline-block;
-    margin-bottom: 1rem;
-  }
-</style>

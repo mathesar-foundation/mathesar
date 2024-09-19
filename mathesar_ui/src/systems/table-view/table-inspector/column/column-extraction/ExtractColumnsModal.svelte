@@ -273,6 +273,7 @@
       field={linkedTable}
       input={{ component: SelectLinkedTable, props: { linkedTables } }}
       label={$_('linked_table')}
+      layout="stacked"
     />
   {/if}
 
@@ -321,19 +322,14 @@
         </RichText>
       </p>
       {#if $targetType === 'newTable'}
-        <Field
-          field={newFkColumnName}
-          label={$_('name_of_link_column')}
-          layout="stacked"
-        >
-          <span slot="help">
-            <RichText text={$_('new_column_added_to_table')} let:slotName>
-              {#if slotName === 'tableName'}
-                <TableName table={currentTable} truncate={false} bold />
-              {/if}
-            </RichText>
-          </span>
-        </Field>
+        <p>
+          <RichText text={$_('new_column_added_to_table')} let:slotName>
+            {#if slotName === 'tableName'}
+              <TableName table={currentTable} truncate={false} bold />
+            {/if}
+          </RichText>
+        </p>
+        <Field field={newFkColumnName} label={$_('column_name')} />
       {/if}
     </OutcomeBox>
   </FieldLayout>
