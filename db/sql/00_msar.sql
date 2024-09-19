@@ -1327,6 +1327,23 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
+msar.drop_role(rol_id regrole) RETURNS void AS $$/*
+Drop a role.
+
+Note:
+- To drop a superuser role, you must be a superuser yourself.
+- To drop non-superuser roles, you must have CREATEROLE privilege and have been granted ADMIN OPTION on the role.
+
+Args:
+  rol_id: The OID of the role to drop on the database.
+*/
+BEGIN
+  EXECUTE format('DROP ROLE %I', msar.get_role_name(rol_id));
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_database_privilege_replace_expr(rol_id regrole, privileges_ jsonb) RETURNS TEXT AS $$
 SELECT string_agg(
   format(
