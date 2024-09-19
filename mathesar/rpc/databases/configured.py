@@ -50,3 +50,17 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
         database_qs = Database.objects.all()
 
     return [ConfiguredDatabaseInfo.from_model(db_model) for db_model in database_qs]
+
+
+@rpc_method(name="databases.configured.disconnect")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def disconnect(*, database_id: int, **kwargs) -> None:
+    """
+    Disconnect a configured database.
+
+    Args:
+        database_id: The Django id of the database.
+    """
+    database_qs = Database.objects.get(database__id=database_id)
+    database_qs.delete()
