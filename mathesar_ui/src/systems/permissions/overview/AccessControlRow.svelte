@@ -51,7 +51,7 @@
 
   let isRolePermissionsOpen = false;
 
-  $: currentRoleOwns = permissionsMetaData.currentRoleOwns;
+  $: currentRoleOwns = permissionsMetaData.currentAccess.currentRoleOwns;
 
   function setCustomPrivileges(pr: Privilege[]) {
     setAccess(roleAccess.roleOid, roleAccess.withCustomAccess(pr));

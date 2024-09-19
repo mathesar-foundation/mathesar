@@ -1,10 +1,9 @@
-import { type Readable, writable } from 'svelte/store';
-
 import { api } from '@mathesar/api/rpc';
 import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 
+import { ObjectCurrentAccess } from './internal/ObjectCurrentAccess';
 import type { Role } from './Role';
 import type { Schema } from './Schema';
 
@@ -17,27 +16,9 @@ export class Table {
 
   metadata;
 
-  schema;
+  readonly schema;
 
-  private _ownerOid;
-
-  get ownerOid(): Readable<RawTableWithMetadata['owner_oid']> {
-    return this._ownerOid;
-  }
-
-  private _currentRolePrivileges;
-
-  get currentRolePrivileges(): Readable<
-    RawTableWithMetadata['current_role_priv']
-  > {
-    return this._currentRolePrivileges;
-  }
-
-  private _currentRoleOwns;
-
-  get currentRoleOwns(): Readable<RawTableWithMetadata['current_role_owns']> {
-    return this._currentRoleOwns;
-  }
+  readonly currentAccess;
 
   constructor(props: {
     schema: Schema;
@@ -47,13 +28,7 @@ export class Table {
     this.name = props.rawTableWithMetadata.name;
     this.description = props.rawTableWithMetadata.description;
     this.metadata = props.rawTableWithMetadata.metadata;
-    this._ownerOid = writable(props.rawTableWithMetadata.owner_oid);
-    this._currentRolePrivileges = writable(
-      props.rawTableWithMetadata.current_role_priv,
-    );
-    this._currentRoleOwns = writable(
-      props.rawTableWithMetadata.current_role_owns,
-    );
+    this.currentAccess = new ObjectCurrentAccess(props.rawTableWithMetadata);
     this.schema = props.schema;
   }
 
@@ -70,9 +45,7 @@ export class Table {
       (resolve, reject) => {
         promise
           .then((result) => {
-            this._ownerOid.set(result.owner_oid);
-            this._currentRolePrivileges.set(result.current_role_priv);
-            this._currentRoleOwns.set(result.current_role_owns);
+            this.currentAccess.set(result);
             return resolve(this);
           }, reject)
           .catch(reject);

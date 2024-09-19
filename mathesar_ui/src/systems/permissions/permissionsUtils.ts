@@ -1,5 +1,6 @@
 import type { Readable } from 'svelte/store';
 
+import type { ObjectCurrentAccess } from '@mathesar/models/internal/ObjectCurrentAccess';
 import type { Role } from '@mathesar/models/Role';
 import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
 import type { ImmutableMap } from '@mathesar-component-library';
@@ -11,9 +12,7 @@ export interface RolePrivileges<Privilege> {
 
 export interface PermissionsMetaData<Privilege> {
   oid: number;
-  ownerOid: Readable<Role['oid']>;
-  currentRolePrivileges: Readable<Privilege[]>;
-  currentRoleOwns: Readable<boolean>;
+  currentAccess: ObjectCurrentAccess<Privilege>;
 }
 
 export interface PermissionsStoreValues<Privilege> {

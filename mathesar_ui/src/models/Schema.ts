@@ -1,11 +1,12 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type { RawSchema, SchemaPrivilege } from '@mathesar/api/rpc/schemas';
+import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 
 import type { Database } from './Database';
+import { ObjectCurrentAccess } from './internal/ObjectCurrentAccess';
 import type { Role } from './Role';
 
 export class Schema {
@@ -29,23 +30,7 @@ export class Schema {
     return this._tableCount;
   }
 
-  private _ownerOid;
-
-  get ownerOid(): Readable<RawSchema['owner_oid']> {
-    return this._ownerOid;
-  }
-
-  private _currentRolePrivileges;
-
-  get currentRolePrivileges(): Readable<RawSchema['current_role_priv']> {
-    return this._currentRolePrivileges;
-  }
-
-  private _currentRoleOwns;
-
-  get currentRoleOwns(): Readable<RawSchema['current_role_owns']> {
-    return this._currentRoleOwns;
-  }
+  readonly currentAccess;
 
   readonly isPublicSchema;
 
@@ -57,9 +42,7 @@ export class Schema {
     this.isPublicSchema = derived(this._name, ($name) => $name === 'public');
     this._description = writable(props.rawSchema.description);
     this._tableCount = writable(props.rawSchema.table_count);
-    this._ownerOid = writable(props.rawSchema.owner_oid);
-    this._currentRolePrivileges = writable(props.rawSchema.current_role_priv);
-    this._currentRoleOwns = writable(props.rawSchema.current_role_owns);
+    this.currentAccess = new ObjectCurrentAccess(props.rawSchema);
     this.database = props.database;
   }
 
@@ -102,9 +85,7 @@ export class Schema {
       (resolve, reject) => {
         promise
           .then((result) => {
-            this._ownerOid.set(result.owner_oid);
-            this._currentRolePrivileges.set(result.current_role_priv);
-            this._currentRoleOwns.set(result.current_role_owns);
+            this.currentAccess.set(result);
             return resolve(this);
           }, reject)
           .catch(reject);

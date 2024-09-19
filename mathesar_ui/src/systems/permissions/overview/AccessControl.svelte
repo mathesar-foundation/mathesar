@@ -49,7 +49,7 @@
     rp: RolePrivileges<Privilege>[],
   ) => Promise<void>;
 
-  $: ({ ownerOid, currentRoleOwns } = permissionsMetaData);
+  $: ({ ownerOid, currentRoleOwns } = permissionsMetaData.currentAccess);
   $: modifiablePrivileges = privilegesForRoles.filterValues(
     (pr) => pr.role_oid !== $ownerOid,
   );

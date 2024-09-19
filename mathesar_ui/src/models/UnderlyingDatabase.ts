@@ -1,34 +1,15 @@
-import { type Readable, writable } from 'svelte/store';
-
 import { api } from '@mathesar/api/rpc';
 import type { RawUnderlyingDatabase } from '@mathesar/api/rpc/databases';
 import { CancellablePromise } from '@mathesar-component-library';
 
 import type { Database } from './Database';
+import { ObjectCurrentAccess } from './internal/ObjectCurrentAccess';
 import type { Role } from './Role';
 
 export class UnderlyingDatabase {
   readonly oid: number;
 
-  private _ownerOid;
-
-  get ownerOid(): Readable<RawUnderlyingDatabase['owner_oid']> {
-    return this._ownerOid;
-  }
-
-  private _currentRolePrivileges;
-
-  get currentRolePrivileges(): Readable<
-    RawUnderlyingDatabase['current_role_priv']
-  > {
-    return this._currentRolePrivileges;
-  }
-
-  private _currentRoleOwns;
-
-  get currentRoleOwns(): Readable<RawUnderlyingDatabase['current_role_owns']> {
-    return this._currentRoleOwns;
-  }
+  readonly currentAccess;
 
   readonly database: Database;
 
@@ -37,13 +18,7 @@ export class UnderlyingDatabase {
     rawUnderlyingDatabase: RawUnderlyingDatabase;
   }) {
     this.oid = props.rawUnderlyingDatabase.oid;
-    this._ownerOid = writable(props.rawUnderlyingDatabase.owner_oid);
-    this._currentRolePrivileges = writable(
-      props.rawUnderlyingDatabase.current_role_priv,
-    );
-    this._currentRoleOwns = writable(
-      props.rawUnderlyingDatabase.current_role_owns,
-    );
+    this.currentAccess = new ObjectCurrentAccess(props.rawUnderlyingDatabase);
     this.database = props.database;
   }
 
@@ -59,9 +34,7 @@ export class UnderlyingDatabase {
       (resolve, reject) => {
         promise
           .then((result) => {
-            this._ownerOid.set(result.owner_oid);
-            this._currentRolePrivileges.set(result.current_role_priv);
-            this._currentRoleOwns.set(result.current_role_owns);
+            this.currentAccess.set(result);
             return resolve(this);
           }, reject)
           .catch(reject);

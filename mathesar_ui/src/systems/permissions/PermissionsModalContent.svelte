@@ -68,7 +68,8 @@
       for: 'owner',
     },
   ];
-  $: currentRoleOwns = $permissionsMetaData.resolvedValue?.currentRoleOwns;
+  $: currentRoleOwns =
+    $permissionsMetaData.resolvedValue?.currentAccess.currentRoleOwns;
   $: displayedTabs = $currentRoleOwns
     ? tabs
     : tabs.filter((t) => t.for === 'all');

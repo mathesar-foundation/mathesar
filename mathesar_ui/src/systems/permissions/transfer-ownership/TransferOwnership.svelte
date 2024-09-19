@@ -25,7 +25,7 @@
   $: ({ roles, permissionsMetaData, currentRole } = storeValues);
 
   $: roleOids = [...roles.values()].map((r) => r.oid);
-  $: ownerOid = permissionsMetaData.ownerOid;
+  $: ownerOid = permissionsMetaData.currentAccess.ownerOid;
   $: currentRoleInfo = roles.get(currentRole.currentRoleOid);
 
   /**
