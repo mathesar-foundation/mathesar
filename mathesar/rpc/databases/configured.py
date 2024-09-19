@@ -62,5 +62,5 @@ def disconnect(*, database_id: int, **kwargs) -> None:
     Args:
         database_id: The Django id of the database.
     """
-    database_qs = Database.objects.get(database__id=database_id)
+    database_qs = Database.objects.get(id=database_id)
     database_qs.delete()

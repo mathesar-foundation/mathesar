@@ -1729,8 +1729,8 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_database(dat_id oid) RETURNS void AS $$/*
-Drop a database
+msar.drop_database_query(dat_id oid) RETURNS text AS $$/*
+Return the SQL query to drop a database.
 
 If no database exists with the given oid, an exception will be raised.
 
@@ -1738,13 +1738,13 @@ Args:
   dat_id: The OID of the role to drop.
 */
 BEGIN
-  EXECUTE format('DROP DATABASE %I', msar.get_database_name(dat_id));
+  RETURN format('DROP DATABASE %I', msar.get_database_name(dat_id));
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.drop_database(dat_name text) RETURNS void AS $$/*
+msar.drop_database_query(dat_name text) RETURNS text AS $$/*
 Drop a database
 
 If no database exists with the given name, an exception will be raised.
@@ -1753,7 +1753,7 @@ Args:
   dat_id: An unqoted name of the database to be dropped.
 */
 BEGIN
-  EXECUTE format('DROP DATABASE %I', dat_name);
+  RETURN format('DROP DATABASE %I', dat_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
