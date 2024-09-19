@@ -64,6 +64,7 @@ To use an RPC function:
     options:
       members:
       - get
+      - delete
       - DatabaseInfo
 
 ## Configured Databases
@@ -72,6 +73,7 @@ To use an RPC function:
     options:
       members:
       - list_
+      - disconnect
       - ConfiguredDatabaseInfo
 
 ## Database Privileges
