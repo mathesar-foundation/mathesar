@@ -1,11 +1,12 @@
 import {
   type Column,
   type TimeFormat,
-  getColumnDisplayOption,
+  getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import { iconUiTypeTime } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
+import { DB_TYPES } from '../dbTypes';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
@@ -13,11 +14,6 @@ import type {
 } from '../types';
 
 import { getTimeFormatOptions } from './utils';
-
-const DB_TYPES = {
-  TIME_WITH_TZ: 'time with time zone',
-  TIME_WITHOUT_TZ: 'time without time zone',
-};
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {
@@ -79,20 +75,18 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(
-  formValues: FormValues,
-): Column['display_options'] {
+function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
   return {
     time_format: formValues.format as TimeFormat,
   };
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  displayOptions: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const column = { display_options: displayOptions };
+  const column = { metadata };
   return {
-    format: getColumnDisplayOption(column, 'time_format'),
+    format: getColumnMetadataValue(column, 'time_format'),
   };
 }
 

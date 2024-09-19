@@ -3,12 +3,12 @@
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Table } from '@mathesar/api/rpc/tables';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+  import type { Table } from '@mathesar/models/Table';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
   import { refetchQueriesForSchema } from '@mathesar/stores/queries';
   import { refetchTablesForSchema } from '@mathesar/stores/tables';
@@ -36,6 +36,7 @@
   $: showTableCreationTutorial = !hasTables;
   $: showExplorationTutorial = hasTables && !hasExplorations;
   $: isExplorationsLoading = explorationsRequestStatus.state === 'processing';
+  $: ({ tableCount } = schema);
 
   // Viewers can explore, they cannot save explorations
   $: canExplore = hasTables && hasExplorations && !isExplorationsLoading;
@@ -49,14 +50,14 @@
       </svelte:fragment>
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
-      <TableSkeleton numTables={schema.table_count} />
+      <TableSkeleton numTables={$tableCount} />
     {:else if tablesRequestStatus.state === 'failure'}
       <ErrorBox>
         <p>{tablesRequestStatus.errors[0]}</p>
         <div>
           <SpinnerButton
             onClick={async () => {
-              await refetchTablesForSchema(database, schema);
+              await refetchTablesForSchema(schema);
             }}
             label={$_('retry')}
             icon={iconRefresh}

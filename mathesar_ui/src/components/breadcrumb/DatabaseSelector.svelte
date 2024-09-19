@@ -9,7 +9,7 @@
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
-  const { databases, currentDatabaseId } = databasesStore;
+  const { databases, currentDatabase } = databasesStore;
 
   function makeBreadcrumbSelectorEntry(
     database: Database,
@@ -19,7 +19,7 @@
       label: database.name,
       href: getDatabasePageUrl(database.id),
       icon: iconDatabase,
-      isActive: () => database.id === $currentDatabaseId,
+      isActive: () => database.id === $currentDatabase?.id,
     };
   }
 

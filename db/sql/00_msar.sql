@@ -918,7 +918,7 @@ SELECT jsonb_build_object(
   'name', relname,
   'schema', relnamespace::bigint,
   'description', msar.obj_description(oid, 'pg_class'),
-  'owner_oid', relowner,
+  'owner_oid', relowner::bigint,
   'current_role_priv', msar.list_table_privileges_for_current_role(tab_id),
   'current_role_owns', pg_catalog.pg_has_role(relowner, 'USAGE')
 ) FROM pg_catalog.pg_class WHERE oid = tab_id;
@@ -949,7 +949,7 @@ SELECT coalesce(
       'name', pgc.relname,
       'schema', pgc.relnamespace::bigint,
       'description', msar.obj_description(pgc.oid, 'pg_class'),
-      'owner_oid', pgc.relowner,
+      'owner_oid', pgc.relowner::bigint,
       'current_role_priv', msar.list_table_privileges_for_current_role(pgc.oid),
       'current_role_owns', pg_catalog.pg_has_role(pgc.relowner, 'USAGE')
     )
@@ -976,7 +976,36 @@ WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.get_schemas() RETURNS jsonb AS $$/*
+CREATE OR REPLACE FUNCTION msar.schema_info_table() RETURNS TABLE
+(
+  oid bigint, -- The OID of the schema.
+  name name, -- Name of the role.
+  description text, -- The description of the schema on the database.
+  owner_oid bigint, -- The owner of the schema.
+  current_role_priv jsonb, -- Privileges of the current role on the schema.
+  current_role_owns boolean, -- Whether the current role owns the schema.
+  table_count integer -- The number of tables in the schema.
+) AS $$
+SELECT 
+  s.oid::bigint AS oid,
+  s.nspname AS name,
+  pg_catalog.obj_description(s.oid) AS description,
+  s.nspowner::bigint AS owner_oid,
+  msar.list_schema_privileges_for_current_role(s.oid) AS current_role_priv,
+  pg_catalog.pg_has_role(s.nspowner, 'USAGE') AS current_role_owns,
+  COALESCE(count(c.oid), 0) AS table_count
+FROM pg_catalog.pg_namespace s
+LEFT JOIN pg_catalog.pg_class c ON c.relnamespace = s.oid AND c.relkind = 'r'
+GROUP BY
+  s.oid,
+  s.nspname,
+  s.nspowner;
+-- Filter on relkind so that we only count tables. This must be done in the ON clause so that
+-- we still get a row for schemas with no tables.
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.list_schemas() RETURNS jsonb AS $$/*
 Return a json array of objects describing the user-defined schemas in the database.
 
 PostgreSQL system schemas are ignored.
@@ -997,30 +1026,30 @@ Each returned JSON object in the array will have the form:
   }
 */
 SELECT jsonb_agg(schema_data)
-FROM (
-  SELECT 
-    s.oid::bigint AS oid,
-    s.nspname AS name,
-    pg_catalog.obj_description(s.oid) AS description,
-    s.nspowner::bigint AS owner_oid,
-    msar.list_schema_privileges_for_current_role(s.oid) AS current_role_priv,
-    pg_catalog.pg_has_role(s.nspowner, 'USAGE') AS current_role_owns,
-    COALESCE(count(c.oid), 0) AS table_count
-  FROM pg_catalog.pg_namespace s
-  LEFT JOIN pg_catalog.pg_class c ON
-    c.relnamespace = s.oid AND
-    -- Filter on relkind so that we only count tables. This must be done in the ON clause so that
-    -- we still get a row for schemas with no tables.
-    c.relkind = 'r'
-  WHERE
-    s.nspname <> 'information_schema' AND
-    s.nspname NOT LIKE 'pg_%'
-  GROUP BY
-    s.oid,
-    s.nspname,
-    s.nspowner
-) AS schema_data;
-$$ LANGUAGE SQL;
+FROM msar.schema_info_table() AS schema_data
+WHERE schema_data.name <> 'information_schema'
+AND schema_data.name NOT LIKE 'pg_%';
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION msar.get_schema(sch_id regnamespace) RETURNS jsonb AS $$/*
+Return a json object describing the user-defined schema in the database.
+
+Each returned JSON object will have the form:
+  {
+    "oid": <int>
+    "name": <str>
+    "description": <str|null>
+    "owner_oid": <int>,
+    "current_role_priv": [<str>],
+    "current_role_owns": <bool>,
+    "table_count": <int>
+  }
+*/
+SELECT to_jsonb(schema_data)
+FROM msar.schema_info_table() AS schema_data
+WHERE schema_data.oid = sch_id;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION msar.list_schema_privileges(sch_id regnamespace) RETURNS jsonb AS $$/*
@@ -1221,7 +1250,7 @@ SELECT jsonb_build_object(
   'current_role_priv', msar.list_database_privileges_for_current_role(pgd.oid),
   'current_role_owns', pg_catalog.pg_has_role(pgd.datdba, 'USAGE')
 ) FROM pg_catalog.pg_database AS pgd
-WHERE pgd.datname = current_database();
+WHERE pgd.datname = pg_catalog.current_database();
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -1308,7 +1337,7 @@ SELECT string_agg(
       ' %3$I'
     ),
     val,
-    current_database(),
+    pg_catalog.current_database(),
     msar.get_role_name(rol_id)
   ),
   E';\n'
@@ -1434,6 +1463,82 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+DROP FUNCTION IF EXISTS msar.transfer_database_ownership(regrole);
+CREATE OR REPLACE FUNCTION
+msar.transfer_database_ownership(new_owner_oid regrole) RETURNS jsonb AS $$/*
+Transfers ownership of the current database to a new owner.
+
+Args:
+  new_owner_oid: The OID of the role whom we want to be the new owner of the current database.
+
+NOTE: To successfully transfer ownership of a database to a new owner the current user must:
+  - Be a Superuser/Owner of the current database.
+  - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+    to the new owning role.
+  - Have `CREATEDB` privilege.
+*/
+BEGIN
+  EXECUTE format(
+    'ALTER DATABASE %I OWNER TO %I',
+    pg_catalog.current_database(),
+    msar.get_role_name(new_owner_oid)
+  );
+  RETURN msar.get_current_database_info();
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.transfer_schema_ownership(sch_id regnamespace, new_owner_oid regrole) RETURNS jsonb AS $$/*
+Transfers ownership of a given schema to a new owner.
+
+Args:
+  sch_id: The OID of the schema to transfer.
+  new_owner_oid: The OID of the role whom we want to be the new owner of the schema.
+
+NOTE: To successfully transfer ownership of a schema to a new owner the current user must:
+  - Be a Superuser/Owner of the schema.
+  - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+    to the new owning role.
+  - Have `CREATE` privilege for the database.
+*/
+BEGIN
+  EXECUTE format(
+    'ALTER SCHEMA %I OWNER TO %I',
+    msar.get_schema_name(sch_id),
+    msar.get_role_name(new_owner_oid)
+  );
+  RETURN msar.get_schema(sch_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.transfer_table_ownership(tab_id regclass, new_owner_oid regrole) RETURNS jsonb AS $$/*
+Transfers ownership of a given table to a new owner.
+
+Args:
+  tab_id: The OID of the table to transfer.
+  new_owner_oid: The OID of the role whom we want to be the new owner of the table.
+
+NOTE: To successfully transfer ownership of a table to a new owner the current user must:
+  - Be a Superuser/Owner of the table.
+  - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+    to the new owning role.
+  - Have `CREATE` privilege on the table's schema.
+*/
+BEGIN
+  EXECUTE format(
+    'ALTER TABLE %I.%I OWNER TO %I',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    msar.get_role_name(new_owner_oid)
+  );
+  RETURN msar.get_table(tab_id);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- ALTER SCHEMA FUNCTIONS
@@ -1480,7 +1585,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS void AS $$/*
+DROP FUNCTION IF EXISTS msar.patch_schema(oid, jsonb);
+CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS jsonb AS $$/*
 Modify a schema according to the given patch.
 
 Args:
@@ -1489,11 +1595,15 @@ Args:
     - name: (optional) The new name of the schema
     - description: (optional) The new description of the schema. To remove a description, pass an
       empty string or NULL.
+
+Returns:
+  A json object describing the user-defined schema in the database.
 */
 BEGIN
   PERFORM msar.rename_schema(sch_id, patch->>'name');
   PERFORM CASE WHEN patch ? 'description'
   THEN msar.set_schema_description(sch_id, patch->>'description') END;
+  RETURN msar.get_schema(sch_id);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -1540,10 +1650,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+DROP FUNCTION IF EXISTS msar.create_schema(text, text);
 CREATE OR REPLACE FUNCTION msar.create_schema(
   sch_name text,
   description text DEFAULT ''
-) RETURNS oid AS $$/*
+) RETURNS jsonb AS $$/*
 Create a schema, possibly with a description.
 
 If a schema with the given name already exists, an exception will be raised.
@@ -1553,7 +1664,7 @@ Args:
   description: (optional) A description for the schema, UNQUOTED.
 
 Returns:
-  The integer OID of the schema
+  A json object describing the user-defined schema in the database.
 
 Note: This function does not support IF NOT EXISTS because it's simpler that way. I originally tried
 to support descriptions and if_not_exists in the same function, but as I discovered more edge cases
@@ -1564,7 +1675,7 @@ BEGIN
   EXECUTE 'CREATE SCHEMA ' || quote_ident(sch_name);
   schema_oid := msar.get_schema_oid(sch_name);
   PERFORM msar.set_schema_description(schema_oid, description);
-  RETURN schema_oid;
+  RETURN msar.get_schema(schema_oid);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -4486,8 +4597,10 @@ WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
 SELECT 'jsonb_build_object(' || string_agg(
   format(
     $j$
-    %1$L, jsonb_object_agg(
-      summary_cte_%1$s.fkey, summary_cte_%1$s.summary
+    %1$L, COALESCE(
+      jsonb_object_agg(
+        summary_cte_%1$s.fkey, summary_cte_%1$s.summary
+      ) FILTER (WHERE summary_cte_%1$s.fkey IS NOT NULL), '{}'::jsonb
     )
     $j$,
     conkey
@@ -4501,7 +4614,13 @@ CREATE OR REPLACE FUNCTION
 msar.build_self_summary_json_expr(tab_id oid) RETURNS TEXT AS $$/*
 */
 SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS NOT NULL THEN
-  'jsonb_object_agg(summary_cte_self.key, summary_cte_self.summary)'
+  $j$
+  COALESCE(
+    jsonb_object_agg(
+      summary_cte_self.key, summary_cte_self.summary
+    ) FILTER (WHERE summary_cte_self.key IS NOT NULL), '{}'::jsonb
+  )
+  $j$
 END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
@@ -4670,10 +4789,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement);
+DROP FUNCTION IF EXISTS msar.get_record_from_table(oid, anyelement, boolean);
 CREATE OR REPLACE FUNCTION
 msar.get_record_from_table(
   tab_id oid,
-  rec_id anyelement,
+  rec_id anycompatible,
   return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
 Get single record from a table. Only columns to which the user has access are returned.

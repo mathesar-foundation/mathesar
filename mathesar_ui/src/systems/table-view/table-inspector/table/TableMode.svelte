@@ -13,6 +13,7 @@
   import TableActions from './TableActions.svelte';
   import TableDescription from './TableDescription.svelte';
   import TableName from './TableName.svelte';
+  import TablePermissions from './TablePermissions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 </script>
@@ -27,6 +28,13 @@
     <div slot="content" class="content-container">
       <TableName />
       <TableDescription />
+    </div>
+  </Collapsible>
+
+  <Collapsible isOpen triggerAppearance="plain">
+    <CollapsibleHeader slot="header" title={$_('table_permissions')} />
+    <div slot="content" class="content-container">
+      <TablePermissions />
     </div>
   </Collapsible>
 

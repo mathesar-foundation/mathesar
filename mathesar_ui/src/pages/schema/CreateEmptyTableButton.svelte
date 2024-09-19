@@ -1,8 +1,8 @@
 <script lang="ts">
   import { router } from 'tinro';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getTablePageUrl } from '@mathesar/routes/urls';
   import { createTable } from '@mathesar/stores/tables';
   import { Button, Spinner } from '@mathesar-component-library';
@@ -17,9 +17,9 @@
 
   async function handleCreateEmptyTable() {
     isCreatingNewTable = true;
-    const tableOid = await createTable(database, schema, {});
+    const table = await createTable({ schema });
     isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.id, schema.oid, tableOid), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, table.oid), false);
   }
 </script>
 

@@ -5,6 +5,8 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.roles.operations.select import list_db_priv
 from db.roles.operations.update import replace_database_privileges_for_roles
+from db.roles.operations.ownership import transfer_database_ownership
+from mathesar.rpc.databases.base import DatabaseInfo
 from mathesar.rpc.utils import connect
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
@@ -64,7 +66,7 @@ def replace_for_roles(
     WARNING: Any privilege included in the `direct` list for a role
     is GRANTed, and any privilege not included is REVOKEd.
 
-    Args:
+    Attributes:
         privileges: The new privilege sets for roles.
         database_id: The Django id of the database.
 
@@ -78,3 +80,29 @@ def replace_for_roles(
             conn, [DBPrivileges.from_dict(i) for i in privileges]
         )
     return [DBPrivileges.from_dict(i) for i in raw_db_priv]
+
+
+@rpc_method(name="databases.privileges.transfer_ownership")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def transfer_ownership(*, new_owner_oid: int, database_id: int, **kwargs) -> DatabaseInfo:
+    """
+    Transfers ownership of the current database to a new owner.
+
+    Attributes:
+        new_owner_oid: The OID of the role whom we want to be the new owner of the current database.
+        database_id: The Django id of the database whose ownership is to be transferred.
+
+    Note: To successfully transfer ownership of a database to a new owner the current user must:
+        - Be a Superuser/Owner of the current database.
+        - Be a `MEMBER` of the new owning role. i.e. The current role should be able to `SET ROLE`
+          to the new owning role.
+        - Have `CREATEDB` privilege.
+
+    Returns:
+        Information about the database, and the current user privileges.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        db_info = transfer_database_ownership(new_owner_oid, conn)
+    return DatabaseInfo.from_dict(db_info)

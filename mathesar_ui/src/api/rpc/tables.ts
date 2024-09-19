@@ -1,4 +1,20 @@
+import type { RecursivePartial } from '@mathesar/component-library';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
+
+import type { ColumnTypeOptions } from './columns';
+import type { RawDatabase } from './databases';
+import type { RawRole } from './roles';
+
+export const allTablePrivileges = [
+  'SELECT',
+  'INSERT',
+  'UPDATE',
+  'DELETE',
+  'TRUNCATE',
+  'REFERENCES',
+  'TRIGGER',
+] as const;
+export type TablePrivilege = (typeof allTablePrivileges)[number];
 
 export interface RawTable {
   oid: number;
@@ -6,16 +22,34 @@ export interface RawTable {
   /** The OID of the schema containing the table */
   schema: number;
   description: string | null;
+  owner_oid: RawRole['oid'];
+  current_role_priv: TablePrivilege[];
+  current_role_owns: boolean;
+}
+
+export interface RawTablePrivilegesForRole {
+  role_oid: RawRole['oid'];
+  direct: TablePrivilege[];
 }
 
 interface TableMetadata {
+  /** The id of the data file used during import while creating the table */
+  data_file_id: number | null;
+  /**
+   * When `true` or `null`, the table has been imported from a data file and the
+   * data has been verified to be correct, with the data types customized by the
+   * user.
+   *
+   * When false, the table still requires import verification before it can be
+   * viewed in the table page.
+   */
   import_verified: boolean | null;
   column_order: number[] | null;
   record_summary_customized: boolean | null;
   record_summary_template: string | null;
 }
 
-export interface Table extends RawTable {
+export interface RawTableWithMetadata extends RawTable {
   metadata: TableMetadata | null;
 }
 
@@ -23,7 +57,7 @@ export interface Table extends RawTable {
 export type JoinPath = [number, number][][];
 
 export interface JoinableTable {
-  target: Table['oid'];
+  target: RawTableWithMetadata['oid'];
   join_path: JoinPath;
   /**
    * [Constraint OID, is_reversed]
@@ -49,7 +83,7 @@ export interface JoinableTablesResult {
   target_table_info: Record<
     string,
     {
-      name: Table['name'];
+      name: RawTableWithMetadata['name'];
       /** Keys are stringified column attnum values */
       columns: Record<
         string,
@@ -60,6 +94,17 @@ export interface JoinableTablesResult {
       >;
     }
   >;
+}
+
+/**
+ * The parameters needed for one column in order to generate an import preview.
+ */
+export interface ColumnPreviewSpec {
+  /** Column attnum */
+  id: number;
+  /** The new type to be applied to the column */
+  type?: string;
+  type_options?: ColumnTypeOptions | null;
 }
 
 export const tables = {
@@ -76,7 +121,7 @@ export const tables = {
       database_id: number;
       schema_oid: number;
     },
-    Table[]
+    RawTableWithMetadata[]
   >(),
 
   get: rpcMethodTypeContainer<
@@ -92,7 +137,7 @@ export const tables = {
       database_id: number;
       table_oid: number;
     },
-    Table
+    RawTableWithMetadata
   >(),
 
   /** Returns the oid of the table created */
@@ -107,7 +152,25 @@ export const tables = {
       /** TODO */
       constraint_data_list?: unknown;
     },
-    number
+    {
+      oid: number;
+      name: string;
+    }
+  >(),
+
+  /** Returns the oid of the table created */
+  import: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      schema_oid: number;
+      table_name?: string;
+      comment?: string;
+      data_file_id: number;
+    },
+    {
+      oid: number;
+      name: string;
+    }
   >(),
 
   patch: rpcMethodTypeContainer<
@@ -139,4 +202,47 @@ export const tables = {
     },
     JoinableTablesResult
   >(),
+
+  get_import_preview: rpcMethodTypeContainer<
+    {
+      database_id: number;
+      table_oid: number;
+      columns: ColumnPreviewSpec[];
+      /** The upper limit for the number of records to return. Defaults to 20 */
+      limit?: number;
+    },
+    Record<string, unknown>[]
+  >(),
+
+  metadata: {
+    list: rpcMethodTypeContainer<{ database_id: number }, TableMetadata[]>(),
+
+    set: rpcMethodTypeContainer<
+      {
+        database_id: number;
+        table_oid: number;
+        metadata: RecursivePartial<TableMetadata>;
+      },
+      void
+    >(),
+  },
+
+  privileges: {
+    list_direct: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        table_oid: RawTable['oid'];
+      },
+      Array<RawTablePrivilegesForRole>
+    >(),
+
+    replace_for_roles: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        table_oid: RawTable['oid'];
+        privileges: Array<RawTablePrivilegesForRole>;
+      },
+      Array<RawTablePrivilegesForRole>
+    >(),
+  },
 };

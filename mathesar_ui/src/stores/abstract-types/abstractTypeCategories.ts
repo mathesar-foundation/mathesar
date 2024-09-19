@@ -1,6 +1,7 @@
 import type { DbType } from '@mathesar/AppTypes';
 
 import { abstractTypeCategory } from './constants';
+import { DB_TYPES } from './dbTypes';
 import Boolean from './type-configs/boolean';
 import arrayFactory from './type-configs/comboTypes/arrayFactory';
 import jsonArrayFactory from './type-configs/comboTypes/jsonArrayFactory';
@@ -12,7 +13,7 @@ import Email from './type-configs/email';
 import Fallback from './type-configs/fallback';
 import Money from './type-configs/money';
 import Number from './type-configs/number';
-import Text, { DB_TYPES as textDbTypes } from './type-configs/text';
+import Text from './type-configs/text';
 import Time from './type-configs/time';
 import Uri from './type-configs/uri';
 import type {
@@ -50,7 +51,7 @@ const comboAbstractTypeCategories: Partial<
   [abstractTypeCategory.JsonObject]: jsonObjectFactory,
 };
 
-export const defaultDbType = textDbTypes.TEXT;
+export const defaultDbType = DB_TYPES.TEXT;
 
 export function constructAbstractTypeMapFromResponse(
   abstractTypesResponse: AbstractTypeResponse[],

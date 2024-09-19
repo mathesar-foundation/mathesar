@@ -81,6 +81,7 @@ To use an RPC function:
       members:
       - list_direct
       - replace_for_roles
+      - transfer_ownership
       - DBPrivileges
 
 ## Database Setup
@@ -98,6 +99,7 @@ To use an RPC function:
     options:
       members:
       - list_
+      - get
       - add
       - delete
       - patch
@@ -111,6 +113,7 @@ To use an RPC function:
       members:
       - list_direct
       - replace_for_roles
+      - transfer_ownership
       - SchemaPrivileges
 
 ## Tables
@@ -141,6 +144,7 @@ To use an RPC function:
       members:
       - list_direct
       - replace_for_roles
+      - transfer_ownership
       - TablePrivileges
 
 ## Table Metadata
@@ -282,6 +286,7 @@ To use an RPC function:
       - split_table
       - move_columns
       - MappingColumn
+      - SplitTableInfo
 
 ## Responses
 

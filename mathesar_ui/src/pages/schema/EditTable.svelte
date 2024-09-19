@@ -1,11 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import type { Table } from '@mathesar/models/Table';
   import {
     factoryToGetTableNameValidationErrors,
     updateTable,
@@ -15,16 +14,16 @@
   export let table: Table;
   export let modalController: ModalController;
 
-  $: getNameValidationErrors = factoryToGetTableNameValidationErrors(
-    $currentDatabase,
-    table,
-  );
+  $: getNameValidationErrors = factoryToGetTableNameValidationErrors(table);
 
   async function handleSave(name: string, description: string) {
-    await updateTable($currentDatabase, {
-      oid: table.oid,
-      name,
-      description,
+    await updateTable({
+      schema: table.schema,
+      table: {
+        oid: table.oid,
+        name,
+        description,
+      },
     });
   }
 </script>

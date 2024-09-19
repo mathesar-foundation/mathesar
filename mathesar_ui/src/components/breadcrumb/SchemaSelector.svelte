@@ -1,9 +1,10 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import { iconSchema } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import {
     currentSchemaId,
@@ -18,7 +19,8 @@
   function makeBreadcrumbSelectorItem(schema: Schema): BreadcrumbSelectorEntry {
     return {
       type: 'simple',
-      label: schema.name,
+      // TODO_BETA: Make label a store
+      label: get(schema.name),
       href: getSchemaPageUrl(database.id, schema.oid),
       icon: iconSchema,
       isActive() {

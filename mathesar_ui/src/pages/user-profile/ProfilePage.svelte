@@ -6,10 +6,7 @@
   import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import {
-    PasswordChangeForm,
-    UserDetailsForm,
-  } from '@mathesar/systems/users-and-permissions';
+  import { PasswordChangeForm, UserDetailsForm } from '@mathesar/systems/users';
 
   const userProfileStore = getUserProfileStoreFromContext();
 

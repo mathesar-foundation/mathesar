@@ -1,6 +1,6 @@
 import type { QueryInstanceSummarizationTransformation } from '@mathesar/api/rest/types/queries';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { Table } from '@mathesar/api/rpc/tables';
+import type { Table } from '@mathesar/models/Table';
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
 import type { TerseGrouping } from '@mathesar/stores/table-data';

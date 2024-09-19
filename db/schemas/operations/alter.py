@@ -27,5 +27,8 @@ def patch_schema(schema_oid, conn, patch):
         patch: A dict mapping the following fields to new values:
             - 'name' (optional): New name for the schema.
             - 'description' (optional): New description for the schema.
+
+    Returns:
+        The SchemaInfo describing the user-defined schema in the database.
     """
-    exec_msar_func(conn, "patch_schema", schema_oid, json.dumps(patch))
+    return exec_msar_func(conn, "patch_schema", schema_oid, json.dumps(patch)).fetchone()[0]

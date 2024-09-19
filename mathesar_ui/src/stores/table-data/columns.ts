@@ -5,10 +5,11 @@ import { api } from '@mathesar/api/rpc';
 import type {
   Column,
   ColumnCreationSpec,
+  ColumnMetadata,
   ColumnPatchSpec,
 } from '@mathesar/api/rpc/columns';
-import type { Table } from '@mathesar/api/rpc/tables';
 import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import {
@@ -146,6 +147,29 @@ export class ColumnsDataStore extends EventHandler<{
       .run();
     await this.fetch();
     await this.dispatch('columnPatched');
+  }
+
+  async setDisplayOptions(
+    column: Pick<Column, 'id'>,
+    displayOptions: ColumnMetadata | null,
+  ): Promise<void> {
+    await api.columns.metadata
+      .set({
+        ...this.apiContext,
+        column_meta_data_list: [{ attnum: column.id, ...displayOptions }],
+      })
+      .run();
+
+    this.fetchedColumns.update((columns) =>
+      columns.map((c) =>
+        c.id === column.id
+          ? {
+              ...c,
+              metadata: { ...c.metadata, ...displayOptions },
+            }
+          : c,
+      ),
+    );
   }
 
   destroy(): void {

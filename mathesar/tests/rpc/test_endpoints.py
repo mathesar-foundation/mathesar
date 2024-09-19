@@ -161,6 +161,11 @@ METHODS = [
         "databases.privileges.replace_for_roles",
         [user_is_authenticated]
     ),
+    (
+        databases.privileges.transfer_ownership,
+        "databases.privileges.transfer_ownership",
+        [user_is_authenticated]
+    ),
 
     (
         databases.setup.create_new,
@@ -293,6 +298,11 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
+        schemas.get,
+        "schemas.get",
+        [user_is_authenticated]
+    ),
+    (
         schemas.patch,
         "schemas.patch",
         [user_is_authenticated]
@@ -306,6 +316,11 @@ METHODS = [
     (
         schemas.privileges.replace_for_roles,
         "schemas.privileges.replace_for_roles",
+        [user_is_authenticated]
+    ),
+    (
+        schemas.privileges.transfer_ownership,
+        "schemas.privileges.transfer_ownership",
         [user_is_authenticated]
     ),
 
@@ -381,6 +396,11 @@ METHODS = [
     (
         tables.privileges.replace_for_roles,
         "tables.privileges.replace_for_roles",
+        [user_is_authenticated]
+    ),
+    (
+        tables.privileges.transfer_ownership,
+        "tables.privileges.transfer_ownership",
         [user_is_authenticated]
     ),
 

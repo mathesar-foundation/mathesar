@@ -1,8 +1,8 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { Table } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
+import type { Table } from '@mathesar/models/Table';
 import { getAvailableName } from '@mathesar/utils/db';
 
 export type LinkType = 'manyToOne' | 'oneToMany' | 'manyToMany';
