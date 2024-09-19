@@ -91,7 +91,6 @@
 
   .target-details {
     display: flex;
-    align-items: center;
 
     > :global(* + *) {
       margin-left: 0.25rem;
