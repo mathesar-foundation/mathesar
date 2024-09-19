@@ -126,7 +126,7 @@
           <LinkMenuItem icon={iconConnection} href={HOME_URL}>
             {$_('databases')}
           </LinkMenuItem>
-          {#if $userProfile.isSuperUser}
+          {#if $userProfile.isMathesarAdmin}
             <LinkMenuItem
               icon={iconSettingsMajor}
               href={ADMIN_URL}

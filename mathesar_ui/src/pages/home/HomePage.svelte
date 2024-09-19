@@ -22,7 +22,7 @@
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: userProfile = $userProfileStore;
-  $: isSuperUser = userProfile?.isSuperUser;
+  $: isSuperUser = userProfile?.isMathesarAdmin;
 
   let filterQuery = '';
 
