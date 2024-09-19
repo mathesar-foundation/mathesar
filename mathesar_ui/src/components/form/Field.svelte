@@ -29,9 +29,7 @@
 <FieldLayout>
   {#if label || $$slots.label}
     <LabeledInput {layout} {label}>
-      <svelte:fragment slot="label">
-        <slot name="label" />
-      </svelte:fragment>
+      <slot name="label" slot="label" />
       <svelte:component
         this={inputComponent}
         bind:value={$field}
