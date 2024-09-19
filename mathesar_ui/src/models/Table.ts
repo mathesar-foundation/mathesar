@@ -1,10 +1,9 @@
+import { type Readable, writable } from 'svelte/store';
+
 import { api } from '@mathesar/api/rpc';
-import type {
-  RawTableWithMetadata,
-  TablePrivilege,
-} from '@mathesar/api/rpc/tables';
+import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
-import { ImmutableMap } from '@mathesar-component-library';
+import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 
 import type { Role } from './Role';
 import type { Schema } from './Schema';
@@ -20,11 +19,25 @@ export class Table {
 
   schema;
 
-  owner_oid: Role['oid'];
+  private _ownerOid;
 
-  current_role_priv: TablePrivilege[];
+  get ownerOid(): Readable<RawTableWithMetadata['owner_oid']> {
+    return this._ownerOid;
+  }
 
-  current_role_owns: boolean;
+  private _currentRolePrivileges;
+
+  get currentRolePrivileges(): Readable<
+    RawTableWithMetadata['current_role_priv']
+  > {
+    return this._currentRolePrivileges;
+  }
+
+  private _currentRoleOwns;
+
+  get currentRoleOwns(): Readable<RawTableWithMetadata['current_role_owns']> {
+    return this._currentRoleOwns;
+  }
 
   constructor(props: {
     schema: Schema;
@@ -34,10 +47,38 @@ export class Table {
     this.name = props.rawTableWithMetadata.name;
     this.description = props.rawTableWithMetadata.description;
     this.metadata = props.rawTableWithMetadata.metadata;
-    this.owner_oid = props.rawTableWithMetadata.owner_oid;
-    this.current_role_priv = props.rawTableWithMetadata.current_role_priv;
-    this.current_role_owns = props.rawTableWithMetadata.current_role_owns;
+    this._ownerOid = writable(props.rawTableWithMetadata.owner_oid);
+    this._currentRolePrivileges = writable(
+      props.rawTableWithMetadata.current_role_priv,
+    );
+    this._currentRoleOwns = writable(
+      props.rawTableWithMetadata.current_role_owns,
+    );
     this.schema = props.schema;
+  }
+
+  updateOwner(newOwner: Role['oid']) {
+    const promise = api.tables.privileges
+      .transfer_ownership({
+        database_id: this.schema.database.id,
+        table_oid: this.oid,
+        new_owner_oid: newOwner,
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then((result) => {
+            this._ownerOid.set(result.owner_oid);
+            this._currentRolePrivileges.set(result.current_role_priv);
+            this._currentRoleOwns.set(result.current_role_owns);
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
   }
 
   constructTablePrivilegesStore() {

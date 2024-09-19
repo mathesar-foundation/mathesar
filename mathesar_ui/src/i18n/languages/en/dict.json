@@ -578,6 +578,7 @@
   "table_name_cannot_be_empty": "The table name cannot be empty.",
   "table_not_found": "Table not found.",
   "table_not_shared": "This table is currently not shared.",
+  "table_ownership_updated_successfully": "Table ownership has been updated successfully.",
   "table_permissions": "Table Permissions",
   "table_preview": "Table Preview",
   "table_privilege_delete_help": "Allow deletion of records within the table.",

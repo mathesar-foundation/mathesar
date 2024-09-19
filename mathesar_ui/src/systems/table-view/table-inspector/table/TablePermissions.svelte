@@ -8,6 +8,7 @@
     TablePrivilege,
   } from '@mathesar/api/rpc/tables';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import type { Role } from '@mathesar/models/Role';
   import type { Table } from '@mathesar/models/Table';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
@@ -124,6 +125,11 @@
     );
     toast.success($_('access_for_roles_saved_successfully'));
   }
+
+  async function transferOwnership(newOwner: Role['oid']) {
+    await table.updateOwner(newOwner);
+    toast.success($_('table_ownership_updated_successfully'));
+  }
 </script>
 
 <div>
@@ -151,6 +157,7 @@
   <TransferOwnership
     slot="transfer-ownership"
     {controller}
+    {transferOwnership}
     let:storeValues
     {storeValues}
   />
