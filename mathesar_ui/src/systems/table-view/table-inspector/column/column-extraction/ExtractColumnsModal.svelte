@@ -329,7 +329,7 @@
             {/if}
           </RichText>
         </p>
-        <Field field={newFkColumnName} label={$_('column_name')} />
+        <Field field={newFkColumnName} label={$_('name_of_link_column')} />
       {/if}
     </OutcomeBox>
   </FieldLayout>
