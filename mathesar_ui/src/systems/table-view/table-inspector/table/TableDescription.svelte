@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
 
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { updateTable } from '@mathesar/stores/tables';
 
@@ -13,7 +12,10 @@
   $: ({ table } = $tabularData);
 
   async function handleSave(description: string) {
-    await updateTable($currentDatabase, { oid: table.oid, description });
+    await updateTable({
+      schema: table.schema,
+      table: { oid: table.oid, description },
+    });
   }
 </script>
 

@@ -15,7 +15,7 @@ export interface ArrayLikeColumn extends CellColumnLike {
   type_options: {
     item_type: DbType;
   } | null;
-  display_options: Record<string, never> | null;
+  metadata: Record<string, never> | null;
 }
 
 type ComponentFactoryMap = Record<SimpleCellDataTypes, CellComponentFactory>;
@@ -39,7 +39,7 @@ function makeDisplayFormatter(
         {
           type: itemDbType,
           type_options: null,
-          display_options: column.display_options,
+          metadata: column.metadata,
         },
         config,
       )(cellValue);

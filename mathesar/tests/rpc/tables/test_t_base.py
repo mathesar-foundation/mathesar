@@ -148,11 +148,11 @@ def test_tables_add(rf, monkeypatch):
     def mock_table_add(table_name, _schema_oid, conn, column_data_list, constraint_data_list, comment):
         if _schema_oid != schema_oid:
             raise AssertionError('incorrect parameters passed')
-        return 1964474
+        return {"oid": 1964474, "name": "newtable"}
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
     monkeypatch.setattr(tables.base, 'create_table_on_database', mock_table_add)
-    actual_table_oid = tables.add(table_name='newtable', schema_oid=2200, database_id=11, request=request)
-    assert actual_table_oid == 1964474
+    actual_table_info = tables.add(table_name='newtable', schema_oid=2200, database_id=11, request=request)
+    assert actual_table_info == {"oid": 1964474, "name": "newtable"}
 
 
 def test_tables_patch(rf, monkeypatch):
@@ -215,17 +215,17 @@ def test_tables_import(rf, monkeypatch):
     def mock_table_import(_data_file_id, table_name, _schema_oid, conn, comment):
         if _schema_oid != schema_oid and _data_file_id != data_file_id:
             raise AssertionError('incorrect parameters passed')
-        return 1964474
+        return {"oid": 1964474, "name": "imported_table"}
     monkeypatch.setattr(tables.base, 'connect', mock_connect)
     monkeypatch.setattr(tables.base, 'import_csv', mock_table_import)
-    imported_table_oid = tables.import_(
+    imported_table_info = tables.import_(
         data_file_id=10,
         table_name='imported_table',
         schema_oid=2200,
         database_id=11,
         request=request
     )
-    assert imported_table_oid == 1964474
+    assert imported_table_info == {"oid": 1964474, "name": "imported_table"}
 
 
 def test_tables_preview(rf, monkeypatch):

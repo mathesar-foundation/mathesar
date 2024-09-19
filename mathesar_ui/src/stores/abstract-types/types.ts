@@ -48,11 +48,9 @@ export interface AbstractTypeDbConfig {
 
 export interface AbstractTypeDisplayConfig {
   form: AbstractTypeConfigForm;
-  determineDisplayOptions: (
-    dbFormValues: FormValues,
-  ) => Column['display_options'];
+  determineDisplayOptions: (dbFormValues: FormValues) => Column['metadata'];
   constructDisplayFormValuesFromDisplayOptions: (
-    displayOptions: Column['display_options'],
+    displayOptions: Column['metadata'],
   ) => FormValues;
 }
 
@@ -91,12 +89,6 @@ export type AbstractTypesMap = Map<AbstractType['identifier'], AbstractType>;
 export type AbstractTypeConfigurationFactory = (
   map: AbstractTypesMap,
 ) => AbstractTypeConfiguration;
-
-export interface AbstractTypesSubstance {
-  state: States;
-  data: AbstractTypesMap;
-  error?: string;
-}
 
 /**
  * These filter ids represent the filter functions used for the _old_ filtering

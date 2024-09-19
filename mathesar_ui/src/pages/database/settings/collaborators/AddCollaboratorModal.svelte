@@ -8,6 +8,7 @@
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
+  import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
   import { toast } from '@mathesar/stores/toast';
@@ -19,11 +20,9 @@
     portalToWindowFooter,
   } from '@mathesar-component-library';
 
-  import { getDatabaseSettingsContext } from '../databaseSettingsUtils';
-
   import SelectConfiguredRoleField from './SelectConfiguredRoleField.svelte';
 
-  const databaseContext = getDatabaseSettingsContext();
+  const routeContext = DatabaseSettingsRouteContext.get();
 
   export let controller: ModalController;
   export let configuredRolesMap: ImmutableMap<number, ConfiguredRole>;
@@ -37,7 +36,7 @@
   const SelectUser = Select<User['id']>;
 
   $: addedUsers = new Set(
-    [...collaboratorsMap.values()].map((cbr) => cbr.user_id),
+    [...collaboratorsMap.values()].map((cbr) => cbr.userId),
   );
   $: usersNotAdded = [...usersMap.values()].filter(
     (user) => !addedUsers.has(user.id),
@@ -45,7 +44,7 @@
 
   async function addCollaborator() {
     if ($userId && $configuredRoleId) {
-      await $databaseContext.addCollaborator($userId, $configuredRoleId);
+      await $routeContext.addCollaborator($userId, $configuredRoleId);
       controller.close();
       toast.success($_('collaborator_added_successfully'));
       form.reset();

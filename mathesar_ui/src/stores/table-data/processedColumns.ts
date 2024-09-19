@@ -2,7 +2,6 @@ import type { Readable } from 'svelte/store';
 
 import type { Column } from '@mathesar/api/rpc/columns';
 import type { Constraint } from '@mathesar/api/rpc/constraints';
-import type { Table } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
@@ -11,9 +10,10 @@ import {
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
 import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
+import type { Table } from '@mathesar/models/Table';
 import {
   getAbstractTypeForDbType,
-  getFiltersForAbstractType,
+  type getFiltersForAbstractType,
   getPreprocFunctionsForAbstractType,
 } from '@mathesar/stores/abstract-types';
 import type {

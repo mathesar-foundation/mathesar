@@ -9,33 +9,40 @@
  * sorting.
  */
 
-import { execPipe, filter, find, map } from 'iter-tools';
-import type { Readable, Writable } from 'svelte/store';
-import { derived, get, readable, writable } from 'svelte/store';
+import { execPipe, filter, map } from 'iter-tools';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  readable,
+  writable,
+} from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { SplitTableResponse } from '@mathesar/api/rest/types/tables/split_table';
+import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { Schema } from '@mathesar/api/rpc/schemas';
-import type { Table } from '@mathesar/api/rpc/tables';
+import type { ColumnPatchSpec } from '@mathesar/api/rpc/columns';
+import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
 import { invalidIf } from '@mathesar/components/form';
 import type { Database } from '@mathesar/models/Database';
+import type { Schema } from '@mathesar/models/Schema';
+import { Table } from '@mathesar/models/Table';
+import {
+  type RpcRequest,
+  batchSend,
+} from '@mathesar/packages/json-rpc-client-builder';
 import { TupleMap } from '@mathesar/packages/tuple-map';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import {
-  mergeTables,
-  tableRequiresImportConfirmation,
-} from '@mathesar/utils/tables';
+import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
 import {
   CancellablePromise,
   type RecursivePartial,
   collapse,
-  defined,
 } from '@mathesar-component-library';
 
-import { currentDatabase } from './databases';
-import { addCountToSchemaNumTables, currentSchemaId } from './schemas';
+import { currentSchema } from './schemas';
 
 const commonData = preloadCommonData();
 
@@ -63,18 +70,14 @@ const tablesStores = new TupleMap<
 
 const tablesRequests = new TupleMap<
   [Database['id'], Schema['oid']],
-  CancellablePromise<Table[]>
+  CancellablePromise<RawTableWithMetadata[]>
 >();
 
 function sortTables(tables: Iterable<Table>): Table[] {
   return [...tables].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function setTablesStore(
-  database: Pick<Database, 'id'>,
-  schema: Pick<Schema, 'oid'>,
-  tables?: Table[],
-): TablesStore {
+function setTablesStore(schema: Schema, tables: Table[]): TablesStore {
   const tablesMap: TablesMap = new Map();
   if (tables) {
     sortTables(tables).forEach((t) => tablesMap.set(t.oid, t));
@@ -85,28 +88,24 @@ function setTablesStore(
     requestStatus: { state: 'success' },
   };
 
-  let store = tablesStores.get([database.id, schema.oid]);
+  let store = tablesStores.get([schema.database.id, schema.oid]);
   if (!store) {
     store = writable(storeValue);
-    tablesStores.set([database.id, schema.oid], store);
+    tablesStores.set([schema.database.id, schema.oid], store);
   } else {
     store.set(storeValue);
   }
   return store;
 }
 
-export function removeTablesStore(
-  database: Pick<Database, 'id'>,
-  schema: Pick<Schema, 'oid'>,
-): void {
-  tablesStores.delete([database.id, schema.oid]);
+export function removeTablesStore(schema: Schema): void {
+  tablesStores.delete([schema.database.id, schema.oid]);
 }
 
 export async function refetchTablesForSchema(
-  database: Pick<Database, 'id'>,
-  schema: Pick<Schema, 'oid'>,
+  schema: Schema,
 ): Promise<TablesData | undefined> {
-  const store = tablesStores.get([database.id, schema.oid]);
+  const store = tablesStores.get([schema.database.id, schema.oid]);
   if (!store) {
     // TODO: why are we logging an error here? I would expect that we'd either
     // throw or ignore. If there's a reason for this logging, please add a code
@@ -121,18 +120,27 @@ export async function refetchTablesForSchema(
       requestStatus: { state: 'processing' },
     }));
 
-    tablesRequests.get([database.id, schema.oid])?.cancel();
+    tablesRequests.get([schema.database.id, schema.oid])?.cancel();
 
     const tablesRequest = api.tables
       .list_with_metadata({
-        database_id: database.id,
+        database_id: schema.database.id,
         schema_oid: schema.oid,
       })
       .run();
-    tablesRequests.set([database.id, schema.oid], tablesRequest);
+    tablesRequests.set([schema.database.id, schema.oid], tablesRequest);
     const tableEntries = await tablesRequest;
 
-    const schemaTablesStore = setTablesStore(database, schema, tableEntries);
+    const schemaTablesStore = setTablesStore(
+      schema,
+      tableEntries.map(
+        (t) =>
+          new Table({
+            schema,
+            rawTableWithMetadata: t,
+          }),
+      ),
+    );
 
     return get(schemaTablesStore);
   } catch (err) {
@@ -151,64 +159,55 @@ export async function refetchTablesForSchema(
 
 let preload = true;
 
-function getTablesStore(
-  database: Pick<Database, 'id'>,
-  schema: Pick<Schema, 'oid'>,
-): TablesStore {
-  let store = tablesStores.get([database.id, schema.oid]);
+function getTablesStore(schema: Schema): TablesStore {
+  let store = tablesStores.get([schema.database.id, schema.oid]);
   if (!store) {
     store = writable({
       requestStatus: { state: 'processing' },
       tablesMap: new Map(),
     });
-    tablesStores.set([database.id, schema.oid], store);
+    tablesStores.set([schema.database.id, schema.oid], store);
     if (
       preload &&
       commonData.current_schema === schema.oid &&
-      commonData.current_database === database.id
+      commonData.current_database === schema.database.id
     ) {
-      store = setTablesStore(database, schema, commonData.tables ?? []);
+      store = setTablesStore(
+        schema,
+        commonData.tables.map(
+          (t) =>
+            new Table({
+              schema,
+              rawTableWithMetadata: t,
+            }),
+        ),
+      );
     } else {
-      void refetchTablesForSchema(database, schema);
+      void refetchTablesForSchema(schema);
     }
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
-    void refetchTablesForSchema(database, schema);
+    void refetchTablesForSchema(schema);
   }
   return store;
 }
 
-function findStoreContainingTable(
-  database: Pick<Database, 'id'>,
-  tableOid: Table['oid'],
-): TablesStore | undefined {
-  return defined(
-    find(
-      ([[databaseId], tablesStore]) =>
-        databaseId === database.id && get(tablesStore).tablesMap.has(tableOid),
-      tablesStores,
-    ),
-    ([, tablesStore]) => tablesStore,
-  );
-}
-
 export function deleteTable(
-  database: Pick<Database, 'id'>,
   schema: Schema,
   tableOid: Table['oid'],
 ): CancellablePromise<void> {
   const promise = api.tables
     .delete({
-      database_id: database.id,
+      database_id: schema.database.id,
       table_oid: tableOid,
     })
     .run();
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then(() => {
-        addCountToSchemaNumTables(database, schema, -1);
+        schema.setTableCount(get(schema.tableCount) - 1);
         tablesStores
-          .get([database.id, schema.oid])
+          .get([schema.database.id, schema.oid])
           ?.update((tableStoreData) => {
             tableStoreData.tablesMap.delete(tableOid);
             return {
@@ -225,137 +224,158 @@ export function deleteTable(
   );
 }
 
-/**
- *
- * @throws Error if the table store is not found or if the table is not found in
- * the store.
- */
-export async function updateTable(
-  database: Pick<Database, 'id'>,
-  table: RecursivePartial<Table> & { oid: Table['oid'] },
-): Promise<void> {
-  await api.tables
-    .patch({
-      database_id: database.id,
-      table_oid: table.oid,
-      table_data_dict: {
-        name: table.name,
-        description: table.description,
-      },
-    })
-    .run();
-
-  // TODO_BETA: also run tables.metadata.patch to handle updates to
-  // `table.metadata`. Run both API calls as one RPC batch request.
-
-  const tableStore = findStoreContainingTable(database, table.oid);
-  if (!tableStore) throw new Error('Table store not found');
-  tableStore.update((tablesData) => {
-    const oldTable = tablesData.tablesMap.get(table.oid);
-    if (!oldTable) throw new Error('Table not found within store.');
-    const newTable = mergeTables(oldTable, table);
-    tablesData.tablesMap.set(table.oid, newTable);
-    const tablesMap: TablesMap = new Map();
-    sortTables([...tablesData.tablesMap.values()]).forEach((t) => {
-      tablesMap.set(t.oid, t);
-    });
-    return { ...tablesData, tablesMap };
-  });
-}
-
-export function createTable(
-  database: Pick<Database, 'id'>,
-  schema: Schema,
-  tableArgs: {
-    name?: string;
-    dataFiles?: [number, ...number[]];
-  },
-): CancellablePromise<Table['oid']> {
-  const promise = api.tables
-    .add({
-      database_id: database.id,
-      schema_oid: schema.oid,
-      table_name: tableArgs.name ?? '',
-      // TODO_BETA
-      //
-      // Figure out how to create a table with `data_files`. We might need a
-      // separate RPC method for that.
-
-      // data_files: tableArgs.dataFiles,
-    })
-    .run();
-  return new CancellablePromise(
-    (resolve, reject) => {
-      void promise.then((tableOid) => {
-        addCountToSchemaNumTables(database, schema, 1);
-        const tablesStore = tablesStores.get([database.id, schema.oid]);
-        tablesStore?.update((tablesData) => {
-          const table: Table = {
-            oid: tableOid,
-            // TODO_BETA: What happens when we create a table without passing a
-            // name. Does the RPC API support this? Should it?
-            name: tableArgs.name ?? '',
-            schema: schema.oid,
-            description: null,
-            metadata: null,
-          };
-          const tables = sortTables([...tablesData.tablesMap.values(), table]);
-          return {
-            ...tablesData,
-            tablesMap: new Map(tables.map((t) => [t.oid, t])),
-          };
-        });
-        return resolve(tableOid);
-      }, reject);
-    },
-    () => {
-      promise.cancel();
-    },
-  );
-}
-
-export function splitTable({
-  id,
-  idsOfColumnsToExtract,
-  extractedTableName,
-  newFkColumnName,
+function updateTableStoreIfPresent({
+  schema,
+  rawTableWithMetadata,
 }: {
-  id: number;
-  idsOfColumnsToExtract: number[];
-  extractedTableName: string;
-  newFkColumnName?: string;
-}): CancellablePromise<SplitTableResponse> {
-  throw new Error('Not implemented'); // TODO_BETA
-
-  // const body: SplitTableRequest = {
-  //   extract_columns: idsOfColumnsToExtract,
-  //   extracted_table_name: extractedTableName,
-  //   relationship_fk_column_name: newFkColumnName,
-  // };
-  // return postAPI(`/api/db/v0/tables/${id}/split_table/`, body);
+  schema: Schema;
+  rawTableWithMetadata: RawTableWithMetadata;
+}): Table {
+  const fullTable: Table = new Table({
+    schema,
+    rawTableWithMetadata,
+  });
+  const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
+  if (tablesStore) {
+    tablesStore.update((tablesData) => {
+      const tables = sortTables([...tablesData.tablesMap.values(), fullTable]);
+      return {
+        ...tablesData,
+        tablesMap: new Map(tables.map((t) => [t.oid, t])),
+      };
+    });
+    schema.setTableCount(get(tablesStore).tablesMap.size);
+  }
+  return fullTable;
 }
 
-export function moveColumns(
-  tableOid: number,
-  idsOfColumnsToMove: number[],
-  targetTableId: number,
-): CancellablePromise<null> {
-  throw new Error('Not implemented'); // TODO_BETA
+export async function updateTable({
+  schema,
+  table: rawPartialTable,
+  columnPatchSpecs,
+  columnsToDelete,
+}: {
+  schema: Schema;
+  table: RecursivePartial<RawTableWithMetadata> & {
+    oid: RawTableWithMetadata['oid'];
+  };
+  columnPatchSpecs?: ColumnPatchSpec[];
+  columnsToDelete?: number[];
+}): Promise<Table> {
+  const requests: RpcRequest<void>[] = [];
+  if (rawPartialTable.name || rawPartialTable.description) {
+    requests.push(
+      api.tables.patch({
+        database_id: schema.database.id,
+        table_oid: rawPartialTable.oid,
+        table_data_dict: {
+          name: rawPartialTable.name,
+          description: rawPartialTable.description,
+        },
+      }),
+    );
+  }
+  if (columnPatchSpecs) {
+    requests.push(
+      api.columns.patch({
+        database_id: schema.database.id,
+        table_oid: rawPartialTable.oid,
+        column_data_list: columnPatchSpecs,
+      }),
+    );
+  }
+  if (rawPartialTable.metadata) {
+    requests.push(
+      api.tables.metadata.set({
+        database_id: schema.database.id,
+        table_oid: rawPartialTable.oid,
+        metadata: rawPartialTable.metadata,
+      }),
+    );
+  }
+  if (columnsToDelete?.length) {
+    requests.push(
+      api.columns.delete({
+        database_id: schema.database.id,
+        table_oid: rawPartialTable.oid,
+        column_attnums: columnsToDelete,
+      }),
+    );
+  }
+  await batchSend(requests);
 
-  // return postAPI(`/api/db/v0/tables/${tableOid}/move_columns/`, {
-  //   move_columns: idsOfColumnsToMove,
-  //   target_table: targetTableId,
-  // });
+  // TODO: Remove once tables.patch_with_metadata response provides RawTableWithMetadata
+  const rawTableWithMetadata = await api.tables
+    .get_with_metadata({
+      database_id: schema.database.id,
+      table_oid: rawPartialTable.oid,
+    })
+    .run();
+  return updateTableStoreIfPresent({ schema, rawTableWithMetadata });
+}
+
+export async function createTable({
+  schema,
+}: {
+  schema: Schema;
+}): Promise<Table> {
+  const created = await api.tables
+    .add({
+      database_id: schema.database.id,
+      schema_oid: schema.oid,
+    })
+    .run();
+
+  // TODO: Remove once tables.patch response provides RawTable
+  const rawTableWithMetadata = await api.tables
+    .get_with_metadata({
+      database_id: schema.database.id,
+      table_oid: created.oid,
+    })
+    .run();
+
+  schema.setTableCount(get(schema.tableCount) + 1);
+  return updateTableStoreIfPresent({ schema, rawTableWithMetadata });
+}
+
+export async function createTableFromDataFile(props: {
+  schema: Schema;
+  dataFile: Pick<DataFile, 'id'>;
+  name?: string;
+}): Promise<Table> {
+  const { schema } = props;
+
+  const created = await api.tables
+    .import({
+      database_id: schema.database.id,
+      schema_oid: schema.oid,
+      table_name: props.name,
+      data_file_id: props.dataFile.id,
+    })
+    .run();
+
+  schema.setTableCount(get(schema.tableCount) + 1);
+  const fullTable = await updateTable({
+    schema,
+    table: {
+      oid: created.oid,
+      metadata: {
+        import_verified: false,
+        data_file_id: props.dataFile.id,
+      },
+    },
+  });
+  return fullTable;
 }
 
 export function getTableFromStoreOrApi({
-  database,
+  schema,
   tableOid,
 }: {
-  database: Pick<Database, 'id'>;
+  schema: Schema;
   tableOid: Table['oid'];
 }): CancellablePromise<Table> {
-  const tablesStore = findStoreContainingTable(database, tableOid);
+  const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
   if (tablesStore) {
     const table = get(tablesStore).tablesMap.get(tableOid);
     if (table) {
@@ -366,14 +386,15 @@ export function getTableFromStoreOrApi({
   }
   const promise = api.tables
     .get_with_metadata({
-      database_id: database.id,
+      database_id: schema.database.id,
       table_oid: tableOid,
     })
     .run();
   return new CancellablePromise(
     (resolve, reject) => {
-      void promise.then((table) => {
-        const store = tablesStores.get([database.id, table.schema]);
+      void promise.then((rawTableWithMetadata) => {
+        const table = new Table({ schema, rawTableWithMetadata });
+        const store = tablesStores.get([schema.database.id, schema.oid]);
         if (store) {
           store.update((existing) => {
             const tableMap = new Map<number, Table>();
@@ -397,10 +418,8 @@ export function getTableFromStoreOrApi({
 }
 
 export const currentTablesData = collapse(
-  derived([currentDatabase, currentSchemaId], ([database, schemaOid]) =>
-    !database || !schemaOid
-      ? readable(makeEmptyTablesData())
-      : getTablesStore(database, { oid: schemaOid }),
+  derived([currentSchema], ([schema]) =>
+    !schema ? readable(makeEmptyTablesData()) : getTablesStore(schema),
   ),
 );
 
@@ -441,19 +460,13 @@ export const currentTable = derived(
       : $tables.tablesMap.get($currentTableId),
 );
 
-export async function refetchTablesForCurrentSchema() {
-  const database = get(currentDatabase);
-  const schemaOid = get(currentSchemaId);
-  if (schemaOid) {
-    await refetchTablesForSchema(database, { oid: schemaOid });
-  }
-}
-
 export function factoryToGetTableNameValidationErrors(
-  database: Pick<Database, 'id'>,
   table: Table,
 ): Readable<(n: string) => string[]> {
-  const tablesStore = tablesStores.get([database.id, table.schema]);
+  const tablesStore = tablesStores.get([
+    table.schema.database.id,
+    table.schema.oid,
+  ]);
   if (!tablesStore) throw new Error('Tables store not found');
 
   const otherTableNames = derived(

@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import { iconTable } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
 
   import NameWithIcon from './NameWithIcon.svelte';

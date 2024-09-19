@@ -1,11 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import { iconEdit, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     getSchemaPageExplorationsSectionUrl,
@@ -22,6 +22,7 @@
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
+  import SchemaPermissionsModal from './SchemaPermissionsModal.svelte';
   import SchemaTables from './SchemaTables.svelte';
   import TableSkeleton from './TableSkeleton.svelte';
 
@@ -30,6 +31,7 @@
   export let section: string;
 
   const addEditModal = modal.spawnModalController();
+  const permissionsModal = modal.spawnModalController();
 
   // NOTE: This has to be same as the name key in the paths prop of Route component
   type TabsKey = 'overview' | 'tables' | 'explorations';
@@ -71,16 +73,17 @@
     addEditModal.open();
   }
 
-  $: isDefault = schema.name === 'public';
+  $: ({ name, description, tableCount } = schema);
+  $: isDefault = $name === 'public';
 
   logEvent('opened_schema', {
     database_name: database.name,
-    schema_name: schema.name,
+    schema_name: $name,
     source: 'schema_page',
   });
 </script>
 
-<svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
+<svelte:head><title>{makeSimplePageTitle($name)}</title></svelte:head>
 
 <LayoutWithHeader
   restrictWidth
@@ -91,7 +94,7 @@
   <AppSecondaryHeader
     slot="secondary-header"
     pageTitleAndMetaProps={{
-      name: schema.name,
+      name: $name,
       icon: iconSchema,
     }}
   >
@@ -102,12 +105,15 @@
           <span>{$_('edit_schema')}</span>
         </Button>
       {/if}
+      <Button appearance="secondary" on:click={() => permissionsModal.open()}>
+        <span>{$_('schema_permissions')}</span>
+      </Button>
     </div>
 
     <svelte:fragment slot="bottom">
-      {#if schema.description}
+      {#if $description}
         <span class="description">
-          {schema.description}
+          {$description}
         </span>
       {/if}
     </svelte:fragment>
@@ -134,7 +140,7 @@
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
         {#if tablesRequestStatus.state === 'processing'}
-          <TableSkeleton numTables={schema.table_count} />
+          <TableSkeleton numTables={$tableCount} />
         {:else}
           <SchemaTables {tablesMap} {database} {schema} />
         {/if}
@@ -157,6 +163,8 @@
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={addEditModal} {database} {schema} />
+
+<SchemaPermissionsModal controller={permissionsModal} {schema} />
 
 <style lang="scss">
   .tab-container {

@@ -48,17 +48,6 @@ To use an RPC function:
       - set_role
       - CollaboratorInfo
 
-## ConfiguredRoles
-
-::: configured_roles
-    options:
-      members:
-      - list_
-      - add
-      - delete
-      - set_password
-      - ConfiguredRoleInfo
-
 ## Connections
 
 ::: connections
@@ -74,22 +63,30 @@ To use an RPC function:
 ::: databases
     options:
       members:
-      - list_
+      - get
       - DatabaseInfo
+
+## Configured Databases
+
+::: databases.configured
+    options:
+      members:
+      - list_
+      - ConfiguredDatabaseInfo
 
 ## Database Privileges
 
-::: database_privileges
+::: databases.privileges
     options:
       members:
       - list_direct
-      - get_owner_oid_and_curr_role_db_priv
+      - replace_for_roles
+      - transfer_ownership
       - DBPrivileges
-      - CurrentDBPrivileges
 
 ## Database Setup
 
-::: database_setup
+::: databases.setup
     options:
       members:
       - create_new
@@ -102,11 +99,22 @@ To use an RPC function:
     options:
       members:
       - list_
+      - get
       - add
       - delete
       - patch
       - SchemaInfo
       - SchemaPatch
+
+## Schema Privileges
+
+::: schemas.privileges
+    options:
+      members:
+      - list_direct
+      - replace_for_roles
+      - transfer_ownership
+      - SchemaPrivileges
 
 ## Tables
 
@@ -121,10 +129,23 @@ To use an RPC function:
       - import_
       - get_import_preview
       - list_joinable
+      - list_with_metadata
+      - get_with_metadata
       - TableInfo
+      - AddedTableInfo
       - SettableTableInfo
       - JoinableTableRecord
       - JoinableTableInfo
+
+## Table Privileges
+
+::: tables.privileges
+    options:
+      members:
+      - list_direct
+      - replace_for_roles
+      - transfer_ownership
+      - TablePrivileges
 
 ## Table Metadata
 
@@ -203,7 +224,6 @@ To use an RPC function:
       - Filter
       - FilterAttnum
       - FilterLiteral
-      - PreviewEntry
       - Grouping
       - Group
       - GroupingResponse
@@ -232,8 +252,20 @@ To use an RPC function:
       members:
       - list_
       - add
+      - get_current_role
       - RoleInfo
       - RoleMember
+
+## Configured Roles
+
+::: roles.configured
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_password
+      - ConfiguredRoleInfo
 
 ## Servers
 
@@ -241,7 +273,7 @@ To use an RPC function:
     options:
       members:
       - list_
-      - ServerInfo
+      - ConfiguredServerInfo
 
 ## Data Modeling
 
@@ -251,7 +283,10 @@ To use an RPC function:
       - add_foreign_key_column
       - add_mapping_table
       - suggest_types
+      - split_table
+      - move_columns
       - MappingColumn
+      - SplitTableInfo
 
 ## Responses
 

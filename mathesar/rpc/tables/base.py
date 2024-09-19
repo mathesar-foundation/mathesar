@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing tables in a database.
 """
-from typing import Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -16,7 +16,7 @@ from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.tables.metadata import TableMetaDataBlob
 from mathesar.rpc.utils import connect
-from mathesar.utils.tables import get_tables_meta_data
+from mathesar.utils.tables import list_tables_meta_data, get_table_meta_data
 
 
 class TableInfo(TypedDict):
@@ -28,11 +28,39 @@ class TableInfo(TypedDict):
         name: The name of the table.
         schema: The `oid` of the schema where the table lives.
         description: The description of the table.
+        owner_oid: The OID of the direct owner of the table.
+        current_role_priv: The privileges available to the user on the table.
+        current_role_owns: Whether the current role owns the table.
     """
     oid: int
     name: str
     schema: int
     description: Optional[str]
+    owner_oid: int
+    current_role_priv: list[
+        Literal[
+            'SELECT',
+            'INSERT',
+            'UPDATE',
+            'DELETE',
+            'TRUNCATE',
+            'REFERENCES',
+            'TRIGGER'
+        ]
+    ]
+    current_role_owns: bool
+
+
+class AddedTableInfo(TypedDict):
+    """
+    Information about a newly created table.
+
+    Attributes:
+        oid: The `oid` of the table in the schema.
+        name: The name of the table.
+    """
+    oid: int
+    name: str
 
 
 class SettableTableInfo(TypedDict):
@@ -175,7 +203,7 @@ def add(
     constraint_data_list: list[CreatableConstraintInfo] = [],
     comment: str = None,
     **kwargs
-) -> int:
+) -> AddedTableInfo:
     """
     Add a table with a default id column.
 
@@ -188,7 +216,7 @@ def add(
         comment: The comment for the new table.
 
     Returns:
-        The `oid` of the created table.
+        The `oid` & `name` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -248,24 +276,24 @@ def patch(
 def import_(
     *,
     data_file_id: int,
-    table_name: str,
     schema_oid: int,
     database_id: int,
+    table_name: str = None,
     comment: str = None,
     **kwargs
-) -> int:
+) -> AddedTableInfo:
     """
     Import a CSV/TSV into a table.
 
     Args:
         data_file_id: The Django id of the DataFile containing desired CSV/TSV.
-        table_name: Name of the table to be imported.
         schema_oid: Identity of the schema in the user's database.
         database_id: The Django id of the database containing the table.
+        table_name: Name of the table to be imported.
         comment: The comment for the new table.
 
     Returns:
-        The `oid` of the created table.
+        The `oid` and `name` of the created table.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
@@ -339,15 +367,37 @@ def list_with_metadata(*, schema_oid: int, database_id: int, **kwargs) -> list:
         database_id: The Django id of the database containing the table.
 
     Returns:
-        A list of table details.
+        A list of table details along with metadata.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         tables = get_table_info(schema_oid, conn)
 
-    metadata_records = get_tables_meta_data(database_id)
+    metadata_records = list_tables_meta_data(database_id)
     metadata_map = {
         r.table_oid: TableMetaDataBlob.from_model(r) for r in metadata_records
     }
 
     return [table | {"metadata": metadata_map.get(table["oid"])} for table in tables]
+
+
+@rpc_method(name="tables.get_with_metadata")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def get_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> dict:
+    """
+    Get information about a table in a schema, along with the associated table metadata.
+
+    Args:
+        table_oid: The OID of the table in the user's database.
+        database_id: The Django id of the database containing the table.
+
+    Returns:
+        A dict describing table details along with its metadata.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        table = get_table(table_oid, conn)
+
+    raw_metadata = get_table_meta_data(table_oid, database_id)
+    return TableInfo(table) | {"metadata": TableMetaDataBlob.from_model(raw_metadata)}

@@ -1,7 +1,7 @@
 import {
   type Column,
   type NumberFormat,
-  getColumnDisplayOption,
+  getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import {
   StringifiedNumberFormatter,
@@ -50,7 +50,7 @@ function getAllowFloat(
 export function getUseGrouping(
   column: Column,
 ): NumberCellExternalProps['formatterOptions']['useGrouping'] {
-  const grouping = getColumnDisplayOption(column, 'num_grouping');
+  const grouping = getColumnMetadataValue(column, 'num_grouping');
   switch (grouping) {
     case 'always':
       return 'always';
@@ -67,7 +67,7 @@ function getFormatterOptions(
   column: Column,
   config?: Config,
 ): NumberCellExternalProps['formatterOptions'] {
-  const displayOptions = column.display_options;
+  const displayOptions = column.metadata;
   const format = displayOptions?.num_format ?? null;
   const locale = (format && localeMap.get(format)) ?? undefined;
   const useGrouping = getUseGrouping(column);
@@ -86,7 +86,7 @@ function getFormatterOptions(
 
 function getProps(column: Column, config?: Config): NumberCellExternalProps {
   const basicFormatterOptions = getFormatterOptions(column, config);
-  const displayOptions = column.display_options;
+  const displayOptions = column.metadata;
   const maximumFractionDigits =
     displayOptions?.num_max_frac_digits ?? undefined;
   const formatterOptions = {

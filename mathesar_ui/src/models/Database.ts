@@ -26,7 +26,7 @@ export class Database {
   }
 
   constructConfiguredRolesStore() {
-    return new AsyncRpcApiStore(api.configured_roles.list, {
+    return new AsyncRpcApiStore(api.roles.configured.list, {
       postProcess: (rawConfiguredRoles) =>
         new SortedImmutableMap(
           (v) => [...v].sort(([, a], [, b]) => a.name.localeCompare(b.name)),
@@ -61,6 +61,22 @@ export class Database {
           ]),
         ),
     });
+  }
+
+  constructDatabasePrivilegesStore() {
+    return new AsyncRpcApiStore(api.databases.privileges.list_direct, {
+      postProcess: (rawDbPrivilegesForRoles) =>
+        new ImmutableMap(
+          rawDbPrivilegesForRoles.map((rawDatabasePrivilegesForRole) => [
+            rawDatabasePrivilegesForRole.role_oid,
+            rawDatabasePrivilegesForRole,
+          ]),
+        ),
+    });
+  }
+
+  constructUnderlyingDatabaseStore() {
+    return new AsyncRpcApiStore(api.databases.get);
   }
 
   addCollaborator(

@@ -4,20 +4,22 @@
   import { router } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import type { CancellablePromise } from '@mathesar/component-library';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconEdit, iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import DataExplorerPage from '@mathesar/pages/data-explorer/DataExplorerPage.svelte';
   import ErrorPage from '@mathesar/pages/ErrorPage.svelte';
   import {
     getDataExplorerPageUrl,
     getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
-  import { getQuery } from '@mathesar/stores/queries';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
+  import {
+    type UnsavedQueryInstance,
+    getQuery,
+  } from '@mathesar/stores/queries';
   import {
     QueryManager,
     QueryModel,
@@ -38,7 +40,7 @@
     queryManager?.destroy();
     queryManager = new QueryManager({
       query: new QueryModel(queryInstance),
-      abstractTypeMap: $currentDbAbstractTypes.data,
+      abstractTypeMap: abstractTypesMap,
       onSave: async (instance) => {
         try {
           const url = getExplorationEditorPageUrl(

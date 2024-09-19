@@ -1,4 +1,4 @@
-import { type Column, getColumnDisplayOption } from '@mathesar/api/rpc/columns';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import { Select, isDefinedNonNullable } from '@mathesar-component-library';
 import type {
   ComponentAndProps,
@@ -24,8 +24,8 @@ interface BooleanLabels {
 
 function getLabels(column: Column): BooleanLabels {
   return {
-    true: getColumnDisplayOption(column, 'bool_true'),
-    false: getColumnDisplayOption(column, 'bool_false'),
+    true: getColumnMetadataValue(column, 'bool_true'),
+    false: getColumnMetadataValue(column, 'bool_false'),
   };
 }
 
@@ -52,7 +52,7 @@ function getProps(
 const booleanType: CellComponentFactory = {
   initialInputValue: null,
   get: (column: Column): ComponentAndProps<Props> => {
-    const displayOptions = column.display_options ?? undefined;
+    const displayOptions = column.metadata ?? undefined;
     if (displayOptions && displayOptions.bool_input === 'dropdown') {
       return {
         component: SingleSelectCell,

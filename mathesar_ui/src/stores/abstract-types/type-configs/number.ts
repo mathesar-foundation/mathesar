@@ -2,27 +2,18 @@ import {
   type Column,
   type NumberFormat,
   type NumberGrouping,
-  getColumnDisplayOption,
+  getColumnMetadataValue,
 } from '@mathesar/api/rpc/columns';
 import type { DbType } from '@mathesar/AppTypes';
 import { iconUiTypeNumber } from '@mathesar/icons';
 import type { FormValues } from '@mathesar-component-library/types';
 
+import { DB_TYPES } from '../dbTypes';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
   AbstractTypeDbConfig,
 } from '../types';
-
-const DB_TYPES = {
-  DECIMAL: 'decimal',
-  NUMERIC: 'numeric',
-  INTEGER: 'integer',
-  SMALLINT: 'smallint',
-  BIGINT: 'bigint',
-  REAL: 'real',
-  DOUBLE_PRECISION: 'double precision',
-};
 
 const dbForm: AbstractTypeConfigForm = {
   variables: {
@@ -211,8 +202,8 @@ const displayForm: AbstractTypeConfigForm = {
     },
     useGrouping: {
       type: 'string',
-      enum: ['true', 'false'],
-      default: 'false',
+      enum: ['auto', 'always', 'never'],
+      default: 'auto',
     },
     numberFormat: {
       type: 'string',
@@ -233,8 +224,9 @@ const displayForm: AbstractTypeConfigForm = {
         variable: 'useGrouping',
         label: 'Digit Grouping',
         options: {
-          true: { label: 'On' },
-          false: { label: 'Off' },
+          auto: { label: 'Auto' },
+          always: { label: 'Always' },
+          never: { label: 'Never' },
         },
       },
       {
@@ -254,11 +246,9 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(
-  formValues: FormValues,
-): Column['display_options'] {
+function determineDisplayOptions(formValues: FormValues): Column['metadata'] {
   const decimalPlaces = formValues.decimalPlaces as number | null;
-  const opts: Partial<Column['display_options']> = {
+  const opts: Partial<Column['metadata']> = {
     num_format:
       formValues.numberFormat === 'none'
         ? undefined
@@ -288,16 +278,16 @@ export function getDecimalPlaces(
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  displayOptions: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const column = { display_options: displayOptions };
+  const column = { metadata };
   const decimalPlaces = getDecimalPlaces(
-    displayOptions?.num_min_frac_digits ?? null,
-    displayOptions?.num_max_frac_digits ?? null,
+    metadata?.num_min_frac_digits ?? null,
+    metadata?.num_max_frac_digits ?? null,
   );
   const formValues: FormValues = {
-    numberFormat: getColumnDisplayOption(column, 'num_format'),
-    useGrouping: getColumnDisplayOption(column, 'num_grouping'),
+    numberFormat: getColumnMetadataValue(column, 'num_format'),
+    useGrouping: getColumnMetadataValue(column, 'num_grouping'),
     decimalPlaces,
   };
   return formValues;

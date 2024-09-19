@@ -1,5 +1,6 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
+import type { RawConfiguredRole, RawRole } from './roles';
 import type { RawServer } from './servers';
 
 export interface RawDatabase {
@@ -8,11 +9,87 @@ export interface RawDatabase {
   server_id: RawServer['id'];
 }
 
+export const allDatabasePrivileges = [
+  'CREATE',
+  'CONNECT',
+  'TEMPORARY',
+] as const;
+export type DatabasePrivilege = (typeof allDatabasePrivileges)[number];
+
+export interface RawUnderlyingDatabase {
+  oid: number;
+  name: string;
+  owner_oid: RawRole['oid'];
+  current_role_priv: DatabasePrivilege[];
+  current_role_owns: boolean;
+}
+
+export const sampleDataOptions = [
+  'library_management',
+  'movie_collection',
+] as const;
+
+export type SampleDataSchemaIdentifier = (typeof sampleDataOptions)[number];
+
+export interface DatabaseConnectionResult {
+  server: RawServer;
+  database: RawDatabase;
+  configured_role: RawConfiguredRole;
+}
+
+export interface RawDatabasePrivilegesForRole {
+  role_oid: RawRole['oid'];
+  direct: DatabasePrivilege[];
+}
+
 export const databases = {
-  list: rpcMethodTypeContainer<
+  get: rpcMethodTypeContainer<
     {
-      server_id?: RawDatabase['server_id'];
+      database_id: RawDatabase['id'];
     },
-    Array<RawDatabase>
+    RawUnderlyingDatabase
   >(),
+  configured: {
+    list: rpcMethodTypeContainer<
+      {
+        server_id?: RawDatabase['server_id'];
+      },
+      Array<RawDatabase>
+    >(),
+  },
+  setup: {
+    create_new: rpcMethodTypeContainer<
+      {
+        database: RawDatabase['name'];
+        sample_data?: SampleDataSchemaIdentifier[];
+      },
+      DatabaseConnectionResult
+    >(),
+    connect_existing: rpcMethodTypeContainer<
+      {
+        host: RawServer['host'];
+        port: RawServer['port'];
+        database: RawDatabase['name'];
+        role: RawConfiguredRole['name'];
+        password: string;
+        sample_data?: SampleDataSchemaIdentifier[];
+      },
+      DatabaseConnectionResult
+    >(),
+  },
+  privileges: {
+    list_direct: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+      },
+      Array<RawDatabasePrivilegesForRole>
+    >(),
+    replace_for_roles: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        privileges: Array<RawDatabasePrivilegesForRole>;
+      },
+      Array<RawDatabasePrivilegesForRole>
+    >(),
+  },
 };

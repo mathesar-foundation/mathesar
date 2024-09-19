@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     type FilledFormValues,
     FormSubmit,
@@ -15,8 +14,8 @@
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import type { Table } from '@mathesar/models/Table';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import {
     type ProcessedColumn,
     TableStructure,
@@ -79,9 +78,9 @@
 
   $: targetTableStructure = $targetTable
     ? new TableStructure({
-        database: $currentDatabase,
+        database: $targetTable.schema.database,
         table: $targetTable,
-        abstractTypesMap: $currentDbAbstractTypes.data,
+        abstractTypesMap,
       })
     : undefined;
   $: targetTableStructureIsLoading = ensureReadable(

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Table } from '@mathesar/api/rpc/tables';
   import TableName from '@mathesar/components/TableName.svelte';
+  import type { Table } from '@mathesar/models/Table';
 
   export let table: Pick<Table, 'name'>;
   export let which: 'base' | 'target' | 'mapping';

@@ -83,6 +83,7 @@ import {
   explorationIcon,
   outcomeIcon,
   tableIcon,
+  treeChildNodeArrowIcon,
 } from './customIcons';
 
 /**
@@ -178,6 +179,9 @@ export const iconTable: IconProps = { data: tableIcon };
 export const iconInspector: IconProps = { data: faInfo };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
+export const iconTreeChildNodeArrow: IconProps = {
+  data: treeChildNodeArrowIcon,
+};
 export const iconUpgradeAvailable: IconProps = { data: faCircleInfo };
 export const iconCurrentlyInstalledVersion: IconProps = { data: faCheck };
 export const iconUser: IconProps = { data: faUser };

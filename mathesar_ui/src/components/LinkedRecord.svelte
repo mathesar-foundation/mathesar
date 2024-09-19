@@ -6,8 +6,6 @@
   import { Icon } from '@mathesar-component-library';
   import type { ValueComparisonOutcome } from '@mathesar-component-library/types';
 
-  import RecordSummary from './RecordSummary.svelte';
-
   const dispatch = createEventDispatcher();
 
   export let recordId: unknown | undefined = undefined;
@@ -59,12 +57,10 @@
       }}
       on:click={(e) => e.stopPropagation()}
     >
-      <RecordSummary recordSummary={label} />
+      {label}
     </a>
   {:else}
-    <span class="record-summary">
-      <RecordSummary recordSummary={label} />
-    </span>
+    <span class="record-summary">{label}</span>
   {/if}
   {#if hasDeleteButton}
     <!--

@@ -1,6 +1,6 @@
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { Schema } from '@mathesar/api/rpc/schemas';
+import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { JoinPath } from '@mathesar/api/rpc/tables';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
 
@@ -130,7 +130,7 @@ export interface QueryResultColumn {
   display_name: string | null;
   type: Column['type'];
   type_options: Column['type_options'];
-  display_options: Column['display_options'];
+  metadata: Column['metadata'];
 }
 
 export interface QueryInitialColumnSource {
@@ -183,7 +183,7 @@ export interface QueryResultsResponse {
 
 export interface QueryRunResponse extends QueryResultsResponse {
   query: {
-    schema: Schema['oid'];
+    schema: RawSchema['oid'];
     base_table: QueryInstance['base_table'];
     initial_columns: QueryInstanceInitialColumn[];
     transformations?: QueryInstanceTransformation[];

@@ -1,14 +1,16 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
+  import type { Schema } from '@mathesar/models/Schema';
 
   export let schema: Schema;
+
+  $: ({ tableCount } = schema);
 </script>
 
 <div class="container">
   <p class="table-count">
-    {$_('count_tables', { values: { count: schema.table_count } })}
+    {$_('count_tables', { values: { count: $tableCount } })}
   </p>
 </div>
 

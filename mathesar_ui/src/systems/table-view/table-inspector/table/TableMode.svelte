@@ -13,6 +13,7 @@
   import TableActions from './TableActions.svelte';
   import TableDescription from './TableDescription.svelte';
   import TableName from './TableName.svelte';
+  import TablePermissions from './TablePermissions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 </script>
@@ -31,6 +32,13 @@
   </Collapsible>
 
   <Collapsible isOpen triggerAppearance="plain">
+    <CollapsibleHeader slot="header" title={$_('table_permissions')} />
+    <div slot="content" class="content-container">
+      <TablePermissions />
+    </div>
+  </Collapsible>
+
+  <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader
       slot="header"
       title={$_('links')}
@@ -41,12 +49,13 @@
     </div>
   </Collapsible>
 
-  <Collapsible triggerAppearance="plain">
+  <!-- TODO_BETA: re-enable this once we make the record summary template configurable -->
+  <!-- <Collapsible triggerAppearance="plain">
     <CollapsibleHeader slot="header" title={$_('record_summary')} />
     <div slot="content" class="content-container">
       <RecordSummaryConfig table={$currentTable} tabularData={$tabularData} />
     </div>
-  </Collapsible>
+  </Collapsible> -->
 
   <Collapsible isOpen triggerAppearance="plain">
     <CollapsibleHeader slot="header" title={$_('actions')} />

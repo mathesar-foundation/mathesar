@@ -1188,7 +1188,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_without_description() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar') INTO sch_oid;
+  SELECT msar.create_schema('foo bar') ->> 'oid' INTO sch_oid;
   RETURN NEXT has_schema('foo bar');
   RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
   RETURN NEXT is(obj_description(sch_oid), NULL);
@@ -1199,7 +1199,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_with_description() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar', 'yay') INTO sch_oid;
+  SELECT msar.create_schema('foo bar', 'yay') ->> 'oid' INTO sch_oid;
   RETURN NEXT has_schema('foo bar');
   RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
   RETURN NEXT is(obj_description(sch_oid), 'yay');
@@ -1210,7 +1210,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_that_already_exists() RETURNS SETOF TEXT AS $t$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar') INTO sch_oid;
+  SELECT msar.create_schema('foo bar') ->> 'oid' INTO sch_oid;
   RETURN NEXT throws_ok($$SELECT msar.create_schema('foo bar')$$, '42P06');
   RETURN NEXT is(msar.create_schema_if_not_exists('foo bar'), sch_oid);
 END;
@@ -2273,6 +2273,32 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_is_pkey_col_tests() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE simple_pkey (col1 text, col2 text PRIMARY KEY, col3 integer);
+  CREATE TABLE multi_pkey (col1 text, col2 text, col3 integer);
+  ALTER TABLE multi_pkey ADD PRIMARY KEY (col1, col2);
+  CREATE TABLE no_pkey (col1 text, col2 text, col3 integer);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_is_pkey_col() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_is_pkey_col_tests();
+  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 1), false);
+  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 2), true);
+  RETURN NEXT is(msar.is_pkey_col('simple_pkey'::regclass::oid, 3), false);
+  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 1), true);
+  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 2), true);
+  RETURN NEXT is(msar.is_pkey_col('multi_pkey'::regclass::oid, 3), false);
+  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 1), false);
+  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 2), false);
+  RETURN NEXT is(msar.is_pkey_col('no_pkey'::regclass::oid, 3), false);
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_create_role() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM msar.create_role('testuser', 'mypass1234', true);
@@ -2597,6 +2623,7 @@ BEGIN
         "primary_key": true,
         "type_options": null,
         "has_dependents": true,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2612,6 +2639,7 @@ BEGIN
           "precision": null
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2626,6 +2654,7 @@ BEGIN
           "length": 128
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2641,6 +2670,7 @@ BEGIN
         "primary_key": false,
         "type_options": null,
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": ["numeric", "text"]
       },
       {
@@ -2658,6 +2688,7 @@ BEGIN
           "precision": null
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2672,6 +2703,7 @@ BEGIN
           "item_type": "integer"
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       },
       {
@@ -2688,6 +2720,7 @@ BEGIN
           "precision": 15
         },
         "has_dependents": false,
+        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
         "valid_target_types": null
       }
     ]$j$::jsonb
@@ -2751,20 +2784,20 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_get_schemas() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_list_schemas() RETURNS SETOF TEXT AS $$
 DECLARE
   initial_schema_count int;
   foo_schema jsonb;
 BEGIN
   -- Get the initial schema count
-  SELECT jsonb_array_length(msar.get_schemas()) INTO initial_schema_count;
+  SELECT jsonb_array_length(msar.list_schemas()) INTO initial_schema_count;
 
   -- Create a schema
   CREATE SCHEMA foo;
   -- We should now have one additional schema
-  RETURN NEXT is(jsonb_array_length(msar.get_schemas()), initial_schema_count + 1);
+  RETURN NEXT is(jsonb_array_length(msar.list_schemas()), initial_schema_count + 1);
   -- Reflect the "foo" schema
-  SELECT jsonb_path_query(msar.get_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- We should have a foo schema object
   RETURN NEXT is(jsonb_typeof(foo_schema), 'object');
   -- It should have no description
@@ -2778,7 +2811,7 @@ BEGIN
   CREATE TABLE foo.test_table_1 (id serial PRIMARY KEY);
   CREATE TABLE foo.test_table_2 (id serial PRIMARY KEY);
   -- Reflect again
-  SELECT jsonb_path_query(msar.get_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- We should see the description we set
   RETURN NEXT is(foo_schema->'description'#>>'{}', 'A test schema');
   -- We should see two tables
@@ -2788,16 +2821,79 @@ BEGIN
   DROP TABLE foo.test_table_1;
   DROP TABLE foo.test_table_2;
   -- Reflect the "foo" schema
-  SELECT jsonb_path_query(msar.get_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
+  SELECT jsonb_path_query(msar.list_schemas(), '$[*] ? (@.name == "foo")') INTO foo_schema;
   -- The "foo" schema should now have no tables
   RETURN NEXT is((foo_schema->'table_count')::int, 0);
 
   -- Drop the "foo" schema
   DROP SCHEMA foo;
   -- We should now have no "foo" schema
-  RETURN NEXT ok(NOT jsonb_path_exists(msar.get_schemas(), '$[*] ? (@.name == "foo")'));
+  RETURN NEXT ok(NOT jsonb_path_exists(msar.list_schemas(), '$[*] ? (@.name == "foo")'));
   -- We should see the initial schema count again
-  RETURN NEXT is(jsonb_array_length(msar.get_schemas()), initial_schema_count);
+  RETURN NEXT is(jsonb_array_length(msar.list_schemas()), initial_schema_count);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_schema_privileges_basic() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE SCHEMA restricted;
+RETURN NEXT is(
+  msar.list_schema_privileges('restricted'::regnamespace),
+  format('[{"direct": ["USAGE", "CREATE"], "role_oid": %s}]', 'mathesar'::regrole::oid)::jsonb,
+  'Initially, only privileges for creator'
+);
+CREATE USER "Alice";
+RETURN NEXT is(
+  msar.list_schema_privileges('restricted'::regnamespace),
+  format('[{"direct": ["USAGE", "CREATE"], "role_oid": %s}]', 'mathesar'::regrole::oid)::jsonb,
+  'Alice should not have any privileges'
+);
+GRANT USAGE ON SCHEMA restricted TO "Alice";
+RETURN NEXT is(
+  msar.list_schema_privileges('restricted'::regnamespace),
+  format(
+    '[{"direct": ["USAGE", "CREATE"], "role_oid": %1$s}, {"direct": ["USAGE"], "role_oid": %2$s}]',
+    'mathesar'::regrole::oid,
+    '"Alice"'::regrole::oid
+  )::jsonb,
+  'Alice should have her schema new privileges'
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_table_privileges_basic() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE restricted_table();
+RETURN NEXT is(
+  msar.list_table_privileges('restricted_table'::regclass),
+  format(
+    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %s}]',
+    'mathesar'::regrole::oid
+  )::jsonb,
+  'Initially, only privileges for creator'
+);
+CREATE USER "Alice";
+RETURN NEXT is(
+  msar.list_table_privileges('restricted_table'::regclass),
+  format(
+    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %s}]',
+    'mathesar'::regrole::oid
+  )::jsonb,
+  'Alice should not have any privileges on restricted_table'
+);
+GRANT SELECT, DELETE ON TABLE restricted_table TO "Alice";
+RETURN NEXT is(
+  msar.list_table_privileges('restricted_table'::regclass),
+  format(
+    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %1$s},
+    {"direct": ["SELECT", "DELETE"], "role_oid": %2$s}]',
+    'mathesar'::regrole::oid,
+    '"Alice"'::regrole::oid
+  )::jsonb,
+  'Alice should have SELECT & DELETE privileges on restricted_table'
+);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -2968,6 +3064,26 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_table_with_self_referential_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE categories (
+  id serial primary key,
+  name TEXT,
+  parent INT REFERENCES categories(id)
+);
+INSERT INTO categories (id, parent, name) VALUES
+( 1,  NULL, 'Tools'),
+( 2,  1   , 'Power tools'),
+( 3,  1   , 'Hand tools'),
+( 4,  2   , 'Drills'),
+( 5,  3   , 'Screwdrivers'),
+( 6,  3   , 'Wrenches');
+-- Reset sequence:
+PERFORM setval('categories_id_seq', (SELECT max(id) FROM categories));
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -2991,7 +3107,8 @@ BEGIN
         {"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -3017,7 +3134,8 @@ BEGIN
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
@@ -3043,7 +3161,8 @@ BEGIN
         {"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
@@ -3075,7 +3194,8 @@ BEGIN
         {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -3101,7 +3221,8 @@ BEGIN
         {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
       ],
       "grouping": null,
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
@@ -3179,7 +3300,8 @@ BEGIN
           }
         ]
       },
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3216,7 +3338,8 @@ BEGIN
           }
         ]
       },
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3249,7 +3372,8 @@ BEGIN
           {"id": 2, "count": 2, "results_eq": {"4": "2020-04 AD"}, "result_indices": [1, 2]}
         ]
       },
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
@@ -3283,12 +3407,58 @@ BEGIN
           {"id": 1, "count": 8, "results_eq": {"4": "2020 AD"}, "result_indices": [0, 1, 2, 3, 4]}
         ]
       },
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
         ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
         ' FROM public."Customers"  ORDER BY "4" ASC, "1" ASC LIMIT ''5'' OFFSET NULL'
+      )
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_records_for_table_with_self_referential_fk() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_table_with_self_referential_fk();
+  rel_id := 'categories'::regclass::oid;
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => 10,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+     "count": 6,
+     "results": [
+        {"1": 1, "2": "Tools", "3": null},
+        {"1": 2, "2": "Power tools", "3": 1},
+        {"1": 3, "2": "Hand tools", "3": 1},
+        {"1": 4, "2": "Drills", "3": 2},
+        {"1": 5, "2": "Screwdrivers", "3": 3},
+        {"1": 6, "2": "Wrenches", "3": 3}
+     ],
+     "grouping": null,
+     "record_summaries": null,
+     "linked_record_summaries": {
+        "3": {
+          "1": "Tools",
+          "2": "Power tools",
+          "3": "Hand tools"
+        }
+     }
+    }$j$ || jsonb_build_object(
+      'query', concat(
+        'SELECT msar.format_data(id) AS "1", msar.format_data(name) AS "2",'
+        ' msar.format_data(parent) AS "3" FROM public.categories  ORDER BY "1" ASC LIMIT ''10'' OFFSET NULL'
       )
     )
   );
@@ -3784,43 +3954,27 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_get_record_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
+  record_2_results jsonb := '[
+    {
+      "1": 2,
+      "2": 34,
+      "3": "sdflfflsk",
+      "4": null,
+      "5": [1, 2, 3, 4]
+    }
+  ]'::jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  RETURN NEXT is(
-    msar.get_record_from_table(rel_id, 2),
-    $j${
-      "count": 1,
-      "results": [
-        {"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
-      ],
-      "grouping": null,
-      "preview_data": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",',
-        ' msar.format_data(col4) AS "5" FROM public.atable WHERE (id) = (''2'')',
-        ' ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
-  );
-  RETURN NEXT is(
-    msar.get_record_from_table(rel_id, 200),
-    $j${
-      "count": 0,
-      "results": [],
-      "grouping": null,
-      "preview_data": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",',
-        ' msar.format_data(col4) AS "5" FROM public.atable WHERE (id) = (''200'')',
-        ' ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
-  );
+  
+  -- We should be able to retrieve a single record
+  RETURN NEXT is(msar.get_record_from_table(rel_id, 2) -> 'results', record_2_results);
+
+  -- We should be able to retrieve a record via stringified primary key
+  RETURN NEXT is(msar.get_record_from_table(rel_id, '2') -> 'results', record_2_results);
+
+  -- We should get an empty array if the record does not exist
+  RETURN NEXT is(msar.get_record_from_table(rel_id, 200) -> 'results', '[]'::jsonb);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3995,7 +4149,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4015,7 +4170,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4035,7 +4191,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": 200, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4055,7 +4212,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": null, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4075,7 +4233,8 @@ BEGIN
     ),
     $a${
       "results": [{"1": 4, "2": null, "3": "ab234", "4": 3, "5": "234"}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4092,7 +4251,8 @@ BEGIN
     msar.patch_record_in_table( rel_id, 2, '{"2": 10}'),
     $p${
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$p$
   );
 END;
@@ -4109,7 +4269,8 @@ BEGIN
     msar.patch_record_in_table( rel_id, 2, '{"2": 10, "4": {"a": "json"}}'),
     $p${
       "results": [{"1": 2, "2": 10, "3": "sdflfflsk", "4": {"a": "json"}, "5": [1, 2, 3, 4]}],
-      "preview_data": null
+      "linked_record_summaries": null,
+      "record_summaries": null
     }$p$
   );
 END;
@@ -4187,7 +4348,8 @@ BEGIN
       offset_ => null,
       order_ => null,
       filter_ => null,
-      group_ => null
+      group_ => null,
+      return_record_summaries => true
     ),
     $j${
       "count": 6,
@@ -4200,16 +4362,24 @@ BEGIN
         {"1": 6, "2": 1.234, "3": 3, "4": "Kelly Kellison", "5": 80, "6": "kkellison@example.edu"}
       ],
       "grouping": null,
-      "preview_data": {
-        "2": [
-          {"key": 1.234, "summary": "Alice Alison"},
-          {"key": 2.345, "summary": "Bob Bobinson"}
-        ],
-        "3": [
-          {"key": 1, "summary": "Carol Carlson"},
-          {"key": 2, "summary": "Dave Davidson"},
-          {"key": 3, "summary": "Eve Evilson"}
-        ]
+      "linked_record_summaries": {
+        "2": {
+          "1.234": "Alice Alison",
+          "2.345": "Bob Bobinson"
+        },
+        "3": {
+          "1": "Carol Carlson",
+          "2": "Dave Davidson",
+          "3": "Eve Evilson"
+        }
+      },
+      "record_summaries":  {
+        "1": "Fred Fredrickson",
+        "2": "Gabby Gabberson",
+        "3": "Hank Hankson",
+        "4": "Ida Idalia",
+        "5": "James Jameson",
+        "6": "Kelly Kellison"
       }
     }$j$ || jsonb_build_object(
       'query', concat(
@@ -4237,16 +4407,17 @@ BEGIN
         {"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"}
       ],
       "grouping": null,
-      "preview_data": {
-        "2": [
-          {"key": 1.234, "summary": "Alice Alison"},
-          {"key": 2.345, "summary": "Bob Bobinson"}
-        ],
-        "3": [
-          {"key": 1, "summary": "Carol Carlson"},
-          {"key": 2, "summary": "Dave Davidson"}
-        ]
-      }
+      "linked_record_summaries": {
+        "2": {
+          "1.234": "Alice Alison",
+          "2.345": "Bob Bobinson"
+        },
+        "3": {
+          "1": "Carol Carlson",
+          "2": "Dave Davidson"
+        }
+      },
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
@@ -4276,15 +4447,16 @@ BEGIN
         "preproc": null,
         "groups": [{"id": 1, "count": 3, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
       },
-      "preview_data": {
-        "2": [
-          {"key": 1.234, "summary": "Alice Alison"}
-        ],
-        "3": [
-          {"key": 1, "summary": "Carol Carlson"},
-          {"key": 2, "summary": "Dave Davidson"}
-        ]
-      }
+      "linked_record_summaries": {
+        "2": {
+          "1.234": "Alice Alison"
+        },
+        "3": {
+          "1": "Carol Carlson",
+          "2": "Dave Davidson"
+        }
+      },
+      "record_summaries": null
     }$j$ || jsonb_build_object(
       'query', concat(
         'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
@@ -4304,16 +4476,18 @@ BEGIN
   RETURN NEXT is(
     msar.add_record_to_table(
       '"Students"'::regclass::oid,
-      '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}'
+      '{"2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}',
+      true
     ),
     $a${
       "results": [
         {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
       ],
-      "preview_data": {
-        "2": [{"key": 2.345, "summary": "Bob Bobinson"}],
-        "3": [{"key": 1, "summary": "Carol Carlson"}]
-      }
+      "linked_record_summaries": {
+        "2": {"2.345": "Bob Bobinson"},
+        "3": {"1": "Carol Carlson"}
+      },
+      "record_summaries": {"7": "Larry Laurelson"}
     }$a$
   );
 END;
@@ -4333,10 +4507,11 @@ BEGIN
       "results": [
         {"1": 2, "2": 2.345, "3": 2, "4": "Gabby Gabberson", "5": 85, "6": "ggabberson@example.edu"}
       ],
-      "preview_data": {
-        "2": [{"key": 2.345, "summary": "Bob Bobinson"}],
-        "3": [{"key": 2, "summary": "Dave Davidson"}]
-      }
+      "linked_record_summaries": {
+        "2": {"2.345": "Bob Bobinson"},
+        "3": {"2": "Dave Davidson"}
+      },
+      "record_summaries": null
     }$a$
   );
 END;
@@ -4351,11 +4526,787 @@ BEGIN
       '"Students"'::regclass::oid,
       '[{"attnum": 4, "literal": "k"}]',
       2
-    ) -> 'preview_data',
+    ) -> 'linked_record_summaries',
     $a${
-      "2": [{"key": 1.234, "summary": "Alice Alison"}, {"key": 2.345, "summary": "Bob Bobinson"}],
-      "3": [{"key": 3, "summary": "Eve Evilson"}]
+      "2": {"1.234": "Alice Alison", "2.345": "Bob Bobinson"},
+      "3": {"3": "Eve Evilson"}
     }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.replace_database_privileges_for_roles ------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+test_replace_database_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
+Happy path, smoke test.
+*/
+DECLARE
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  RETURN NEXT set_eq(
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
+          'role_oid', %1$s, 'direct', jsonb_build_array('CONNECT', 'CREATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id
+    ),
+    ARRAY['CONNECT', 'CREATE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['CONNECT', 'CREATE'],
+    'Privileges should be updated for actual database properly'
+  );
+  RETURN NEXT set_eq(
+    format(
+      $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_database_privileges_for_roles(jsonb_build_array(jsonb_build_object(
+              'role_oid', %1$s, 'direct', jsonb_build_array('CONNECT')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t2$,
+      bob_id
+    ),
+    ARRAY['CONNECT'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['CONNECT', 'CREATE'],
+    'Alice''s privileges should be left alone properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['CONNECT'],
+    'Privileges should be updated for actual database properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_alice_and_bob_preloaded() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE ROLE "Alice";
+  GRANT CONNECT, CREATE ON DATABASE mathesar_testing TO "Alice";
+  CREATE ROLE bob;
+  GRANT CONNECT ON DATABASE mathesar_testing TO bob;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+test_replace_database_privileges_for_roles_multi_ops() RETURNS SETOF TEXT AS $$/*
+Test that we can add/revoke multiple privileges to/from multiple roles simultaneously.
+*/
+DECLARE
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  PERFORM __setup_alice_and_bob_preloaded();
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+  RETURN NEXT set_eq(
+    -- Revoke CREATE from Alice, Grant CREATE to Bob.
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_database_privileges_for_roles(jsonb_build_array(
+          jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('CONNECT')),
+          jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('CONNECT', 'CREATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      bob_id
+    ),
+    ARRAY['CONNECT'], -- This only checks form of Alice's info in response.
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['CONNECT'],
+    'Alice''s privileges should be updated for actual database properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_database, LATERAL aclexplode(pg_database.datacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['CONNECT', 'CREATE'],
+    'Bob''s privileges should be updated for actual database properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.replace_schema_privileges_for_roles --------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+test_replace_schema_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
+Happy path, smoke test.
+*/
+DECLARE
+  schema_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE SCHEMA restricted_test;
+  schema_id := 'restricted_test'::regnamespace::oid;
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  RETURN NEXT set_eq(
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_schema_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+          'role_oid', %1$s, 'direct', jsonb_build_array('USAGE', 'CREATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      schema_id
+    ),
+    ARRAY['USAGE', 'CREATE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['USAGE', 'CREATE'],
+    'Privileges should be updated for actual schema properly'
+  );
+  RETURN NEXT set_eq(
+    format(
+      $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_schema_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+              'role_oid', %1$s, 'direct', jsonb_build_array('USAGE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t2$,
+      bob_id,
+      schema_id
+    ),
+    ARRAY['USAGE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['USAGE', 'CREATE'],
+    'Alice''s privileges should be left alone properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['USAGE'],
+    'Privileges should be updated for actual schema properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+test_replace_schema_privileges_for_roles_multi_ops() RETURNS SETOF TEXT AS $$/*
+Test that we can add/revoke multiple privileges to/from multiple roles simultaneously.
+*/
+DECLARE
+  schema_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE SCHEMA "test Multiops";
+  schema_id := '"test Multiops"'::regnamespace::oid;
+
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  GRANT USAGE, CREATE ON SCHEMA "test Multiops" TO "Alice";
+  GRANT USAGE ON SCHEMA "test Multiops" TO bob;
+
+  RETURN NEXT set_eq(
+    -- Revoke CREATE from Alice, Grant CREATE to Bob.
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_schema_privileges_for_roles(%3$s, jsonb_build_array(
+          jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('USAGE')),
+          jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('USAGE', 'CREATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      bob_id,
+      schema_id
+    ),
+    ARRAY['USAGE'], -- This only checks form of Alice's info in response.
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['USAGE'],
+    'Alice''s privileges should be updated for actual schema properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_namespace, LATERAL aclexplode(pg_namespace.nspacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['USAGE', 'CREATE'],
+    'Bob''s privileges should be updated for actual schema properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- msar.replace_table_privileges_for_roles --------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION
+test_replace_table_privileges_for_roles_basic() RETURNS SETOF TEXT AS $$/*
+Happy path, smoke test.
+*/
+DECLARE
+  table_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE TABLE restricted_table();
+  table_id := 'restricted_table'::regclass::oid;
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  RETURN NEXT set_eq(
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+          'role_oid', %1$s, 'direct', jsonb_build_array('SELECT', 'UPDATE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      table_id
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Privileges should be updated for actual table properly'
+  );
+  RETURN NEXT set_eq(
+    format(
+      $t2$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%2$s, jsonb_build_array(jsonb_build_object(
+              'role_oid', %1$s, 'direct', jsonb_build_array('INSERT', 'SELECT', 'DELETE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t2$,
+      bob_id,
+      table_id
+    ),
+    ARRAY['INSERT', 'SELECT', 'DELETE'],
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['SELECT', 'UPDATE'],
+    'Alice''s privileges should be left alone properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['INSERT', 'SELECT', 'DELETE'],
+    'Privileges should be updated for actual table properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
+test_replace_table_privileges_for_roles_multi_ops() RETURNS SETOF TEXT AS $$/*
+Test that we can add/revoke multiple privileges to/from multiple roles simultaneously.
+*/
+DECLARE
+  table_id oid;
+  alice_id oid;
+  bob_id oid;
+BEGIN
+  CREATE TABLE "test Multiops table"();
+  table_id := '"test Multiops table"'::regclass::oid;
+
+  CREATE ROLE "Alice";
+  CREATE ROLE bob;
+  alice_id := '"Alice"'::regrole::oid;
+  bob_id := 'bob'::regrole::oid;
+
+  GRANT SELECT, DELETE ON TABLE "test Multiops table" TO "Alice";
+  GRANT INSERT, UPDATE ON TABLE "test Multiops table" TO bob;
+
+  RETURN NEXT set_eq(
+    -- Grant INSERT, SELECT and UPDATE to Alice, Revoke DELETE.
+    -- Grant SELECT and DELETE to Bob, Revoke INSERT and UPDATE.
+    format(
+      $t1$SELECT jsonb_array_elements_text(direct) FROM jsonb_to_recordset(
+        msar.replace_table_privileges_for_roles(%3$s, jsonb_build_array(
+          jsonb_build_object('role_oid', %1$s, 'direct', jsonb_build_array('INSERT', 'SELECT', 'UPDATE')),
+          jsonb_build_object('role_oid', %2$s, 'direct', jsonb_build_array('SELECT', 'DELETE')))))
+        AS x(direct jsonb, role_oid regrole)
+      WHERE role_oid=%1$s $t1$,
+      alice_id,
+      bob_id,
+      table_id
+    ),
+    ARRAY['INSERT', 'SELECT', 'UPDATE'], -- This only checks form of Alice's info in response.
+    'Response should contain updated role info in correct form'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', alice_id)
+    ),
+    ARRAY['INSERT', 'SELECT', 'UPDATE'],
+    'Alice''s privileges should be updated for actual table properly'
+  );
+  RETURN NEXT set_eq(
+    concat(
+      'SELECT privilege_type FROM pg_class, LATERAL aclexplode(pg_class.relacl) acl',
+      format(' WHERE acl.grantee=%s;', bob_id)
+    ),
+    ARRAY['SELECT', 'DELETE'],
+    'Bob''s privileges should be updated for actual table properly'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_column_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid;
+BEGIN
+CREATE TABLE mytab (col1 varchar, col2 varchar);
+tab_id := 'mytab'::regclass::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT SELECT, INSERT (col1) ON TABLE mytab TO test_intern1;
+GRANT SELECT (col2) ON TABLE mytab TO test_intern1;
+GRANT UPDATE (col1) ON TABLE mytab TO test_intern2;
+GRANT UPDATE, REFERENCES (col2) ON TABLE mytab TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["SELECT", "INSERT", "UPDATE", "REFERENCES"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["SELECT", "INSERT", "UPDATE", "REFERENCES"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["SELECT", "INSERT"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["SELECT"]'
+);
+
+SET ROLE test_intern2;
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 1::smallint),
+  '["UPDATE"]'
+);
+RETURN NEXT is(
+  msar.list_column_privileges_for_current_role(tab_id, 2::smallint),
+  '["UPDATE", "REFERENCES"]'
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_schema_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  sch_id oid;
+BEGIN
+CREATE SCHEMA restricted;
+sch_id := 'restricted'::regnamespace::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT USAGE ON SCHEMA restricted TO test_intern1;
+GRANT USAGE, CREATE ON SCHEMA restricted TO test_intern2;
+
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
+
+SET ROLE test_intern1;
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE"]');
+
+SET ROLE test_intern2;
+RETURN NEXT is(msar.list_schema_privileges_for_current_role(sch_id), '["USAGE", "CREATE"]');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_table_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  tab_id oid;
+BEGIN
+CREATE TABLE mytab (col1 varchar);
+tab_id := 'mytab'::regclass::oid;
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+
+GRANT SELECT, INSERT, UPDATE ON TABLE mytab TO test_intern1;
+GRANT DELETE, TRUNCATE, REFERENCES, TRIGGER ON TABLE mytab TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["SELECT", "INSERT", "UPDATE"]'
+);
+
+SET ROLE test_intern2;
+RETURN NEXT is(
+  msar.list_table_privileges_for_current_role(tab_id),
+  '["DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_list_database_privileges_for_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  dat_id oid := oid FROM pg_database WHERE datname=current_database();
+BEGIN
+CREATE ROLE test_intern1;
+CREATE ROLE test_intern2;
+GRANT USAGE ON SCHEMA msar, __msar TO test_intern1, test_intern2;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO test_intern1, test_intern2;
+
+REVOKE ALL ON DATABASE mathesar_testing FROM PUBLIC;
+GRANT CONNECT, CREATE ON DATABASE mathesar_testing TO test_intern1;
+GRANT CONNECT, TEMPORARY ON DATABASE mathesar_testing TO test_intern2;
+
+RETURN NEXT is(
+  msar.list_database_privileges_for_current_role(dat_id),
+  '["CONNECT", "CREATE", "TEMPORARY"]'
+);
+
+SET ROLE test_intern1;
+RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "CREATE"]');
+
+SET ROLE test_intern2;
+RETURN NEXT is(msar.list_database_privileges_for_current_role(dat_id), '["CONNECT", "TEMPORARY"]');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_move_columns() RETURNS SETOF TEXT AS $$
+BEGIN
+-- Authors -----------------------------------------------------------------------------------------
+CREATE TABLE "Authors" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "First Name" text,
+    "Last Name" text,
+    "Website" text
+);
+INSERT INTO "Authors" OVERRIDING SYSTEM VALUE VALUES
+  (1, 'Edwin A.', 'Abbott', NULL),
+  (2, 'M.A.S.', 'Abdel Haleem', NULL),
+  (3, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/'),
+  (4, 'Daniel', 'Abraham', 'https://www.danielabraham.com/'),
+  (5, NULL, 'Abu''l-Fazl', NULL);
+PERFORM setval(pg_get_serial_sequence('"Authors"', 'id'), (SELECT max(id) FROM "Authors"));
+-- colors ------------------------------------------------------------------------------------------
+CREATE TABLE colors (id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, name text);
+INSERT INTO colors (name) VALUES ('red'), ('blue');
+-- fav_combos --------------------------------------------------------------------------------------
+CREATE TABLE fav_combos (number integer, color integer);
+ALTER TABLE fav_combos ADD UNIQUE (number, color);
+INSERT INTO fav_combos VALUES (5, 1), (5, 2), (10, 1), (10, 2);
+-- Books -------------------------------------------------------------------------------------------
+CREATE TABLE "Books" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "Title" text,
+    "Publication Year" date,
+    "ISBN" text,
+    "Dewey Decimal" text,
+    "Author" integer REFERENCES "Authors"(id),
+    "Publisher" integer,
+    "Favorite Number" integer,
+    "Favorite Color" integer REFERENCES colors(id)
+);
+ALTER TABLE "Books" DROP COLUMN "Publication Year";
+INSERT INTO "Books" OVERRIDING SYSTEM VALUE VALUES
+  (1059, 'The History of Akbar, Volume 7', '06-742-4416-8', NULL, 5, 116, 5, 1),
+  (960, 'The Dragon''s Path', '978-68173-11-59-3', '813.6', 4, 167, 5, 1),
+  (419, 'Half a King', '0007-55-020-0', '823.92', 3, 113, 5, 1),
+  (1047, 'The Heroes', '0-3-1604498-9', '823.92', 3, 167, 5, 1),
+  (103, 'Best Served Cold', '031604-49-5-4', '823.92', 3, 167, 5, 1),
+  (1302, 'The Widow''s House', '0-31-620398-X', '813.6', 4, 167, 5, NULL),
+  (99, 'Before They Are Hanged', '1-5910-2641-5', '823.92', 3, 195, 5, 2),
+  (530, 'Last Argument of Kings', '1591-02-690-3', '823.92', 3, 195, NULL, 1),
+  (104, 'Best Served Cold', '978-9552-8856-8-1', '823.92', 3, 167, 5, 1),
+  (1185, 'The Qur''an', '0-19-957071-X', '297.122521', 2, 171, 5, 1),
+  (1053, 'The History of Akbar, Volume 1', '0-674-42775-0', '954.02', 5, 116, 5, 1),
+  (959, 'The Dragon''s Path', '978-0-316080-68-2', '813.6', 4, 167, 5, 1),
+  (1056, 'The History of Akbar, Volume 4', '0-67497-503-0', NULL, 5, 116, 5, 1),
+  (69, 'A Shadow in Summer', '07-6-531340-5', '813.6', 4, 243, 5, 2),
+  (907, 'The Blade Itself', '978-1984-1-1636-1', '823.92', 3, 195, 5, 1),
+  (1086, 'The King''s Blood', '978-03-1608-077-4', '813.6', 4, 167, 5, 1),
+  (1060, 'The History of Akbar, Volume 8', '0-674-24417-6', NULL, 5, 116, 5, 1),
+  (70, 'A Shadow in Summer', '978-9-5-7802049-0', '813.6', 4, 243, 5, 2),
+  (1278, 'The Tyrant''s Law', '0-316-08070-5', '813.6', 4, 167, 5, 1),
+  (1054, 'The History of Akbar, Volume 2', '0-67-450494-1', NULL, 5, 116, 10, 1),
+  (1057, 'The History of Akbar, Volume 5', '0-6-7498395-5', NULL, 5, 116, 5, 1),
+  (351, 'Flatland: A Romance of Many Dimensions', '0-486-27263-X', '530.11', 1, 71, 5, 1),
+  (729, 'Red Country', '03161-87-20-8', '823.92', 3, 167, 5, 1),
+  (906, 'The Blade Itself', '1-591-02594-X', '823.92', 3, 195, 5, 1),
+  (1058, 'The History of Akbar, Volume 6', '067-4-98613-X', NULL, 5, 116, 10, 1),
+  (1055, 'The History of Akbar, Volume 3', '0-6-7465982-1', NULL, 5, 116, 5, 1);
+PERFORM setval(pg_get_serial_sequence('"Books"', 'id'), (SELECT max(id) FROM "Books"));
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_move_columns_nodata() RETURNS SETOF TEXT AS $$
+BEGIN
+-- Authors -----------------------------------------------------------------------------------------
+CREATE TABLE "Authors" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "First Name" text,
+    "Last Name" text,
+    "Website" text
+);
+-- colors ------------------------------------------------------------------------------------------
+CREATE TABLE colors (id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, name text);
+-- fav_combos --------------------------------------------------------------------------------------
+CREATE TABLE fav_combos (number integer, color integer);
+ALTER TABLE fav_combos ADD UNIQUE (number, color);
+-- Books -------------------------------------------------------------------------------------------
+CREATE TABLE "Books" (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "Title" text,
+    "Publication Year" date,
+    "ISBN" text,
+    "Dewey Decimal" text,
+    "Author" integer REFERENCES "Authors"(id),
+    "Publisher" integer,
+    "Favorite Number" integer UNIQUE,
+    "Favorite Color" integer REFERENCES colors(id)
+);
+ALTER TABLE "Books" DROP COLUMN "Publication Year";
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_to_referenced_table_nodata() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns_nodata();
+  PERFORM msar.move_columns_to_referenced_table(
+    '"Books"'::regclass, '"Authors"'::regclass, ARRAY[8, 9]::smallint[]
+  );
+  RETURN NEXT columns_are(
+    'Authors',
+    ARRAY['id', 'First Name', 'Last Name', 'Website', 'Favorite Number', 'Favorite Color']
+  );
+  RETURN NEXT columns_are(
+    'Books',
+    ARRAY['id', 'Title', 'ISBN', 'Dewey Decimal', 'Author', 'Publisher']
+  );
+  RETURN NEXT col_is_unique('Authors', 'Favorite Number');
+  RETURN NEXT fk_ok('Authors', 'Favorite Color', 'colors', 'id');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_to_referenced_table() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns();
+  PERFORM msar.move_columns_to_referenced_table(
+    '"Books"'::regclass, '"Authors"'::regclass, ARRAY[8, 9]::smallint[]
+  );
+  RETURN NEXT columns_are(
+    'Authors',
+    ARRAY['id', 'First Name', 'Last Name', 'Website', 'Favorite Number', 'Favorite Color']
+  );
+  RETURN NEXT columns_are(
+    'Books',
+    ARRAY['id', 'Title', 'ISBN', 'Dewey Decimal', 'Author', 'Publisher']
+  );
+  RETURN NEXT fk_ok('Authors', 'Favorite Color', 'colors', 'id');
+  RETURN NEXT results_eq(
+    $h$SELECT * FROM "Authors" ORDER BY id;$h$,
+    $w$VALUES
+      (1, 'Edwin A.', 'Abbott', NULL, 5, 1),
+      (2, 'M.A.S.', 'Abdel Haleem', NULL, 5, 1),
+      (3, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/', 5, 1),
+      (4, 'Daniel', 'Abraham', 'https://www.danielabraham.com/', 5, 1),
+      (5, NULL, 'Abu''l-Fazl', NULL, 5, 1),
+      (6, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/', 5, 2),
+      (7, 'Joe', 'Abercrombie', 'https://joeabercrombie.com/',NULL,1),
+      (8, 'Daniel', 'Abraham', 'https://www.danielabraham.com/', 5, 2),
+      (9, 'Daniel', 'Abraham', 'https://www.danielabraham.com/', 5, NULL),
+      (10, NULL, 'Abu''l-Fazl', NULL, 10, 1);
+    $w$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_move_columns_multicol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE target_table(
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  x text,
+  y integer
+);
+CREATE TABLE source_table(
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  c1 integer,
+  c2 integer,
+  c3 integer,
+  c4 integer REFERENCES target_table(id),
+  UNIQUE (c1, c2)
+);
+CREATE TABLE t1 (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  a integer,
+  b integer,
+  c integer,
+  FOREIGN KEY (b, c) REFERENCES source_table (c1, c2)
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_not_referenced_by_multicol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns_multicol_fk();
+  PERFORM msar.move_columns_to_referenced_table(
+    'source_table'::regclass, 'target_table'::regclass, ARRAY[4]::smallint[]
+  );
+  RETURN NEXT columns_are(
+    'source_table',
+    ARRAY['id', 'c1', 'c2', 'c4']
+  );
+  RETURN NEXT columns_are(
+    'target_table',
+    ARRAY['id', 'x', 'y', 'c3']
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_referenced_by_multicol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns_multicol_fk();
+  RETURN NEXT throws_ok(
+    $w$SELECT msar.move_columns_to_referenced_table(
+      'source_table'::regclass, 'target_table'::regclass, ARRAY[2, 3, 4]::smallint[]
+    );$w$,
+    '2BP01',
+    'cannot drop column c1 of table source_table because other objects depend on it'
+  );
+  RETURN NEXT columns_are(
+    'source_table',
+    ARRAY['id', 'c1', 'c2', 'c3', 'c4']
+  );
+  RETURN NEXT columns_are(
+    'target_table',
+    ARRAY['id', 'x', 'y']
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION __setup_move_columns_singlecol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+CREATE TABLE target_table(
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  x text,
+  y integer
+);
+CREATE TABLE source_table(
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  c1 integer,
+  c2 integer REFERENCES target_table(id),
+  UNIQUE (c1)
+);
+CREATE TABLE t1 (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  a integer,
+  b integer,
+  FOREIGN KEY (b) REFERENCES source_table (c1)
+);
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_move_columns_referenced_by_singlecol_fk() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_move_columns_singlecol_fk();
+  RETURN NEXT throws_ok(
+    $w$SELECT msar.move_columns_to_referenced_table(
+      'source_table'::regclass, 'target_table'::regclass, ARRAY[2]::smallint[]
+    );$w$,
+    '2BP01',
+    'cannot drop column c1 of table source_table because other objects depend on it'
+  );
+  RETURN NEXT columns_are(
+    'source_table',
+    ARRAY['id', 'c1', 'c2']
+  );
+  RETURN NEXT columns_are(
+    'target_table',
+    ARRAY['id', 'x', 'y']
   );
 END;
 $$ LANGUAGE plpgsql;

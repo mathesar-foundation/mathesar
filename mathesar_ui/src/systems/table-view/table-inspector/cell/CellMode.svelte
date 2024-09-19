@@ -7,12 +7,12 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ selection, recordsData, processedColumns } = $tabularData);
-  $: ({ recordSummaries, selectableRowsMap } = recordsData);
+  $: ({ linkedRecordSummaries, selectableRowsMap } = recordsData);
   $: selectedCellData = getSelectedCellData(
     $selection,
     $selectableRowsMap,
     $processedColumns,
-    $recordSummaries,
+    $linkedRecordSummaries,
   );
 </script>
 

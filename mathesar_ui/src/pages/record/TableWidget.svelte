@@ -1,9 +1,8 @@
 <script lang="ts">
   import type { Column } from '@mathesar/api/rpc/columns';
-  import type { Table } from '@mathesar/api/rpc/tables';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import type { Table } from '@mathesar/models/Table';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import {
     Meta,
     TabularData,
@@ -26,9 +25,8 @@
   export let table: Table;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
-  $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: tabularData = new TabularData({
-    database: $currentDatabase,
+    database: table.schema.database,
     table,
     abstractTypesMap,
     meta,

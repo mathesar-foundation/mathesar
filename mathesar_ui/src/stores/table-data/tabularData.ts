@@ -3,11 +3,11 @@ import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
-import type { Table } from '@mathesar/api/rpc/tables';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
@@ -39,9 +39,19 @@ export interface TabularDataProps {
   hasEnhancedPrimaryKeyCell?: Parameters<
     typeof processColumn
   >[0]['hasEnhancedPrimaryKeyCell'];
+  /**
+   * When true, load the record summaries associated directly with each record
+   * in the table. These are *not* the record summaries associated with linked
+   * records. Instead they are the summaries of the records themselves. By
+   * default, we don't load these summaries because it's a performance hit. But
+   * we need them for the records within the record selector.
+   */
+  loadIntrinsicRecordSummaries?: boolean;
 }
 
 export class TabularData {
+  database: Pick<Database, 'id'>;
+
   table: Table;
 
   meta: Meta;
@@ -63,6 +73,7 @@ export class TabularData {
   shareConsumer?: ShareConsumer;
 
   constructor(props: TabularDataProps) {
+    this.database = props.database;
     const contextualFilters =
       props.contextualFilters ?? new Map<number, string | number>();
     this.table = props.table;
@@ -86,6 +97,7 @@ export class TabularData {
       columnsDataStore: this.columnsDataStore,
       contextualFilters,
       shareConsumer: this.shareConsumer,
+      loadIntrinsicRecordSummaries: props.loadIntrinsicRecordSummaries,
     });
     this.display = new Display(
       this.meta,

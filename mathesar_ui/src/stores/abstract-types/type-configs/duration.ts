@@ -1,4 +1,9 @@
-import { type Column, getColumnDisplayOption } from '@mathesar/api/rpc/columns';
+import {
+  type Column,
+  type ColumnMetadata,
+  type DurationUnit,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeDuration } from '@mathesar/icons';
 import { DurationSpecification } from '@mathesar/utils/duration';
 import type { FormValues } from '@mathesar-component-library/types';
@@ -22,8 +27,8 @@ const displayForm: AbstractTypeConfigForm = {
     durationConfig: {
       type: 'custom',
       default: {
-        max: durationDefaults.max,
-        min: durationDefaults.min,
+        duration_max: durationDefaults.max,
+        duration_min: durationDefaults.min,
       },
     },
   },
@@ -39,24 +44,26 @@ const displayForm: AbstractTypeConfigForm = {
   },
 };
 
-function determineDisplayOptions(
-  formValues: FormValues,
-): Column['display_options'] {
-  const displayOptions: Column['display_options'] = {
-    ...(formValues.durationConfig as Record<string, unknown>),
-    duration_show_units: false,
+function determineDisplayOptions(formValues: FormValues): ColumnMetadata {
+  const durationConfig = formValues.durationConfig as {
+    max: DurationUnit;
+    min: DurationUnit;
+  };
+  const displayOptions: Column['metadata'] = {
+    duration_max: durationConfig.max,
+    duration_min: durationConfig.min,
   };
   return displayOptions;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  displayOptions: Column['display_options'],
+  metadata: Column['metadata'],
 ): FormValues {
-  const column = { display_options: displayOptions };
+  const column = { metadata };
   const formValues: FormValues = {
     durationConfig: {
-      max: getColumnDisplayOption(column, 'duration_max'),
-      min: getColumnDisplayOption(column, 'duration_min'),
+      max: getColumnMetadataValue(column, 'duration_max'),
+      min: getColumnMetadataValue(column, 'duration_min'),
     },
   };
   return formValues;

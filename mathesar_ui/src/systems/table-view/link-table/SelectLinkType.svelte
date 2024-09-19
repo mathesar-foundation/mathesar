@@ -1,10 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
+  import type { Table } from '@mathesar/models/Table';
 
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';

@@ -1,22 +1,18 @@
-import { type Readable, derived, writable } from 'svelte/store';
+import { type Writable, writable } from 'svelte/store';
 
-import {
-  type RequestStatus,
-  getAPI,
-  patchAPI,
-} from '@mathesar/api/rest/utils/requestUtils';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
 import type { RecordsResponse } from '@mathesar/api/rpc/records';
-import type { Table } from '@mathesar/api/rpc/tables';
 import { WritableMap } from '@mathesar/component-library';
+import type { Database } from '@mathesar/models/Database';
+import type { Table } from '@mathesar/models/Table';
 import RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
-import {
-  buildRecordSummariesForSheet,
-  prepareFieldsAsRecordSummaryInputData,
-  renderTransitiveRecordSummary,
-} from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
+import { buildRecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
 
 export default class RecordStore {
+  database: Pick<Database, 'id'>;
+
   fetchRequest = writable<RequestStatus | undefined>(undefined);
 
   /** Keys are column ids */
@@ -24,38 +20,25 @@ export default class RecordStore {
 
   recordSummaries = new RecordSummaryStore();
 
-  summary: Readable<string>;
+  summary: Writable<string>;
 
   table: Table;
 
   recordPk: string;
 
-  private url: string;
-
-  constructor({ table, recordPk }: { table: Table; recordPk: string }) {
+  constructor({
+    database,
+    table,
+    recordPk,
+  }: {
+    database: Pick<Database, 'id'>;
+    table: Table;
+    recordPk: string;
+  }) {
+    this.database = database;
     this.table = table;
     this.recordPk = recordPk;
-    this.url = `/api/db/v0/tables/${this.table.oid}/records/${this.recordPk}/`;
-    // TODO_RS_TEMPLATE
-    //
-    // We need to handle the case where no record summary template is set.
-    // Previously it was the responsibility of the service layer to _always_
-    // return a record summary template, even by deriving one on the fly to send
-    // if necessary. With the changes for beta, it will be the responsibility of
-    // the client to handle the case where no template is set. We need to wait
-    // until after the service layer changes are made before we can implement
-    // this here.
-    const template =
-      this.table.metadata?.record_summary_template ?? 'TODO_RS_TEMPLATE';
-    this.summary = derived(
-      [this.fieldValues, this.recordSummaries],
-      ([fields, fkSummaryData]) =>
-        renderTransitiveRecordSummary({
-          template,
-          inputData: prepareFieldsAsRecordSummaryInputData(fields),
-          transitiveData: fkSummaryData,
-        }),
-    );
+    this.summary = writable('');
     void this.fetch();
   }
 
@@ -64,9 +47,10 @@ export default class RecordStore {
     this.fieldValues.reconstruct(
       Object.entries(result).map(([k, v]) => [parseInt(k, 10), v]),
     );
-    if (response.preview_data) {
+    this.summary.set(response.record_summaries?.[this.recordPk] ?? '');
+    if (response.linked_record_summaries) {
       this.recordSummaries.setFetchedSummaries(
-        buildRecordSummariesForSheet(response.preview_data),
+        buildRecordSummariesForSheet(response.linked_record_summaries),
       );
     }
   }
@@ -74,7 +58,15 @@ export default class RecordStore {
   async fetch(): Promise<void> {
     this.fetchRequest.set({ state: 'processing' });
     try {
-      this.updateSelfWithApiResponseData(await getAPI(this.url));
+      const response = await api.records
+        .get({
+          database_id: this.database.id,
+          table_oid: this.table.oid,
+          record_id: this.recordPk,
+          return_record_summaries: true,
+        })
+        .run();
+      this.updateSelfWithApiResponseData(response);
       this.fetchRequest.set({ state: 'success' });
     } catch (error) {
       this.fetchRequest.set({
@@ -85,6 +77,15 @@ export default class RecordStore {
   }
 
   async patch(payload: Record<string, unknown>) {
-    this.updateSelfWithApiResponseData(await patchAPI(this.url, payload));
+    const response = await api.records
+      .patch({
+        database_id: this.database.id,
+        table_oid: this.table.oid,
+        record_id: this.recordPk,
+        record_def: payload,
+        return_record_summaries: true,
+      })
+      .run();
+    this.updateSelfWithApiResponseData(response);
   }
 }

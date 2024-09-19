@@ -2,12 +2,11 @@
   import { tick } from 'svelte';
   import { router } from 'tinro';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import { focusActiveCell } from '@mathesar/components/sheet/utils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Table } from '@mathesar/models/Table';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import {
     Meta,
     TabularData,
@@ -33,11 +32,10 @@
 
   let sheetElement: HTMLElement;
 
-  $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: ({ query } = $router);
   $: meta = Meta.fromSerialization(query[metaSerializationQueryKey] ?? '');
   $: tabularData = new TabularData({
-    database: $currentDatabase,
+    database: table.schema.database,
     table,
     abstractTypesMap,
     meta,

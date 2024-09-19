@@ -24,13 +24,12 @@
   export let configuredRolesMap: ImmutableMap<number, ConfiguredRole>;
   export let usersMap: ImmutableMap<number, User>;
 
-  $: savedConfiguredRoleId = collaborator.configured_role_id;
+  $: savedConfiguredRoleId = collaborator.configuredRoleId;
   $: configuredRoleId = requiredField<number>($savedConfiguredRoleId);
   $: form = makeForm({ configuredRoleId });
 
   $: userName =
-    usersMap.get(collaborator.user_id)?.username ??
-    String(collaborator.user_id);
+    usersMap.get(collaborator.userId)?.username ?? String(collaborator.userId);
 
   async function updateRoleForCollaborator() {
     await collaborator.setConfiguredRole($configuredRoleId);

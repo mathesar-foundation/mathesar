@@ -3,11 +3,11 @@
   import { router } from 'tinro';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import {
     ExplorationResult,
@@ -23,6 +23,8 @@
   export let schema: Schema;
   export let query: QueryInstance;
   export let shareConsumer: ShareConsumer | undefined = undefined;
+
+  $: schemaName = schema.name;
 
   let queryRunner: QueryRunner | undefined;
   let isInspectorOpen = true;
@@ -42,7 +44,7 @@
 
   let context: 'shared-consumer-page' | 'page' = 'page';
   $: context = shareConsumer ? 'shared-consumer-page' : 'page';
-  $: createQueryRunner(query, $currentDbAbstractTypes.data);
+  $: createQueryRunner(query, abstractTypesMap);
 
   function gotoSchemaPage() {
     router.goto(getSchemaPageUrl(database.id, schema.oid));
@@ -50,7 +52,7 @@
 </script>
 
 <svelte:head>
-  <title>{query.name} | {schema.name} | {$_('mathesar')}</title>
+  <title>{query.name} | {$schemaName} | {$_('mathesar')}</title>
 </svelte:head>
 
 <LayoutWithHeader fitViewport>

@@ -48,6 +48,6 @@ def create_schema(schema_name, conn, description=None):
     If a schema already exists with the given name, this function will raise an error.
 
     Returns:
-        The integer oid of the newly created schema.
+        The SchemaInfo describing the user-defined schema in the database.
     """
     return exec_msar_func(conn, 'create_schema', schema_name, description).fetchone()[0]
