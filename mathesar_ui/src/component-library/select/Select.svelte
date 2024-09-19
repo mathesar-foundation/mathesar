@@ -82,10 +82,13 @@
    */
   export let valuesAreEqual: DefinedProps['valuesAreEqual'] = (a, b) => a === b;
 
+  export let isOptionDisabled: DefinedProps['isOptionDisabled'] = () => false;
+
   export let autoSelect: DefinedProps['autoSelect'] = 'first';
 
   function setValueFromArray(values: readonly (Option | undefined)[]) {
-    [value] = values;
+    const firstEnabledOption = values.find((opt) => !isOptionDisabled(opt));
+    value = firstEnabledOption;
     dispatch('change', value);
     dispatch('input', value);
     dispatch('artificialChange', value);
@@ -140,6 +143,7 @@
   {labelKey}
   {getLabel}
   checkEquality={valuesAreEqual}
+  checkIfOptionIsDisabled={isOptionDisabled}
   let:api
   let:isOpen
 >
