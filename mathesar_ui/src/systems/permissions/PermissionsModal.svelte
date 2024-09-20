@@ -4,56 +4,38 @@
   import {
     ControlledModal,
     type ModalController,
-    TabContainer,
   } from '@mathesar-component-library';
 
-  export let controller: ModalController;
-  export let onClose: () => void = () => {};
+  import PermissionsModalContent from './PermissionsModalContent.svelte';
+  import type {
+    PermissionsAsyncStores,
+    PermissionsModalSlots,
+  } from './permissionsUtils';
 
-  const tabs = [
-    {
-      id: 'share',
-      label: $_('share'),
-    },
-    // {
-    //   id: 'transfer_ownership',
-    //   label: $_('transfer_ownership'),
-    // },
-  ];
-  let activeTab = tabs[0];
-
-  function onModalClose() {
-    [activeTab] = tabs;
-    onClose();
+  type Privilege = $$Generic;
+  interface $$Slots extends PermissionsModalSlots<Privilege> {
+    title: Record<never, never>;
   }
+
+  export let controller: ModalController;
+  export let getAsyncStores: () => PermissionsAsyncStores<Privilege>;
+  export let onClose: () => void = () => {};
 </script>
 
-<ControlledModal {controller} on:close={onModalClose}>
+<ControlledModal {controller} on:close={() => onClose()}>
   <slot name="title" slot="title" />
-  <div class="tabs">
-    <TabContainer
-      bind:activeTab
-      {tabs}
-      uniformTabWidth={false}
-      tabStyle="compact"
-    >
-      <div class="tab-content">
-        {#if activeTab.id === 'share'}
-          <slot name="share" {controller} />
-        {:else}
-          <slot name="transfer-ownership" {controller} />
-        {/if}
-      </div>
-    </TabContainer>
-  </div>
+
+  <PermissionsModalContent {getAsyncStores}>
+    <!--
+      -- `<slot name="share" let:storeValues {storeValues} />` seems
+      -- to result in a error when performing typecheck even though
+      -- it works.
+    -->
+    <svelte:fragment slot="share" let:storeValues>
+      <slot name="share" {storeValues} />
+    </svelte:fragment>
+    <svelte:fragment slot="transfer-ownership" let:storeValues>
+      <slot name="transfer-ownership" {storeValues} />
+    </svelte:fragment>
+  </PermissionsModalContent>
 </ControlledModal>
-
-<style lang="scss">
-  .tabs {
-    --Tab_margin-right: var(--size-small);
-
-    .tab-content {
-      margin-top: var(--size-base);
-    }
-  }
-</style>

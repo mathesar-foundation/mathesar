@@ -7,6 +7,7 @@
     RawDatabasePrivilegesForRole,
   } from '@mathesar/api/rpc/databases';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import type { Role } from '@mathesar/models/Role';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { toast } from '@mathesar/stores/toast';
   import {
@@ -23,7 +24,7 @@
   export let controller: ModalController;
 
   const databaseContext = DatabaseRouteContext.get();
-  $: ({ database, roles, underlyingDatabase } = $databaseContext);
+  $: ({ database, roles, underlyingDatabase, currentRole } = $databaseContext);
   $: databasePrivileges = database.constructDatabasePrivilegesStore();
 
   const accessControlConfig: AccessControlConfig<
@@ -68,11 +69,13 @@
       databasePrivileges.batchRunner({ database_id: database.id }),
       roles.batchRunner({ database_id: database.id }),
       underlyingDatabase.batchRunner({ database_id: database.id }),
+      currentRole.batchRunner({ database_id: database.id }),
     ]);
     return {
       roles,
       privilegesForRoles: databasePrivileges,
       permissionsMetaData: underlyingDatabase,
+      currentRole,
     };
   }
 
@@ -87,9 +90,21 @@
     );
     toast.success($_('access_for_roles_saved_successfully'));
   }
+
+  async function transferOwnership(newOwner: Role['oid']) {
+    if (!$underlyingDatabase.resolvedValue) {
+      throw new Error('Database has not been stored');
+    }
+    await $underlyingDatabase.resolvedValue.updateOwner(newOwner);
+    toast.success($_('database_ownership_updated_successfully'));
+  }
 </script>
 
-<PermissionsModal {controller} onClose={() => databasePrivileges.reset()}>
+<PermissionsModal
+  {controller}
+  getAsyncStores={getAsyncStoresForPermissions}
+  onClose={() => databasePrivileges.reset()}
+>
   <span slot="title">
     {$_('database_permissions')}
   </span>
@@ -97,8 +112,15 @@
     slot="share"
     {controller}
     {accessControlConfig}
-    getAsyncStores={getAsyncStoresForPermissions}
+    let:storeValues
+    {storeValues}
     {savePrivilegesForRoles}
   />
-  <TransferOwnership slot="transfer-ownership" {controller} />
+  <TransferOwnership
+    slot="transfer-ownership"
+    {controller}
+    {transferOwnership}
+    let:storeValues
+    {storeValues}
+  />
 </PermissionsModal>

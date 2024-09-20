@@ -76,9 +76,11 @@
     {@const isSelected = $value.some((opt) =>
       $staticProps.checkEquality(opt, option),
     )}
+    {@const isDisabled = $staticProps.checkIfOptionIsDisabled(option)}
     <li
       role="option"
       class:selected={isSelected}
+      class:disabled={isDisabled}
       class:in-focus={index === $focusedOptionIndex}
       aria-selected={isSelected ? true : undefined}
       on:click={() => api.pick(option)}

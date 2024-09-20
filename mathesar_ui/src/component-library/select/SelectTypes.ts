@@ -14,6 +14,9 @@ export interface SelectProps<Option> extends BaseInputProps {
   triggerAppearance?: Appearance;
   ariaLabel?: string;
   valuesAreEqual?: ListBoxProps<Option | undefined>['checkEquality'];
+  isOptionDisabled?: ListBoxProps<
+    Option | undefined
+  >['checkIfOptionIsDisabled'];
   /**
    * When options change and the selected value is either undefined or
    * not present in the options array, autoSelect determines how to

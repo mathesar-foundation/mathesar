@@ -244,5 +244,14 @@ export const tables = {
       },
       Array<RawTablePrivilegesForRole>
     >(),
+
+    transfer_ownership: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        table_oid: RawTable['oid'];
+        new_owner_oid: RawRole['oid'];
+      },
+      RawTable
+    >(),
   },
 };

@@ -8,6 +8,7 @@
     SchemaPrivilege,
   } from '@mathesar/api/rpc/schemas';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import type { Role } from '@mathesar/models/Role';
   import type { Schema } from '@mathesar/models/Schema';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
@@ -29,7 +30,7 @@
   $: schemaPrivileges = schema.constructSchemaPrivilegesStore();
 
   const databaseContext = DatabaseRouteContext.get();
-  $: ({ roles } = $databaseContext);
+  $: ({ roles, currentRole } = $databaseContext);
 
   const accessControlConfig: AccessControlConfig<
     'read' | 'read_and_create',
@@ -71,6 +72,7 @@
         schema_oid: schema.oid,
       }),
       roles.batchRunner({ database_id: schema.database.id }),
+      currentRole.batchRunner({ database_id: schema.database.id }),
     ]);
     return {
       roles,
@@ -84,6 +86,7 @@
           },
         }),
       ),
+      currentRole,
     };
   }
 
@@ -102,9 +105,18 @@
     );
     toast.success($_('access_for_roles_saved_successfully'));
   }
+
+  async function transferOwnership(newOwner: Role['oid']) {
+    await schema.updateOwner(newOwner);
+    toast.success($_('schema_ownership_updated_successfully'));
+  }
 </script>
 
-<PermissionsModal {controller} onClose={() => schemaPrivileges.reset()}>
+<PermissionsModal
+  {controller}
+  getAsyncStores={getAsyncStoresForPermissions}
+  onClose={() => schemaPrivileges.reset()}
+>
   <span slot="title">
     {$_('schema_permissions')}
   </span>
@@ -112,8 +124,15 @@
     slot="share"
     {controller}
     {accessControlConfig}
-    getAsyncStores={getAsyncStoresForPermissions}
+    let:storeValues
+    {storeValues}
     {savePrivilegesForRoles}
   />
-  <TransferOwnership slot="transfer-ownership" {controller} />
+  <TransferOwnership
+    slot="transfer-ownership"
+    {controller}
+    {transferOwnership}
+    let:storeValues
+    {storeValues}
+  />
 </PermissionsModal>

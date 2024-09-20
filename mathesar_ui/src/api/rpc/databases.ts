@@ -91,5 +91,12 @@ export const databases = {
       },
       Array<RawDatabasePrivilegesForRole>
     >(),
+    transfer_ownership: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        new_owner_oid: RawRole['oid'];
+      },
+      RawUnderlyingDatabase
+    >(),
   },
 };
