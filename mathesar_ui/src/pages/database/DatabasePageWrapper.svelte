@@ -15,6 +15,7 @@
     getDatabasePageSettingsSectionUrl,
   } from '@mathesar/routes/urls';
   import { modal } from '@mathesar/stores/modal';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     Button,
     ButtonMenuItem,
@@ -25,6 +26,9 @@
   import DatabasePermissionsModal from './permissions/DatabasePermissionsModal.svelte';
 
   const permissionsModal = modal.spawnModalController();
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: ({ isMathesarAdmin } = $userProfileStore);
 
   export let database: Database;
 
@@ -76,20 +80,22 @@
         <span>{$_('database_permissions')}</span>
       </Button>
 
-      <!-- <DropdownMenu
-        showArrow={false}
-        triggerAppearance="plain"
-        closeOnInnerClick={false}
-        icon={iconMoreActions}
-        preferredPlacement="bottom-end"
-      >
-        <ButtonMenuItem icon={iconDeleteMajor}>
-          {$_('disconnect_database')}
-        </ButtonMenuItem>
-        <ButtonMenuItem icon={iconDeleteMajor} danger>
-          {$_('delete_database')}
-        </ButtonMenuItem>
-      </DropdownMenu> -->
+      {#if isMathesarAdmin}
+        <DropdownMenu
+          showArrow={false}
+          triggerAppearance="plain"
+          closeOnInnerClick={false}
+          icon={iconMoreActions}
+          preferredPlacement="bottom-end"
+        >
+          <ButtonMenuItem icon={iconDeleteMajor}>
+            {$_('disconnect_database')}
+          </ButtonMenuItem>
+          <ButtonMenuItem icon={iconDeleteMajor} danger>
+            {$_('delete_database')}
+          </ButtonMenuItem>
+        </DropdownMenu>
+      {/if}
     </div>
   </AppSecondaryHeader>
 

@@ -18,6 +18,7 @@
   import { confirm } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import {
     Button,
@@ -32,6 +33,8 @@
 
   const routeContext = DatabaseSettingsRouteContext.get();
   const configureRoleModalController = modal.spawnModalController();
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: ({ isMathesarAdmin } = $userProfileStore);
 
   $: ({ database, databaseRouteContext, configuredRoles, combinedLoginRoles } =
     $routeContext);
@@ -88,12 +91,14 @@
                   <Button
                     appearance="secondary"
                     on:click={() => configureRole(combinedLoginRole)}
+                    disabled={!isMathesarAdmin}
                   >
                     <Icon {...iconEdit} size="0.8em" />
                     <span>{$_('configure_password')}</span>
                   </Button>
                   <SpinnerButton
                     appearance="secondary"
+                    disabled={!isMathesarAdmin}
                     confirm={() =>
                       confirm({
                         title: {
@@ -124,6 +129,7 @@
                 <Button
                   appearance="secondary"
                   on:click={() => configureRole(combinedLoginRole)}
+                  disabled={!isMathesarAdmin}
                 >
                   <Icon {...iconConfigurePassword} size="0.8em" />
                   <span>{$_('configure_in_mathesar')}</span>
