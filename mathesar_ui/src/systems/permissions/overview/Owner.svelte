@@ -4,16 +4,19 @@
   import type { Role } from '@mathesar/models/Role';
   import type { ImmutableMap } from '@mathesar-component-library';
 
+  import type { PermissionsMetaData } from '../permissionsUtils';
+
   import OverviewSection from './OverviewSection.svelte';
   import RoleWithChildren from './RoleWithChildren.svelte';
-  import type { PermissionsMetaData } from './utils';
 
   type Privilege = $$Generic;
 
   export let roles: ImmutableMap<Role['oid'], Role>;
   export let permissionsMetaData: PermissionsMetaData<Privilege>;
+
+  $: ownerOid = permissionsMetaData.currentAccess.ownerOid;
 </script>
 
 <OverviewSection title={$_('owner')}>
-  <RoleWithChildren rolesMap={roles} roleOid={permissionsMetaData.owner_oid} />
+  <RoleWithChildren rolesMap={roles} roleOid={$ownerOid} />
 </OverviewSection>

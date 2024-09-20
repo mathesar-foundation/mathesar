@@ -38,9 +38,6 @@
   $: addedUsers = new Set(
     [...collaboratorsMap.values()].map((cbr) => cbr.userId),
   );
-  $: usersNotAdded = [...usersMap.values()].filter(
-    (user) => !addedUsers.has(user.id),
-  );
 
   async function addCollaborator() {
     if ($userId && $configuredRoleId) {
@@ -64,7 +61,7 @@
       input={{
         component: SelectUser,
         props: {
-          options: usersNotAdded.map((user) => user.id),
+          options: [...usersMap.values()].map((user) => user.id),
           getLabel: (option) => {
             if (option) {
               return usersMap.get(option)?.username ?? String(option);
@@ -72,6 +69,8 @@
             return $_('select_user');
           },
           autoSelect: 'none',
+          isOptionDisabled: (option) =>
+            option !== undefined && addedUsers.has(option),
         },
       }}
     />
