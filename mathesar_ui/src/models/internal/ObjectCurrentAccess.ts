@@ -11,7 +11,7 @@ export class ObjectCurrentAccess<Privilege> {
 
   private _currentRolePrivileges;
 
-  get currentRolePrivileges(): Readable<Privilege[]> {
+  get currentRolePrivileges(): Readable<Set<Privilege>> {
     return this._currentRolePrivileges;
   }
 
@@ -27,7 +27,7 @@ export class ObjectCurrentAccess<Privilege> {
     current_role_owns: boolean;
   }) {
     this._ownerOid = writable(props.owner_oid);
-    this._currentRolePrivileges = writable(props.current_role_priv);
+    this._currentRolePrivileges = writable(new Set(props.current_role_priv));
     this._currentRoleOwns = writable(props.current_role_owns);
   }
 
@@ -37,7 +37,7 @@ export class ObjectCurrentAccess<Privilege> {
     current_role_owns: boolean;
   }) {
     this._ownerOid.set(props.owner_oid);
-    this._currentRolePrivileges.set(props.current_role_priv);
+    this._currentRolePrivileges.set(new Set(props.current_role_priv));
     this._currentRoleOwns.set(props.current_role_owns);
   }
 }
