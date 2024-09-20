@@ -69,7 +69,10 @@
     </div>
   </Button>
   {#if canMoveToLinkedTable}
-    <Button on:click={handleMoveColumnsToExistingLinkedTable} appearance="action">
+    <Button
+      on:click={handleMoveColumnsToExistingLinkedTable}
+      appearance="action"
+    >
       <div class="action-item">
         <div>
           <Icon {...iconMoveColumnsToExistingLinkedTable} />

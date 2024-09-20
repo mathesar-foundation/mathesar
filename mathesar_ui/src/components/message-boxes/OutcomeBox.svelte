@@ -8,10 +8,13 @@
   type $$Props = ComponentProps<MessageBox>;
 
   export let fullWidth = true;
+  export let title = "What's Changing";
 </script>
 
 <div class="outcome-box">
-  <MessageBox icon={iconOutcome} {fullWidth}><slot /></MessageBox>
+  <MessageBox icon={iconOutcome} {fullWidth} {title}>
+    <slot />
+  </MessageBox>
 </div>
 
 <style>

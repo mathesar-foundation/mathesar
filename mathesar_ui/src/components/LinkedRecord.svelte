@@ -141,7 +141,6 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-
   }
   .delete-button {
     position: relative;

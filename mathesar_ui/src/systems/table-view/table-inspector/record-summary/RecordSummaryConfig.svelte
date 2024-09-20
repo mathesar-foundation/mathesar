@@ -86,7 +86,8 @@
     <div class="content">
       <RadioGroup
         options={[false, true]}
-        getRadioLabel={(v) => (v ? $_('use_custom_template') : $_('use_default'))}
+        getRadioLabel={(v) =>
+          v ? $_('use_custom_template') : $_('use_default')}
         ariaLabel={$_('template_type')}
         isInline
         bind:value={$customized}
@@ -105,7 +106,6 @@
               {/if}
             </RichText>
           </div>
-          
         </div>
       {/if}
 
@@ -153,10 +153,9 @@
         />
       {/if}
       {#if !previewRecordSummary}
-      <span class="null-text">{$_('no_record_summary_available')}</span>
-    {/if}
+        <span class="null-text">{$_('no_record_summary_available')}</span>
+      {/if}
     </div>
-   
   {/if}
 </div>
 

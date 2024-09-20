@@ -216,6 +216,15 @@
       }
     }
   }
+
+  &.btn-outcome {
+    background-color: var(--purple-100);
+    border: 1px solid var(--purple-200);
+
+    &:hover {
+      border: 1px solid var(--purple-300);
+    }
+  }
 }
 a.btn {
   text-decoration: none;
