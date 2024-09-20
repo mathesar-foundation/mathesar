@@ -385,9 +385,6 @@
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);
   }
-  .description {
-    margin-bottom: 1rem;
-  }
   :global(
       .form
         .collapsible

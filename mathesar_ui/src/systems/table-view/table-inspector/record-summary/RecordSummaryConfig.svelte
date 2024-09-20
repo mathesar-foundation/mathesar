@@ -160,11 +160,6 @@
 </div>
 
 <style>
-  .heading {
-    margin-block: 0;
-    color: var(--color-text-muted);
-    font-size: var(--text-size-small);
-  }
   .content > :global(* + *) {
     margin-top: 1rem;
   }
