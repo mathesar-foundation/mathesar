@@ -6,11 +6,7 @@ import type {
   QueryResultColumn,
   QueryRunResponse,
 } from '@mathesar/api/rpc/explorations';
-import type {
-  JoinPath,
-  JoinableTablesResult,
-  Table,
-} from '@mathesar/api/rpc/tables';
+import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
@@ -18,6 +14,7 @@ import {
   getDisplayFormatter,
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
+import type { Table } from '@mathesar/models/Table';
 import {
   getAbstractTypeForDbType,
   getFiltersForAbstractType,

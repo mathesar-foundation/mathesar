@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import tableShareApi from '@mathesar/api/rest/tableShares';
-  import type { Table } from '@mathesar/api/rpc/tables';
   import { iconShare } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
   import { getSharedTablePageUrl } from '@mathesar/routes/urls';
   import ShareEntity from '@mathesar/systems/shares/ShareEntity.svelte';
   import { Dropdown, Icon } from '@mathesar-component-library';

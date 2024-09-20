@@ -3,7 +3,7 @@ import type {
   QueryInstanceSummarizationTransformation,
   UnsavedQueryInstance,
 } from '@mathesar/api/rpc/explorations';
-import type { Table } from '@mathesar/api/rpc/tables';
+import type { Table } from '@mathesar/models/Table';
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
 import type { TerseGrouping } from '@mathesar/stores/table-data';
 import Url64 from '@mathesar/utils/Url64';

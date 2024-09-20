@@ -3,13 +3,13 @@ import type { RawDatabase } from '@mathesar/api/rpc/databases';
 import type { QueryInstance } from '@mathesar/api/rpc/explorations';
 import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { RawServer } from '@mathesar/api/rpc/servers';
-import type { Table } from '@mathesar/api/rpc/tables';
+import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
 
 export interface CommonData {
   databases: RawDatabase[];
   servers: RawServer[];
   schemas: RawSchema[];
-  tables: Table[];
+  tables: RawTableWithMetadata[];
   queries: QueryInstance[];
   current_database: RawDatabase['id'] | null;
   internal_db_connection: {

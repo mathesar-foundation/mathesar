@@ -1,7 +1,6 @@
 <script lang="ts">
   import { first } from 'iter-tools';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import { ContextMenu } from '@mathesar/component-library';
   import {
     SheetCellResizer,
@@ -10,11 +9,11 @@
     SheetHeader,
   } from '@mathesar/components/sheet';
   import SheetOriginCell from '@mathesar/components/sheet/cells/SheetOriginCell.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import type { ProcessedColumn } from '@mathesar/stores/table-data';
+  import type { Table } from '@mathesar/models/Table';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
+    type ProcessedColumn,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { updateTable } from '@mathesar/stores/tables';
@@ -28,7 +27,7 @@
 
   export let hasNewColumnButton = false;
   export let columnOrder: number[];
-  export let table: Pick<Table, 'oid'>;
+  export let table: Table;
 
   $: columnOrder = columnOrder ?? [];
   $: ({ selection, processedColumns } = $tabularData);
@@ -87,7 +86,7 @@
     }
 
     void updateTable({
-      database: $currentDatabase,
+      schema: table.schema,
       table: {
         oid: table.oid,
         metadata: { column_order: newColumnOrder },

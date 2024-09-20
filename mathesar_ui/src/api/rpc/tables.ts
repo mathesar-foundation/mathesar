@@ -2,6 +2,19 @@ import type { RecursivePartial } from '@mathesar/component-library';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 import type { ColumnTypeOptions } from './columns';
+import type { RawDatabase } from './databases';
+import type { RawRole } from './roles';
+
+export const allTablePrivileges = [
+  'SELECT',
+  'INSERT',
+  'UPDATE',
+  'DELETE',
+  'TRUNCATE',
+  'REFERENCES',
+  'TRIGGER',
+] as const;
+export type TablePrivilege = (typeof allTablePrivileges)[number];
 
 export interface RawTable {
   oid: number;
@@ -9,6 +22,14 @@ export interface RawTable {
   /** The OID of the schema containing the table */
   schema: number;
   description: string | null;
+  owner_oid: RawRole['oid'];
+  current_role_priv: TablePrivilege[];
+  current_role_owns: boolean;
+}
+
+export interface RawTablePrivilegesForRole {
+  role_oid: RawRole['oid'];
+  direct: TablePrivilege[];
 }
 
 interface TableMetadata {
@@ -28,7 +49,7 @@ interface TableMetadata {
   record_summary_template: string | null;
 }
 
-export interface Table extends RawTable {
+export interface RawTableWithMetadata extends RawTable {
   metadata: TableMetadata | null;
 }
 
@@ -36,7 +57,7 @@ export interface Table extends RawTable {
 export type JoinPath = [number, number][][];
 
 export interface JoinableTable {
-  target: Table['oid'];
+  target: RawTableWithMetadata['oid'];
   join_path: JoinPath;
   /**
    * [Constraint OID, is_reversed]
@@ -62,7 +83,7 @@ export interface JoinableTablesResult {
   target_table_info: Record<
     string,
     {
-      name: Table['name'];
+      name: RawTableWithMetadata['name'];
       /** Keys are stringified column attnum values */
       columns: Record<
         string,
@@ -100,7 +121,7 @@ export const tables = {
       database_id: number;
       schema_oid: number;
     },
-    Table[]
+    RawTableWithMetadata[]
   >(),
 
   get: rpcMethodTypeContainer<
@@ -116,7 +137,7 @@ export const tables = {
       database_id: number;
       table_oid: number;
     },
-    Table
+    RawTableWithMetadata
   >(),
 
   /** Returns the oid of the table created */
@@ -203,6 +224,25 @@ export const tables = {
         metadata: RecursivePartial<TableMetadata>;
       },
       void
+    >(),
+  },
+
+  privileges: {
+    list_direct: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        table_oid: RawTable['oid'];
+      },
+      Array<RawTablePrivilegesForRole>
+    >(),
+
+    replace_for_roles: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        table_oid: RawTable['oid'];
+        privileges: Array<RawTablePrivilegesForRole>;
+      },
+      Array<RawTablePrivilegesForRole>
     >(),
   },
 };

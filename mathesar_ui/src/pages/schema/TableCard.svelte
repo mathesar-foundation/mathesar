@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
@@ -13,6 +12,7 @@
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
+  import type { Table } from '@mathesar/models/Table';
   import {
     getImportPreviewPageUrl,
     getTablePageUrl,

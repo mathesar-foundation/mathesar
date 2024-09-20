@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import type { FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
+  import type { Table } from '@mathesar/models/Table';
   import { Label, Radio, assertExhaustive } from '@mathesar-component-library';
 
   import Diagram from './diagram/Diagram.svelte';

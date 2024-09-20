@@ -25,7 +25,7 @@
   <div>
     {#if user}
       <div>{userName}</div>
-      <div>{user.email}</div>
+      <div>{user.email ?? ''}</div>
     {:else}
       {collaborator.userId}
     {/if}

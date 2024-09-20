@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
 
   import EditableTextWithActions from '@mathesar/components/EditableTextWithActions.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import {
     factoryToGetTableNameValidationErrors,
@@ -14,14 +13,11 @@
   export let disabled = false;
 
   $: ({ table } = $tabularData);
-  $: getNameValidationErrors = factoryToGetTableNameValidationErrors(
-    $currentDatabase,
-    table,
-  );
+  $: getNameValidationErrors = factoryToGetTableNameValidationErrors(table);
 
   async function handleSubmit(name: string) {
     await updateTable({
-      database: $currentDatabase,
+      schema: table.schema,
       table: {
         oid: table.oid,
         name,

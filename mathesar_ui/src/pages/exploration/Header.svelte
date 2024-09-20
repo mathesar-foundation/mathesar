@@ -9,8 +9,6 @@
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import { Button, Icon } from '@mathesar-component-library';
 
-  import ShareExplorationDropdown from './ShareExplorationDropdown.svelte';
-
   export let database: Database;
   export let schema: Schema;
   export let query: QueryInstance;
@@ -33,7 +31,8 @@
       >
         <span>{$_('edit_in_data_explorer')}</span>
       </a>
-      <ShareExplorationDropdown id={query.id} />
+      <!-- TODO: Display Share option when we re-implement it with the new permissions structure -->
+      <!-- <ShareExplorationDropdown id={query.id} /> -->
     {/if}
     <Button
       appearance="secondary"

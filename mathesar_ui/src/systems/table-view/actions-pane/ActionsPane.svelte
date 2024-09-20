@@ -10,7 +10,6 @@
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
   import SortDropdown from './record-operations/sort/SortDropdown.svelte';
-  import ShareTableDropdown from './ShareTableDropdown.svelte';
 
   type TableActionsContext = 'page' | 'shared-consumer-page';
 
@@ -48,7 +47,8 @@
 
   <div class="aux-actions" slot="actions-right">
     {#if context === 'page'}
-      <ShareTableDropdown id={table.oid} />
+      <!-- TODO: Display Share option when we re-implement it with the new permissions structure -->
+      <!-- <ShareTableDropdown id={table.oid} /> -->
 
       <Button
         appearance="secondary"

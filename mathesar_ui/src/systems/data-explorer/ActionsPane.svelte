@@ -2,7 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
@@ -14,6 +13,7 @@
     iconRedo,
     iconUndo,
   } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesDataStore } from '@mathesar/stores/tables';

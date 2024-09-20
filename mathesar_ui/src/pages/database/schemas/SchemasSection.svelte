@@ -65,7 +65,7 @@
       onProceed: async () => {
         await deleteSchemaAPI(schema);
         // TODO: Create common util to handle data clearing & sync between stores
-        removeTablesStore(database, schema);
+        removeTablesStore(schema);
       },
     });
   }

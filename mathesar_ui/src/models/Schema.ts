@@ -34,13 +34,14 @@ export class Schema {
 
   readonly current_role_owns: boolean;
 
-  readonly isPublicSchema = derived(this.name, ($name) => $name === 'public');
+  readonly isPublicSchema;
 
   readonly database: Database;
 
   constructor(props: { database: Database; rawSchema: RawSchema }) {
     this.oid = props.rawSchema.oid;
     this._name = writable(props.rawSchema.name);
+    this.isPublicSchema = derived(this._name, ($name) => $name === 'public');
     this._description = writable(props.rawSchema.description);
     this._tableCount = writable(props.rawSchema.table_count);
     this.owner_oid = props.rawSchema.owner_oid;
@@ -75,7 +76,7 @@ export class Schema {
     );
   }
 
-  updateTableCount(count: number) {
+  setTableCount(count: number) {
     this._tableCount.set(count);
   }
 

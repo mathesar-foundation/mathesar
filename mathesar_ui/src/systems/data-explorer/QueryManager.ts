@@ -8,7 +8,10 @@ import type {
   QueryInstance,
   QueryRunResponse,
 } from '@mathesar/api/rpc/explorations';
-import type { JoinableTablesResult, Table } from '@mathesar/api/rpc/tables';
+import type {
+  JoinableTablesResult,
+  RawTableWithMetadata,
+} from '@mathesar/api/rpc/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { currentDatabase } from '@mathesar/stores/databases';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
@@ -62,7 +65,9 @@ export default class QueryManager extends QueryRunner {
 
   // Promises
 
-  private baseTableFetchPromise: CancellablePromise<Table> | undefined;
+  private baseTableFetchPromise:
+    | CancellablePromise<RawTableWithMetadata>
+    | undefined;
 
   private joinableColumnsFetchPromise:
     | CancellablePromise<JoinableTablesResult>

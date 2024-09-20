@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import {
     FormSubmit,
     makeForm,
@@ -13,7 +12,7 @@
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { currentDatabase } from '@mathesar/stores/databases';
+  import type { Table } from '@mathesar/models/Table';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
   import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -65,7 +64,7 @@
   async function save() {
     try {
       await updateTable({
-        database: $currentDatabase,
+        schema: table.schema,
         table: {
           oid: table.oid,
           metadata: {
