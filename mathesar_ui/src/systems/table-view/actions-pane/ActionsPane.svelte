@@ -18,8 +18,11 @@
   export let context: TableActionsContext = 'page';
 
   $: ({ table, meta, isLoading, display } = $tabularData);
+  $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
   $: ({ isTableInspectorVisible } = display);
+
+  $: isSelectable = $currentRolePrivileges.has('SELECT');
 
   const canViewLinkedEntities = true;
 
@@ -35,18 +38,20 @@
     icon: iconTable,
   }}
 >
-  <div class="quick-access">
-    <FilterDropdown {filtering} {canViewLinkedEntities} />
-    <SortDropdown {sorting} />
-    <GroupDropdown {grouping} />
-  </div>
+  {#if isSelectable}
+    <div class="quick-access">
+      <FilterDropdown {filtering} {canViewLinkedEntities} />
+      <SortDropdown {sorting} />
+      <GroupDropdown {grouping} />
+    </div>
+  {/if}
 
   {#if context === 'page'}
     <ModificationStatus requestState={$sheetState} />
   {/if}
 
   <div class="aux-actions" slot="actions-right">
-    {#if context === 'page'}
+    {#if context === 'page' && isSelectable}
       <!-- TODO: Display Share option when we re-implement it with the new permissions structure -->
       <!-- <ShareTableDropdown id={table.oid} /> -->
 

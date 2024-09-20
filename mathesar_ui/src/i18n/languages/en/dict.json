@@ -384,6 +384,7 @@
   "no_grouping_condition_added": "No grouping condition has been added",
   "no_matches": "No matches for [searchValue]",
   "no_matching_records": "No matching records",
+  "no_privileges_view_table": "Your role does not have the privileges to view the table",
   "no_record_summary_available": "No record summary available.",
   "no_records_found": "No records found",
   "no_results_found": "No results found",
