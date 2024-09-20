@@ -1,14 +1,12 @@
 import type { PaginatedResponse } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column, ColumnMetadata } from '@mathesar/api/rpc/columns';
-import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { JoinPath } from '@mathesar/api/rpc/tables';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 import type { FilterId } from '@mathesar/stores/abstract-types/types';
 
-type QueryColumnAlias = string;
-
-export interface QueryInstanceInitialColumn {
-  alias: QueryColumnAlias;
+export interface InitialColumn {
+  alias: string;
+  /** The PostgreSQL attnum of the column */
   id: Column['id'];
   jp_path?: JoinPath;
 }
@@ -60,7 +58,8 @@ export interface QueryInstanceSummarizationTransformation {
 
 export interface QueryInstanceHideTransformation {
   type: 'hide';
-  spec: QueryColumnAlias[];
+  /** Column aliases */
+  spec: string[];
 }
 
 export interface QueryInstanceSortTransformation {
@@ -79,46 +78,26 @@ export type QueryInstanceTransformation =
   | QueryInstanceHideTransformation
   | QueryInstanceSortTransformation;
 
-/** Called `ExplorationInfo` in Python docs */
-export interface QueryInstance {
+export interface SavedExploration {
   id: number;
   database_id: number;
   name: string;
   description?: string;
   base_table_oid: number;
-  initial_columns?: QueryInstanceInitialColumn[];
+  initial_columns: InitialColumn[];
   transformations?: QueryInstanceTransformation[];
-  display_names: Record<string, string> | null;
+  display_names?: Record<string, string> | null;
   display_options?: unknown[];
 }
 
-export type UnsavedQueryInstance = Partial<QueryInstance> & {
+export type UnsavedExploration = Partial<SavedExploration> & {
   database_id: number;
 };
 
-export interface QueryGetResponse extends QueryInstance {
-  readonly schema: number;
-}
-
-/**
- * TODO: fix code duplication with QueryInstance
- */
-export interface ExplorationDef {
-  database_id: number;
-  base_table_oid: number;
-  initial_columns: unknown[];
-  transformations?: unknown[];
-  display_options?: unknown[];
-  display_names?: Record<string, unknown>;
-  description?: string;
-}
-
-export interface NamedExplorationDef extends ExplorationDef {
-  name: string;
-}
+export type AnonymousExploration = Omit<SavedExploration, 'id' | 'name'>;
 
 export interface ExplorationRunParams {
-  exploration_def: ExplorationDef;
+  exploration_def: AnonymousExploration;
   limit: number;
   offset: number;
 }
@@ -161,19 +140,21 @@ type QueryResultRecords =
   | PaginatedResponse<QueryResultRecord>
   | { count: 0; results: null };
 
-/** Called `ExplorationResult` in Python docs */
-export interface QueryRunResponse {
+export interface ExplorationResult {
   records: QueryResultRecords;
-  output_columns: QueryColumnAlias[];
+  /** Each string is a column alias */
+  output_columns: string[];
   column_metadata: Record<string, QueryColumnMetaData>;
   query: {
-    schema: RawSchema['oid'];
-    base_table: QueryInstance['base_table_oid'];
-    initial_columns: QueryInstanceInitialColumn[];
+    /** The schema OID */
+    schema: number;
+    /** The table OID */
+    base_table: number;
+    initial_columns: InitialColumn[];
     transformations?: QueryInstanceTransformation[];
   };
-  limit: unknown;
-  offset: unknown;
+  limit: number;
+  offset: number;
   filter: unknown;
   order_by: unknown;
   /** Specifies a list of dicts containing column names and searched expression. */
@@ -183,17 +164,20 @@ export interface QueryRunResponse {
 }
 
 export const explorations = {
-  list: rpcMethodTypeContainer<{ database_id: number }, QueryInstance[]>(),
+  list: rpcMethodTypeContainer<{ database_id: number }, SavedExploration[]>(),
 
-  get: rpcMethodTypeContainer<{ exploration_id: number }, QueryInstance>(),
+  get: rpcMethodTypeContainer<{ exploration_id: number }, SavedExploration>(),
 
-  add: rpcMethodTypeContainer<NamedExplorationDef, void>(),
+  add: rpcMethodTypeContainer<AnonymousExploration & { name: string }, void>(),
 
   delete: rpcMethodTypeContainer<{ exploration_id: number }, void>(),
 
-  replace: rpcMethodTypeContainer<{ new_exploration: QueryInstance }, void>(),
+  replace: rpcMethodTypeContainer<
+    { new_exploration: SavedExploration },
+    void
+  >(),
 
-  run: rpcMethodTypeContainer<ExplorationRunParams, QueryRunResponse>(),
+  run: rpcMethodTypeContainer<ExplorationRunParams, ExplorationResult>(),
 
   run_saved: rpcMethodTypeContainer<
     {
@@ -201,6 +185,6 @@ export const explorations = {
       limit: number;
       offset: number;
     },
-    QueryRunResponse
+    ExplorationResult
   >(),
 };

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import { iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -9,7 +9,7 @@
   import EmptyEntity from './EmptyEntity.svelte';
   import ExplorationItem from './ExplorationItem.svelte';
 
-  export let explorations: QueryInstance[];
+  export let explorations: SavedExploration[];
   export let database: Database;
   export let schema: Schema;
   export let bordered = true;

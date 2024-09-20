@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
@@ -24,7 +24,7 @@
   import TablesList from './TablesList.svelte';
 
   export let tablesMap: Map<Table['oid'], Table>;
-  export let explorationsMap: Map<number, QueryInstance>;
+  export let explorationsMap: Map<number, SavedExploration>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
 

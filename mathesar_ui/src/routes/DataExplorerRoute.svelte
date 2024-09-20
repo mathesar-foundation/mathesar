@@ -4,8 +4,8 @@
   import { router } from 'tinro';
 
   import type {
-    QueryInstance,
-    UnsavedQueryInstance,
+    SavedExploration,
+    UnsavedExploration,
   } from '@mathesar/api/rpc/explorations';
   import type { CancellablePromise } from '@mathesar/component-library';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
@@ -33,10 +33,10 @@
   let is404 = false;
 
   let queryManager: QueryManager | undefined;
-  let queryLoadPromise: CancellablePromise<QueryInstance>;
+  let queryLoadPromise: CancellablePromise<SavedExploration>;
   let query: Readable<QueryModel | undefined> = readable(undefined);
 
-  function createQueryManager(queryInstance: UnsavedQueryInstance) {
+  function createQueryManager(queryInstance: UnsavedExploration) {
     queryManager?.destroy();
     queryManager = new QueryManager({
       query: new QueryModel(queryInstance),

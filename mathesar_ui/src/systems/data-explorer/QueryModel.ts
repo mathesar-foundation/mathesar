@@ -1,9 +1,9 @@
 import type {
-  ExplorationDef,
-  QueryInstance,
-  QueryInstanceInitialColumn,
+  AnonymousExploration,
+  InitialColumn,
   QueryInstanceTransformation,
-  UnsavedQueryInstance,
+  SavedExploration,
+  UnsavedExploration,
 } from '@mathesar/api/rpc/explorations';
 import { assertExhaustive } from '@mathesar-component-library';
 
@@ -22,7 +22,7 @@ export interface QueryModelUpdateDiff {
     | 'initialColumnName'
     | 'transformations'
     | 'initialColumnsAndTransformations';
-  diff: Partial<UnsavedQueryInstance>;
+  diff: Partial<UnsavedExploration>;
 }
 
 export type QueryTransformationModel =
@@ -61,27 +61,27 @@ function validate(
 }
 
 export default class QueryModel {
-  readonly database_id: UnsavedQueryInstance['database_id'];
+  readonly database_id: UnsavedExploration['database_id'];
 
-  readonly base_table_oid: UnsavedQueryInstance['base_table_oid'];
+  readonly base_table_oid: UnsavedExploration['base_table_oid'];
 
-  readonly id: UnsavedQueryInstance['id'];
+  readonly id: UnsavedExploration['id'];
 
-  readonly name: UnsavedQueryInstance['name'];
+  readonly name: UnsavedExploration['name'];
 
-  readonly description: UnsavedQueryInstance['description'];
+  readonly description: UnsavedExploration['description'];
 
-  readonly initial_columns: QueryInstanceInitialColumn[];
+  readonly initial_columns: InitialColumn[];
 
   readonly transformationModels: QueryTransformationModel[];
 
-  readonly display_names: NonNullable<QueryInstance['display_names']>;
+  readonly display_names: NonNullable<SavedExploration['display_names']>;
 
   readonly isValid: boolean;
 
   readonly isRunnable: boolean;
 
-  constructor(model: UnsavedQueryInstance | QueryModel) {
+  constructor(model: UnsavedExploration | QueryModel) {
     this.database_id = model.database_id;
     this.base_table_oid = model.base_table_oid;
     this.id = model.id;
@@ -163,7 +163,7 @@ export default class QueryModel {
     };
   }
 
-  withInitialColumn(column: QueryInstanceInitialColumn): QueryModelUpdateDiff {
+  withInitialColumn(column: InitialColumn): QueryModelUpdateDiff {
     const initialColumns = [...this.initial_columns, column];
     const model = new QueryModel({
       ...this,
@@ -387,7 +387,7 @@ export default class QueryModel {
     };
   }
 
-  getColumn(columnAlias: string): QueryInstanceInitialColumn | undefined {
+  getColumn(columnAlias: string): InitialColumn | undefined {
     return this.initial_columns.find((column) => column.alias === columnAlias);
   }
 
@@ -436,7 +436,7 @@ export default class QueryModel {
     );
   }
 
-  toExplorationDef(): ExplorationDef {
+  toAnonymousExploration(): AnonymousExploration {
     if (this.base_table_oid === undefined) {
       throw new Error(
         'Cannot formulate run request since base_table is undefined',
@@ -454,11 +454,11 @@ export default class QueryModel {
     };
   }
 
-  getColumnCount(id: QueryInstanceInitialColumn['id']): number {
+  getColumnCount(id: InitialColumn['id']): number {
     return this.initial_columns.filter((entry) => entry.id === id).length;
   }
 
-  toJson(): UnsavedQueryInstance {
+  toJson(): UnsavedExploration {
     return {
       database_id: this.database_id,
       id: this.id,

@@ -1,10 +1,10 @@
 import type { Column } from '@mathesar/api/rpc/columns';
 import type {
+  ExplorationResult,
   QueryColumnMetaData,
   QueryGeneratedColumnSource,
   QueryInitialColumnSource,
   QueryResultColumn,
-  QueryRunResponse,
 } from '@mathesar/api/rpc/explorations';
 import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
@@ -359,7 +359,7 @@ function processColumn(
 }
 
 export function processColumnMetaData(
-  columnMetaData: QueryRunResponse['column_metadata'],
+  columnMetaData: ExplorationResult['column_metadata'],
   abstractTypeMap: AbstractTypesMap,
 ): ProcessedQueryResultColumnMap {
   return new ImmutableMap(
@@ -508,7 +508,7 @@ export function speculateColumnMetaData({
 }
 
 export function getProcessedOutputColumns(
-  outputColumnAliases: QueryRunResponse['output_columns'],
+  outputColumnAliases: ExplorationResult['output_columns'],
   processedColumnMetaData: ProcessedQueryResultColumnMap,
 ): ProcessedQueryOutputColumnMap {
   return new ImmutableMap(

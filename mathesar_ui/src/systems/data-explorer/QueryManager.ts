@@ -5,8 +5,8 @@ import { _ } from 'svelte-i18n';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type {
-  QueryInstance,
-  QueryRunResponse,
+  ExplorationResult,
+  SavedExploration,
 } from '@mathesar/api/rpc/explorations';
 import type {
   JoinableTablesResult,
@@ -73,9 +73,9 @@ export default class QueryManager extends QueryRunner {
     | CancellablePromise<JoinableTablesResult>
     | undefined;
 
-  private querySavePromise: CancellablePromise<QueryInstance> | undefined;
+  private querySavePromise: CancellablePromise<SavedExploration> | undefined;
 
-  private onSaveCallback: (instance: QueryInstance) => unknown;
+  private onSaveCallback: (instance: SavedExploration) => unknown;
 
   constructor({
     query,
@@ -84,12 +84,12 @@ export default class QueryManager extends QueryRunner {
   }: {
     query: QueryModel;
     abstractTypeMap: AbstractTypesMap;
-    onSave?: (instance: QueryInstance) => unknown;
+    onSave?: (instance: SavedExploration) => unknown;
   }) {
     super({
       query,
       abstractTypeMap,
-      onRunWithObject: (response: QueryRunResponse) => {
+      onRunWithObject: (response: ExplorationResult) => {
         this.checkAndUpdateSummarizationAfterRun(
           new QueryModel({ database_id: query.database_id, ...response.query }),
         );
@@ -340,7 +340,7 @@ export default class QueryManager extends QueryRunner {
       // TODO: Check for latest validation status here
       if (queryJSON.id !== undefined) {
         // TODO: Figure out a better way to help TS identify this as a saved instance
-        this.querySavePromise = putQuery(queryJSON as QueryInstance);
+        this.querySavePromise = putQuery(queryJSON as SavedExploration);
       } else {
         this.querySavePromise = createQuery(queryJSON);
       }

@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
@@ -74,7 +74,7 @@
         .withName(name)
         .model.withDescription(description).model;
       // TODO: Write better utility methods to identify saved instances
-      await putQuery(updatedQuery.toJson() as QueryInstance);
+      await putQuery(updatedQuery.toJson() as SavedExploration);
       query.set(updatedQuery);
     } catch (err) {
       const message =

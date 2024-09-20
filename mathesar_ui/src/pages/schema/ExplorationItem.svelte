@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import TableName from '@mathesar/components/TableName.svelte';
   import { iconExploration } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -10,7 +10,7 @@
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import { Icon } from '@mathesar-component-library';
 
-  export let exploration: QueryInstance;
+  export let exploration: SavedExploration;
   export let database: Database;
   export let schema: Schema;
 

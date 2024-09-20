@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rpc/explorations';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';
@@ -14,7 +14,7 @@
 
   export let database: Database;
   export let schema: Schema;
-  export let explorationsMap: Map<number, QueryInstance>;
+  export let explorationsMap: Map<number, SavedExploration>;
   export let hasTablesToExplore: boolean;
 
   $: showTutorial = explorationsMap.size === 0 && hasTablesToExplore;
@@ -22,7 +22,7 @@
   let explorationsSearchQuery = '';
 
   function filterExplorations(
-    _explorationsMap: Map<number, QueryInstance>,
+    _explorationsMap: Map<number, SavedExploration>,
     searchQuery: string,
   ) {
     return [..._explorationsMap.values()].filter((exploration) =>

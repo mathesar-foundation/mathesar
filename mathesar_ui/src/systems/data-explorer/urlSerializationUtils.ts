@@ -1,7 +1,7 @@
 import type { Column } from '@mathesar/api/rpc/columns';
 import type {
   QueryInstanceSummarizationTransformation,
-  UnsavedQueryInstance,
+  UnsavedExploration,
 } from '@mathesar/api/rpc/explorations';
 import type { Table } from '@mathesar/models/Table';
 import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
@@ -91,7 +91,7 @@ export function constructDataExplorerUrlToSummarizeFromGroup(
 
 export function constructQueryModelFromHash(
   hash: string,
-): UnsavedQueryInstance | undefined {
+): UnsavedExploration | undefined {
   const terseSummarization = JSON.parse(
     Url64.decode(hash),
   ) as Partial<TerseSummarization>;
@@ -104,8 +104,8 @@ export function constructQueryModelFromHash(
   }
 
   const { baseTable, databaseId } = terseSummarization;
-  let initialColumns: UnsavedQueryInstance['initial_columns'] = [];
-  let transformations: UnsavedQueryInstance['transformations'] = [];
+  let initialColumns: UnsavedExploration['initial_columns'] = [];
+  let transformations: UnsavedExploration['transformations'] = [];
 
   if (
     !terseSummarization.terseGrouping?.length ||

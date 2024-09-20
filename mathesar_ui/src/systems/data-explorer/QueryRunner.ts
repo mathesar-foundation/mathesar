@@ -5,9 +5,9 @@ import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
 import type {
+  ExplorationResult,
   QueryColumnMetaData,
   QueryResultRecord,
-  QueryRunResponse,
 } from '@mathesar/api/rpc/explorations';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
@@ -72,13 +72,13 @@ export default class QueryRunner {
 
   inspector: QueryInspector;
 
-  private runPromise: CancellablePromise<QueryRunResponse> | undefined;
+  private runPromise: CancellablePromise<ExplorationResult> | undefined;
 
   private runMode: QueryRunMode;
 
-  private onRunWithObjectCallback?: (results: QueryRunResponse) => unknown;
+  private onRunWithObjectCallback?: (results: ExplorationResult) => unknown;
 
-  private onRunWithIdCallback?: (results: QueryRunResponse) => unknown;
+  private onRunWithIdCallback?: (results: ExplorationResult) => unknown;
 
   private shareConsumer?: ShareConsumer;
 
@@ -93,8 +93,8 @@ export default class QueryRunner {
     query: QueryModel;
     abstractTypeMap: AbstractTypesMap;
     runMode?: QueryRunMode;
-    onRunWithObject?: (instance: QueryRunResponse) => unknown;
-    onRunWithId?: (instance: QueryRunResponse) => unknown;
+    onRunWithObject?: (instance: ExplorationResult) => unknown;
+    onRunWithId?: (instance: ExplorationResult) => unknown;
     shareConsumer?: ShareConsumer;
   }) {
     this.abstractTypeMap = abstractTypeMap;
@@ -149,7 +149,7 @@ export default class QueryRunner {
     );
   }
 
-  async run(): Promise<QueryRunResponse | undefined> {
+  async run(): Promise<ExplorationResult | undefined> {
     this.runPromise?.cancel();
     const queryModel = this.getQueryModel();
 
@@ -162,7 +162,7 @@ export default class QueryRunner {
       return undefined;
     }
 
-    let response: QueryRunResponse;
+    let response: ExplorationResult;
     let triggerCallback: () => unknown;
     try {
       const paginationParams = get(this.pagination).recordsRequestParams();
@@ -170,7 +170,7 @@ export default class QueryRunner {
       if (this.runMode === 'queryObject') {
         const internalRunPromise = api.explorations
           .run({
-            exploration_def: queryModel.toExplorationDef(),
+            exploration_def: queryModel.toAnonymousExploration(),
             ...paginationParams,
           })
           .run();
