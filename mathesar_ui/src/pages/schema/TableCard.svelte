@@ -37,6 +37,8 @@
   export let schema: Schema;
   export let openEditTableModal: (_table: Table) => void;
 
+  $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
+
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
   let isTableCardFocused = false;
@@ -77,6 +79,7 @@
 <div
   class="table-card"
   class:focus={isTableCardFocused}
+  class:no-select={!$currentRolePrivileges.has('SELECT')}
   class:hovering-menu-trigger={isHoveringMenuTrigger}
   class:hovering-bottom-button={isHoveringBottomButton}
   class:unconfirmed-import={requiresImportConfirmation}
@@ -137,6 +140,7 @@
         <ButtonMenuItem
           on:click={() => openEditTableModal(table)}
           icon={iconEdit}
+          disabled={!$currentRoleOwns}
         >
           {$_('edit_table')}
         </ButtonMenuItem>
@@ -145,6 +149,7 @@
         on:click={handleDeleteTable}
         danger
         icon={iconDeleteMajor}
+        disabled={!$currentRoleOwns}
       >
         {$_('delete_table')}
       </ButtonMenuItem>
@@ -160,6 +165,7 @@
         isHoveringBottomButton = false;
       }}
       on:click={handleFindRecord}
+      disabled={!$currentRolePrivileges.has('SELECT')}
     >
       <Icon {...iconSelectRecord} />
       <span class="label">{$_('find_record')}</span>
@@ -256,17 +262,20 @@
     z-index: 1;
     cursor: pointer;
   }
-  .bottom-button:focus {
+  .bottom-button:disabled {
+    cursor: not-allowed;
+  }
+  .bottom-button:not(:disabled):focus {
     outline: 2px solid var(--slate-300);
     outline-offset: 1px;
     border-bottom-left-radius: var(--border-radius-l);
     border-bottom-right-radius: var(--border-radius-l);
   }
 
-  .hovering-bottom-button .bottom-button {
+  .hovering-bottom-button .bottom-button:not(:disabled) {
     color: inherit;
   }
-  .hovering-bottom-button .bottom {
+  .hovering-bottom-button:not(.no-select) .bottom {
     color: inherit;
     background: var(--sand-200);
   }
@@ -278,6 +287,10 @@
     justify-content: center;
     font-size: var(--text-size-small);
     color: var(--color-text-muted);
+  }
+  .no-select .bottom-button,
+  .no-select .bottom {
+    color: var(--slate-300);
   }
   .bottom-button .label {
     margin-left: 0.25rem;
