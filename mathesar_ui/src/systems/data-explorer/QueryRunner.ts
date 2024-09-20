@@ -3,6 +3,7 @@ import { derived, get, writable } from 'svelte/store';
 
 import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
 import type {
   QueryColumnMetaData,
   QueryResultRecord,
@@ -12,7 +13,7 @@ import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { fetchQueryResults, runQuery } from '@mathesar/stores/queries';
+import { fetchQueryResults } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
@@ -167,12 +168,12 @@ export default class QueryRunner {
       const paginationParams = get(this.pagination).recordsRequestParams();
       this.runState.set({ state: 'processing' });
       if (this.runMode === 'queryObject') {
-        const internalRunPromise = runQuery({
-          ...queryModel.toRunRequestJson(),
-          parameters: {
+        const internalRunPromise = api.explorations
+          .run({
+            exploration_def: queryModel.toExplorationDef(),
             ...paginationParams,
-          },
-        });
+          })
+          .run();
         this.runPromise = internalRunPromise;
         const internalResponse = await internalRunPromise;
         response = internalResponse;

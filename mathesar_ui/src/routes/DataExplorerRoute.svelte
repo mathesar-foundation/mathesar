@@ -78,14 +78,17 @@
       try {
         const newQueryModel = constructQueryModelFromHash(hash);
         router.location.hash.clear();
-        createQueryManager(newQueryModel ?? {});
+        createQueryManager({
+          database_id: database.id,
+          ...(newQueryModel ?? {}),
+        });
         return;
       } catch {
         // fail silently
         console.error('Unable to create query model from hash', hash);
       }
     }
-    createQueryManager({});
+    createQueryManager({ database_id: database.id });
   }
 
   async function loadSavedQuery(_queryId: number) {

@@ -91,7 +91,7 @@ export default class QueryManager extends QueryRunner {
       abstractTypeMap,
       onRunWithObject: (response: QueryRunResponse) => {
         this.checkAndUpdateSummarizationAfterRun(
-          new QueryModel(response.query),
+          new QueryModel({ database_id: query.database_id, ...response.query }),
         );
       },
     });

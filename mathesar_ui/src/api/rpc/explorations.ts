@@ -81,52 +81,46 @@ export type QueryInstanceTransformation =
 
 /** Called `ExplorationInfo` in Python docs */
 export interface QueryInstance {
-  readonly id: number;
-  readonly database_id: number;
-  readonly name: string;
-  readonly description?: string;
-  readonly base_table_oid: number;
-  readonly initial_columns?: QueryInstanceInitialColumn[];
-  readonly transformations?: QueryInstanceTransformation[];
-  readonly display_names: Record<string, string> | null;
-  readonly display_options?: unknown[];
+  id: number;
+  database_id: number;
+  name: string;
+  description?: string;
+  base_table_oid: number;
+  initial_columns?: QueryInstanceInitialColumn[];
+  transformations?: QueryInstanceTransformation[];
+  display_names: Record<string, string> | null;
+  display_options?: unknown[];
 }
 
-export type UnsavedQueryInstance = Partial<QueryInstance>;
+export type UnsavedQueryInstance = Partial<QueryInstance> & {
+  database_id: number;
+};
 
 export interface QueryGetResponse extends QueryInstance {
   readonly schema: number;
 }
 
 /**
- * TODO: refactor this to match:
- *
- * ```ts
- * interface ExplorationDef {
- *   database_id: number;
- *   name: string;
- *   base_table_oid: number;
- *   initial_columns: unknown[];
- *   transformations?: unknown[];
- *   display_options?: unknown[];
- *   display_names?: Record<string, unknown>;
- *   description?: string;
- * }
- * ```
+ * TODO: fix code duplication with QueryInstance
  */
-export interface QueryRunRequest {
-  base_table: QueryInstance['base_table_oid'];
-  initial_columns: QueryInstanceInitialColumn[];
-  transformations?: QueryInstanceTransformation[];
-  display_names: QueryInstance['display_names'];
-  parameters: {
-    order_by?: {
-      field: QueryColumnAlias;
-      direction: 'asc' | 'desc';
-    }[];
-    limit: number;
-    offset: number;
-  };
+export interface ExplorationDef {
+  database_id: number;
+  base_table_oid: number;
+  initial_columns: unknown[];
+  transformations?: unknown[];
+  display_options?: unknown[];
+  display_names?: Record<string, unknown>;
+  description?: string;
+}
+
+export interface NamedExplorationDef extends ExplorationDef {
+  name: string;
+}
+
+export interface ExplorationRunParams {
+  exploration_def: ExplorationDef;
+  limit: number;
+  offset: number;
 }
 
 export interface QueryResultColumn {
@@ -188,34 +182,18 @@ export interface QueryRunResponse {
   duplicate_only: unknown;
 }
 
-// =============================================================================
-
-interface ExplorationDef {
-  database_id: number;
-  name: string;
-  base_table_oid: number;
-  initial_columns: unknown[];
-  transformations?: unknown[];
-  display_options?: unknown[];
-  display_names?: Record<string, unknown>;
-  description?: string;
-}
-
 export const explorations = {
   list: rpcMethodTypeContainer<{ database_id: number }, QueryInstance[]>(),
 
   get: rpcMethodTypeContainer<{ exploration_id: number }, QueryInstance>(),
 
-  add: rpcMethodTypeContainer<ExplorationDef, void>(),
+  add: rpcMethodTypeContainer<NamedExplorationDef, void>(),
 
   delete: rpcMethodTypeContainer<{ exploration_id: number }, void>(),
 
   replace: rpcMethodTypeContainer<{ new_exploration: QueryInstance }, void>(),
 
-  run: rpcMethodTypeContainer<
-    { exploration_def: ExplorationDef },
-    QueryRunResponse
-  >(),
+  run: rpcMethodTypeContainer<ExplorationRunParams, QueryRunResponse>(),
 
   run_saved: rpcMethodTypeContainer<
     {

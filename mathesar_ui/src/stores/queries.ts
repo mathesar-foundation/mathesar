@@ -53,7 +53,6 @@ import {
 import type {
   QueryGetResponse,
   QueryInstance,
-  QueryRunRequest,
   QueryRunResponse,
   UnsavedQueryInstance,
 } from '@mathesar/api/rpc/explorations';
@@ -274,12 +273,6 @@ export function getQuery(
     );
   }
   return new CancellablePromise((resolve) => resolve());
-}
-
-export function runQuery(
-  request: QueryRunRequest,
-): CancellablePromise<QueryRunResponse> {
-  return postAPI('/api/db/v0/queries/run/', request);
 }
 
 export function fetchQueryResults(
