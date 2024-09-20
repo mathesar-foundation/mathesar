@@ -39,7 +39,6 @@
   icon={iconAddNew}
   {disabled}
   size="small"
-  appearance="secondary"
 >
   {#each columns as column (column.id)}
     <ButtonMenuItem
