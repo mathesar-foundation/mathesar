@@ -18,7 +18,6 @@
     getTablePageUrl,
   } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { modal } from '@mathesar/stores/modal';
   import { deleteTable } from '@mathesar/stores/tables';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
@@ -31,14 +30,12 @@
     Truncate,
   } from '@mathesar-component-library';
 
-  import EditTable from './EditTable.svelte';
-
   const recordSelector = getRecordSelectorFromContext();
-  const editTableModalController = modal.spawnModalController();
 
   export let table: Table;
   export let database: Database;
   export let schema: Schema;
+  export let openEditTableModal: (_table: Table) => void;
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
@@ -70,10 +67,6 @@
         await deleteTable(schema, table.oid);
       },
     });
-  }
-
-  function handleEditTable() {
-    editTableModalController.open();
   }
 
   function handleFindRecord() {
@@ -141,7 +134,10 @@
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           {$_('explore_table')}
         </LinkMenuItem>
-        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+        <ButtonMenuItem
+          on:click={() => openEditTableModal(table)}
+          icon={iconEdit}
+        >
           {$_('edit_table')}
         </ButtonMenuItem>
       {/if}
@@ -170,8 +166,6 @@
     </button>
   {/if}
 </div>
-
-<EditTable modalController={editTableModalController} {table} />
 
 <style>
   .table-card {
