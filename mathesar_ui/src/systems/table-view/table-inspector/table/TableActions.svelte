@@ -63,7 +63,7 @@
 </script>
 
 <div class="actions-container">
-  <AnchorButton href={explorationPageUrl} appearance="secondary">
+  <AnchorButton href={explorationPageUrl} appearance="action">
     <div class="action-item">
       <div>
         <Icon {...iconExploration} /> <span>{$_('explore_data')}</span>

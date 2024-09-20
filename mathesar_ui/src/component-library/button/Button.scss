@@ -191,6 +191,31 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  &.btn-action {
+    background: var(--sand-100);
+    border-color: var(--sand-400);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        background: var(--sand-200);
+        border-color: var(--sand-500);
+      }
+
+      &:active,
+      &.active {
+        background: var(--sand-300);
+        border-color: var(--sand-600);
+      }
+
+      &:focus,
+      &.focus {
+        outline: 2px solid var(--sand-500);
+        outline-offset: 1px;
+      }
+    }
+  }
 }
 a.btn {
   text-decoration: none;

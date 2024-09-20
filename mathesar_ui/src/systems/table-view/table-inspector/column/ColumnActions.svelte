@@ -55,7 +55,7 @@
 </script>
 
 <div class="actions-container">
-  <Button on:click={handleMoveColumnsToNewLinkedTable} appearance="secondary">
+  <Button on:click={handleMoveColumnsToNewLinkedTable} appearance="action">
     <div class="action-item">
       <div>
         <Icon {...iconMoveColumnsToNewLinkedTable} />
@@ -69,7 +69,7 @@
     </div>
   </Button>
   {#if canMoveToLinkedTable}
-    <Button on:click={handleMoveColumnsToExistingLinkedTable} appearance="secondary">
+    <Button on:click={handleMoveColumnsToExistingLinkedTable} appearance="action">
       <div class="action-item">
         <div>
           <Icon {...iconMoveColumnsToExistingLinkedTable} />

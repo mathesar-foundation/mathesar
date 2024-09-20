@@ -55,7 +55,7 @@
       flex-direction: column;
 
       > :global(* + *) {
-        margin-top: 0.75rem;
+        margin-top: 0.5rem;
       }
     }
   }
