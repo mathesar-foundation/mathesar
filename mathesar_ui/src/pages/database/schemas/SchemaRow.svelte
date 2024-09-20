@@ -10,7 +10,7 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
+  import { ButtonMenuItem } from '@mathesar-component-library';
 
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
@@ -19,7 +19,8 @@
   export let database: Database;
   export let schema: Schema;
 
-  $: ({ name, description, isPublicSchema } = schema);
+  $: ({ name, description, isPublicSchema, currentAccess } = schema);
+  $: ({ currentRoleOwns } = currentAccess);
 
   let isHovered = false;
   let isFocused = false;
@@ -39,7 +40,11 @@
         icon={iconMoreActions}
         menuStyle="--Menu__padding-x:0.8em;"
       >
-        <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}>
+        <ButtonMenuItem
+          on:click={() => dispatch('edit')}
+          icon={iconEdit}
+          disabled={!$currentRoleOwns}
+        >
           {$_('edit_schema')}
         </ButtonMenuItem>
         <MenuDivider />
@@ -47,6 +52,7 @@
           danger
           on:click={() => dispatch('delete')}
           icon={iconDeleteMajor}
+          disabled={!$currentRoleOwns}
         >
           {$_('delete_schema')}
         </ButtonMenuItem>

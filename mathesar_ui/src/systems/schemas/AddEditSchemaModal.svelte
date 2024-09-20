@@ -18,6 +18,7 @@
 
   $: schemaName = schema?.name;
   $: schemaDescription = schema?.description;
+  $: currentRoleOwns = schema?.currentAccess?.currentRoleOwns;
 
   function nameIsDuplicate(name: string) {
     // Handling the condition when the new name is equal to the current name
@@ -60,6 +61,7 @@
   getInitialName={() => $schemaName ?? ''}
   getInitialDescription={() => $schemaDescription ?? ''}
   saveButtonLabel={schema ? $_('save') : $_('create_new_schema')}
+  disabled={!$currentRoleOwns}
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
@@ -71,7 +73,7 @@
 
   <span slot="title" let:initialName>
     {#if schema}
-      <RichText text={$_('rename_schema')} let:slotName>
+      <RichText text={$_('edit_schema_with_name')} let:slotName>
         {#if slotName === 'schemaName'}
           <Identifier>{initialName}</Identifier>
         {/if}
