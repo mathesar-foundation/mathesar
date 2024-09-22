@@ -44,13 +44,19 @@
   export let record: RecordStore;
   export let processedColumn: ProcessedColumn;
   export let field: FieldStore;
+  export let canUpdateTableRecords = true;
 
   $: ({ recordSummaries } = record);
   $: ({ column, abstractType } = processedColumn);
+  $: canUpdateColumn = processedColumn.currentRolePrivileges.has('UPDATE');
   $: value = $field;
   $: fieldIsDisabled = field.disabled;
   $: ({ showsError } = field);
-  $: disabled = column.primary_key || $fieldIsDisabled;
+  $: disabled =
+    column.primary_key ||
+    $fieldIsDisabled ||
+    !canUpdateTableRecords ||
+    !canUpdateColumn;
   $: shouldDisplayNullOverlay = !cellDataTypesThatUsePlaceholderText.has(
     abstractType.cellInfo.type,
   );

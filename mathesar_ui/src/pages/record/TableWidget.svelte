@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import type { Column } from '@mathesar/api/rpc/columns';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Table } from '@mathesar/models/Table';
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
@@ -33,16 +36,26 @@
     contextualFilters: new Map([[fkColumn.id, recordPk]]),
   });
   $: tabularDataStore.set(tabularData);
+  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: canViewTable = $currentRolePrivileges.has('SELECT');
 </script>
 
 <div class="table-widget">
   <div class="top">
     <h3 class="bold-header"><TableName {table} /></h3>
-    <MiniActionsPane />
+    {#if canViewTable}
+      <MiniActionsPane />
+    {/if}
   </div>
 
   <div class="results">
-    <TableView context="widget" {table} />
+    {#if canViewTable}
+      <TableView context="widget" {table} />
+    {:else}
+      <WarningBox fullWidth>
+        {$_('no_privileges_view_table')}
+      </WarningBox>
+    {/if}
   </div>
 </div>
 
