@@ -49,6 +49,8 @@
   $: schema = $currentSchema;
   $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
   $: isNormalRoutingContext = commonData.routing_context === 'normal';
+  $: currentRolePrivileges = schema?.currentAccess.currentRolePrivileges;
+  $: canCreateTable = $currentRolePrivileges?.has('CREATE');
 
   let isCreatingNewEmptyTable = false;
 
@@ -81,12 +83,17 @@
             <span class="icon"><Icon {...iconShortcuts} /></span>
             <span class="text">{$_('shortcuts')}</span>
           </span>
-          <ButtonMenuItem icon={iconAddNew} on:click={handleCreateEmptyTable}>
+          <ButtonMenuItem
+            icon={iconAddNew}
+            on:click={handleCreateEmptyTable}
+            disabled={!canCreateTable}
+          >
             {$_('new_table_from_scratch')}
           </ButtonMenuItem>
           <LinkMenuItem
             icon={iconAddNew}
             href={getImportPageUrl(database.id, schema.oid)}
+            disabled={!canCreateTable}
           >
             {$_('new_table_from_data_import')}
           </LinkMenuItem>

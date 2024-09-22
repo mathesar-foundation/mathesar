@@ -25,14 +25,18 @@
   }
 </script>
 
-<div class="container">
-  {#each tables as table (table.oid)}
-    <TableCard {table} {database} {schema} {openEditTableModal} />
+<div class="tables-list">
+  {#if tables.length > 0}
+    <div class="container">
+      {#each tables as table (table.oid)}
+        <TableCard {table} {database} {schema} {openEditTableModal} />
+      {/each}
+    </div>
   {:else}
     <EmptyEntity icon={iconTable}>
       <p>{$_('no_tables')}</p>
     </EmptyEntity>
-  {/each}
+  {/if}
 </div>
 
 {#if selectedTable}
