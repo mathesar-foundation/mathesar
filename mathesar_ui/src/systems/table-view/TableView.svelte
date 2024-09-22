@@ -32,8 +32,8 @@
   let tableInspectorTab: ComponentProps<WithTableInspector>['activeTabId'] =
     'table';
 
+  $: ({ currentRoleOwns } = table.currentAccess);
   $: usesVirtualList = context !== 'widget';
-  $: allowsDdlOperations = context !== 'widget';
   $: sheetHasBorder = context === 'widget';
   $: ({ processedColumns, display, isLoading, selection, recordsData } =
     $tabularData);
@@ -52,7 +52,7 @@
   $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
     display);
   $: columnOrder = table.metadata?.column_order ?? [];
-  $: hasNewColumnButton = allowsDdlOperations;
+  $: hasNewColumnButton = context !== 'widget' && $currentRoleOwns;
   /**
    * These are separate variables for readability and also to keep the door open
    * to more easily displaying the Table Inspector even if DDL operations are
