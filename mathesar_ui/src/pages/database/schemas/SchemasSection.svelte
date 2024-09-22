@@ -30,8 +30,6 @@
   const addEditModal = modal.spawnModalController();
   const databaseRouteContext = DatabaseRouteContext.get();
 
-  export let database: Database;
-
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
   $: void underlyingDatabase.run({ database_id: database.id });
   $: schemasMap = $schemasStore.data;

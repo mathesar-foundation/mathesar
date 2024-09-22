@@ -48,7 +48,7 @@
 
     <DatabasePageWrapper database={$currentDatabase} let:setSection>
       <EventfulRoute path="/schemas" onLoad={() => setSection('schemas')}>
-        <DatabasePageSchemasSection database={$currentDatabase} />
+        <DatabasePageSchemasSection />
       </EventfulRoute>
       <EventfulRoute
         path="/settings/*"

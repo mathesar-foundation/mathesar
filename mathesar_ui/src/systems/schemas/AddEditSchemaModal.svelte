@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
+  import { get, readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -16,8 +16,9 @@
   export let controller: ModalController;
   export let schema: Schema | undefined = undefined;
 
-  $: schemaName = schema?.name;
-  $: schemaDescription = schema?.description;
+  $: isEditMode = schema !== undefined;
+  $: schemaName = schema?.name ?? readable('');
+  $: schemaDescription = schema?.description ?? readable('');
   $: currentRoleOwns = schema?.currentAccess?.currentRoleOwns;
 
   function nameIsDuplicate(name: string) {
@@ -61,7 +62,7 @@
   getInitialName={() => $schemaName ?? ''}
   getInitialDescription={() => $schemaDescription ?? ''}
   saveButtonLabel={schema ? $_('save') : $_('create_new_schema')}
-  disabled={!$currentRoleOwns}
+  disabled={isEditMode && !$currentRoleOwns}
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
