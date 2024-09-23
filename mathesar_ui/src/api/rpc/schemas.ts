@@ -75,5 +75,14 @@ export const schemas = {
       },
       Array<RawSchemaPrivilegesForRole>
     >(),
+
+    transfer_ownership: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+        schema_oid: RawSchema['oid'];
+        new_owner_oid: RawRole['oid'];
+      },
+      RawSchema
+    >(),
   },
 };

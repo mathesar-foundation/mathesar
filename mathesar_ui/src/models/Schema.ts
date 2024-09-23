@@ -1,11 +1,13 @@
 import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type { RawSchema, SchemaPrivilege } from '@mathesar/api/rpc/schemas';
+import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
 
 import type { Database } from './Database';
+import { ObjectCurrentAccess } from './internal/ObjectCurrentAccess';
+import type { Role } from './Role';
 
 export class Schema {
   readonly oid: number;
@@ -28,11 +30,7 @@ export class Schema {
     return this._tableCount;
   }
 
-  readonly owner_oid: number;
-
-  readonly current_role_priv: SchemaPrivilege[];
-
-  readonly current_role_owns: boolean;
+  readonly currentAccess;
 
   readonly isPublicSchema;
 
@@ -44,9 +42,7 @@ export class Schema {
     this.isPublicSchema = derived(this._name, ($name) => $name === 'public');
     this._description = writable(props.rawSchema.description);
     this._tableCount = writable(props.rawSchema.table_count);
-    this.owner_oid = props.rawSchema.owner_oid;
-    this.current_role_priv = props.rawSchema.current_role_priv;
-    this.current_role_owns = props.rawSchema.current_role_owns;
+    this.currentAccess = new ObjectCurrentAccess(props.rawSchema);
     this.database = props.database;
   }
 
@@ -68,6 +64,28 @@ export class Schema {
           .then(() => {
             this._name.set(props.name);
             this._description.set(props.description);
+            return resolve(this);
+          }, reject)
+          .catch(reject);
+      },
+      () => promise.cancel(),
+    );
+  }
+
+  updateOwner(newOwner: Role['oid']) {
+    const promise = api.schemas.privileges
+      .transfer_ownership({
+        database_id: this.database.id,
+        schema_oid: this.oid,
+        new_owner_oid: newOwner,
+      })
+      .run();
+
+    return new CancellablePromise(
+      (resolve, reject) => {
+        promise
+          .then((result) => {
+            this.currentAccess.set(result);
             return resolve(this);
           }, reject)
           .catch(reject);

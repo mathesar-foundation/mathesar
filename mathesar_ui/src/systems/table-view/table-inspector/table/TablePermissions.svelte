@@ -8,6 +8,7 @@
     TablePrivilege,
   } from '@mathesar/api/rpc/tables';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import type { Role } from '@mathesar/models/Role';
   import type { Table } from '@mathesar/models/Table';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
@@ -29,7 +30,7 @@
   $: tablePrivileges = table.constructTablePrivilegesStore();
 
   const databaseContext = DatabaseRouteContext.get();
-  $: ({ roles } = $databaseContext);
+  $: ({ roles, currentRole } = $databaseContext);
 
   const accessControlConfig: AccessControlConfig<
     'read' | 'write',
@@ -91,6 +92,7 @@
         table_oid: table.oid,
       }),
       roles.batchRunner({ database_id: table.schema.database.id }),
+      currentRole.batchRunner({ database_id: table.schema.database.id }),
     ]);
     return {
       roles,
@@ -104,6 +106,7 @@
           },
         }),
       ),
+      currentRole,
     };
   }
 
@@ -122,6 +125,11 @@
     );
     toast.success($_('access_for_roles_saved_successfully'));
   }
+
+  async function transferOwnership(newOwner: Role['oid']) {
+    await table.updateOwner(newOwner);
+    toast.success($_('table_ownership_updated_successfully'));
+  }
 </script>
 
 <div>
@@ -130,7 +138,11 @@
   </Button>
 </div>
 
-<PermissionsModal {controller} onClose={() => tablePrivileges.reset()}>
+<PermissionsModal
+  {controller}
+  getAsyncStores={getAsyncStoresForPermissions}
+  onClose={() => tablePrivileges.reset()}
+>
   <span slot="title">
     {$_('table_permissions')}
   </span>
@@ -138,8 +150,15 @@
     slot="share"
     {controller}
     {accessControlConfig}
-    getAsyncStores={getAsyncStoresForPermissions}
+    let:storeValues
+    {storeValues}
     {savePrivilegesForRoles}
   />
-  <TransferOwnership slot="transfer-ownership" {controller} />
+  <TransferOwnership
+    slot="transfer-ownership"
+    {controller}
+    {transferOwnership}
+    let:storeValues
+    {storeValues}
+  />
 </PermissionsModal>
