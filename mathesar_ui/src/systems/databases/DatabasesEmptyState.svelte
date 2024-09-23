@@ -27,16 +27,17 @@
         {$_('setup_connections_help')}
       </div>
     </div>
-    {#if isMathesarAdmin}
-      <Button
-        slot="footer"
-        appearance="primary"
-        on:click={() => connectDatabaseModalController.open()}
-      >
-        <Icon {...iconAddNew} />
-        <span>{$_('connect_database')}</span>
-      </Button>
-    {/if}
+    <div slot="footer">
+      {#if isMathesarAdmin}
+        <Button
+          appearance="primary"
+          on:click={() => connectDatabaseModalController.open()}
+        >
+          <Icon {...iconAddNew} />
+          <span>{$_('connect_database')}</span>
+        </Button>
+      {/if}
+    </div>
   </Tutorial>
 </div>
 

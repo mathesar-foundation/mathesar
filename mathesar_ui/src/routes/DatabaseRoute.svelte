@@ -46,7 +46,7 @@
   <Route path="/*" firstmatch>
     <Route path="/" redirect="schemas/" />
 
-    <DatabasePageWrapper database={$currentDatabase} let:setSection>
+    <DatabasePageWrapper let:setSection>
       <EventfulRoute path="/schemas" onLoad={() => setSection('schemas')}>
         <DatabasePageSchemasSection />
       </EventfulRoute>

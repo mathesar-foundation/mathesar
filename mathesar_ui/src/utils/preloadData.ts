@@ -12,12 +12,11 @@ export interface CommonData {
   tables: RawTableWithMetadata[];
   queries: QueryInstance[];
   current_database: RawDatabase['id'] | null;
-  internal_db_connection: {
-    database: string;
+  internal_db: {
+    database_name: string;
     host: string;
     port: number;
     type: string;
-    user: string;
   };
   current_schema: number | null;
   user: User;

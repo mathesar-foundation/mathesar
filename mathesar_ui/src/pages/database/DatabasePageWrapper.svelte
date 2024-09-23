@@ -1,21 +1,28 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { router } from 'tinro';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
+  import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
+  import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import {
     iconDatabase,
     iconDeleteMajor,
     iconMoreActions,
   } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import type { Database } from '@mathesar/models/Database';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
+    HOME_URL,
     getDatabasePageSchemasSectionUrl,
     getDatabasePageSettingsSectionUrl,
   } from '@mathesar/routes/urls';
+  import { confirm } from '@mathesar/stores/confirmation';
+  import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
+  import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     Button,
     ButtonMenuItem,
@@ -25,12 +32,22 @@
 
   import DatabasePermissionsModal from './permissions/DatabasePermissionsModal.svelte';
 
+  const databaseRouteContext = DatabaseRouteContext.get();
+  $: ({ database, underlyingDatabase } = $databaseRouteContext);
+  $: void underlyingDatabase.run({ database_id: database.id });
+
+  const commonData = preloadCommonData();
+
+  $: currentRoleOwnsDatabase =
+    $underlyingDatabase.resolvedValue?.currentAccess.currentRoleOwns;
+  $: isDatabaseInInternalServer =
+    database.server.host === commonData.internal_db.host &&
+    database.server.port === commonData.internal_db.port;
+
   const permissionsModal = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
-
-  export let database: Database;
 
   type Section = 'schemas' | 'settings';
   let section: Section = 'schemas';
@@ -51,6 +68,39 @@
 
   export function setSection(_section: Section) {
     section = _section;
+  }
+
+  async function disconnectDatabase() {
+    await confirm({
+      title: {
+        component: PhraseContainingIdentifier,
+        props: {
+          identifier: database.name,
+          wrappingString: $_('disconnect_database_with_name'),
+        },
+      },
+      body: [
+        $_('action_cannot_be_undone'),
+        $_('disconnect_database_info'),
+        $_('disconnect_database_db_delete_info'),
+        $_('are_you_sure_to_proceed'),
+      ],
+      proceedButton: {
+        label: $_('disconnect_database'),
+        icon: undefined,
+      },
+      onProceed: async () => {
+        await databasesStore.disconnectDatabase(database);
+      },
+      onSuccess: () => {
+        toast.success($_('database_disconnect_success'));
+        router.goto(HOME_URL);
+      },
+      onError: (e) =>
+        toast.error({
+          message: `${$_('database_disconnect_failed')} ${e.message}`,
+        }),
+    });
   }
 </script>
 
@@ -88,12 +138,19 @@
           icon={iconMoreActions}
           preferredPlacement="bottom-end"
         >
-          <ButtonMenuItem icon={iconDeleteMajor}>
+          <ButtonMenuItem icon={iconDeleteMajor} on:click={disconnectDatabase}>
             {$_('disconnect_database')}
           </ButtonMenuItem>
-          <ButtonMenuItem icon={iconDeleteMajor} danger>
-            {$_('delete_database')}
-          </ButtonMenuItem>
+          <!-- TODO_BETA: Allow dropping databases -->
+          <!-- {#if isDatabaseInInternalServer}
+            <ButtonMenuItem
+              icon={iconDeleteMajor}
+              danger
+              disabled={!$currentRoleOwnsDatabase}
+            >
+              {$_('delete_database')}
+            </ButtonMenuItem>
+          {/if} -->
         </DropdownMenu>
       {/if}
     </div>
