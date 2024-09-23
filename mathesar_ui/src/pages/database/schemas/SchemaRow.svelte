@@ -113,7 +113,7 @@
     border-radius: var(--border-radius-l);
     border: 1px solid var(--slate-200);
     background-color: var(--white);
-    padding: 1.142em;
+    padding: 1em;
     display: flex;
     flex-direction: column;
   }
@@ -165,12 +165,12 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    flex-grow: 1;
+    flex-grow: 1;    
   }
 
   .name {
-    font-size: var(--text-size-x-large);
-    font-weight: 500;
+    font-size: var(--text-size-xx-large);
+    font-weight: var(--font-weight-medium);
     --icon-color: var(--brand-500);
     overflow: hidden;
   }
@@ -178,5 +178,6 @@
   .lock {
     color: var(--slate-300);
     align-self: baseline;
+    padding: 0.5rem;
   }
 </style>

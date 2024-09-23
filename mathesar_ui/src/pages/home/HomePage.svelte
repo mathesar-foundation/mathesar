@@ -117,12 +117,13 @@
   [data-identifier='databases-header'] {
     display: flex;
     align-items: center;
+    padding: 1rem 0;
 
     span {
       flex: 1 0 0;
-      color: var(--slate-800);
-      font-size: var(--size-xx-large);
-      font-weight: 500;
+      color: var(--slate-900);
+      font-size: var(--text-size-ultra-large);
+      font-weight: var(--font-weight-medium);
     }
   }
 
@@ -131,12 +132,13 @@
     margin-top: var(--size-x-large);
     flex-direction: column;
     align-items: stretch;
-    gap: var(--size-x-small);
+    gap: var(--size-medium);
   }
 
   [data-identifier='databases-list-grid'] {
     display: grid;
-    gap: 1rem;
-    margin-top: var(--size-x-large);
+    gap: 1.25rem;
+    margin-top: var(--size-large);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 </style>

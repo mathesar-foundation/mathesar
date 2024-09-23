@@ -146,9 +146,9 @@
     }
 
     .schema-list-title {
-      font-size: var(--text-size-x-large);
-      font-weight: 500;
+      font-size: var(--text-size-ultra-large);
       margin-top: var(--size-super-ultra-small);
+      font-weight: var(--font-weight-medium);
     }
 
     .schema-list {

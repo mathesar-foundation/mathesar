@@ -89,6 +89,7 @@
   restrictWidth
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
+    '--layout-background-color': 'var(--sand-50)',
   }}
 >
   <AppSecondaryHeader
