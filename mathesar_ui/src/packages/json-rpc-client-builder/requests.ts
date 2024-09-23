@@ -73,18 +73,20 @@ function send<T>(request: RpcRequest<T>): CancellablePromise<RpcResponse<T>> {
 
 function makeRpcBatchResponse<T extends RpcRequest<unknown>[]>(
   values: unknown,
-): RpcBatchResponse<T> {
+): RpcBatchSendResponse<T> {
   if (!Array.isArray(values)) {
     throw new Error('Response is not an array');
   }
-  return values.map((value) => makeRpcResponse(value)) as RpcBatchResponse<T>;
+  return values.map((value) =>
+    makeRpcResponse(value),
+  ) as RpcBatchSendResponse<T>;
 }
 
 function sendBatchRequest<T extends RpcRequest<unknown>[]>(
   endpoint: string,
   headers: Record<string, string | undefined>,
   requests: T,
-): CancellablePromise<RpcBatchResponse<T>> {
+): CancellablePromise<RpcBatchSendResponse<T>> {
   const fetch = cancellableFetch(endpoint, {
     method: 'POST',
     headers: {
@@ -104,7 +106,7 @@ function sendBatchRequest<T extends RpcRequest<unknown>[]>(
             resolve(
               requests.map(() =>
                 RpcError.fromAnything(rejectionReason),
-              ) as RpcBatchResponse<T>,
+              ) as RpcBatchSendResponse<T>,
             ),
         )
         .then((json) => resolve(makeRpcBatchResponse(json))),
@@ -171,13 +173,23 @@ export class RpcRequest<T> {
   }
 }
 
-export type RpcBatchResponse<T extends RpcRequest<unknown>[]> = {
+type RpcBatchSendResponse<T extends RpcRequest<unknown>[]> = {
   [K in keyof T]: T[K] extends RpcRequest<infer R> ? RpcResponse<R> : never;
 };
 
-export function batchSend<T extends RpcRequest<unknown>[]>(
-  requests: T,
-): CancellablePromise<RpcBatchResponse<T>> {
+/**
+ * Use this to run multiple RPC requests in a single batch and handle errors on
+ * a per-request basis.
+ *
+ * This function will not throw any errors when awaited.
+ *
+ * For less boilerplate, use `batchRun` which is simpler but less powerful.
+ */
+export function batchSend<
+  T extends
+    | [RpcRequest<unknown>, ...RpcRequest<unknown>[]]
+    | RpcRequest<unknown>[],
+>(requests: T): CancellablePromise<RpcBatchSendResponse<T>> {
   if (requests.length === 0) {
     throw new Error('There must be atleast one request');
   }
@@ -188,6 +200,43 @@ export function batchSend<T extends RpcRequest<unknown>[]>(
   }
   // TODO: Decide if headers need to be merged
   return sendBatchRequest(endpoint, firstRequest.getHeaders(), requests);
+}
+
+type RpcBatchRunResponse<T extends RpcRequest<unknown>[]> = {
+  [K in keyof T]: T[K] extends RpcRequest<infer R> ? R : never;
+};
+
+/**
+ * Use this to run multiple RPC requests without fine-grained error handling.
+ *
+ * For more control over error handling, use `batchSend` and handle errors
+ * manually.
+ *
+ * @throws `RpcError` when awaited if any errors are encountered. When multiple
+ * requests are run, there can be multiple errors. In that case, the first error
+ * encountered is thrown.
+ */
+export function batchRun<
+  T extends
+    | [RpcRequest<unknown>, ...RpcRequest<unknown>[]]
+    | RpcRequest<unknown>[],
+>(requests: T): CancellablePromise<RpcBatchRunResponse<T>> {
+  const promise = batchSend(requests);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      promise
+        .then((responses) => {
+          const values = [];
+          for (const response of responses as RpcResponse<unknown>[]) {
+            if (response.status !== 'ok') return reject(response);
+            values.push(response.value);
+          }
+          return resolve(values as RpcBatchRunResponse<T>);
+        }, reject)
+        .catch(reject);
+    },
+    () => promise.cancel(),
+  );
 }
 
 /**
