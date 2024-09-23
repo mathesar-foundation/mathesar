@@ -165,7 +165,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    flex-grow: 1;    
+    flex-grow: 1;
   }
 
   .name {
