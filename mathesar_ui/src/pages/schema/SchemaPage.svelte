@@ -169,8 +169,7 @@
 
 <style lang="scss">
   .tab-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding: var(--size-xx-large) 0;
   }
 
   .tab-header-container {
