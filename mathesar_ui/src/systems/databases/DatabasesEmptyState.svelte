@@ -3,9 +3,13 @@
 
   import { iconAddNew, iconConnection } from '@mathesar/icons';
   import { modal } from '@mathesar/stores/modal';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { Button, Icon, Tutorial } from '@mathesar-component-library';
 
   import ConnectDatabaseModal from './create-database/ConnectDatabaseModal.svelte';
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: ({ isMathesarAdmin } = $userProfileStore);
 
   const connectDatabaseModalController = modal.spawnModalController();
 </script>
@@ -23,14 +27,17 @@
         {$_('setup_connections_help')}
       </div>
     </div>
-    <Button
-      slot="footer"
-      appearance="primary"
-      on:click={() => connectDatabaseModalController.open()}
-    >
-      <Icon {...iconAddNew} />
-      <span>{$_('connect_database')}</span>
-    </Button>
+    <div slot="footer">
+      {#if isMathesarAdmin}
+        <Button
+          appearance="primary"
+          on:click={() => connectDatabaseModalController.open()}
+        >
+          <Icon {...iconAddNew} />
+          <span>{$_('connect_database')}</span>
+        </Button>
+      {/if}
+    </div>
   </Tutorial>
 </div>
 

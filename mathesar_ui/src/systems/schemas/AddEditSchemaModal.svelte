@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
+  import { get, readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -16,8 +16,10 @@
   export let controller: ModalController;
   export let schema: Schema | undefined = undefined;
 
-  $: schemaName = schema?.name;
-  $: schemaDescription = schema?.description;
+  $: isEditMode = schema !== undefined;
+  $: schemaName = schema?.name ?? readable('');
+  $: schemaDescription = schema?.description ?? readable('');
+  $: currentRoleOwns = schema?.currentAccess?.currentRoleOwns;
 
   function nameIsDuplicate(name: string) {
     // Handling the condition when the new name is equal to the current name
@@ -61,6 +63,7 @@
   getInitialDescription={() => $schemaDescription ?? ''}
   saveButtonLabel={schema ? $_('save') : $_('create_new_schema')}
   namePlaceholder={$_('schema_name_placeholder')}
+  disabled={isEditMode && !$currentRoleOwns}
 >
   <svelte:fragment slot="helpText">
     {#if !schema}
@@ -72,7 +75,7 @@
 
   <span slot="title" let:initialName>
     {#if schema}
-      <RichText text={$_('rename_schema')} let:slotName>
+      <RichText text={$_('edit_schema_with_name')} let:slotName>
         {#if slotName === 'schemaName'}
           <Identifier>{initialName}</Identifier>
         {/if}

@@ -18,6 +18,7 @@
   export let selectedDbType: DbType;
   export let typeOptions: ColumnWithAbstractType['type_options'];
   export let column: ColumnWithAbstractType;
+  export let disabled = false;
 
   $: ({ dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
@@ -59,7 +60,7 @@
     {#if dbForm}
       <div class="option-form db-opts">
         <div class="content">
-          <FormBuilder form={dbForm} />
+          <FormBuilder form={dbForm} {disabled} />
         </div>
       </div>
     {/if}

@@ -18,7 +18,6 @@
     getTablePageUrl,
   } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { modal } from '@mathesar/stores/modal';
   import { deleteTable } from '@mathesar/stores/tables';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
@@ -31,14 +30,14 @@
     Truncate,
   } from '@mathesar-component-library';
 
-  import EditTable from './EditTable.svelte';
-
   const recordSelector = getRecordSelectorFromContext();
-  const editTableModalController = modal.spawnModalController();
 
   export let table: Table;
   export let database: Database;
   export let schema: Schema;
+  export let openEditTableModal: (_table: Table) => void;
+
+  $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
@@ -72,10 +71,6 @@
     });
   }
 
-  function handleEditTable() {
-    editTableModalController.open();
-  }
-
   function handleFindRecord() {
     recordSelector.navigateToRecordPage({ tableId: table.oid });
   }
@@ -84,6 +79,7 @@
 <div
   class="table-card"
   class:focus={isTableCardFocused}
+  class:no-select={!$currentRolePrivileges.has('SELECT')}
   class:hovering-menu-trigger={isHoveringMenuTrigger}
   class:hovering-bottom-button={isHoveringBottomButton}
   class:unconfirmed-import={requiresImportConfirmation}
@@ -141,7 +137,11 @@
         <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
           {$_('explore_table')}
         </LinkMenuItem>
-        <ButtonMenuItem on:click={handleEditTable} icon={iconEdit}>
+        <ButtonMenuItem
+          on:click={() => openEditTableModal(table)}
+          icon={iconEdit}
+          disabled={!$currentRoleOwns}
+        >
           {$_('edit_table')}
         </ButtonMenuItem>
       {/if}
@@ -149,6 +149,7 @@
         on:click={handleDeleteTable}
         danger
         icon={iconDeleteMajor}
+        disabled={!$currentRoleOwns}
       >
         {$_('delete_table')}
       </ButtonMenuItem>
@@ -164,14 +165,13 @@
         isHoveringBottomButton = false;
       }}
       on:click={handleFindRecord}
+      disabled={!$currentRolePrivileges.has('SELECT')}
     >
       <Icon {...iconSelectRecord} />
       <span class="label">{$_('find_record')}</span>
     </button>
   {/if}
 </div>
-
-<EditTable modalController={editTableModalController} {table} />
 
 <style>
   .table-card {
@@ -266,17 +266,20 @@
     z-index: 1;
     cursor: pointer;
   }
-  .bottom-button:focus {
+  .bottom-button:disabled {
+    cursor: not-allowed;
+  }
+  .bottom-button:not(:disabled):focus {
     outline: 2px solid var(--slate-300);
     outline-offset: 1px;
     border-bottom-left-radius: var(--border-radius-l);
     border-bottom-right-radius: var(--border-radius-l);
   }
 
-  .hovering-bottom-button .bottom-button {
+  .hovering-bottom-button .bottom-button:not(:disabled) {
     color: inherit;
   }
-  .hovering-bottom-button .bottom {
+  .hovering-bottom-button:not(.no-select) .bottom {
     color: inherit;
     background: var(--slate-50);
   }
@@ -288,6 +291,10 @@
     justify-content: center;
     font-size: var(--text-size-small);
     color: var(--color-text-muted);
+  }
+  .no-select .bottom-button,
+  .no-select .bottom {
+    color: var(--slate-300);
   }
   .bottom-button .label {
     margin-left: 0.25rem;

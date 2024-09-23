@@ -18,7 +18,8 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ processedColumns, selection } = $tabularData);
+  $: ({ table, processedColumns, selection } = $tabularData);
+  $: ({ currentRoleOwns } = table.currentAccess);
   $: selectedColumns = (() => {
     const ids = $selection.columnIds;
     const columns = [];
@@ -68,6 +69,7 @@
             <ColumnNameAndDescription
               {column}
               columnsDataStore={$tabularData.columnsDataStore}
+              currentRoleOwnsTable={$currentRoleOwns}
             />
             {#if column.column.primary_key}
               <ColumnTypeSpecifierTag {column} type="primaryKey" />
@@ -79,6 +81,7 @@
                 {column}
                 columnsDataStore={$tabularData.columnsDataStore}
                 constraintsDataStore={$tabularData.constraintsDataStore}
+                currentRoleOwnsTable={$currentRoleOwns}
               />
             {/if}
           </div>
@@ -113,7 +116,7 @@
     {/if}
 
     {#if column}
-      <Collapsible triggerAppearance="plain">
+      <Collapsible isOpen triggerAppearance="plain">
         <CollapsibleHeader slot="header" title={$_('formatting')} />
         <div slot="content" class="content-container">
           {#key column}

@@ -27,6 +27,9 @@
   export let fillContainerHeight = false;
   export let uniformTabWidth = true;
   export let tabStyle: 'default' | 'compact' = 'default';
+  export let hideTabsInCaseOfSingleTab = false;
+
+  $: hideTabs = hideTabsInCaseOfSingleTab && tabs.length === 1;
 
   function selectActiveTab(e: Event, tab: Tab) {
     const hasLink = !!tab[linkKey];
@@ -88,28 +91,30 @@
   class:fill-container-height={fillContainerHeight}
   class:compact={tabStyle === 'compact'}
 >
-  <ul role="tablist" class="tabs" class:fill-tab-width={fillTabWidth}>
-    {#each tabs as tab, index (tab[idKey] || tab)}
-      <TabComponent
-        {componentId}
-        {tab}
-        {allowRemoval}
-        {uniformTabWidth}
-        link={getTabLink(tab)}
-        totalTabs={tabs.length}
-        isActive={tab[idKey] === activeTab?.[idKey]}
-        on:focus={focusTab}
-        on:blur={blurTab}
-        on:click={checkAndPreventDefault}
-        on:mousedown={(e) => selectActiveTab(e, tab)}
-        on:remove={(e) => removeTab(e, index)}
-      >
-        <slot name="tab" {tab}>
-          {tab[labelKey]}
-        </slot>
-      </TabComponent>
-    {/each}
-  </ul>
+  {#if !hideTabs}
+    <ul role="tablist" class="tabs" class:fill-tab-width={fillTabWidth}>
+      {#each tabs as tab, index (tab[idKey] || tab)}
+        <TabComponent
+          {componentId}
+          {tab}
+          {allowRemoval}
+          {uniformTabWidth}
+          link={getTabLink(tab)}
+          totalTabs={tabs.length}
+          isActive={tab[idKey] === activeTab?.[idKey]}
+          on:focus={focusTab}
+          on:blur={blurTab}
+          on:click={checkAndPreventDefault}
+          on:mousedown={(e) => selectActiveTab(e, tab)}
+          on:remove={(e) => removeTab(e, index)}
+        >
+          <slot name="tab" {tab}>
+            {tab[labelKey]}
+          </slot>
+        </TabComponent>
+      {/each}
+    </ul>
+  {/if}
 
   <div class="tab-content-holder">
     <div

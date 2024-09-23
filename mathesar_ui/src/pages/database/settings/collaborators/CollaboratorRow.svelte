@@ -7,6 +7,7 @@
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { Button, SpinnerButton } from '@mathesar-component-library';
 
   export let collaborator: Collaborator;
@@ -14,6 +15,9 @@
 
   const routeContext = DatabaseSettingsRouteContext.get();
   $: ({ configuredRoles, users } = $routeContext);
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: ({ isMathesarAdmin } = $userProfileStore);
 
   $: user = $users.resolvedValue?.get(collaborator.userId);
   $: configuredRoleId = collaborator.configuredRoleId;
@@ -44,6 +48,7 @@
       <Button
         appearance="secondary"
         on:click={() => editRoleForCollaborator(collaborator)}
+        disabled={!isMathesarAdmin}
       >
         <Icon {...iconEdit} size="0.8em" />
       </Button>
@@ -61,6 +66,7 @@
     icon={{ ...iconDeleteMajor, size: '0.8em' }}
     label=""
     appearance="secondary"
+    disabled={!isMathesarAdmin}
   />
 </GridTableCell>
 

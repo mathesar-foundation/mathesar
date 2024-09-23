@@ -79,11 +79,12 @@
   {#if isLoading}
     <Spinner />
   {:else if isSuccess && storeValues}
-    <div class="tabs">
+    <div class="tabs" class:tabs-displayed={displayedTabs.length > 1}>
       <TabContainer
         tabs={displayedTabs}
         uniformTabWidth={false}
         tabStyle="compact"
+        hideTabsInCaseOfSingleTab={true}
         let:activeTab
       >
         <div class="tab-content">
@@ -104,8 +105,10 @@
   .tabs {
     --Tab_margin-right: var(--size-small);
 
-    .tab-content {
-      margin-top: var(--size-base);
+    &.tabs-displayed {
+      .tab-content {
+        margin-top: var(--size-base);
+      }
     }
   }
 </style>

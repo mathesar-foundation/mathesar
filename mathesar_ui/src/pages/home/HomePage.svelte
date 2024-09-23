@@ -21,8 +21,7 @@
   const connectDbModalController = modal.spawnModalController();
 
   const userProfileStore = getUserProfileStoreFromContext();
-  $: userProfile = $userProfileStore;
-  $: isSuperUser = userProfile?.isSuperUser;
+  $: ({ isMathesarAdmin } = $userProfileStore);
 
   let filterQuery = '';
 
@@ -71,7 +70,7 @@
         on:clear={handleClearFilterQuery}
       >
         <svelte:fragment slot="action">
-          {#if isSuperUser}
+          {#if isMathesarAdmin}
             <Button
               appearance="primary"
               on:click={() => connectDbModalController.open()}

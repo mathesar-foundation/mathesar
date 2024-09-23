@@ -11,7 +11,7 @@ import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 export class UserModel {
   readonly id: User['id'];
 
-  readonly isSuperUser: User['is_superuser'];
+  readonly isMathesarAdmin: User['is_superuser'];
 
   readonly fullName: User['full_name'];
 
@@ -23,7 +23,7 @@ export class UserModel {
 
   constructor(userDetails: User) {
     this.id = userDetails.id;
-    this.isSuperUser = userDetails.is_superuser;
+    this.isMathesarAdmin = userDetails.is_superuser;
     this.fullName = userDetails.full_name;
     this.email = userDetails.email;
     this.username = userDetails.username;
@@ -37,7 +37,7 @@ export class UserModel {
   getUser(): User {
     return {
       id: this.id,
-      is_superuser: this.isSuperUser,
+      is_superuser: this.isMathesarAdmin,
       username: this.username,
       full_name: this.fullName,
       email: this.email,

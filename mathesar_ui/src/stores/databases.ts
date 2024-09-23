@@ -101,6 +101,15 @@ class DatabasesStore {
     return connectedDatabase;
   }
 
+  async disconnectDatabase(database: Database) {
+    await api.databases.configured
+      .disconnect({
+        database_id: database.id,
+      })
+      .run();
+    this.unsortedDatabases.delete(database.id);
+  }
+
   setCurrentDatabaseId(databaseId: Database['id']) {
     this.currentDatabaseId.set(databaseId);
   }

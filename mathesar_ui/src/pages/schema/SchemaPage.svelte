@@ -73,8 +73,8 @@
     addEditModal.open();
   }
 
-  $: ({ name, description, tableCount } = schema);
-  $: isDefault = $name === 'public';
+  $: ({ name, description, tableCount, currentAccess } = schema);
+  $: ({ currentRoleOwns } = currentAccess);
 
   logEvent('opened_schema', {
     database_name: database.name,
@@ -100,12 +100,14 @@
     }}
   >
     <div slot="action">
-      {#if !isDefault}
-        <Button on:click={handleEditSchema} appearance="secondary">
-          <Icon {...iconEdit} />
-          <span>{$_('edit_schema')}</span>
-        </Button>
-      {/if}
+      <Button
+        on:click={handleEditSchema}
+        appearance="secondary"
+        disabled={!$currentRoleOwns}
+      >
+        <Icon {...iconEdit} />
+        <span>{$_('edit_schema')}</span>
+      </Button>
       <Button appearance="secondary" on:click={() => permissionsModal.open()}>
         <span>{$_('schema_permissions')}</span>
       </Button>

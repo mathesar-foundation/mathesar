@@ -16,7 +16,9 @@
   export let database: Database;
   export let schema: Schema;
 
-  $: showTutorial = tablesMap.size === 0;
+  $: ({ currentRolePrivileges } = schema.currentAccess);
+  $: showTutorial =
+    tablesMap.size === 0 && $currentRolePrivileges.has('CREATE');
 
   let tableSearchQuery = '';
 

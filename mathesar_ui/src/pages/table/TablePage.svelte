@@ -1,7 +1,9 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { focusActiveCell } from '@mathesar/components/sheet/utils';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Table } from '@mathesar/models/Table';
@@ -34,6 +36,7 @@
 
   $: ({ query } = $router);
   $: meta = Meta.fromSerialization(query[metaSerializationQueryKey] ?? '');
+  $: ({ currentRolePrivileges } = table.currentAccess);
   $: tabularData = new TabularData({
     database: table.schema.database,
     table,
@@ -73,7 +76,15 @@
 <LayoutWithHeader fitViewport restrictWidth={false}>
   <div class="table-page">
     <ActionsPane {context} />
-    <TableView {table} {context} bind:sheetElement />
+    {#if $currentRolePrivileges.has('SELECT')}
+      <TableView {table} {context} bind:sheetElement />
+    {:else}
+      <div class="warning">
+        <WarningBox fullWidth>
+          {$_('no_privileges_view_table')}
+        </WarningBox>
+      </div>
+    {/if}
   </div>
 </LayoutWithHeader>
 
@@ -82,5 +93,8 @@
     display: grid;
     grid-template: auto 1fr / 1fr;
     height: 100%;
+  }
+  .warning {
+    padding: var(--size-base);
   }
 </style>

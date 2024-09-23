@@ -3,8 +3,9 @@
   import { _ } from 'svelte-i18n';
 
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import Errors from '@mathesar/components/Errors.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -17,17 +18,27 @@
   } from '@mathesar/stores/schemas';
   import { removeTablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
-  import { Button, Icon } from '@mathesar-component-library';
+  import {
+    Button,
+    Icon,
+    isDefinedNonNullable,
+  } from '@mathesar-component-library';
 
   import SchemaListSkeleton from './SchemaListSkeleton.svelte';
   import SchemaRow from './SchemaRow.svelte';
 
   const addEditModal = modal.spawnModalController();
+  const databaseRouteContext = DatabaseRouteContext.get();
 
-  export let database: Database;
-
+  $: ({ database, underlyingDatabase } = $databaseRouteContext);
+  $: void underlyingDatabase.run({ database_id: database.id });
   $: schemasMap = $schemasStore.data;
   $: schemasRequestStatus = $schemasStore.requestStatus;
+  $: isLoading =
+    $underlyingDatabase.isLoading ||
+    schemasRequestStatus.state === 'processing';
+  $: currentRoleDatabasePrivileges =
+    $underlyingDatabase.resolvedValue?.currentAccess.currentRolePrivileges;
 
   let filterQuery = '';
   let targetSchema: Schema | undefined;
@@ -77,7 +88,10 @@
 
 <div class="schema-list-wrapper">
   <div class="schema-list-title-container">
-    <h2 class="schema-list-title">{$_('schemas')} ({schemasMap.size})</h2>
+    <h2 class="schema-list-title">
+      {$_('schemas')}
+      {schemasMap.size ? `(${schemasMap.size})` : ''}
+    </h2>
   </div>
   <EntityContainerWithFilterBar
     searchPlaceholder={$_('search_schemas')}
@@ -85,7 +99,11 @@
     on:clear={handleClearFilterQuery}
   >
     <svelte:fragment slot="action">
-      <Button on:click={addSchema} appearance="primary">
+      <Button
+        on:click={addSchema}
+        appearance="primary"
+        disabled={!$currentRoleDatabasePrivileges?.has('CREATE')}
+      >
         <Icon {...iconAddNew} />
         <span>{$_('create_schema')}</span>
       </Button>
@@ -114,14 +132,16 @@
             />
           </li>
         {/each}
-      {:else if schemasRequestStatus.state === 'processing'}
+      {:else if schemasRequestStatus.state === 'processing' || isLoading}
         <SchemaListSkeleton />
-      {:else if schemasRequestStatus.state === 'failure'}
-        <ErrorBox fullWidth>
-          {#each schemasRequestStatus.errors as error (error)}
-            <p>{error}</p>
-          {/each}
-        </ErrorBox>
+      {:else if schemasRequestStatus.state === 'failure' || $underlyingDatabase.error}
+        <Errors
+          fullWidth
+          errors={[
+            ...schemasRequestStatus.errors,
+            $underlyingDatabase.error,
+          ].filter(isDefinedNonNullable)}
+        />
       {/if}
     </ul>
   </EntityContainerWithFilterBar>

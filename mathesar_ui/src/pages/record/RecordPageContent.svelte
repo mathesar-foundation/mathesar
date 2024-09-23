@@ -27,6 +27,8 @@
   export let tableStructure: TableStructure;
 
   $: table = $currentTable as Table;
+  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: canUpdateTableRecords = $currentRolePrivileges.has('UPDATE');
   $: ({ processedColumns } = tableStructure);
   $: ({ recordPk, summary, fieldValues } = record);
   $: fieldPropsObjects = [...$processedColumns.values()].map((c) => ({
@@ -66,7 +68,12 @@
     </div>
     <div class="fields">
       {#each fieldPropsObjects as { field, processedColumn } (processedColumn.id)}
-        <DirectField {record} {processedColumn} {field} />
+        <DirectField
+          {record}
+          {processedColumn}
+          {field}
+          {canUpdateTableRecords}
+        />
       {/each}
     </div>
     <div class="submit">

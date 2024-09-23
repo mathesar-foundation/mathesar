@@ -41,6 +41,7 @@
         terseGrouping: $grouping.terse(),
       },
     ))();
+  $: ({ currentRoleOwns } = table.currentAccess);
 
   function handleDeleteTable() {
     void confirmDelete({
@@ -89,7 +90,11 @@
     </AnchorButton>
   {/if}
 
-  <Button appearance="outline-primary" on:click={handleDeleteTable}>
+  <Button
+    appearance="outline-primary"
+    on:click={handleDeleteTable}
+    disabled={!$currentRoleOwns}
+  >
     <Icon {...iconDeleteMajor} />
     <span>{$_('delete_table')}</span>
   </Button>

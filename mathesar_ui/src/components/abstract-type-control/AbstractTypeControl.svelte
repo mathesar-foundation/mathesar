@@ -26,17 +26,19 @@
     options: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
   ) => Promise<unknown>;
   export let showWarnings = true;
+  export let disabled = false;
 
   let selectedAbstractType: ColumnWithAbstractType['abstractType'] =
     column.abstractType;
   let selectedDbType: ColumnWithAbstractType['type'] = column.type;
+  let savedTypeOptions = column.type_options ?? {};
   let typeOptions: ColumnWithAbstractType['type_options'] = {
-    ...(column.type_options ?? {}),
+    ...savedTypeOptions,
   };
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
-    !objectsAreDeeplyEqual(column.type_options, typeOptions);
+    !objectsAreDeeplyEqual(savedTypeOptions, typeOptions);
 
   let typeChangeState: RequestStatus;
 
@@ -50,7 +52,8 @@
   function resetAbstractType(_column: ColumnWithAbstractType) {
     selectedAbstractType = _column.abstractType;
     selectedDbType = _column.type;
-    typeOptions = { ...(_column.type_options ?? {}) };
+    savedTypeOptions = _column.type_options ?? {};
+    typeOptions = { ...savedTypeOptions };
   }
   $: resetAbstractType(column);
 
@@ -97,7 +100,7 @@
   {column}
   on:change={(e) => selectTypeAndAbstractType(e.detail)}
   on:reset={() => resetAbstractType(column)}
-  disabled={typeChangeState?.state === 'processing'}
+  disabled={typeChangeState?.state === 'processing' || disabled}
 />
 
 {#if selectedAbstractType && selectedDbType}
@@ -107,6 +110,7 @@
       bind:selectedDbType
       bind:typeOptions
       {column}
+      {disabled}
     />
   {/key}
 {/if}

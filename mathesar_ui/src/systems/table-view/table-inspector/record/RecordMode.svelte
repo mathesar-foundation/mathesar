@@ -10,7 +10,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ selection, recordsData } = $tabularData);
+  $: ({ table, selection, recordsData } = $tabularData);
   $: selectedRowIds = $selection.rowIds;
   $: selectedRowCount = selectedRowIds.size;
 </script>
@@ -28,6 +28,7 @@
       <CollapsibleHeader slot="header" title={$_('actions')} />
       <div slot="content" class="content-container">
         <RowActions
+          {table}
           {selectedRowIds}
           {recordsData}
           columnsDataStore={$tabularData.columnsDataStore}

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Table } from '@mathesar/models/Table';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
@@ -13,6 +16,8 @@
   export let record: RecordStore;
 
   $: table = $currentTable as Table;
+  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: canViewTable = $currentRolePrivileges.has('SELECT');
   $: tableStructure = new TableStructure({
     database: table.schema.database,
     table,
@@ -31,7 +36,19 @@
 <LayoutWithHeader cssVariables={{ '--page-padding': '0' }} fitViewport>
   {#if isLoading}
     <RecordPageLoadingSpinner />
-  {:else}
+  {:else if canViewTable}
     <RecordPageContent {tableStructure} {record} />
+  {:else}
+    <div class="no-access">
+      <WarningBox fullWidth>
+        {$_('no_privileges_view_record')}
+      </WarningBox>
+    </div>
   {/if}
 </LayoutWithHeader>
+
+<style>
+  .no-access {
+    padding: var(--size-base);
+  }
+</style>

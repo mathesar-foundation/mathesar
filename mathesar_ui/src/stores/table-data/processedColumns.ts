@@ -1,6 +1,6 @@
 import type { Readable } from 'svelte/store';
 
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { Column, ColumnPrivilege } from '@mathesar/api/rpc/columns';
 import type { Constraint } from '@mathesar/api/rpc/constraints';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
@@ -47,6 +47,7 @@ export interface ProcessedColumn extends CellColumnFabric {
     cellValue: unknown,
     recordSummaries?: RecordSummariesForSheet,
   ) => string | null | undefined;
+  currentRolePrivileges: Set<ColumnPrivilege>;
 }
 
 /** Maps column ids to processed columns */
@@ -117,5 +118,6 @@ export function processColumn({
       abstractType.identifier,
     ),
     formatCellValue: getDisplayFormatter(column, column.id),
+    currentRolePrivileges: new Set(column.current_role_priv),
   };
 }
