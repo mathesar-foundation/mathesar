@@ -226,6 +226,10 @@
   let isNewColumnsOpen = false;
 </script>
 
+<div class="description">
+  {$_('link_table_description')}
+</div>
+
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
@@ -384,6 +388,9 @@
   .form.self-referential {
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);
+  }
+  .description {
+    margin-bottom: 1rem;
   }
   :global(
       .form
