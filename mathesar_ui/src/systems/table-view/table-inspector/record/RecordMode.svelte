@@ -43,7 +43,7 @@
 
 <style lang="scss">
   .column-mode-container {
-    padding-bottom: 1rem;
+    padding-bottom: var(--size-small);
     display: flex;
     flex-direction: column;
   }
@@ -53,11 +53,11 @@
   }
 
   .records-selected-count {
-    padding: 1rem;
+    padding: var(--size-large);
   }
 
   .content-container {
-    padding: 1rem;
+    padding: var(--size-small);
     display: flex;
     flex-direction: column;
 

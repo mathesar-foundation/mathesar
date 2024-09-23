@@ -50,7 +50,7 @@
 </script>
 
 <div class="column-property column-name">
-  <span>{$_('name')}</span>
+  <span class="label">{$_('name')}</span>
   <EditableTextWithActions
     initialValue={column.column.name}
     onSubmit={handleColumnNameChange}
@@ -59,7 +59,7 @@
 </div>
 
 <div class="column-property column-description">
-  <span>{$_('description')}</span>
+  <span class="label">{$_('description')}</span>
   <EditableTextWithActions
     initialValue={column.column.description ?? ''}
     onSubmit={handleColumnDescriptionChange}
@@ -73,7 +73,10 @@
     flex-direction: column;
 
     > :global(* + *) {
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
     }
+  }
+  .label {
+    font-weight: var(--font-weight-medium);
   }
 </style>

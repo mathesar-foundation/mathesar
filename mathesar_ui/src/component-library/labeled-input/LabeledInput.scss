@@ -27,6 +27,17 @@
     }
   }
 
+  .description {
+    display: block;
+    font-size: var(--text-size-small);
+    color: var(--color-text-muted);
+    margin-top: var(--spacing-y, var(--spacing-y-default));
+    margin-left: 1.5rem;
+    &:empty {
+      display: none;
+    }
+  }
+
   &.layout-stacked {
     .input {
       margin-top: var(--spacing-y, var(--spacing-y-default));

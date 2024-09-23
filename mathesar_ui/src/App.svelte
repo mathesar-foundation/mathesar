@@ -53,7 +53,7 @@
     --color-contrast-light: var(--color-blue-light);
     --color-link: var(--color-blue-dark);
     --color-text: #171717;
-    --color-text-muted: #5e6471;
+    --color-text-muted: #515662;
     --color-substring-match: rgb(254, 221, 72);
     --color-substring-match-light: rgba(254, 221, 72, 0.2);
     --text-size-xx-small: var(--size-xx-small);

@@ -22,6 +22,7 @@
 <style lang="scss">
   .description {
     display: inline-block;
+    font-size: var(--text-size-small);
     margin-bottom: 1rem;
   }
 </style>

@@ -154,17 +154,17 @@
 
 <style lang="scss">
   .column-mode-container {
-    padding-bottom: 1rem;
+    padding-bottom: var(--size-small);
     display: flex;
     flex-direction: column;
   }
 
   .no-cell-selected {
-    padding: 2rem;
+    padding: var(--size-ultra-large);
   }
 
   .content-container {
-    padding: 1rem;
+    padding: var(--size-small);
     display: flex;
     flex-direction: column;
 

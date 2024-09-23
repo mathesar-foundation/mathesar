@@ -32,5 +32,6 @@
   .column-insert {
     display: block;
     text-align: right;
+    margin-top: 0.5rem;
   }
 </style>

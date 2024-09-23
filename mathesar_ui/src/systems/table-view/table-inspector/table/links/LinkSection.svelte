@@ -34,6 +34,7 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 0.5rem;
+      font-weight: var(--font-weight-medium);
 
       > :global(* + *) {
         margin-left: 0.25rem;
@@ -55,7 +56,7 @@
       flex-direction: column;
 
       > :global(* + *) {
-        margin-top: 0.75rem;
+        margin-top: 0.5rem;
       }
     }
   }

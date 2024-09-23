@@ -13,7 +13,7 @@
     #000 0 0 0 0,
     #000 0 0 0 0,
     rgba(0, 0, 0, 0.05) 0 1px 2px 0;
-  font-weight: inherit;
+  font-weight: var(--font-weight-medium);
   position: relative;
   padding: var(--input-padding);
   box-sizing: border-box;
@@ -31,11 +31,11 @@
   /* Appearances */
   &.btn-default {
     background: var(--color-white);
-    border-color: var(--slate-200);
+    border-color: var(--slate-300);
 
     &:not(:disabled) {
       &:focus {
-        border-color: var(--slate-300);
+        border-color: var(--slate-400);
       }
     }
   }
@@ -68,20 +68,20 @@
 
   &.btn-secondary {
     background: var(--slate-100);
-    border-color: var(--slate-200);
+    border-color: var(--slate-300);
     color: var(--slate-800);
 
     &:not(:disabled) {
       &.focus,
       &:focus {
-        outline: 2px solid var(--slate-300);
+        outline: 2px solid var(--slate-400);
         outline-offset: 1px;
       }
 
       &:hover,
       &.hover {
         background: var(--slate-200);
-        border-color: var(--slate-300);
+        border-color: var(--slate-400);
       }
 
       &:active,
@@ -190,6 +190,31 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  &.btn-action {
+    background: var(--sand-100);
+    border-color: var(--sand-400);
+
+    &:not(:disabled) {
+      &:hover,
+      &.hover {
+        background: var(--sand-200);
+        border-color: var(--sand-500);
+      }
+
+      &:active,
+      &.active {
+        background: var(--sand-300);
+        border-color: var(--sand-600);
+      }
+
+      &:focus,
+      &.focus {
+        outline: 2px solid var(--sand-500);
+        outline-offset: 1px;
+      }
+    }
   }
 
   &.btn-outcome {

@@ -74,11 +74,11 @@
 
 <style lang="scss">
   .table-mode-container {
-    padding-bottom: 1rem;
+    padding-bottom: var(--size-small);
   }
 
   .content-container {
-    padding: 1rem;
+    padding: var(--size-small);
     display: flex;
     flex-direction: column;
 

@@ -5,6 +5,7 @@ export type Appearance =
   | 'plain'
   | 'ghost'
   | 'plain-primary'
+  | 'action'
   | 'outcome'
   | 'outline-primary';
 
