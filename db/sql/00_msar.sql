@@ -1193,7 +1193,7 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_grant_membership_expr(parent_rol_id regrole, g_roles bigint[]) RETURNS TEXT AS $$
+msar.build_grant_membership_expr(parent_rol_id regrole, g_roles oid[]) RETURNS TEXT AS $$
 SELECT string_agg(
   format(
     'GRANT %1$s TO %2$s',
@@ -1207,7 +1207,7 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_revoke_membership_expr(parent_rol_id regrole, r_roles bigint[]) RETURNS TEXT AS $$
+msar.build_revoke_membership_expr(parent_rol_id regrole, r_roles oid[]) RETURNS TEXT AS $$
 SELECT string_agg(
   format(
     'REVOKE %1$s FROM %2$s',
@@ -1220,7 +1220,31 @@ FROM unnest(r_roles) as x(rol_id);
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.set_members_to_role(parent_rol_id regrole, members bigint[]) RETURNS jsonb AS $$
+CREATE OR REPLACE FUNCTION msar.set_members_to_role(parent_rol_id regrole, members oid[]) RETURNS jsonb AS $$/*
+Grant/Revoke direct membership to/from roles.
+
+Returns a json object describing the updated information of the parent role.
+
+  {
+    "oid": <int>
+    "name": <str>
+    "super": <bool>
+    "inherits": <bool>
+    "create_role": <bool>
+    "create_db": <bool>
+    "login": <bool>
+    "description": <str|null>
+    "members": <[
+        { "oid": <int>, "admin": <bool> }
+      ]|null>
+  }
+
+Args:
+  parent_rol_id: The OID of role whose membership will be granted/revoked to/from other roles.
+  members: An array of role OID(s) whom we want to grant direct membership of the parent role.
+           Only the OID(s) present in the array will be granted membership of parent role,
+           Membership will be revoked for existing members not present in this array.
+*/
 DECLARE
   parent_role_info jsonb := msar.get_role(parent_rol_id::regrole::text);
   all_members_array bigint[];
