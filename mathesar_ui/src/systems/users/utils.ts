@@ -23,9 +23,9 @@ export function getUserTypeInfoFromUserModel(userModel: UserModel): {
   type: UserType;
   displayName: string;
 } {
-  const type: UserType = userModel.isSuperUser ? 'admin' : 'standard';
+  const type: UserType = userModel.isMathesarAdmin ? 'admin' : 'standard';
   const displayName = getDisplayNameForUserType(type);
-  const icon = userModel.isSuperUser ? iconAdminUser : iconUser;
+  const icon = userModel.isMathesarAdmin ? iconAdminUser : iconUser;
   return {
     icon,
     type,

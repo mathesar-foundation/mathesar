@@ -29,7 +29,7 @@
 
     const userProfileStore = setUserProfileStoreInContext(user);
     const userProfile = get(userProfileStore);
-    if (commonData.is_authenticated && userProfile.isSuperUser) {
+    if (commonData.is_authenticated && userProfile.isMathesarAdmin) {
       // Toggle these lines to test with a mock tag name
       // setReleasesStoreInContext('1.75.0');
       setReleasesStoreInContext(commonData.current_release_tag_name);

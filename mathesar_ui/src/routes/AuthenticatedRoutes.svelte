@@ -33,7 +33,7 @@
   <UserProfileRoute />
 </Route>
 
-{#if userProfile?.isSuperUser}
+{#if userProfile?.isMathesarAdmin}
   <Route path="/administration/*" firstmatch>
     <AdminRoute />
   </Route>
