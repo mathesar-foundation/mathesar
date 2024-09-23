@@ -16,6 +16,7 @@
   font-weight: inherit;
   position: relative;
   padding: var(--input-padding);
+  box-sizing: border-box;
 
   > * + * {
     margin-left: 0.25em;
@@ -189,6 +190,15 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  &.btn-outcome {
+    background-color: var(--purple-100);
+    border: 1px solid var(--purple-200);
+
+    &:hover {
+      border: 1px solid var(--purple-300);
+    }
   }
 }
 a.btn {

@@ -5,6 +5,7 @@ export type Appearance =
   | 'plain'
   | 'ghost'
   | 'plain-primary'
+  | 'outcome'
   | 'outline-primary';
 
 export type Size = 'small' | 'medium' | 'large';

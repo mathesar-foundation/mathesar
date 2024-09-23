@@ -1,10 +1,11 @@
 .labeled-input {
-  --spacing-y-default: 0.4em;
+  --spacing-y-default: 0.25em;
   --spacing-x-default: 0.4em;
 
   .label {
     display: inline-block;
     color: var(--slate-800);
+    font-weight: var(--font-weight-medium);
   }
   .input {
     display: block;
@@ -32,17 +33,18 @@
     }
   }
 
-  // TODO: add support for help text with an inline layout.
   &.layout-inline .label-content {
-    display: inline-flex;
+    display: flex;
     flex-direction: row;
-    align-items: center; // To support a text input that's taller than the label
-    .label {
-      flex: 1 1 auto;
-    }
-    .input {
+    align-items: center;
+    > .label {
       flex: 0 0 auto;
-      margin-left: var(--spacing-x, var(--spacing-x-default));
+      margin-right: 0.5rem;
+      padding-top: calc(var(--input-padding-y, 0.5em));
+      padding-bottom: calc(var(--input-padding-y, 0.5em));
+    }
+    .field-help {
+      margin-top: 0.25em;
     }
   }
 

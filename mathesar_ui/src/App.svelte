@@ -53,7 +53,7 @@
     --color-contrast-light: var(--color-blue-light);
     --color-link: var(--color-blue-dark);
     --color-text: #171717;
-    --color-text-muted: #6b7280;
+    --color-text-muted: #5e6471;
     --color-substring-match: rgb(254, 221, 72);
     --color-substring-match-light: rgba(254, 221, 72, 0.2);
     --text-size-xx-small: var(--size-xx-small);
@@ -65,7 +65,10 @@
     --text-size-xx-large: var(--size-xx-large);
     --text-size-ultra-large: var(--size-ultra-large);
     --text-size-super-ultra-large: var(--size-super-ultra-large);
-
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 600;
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
 

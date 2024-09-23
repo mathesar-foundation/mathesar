@@ -29,8 +29,9 @@
   export let installationSchemas: RequiredField<InstallationSchema[]>;
 </script>
 
-<div class="schemas-cbgroup">
+<div>
   <CheckboxGroup
+    boxed
     label={$_('schemas_to_install')}
     ariaLabel={$_('schemas_to_install')}
     bind:values={$installationSchemas}
@@ -40,13 +41,3 @@
     getCheckboxDisabled={(o) => o === 'internal'}
   />
 </div>
-
-<style>
-  .schemas-cbgroup :global(ul.options) {
-    background: var(--white);
-    padding: 1rem;
-    border: 1px solid var(--slate-200);
-    border-radius: var(--border-radius-m);
-    margin-top: var(--size-ultra-small);
-  }
-</style>
