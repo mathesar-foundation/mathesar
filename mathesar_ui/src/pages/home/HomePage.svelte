@@ -117,7 +117,6 @@
   [data-identifier='databases-header'] {
     display: flex;
     align-items: center;
-    padding: 1rem 0;
 
     span {
       flex: 1 0 0;
@@ -132,13 +131,12 @@
     margin-top: var(--size-x-large);
     flex-direction: column;
     align-items: stretch;
-    gap: var(--size-medium);
+    gap: var(--size-x-small);
   }
 
   [data-identifier='databases-list-grid'] {
     display: grid;
-    gap: 1.25rem;
-    margin-top: var(--size-large);
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: var(--size-x-large);
   }
 </style>
