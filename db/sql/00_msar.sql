@@ -516,6 +516,28 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_database_name(dat_id oid) RETURNS TEXT AS $$/*
+Return the UNQUOTED name of a given database.
+
+If the database does not exist, an exception will be raised.
+
+Args:
+  dat_id: The OID of the role.
+*/
+DECLARE dat_name text;
+BEGIN
+  SELECT datname INTO dat_name FROM pg_catalog.pg_database WHERE oid=dat_id;
+
+  IF dat_name IS NULL THEN
+    RAISE EXCEPTION 'Database with OID % does not exist', dat_id
+    USING ERRCODE = '42704'; -- undefined_object
+  END IF;
+
+  RETURN dat_name;
+END;
+$$ LANGUAGE plpgsql STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_role_name(rol_oid oid) RETURNS TEXT AS $$/*
 Return the UNQUOTED name of a given role.
 
@@ -526,7 +548,7 @@ Args:
 */
 DECLARE rol_name text;
 BEGIN
-  SELECT rolname INTO rol_name FROM pg_roles WHERE oid=rol_oid;
+  SELECT rolname INTO rol_name FROM pg_catalog.pg_roles WHERE oid=rol_oid;
 
   IF rol_name IS NULL THEN
     RAISE EXCEPTION 'Role with OID % does not exist', rol_oid
@@ -535,7 +557,7 @@ BEGIN
 
   RETURN rol_name;
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION msar.get_constraint_type_api_code(contype char) RETURNS TEXT AS $$/*
@@ -1327,6 +1349,23 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
+msar.drop_role(rol_id regrole) RETURNS void AS $$/*
+Drop a role.
+
+Note:
+- To drop a superuser role, you must be a superuser yourself.
+- To drop non-superuser roles, you must have CREATEROLE privilege and have been granted ADMIN OPTION on the role.
+
+Args:
+  rol_id: The OID of the role to drop on the database.
+*/
+BEGIN
+  EXECUTE format('DROP ROLE %I', msar.get_role_name(rol_id));
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_database_privilege_replace_expr(rol_id regrole, privileges_ jsonb) RETURNS TEXT AS $$
 SELECT string_agg(
   format(
@@ -1678,6 +1717,43 @@ BEGIN
   RETURN msar.get_schema(schema_oid);
 END;
 $$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- DROP DATABASE FUNCTIONS
+--
+-- Drop a database.
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_database_query(dat_id oid) RETURNS text AS $$/*
+Return the SQL query to drop a database.
+
+If no database exists with the given oid, an exception will be raised.
+
+Args:
+  dat_id: The OID of the role to drop.
+*/
+BEGIN
+  RETURN format('DROP DATABASE %I', msar.get_database_name(dat_id));
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.drop_database_query(dat_name text) RETURNS text AS $$/*
+Return the SQL query to drop a database.
+
+Args:
+  dat_id: An unqoted name of the database to be dropped.
+*/
+BEGIN
+  RETURN format('DROP DATABASE %I', dat_name);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 ----------------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.utils import connect
 from db.databases.operations.select import get_database
+from db.databases.operations.drop import drop_database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
@@ -53,3 +54,19 @@ def get(*, database_id: int, **kwargs) -> DatabaseInfo:
     with connect(database_id, user) as conn:
         db_info = get_database(conn)
     return DatabaseInfo.from_dict(db_info)
+
+
+@rpc_method(name="databases.delete")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def delete(*, database_oid: int, database_id: int, **kwargs) -> None:
+    """
+    Drop a database from the server.
+
+    Args:
+        database_oid: The OID of the database to delete on the database.
+        database_id: The Django id of the database to connect to.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        drop_database(database_oid, conn)
