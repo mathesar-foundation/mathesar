@@ -2,9 +2,9 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { Table } from '@mathesar/api/rpc/tables';
   import { Icon } from '@mathesar/component-library';
   import { iconSelectRecord } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
 
   import { getRecordSelectorFromContext } from './RecordSelectorController';
 

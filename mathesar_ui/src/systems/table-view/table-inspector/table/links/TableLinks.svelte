@@ -2,7 +2,6 @@
   import { api } from '@mathesar/api/rpc';
   import { Spinner } from '@mathesar/component-library';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
-  import { currentDatabase } from '@mathesar/stores/databases';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
@@ -11,6 +10,7 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: columns = $tabularData.processedColumns;
+  $: table = $tabularData.table;
 
   function getJoinableTables(databaseId: number, tableOid: number) {
     return api.tables
@@ -24,7 +24,7 @@
 </script>
 
 <div>
-  {#await getJoinableTables($currentDatabase.id, $tabularData.table.oid)}
+  {#await getJoinableTables(table.schema.database.id, table.oid)}
     <Spinner />
   {:then joinableTablesResult}
     <LinksSectionContainer

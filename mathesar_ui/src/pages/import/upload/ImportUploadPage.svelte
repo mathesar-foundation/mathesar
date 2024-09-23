@@ -4,7 +4,6 @@
 
   import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
   import {
@@ -21,9 +20,10 @@
   import { iconPaste, iconUrl } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
-  import { createTable } from '@mathesar/stores/tables';
+  import { createTableFromDataFile } from '@mathesar/stores/tables';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import {
     RadioGroup,
@@ -113,13 +113,14 @@
       if (dataFileId === undefined) {
         return;
       }
-      const tableOid = await createTable(database, schema, {
-        dataFiles: [dataFileId],
+      const table = await createTableFromDataFile({
+        schema,
+        dataFile: { id: dataFileId },
       });
       const previewPage = getImportPreviewPageUrl(
         database.id,
         schema.oid,
-        tableOid,
+        table.oid,
         { useColumnTypeInference: $useColumnTypeInference },
       );
       router.goto(previewPage, true);

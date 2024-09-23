@@ -64,6 +64,7 @@ To use an RPC function:
     options:
       members:
       - get
+      - delete
       - DatabaseInfo
 
 ## Configured Databases
@@ -72,6 +73,7 @@ To use an RPC function:
     options:
       members:
       - list_
+      - disconnect
       - ConfiguredDatabaseInfo
 
 ## Database Privileges
@@ -252,6 +254,7 @@ To use an RPC function:
       members:
       - list_
       - add
+      - delete
       - get_current_role
       - RoleInfo
       - RoleMember
@@ -286,6 +289,7 @@ To use an RPC function:
       - split_table
       - move_columns
       - MappingColumn
+      - SplitTableInfo
 
 ## Responses
 

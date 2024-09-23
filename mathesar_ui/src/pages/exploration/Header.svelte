@@ -2,14 +2,12 @@
   import { _ } from 'svelte-i18n';
 
   import type { QueryInstance } from '@mathesar/api/rest/types/queries';
-  import type { Schema } from '@mathesar/api/rpc/schemas';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
   import { Button, Icon } from '@mathesar-component-library';
-
-  import ShareExplorationDropdown from './ShareExplorationDropdown.svelte';
 
   export let database: Database;
   export let schema: Schema;
@@ -33,7 +31,8 @@
       >
         <span>{$_('edit_in_data_explorer')}</span>
       </a>
-      <ShareExplorationDropdown id={query.id} />
+      <!-- TODO: Display Share option when we re-implement it with the new permissions structure -->
+      <!-- <ShareExplorationDropdown id={query.id} /> -->
     {/if}
     <Button
       appearance="secondary"

@@ -53,6 +53,16 @@ export const roles = {
     RawRole
   >(),
 
+  get_current_role: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+    },
+    {
+      current_role: RawRole;
+      parent_roles: RawRole[];
+    }
+  >(),
+
   delete: rpcMethodTypeContainer<
     {
       database_id: RawDatabase['id'];

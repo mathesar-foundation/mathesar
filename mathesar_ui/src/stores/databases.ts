@@ -25,7 +25,7 @@ class DatabasesStore {
 
   readonly databases: Readable<ImmutableMap<Database['id'], Database>>;
 
-  readonly currentDatabaseId = writable<Database['id'] | undefined>();
+  private readonly currentDatabaseId = writable<Database['id'] | undefined>();
 
   readonly currentDatabase: Readable<Database | undefined>;
 

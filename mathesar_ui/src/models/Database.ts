@@ -11,6 +11,7 @@ import { Collaborator } from './Collaborator';
 import { ConfiguredRole } from './ConfiguredRole';
 import { Role } from './Role';
 import type { Server } from './Server';
+import { UnderlyingDatabase } from './UnderlyingDatabase';
 
 export class Database {
   readonly id: number;
@@ -76,7 +77,22 @@ export class Database {
   }
 
   constructUnderlyingDatabaseStore() {
-    return new AsyncRpcApiStore(api.databases.get);
+    return new AsyncRpcApiStore(api.databases.get, {
+      postProcess: (rawUnderlyingDatabase) =>
+        new UnderlyingDatabase({
+          database: this,
+          rawUnderlyingDatabase,
+        }),
+    });
+  }
+
+  constructCurrentRoleStore() {
+    return new AsyncRpcApiStore(api.roles.get_current_role, {
+      postProcess: (currentRole) => ({
+        currentRoleOid: currentRole.current_role.oid,
+        parentRoleOids: currentRole.parent_roles.map((pr) => pr.oid),
+      }),
+    });
   }
 
   addCollaborator(

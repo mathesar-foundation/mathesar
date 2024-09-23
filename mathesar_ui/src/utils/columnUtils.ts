@@ -1,8 +1,8 @@
 import type { Column } from '@mathesar/api/rpc/columns';
 import type { ConstraintType } from '@mathesar/api/rpc/constraints';
-import type { Table } from '@mathesar/api/rpc/tables';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
+import type { Table } from '@mathesar/models/Table';
 import {
   abstractTypesMap,
   getAbstractTypeForDbType,

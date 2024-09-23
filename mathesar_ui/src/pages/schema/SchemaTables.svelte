@@ -1,11 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { Schema } from '@mathesar/api/rpc/schemas';
-  import type { Table } from '@mathesar/api/rpc/tables';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+  import type { Table } from '@mathesar/models/Table';
 
   import CreateNewTableButton from './CreateNewTableButton.svelte';
   import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';

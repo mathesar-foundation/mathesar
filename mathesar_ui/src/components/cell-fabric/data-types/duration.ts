@@ -18,8 +18,8 @@ import type { CellComponentFactory } from './typeDefinitions';
 
 function getProps(column: Column): FormattedInputCellExternalProps {
   const defaults = DurationSpecification.getDefaults();
-  const max = column.display_options?.duration_max ?? defaults.max;
-  const min = column.display_options?.duration_min ?? defaults.min;
+  const max = column.metadata?.duration_max ?? defaults.max;
+  const min = column.metadata?.duration_min ?? defaults.min;
   const durationSpecification = new DurationSpecification({ max, min });
   const formatter = new DurationFormatter(durationSpecification);
   return {

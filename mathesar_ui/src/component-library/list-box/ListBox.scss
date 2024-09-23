@@ -28,6 +28,11 @@
     &.in-focus {
       background: #f3f4f5;
     }
+
+    &.disabled {
+      color: var(--slate-300);
+      cursor: not-allowed;
+    }
   }
 
   &.multiple {
