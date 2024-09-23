@@ -178,7 +178,7 @@ def set_members(
     Grant/Revoke direct membership to/from roles.
 
     Args:
-      parent_rol_id: The OID of role whose membership will be granted/revoked to/from other roles.
+      parent_role_oid: The OID of role whose membership will be granted/revoked to/from other roles.
       members: An array of role OID(s) whom we want to grant direct membership of the parent role.
                Only the OID(s) present in the array will be granted membership of parent role,
                Membership will be revoked for existing members not present in this array.
