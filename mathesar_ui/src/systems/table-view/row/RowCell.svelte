@@ -4,6 +4,7 @@
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import type { TablePrivilege } from '@mathesar/api/rpc/tables';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -48,6 +49,7 @@
   export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
   export let rowKey: string;
+  export let currentRoleTablePrivileges: Set<TablePrivilege>;
 
   $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
   const canViewLinkedEntities = true;
@@ -63,7 +65,12 @@
   $: canSetNull = column.nullable && value !== null;
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
-  $: isEditable = !column.primary_key;
+  // TODO_BETA: Handle case where INSERT is allowed, but UPDATE isn't
+  // i.e. row is a placeholder row and record isn't saved yet
+  $: isEditable =
+    !column.primary_key &&
+    currentRoleTablePrivileges.has('UPDATE') &&
+    processedColumn.currentRolePrivileges.has('UPDATE');
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table_oid, recordId: value })

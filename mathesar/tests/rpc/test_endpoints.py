@@ -144,10 +144,20 @@ METHODS = [
         "databases.get",
         [user_is_authenticated]
     ),
+    (
+        databases.delete,
+        "databases.delete",
+        [user_is_authenticated]
+    ),
 
     (
         databases.configured.list_,
         "databases.configured.list",
+        [user_is_authenticated]
+    ),
+    (
+        databases.configured.disconnect,
+        "databases.configured.disconnect",
         [user_is_authenticated]
     ),
 
@@ -253,6 +263,11 @@ METHODS = [
     (
         roles.add,
         "roles.add",
+        [user_is_authenticated]
+    ),
+    (
+        roles.delete,
+        "roles.delete",
         [user_is_authenticated]
     ),
     (

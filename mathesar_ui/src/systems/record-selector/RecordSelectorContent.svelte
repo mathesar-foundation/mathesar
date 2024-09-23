@@ -4,6 +4,7 @@
 
   import { States } from '@mathesar/api/rest/utils/requestUtils';
   import { api } from '@mathesar/api/rpc';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type { TabularData } from '@mathesar/stores/table-data';
@@ -36,6 +37,9 @@
     recordsData,
     table,
   } = tabularData);
+  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: canViewTable = $currentRolePrivileges.has('SELECT');
+  $: canInsertRecords = $currentRolePrivileges.has('INSERT');
   $: ({ purpose: rowType } = controller);
   $: ({ columns, fetchStatus } = columnsDataStore);
   $: ({ state: constraintsState } = $constraintsDataStore);
@@ -105,7 +109,7 @@
     </div>
   {/if}
 
-  {#if isInitialized}
+  {#if isInitialized && canViewTable}
     <RecordSelectorTable
       {tabularData}
       {controller}
@@ -115,7 +119,13 @@
     />
   {/if}
 
-  {#if isInitialized && !records.length}
+  {#if !canViewTable}
+    <WarningBox fullWidth>
+      {$_('no_privileges_view_table')}
+    </WarningBox>
+  {/if}
+
+  {#if isInitialized && !records.length && canViewTable}
     {#if $isLoading}
       <!--
         This only shows when there are no results. When there are results, the
@@ -136,7 +146,7 @@
   {/if}
 
   <div class="footer">
-    {#if hasSearchQueries}
+    {#if hasSearchQueries && canInsertRecords}
       <div class="button">
         <Button
           size="small"

@@ -17,7 +17,6 @@ from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.api.ui.serializers.users import UserSerializer
 from mathesar.api.utils import is_valid_uuid_v4
 from mathesar.database.types import UIType
-from mathesar.models.deprecated import Connection
 from mathesar.models.shares import SharedTable, SharedQuery
 from mathesar.state import reset_reflection
 from mathesar import __version__
@@ -71,14 +70,13 @@ def get_user_data(request):
 
 
 def _get_internal_db_meta():
-    internal_db = Connection.create_from_settings_key('default')
+    internal_db = settings.DATABASES['default']
     if internal_db is not None:
         return {
             'type': 'postgres',
-            'user': internal_db.username,
-            'host': internal_db.host,
-            'port': internal_db.port,
-            'database': internal_db.db_name
+            'host': internal_db['HOST'],
+            'port': internal_db['PORT'],
+            'database_name': internal_db['NAME']
         }
     else:
         return {'type': 'sqlite'}
@@ -92,7 +90,7 @@ def _get_base_data_all_routes(request, database_id=None, schema_id=None):
         'current_release_tag_name': __version__,
         'databases': get_database_list(request),
         'servers': get_servers_list(),
-        'internal_db_connection': _get_internal_db_meta(),
+        'internal_db': _get_internal_db_meta(),
         'is_authenticated': not request.user.is_anonymous,
         'queries': [],
         'schemas': get_schema_list(request, database_id),

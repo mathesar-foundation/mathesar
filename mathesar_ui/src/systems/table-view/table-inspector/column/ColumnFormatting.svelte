@@ -50,8 +50,13 @@
 
   function cancel() {
     typeChangeState = { state: 'success' };
-    displayOptions = {};
+    displayOptions = column.column.metadata ?? {};
     actionButtonsVisible = false;
+    ({ displayOptionsConfig, displayForm, displayFormValues } =
+      constructDisplayForm(column.abstractType, column.column.type, {
+        ...column.column,
+        abstractType: column.abstractType,
+      }));
   }
 
   $: isSaveDisabled =

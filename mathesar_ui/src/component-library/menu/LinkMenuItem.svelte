@@ -14,7 +14,7 @@
 </script>
 
 <MenuItemWrapper
-  tag="a"
+  tag={disabled ? 'span' : 'a'}
   class="menu-item-link {classes}"
   {href}
   {disabled}
