@@ -39,7 +39,7 @@
     text-decoration: inherit;
   }
   .name-with-icon.bold {
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
   }
   .icon {
     color: var(--icon-color, currentcolor);
