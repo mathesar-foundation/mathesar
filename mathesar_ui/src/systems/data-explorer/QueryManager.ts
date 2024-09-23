@@ -3,15 +3,10 @@ import { get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import { api } from '@mathesar/api/rpc';
 import type {
   ExplorationResult,
   SavedExploration,
 } from '@mathesar/api/rpc/explorations';
-import type {
-  JoinableTablesResult,
-  RawTableWithMetadata,
-} from '@mathesar/api/rpc/tables';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { currentDatabase } from '@mathesar/stores/databases';
 import { createQuery, putQuery } from '@mathesar/stores/queries';
@@ -23,12 +18,8 @@ import QueryModel from './QueryModel';
 import QueryRunner from './QueryRunner';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
-import type { InputColumnsStoreSubstance } from './utils';
-import {
-  getBaseTableColumnsWithLinks,
-  getColumnInformationMap,
-  getTablesThatReferenceBaseTable,
-} from './utils';
+import type { InputColumnsStoreSubstance, QueryTableStructure } from './utils';
+import { getInputColumns, getQueryTableStructure } from './utils';
 
 export default class QueryManager extends QueryRunner {
   private undoRedoManager: QueryUndoRedoManager;
@@ -65,12 +56,8 @@ export default class QueryManager extends QueryRunner {
 
   // Promises
 
-  private baseTableFetchPromise:
-    | CancellablePromise<RawTableWithMetadata>
-    | undefined;
-
-  private joinableColumnsFetchPromise:
-    | CancellablePromise<JoinableTablesResult>
+  private tableStructurePromise:
+    | CancellablePromise<QueryTableStructure>
     | undefined;
 
   private querySavePromise: CancellablePromise<SavedExploration> | undefined;
@@ -119,9 +106,7 @@ export default class QueryManager extends QueryRunner {
 
     const cachedResult = this.cacheManagers.inputColumns.get(baseTableId);
     if (cachedResult) {
-      this.inputColumns.set({
-        ...cachedResult,
-      });
+      this.inputColumns.set({ ...cachedResult });
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'success' },
@@ -132,48 +117,18 @@ export default class QueryManager extends QueryRunner {
 
     try {
       const database = get(currentDatabase);
-      this.baseTableFetchPromise?.cancel();
-      this.joinableColumnsFetchPromise?.cancel();
-
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'processing' },
       }));
 
-      this.baseTableFetchPromise = api.tables
-        .get_with_metadata({
-          database_id: database.id,
-          table_oid: baseTableId,
-        })
-        .run();
+      this.tableStructurePromise?.cancel();
+      this.tableStructurePromise = getQueryTableStructure({
+        database,
+        baseTableId,
+      });
+      const inputColumns = getInputColumns(await this.tableStructurePromise);
 
-      this.joinableColumnsFetchPromise = api.tables
-        .list_joinable({
-          database_id: database.id,
-          table_oid: baseTableId,
-        })
-        .run();
-      const [baseTableResult, joinableColumnsResult] = await Promise.all([
-        this.baseTableFetchPromise,
-        this.joinableColumnsFetchPromise,
-      ]);
-      const baseTableColumns = getBaseTableColumnsWithLinks(
-        joinableColumnsResult,
-        baseTableResult,
-      );
-      const tablesThatReferenceBaseTable = getTablesThatReferenceBaseTable(
-        joinableColumnsResult,
-        baseTableResult,
-      );
-      const inputColumnInformationMap = getColumnInformationMap(
-        joinableColumnsResult,
-        baseTableResult,
-      );
-      const inputColumns = {
-        baseTableColumns,
-        tablesThatReferenceBaseTable,
-        inputColumnInformationMap,
-      };
       this.cacheManagers.inputColumns.set(baseTableId, inputColumns);
       this.inputColumns.set(inputColumns);
       this.speculateColumns();
@@ -388,8 +343,7 @@ export default class QueryManager extends QueryRunner {
 
   destroy(): void {
     super.destroy();
-    this.baseTableFetchPromise?.cancel();
-    this.joinableColumnsFetchPromise?.cancel();
+    this.tableStructurePromise?.cancel();
     this.querySavePromise?.cancel();
   }
 }
