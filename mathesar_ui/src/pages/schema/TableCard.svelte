@@ -221,6 +221,7 @@
     padding: 0 var(--padding) var(--padding) var(--padding);
     font-size: var(--text-size-base);
     color: var(--slate-500);
+    font-weight: var(--font-weight-normal);
   }
 
   /** Menu button =========================================================== */

@@ -61,6 +61,7 @@
     .server {
       font-size: var(--text-size-base);
       margin-top: var(--size-extreme-small);
+      color: var(--slate-500);
     }
   }
 </style>

@@ -151,8 +151,8 @@
 
   .description {
     font-weight: 400;
-    font-size: var(--text-size-large);
-    color: var(--slate-700);
+    font-size: var(--text-size-base);
+    color: var(--slate-500);
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
