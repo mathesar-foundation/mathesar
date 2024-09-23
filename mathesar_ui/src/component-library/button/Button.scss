@@ -199,8 +199,7 @@
     &:not(:disabled) {
       &:hover,
       &.hover {
-        background: var(--sand-200);
-        border-color: var(--sand-500);
+        border-color: var(--sand-400);
       }
 
       &:active,
