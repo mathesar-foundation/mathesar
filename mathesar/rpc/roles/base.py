@@ -11,6 +11,7 @@ from mathesar.rpc.utils import connect
 from db.roles.operations.select import list_roles, get_current_role_from_db
 from db.roles.operations.create import create_role
 from db.roles.operations.drop import drop_role
+from db.roles.operations.membership import set_members_to_role
 
 
 class RoleMember(TypedDict):
@@ -161,3 +162,31 @@ def get_current_role(*, database_id: int, **kwargs) -> dict:
         "current_role": RoleInfo.from_dict(current_role["current_role"]),
         "parent_roles": [RoleInfo.from_dict(role) for role in current_role["parent_roles"]]
     }
+
+
+@rpc_method(name="roles.set_members")
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def set_members(
+    *,
+    parent_role_oid: int,
+    members: list,
+    database_id: int,
+    **kwargs
+) -> RoleInfo:
+    """
+    Grant/Revoke direct membership to/from roles.
+
+    Args:
+      parent_rol_id: The OID of role whose membership will be granted/revoked to/from other roles.
+      members: An array of role OID(s) whom we want to grant direct membership of the parent role.
+               Only the OID(s) present in the array will be granted membership of parent role,
+               Membership will be revoked for existing members not present in this array.
+
+    Returns:
+        A dict describing the updated information of the parent role.
+    """
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        parent_role = set_members_to_role(parent_role_oid, members, conn)
+    return RoleInfo.from_dict(parent_role)
