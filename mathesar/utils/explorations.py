@@ -2,6 +2,7 @@ from db.engine import create_future_engine_with_custom_types
 from db.records.operations.select import get_count
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.tables.operations.select import get_table
+from db.transforms.operations.deserialize import deserialize_transformation
 from mathesar.api.utils import process_annotated_records
 from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
@@ -78,11 +79,15 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
                 jp_path=join_path if jp_path else None
             )
         )
+    transformations = tuple(
+        deserialize_transformation(i)
+        for i in exploration_def.get("transformations", [])
+    )
     db_query = DBQuery(
         base_table_oid=base_table_oid,
         initial_columns=processed_initial_columns,
         engine=engine,
-        transformations=exploration_def.get("transformations", []),
+        transformations=transformations,
         name=None,
         metadata=metadata
     )
