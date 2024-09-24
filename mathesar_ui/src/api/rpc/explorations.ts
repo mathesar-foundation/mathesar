@@ -8,7 +8,7 @@ export interface InitialColumn {
   alias: string;
   /** The PostgreSQL attnum of the column */
   attnum: Column['id'];
-  jp_path?: JoinPath;
+  join_path?: JoinPath;
 }
 
 type FilterConditionParams = [

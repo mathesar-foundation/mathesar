@@ -63,7 +63,7 @@
       const newQuery = q.withInitialColumn({
         alias,
         attnum: column.id,
-        jp_path: column.jpPath,
+        join_path: column.jpPath,
       });
       if (addNewAutoSummarization) {
         const autoSummarization =
