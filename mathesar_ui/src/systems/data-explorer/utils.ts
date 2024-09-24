@@ -440,7 +440,7 @@ export function speculateColumnMetaData({
   if (initialColumnsWithoutMetaData.length > 0) {
     initialColumnsWithoutMetaData.forEach((initialColumn) => {
       const inputColumnInformation = inputColumnInformationMap.get(
-        initialColumn.id,
+        initialColumn.attnum,
       );
       updatedColumnsMetaData = updatedColumnsMetaData.with(
         initialColumn.alias,

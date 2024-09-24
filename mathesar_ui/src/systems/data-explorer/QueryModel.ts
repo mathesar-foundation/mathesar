@@ -305,7 +305,7 @@ export default class QueryModel {
 
   getInitialColumnsAndTransformsUtilizingThemByColumnIds(columnIds: number[]) {
     const initialColumnsUsingColumnIds = this.initial_columns.filter((entry) =>
-      columnIds.includes(entry.id),
+      columnIds.includes(entry.attnum),
     );
     const initialColumnAliases = initialColumnsUsingColumnIds.map(
       (entry) => entry.alias,
@@ -350,7 +350,7 @@ export default class QueryModel {
 
   withoutColumnsById(columnIds: number[]): QueryModelUpdateDiff {
     const initialColumns = this.initial_columns.filter(
-      (entry) => !columnIds.includes(entry.id),
+      (entry) => !columnIds.includes(entry.attnum),
     );
     let retainedTransformationModels = this.transformationModels;
     const firstSummarizationTransformIndex =
@@ -364,7 +364,7 @@ export default class QueryModel {
       );
     }
     const alaisesForTheIds = this.initial_columns
-      .filter((entry) => columnIds.includes(entry.id))
+      .filter((entry) => columnIds.includes(entry.attnum))
       .map((entry) => entry.alias);
     const transformationModels = retainedTransformationModels.filter(
       (model) =>
@@ -454,8 +454,8 @@ export default class QueryModel {
     };
   }
 
-  getColumnCount(id: InitialColumn['id']): number {
-    return this.initial_columns.filter((entry) => entry.id === id).length;
+  getColumnCount(id: InitialColumn['attnum']): number {
+    return this.initial_columns.filter((entry) => entry.attnum === id).length;
   }
 
   toJson(): UnsavedExploration {

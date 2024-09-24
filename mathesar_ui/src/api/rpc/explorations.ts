@@ -7,7 +7,7 @@ import type { FilterId } from '@mathesar/stores/abstract-types/types';
 export interface InitialColumn {
   alias: string;
   /** The PostgreSQL attnum of the column */
-  id: Column['id'];
+  attnum: Column['id'];
   jp_path?: JoinPath;
 }
 

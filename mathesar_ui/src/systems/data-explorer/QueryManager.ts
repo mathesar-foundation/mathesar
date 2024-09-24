@@ -328,7 +328,7 @@ export default class QueryManager extends QueryRunner {
     const { baseTableColumns } = get(this.inputColumns);
     const firstBaseTableInitialColumn =
       this.getQueryModel().initial_columns.find((initialColumn) =>
-        baseTableColumns.has(initialColumn.id),
+        baseTableColumns.has(initialColumn.attnum),
       );
     if (firstBaseTableInitialColumn) {
       return new QuerySummarizationTransformationModel({

@@ -138,7 +138,7 @@ export function constructQueryModelFromHash(
 
   initialColumns = [...groupingColumns, ...aggregatedColumns].map((column) => ({
     alias: column.name,
-    id: column.id,
+    attnum: column.id,
   }));
 
   const groupingExpressions = groupingColumns.map((entry, index) => ({
