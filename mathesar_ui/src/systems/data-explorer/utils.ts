@@ -263,61 +263,60 @@ function getBaseTableColumnsWithLinks({
 
 function getTablesThatReferenceBaseTable({
   joinableTables,
+  baseTable,
   columns,
 }: QueryTableStructure): ReferencedByTable[] {
-  const referenceLinks = joinableTables.joinable_tables.filter(
+  const links = joinableTables.joinable_tables.filter(
     (entry) => entry.depth === 1 && entry.fkey_path[0][1] === true,
   );
   const references: ReferencedByTable[] = [];
 
-  referenceLinks.forEach((reference) => {
-    const tableId = reference.target;
-    const table = joinableTables.target_table_info[tableId];
-    const baseTableColumnId = reference.join_path[0][0][0]; // TODO_3855: verify
-    const referenceTableColumnId = reference.join_path[0][1][1];
+  for (const link of links) {
+    const baseTableColumnId = link.join_path[0][0][1];
+    const referenceTableColumnId = link.join_path[0][1][1];
 
-    const baseTableColumn = columns.find(
-      (column) => column.id === baseTableColumnId,
-    );
-    if (!baseTableColumn) {
-      return;
-    }
+    const baseTableColumn = columns.find((c) => c.id === baseTableColumnId);
+    if (!baseTableColumn) continue;
+    const targetTableId = link.target;
+    const targetTable = joinableTables.target_table_info[targetTableId];
+    const targetTableColumn = targetTable.columns[referenceTableColumnId];
     const columnMapEntries: [ColumnWithLink['id'], ColumnWithLink][] =
-      Object.entries(table.columns)
+      Object.entries(targetTable.columns)
         .filter(([columnId]) => columnId !== String(referenceTableColumnId))
         .map(([columnIdKey, column]) => {
           const columnId = parseInt(columnIdKey, 10);
-          const parentPath = reference.join_path.join(',');
+          const parentPath = link.join_path.join(',');
           return [
             columnId,
             {
               id: columnId,
               name: column.name,
               type: column.type,
-              tableName: table.name,
+              tableName: baseTable.name,
               linksTo: getLinkFromColumn(
                 joinableTables,
                 columnId,
                 2,
                 parentPath,
               ),
-              jpPath: reference.join_path,
-              producesMultipleResults: reference.multiple_results,
+              jpPath: link.join_path,
+              producesMultipleResults: link.multiple_results,
             },
           ];
         });
 
     references.push({
-      id: tableId,
-      name: table.name,
+      id: targetTableId,
+      name: targetTable.name,
       referencedViaColumn: {
         id: referenceTableColumnId,
-        ...table.columns[referenceTableColumnId],
+        name: targetTableColumn.name,
+        type: targetTableColumn.type,
       },
       linkedToColumn: baseTableColumn,
       columns: new Map(columnMapEntries.sort(compareColumnByLinks)),
     });
-  });
+  }
 
   return references;
 }
