@@ -29,6 +29,7 @@ def create_mathesar_table(engine, table_name, schema_oid, columns=[], constraint
         table_name,
         json.dumps(columns),
         json.dumps(constraints),
+        None,
         comment
     ).fetchone()[0]["oid"]
 
@@ -39,6 +40,7 @@ def create_table_on_database(
     conn,
     column_data_list=[],
     constraint_data_list=[],
+    owner_oid=None,
     comment=None
 ):
     """
@@ -49,6 +51,7 @@ def create_table_on_database(
         schema_oid: The OID of the schema where the table will be created.
         columns: The columns dict for the new table, in order. (optional)
         constraints: The constraints dict for the new table. (optional)
+        owner_oid: The OID of the role who will own the new table.(optional)
         comment: The comment for the new table. (optional)
 
     Returns:
@@ -61,6 +64,7 @@ def create_table_on_database(
         table_name,
         json.dumps(column_data_list),
         json.dumps(constraint_data_list),
+        owner_oid,
         comment
     ).fetchone()[0]
 
