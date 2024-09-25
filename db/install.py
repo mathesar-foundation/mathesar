@@ -28,8 +28,8 @@ def install_mathesar(
             "Installing Mathesar on preexisting PostgreSQL database"
             f" {database_name} at host {hostname}..."
         )
-        sql_install.install(user_db_engine)
         types_install.install_mathesar_on_database(user_db_engine)
+        sql_install.install(user_db_engine)
         user_db_engine.dispose()
     except OperationalError as e:
         if create_db:
@@ -49,8 +49,8 @@ def install_mathesar(
                 "Installing Mathesar on PostgreSQL database"
                 f" {database_name} at host {hostname}..."
             )
-            sql_install.install(user_db_engine)
             types_install.install_mathesar_on_database(user_db_engine)
+            sql_install.install(user_db_engine)
             user_db_engine.dispose()
         else:
             print(f"Skipping installing on DB with key {database_name}.")
