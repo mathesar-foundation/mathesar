@@ -11,7 +11,10 @@
       {errors[0]}
     {:else}
       <ul class="list">
-        {#each errors as error (error)}
+        <!-- Do not use a key here since
+          -- error messages could be the same.
+          -->
+        {#each errors as error}
           <li>{error}</li>
         {/each}
       </ul>

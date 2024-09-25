@@ -6,16 +6,11 @@
   import MenuDivider from '@mathesar/component-library/menu/MenuDivider.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
-  import {
-    iconDeleteMajor,
-    iconEdit,
-    iconMoreActions,
-    iconNotEditable,
-  } from '@mathesar/icons';
+  import { iconDeleteMajor, iconEdit, iconMoreActions } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { ButtonMenuItem, Icon } from '@mathesar-component-library';
+  import { ButtonMenuItem } from '@mathesar-component-library';
 
   import SchemaConstituentCounts from './SchemaConstituentCounts.svelte';
 
@@ -24,50 +19,45 @@
   export let database: Database;
   export let schema: Schema;
 
-  $: ({ name, description, isPublicSchema } = schema);
+  $: ({ name, description, isPublicSchema, currentAccess } = schema);
+  $: ({ currentRoleOwns } = currentAccess);
 
   let isHovered = false;
   let isFocused = false;
 
   $: href = getSchemaPageUrl(database.id, schema.oid);
-  $: isDefault = $isPublicSchema;
-  $: isLocked = $isPublicSchema;
 </script>
 
-<div
-  class="schema-row"
-  class:hover={isHovered}
-  class:focus={isFocused}
-  class:is-locked={isLocked}
->
+<div class="schema-row" class:hover={isHovered} class:focus={isFocused}>
   <div class="title-and-meta">
     <div class="name"><SchemaName {schema} iconHasBox /></div>
 
-    {#if isLocked}
-      <div class="lock"><Icon {...iconNotEditable} /></div>
-    {:else}
-      <div class="menu-trigger">
-        <DropdownMenu
-          showArrow={false}
-          triggerAppearance="plain"
-          preferredPlacement="bottom-end"
-          icon={iconMoreActions}
-          menuStyle="--Menu__padding-x:0.8em;"
+    <div class="menu-trigger">
+      <DropdownMenu
+        showArrow={false}
+        triggerAppearance="plain"
+        preferredPlacement="bottom-end"
+        icon={iconMoreActions}
+        menuStyle="--Menu__padding-x:0.8em;"
+      >
+        <ButtonMenuItem
+          on:click={() => dispatch('edit')}
+          icon={iconEdit}
+          disabled={!$currentRoleOwns}
         >
-          <ButtonMenuItem on:click={() => dispatch('edit')} icon={iconEdit}>
-            {$_('edit_schema')}
-          </ButtonMenuItem>
-          <MenuDivider />
-          <ButtonMenuItem
-            danger
-            on:click={() => dispatch('delete')}
-            icon={iconDeleteMajor}
-          >
-            {$_('delete_schema')}
-          </ButtonMenuItem>
-        </DropdownMenu>
-      </div>
-    {/if}
+          {$_('edit_schema')}
+        </ButtonMenuItem>
+        <MenuDivider />
+        <ButtonMenuItem
+          danger
+          on:click={() => dispatch('delete')}
+          icon={iconDeleteMajor}
+          disabled={!$currentRoleOwns}
+        >
+          {$_('delete_schema')}
+        </ButtonMenuItem>
+      </DropdownMenu>
+    </div>
   </div>
 
   {#if $description}
@@ -78,7 +68,7 @@
 
   <SchemaConstituentCounts {schema} />
 
-  {#if isDefault}
+  {#if $isPublicSchema}
     <InfoBox>
       {$_('public_schema_info')}
     </InfoBox>
@@ -132,10 +122,6 @@
     outline-offset: 1px;
   }
 
-  .schema-row.is-locked {
-    background-color: var(--slate-100);
-  }
-
   .hyperlink-overlay {
     position: absolute;
     height: 100%;
@@ -173,10 +159,5 @@
     font-weight: 500;
     --icon-color: var(--brand-500);
     overflow: hidden;
-  }
-
-  .lock {
-    color: var(--slate-300);
-    align-self: baseline;
   }
 </style>

@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
 
   import { AbstractTypeControl } from '@mathesar/components/abstract-type-control';
-  import AbstractTypeSelector from '@mathesar/components/abstract-type-control/AbstractTypeSelector.svelte';
   import type { ColumnTypeOptionsSaveArgs } from '@mathesar/components/abstract-type-control/types';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import {
@@ -11,7 +10,8 @@
   } from '@mathesar/stores/table-data';
 
   const tabularData = getTabularDataStoreFromContext();
-  $: ({ columnsDataStore } = $tabularData);
+  $: ({ table, columnsDataStore } = $tabularData);
+  $: ({ currentRoleOwns } = table.currentAccess);
 
   export let column: ProcessedColumn;
 
@@ -25,7 +25,8 @@
       default: null,
     });
   }
-  $: disallowDataTypeChange = column.column.primary_key || !!column.linkFk;
+  $: disallowDataTypeChange =
+    column.column.primary_key || !!column.linkFk || !$currentRoleOwns;
   $: columnWithAbstractType = {
     ...column.column,
     abstractType: column.abstractType,
@@ -41,23 +42,19 @@
   })();
 </script>
 
-{#if disallowDataTypeChange}
-  <AbstractTypeSelector
-    selectedAbstractType={column.abstractType}
+{#key columnWithAbstractType}
+  <AbstractTypeControl
     column={columnWithAbstractType}
-    disabled={true}
+    {save}
+    disabled={disallowDataTypeChange}
   />
-  {#if infoAlertText}
-    <InfoBox>
-      <span class="info-alert">
-        {infoAlertText}
-      </span>
-    </InfoBox>
-  {/if}
-{:else}
-  {#key columnWithAbstractType}
-    <AbstractTypeControl column={columnWithAbstractType} {save} />
-  {/key}
+{/key}
+{#if infoAlertText}
+  <InfoBox>
+    <span class="info-alert">
+      {infoAlertText}
+    </span>
+  </InfoBox>
 {/if}
 
 <style lang="scss">

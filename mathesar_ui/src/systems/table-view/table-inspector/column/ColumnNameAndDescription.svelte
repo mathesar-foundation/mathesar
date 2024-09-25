@@ -11,6 +11,7 @@
 
   export let column: ProcessedColumn;
   export let columnsDataStore: ColumnsDataStore;
+  export let currentRoleOwnsTable: boolean;
 
   $: ({ columns } = columnsDataStore);
 
@@ -55,6 +56,7 @@
     initialValue={column.column.name}
     onSubmit={handleColumnNameChange}
     {getValidationErrors}
+    disabled={!currentRoleOwnsTable}
   />
 </div>
 
@@ -64,6 +66,7 @@
     initialValue={column.column.description ?? ''}
     onSubmit={handleColumnDescriptionChange}
     isLongText
+    disabled={!currentRoleOwnsTable}
   />
 </div>
 

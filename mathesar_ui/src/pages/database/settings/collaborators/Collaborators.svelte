@@ -10,6 +10,7 @@
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     Button,
     Spinner,
@@ -25,6 +26,9 @@
   const routeContext = DatabaseSettingsRouteContext.get();
   const addCollaboratorModal = modal.spawnModalController();
   const editCollaboratorRoleModal = modal.spawnModalController();
+
+  const userProfileStore = getUserProfileStoreFromContext();
+  $: ({ isMathesarAdmin } = $userProfileStore);
 
   $: ({ database, configuredRoles, collaborators, users } = $routeContext);
 
@@ -56,7 +60,11 @@
   </svelte:fragment>
   <svelte:fragment slot="actions">
     {#if isSuccess}
-      <Button appearance="primary" on:click={() => addCollaboratorModal.open()}>
+      <Button
+        appearance="primary"
+        on:click={() => addCollaboratorModal.open()}
+        disabled={!isMathesarAdmin}
+      >
         <Icon {...iconAddNew} />
         <span>{$_('add_collaborator')}</span>
       </Button>

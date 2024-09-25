@@ -56,6 +56,12 @@ export const databases = {
       },
       Array<RawDatabase>
     >(),
+    disconnect: rpcMethodTypeContainer<
+      {
+        database_id: RawDatabase['id'];
+      },
+      void
+    >(),
   },
   setup: {
     create_new: rpcMethodTypeContainer<

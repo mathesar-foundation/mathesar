@@ -18,6 +18,8 @@
   export let database: Database;
   export let schema: Schema;
 
+  $: ({ currentRolePrivileges } = schema.currentAccess);
+
   let isCreatingNewTable = false;
 
   async function handleCreateEmptyTable() {
@@ -33,6 +35,7 @@
   triggerAppearance="primary"
   closeOnInnerClick={true}
   label={$_('new_table')}
+  disabled={!$currentRolePrivileges.has('CREATE')}
 >
   <div slot="trigger">
     {#if isCreatingNewTable}

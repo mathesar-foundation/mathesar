@@ -27,8 +27,15 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ recordsData, columnsDataStore, meta, processedColumns, selection } =
-    $tabularData);
+  $: ({
+    table,
+    recordsData,
+    columnsDataStore,
+    meta,
+    processedColumns,
+    selection,
+  } = $tabularData);
+  $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({
     rowStatus,
     rowCreationStatus,
@@ -113,6 +120,7 @@
           {processedColumn}
           {recordsData}
           {rowKey}
+          currentRoleTablePrivileges={$currentRolePrivileges}
         />
       {/each}
     {/if}

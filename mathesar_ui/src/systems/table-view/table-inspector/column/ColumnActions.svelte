@@ -24,9 +24,10 @@
 
   export let columns: ProcessedColumn[];
 
-  $: ({ processedColumns, columnsDataStore } = $tabularData);
+  $: ({ table, processedColumns, columnsDataStore } = $tabularData);
   $: column = columns.length === 1 ? columns[0] : undefined;
   $: canMoveToLinkedTable = [...$processedColumns].some(([, c]) => c.linkFk);
+  $: ({ currentRoleOwns } = table.currentAccess);
 
   function handleDeleteColumn(c: ProcessedColumn) {
     void confirmDelete({
@@ -55,7 +56,10 @@
 </script>
 
 <div class="actions-container">
-  <Button on:click={handleMoveColumnsToNewLinkedTable}>
+  <Button
+    on:click={handleMoveColumnsToNewLinkedTable}
+    disabled={!$currentRoleOwns}
+  >
     <div class="action-item">
       <div>
         <Icon {...iconMoveColumnsToNewLinkedTable} />
@@ -69,7 +73,10 @@
     </div>
   </Button>
   {#if canMoveToLinkedTable}
-    <Button on:click={handleMoveColumnsToExistingLinkedTable}>
+    <Button
+      on:click={handleMoveColumnsToExistingLinkedTable}
+      disabled={!$currentRoleOwns}
+    >
       <div class="action-item">
         <div>
           <Icon {...iconMoveColumnsToExistingLinkedTable} />
@@ -87,6 +94,7 @@
     <Button
       appearance="outline-primary"
       on:click={() => column && handleDeleteColumn(column)}
+      disabled={!$currentRoleOwns}
     >
       <Icon {...iconDeleteMajor} />
       <span>

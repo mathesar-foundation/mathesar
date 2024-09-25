@@ -142,6 +142,14 @@ interface ColumnDefault {
   is_dynamic: boolean;
 }
 
+export const allColumnPrivileges = [
+  'SELECT',
+  'INSERT',
+  'UPDATE',
+  'REFERENCES',
+] as const;
+export type ColumnPrivilege = (typeof allColumnPrivileges)[number];
+
 /** The raw column data, from the user database only */
 interface RawColumn {
   /** The PostgreSQL attnum of the column */
@@ -156,6 +164,7 @@ interface RawColumn {
   default: ColumnDefault | null;
   has_dependents: boolean;
   valid_target_types: string[];
+  current_role_priv: ColumnPrivilege[];
 }
 
 /**

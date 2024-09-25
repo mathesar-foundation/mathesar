@@ -40,7 +40,7 @@
         <PasswordChangeForm userId={userProfile.id} />
       </InsetPageSection>
 
-      {#if !userProfile.isSuperUser}
+      {#if !userProfile.isMathesarAdmin}
         <InsetPageSection>
           <h2 class="large-bold-header" slot="header">
             {$_('delete_account')}

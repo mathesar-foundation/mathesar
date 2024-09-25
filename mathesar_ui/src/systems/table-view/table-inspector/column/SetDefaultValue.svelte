@@ -17,8 +17,9 @@
   export let column: ProcessedColumn;
 
   const tabularData = getTabularDataStoreFromContext();
-  $: ({ columnsDataStore, recordsData } = $tabularData);
+  $: ({ table, columnsDataStore, recordsData } = $tabularData);
   $: ({ linkedRecordSummaries } = recordsData);
+  $: ({ currentRoleOwns } = table.currentAccess);
 
   $: initialValue = column.column.default?.value ?? column.initialInputValue;
   $: value = initialValue;
@@ -86,17 +87,17 @@
     }
   }
 
-  $: disabled = typeChangeState?.state === 'processing';
+  $: disabled = typeChangeState?.state === 'processing' || !$currentRoleOwns;
 </script>
 
 <div class="default-value-container">
   <LabeledInput layout="inline-input-first">
     <span slot="label">{$_('no_default_value')}</span>
-    <Radio checked={isDefaultNull} on:change={toggleNoDefault} />
+    <Radio checked={isDefaultNull} on:change={toggleNoDefault} {disabled} />
   </LabeledInput>
   <LabeledInput layout="inline-input-first">
     <span slot="label">{$_('custom_default')}</span>
-    <Radio checked={!isDefaultNull} on:change={toggleNoDefault} />
+    <Radio checked={!isDefaultNull} on:change={toggleNoDefault} {disabled} />
   </LabeledInput>
   {#if !isDefaultNull}
     <DynamicInput

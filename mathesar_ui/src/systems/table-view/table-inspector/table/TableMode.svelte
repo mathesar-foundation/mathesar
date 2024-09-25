@@ -2,8 +2,6 @@
   import { _ } from 'svelte-i18n';
 
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { currentTable } from '@mathesar/stores/tables';
-  import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
   import { Collapsible } from '@mathesar-component-library';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
@@ -16,6 +14,8 @@
   import TablePermissions from './TablePermissions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
+  $: ({ table } = $tabularData);
+  $: ({ currentRoleOwns } = table.currentAccess);
 </script>
 
 <div class="table-mode-container">
@@ -26,8 +26,8 @@
       isDbLevelConfiguration
     />
     <div slot="content" class="content-container">
-      <TableName />
-      <TableDescription />
+      <TableName disabled={!$currentRoleOwns} />
+      <TableDescription disabled={!$currentRoleOwns} />
     </div>
   </Collapsible>
 

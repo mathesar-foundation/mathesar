@@ -14,12 +14,10 @@
   import TextArea from '@mathesar/component-library/text-area/TextArea.svelte';
   import { toast } from '@mathesar/stores/toast';
   import {
-    LabeledInput,
-    type ModalController,
-  } from '@mathesar-component-library';
-  import {
     CancelOrProceedButtonPair,
     ControlledModal,
+    LabeledInput,
+    type ModalController,
     TextInput,
   } from '@mathesar-component-library';
 
@@ -29,19 +27,7 @@
   export let getInitialName: () => string = () => '';
   export let getInitialDescription: () => string = () => '';
   export let save: (name: string, description: string) => Promise<void>;
-
-  /**
-   * NOTE: This is NOT a feature
-   *
-   * Ideally this component should not have this prop
-   * since the name of the component itself suggests
-   * that its used to edit both name and description
-   *
-   * But still adding this prop to support only editing
-   * table name. Since editing table description is planned
-   * but will come in future.
-   */
-  export let hideDescription = false;
+  export let disabled = false;
 
   let isSubmitting = false;
   let inputElement: HTMLInputElement;
@@ -76,7 +62,7 @@
   }
 
   $: nameValidationErrors = getNameValidationErrors(name);
-  $: canProceed = !nameValidationErrors.length;
+  $: canProceed = !nameValidationErrors.length && !disabled;
 </script>
 
 <ControlledModal
@@ -99,7 +85,7 @@
           on:input={() => {
             nameHasChanged = true;
           }}
-          disabled={isSubmitting}
+          disabled={isSubmitting || disabled}
           placeholder={$_('name')}
           id="name"
         />
@@ -111,18 +97,16 @@
       </LabeledInput>
     </div>
 
-    {#if !hideDescription}
-      <div class="input-container">
-        <LabeledInput label={$_('description')} layout="stacked">
-          <TextArea
-            bind:value={description}
-            aria-label={$_('description')}
-            disabled={isSubmitting}
-            placeholder={$_('description')}
-          />
-        </LabeledInput>
-      </div>
-    {/if}
+    <div class="input-container">
+      <LabeledInput label={$_('description')} layout="stacked">
+        <TextArea
+          bind:value={description}
+          aria-label={$_('description')}
+          disabled={isSubmitting || disabled}
+          placeholder={$_('description')}
+        />
+      </LabeledInput>
+    </div>
   </div>
   <CancelOrProceedButtonPair
     proceedButton={{ label: saveButtonLabel }}
