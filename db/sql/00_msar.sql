@@ -1193,6 +1193,92 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_grant_membership_expr(parent_rol_id regrole, g_roles oid[]) RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    'GRANT %1$s TO %2$s',
+    msar.get_role_name(parent_rol_id),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(g_roles) as x(rol_id);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_revoke_membership_expr(parent_rol_id regrole, r_roles oid[]) RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    'REVOKE %1$s FROM %2$s',
+    msar.get_role_name(parent_rol_id),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(r_roles) as x(rol_id);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.set_members_to_role(parent_rol_id regrole, members oid[]) RETURNS jsonb AS $$/*
+Grant/Revoke direct membership to/from roles.
+
+Returns a json object describing the updated information of the parent role.
+
+  {
+    "oid": <int>
+    "name": <str>
+    "super": <bool>
+    "inherits": <bool>
+    "create_role": <bool>
+    "create_db": <bool>
+    "login": <bool>
+    "description": <str|null>
+    "members": <[
+        { "oid": <int>, "admin": <bool> }
+      ]|null>
+  }
+
+Args:
+  parent_rol_id: The OID of role whose membership will be granted/revoked to/from other roles.
+  members: An array of role OID(s) whom we want to grant direct membership of the parent role.
+           Only the OID(s) present in the array will be granted membership of parent role,
+           Membership will be revoked for existing members not present in this array.
+*/
+DECLARE
+  parent_role_info jsonb := msar.get_role(parent_rol_id::regrole::text);
+  all_members_array bigint[];
+  revoke_members_array bigint[];
+  set_members_expr text;
+BEGIN
+  -- Get all the members of parent_role.
+  SELECT array_agg(x.oid)
+    FROM jsonb_to_recordset(
+      CASE WHEN parent_role_info ->> 'members' IS NOT NULL
+      THEN parent_role_info -> 'members'
+      ELSE NULL END
+    ) AS x(oid oid, admin boolean)
+  INTO all_members_array;
+  -- Find all the roles whose membership we want to revoke.
+  SELECT ARRAY(
+    SELECT unnest(all_members_array)
+    EXCEPT
+    SELECT unnest(members)
+  ) INTO revoke_members_array;
+  -- REVOKE/GRANT membership for parent_role.
+  set_members_expr := concat_ws(
+    E'\n',
+    msar.build_revoke_membership_expr(parent_rol_id, revoke_members_array),
+    msar.build_grant_membership_expr(parent_rol_id, members)
+  );
+  EXECUTE set_members_expr;
+  -- Return the updated parent_role info including membership details.
+  RETURN msar.get_role(parent_rol_id::regrole::text);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_current_role() RETURNS jsonb AS $$/*
 Returns a JSON object describing the current_role and the parent role(s) whose
 privileges are immediately available to current_role without doing SET ROLE.
@@ -1692,6 +1778,7 @@ $$ LANGUAGE plpgsql;
 DROP FUNCTION IF EXISTS msar.create_schema(text, text);
 CREATE OR REPLACE FUNCTION msar.create_schema(
   sch_name text,
+  own_id regrole,
   description text DEFAULT ''
 ) RETURNS jsonb AS $$/*
 Create a schema, possibly with a description.
@@ -1699,21 +1786,27 @@ Create a schema, possibly with a description.
 If a schema with the given name already exists, an exception will be raised.
 
 Args:
-  sch_name: the name of the schema to be created, UNQUOTED.
+  sch_name: The name of the schema to be created, UNQUOTED.
+  own_id:      (optional) The OID of the role who will own the new schema.
   description: (optional) A description for the schema, UNQUOTED.
 
 Returns:
   A json object describing the user-defined schema in the database.
 
-Note: This function does not support IF NOT EXISTS because it's simpler that way. I originally tried
-to support descriptions and if_not_exists in the same function, but as I discovered more edge cases
-and inconsistencies, it got too complex, and I didn't think we'd have a good enough use case for it.
+Note:
+  - This function does not support IF NOT EXISTS because it's simpler that way. I originally tried
+    to support descriptions and if_not_exists in the same function, but as I discovered more edge cases
+    and inconsistencies, it got too complex, and I didn't think we'd have a good enough use case for it.
+  - If own_id is NULL, the current role will be the owner of the new schema.
 */
 DECLARE schema_oid oid;
 BEGIN
   EXECUTE 'CREATE SCHEMA ' || quote_ident(sch_name);
   schema_oid := msar.get_schema_oid(sch_name);
   PERFORM msar.set_schema_description(schema_oid, description);
+  IF own_id IS NOT NULL THEN
+    PERFORM msar.transfer_schema_ownership(schema_oid, own_id);
+  END IF;
   RETURN msar.get_schema(schema_oid);
 END;
 $$ LANGUAGE plpgsql;
@@ -3066,7 +3159,7 @@ $$ LANGUAGE SQL;
 DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
-msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, comment_ text)
+msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, own_id regrole, comment_ text)
   RETURNS jsonb AS $$/*
 Add a table, with a default id column, returning the OID & name of the created table.
 
@@ -3075,13 +3168,16 @@ Args:
   tab_name (optional): The unquoted name for the new table.
   col_defs (optional): The columns for the new table, in order.
   con_defs (optional): The constraints for the new table.
+  own_id   (optional): The OID of the role who will own the new table.
   comment_ (optional): The comment for the new table.
 
-Note that if tab_name is null, the table will be created with a name in the format 'Table <n>'.
-If col_defs is null, the table will still be created with a default 'id' column. Also,
-if an 'id' column is given in the input, it will be replaced with our default 'id' column. This is
-the behavior of the current python functions, so we're keeping it for now. In any case, the created
-table will always have our default 'id' column as its first column.
+Note:
+  - If tab_name is NULL, the table will be created with a name in the format 'Table <n>'.
+  - If col_defs is NULL, the table will still be created with a default 'id' column. Also,
+    if an 'id' column is given in the input, it will be replaced with our default 'id' column. This is
+    the behavior of the current python functions, so we're keeping it for now. In any case, the created
+    table will always have our default 'id' column as its first column.
+  - If own_id is NULL, the current role will be the owner of the new table.
 */
 DECLARE
   schema_name text;
@@ -3125,6 +3221,9 @@ BEGIN
   PERFORM __msar.add_table(fq_table_name, column_defs, constraint_defs);
   created_table_id := fq_table_name::regclass::oid;
   PERFORM msar.comment_on_table(created_table_id, comment_);
+  IF own_id IS NOT NULL THEN
+    PERFORM msar.transfer_table_ownership(created_table_id, own_id);
+  END IF;
   RETURN jsonb_build_object(
     'oid', created_table_id::bigint,
     'name', relname
@@ -3175,7 +3274,7 @@ DECLARE
   copy_sql text;
 BEGIN
   -- Create string table
-  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, comment_) ->> 'oid';
+  rel_id := msar.add_mathesar_table(sch_id, tab_name, col_defs, NULL, NULL, comment_) ->> 'oid';
   -- Get unquoted schema and table name for the created table
   SELECT nspname, relname INTO sch_name, rel_name
   FROM pg_catalog.pg_class AS pgc
@@ -3904,7 +4003,7 @@ The elements of the mapping_columns array must have the form
 DECLARE
   added_table_id oid;
 BEGIN
-  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL) ->> 'oid';
+  added_table_id := msar.add_mathesar_table(sch_id, tab_name, NULL, NULL, NULL, NULL) ->> 'oid';
   PERFORM msar.add_foreign_key_column(column_name, added_table_id, referent_table_oid)
   FROM jsonb_to_recordset(mapping_columns) AS x(column_name text, referent_table_oid oid);
   RETURN added_table_id;
@@ -3951,6 +4050,7 @@ BEGIN
     new_tab_name,
     extracted_col_defs,
     extracted_con_defs,
+    NULL, -- own_id is set to NULL so the current role would be the owner of the extracted table.
     format('Extracted from %s', __msar.get_qualified_relation_name(tab_id))
   ) ->> 'oid';
   -- Create a new fkey column and foreign key linking the original table to the extracted one.
