@@ -1285,12 +1285,12 @@ privileges are immediately available to current_role without doing SET ROLE.
 */
 SELECT jsonb_build_object(
   'current_role', msar.get_role(current_role),
-  'parent_roles', array_remove(
+  'parent_roles', COALESCE(array_remove(
     array_agg(
       CASE WHEN pg_has_role(role_data.name, current_role, 'USAGE')
       THEN msar.get_role(role_data.name) END
     ), NULL
-  )
+  ), ARRAY[]::jsonb[])
 )
 FROM msar.role_info_table() AS role_data
 WHERE role_data.name NOT LIKE 'pg_%'
