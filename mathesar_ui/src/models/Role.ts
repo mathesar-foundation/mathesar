@@ -85,7 +85,7 @@ export class Role {
     const promise = api.roles
       .set_members({
         database_id: this.database.id,
-        role_oid: this.oid,
+        parent_role_oid: this.oid,
         members: [...memberOids],
       })
       .run();
