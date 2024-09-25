@@ -6,6 +6,8 @@ from typing import Optional, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
+from db.connection import exec_msar_func
+
 from mathesar.models.base import Explorations
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
@@ -29,6 +31,7 @@ class ExplorationInfo(TypedDict):
         database_id: The Django id of the database containing the exploration.
         name: The name of the exploration.
         base_table_oid: The OID of the base table of the exploration on the database.
+        schema_oid: The OID of the schema containing the base table of the exploration.
         initial_columns: A list describing the columns to be included in the exploration.
         transformations: A list describing the transformations to be made on the included columns.
         display_options: A list describing metadata for the columns in the explorations.
@@ -39,6 +42,7 @@ class ExplorationInfo(TypedDict):
     database_id: int
     name: str
     base_table_oid: int
+    schema_oid: int
     initial_columns: list
     transformations: Optional[list]
     display_options: Optional[list]
@@ -46,12 +50,13 @@ class ExplorationInfo(TypedDict):
     description: Optional[str]
 
     @classmethod
-    def from_model(cls, model):
+    def from_model(cls, model, schema_oid):
         return cls(
             id=model.id,
             database_id=model.database.id,
             name=model.name,
             base_table_oid=model.base_table_oid,
+            schema_oid=schema_oid,
             initial_columns=model.initial_columns,
             transformations=model.transformations,
             display_options=model.display_options,
@@ -130,18 +135,28 @@ class ExplorationResult(TypedDict):
 @rpc_method(name="explorations.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, database_id: int, **kwargs) -> list[ExplorationInfo]:
+def list_(*, database_id: int, schema_oid: int, **kwargs) -> list[ExplorationInfo]:
     """
     List information about explorations for a database. Exposed as `list`.
 
     Args:
         database_id: The Django id of the database containing the explorations.
+        schema_oid: The OID of the schema containing the base tables of the explorations.
 
     Returns:
         A list of exploration details.
     """
     explorations = list_explorations(database_id)
-    return [ExplorationInfo.from_model(exploration) for exploration in explorations]
+    print(explorations)
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(database_id, user) as conn:
+        tables = exec_msar_func(conn, 'get_table_info', schema_oid).fetchone()[0]
+    table_oids = set(table['oid'] for table in tables)
+    return [
+        ExplorationInfo.from_model(exploration, schema_oid)
+        for exploration in explorations
+        if exploration.base_table_oid in table_oids
+    ]
 
 
 @rpc_method(name="explorations.get")
@@ -158,7 +173,14 @@ def get(*, exploration_id: int, **kwargs) -> ExplorationInfo:
         Exploration details for a given exploration_id.
     """
     exploration = get_exploration(exploration_id)
-    return ExplorationInfo.from_model(exploration)
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(exploration['database_id'], user) as conn:
+        schema_oid = exec_msar_func(
+            conn,
+            'get_relation_namespace_oid',
+            exploration['base_table_oid']
+        ).fetchone()[0]
+    return ExplorationInfo.from_model(exploration, schema_oid)
 
 
 @rpc_method(name="explorations.delete")
@@ -183,6 +205,11 @@ def run(*, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, *
 
     Args:
         exploration_def: A dict describing an exploration to run.
+        limit: The max number of rows to return.(default 100)
+        offset: The number of rows to skip.(default 0)
+
+    Returns:
+        The result of the exploration run.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(exploration_def['database_id'], user) as conn:
@@ -201,6 +228,9 @@ def run_saved(*, exploration_id: int, limit: int = 100, offset: int = 0, **kwarg
         exploration_id: The Django id of the exploration to run.
         limit: The max number of rows to return.(default 100)
         offset: The number of rows to skip.(default 0)
+
+    Returns:
+        The result of the exploration run.
     """
     user = kwargs.get(REQUEST_KEY).user
     exp_model = Explorations.objects.get(id=exploration_id)
@@ -212,26 +242,46 @@ def run_saved(*, exploration_id: int, limit: int = 100, offset: int = 0, **kwarg
 @rpc_method(name='explorations.replace')
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def replace(*, new_exploration: ExplorationInfo) -> ExplorationInfo:
+def replace(*, new_exploration: ExplorationInfo, **kwargs) -> ExplorationInfo:
     """
     Replace a saved exploration.
 
     Args:
         new_exploration: A dict describing the exploration to replace, including the updated fields.
+
+    Returns:
+        The exploration details for the replaced exploration.
     """
     replaced_exp_model = replace_exploration(new_exploration)
-    return ExplorationInfo.from_model(replaced_exp_model)
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(replaced_exp_model['database_id'], user) as conn:
+        schema_oid = exec_msar_func(
+            conn,
+            'get_relation_namespace_oid',
+            replaced_exp_model['base_table_oid']
+        ).fetchone()[0]
+    return ExplorationInfo.from_model(replaced_exp_model, schema_oid)
 
 
 @rpc_method(name='explorations.add')
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def add(*, exploration_def: ExplorationDef) -> ExplorationInfo:
+def add(*, exploration_def: ExplorationDef, **kwargs) -> ExplorationInfo:
     """
     Add a new exploration.
 
     Args:
         exploration_def: A dict describing the exploration to create.
+
+    Returns:
+        The exploration details for the newly created exploration.
     """
     exp_model = create_exploration(exploration_def)
-    return ExplorationInfo.from_model(exp_model)
+    user = kwargs.get(REQUEST_KEY).user
+    with connect(exploration_def['database_id'], user) as conn:
+        schema_oid = exec_msar_func(
+            conn,
+            'get_relation_namespace_oid',
+            exploration_def['base_table_oid']
+        ).fetchone()[0]
+    return ExplorationInfo.from_model(exp_model, schema_oid)
