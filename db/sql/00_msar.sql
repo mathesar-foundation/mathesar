@@ -1193,6 +1193,92 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_grant_membership_expr(parent_rol_id regrole, g_roles oid[]) RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    'GRANT %1$s TO %2$s',
+    msar.get_role_name(parent_rol_id),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(g_roles) as x(rol_id);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_revoke_membership_expr(parent_rol_id regrole, r_roles oid[]) RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    'REVOKE %1$s FROM %2$s',
+    msar.get_role_name(parent_rol_id),
+    msar.get_role_name(rol_id)
+  ),
+  E';\n'
+) || E';\n'
+FROM unnest(r_roles) as x(rol_id);
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.set_members_to_role(parent_rol_id regrole, members oid[]) RETURNS jsonb AS $$/*
+Grant/Revoke direct membership to/from roles.
+
+Returns a json object describing the updated information of the parent role.
+
+  {
+    "oid": <int>
+    "name": <str>
+    "super": <bool>
+    "inherits": <bool>
+    "create_role": <bool>
+    "create_db": <bool>
+    "login": <bool>
+    "description": <str|null>
+    "members": <[
+        { "oid": <int>, "admin": <bool> }
+      ]|null>
+  }
+
+Args:
+  parent_rol_id: The OID of role whose membership will be granted/revoked to/from other roles.
+  members: An array of role OID(s) whom we want to grant direct membership of the parent role.
+           Only the OID(s) present in the array will be granted membership of parent role,
+           Membership will be revoked for existing members not present in this array.
+*/
+DECLARE
+  parent_role_info jsonb := msar.get_role(parent_rol_id::regrole::text);
+  all_members_array bigint[];
+  revoke_members_array bigint[];
+  set_members_expr text;
+BEGIN
+  -- Get all the members of parent_role.
+  SELECT array_agg(x.oid)
+    FROM jsonb_to_recordset(
+      CASE WHEN parent_role_info ->> 'members' IS NOT NULL
+      THEN parent_role_info -> 'members'
+      ELSE NULL END
+    ) AS x(oid oid, admin boolean)
+  INTO all_members_array;
+  -- Find all the roles whose membership we want to revoke.
+  SELECT ARRAY(
+    SELECT unnest(all_members_array)
+    EXCEPT
+    SELECT unnest(members)
+  ) INTO revoke_members_array;
+  -- REVOKE/GRANT membership for parent_role.
+  set_members_expr := concat_ws(
+    E'\n',
+    msar.build_revoke_membership_expr(parent_rol_id, revoke_members_array),
+    msar.build_grant_membership_expr(parent_rol_id, members)
+  );
+  EXECUTE set_members_expr;
+  -- Return the updated parent_role info including membership details.
+  RETURN msar.get_role(parent_rol_id::regrole::text);
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_current_role() RETURNS jsonb AS $$/*
 Returns a JSON object describing the current_role and the parent role(s) whose
 privileges are immediately available to current_role without doing SET ROLE.
