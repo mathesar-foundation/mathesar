@@ -237,11 +237,14 @@ function updateTableStoreIfPresent({
   });
   const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
   if (tablesStore) {
-    tablesStore.update((tablesData) => {
-      const tables = sortTables([...tablesData.tablesMap.values(), fullTable]);
+    tablesStore.update(({ requestStatus, tablesMap }) => {
+      tablesMap.set(fullTable.oid, fullTable);
+      const newTablesMap = new Map(
+        sortTables(tablesMap.values()).map((t) => [t.oid, t]),
+      );
       return {
-        ...tablesData,
-        tablesMap: new Map(tables.map((t) => [t.oid, t])),
+        requestStatus,
+        tablesMap: newTablesMap,
       };
     });
     schema.setTableCount(get(tablesStore).tablesMap.size);
