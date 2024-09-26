@@ -41,27 +41,19 @@ import {
   writable,
 } from 'svelte/store';
 
-import {
-  type PaginatedResponse,
-  type RequestStatus,
-  addQueryParamsToUrl,
-  deleteAPI,
-  getAPI,
-  postAPI,
-  putAPI,
-} from '@mathesar/api/rest/utils/requestUtils';
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
 import type {
+  AddableExploration,
   ExplorationResult,
   SavedExploration,
-  UnsavedExploration,
 } from '@mathesar/api/rpc/explorations';
 import type { Schema } from '@mathesar/models/Schema';
 import CacheManager from '@mathesar/utils/CacheManager';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import type { SHARED_LINK_UUID_QUERY_PARAM } from '@mathesar/utils/shares';
-import { CancellablePromise } from '@mathesar-component-library';
+import type { CancellablePromise } from '@mathesar-component-library';
 
-import { currentSchemaId } from './schemas';
+import { currentSchema } from './schemas';
 
 const commonData = preloadCommonData();
 
@@ -79,7 +71,7 @@ const schemasCacheManager = new CacheManager<
 
 const requestMap: Map<
   Schema['oid'],
-  CancellablePromise<PaginatedResponse<SavedExploration>>
+  CancellablePromise<SavedExploration[]>
 > = new Map();
 
 function sortedQueryEntries(
@@ -121,12 +113,13 @@ function findSchemaStoreForQuery(id: SavedExploration['id']) {
   );
 }
 
-export async function refetchQueriesForSchema(
-  schemaId: Schema['oid'],
-): Promise<QueriesStoreSubstance | undefined> {
-  const store = schemasCacheManager.get(schemaId);
+export async function refetchExplorationsForSchema(schema: {
+  oid: number;
+  database: { id: number };
+}): Promise<QueriesStoreSubstance | undefined> {
+  const store = schemasCacheManager.get(schema.oid);
   if (!store) {
-    console.error(`Queries store for schema: ${schemaId} not found.`);
+    console.error(`Queries store for schema: ${schema.oid} not found.`);
     return undefined;
   }
 
@@ -136,17 +129,18 @@ export async function refetchQueriesForSchema(
       requestStatus: { state: 'processing' },
     }));
 
-    requestMap.get(schemaId)?.cancel();
+    requestMap.get(schema.oid)?.cancel();
 
-    const queriesRequest = getAPI<PaginatedResponse<SavedExploration>>(
-      `/api/db/v0/queries/?schema=${schemaId}&limit=500`,
-    );
-    requestMap.set(schemaId, queriesRequest);
+    const queriesRequest = api.explorations
+      .list({
+        database_id: schema.database.id,
+        schema_oid: schema.oid,
+      })
+      .run();
+    requestMap.set(schema.oid, queriesRequest);
 
-    const response = await queriesRequest;
-    const queriesResult = response.results || [];
-
-    const schemaQueriesStore = setSchemaQueriesStore(schemaId, queriesResult);
+    const queriesResult = await queriesRequest;
+    const schemaQueriesStore = setSchemaQueriesStore(schema.oid, queriesResult);
 
     return get(schemaQueriesStore);
   } catch (err) {
@@ -165,40 +159,41 @@ export async function refetchQueriesForSchema(
 
 let preload = true;
 
-export function getQueriesStoreForSchema(
-  schemaId: Schema['oid'],
-): Writable<QueriesStoreSubstance> {
-  let store = schemasCacheManager.get(schemaId);
+export function getExplorationsStoreForSchema(schema: {
+  oid: number;
+  database: { id: number };
+}): Writable<QueriesStoreSubstance> {
+  let store = schemasCacheManager.get(schema.oid);
   if (!store) {
     store = writable({
-      schemaId,
+      schemaId: schema.oid,
       requestStatus: { state: 'processing' },
       data: new Map(),
     });
-    schemasCacheManager.set(schemaId, store);
-    if (preload && commonData.current_schema === schemaId) {
-      store = setSchemaQueriesStore(schemaId, commonData.queries ?? []);
+    schemasCacheManager.set(schema.oid, store);
+    if (preload && commonData.current_schema === schema.oid) {
+      store = setSchemaQueriesStore(schema.oid, commonData.queries ?? []);
     } else {
-      void refetchQueriesForSchema(schemaId);
+      void refetchExplorationsForSchema(schema);
     }
     preload = false;
   } else if (get(store).requestStatus.state === 'failure') {
-    void refetchQueriesForSchema(schemaId);
+    void refetchExplorationsForSchema(schema);
   }
   return store;
 }
 
 export const queries: Readable<Omit<QueriesStoreSubstance, 'schemaId'>> =
-  derived(currentSchemaId, ($currentSchemaId, set) => {
+  derived(currentSchema, ($currentSchema, set) => {
     let unsubscribe: Unsubscriber;
 
-    if (!$currentSchemaId) {
+    if (!$currentSchema) {
       set({
         requestStatus: { state: 'success' },
         data: new Map(),
       });
     } else {
-      const store = getQueriesStoreForSchema($currentSchemaId);
+      const store = getExplorationsStoreForSchema($currentSchema);
       unsubscribe = store.subscribe((dbSchemasData) => {
         set(dbSchemasData);
       });
@@ -209,99 +204,71 @@ export const queries: Readable<Omit<QueriesStoreSubstance, 'schemaId'>> =
     };
   });
 
-export function createQuery(
-  newQuery: UnsavedExploration,
-): CancellablePromise<SavedExploration & { schema: number }> {
-  const promise = postAPI<SavedExploration & { schema: number }>(
-    '/api/db/v0/queries/',
-    newQuery,
-  );
-  void promise.then((instance) => {
-    void refetchQueriesForSchema(instance.schema);
-    return instance;
+export function addExploration(
+  exploration: AddableExploration,
+): CancellablePromise<SavedExploration> {
+  const promise = api.explorations.add({ exploration_def: exploration }).run();
+  void promise.then((savedExploration) => {
+    void refetchExplorationsForSchema({
+      oid: savedExploration.schema_oid,
+      database: { id: exploration.database_id },
+    });
+    return savedExploration;
   });
   return promise;
 }
 
-export function putQuery(
-  query: SavedExploration,
+export function replaceExploration(
+  exploration: SavedExploration,
 ): CancellablePromise<SavedExploration> {
-  const promise = putAPI<SavedExploration>(
-    `/api/db/v0/queries/${query.id}/`,
-    query,
-  );
-  void promise.then((result) => {
-    // TODO: Get schemaId as a query property
-    const schemaId = get(currentSchemaId);
-    if (schemaId) {
-      const store = getQueriesStoreForSchema(schemaId);
-      get(store).data.set(query.id, result);
-      setSchemaQueriesStore(schemaId, [...get(store).data.values()]);
-    }
+  const promise = api.explorations
+    .replace({ new_exploration: exploration })
+    .run();
+
+  void promise.then((newlySavedExploration) => {
+    const schemaId = newlySavedExploration.schema_oid;
+    const store = getExplorationsStoreForSchema({
+      oid: schemaId,
+      database: { id: newlySavedExploration.database_id },
+    });
+    get(store).data.set(exploration.id, newlySavedExploration);
+    setSchemaQueriesStore(schemaId, [...get(store).data.values()]);
     return undefined;
   });
+
   return promise;
 }
 
-export function getQuery(
-  queryId: SavedExploration['id'],
+export function getExploration(
+  id: SavedExploration['id'],
 ): CancellablePromise<SavedExploration> {
-  // TODO: Get schemaId as a query property
-  const schemaId = get(currentSchemaId);
-  let innerRequest: CancellablePromise<SavedExploration>;
-  if (schemaId) {
-    return new CancellablePromise<SavedExploration>(
-      (resolve, reject) => {
-        const store = getQueriesStoreForSchema(schemaId);
-        const storeSubstance = get(store);
-        const queryResponse = storeSubstance.data.get(queryId);
-        if (queryResponse) {
-          resolve(queryResponse);
-          return;
-        }
-        if (storeSubstance.requestStatus.state !== 'success') {
-          innerRequest = getAPI<SavedExploration>(
-            `/api/db/v0/queries/${queryId}/`,
-          );
-          void innerRequest.then(
-            (result) => resolve(result),
-            (reason) => reject(reason),
-          );
-        } else {
-          reject(new Error('Query not found'));
-        }
-      },
-      () => {
-        innerRequest?.cancel();
-      },
-    );
-  }
-  return new CancellablePromise((resolve) => resolve());
+  return api.explorations.get({ exploration_id: id }).run();
 }
 
-export function fetchQueryResults(
-  queryId: number,
-  params?: {
+export function runSavedExploration(
+  id: number,
+  params: {
     limit: number;
     offset: number;
-    [SHARED_LINK_UUID_QUERY_PARAM]?: string;
   },
 ): CancellablePromise<ExplorationResult> {
-  const url = addQueryParamsToUrl(
-    `/api/db/v0/queries/${queryId}/results/`,
-    params,
-  );
-  return getAPI(url);
+  return api.explorations
+    .run_saved({
+      exploration_id: id,
+      limit: params.limit,
+      offset: params.offset,
+    })
+    .run();
 }
 
-export function deleteQuery(queryId: number): CancellablePromise<void> {
-  const promise = deleteAPI<void>(`/api/db/v0/queries/${queryId}/`);
+export function deleteExploration(id: number): CancellablePromise<void> {
+  const promise = api.explorations.delete({ exploration_id: id }).run();
 
   void promise.then(() => {
-    const store = findSchemaStoreForQuery(queryId);
+    const store = findSchemaStoreForQuery(id);
     if (store) {
       store.update((storeData) => {
-        storeData.data.delete(queryId);
+        storeData.data.delete(id);
         return { ...storeData, data: new Map(storeData.data) };
       });
     }
