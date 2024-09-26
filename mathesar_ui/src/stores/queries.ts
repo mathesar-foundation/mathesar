@@ -41,13 +41,6 @@ import {
   writable,
 } from 'svelte/store';
 
-import type {
-  QueryGetResponse,
-  QueryInstance,
-  QueryResultsResponse,
-  QueryRunRequest,
-  QueryRunResponse,
-} from '@mathesar/api/rest/types/queries';
 import {
   type PaginatedResponse,
   type RequestStatus,
@@ -57,6 +50,11 @@ import {
   postAPI,
   putAPI,
 } from '@mathesar/api/rest/utils/requestUtils';
+import type {
+  ExplorationResult,
+  SavedExploration,
+  UnsavedExploration,
+} from '@mathesar/api/rpc/explorations';
 import type { Schema } from '@mathesar/models/Schema';
 import CacheManager from '@mathesar/utils/CacheManager';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -67,12 +65,10 @@ import { currentSchemaId } from './schemas';
 
 const commonData = preloadCommonData();
 
-export type UnsavedQueryInstance = Partial<QueryInstance>;
-
 export interface QueriesStoreSubstance {
   schemaId: Schema['oid'];
   requestStatus: RequestStatus;
-  data: Map<QueryInstance['id'], QueryInstance>;
+  data: Map<SavedExploration['id'], SavedExploration>;
 }
 
 // Cache the query list of the last 3 opened schemas
@@ -83,16 +79,18 @@ const schemasCacheManager = new CacheManager<
 
 const requestMap: Map<
   Schema['oid'],
-  CancellablePromise<PaginatedResponse<QueryInstance>>
+  CancellablePromise<PaginatedResponse<SavedExploration>>
 > = new Map();
 
-function sortedQueryEntries(queryEntries: QueryInstance[]): QueryInstance[] {
+function sortedQueryEntries(
+  queryEntries: SavedExploration[],
+): SavedExploration[] {
   return [...queryEntries].sort((a, b) => a.name?.localeCompare(b.name));
 }
 
 function setSchemaQueriesStore(
   schemaId: Schema['oid'],
-  queryEntries?: QueryInstance[],
+  queryEntries?: SavedExploration[],
 ): Writable<QueriesStoreSubstance> {
   const queries: QueriesStoreSubstance['data'] = new Map();
   if (queryEntries) {
@@ -117,7 +115,7 @@ function setSchemaQueriesStore(
   return store;
 }
 
-function findSchemaStoreForQuery(id: QueryInstance['id']) {
+function findSchemaStoreForQuery(id: SavedExploration['id']) {
   return [...schemasCacheManager.cache.values()].find((entry) =>
     get(entry).data.has(id),
   );
@@ -140,7 +138,7 @@ export async function refetchQueriesForSchema(
 
     requestMap.get(schemaId)?.cancel();
 
-    const queriesRequest = getAPI<PaginatedResponse<QueryInstance>>(
+    const queriesRequest = getAPI<PaginatedResponse<SavedExploration>>(
       `/api/db/v0/queries/?schema=${schemaId}&limit=500`,
     );
     requestMap.set(schemaId, queriesRequest);
@@ -212,9 +210,12 @@ export const queries: Readable<Omit<QueriesStoreSubstance, 'schemaId'>> =
   });
 
 export function createQuery(
-  newQuery: UnsavedQueryInstance,
-): CancellablePromise<QueryGetResponse> {
-  const promise = postAPI<QueryGetResponse>('/api/db/v0/queries/', newQuery);
+  newQuery: UnsavedExploration,
+): CancellablePromise<SavedExploration & { schema: number }> {
+  const promise = postAPI<SavedExploration & { schema: number }>(
+    '/api/db/v0/queries/',
+    newQuery,
+  );
   void promise.then((instance) => {
     void refetchQueriesForSchema(instance.schema);
     return instance;
@@ -223,9 +224,9 @@ export function createQuery(
 }
 
 export function putQuery(
-  query: QueryInstance,
-): CancellablePromise<QueryInstance> {
-  const promise = putAPI<QueryInstance>(
+  query: SavedExploration,
+): CancellablePromise<SavedExploration> {
+  const promise = putAPI<SavedExploration>(
     `/api/db/v0/queries/${query.id}/`,
     query,
   );
@@ -243,13 +244,13 @@ export function putQuery(
 }
 
 export function getQuery(
-  queryId: QueryInstance['id'],
-): CancellablePromise<QueryInstance> {
+  queryId: SavedExploration['id'],
+): CancellablePromise<SavedExploration> {
   // TODO: Get schemaId as a query property
   const schemaId = get(currentSchemaId);
-  let innerRequest: CancellablePromise<QueryInstance>;
+  let innerRequest: CancellablePromise<SavedExploration>;
   if (schemaId) {
-    return new CancellablePromise<QueryInstance>(
+    return new CancellablePromise<SavedExploration>(
       (resolve, reject) => {
         const store = getQueriesStoreForSchema(schemaId);
         const storeSubstance = get(store);
@@ -259,7 +260,7 @@ export function getQuery(
           return;
         }
         if (storeSubstance.requestStatus.state !== 'success') {
-          innerRequest = getAPI<QueryInstance>(
+          innerRequest = getAPI<SavedExploration>(
             `/api/db/v0/queries/${queryId}/`,
           );
           void innerRequest.then(
@@ -278,12 +279,6 @@ export function getQuery(
   return new CancellablePromise((resolve) => resolve());
 }
 
-export function runQuery(
-  request: QueryRunRequest,
-): CancellablePromise<QueryRunResponse> {
-  return postAPI('/api/db/v0/queries/run/', request);
-}
-
 export function fetchQueryResults(
   queryId: number,
   params?: {
@@ -291,7 +286,7 @@ export function fetchQueryResults(
     offset: number;
     [SHARED_LINK_UUID_QUERY_PARAM]?: string;
   },
-): CancellablePromise<QueryResultsResponse> {
+): CancellablePromise<ExplorationResult> {
   const url = addQueryParamsToUrl(
     `/api/db/v0/queries/${queryId}/results/`,
     params,

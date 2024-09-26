@@ -31,7 +31,7 @@
         const source = $columnsMetaData.get(initialColumn.alias)?.source;
         return (
           source?.is_initial_column &&
-          source.input_table_id === $query.base_table
+          source.input_table_id === $query.base_table_oid
         );
       },
     );

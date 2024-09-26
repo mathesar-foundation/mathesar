@@ -1,19 +1,19 @@
 import type { Readable, Writable } from 'svelte/store';
 import { derived, get, writable } from 'svelte/store';
 
-import type {
-  QueryColumnMetaData,
-  QueryResultRecord,
-  QueryResultsResponse,
-  QueryRunResponse,
-} from '@mathesar/api/rest/types/queries';
 import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type {
+  ExplorationResult,
+  QueryColumnMetaData,
+  QueryResultRecord,
+} from '@mathesar/api/rpc/explorations';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { fetchQueryResults, runQuery } from '@mathesar/stores/queries';
+import { fetchQueryResults } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
@@ -72,13 +72,13 @@ export default class QueryRunner {
 
   inspector: QueryInspector;
 
-  private runPromise: CancellablePromise<QueryResultsResponse> | undefined;
+  private runPromise: CancellablePromise<ExplorationResult> | undefined;
 
   private runMode: QueryRunMode;
 
-  private onRunWithObjectCallback?: (results: QueryRunResponse) => unknown;
+  private onRunWithObjectCallback?: (results: ExplorationResult) => unknown;
 
-  private onRunWithIdCallback?: (results: QueryResultsResponse) => unknown;
+  private onRunWithIdCallback?: (results: ExplorationResult) => unknown;
 
   private shareConsumer?: ShareConsumer;
 
@@ -93,8 +93,8 @@ export default class QueryRunner {
     query: QueryModel;
     abstractTypeMap: AbstractTypesMap;
     runMode?: QueryRunMode;
-    onRunWithObject?: (instance: QueryRunResponse) => unknown;
-    onRunWithId?: (instance: QueryResultsResponse) => unknown;
+    onRunWithObject?: (instance: ExplorationResult) => unknown;
+    onRunWithId?: (instance: ExplorationResult) => unknown;
     shareConsumer?: ShareConsumer;
   }) {
     this.abstractTypeMap = abstractTypeMap;
@@ -149,11 +149,11 @@ export default class QueryRunner {
     );
   }
 
-  async run(): Promise<QueryResultsResponse | undefined> {
+  async run(): Promise<ExplorationResult | undefined> {
     this.runPromise?.cancel();
     const queryModel = this.getQueryModel();
 
-    if (queryModel.base_table === undefined) {
+    if (queryModel.base_table_oid === undefined) {
       const rowsData = { totalCount: 0, rows: [] };
       this.columnsMetaData.set(new ImmutableMap());
       this.processedColumns.set(new ImmutableMap());
@@ -162,18 +162,18 @@ export default class QueryRunner {
       return undefined;
     }
 
-    let response: QueryResultsResponse;
+    let response: ExplorationResult;
     let triggerCallback: () => unknown;
     try {
       const paginationParams = get(this.pagination).recordsRequestParams();
       this.runState.set({ state: 'processing' });
       if (this.runMode === 'queryObject') {
-        const internalRunPromise = runQuery({
-          ...queryModel.toRunRequestJson(),
-          parameters: {
+        const internalRunPromise = api.explorations
+          .run({
+            exploration_def: queryModel.toAnonymousExploration(),
             ...paginationParams,
-          },
-        });
+          })
+          .run();
         this.runPromise = internalRunPromise;
         const internalResponse = await internalRunPromise;
         response = internalResponse;

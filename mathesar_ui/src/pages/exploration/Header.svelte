@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -11,7 +11,7 @@
 
   export let database: Database;
   export let schema: Schema;
-  export let query: QueryInstance;
+  export let query: SavedExploration;
   export let isInspectorOpen = true;
   export let context: 'page' | 'shared-consumer-page' = 'page';
 </script>

@@ -28,7 +28,7 @@
     bind:isInspectorOpen
     on:close
   />
-  {#if !$query.base_table}
+  {#if !$query.base_table_oid}
     <div class="initial-content">
       {#if $queries.requestStatus.state === 'success' && $queries.data.size === 0}
         <div class="tutorial-holder">

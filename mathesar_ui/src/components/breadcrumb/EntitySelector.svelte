@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { meta } from 'tinro';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import { iconTable } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -40,7 +40,7 @@
   const currentRoute = meta();
 
   function makeQueryBreadcrumbSelectorItem(
-    queryInstance: QueryInstance,
+    queryInstance: SavedExploration,
   ): SimpleBreadcrumbSelectorEntry {
     return {
       type: 'simple',
