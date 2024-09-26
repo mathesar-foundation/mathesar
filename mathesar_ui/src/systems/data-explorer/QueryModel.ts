@@ -11,6 +11,7 @@ import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
 import QuerySortTransformationModel from './QuerySortTransformationModel';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
+import type { ColumnWithLink } from './utils';
 
 export interface QueryModelUpdateDiff {
   model: QueryModel;
@@ -454,8 +455,12 @@ export default class QueryModel {
     };
   }
 
-  getColumnCount(id: InitialColumn['attnum']): number {
-    return this.initial_columns.filter((entry) => entry.attnum === id).length;
+  getColumnCount(column: ColumnWithLink): number {
+    const columnJoinPath = JSON.stringify(column.jpPath);
+    return this.initial_columns.filter((entry) => {
+      const entryJoinPath = JSON.stringify(entry.join_path);
+      return entry.attnum === column.id && entryJoinPath === columnJoinPath;
+    }).length;
   }
 
   toJson(): UnsavedExploration {
