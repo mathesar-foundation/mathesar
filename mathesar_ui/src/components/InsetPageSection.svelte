@@ -8,8 +8,8 @@
 <style>
   .section {
     background: var(--white);
-    padding: var(--inset-page-section-padding, 1.5rem 1rem);
-    border: solid 1px var(--slate-300);
+    padding: var(--inset-page-section-padding, 2rem 1.5rem);
+    border: solid 1px var(--slate-200);
     border-radius: 0.3rem;
   }
 </style>

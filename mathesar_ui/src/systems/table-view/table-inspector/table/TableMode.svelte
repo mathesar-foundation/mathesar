@@ -19,7 +19,7 @@
 </script>
 
 <div class="table-mode-container">
-  <Collapsible isOpen triggerAppearance="plain">
+  <Collapsible isOpen triggerAppearance="inspector">
     <CollapsibleHeader
       slot="header"
       title={$_('properties')}
@@ -31,14 +31,14 @@
     </div>
   </Collapsible>
 
-  <Collapsible isOpen triggerAppearance="plain">
+  <Collapsible isOpen triggerAppearance="inspector">
     <CollapsibleHeader slot="header" title={$_('table_permissions')} />
     <div slot="content" class="content-container">
       <TablePermissions />
     </div>
   </Collapsible>
 
-  <Collapsible isOpen triggerAppearance="plain">
+  <Collapsible isOpen triggerAppearance="inspector">
     <CollapsibleHeader
       slot="header"
       title={$_('links')}
@@ -57,14 +57,14 @@
     </div>
   </Collapsible> -->
 
-  <Collapsible isOpen triggerAppearance="plain">
+  <Collapsible isOpen triggerAppearance="inspector">
     <CollapsibleHeader slot="header" title={$_('actions')} />
     <div slot="content" class="content-container">
       <TableActions />
     </div>
   </Collapsible>
 
-  <Collapsible triggerAppearance="plain">
+  <Collapsible triggerAppearance="inspector">
     <CollapsibleHeader slot="header" title={$_('advanced')} />
     <div slot="content" class="content-container">
       <AdvancedActions />
@@ -74,11 +74,15 @@
 
 <style lang="scss">
   .table-mode-container {
-    padding-bottom: 1rem;
+    padding-bottom: var(--size-small);
+
+    > :global(* + *) {
+      margin-top: var(--size-super-ultra-small);
+    }
   }
 
   .content-container {
-    padding: 1rem;
+    padding: var(--size-small);
     display: flex;
     flex-direction: column;
 

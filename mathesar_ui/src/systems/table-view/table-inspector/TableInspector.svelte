@@ -49,23 +49,14 @@
   .table-inspector {
     height: 100%;
     box-shadow:
-      0px 2px 2px 0px rgba(0, 0, 0, 0.14),
-      0px 3px 1px -2px rgba(0, 0, 0, 0.12),
-      0px 1px 5px 0px rgba(0, 0, 0, 0.2);
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
     position: relative;
     background-color: var(--sand-100);
     isolation: isolate;
 
-    :global(.collapsible > .collapsible-header > button.btn) {
-      background-color: var(--sand-200);
-
-      &:hover {
-        background-color: var(--sand-300);
-      }
-
-      &:active {
-        background-color: var(--sand-400);
-      }
+    .tabs-container {
+      padding: var(--size-super-ultra-small);
     }
   }
 </style>

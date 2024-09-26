@@ -119,9 +119,9 @@
 
     span {
       flex: 1 0 0;
-      color: var(--slate-800);
-      font-size: var(--size-xx-large);
-      font-weight: 500;
+      color: var(--slate-900);
+      font-size: var(--text-size-ultra-large);
+      font-weight: var(--font-weight-medium);
     }
   }
 

@@ -74,7 +74,11 @@
     <span class="null-text">{$_('table_does_not_link')}</span>
   {/if}
   <div>
-    <Button on:click={() => linkTableModal.open()} appearance="secondary">
+    <Button
+      on:click={() => linkTableModal.open()}
+      appearance="secondary"
+      size="small"
+    >
       <Icon {...iconAddNew} />
       <span>{$_('create_link')}</span>
     </Button>

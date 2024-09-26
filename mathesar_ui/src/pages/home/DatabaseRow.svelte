@@ -54,13 +54,14 @@
     padding-left: var(--size-ultra-small);
 
     .name {
-      font-size: var(--text-size-x-large);
-      font-weight: 500;
+      font-size: var(--text-size-xx-large);
+      font-weight: var(--font-weight-medium);
     }
 
     .server {
       font-size: var(--text-size-base);
       margin-top: var(--size-extreme-small);
+      color: var(--slate-500);
     }
   }
 </style>

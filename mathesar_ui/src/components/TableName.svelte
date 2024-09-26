@@ -19,7 +19,7 @@
   $: isNotConfirmed = tableRequiresImportConfirmation(table);
 </script>
 
-<NameWithIcon icon={iconTable} {isLoading} {...$$restProps}>
+<NameWithIcon icon={iconTable} {isLoading} {...$$restProps} bold>
   <slot tableName={table.name}>
     {table.name}
   </slot>

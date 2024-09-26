@@ -39,12 +39,12 @@
     text-decoration: inherit;
   }
   .name-with-icon.bold {
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
   }
   .icon {
     color: var(--icon-color, currentcolor);
     opacity: var(--NameWithIcon__icon-opacity, 0.75);
-    vertical-align: middle;
+    vertical-align: bottom;
   }
   .icon > :global(.fa-icon + .fa-icon) {
     margin-left: 0.2em;
@@ -61,6 +61,6 @@
   }
   .name {
     color: var(--name-color, currentcolor);
-    vertical-align: middle;
+    vertical-align: bottom;
   }
 </style>

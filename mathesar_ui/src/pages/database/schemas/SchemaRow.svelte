@@ -103,7 +103,7 @@
     border-radius: var(--border-radius-l);
     border: 1px solid var(--slate-200);
     background-color: var(--white);
-    padding: 1.142em;
+    padding: 1em;
     display: flex;
     flex-direction: column;
   }
@@ -137,8 +137,8 @@
 
   .description {
     font-weight: 400;
-    font-size: var(--text-size-large);
-    color: var(--slate-700);
+    font-size: var(--text-size-base);
+    color: var(--slate-500);
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -155,8 +155,8 @@
   }
 
   .name {
-    font-size: var(--text-size-x-large);
-    font-weight: 500;
+    font-size: var(--text-size-xx-large);
+    font-weight: var(--font-weight-medium);
     --icon-color: var(--brand-500);
     overflow: hidden;
   }

@@ -41,13 +41,15 @@
       </div>
     </section>
   {:else}
-    {$_('select_cell_view_properties')}
+    <div class="no-cell-selected">
+      {$_('select_cell_view_properties')}
+    </div>
   {/if}
 </div>
 
 <style>
   .cell-inspector {
-    padding: var(--size-x-small);
+    padding: var(--size-small);
   }
   .header {
     font-weight: 500;
@@ -58,5 +60,9 @@
     padding: var(--size-xx-small);
     border-radius: var(--border-radius-m);
     margin-top: var(--size-x-small);
+  }
+  .no-cell-selected {
+    color: var(--slate-500);
+    padding: var(--size-large);
   }
 </style>
