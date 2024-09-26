@@ -47,7 +47,7 @@ export const roles = {
   set_members: rpcMethodTypeContainer<
     {
       database_id: RawDatabase['id'];
-      role_oid: RawRole['oid'];
+      parent_role_oid: RawRole['oid'];
       members: RawRole['oid'][];
     },
     RawRole

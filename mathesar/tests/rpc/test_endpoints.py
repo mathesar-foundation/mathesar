@@ -275,6 +275,11 @@ METHODS = [
         "roles.get_current_role",
         [user_is_authenticated]
     ),
+    (
+        roles.set_members,
+        "roles.set_members",
+        [user_is_authenticated]
+    ),
 
     (
         roles.configured.add,

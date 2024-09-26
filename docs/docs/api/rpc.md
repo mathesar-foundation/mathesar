@@ -256,6 +256,7 @@ To use an RPC function:
       - add
       - delete
       - get_current_role
+      - set_members
       - RoleInfo
       - RoleMember
 

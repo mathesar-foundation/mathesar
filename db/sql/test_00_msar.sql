@@ -1188,7 +1188,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_without_description() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar') ->> 'oid' INTO sch_oid;
+  SELECT msar.create_schema('foo bar', NULL) ->> 'oid' INTO sch_oid;
   RETURN NEXT has_schema('foo bar');
   RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
   RETURN NEXT is(obj_description(sch_oid), NULL);
@@ -1199,7 +1199,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_with_description() RETURNS SETOF TEXT AS $$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar', 'yay') ->> 'oid' INTO sch_oid;
+  SELECT msar.create_schema('foo bar', NULL, 'yay') ->> 'oid' INTO sch_oid;
   RETURN NEXT has_schema('foo bar');
   RETURN NEXT is(sch_oid, msar.get_schema_oid('foo bar'));
   RETURN NEXT is(obj_description(sch_oid), 'yay');
@@ -1210,8 +1210,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_create_schema_that_already_exists() RETURNS SETOF TEXT AS $t$
 DECLARE sch_oid oid;
 BEGIN
-  SELECT msar.create_schema('foo bar') ->> 'oid' INTO sch_oid;
-  RETURN NEXT throws_ok($$SELECT msar.create_schema('foo bar')$$, '42P06');
+  SELECT msar.create_schema('foo bar', NULL) ->> 'oid' INTO sch_oid;
+  RETURN NEXT throws_ok($$SELECT msar.create_schema('foo bar', NULL)$$, '42P06');
   RETURN NEXT is(msar.create_schema_if_not_exists('foo bar'), sch_oid);
 END;
 $t$ LANGUAGE plpgsql;
@@ -1480,7 +1480,7 @@ CREATE OR REPLACE FUNCTION test_add_mathesar_table_minimal_id_col() RETURNS SETO
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null
+    'tab_create_schema'::regnamespace::oid, 'anewtable', null, null, null, null
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'anewtable', 'id', 'id column should be pkey'
@@ -1502,7 +1502,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, badname, null, null, null
+    'tab_create_schema'::regnamespace::oid, badname, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, badname::name);
 END;
@@ -1515,7 +1515,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
 END;
@@ -1529,10 +1529,10 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
   );
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 1'::name);
   RETURN NEXT has_table('tab_create_schema'::name, 'Table 2'::name);
@@ -1544,7 +1544,7 @@ BEGIN
   );
   RETURN NEXT hasnt_table('tab_create_schema'::name, 'Table 1'::name);
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, null, null, null, null
+    'tab_create_schema'::regnamespace::oid, null, null, null, null, null
   );
   RETURN NEXT has_table('tab_create_schema'::name, generated_name::name);
 END;
@@ -1564,7 +1564,7 @@ BEGIN
     'tab_create_schema'::regnamespace::oid,
     'cols_table',
     col_defs,
-    null, null
+    null, null, null
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'
@@ -1619,7 +1619,7 @@ DECLARE
 BEGIN
   PERFORM __setup_create_table();
   PERFORM msar.add_mathesar_table(
-    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, comment_
+    'tab_create_schema'::regnamespace::oid, 'cols_table', null, null, null, comment_
   );
   RETURN NEXT col_is_pk(
     'tab_create_schema', 'cols_table', 'id', 'id column should be pkey'

@@ -56,6 +56,7 @@ def add(
     *,
     name: str,
     database_id: int,
+    owner_oid: int = None,
     description: Optional[str] = None,
     **kwargs,
 ) -> SchemaInfo:
@@ -65,6 +66,8 @@ def add(
     Args:
         name: The name of the schema to add.
         database_id: The Django id of the database containing the schema.
+        owner_oid: The OID of the role who will own the new schema.
+            If owner_oid is None, the current role will be the owner of the new schema.
         description: A description of the schema
 
     Returns:
@@ -74,6 +77,7 @@ def add(
         return create_schema(
             schema_name=name,
             conn=conn,
+            owner_oid=owner_oid,
             description=description
         )
 
