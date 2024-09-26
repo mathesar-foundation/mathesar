@@ -15,7 +15,7 @@ def test_explorations_list(rf, monkeypatch):
     request.user = User(username='alice', password='pass1234')
     database_id = 11
 
-    def mock_exploration_info(_database_id):
+    def mock_exploration_info(_database_id, _schema_oid):
         if _database_id != database_id:
             raise AssertionError('incorrect parameters passed')
         return [
