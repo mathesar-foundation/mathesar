@@ -76,10 +76,8 @@
   .table-mode-container {
     padding-bottom: var(--size-small);
 
-    :global {
-      > * + * {
-        margin-top: var(--size-super-ultra-small);
-      }
+    > :global(* + *) {
+      margin-top: var(--size-super-ultra-small);
     }
   }
 
