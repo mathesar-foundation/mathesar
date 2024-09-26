@@ -10,7 +10,9 @@ from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
 from mathesar.state import get_cached_metadata
 
 
-def list_explorations(database_id):
+def list_explorations(database_id, schema_oid=None):
+    if schema_oid is not None:
+        return Explorations.objects.filter(database__id=database_id, schema_oid=schema_oid)
     return Explorations.objects.filter(database__id=database_id)
 
 
@@ -27,6 +29,7 @@ def replace_exploration(new_exploration):
         database=Database.objects.get(id=new_exploration["database_id"]),
         name=new_exploration["name"],
         base_table_oid=new_exploration["base_table_oid"],
+        schema_oid=new_exploration["schema_oid"],
         initial_columns=new_exploration["initial_columns"],
         transformations=new_exploration.get("transformations"),
         display_options=new_exploration.get("display_options"),
@@ -41,6 +44,7 @@ def create_exploration(exploration_def):
         database=Database.objects.get(id=exploration_def["database_id"]),
         name=exploration_def["name"],
         base_table_oid=exploration_def["base_table_oid"],
+        schema_oid=exploration_def["schema_oid"],
         initial_columns=exploration_def["initial_columns"],
         transformations=exploration_def.get("transformations"),
         display_options=exploration_def.get("display_options"),

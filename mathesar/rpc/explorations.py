@@ -29,6 +29,7 @@ class ExplorationInfo(TypedDict):
         database_id: The Django id of the database containing the exploration.
         name: The name of the exploration.
         base_table_oid: The OID of the base table of the exploration on the database.
+        schema_oid: The OID of the schema containing the base table of the exploration.
         initial_columns: A list describing the columns to be included in the exploration.
         transformations: A list describing the transformations to be made on the included columns.
         display_options: A list describing metadata for the columns in the explorations.
@@ -39,6 +40,7 @@ class ExplorationInfo(TypedDict):
     database_id: int
     name: str
     base_table_oid: int
+    schema_oid: int
     initial_columns: list
     transformations: Optional[list]
     display_options: Optional[list]
@@ -52,6 +54,7 @@ class ExplorationInfo(TypedDict):
             database_id=model.database.id,
             name=model.name,
             base_table_oid=model.base_table_oid,
+            schema_oid=model.schema_oid,
             initial_columns=model.initial_columns,
             transformations=model.transformations,
             display_options=model.display_options,
@@ -68,6 +71,7 @@ class ExplorationDef(TypedDict):
         database_id: The Django id of the database containing the exploration.
         name: The name of the exploration.
         base_table_oid: The OID of the base table of the exploration on the database.
+        schema_oid: The OID of the schema containing the base table of the exploration.
         initial_columns: A list describing the columns to be included in the exploration.
         transformations: A list describing the transformations to be made on the included columns.
         display_options: A list describing metadata for the columns in the explorations.
@@ -77,6 +81,7 @@ class ExplorationDef(TypedDict):
     database_id: int
     name: str
     base_table_oid: int
+    schema_oid: int
     initial_columns: list
     transformations: Optional[list]
     display_options: Optional[list]
@@ -130,17 +135,18 @@ class ExplorationResult(TypedDict):
 @rpc_method(name="explorations.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, database_id: int, **kwargs) -> list[ExplorationInfo]:
+def list_(*, database_id: int, schema_oid: int = None, **kwargs) -> list[ExplorationInfo]:
     """
     List information about explorations for a database. Exposed as `list`.
 
     Args:
         database_id: The Django id of the database containing the explorations.
+        schema_oid: The OID of the schema containing the base table(s) of the exploration(s).(optional)
 
     Returns:
         A list of exploration details.
     """
-    explorations = list_explorations(database_id)
+    explorations = list_explorations(database_id, schema_oid)
     return [ExplorationInfo.from_model(exploration) for exploration in explorations]
 
 
@@ -183,6 +189,11 @@ def run(*, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, *
 
     Args:
         exploration_def: A dict describing an exploration to run.
+        limit: The max number of rows to return.(default 100)
+        offset: The number of rows to skip.(default 0)
+
+    Returns:
+        The result of the exploration run.
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(exploration_def['database_id'], user) as conn:
@@ -201,6 +212,9 @@ def run_saved(*, exploration_id: int, limit: int = 100, offset: int = 0, **kwarg
         exploration_id: The Django id of the exploration to run.
         limit: The max number of rows to return.(default 100)
         offset: The number of rows to skip.(default 0)
+
+    Returns:
+        The result of the exploration run.
     """
     user = kwargs.get(REQUEST_KEY).user
     exp_model = Explorations.objects.get(id=exploration_id)
@@ -218,6 +232,9 @@ def replace(*, new_exploration: ExplorationInfo) -> ExplorationInfo:
 
     Args:
         new_exploration: A dict describing the exploration to replace, including the updated fields.
+
+    Returns:
+        The exploration details for the replaced exploration.
     """
     replaced_exp_model = replace_exploration(new_exploration)
     return ExplorationInfo.from_model(replaced_exp_model)
@@ -232,6 +249,9 @@ def add(*, exploration_def: ExplorationDef) -> ExplorationInfo:
 
     Args:
         exploration_def: A dict describing the exploration to create.
+
+    Returns:
+        The exploration details for the newly created exploration.
     """
     exp_model = create_exploration(exploration_def)
     return ExplorationInfo.from_model(exp_model)
