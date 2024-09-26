@@ -36,15 +36,24 @@
   </svelte:fragment>
 
   <svelte:fragment slot="content">
-    {#if targetColumnsAreLoading}
-      <!--
-        We need to wait for the columns to load because we can't suggest a valid
-        column name until we know the existing columns in the table.
-      -->
-      {label}
-      <Spinner />
-    {:else}
-      <Field {field} {label} />
-    {/if}
+    <div class="collapsible-detail">
+      {#if targetColumnsAreLoading}
+        <!--
+          We need to wait for the columns to load because we can't suggest a valid
+          column name until we know the existing columns in the table.
+        -->
+        {label}
+        <Spinner />
+      {:else}
+        <Field {field} {label} />
+      {/if}
+    </div>
   </svelte:fragment>
 </Collapsible>
+
+<style>
+  .collapsible-detail {
+    padding: var(--size-xx-small);
+    margin-top: 0.25em;
+  }
+</style>

@@ -264,40 +264,25 @@
 
     <FieldLayout>
       <OutcomeBox>
-        {#if $linkType === 'oneToMany'}
-          <NewColumn
-            base={target}
-            target={base}
-            field={columnNameInTarget}
-            {targetColumnsAreLoading}
-          />
-        {:else if $linkType === 'manyToOne'}
-          <NewColumn {base} {target} field={columnNameInBase} />
-        {:else if $linkType === 'manyToMany'}
-          {#if isSelfReferential}
-            <Collapsible
-              bind:isOpen={isNewTableOpen}
-              triggerAppearance="outcome"
-            >
-              <svelte:fragment slot="header">
-                <RichText text={$_('we_will_create_a_new_table')} let:slotName>
-                  {#if slotName === 'mappingTable'}
-                    <Pill table={{ name: $mappingTableName }} which="mapping" />
-                  {/if}
-                </RichText>
-              </svelte:fragment>
-              <svelte:fragment slot="content">
-                <Field field={mappingTableName} label={$_('table_name')} />
-              </svelte:fragment>
-            </Collapsible>
-            {#if $mappingTableName}
+        <div class="collapsible-sections">
+          {#if $linkType === 'oneToMany'}
+            <NewColumn
+              base={target}
+              target={base}
+              field={columnNameInTarget}
+              {targetColumnsAreLoading}
+            />
+          {:else if $linkType === 'manyToOne'}
+            <NewColumn {base} {target} field={columnNameInBase} />
+          {:else if $linkType === 'manyToMany'}
+            {#if isSelfReferential}
               <Collapsible
-                bind:isOpen={isNewColumnsOpen}
+                bind:isOpen={isNewTableOpen}
                 triggerAppearance="outcome"
               >
                 <svelte:fragment slot="header">
                   <RichText
-                    text={$_('we_will_add_two_columns_in_x_to_y')}
+                    text={$_('we_will_create_a_new_table')}
                     let:slotName
                   >
                     {#if slotName === 'mappingTable'}
@@ -305,60 +290,99 @@
                         table={{ name: $mappingTableName }}
                         which="mapping"
                       />
-                    {:else if slotName === 'targetTable'}
-                      <Pill table={target} which="target" />
+                    {/if}
+                  </RichText>
+                </svelte:fragment>
+                <svelte:fragment slot="content">
+                  <div class="collapsible-detail">
+                    <Field field={mappingTableName} label={$_('table_name')} />
+                  </div>
+                </svelte:fragment>
+              </Collapsible>
+              {#if $mappingTableName}
+                <Collapsible
+                  bind:isOpen={isNewColumnsOpen}
+                  triggerAppearance="outcome"
+                >
+                  <svelte:fragment slot="header">
+                    <RichText
+                      text={$_('we_will_add_two_columns_in_x_to_y')}
+                      let:slotName
+                    >
+                      {#if slotName === 'mappingTable'}
+                        <Pill
+                          table={{ name: $mappingTableName }}
+                          which="mapping"
+                        />
+                      {:else if slotName === 'targetTable'}
+                        <Pill table={target} which="target" />
+                      {/if}
+                    </RichText>
+                  </svelte:fragment>
+
+                  <svelte:fragment slot="content">
+                    <div class="collapsible-detail">
+                      <Field
+                        field={columnNameMappingToBase}
+                        label={$_('column_number_name', {
+                          values: { number: 1 },
+                        })}
+                      />
+                      <Field
+                        field={columnNameMappingToTarget}
+                        label={$_('column_number_name', {
+                          values: { number: 2 },
+                        })}
+                      />
+                    </div>
+                  </svelte:fragment>
+                </Collapsible>
+              {/if}
+            {:else}
+              <Collapsible
+                bind:isOpen={isNewTableOpen}
+                triggerAppearance="outcome"
+              >
+                <svelte:fragment slot="header">
+                  <RichText
+                    text={$_('we_will_create_a_new_table')}
+                    let:slotName
+                  >
+                    {#if slotName === 'mappingTable'}
+                      <Pill
+                        table={{ name: $mappingTableName }}
+                        which="mapping"
+                      />
                     {/if}
                   </RichText>
                 </svelte:fragment>
 
                 <svelte:fragment slot="content">
-                  <Field
-                    field={columnNameMappingToBase}
-                    label={$_('column_number_name', { values: { number: 1 } })}
-                  />
-                  <Field
-                    field={columnNameMappingToTarget}
-                    label={$_('column_number_name', { values: { number: 2 } })}
-                  />
+                  <div class="collapsible-detail">
+                    <Field field={mappingTableName} label={$_('table_name')} />
+                  </div>
                 </svelte:fragment>
               </Collapsible>
+              {#if $mappingTableName}
+                <NewColumn
+                  base={{ name: $mappingTableName }}
+                  baseWhich="mapping"
+                  target={base}
+                  targetWhich="base"
+                  field={columnNameMappingToBase}
+                />
+                <NewColumn
+                  base={{ name: $mappingTableName }}
+                  baseWhich="mapping"
+                  {target}
+                  field={columnNameMappingToTarget}
+                />
+              {/if}
             {/if}
           {:else}
-            <Collapsible
-              bind:isOpen={isNewTableOpen}
-              triggerAppearance="outcome"
-            >
-              <svelte:fragment slot="header">
-                <RichText text={$_('we_will_create_a_new_table')} let:slotName>
-                  {#if slotName === 'mappingTable'}
-                    <Pill table={{ name: $mappingTableName }} which="mapping" />
-                  {/if}
-                </RichText>
-              </svelte:fragment>
-
-              <svelte:fragment slot="content">
-                <Field field={mappingTableName} label={$_('table_name')} />
-              </svelte:fragment>
-            </Collapsible>
-            {#if $mappingTableName}
-              <NewColumn
-                base={{ name: $mappingTableName }}
-                baseWhich="mapping"
-                target={base}
-                targetWhich="base"
-                field={columnNameMappingToBase}
-              />
-              <NewColumn
-                base={{ name: $mappingTableName }}
-                baseWhich="mapping"
-                {target}
-                field={columnNameMappingToTarget}
-              />
-            {/if}
+            {assertExhaustive($linkType)}
           {/if}
-        {:else}
-          {assertExhaustive($linkType)}
-        {/if}
+        </div>
       </OutcomeBox>
     </FieldLayout>
   {/if}
@@ -392,20 +416,11 @@
   .description {
     margin-bottom: 1rem;
   }
-  :global(
-      .form
-        .collapsible
-        .collapsible-header
-        .collapsible-header-btn
-        .collapsible-header-title
-    ) {
-    font-weight: var(--font-weight-medium);
-  }
-  :global(.form .collapsible-content) {
+  .collapsible-detail {
     padding: var(--size-xx-small);
     margin-top: 0.25em;
   }
-  :global(.form .collapsible:not(:last-child)) {
-    margin-bottom: var(--size-xx-small);
+  .collapsible-sections > :global(* + *) {
+    margin-top: var(--size-xx-small);
   }
 </style>
