@@ -224,6 +224,20 @@
       border: 1px solid var(--purple-300);
     }
   }
+
+  &.btn-inspector {
+    background-color: var(--sand-200);
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+
+    &:hover {
+      background-color: var(--sand-300);
+    }
+
+    &:active {
+      background-color: var(--sand-400);
+    }
+  }
 }
 a.btn {
   text-decoration: none;

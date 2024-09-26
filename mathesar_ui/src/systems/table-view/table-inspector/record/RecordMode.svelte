@@ -24,7 +24,7 @@
         })}
       </span>
     {/if}
-    <Collapsible isOpen triggerAppearance="plain">
+    <Collapsible isOpen triggerAppearance="inspector">
       <CollapsibleHeader slot="header" title={$_('actions')} />
       <div slot="content" class="content-container">
         <RowActions

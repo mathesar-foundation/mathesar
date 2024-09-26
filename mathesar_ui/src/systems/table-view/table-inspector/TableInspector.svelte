@@ -55,26 +55,8 @@
     background-color: var(--sand-100);
     isolation: isolate;
 
-    :global(.tabs-container) {
-      padding: 3px;
-    }
-
-    :global(.collapsible > .collapsible-header > button.btn) {
-      background-color: var(--sand-200);
-      transition: all 0.2s ease;
-      border-radius: 4px;
-      margin: 3px 0;
-      font-weight: var(--font-weight-medium);
-      outline: none;
-      border: 2px solid transparent;
-
-      &:hover {
-        background-color: var(--sand-300);
-      }
-
-      &:active {
-        background-color: var(--sand-400);
-      }
+    .tabs-container {
+      padding: var(--size-super-ultra-small);
     }
   }
 </style>

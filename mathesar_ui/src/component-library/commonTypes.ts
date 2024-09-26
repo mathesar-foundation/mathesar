@@ -7,7 +7,8 @@ export type Appearance =
   | 'plain-primary'
   | 'action'
   | 'outcome'
-  | 'outline-primary';
+  | 'outline-primary'
+  | 'inspector';
 
 export type Size = 'small' | 'medium' | 'large';
 
