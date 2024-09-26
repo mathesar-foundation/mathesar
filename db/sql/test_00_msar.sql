@@ -4293,6 +4293,47 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION __setup_add_records_table_only_pk() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE atable (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_add_record_to_table_only_pk() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_records_table_only_pk();
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{}'::jsonb
+    ),
+    $a${
+      "results": [{"1": 1}],
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$a$
+  );
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{}'::jsonb
+    ),
+    $a${
+      "results": [{"1": 2}],
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION __setup_preview_fkey_cols() RETURNS SETOF TEXT AS $$
 BEGIN
 CREATE TABLE "Counselors" (
