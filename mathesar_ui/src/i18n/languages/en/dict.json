@@ -677,6 +677,7 @@
   "what_is_a_table": "Tables store your data. It's good to have one table per entity. An entity is a thing you wish to keep data about. For example, in your personal financial schema, you may have a table for your bank accounts and another for your transactions. You can have as many tables as you wish.",
   "what_is_an_exploration": "Explorations let you query your data to uncover trends and insights. They may be stored and run anytime to see the latest data. Explorations make great reports. You might, for example, create an exploration that shows your monthly spending.",
   "what_is_an_exploration_mini": "Explorations let you query your data to uncover trends and insights.",
+  "whats_changing": "What's Changing",
   "where": "where",
   "while_upgrading": "While Upgrading",
   "why_is_this_needed": "Why is this needed?",
@@ -684,6 +685,5 @@
   "write": "Write",
   "yes": "Yes",
   "yes_summarize_as_list": "Yes, summarize as a list",
-  "yesterday": "Yesterday",
-  "whats_changing": "What's Changing"
+  "yesterday": "Yesterday"
 }
