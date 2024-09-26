@@ -36,6 +36,7 @@
       table.schema.database.id,
       table.schema.oid,
       {
+        databaseId: table.schema.database.id,
         baseTable: table,
         columns: $columns,
         terseGrouping: $grouping.terse(),

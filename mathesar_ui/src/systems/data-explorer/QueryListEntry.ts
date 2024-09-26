@@ -1,7 +1,7 @@
-import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+import type { UnsavedExploration } from '@mathesar/api/rpc/explorations';
 
 export default class QueryListEntry {
-  queryJSON: UnsavedQueryInstance;
+  queryJSON: UnsavedExploration;
 
   isValid: boolean;
 
@@ -9,7 +9,7 @@ export default class QueryListEntry {
 
   prev: QueryListEntry | undefined = undefined;
 
-  constructor(queryJSON: UnsavedQueryInstance, isValid: boolean) {
+  constructor(queryJSON: UnsavedExploration, isValid: boolean) {
     this.queryJSON = queryJSON;
     this.isValid = isValid;
   }

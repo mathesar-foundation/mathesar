@@ -3,7 +3,10 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type {
+    SavedExploration,
+    UnsavedExploration,
+  } from '@mathesar/api/rpc/explorations';
   import type { CancellablePromise } from '@mathesar/component-library';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import { iconEdit, iconExploration } from '@mathesar/icons';
@@ -16,10 +19,7 @@
     getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
   import { abstractTypesMap } from '@mathesar/stores/abstract-types';
-  import {
-    type UnsavedQueryInstance,
-    getQuery,
-  } from '@mathesar/stores/queries';
+  import { getQuery } from '@mathesar/stores/queries';
   import {
     QueryManager,
     QueryModel,
@@ -33,10 +33,10 @@
   let is404 = false;
 
   let queryManager: QueryManager | undefined;
-  let queryLoadPromise: CancellablePromise<QueryInstance>;
+  let queryLoadPromise: CancellablePromise<SavedExploration>;
   let query: Readable<QueryModel | undefined> = readable(undefined);
 
-  function createQueryManager(queryInstance: UnsavedQueryInstance) {
+  function createQueryManager(queryInstance: UnsavedExploration) {
     queryManager?.destroy();
     queryManager = new QueryManager({
       query: new QueryModel(queryInstance),
@@ -78,14 +78,17 @@
       try {
         const newQueryModel = constructQueryModelFromHash(hash);
         router.location.hash.clear();
-        createQueryManager(newQueryModel ?? {});
+        createQueryManager({
+          database_id: database.id,
+          ...(newQueryModel ?? {}),
+        });
         return;
       } catch {
         // fail silently
         console.error('Unable to create query model from hash', hash);
       }
     }
-    createQueryManager({});
+    createQueryManager({ database_id: database.id });
   }
 
   async function loadSavedQuery(_queryId: number) {
