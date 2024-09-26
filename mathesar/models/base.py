@@ -151,6 +151,7 @@ class Explorations(BaseModel):
     database = models.ForeignKey('Database', on_delete=models.CASCADE)
     name = models.CharField(max_length=128, unique=True)
     base_table_oid = models.PositiveBigIntegerField()
+    schema_oid = models.PositiveBigIntegerField()
     initial_columns = models.JSONField()
     transformations = models.JSONField(null=True)
     display_options = models.JSONField(null=True)
