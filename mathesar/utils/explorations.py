@@ -10,7 +10,9 @@ from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
 from mathesar.state import get_cached_metadata
 
 
-def list_explorations(database_id):
+def list_explorations(database_id, schema_oid=None):
+    if schema_oid is not None:
+        return Explorations.objects.filter(database__id=database_id, schema_oid=schema_oid)
     return Explorations.objects.filter(database__id=database_id)
 
 

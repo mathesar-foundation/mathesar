@@ -135,17 +135,18 @@ class ExplorationResult(TypedDict):
 @rpc_method(name="explorations.list")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list_(*, database_id: int, **kwargs) -> list[ExplorationInfo]:
+def list_(*, database_id: int, schema_oid: int = None, **kwargs) -> list[ExplorationInfo]:
     """
     List information about explorations for a database. Exposed as `list`.
 
     Args:
         database_id: The Django id of the database containing the explorations.
+        schema_oid: The OID of the schema containing the base table(s) of the exploration(s).(optional)
 
     Returns:
         A list of exploration details.
     """
-    explorations = list_explorations(database_id)
+    explorations = list_explorations(database_id, schema_oid)
     return [ExplorationInfo.from_model(exploration) for exploration in explorations]
 
 
