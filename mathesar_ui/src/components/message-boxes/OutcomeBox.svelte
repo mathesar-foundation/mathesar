@@ -1,8 +1,6 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
-
   import { _ } from 'svelte-i18n';
-
   import { iconOutcome } from '@mathesar/icons';
   import MessageBox from './MessageBox.svelte';
 
