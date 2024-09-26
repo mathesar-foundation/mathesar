@@ -5035,15 +5035,25 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION
 msar.build_single_insert_expr(tab_id oid, rec_def jsonb) RETURNS TEXT AS $$
-SELECT
-  format(
-    'INSERT INTO %I.%I (%s) VALUES (%s)',
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id),
-    string_agg(format('%I', msar.get_column_name(tab_id, key::smallint)), ', '),
-    string_agg(format('%L', value), ', ')
+SELECT CASE WHEN NULLIF(rec_def, '{}'::jsonb) IS NOT NULL THEN
+  (
+    SELECT
+      format(
+        'INSERT INTO %I.%I (%s) VALUES (%s)',
+        msar.get_relation_schema_name(tab_id),
+        msar.get_relation_name(tab_id),
+        string_agg(format('%I', msar.get_column_name(tab_id, key::smallint)), ', '),
+        string_agg(format('%L', value), ', ')
+      )
+    FROM jsonb_each_text(rec_def)
   )
-FROM jsonb_each_text(rec_def);
+ELSE
+  format(
+    'INSERT INTO %I.%I DEFAULT VALUES',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id)
+  )
+END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
