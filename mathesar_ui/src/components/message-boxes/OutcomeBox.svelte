@@ -1,14 +1,13 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
-
   import { iconOutcome } from '@mathesar/icons';
-
   import MessageBox from './MessageBox.svelte';
+  import { _ } from 'svelte-i18n';
 
   type $$Props = ComponentProps<MessageBox>;
 
   export let fullWidth = true;
-  export let title = "What's Changing";
+  export let title = $_('whats_changing');
 </script>
 
 <div class="outcome-box">
