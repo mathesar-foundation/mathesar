@@ -5098,10 +5098,11 @@ FROM jsonb_each_text(rec_def);
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+DROP FUNCTION IF EXISTS msar.patch_record_in_table(oid, anyelement, jsonb, boolean);
 CREATE OR REPLACE FUNCTION
 msar.patch_record_in_table(
   tab_id oid,
-  rec_id anyelement,
+  rec_id anycompatible,
   rec_def jsonb,
   return_record_summaries boolean DEFAULT false
 ) RETURNS jsonb AS $$/*
