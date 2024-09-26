@@ -1,6 +1,7 @@
 from db.engine import create_future_engine_with_custom_types
 from db.records.operations.select import get_count
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
+from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.tables.operations.select import get_table
 from db.transforms.operations.deserialize import deserialize_transformation
 from mathesar.api.utils import process_annotated_records
@@ -91,6 +92,8 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         name=None,
         metadata=metadata
     )
+    transformations = get_transforms_with_summarizes_speced(db_query, engine, metadata)
+    db_query.transformations = transformations
     records = db_query.get_records(
         limit=limit,
         offset=offset
