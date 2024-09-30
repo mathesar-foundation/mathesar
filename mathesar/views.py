@@ -12,12 +12,10 @@ from mathesar.rpc.explorations import list_ as explorations_list
 from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
-from mathesar.api.serializers.databases import TypeSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.api.ui.serializers.users import UserSerializer
 from mathesar.api.utils import is_valid_uuid_v4
-from mathesar.database.types import UIType
 from mathesar.models.shares import SharedTable, SharedQuery
 from mathesar.state import reset_reflection
 from mathesar import __version__
