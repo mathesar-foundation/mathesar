@@ -15,7 +15,6 @@
     deleteSchema as deleteSchemaAPI,
     schemas as schemasStore,
   } from '@mathesar/stores/schemas';
-  import { removeTablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import {
     Button,
@@ -74,8 +73,6 @@
       body: [$_('schema_delete_warning'), $_('are_you_sure_to_proceed')],
       onProceed: async () => {
         await deleteSchemaAPI(schema);
-        // TODO: Create common util to handle data clearing & sync between stores
-        removeTablesStore(schema);
       },
     });
   }
