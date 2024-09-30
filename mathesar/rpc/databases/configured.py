@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from modernrpc.core import rpc_method
+from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.models.base import Database
@@ -44,10 +44,18 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
     Returns:
         A list of database details.
     """
-    if server_id is not None:
-        database_qs = Database.objects.filter(server__id=server_id)
+    user = kwargs.get(REQUEST_KEY).user
+    if user.is_superuser:
+        database_qs = Database.objects.filter(
+            server__id=server_id
+        ) if server_id is not None else Database.objects.all()
     else:
-        database_qs = Database.objects.all()
+        database_qs = Database.objects.filter(
+            server__id=server_id,
+            userdatabaserolemap__user=user
+        ) if server_id is not None else Database.objects.filter(
+            userdatabaserolemap__user=user
+        )
 
     return [ConfiguredDatabaseInfo.from_model(db_model) for db_model in database_qs]
 
