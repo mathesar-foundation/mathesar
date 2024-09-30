@@ -48,15 +48,10 @@
     );
 
     if (currentRoleInheritsOrIsEditedRole) {
-      void AsyncRpcApiStore.runBatched(
-        [
-          currentRole.batchRunner({ database_id: database.id }),
-          underlyingDatabase.batchRunner({ database_id: database.id }),
-        ],
-        {
-          mode: 'force-run',
-        },
-      );
+      void AsyncRpcApiStore.runBatch([
+        currentRole.batchRunner({ database_id: database.id }),
+        underlyingDatabase.batchRunner({ database_id: database.id }),
+      ]);
       void fetchSchemasForCurrentDatabase();
     }
   }

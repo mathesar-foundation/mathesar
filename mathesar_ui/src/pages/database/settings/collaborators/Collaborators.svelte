@@ -39,7 +39,7 @@
     databaseRouteContext,
   } = $routeContext);
 
-  $: void AsyncRpcApiStore.runBatched([
+  $: void AsyncRpcApiStore.runBatchConservatively([
     collaborators.batchRunner({ database_id: database.id }),
     configuredRoles.batchRunner({ server_id: database.server.id }),
   ]);
@@ -62,17 +62,12 @@
 
   function checkAndHandleSideEffects(collaborator: Collaborator) {
     if (collaborator.userId === $userProfileStore.id) {
-      void AsyncRpcApiStore.runBatched(
-        [
-          databaseRouteContext.underlyingDatabase.batchRunner({
-            database_id: database.id,
-          }),
-          databaseRouteContext.roles.batchRunner({ database_id: database.id }),
-        ],
-        {
-          mode: 'force-run',
-        },
-      );
+      void AsyncRpcApiStore.runBatch([
+        databaseRouteContext.underlyingDatabase.batchRunner({
+          database_id: database.id,
+        }),
+        databaseRouteContext.roles.batchRunner({ database_id: database.id }),
+      ]);
       void fetchSchemasForCurrentDatabase();
     }
   }

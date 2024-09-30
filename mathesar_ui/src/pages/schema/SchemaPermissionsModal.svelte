@@ -66,7 +66,7 @@
   };
 
   function getAsyncStoresForPermissions() {
-    void AsyncRpcApiStore.runBatched([
+    void AsyncRpcApiStore.runBatchConservatively([
       schemaPrivileges.batchRunner({
         database_id: schema.database.id,
         schema_oid: schema.oid,
