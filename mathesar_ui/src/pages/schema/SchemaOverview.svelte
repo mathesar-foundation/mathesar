@@ -10,7 +10,7 @@
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-  import { refetchExplorationsForSchema } from '@mathesar/stores/queries';
+  import { fetchExplorationsForCurrentSchema } from '@mathesar/stores/queries';
   import { fetchTablesForCurrentSchema } from '@mathesar/stores/tables';
   import { AnchorButton, Button } from '@mathesar-component-library';
 
@@ -88,7 +88,7 @@
           <div>
             <SpinnerButton
               onClick={async () => {
-                await refetchExplorationsForSchema(schema);
+                await fetchExplorationsForCurrentSchema();
               }}
               label={$_('retry')}
               icon={iconRefresh}
