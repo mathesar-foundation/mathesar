@@ -29,7 +29,7 @@
       {#each [...baseTableColumns] as [columnId, column] (columnId)}
         <SelectableColumn
           {column}
-          usageCount={$query.getColumnCount(columnId)}
+          usageCount={$query.getColumnCount(column)}
           on:add
         />
       {/each}
