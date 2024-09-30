@@ -78,11 +78,14 @@ export type QueryInstanceTransformation =
   | QueryInstanceHideTransformation
   | QueryInstanceSortTransformation;
 
-export interface SavedExploration {
-  id: number;
+/** The data an exploration contains when the data explorer opens */
+export interface InitialExploration {
   database_id: number;
-  name: string;
-  description?: string;
+  schema_oid: number;
+}
+
+/** The data needed to run an exploration without it being saved */
+export interface AnonymousExploration extends InitialExploration {
   base_table_oid: number;
   initial_columns: InitialColumn[];
   transformations?: QueryInstanceTransformation[];
@@ -90,11 +93,38 @@ export interface SavedExploration {
   display_options?: unknown[];
 }
 
-export type UnsavedExploration = Partial<SavedExploration> & {
-  database_id: number;
-};
+export interface AddableExploration extends AnonymousExploration {
+  name: string;
+  description?: string;
+}
 
-export type AnonymousExploration = Omit<SavedExploration, 'id' | 'name'>;
+export interface SavedExploration extends AddableExploration {
+  id: number;
+}
+
+export type MaybeSavedExploration = Partial<SavedExploration> &
+  InitialExploration;
+
+export function explorationIsAddable(
+  e: MaybeSavedExploration,
+): e is MaybeSavedExploration & AddableExploration {
+  return (
+    'name' in e &&
+    e.name !== '' &&
+    e.name !== undefined &&
+    'base_table_oid' in e &&
+    e.base_table_oid !== undefined &&
+    'initial_columns' in e &&
+    e.initial_columns !== undefined &&
+    e.initial_columns.length > 0
+  );
+}
+
+export function explorationIsSaved(
+  e: MaybeSavedExploration,
+): e is SavedExploration {
+  return explorationIsAddable(e) && 'id' in e && e.id !== undefined;
+}
 
 export interface ExplorationRunParams {
   exploration_def: AnonymousExploration;
@@ -164,17 +194,23 @@ export interface ExplorationResult {
 }
 
 export const explorations = {
-  list: rpcMethodTypeContainer<{ database_id: number }, SavedExploration[]>(),
+  list: rpcMethodTypeContainer<
+    { database_id: number; schema_oid: number },
+    SavedExploration[]
+  >(),
 
   get: rpcMethodTypeContainer<{ exploration_id: number }, SavedExploration>(),
 
-  add: rpcMethodTypeContainer<AnonymousExploration & { name: string }, void>(),
+  add: rpcMethodTypeContainer<
+    { exploration_def: AddableExploration },
+    SavedExploration
+  >(),
 
   delete: rpcMethodTypeContainer<{ exploration_id: number }, void>(),
 
   replace: rpcMethodTypeContainer<
     { new_exploration: SavedExploration },
-    void
+    SavedExploration
   >(),
 
   run: rpcMethodTypeContainer<ExplorationRunParams, ExplorationResult>(),

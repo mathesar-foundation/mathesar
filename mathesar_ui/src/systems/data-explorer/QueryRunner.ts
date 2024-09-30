@@ -13,7 +13,7 @@ import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import { fetchQueryResults } from '@mathesar/stores/queries';
+import { runSavedExploration } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
@@ -188,7 +188,7 @@ export default class QueryRunner {
           });
           return undefined;
         }
-        this.runPromise = fetchQueryResults(queryModel.id, {
+        this.runPromise = runSavedExploration(queryModel.id, {
           ...paginationParams,
           ...this.shareConsumer?.getQueryParams(),
         });

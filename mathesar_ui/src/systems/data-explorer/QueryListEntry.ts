@@ -1,7 +1,7 @@
-import type { UnsavedExploration } from '@mathesar/api/rpc/explorations';
+import type { MaybeSavedExploration } from '@mathesar/api/rpc/explorations';
 
 export default class QueryListEntry {
-  queryJSON: UnsavedExploration;
+  queryJSON: MaybeSavedExploration;
 
   isValid: boolean;
 
@@ -9,7 +9,7 @@ export default class QueryListEntry {
 
   prev: QueryListEntry | undefined = undefined;
 
-  constructor(queryJSON: UnsavedExploration, isValid: boolean) {
+  constructor(queryJSON: MaybeSavedExploration, isValid: boolean) {
     this.queryJSON = queryJSON;
     this.isValid = isValid;
   }

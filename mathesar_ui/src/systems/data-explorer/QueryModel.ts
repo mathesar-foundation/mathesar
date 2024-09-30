@@ -1,9 +1,9 @@
 import type {
   AnonymousExploration,
   InitialColumn,
+  MaybeSavedExploration,
   QueryInstanceTransformation,
   SavedExploration,
-  UnsavedExploration,
 } from '@mathesar/api/rpc/explorations';
 import { assertExhaustive } from '@mathesar-component-library';
 
@@ -22,7 +22,7 @@ export interface QueryModelUpdateDiff {
     | 'initialColumnName'
     | 'transformations'
     | 'initialColumnsAndTransformations';
-  diff: Partial<UnsavedExploration>;
+  diff: Partial<MaybeSavedExploration>;
 }
 
 export type QueryTransformationModel =
@@ -61,15 +61,17 @@ function validate(
 }
 
 export default class QueryModel {
-  readonly database_id: UnsavedExploration['database_id'];
+  readonly database_id: MaybeSavedExploration['database_id'];
 
-  readonly base_table_oid: UnsavedExploration['base_table_oid'];
+  readonly schema_oid: MaybeSavedExploration['schema_oid'];
 
-  readonly id: UnsavedExploration['id'];
+  readonly base_table_oid: MaybeSavedExploration['base_table_oid'];
 
-  readonly name: UnsavedExploration['name'];
+  readonly id: MaybeSavedExploration['id'];
 
-  readonly description: UnsavedExploration['description'];
+  readonly name: MaybeSavedExploration['name'];
+
+  readonly description: MaybeSavedExploration['description'];
 
   readonly initial_columns: InitialColumn[];
 
@@ -81,8 +83,9 @@ export default class QueryModel {
 
   readonly isRunnable: boolean;
 
-  constructor(model: UnsavedExploration | QueryModel) {
+  constructor(model: MaybeSavedExploration | QueryModel) {
     this.database_id = model.database_id;
+    this.schema_oid = model.schema_oid;
     this.base_table_oid = model.base_table_oid;
     this.id = model.id;
     this.name = model.name;
@@ -108,6 +111,7 @@ export default class QueryModel {
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
     const model = new QueryModel({
       database_id: this.database_id,
+      schema_oid: this.schema_oid,
       base_table_oid: base_table,
       id: this.id,
       name: this.name,
@@ -235,7 +239,7 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJson().transformations,
+        transformations: model.toMaybeSavedExploration().transformations,
       },
     };
   }
@@ -279,7 +283,7 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJson().transformations,
+        transformations: model.toMaybeSavedExploration().transformations,
       },
     };
   }
@@ -298,7 +302,7 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJson().transformations,
+        transformations: model.toMaybeSavedExploration().transformations,
       },
     };
   }
@@ -382,7 +386,7 @@ export default class QueryModel {
       type: 'initialColumnsAndTransformations',
       diff: {
         initial_columns: initialColumns,
-        transformations: model.toJson().transformations,
+        transformations: model.toMaybeSavedExploration().transformations,
       },
     };
   }
@@ -447,6 +451,7 @@ export default class QueryModel {
       : this.transformationModels.filter((transform) => transform.isValid());
     return {
       database_id: this.database_id,
+      schema_oid: this.schema_oid,
       base_table_oid: this.base_table_oid,
       initial_columns: this.initial_columns,
       transformations: transformations.map((entry) => entry.toJson()),
@@ -458,9 +463,10 @@ export default class QueryModel {
     return this.initial_columns.filter((entry) => entry.attnum === id).length;
   }
 
-  toJson(): UnsavedExploration {
+  toMaybeSavedExploration(): MaybeSavedExploration {
     return {
       database_id: this.database_id,
+      schema_oid: this.schema_oid,
       id: this.id,
       name: this.name,
       description: this.description,

@@ -1,4 +1,4 @@
-import type { UnsavedExploration } from '@mathesar/api/rpc/explorations';
+import type { MaybeSavedExploration } from '@mathesar/api/rpc/explorations';
 
 import QueryListEntry from './QueryListEntry';
 import QueryModel from './QueryModel';
@@ -10,8 +10,8 @@ export default class QueryUndoRedoManager {
     if (queryInfo) {
       const { query, isValid } = queryInfo;
       const json = JSON.parse(
-        JSON.stringify(query.toJson()),
-      ) as UnsavedExploration;
+        JSON.stringify(query.toMaybeSavedExploration()),
+      ) as MaybeSavedExploration;
       this.current = new QueryListEntry(json, isValid);
     }
   }
@@ -21,8 +21,8 @@ export default class QueryUndoRedoManager {
       this.current.next.prev = undefined;
     }
     const json = JSON.parse(
-      JSON.stringify(query.toJson()),
-    ) as UnsavedExploration;
+      JSON.stringify(query.toMaybeSavedExploration()),
+    ) as MaybeSavedExploration;
     const newNode = new QueryListEntry(json, isValid);
     if (this.current && !this.current.isValid) {
       newNode.prev = this.current.prev;
