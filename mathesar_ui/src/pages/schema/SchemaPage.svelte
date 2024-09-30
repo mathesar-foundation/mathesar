@@ -56,12 +56,14 @@
     {
       label: $_('tables'),
       id: 'tables',
+      showCount: tablesRequestStatus.state === 'success',
       count: tablesMap.size,
       href: getSchemaPageTablesSectionUrl(database.id, schema.oid),
     },
     {
       label: $_('explorations'),
       id: 'explorations',
+      showCount: explorationsRequestStatus.state === 'success',
       count: explorationsMap.size,
       href: getSchemaPageExplorationsSectionUrl(database.id, schema.oid),
     },
@@ -125,7 +127,7 @@
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div slot="tab" let:tab class="tab-header-container">
       <span>{tab.label}</span>
-      {#if tab.count !== undefined}
+      {#if tab.count !== undefined && tab.showCount}
         <span class="count">{tab.count}</span>
       {/if}
     </div>
