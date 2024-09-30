@@ -11,7 +11,7 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import {
-    type DBSchemaStoreData,
+    type SchemaStoreData,
     deleteSchema as deleteSchemaAPI,
     schemas as schemasStore,
   } from '@mathesar/stores/schemas';
@@ -43,7 +43,7 @@
   let targetSchema: Schema | undefined;
 
   function filterSchemas(
-    schemaData: DBSchemaStoreData['data'],
+    schemaData: SchemaStoreData['data'],
     filter: string,
   ): Schema[] {
     const filtered: Schema[] = [];
