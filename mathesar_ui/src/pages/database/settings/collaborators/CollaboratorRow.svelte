@@ -12,8 +12,8 @@
   import { Button, SpinnerButton } from '@mathesar-component-library';
 
   export let collaborator: Collaborator;
-  export let editRoleForCollaborator: (collaborator: Collaborator) => void;
-  export let checkAndHandleSideEffects: (collaboror: Collaborator) => void;
+  export let onClickEditRole: (collaborator: Collaborator) => void;
+  export let onDelete: (collaborator: Collaborator) => void;
 
   const routeContext = DatabaseSettingsRouteContext.get();
   $: ({ configuredRoles, users } = $routeContext);
@@ -28,7 +28,7 @@
 
   async function deleteCollaborator() {
     await $routeContext.deleteCollaborator(collaborator);
-    checkAndHandleSideEffects(collaborator);
+    onDelete(collaborator);
     toast.success($_('collaborator_removed_successfully'));
   }
 </script>
@@ -55,7 +55,7 @@
     <div class="actions">
       <Button
         appearance="secondary"
-        on:click={() => editRoleForCollaborator(collaborator)}
+        on:click={() => onClickEditRole(collaborator)}
         disabled={!isMathesarAdmin}
       >
         <Icon {...iconEdit} size="0.8em" />

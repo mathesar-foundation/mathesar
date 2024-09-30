@@ -27,7 +27,7 @@
   $: ({ database, roles, underlyingDatabase, currentRole } =
     databaseRouteContext);
 
-  $: void roles.runOptimally({ database_id: database.id });
+  $: void roles.runConservatively({ database_id: database.id });
   $: roleList = [...($roles.resolvedValue?.values() ?? [])];
 
   let targetRole: Role | undefined = undefined;
@@ -93,8 +93,8 @@
           <RoleRow
             {role}
             rolesMap={$roles.resolvedValue}
-            {modifyMembersForRole}
-            {handleRoleChangeSideEffects}
+            onClickEditMembers={modifyMembersForRole}
+            onDrop={handleRoleChangeSideEffects}
           />
         {/each}
       </GridTable>
@@ -113,7 +113,7 @@
     parentRole={targetRole}
     rolesMap={$roles.resolvedValue}
     controller={modifyRoleMembersModalController}
-    {handleRoleChangeSideEffects}
+    onSave={({ parentRole }) => handleRoleChangeSideEffects(parentRole)}
   />
 {/if}
 

@@ -158,7 +158,7 @@ export default class AsyncStore<Props = void, T = unknown>
    * - rejected
    * - not loading
    */
-  async runOptimally(props: Props): Promise<AsyncStoreValue<T, string>> {
+  async runConservatively(props: Props): Promise<AsyncStoreValue<T, string>> {
     const value = get(this.value);
     if (value.isLoading || value.isOk) {
       return value;

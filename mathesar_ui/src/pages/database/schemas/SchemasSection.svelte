@@ -29,7 +29,7 @@
   const databaseRouteContext = DatabaseRouteContext.get();
 
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
-  $: void underlyingDatabase.runOptimally({ database_id: database.id });
+  $: void underlyingDatabase.runConservatively({ database_id: database.id });
   $: schemasMap = $schemasStore.data;
   $: schemasRequestStatus = $schemasStore.requestStatus;
   $: isLoading =

@@ -26,7 +26,7 @@
   export let controller: ModalController;
   export let parentRole: Role;
   export let rolesMap: ImmutableMap<number, Role>;
-  export let handleRoleChangeSideEffects: (role: Role) => void;
+  export let onSave: (props: { parentRole: Role }) => void;
 
   $: savedMembers = parentRole.members;
   $: savedMemberOids = new Set([...$savedMembers.keys()]);
@@ -52,7 +52,7 @@
 
   async function saveMembers() {
     await parentRole.setMembers(new Set($memberOids));
-    handleRoleChangeSideEffects(parentRole);
+    onSave({ parentRole });
     controller.close();
     toast.success($_('child_roles_saved_successfully'));
   }

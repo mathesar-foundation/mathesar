@@ -43,7 +43,7 @@
     collaborators.batchRunner({ database_id: database.id }),
     configuredRoles.batchRunner({ server_id: database.server.id }),
   ]);
-  $: void users.runOptimally();
+  $: void users.runConservatively();
   $: isLoading =
     $collaborators.isLoading || $configuredRoles.isLoading || $users.isLoading;
   $: isSuccess = $collaborators.isOk && $configuredRoles.isOk && $users.isOk;
@@ -105,8 +105,8 @@
         {#each [...($collaborators.resolvedValue?.values() ?? [])] as collaborator (collaborator.id)}
           <CollaboratorRow
             {collaborator}
-            {editRoleForCollaborator}
-            {checkAndHandleSideEffects}
+            onClickEditRole={editRoleForCollaborator}
+            onDelete={checkAndHandleSideEffects}
           />
         {/each}
       </GridTable>
@@ -131,7 +131,7 @@
     usersMap={$users.resolvedValue}
     controller={editCollaboratorRoleModal}
     configuredRolesMap={$configuredRoles.resolvedValue}
-    {checkAndHandleSideEffects}
+    onUpdateRole={checkAndHandleSideEffects}
   />
 {/if}
 
