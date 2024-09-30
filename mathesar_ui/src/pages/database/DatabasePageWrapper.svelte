@@ -34,7 +34,7 @@
 
   const databaseRouteContext = DatabaseRouteContext.get();
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
-  $: void underlyingDatabase.run({ database_id: database.id });
+  $: void underlyingDatabase.runOptimally({ database_id: database.id });
 
   const commonData = preloadCommonData();
 

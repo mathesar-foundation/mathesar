@@ -72,31 +72,30 @@ export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
   static async runBatched(
     batchRunners: BatchRunner[],
     options?: Partial<{
-      when?: 'always' | 'not-initialized' | ('always' | 'not-initialized')[];
-      onlyRunIfNotInitialized: boolean;
+      mode?: 'force-run' | 'optimal' | ('force-run' | 'optimal')[];
     }>,
   ) {
     const toRun = (() => {
-      if (options?.when && Array.isArray(options.when)) {
-        if (options.when.length !== batchRunners.length) {
+      if (options?.mode && Array.isArray(options.mode)) {
+        if (options.mode.length !== batchRunners.length) {
           throw new Error(
             'Number of run options do not match number of batchRunners',
           );
         }
         return batchRunners.filter((runner, index) => {
-          switch (options.when?.[index]) {
-            case 'always':
+          switch (options.mode?.[index]) {
+            case 'force-run':
               return true;
-            case 'not-initialized':
+            case 'optimal':
             default:
               return !runner.getValue().hasInitialized;
           }
         });
       }
-      if (options?.when === 'always') {
+      if (options?.mode === 'force-run') {
         return batchRunners;
       }
-      // default is `not-initialized`
+      // default is `optimal`
       return batchRunners.filter((runner) => !runner.getValue().hasInitialized);
     })();
 

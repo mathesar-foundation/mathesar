@@ -22,7 +22,7 @@
 
   $: ({ database, roles } = $routeContext.databaseRouteContext);
 
-  $: void roles.runIfNotInitialized({ database_id: database.id });
+  $: void roles.runOptimally({ database_id: database.id });
   $: roleList = [...($roles.resolvedValue?.values() ?? [])];
 
   let targetRole: Role | undefined = undefined;

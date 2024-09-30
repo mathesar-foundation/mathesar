@@ -7,7 +7,6 @@
   import { RichText } from '@mathesar/components/rich-text';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import { iconAddNew } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -31,7 +30,7 @@
   const databaseRouteContext = DatabaseRouteContext.get();
 
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
-  $: void underlyingDatabase.run({ database_id: database.id });
+  $: void underlyingDatabase.runOptimally({ database_id: database.id });
   $: schemasMap = $schemasStore.data;
   $: schemasRequestStatus = $schemasStore.requestStatus;
   $: isLoading =

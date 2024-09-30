@@ -152,12 +152,18 @@ export default class AsyncStore<Props = void, T = unknown>
     }
   }
 
-  async runIfNotInitialized(props: Props): Promise<AsyncStoreValue<T, string>> {
+  /**
+   * Only runs if the current value is one of
+   * - not initialized
+   * - rejected
+   * - not loading
+   */
+  async runOptimally(props: Props): Promise<AsyncStoreValue<T, string>> {
     const value = get(this.value);
-    if (!value.hasInitialized) {
-      return this.run(props);
+    if (value.isLoading || value.isOk) {
+      return value;
     }
-    return value;
+    return this.run(props);
   }
 
   /**

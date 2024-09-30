@@ -36,7 +36,7 @@
     collaborators.batchRunner({ database_id: database.id }),
     configuredRoles.batchRunner({ server_id: database.server.id }),
   ]);
-  $: void users.runIfNotInitialized();
+  $: void users.runOptimally();
   $: isLoading =
     $collaborators.isLoading || $configuredRoles.isLoading || $users.isLoading;
   $: isSuccess = $collaborators.isOk && $configuredRoles.isOk && $users.isOk;
