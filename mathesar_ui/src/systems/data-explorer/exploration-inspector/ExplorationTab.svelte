@@ -2,12 +2,16 @@
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import Form from '@mathesar/components/Form.svelte';
   import FormField from '@mathesar/components/FormField.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { deleteQuery, putQuery, queries } from '@mathesar/stores/queries';
+  import {
+    deleteExploration,
+    queries,
+    replaceExploration,
+  } from '@mathesar/stores/queries';
   import { toast } from '@mathesar/stores/toast';
   import { getAvailableName } from '@mathesar/utils/db';
   import {
@@ -74,7 +78,9 @@
         .withName(name)
         .model.withDescription(description).model;
       // TODO: Write better utility methods to identify saved instances
-      await putQuery(updatedQuery.toJson() as QueryInstance);
+      await replaceExploration(
+        updatedQuery.toMaybeSavedExploration() as SavedExploration,
+      );
       query.set(updatedQuery);
     } catch (err) {
       const message =
@@ -89,7 +95,7 @@
       void confirmDelete({
         identifierType: 'Exploration',
         onProceed: async () => {
-          await deleteQuery(queryId);
+          await deleteExploration(queryId);
           dispatch('delete');
         },
       });

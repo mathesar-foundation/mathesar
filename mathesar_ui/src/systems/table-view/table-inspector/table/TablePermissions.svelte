@@ -133,7 +133,11 @@
 </script>
 
 <div>
-  <Button appearance="secondary" on:click={() => controller.open()}>
+  <Button
+    appearance="secondary"
+    on:click={() => controller.open()}
+    size="small"
+  >
     <span>{$_('table_permissions')}</span>
   </Button>
 </div>

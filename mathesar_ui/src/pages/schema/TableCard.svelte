@@ -177,7 +177,7 @@
   .table-card {
     position: relative;
     isolation: isolate;
-    --menu-trigger-size: 4rem;
+    --menu-trigger-size: 3rem;
     --padding: 1rem;
     --bottom-height: 2.5rem;
   }
@@ -192,14 +192,16 @@
   .link {
     display: grid;
     grid-template: auto 1fr auto / 1fr;
-    border: 1px solid var(--slate-300);
+    border: 1px solid var(--slate-200);
     border-radius: var(--border-radius-l);
     cursor: pointer;
     overflow: hidden;
     height: 100%;
+    background-color: var(--white);
+    font-weight: var(--font-weight-medium);
   }
   .link:hover {
-    border-color: var(--slate-500);
+    border-color: var(--slate-300);
     box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.1);
   }
   .top {
@@ -217,7 +219,9 @@
   }
   .description:not(:empty) {
     padding: 0 var(--padding) var(--padding) var(--padding);
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-base);
+    color: var(--slate-500);
+    font-weight: var(--font-weight-normal);
   }
 
   /** Menu button =========================================================== */
@@ -244,8 +248,8 @@
 
   /** Bottom button========================================================== */
   .table-card .bottom {
-    background: var(--sand-100);
-    border-top: solid 1px var(--sand-200);
+    background: var(--white);
+    border-top: solid 1px var(--slate-100);
   }
   .table-card.unconfirmed-import .bottom {
     background: none;
@@ -277,7 +281,7 @@
   }
   .hovering-bottom-button:not(.no-select) .bottom {
     color: inherit;
-    background: var(--sand-200);
+    background: var(--slate-50);
   }
   .bottom-button,
   .bottom {

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import SpinnerButton from '@mathesar/component-library/spinner-button/SpinnerButton.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconRefresh } from '@mathesar/icons';
@@ -10,7 +10,7 @@
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-  import { refetchQueriesForSchema } from '@mathesar/stores/queries';
+  import { refetchExplorationsForSchema } from '@mathesar/stores/queries';
   import { refetchTablesForSchema } from '@mathesar/stores/tables';
   import { AnchorButton, Button } from '@mathesar-component-library';
 
@@ -24,7 +24,7 @@
   import TablesList from './TablesList.svelte';
 
   export let tablesMap: Map<Table['oid'], Table>;
-  export let explorationsMap: Map<number, QueryInstance>;
+  export let explorationsMap: Map<number, SavedExploration>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
 
@@ -88,7 +88,7 @@
           <div>
             <SpinnerButton
               onClick={async () => {
-                await refetchQueriesForSchema(schema.oid);
+                await refetchExplorationsForSchema(schema);
               }}
               label={$_('retry')}
               icon={iconRefresh}

@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from mathesar.rpc.databases.configured import list_ as databases_list
+from mathesar.rpc.explorations import list_ as explorations_list
 from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
@@ -44,9 +45,8 @@ def get_table_list(request, database_id, schema_oid):
         return []
 
 
-def get_queries_list(request, schema_id):
-    # TODO_BETA: Fill this method
-    return []
+def get_queries_list(request, database_id, schema_id):
+    return explorations_list(request=request, database_id=database_id, schema_oid=schema_id)
 
 
 def get_ui_type_list(request, database_id):
@@ -104,7 +104,7 @@ def get_common_data(request, database_id=None, schema_id=None):
     return {
         **_get_base_data_all_routes(request, database_id, schema_id),
         'tables': get_table_list(request, database_id, schema_id),
-        'queries': get_queries_list(request, schema_id),
+        'queries': get_queries_list(request, database_id, schema_id),
         'routing_context': 'normal',
     }
 

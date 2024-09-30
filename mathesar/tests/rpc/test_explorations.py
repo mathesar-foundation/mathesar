@@ -15,7 +15,7 @@ def test_explorations_list(rf, monkeypatch):
     request.user = User(username='alice', password='pass1234')
     database_id = 11
 
-    def mock_exploration_info(_database_id):
+    def mock_exploration_info(_database_id, _schema_oid):
         if _database_id != database_id:
             raise AssertionError('incorrect parameters passed')
         return [
@@ -24,6 +24,7 @@ def test_explorations_list(rf, monkeypatch):
                 database=Database(id=1),
                 name='page count',
                 base_table_oid=12375,
+                schema_oid=2200,
                 initial_columns=[
                     {'id': 51586, 'alias': 'Items_Acquisition Date'},
                     {'id': 51598, 'alias': 'Items_id'},
@@ -49,6 +50,7 @@ def test_explorations_list(rf, monkeypatch):
                 database=Database(id=1),
                 name='ISBN',
                 base_table_oid=12356,
+                schema_oid=2200,
                 initial_columns=[
                     {'id': 51594, 'alias': 'Publishers_Name'},
                     {'id': 51575, 'alias': 'Books_ISBN', 'jp_path': [[51593, 51579]]}
@@ -81,6 +83,7 @@ def test_explorations_list(rf, monkeypatch):
             'database_id': 1,
             'name': 'page count',
             'base_table_oid': 12375,
+            'schema_oid': 2200,
             'initial_columns': [
                 {'id': 51586, 'alias': 'Items_Acquisition Date'},
                 {'id': 51598, 'alias': 'Items_id'},
@@ -105,6 +108,7 @@ def test_explorations_list(rf, monkeypatch):
             'database_id': 1,
             'name': 'ISBN',
             'base_table_oid': 12356,
+            'schema_oid': 2200,
             'initial_columns': [
                 {'id': 51594, 'alias': 'Publishers_Name'},
                 {'id': 51575, 'alias': 'Books_ISBN', 'jp_path': [[51593, 51579]]}

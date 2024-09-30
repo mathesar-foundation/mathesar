@@ -59,7 +59,7 @@
     {/if}
     {#if column}
       {#key column}
-        <Collapsible isOpen triggerAppearance="plain">
+        <Collapsible isOpen triggerAppearance="inspector">
           <CollapsibleHeader
             slot="header"
             title={$_('properties')}
@@ -90,7 +90,7 @@
     {/if}
 
     {#if column}
-      <Collapsible isOpen triggerAppearance="plain">
+      <Collapsible isOpen triggerAppearance="inspector">
         <CollapsibleHeader
           slot="header"
           title={$_('data_type')}
@@ -103,7 +103,7 @@
     {/if}
 
     {#if column && !column.column.default?.is_dynamic}
-      <Collapsible isOpen triggerAppearance="plain">
+      <Collapsible isOpen triggerAppearance="inspector">
         <CollapsibleHeader
           slot="header"
           title={$_('default_value')}
@@ -116,7 +116,7 @@
     {/if}
 
     {#if column}
-      <Collapsible isOpen triggerAppearance="plain">
+      <Collapsible isOpen triggerAppearance="inspector">
         <CollapsibleHeader slot="header" title={$_('formatting')} />
         <div slot="content" class="content-container">
           {#key column}
@@ -134,7 +134,7 @@
           ? undefined
           : $currentTablesData.tablesMap.get(referentTableId)}
       {#if referentTable !== undefined}
-        <Collapsible triggerAppearance="plain">
+        <Collapsible triggerAppearance="inspector">
           <CollapsibleHeader
             slot="header"
             title={$_('linked_record_summary')}
@@ -146,7 +146,7 @@
       {/if}
     {/if} -->
 
-    <Collapsible isOpen triggerAppearance="plain">
+    <Collapsible isOpen triggerAppearance="inspector">
       <CollapsibleHeader slot="header" title={$_('actions')} />
       <div slot="content" class="content-container">
         <ColumnActions columns={selectedColumns} />
@@ -157,17 +157,17 @@
 
 <style lang="scss">
   .column-mode-container {
-    padding-bottom: 1rem;
+    padding-bottom: var(--size-small);
     display: flex;
     flex-direction: column;
   }
 
   .no-cell-selected {
-    padding: 2rem;
+    padding: var(--size-ultra-large);
   }
 
   .content-container {
-    padding: 1rem;
+    padding: var(--size-small);
     display: flex;
     flex-direction: column;
 

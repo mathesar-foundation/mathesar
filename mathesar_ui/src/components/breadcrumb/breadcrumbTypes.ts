@@ -1,4 +1,4 @@
-import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+import type { SavedExploration } from '@mathesar/api/rpc/explorations';
 import type {
   ComponentAndProps,
   IconProps,
@@ -51,7 +51,7 @@ export interface BreadcrumbItemExploration {
   type: 'exploration';
   database: Database;
   schema: Schema;
-  query: Pick<QueryInstance, 'id' | 'name'>;
+  query: Pick<SavedExploration, 'id' | 'name'>;
 }
 
 export type BreadcrumbItem =

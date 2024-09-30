@@ -59,6 +59,7 @@
   <Button
     on:click={handleMoveColumnsToNewLinkedTable}
     disabled={!$currentRoleOwns}
+    appearance="action"
   >
     <div class="action-item">
       <div>
@@ -76,6 +77,7 @@
     <Button
       on:click={handleMoveColumnsToExistingLinkedTable}
       disabled={!$currentRoleOwns}
+      appearance="action"
     >
       <div class="action-item">
         <div>

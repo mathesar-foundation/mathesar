@@ -12,7 +12,7 @@
     <div class="left">
       <div class="entity-container">
         <div class="entity-icon">
-          <Icon {...icon} size="2em" />
+          <Icon {...icon} size="1.5em" />
         </div>
         <div class="left-meta-container">
           <span class="entity-name">{name}</span>
@@ -56,7 +56,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: var(--border-radius-l);
+    border-radius: 50%;
     color: var(--white);
   }
 

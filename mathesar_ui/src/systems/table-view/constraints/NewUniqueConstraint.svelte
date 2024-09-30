@@ -123,10 +123,12 @@
 </script>
 
 <div class="add-new-unique-constraint">
-  <span>{$_('new_unique_constraint')}</span>
   <Form>
     <FormField>
       <LabeledInput label={$_('columns')} layout="stacked">
+        <span slot="help">
+          {$_('columns_unique_values_help')}
+        </span>
         <MultiSelect
           bind:values={constraintColumns}
           options={columnsInTable}
@@ -174,7 +176,7 @@
   <CancelOrProceedButtonPair
     onProceed={handleSave}
     onCancel={handleCancel}
-    proceedButton={{ label: $_('add') }}
+    proceedButton={{ label: $_('add_unique_constraint') }}
     {canProceed}
     size="small"
   />

@@ -23,13 +23,13 @@
   $: inputComponent = input?.component ?? (TextInput as typeof SvelteComponent);
   $: inputComponentProps = input?.props ?? {};
   $: ({ showsError, disabled } = field);
+  $: isStacked = layout === 'stacked';
 </script>
 
 <FieldLayout>
   {#if label || $$slots.label}
-    <LabeledInput {label} {layout} {help}>
+    <LabeledInput {layout} {label}>
       <slot name="label" slot="label" />
-      <slot name="help" slot="help" />
       <svelte:component
         this={inputComponent}
         bind:value={$field}
@@ -37,6 +37,11 @@
         disabled={$disabled}
         {...inputComponentProps}
       />
+      {#if !isStacked && (help || $$slots.help)}
+        <FieldHelp>
+          <slot name="help">{help}</slot>
+        </FieldHelp>
+      {/if}
     </LabeledInput>
   {:else}
     <svelte:component
@@ -48,11 +53,13 @@
     >
       <slot />
     </svelte:component>
-    {#if help || $$slots.help}
-      <FieldHelp>
-        <slot name="help">{help}</slot>
-      </FieldHelp>
-    {/if}
   {/if}
+
+  {#if isStacked && (help || $$slots.help)}
+    <FieldHelp>
+      <slot name="help">{help}</slot>
+    </FieldHelp>
+  {/if}
+
   <FieldErrors {field} />
 </FieldLayout>

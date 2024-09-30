@@ -4,8 +4,8 @@
 
   export let icon: IconProps | undefined = undefined;
   export let style: string | undefined = undefined;
-  /** When true, the box will take the full width of its parent */
   export let fullWidth = false;
+  export let title: string | undefined = undefined;
 </script>
 
 <div
@@ -20,6 +20,9 @@
     </span>
   {/if}
   <div class="content trim-child-margins">
+    {#if title}
+      <h3 class="title">{title}</h3>
+    {/if}
     <slot />
   </div>
 </div>
@@ -31,7 +34,7 @@
     border-radius: var(--border-radius-m);
     margin: var(--MessageBox__margin);
     background: var(--MessageBox__background);
-    border: var(--MessageBox__border);
+    border-left: var(--MessageBox__border);
   }
   .message-box:not(.full-width) {
     max-width: max-content;
@@ -44,5 +47,10 @@
     left: 0.8em;
     top: 0.7em;
     color: var(--MessageBox__icon-color, currentcolor);
+  }
+  .title {
+    font-size: var(--size-large);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--size-ultra-small);
   }
 </style>

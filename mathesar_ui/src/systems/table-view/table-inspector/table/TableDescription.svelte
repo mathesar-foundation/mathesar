@@ -35,7 +35,10 @@
     flex-direction: column;
 
     > :global(* + *) {
-      margin-top: 0.5rem;
+      margin-top: 0.25rem;
     }
+  }
+  .label {
+    font-weight: var(--font-weight-medium);
   }
 </style>

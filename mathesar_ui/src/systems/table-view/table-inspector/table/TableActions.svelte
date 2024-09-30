@@ -36,6 +36,8 @@
       table.schema.database.id,
       table.schema.oid,
       {
+        databaseId: table.schema.database.id,
+        schemaOid: table.schema.oid,
         baseTable: table,
         columns: $columns,
         terseGrouping: $grouping.terse(),
@@ -64,7 +66,7 @@
 </script>
 
 <div class="actions-container">
-  <AnchorButton href={explorationPageUrl}>
+  <AnchorButton href={explorationPageUrl} appearance="action">
     <div class="action-item">
       <div>
         <Icon {...iconExploration} /> <span>{$_('explore_data')}</span>

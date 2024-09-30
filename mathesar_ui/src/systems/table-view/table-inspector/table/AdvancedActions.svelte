@@ -16,7 +16,7 @@
 </script>
 
 <div class="actions-container">
-  <Button on:click={() => constraintsModal.open()}>
+  <Button on:click={() => constraintsModal.open()} appearance="action">
     <div class="action-item">
       <div>
         <Icon {...iconConstraint} /> <span>{$_('constraints')}</span>

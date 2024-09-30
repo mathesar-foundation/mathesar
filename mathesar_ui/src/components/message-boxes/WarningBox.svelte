@@ -15,7 +15,7 @@
 <style>
   .warning-box {
     --MessageBox__background: var(--yellow-100);
-    --MessageBox__border: solid 1px var(--yellow-200);
+    --MessageBox__border: solid 4px var(--yellow-300);
     --MessageBox__icon-color: var(--yellow-300);
   }
 </style>

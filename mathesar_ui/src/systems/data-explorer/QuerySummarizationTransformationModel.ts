@@ -4,7 +4,7 @@ import { _ } from 'svelte-i18n';
 import type {
   QueryInstanceSummarizationTransformation,
   QuerySummarizationFunctionId,
-} from '@mathesar/api/rest/types/queries';
+} from '@mathesar/api/rpc/explorations';
 import { ImmutableMap } from '@mathesar-component-library';
 
 export interface QuerySummarizationAggregationEntry {

@@ -1,10 +1,10 @@
 import type {
-  QueryInstance,
-  QueryInstanceInitialColumn,
+  AnonymousExploration,
+  InitialColumn,
+  MaybeSavedExploration,
   QueryInstanceTransformation,
-  QueryRunRequest,
-} from '@mathesar/api/rest/types/queries';
-import type { UnsavedQueryInstance } from '@mathesar/stores/queries';
+  SavedExploration,
+} from '@mathesar/api/rpc/explorations';
 import { assertExhaustive } from '@mathesar-component-library';
 
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
@@ -22,7 +22,7 @@ export interface QueryModelUpdateDiff {
     | 'initialColumnName'
     | 'transformations'
     | 'initialColumnsAndTransformations';
-  diff: Partial<UnsavedQueryInstance>;
+  diff: Partial<MaybeSavedExploration>;
 }
 
 export type QueryTransformationModel =
@@ -49,9 +49,9 @@ function getTransformationModel(
 }
 
 function validate(
-  queryModel: Pick<QueryModel, 'base_table' | 'transformationModels'>,
+  queryModel: Pick<QueryModel, 'base_table_oid' | 'transformationModels'>,
 ): { isValid: boolean; isRunnable: boolean } {
-  if (queryModel.base_table === undefined) {
+  if (queryModel.base_table_oid === undefined) {
     return { isValid: false, isRunnable: false };
   }
   const isValid = queryModel.transformationModels.every((transformation) =>
@@ -61,41 +61,47 @@ function validate(
 }
 
 export default class QueryModel {
-  readonly base_table: UnsavedQueryInstance['base_table'];
+  readonly database_id: MaybeSavedExploration['database_id'];
 
-  readonly id: UnsavedQueryInstance['id'];
+  readonly schema_oid: MaybeSavedExploration['schema_oid'];
 
-  readonly name: UnsavedQueryInstance['name'];
+  readonly base_table_oid: MaybeSavedExploration['base_table_oid'];
 
-  readonly description: UnsavedQueryInstance['description'];
+  readonly id: MaybeSavedExploration['id'];
 
-  readonly initial_columns: QueryInstanceInitialColumn[];
+  readonly name: MaybeSavedExploration['name'];
+
+  readonly description: MaybeSavedExploration['description'];
+
+  readonly initial_columns: InitialColumn[];
 
   readonly transformationModels: QueryTransformationModel[];
 
-  readonly display_names: NonNullable<QueryInstance['display_names']>;
+  readonly display_names: NonNullable<SavedExploration['display_names']>;
 
   readonly isValid: boolean;
 
   readonly isRunnable: boolean;
 
-  constructor(model?: UnsavedQueryInstance | QueryModel) {
-    this.base_table = model?.base_table;
-    this.id = model?.id;
-    this.name = model?.name;
-    this.description = model?.description;
-    this.initial_columns = model?.initial_columns ?? [];
+  constructor(model: MaybeSavedExploration | QueryModel) {
+    this.database_id = model.database_id;
+    this.schema_oid = model.schema_oid;
+    this.base_table_oid = model.base_table_oid;
+    this.id = model.id;
+    this.name = model.name;
+    this.description = model.description;
+    this.initial_columns = model.initial_columns ?? [];
     let transformationModels;
     if (model && 'transformationModels' in model) {
       transformationModels = [...model.transformationModels];
     } else {
       transformationModels =
-        model?.transformations?.map(getTransformationModel) ?? [];
+        model.transformations?.map(getTransformationModel) ?? [];
     }
     this.transformationModels = transformationModels;
-    this.display_names = model?.display_names ?? {};
+    this.display_names = model.display_names ?? {};
     const validationResult = validate({
-      base_table: model?.base_table,
+      base_table_oid: model.base_table_oid,
       transformationModels,
     });
     this.isValid = validationResult.isValid;
@@ -104,7 +110,9 @@ export default class QueryModel {
 
   withBaseTable(base_table?: number): QueryModelUpdateDiff {
     const model = new QueryModel({
-      base_table,
+      database_id: this.database_id,
+      schema_oid: this.schema_oid,
+      base_table_oid: base_table,
       id: this.id,
       name: this.name,
     });
@@ -112,7 +120,7 @@ export default class QueryModel {
       model,
       type: 'baseTable',
       diff: {
-        base_table,
+        base_table_oid: base_table,
       },
     };
   }
@@ -159,7 +167,7 @@ export default class QueryModel {
     };
   }
 
-  withInitialColumn(column: QueryInstanceInitialColumn): QueryModelUpdateDiff {
+  withInitialColumn(column: InitialColumn): QueryModelUpdateDiff {
     const initialColumns = [...this.initial_columns, column];
     const model = new QueryModel({
       ...this,
@@ -231,7 +239,7 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJson().transformations,
+        transformations: model.toMaybeSavedExploration().transformations,
       },
     };
   }
@@ -275,7 +283,7 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJson().transformations,
+        transformations: model.toMaybeSavedExploration().transformations,
       },
     };
   }
@@ -294,14 +302,14 @@ export default class QueryModel {
       model,
       type: 'transformations',
       diff: {
-        transformations: model.toJson().transformations,
+        transformations: model.toMaybeSavedExploration().transformations,
       },
     };
   }
 
   getInitialColumnsAndTransformsUtilizingThemByColumnIds(columnIds: number[]) {
     const initialColumnsUsingColumnIds = this.initial_columns.filter((entry) =>
-      columnIds.includes(entry.id),
+      columnIds.includes(entry.attnum),
     );
     const initialColumnAliases = initialColumnsUsingColumnIds.map(
       (entry) => entry.alias,
@@ -346,7 +354,7 @@ export default class QueryModel {
 
   withoutColumnsById(columnIds: number[]): QueryModelUpdateDiff {
     const initialColumns = this.initial_columns.filter(
-      (entry) => !columnIds.includes(entry.id),
+      (entry) => !columnIds.includes(entry.attnum),
     );
     let retainedTransformationModels = this.transformationModels;
     const firstSummarizationTransformIndex =
@@ -360,7 +368,7 @@ export default class QueryModel {
       );
     }
     const alaisesForTheIds = this.initial_columns
-      .filter((entry) => columnIds.includes(entry.id))
+      .filter((entry) => columnIds.includes(entry.attnum))
       .map((entry) => entry.alias);
     const transformationModels = retainedTransformationModels.filter(
       (model) =>
@@ -378,12 +386,12 @@ export default class QueryModel {
       type: 'initialColumnsAndTransformations',
       diff: {
         initial_columns: initialColumns,
-        transformations: model.toJson().transformations,
+        transformations: model.toMaybeSavedExploration().transformations,
       },
     };
   }
 
-  getColumn(columnAlias: string): QueryInstanceInitialColumn | undefined {
+  getColumn(columnAlias: string): InitialColumn | undefined {
     return this.initial_columns.find((column) => column.alias === columnAlias);
   }
 
@@ -432,8 +440,8 @@ export default class QueryModel {
     );
   }
 
-  toRunRequestJson(): Omit<QueryRunRequest, 'parameters'> {
-    if (this.base_table === undefined) {
+  toAnonymousExploration(): AnonymousExploration {
+    if (this.base_table_oid === undefined) {
       throw new Error(
         'Cannot formulate run request since base_table is undefined',
       );
@@ -442,23 +450,27 @@ export default class QueryModel {
       ? this.transformationModels
       : this.transformationModels.filter((transform) => transform.isValid());
     return {
-      base_table: this.base_table,
+      database_id: this.database_id,
+      schema_oid: this.schema_oid,
+      base_table_oid: this.base_table_oid,
       initial_columns: this.initial_columns,
       transformations: transformations.map((entry) => entry.toJson()),
       display_names: this.display_names,
     };
   }
 
-  getColumnCount(id: QueryInstanceInitialColumn['id']): number {
-    return this.initial_columns.filter((entry) => entry.id === id).length;
+  getColumnCount(id: InitialColumn['attnum']): number {
+    return this.initial_columns.filter((entry) => entry.attnum === id).length;
   }
 
-  toJson(): UnsavedQueryInstance {
+  toMaybeSavedExploration(): MaybeSavedExploration {
     return {
+      database_id: this.database_id,
+      schema_oid: this.schema_oid,
       id: this.id,
       name: this.name,
       description: this.description,
-      base_table: this.base_table,
+      base_table_oid: this.base_table_oid,
       initial_columns: this.initial_columns,
       transformations: this.transformationModels.map((entry) => entry.toJson()),
       display_names: this.display_names,

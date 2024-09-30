@@ -157,7 +157,7 @@
   </AppSecondaryHeader>
 
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
-    <div class="tab-content">
+    <div class="tab-container">
       <slot {setSection} />
     </div>
   </TabContainer>
@@ -166,7 +166,7 @@
 <DatabasePermissionsModal controller={permissionsModal} />
 
 <style>
-  .tab-content {
-    padding: 1rem 0;
+  .tab-container {
+    padding: var(--size-xx-large) 0;
   }
 </style>

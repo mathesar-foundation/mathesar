@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { QueryInstance } from '@mathesar/api/rest/types/queries';
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -21,7 +21,7 @@
 
   export let database: Database;
   export let schema: Schema;
-  export let query: QueryInstance;
+  export let query: SavedExploration;
   export let shareConsumer: ShareConsumer | undefined = undefined;
 
   $: schemaName = schema.name;
@@ -30,7 +30,7 @@
   let isInspectorOpen = true;
 
   function createQueryRunner(
-    _query: QueryInstance,
+    _query: SavedExploration,
     abstractTypeMap: AbstractTypesMap,
   ) {
     queryRunner?.destroy();

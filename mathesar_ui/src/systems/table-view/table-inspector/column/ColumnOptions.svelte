@@ -109,6 +109,7 @@
         {$_('restrict_to_unique_help')}
       </Help>
     </span>
+
     {#if isRequestingToggleAllowDuplicates}
       <Icon class="opt" {...iconLoading} />
     {:else}

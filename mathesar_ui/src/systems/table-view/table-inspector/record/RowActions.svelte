@@ -68,7 +68,7 @@
 
 <div class="actions-container">
   {#if recordPageLink}
-    <AnchorButton href={recordPageLink}>
+    <AnchorButton href={recordPageLink} appearance="action">
       <div class="action-item">
         <div>
           <Icon {...iconRecord} />
@@ -81,6 +81,7 @@
   <Button
     on:click={handleDeleteRecords}
     disabled={!$currentRolePrivileges.has('DELETE')}
+    appearance="action"
   >
     <Icon {...iconDeleteMajor} />
     <span>
