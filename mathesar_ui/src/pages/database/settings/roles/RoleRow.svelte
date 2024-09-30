@@ -20,13 +20,15 @@
 
   export let role: Role;
   export let rolesMap: ImmutableMap<number, Role>;
-  export let modifyMembersForRole: (role: Role) => unknown;
+  export let modifyMembersForRole: (role: Role) => void;
+  export let handleRoleChangeSideEffects: (role: Role) => void;
 
   $: members = role.members;
 
   async function dropRole() {
     try {
-      await $routeContext.deleteRoleAndResetDependents(role);
+      await $routeContext.databaseRouteContext.deleteRole(role);
+      handleRoleChangeSideEffects(role);
       toast.success($_('role_dropped_successfully'));
     } catch (err) {
       toast.error(getErrorMessage(err));

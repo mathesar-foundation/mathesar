@@ -70,11 +70,19 @@ export class DatabaseSettingsRouteContext {
           (cr) => cr.name,
         );
         if (isStable && loginRoles && configuredRoles) {
-          return [...loginRoles.values()].map((role) => ({
+          const allRoles = [...loginRoles.values()].map((role) => ({
             name: role.name,
             role,
             configuredRole: configuredRoles.get(role.name),
           }));
+          const allLoginRoleNames = new Set(allRoles.map((ar) => ar.name));
+          const configuredRolesNotInAllRoles = [...configuredRoles.values()]
+            .filter((cr) => !allLoginRoleNames.has(cr.name))
+            .map((configuredRole) => ({
+              name: configuredRole.name,
+              configuredRole,
+            }));
+          return [...allRoles, ...configuredRolesNotInAllRoles];
         }
         if ($configuredRoles.isStable && configuredRoles) {
           return [...configuredRoles.values()].map((configuredRole) => ({
@@ -134,13 +142,6 @@ export class DatabaseSettingsRouteContext {
   async deleteCollaborator(collaborator: Collaborator) {
     await collaborator.delete();
     this.collaborators.updateResolvedValue((c) => c.without(collaborator.id));
-  }
-
-  async deleteRoleAndResetDependents(role: Role) {
-    await this.databaseRouteContext.deleteRole(role);
-    // When a role is deleted, both Collaborators & ConfiguredRoles need to be reset
-    this.configuredRoles.reset();
-    this.collaborators.reset();
   }
 
   static construct(databaseRouteContext: DatabaseRouteContext) {
