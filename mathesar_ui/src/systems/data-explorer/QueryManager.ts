@@ -3,13 +3,15 @@ import { get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-import type {
-  ExplorationResult,
-  SavedExploration,
+import {
+  type ExplorationResult,
+  type SavedExploration,
+  explorationIsAddable,
+  explorationIsSaved,
 } from '@mathesar/api/rpc/explorations';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { currentDatabase } from '@mathesar/stores/databases';
-import { createQuery, putQuery } from '@mathesar/stores/queries';
+import { addExploration, replaceExploration } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -78,7 +80,11 @@ export default class QueryManager extends QueryRunner {
       abstractTypeMap,
       onRunWithObject: (response: ExplorationResult) => {
         this.checkAndUpdateSummarizationAfterRun(
-          new QueryModel({ database_id: query.database_id, ...response.query }),
+          new QueryModel({
+            database_id: query.database_id,
+            schema_oid: query.schema_oid,
+            ...response.query,
+          }),
         );
       },
     });
@@ -285,7 +291,8 @@ export default class QueryManager extends QueryRunner {
    * @throws Error if unable to save
    */
   async save(): Promise<QueryModel> {
-    const queryJSON = this.getQueryModel().toJson();
+    const maybeSavedExploration =
+      this.getQueryModel().toMaybeSavedExploration();
     this.state.update((_state) => ({
       ..._state,
       saveState: { state: 'processing' },
@@ -293,11 +300,12 @@ export default class QueryManager extends QueryRunner {
     try {
       this.querySavePromise?.cancel();
       // TODO: Check for latest validation status here
-      if (queryJSON.id !== undefined) {
-        // TODO: Figure out a better way to help TS identify this as a saved instance
-        this.querySavePromise = putQuery(queryJSON as SavedExploration);
+      if (explorationIsSaved(maybeSavedExploration)) {
+        this.querySavePromise = replaceExploration(maybeSavedExploration);
+      } else if (explorationIsAddable(maybeSavedExploration)) {
+        this.querySavePromise = addExploration(maybeSavedExploration);
       } else {
-        this.querySavePromise = createQuery(queryJSON);
+        throw new Error(get(_)('error_saving_query'));
       }
       const result = await this.querySavePromise;
       this.query.update((qr) => qr.withId(result.id).model);
