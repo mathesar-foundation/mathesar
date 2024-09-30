@@ -1,12 +1,13 @@
 from db.types.custom import email, money, multicurrency, uri, json_array, json_object
 from db.constants import TYPES_SCHEMA
-from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
 from db.types.operations.cast import install_all_casts
 import psycopg
 
 
 def create_type_schema(engine) -> None:
-    create_schema_if_not_exists_via_sql_alchemy(TYPES_SCHEMA, engine)
+    conn_str = str(engine.url)
+    with psycopg.connect(conn_str) as conn:
+        conn.execute(f"CREATE SCHEMA IF NOT EXISTS {TYPES_SCHEMA}")
 
 
 def install_mathesar_on_database(engine):

@@ -74,8 +74,8 @@ def create_db(request, SES_engine_cache):
         create_database(engine.url)
         created_dbs.add(db_name)
         # Our default testing database has our types and functions preinstalled.
-        sql_install.install(engine)
         install.install_mathesar_on_database(engine)
+        sql_install.install(engine)
         engine.dispose()
         return db_name
     yield __create_db
