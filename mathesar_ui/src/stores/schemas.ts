@@ -80,7 +80,7 @@ function removeSchemaInStore(database: Database, schema: Schema) {
   }
 }
 
-async function fetchSchemasForCurrentDatabase() {
+export async function fetchSchemasForCurrentDatabase() {
   request?.cancel();
   const $currentDatabase = get(databasesStore.currentDatabase);
   if (!$currentDatabase) {
@@ -88,20 +88,37 @@ async function fetchSchemasForCurrentDatabase() {
     return;
   }
 
-  schemasStore.set({
-    databaseId: $currentDatabase.id,
-    requestStatus: { state: 'processing' },
-    data: new Map(),
+  schemasStore.update(($schemasStore) => {
+    if ($schemasStore.databaseId === $currentDatabase.id) {
+      return {
+        ...$schemasStore,
+        requestStatus: { state: 'processing' },
+      };
+    }
+    return {
+      databaseId: $currentDatabase.id,
+      requestStatus: { state: 'processing' },
+      data: new Map(),
+    };
   });
+
   try {
     request = api.schemas.list({ database_id: $currentDatabase.id }).run();
     const rawSchemas = await request;
     setSchemasInStore($currentDatabase, rawSchemas);
   } catch (err) {
-    schemasStore.set({
-      databaseId: $currentDatabase.id,
-      requestStatus: { state: 'failure', errors: [getErrorMessage(err)] },
-      data: new Map(),
+    schemasStore.update(($schemasStore) => {
+      if ($schemasStore.databaseId === $currentDatabase.id) {
+        return {
+          ...$schemasStore,
+          requestStatus: { state: 'failure', errors: [getErrorMessage(err)] },
+        };
+      }
+      return {
+        databaseId: $currentDatabase.id,
+        requestStatus: { state: 'failure', errors: [getErrorMessage(err)] },
+        data: new Map(),
+      };
     });
   }
 }

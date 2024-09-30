@@ -66,6 +66,7 @@
   "click_save_button_to_save_changes": "Click Save button to save changes.",
   "collaborator": "Collaborator",
   "collaborator_added_successfully": "Collaborator added successfully",
+  "collaborator_removed_successfully": "Collaborator removed successfully",
   "collaborator_role_help": "This role determines permissions for this collaborator. Mathesar will use this PostgreSQL role for all database interactions by this user.",
   "collaborator_role_updated_successfully": "Role updated successfully for collaborator.",
   "collaborators": "Collaborators",
