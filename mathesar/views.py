@@ -45,19 +45,15 @@ def get_table_list(request, database_id, schema_oid):
         return []
 
 
-def get_queries_list(request, database_id, schema_id):
-    return explorations_list(request=request, database_id=database_id, schema_oid=schema_id)
-
-
-def get_ui_type_list(request, database_id):
-    if database_id is None:
+def get_queries_list(request, database_id, schema_oid):
+    if database_id is not None and schema_oid is not None:
+        return explorations_list(
+            request=request,
+            database_id=database_id,
+            schema_oid=schema_oid
+        )
+    else:
         return []
-    type_serializer = TypeSerializer(
-        UIType,
-        many=True,
-        context={'request': request}
-    )
-    return type_serializer.data
 
 
 def get_user_data(request):
@@ -84,7 +80,6 @@ def _get_internal_db_meta():
 
 def _get_base_data_all_routes(request, database_id=None, schema_id=None):
     return {
-        'abstract_types': get_ui_type_list(request, database_id),
         'current_database': int(database_id) if database_id else None,
         'current_schema': int(schema_id) if schema_id else None,
         'current_release_tag_name': __version__,
