@@ -10,14 +10,7 @@
  */
 
 import { execPipe, filter, map } from 'iter-tools';
-import {
-  type Readable,
-  type Writable,
-  derived,
-  get,
-  readable,
-  writable,
-} from 'svelte/store';
+import { type Readable, derived, get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
@@ -33,7 +26,7 @@ import {
   type RpcRequest,
   batchSend,
 } from '@mathesar/packages/json-rpc-client-builder';
-import { TupleMap } from '@mathesar/packages/tuple-map';
+import { getErrorMessage } from '@mathesar/utils/errors';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
 import {
@@ -49,6 +42,8 @@ const commonData = preloadCommonData();
 type TablesMap = Map<Table['oid'], Table>;
 
 interface TablesData {
+  databaseId?: Database['id'];
+  schemaOid?: Schema['oid'];
   tablesMap: TablesMap;
   requestStatus: RequestStatus;
 }
@@ -60,136 +55,100 @@ function makeEmptyTablesData(): TablesData {
   };
 }
 
-type TablesStore = Writable<TablesData>;
-
-/** Maps [databaseId, schemaOid] to TablesStore */
-const tablesStores = new TupleMap<
-  [Database['id'], Schema['oid']],
-  TablesStore
->();
-
-const tablesRequests = new TupleMap<
-  [Database['id'], Schema['oid']],
-  CancellablePromise<RawTableWithMetadata[]>
->();
+const tablesStore = writable(makeEmptyTablesData());
 
 function sortTables(tables: Iterable<Table>): Table[] {
   return [...tables].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function setTablesStore(schema: Schema, tables: Table[]): TablesStore {
-  const tablesMap: TablesMap = new Map();
-  if (tables) {
-    sortTables(tables).forEach((t) => tablesMap.set(t.oid, t));
-  }
+function setTablesStore(
+  schema: Schema,
+  rawTablesWithMetadata: RawTableWithMetadata[],
+) {
+  const tables = rawTablesWithMetadata.map(
+    (t) =>
+      new Table({
+        schema,
+        rawTableWithMetadata: t,
+      }),
+  );
 
-  const storeValue: TablesData = {
+  const tablesMap: TablesMap = new Map();
+  sortTables(tables).forEach((t) => tablesMap.set(t.oid, t));
+
+  tablesStore.set({
+    databaseId: schema.database.id,
+    schemaOid: schema.oid,
     tablesMap,
     requestStatus: { state: 'success' },
-  };
-
-  let store = tablesStores.get([schema.database.id, schema.oid]);
-  if (!store) {
-    store = writable(storeValue);
-    tablesStores.set([schema.database.id, schema.oid], store);
-  } else {
-    store.set(storeValue);
-  }
-  return store;
+  });
 }
 
-export function removeTablesStore(schema: Schema): void {
-  tablesStores.delete([schema.database.id, schema.oid]);
-}
+let request: CancellablePromise<RawTableWithMetadata[]>;
 
-export async function refetchTablesForSchema(
-  schema: Schema,
-): Promise<TablesData | undefined> {
-  const store = tablesStores.get([schema.database.id, schema.oid]);
-  if (!store) {
-    // TODO: why are we logging an error here? I would expect that we'd either
-    // throw or ignore. If there's a reason for this logging, please add a code
-    // comment explaining why.
-    console.error('Tables store not found.');
-    return undefined;
+export async function fetchTablesForCurrentSchema() {
+  request?.cancel();
+
+  const $currentSchema = get(currentSchema);
+  if (!$currentSchema) {
+    tablesStore.set(makeEmptyTablesData());
+    return;
   }
 
   try {
-    store.update((currentData) => ({
-      ...currentData,
-      requestStatus: { state: 'processing' },
-    }));
+    tablesStore.update(($tablesStore) => {
+      if (
+        $tablesStore.databaseId === $currentSchema.database.id &&
+        $tablesStore.schemaOid === $currentSchema.oid
+      ) {
+        return {
+          ...$tablesStore,
+          requestStatus: { state: 'processing' },
+        };
+      }
+      return {
+        databaseId: $currentSchema.database.id,
+        schemaOid: $currentSchema.oid,
+        tablesMap: new Map(),
+        requestStatus: { state: 'processing' },
+      };
+    });
 
-    tablesRequests.get([schema.database.id, schema.oid])?.cancel();
-
-    const tablesRequest = api.tables
+    request = api.tables
       .list_with_metadata({
-        database_id: schema.database.id,
-        schema_oid: schema.oid,
+        database_id: $currentSchema.database.id,
+        schema_oid: $currentSchema.oid,
       })
       .run();
-    tablesRequests.set([schema.database.id, schema.oid], tablesRequest);
-    const tableEntries = await tablesRequest;
 
-    const schemaTablesStore = setTablesStore(
-      schema,
-      tableEntries.map(
-        (t) =>
-          new Table({
-            schema,
-            rawTableWithMetadata: t,
-          }),
-      ),
-    );
+    const tableEntries = await request;
 
-    return get(schemaTablesStore);
+    setTablesStore($currentSchema, tableEntries);
   } catch (err) {
-    store.update((currentData) => ({
-      ...currentData,
-      requestStatus: {
-        state: 'failure',
-        errors: [
-          err instanceof Error ? err.message : 'Error in fetching schemas',
-        ],
-      },
-    }));
-    return undefined;
-  }
-}
-
-let preload = true;
-
-function getTablesStore(schema: Schema): TablesStore {
-  let store = tablesStores.get([schema.database.id, schema.oid]);
-  if (!store) {
-    store = writable({
-      requestStatus: { state: 'processing' },
-      tablesMap: new Map(),
+    tablesStore.update(($tablesStore) => {
+      if (
+        $tablesStore.databaseId === $currentSchema.database.id &&
+        $tablesStore.schemaOid === $currentSchema.oid
+      ) {
+        return {
+          ...$tablesStore,
+          requestStatus: {
+            state: 'failure',
+            errors: [getErrorMessage(err)],
+          },
+        };
+      }
+      return {
+        databaseId: $currentSchema.database.id,
+        schemaOid: $currentSchema.oid,
+        tablesMap: new Map(),
+        requestStatus: {
+          state: 'failure',
+          errors: [getErrorMessage(err)],
+        },
+      };
     });
-    tablesStores.set([schema.database.id, schema.oid], store);
-    if (
-      preload &&
-      commonData.current_schema === schema.oid &&
-      commonData.current_database === schema.database.id
-    ) {
-      store = setTablesStore(
-        schema,
-        commonData.tables.map(
-          (t) =>
-            new Table({
-              schema,
-              rawTableWithMetadata: t,
-            }),
-        ),
-      );
-    } else {
-      void refetchTablesForSchema(schema);
-    }
-    preload = false;
-  } else if (get(store).requestStatus.state === 'failure') {
-    void refetchTablesForSchema(schema);
   }
-  return store;
 }
 
 export function deleteTable(
@@ -206,15 +165,19 @@ export function deleteTable(
     (resolve, reject) => {
       void promise.then(() => {
         schema.setTableCount(get(schema.tableCount) - 1);
-        tablesStores
-          .get([schema.database.id, schema.oid])
-          ?.update((tableStoreData) => {
+        const $tablesStore = get(tablesStore);
+        if (
+          $tablesStore.databaseId === schema.database.id &&
+          $tablesStore.schemaOid === schema.oid
+        ) {
+          tablesStore.update((tableStoreData) => {
             tableStoreData.tablesMap.delete(tableOid);
             return {
               ...tableStoreData,
               tablesMap: new Map(tableStoreData.tablesMap),
             };
           });
+        }
         return resolve();
       }, reject);
     },
@@ -224,7 +187,7 @@ export function deleteTable(
   );
 }
 
-function updateTableStoreIfPresent({
+function putTableInStore({
   schema,
   rawTableWithMetadata,
 }: {
@@ -235,8 +198,11 @@ function updateTableStoreIfPresent({
     schema,
     rawTableWithMetadata,
   });
-  const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
-  if (tablesStore) {
+  const $tablesStore = get(tablesStore);
+  if (
+    $tablesStore.databaseId === schema.database.id &&
+    $tablesStore.schemaOid === schema.oid
+  ) {
     tablesStore.update(({ requestStatus, tablesMap }) => {
       tablesMap.set(fullTable.oid, fullTable);
       const newTablesMap = new Map(
@@ -314,7 +280,7 @@ export async function updateTable({
       table_oid: rawPartialTable.oid,
     })
     .run();
-  return updateTableStoreIfPresent({ schema, rawTableWithMetadata });
+  return putTableInStore({ schema, rawTableWithMetadata });
 }
 
 export async function createTable({
@@ -338,7 +304,7 @@ export async function createTable({
     .run();
 
   schema.setTableCount(get(schema.tableCount) + 1);
-  return updateTableStoreIfPresent({ schema, rawTableWithMetadata });
+  return putTableInStore({ schema, rawTableWithMetadata });
 }
 
 export async function createTableFromDataFile(props: {
@@ -378,39 +344,34 @@ export function getTableFromStoreOrApi({
   schema: Schema;
   tableOid: Table['oid'];
 }): CancellablePromise<Table> {
-  const tablesStore = tablesStores.get([schema.database.id, schema.oid]);
-  if (tablesStore) {
-    const table = get(tablesStore).tablesMap.get(tableOid);
+  const $tablesStore = get(tablesStore);
+
+  if (
+    $tablesStore.databaseId === schema.database.id &&
+    $tablesStore.schemaOid === schema.oid
+  ) {
+    const table = $tablesStore.tablesMap.get(tableOid);
     if (table) {
       return new CancellablePromise((resolve) => {
         resolve(table);
       });
     }
   }
+
   const promise = api.tables
     .get_with_metadata({
       database_id: schema.database.id,
       table_oid: tableOid,
     })
     .run();
+
   return new CancellablePromise(
     (resolve, reject) => {
       void promise.then((rawTableWithMetadata) => {
-        const table = new Table({ schema, rawTableWithMetadata });
-        const store = tablesStores.get([schema.database.id, schema.oid]);
-        if (store) {
-          store.update((existing) => {
-            const tableMap = new Map<number, Table>();
-            const tables = [...existing.tablesMap.values(), table];
-            sortTables(tables).forEach((t) => {
-              tableMap.set(t.oid, t);
-            });
-            return {
-              ...existing,
-              tablesMap: tableMap,
-            };
-          });
-        }
+        const table = putTableInStore({
+          schema,
+          rawTableWithMetadata,
+        });
         return resolve(table);
       }, reject);
     },
@@ -420,10 +381,30 @@ export function getTableFromStoreOrApi({
   );
 }
 
+let preload = true;
+
 export const currentTablesData = collapse(
-  derived([currentSchema], ([schema]) =>
-    !schema ? readable(makeEmptyTablesData()) : getTablesStore(schema),
-  ),
+  derived(currentSchema, ($currentSchema) => {
+    const $tablesStore = get(tablesStore);
+    if (
+      $tablesStore.databaseId !== $currentSchema?.database.id ||
+      $tablesStore.schemaOid !== $currentSchema?.oid
+    ) {
+      if (
+        preload &&
+        commonData.current_schema === $currentSchema?.oid &&
+        commonData.current_database === $currentSchema?.database.id
+      ) {
+        setTablesStore($currentSchema, commonData.tables);
+      } else {
+        void fetchTablesForCurrentSchema();
+      }
+      preload = false;
+    } else if ($tablesStore.requestStatus.state === 'failure') {
+      void fetchTablesForCurrentSchema();
+    }
+    return tablesStore;
+  }),
 );
 
 export const currentTablesMap = derived(
@@ -466,12 +447,6 @@ export const currentTable = derived(
 export function factoryToGetTableNameValidationErrors(
   table: Table,
 ): Readable<(n: string) => string[]> {
-  const tablesStore = tablesStores.get([
-    table.schema.database.id,
-    table.schema.oid,
-  ]);
-  if (!tablesStore) throw new Error('Tables store not found');
-
   const otherTableNames = derived(
     tablesStore,
     (d) =>

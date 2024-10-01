@@ -7,11 +7,13 @@
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { Button, SpinnerButton } from '@mathesar-component-library';
 
   export let collaborator: Collaborator;
-  export let editRoleForCollaborator: (collaborator: Collaborator) => void;
+  export let onClickEditRole: (collaborator: Collaborator) => void;
+  export let onDelete: (collaborator: Collaborator) => void;
 
   const routeContext = DatabaseSettingsRouteContext.get();
   $: ({ configuredRoles, users } = $routeContext);
@@ -23,6 +25,12 @@
   $: configuredRoleId = collaborator.configuredRoleId;
   $: configuredRole = $configuredRoles.resolvedValue?.get($configuredRoleId);
   $: userName = user ? user.full_name || user.username : '';
+
+  async function deleteCollaborator() {
+    await $routeContext.deleteCollaborator(collaborator);
+    onDelete(collaborator);
+    toast.success($_('collaborator_removed_successfully'));
+  }
 </script>
 
 <GridTableCell>
@@ -47,7 +55,7 @@
     <div class="actions">
       <Button
         appearance="secondary"
-        on:click={() => editRoleForCollaborator(collaborator)}
+        on:click={() => onClickEditRole(collaborator)}
         disabled={!isMathesarAdmin}
       >
         <Icon {...iconEdit} size="0.8em" />
@@ -62,7 +70,7 @@
         identifierName: userName,
         identifierType: $_('collaborator'),
       })}
-    onClick={() => $routeContext.deleteCollaborator(collaborator)}
+    onClick={deleteCollaborator}
     icon={{ ...iconDeleteMajor, size: '0.8em' }}
     label=""
     appearance="secondary"

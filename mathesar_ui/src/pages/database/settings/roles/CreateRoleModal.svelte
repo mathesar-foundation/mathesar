@@ -60,7 +60,7 @@
         login: false,
       });
     }
-    toast.success('role_created_successfully');
+    toast.success($_('role_created_successfully'));
     controller.close();
   }
 </script>

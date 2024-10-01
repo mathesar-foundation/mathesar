@@ -28,6 +28,7 @@
   export let configuredRolesMap: ImmutableMap<number, ConfiguredRole>;
   export let usersMap: ImmutableMap<number, User>;
   export let collaboratorsMap: ImmutableMap<number, Collaborator>;
+  export let onAdd: (collaborator: Collaborator) => void;
 
   const userId = requiredField<number | undefined>(undefined);
   const configuredRoleId = requiredField<number | undefined>(undefined);
@@ -41,7 +42,11 @@
 
   async function addCollaborator() {
     if ($userId && $configuredRoleId) {
-      await $routeContext.addCollaborator($userId, $configuredRoleId);
+      const collaborator = await $routeContext.addCollaborator(
+        $userId,
+        $configuredRoleId,
+      );
+      onAdd(collaborator);
       controller.close();
       toast.success($_('collaborator_added_successfully'));
       form.reset();

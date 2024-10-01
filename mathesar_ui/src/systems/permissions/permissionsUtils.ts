@@ -21,7 +21,7 @@ export interface PermissionsStoreValues<Privilege> {
   permissionsMetaData: PermissionsMetaData<Privilege>;
   currentRole: {
     currentRoleOid: Role['oid'];
-    parentRoleOids: Role['oid'][];
+    parentRoleOids: Set<Role['oid']>;
   };
 }
 

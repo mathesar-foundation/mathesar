@@ -7,16 +7,14 @@
   import { RichText } from '@mathesar/components/rich-text';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import { iconAddNew } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import {
-    type DBSchemaStoreData,
+    type SchemaStoreData,
     deleteSchema as deleteSchemaAPI,
     schemas as schemasStore,
   } from '@mathesar/stores/schemas';
-  import { removeTablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import {
     Button,
@@ -31,7 +29,7 @@
   const databaseRouteContext = DatabaseRouteContext.get();
 
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
-  $: void underlyingDatabase.run({ database_id: database.id });
+  $: void underlyingDatabase.runConservatively({ database_id: database.id });
   $: schemasMap = $schemasStore.data;
   $: schemasRequestStatus = $schemasStore.requestStatus;
   $: isLoading =
@@ -44,7 +42,7 @@
   let targetSchema: Schema | undefined;
 
   function filterSchemas(
-    schemaData: DBSchemaStoreData['data'],
+    schemaData: SchemaStoreData['data'],
     filter: string,
   ): Schema[] {
     const filtered: Schema[] = [];
@@ -75,8 +73,6 @@
       body: [$_('schema_delete_warning'), $_('are_you_sure_to_proceed')],
       onProceed: async () => {
         await deleteSchemaAPI(schema);
-        // TODO: Create common util to handle data clearing & sync between stores
-        removeTablesStore(schema);
       },
     });
   }
