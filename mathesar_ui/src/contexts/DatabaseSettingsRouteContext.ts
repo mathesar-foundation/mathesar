@@ -137,6 +137,7 @@ export class DatabaseSettingsRouteContext {
     this.collaborators.updateResolvedValue((collaborators) =>
       collaborators.with(newCollaborator.id, newCollaborator),
     );
+    return newCollaborator;
   }
 
   async deleteCollaborator(collaborator: Collaborator) {

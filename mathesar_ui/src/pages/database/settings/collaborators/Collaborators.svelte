@@ -117,6 +117,7 @@
     usersMap={$users.resolvedValue}
     configuredRolesMap={$configuredRoles.resolvedValue}
     collaboratorsMap={$collaborators.resolvedValue}
+    onAdd={checkAndHandleSideEffects}
   />
 {/if}
 
