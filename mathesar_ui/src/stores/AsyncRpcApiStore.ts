@@ -81,7 +81,9 @@ export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
    * that have already been initialized.
    */
   static async runBatchConservatively(runners: BatchRunner[]) {
-    const toRun = runners.filter((runner) => !runner.getValue().hasInitialized);
+    const toRun = runners.filter(
+      (runner) => runner.getValue().isIdleAndUnsettled,
+    );
     await AsyncRpcApiStore.runBatch(toRun);
   }
 }

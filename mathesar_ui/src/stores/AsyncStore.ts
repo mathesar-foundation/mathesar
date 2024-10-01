@@ -94,8 +94,12 @@ export class AsyncStoreValue<T, E> {
     return !this.isLoading && this.settlement?.state === 'rejected';
   }
 
-  get hasInitialized(): boolean {
+  get hasSettled(): boolean {
     return this.settlement !== undefined;
+  }
+
+  get isIdleAndUnsettled(): boolean {
+    return !this.hasSettled && !this.isLoading;
   }
 }
 
@@ -152,18 +156,12 @@ export default class AsyncStore<Props = void, T = unknown>
     }
   }
 
-  /**
-   * Only runs if the current value is one of
-   * - not initialized
-   * - rejected
-   * - not loading
-   */
   async runConservatively(props: Props): Promise<AsyncStoreValue<T, string>> {
     const value = get(this.value);
-    if (value.isLoading || value.isOk) {
-      return value;
+    if (value.isIdleAndUnsettled) {
+      return this.run(props);
     }
-    return this.run(props);
+    return value;
   }
 
   /**
