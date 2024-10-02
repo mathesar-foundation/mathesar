@@ -1,11 +1,12 @@
 from enum import Enum
 import os
-from sqlalchemy import text, Table, Column, String, MetaData, TEXT
-from sqlalchemy.exc import ProgrammingError
-from sqlalchemy.types import UserDefinedType
-from psycopg2.errors import DuplicateTable
 
-from db.types.base import MathesarCustomType, PostgresType, get_qualified_name, get_ma_qualified_schema
+from sqlalchemy import TEXT, text
+from sqlalchemy.types import UserDefinedType
+from psycopg.errors import DuplicateTable
+from psycopg import sql
+
+from db.types.base import MathesarCustomType, PostgresType, get_qualified_name
 from db.types.custom.underlying_type import HasUnderlyingType
 from db.utils import ignore_duplicate_wrapper
 
@@ -81,20 +82,17 @@ def install(engine):
         conn.commit()
 
 
-def install_tld_lookup_table(engine):
-    tlds_table = Table(
-        TLDS_TABLE_NAME,
-        MetaData(bind=engine),
-        Column("tld", String, primary_key=True),
-        schema=get_ma_qualified_schema(),
-    )
+def install_tld_lookup_table(conn):
     try:
-        tlds_table.create()
-        with engine.begin() as conn, open(TLDS_PATH) as f:
-            conn.execute(
-                tlds_table.insert(),
-                [{"tld": tld.strip().lower()} for tld in f if tld[:2] != "# "],
-            )
-    except ProgrammingError as e:
-        if e.orig == DuplicateTable:
-            pass
+        create_tlds_table_sql = sql.SQL("CREATE TABLE mathesar_types.top_level_domains (tld text PRIMARY KEY)")
+        copy_tld_sql = sql.SQL("COPY mathesar_types.top_level_domains(tld) FROM STDIN")
+
+        with open(TLDS_PATH) as f:
+            tld_insert = [(tld.strip().lower()) for tld in f if tld[:2] != "# "]
+            data_buffer = "\n".join(tld_insert).encode('utf-8')
+        with conn.transaction():
+            conn.execute(create_tlds_table_sql)
+            with conn.cursor().copy(copy_tld_sql) as copy:
+                copy.write(data_buffer)
+    except DuplicateTable:
+        pass
