@@ -2,7 +2,6 @@ from sqlalchemy import text
 from db.constants import TYPES_SCHEMA
 from db.types import install
 from db.types.custom import email
-from db.types.install import install_mathesar_on_database
 
 
 def test_create_type_schema(engine):
@@ -25,9 +24,3 @@ def test_create_email_when_exists(engine):
     # already exists when it's run.
     email.install(engine)
     email.install(engine)
-
-
-def test_install_when_exists(engine):
-    # This just checks that the function is idempotent
-    install_mathesar_on_database(engine)
-    install_mathesar_on_database(engine)
