@@ -2,6 +2,7 @@ import pytest
 import random
 import string
 import os
+import psycopg
 
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
 from django.db import connection as dj_connection
@@ -11,7 +12,6 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from db.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
-from db.types import install
 from db.sql import install as sql_install
 from db.schemas.operations.drop import drop_schema_via_name as drop_sa_schema
 from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
@@ -74,8 +74,8 @@ def create_db(request, SES_engine_cache):
         create_database(engine.url)
         created_dbs.add(db_name)
         # Our default testing database has our types and functions preinstalled.
-        install.install_mathesar_on_database(engine)
-        sql_install.install(engine)
+        with psycopg.connect(str(engine.url)) as conn:
+            sql_install.install(conn)
         engine.dispose()
         return db_name
     yield __create_db
