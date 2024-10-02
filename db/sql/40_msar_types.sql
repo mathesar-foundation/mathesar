@@ -1446,6 +1446,31 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- mathesar_types.cast_to_mathesar_money
 
+CREATE OR REPLACE FUNCTION mathesar_types.get_mathesar_money_array(text) RETURNS text[]
+AS $$
+  DECLARE
+    raw_arr text[];
+    actual_number_arr text[];
+    group_divider_arr text[];
+    decimal_point_arr text[];
+    actual_number text;
+    group_divider text;
+    decimal_point text;
+  BEGIN
+    SELECT regexp_matches($1, '^(?:(?:[^.,0-9]+)([0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?|[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?)(?:[^.,0-9]+)?|(?:[^.,0-9]+)?([0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?|[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?)(?:[^.,0-9]+))$') INTO raw_arr;
+    IF raw_arr IS NULL THEN
+      RETURN NULL;
+    END IF;
+    SELECT array_remove(ARRAY[raw_arr[1],raw_arr[16]], null) INTO actual_number_arr;
+    SELECT array_remove(ARRAY[raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[14],raw_arr[19],raw_arr[21],raw_arr[23],raw_arr[25],raw_arr[27],raw_arr[29]], null) INTO group_divider_arr;
+    SELECT array_remove(ARRAY[raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[15],raw_arr[17],raw_arr[18],raw_arr[20],raw_arr[22],raw_arr[24],raw_arr[26],raw_arr[28],raw_arr[30]], null) INTO decimal_point_arr;
+    SELECT actual_number_arr[1] INTO actual_number;
+    SELECT group_divider_arr[1] INTO group_divider;
+    SELECT decimal_point_arr[1] INTO decimal_point;
+    RETURN ARRAY[actual_number, group_divider, decimal_point, replace($1, actual_number, '')];
+  END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(mathesar_types.mathesar_money)
 RETURNS mathesar_types.mathesar_money
 AS $$
@@ -4037,6 +4062,31 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
 -- mathesar_types.cast_to_numeric
+
+CREATE OR REPLACE FUNCTION mathesar_types.get_numeric_array(text) RETURNS text[]
+AS $$
+  DECLARE
+    raw_arr text[];
+    actual_number_arr text[];
+    group_divider_arr text[];
+    decimal_point_arr text[];
+    actual_number text;
+    group_divider text;
+    decimal_point text;
+  BEGIN
+    SELECT regexp_matches($1, '^(?:[+-]?([0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?|[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\'')[0-9]{3})+(?:([.])[0-9]+)?))$') INTO raw_arr;
+    IF raw_arr IS NULL THEN
+      RETURN NULL;
+    END IF;
+    SELECT array_remove(ARRAY[raw_arr[1]], null) INTO actual_number_arr;
+    SELECT array_remove(ARRAY[raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[14],raw_arr[16]], null) INTO group_divider_arr;
+    SELECT array_remove(ARRAY[raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[15],raw_arr[17]], null) INTO decimal_point_arr;
+    SELECT actual_number_arr[1] INTO actual_number;
+    SELECT group_divider_arr[1] INTO group_divider;
+    SELECT decimal_point_arr[1] INTO decimal_point;
+    RETURN ARRAY[actual_number, group_divider, decimal_point];
+  END;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(smallint)
 RETURNS numeric
