@@ -119,3 +119,6 @@ markdown_extensions:
 
 extra:
   mathesar_version: 0.1.7
+  version:
+    provider: mike
+    alias: true
