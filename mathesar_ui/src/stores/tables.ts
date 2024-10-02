@@ -203,13 +203,13 @@ function putTableInStore({
     $tablesStore.databaseId === schema.database.id &&
     $tablesStore.schemaOid === schema.oid
   ) {
-    tablesStore.update(({ requestStatus, tablesMap }) => {
-      tablesMap.set(fullTable.oid, fullTable);
+    tablesStore.update((tablesData) => {
+      tablesData.tablesMap.set(fullTable.oid, fullTable);
       const newTablesMap = new Map(
-        sortTables(tablesMap.values()).map((t) => [t.oid, t]),
+        sortTables(tablesData.tablesMap.values()).map((t) => [t.oid, t]),
       );
       return {
-        requestStatus,
+        ...tablesData,
         tablesMap: newTablesMap,
       };
     });
