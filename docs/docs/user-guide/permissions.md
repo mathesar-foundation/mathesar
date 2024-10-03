@@ -34,8 +34,8 @@ The **Server Roles** section, found under the **Settings** tab, shows the roles 
 These roles will be displayed for all databases on the server. Also, any changes made to a server role will be reflected in all databases on the server.
 
 - **Create Roles**: You can create new server-level roles from this section. You can configure these roles in two ways:
-  1. With login capability and a password, which you can assign to collaborators.
-  2. Without login capability, to be used as a parent role exclusively. You cannot assign these roles to collaborators directly.
+    1. With login capability and a password, which you can assign to collaborators.
+    2. Without login capability, to be used as a parent role exclusively. You cannot assign these roles to collaborators directly.
 - **Define Child Roles**: For existing server-level roles, you can specify which other roles should be their child roles. This allows for creating hierarchies of roles where permissions can be inherited from parent to child roles.
 - **Drop Roles**: You can drop server-level roles that are no longer needed. This action removes the role from the server and all databases where it has been assigned. Exercise caution when dropping roles, as it may affect existing permissions and user access across multiple databases.
 
