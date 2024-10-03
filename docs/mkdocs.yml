@@ -26,6 +26,7 @@ nav:
       - Importing data: user-guide/importing-data.md
       - Syncing database changes: user-guide/syncing-db.md
       - Users: user-guide/users.md
+      - Permissions: user-guide/permissions.md
       - Glossary: user-guide/glossary.md
   - API:
       - REST: api/rest.md
