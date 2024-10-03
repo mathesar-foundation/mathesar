@@ -1287,7 +1287,7 @@ SELECT jsonb_build_object(
   'current_role', msar.get_role(current_role),
   'parent_roles', COALESCE(array_remove(
     array_agg(
-      CASE WHEN pg_has_role(role_data.name, current_role, 'USAGE')
+      CASE WHEN pg_has_role(current_role, role_data.name, 'USAGE')
       THEN msar.get_role(role_data.name) END
     ), NULL
   ), ARRAY[]::jsonb[])
