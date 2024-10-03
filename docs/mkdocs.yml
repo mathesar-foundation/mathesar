@@ -23,13 +23,14 @@ nav:
       - Debug Mathesar: administration/debug.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
-      - Importing data: user-guide/importing-data.md
+      - Databases: user-guide/databases.md
       - Users: user-guide/users.md
       - Permissions: user-guide/permissions.md
+      - Importing data: user-guide/importing-data.md
       - Glossary: user-guide/glossary.md
   - API:
-      - REST: api/rest.md
       - RPC: api/rpc.md
+      - REST: api/rest.md
   - Releases:
       - '0.1.7': releases/0.1.7.md
       - '0.1.6': releases/0.1.6.md
