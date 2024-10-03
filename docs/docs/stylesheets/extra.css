@@ -151,3 +151,17 @@
   border-bottom: 2px solid var(--md-primary-fg-color--light);
   color: var(--md-primary-bg-color--lightest);
 }
+
+/* Make header title smaller */
+.md-header__title { font-size: 0.8rem; }
+[dir="ltr"] .md-header__title { margin-left: 0; }
+
+/* Make header theme switcher smaller */
+.md-header__option .md-header__button { padding: 0.2rem; }
+.md-header__option .md-header__button { padding: 0.2rem; }
+.md-header__option .md-header__button svg { height: 1rem; width: 1rem; }
+
+/* Make version switcher smaller */
+.md-version { font-size: 0.7rem; font-weight: normal; }
+[dir="ltr"] .md-version__current { margin-left: 0.6rem; }
+.md-version__list { margin: 1.7rem 0 0 0; }
