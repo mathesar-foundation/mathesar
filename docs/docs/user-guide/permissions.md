@@ -47,9 +47,9 @@ These roles will be displayed for all databases on the server. Also, any changes
 
 Mathesar manages permissions at three levels:
 
-1. **Database Level:** Manageable from the database page
-2. **Schema Level:** Manageable from the schema page
-3. **Table Level:** Manageable from the inspector panel for each table
+1. **Database Level:** Managed from the database page.
+2. **Schema Level:** Managed from the schema page.
+3. **Table Level:** Managed from the inspector panel for each table.
 
 ### Ownership of Objects
 
