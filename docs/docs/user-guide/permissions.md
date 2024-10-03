@@ -47,21 +47,15 @@ These roles will be displayed for all databases on the server. Also, any changes
 
 Mathesar manages permissions at three levels:
 
-1. **Database**
-2. **Schema**
-3. **Table**
+1. **Database Level:** Manageable from the database page
+2. **Schema Level:** Manageable from the schema page
+3. **Table Level:** Manageable from the inspector panel for each table
+
+### Ownership of Objects
 
 Owners of each object (database, schema, or table) can set permissions for other users. Ownership is determined by the user's assigned collaborator role in the database.
 
-### Ownership of New Objects
-
 When a new object (database, schema, or table) is created, the owner of the object is the collaborator who created it. This automatic ownership assignment allows the creator to have immediate and full control over the objects they create, including the ability to manage permissions and transfer ownership if needed.
-
-You can find and manage permissions in the following sections:
-
-- **Database Permissions**: On the database settings page.
-- **Schema Permissions**: On each schema's page.
-- **Table Permissions**: In each table's inspector panel.
 
 ### Database Permissions
 
