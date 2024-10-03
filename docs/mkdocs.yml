@@ -25,7 +25,7 @@ nav:
       - Introduction: user-guide/index.md
       - Importing data: user-guide/importing-data.md
       - Syncing database changes: user-guide/syncing-db.md
-      - Users & access levels: user-guide/users.md
+      - Users: user-guide/users.md
       - Glossary: user-guide/glossary.md
   - API:
       - REST: api/rest.md
