@@ -1,6 +1,12 @@
 # Mathesar's Role-Based Permissions
 
-Mathesar uses PostgreSQL roles to manage permissions at the database, schema, and table levels. These roles define the actions users can perform, allowing fine-grained control over access.
+Mathesar uses [PostgreSQL roles](https://www.postgresql.org/docs/current/user-manag.html) to manage permissions within a database. These roles define the actions users can perform, allowing fine-grained control over access.
+
+## Roles vs Users
+
+Each Mathesar user accesses a database through one PostgreSQL role — and the user's permissions are determined by the _role's_ permissions within PostgreSQL.
+
+You can read more about [how users and roles work together](./users.md#users-vs-roles).
 
 ## Database Settings
 
@@ -21,14 +27,14 @@ These configurations affect the underlying PostgreSQL server where your database
 
 ### Role Configuration
 
-In the **Role Configuration** section, all LOGIN roles that exist on the server are listed. These roles can then be assigned to collaborators once configured. A configured role has a password set.
+In the **Role Configuration** section, all [LOGIN roles](https://www.postgresql.org/docs/current/role-attributes.html#ROLE-ATTRIBUTES) that exist on the server are listed. These roles can then be assigned to collaborators once configured. A configured role has a password set.
 
 - **Password Management**: For each role, you can configure or change the password directly within Mathesar.
 - **Remove Role Configuration**: You can remove role configurations from Mathesar as needed. This only removes the credentials, not the role from the server.
 
 ### Collaborators
 
-Collaborators are users who have been added to work on the database. Each collaborator is assigned a PostgreSQL LOGIN role that dictates their level of access to the database and its objects (schemas, tables, etc.).
+Collaborators are users who have been added to work on a database. Each collaborator is assigned a PostgreSQL LOGIN role that dictates their level of access to the database and its objects (schemas, tables, etc.).
 
 - **Add Collaborators**: In the **Collaborators** section, you can add new users as collaborators to the database. When adding a collaborator, you assign them one of the roles that have been configured in Mathesar.
 
@@ -41,12 +47,13 @@ The **Server Roles** section, found under the **Settings** tab, shows the roles 
 These roles will be displayed for all databases on the server. Also, any changes made to a server role will be reflected in all databases on the server.
 
 - **Create Roles**: You can create new server-level roles from this section. You can configure these roles in two ways:
-  1. With login capability and a password, which you can assign to collaborators.
-  2. Without login capability, to be used as a parent role exclusively. You cannot assign these roles to collaborators directly.
-- **Define Child Roles**: For existing server-level roles, you can specify which other roles should be their child roles. This allows for creating hierarchies of roles where permissions can be inherited from parent to child roles.
+    1. With login capability and a password, which you can assign to collaborators.
+    2. Without login capability, to be used as a parent role exclusively. You cannot assign these roles to collaborators directly.
+- **Define Child Roles**: PostgreSQL has a mechanism for [Role Membership](https://www.postgresql.org/docs/current/role-membership.html) wherein any role can be "granted" to any other role to form simple hierarchies or complex graph-based inheritance structures. For any role you've configured within Mathesar, you can use Mathesar to grant the role to other "child roles".
 - **Drop Roles**: You can drop server-level roles that are no longer needed. This action removes the role from the server and all databases where it has been assigned. Exercise caution when dropping roles, as it may affect existing permissions and user access across multiple databases.
 
-> **Note:** Server roles, once added, must be configured in Mathesar under the **Role Configuration** section before they can be assigned to collaborators.
+!!! note
+    Server roles, once added, must be configured in Mathesar under the **Role Configuration** section before they can be assigned to collaborators.
 
 ---
 
