@@ -6,11 +6,18 @@ Mathesar uses PostgreSQL roles to manage permissions at the database, schema, an
 
 Mathesar provides three main sections for role management within the database settings:
 
+### In Mathesar
+
+These configurations specifically control how you interact with the database within the Mathesar interface.
+
 - **Role Configuration**: Used to manage credentials (passwords) for roles that exist on the server. These roles can then be assigned to collaborators.
 - **Collaborators**: This section allows you to add users and assign them configured roles, dictating their access levels within the database.
-- **Server Roles**: Here you can manage roles available on the server itself, defining inheritance, creating new roles, or deleting existing ones.
 
-> **Note:** Role Configuration is Mathesar-specific, managing credentials for existing roles within a connected database. Server Roles, however, exist on the PostgreSQL server itself and affect all databases.
+### On the Server
+
+These configurations affect the underlying PostgreSQL server where your database lives. Changes to these configurations will be reflected in all databases on the server.
+
+- **Roles**: Here you can manage roles available on the server, defining their inheritance, creating new roles, or deleting existing ones.
 
 ### Role Configuration
 
