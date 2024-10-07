@@ -33,7 +33,7 @@ These configurations affect the underlying PostgreSQL server where your database
 In the **Role Configuration** section, all [LOGIN roles](https://www.postgresql.org/docs/current/role-attributes.html#ROLE-ATTRIBUTES) that exist on the server are listed. These roles can then be assigned to collaborators once configured. A configured role has a password set.
 
 - **Configure Password**: For each role, you can configure or change the password directly within Mathesar.
-- **Remove Role**: You can remove role configurations from Mathesar as needed. This only removes the configured credentials (password), not the role from the server.
+- **Remove**: You can remove role configurations from Mathesar as needed. This only removes the configured credentials (password), not the role from the server.
 
 ### Collaborators
 
