@@ -5369,3 +5369,33 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_build_grant_revoke_membership_expr() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE USER "Alice";
+  CREATE USER "Bob";
+  CREATE USER carol;
+  RETURN NEXT is(
+    msar.build_grant_membership_expr('"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid]),
+    E'GRANT "Alice" TO "Bob";\n'
+  );
+  RETURN NEXT is(
+    msar.build_grant_membership_expr(
+      '"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid, 'carol'::regrole::oid]
+    ),
+    E'GRANT "Alice" TO "Bob";\nGRANT "Alice" TO carol;\n'
+  );
+
+  RETURN NEXT is(
+    msar.build_revoke_membership_expr('"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid]),
+    E'REVOKE "Alice" FROM "Bob";\n'
+  );
+  RETURN NEXT is(
+    msar.build_revoke_membership_expr(
+      '"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid, 'carol'::regrole::oid]
+    ),
+    E'REVOKE "Alice" FROM "Bob";\nREVOKE "Alice" FROM carol;\n'
+  );
+END;
+$$ LANGUAGE plpgsql;
