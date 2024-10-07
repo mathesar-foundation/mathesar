@@ -11,7 +11,7 @@ Mathesar provides three main sections for role management within the database se
 These configurations specifically control how you interact with the database within the Mathesar interface.
 
 - **Role Configuration**: Used to manage credentials (passwords) for roles that exist on the server. These roles can then be assigned to collaborators.
-- **Collaborators**: This section allows you to add users and assign them configured roles, dictating their access levels within the database.
+- **Collaborators**: This section enables you to manage user access to the database. You can add existing Mathesar users as collaborators and assign them configured roles, which determine their specific access levels and permissions within the database.
 
 ### On the Server
 
