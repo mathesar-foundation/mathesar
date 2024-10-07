@@ -33,10 +33,10 @@ Upon installing Mathesar, your first user will be an Admin user.
 How users and roles work together:
 
 - To access a database, each Mathesar user must be assigned a PostgreSQL role to be used for that database.
-- The user's permissions on anything _inside_ the database are determined by the corresponding role's permissions within PostgreSQL.
+- The user's permissions on actual data (in the [user database](./glossary.md#user-db)) are determined by the corresponding role's permissions within PostgreSQL.
 
     !!! info "Admin doesn't matter here"
-        The user's "admin" status with Mathesar _has no effect_ on the user's ability to do things within a database! It only affects operations outside the database. This includes configuring database roles and managing collaborators, even though those operations are presented within the Database section of the UI they are considered to be _outside_ the database.
+        The user's "admin" status with Mathesar _has no effect_ on the user's ability to do things with the _data_ in a database! The admin status only affects operations on Mathesar's [internal database](./glossary.md#internal-db) such as managing collaborators and their corresponding roles.
 
 - You can configure separate Mathesar users to share the same PostgreSQL role if you like. This is a good option if you want those users to have the same permissions on the data.
 - Or you can use separate PostgreSQL roles for different users. This is necessary any time you want different users to have different permissions on the data.
