@@ -114,4 +114,4 @@ For each table, the following permission levels can be granted:
 - **Write**: Includes Read permissions and allows the role to insert, update, and delete records in the table.
 - **Custom**: Enables the granular setting of permissions beyond the predefined options.
 
-You can read more on custom permissions and the specific privileges that can be granted on the [PostgreSQL GRANT documentation](https://www.postgresql.org/docs/current/sql-grant.html).
+You can read more about the specific privileges that can be granted in the [PostgreSQL documentation on Privileges](https://www.postgresql.org/docs/current/ddl-priv.html).
