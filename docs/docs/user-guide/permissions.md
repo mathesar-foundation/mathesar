@@ -21,36 +21,39 @@ These configurations specifically control how you interact with the database wit
 
 ### On the Server
 
-These configurations affect the underlying PostgreSQL server where your database lives. Changes to these configurations will be reflected in all databases on the server.
+These configurations affect the underlying PostgreSQL server where your database lives.
 
 - **Roles**: Here you can manage roles available on the server, defining their inheritance, creating new roles, or deleting existing ones.
+
+!!! note
+    Changes to this configuration will be reflected in all databases on the server.
 
 ### Role Configuration
 
 In the **Role Configuration** section, all [LOGIN roles](https://www.postgresql.org/docs/current/role-attributes.html#ROLE-ATTRIBUTES) that exist on the server are listed. These roles can then be assigned to collaborators once configured. A configured role has a password set.
 
-- **Password Management**: For each role, you can configure or change the password directly within Mathesar.
-- **Remove Role Configuration**: You can remove role configurations from Mathesar as needed. This only removes the credentials, not the role from the server.
+- **Configure Password**: For each role, you can configure or change the password directly within Mathesar.
+- **Remove Role**: You can remove role configurations from Mathesar as needed. This only removes the configured credentials (password), not the role from the server.
 
 ### Collaborators
 
-Collaborators are users who have been added to work on a database. Each collaborator is assigned a PostgreSQL LOGIN role that dictates their level of access to the database and its objects (schemas, tables, etc.).
+Collaborators are existing Mathesar users who have been added to work on a database. Each collaborator is assigned a PostgreSQL LOGIN role that dictates their level of access to the database and its objects (schemas, tables, etc.).
 
-- **Add Collaborators**: In the **Collaborators** section, you can add new users as collaborators to the database. When adding a collaborator, you assign them one of the roles that have been configured in Mathesar.
+- **Add Collaborators**: In the **Collaborators** section, you can add existing Mathesar users as collaborators to the database. When adding a collaborator, you assign them one of the roles that have been configured in Mathesar.
 
-- **Remove Collaborators**: You can remove collaborators if they no longer require access to the database. The Mathesar user will still exist and you can add them back as a collaborator at a later time.
+- **Remove Collaborator**: You can remove a collaborator if they no longer require access to the database. The Mathesar user will still exist, and you can add them back as a collaborator at a later time.
 
 ### Server Roles
 
-The **Server Roles** section, found under the **Settings** tab, shows the roles available on the server for the current database.
+The **Roles** section, found under the **Settings** tab, shows the roles available on the PostgreSQL server of the connected database.
 
-These roles will be displayed for all databases on the server. Also, any changes made to a server role will be reflected in all databases on the server.
+These roles are displayed for all databases on the server, and any changes made to a server role will be reflected across all databases on the server.
 
 - **Create Roles**: You can create new server-level roles from this section. You can configure these roles in two ways:
     1. With login capability and a password, which you can assign to collaborators.
-    2. Without login capability, to be used as a parent role exclusively. You cannot assign these roles to collaborators directly.
+    2. Without login capability, to be used exclusively as a parent role to group permissions that can be inherited by other roles. You cannot assign these non-login roles to collaborators directly.
 - **Define Child Roles**: PostgreSQL has a mechanism for [Role Membership](https://www.postgresql.org/docs/current/role-membership.html) wherein any role can be "granted" to any other role to form simple hierarchies or complex graph-based inheritance structures. For any role you've configured within Mathesar, you can use Mathesar to grant the role to other "child roles".
-- **Drop Roles**: You can drop server-level roles that are no longer needed. This action removes the role from the server and all databases where it has been assigned. Exercise caution when dropping roles, as it may affect existing permissions and user access across multiple databases.
+- **Drop Roles**: You can drop server-level roles that are no longer needed. This action removes the role from the server, however if the role is configured in Mathesar, it will still be displayed. Exercise caution when dropping roles, as it may affect collaborators using the dropped role in Mathesar.
 
 !!! note
     Server roles, once added, must be configured in Mathesar under the **Role Configuration** section before they can be assigned to collaborators.
@@ -59,25 +62,23 @@ These roles will be displayed for all databases on the server. Also, any changes
 
 ## Permissions Management at Different Levels
 
-Mathesar manages permissions at three levels:
+Mathesar provides an interface to manage permissions at different levels in the underlying PostgreSQL database:
 
-1. **Database Level:** Managed from the database page.
-2. **Schema Level:** Managed from the schema page.
-3. **Table Level:** Managed from the inspector panel for each table.
+1. **Database Level:** Accessible from the database page.
+2. **Schema Level:** Accessible from the schema page.
+3. **Table Level:** Accessible from the inspector panel for each table.
 
 ### Ownership of Objects
 
-Owners of each object (database, schema, or table) can set permissions for other users. Ownership is determined by the user's assigned collaborator role in the database.
-
-When a new object (database, schema, or table) is created, the owner of the object is the collaborator who created it. This automatic ownership assignment allows the creator to have immediate and full control over the objects they create, including the ability to manage permissions and transfer ownership if needed.
+When a new object (database, schema, or table) is created, the owner of the object is the configured role that the collaborator uses to create it. This automatic ownership assignment allows the role to have immediate and administrative control over the objects created under it, including the ability to manage permissions and transfer ownership if needed.
 
 ### Database Permissions
 
 Database permissions control access and actions at the database level.
 
-- **Owner**: Each database has an owner who has full control over the database, including managing permissions and transferring ownership.
+- **Owner**: Each database has an owner who has administrative control over the database itself, including managing database-level permissions and transferring ownership. Ownership does not automatically extend to the objects within the database (such as schemas and tables), which may have their own separate ownership and permission settings.
 - **Granted Access**: Specific permissions can be granted to roles for various actions within the database.
-- **Transfer Ownership**: The current owner can transfer ownership to another role, granting them full administrative control.
+- **Transfer Ownership**: The current owner can transfer ownership to another role, granting them administrative control.
 
 For each database, the following permission levels can be granted:
 
@@ -89,9 +90,9 @@ For each database, the following permission levels can be granted:
 
 Schema permissions control access and actions at the schema level.
 
-- **Owner**: Each schema has an owner who has full control over the schema, including managing permissions and transferring ownership.
+- **Owner**: Each schema has an owner who has administrative control over the schema itself, including managing schema-level permissions and transferring ownership. Ownership does not automatically extend to the objects within the schema (such as tables), which may have their own separate ownership and permission settings.
 - **Granted Access**: Specific permissions can be granted to roles for various actions within the schema.
-- **Transfer Ownership**: The current owner can transfer ownership to another role, granting them full administrative control over the schema.
+- **Transfer Ownership**: The current owner can transfer ownership to another role, granting them administrative control over the schema.
 
 For each schema, the following permission levels can be granted:
 
@@ -103,12 +104,14 @@ For each schema, the following permission levels can be granted:
 
 Table permissions control access and actions at the table level.
 
-- **Owner**: Each table has an owner who has full control over the table, including managing permissions, transferring ownership, and modifying the table's structure (such as adding, removing, or altering columns).
+- **Owner**: Each table has an owner who has administrative control over the table itself, including managing table-level permissions, transferring ownership, and modifying the table's structure (such as adding, removing, or altering columns).
 - **Granted Access**: Specific permissions can be granted to roles for various actions on the table.
-- **Transfer Ownership**: The current owner can transfer ownership to another role, granting them full administrative control over the table.
+- **Transfer Ownership**: The current owner can transfer ownership to another role, granting them administrative control over the table.
 
 For each table, the following permission levels can be granted:
 
 - **Read**: Allows the role to access the table and read records.
 - **Write**: Includes Read permissions and allows the role to insert, update, and delete records in the table.
 - **Custom**: Enables the granular setting of permissions beyond the predefined options.
+
+You can read more on custom permissions and the specific privileges that can be granted on the [PostgreSQL GRANT documentation](https://www.postgresql.org/docs/current/sql-grant.html).
