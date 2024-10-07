@@ -10,7 +10,6 @@ Mathesar allows multiple users to collaborate on the same data using a [role-bas
 !!! info "Admin-assigned passwords"
     Any user with an admin-assigned password (new or edited) will be prompted to change their password after logging in.
 
-
 ## Admin vs Standard users
 
 Each Mathesar user is either **Admin** or **Standard**.
@@ -37,7 +36,7 @@ How users and roles work together:
 - The user's permissions on anything _inside_ the database are determined by the corresponding role's permissions within PostgreSQL.
 
     !!! info "Admin doesn't matter here"
-        The user's "admin" status with Mathesar _has no effect_ on the user's ability to do things within a database! It only affects operations outside the database.
+        The user's "admin" status with Mathesar _has no effect_ on the user's ability to do things within a database! It only affects operations outside the database. This includes configuring database roles and managing collaborators, even though those operations are presented within the Database section of the UI they are considered to be _outside_ the database.
 
 - You can configure separate Mathesar users to share the same PostgreSQL role if you like. This is a good option if you want those users to have the same permissions on the data.
 - Or you can use separate PostgreSQL roles for different users. This is necessary any time you want different users to have different permissions on the data.
@@ -49,4 +48,3 @@ See [Permissions](./permissions.md) for more information on managing roles.
 
 - Mathesar does not send invitation emails to new users (yet). You'll need to send the user their username and password yourself.
 - Nor is there yet an email-based password recovery mechanism. If you are locked out of your Mathesar installation's web interface, your system administrator can still [use the command line reset any user's password](https://stackoverflow.com/questions/6358030/how-to-reset-django-admin-password).
-
