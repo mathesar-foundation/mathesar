@@ -31,10 +31,6 @@ ui_router.register(r'schema_roles', ui_viewsets.SchemaRoleViewSet, basename='sch
 ui_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
 ui_table_router.register(r'records', ui_viewsets.RecordViewSet, basename='table-record')
 
-# Shares
-ui_router.register(r'tables/(?P<table_pk>[^/.]+)/shares', ui_viewsets.SharedTableViewSet, basename='shared-table')
-ui_router.register(r'queries/(?P<query_pk>[^/.]+)/shares', ui_viewsets.SharedQueryViewSet, basename='shared-query')
-
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
     path('api/db/v0/', include(db_router.urls)),
@@ -52,8 +48,6 @@ urlpatterns = [
     path('administration/users/', views.admin_home, name='admin_users_home'),
     path('administration/users/<int:user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
-    path('shares/tables/<slug>/', views.shared_table, name='shared_table'),
-    path('shares/explorations/<slug>/', views.shared_query, name='shared_query'),
     path('databases/', views.databases, name='databases'),
     path('i18n/', include('django.conf.urls.i18n')),
     re_path(

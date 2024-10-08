@@ -1,7 +1,6 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
-from mathesar.api.utils import SHARED_LINK_UUID_QUERY_PARAM
 from mathesar.api.permission_utils import QueryAccessInspector
 from mathesar.models.users import Role
 
@@ -80,14 +79,6 @@ class QueryAccessPolicy(AccessPolicy):
             )
             qs = qs.filter(permissible_database_role_filter | permissible_schema_roles_filter)
         return qs
-
-    def is_atleast_query_viewer(self, request, view, action):
-        query = view.get_object()
-        return QueryAccessInspector(
-            request.user,
-            query,
-            token=request.query_params.get(SHARED_LINK_UUID_QUERY_PARAM)
-        ).is_atleast_viewer()
 
 
 def _get_is_action_for_retrieving_single_query(action):

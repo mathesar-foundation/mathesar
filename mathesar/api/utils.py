@@ -14,7 +14,6 @@ import psycopg
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
-SHARED_LINK_UUID_QUERY_PARAM = 'shared-link-uuid'
 
 
 def get_table_or_404(pk):

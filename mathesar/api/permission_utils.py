@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 from mathesar.api.utils import is_valid_uuid_v4
 from mathesar.models.users import DatabaseRole, Role, SchemaRole
-from mathesar.models.shares import SharedTable, SharedQuery
 
 
 class AbstractAccessInspector(ABC):
@@ -81,16 +80,6 @@ class TableAccessInspector(AbstractAccessInspector):
         return self.schema_access_inspector.has_role(allowed_roles)
 
     def is_atleast_viewer(self):
-        if self.token is not None:
-            is_table_shared = SharedTable.objects.filter(
-                table=self.table,
-                slug=self.token,
-                enabled=True
-            ).exists()
-
-            if is_table_shared:
-                return True
-
         return super().is_atleast_viewer()
 
 
@@ -107,14 +96,4 @@ class QueryAccessInspector(AbstractAccessInspector):
         return self.schema_access_inspector.has_role(allowed_roles)
 
     def is_atleast_viewer(self):
-        if self.token is not None:
-            is_query_shared = SharedQuery.objects.filter(
-                query=self.query,
-                slug=self.token,
-                enabled=True
-            ).exists()
-
-            if is_query_shared:
-                return True
-
         return super().is_atleast_viewer()
