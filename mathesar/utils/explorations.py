@@ -113,7 +113,11 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
     )
     transformations = get_transforms_with_summarizes_speced(db_query, engine, metadata)
     db_query.transformations = transformations
-    exploration_def["transformations"] = [transformation.spec for transformation in transformations]
+    if exploration_def.get("transformations") is not None:
+        exploration_def["transformations"] = [
+            {"type": transformation.type, "spec": transformation.spec}
+            for transformation in transformations
+        ]
     exploration_def["display_names"] = _get_default_display_names_for_summarize_transforms(
         transformations,
         exploration_def.get("display_names", {})
