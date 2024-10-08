@@ -3,7 +3,22 @@ from db.records.operations.select import get_count
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.tables.operations.select import get_table
+from db.transforms.base import Summarize
 from db.transforms.operations.deserialize import deserialize_transformation
+from db.functions.base import (
+    Count,
+    ArrayAgg,
+    Sum,
+    Median,
+    Mode,
+    Percentage_True,
+    Max,
+    Min,
+    Mean,
+    PeakTime,
+    PeakMonth,
+)
+from db.functions.packed import DistinctArrayAgg
 from mathesar.api.utils import process_annotated_records
 from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
@@ -98,6 +113,11 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
     )
     transformations = get_transforms_with_summarizes_speced(db_query, engine, metadata)
     db_query.transformations = transformations
+    exploration_def["transformations"] = [transformation.spec for transformation in transformations]
+    exploration_def["display_names"] = _get_default_display_names_for_summarize_transforms(
+        transformations,
+        exploration_def.get("display_names", {})
+    )
     records = db_query.get_records(
         limit=limit,
         offset=offset
@@ -174,3 +194,76 @@ def _get_exploration_column_metadata(
             "input_alias": db_query.get_input_alias_for_output_alias(alias)
         }
     return exploration_column_metadata
+
+
+def _get_default_display_names_for_summarize_transforms(transformations, current_display_names=dict()):
+    default_display_names = dict()
+    if not current_display_names:
+        return default_display_names
+    summarize_transforms = [
+        db_transform
+        for db_transform in transformations
+        if isinstance(db_transform, Summarize)
+    ]
+    for summarize_transform in summarize_transforms:
+        # Find default display names for grouping output aliases
+        for output_alias in summarize_transform.grouping_output_aliases:
+            default_display_name = _get_default_display_name_for_group_output_alias(
+                summarize_transform,
+                output_alias,
+                current_display_names,
+            )
+            if default_display_name:
+                default_display_names[output_alias] = default_display_name
+        # Find default display names for aggregation output aliases
+        for agg_col_spec in summarize_transform.aggregation_col_specs:
+            input_alias = agg_col_spec.get("input_alias")
+            output_alias = agg_col_spec.get("output_alias")
+            agg_function = agg_col_spec.get("function")
+            default_display_name = _get_default_display_name_for_agg_output_alias(
+                output_alias,
+                input_alias,
+                agg_function,
+                current_display_names,
+            )
+            if default_display_name:
+                default_display_names[output_alias] = default_display_name
+    return default_display_names | current_display_names
+
+
+def _get_default_display_name_for_agg_output_alias(
+    output_alias,
+    input_alias,
+    agg_function,
+    current_display_names,
+):
+    if output_alias and input_alias and agg_function:
+        map_of_agg_function_to_suffix = {
+            DistinctArrayAgg.id: " distinct list",
+            ArrayAgg.id: " list",
+            Count.id: " count",
+            Sum.id: " sum",
+            Max.id: " max",
+            Median.id: " median",
+            Mode.id: " mode",
+            Percentage_True.id: " percentage true",
+            Min.id: " min",
+            Mean.id: " mean",
+            PeakTime.id: " peak_time",
+            PeakMonth.id: " peak_month",
+        }
+        suffix_to_add = map_of_agg_function_to_suffix.get(agg_function)
+        if suffix_to_add:
+            input_alias_display_name = current_display_names.get(input_alias)
+            if input_alias_display_name:
+                return input_alias_display_name + suffix_to_add
+
+
+def _get_default_display_name_for_group_output_alias(
+    summarize_transform,
+    output_alias,
+    current_display_names,
+):
+    input_alias = summarize_transform.map_of_output_alias_to_input_alias[output_alias]
+    input_alias_display_name = current_display_names.get(input_alias)
+    return input_alias_display_name
