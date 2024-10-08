@@ -17,7 +17,6 @@ db_router.register(r'schemas', db_viewsets.SchemaViewSet, basename='schema')
 db_router.register(r'data_files', db_viewsets.DataFileViewSet, basename='data-file')
 
 db_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
-db_table_router.register(r'records', db_viewsets.RecordViewSet, basename='table-record')
 db_table_router.register(r'settings', db_viewsets.TableSettingsViewSet, basename='table-setting')
 db_table_router.register(r'columns', db_viewsets.ColumnViewSet, basename='table-column')
 db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename='table-constraint')
@@ -28,7 +27,6 @@ ui_router.register(r'database_roles', ui_viewsets.DatabaseRoleViewSet, basename=
 ui_router.register(r'schema_roles', ui_viewsets.SchemaRoleViewSet, basename='schema_role')
 
 ui_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
-ui_table_router.register(r'records', ui_viewsets.RecordViewSet, basename='table-record')
 
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
