@@ -74,7 +74,7 @@ In PostgreSQL, an "object" is a thing like: a database, a schema, a table, _(and
     
     1. We can create a third role to directly own the object and act as a sort of proxy "group". (The group role doesn't need to be a `LOGIN` role and thus doesn't require a password to be configured.)
     1. Then we can grant _that group role_ to any other roles we'd like.
-    1. Those granted roles will then have permission do things _as if they were the owner themselves_.
+    1. Those child roles will then have permission do things _as if they were the owner themselves_.
     
     You can use the Mathesar UI to configure an arrangement like the above, though it will require many steps.
 
