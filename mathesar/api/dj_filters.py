@@ -61,20 +61,3 @@ class TableFilter(PropertyFilterSet):
     class Meta:
         model = Table
         fields = ['name', 'schema', 'created_at', 'updated_at', 'import_verified']
-
-
-class ExplorationFilter(PropertyFilterSet):
-    database = CharInFilter(field_name='base_table__schema__database__name', lookup_expr='in')
-    name = CharInFilter(field_name='name', lookup_expr='in')
-
-    sort_by = PropertyOrderingFilter(
-        fields=(
-            ('id', 'id'),
-            ('name', 'name'),
-        ),
-        label="Sort By",
-    )
-
-    class Meta:
-        model = Exploration
-        fields = ['name']
