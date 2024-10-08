@@ -25,7 +25,7 @@ Use this section to manage the credentials (i.e. passwords) for roles that you'd
 
 ### _In Mathesar:_ Collaborators {:#collaborators}
 
-A "collaborator" is a Mathesar users who has access to a database through a specific PostgreSQL sole.
+A "collaborator" is a Mathesar user who has access to a database through a specific PostgreSQL role.
 
 The Collaborators section allows you to add and remove collaborators and edit their corresponding PostgreSQL roles.
 
