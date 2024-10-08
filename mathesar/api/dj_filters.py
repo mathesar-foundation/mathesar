@@ -1,7 +1,7 @@
-from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
+from django_filters import BooleanFilter, DateTimeFromToRangeFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from mathesar.models.deprecated import Schema, Table, Connection, DataFile
+from mathesar.models.deprecated import Schema, Table, DataFile
 from mathesar.models.query import Exploration
 
 

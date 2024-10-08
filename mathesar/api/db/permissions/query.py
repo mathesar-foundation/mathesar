@@ -1,7 +1,6 @@
 from django.db.models import Q
 from rest_access_policy import AccessPolicy
 
-from mathesar.api.permission_utils import QueryAccessInspector
 from mathesar.models.users import Role
 
 _statement_for_retrieving_single_queries = {
