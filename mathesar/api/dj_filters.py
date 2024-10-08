@@ -9,20 +9,6 @@ class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
     pass
 
 
-class DatabaseFilter(PropertyFilterSet):
-    sort_by = OrderingFilter(
-        fields=(
-            ('id', 'id'),
-            ('name', 'name'),
-        ),
-        label="Sort By",
-    )
-
-    class Meta:
-        model = Connection
-        fields = ['deleted']
-
-
 class DataFileFilter(PropertyFilterSet):
     database = CharInFilter(field_name='table_imported_to__schema__database__name', lookup_expr='in')
     name = CharInFilter(field_name='name', lookup_expr='in')
