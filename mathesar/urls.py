@@ -23,7 +23,6 @@ db_table_router.register(r'columns', db_viewsets.ColumnViewSet, basename='table-
 db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename='table-constraint')
 
 ui_router = routers.DefaultRouter()
-ui_router.register(r'version', ui_viewsets.VersionViewSet, basename='version')
 ui_router.register(r'users', ui_viewsets.UserViewSet, basename='user')
 ui_router.register(r'database_roles', ui_viewsets.DatabaseRoleViewSet, basename='database_role')
 ui_router.register(r'schema_roles', ui_viewsets.SchemaRoleViewSet, basename='schema_role')
