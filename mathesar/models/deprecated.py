@@ -920,9 +920,25 @@ def validate_column_order(value):
         raise ValidationError("All elements of column order must be positive integers.")
 
 
+class TableSettings(ReflectionManagerMixin, BaseModel):
+    preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
+    table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
+    column_order = JSONField(null=True, blank=True, default=None, validators=[validate_column_order])
+
+    def save(self, **kwargs):
+        # Cleans the fields before saving by running respective field validator(s)
+        try:
+            self.clean_fields()
+        except ValidationError as e:
+            raise e
+        super().save(**kwargs)
+
+
 def _create_table_settings(tables):
     # TODO Bulk create preview settings to improve performance
-    pass
+    for table in tables:
+        preview_column_settings = PreviewColumnSettings.objects.create(customized=False)
+        TableSettings.current_objects.create(table=table, preview_settings=preview_column_settings)
 
 
 def _set_default_preview_template(table):
