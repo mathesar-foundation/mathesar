@@ -1,4 +1,3 @@
-import psycopg
 from db import engine
 
 

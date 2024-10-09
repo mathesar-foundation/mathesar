@@ -1,8 +1,4 @@
-from django.db import transaction
-
-from db.schemas.utils import get_schema_oid_from_name
-from mathesar.models.deprecated import Connection, Schema
-from mathesar.models.users import User, DatabaseRole, SchemaRole
+from mathesar.models.users import User
 
 
 def test_user_list(client):

@@ -6,7 +6,6 @@ from enum import Enum
 from db.types.base import (
     PostgresType, MathesarCustomType
 )
-from db.types.hintsets import db_types_hinted
 
 
 class UIType(Enum):
