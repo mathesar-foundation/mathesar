@@ -1,52 +1,8 @@
-from uuid import UUID
-from rest_framework.exceptions import NotFound
-from rest_framework import status
-import mathesar.api.exceptions.generic_exceptions.base_exceptions as generic_api_exceptions
-import re
-
 from db.records.operations import group
-from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models.deprecated import Table
-from mathesar.models.query import Exploration
 from mathesar.utils.preview import column_alias_from_preview_template
-from mathesar.api.exceptions.generic_exceptions.base_exceptions import BadDBCredentials
-import psycopg
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
-
-
-def get_table_or_404(pk):
-    """
-    Get table for which the user has correct permission if it exists,
-     otherwise throws a DRF NotFound error.
-    Args:
-        pk: id of table
-        request: Viewset request, required for filtering based on permissions
-    Returns:
-        table: return the table based on a specific id
-    """
-    try:
-        table = Table.objects.get(id=pk)
-    except Table.DoesNotExist:
-        raise generic_api_exceptions.NotFoundAPIException(
-            NotFound,
-            error_code=ErrorCodes.TableNotFound.value,
-            message="Table doesn't exist"
-        )
-    return table
-
-
-def get_query_or_404(pk):
-    try:
-        query = Exploration.objects.get(id=pk)
-    except Exploration.DoesNotExist:
-        raise generic_api_exceptions.NotFoundAPIException(
-            NotFound,
-            error_code=ErrorCodes.QueryNotFound.value,
-            message="Query doesn't exist"
-        )
-    return query
 
 
 def process_annotated_records(record_list, column_name_id_map=None, preview_metadata=None):
@@ -130,50 +86,3 @@ def process_annotated_records(record_list, column_name_id_map=None, preview_meta
         output_groups = None
 
     return processed_records, output_groups, preview_metadata
-
-
-def follows_json_number_spec(number):
-    """
-    Check if a string follows JSON number spec
-    Args:
-        number: number as string
-    """
-    patterns = [
-        r"^-?0$",
-        r"^-?0[\.][0-9]+$",
-        r"^-?0[eE][+-]?[0-9]*$",
-        r"^-?0[\.][0-9]+[eE][+-]?[0-9]+$",
-        r"^-?[1-9][0-9]*$",
-        r"^-?[1-9][0-9]*[\.][0-9]+$",
-        r"^-?[1-9][0-9]*[eE][+-]?[0-9]+$",
-        r"^-?[1-9][0-9]*[\.][0-9]+[eE][+-]?[0-9]+$",
-    ]
-    for pattern in patterns:
-        if re.search(pattern, number) is not None:
-            return True
-    return False
-
-
-def is_valid_uuid_v4(value):
-    try:
-        UUID(str(value), version=4)
-        return True
-    except ValueError:
-        return False
-
-
-def is_valid_pg_creds(credentials):
-    dbname = credentials["db_name"]
-    user = credentials["username"]
-    password = credentials["password"]
-    host = credentials["host"]
-    port = credentials["port"]
-    conn_str = f'dbname={dbname} user={user} password={password} host={host} port={port}'
-    try:
-        with psycopg.connect(conn_str):
-            return True
-    except psycopg.errors.OperationalError as e:
-        raise BadDBCredentials(
-            exception=e,
-            status_code=status.HTTP_400_BAD_REQUEST
-        )
