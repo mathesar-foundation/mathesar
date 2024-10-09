@@ -1,8 +1,11 @@
+import pytest
+
 from mathesar.models.query import Exploration
 from db.queries.base import DBQuery, InitialColumn
 from db.transforms import base as transforms_base
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_convert_to_db_query(create_patents_table, get_uid):
     base_table_dj = create_patents_table(table_name=get_uid())
     col1_dj = base_table_dj.get_column_by_name('Center')

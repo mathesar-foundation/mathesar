@@ -109,7 +109,6 @@ def reflect_tables_from_schemas(schemas, metadata):
         tables.append(table)
     models_deprecated.Table.current_objects.bulk_create(tables, ignore_conflicts=True)
     # Calling signals manually because bulk create does not emit any signals
-    models_deprecated._create_table_settings(models_deprecated.Table.current_objects.filter(settings__isnull=True))
     deleted_tables = []
     for table in models_deprecated.Table.current_objects.filter(schema__in=schemas).select_related('schema'):
         if (table.oid, table.schema.oid) not in db_table_oids:

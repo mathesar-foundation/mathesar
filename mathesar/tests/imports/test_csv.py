@@ -62,6 +62,7 @@ def check_csv_upload(table, table_name, schema, num_records, row, cols):
         assert col in table.sa_column_names
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_csv_upload(data_file, schema):
     table_name = "NASA 1"
     table = create_table_from_data_file(data_file, table_name, schema)
@@ -91,6 +92,7 @@ def test_csv_upload(data_file, schema):
     )
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_headerless_csv_upload(headerless_data_file, schema):
     table_name = "NASA no headers"
     table = create_table_from_data_file(headerless_data_file, table_name, schema)
@@ -113,6 +115,7 @@ def test_headerless_csv_upload(headerless_data_file, schema):
     )
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_col_names_with_spaces_csv(col_names_with_spaces_data_file, schema):
     table_name = "Column names with spaces"
     table = create_table_from_data_file(col_names_with_spaces_data_file, table_name, schema)
@@ -130,6 +133,7 @@ def test_col_names_with_spaces_csv(col_names_with_spaces_data_file, schema):
     )
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_col_headers_empty_csv(col_headers_empty_data_file, schema):
     table_name = "Empty column header"
     table = create_table_from_data_file(col_headers_empty_data_file, table_name, schema)
@@ -144,6 +148,7 @@ def test_col_headers_empty_csv(col_headers_empty_data_file, schema):
 
 
 @pytest.mark.skip(reason="msar.add_mathesar_table no longer raises an exception if a table with the same name already exists in the database.")
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_csv_upload_with_duplicate_table_name(data_file, schema):
     table_name = "NASA 2"
 
@@ -157,6 +162,7 @@ def test_csv_upload_with_duplicate_table_name(data_file, schema):
         create_table_from_data_file(data_file, table_name, schema)
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_csv_upload_table_imported_to(data_file, schema):
     table = create_table_from_data_file(data_file, "NASA", schema)
     data_file.refresh_from_db()

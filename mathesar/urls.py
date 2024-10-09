@@ -14,9 +14,6 @@ db_router.register(r'tables', db_viewsets.TableViewSet, basename='table')
 db_router.register(r'schemas', db_viewsets.SchemaViewSet, basename='schema')
 db_router.register(r'data_files', db_viewsets.DataFileViewSet, basename='data-file')
 
-db_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
-db_table_router.register(r'settings', db_viewsets.TableSettingsViewSet, basename='table-setting')
-
 ui_router = routers.DefaultRouter()
 ui_router.register(r'users', ui_viewsets.UserViewSet, basename='user')
 ui_router.register(r'database_roles', ui_viewsets.DatabaseRoleViewSet, basename='database_role')
@@ -27,7 +24,6 @@ ui_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
     path('api/db/v0/', include(db_router.urls)),
-    path('api/db/v0/', include(db_table_router.urls)),
     path('api/ui/v0/', include(ui_router.urls)),
     path('api/ui/v0/', include(ui_table_router.urls)),
     path('api/ui/v0/reflect/', views.reflect_all, name='reflect_all'),
