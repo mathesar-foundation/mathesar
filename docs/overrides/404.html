@@ -1,20 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>Page Not Found</h1>
+  <h1>Loading...</h1>
 
-  <p>
-    If you followed a link here, we'd appreciate it if you would open a
-    <a href="https://github.com/mathesar-foundation/mathesar/issues">
-      GitHub issue
-    </a>
-    describing how you got here so we can fix the link.
-  </p>
-
-  <p>
-    You can also ask the Mathesar team for help by reaching out on
-    <a href="https://wiki.mathesar.org/community/matrix/">Matrix</a>.
-  </p>
+  <div class="help-404" style="display:none;">
+    <p>
+      If you followed a link here, we'd appreciate it if you would open a
+      <a href="https://github.com/mathesar-foundation/mathesar/issues">
+        GitHub issue
+      </a>
+      describing how you got here so we can fix the link.
+    </p>
+    <p>
+      You can also ask the Mathesar team for help by reaching out on
+      <a href="https://wiki.mathesar.org/community/matrix/">Matrix</a>.
+    </p>
+  </div>
 {% endblock %}
 
 {% block scripts %}
@@ -33,11 +34,12 @@
      */
     const pathPartsBeforeVersion = [];
     const versionPositionInPath = pathPartsBeforeVersion.length;
-
-    async function handleMissingVersion() {
+    
+    /** @returns {Promise<string | undefined>} */
+    async function getRedirectionTarget() {
       try {
         const response = await fetch('/versions.json');
-        if (!response.ok) return;
+        if (!response.ok) return undefined;
         
         /** @type {({ version: string; title: string; aliases: string[]; })[]} */
         const versionBlobs = await response.json();
@@ -47,9 +49,9 @@
         const pathParts = url.pathname.split('/').filter(Boolean);
         const firstPathPart = pathParts[versionPositionInPath];
 
-        if (versionLikeStrings.includes(firstPathPart)) return;
+        if (versionLikeStrings.includes(firstPathPart)) return undefined;
 
-        window.location.href = [
+        return [
           '',
           ...pathPartsBeforeVersion,
           defaultVersionAlias,
@@ -58,10 +60,32 @@
         ].join('/');
       }
       catch (e) {
-        // Ignore errors
+        return undefined;
       }
     }
 
-    handleMissingVersion();
+    function setupErrorPageContent() {
+      const h1 = document.querySelector('h1');
+      if (h1) {
+        h1.textContent = 'Page Not Found';
+      }
+
+      /** @type {HTMLElement | null} */
+      const help404 = document.querySelector('.help-404');
+      if (help404) {
+        help404.style.display = 'block';
+      }
+    }
+
+    async function init() {
+      const redirectionTarget = await getRedirectionTarget();
+      if (redirectionTarget) {
+        window.location.href = redirectionTarget;
+      } else {
+        setupErrorPageContent();
+      }
+    }
+
+    init();
   </script>
 {% endblock %}
