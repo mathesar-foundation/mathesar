@@ -3,7 +3,6 @@ from rest_framework import serializers
 
 from db.identifiers import is_identifier_too_long
 
-from mathesar.api.db.permissions.table import TableAccessPolicy
 from mathesar.api.db.permissions.database import DatabaseAccessPolicy
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models.deprecated import Connection, Schema, Table
@@ -33,11 +32,6 @@ class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSe
             'id', 'name', 'connection_id', 'has_dependents', 'description',
             'num_tables', 'num_queries'
         ]
-
-    def get_num_tables(self, obj):
-        qs = Table.objects.filter(schema=obj)
-        count = TableAccessPolicy.scope_queryset(self.context['request'], qs).count()
-        return count
 
     def get_num_queries(self, obj):
         return sum(t.queries.count() for t in obj.tables.all())
