@@ -1,12 +1,11 @@
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_access_policy import FieldAccessMixin, PermittedPkRelatedField
+from rest_access_policy import FieldAccessMixin
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import IncorrectOldPassword
 from mathesar.api.ui.permissions.users import UserAccessPolicy
-from mathesar.models.deprecated import Connection, Schema
 from mathesar.models.users import User
 
 

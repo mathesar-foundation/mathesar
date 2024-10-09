@@ -1,5 +1,3 @@
-from mathesar.api.utils import get_table_or_404
-
 # These are available to all AccessPolicy instances
 # https://rsinger86.github.io/drf-access-policy/reusable_conditions/
 
