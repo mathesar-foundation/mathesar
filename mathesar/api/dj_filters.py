@@ -24,20 +24,3 @@ class DataFileFilter(PropertyFilterSet):
     class Meta:
         model = DataFile
         fields = ['name']
-
-
-class SchemaFilter(PropertyFilterSet):
-    database = CharInFilter(field_name='database__name', lookup_expr='in')
-    name = CharInFilter(field_name='name', lookup_expr='in')
-
-    sort_by = PropertyOrderingFilter(
-        fields=(
-            ('id', 'id'),
-            ('name', 'name'),
-        ),
-        label="Sort By",
-    )
-
-    class Meta:
-        model = Schema
-        fields = ['name']

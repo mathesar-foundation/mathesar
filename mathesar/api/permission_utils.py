@@ -81,19 +81,3 @@ class TableAccessInspector(AbstractAccessInspector):
 
     def is_atleast_viewer(self):
         return super().is_atleast_viewer()
-
-
-class QueryAccessInspector(AbstractAccessInspector):
-    def __init__(self, user, query, token=None):
-        super().__init__(user)
-        self.query = query
-        self.token = token if is_valid_uuid_v4(token) else None
-        self.schema_access_inspector = SchemaAccessInspector(self.user, self.query.base_table.schema)
-
-    # Currently, there's no access controls on individual queries.
-    # If users have access to db or schema, they have access to the queries within them.
-    def is_role_present(self, allowed_roles):
-        return self.schema_access_inspector.has_role(allowed_roles)
-
-    def is_atleast_viewer(self):
-        return super().is_atleast_viewer()

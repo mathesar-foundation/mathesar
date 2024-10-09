@@ -10,7 +10,6 @@ from mathesar.users.password_reset import MathesarPasswordResetConfirmView
 from mathesar.users.superuser_create import SuperuserFormView
 
 db_router = routers.DefaultRouter()
-db_router.register(r'schemas', db_viewsets.SchemaViewSet, basename='schema')
 db_router.register(r'data_files', db_viewsets.DataFileViewSet, basename='data-file')
 
 ui_router = routers.DefaultRouter()
