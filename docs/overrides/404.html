@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Page Not Found</h1>
+
+  <p>
+    If you followed a link here, we'd appreciate it if you would open a
+    <a href="https://github.com/mathesar-foundation/mathesar/issues">
+      GitHub issue
+    </a>
+    describing how you got here so we can fix the link.
+  </p>
+
+  <p>
+    You can also ask the Mathesar team for help by reaching out on
+    <a href="https://wiki.mathesar.org/community/matrix/">Matrix</a>.
+  </p>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    // @ts-check
+    
+    const defaultVersionAlias = 'latest';
+
+    /**
+     * Add strings here if your docs URL has any prefixes before the version
+     * such as a repo name, a subdirectory, or a language code.
+     * 
+     * If your docs URLs look like `https://example.com/docs/en/1.0/foo/bar`
+     * then set this value to `['docs', 'en']`.
+     */
+    const pathPartsBeforeVersion = [];
+    const versionPositionInPath = pathPartsBeforeVersion.length;
+
+    async function handleMissingVersion() {
+      try {
+        const response = await fetch('/versions.json');
+        if (!response.ok) return;
+        
+        /** @type {({ version: string; title: string; aliases: string[]; })[]} */
+        const versionBlobs = await response.json();
+        const versionLikeStrings = versionBlobs.flatMap(v => [v.version, ...v.aliases]);
+  
+        const url = new URL(window.location.href);
+        const pathParts = url.pathname.split('/').filter(Boolean);
+        const firstPathPart = pathParts[versionPositionInPath];
+
+        if (versionLikeStrings.includes(firstPathPart)) return;
+
+        window.location.href = [
+          '',
+          ...pathPartsBeforeVersion,
+          defaultVersionAlias,
+          ...pathParts,
+          url.search + url.hash
+        ].join('/');
+      }
+      catch (e) {
+        // Ignore errors
+      }
+    }
+
+    handleMissingVersion();
+  </script>
+{% endblock %}
