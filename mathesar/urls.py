@@ -14,8 +14,6 @@ db_router.register(r'data_files', db_viewsets.DataFileViewSet, basename='data-fi
 
 ui_router = routers.DefaultRouter()
 ui_router.register(r'users', ui_viewsets.UserViewSet, basename='user')
-ui_router.register(r'database_roles', ui_viewsets.DatabaseRoleViewSet, basename='database_role')
-ui_router.register(r'schema_roles', ui_viewsets.SchemaRoleViewSet, basename='schema_role')
 
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
