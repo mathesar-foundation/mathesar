@@ -2,16 +2,12 @@
 
 Mathesar has an API available at `/api/rpc/v0/` which follows the [JSON-RPC](https://www.jsonrpc.org/specification) spec version 2.0.
 
-## About
+!!! caution "Not yet stable"
+    The RPC API is not yet stable and may change in the future. If you build logic that depends on this API, be mindful that it may change in the future without warning or notice.
 
-### Status
+## Usage
 
-We are currently in the process of [transitioning](https://wiki.mathesar.org/projects/2024/architecture-transition/rpc/) our API architecture from a [RESTful](rest.md) API to this RPC-style API, and we hope to have all functionality available through the RPC API by Mathesar's beta release.
-
-!!! caution "Stability"
-    The RPC API is not yet stable and may change in the future, even after we've completed the transition to the RPC API architecture. If you build logic that depends on this API, be mindful that it may change in the future without warning or notice.
-
-### Usage
+### Requests
 
 To use an RPC function:
 
@@ -23,7 +19,7 @@ To use an RPC function:
 
     To call function `tables.list` from the Tables section of this page, you'd send something like:
 
-    `POST /api/rpc/v0/`
+    `POST /api/rpc/v0/`b
 
     ```json
     {
@@ -37,6 +33,53 @@ To use an RPC function:
     }
     ```
 
+### Responses
+
+#### Success
+
+Upon a successful call to an RPC function, the API will return a success object. Such an object has the following form:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 234,
+  "result": <any>
+}
+```
+
+The `result` is whatever was returned by the underlying function.
+
+#### Errors
+
+When an error is produced by a call to the RPC endpoint, we produce an error of the following form:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 234,
+  "error": {
+    "code": <int>,
+    "message": <str>
+  }
+}
+```
+
+The `code` is a negative integer. Some codes are produced according to the [JSON-RPC spec](https://www.jsonrpc.org/specification#error_object).
+
+Other error codes are grouped according to the library that produced the Exception:
+
+- `builtins`: -31xxx
+- `psycopg` or `psycopg2`: -30xxx
+- `django`: -29xxx
+- `mathesar` (our code): -28xxx
+- `db` (our code): -27xxx
+- `sqlalchemy`: -26xxx
+- other: -25xxx
+
+Unrecognized errors from a given library return a "round number" code, so an unknown `builtins` error gets the code -31000.
+
+---
+
 ## Collaborators
 
 ::: collaborators
@@ -47,107 +90,6 @@ To use an RPC function:
       - delete
       - set_role
       - CollaboratorInfo
-
-## Databases
-
-::: databases
-    options:
-      members:
-      - get
-      - delete
-      - DatabaseInfo
-
-## Configured Databases
-
-::: databases.configured
-    options:
-      members:
-      - list_
-      - disconnect
-      - ConfiguredDatabaseInfo
-
-## Database Privileges
-
-::: databases.privileges
-    options:
-      members:
-      - list_direct
-      - replace_for_roles
-      - transfer_ownership
-      - DBPrivileges
-
-## Database Setup
-
-::: databases.setup
-    options:
-      members:
-      - create_new
-      - connect_existing
-      - DatabaseConnectionResult
-
-## Schemas
-
-::: schemas
-    options:
-      members:
-      - list_
-      - get
-      - add
-      - delete
-      - patch
-      - SchemaInfo
-      - SchemaPatch
-
-## Schema Privileges
-
-::: schemas.privileges
-    options:
-      members:
-      - list_direct
-      - replace_for_roles
-      - transfer_ownership
-      - SchemaPrivileges
-
-## Tables
-
-::: tables
-    options:
-      members:
-      - list_
-      - get
-      - add
-      - delete
-      - patch
-      - import_
-      - get_import_preview
-      - list_joinable
-      - list_with_metadata
-      - get_with_metadata
-      - TableInfo
-      - AddedTableInfo
-      - SettableTableInfo
-      - JoinableTableRecord
-      - JoinableTableInfo
-
-## Table Privileges
-
-::: tables.privileges
-    options:
-      members:
-      - list_direct
-      - replace_for_roles
-      - transfer_ownership
-      - TablePrivileges
-
-## Table Metadata
-
-::: tables.metadata
-    options:
-      members:
-      - list_
-      - set_
-      - TableMetaDataBlob
-      - TableMetaDataRecord
 
 ## Columns
 
@@ -177,13 +119,14 @@ To use an RPC function:
       - ColumnMetaDataRecord
       - ColumnMetaDataBlob
 
-## Types
+## Configured Databases
 
-::: types
+::: databases.configured
     options:
       members:
       - list_
-      - TypeInfo
+      - disconnect
+      - ConfiguredDatabaseInfo
 
 ## Constraints
 
@@ -198,6 +141,63 @@ To use an RPC function:
       - PrimaryKeyConstraint
       - UniqueConstraint
       - CreatableConstraintInfo
+
+## Data Modeling
+
+:::data_modeling
+    options:
+      members:
+      - add_foreign_key_column
+      - add_mapping_table
+      - suggest_types
+      - split_table
+      - move_columns
+      - MappingColumn
+      - SplitTableInfo
+
+## Databases
+
+::: databases
+    options:
+      members:
+      - get
+      - delete
+      - DatabaseInfo
+
+## Database Privileges
+
+::: databases.privileges
+    options:
+      members:
+      - list_direct
+      - replace_for_roles
+      - transfer_ownership
+      - DBPrivileges
+
+## Database Setup
+
+::: databases.setup
+    options:
+      members:
+      - create_new
+      - connect_existing
+      - DatabaseConnectionResult
+
+## Explorations
+
+::: explorations
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - replace
+      - run
+      - run_saved
+      - ExplorationInfo
+      - ExplorationDef
+      - ExplorationResult
 
 ## Records
 
@@ -221,22 +221,6 @@ To use an RPC function:
       - GroupingResponse
       - SearchParam
 
-## Explorations
-
-::: explorations
-    options:
-      members:
-      - list_
-      - get
-      - add
-      - delete
-      - replace
-      - run
-      - run_saved
-      - ExplorationInfo
-      - ExplorationDef
-      - ExplorationResult
-
 ## Roles
 
 ::: roles
@@ -250,7 +234,7 @@ To use an RPC function:
       - RoleInfo
       - RoleMember
 
-## Configured Roles
+## Roles Configured
 
 ::: roles.configured
     options:
@@ -261,6 +245,29 @@ To use an RPC function:
       - set_password
       - ConfiguredRoleInfo
 
+## Schemas
+
+::: schemas
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - patch
+      - SchemaInfo
+      - SchemaPatch
+
+## Schema Privileges
+
+::: schemas.privileges
+    options:
+      members:
+      - list_direct
+      - replace_for_roles
+      - transfer_ownership
+      - SchemaPrivileges
+
 ## Servers
 
 ::: servers
@@ -269,60 +276,51 @@ To use an RPC function:
       - list_
       - ConfiguredServerInfo
 
-## Data Modeling
+## Tables
 
-:::data_modeling
+::: tables
     options:
       members:
-      - add_foreign_key_column
-      - add_mapping_table
-      - suggest_types
-      - split_table
-      - move_columns
-      - MappingColumn
-      - SplitTableInfo
+      - list_
+      - get
+      - add
+      - delete
+      - patch
+      - import_
+      - get_import_preview
+      - list_joinable
+      - list_with_metadata
+      - get_with_metadata
+      - TableInfo
+      - AddedTableInfo
+      - SettableTableInfo
+      - JoinableTableRecord
+      - JoinableTableInfo
 
-## Responses
+## Table Metadata
 
-### Success
+::: tables.metadata
+    options:
+      members:
+      - list_
+      - set_
+      - TableMetaDataBlob
+      - TableMetaDataRecord
 
-Upon a successful call to an RPC function, the API will return a success object. Such an object has the following form:
+## Table Privileges
 
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 234,
-  "result": <any>
-}
-```
+::: tables.privileges
+    options:
+      members:
+      - list_direct
+      - replace_for_roles
+      - transfer_ownership
+      - TablePrivileges
 
-The `result` is whatever was returned by the underlying function.
+## Types
 
-### Errors
-
-When an error is produced by a call to the RPC endpoint, we produce an error of the following form:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 234,
-  "error": {
-    "code": <int>,
-    "message": <str>
-  }
-}
-```
-
-The `code` is a negative integer. Some codes are produced according to the [JSON-RPC spec](https://www.jsonrpc.org/specification#error_object).
-
-Other error codes are grouped according to the library that produced the Exception:
-
-- `builtins`: -31xxx
-- `psycopg` or `psycopg2`: -30xxx
-- `django`: -29xxx
-- `mathesar` (our code): -28xxx
-- `db` (our code): -27xxx
-- `sqlalchemy`: -26xxx
-- other: -25xxx
-
-Unrecognized errors from a given library return a "round number" code, so an unknown `builtins` error gets the code -31000.
+::: types
+    options:
+      members:
+      - list_
+      - TypeInfo
