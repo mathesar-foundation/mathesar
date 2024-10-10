@@ -10,7 +10,6 @@ from modernrpc.auth import user_is_authenticated, user_is_superuser
 
 from mathesar.rpc import collaborators
 from mathesar.rpc import columns
-from mathesar.rpc import connections
 from mathesar.rpc import constraints
 from mathesar.rpc import data_modeling
 from mathesar.rpc import databases
@@ -79,22 +78,6 @@ METHODS = [
         columns.metadata.set_,
         "columns.metadata.set",
         [user_is_authenticated]
-    ),
-
-    (
-        connections.add_from_known_connection,
-        "connections.add_from_known_connection",
-        [user_is_superuser]
-    ),
-    (
-        connections.add_from_scratch,
-        "connections.add_from_scratch",
-        [user_is_superuser]
-    ),
-    (
-        connections.grant_access_to_user,
-        "connections.grant_access_to_user",
-        [user_is_superuser]
     ),
 
     (

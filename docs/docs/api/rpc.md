@@ -21,7 +21,7 @@ To use an RPC function:
 
 !!! example
 
-    To call function `add_from_known_connection` from the `connections` section of this page, you'd send something like:
+    To call function `tables.list` from the Tables section of this page, you'd send something like:
 
     `POST /api/rpc/v0/`
 
@@ -29,11 +29,11 @@ To use an RPC function:
     {
       "jsonrpc": "2.0",
       "id": 234,
-      "method": "connections.add_from_known_connection",
+      "method": "tables.list",
       "params": {
-        "nickname": "anewconnection",
-        "db_name": "mynewcooldb"
-      },
+        "schema_oid": 47324,
+        "database_id": 1
+      }
     }
     ```
 
@@ -47,16 +47,6 @@ To use an RPC function:
       - delete
       - set_role
       - CollaboratorInfo
-
-## Connections
-
-::: connections
-    options:
-      members:
-      - add_from_known_connection
-      - add_from_scratch
-      - grant_access_to_user
-      - ConnectionReturn
 
 ## Databases
 

@@ -8,9 +8,13 @@ from mathesar.examples.movies_dataset import load_movies_dataset
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
 from mathesar.models.deprecated import Connection
 from mathesar.models.users import User
-from mathesar.utils.connections import BadInstallationTarget
 
 INTERNAL_DB_KEY = 'default'
+
+
+class BadInstallationTarget(Exception):
+    """Raise when an attempt is made to install on a disallowed target"""
+    pass
 
 
 def migrate_connection_for_user(connection_id, user_id):
