@@ -6,8 +6,6 @@ from db.install import install_mathesar
 from mathesar.examples.library_dataset import load_library_dataset
 from mathesar.examples.movies_dataset import load_movies_dataset
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
-from mathesar.models.deprecated import Connection
-from mathesar.models.users import User
 
 INTERNAL_DB_KEY = 'default'
 
