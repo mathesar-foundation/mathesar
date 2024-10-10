@@ -49,10 +49,7 @@ You can self-host Mathesar by following one of the guides below:
 
 ## Use Mathesar
 
-Mathesar should be pretty intuitive to use. More documentation is coming soon, but for now, we've written some documentation for some things that could be tricky.
-
-- [Syncing database changes](./user-guide/syncing-db.md) if the database's structure is changed outside of Mathesar.
-- How to set up [users with different access levels](./user-guide/users.md)
+See our [Using Mathesar](user-guide/index.md) section for documentation on Mathesar's features.
 
 ## Contribute to Mathesar
 
