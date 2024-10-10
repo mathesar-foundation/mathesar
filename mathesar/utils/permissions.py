@@ -17,15 +17,6 @@ class BadInstallationTarget(Exception):
     pass
 
 
-def migrate_connection_for_user(connection_id, user_id):
-    """Move data from old-style connection model to new models."""
-    conn = Connection.current_objects.get(id=connection_id)
-    user = User.objects.get(id=user_id)
-    return _setup_connection_models(
-        conn.host, conn.port, conn.db_name, conn.username, conn.password, user
-    )
-
-
 @transaction.atomic
 def set_up_new_database_for_user_on_internal_server(
         database_name, user, sample_data=[]
