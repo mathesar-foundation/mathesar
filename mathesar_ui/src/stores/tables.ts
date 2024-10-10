@@ -395,7 +395,19 @@ export const currentTablesData = collapse(
         commonData.current_schema === $currentSchema?.oid &&
         commonData.current_database === $currentSchema?.database.id
       ) {
-        setTablesStore($currentSchema, commonData.tables);
+        if (commonData.tables.state === 'success') {
+          setTablesStore($currentSchema, commonData.tables.data);
+        } else {
+          tablesStore.set({
+            databaseId: $currentSchema.database.id,
+            schemaOid: $currentSchema.oid,
+            tablesMap: new Map(),
+            requestStatus: {
+              state: 'failure',
+              errors: [getErrorMessage(commonData.tables.error)],
+            },
+          });
+        }
       } else {
         void fetchTablesForCurrentSchema();
       }
