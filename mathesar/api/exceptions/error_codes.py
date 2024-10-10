@@ -40,22 +40,16 @@ class ErrorCodes(Enum):
     UniqueImportViolation = 4303
 
     # Validation Error
-    BadDBCredentials = 4428
-    ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
     MappingsNotFound = 4417
-    MultipleDataFiles = 4400
     MoneyDisplayOptionConflict = 4407
     UnsupportedAlter = 4403
     URLDownloadError = 4404
     URLNotReachableError = 4405
     URLInvalidContentType = 4406
     UnknownDBType = 4408
-    InvalidColumnOrder = 4430
     InvalidDateError = 4413
     InvalidDateFormatError = 4414
-    InvalidLinkChoice = 4409
-    InvalidTableName = 4420
     IncompatibleFractionDigitValues = 4410
     UnsupportedConstraint = 4411
     ConstraintColumnEmpty = 4412
@@ -64,9 +58,7 @@ class ErrorCodes(Enum):
     DeletedColumnAccess = 4418
     IncorrectOldPassword = 4419
     EditingPublicSchema = 4421
-    DuplicateExplorationInSchema = 4422
     DynamicDefaultAlterationToStaticDefault = 4424
     InvalidJSONFormat = 4425
     UnsupportedJSONFormat = 4426
     UnsupportedFileFormat = 4427
-    UnsupportedInstallationDatabase = 4429
