@@ -3466,6 +3466,77 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- msar.get_current_role ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_get_current_role() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE USER parent1;
+  CREATE ROLE parent2;
+  CREATE ROLE child_role;
+  GRANT parent1 TO child_role;
+  GRANT parent2 TO child_role;
+  GRANT USAGE ON SCHEMA msar, __msar TO child_role;
+  -- GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_current_role() RETURNS SETOF TEXT AS $$
+DECLARE
+  child_role_oid oid;
+  parent1_oid oid;
+  parent2_oid oid;
+BEGIN
+  PERFORM __setup_get_current_role();
+  SET ROLE child_role;
+  child_role_oid := 'child_role'::regrole::oid;
+  parent1_oid := 'parent1'::regrole::oid;
+  parent2_oid := 'parent2'::regrole::oid;
+  RETURN NEXT is(
+    msar.get_current_role(),
+    format($j${
+        "current_role":{
+          "oid": %1$s,
+          "name": "child_role",
+          "login": false,
+          "super": false,
+          "members": null,
+          "inherits": true,
+          "create_db": false,
+          "create_role": false,
+          "description": null
+        },
+        "parent_roles": [
+          {
+            "oid": %2$s,
+            "name": "parent1",
+            "login": true,
+            "super": false,
+            "members": [{"oid": %1$s, "admin": false}],
+            "inherits": true,
+            "create_db": false,
+            "create_role": false,
+            "description": null
+          }, 
+          {
+            "oid": %3$s,
+            "name": "parent2",
+            "login": false,
+            "super": false,
+            "members": [{"oid": %1$s, "admin": false}],
+            "inherits": true,
+            "create_db": false,
+            "create_role": false,
+            "description": null
+          }
+        ]
+      }
+      $j$, child_role_oid, parent1_oid, parent2_oid
+    )::jsonb
+  );
+END;
+$$ LANGUAGE plpgsql;
+
 -- msar.build_order_by_expr ------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION test_build_order_by_expr() RETURNS SETOF TEXT AS $$
@@ -5366,6 +5437,36 @@ BEGIN
   RETURN NEXT columns_are(
     'target_table',
     ARRAY['id', 'x', 'y']
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_build_grant_revoke_membership_expr() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE USER "Alice";
+  CREATE USER "Bob";
+  CREATE USER carol;
+  RETURN NEXT is(
+    msar.build_grant_membership_expr('"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid]),
+    E'GRANT "Alice" TO "Bob";\n'
+  );
+  RETURN NEXT is(
+    msar.build_grant_membership_expr(
+      '"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid, 'carol'::regrole::oid]
+    ),
+    E'GRANT "Alice" TO "Bob";\nGRANT "Alice" TO carol;\n'
+  );
+
+  RETURN NEXT is(
+    msar.build_revoke_membership_expr('"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid]),
+    E'REVOKE "Alice" FROM "Bob";\n'
+  );
+  RETURN NEXT is(
+    msar.build_revoke_membership_expr(
+      '"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid, 'carol'::regrole::oid]
+    ),
+    E'REVOKE "Alice" FROM "Bob";\nREVOKE "Alice" FROM carol;\n'
   );
 END;
 $$ LANGUAGE plpgsql;

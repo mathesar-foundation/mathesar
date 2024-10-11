@@ -1196,7 +1196,7 @@ CREATE OR REPLACE FUNCTION
 msar.build_grant_membership_expr(parent_rol_id regrole, g_roles oid[]) RETURNS TEXT AS $$
 SELECT string_agg(
   format(
-    'GRANT %1$s TO %2$s',
+    'GRANT %1$I TO %2$I',
     msar.get_role_name(parent_rol_id),
     msar.get_role_name(rol_id)
   ),
@@ -1210,7 +1210,7 @@ CREATE OR REPLACE FUNCTION
 msar.build_revoke_membership_expr(parent_rol_id regrole, r_roles oid[]) RETURNS TEXT AS $$
 SELECT string_agg(
   format(
-    'REVOKE %1$s FROM %2$s',
+    'REVOKE %1$I FROM %2$I',
     msar.get_role_name(parent_rol_id),
     msar.get_role_name(rol_id)
   ),
@@ -1287,7 +1287,7 @@ SELECT jsonb_build_object(
   'current_role', msar.get_role(current_role),
   'parent_roles', COALESCE(array_remove(
     array_agg(
-      CASE WHEN pg_has_role(role_data.name, current_role, 'USAGE')
+      CASE WHEN pg_has_role(current_role, role_data.name, 'USAGE')
       THEN msar.get_role(role_data.name) END
     ), NULL
   ), ARRAY[]::jsonb[])

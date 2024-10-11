@@ -23,13 +23,14 @@ nav:
       - Debug Mathesar: administration/debug.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
+      - Databases: user-guide/databases.md
+      - Users: user-guide/users.md
+      - Permissions: user-guide/permissions.md
       - Importing data: user-guide/importing-data.md
-      - Syncing database changes: user-guide/syncing-db.md
-      - Users & access levels: user-guide/users.md
       - Glossary: user-guide/glossary.md
   - API:
-      - REST: api/rest.md
       - RPC: api/rpc.md
+      - REST: api/rest.md
   - Releases:
       - '0.1.7': releases/0.1.7.md
       - '0.1.6': releases/0.1.6.md
@@ -47,7 +48,6 @@ plugins:
       redirect_maps:
         "installation-dc/ansible-setup.md": "installation/docker-compose/index.md"
         "product/intro.md": "user-guide/index.md"
-        "product/syncing-db.md": "user-guide/syncing-db.md"
         "product/users.md": "user-guide/users.md"
         "install/index.md": "index.md"
         "install/docker-compose/index.md": "installation/docker-compose/index.md"
