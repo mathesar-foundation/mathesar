@@ -1,5 +1,10 @@
 # Mathesar Documentation
 
+!!! info "Help us get our beta out sooner – send us feedback!"
+    You're looking at the documentation for our **✨ new test build ✨**, see [release notes here](releases/0.2.0-testing.1.md).
+    
+    For a timely and stable beta release, we need feedback from as many users as possible about how this new version of Mathesar is working for you. Let us know on [this GitHub discussion](https://github.com/mathesar-foundation/mathesar/discussions/3956) or drop us a line at <hello@mathesar.org>.
+
 ## Welcome!
 
 Mathesar is a self-hostable open source project that provides a spreadsheet-like interface to a PostgreSQL database. Our web-based interface helps you and your collaborators set up data models, edit data, and build custom reports &mdash; no technical skills needed. You can create a new PostgreSQL database while setting up Mathesar or use our UI to interact with an existing database (or do both).
