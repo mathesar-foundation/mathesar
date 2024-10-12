@@ -23,7 +23,7 @@ You should have **root access** to the machine you're installing Mathesar on.
 
 You'll need to install the following system packages before you install Mathesar:
 
-- [Python](https://www.python.org/downloads/) 3.9, 3.10, or 3.11
+- [Python](https://www.python.org/downloads/) 3.9, 3.10, or 3.11 (along with appropriate [`venv`](https://docs.python.org/3/library/venv.html) module)
 
     !!! note "Python version"
 
@@ -38,6 +38,8 @@ You'll need to install the following system packages before you install Mathesar
 - [git](https://git-scm.com/downloads) (Verify with `git --version`)
 
 - [GNU gettext](https://www.gnu.org/software/gettext/) (Verify with `gettext --version`)
+
+- [unzip](https://packages.debian.org/search?keywords=unzip) A utility tool to de-archive .zip files (Verify with `unzip -v`)
 
 ### Domain (optional)
 
@@ -177,21 +179,29 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             Your `.env` file should look something like this
             
             ```
+            SECRET_KEY='REPLACE_THIS_WITH_YOUR_RANDOMLY_GENERATED_VALUE'
             DOMAIN_NAME='xDOMAIN_NAMEx'
             ALLOWED_HOSTS='xDOMAIN_NAMEx'
-            SECRET_KEY='REPLACE_THIS_WITH_YOUR_RANDOMLY_GENERATED_VALUE' # REPLACE THIS!
             POSTGRES_DB=mathesar_django
             POSTGRES_USER=mathesar
-            POSTGRES_PASSWORD=mathesar1234  # Do not use this password!
+            POSTGRES_PASSWORD=REPLACE_THIS_WITH_APPROPRIATE_PASSWORD_FOR_THE_CHOSEN_POSTGRES_USER
             POSTGRES_HOST=localhost
             POSTGRES_PORT=5432
             ```
 
         !!! tip
-            You can generate a [SECRET_KEY variable](../../configuration/env-variables.md#secret_key) by running:
+            To generate a [`SECRET_KEY`](../../configuration/env-variables.md#secret_key) you can use this [browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
 
             ```
             echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
+            ```
+
+        !!! tip
+            If you want to host Mathesar on multiple domains/subdomains you can do so by adding multiple comma separated domain names to the following env variables without a whitespace: 
+
+            ```
+            DOMAIN_NAME='xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org'
+            ALLOWED_HOSTS='xDOMAIN_NAMEx,xDOMAIN_NAMEx.example.org'
             ```
 
     1. Add the environment variables to the shell
@@ -290,7 +300,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Check the logs to verify if Gunicorn is running without any errors
     
     ```
-    journalctl --priority=notice --unit=gunicorn.service
+    journalctl --unit=gunicorn.service
     ```
 
 ### Set up the Caddy reverse proxy
@@ -307,7 +317,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 2. Add the configuration details to the CaddyFile
 
     ```
-    https://xDOMAIN_NAMEx {
+    $DOMAIN_NAME {
         log {
             output stdout
         }
@@ -385,7 +395,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 1. Check the logs to verify if Caddy is running without any errors
     
     ```
-    journalctl --priority=notice --unit=caddy.service
+    journalctl --unit=caddy.service
     ```
 
 ### Set up your user account
