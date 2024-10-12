@@ -30,6 +30,8 @@ nav:
   - API:
       - REST: api/rest.md
       - RPC: api/rpc.md
+  - Test Builds:
+      - '0.2.0-testing.1': releases/0.2.0-testing.1.md
   - Releases:
       - '0.1.7': releases/0.1.7.md
       - '0.1.6': releases/0.1.6.md
