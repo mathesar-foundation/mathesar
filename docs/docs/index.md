@@ -1,6 +1,6 @@
 # Mathesar Documentation
 
-!!! info "Help us get our beta out sooner – send us feedback!"
+!!! question "Help us get our beta out sooner – send us feedback!"
     You're looking at the documentation for our **✨ new test build ✨**, see [release notes here](releases/0.2.0-testing.1.md).
     
     For a timely and stable beta release, we need feedback from as many users as possible about how this new version of Mathesar is working for you. Let us know on [this GitHub discussion](https://github.com/mathesar-foundation/mathesar/discussions/3956) or drop us a line at <hello@mathesar.org>.
