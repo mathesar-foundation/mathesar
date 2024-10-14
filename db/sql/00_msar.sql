@@ -1246,7 +1246,8 @@ Args:
            Membership will be revoked for existing members not present in this array.
 */
 DECLARE
-  parent_role_info jsonb := msar.get_role(parent_rol_id::regrole::text);
+  parent_role_name text := msar.get_role_name(parent_rol_id);
+  parent_role_info jsonb := msar.get_role(parent_role_name);
   all_members_array bigint[];
   revoke_members_array bigint[];
   set_members_expr text;
@@ -1273,7 +1274,7 @@ BEGIN
   );
   EXECUTE set_members_expr;
   -- Return the updated parent_role info including membership details.
-  RETURN msar.get_role(parent_rol_id::regrole::text);
+  RETURN msar.get_role(parent_role_name);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
