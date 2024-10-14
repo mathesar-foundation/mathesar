@@ -131,14 +131,14 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     git clone https://github.com/mathesar-foundation/mathesar.git .
     ```
 
-1. Checkout the tag of the latest stable release, `{{mathesar_version}}`.
+1. Checkout the tag of the release you'd like to install.
 
     ```
     git checkout {{mathesar_version}}
     ```
 
     !!! warning "Important"
-        If you don't run the above command you'll end up installing the latest _development_ version of Mathesar, which will be less stable.
+        If you don't run the above command you'll end up installing the latest _development_ version of Mathesar.
 
 1. We need to create a python virtual environment for the Mathesar application.
 
