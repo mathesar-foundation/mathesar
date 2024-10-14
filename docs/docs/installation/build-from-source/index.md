@@ -131,7 +131,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     git clone https://github.com/mathesar-foundation/mathesar.git .
     ```
 
-1. Checkout the tag of the release you'd like to install.
+1. Check out the tag of the release or build you'd like to install, `{{mathesar_version}}`.
 
     ```
     git checkout {{mathesar_version}}
