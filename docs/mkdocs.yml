@@ -93,6 +93,7 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  custom_dir: overrides
 
 extra_css:
   - stylesheets/extra.css
@@ -120,3 +121,6 @@ markdown_extensions:
 
 extra:
   mathesar_version: 0.2.0-testing.1
+  version:
+    provider: mike
+    alias: true
