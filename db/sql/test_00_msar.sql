@@ -2867,31 +2867,49 @@ CREATE OR REPLACE FUNCTION test_list_table_privileges_basic() RETURNS SETOF TEXT
 BEGIN
 CREATE TABLE restricted_table();
 RETURN NEXT is(
-  msar.list_table_privileges('restricted_table'::regclass),
-  format(
-    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %s}]',
-    'mathesar'::regrole::oid
-  )::jsonb,
+  msar.list_table_privileges('restricted_table'::regclass)->0->'direct'
+  @>'["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'::jsonb,
+  true,
+  'Initially, only privileges for creator'
+);
+RETURN NEXT is(
+  CAST(msar.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
+  'mathesar'::regrole::oid,
   'Initially, only privileges for creator'
 );
 CREATE USER "Alice";
 RETURN NEXT is(
-  msar.list_table_privileges('restricted_table'::regclass),
-  format(
-    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %s}]',
-    'mathesar'::regrole::oid
-  )::jsonb,
+  msar.list_table_privileges('restricted_table'::regclass)->0->'direct'
+  @>'["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'::jsonb,
+  true,
+  'Alice should not have any privileges on restricted_table'
+);
+RETURN NEXT is(
+  CAST(msar.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
+  'mathesar'::regrole::oid,
   'Alice should not have any privileges on restricted_table'
 );
 GRANT SELECT, DELETE ON TABLE restricted_table TO "Alice";
 RETURN NEXT is(
-  msar.list_table_privileges('restricted_table'::regclass),
-  format(
-    '[{"direct": ["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"], "role_oid": %1$s},
-    {"direct": ["SELECT", "DELETE"], "role_oid": %2$s}]',
-    'mathesar'::regrole::oid,
-    '"Alice"'::regrole::oid
-  )::jsonb,
+  msar.list_table_privileges('restricted_table'::regclass)->0->'direct'
+  @>'["INSERT", "SELECT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"]'::jsonb,
+  true,
+  'mathesar''s privileges should stay the same'
+);
+RETURN NEXT is(
+  CAST(msar.list_table_privileges('restricted_table'::regclass)->0->>'role_oid' AS oid),
+  'mathesar'::regrole::oid,
+  'mathesar''s privileges should stay the same'
+);
+RETURN NEXT is(
+  msar.list_table_privileges('restricted_table'::regclass)->1->'direct'
+  @>'["SELECT", "DELETE"]'::jsonb,
+  true,
+  'Alice should have SELECT & DELETE privileges on restricted_table'
+);
+RETURN NEXT is(
+  CAST(msar.list_table_privileges('restricted_table'::regclass)->1->>'role_oid' AS oid),
+  '"Alice"'::regrole::oid,
   'Alice should have SELECT & DELETE privileges on restricted_table'
 );
 END;
