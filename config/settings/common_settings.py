@@ -200,6 +200,21 @@ STATIC_URL = "/static/"
 # The files need to served in brotli or gzip compressed format
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
+# Enable the use of WhiteNoise to serve static files with precompression support (Brotli and Gzip)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# WhiteNoise Settings
+WHITENOISE_MAX_AGE = 31536000  # One year cache for static files
+WHITENOISE_ALLOW_ALL_ORIGINS = True  # CORS support for static files
+
+# Brotli compression settings (WhiteNoise automatically supports Brotli)
+WHITENOISE_USE_BROTLI = True
+
+# Ensure static files are compressed during `collectstatic`
+# This will create `.gz` and `.br` versions of each static file.
+COMPRESS_PRECOMPRESS_GZIP = True
+COMPRESS_PRECOMPRESS_BROTLI = True
+
 # Media files (uploaded by the user)
 DEFAULT_MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
 MEDIA_ROOT = decouple_config('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
