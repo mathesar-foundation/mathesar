@@ -1,8 +1,11 @@
+from functools import wraps
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from modernrpc.views import RPCEntryPoint
+from modernrpc.exceptions import RPCException
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -17,6 +20,30 @@ from mathesar.state import reset_reflection
 from mathesar import __version__
 
 
+def get_database_list(request):
+    return databases_list(request=request)
+
+
+def wrap_data_and_rpc_exceptions(f):
+    @wraps(f)
+    def safe_func(*args, **kwargs):
+        try:
+            return {
+                'state': 'success',
+                'data': f(*args, **kwargs)
+            }
+        except RPCException as exp:
+            return {
+                'state': 'failure',
+                'error': {
+                    'code': exp.code,
+                    'message': exp.message
+                }
+            }
+    return safe_func
+
+
+@wrap_data_and_rpc_exceptions
 def get_schema_list(request, database_id):
     if database_id is not None:
         return schemas_list(request=request, database_id=database_id)
@@ -24,10 +51,7 @@ def get_schema_list(request, database_id):
         return []
 
 
-def get_database_list(request):
-    return databases_list(request=request)
-
-
+@wrap_data_and_rpc_exceptions
 def get_table_list(request, database_id, schema_oid):
     if database_id is not None and schema_oid is not None:
         return tables_list(
@@ -72,28 +96,31 @@ def _get_internal_db_meta():
         return {'type': 'sqlite'}
 
 
-def _get_base_data_all_routes(request, database_id=None, schema_id=None):
+def get_common_data(request, database_id=None, schema_oid=None):
+    databases = get_database_list(request)
+    database_id_int = int(database_id) if database_id else None
+    current_database = next((database for database in databases if database['id'] == database_id_int), None)
+    current_database_id = current_database['id'] if current_database else None
+
+    schemas = get_schema_list(request, current_database_id)
+    schema_oid_int = int(schema_oid) if schema_oid else None
+    schemas_data = schemas['data'] if 'data' in schemas else []
+    current_schema = next((schema for schema in schemas_data if schema['oid'] == schema_oid_int), None)
+    current_schema_oid = current_schema['oid'] if current_schema else None
+
     return {
-        'current_database': int(database_id) if database_id else None,
-        'current_schema': int(schema_id) if schema_id else None,
+        'current_database': current_database_id,
+        'current_schema': current_schema_oid,
         'current_release_tag_name': __version__,
-        'databases': get_database_list(request),
-        'servers': get_servers_list(),
+        'databases': databases,
         'internal_db': _get_internal_db_meta(),
         'is_authenticated': not request.user.is_anonymous,
-        'queries': [],
-        'schemas': get_schema_list(request, database_id),
+        'servers': get_servers_list(),
+        'schemas': schemas,
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
-        'tables': [],
-        'user': get_user_data(request)
-    }
-
-
-def get_common_data(request, database_id=None, schema_id=None):
-    return {
-        **_get_base_data_all_routes(request, database_id, schema_id),
-        'tables': get_table_list(request, database_id, schema_id),
-        'queries': get_queries_list(request, database_id, schema_id),
+        'tables': get_table_list(request, current_database_id, current_schema_oid),
+        'user': get_user_data(request),
+        'queries': get_queries_list(request, current_database_id, current_schema_oid),
         'routing_context': 'normal',
     }
 
@@ -114,10 +141,10 @@ def home(request):
     database_list = get_database_list(request)
     number_of_databases = len(database_list)
     if number_of_databases > 1:
-        return redirect('databases')
+        return redirect('databases_list_route')
     elif number_of_databases == 1:
         db = database_list[0]
-        return redirect('schemas', database_id=db['id'])
+        return redirect('database_route', database_id=db['id'])
     else:
         return render(request, 'mathesar/index.html', {
             'common_data': get_common_data(request)
@@ -125,7 +152,7 @@ def home(request):
 
 
 @login_required
-def databases(request):
+def databases_list_route(request):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)
     })
@@ -146,14 +173,14 @@ def admin_home(request, **kwargs):
 
 
 @login_required
-def schemas(request, database_id, **kwargs):
+def database_route(request, database_id, **kwargs):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database_id, None)
     })
 
 
 @login_required
-def schemas_home(request, database_id, schema_id, **kwargs):
+def schema_route(request, database_id, schema_id, **kwargs):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database_id, schema_id)
     })

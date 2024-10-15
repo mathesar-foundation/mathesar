@@ -152,7 +152,18 @@ export const schemas = collapse(
     const $schemasStore = get(schemasStore);
     if ($schemasStore.databaseId !== $currentDatabase?.id) {
       if (preload && commonData.current_database === $currentDatabase?.id) {
-        setSchemasInStore($currentDatabase, commonData.schemas);
+        if (commonData.schemas.state === 'success') {
+          setSchemasInStore($currentDatabase, commonData.schemas.data);
+        } else {
+          schemasStore.set({
+            databaseId: $currentDatabase.id,
+            requestStatus: {
+              state: 'failure',
+              errors: [getErrorMessage(commonData.schemas.error)],
+            },
+            data: new Map(),
+          });
+        }
       } else {
         void fetchSchemasForCurrentDatabase();
       }

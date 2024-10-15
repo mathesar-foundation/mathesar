@@ -2,7 +2,7 @@
 
 Mathesar has an API available at `/api/rpc/v0/` which follows the [JSON-RPC](https://www.jsonrpc.org/specification) spec version 2.0.
 
-!!! caution "Not yet stable"
+!!! danger "Not yet stable"
     The RPC API is not yet stable and may change in the future. If you build logic that depends on this API, be mindful that it may change in the future without warning or notice.
 
 ## Usage
