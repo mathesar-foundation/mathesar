@@ -2,7 +2,6 @@
 This inherits the fixtures in the root conftest.py
 """
 import pytest
-import logging
 import responses
 from copy import deepcopy
 
@@ -12,12 +11,7 @@ from django.conf import settings
 from django.db import connection as dj_connection
 from rest_framework.test import APIClient
 
-from sqlalchemy import Column, MetaData, Integer, Date
-from sqlalchemy import Table as SATable
-
-from db.tables.operations.select import get_oid_from_table
 from db.tables.operations.create import create_mathesar_table as actual_create_mathesar_table
-from db.columns.operations.select import get_column_attnum_from_name
 from db.schemas.utils import get_schema_oid_from_name
 
 import mathesar.tests.conftest
@@ -25,9 +19,6 @@ from mathesar.models.base import DataFile
 from mathesar.models.users import User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
-import conftest
-from db.metadata import get_empty_metadata
-from db.tests.columns.utils import create_test_table
 
 
 @pytest.fixture

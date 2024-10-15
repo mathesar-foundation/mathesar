@@ -3,9 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from modernrpc.views import RPCEntryPoint
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 
 from mathesar.rpc.databases.configured import list_ as databases_list
 from mathesar.rpc.explorations import list_ as explorations_list

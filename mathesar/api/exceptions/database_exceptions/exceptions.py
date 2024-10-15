@@ -1,8 +1,5 @@
 from rest_framework import status
 
-from db.constraints.operations.select import (
-    get_constraint_oid_by_name_and_table_oid,
-)
 from db.columns.exceptions import InvalidTypeError
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (

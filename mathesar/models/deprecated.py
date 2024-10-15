@@ -47,6 +47,7 @@ from db.tables.utils import get_primary_key_column
 
 from mathesar.models.base import BaseModel
 from mathesar.models.relation import Relation
+from mathesar.state import get_cached_metadata
 from mathesar.utils import models as model_utils
 from mathesar.utils.prefetch import PrefetchManager, Prefetcher
 from mathesar.database.base import create_mathesar_engine
@@ -677,7 +678,6 @@ class Table(DatabaseObject, Relation):
             col_mappings = [[from_col.name, target_col.name] for from_col, target_col in mappings]
         else:
             col_mappings = None
-        data_file = data_files[0]
         try:
             table, _ = insert_from_select(from_table, target_table, engine, col_mappings)
         except Exception as e:
