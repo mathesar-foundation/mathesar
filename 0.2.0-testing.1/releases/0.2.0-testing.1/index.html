@@ -1235,9 +1235,10 @@
 <li>Filter databases for admin and standard users <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3895" title="Filter databases for admin and standard users">#3895</a></em></li>
 <li>Fix logic in <code>get_current_role</code> <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3922" title="Fix logic in get_current_role">#3922</a></em></li>
 <li>Fix quoting for role grant/revoke expressions <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3931" title="Fix quoting for role grant/revoke expressions">#3931</a></em></li>
+<li>Bugfix msar.set_members <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3958" title="Bugfix msar.set_members">#3958</a></em></li>
 </ul>
 <h3 id="performance-improvements-and-rpc-api">Performance improvements and RPC API<a class="headerlink" href="#performance-improvements-and-rpc-api" title="Permanent link">&para;</a></h3>
-<p>We&rsquo;ve made major improvements to the responsiveness of the Mathesar UI. Loading data and data entry should be much more snappy, and importing data into Mathsar is around 50 times faster. We&rsquo;ve also eliminated the need to manually sync database schema changes to Mathesar, any DDL changes will be reflected in the UI automatically.</p>
+<p>We&rsquo;ve made major improvements to the responsiveness of the Mathesar UI. Loading data and data entry should be much more snappy, and importing data into Mathesar is around 50 times faster. We&rsquo;ve also eliminated the need to manually sync database schema changes to Mathesar, any DDL changes will be reflected in the UI automatically.</p>
 <p>To achieve these performance benefits, we needed to overhaul our backend architecture and API. We have built out a new RPC API and our frontend UI now primarily uses that API. The RPC API <a href="../../api/rpc/">has some documentation here</a>, but should not be considered stable yet.</p>
 <p>Most of our REST API endpoints are now deprecated and will be removed soon. The <code>/users/</code> and <code>/data-files/</code> endpoints remain in use.</p>
 <ul>
@@ -1245,23 +1246,29 @@
 <li>Exception handler tests <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3547" title="Exception handler tests">#3547</a></em></li>
 <li>Fix SQL syntax highlighting in VS code for SQL tests <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3588" title="Fix SQL syntax highlighting in VS code for SQL tests">#3588</a></em></li>
 <li>Remove dead front end API client code to GET one schema <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3589" title="Remove dead front end API client code to GET one schema">#3589</a></em></li>
+<li>Refactor list of RPC methods to test <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3597" title="Refactor list of RPC methods to test">#3597</a></em></li>
+<li>Implement <code>tables.list</code> rpc endpoint <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3599" title="Implement tables.list rpc endpoint">#3599</a></em></li>
 <li>Implement <code>tables.delete</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3608" title="Implement tables.delete RPC endpoint">#3608</a></em></li>
+<li>Implement <code>schemas.list</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3598" title="Implement schemas.list RPC method">#3598</a></em></li>
 <li>Implement <code>schemas.delete</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3610" title="Implement schemas.delete RPC method">#3610</a></em></li>
 <li>Implement <code>tables.get</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3612" title="Implement tables.get RPC endpoint">#3612</a></em></li>
 <li>Implement <code>tables.add</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3614" title="Implement tables.add RPC endpoint">#3614</a></em></li>
+<li>Col delete func <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3586" title="Col delete func">#3586</a></em></li>
+<li>Add <code>columns.list</code> function <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3556" title="Add columns.list function">#3556</a></em></li>
 <li>Add <code>columns.patch</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3615" title="Add columns.patch RPC function">#3615</a></em></li>
 <li>Add <code>columns.add</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3616" title="Add columns.add RPC function">#3616</a></em></li>
 <li>Implement <code>tables.patch</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3618" title="Implement tables.patch RPC endpoint">#3618</a></em></li>
 <li>Implement <code>schemas.add</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3620" title="Implement schemas.add RPC method">#3620</a></em></li>
 <li>Implement <code>table.import</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3623" title="Implement table.import RPC endpoint">#3623</a></em></li>
 <li>Implement <code>schemas.patch</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3628" title="Implement schemas.patch RPC method">#3628</a></em></li>
+<li>Use schemas RPC APIs in the front end on the database page <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3648" title="Use schemas RPC APIs in the front end on the database page">#3648</a></em></li>
 <li>Wire RPC methods to new models <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3632" title="Wire RPC functions to new models">#3632</a></em></li>
 <li>Quoting refactor <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3633" title="Quoting refactor">#3633</a></em></li>
 <li>Implement <code>tables.get_import_preview</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3635" title="Implement tables.get_import_preview RPC endpoint">#3635</a></em></li>
 <li>Auto generate table name <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3637" title="Auto generate table name">#3637</a></em></li>
 <li>Add <code>columns.metadata.list</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3641" title="Add columns.metadata.list RPC function">#3641</a></em></li>
 <li>Implement <code>tables.metadata</code> <code>list</code> &amp; <code>patch</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3646" title="Implement tables.metadata list &amp; patch RPC endpoint">#3646</a></em></li>
-<li>Fix issue with removing comments on schemas <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3649" title="Allow unsetting schema comment using NULL">#3649</a></em></li>
+<li>Fix issue with removing comments on schemas <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3649" title="Allow un-setting schema comment using NULL">#3649</a></em></li>
 <li>Drop old SQL function signature <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3650" title="Drop old SQL function signature">#3650</a></em></li>
 <li>Implement tables list and delete RPC methods <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3651" title="Implement tables list and delete RPC APIs">#3651</a></em></li>
 <li>Columns meta RPC patch <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3653" title="Columns meta RPC patch">#3653</a></em></li>
@@ -1334,7 +1341,7 @@
 <li>Get &ldquo;extract columns&rdquo; and &ldquo;move columns&rdquo; functionality working again <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3856" title="Get 'extract columns' and 'move columns' functionality working again">#3856</a></em></li>
 <li>Allow patching records via string PKs <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3857" title="Allow patching records via string PKs">#3857</a></em></li>
 <li>Implement <code>roles.set_members</code> RPC method <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3866" title="Implement roles.set_members RPC endpoint">#3866</a></em></li>
-<li>Fix updating of table name <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3879" title="Fix ypdating of table name">#3879</a></em></li>
+<li>Fix updating of table name <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3879" title="Fix updating of table name">#3879</a></em></li>
 <li>Bugfix summarizations <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3884" title="Bugfix summarizations">#3884</a></em></li>
 <li>Fix insert for table with only ID column <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3885" title="Fix insert for table with only ID column">#3885</a></em></li>
 <li>Add <code>schema_oid</code> to <code>Explorations</code> model <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3892" title="Add schema_oid to Explorations model">#3892</a></em></li>
@@ -1344,6 +1351,7 @@
 <li>Fix bug when updating table twice _<a href="https://github.com/mathesar-foundation/mathesar/pull/3909" title="Fix bug when updating table twice">#3909</a></li>
 <li>Fix response of <code>explorations.run</code> for summarizations <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3940" title="Fix response of explorations.run for summarizations">#3940</a></em></li>
 <li>Fixes server errors when RPC exceptions are thrown while rendering common_data <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3948" title="Fixes server errors when RPC exceptions are thrown while rendering common_data">#3948</a></em></li>
+<li>Deserialize transformations before creating DBQuery object <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3873" title="Deserialize transformations before creating DBQuery object">#3873</a></em></li>
 </ul>
 <h3 id="visual-improvements">Visual improvements<a class="headerlink" href="#visual-improvements" title="Permanent link">&para;</a></h3>
 <p>We made several visual improvements to Mathesar to ensure consistency, better usability, and adherence to design guidelines. The changes were mainly to various modals and to the table inspector.</p>
@@ -1356,24 +1364,23 @@
 <h2 id="bug-fixes">Bug fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">&para;</a></h2>
 <p>Bugs related to permissions or the backend overhaul are listed in the relevant sections above. The bugs listed here are unrelated to those changes.</p>
 <ul>
-<li>Remove nonsensical cast_to_email and cast_to_uri functions <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3564" title="Remove nonsensical cast_to_email and cast_to_uri functions">#3564</a></em></li>
-<li>Add 0.1.7 release notes to the nav menu <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3569" title="Merge pull request #3568 from mathesar-foundation/release_notes_nav">#3569</a></em></li>
 <li>Fix error when trying to reset password of other user <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3536" title="Fix change password error">#3536</a></em></li>
-<li>Handle negative numbers not being serialized correctly when copying  <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3582" title="Handle negative numbers in TSV serialization for copy">#3582</a></em></li>
+<li>Handle negative numbers correctly when copying cells <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3582" title="Handle negative numbers in TSV serialization for copy">#3582</a></em></li>
+<li>Fix several subtle bugs related to selecting cells in a sheet <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3037" title="Refactor CellSelection data structure and store">#3037</a></em></li>
 <li>Fix timeout when installing Mathesar on a remote DB <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3917" title="Fast install">#3917</a></em></li>
-<li>Use a semver library to parse our version strings on the front end <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3938" title="Use a semver library to parse our version strings on the front end">#3938</a></em></li>
 </ul>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Updated user guide to cover new features and remove unnecessary pages <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3910" title="Permissions Documentation Updates">#3910</a></em></li>
-<li>Improvements to installation from scratch documentation <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3945" title="Docs improvements for build from scrach">#3945</a></em></li>
+<li>Improvements to installation from scratch documentation <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3945" title="Docs improvements for build from scratch">#3945</a></em></li>
 </ul>
 <h2 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h2>
-<p>Miscellanous work done to reduce technical debt, improve developer documentation, and maintain our workflow.</p>
+<p>Miscellaneous work done to reduce technical debt, improve developer documentation, and maintain our workflow.</p>
 <ul>
-<li>Refactor CellSelection data structure and store <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3037" title="Refactor CellSelection data structure and store">#3037</a></em></li>
+<li>Add 0.1.7 release notes to the nav menu <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3569" title="Merge pull request #3568 from mathesar-foundation/release_notes_nav">#3569</a></em> <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3568" title="Add 0.1.7 release notes to the nav menu">#3568</a></em></li>
 <li>Remove API documentation infrastructure <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3541" title="Remove API documentation infrastructure">#3541</a></em></li>
 <li>Remove Debian build <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3546" title="Remove Debian build">#3546</a></em></li>
+<li>Remove nonsensical cast_to_email and cast_to_uri functions <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3564" title="Remove nonsensical cast_to_email and cast_to_uri functions">#3564</a></em></li>
 <li>Update docs to add instructions for loading data from playground <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3535" title="Update docs to add instructions for loading data from playground">#3535</a></em></li>
 <li>Merge 0.1.7 release back into develop <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3558" title="Merge pull request #3539 from mathesar-foundation/0.1.7">#3558</a></em></li>
 <li>Resolve merge conflict for #3558 <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3559" title="Resolve merge conflict for #3558">#3559</a></em></li>
@@ -1385,7 +1392,13 @@
 <li>Fix issue with SQL migrations not running when service restarts <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3678" title="Fix install script">#3678</a></em></li>
 <li>Merge breaking changes into <code>develop</code> <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3695" title="Merge breaking changes into develop">#3695</a></em></li>
 <li>Update MkDocs dependencies <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3763" title="Update MkDocs dependencies">#3763</a></em></li>
+<li>Merge master into testing.1 branch <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3959" title="Merge master into testing.1 branch">#3959</a></em></li>
 <li>Merge develop into release branch. <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3950" title="Merge develop into release branch.">#3950</a></em></li>
+<li>Release 0.2.0-testing.1 <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3939" title="Release 0.2.0-testing.1">#3939</a></em></li>
+<li>Release notes for 0.2.0-testing.1 <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3949" title="Release notes for 0.2.0-testing.1">#3949</a></em></li>
+<li>Multi-versioned docs — <code>0.1.7</code> updates <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3920" title="Multi-versioned docs — 0.1.7 updates">#3920</a></em></li>
+<li>Remove GitHub action to auto-publish documentation <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3943" title="Remove GitHub action to auto-publish documentation">#3943</a></em></li>
+<li>Use a semver library to parse our version strings on the front end <em><a href="https://github.com/mathesar-foundation/mathesar/pull/3938" title="Use a semver library to parse our version strings on the front end">#3938</a></em></li>
 </ul>
 <h2 id="live-demo-changes">Live demo changes<a class="headerlink" href="#live-demo-changes" title="Permanent link">&para;</a></h2>
 <p>We have removed code related to Mathesar&rsquo;s &ldquo;live demo&rdquo; mode since we didn&rsquo;t think it made sense to include code for our promotional website in the core product. If we do choose to maintain our live demo in the future, we will set up a separate microservice that performs some of these functions.</p>
