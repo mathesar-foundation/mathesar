@@ -80,7 +80,7 @@ mkdir -p "$CACHE_DIR"
 
 # Find and cache the hashes for all the PR-merge commits included in the release
 # branch but not included in the master branch.
-git log --format=%H --first-parent $PREV_RELEASE..$RELEASE_BRANCH > $COMMITS_FILE
+git log --format=%H $PREV_RELEASE..$RELEASE_BRANCH > $COMMITS_FILE
 
 ONE_YEAR_AGO=$(python3 -c "
 from datetime import datetime, timedelta
