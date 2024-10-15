@@ -54,18 +54,16 @@ urlpatterns = [
     path('administration/users/', views.admin_home, name='admin_users_home'),
     path('administration/users/<int:user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
-    path('shares/tables/<slug>/', views.shared_table, name='shared_table'),
-    path('shares/explorations/<slug>/', views.shared_query, name='shared_query'),
-    path('databases/', views.databases, name='databases'),
+    path('databases/', views.databases_list_route, name='databases_list_route'),
     path('i18n/', include('django.conf.urls.i18n')),
     re_path(
         r'^db/(?P<database_id>\d+)/schemas/(?P<schema_id>\d+)/',
-        views.schemas_home,
-        name='schema_home'
+        views.schema_route,
+        name='schema_route'
     ),
     re_path(
         r'^db/(?P<database_id>\d+)/((schemas|settings)/)?',
-        views.schemas,
-        name='schemas'
+        views.database_route,
+        name='database_route'
     ),
 ]
