@@ -17,5 +17,4 @@ class MathesarConfig(AppConfig):
 
     def ready(self):
         """Perform initialization tasks."""
-        import mathesar.signals  # noqa
         post_migrate.connect(_prepare_database_model)
