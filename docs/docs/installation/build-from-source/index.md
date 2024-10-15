@@ -1,5 +1,8 @@
 # Install Mathesar from source on Linux
 
+!!! danger "Not a stable release"
+    This is a testing build released with the goal of gathering feedback from our community. It has **[many known issues](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aissue+milestone%3Av0.2.0-testing.2+)** and is not recommended for production use.
+
 !!! warning "For experienced Linux sysadmins"
     To follow this guide you need be experienced with Linux server administration, including the command line interface and some common utilities.
 
@@ -131,14 +134,14 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
     git clone https://github.com/mathesar-foundation/mathesar.git .
     ```
 
-1. Checkout the tag of the latest stable release, `{{mathesar_version}}`.
+1. Check out the tag of the release or build you'd like to install, `{{mathesar_version}}`.
 
     ```
     git checkout {{mathesar_version}}
     ```
 
     !!! warning "Important"
-        If you don't run the above command you'll end up installing the latest _development_ version of Mathesar, which will be less stable.
+        If you don't run the above command you'll end up installing the latest _development_ version of Mathesar.
 
 1. We need to create a python virtual environment for the Mathesar application.
 
