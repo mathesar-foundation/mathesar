@@ -28,9 +28,9 @@
   <svelte:fragment slot="header">
     <RichText text={$_('we_will_add_a_column_in_x_to_y')} let:slotName>
       {#if slotName === 'baseTable'}
-        <Pill table={target} which={targetWhich} />
+        <Pill table={base} which={targetWhich} />
       {:else if slotName === 'targetTable'}
-        <Pill table={base} which={baseWhich} />
+        <Pill table={target} which={baseWhich} />
       {/if}
     </RichText>
   </svelte:fragment>
