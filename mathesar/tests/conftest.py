@@ -25,7 +25,7 @@ from mathesar.imports.base import create_table_from_data_file
 from mathesar.models.base import DataFile
 from mathesar.models.deprecated import Schema, Table, Connection
 from mathesar.models.deprecated import Column as mathesar_model_column
-from mathesar.models.users import DatabaseRole, SchemaRole, User
+from mathesar.models.users import User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
@@ -545,80 +545,3 @@ def user_tom():
     user.save()
     yield user
     user.delete()
-
-
-@pytest.fixture
-def db_manager_client_factory(user_bob):
-    def _db_manager_client(schema):
-        role = 'manager'
-        client = APIClient()
-        client.login(username=user_bob.username, password='password')
-        DatabaseRole.objects.create(user=user_bob, database=schema.database, role=role)
-        return client
-    return _db_manager_client
-
-
-@pytest.fixture
-def db_editor_client_factory(user_turdy):
-    def _db_editor_client(schema):
-        role = 'editor'
-        client = APIClient()
-        client.login(username=user_turdy.username, password='password')
-        DatabaseRole.objects.create(user=user_turdy, database=schema.database, role=role)
-        return client
-    return _db_editor_client
-
-
-@pytest.fixture
-def schema_manager_client_factory(user_alice):
-    def _schema_manager_client(schema):
-        role = 'manager'
-        client = APIClient()
-        client.login(username=user_alice.username, password='password')
-        SchemaRole.objects.create(user=user_alice, schema=schema, role=role)
-        return client
-    return _schema_manager_client
-
-
-@pytest.fixture
-def schema_viewer_client_factory(user_jerry):
-    def _schema_viewer_client(schema):
-        role = 'viewer'
-        client = APIClient()
-        client.login(username=user_jerry.username, password='password')
-        SchemaRole.objects.create(user=user_jerry, schema=schema, role=role)
-        return client
-    return _schema_viewer_client
-
-
-@pytest.fixture
-def db_viewer_schema_manager_client_factory(user_tom):
-    def _db_viewer_schema_manager_client(schema):
-        schema_role = 'manager'
-        db_role = 'viewer'
-
-        client = APIClient()
-        client.login(username=user_tom.username, password='password')
-        DatabaseRole.objects.create(user=user_tom, database=schema.database, role=db_role)
-        SchemaRole.objects.create(user=user_tom, schema=schema, role=schema_role)
-        return client
-    return _db_viewer_schema_manager_client
-
-
-@pytest.fixture
-def superuser_client_factory(client):
-    """
-    A facade for the `client` fixture
-     to the same behaviour as other role based client factories
-    """
-    def _client(schema):
-        return client
-    return _client
-
-
-@pytest.fixture
-def anonymous_client_factory():
-    def _client(schema):
-        client = APIClient()
-        return client
-    return _client
