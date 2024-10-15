@@ -9,7 +9,6 @@ from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
     MathesarAPIException,
     get_default_exception_detail,
 )
-from mathesar.models.deprecated import Constraint
 
 
 class UniqueViolationAPIException(MathesarAPIException):
@@ -32,21 +31,6 @@ class UniqueViolationAPIException(MathesarAPIException):
     ):
         if details is None and table is not None:
             details = {}
-            try:
-                constraint_oid = get_constraint_oid_by_name_and_table_oid(
-                    exception.orig.diag.constraint_name,
-                    table.oid,
-                    table._sa_engine
-                )
-                constraint = Constraint.objects.get(table=table, oid=constraint_oid)
-                details = {
-                    "constraint": constraint.id,
-                    "constraint_columns": [c.id for c in constraint.columns],
-                }
-            except TypeError:
-                details = {
-                    "constraint": None,
-                }
             details.update(
                 {
                     "original_details": exception.orig.diag.message_detail,
