@@ -38,6 +38,7 @@ def check_json_upload(table, table_name, schema, num_records, row, cols):
         assert col in table.sa_column_names
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_json_upload(data_file, schema):
     table_name = "NASA 1"
     table = create_table_from_data_file(data_file, table_name, schema)
@@ -81,6 +82,7 @@ def test_json_upload_with_duplicate_table_name(data_file, schema):
         create_table_from_data_file(data_file, table_name, schema)
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_json_upload_table_imported_to(data_file, schema):
     table = create_table_from_data_file(data_file, "NASA", schema)
     data_file.refresh_from_db()

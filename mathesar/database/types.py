@@ -6,7 +6,6 @@ from enum import Enum
 from db.types.base import (
     PostgresType, MathesarCustomType
 )
-from db.types.hintsets import db_types_hinted
 
 
 class UIType(Enum):
@@ -158,57 +157,8 @@ class UIType(Enum):
         return self.id
 
 
-def ui_types_that_satisfy_hintset(ui_types_mapped_to_hintsets, hintset):
-    """
-    Provided a mapping of UI types to their hintsets and a hintset, tries to find UI
-    types whose hintsets satisfy the passed hintset, meaning the UI types whose hintsets are
-    supersets of the passed hintset.
-    """
-    hintset = set(hintset)
-    return frozenset(
-        ui_type
-        for ui_type, ui_type_hintset
-        in ui_types_mapped_to_hintsets.items()
-        if set.issubset(hintset, ui_type_hintset)
-    )
-
-
-def get_ui_types_mapped_to_hintsets():
-    """
-    Returns a dict where the keys are UI types and the values their hintsets.
-    A UI type's hintset is defined as the intersection of the hintsets of its associated
-    database types.
-    """
-    ui_types_mapped_to_hintsets = {}
-    for ui_type in UIType:
-        associated_db_types = ui_type.db_types
-        associated_db_type_hintsets = tuple(
-            set(db_types_hinted[associated_db_type])
-            for associated_db_type in associated_db_types
-            if associated_db_type in db_types_hinted
-        )
-        hintsets_intersection = _safe_set_intersection(associated_db_type_hintsets)
-        ui_types_mapped_to_hintsets[ui_type] = frozenset(hintsets_intersection)
-    return ui_types_mapped_to_hintsets
-
-
-def _safe_set_intersection(sets):
-    # set.intersection fails if it is not passed anything.
-    if len(sets) > 0:
-        return set.intersection(*sets)
-    else:
-        return set()
-
-
 def get_ui_type_from_db_type(db_type_to_find):
     for ui_type in UIType:
         associated_db_types = ui_type.db_types
         if db_type_to_find in associated_db_types:
             return ui_type
-
-
-def get_ui_type_from_id(ui_type_id):
-    try:
-        return UIType(ui_type_id)
-    except ValueError:
-        return None

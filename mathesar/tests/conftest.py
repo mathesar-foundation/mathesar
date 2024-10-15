@@ -203,11 +203,6 @@ def patents_excel_filepath():
 
 
 @pytest.fixture(scope='session')
-def table_with_id_col_filepath():
-    return 'mathesar/tests/data/table_with_id_col.csv'
-
-
-@pytest.fixture(scope='session')
 def paste_filename():
     return 'mathesar/tests/data/patents.txt'
 
@@ -225,11 +220,6 @@ def patents_url():
 @pytest.fixture(scope='session')
 def patents_url_filename():
     return 'mathesar/tests/data/api_patents.csv'
-
-
-@pytest.fixture(scope='session')
-def data_types_csv_filepath():
-    return 'mathesar/tests/data/data_types.csv'
 
 
 @pytest.fixture(scope='session')

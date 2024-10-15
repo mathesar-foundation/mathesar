@@ -1,4 +1,3 @@
-import psycopg
 from db import engine
 
 
@@ -18,20 +17,4 @@ def _get_credentials_for_db_model(db_model):
         hostname=db_model.host,
         database=db_model.db_name,
         port=db_model.port,
-    )
-
-
-def get_psycopg_connection(db_model):
-    """
-    Get a psycopg connection, given a Database model.
-
-    Args:
-        db_model: The Django model corresponding to the Database.
-    """
-    return psycopg.connect(
-        host=db_model.host,
-        port=db_model.port,
-        dbname=db_model.db_name,
-        user=db_model.username,
-        password=db_model.password,
     )

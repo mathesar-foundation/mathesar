@@ -3,7 +3,6 @@ from django.dispatch import receiver
 
 from mathesar.models.deprecated import (
     Column, Table, _set_default_preview_template,
-    _create_table_settings,
 )
 from mathesar.state.django import reflect_new_table_constraints
 
@@ -14,13 +13,6 @@ def sync_table_constraints(**kwargs):
     # Constraint model instances for that table's constraints.
     if kwargs['created']:
         reflect_new_table_constraints(kwargs['instance'])
-
-
-@receiver(post_save, sender=Table)
-def create_table_settings(**kwargs):
-    if kwargs['created']:
-        instance = kwargs['instance']
-        _create_table_settings([instance])
 
 
 @receiver(post_save, sender=Column)
