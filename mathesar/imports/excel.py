@@ -10,8 +10,6 @@ from mathesar.imports.utils import get_alternate_column_names, process_column_na
 from psycopg2.errors import IntegrityError, DataError
 from sqlalchemy.exc import IntegrityError as sqlalchemy_integrity_error
 
-from mathesar.state import reset_reflection
-
 
 def insert_records_from_dataframe(name, schema, column_names, engine, comment, dataframe):
     table = create_string_column_table(
@@ -63,5 +61,4 @@ def create_db_table_from_excel_data_file(data_file, name, schema, comment=None):
         column_names_alt = get_alternate_column_names(column_names)
         table = insert_records_from_dataframe(name, schema, column_names_alt, engine, comment, dataframe)
 
-    reset_reflection(db_name=db_model.name)
     return table

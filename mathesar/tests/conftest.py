@@ -26,8 +26,6 @@ from mathesar.models.users import User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
 import conftest
-from mathesar.state import reset_reflection
-from mathesar.state.base import set_initial_reflection_happened
 from db.metadata import get_empty_metadata
 from db.tests.columns.utils import create_test_table
 
@@ -54,21 +52,6 @@ def django_db_modify_db_settings(
         django_db_modify_db_settings,   # noqa: F841
 ):
     return
-
-
-@pytest.fixture(autouse=True)
-def reflection_fixture():
-    """
-    During setup, makes sure reflection is reset when one of our models' querysets is next
-    accessed. During teardown, eagerly resets reflection; unfortunately that currently causes
-    redundant reflective calls to Postgres.
-    """
-    logger = logging.getLogger('mark_reflection_as_not_having_happened')
-    logger.debug('setup')
-    set_initial_reflection_happened(False)
-    yield
-    reset_reflection()
-    logger.debug('teardown')
 
 
 @pytest.fixture(scope="session", autouse=True)

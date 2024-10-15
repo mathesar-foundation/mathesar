@@ -13,7 +13,6 @@ from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.api.ui.serializers.users import UserSerializer
-from mathesar.state import reset_reflection
 from mathesar import __version__
 
 
@@ -100,13 +99,6 @@ def get_common_data(request, database_id=None, schema_id=None):
 
 class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
     pass
-
-
-@login_required
-@api_view(['POST'])
-def reflect_all(_):
-    reset_reflection()
-    return Response(status=status.HTTP_200_OK)
 
 
 @login_required

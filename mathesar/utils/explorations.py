@@ -1,4 +1,5 @@
 from db.engine import create_future_engine_with_custom_types
+from db.metadata import get_empty_metadata
 from db.records.operations.select import get_count
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.queries.operations.process import get_transforms_with_summarizes_speced
@@ -22,7 +23,6 @@ from db.functions.packed import DistinctArrayAgg
 from mathesar.api.utils import process_annotated_records
 from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
-from mathesar.state import get_cached_metadata
 
 
 def list_explorations(database_id, schema_oid=None):
@@ -76,7 +76,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         conn.info.dbname,
         conn.info.port
     )
-    metadata = get_cached_metadata()
+    metadata = get_empty_metadata()
     base_table_oid = exploration_def["base_table_oid"]
     initial_columns = exploration_def['initial_columns']
     processed_initial_columns = []

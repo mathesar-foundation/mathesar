@@ -12,8 +12,6 @@ from mathesar.imports.utils import get_alternate_column_names, process_column_na
 from db.constants import COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
-from mathesar.state import reset_reflection
-
 # The user-facing documentation replicates these delimiter characters. If you
 # change this variable, please update the documentation as well.
 ALLOWED_DELIMITERS = ",\t:|;"
@@ -159,5 +157,4 @@ def create_db_table_from_csv_data_file(data_file, name, schema, comment=None):
         drop_table(name=name, schema=schema.name, engine=engine)
         column_names_alt = get_alternate_column_names(column_names)
         table = insert_records_from_csv_data_file(name, schema, column_names_alt, engine, comment, data_file)
-    reset_reflection(db_name=db_model.name)
     return table

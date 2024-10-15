@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
+from django.utils.functional import cached_property
 from encrypted_fields.fields import EncryptedCharField
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -50,8 +51,6 @@ from mathesar.utils import models as model_utils
 from mathesar.utils.prefetch import PrefetchManager, Prefetcher
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import UIType, get_ui_type_from_db_type
-from mathesar.state import make_sure_initial_reflection_happened, get_cached_metadata, reset_reflection
-from mathesar.state.cached_property import cached_property
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 
 
@@ -60,7 +59,6 @@ NAME_CACHE_INTERVAL = 60 * 5
 
 class DatabaseObjectManager(PrefetchManager):
     def get_queryset(self):
-        make_sure_initial_reflection_happened()
         return super().get_queryset()
 
 
@@ -230,12 +228,10 @@ class Schema(DatabaseObject):
 
     def update_sa_schema(self, update_params):
         result = model_utils.update_sa_schema(self, update_params)
-        reset_reflection(db_name=self.database.name)
         return result
 
     def delete_sa_schema(self):
         drop_schema_via_name(self._sa_engine, self.name, cascade=True)
-        reset_reflection(db_name=self.database.name)
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
@@ -444,7 +440,6 @@ class Table(DatabaseObject, Relation):
             self.oid,
             column_data,
         )
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def alter_column(self, column_attnum, column_data):
@@ -454,7 +449,6 @@ class Table(DatabaseObject, Relation):
             column_attnum,
             column_data,
         )
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def drop_column(self, column_attnum):
@@ -463,7 +457,6 @@ class Table(DatabaseObject, Relation):
             column_attnum,
             self.schema._sa_engine,
         )
-        reset_reflection(db_name=self.schema.database.name)
 
     def duplicate_column(self, column_attnum, copy_data, copy_constraints, name=None):
         result = duplicate_column(
@@ -474,7 +467,6 @@ class Table(DatabaseObject, Relation):
             copy_data=copy_data,
             copy_constraints=copy_constraints,
         )
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def get_preview(self, column_definitions):
@@ -507,7 +499,6 @@ class Table(DatabaseObject, Relation):
 
     def delete_sa_table(self):
         result = drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def get_record(self, id_value):
@@ -561,7 +552,6 @@ class Table(DatabaseObject, Relation):
             add_constraint_via_sql_alchemy(constraint_obj, engine=self._sa_engine)
         )
         result = Constraint.current_objects.create(oid=constraint_oid, table=self)
-        reset_reflection(db_name=self.schema.database.name)
         return result
 
     def get_column_name_id_bidirectional_map(self):
@@ -624,7 +614,6 @@ class Table(DatabaseObject, Relation):
         self.save()
         remainder_column_names = column_names_id_map.keys() - column_names_to_move
         self.update_column_reference(remainder_column_names, column_names_id_map)
-        reset_reflection(db_name=self.schema.database.name)
         return extracted_sa_table, remainder_sa_table
 
     def split_table(
@@ -656,7 +645,6 @@ class Table(DatabaseObject, Relation):
         extracted_table.update_column_reference(extracted_column_names, column_names_id_map)
         remainder_table = Table.current_objects.get(schema__database=self.schema.database, oid=remainder_table_oid)
         remainder_table.update_column_reference(remainder_column_names, column_names_id_map)
-        reset_reflection(db_name=self.schema.database.name)
         remainder_fk_column = Column.objects.get(table=remainder_table, attnum=linking_fk_column_attnum)
 
         return extracted_table, remainder_table, remainder_fk_column
@@ -883,7 +871,6 @@ class Constraint(DatabaseObject):
             self.name
         )
         self.delete()
-        reset_reflection(db_name=self.table.schema.database.name)
 
 
 class PreviewColumnSettings(BaseModel):
