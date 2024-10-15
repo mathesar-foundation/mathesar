@@ -3,7 +3,8 @@ import pytest
 from django.core.files import File
 from sqlalchemy import text
 
-from mathesar.models.deprecated import DataFile, Schema
+from mathesar.models.base import DataFile
+from mathesar.models.deprecated import Schema
 from mathesar.errors import InvalidTableError
 from mathesar.imports.base import create_table_from_data_file
 from mathesar.imports.csv import get_sv_dialect, get_sv_reader
@@ -160,13 +161,6 @@ def test_csv_upload_with_duplicate_table_name(data_file, schema):
 
     with pytest.raises(DuplicateTable):
         create_table_from_data_file(data_file, table_name, schema)
-
-
-@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
-def test_csv_upload_table_imported_to(data_file, schema):
-    table = create_table_from_data_file(data_file, "NASA", schema)
-    data_file.refresh_from_db()
-    assert data_file.table_imported_to == table
 
 
 get_dialect_test_list = [

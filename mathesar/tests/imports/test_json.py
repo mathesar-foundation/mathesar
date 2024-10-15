@@ -3,7 +3,8 @@ import pytest
 from django.core.files import File
 from sqlalchemy import text
 
-from mathesar.models.deprecated import DataFile, Schema
+from mathesar.models.base import DataFile
+from mathesar.models.deprecated import Schema
 from mathesar.imports.base import create_table_from_data_file
 from db.schemas.operations.create import create_schema_via_sql_alchemy
 from db.schemas.utils import get_schema_oid_from_name
@@ -80,10 +81,3 @@ def test_json_upload_with_duplicate_table_name(data_file, schema):
 
     with pytest.raises(DuplicateTable):
         create_table_from_data_file(data_file, table_name, schema)
-
-
-@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
-def test_json_upload_table_imported_to(data_file, schema):
-    table = create_table_from_data_file(data_file, "NASA", schema)
-    data_file.refresh_from_db()
-    assert data_file.table_imported_to == table

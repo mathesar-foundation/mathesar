@@ -2,7 +2,8 @@ import pytest
 
 from django.core.files import File
 
-from mathesar.models.deprecated import DataFile, Schema
+from mathesar.models.base import DataFile
+from mathesar.models.deprecated import Schema
 from mathesar.imports.base import create_table_from_data_file
 from db.schemas.utils import get_schema_oid_from_name
 from psycopg.errors import DuplicateTable
@@ -74,13 +75,3 @@ def test_excel_upload_with_duplicate_table_name(data_file, engine_with_schema):
 
     with pytest.raises(DuplicateTable):
         create_table_from_data_file(data_file, table_name, schema)
-
-
-@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
-def test_excel_upload_table_imported_to(data_file, engine_with_schema):
-    engine, schema_name = engine_with_schema
-    schema_oid = get_schema_oid_from_name(schema_name, engine)
-    schema = Schema.objects.get(oid=schema_oid)
-    table = create_table_from_data_file(data_file, "NASA", schema)
-    data_file.refresh_from_db()
-    assert data_file.table_imported_to == table

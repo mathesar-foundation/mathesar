@@ -7,7 +7,8 @@ from sqlalchemy import Table as SATable
 
 from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
-from mathesar.models.deprecated import Table, DataFile, Column as ServiceLayerColumn
+from mathesar.models.deprecated import Table, Column as ServiceLayerColumn
+from mathesar.models.base import DataFile
 from db.metadata import get_empty_metadata
 from mathesar.state import reset_reflection
 

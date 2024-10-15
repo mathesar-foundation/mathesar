@@ -692,7 +692,6 @@ class Table(DatabaseObject, Relation):
         data_file = data_files[0]
         try:
             table, _ = insert_from_select(from_table, target_table, engine, col_mappings)
-            data_file.table_imported_to = existing_table
         except Exception as e:
             # ToDo raise specific exceptions.
             raise e
@@ -885,26 +884,6 @@ class Constraint(DatabaseObject):
         )
         self.delete()
         reset_reflection(db_name=self.table.schema.database.name)
-
-
-class DataFile(BaseModel):
-    created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
-    file_type_choices = models.TextChoices("type", "CSV TSV JSON")
-
-    file = models.FileField(upload_to=model_utils.user_directory_path)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
-    created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
-    type = models.CharField(max_length=128, choices=file_type_choices.choices)
-    table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
-                                          null=True, on_delete=models.SET_NULL)
-
-    base_name = models.CharField(max_length=100)
-    header = models.BooleanField(default=True)
-    max_level = models.IntegerField(default=0, blank=True)
-    sheet_index = models.IntegerField(default=0)
-    delimiter = models.CharField(max_length=1, default=',', blank=True)
-    escapechar = models.CharField(max_length=1, blank=True)
-    quotechar = models.CharField(max_length=1, default='"', blank=True)
 
 
 class PreviewColumnSettings(BaseModel):

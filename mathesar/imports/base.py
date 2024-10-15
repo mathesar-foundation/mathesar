@@ -34,6 +34,5 @@ def create_table_from_data_file(data_file, name, schema, comment=None):
     )
     table.import_verified = False
     table.save()
-    data_file.table_imported_to = table
     data_file.save()
     return table

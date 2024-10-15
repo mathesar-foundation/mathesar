@@ -22,7 +22,8 @@ from db.schemas.utils import get_schema_oid_from_name
 
 import mathesar.tests.conftest
 from mathesar.imports.base import create_table_from_data_file
-from mathesar.models.deprecated import Schema, Table, Connection, DataFile
+from mathesar.models.base import DataFile
+from mathesar.models.deprecated import Schema, Table, Connection
 from mathesar.models.deprecated import Column as mathesar_model_column
 from mathesar.models.users import DatabaseRole, SchemaRole, User
 
