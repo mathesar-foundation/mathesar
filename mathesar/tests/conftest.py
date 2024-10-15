@@ -21,10 +21,7 @@ from db.columns.operations.select import get_column_attnum_from_name
 from db.schemas.utils import get_schema_oid_from_name
 
 import mathesar.tests.conftest
-from mathesar.imports.base import create_table_from_data_file
 from mathesar.models.base import DataFile
-from mathesar.models.deprecated import Schema, Table, Connection
-from mathesar.models.deprecated import Column as mathesar_model_column
 from mathesar.models.users import User
 
 from fixtures.utils import create_scoped_fixtures, get_fixture_value
@@ -83,66 +80,6 @@ def ignore_all_dbs_except_default(SES_dj_databases):
     for entry_name in set(SES_dj_databases.keys()):
         if entry_name != entry_name_to_keep:
             del SES_dj_databases[entry_name]
-
-
-# TODO consider renaming dj_db to target_db
-def create_dj_db(request):
-    """
-    Like create_db, but adds the new db to Django's settings.DATABASES dict.
-    """
-    add_db_to_dj_settings = get_fixture_value(
-        request,
-        mathesar.tests.conftest.add_db_to_dj_settings
-    )
-    create_db = get_fixture_value(
-        request,
-        conftest.create_db
-    )
-
-    def _create_and_add(db_name):
-        create_db(db_name)
-        add_db_to_dj_settings(db_name)
-        credentials = settings.DATABASES.get(db_name)
-        database_model = Connection.current_objects.create(
-            name=db_name,
-            db_name=db_name,
-            username=credentials['USER'],
-            password=credentials['PASSWORD'],
-            host=credentials['HOST'],
-            port=credentials['PORT']
-        )
-        return database_model
-    yield _create_and_add
-
-
-# defines:
-# FUN_create_dj_db
-# CLA_create_dj_db
-# MOD_create_dj_db
-# SES_create_dj_db
-create_scoped_fixtures(globals(), create_dj_db)
-
-
-@pytest.fixture(scope="function", autouse=True)
-def test_db_model(request, test_db_name, django_db_blocker):
-    add_db_to_dj_settings = get_fixture_value(
-        request,
-        mathesar.tests.conftest.add_db_to_dj_settings
-    )
-
-    add_db_to_dj_settings(test_db_name)
-    with django_db_blocker.unblock():
-        credentials = settings.DATABASES.get(test_db_name)
-        database_model = Connection.current_objects.create(
-            name=test_db_name,
-            db_name=test_db_name,
-            username=credentials['USER'],
-            password=credentials['PASSWORD'],
-            host=credentials['HOST'],
-            port=credentials['PORT']
-        )
-    yield database_model
-    database_model.delete()
 
 
 def add_db_to_dj_settings(request):
@@ -273,73 +210,6 @@ def multiple_sheets_excel_filepath():
     return 'mathesar/tests/data/excel_parsing/multiple_sheets.xlsx'
 
 
-@pytest.fixture
-def db_table_to_dj_table(engine, create_schema):
-    """
-    Factory creating Django Table models from DB/SA tables.
-    """
-    def _create_ma_table(db_table):
-        schema_name = db_table.schema
-        dj_schema = create_schema(schema_name)
-        db_table_oid = get_oid_from_table(
-            db_table.name, schema_name, engine
-        )
-        dj_table, _ = Table.current_objects.get_or_create(
-            oid=db_table_oid, schema=dj_schema
-        )
-        return dj_table
-    yield _create_ma_table
-
-
-@pytest.fixture
-def empty_nasa_table(patent_schema, engine_with_schema):
-    engine, _ = engine_with_schema
-    NASA_TABLE = 'NASA Schema List'
-    db_table = SATable(
-        NASA_TABLE, MetaData(bind=engine),
-        Column('id', Integer, primary_key=True),
-        schema=patent_schema.name,
-    )
-    db_table.create()
-    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
-
-    yield table
-
-    table.delete_sa_table()
-    table.delete()
-
-
-@pytest.fixture
-def patent_schema(create_schema):
-    PATENT_SCHEMA = 'Patents'
-    yield create_schema(PATENT_SCHEMA)
-
-
-@pytest.fixture
-def reservations_schema(create_schema):
-    RESERVATIONS_SCHEMA = 'Reservations'
-    yield create_schema(RESERVATIONS_SCHEMA)
-
-
-# TODO rename to create_ma_schema
-@pytest.fixture
-def create_schema(test_db_model, create_db_schema):
-    """
-    Creates a DJ Schema model factory, making sure to cache and clean up new instances.
-    """
-    engine = test_db_model._sa_engine
-
-    def _create_schema(schema_name):
-        create_db_schema(schema_name, engine)
-        schema_oid = get_schema_oid_from_name(schema_name, engine)
-        schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
-        return schema_model
-
-    yield _create_schema
-    # NOTE: Schema model is not cleaned up. Maybe invalidate cache?
-
-
 # TODO rename to create_mathesar_db_table
 @pytest.fixture
 def create_mathesar_table(create_db_schema):
@@ -355,99 +225,10 @@ def create_mathesar_table(create_db_schema):
     yield _create_mathesar_table
 
 
-@pytest.fixture
-def create_reservations_table(engine_with_schema, reservations_schema):
-    engine, _ = engine_with_schema
-    table_name = 'Exclusion Check'
-    schema_name = reservations_schema.name
-    cols = [
-        Column('id', Integer, primary_key=True),
-        Column('room_number', Integer),
-        Column('check_in_date', Date),
-        Column('check_out_date', Date)
-    ]
-    insert_data = [
-        (1, 1, '11/10/2023', '11/15/2023'),
-        (2, 1, '11/16/2023', '11/20/2023')
-    ]
-    sa_table = create_test_table(table_name, cols, insert_data, schema_name, engine)
-    table_oid = get_oid_from_table(sa_table.name, schema_name, engine)
-    table = Table.current_objects.create(oid=table_oid, schema=reservations_schema)
-    yield table
-    table.delete_sa_table()
-    table.delete()
-
-
-@pytest.fixture
-def create_patents_table(patents_csv_filepath, patent_schema, create_table):
-    schema_name = patent_schema.name
-    csv_filepath = patents_csv_filepath
-
-    def _create_table(table_name, schema_name=schema_name):
-        return create_table(
-            table_name=table_name,
-            schema_name=schema_name,
-            csv_filepath=csv_filepath,
-        )
-
-    return _create_table
-
-
-@pytest.fixture
-def patents_table(create_patents_table, uid):
-    return create_patents_table(f"table_patents_{uid}")
-
-
-# TODO rename to create_ma_table_from_csv
-@pytest.fixture
-def create_table(create_schema):
-    def _create_table(table_name, schema_name, csv_filepath):
-        data_file = _get_datafile_for_path(csv_filepath)
-        schema_model = create_schema(schema_name)
-        return create_table_from_data_file(data_file, table_name, schema_model)
-    return _create_table
-
-
 def _get_datafile_for_path(path):
     with open(path, 'rb') as file:
         datafile = DataFile.objects.create(file=File(file), type='csv')
         return datafile
-
-
-@pytest.fixture
-def create_column():
-    def _create_column(table, column_data):
-        attnum = table.add_column(column_data)[0]
-        column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
-        return column[0]
-    return _create_column
-
-
-@pytest.fixture
-def custom_types_schema_url(schema, live_server):
-    return f"{live_server}/{schema.database.name}/{schema.id}"
-
-
-@pytest.fixture
-def create_column_with_display_options():
-    def _create_column(table, column_data):
-        column = table.add_column(column_data)
-        attnum = get_column_attnum_from_name(
-            table.oid,
-            [column.name],
-            table.schema._sa_engine,
-            metadata=get_empty_metadata()
-        )
-        # passing table object caches sa_columns, missing out any new columns
-        # So table.id is passed to get new instance of table.
-        column = mathesar_model_column.current_objects.get_or_create(
-            attnum=attnum,
-            table_id=table.id,
-            display_options=column_data.get('display_options', None)
-        )
-        return column[0]
-
-    return _create_column
 
 
 @pytest.fixture
