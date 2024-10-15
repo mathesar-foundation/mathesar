@@ -15,7 +15,8 @@
   } from '@mathesar/stores/table-data';
 
   import Row from './row/Row.svelte';
-  import ScrollAndResetHandler from './ScrollAndResetHandler.svelte';
+  import RowHeightAdjuster from './RowHeightAdjuster.svelte';
+  import ScrollResetHandler from './ScrollResetHandler.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -62,7 +63,8 @@
       let:items
       let:api
     >
-      <ScrollAndResetHandler {api} />
+      <ScrollResetHandler {api} />
+      <RowHeightAdjuster {api} />
       {#each items as item (item.key)}
         {#if $displayableRecords[item.index] && !(isPlaceholderRow($displayableRecords[item.index]) && !canAddRow)}
           <Row style={item.style} bind:row={$displayableRecords[item.index]} />

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { beforeUpdate, tick } from 'svelte';
 
-  import type { States } from '@mathesar/api/rest/utils/requestUtils';
   import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
   import {
     Filtering,
@@ -15,7 +14,7 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ recordsData, display, meta } = $tabularData);
-  $: ({ newRecords, state } = recordsData);
+  $: ({ newRecords } = recordsData);
   $: ({ sorting, filtering, grouping, pagination } = meta);
   $: ({ displayableRecords } = display);
 
@@ -46,22 +45,8 @@
 
   let previousNewRecordsCount = 0;
   let previousAllRecordsCount = 0;
-  let prevGrouping: Grouping;
-  let prevRecordState: States;
 
-  async function resetIndex(_recordState: States, _displayableRecords: Row[]) {
-    if (
-      prevGrouping !== $grouping ||
-      ($grouping.entries.length > 0 && prevRecordState !== _recordState)
-    ) {
-      await tick();
-      // Reset if grouping is active
-      api.recalculateHeightsAfterIndex(0);
-      prevGrouping = $grouping;
-      prevRecordState = _recordState;
-      return;
-    }
-
+  async function resetIndex(_displayableRecords: Row[]) {
     const allRecordCount = _displayableRecords.length ?? 0;
     const newRecordCount = $newRecords.length ?? 0;
     if (previousNewRecordsCount !== newRecordCount) {
@@ -79,5 +64,5 @@
     }
   }
 
-  $: void resetIndex($state, $displayableRecords);
+  $: void resetIndex($displayableRecords);
 </script>
