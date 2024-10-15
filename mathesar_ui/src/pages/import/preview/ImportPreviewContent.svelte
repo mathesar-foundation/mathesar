@@ -1,15 +1,11 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import {
-    CancelOrProceedButtonPair,
-    Spinner,
-  } from '@mathesar-component-library';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { columnsApi } from '@mathesar/api/columns';
-  import type { DataFile } from '@mathesar/api/types/dataFiles';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import { router } from 'tinro';
+
+  import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
+  import { api } from '@mathesar/api/rpc';
+  import type { Column } from '@mathesar/api/rpc/columns';
+  import type { ColumnPreviewSpec } from '@mathesar/api/rpc/tables';
   import {
     Field,
     FieldLayout,
@@ -19,93 +15,120 @@
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import type { Schema } from '@mathesar/models/Schema';
+  import type { Table } from '@mathesar/models/Table';
+  import { runner } from '@mathesar/packages/json-rpc-client-builder';
   import {
     getImportPreviewPageUrl,
     getSchemaPageUrl,
     getTablePageUrl,
   } from '@mathesar/routes/urls';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import AsyncStore from '@mathesar/stores/AsyncStore';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
-    generateTablePreview,
-    getTypeSuggestionsForTable,
-    patchTable,
-    tables,
+    currentTables,
+    deleteTable,
+    updateTable,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
+  import {
+    CancelOrProceedButtonPair,
+    Spinner,
+  } from '@mathesar-component-library';
+
   import ColumnNamingStrategyInput from '../column-names/ColumnNamingStrategyInput.svelte';
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
+
   import ErrorInfo from './ErrorInfo.svelte';
   import ImportPreviewLayout from './ImportPreviewLayout.svelte';
-  import ImportPreviewSheet from './ImportPreviewSheet.svelte';
   import {
     buildColumnPropertiesMap,
     finalizeColumns,
     getSkeletonRecords,
-    makeDeleteTableRequest,
     makeHeaderUpdateRequest,
     processColumns,
   } from './importPreviewPageUtils';
+  import ImportPreviewSheet from './ImportPreviewSheet.svelte';
 
   /** Set via back-end */
   const TRUNCATION_LIMIT = 20;
 
-  const columnsFetch = new AsyncStore(columnsApi.list);
-  const previewRequest = new AsyncStore(generateTablePreview);
-  const typeSuggestionsRequest = new AsyncStore(getTypeSuggestionsForTable);
-  const headerUpdate = makeHeaderUpdateRequest();
-  const cancelationRequest = makeDeleteTableRequest();
-
-  export let database: Database;
-  export let schema: SchemaEntry;
-  export let table: TableEntry;
+  export let schema: Schema;
+  export let table: Table;
   export let dataFile: DataFile;
   export let useColumnTypeInference = false;
 
   let columns: Column[] = [];
   let columnPropertiesMap = buildColumnPropertiesMap([]);
 
-  $: otherTableNames = [...$tables.data.values()]
-    .filter((t) => t.id !== table.id)
+  $: otherTableNames = $currentTables
+    .filter((t) => t.oid !== table.oid)
     .map((t) => t.name);
   $: customizedTableName = requiredField(table.name, [
     uniqueWith(otherTableNames, $_('table_name_already_exists')),
   ]);
   $: form = makeForm({ customizedTableName });
-  $: records = $previewRequest.resolvedValue?.records ?? getSkeletonRecords();
+
+  $: headerUpdateRequest = makeHeaderUpdateRequest({
+    schema,
+    table,
+    dataFile,
+  });
+  $: cancelationRequest = new AsyncStore(() => deleteTable(schema, table.oid));
+  $: typeSuggestionsRequest = new AsyncStore(() =>
+    api.data_modeling
+      .suggest_types({ table_oid: table.oid, database_id: schema.database.id })
+      .run(),
+  );
+  $: previewRequest = new AsyncStore(
+    (columnPreviewSpecs: ColumnPreviewSpec[]) =>
+      api.tables
+        .get_import_preview({
+          database_id: schema.database.id,
+          table_oid: table.oid,
+          columns: columnPreviewSpecs,
+        })
+        .run(),
+  );
+  $: columnsFetch = new AsyncStore(runner(api.columns.list_with_metadata));
+
+  $: records = $previewRequest.resolvedValue ?? getSkeletonRecords();
   $: formInputsAreDisabled = !$previewRequest.isOk;
   $: canProceed = $previewRequest.isOk && $form.canSubmit;
-  $: processedColumns = processColumns(columns, $currentDbAbstractTypes.data);
+  $: processedColumns = processColumns(columns, abstractTypesMap);
 
   async function init() {
-    const columnsResponse = await columnsFetch.run(table.id);
-    const fetchedColumns = columnsResponse?.resolvedValue?.results;
+    const columnsResponse = await columnsFetch.run({
+      database_id: schema.database.id,
+      table_oid: table.oid,
+    });
+    const fetchedColumns = columnsResponse?.resolvedValue;
     if (!fetchedColumns) {
       return;
     }
     columns = fetchedColumns;
     columnPropertiesMap = buildColumnPropertiesMap(columns);
     if (useColumnTypeInference) {
-      const response = await typeSuggestionsRequest.run(table.id);
+      const response = await typeSuggestionsRequest.run();
       if (response.settlement?.state === 'resolved') {
         const typeSuggestions = response.settlement.value;
         columns = columns.map((column) => ({
           ...column,
-          type: typeSuggestions[column.name] ?? column.type,
+          type: typeSuggestions[column.id] ?? column.type,
         }));
       }
     }
-    await previewRequest.run({ table, columns });
+    await previewRequest.run(columns);
   }
   $: table, useColumnTypeInference, void init();
 
   function reload(props: {
-    table?: TableEntry;
+    table?: Pick<Table, 'oid'>;
     useColumnTypeInference?: boolean;
   }) {
-    const tableId = props.table?.id ?? table.id;
+    const tableId = props.table?.oid ?? table.oid;
     router.goto(
-      getImportPreviewPageUrl(database.id, schema.id, tableId, {
+      getImportPreviewPageUrl(schema.database.id, schema.oid, tableId, {
         useColumnTypeInference:
           props.useColumnTypeInference ?? useColumnTypeInference,
       }),
@@ -115,16 +138,12 @@
 
   async function toggleHeader() {
     previewRequest.reset();
-    const response = await headerUpdate.run({
-      database,
-      dataFile,
+    const response = await headerUpdateRequest.run({
       firstRowIsHeader: !dataFile.header,
-      schema,
-      table,
       customizedTableName: $customizedTableName,
     });
     if (response.resolvedValue) {
-      reload({ table: response.resolvedValue });
+      reload({ table: response.resolvedValue, useColumnTypeInference });
     }
   }
 
@@ -137,13 +156,13 @@
     columns = columns.map((c) =>
       c.id === updatedColumn.id ? updatedColumn : c,
     );
-    return previewRequest.run({ table, columns });
+    return previewRequest.run(columns);
   }
 
   async function cancel() {
-    const response = await cancelationRequest.run({ database, schema, table });
+    const response = await cancelationRequest.run();
     if (response.isOk) {
-      router.goto(getSchemaPageUrl(database.id, schema.id), true);
+      router.goto(getSchemaPageUrl(schema.database.id, schema.oid), true);
     } else {
       toast.fromError(response.error);
     }
@@ -151,12 +170,24 @@
 
   async function finishImport() {
     try {
-      await patchTable(table.id, {
-        name: $customizedTableName,
-        import_verified: true,
-        columns: finalizeColumns(columns, columnPropertiesMap),
+      await updateTable({
+        schema,
+        table: {
+          oid: table.oid,
+          name: $customizedTableName,
+          metadata: {
+            import_verified: true,
+          },
+        },
+        columnPatchSpecs: finalizeColumns(columns, columnPropertiesMap),
+        columnsToDelete: Object.entries(columnPropertiesMap)
+          .filter(([, { selected }]) => !selected)
+          .map(([id]) => parseInt(id, 10)),
       });
-      router.goto(getTablePageUrl(database.id, schema.id, table.id), true);
+      router.goto(
+        getTablePageUrl(schema.database.id, schema.oid, table.oid),
+        true,
+      );
     } catch (err) {
       toast.fromError(err);
     }
@@ -196,7 +227,7 @@
           on:retry={init}
           on:delete={cancel}
         />
-      {:else if !$previewRequest.hasInitialized}
+      {:else if !$previewRequest.hasSettled}
         <div class="loading"><Spinner /></div>
       {:else if $previewRequest.error}
         <ErrorInfo
@@ -204,9 +235,9 @@
           on:retry={init}
           on:delete={cancel}
         />
-      {:else if $headerUpdate.error}
+      {:else if $headerUpdateRequest.error}
         <ErrorInfo
-          error={$headerUpdate.error}
+          error={$headerUpdateRequest.error}
           on:retry={init}
           on:delete={cancel}
         />
@@ -266,7 +297,8 @@
   }
   .sheet-holder {
     max-width: fit-content;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin: 0 auto;
     border: 1px solid var(--slate-200);
   }

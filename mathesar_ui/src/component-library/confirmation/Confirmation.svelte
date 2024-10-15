@@ -1,7 +1,9 @@
 <script lang="ts">
   import CancelOrProceedButtonPair from '@mathesar-component-library-dir/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
   import { ControlledModal } from '@mathesar-component-library-dir/modal';
+
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
+
   import type { ConfirmationController } from './ConfirmationController';
 
   export let controller: ConfirmationController;
@@ -27,8 +29,8 @@
   async function handleProceedButton() {
     try {
       allowClose = false;
-      await onProceed();
-      onSuccess();
+      const result = await onProceed();
+      onSuccess(result);
       $resolve(true);
       modal.close();
     } catch (error) {

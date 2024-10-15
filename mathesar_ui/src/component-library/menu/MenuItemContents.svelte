@@ -4,6 +4,7 @@
 
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+
   import { getMenuControllerFromContext } from './MenuController';
 
   const menu = getMenuControllerFromContext();

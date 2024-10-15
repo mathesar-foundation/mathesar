@@ -1,5 +1,5 @@
 <script>
-  import { makeForm, FormBuilder } from '../index';
+  import { FormBuilder, makeForm } from '../index';
 
   export let formConfig;
 

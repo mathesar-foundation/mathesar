@@ -1,6 +1,6 @@
 <script lang="ts">
+  import type { ConditionalSwitchElement, FormValueStore } from './types';
   import { computeSwitchElements } from './utils';
-  import type { FormValueStore, ConditionalSwitchElement } from './types';
 
   export let store: FormValueStore;
   export let cases: ConditionalSwitchElement['cases'];

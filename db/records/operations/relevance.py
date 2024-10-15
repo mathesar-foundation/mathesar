@@ -1,5 +1,6 @@
 from sqlalchemy import case, select, desc
 from db.types import categories
+from db.types.base import MathesarCustomType
 from db.types.operations.convert import get_db_type_enum_from_class
 
 WEIGHT_4 = 4
@@ -37,8 +38,8 @@ def _get_scored_selectable(relation, parameters_dict):
 
 def _get_col_score_expr(col, param_val):
     col_type = get_db_type_enum_from_class(col.type.__class__)
-
-    if col_type in categories.STRING_LIKE_TYPES:
+    searchable_string_types = categories.STRING_LIKE_TYPES | frozenset([MathesarCustomType.URI, MathesarCustomType.EMAIL])
+    if col_type in searchable_string_types:
         score_expr = case(
             (col.ilike(param_val), WEIGHT_4),
             (col.ilike(param_val + '%'), WEIGHT_3),

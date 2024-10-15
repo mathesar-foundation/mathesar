@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { iconForwardSeparator } from '@mathesar/icons';
   import { Icon } from '@mathesar/component-library';
+  import { iconForwardSeparator } from '@mathesar/icons';
 </script>
 
 <span class="page-separator"><Icon {...iconForwardSeparator} /></span>

@@ -23,13 +23,16 @@ nav:
       - Debug Mathesar: administration/debug.md
   - Using Mathesar:
       - Introduction: user-guide/index.md
+      - Databases: user-guide/databases.md
+      - Users: user-guide/users.md
+      - Permissions: user-guide/permissions.md
       - Importing data: user-guide/importing-data.md
-      - Syncing database changes: user-guide/syncing-db.md
-      - Users & access levels: user-guide/users.md
       - Glossary: user-guide/glossary.md
   - API:
-      - REST: api/rest.md
       - RPC: api/rpc.md
+      - REST: api/rest.md
+  - Test Builds:
+      - '0.2.0-testing.1': releases/0.2.0-testing.1.md
   - Releases:
       - '0.1.7': releases/0.1.7.md
       - '0.1.6': releases/0.1.6.md
@@ -47,7 +50,6 @@ plugins:
       redirect_maps:
         "installation-dc/ansible-setup.md": "installation/docker-compose/index.md"
         "product/intro.md": "user-guide/index.md"
-        "product/syncing-db.md": "user-guide/syncing-db.md"
         "product/users.md": "user-guide/users.md"
         "install/index.md": "index.md"
         "install/docker-compose/index.md": "installation/docker-compose/index.md"
@@ -57,14 +59,14 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: [..]
+          paths: [../mathesar/rpc/]
           options:
+            heading_level: 3
             docstring_style: google
             separate_signature: true
-            show_root_heading: true
-            show_root_full_path: false
+            show_root_toc_entry: false
+            show_root_members_full_path: true
             show_source: false
-            show_symbol_type_heading: true
             group_by_category: false
 
 theme:
@@ -91,6 +93,7 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  custom_dir: overrides
 
 extra_css:
   - stylesheets/extra.css
@@ -117,4 +120,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.1.7
+  mathesar_version: 0.2.0-testing.1
+  version:
+    provider: mike
+    alias: true

@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { Label, Radio } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { FieldStore } from '@mathesar/components/form';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
   import { _ } from 'svelte-i18n';
+
+  import type { FieldStore } from '@mathesar/components/form';
   import { RichText } from '@mathesar/components/rich-text';
+  import type { Table } from '@mathesar/models/Table';
+  import { Label, Radio, assertExhaustive } from '@mathesar-component-library';
+
   import Diagram from './diagram/Diagram.svelte';
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';
@@ -12,8 +13,8 @@
   export let linkType: LinkType;
   export let isSelfReferential: boolean;
   export let field: FieldStore<LinkType>;
-  export let base: Pick<TableEntry, 'name'>;
-  export let target: Pick<TableEntry, 'name'>;
+  export let base: Pick<Table, 'name'>;
+  export let target: Pick<Table, 'name'>;
 
   $: checked = linkType === $field;
   $: label = (() => {

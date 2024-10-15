@@ -1,12 +1,13 @@
-import type { QueryInstanceInitialColumn } from '@mathesar/api/types/queries';
-import {
-  getProcessedOutputColumns,
-  type ProcessedQueryResultColumnMap,
-} from '../../utils';
+import type { InitialColumn } from '@mathesar/api/rpc/explorations';
+
 import type { QueryTransformationModel } from '../../QueryModel';
+import {
+  type ProcessedQueryResultColumnMap,
+  getProcessedOutputColumns,
+} from '../../utils';
 
 export function calcAllowedColumnsPerTransformation(
-  initialColumns: QueryInstanceInitialColumn[],
+  initialColumns: InitialColumn[],
   transformationModels: QueryTransformationModel[],
   columnsMetaData: ProcessedQueryResultColumnMap,
 ): ProcessedQueryResultColumnMap[] {

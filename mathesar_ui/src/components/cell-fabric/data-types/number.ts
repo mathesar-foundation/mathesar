@@ -1,13 +1,15 @@
 import {
-  isDefinedNonNullable,
+  type Column,
+  type NumberFormat,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
+import {
   StringifiedNumberFormatter,
+  assertExhaustive,
+  isDefinedNonNullable,
 } from '@mathesar-component-library';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type {
-  NumberColumn,
-  NumberDisplayOptions,
-  NumberFormat,
-} from '@mathesar/api/types/tables/columns';
+
 import NumberCell from './components/number/NumberCell.svelte';
 import NumberCellInput from './components/number/NumberCellInput.svelte';
 import type { NumberCellExternalProps } from './components/typeDefinitions';
@@ -33,7 +35,7 @@ interface Config extends Record<string, unknown> {
 }
 
 function getAllowFloat(
-  column: NumberColumn,
+  column: Column,
   floatAllowanceStrategy?: FloatAllowanceStrategy,
 ): boolean {
   if (floatAllowanceStrategy === 'scale-based') {
@@ -46,29 +48,33 @@ function getAllowFloat(
 }
 
 export function getUseGrouping(
-  apiUseGrouping: NumberDisplayOptions['use_grouping'],
+  column: Column,
 ): NumberCellExternalProps['formatterOptions']['useGrouping'] {
-  switch (apiUseGrouping) {
-    case 'true':
-      return true;
-    case 'false':
-    default:
+  const grouping = getColumnMetadataValue(column, 'num_grouping');
+  switch (grouping) {
+    case 'always':
+      return 'always';
+    case 'auto':
+      return 'auto';
+    case 'never':
       return false;
+    default:
+      return assertExhaustive(grouping);
   }
 }
 
 function getFormatterOptions(
-  column: NumberColumn,
+  column: Column,
   config?: Config,
 ): NumberCellExternalProps['formatterOptions'] {
-  const displayOptions = column.display_options;
-  const format = displayOptions?.number_format ?? null;
+  const displayOptions = column.metadata;
+  const format = displayOptions?.num_format ?? null;
   const locale = (format && localeMap.get(format)) ?? undefined;
-  const useGrouping = getUseGrouping(displayOptions?.use_grouping ?? 'false');
+  const useGrouping = getUseGrouping(column);
   const allowFloat = getAllowFloat(column, config?.floatAllowanceStrategy);
   const allowNegative = true;
   const minimumFractionDigits =
-    displayOptions?.minimum_fraction_digits ?? undefined;
+    displayOptions?.num_min_frac_digits ?? undefined;
   return {
     locale,
     allowFloat,
@@ -78,14 +84,11 @@ function getFormatterOptions(
   };
 }
 
-function getProps(
-  column: NumberColumn,
-  config?: Config,
-): NumberCellExternalProps {
+function getProps(column: Column, config?: Config): NumberCellExternalProps {
   const basicFormatterOptions = getFormatterOptions(column, config);
-  const displayOptions = column.display_options;
+  const displayOptions = column.metadata;
   const maximumFractionDigits =
-    displayOptions?.maximum_fraction_digits ?? undefined;
+    displayOptions?.num_max_frac_digits ?? undefined;
   const formatterOptions = {
     ...basicFormatterOptions,
     // We only want to apply `maximumFractionDigits` during display. We don't
@@ -108,7 +111,7 @@ function getProps(
 
 const numberType: CellComponentFactory = {
   get(
-    column: NumberColumn,
+    column: Column,
     config?: Config,
   ): ComponentAndProps<NumberCellExternalProps> {
     return {
@@ -118,7 +121,7 @@ const numberType: CellComponentFactory = {
   },
 
   getInput(
-    column: NumberColumn,
+    column: Column,
     config?: Config,
   ): ComponentAndProps<NumberCellExternalProps['formatterOptions']> {
     return {
@@ -127,7 +130,7 @@ const numberType: CellComponentFactory = {
     };
   },
 
-  getDisplayFormatter(column: NumberColumn, config?: Config) {
+  getDisplayFormatter(column: Column, config?: Config) {
     return (v) => getProps(column, config).formatForDisplay(String(v));
   },
 };

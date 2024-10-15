@@ -18,7 +18,7 @@ import mathesar.rpc.connections as rpc_conn
     ]
 )
 def test_add_from_known_connection(create_db, connection_id, sample_data):
-    with patch.object(rpc_conn, 'DBModelReturn'):
+    with patch.object(rpc_conn, 'ConnectionReturn'):
         with patch.object(
             rpc_conn.connections,
             'copy_connection_from_preexisting'
@@ -56,7 +56,7 @@ def test_add_from_known_connection(create_db, connection_id, sample_data):
     ]
 )
 def test_add_from_scratch(port, sample_data):
-    with patch.object(rpc_conn, 'DBModelReturn'):
+    with patch.object(rpc_conn, 'ConnectionReturn'):
         with patch.object(
             rpc_conn.connections,
             'create_connection_from_scratch'

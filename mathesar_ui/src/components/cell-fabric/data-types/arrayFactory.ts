@@ -1,20 +1,21 @@
 import type { DbType } from '@mathesar/AppTypes';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
 import { TextInput, isDefinedNonNullable } from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import ArrayCell from './components/array/ArrayCell.svelte';
 import type { ArrayCellExternalProps } from './components/typeDefinitions';
 import type {
-  SimpleCellDataTypes,
-  CellComponentFactory,
   CellColumnLike,
+  CellComponentFactory,
+  SimpleCellDataTypes,
 } from './typeDefinitions';
-import { getCellInfo, getCellConfiguration } from './utils';
+import { getCellConfiguration, getCellInfo } from './utils';
 
 export interface ArrayLikeColumn extends CellColumnLike {
   type_options: {
     item_type: DbType;
   } | null;
-  display_options: Record<string, never> | null;
+  metadata: Record<string, never> | null;
 }
 
 type ComponentFactoryMap = Record<SimpleCellDataTypes, CellComponentFactory>;
@@ -38,7 +39,7 @@ function makeDisplayFormatter(
         {
           type: itemDbType,
           type_options: null,
-          display_options: column.display_options,
+          metadata: column.metadata,
         },
         config,
       )(cellValue);

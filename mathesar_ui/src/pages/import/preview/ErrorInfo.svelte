@@ -1,9 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { Button, Icon } from '@mathesar-component-library';
+
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
+  import { Button, Icon } from '@mathesar-component-library';
 
   const dispatch = createEventDispatcher();
 

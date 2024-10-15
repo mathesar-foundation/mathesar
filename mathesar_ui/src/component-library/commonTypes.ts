@@ -5,7 +5,10 @@ export type Appearance =
   | 'plain'
   | 'ghost'
   | 'plain-primary'
-  | 'outline-primary';
+  | 'action'
+  | 'outcome'
+  | 'outline-primary'
+  | 'inspector';
 
 export type Size = 'small' | 'medium' | 'large';
 

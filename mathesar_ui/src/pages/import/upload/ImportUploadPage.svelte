@@ -1,18 +1,11 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import {
-    RadioGroup,
-    TextArea,
-    iconUploadFile,
-  } from '@mathesar-component-library';
-  import type { IconProps } from '@mathesar-component-library/types';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { dataFilesApi } from '@mathesar/api/dataFiles';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import { router } from 'tinro';
+
+  import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
     Field,
     FieldLayout,
@@ -22,19 +15,30 @@
   } from '@mathesar/components/form';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconPaste, iconUrl } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getImportPreviewPageUrl } from '@mathesar/routes/urls';
-  import { createTable } from '@mathesar/stores/tables';
+  import { createTableFromDataFile } from '@mathesar/stores/tables';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { assertExhaustive } from '@mathesar/utils/typeUtils';
-  import DataFileInput from './DataFileInput.svelte';
+  import {
+    RadioGroup,
+    TextArea,
+    assertExhaustive,
+    iconUploadFile,
+  } from '@mathesar-component-library';
+  import type { IconProps } from '@mathesar-component-library/types';
+
   import ColumnTypeInferenceInput from '../inference/ColumnTypeInferenceInput.svelte';
 
+  import DataFileInput from './DataFileInput.svelte';
+
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   interface UploadMethod {
     key: 'file' | 'url' | 'clipboard';
@@ -109,13 +113,14 @@
       if (dataFileId === undefined) {
         return;
       }
-      const table = await createTable(database, schema, {
-        dataFiles: [dataFileId],
+      const table = await createTableFromDataFile({
+        schema,
+        dataFile: { id: dataFileId },
       });
       const previewPage = getImportPreviewPageUrl(
         database.id,
-        schema.id,
-        table.id,
+        schema.oid,
+        table.oid,
         { useColumnTypeInference: $useColumnTypeInference },
       );
       router.goto(previewPage, true);

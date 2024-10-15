@@ -1,118 +1,40 @@
 <script lang="ts">
-  import { tick } from 'svelte';
-  import {
-    SheetCell,
-    isCellActive,
-    scrollBasedOnActiveCell,
-    isCellSelected,
-  } from '@mathesar/components/sheet';
+  import type { Writable } from 'svelte/store';
+
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-  import type { QueryRow, QuerySheetSelection } from '../QueryRunner';
+  import { SheetDataCell } from '@mathesar/components/sheet';
+  import { makeCellId } from '@mathesar/components/sheet/cellIds';
+  import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
+  import { handleKeyboardEventOnCell } from '@mathesar/components/sheet/sheetKeyboardUtils';
+
+  import type { QueryRow } from '../QueryRunner';
   import type { ProcessedQueryOutputColumn } from '../utils';
-  import type QueryInspector from '../QueryInspector';
 
-  export let processedQueryColumn: ProcessedQueryOutputColumn;
+  export let column: ProcessedQueryOutputColumn;
   export let row: QueryRow | undefined;
+  export let rowSelectionId: string;
   export let recordRunState: RequestStatus['state'] | undefined;
-  export let selection: QuerySheetSelection;
-  export let inspector: QueryInspector;
+  export let selection: Writable<SheetSelection>;
 
-  $: ({ activeCell, selectedCells } = selection);
-  $: isActive =
-    $activeCell && row && isCellActive($activeCell, row, processedQueryColumn);
-
-  /**
-   * The name indicates that this boolean is only true when more than one cell
-   * is selected. However, because of the bug that [the active cell and selected
-   * cells do not remain in sync when using keyboard][1] this boolean is
-   * sometimes true even when multiple cells are selected. This is to
-   * differentiate between different active and selected cell using blue
-   * background styling for selected cell and blue border styling for active
-   * cell.
-   *
-   * The above bug can be fixed when following two conditions are met
-   *
-   * - We are working on keyboard accessability of the application.
-   * - `selectedCells` and `activeCell` are merged in a single store.
-   *
-   * [1]: https://github.com/centerofci/mathesar/issues/1534
-   */
-  $: isSelectedInRange =
-    row &&
-    isCellSelected($selectedCells, row, processedQueryColumn) &&
-    $selectedCells.size > 1;
-
-  async function checkTypeAndScroll(type?: string) {
-    if (type === 'moved') {
-      await tick();
-      scrollBasedOnActiveCell();
-    }
-  }
-
-  async function moveThroughCells(
-    event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
-  ) {
-    const { originalEvent } = event.detail;
-    const type = selection.handleKeyEventsOnActiveCell(originalEvent);
-    if (type) {
-      originalEvent.stopPropagation();
-      originalEvent.preventDefault();
-
-      await checkTypeAndScroll(type);
-    }
-  }
+  $: cellId = row && makeCellId(rowSelectionId, column.id);
 </script>
 
-<SheetCell
-  columnIdentifierKey={processedQueryColumn.id}
-  let:htmlAttributes
-  let:style
+<SheetDataCell
+  columnIdentifierKey={column.id}
+  cellSelectionId={cellId}
+  selection={$selection}
+  let:isActive
 >
-  <div {...htmlAttributes} {style} class="cell" class:is-active={isActive}>
-    {#if row || recordRunState === 'processing'}
-      <CellFabric
-        {isActive}
-        {isSelectedInRange}
-        columnFabric={processedQueryColumn}
-        value={row?.record[processedQueryColumn.id]}
-        showAsSkeleton={recordRunState === 'processing'}
-        disabled={true}
-        on:movementKeyDown={moveThroughCells}
-        on:activate={() => {
-          if (row) {
-            selection.activateCell(row, processedQueryColumn);
-            inspector.selectCellTab();
-          }
-        }}
-        on:onSelectionStart={() => {
-          if (row) {
-            selection.onStartSelection(row, processedQueryColumn);
-          }
-        }}
-        on:onMouseEnterCellWhileSelection={() => {
-          if (row) {
-            // This enables the click + drag to
-            // select multiple cells
-            selection.onMouseEnterCellWhileSelection(row, processedQueryColumn);
-          }
-        }}
-      />
-    {/if}
-  </div>
-</SheetCell>
-
-<style lang="scss">
-  .cell {
-    user-select: none;
-    -webkit-user-select: none; /* Safari */
-    background: var(--cell-bg-color-base);
-
-    &.is-active {
-      z-index: var(--z-index__sheet__active-cell);
-      border-color: transparent;
-      min-height: 100%;
-      height: auto;
-    }
-  }
-</style>
+  {#if row || recordRunState === 'processing'}
+    <CellFabric
+      {isActive}
+      columnFabric={column}
+      value={row?.record[column.id]}
+      showAsSkeleton={recordRunState === 'processing'}
+      disabled={true}
+      on:movementKeyDown={({ detail }) =>
+        handleKeyboardEventOnCell(detail.originalEvent, selection)}
+    />
+  {/if}
+</SheetDataCell>

@@ -1,12 +1,12 @@
 <script lang="ts">
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { MoneyCellProps } from '../typeDefinitions';
+
   import MoneyCellInput from './MoneyCellInput.svelte';
 
   type $$Props = MoneyCellProps;
 
   export let isActive: $$Props['isActive'];
-  export let isSelectedInRange: $$Props['isSelectedInRange'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
   export let searchValue: $$Props['searchValue'] = undefined;
@@ -19,7 +19,6 @@
 <SteppedInputCell
   bind:value
   {isActive}
-  {isSelectedInRange}
   {disabled}
   {searchValue}
   {isIndependentOfSheet}
@@ -30,7 +29,6 @@
   let:handleInputKeydown
   on:movementKeyDown
   on:mouseenter
-  on:activate
   on:update
 >
   <MoneyCellInput

@@ -1,18 +1,19 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
 
+  import CellValue from '@mathesar/components/CellValue.svelte';
   import {
     Truncate,
     compareWholeValues,
     getValueComparisonOutcome,
     splitMatchParts,
   } from '@mathesar-component-library';
-  import CellValue from '@mathesar/components/CellValue.svelte';
+
   import CellWrapper from './CellWrapper.svelte';
   import type {
     CellTypeProps,
-    HorizontalAlignment,
     CellValueFormatter,
+    HorizontalAlignment,
   } from './typeDefinitions';
 
   const dispatch = createEventDispatcher();
@@ -21,7 +22,6 @@
   type Props = CellTypeProps<Value>;
 
   export let isActive: Props['isActive'];
-  export let isSelectedInRange: Props['isSelectedInRange'];
   export let value: Props['value'];
   export let disabled: Props['disabled'];
   export let multiLineTruncate = false;
@@ -143,23 +143,15 @@
     resetEditMode();
   }
 
-  function handleMouseDown() {
-    if (!isActive) {
-      dispatch('activate');
-    }
-  }
-
   onMount(initLastSavedValue);
 </script>
 
 <CellWrapper
   {isActive}
-  {isSelectedInRange}
   {disabled}
   bind:element={cellRef}
   on:dblclick={setModeToEdit}
   on:keydown={handleKeyDown}
-  on:mousedown={handleMouseDown}
   on:mouseenter
   mode={isEditMode ? 'edit' : 'default'}
   {multiLineTruncate}

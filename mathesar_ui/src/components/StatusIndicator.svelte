@@ -1,10 +1,10 @@
 <script lang="ts">
   import {
     Icon,
+    Spinner,
     iconError,
     iconSuccess,
     iconWarning,
-    Spinner,
   } from '@mathesar-component-library';
 
   type State = 'processing' | 'success' | 'failure' | 'warning';

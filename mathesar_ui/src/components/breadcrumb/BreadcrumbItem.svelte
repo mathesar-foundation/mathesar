@@ -1,37 +1,42 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import { StringOrComponent } from '@mathesar/component-library';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
+  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import SchemaName from '@mathesar/components/SchemaName.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
+    iconConnectDatabase,
+    iconExploration,
+    iconRecord,
+  } from '@mathesar/icons';
+  import {
+    HOME_URL,
     getDatabasePageUrl,
     getExplorationPageUrl,
     getRecordPageUrl,
     getSchemaPageUrl,
-    CONNECTIONS_URL,
   } from '@mathesar/routes/urls';
-  import { StringOrComponent } from '@mathesar/component-library';
-  import { iconExploration, iconRecord, iconConnection } from '@mathesar/icons';
   import { getLinkForTableItem } from '@mathesar/utils/tables';
+
   import BreadcrumbLink from './BreadcrumbLink.svelte';
+  import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
+  import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
   import DatabaseSelector from './DatabaseSelector.svelte';
   import EntitySelector from './EntitySelector.svelte';
   import SchemaSelector from './SchemaSelector.svelte';
-  import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
-  import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
-  import RecordSummary from '../RecordSummary.svelte';
 
   export let item: BreadcrumbItem;
 </script>
 
-{#if item.type === 'connectionList'}
+{#if item.type === 'home'}
   <DatabaseSelector />
   <div class="breadcrumb-item truncate">
-    <BreadcrumbLink href={CONNECTIONS_URL}>
-      <NameWithIcon icon={iconConnection}>
-        {$_('connections')}
+    <BreadcrumbLink href={HOME_URL}>
+      <NameWithIcon icon={{ ...iconConnectDatabase, size: '1.4rem' }}>
+        {$_('databases')}
       </NameWithIcon>
     </BreadcrumbLink>
   </div>
@@ -45,7 +50,7 @@
 {:else if item.type === 'schema'}
   <SchemaSelector database={item.database} />
   <div class="breadcrumb-item truncate">
-    <BreadcrumbLink href={getSchemaPageUrl(item.database.id, item.schema.id)}>
+    <BreadcrumbLink href={getSchemaPageUrl(item.database.id, item.schema.oid)}>
       <SchemaName schema={item.schema} />
     </BreadcrumbLink>
   </div>
@@ -53,7 +58,7 @@
   <EntitySelector database={item.database} schema={item.schema} />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
-      href={getLinkForTableItem(item.database.id, item.schema.id, item.table)}
+      href={getLinkForTableItem(item.database.id, item.schema.oid, item.table)}
     >
       <TableName table={item.table} />
     </BreadcrumbLink>
@@ -64,14 +69,12 @@
     <BreadcrumbLink
       href={getRecordPageUrl(
         item.database.id,
-        item.schema.id,
-        item.table.id,
+        item.schema.oid,
+        item.table.oid,
         item.record.pk,
       )}
     >
-      <NameWithIcon icon={iconRecord}>
-        <RecordSummary recordSummary={item.record.summary} />
-      </NameWithIcon>
+      <NameWithIcon icon={iconRecord}>{item.record.summary}</NameWithIcon>
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'exploration'}
@@ -80,7 +83,7 @@
     <BreadcrumbLink
       href={getExplorationPageUrl(
         item.database.id,
-        item.schema.id,
+        item.schema.oid,
         item.query.id,
       )}
     >

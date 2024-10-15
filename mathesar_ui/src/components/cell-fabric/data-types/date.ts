@@ -1,22 +1,18 @@
-import { isDefinedNonNullable } from '@mathesar-component-library';
-import type { DateDisplayOptions } from '@mathesar/api/types/tables/columns';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import { type Column, getColumnMetadataValue } from '@mathesar/api/rpc/columns';
 import {
   DateTimeFormatter,
   DateTimeSpecification,
 } from '@mathesar/utils/date-time';
-import type { DateTimeCellExternalProps } from './components/typeDefinitions';
-import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
+import { isDefinedNonNullable } from '@mathesar-component-library';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import DateTimeCell from './components/date-time/DateTimeCell.svelte';
 import DateTimeInput from './components/date-time/DateTimeInput.svelte';
+import type { DateTimeCellExternalProps } from './components/typeDefinitions';
+import type { CellComponentFactory } from './typeDefinitions';
 
-export interface DateLikeColumn extends CellColumnLike {
-  display_options: Partial<DateDisplayOptions> | null;
-}
-
-function getProps(column: DateLikeColumn): DateTimeCellExternalProps {
-  const displayOptions = column.display_options ?? {};
-  const format = displayOptions.format ?? 'none';
+function getProps(column: Column): DateTimeCellExternalProps {
+  const format = getColumnMetadataValue(column, 'date_format');
   const specification = new DateTimeSpecification({
     type: 'date',
     dateFormat: format,
@@ -38,14 +34,12 @@ function getProps(column: DateLikeColumn): DateTimeCellExternalProps {
 }
 
 const stringType: CellComponentFactory = {
-  get: (
-    column: DateLikeColumn,
-  ): ComponentAndProps<DateTimeCellExternalProps> => ({
+  get: (column: Column): ComponentAndProps<DateTimeCellExternalProps> => ({
     component: DateTimeCell,
     props: getProps(column),
   }),
   getInput: (
-    column: DateLikeColumn,
+    column: Column,
   ): ComponentAndProps<
     Omit<DateTimeCellExternalProps, 'formatForDisplay'>
   > => ({
@@ -55,7 +49,7 @@ const stringType: CellComponentFactory = {
       allowRelativePresets: true,
     },
   }),
-  getDisplayFormatter(column: DateLikeColumn) {
+  getDisplayFormatter(column: Column) {
     return (v) => getProps(column).formatForDisplay(String(v));
   },
 };

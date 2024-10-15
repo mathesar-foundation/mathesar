@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { Spinner } from '@mathesar-component-library';
-  import { preloadCommonData } from '@mathesar/utils/preloadData';
   import { isLoading as isTranslationLoading, locale } from 'svelte-i18n';
+
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import { Spinner } from '@mathesar-component-library';
+
   import AppContext from './AppContext.svelte';
-  import RootRoute from './routes/RootRoute.svelte';
   import { initI18n } from './i18n';
+  import RootRoute from './routes/RootRoute.svelte';
 
   const commonData = preloadCommonData();
   void initI18n(commonData.user.display_language ?? 'en');
@@ -51,19 +53,22 @@
     --color-contrast-light: var(--color-blue-light);
     --color-link: var(--color-blue-dark);
     --color-text: #171717;
-    --color-text-muted: #6b7280;
+    --color-text-muted: #515662;
     --color-substring-match: rgb(254, 221, 72);
     --color-substring-match-light: rgba(254, 221, 72, 0.2);
-    --text-size-xx-small: var(--size-xx-small); // 8px
-    --text-size-x-small: var(--size-x-small); // 10px
-    --text-size-small: var(--size-small); // 12px
-    --text-size-base: var(--size-base); // 14px
-    --text-size-large: var(--size-large); // 16px
-    --text-size-x-large: var(--size-x-large); // 18px
-    --text-size-xx-large: var(--size-xx-large); // 20px
-    --text-size-ultra-large: var(--size-ultra-large); // 24px
-    --text-size-super-ultra-large: var(--size-super-ultra-large); // 32px
-
+    --text-size-xx-small: var(--size-xx-small);
+    --text-size-x-small: var(--size-x-small);
+    --text-size-small: var(--size-small);
+    --text-size-base: var(--size-base);
+    --text-size-large: var(--size-large);
+    --text-size-x-large: var(--size-x-large);
+    --text-size-xx-large: var(--size-xx-large);
+    --text-size-ultra-large: var(--size-ultra-large);
+    --text-size-super-ultra-large: var(--size-super-ultra-large);
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 600;
     --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
 
@@ -141,7 +146,7 @@
 
   h1 {
     margin: 0 0 1rem 0;
-    font-size: var(--size-xx-large);
+    font-size: var(--size-ultra-large);
     font-weight: 500;
   }
 

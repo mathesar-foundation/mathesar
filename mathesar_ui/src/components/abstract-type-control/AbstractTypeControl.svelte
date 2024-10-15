@@ -1,20 +1,23 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import {
-    createValidationContext,
-    CancelOrProceedButtonPair,
-  } from '@mathesar-component-library';
+
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import { toast } from '@mathesar/stores/toast';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+  import { objectsAreDeeplyEqual } from '@mathesar/utils/objectUtils';
   import {
-    type ColumnWithAbstractType,
-    type ColumnTypeOptionsSaveArgs,
-    hasTypeOptionsChanged,
-  } from './utils';
+    CancelOrProceedButtonPair,
+    createValidationContext,
+  } from '@mathesar-component-library';
+
+  import WarningBox from '../message-boxes/WarningBox.svelte';
+
   import AbstractTypeDBOptions from './AbstractTypeDBOptions.svelte';
   import AbstractTypeSelector from './AbstractTypeSelector.svelte';
-  import WarningBox from '../message-boxes/WarningBox.svelte';
+  import type {
+    ColumnTypeOptionsSaveArgs,
+    ColumnWithAbstractType,
+  } from './utils';
 
   const dispatch = createEventDispatcher();
 
@@ -23,17 +26,19 @@
     options: Pick<ColumnTypeOptionsSaveArgs, 'type' | 'type_options'>,
   ) => Promise<unknown>;
   export let showWarnings = true;
+  export let disabled = false;
 
   let selectedAbstractType: ColumnWithAbstractType['abstractType'] =
     column.abstractType;
   let selectedDbType: ColumnWithAbstractType['type'] = column.type;
+  let savedTypeOptions = column.type_options ?? {};
   let typeOptions: ColumnWithAbstractType['type_options'] = {
-    ...(column.type_options ?? {}),
+    ...savedTypeOptions,
   };
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
-    hasTypeOptionsChanged(column.type_options ?? {}, typeOptions ?? {});
+    !objectsAreDeeplyEqual(savedTypeOptions, typeOptions);
 
   let typeChangeState: RequestStatus;
 
@@ -47,7 +52,8 @@
   function resetAbstractType(_column: ColumnWithAbstractType) {
     selectedAbstractType = _column.abstractType;
     selectedDbType = _column.type;
-    typeOptions = { ...(_column.type_options ?? {}) };
+    savedTypeOptions = _column.type_options ?? {};
+    typeOptions = { ...savedTypeOptions };
   }
   $: resetAbstractType(column);
 
@@ -94,7 +100,7 @@
   {column}
   on:change={(e) => selectTypeAndAbstractType(e.detail)}
   on:reset={() => resetAbstractType(column)}
-  disabled={typeChangeState?.state === 'processing'}
+  disabled={typeChangeState?.state === 'processing' || disabled}
 />
 
 {#if selectedAbstractType && selectedDbType}
@@ -104,6 +110,7 @@
       bind:selectedDbType
       bind:typeOptions
       {column}
+      {disabled}
     />
   {/key}
 {/if}

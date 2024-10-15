@@ -1,23 +1,17 @@
 from sqlalchemy import select, and_, not_, or_, func
 
-from db import constants
-from db import types
+from db.constants import INTERNAL_SCHEMAS
 from db.utils import get_pg_catalog_table
 from db.metadata import get_empty_metadata
+from db.connection import exec_msar_func
 
-TYPES_SCHEMA = types.base.SCHEMA
-TEMP_INFER_SCHEMA = constants.INFERENCE_SCHEMA
-MSAR_PUBLIC = constants.MSAR_PUBLIC
-MSAR_PRIVAT = constants.MSAR_PRIVAT
-MSAR_VIEWS = constants.MSAR_VIEWS
-EXCLUDED_SCHEMATA = [
-    "information_schema",
-    MSAR_PRIVAT,
-    MSAR_PUBLIC,
-    MSAR_VIEWS,
-    TEMP_INFER_SCHEMA,
-    TYPES_SCHEMA,
-]
+
+def list_schemas(conn):
+    return exec_msar_func(conn, 'list_schemas').fetchone()[0]
+
+
+def get_schema(schema_oid, conn):
+    return exec_msar_func(conn, 'get_schema').fetchone()[0]
 
 
 def reflect_schema(engine, name=None, oid=None, metadata=None):
@@ -46,7 +40,8 @@ def get_mathesar_schemas_with_oids(engine):
         select(pg_namespace.c.nspname.label('schema'), pg_namespace.c.oid)
         .where(
             and_(
-                *[pg_namespace.c.nspname != schema for schema in EXCLUDED_SCHEMATA],
+                *[pg_namespace.c.nspname != schema for schema in INTERNAL_SCHEMAS],
+                pg_namespace.c.nspname != "information_schema",
                 not_(pg_namespace.c.nspname.like("pg_%"))
             )
         )

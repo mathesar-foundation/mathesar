@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { Button, iconSearch, Icon } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/types/tables';
   import { iconExpandRight } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import { Button, Icon, iconSearch } from '@mathesar-component-library';
 
   const recordSelector = getRecordSelectorFromContext();
-  export let table: TableEntry;
+  export let table: Table;
 
   function handleClick() {
-    recordSelector.navigateToRecordPage({ tableId: table.id });
+    recordSelector.navigateToRecordPage({ tableId: table.oid });
   }
 </script>
 

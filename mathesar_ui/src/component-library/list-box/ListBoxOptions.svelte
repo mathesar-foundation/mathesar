@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { onMount, getContext, tick } from 'svelte';
+  import { getContext, onMount, tick } from 'svelte';
+
   import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
+
   import type { ListBoxContext } from './ListBoxTypes';
 
   type Option = $$Generic;
@@ -74,9 +76,11 @@
     {@const isSelected = $value.some((opt) =>
       $staticProps.checkEquality(opt, option),
     )}
+    {@const isDisabled = $staticProps.checkIfOptionIsDisabled(option)}
     <li
       role="option"
       class:selected={isSelected}
+      class:disabled={isDisabled}
       class:in-focus={index === $focusedOptionIndex}
       aria-selected={isSelected ? true : undefined}
       on:click={() => api.pick(option)}

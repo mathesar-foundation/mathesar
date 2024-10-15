@@ -1,7 +1,8 @@
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
-import type { TableEntry } from '@mathesar/api/types/tables';
+
 import { invalidIf } from '@mathesar/components/form';
+import type { Table } from '@mathesar/models/Table';
 import { getAvailableName } from '@mathesar/utils/db';
 
 export type LinkType = 'manyToOne' | 'oneToMany' | 'manyToMany';
@@ -14,9 +15,9 @@ export function columnNameIsNotId() {
 }
 
 export function suggestMappingTableName(
-  baseTable: Pick<TableEntry, 'name'>,
-  targetTable: Pick<TableEntry, 'name'> | undefined,
-  allTables: Pick<TableEntry, 'name'>[],
+  baseTable: Pick<Table, 'name'>,
+  targetTable: Pick<Table, 'name'> | undefined,
+  allTables: Pick<Table, 'name'>[],
 ): string {
   return targetTable
     ? getAvailableName(

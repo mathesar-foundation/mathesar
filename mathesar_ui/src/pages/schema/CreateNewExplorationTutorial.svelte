@@ -1,11 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton, Tutorial } from '@mathesar-component-library';
+
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import { AnchorButton, Tutorial } from '@mathesar-component-library';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 </script>
 
 <Tutorial>
@@ -17,7 +19,7 @@
   </span>
   <AnchorButton
     slot="footer"
-    href={getDataExplorerPageUrl(database.id, schema.id)}
+    href={getDataExplorerPageUrl(database.id, schema.oid)}
   >
     {$_('open_data_explorer')}
   </AnchorButton>

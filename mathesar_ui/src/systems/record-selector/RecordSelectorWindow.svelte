@@ -1,13 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { portal, Window } from '@mathesar-component-library';
-  import TableName from '@mathesar/components/TableName.svelte';
+
   import { RichText } from '@mathesar/components/rich-text';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import TableName from '@mathesar/components/TableName.svelte';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import { Meta, TabularData } from '@mathesar/stores/table-data';
-  import { getTableName } from '@mathesar/stores/tables';
+  import { currentTablesMap } from '@mathesar/stores/tables';
   import Pagination from '@mathesar/utils/Pagination';
-  import { tables } from '@mathesar/stores/tables';
+  import { Window, defined, portal } from '@mathesar-component-library';
+
   import RecordSelectorContent from './RecordSelectorContent.svelte';
   import { RecordSelectorController } from './RecordSelectorController';
 
@@ -29,18 +30,18 @@
     nestingLevel: controller.nestingLevel + 1,
   });
   $: ({ tableId, purpose } = controller);
-  $: table = $tableId && $tables.data.get($tableId);
+  $: table = defined($tableId, (id) => $currentTablesMap.get(id));
   $: tabularData =
     $tableId && table
       ? new TabularData({
-          id: $tableId,
-          abstractTypesMap: $currentDbAbstractTypes.data,
+          database: table.schema.database,
+          abstractTypesMap,
           meta: new Meta({ pagination: new Pagination({ size: 10 }) }),
           hasEnhancedPrimaryKeyCell: false,
           table,
+          loadIntrinsicRecordSummaries: true,
         })
       : undefined;
-  $: tableName = $tableId ? getTableName($tableId) : undefined;
   $: nestedSelectorIsOpen = nestedController.isOpen;
   $: marginBottom = $nestedSelectorIsOpen
     ? `calc(${nestedSelectorVerticalOffset} - ${contentHeight}px)`
@@ -94,8 +95,8 @@
             : $_('open_table_record')}
           let:slotName
         >
-          {#if slotName === 'tableName' && tableName}
-            <TableName table={{ name: tableName }} truncate={false} />
+          {#if slotName === 'tableName' && table}
+            <TableName table={{ name: table.name }} truncate={false} />
           {/if}
         </RichText>
       </span>

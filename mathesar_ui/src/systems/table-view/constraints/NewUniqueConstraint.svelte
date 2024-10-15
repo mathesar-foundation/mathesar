@@ -1,24 +1,25 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import Form from '@mathesar/components/Form.svelte';
+  import FormField from '@mathesar/components/FormField.svelte';
+  import {
+    type ProcessedColumn,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
+  import { toast } from '@mathesar/stores/toast';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { getAvailableName } from '@mathesar/utils/db';
+  import { getErrorMessage } from '@mathesar/utils/errors';
+  import { CancelOrProceedButtonPair } from '@mathesar-component-library';
   import {
     LabeledInput,
     MultiSelect,
     RadioGroup,
     TextInput,
   } from '@mathesar-component-library';
-  import { CancelOrProceedButtonPair } from '@mathesar-component-library';
-  import {
-    getTabularDataStoreFromContext,
-    type ProcessedColumn,
-  } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
-  import FormField from '@mathesar/components/FormField.svelte';
-  import { toast } from '@mathesar/stores/toast';
-  import Form from '@mathesar/components/Form.svelte';
-  import { getAvailableName } from '@mathesar/utils/db';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
-  import { getErrorMessage } from '@mathesar/utils/errors';
+
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
@@ -73,7 +74,7 @@
   $: existingConstraintNames = new Set(
     $constraintsDataStore.constraints.map((c) => c.name),
   );
-  $: tableName = $tables.data.get($tabularData.id)?.name ?? '';
+  $: tableName = $tabularData.table.name;
   $: ({ processedColumns } = $tabularData);
   $: columnsInTable = Array.from($processedColumns.values());
   $: nameValidationErrors = getNameValidationErrors(
@@ -100,7 +101,7 @@
     try {
       await constraintsDataStore.add({
         columns: constraintColumns.map((c) => c.id),
-        type: 'unique',
+        type: 'u',
         name: constraintName,
       });
       // Why init before close when we also init on open? Because without init
@@ -122,10 +123,12 @@
 </script>
 
 <div class="add-new-unique-constraint">
-  <span>{$_('new_unique_constraint')}</span>
   <Form>
     <FormField>
       <LabeledInput label={$_('columns')} layout="stacked">
+        <span slot="help">
+          {$_('columns_unique_values_help')}
+        </span>
         <MultiSelect
           bind:values={constraintColumns}
           options={columnsInTable}
@@ -173,7 +176,7 @@
   <CancelOrProceedButtonPair
     onProceed={handleSave}
     onCancel={handleCancel}
-    proceedButton={{ label: $_('add') }}
+    proceedButton={{ label: $_('add_unique_constraint') }}
     {canProceed}
     size="small"
   />

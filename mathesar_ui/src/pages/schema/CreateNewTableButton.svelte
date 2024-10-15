@@ -1,28 +1,32 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
-  import { createTable } from '@mathesar/stores/tables';
-  import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import {
-    DropdownMenu,
-    Spinner,
-    ButtonMenuItem,
-  } from '@mathesar-component-library';
-  import { iconAddNew } from '@mathesar/icons';
+  import { router } from 'tinro';
+
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
+  import { iconAddNew } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+  import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
+  import { createTable } from '@mathesar/stores/tables';
+  import {
+    ButtonMenuItem,
+    DropdownMenu,
+    Spinner,
+  } from '@mathesar-component-library';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
+
+  $: ({ currentRolePrivileges } = schema.currentAccess);
 
   let isCreatingNewTable = false;
 
   async function handleCreateEmptyTable() {
     isCreatingNewTable = true;
-    const tableInfo = await createTable(database, schema, {});
+    const table = await createTable({ schema });
     isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.id, schema.id, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, table.oid), false);
   }
 </script>
 
@@ -31,6 +35,7 @@
   triggerAppearance="primary"
   closeOnInnerClick={true}
   label={$_('new_table')}
+  disabled={!$currentRolePrivileges.has('CREATE')}
 >
   <div slot="trigger">
     {#if isCreatingNewTable}
@@ -43,7 +48,7 @@
   <ButtonMenuItem on:click={handleCreateEmptyTable}>
     {$_('from_scratch')}
   </ButtonMenuItem>
-  <LinkMenuItem href={getImportPageUrl(database.id, schema.id)}>
+  <LinkMenuItem href={getImportPageUrl(database.id, schema.oid)}>
     {$_('from_data_import')}
   </LinkMenuItem>
 </DropdownMenu>

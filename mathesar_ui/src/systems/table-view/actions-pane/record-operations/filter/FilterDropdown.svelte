@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { onMount, type ComponentProps } from 'svelte';
+  import { type ComponentProps, onMount } from 'svelte';
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
-  import { Dropdown, Icon, BadgeCount } from '@mathesar-component-library';
+
   import { iconFiltering } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
   import {
-    getTabularDataStoreFromContext,
     type Filtering,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
+  import { BadgeCount, Dropdown, Icon } from '@mathesar-component-library';
+
   import Filter from './Filter.svelte';
 
   interface $$Props extends ComponentProps<Dropdown> {
@@ -55,6 +57,6 @@
     slot="content"
     {filtering}
     processedColumns={processedColumnsToShow}
-    recordSummaries={recordsData.recordSummaries}
+    recordSummaries={recordsData.linkedRecordSummaries}
   />
 </Dropdown>

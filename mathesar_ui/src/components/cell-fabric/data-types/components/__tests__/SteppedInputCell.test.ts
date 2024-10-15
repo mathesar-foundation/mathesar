@@ -1,10 +1,11 @@
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/svelte';
+
 import SteppedInputCell from '../SteppedInputCell.svelte';
 
 const requiredProps = {
   isActive: false,
-  isSelectedInRange: false,
+  isSelected: false,
   disabled: false,
 };
 

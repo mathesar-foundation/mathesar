@@ -1,24 +1,25 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
+
+  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
+  import {
+    type ProcessedColumn,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
+  import { toast } from '@mathesar/stores/toast';
   import {
     CancelOrProceedButtonPair,
     LabeledInput,
     Radio,
   } from '@mathesar-component-library';
-  import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import {
-    getTabularDataStoreFromContext,
-    type ProcessedColumn,
-  } from '@mathesar/stores/table-data';
-  import { toast } from '@mathesar/stores/toast';
 
   export let column: ProcessedColumn;
-  export let canExecuteDDL: boolean;
 
   const tabularData = getTabularDataStoreFromContext();
-  $: ({ columnsDataStore, recordsData } = $tabularData);
-  $: ({ recordSummaries } = recordsData);
+  $: ({ table, columnsDataStore, recordsData } = $tabularData);
+  $: ({ linkedRecordSummaries } = recordsData);
+  $: ({ currentRoleOwns } = table.currentAccess);
 
   $: initialValue = column.column.default?.value ?? column.initialInputValue;
   $: value = initialValue;
@@ -33,7 +34,7 @@
     return String(value) !== String(initialValue);
   })();
 
-  $: recordSummary = $recordSummaries
+  $: recordSummary = $linkedRecordSummaries
     .get(String(column.id))
     ?.get(String(value));
 
@@ -49,10 +50,11 @@
       ? null
       : {
           is_dynamic: !!column.column.default?.is_dynamic,
-          value,
+          value: String(value),
         };
     try {
-      await columnsDataStore.patch(column.id, {
+      await columnsDataStore.patch({
+        id: column.id,
         default: defaultRequest,
       });
       typeChangeState = { state: 'success' };
@@ -76,8 +78,8 @@
   }
 
   function setRecordSummary(recordId: string, _recordSummary: string) {
-    if (recordSummaries) {
-      recordSummaries.addBespokeRecordSummary({
+    if (linkedRecordSummaries) {
+      linkedRecordSummaries.addBespokeRecordSummary({
         columnId: String(column.id),
         recordId,
         recordSummary: _recordSummary,
@@ -85,17 +87,17 @@
     }
   }
 
-  $: disabled = !canExecuteDDL || typeChangeState?.state === 'processing';
+  $: disabled = typeChangeState?.state === 'processing' || !$currentRoleOwns;
 </script>
 
 <div class="default-value-container">
   <LabeledInput layout="inline-input-first">
     <span slot="label">{$_('no_default_value')}</span>
-    <Radio checked={isDefaultNull} on:change={toggleNoDefault} />
+    <Radio checked={isDefaultNull} on:change={toggleNoDefault} {disabled} />
   </LabeledInput>
   <LabeledInput layout="inline-input-first">
     <span slot="label">{$_('custom_default')}</span>
-    <Radio checked={!isDefaultNull} on:change={toggleNoDefault} />
+    <Radio checked={!isDefaultNull} on:change={toggleNoDefault} {disabled} />
   </LabeledInput>
   {#if !isDefaultNull}
     <DynamicInput

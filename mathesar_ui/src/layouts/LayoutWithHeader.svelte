@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
   import AppHeader from '@mathesar/components/AppHeader.svelte';
-  import LiveDemoBanner from '@mathesar/components/LiveDemoBanner.svelte';
+  import { makeStyleStringFromCssVariables } from '@mathesar-component-library';
 
   export let fitViewport = false;
   export let restrictWidth = false;
@@ -14,7 +13,6 @@
 
 <div class="app-layout" class:fit-viewport={fitViewport} {style}>
   <div class="app-layout-header">
-    <LiveDemoBanner />
     <AppHeader />
   </div>
   <slot name="secondary-header" />

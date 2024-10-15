@@ -1,12 +1,15 @@
 <script lang="ts">
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Column } from '@mathesar/api/types/tables/columns';
+  import { _ } from 'svelte-i18n';
+
+  import type { Column } from '@mathesar/api/rpc/columns';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import type { Table } from '@mathesar/models/Table';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import {
     Meta,
-    setTabularDataStoreInContext,
     TabularData,
+    setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
   import MiniActionsPane from '@mathesar/systems/table-view/actions-pane/MiniActionsPane.svelte';
   import TableView from '@mathesar/systems/table-view/TableView.svelte';
@@ -22,28 +25,37 @@
   });
 
   export let recordPk: string;
-  export let table: TableEntry;
+  export let table: Table;
   export let fkColumn: Pick<Column, 'id' | 'name'>;
 
-  $: abstractTypesMap = $currentDbAbstractTypes.data;
   $: tabularData = new TabularData({
-    id: table.id,
+    database: table.schema.database,
+    table,
     abstractTypesMap,
     meta,
     contextualFilters: new Map([[fkColumn.id, recordPk]]),
-    table,
   });
   $: tabularDataStore.set(tabularData);
+  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: canViewTable = $currentRolePrivileges.has('SELECT');
 </script>
 
 <div class="table-widget">
   <div class="top">
     <h3 class="bold-header"><TableName {table} /></h3>
-    <MiniActionsPane />
+    {#if canViewTable}
+      <MiniActionsPane />
+    {/if}
   </div>
 
   <div class="results">
-    <TableView context="widget" {table} />
+    {#if canViewTable}
+      <TableView context="widget" {table} />
+    {:else}
+      <WarningBox fullWidth>
+        {$_('no_privileges_view_table')}
+      </WarningBox>
+    {/if}
   </div>
 </div>
 

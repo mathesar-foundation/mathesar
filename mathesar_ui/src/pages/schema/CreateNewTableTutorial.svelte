@@ -1,12 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton, Tutorial } from '@mathesar-component-library';
+
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getImportPageUrl } from '@mathesar/routes/urls';
+  import { AnchorButton, Tutorial } from '@mathesar-component-library';
+
   import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 </script>
 
 <Tutorial>
@@ -20,7 +23,7 @@
       <CreateEmptyTableButton class="padding-zero" {database} {schema}>
         <span>{$_('from_scratch')}</span>
       </CreateEmptyTableButton>
-      <AnchorButton href={getImportPageUrl(database.id, schema.id)}>
+      <AnchorButton href={getImportPageUrl(database.id, schema.oid)}>
         {$_('import_from_file')}
       </AnchorButton>
     </div>

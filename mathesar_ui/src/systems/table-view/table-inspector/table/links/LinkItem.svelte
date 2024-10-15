@@ -1,8 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import { RichText } from '@mathesar/components/rich-text';
   import TableName from '@mathesar/components/TableName.svelte';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
-  import { RichText } from '@mathesar/components/rich-text';
+
   import type { TableLink } from './utils';
 
   export let link: TableLink;
@@ -15,30 +17,31 @@
   <span class="table-name">
     <TableName table={link.table} truncate={false} />
   </span>
-  <span class="sub-text">
-    <RichText text={$_('linked_via_column')} let:slotName>
-      {#if slotName === 'columnName'}
-        <strong>{link.column.name}</strong>
-      {/if}
-    </RichText>
-  </span>
+  {#if link.column}
+    <span class="sub-text">
+      <RichText text={$_('linked_via_column')} let:slotName>
+        {#if slotName === 'columnName'}
+          <strong>{link.column.name}</strong>
+        {/if}
+      </RichText>
+    </span>
+  {/if}
 </a>
 
 <style lang="scss">
   .link-item-container {
-    border: 1px solid var(--slate-300);
+    border-left: 3px solid var(--yellow-300);
     background-color: var(--white);
-    padding: 0.5rem;
-    border-radius: var(--border-radius-m);
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.375rem;
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
     &:hover {
-      background: var(--slate-100);
-      .table-name {
-        text-decoration: underline;
-      }
+      background: var(--slate-50);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     > :global(* + *) {
@@ -47,6 +50,7 @@
 
     .sub-text {
       font-size: var(--text-size-small);
+      color: var(--color-text-muted);
     }
   }
 </style>

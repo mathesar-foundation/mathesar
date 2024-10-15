@@ -1,10 +1,8 @@
-from psycopg.errors import InsufficientPrivilege
-from sqlalchemy import text
-from sqlalchemy.exc import OperationalError, ProgrammingError
+import psycopg
+from psycopg.errors import OperationalError, InsufficientPrivilege
+from psycopg import sql
 
-from db import engine
 from db.sql import install as sql_install
-from db.types import install as types_install
 
 
 def install_mathesar(
@@ -18,19 +16,22 @@ def install_mathesar(
         root_db='postgres'
 ):
     """Create database and install Mathesar on it."""
-    user_db_engine = engine.create_future_engine(
-        username, password, hostname, database_name, port,
-        connect_args={"connect_timeout": 10}
-    )
+
     try:
-        user_db_engine.connect()
+        conn = psycopg.connect(
+            host=hostname,
+            port=port,
+            dbname=database_name,
+            user=username,
+            password=password,
+        )
         print(
             "Installing Mathesar on preexisting PostgreSQL database"
             f" {database_name} at host {hostname}..."
         )
-        sql_install.install(user_db_engine)
-        types_install.install_mathesar_on_database(user_db_engine)
-        user_db_engine.dispose()
+        with conn:
+            sql_install.install(conn)
+
     except OperationalError as e:
         if create_db:
             database_created = _create_database(
@@ -45,13 +46,19 @@ def install_mathesar(
         else:
             database_created = False
         if database_created:
+            conn = psycopg.connect(
+                host=hostname,
+                port=port,
+                dbname=database_name,
+                user=username,
+                password=password,
+            )
             print(
                 "Installing Mathesar on PostgreSQL database"
                 f" {database_name} at host {hostname}..."
             )
-            sql_install.install(user_db_engine)
-            types_install.install_mathesar_on_database(user_db_engine)
-            user_db_engine.dispose()
+            with conn:
+                sql_install.install(conn)
         else:
             print(f"Skipping installing on DB with key {database_name}.")
             raise e
@@ -71,21 +78,24 @@ def _create_database(
         # Database.  So we use the default database `postgres` that comes with
         # postgres.
         # TODO Throw correct error when the root database does not exist.
-        root_db_engine = engine.create_future_engine(
-            username, password, hostname, root_database, port,
-            connect_args={"connect_timeout": 10}
+        root_db_conn = psycopg.connect(
+            host=hostname,
+            port=port,
+            dbname=root_database,
+            user=username,
+            password=password,
         )
         try:
-            with root_db_engine.connect() as conn:
-                conn.execution_options(isolation_level="AUTOCOMMIT")
-                conn.execute(text(f'CREATE DATABASE "{db_name}"'))
-            root_db_engine.dispose()
+            with root_db_conn as conn:
+                cursor = conn.cursor()
+                conn.autocommit = True
+                cursor.execute(sql.SQL(f'CREATE DATABASE "{db_name}"'))
+                cursor.close()
             print(f"Created DB is {db_name}.")
             return True
-        except ProgrammingError as e:
-            if isinstance(e.orig, InsufficientPrivilege):
-                print(f"Database {db_name} could not be created due to Insufficient Privilege")
-                return False
+        except InsufficientPrivilege:
+            print(f"Database {db_name} could not be created due to Insufficient Privilege")
+            return False
         except Exception:
             print(f"Database {db_name} could not be created!")
             return False

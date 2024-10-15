@@ -1,17 +1,13 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
+
   import PageTitleAndMeta from './PageTitleAndMeta.svelte';
 
   export let pageTitleAndMetaProps: ComponentProps<PageTitleAndMeta>;
   export let restrictWidth = true;
-  export let theme: 'dark' | 'light' | undefined = undefined;
 </script>
 
-<div
-  class="container"
-  class:theme-dark={theme === 'dark'}
-  class:theme-light={theme === 'light'}
->
+<div class="container">
   <div class="content" class:restrict-width={restrictWidth}>
     <div class="page-title-and-meta-container">
       <PageTitleAndMeta {...pageTitleAndMetaProps}>
@@ -23,11 +19,7 @@
 </div>
 
 <style>
-  .theme-dark {
-    background-color: var(--slate-500);
-    color: var(--white);
-  }
-  .theme-light {
+  .container {
     background-color: var(--sand-200);
   }
   .content {

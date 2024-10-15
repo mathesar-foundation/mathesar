@@ -1,13 +1,14 @@
-import type { QueryInstance } from '@mathesar/api/types/queries';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+import type { SavedExploration } from '@mathesar/api/rpc/explorations';
 import type {
   ComponentAndProps,
   IconProps,
 } from '@mathesar/component-library/types';
+import type { Database } from '@mathesar/models/Database';
+import type { Schema } from '@mathesar/models/Schema';
+import type { Table } from '@mathesar/models/Table';
 
-export interface BreadcrumbItemConnectionList {
-  type: 'connectionList';
+export interface BreadcrumbItemHome {
+  type: 'home';
 }
 
 export interface BreadcrumbItemDatabase {
@@ -18,14 +19,14 @@ export interface BreadcrumbItemDatabase {
 export interface BreadcrumbItemSchema {
   type: 'schema';
   database: Database;
-  schema: SchemaEntry;
+  schema: Schema;
 }
 
 export interface BreadcrumbItemTable {
   type: 'table';
   database: Database;
-  schema: SchemaEntry;
-  table: TableEntry;
+  schema: Schema;
+  table: Table;
 }
 
 export interface BreadcrumbItemSimple {
@@ -38,8 +39,8 @@ export interface BreadcrumbItemSimple {
 export interface BreadcrumbItemRecord {
   type: 'record';
   database: Database;
-  schema: SchemaEntry;
-  table: TableEntry;
+  schema: Schema;
+  table: Table;
   record: {
     pk: string;
     summary: string;
@@ -49,12 +50,12 @@ export interface BreadcrumbItemRecord {
 export interface BreadcrumbItemExploration {
   type: 'exploration';
   database: Database;
-  schema: SchemaEntry;
-  query: Pick<QueryInstance, 'id' | 'name'>;
+  schema: Schema;
+  query: Pick<SavedExploration, 'id' | 'name'>;
 }
 
 export type BreadcrumbItem =
-  | BreadcrumbItemConnectionList
+  | BreadcrumbItemHome
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
   | BreadcrumbItemTable
@@ -77,7 +78,7 @@ export interface SimpleBreadcrumbSelectorEntry
 export interface BreadcrumbSelectorEntryForTable
   extends BaseBreadcrumbSelectorEntry {
   type: 'table';
-  table: TableEntry;
+  table: Table;
 }
 
 export type BreadcrumbSelectorEntry =

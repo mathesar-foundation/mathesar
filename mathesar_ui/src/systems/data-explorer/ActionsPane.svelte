@@ -1,32 +1,34 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
+  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
+  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
+  import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
+  import TableName from '@mathesar/components/TableName.svelte';
   import {
-    Icon,
-    InputGroup,
-    Button,
-    SpinnerButton,
-    DropdownMenu,
-    ButtonMenuItem,
-    iconExpandDown,
-    Help,
-  } from '@mathesar-component-library';
-  import {
+    iconExploration,
+    iconInspector,
     iconRedo,
     iconUndo,
-    iconInspector,
-    iconExploration,
   } from '@mathesar/icons';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import { tables as tablesDataStore } from '@mathesar/stores/tables';
-  import TableName from '@mathesar/components/TableName.svelte';
-  import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
-  import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
-  import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
-  import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
+  import type { Table } from '@mathesar/models/Table';
   import { modal } from '@mathesar/stores/modal';
-  import { toast } from '@mathesar/stores/toast';
   import { queries } from '@mathesar/stores/queries';
+  import { currentTablesData as tablesDataStore } from '@mathesar/stores/tables';
+  import { toast } from '@mathesar/stores/toast';
+  import {
+    Button,
+    ButtonMenuItem,
+    DropdownMenu,
+    Help,
+    Icon,
+    InputGroup,
+    SpinnerButton,
+    iconExpandDown,
+  } from '@mathesar-component-library';
+
   import type QueryManager from './QueryManager';
   import type { ColumnWithLink } from './utils';
 
@@ -37,21 +39,19 @@
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
     {};
   export let isInspectorOpen: boolean;
-  export let canEditMetadata: boolean;
 
   $: ({ query, state, queryHasUnsavedChanges } = queryManager);
-  $: currentTable = $query.base_table
-    ? $tablesDataStore.data.get($query.base_table)
+  $: currentTable = $query.base_table_oid
+    ? $tablesDataStore.tablesMap.get($query.base_table_oid)
     : undefined;
   $: isSaved = $query.isSaved();
   $: hasNoColumns = $query.initial_columns.length === 0;
   $: querySaveRequestStatus = $state.saveState?.state;
 
-  function updateBaseTable(tableEntry: TableEntry | undefined) {
+  function updateBaseTable(table: Table | undefined) {
     void queryManager.update((q) =>
-      q.withBaseTable(tableEntry ? tableEntry.id : undefined),
+      q.withBaseTable(table ? table.oid : undefined),
     );
-    queryManager.clearSelection();
     linkCollapsibleOpenState = {};
   }
 
@@ -154,37 +154,35 @@
 
     <svelte:fragment slot="actions-right">
       {#if currentTable}
-        {#if canEditMetadata}
-          <InputGroup>
-            <!-- TODO: Change disabled condition to is_valid(query) -->
-            <SpinnerButton
-              label={querySaveRequestStatus === 'processing'
-                ? $_('saving')
-                : $_('save')}
-              disabled={!$query.base_table ||
-                hasNoColumns ||
-                querySaveRequestStatus === 'processing'}
-              onClick={saveExistingOrCreateNew}
-            />
-            {#if isSaved}
-              <DropdownMenu
-                triggerAppearance="primary"
-                placements={['bottom-end']}
-                closeOnInnerClick={true}
-                icon={{
-                  ...iconExpandDown,
-                  size: '0.8em',
-                }}
-                showArrow={false}
-              >
-                <ButtonMenuItem on:click={save}>{$_('save')}</ButtonMenuItem>
-                <ButtonMenuItem on:click={saveAndClose}>
-                  {$_('save_and_close')}
-                </ButtonMenuItem>
-              </DropdownMenu>
-            {/if}
-          </InputGroup>
-        {/if}
+        <InputGroup>
+          <!-- TODO: Change disabled condition to is_valid(query) -->
+          <SpinnerButton
+            label={querySaveRequestStatus === 'processing'
+              ? $_('saving')
+              : $_('save')}
+            disabled={!$query.base_table_oid ||
+              hasNoColumns ||
+              querySaveRequestStatus === 'processing'}
+            onClick={saveExistingOrCreateNew}
+          />
+          {#if isSaved}
+            <DropdownMenu
+              triggerAppearance="primary"
+              placements={['bottom-end']}
+              closeOnInnerClick={true}
+              icon={{
+                ...iconExpandDown,
+                size: '0.8em',
+              }}
+              showArrow={false}
+            >
+              <ButtonMenuItem on:click={save}>{$_('save')}</ButtonMenuItem>
+              <ButtonMenuItem on:click={saveAndClose}>
+                {$_('save_and_close')}
+              </ButtonMenuItem>
+            </DropdownMenu>
+          {/if}
+        </InputGroup>
 
         <InputGroup>
           <Button

@@ -6,6 +6,7 @@ module.exports = {
     'dist',
     'index.html',
     'src/**/*.stories.svelte',
+    '*.cjs',
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,
@@ -22,10 +23,14 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:svelte/recommended',
     'plugin:svelte/prettier',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
   ],
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': ['warn', { allow: ['error'] }],
+    'generator-star-spacing': 'off',
     'no-continue': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/ban-ts-comment': [
@@ -43,7 +48,36 @@ module.exports = {
     'array-bracket-spacing': 'off',
     'no-restricted-syntax': 0,
     '@typescript-eslint/require-await': 'off',
+    // TODO_BETA: Add following eslint rules
+    // '@typescript-eslint/consistent-type-imports': 'error',
+    // 'no-duplicate-imports': 'error',
     'class-methods-use-this': 'off',
+    'no-multiple-empty-lines': 1,
+    'import/order': [
+      'error',
+      {
+        alphabetize: {
+          order: 'asc',
+          orderImportKind: 'asc',
+          caseInsensitive: true,
+        },
+        'newlines-between': 'always',
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+        ],
+      },
+    ],
+    'sort-imports': [
+      'error',
+      {
+        ignoreDeclarationSort: true,
+      },
+    ],
   },
   overrides: [
     {

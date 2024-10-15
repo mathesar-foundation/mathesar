@@ -1,38 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import type { IconProps } from '@mathesar/component-library/types';
   import { Icon } from '@mathesar-component-library';
-  import {
-    iconLinksFromOtherTables,
-    iconLinksInThisTable,
-  } from '@mathesar/icons';
-  import { MissingExhaustiveConditionError } from '@mathesar/utils/errors';
-  import type { TableLink, TableLinkType } from './utils';
+
   import LinkItem from './LinkItem.svelte';
+  import type { TableLink } from './utils';
 
+  export let icon: IconProps;
+  export let title: string;
   export let links: TableLink[];
-  export let type: TableLinkType;
-
-  $: icon = (() => {
-    switch (type) {
-      case 'in_this_table':
-        return iconLinksInThisTable;
-      case 'from_other_tables':
-        return iconLinksFromOtherTables;
-      default:
-        throw new MissingExhaustiveConditionError(type);
-    }
-  })();
-
-  $: title = (() => {
-    switch (type) {
-      case 'in_this_table':
-        return $_('in_this_table');
-      case 'from_other_tables':
-        return $_('from_other_tables');
-      default:
-        throw new MissingExhaustiveConditionError(type);
-    }
-  })();
 </script>
 
 <div class="link-section-container">
@@ -57,6 +34,7 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 0.5rem;
+      font-weight: var(--font-weight-medium);
 
       > :global(* + *) {
         margin-left: 0.25rem;
@@ -78,7 +56,7 @@
       flex-direction: column;
 
       > :global(* + *) {
-        margin-top: 0.75rem;
+        margin-top: 0.5rem;
       }
     }
   }

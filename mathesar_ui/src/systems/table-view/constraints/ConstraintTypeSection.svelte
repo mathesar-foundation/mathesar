@@ -1,20 +1,23 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+
+  import type {
+    Constraint,
+    ConstraintType,
+  } from '@mathesar/api/rpc/constraints';
   import { Button, Collapsible, Help, Icon } from '@mathesar/component-library';
-  import type { Constraint } from '@mathesar/stores/table-data';
   import { iconDeleteMajor } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+
   import ConstraintCollapseHeader from './ConstraintCollapseHeader.svelte';
-  import NewUniqueConstraint from './NewUniqueConstraint.svelte';
-  import NewFkConstraint from './NewFkConstraint.svelte';
   import ConstraintDetails from './ConstraintDetails.svelte';
   import ForeignKeyConstraintDetails from './ForeignKeyConstraintDetails.svelte';
+  import NewFkConstraint from './NewFkConstraint.svelte';
+  import NewUniqueConstraint from './NewUniqueConstraint.svelte';
 
   export let constraintType: ConstraintType;
   export let constraints: Constraint[];
-  export let canExecuteDDL: boolean;
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -60,16 +63,12 @@
       identifierType: $_('constraint'),
       identifierName: constraint.name,
       body: [$_('are_you_sure_to_proceed')],
-      onProceed: () => constraintsDataStore.remove(constraint.id),
+      onProceed: () => constraintsDataStore.remove(constraint.oid),
     });
   }
 
-  $: canAdd =
-    CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType) &&
-    canExecuteDDL;
-  $: canDrop =
-    CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType) &&
-    canExecuteDDL;
+  $: canAdd = CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType);
+  $: canDrop = CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType);
 </script>
 
 <div class="constraint-type-section">
@@ -93,7 +92,7 @@
       {/if}
     </div>
   {/if}
-  {#each constraints as constraint (constraint.id)}
+  {#each constraints as constraint (constraint.oid)}
     <Collapsible triggerAppearance="ghost">
       <span slot="header">
         <ConstraintCollapseHeader {constraint} />
@@ -138,7 +137,7 @@
     }
 
     :global(.collapsible-content) {
-      padding-left: 1rem;
+      padding-left: var(--size-x-large);
     }
 
     .null {
@@ -151,14 +150,14 @@
     justify-content: space-between;
     align-items: center;
     font-size: var(--text-size-large);
-
+    font-weight: var(--font-weight-medium);
     border-bottom: 1px solid var(--slate-200);
-    padding: 0.25rem;
-    margin-bottom: 0.5rem;
+    min-height: 2.5rem;
+    margin-bottom: var(--size-xx-small);
   }
 
   .add-constraint {
-    padding: 0.5rem;
+    padding: var(--size-base);
     border: 1px solid var(--slate-300);
     border-radius: var(--border-radius-m);
   }

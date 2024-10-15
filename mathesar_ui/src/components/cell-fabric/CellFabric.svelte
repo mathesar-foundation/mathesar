@@ -4,15 +4,8 @@
   This component is meant to be common for tables, queries, and for import preview
 -->
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import type { HorizontalAlignment } from './data-types/components/typeDefinitions';
   import type { CellColumnFabric } from './types';
-
-  type CustomEvents = {
-    onSelectionStart: { e: MouseEvent };
-    onMouseEnterCellWhileSelection: { e: MouseEvent };
-  };
-  const dispatch = createEventDispatcher<CustomEvents>();
 
   export let columnFabric: CellColumnFabric;
   export let value: unknown;
@@ -21,7 +14,6 @@
     | ((recordId: string, recordSummary: string) => void)
     | undefined = undefined;
   export let isActive = false;
-  export let isSelectedInRange = false;
   export let disabled = false;
   export let showAsSkeleton = false;
   export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
@@ -30,18 +22,11 @@
   export let isIndependentOfSheet = false;
   export let showTruncationPopover = false;
   export let canViewLinkedEntities = true;
+  export let lightText = false;
 
   $: ({ cellComponentAndProps } = columnFabric);
   $: ({ component } = cellComponentAndProps);
   $: props = cellComponentAndProps.props as Record<string, unknown>;
-
-  function handleMouseDown(e: MouseEvent) {
-    dispatch('onSelectionStart', { e });
-  }
-
-  function handleMouseEnter(e: MouseEvent) {
-    dispatch('onMouseEnterCellWhileSelection', { e });
-  }
 </script>
 
 <div
@@ -49,15 +34,13 @@
   data-column-identifier={columnFabric.id}
   class:show-as-skeleton={showAsSkeleton}
   class:is-independent={isIndependentOfSheet}
-  on:mousedown={handleMouseDown}
-  on:mouseenter={handleMouseEnter}
+  class:light-text={lightText}
 >
   <svelte:component
     this={component}
     {...props}
     {columnFabric}
     {isActive}
-    {isSelectedInRange}
     {disabled}
     {isIndependentOfSheet}
     {horizontalAlignment}
@@ -69,9 +52,7 @@
     {canViewLinkedEntities}
     bind:value
     on:movementKeyDown
-    on:activate
     on:update
-    on:mouseenter
   />
 
   <div class="loader">
@@ -116,5 +97,8 @@
   }
   .cell-fabric:not(.show-as-skeleton) .loader {
     display: none;
+  }
+  .light-text {
+    color: var(--cell-text-color-processing);
   }
 </style>

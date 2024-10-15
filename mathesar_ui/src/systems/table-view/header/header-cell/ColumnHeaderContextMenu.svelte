@@ -1,12 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import {
-    getSortingLabelForColumn,
     type SortDirection,
+    getSortingLabelForColumn,
   } from '@mathesar/components/sort-entry/utils';
   import {
     iconAddFilter,
@@ -17,24 +16,17 @@
     iconTable,
   } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
-    getTabularDataStoreFromContext,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-
-  const userProfile = getUserProfileStoreFromContext();
+  import { currentTablesData } from '@mathesar/stores/tables';
+  import { ButtonMenuItem, LinkMenuItem } from '@mathesar-component-library';
 
   export let processedColumn: ProcessedColumn;
 
-  $: canViewLinkedEntities = !!$userProfile?.hasPermission(
-    { database: $currentDatabase, schema: $currentSchema },
-    'canViewLinkedEntities',
-  );
+  const canViewLinkedEntities = true;
 
   $: columnAllowsFiltering = processedColumn.linkFk
     ? canViewLinkedEntities
@@ -60,9 +52,11 @@
   $: hasGrouping = $grouping.hasColumn(columnId);
 
   $: ({ linkFk } = processedColumn);
-  $: linkedTable = linkFk ? $tables.data.get(linkFk.referent_table) : undefined;
+  $: linkedTable = linkFk
+    ? $currentTablesData.tablesMap.get(linkFk.referent_table_oid)
+    : undefined;
   $: linkedTableHref = linkedTable
-    ? $storeToGetTablePageUrl({ tableId: linkedTable.id })
+    ? $storeToGetTablePageUrl({ tableId: linkedTable.oid })
     : undefined;
 
   function addFilter() {

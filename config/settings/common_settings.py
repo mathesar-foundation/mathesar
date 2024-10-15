@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "django_property_filter",
-    "drf_spectacular",
     "modernrpc",
     "mathesar",
 ]
@@ -66,7 +65,27 @@ MIDDLEWARE = [
 ROOT_URLCONF = "config.urls"
 
 MODERNRPC_METHODS_MODULES = [
-    'mathesar.rpc.connections'
+    'mathesar.rpc.collaborators',
+    'mathesar.rpc.columns',
+    'mathesar.rpc.columns.metadata',
+    'mathesar.rpc.connections',
+    'mathesar.rpc.constraints',
+    'mathesar.rpc.data_modeling',
+    'mathesar.rpc.databases',
+    'mathesar.rpc.databases.configured',
+    'mathesar.rpc.databases.privileges',
+    'mathesar.rpc.databases.setup',
+    'mathesar.rpc.explorations',
+    'mathesar.rpc.records',
+    'mathesar.rpc.roles',
+    'mathesar.rpc.roles.configured',
+    'mathesar.rpc.schemas',
+    'mathesar.rpc.schemas.privileges',
+    'mathesar.rpc.servers.configured',
+    'mathesar.rpc.tables',
+    'mathesar.rpc.tables.metadata',
+    'mathesar.rpc.tables.privileges',
+    'mathesar.rpc.types',
 ]
 
 TEMPLATES = [
@@ -207,18 +226,6 @@ REST_FRAMEWORK = {
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'EXCEPTION_HANDLER':
         'mathesar.exception_handlers.mathesar_exception_handler',
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
-}
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Mathesar API',
-    'DESCRIPTION': '',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'PREPROCESSING_HOOKS': ['config.settings.openapi.custom_preprocessing_hook'],
-    'POSTPROCESSING_HOOKS': [
-        'config.settings.openapi.remove_url_prefix_hook',
-    ],
-    # OTHER SETTINGS
 }
 FRIENDLY_ERRORS = {
     'FIELD_ERRORS': {
@@ -256,6 +263,8 @@ MATHESAR_CLIENT_DEV_URL = decouple_config(
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # UI source files have to be served by Django in order for static assets to be included during dev mode
 # https://vitejs.dev/guide/assets.html

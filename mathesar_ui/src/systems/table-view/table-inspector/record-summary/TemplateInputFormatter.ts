@@ -2,9 +2,10 @@ import type {
   InputFormatter,
   ParseResult,
 } from '@mathesar-component-library/types';
+
 import {
-  columnIsConformant,
   type ColumnLike,
+  columnIsConformant,
 } from './recordSummaryTemplateUtils';
 
 export default class TemplateInputFormatter implements InputFormatter<string> {

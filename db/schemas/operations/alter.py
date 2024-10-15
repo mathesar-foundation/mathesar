@@ -1,48 +1,34 @@
-from db.connection import execute_msar_func_with_engine
+import json
 
-SUPPORTED_SCHEMA_ALTER_ARGS = {'name', 'description'}
+from db.connection import execute_msar_func_with_engine, exec_msar_func
 
 
-def rename_schema(schema_name, engine, rename_to):
+def patch_schema_via_sql_alchemy(schema_name, engine, patch):
     """
-    Rename an existing schema.
+    Patch a schema using a SQLAlchemy engine.
 
     Args:
         schema_name: Name of the schema to change.
         engine: SQLAlchemy engine object for connecting.
-        rename_to: New schema name.
-
-    Returns:
-        Returns a string giving the command that was run.
+        patch: A dict mapping the following fields to new values:
+            - 'name' (optional): New name for the schema.
+            - 'description' (optional): New description for the schema.
     """
-    if rename_to == schema_name:
-        return
-    return execute_msar_func_with_engine(
-        engine, 'rename_schema', schema_name, rename_to
-    ).fetchone()[0]
+    execute_msar_func_with_engine(engine, "patch_schema", schema_name, json.dumps(patch))
 
 
-def comment_on_schema(schema_name, engine, comment):
+def patch_schema(schema_oid, conn, patch):
     """
-    Change description of a schema.
+    Patch a schema using a psycopg connection.
 
     Args:
-        schema_name: The name of the schema whose comment we will
-                     change.
-        comment: The new comment. Any quotes or special characters must
-                 be escaped.
-        engine: SQLAlchemy engine object for connecting.
+        schema_oid: The OID of the schema to change.
+        conn: a psycopg connection
+        patch: A dict mapping the following fields to new values:
+            - 'name' (optional): New name for the schema.
+            - 'description' (optional): New description for the schema.
 
     Returns:
-        Returns a string giving the command that was run.
+        The SchemaInfo describing the user-defined schema in the database.
     """
-    return execute_msar_func_with_engine(
-        engine, 'comment_on_schema', schema_name, comment
-    ).fetchone()[0]
-
-
-def alter_schema(name, engine, update_data):
-    if "description" in update_data:
-        comment_on_schema(name, engine, update_data["description"])
-    if "name" in update_data:
-        rename_schema(name, engine, update_data["name"])
+    return exec_msar_func(conn, "patch_schema", schema_oid, json.dumps(patch)).fetchone()[0]

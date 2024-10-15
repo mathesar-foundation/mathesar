@@ -1,14 +1,15 @@
 <script lang="ts">
+  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { SheetPositionableCell } from '@mathesar/components/sheet';
   import type {
-    RecordGrouping,
-    RecordGroup,
     GroupHeaderRow,
     ProcessedColumn,
+    RecordGroup,
+    RecordGrouping,
   } from '@mathesar/stores/table-data';
   import type { RecordSummariesForSheet } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import CellBackground from '@mathesar/components/CellBackground.svelte';
   import { Badge } from '@mathesar-component-library';
+
   import GroupHeaderCellValue from './GroupHeaderCellValue.svelte';
 
   export let processedColumnsMap: Map<number, ProcessedColumn>;
@@ -30,13 +31,8 @@
   );
 </script>
 
-<SheetPositionableCell
-  index={0}
-  columnSpan={processedColumnsMap.size + 1}
-  let:htmlAttributes
-  let:style
->
-  <div {...htmlAttributes} {style} class="group-header">
+<SheetPositionableCell index={0} columnSpan={processedColumnsMap.size + 1}>
+  <div class="group-header">
     <CellBackground color="var(--sand-200)" />
     <div class="groups-data">
       {#each columnIds as columnId, index (columnId)}
@@ -60,7 +56,6 @@
 <style lang="scss">
   .group-header {
     padding: 0.5rem 1.5rem;
-    z-index: var(--z-index__sheet__group-header);
 
     .groups-data {
       align-items: start;

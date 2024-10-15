@@ -1,10 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
+  import { currentTable } from '@mathesar/stores/tables';
   import {
     ControlledModal,
     type ModalController,
   } from '@mathesar-component-library';
-  import { currentTable } from '@mathesar/stores/tables';
+
   import LinkTableForm from './LinkTableForm.svelte';
 
   export let controller: ModalController;

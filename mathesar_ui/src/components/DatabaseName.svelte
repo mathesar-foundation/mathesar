@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { Database } from '@mathesar/AppTypes';
   import { iconDatabase } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
+
   import NameWithIcon from './NameWithIcon.svelte';
 
   export let database: Database;
@@ -8,5 +9,5 @@
 </script>
 
 <NameWithIcon icon={iconDatabase} {iconHasBox}>
-  {database.nickname}
+  {database.name}
 </NameWithIcon>

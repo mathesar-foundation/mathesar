@@ -25,12 +25,12 @@
       border-radius: 2px 2px 0px 0px;
       border-bottom: 2px solid transparent;
       margin-bottom: -1px;
-      margin-right: 2rem;
+      margin-right: var(--Tab_margin-right, 2rem);
       font-size: var(--text-size-large);
 
       > div,
       a {
-        padding: 0.75rem 0;
+        padding: 0.5rem 1rem;
         white-space: nowrap;
         text-decoration: none;
         text-overflow: ellipsis;
@@ -113,7 +113,7 @@
       > li.tab {
         font-size: var(--text-size-base);
         text-align: center;
-        margin-right: 0;
+        margin-right: var(--Tab_margin-right, 0);
         > div {
           padding: 0.5rem 0;
         }

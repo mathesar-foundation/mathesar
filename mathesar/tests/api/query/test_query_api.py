@@ -1,6 +1,6 @@
 import pytest
 
-from mathesar.models.query import UIQuery
+from mathesar.models.query import Exploration
 
 
 @pytest.fixture
@@ -330,7 +330,7 @@ def test_update_based_on_permission(
 ):
     base_table = create_patents_table(table_name=get_uid())
     different_schema_base_table = create_patents_table(table_name=get_uid(), schema_name='Private Schema')
-    ui_query = UIQuery.objects.create(
+    ui_query = Exploration.objects.create(
         name="Query1",
         base_table=base_table,
         initial_columns=[
@@ -342,7 +342,7 @@ def test_update_based_on_permission(
             }
         ]
     )
-    different_schema_ui_query = UIQuery.objects.create(
+    different_schema_ui_query = Exploration.objects.create(
         name="Query2",
         base_table=different_schema_base_table,
         initial_columns=[

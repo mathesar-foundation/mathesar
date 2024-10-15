@@ -2,7 +2,8 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from mathesar.models.base import BaseModel, Database, Schema
+from mathesar.models.base import BaseModel
+from mathesar.models.deprecated import Connection, Schema
 
 
 class User(AbstractUser):
@@ -17,6 +18,9 @@ class User(AbstractUser):
     password_change_needed = models.BooleanField(default=False)
     display_language = models.CharField(max_length=30, blank=True, default='en')
 
+    def metadata_privileges(self, database_id):
+        return 'read write'
+
 
 class Role(models.TextChoices):
     MANAGER = 'manager', 'Manager'
@@ -26,7 +30,7 @@ class Role(models.TextChoices):
 
 class DatabaseRole(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='database_roles')
-    database = models.ForeignKey(Database, on_delete=models.CASCADE)
+    database = models.ForeignKey(Connection, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=Role.choices)
 
     class Meta:

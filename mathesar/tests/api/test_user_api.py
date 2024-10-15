@@ -1,7 +1,7 @@
 from django.db import transaction
 
 from db.schemas.utils import get_schema_oid_from_name
-from mathesar.models.base import Database, Schema
+from mathesar.models.deprecated import Connection, Schema
 from mathesar.models.users import User, DatabaseRole, SchemaRole
 
 
@@ -61,15 +61,29 @@ def test_user_password_reset_non_superuser(client_bob, user_bob):
 
 
 def test_user_password_change(client_bob, user_bob):
-    new_password = 'new_password'
+    new_password = 'NewPass0!'
+    old_password = 'password'
     data = {
         'password': new_password,
-        'old_password': 'password'
+        'old_password': old_password
     }
     response = client_bob.post('/api/ui/v0/users/password_change/', data=data)
     assert response.status_code == 200
     user_bob.refresh_from_db()
     assert user_bob.check_password(new_password) is True
+
+
+def test_user_password_change_invalid(client_bob, user_bob):
+    new_password = 'new_pwd'
+    old_password = 'password'
+    data = {
+        'password': new_password,
+        'old_password': old_password
+    }
+    response = client_bob.post('/api/ui/v0/users/password_change/', data=data)
+    assert response.status_code == 400
+    user_bob.refresh_from_db()
+    assert user_bob.check_password(new_password) is False
 
 
 def test_diff_user_detail_as_non_superuser(client_bob, admin_user):
@@ -239,7 +253,7 @@ def test_user_delete_different_user(client_bob, user_alice):
 
 def test_database_role_list_user_without_view_permission(client_bob, user_alice):
     role = 'manager'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     DatabaseRole.objects.create(user=user_alice, database=database, role=role)
 
     response = client_bob.get('/api/ui/v0/database_roles/')
@@ -253,7 +267,7 @@ def test_db_role_list_with_roles_on_multiple_database(FUN_create_dj_db, client_b
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
-    databases = Database.objects.all()
+    databases = Connection.objects.all()
     database_with_viewer_access = databases[0]
     DatabaseRole.objects.create(user=user_bob, database=database_with_viewer_access, role='viewer')
     database_with_manager_access = databases[1]
@@ -266,7 +280,7 @@ def test_db_role_list_with_roles_on_multiple_database(FUN_create_dj_db, client_b
 
 def test_database_role_list_user_with_view_permission(client_bob, user_alice, user_bob):
     role = 'manager'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     DatabaseRole.objects.create(user=user_alice, database=database, role=role)
     DatabaseRole.objects.create(user=user_bob, database=database, role=role)
 
@@ -279,7 +293,7 @@ def test_database_role_list_user_with_view_permission(client_bob, user_alice, us
 
 def test_database_role_list_superuser(client, user_bob):
     role = 'manager'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     DatabaseRole.objects.create(user=user_bob, database=database, role=role)
 
     response = client.get('/api/ui/v0/database_roles/')
@@ -370,7 +384,7 @@ def test_schema_role_list_with_roles_on_multiple_database(
 
 def test_database_role_detail(client, user_bob):
     role = 'editor'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     database_role = DatabaseRole.objects.create(user=user_bob, database=database, role=role)
 
     response = client.get(f'/api/ui/v0/database_roles/{database_role.id}/')
@@ -400,7 +414,7 @@ def test_schema_role_detail(client, user_bob):
 
 def test_database_role_update(client, user_bob):
     role = 'viewer'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     database_role = DatabaseRole.objects.create(user=user_bob, database=database, role=role)
     data = {'user': user_bob.id, 'role': role, 'database': database.id}
 
@@ -426,7 +440,7 @@ def test_schema_role_update(client, user_bob):
 
 def test_database_role_partial_update(client, user_bob):
     role = 'viewer'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     database_role = DatabaseRole.objects.create(user=user_bob, database=database, role=role)
     data = {'role': 'editor'}
 
@@ -452,7 +466,7 @@ def test_schema_role_partial_update(client, user_bob):
 
 def test_database_role_create_by_superuser(client, user_bob):
     role = 'editor'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     data = {'user': user_bob.id, 'role': role, 'database': database.id}
 
     response = client.post('/api/ui/v0/database_roles/', data)
@@ -466,7 +480,7 @@ def test_database_role_create_by_superuser(client, user_bob):
 
 
 def test_database_role_create_by_manager(client_bob, user_bob, user_alice):
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     DatabaseRole.objects.create(user=user_bob, database=database, role='manager')
 
     role = 'viewer'
@@ -486,7 +500,7 @@ def test_db_role_create_with_roles_on_multiple_database(FUN_create_dj_db, client
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
     FUN_create_dj_db(get_uid())
-    databases = Database.objects.all()
+    databases = Connection.objects.all()
     database_with_viewer_access = databases[0]
     DatabaseRole.objects.create(user=user_bob, database=database_with_viewer_access, role='viewer')
     database_with_manager_access = databases[1]
@@ -502,7 +516,7 @@ def test_db_role_create_with_roles_on_multiple_database(FUN_create_dj_db, client
 
 def test_database_role_create_non_superuser(client_bob, user_bob):
     role = 'editor'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     data = {'user': user_bob.id, 'role': role, 'database': database.id}
 
     response = client_bob.post('/api/ui/v0/database_roles/', data)
@@ -628,7 +642,7 @@ def test_schema_role_create_with_multiple_database(
 
 def test_database_role_create_with_incorrect_role(client, user_bob):
     role = 'nonsense'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     data = {'user': user_bob.id, 'role': role, 'database': database.id}
 
     response = client.post('/api/ui/v0/database_roles/', data)
@@ -652,7 +666,7 @@ def test_schema_role_create_with_incorrect_role(client, user_bob):
 
 def test_database_role_create_with_incorrect_database(client, user_bob):
     role = 'editor'
-    database = Database.objects.order_by('-id')[0]
+    database = Connection.objects.order_by('-id')[0]
     data = {'user': user_bob.id, 'role': role, 'database': database.id + 1}
 
     response = client.post('/api/ui/v0/database_roles/', data)
@@ -676,7 +690,7 @@ def test_schema_role_create_with_incorrect_schema(client, user_bob):
 
 def test_database_role_destroy(client, user_bob):
     role = 'viewer'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     database_role = DatabaseRole.objects.create(user=user_bob, database=database, role=role)
 
     response = client.delete(f'/api/ui/v0/database_roles/{database_role.id}/')
@@ -684,7 +698,7 @@ def test_database_role_destroy(client, user_bob):
 
 
 def test_database_role_destroy_by_manager(client_bob, user_bob, user_alice):
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     DatabaseRole.objects.create(user=user_bob, database=database, role='manager')
 
     role = 'viewer'
@@ -695,7 +709,7 @@ def test_database_role_destroy_by_manager(client_bob, user_bob, user_alice):
 
 
 def test_database_role_destroy_by_non_manager(client_bob, user_bob, user_alice):
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     DatabaseRole.objects.create(user=user_bob, database=database, role='viewer')
 
     role = 'viewer'
@@ -706,7 +720,7 @@ def test_database_role_destroy_by_non_manager(client_bob, user_bob, user_alice):
 
 
 def test_database_role_destroy_by_user_without_role(client_bob, user_alice):
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
 
     role = 'viewer'
     database_role = DatabaseRole.objects.create(user=user_alice, database=database, role=role)
@@ -755,7 +769,7 @@ def test_schema_role_destroy_by_db_manager(client_bob, user_bob, user_alice):
 
 def test_database_role_create_multiple_roles_on_same_object(client, user_bob):
     role = 'manager'
-    database = Database.objects.all()[0]
+    database = Connection.objects.all()[0]
     DatabaseRole.objects.create(user=user_bob, database=database, role=role)
     data = {'user': user_bob.id, 'role': 'editor', 'database': database.id}
 

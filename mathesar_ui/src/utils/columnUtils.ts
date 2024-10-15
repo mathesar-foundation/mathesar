@@ -1,40 +1,39 @@
-import { get } from 'svelte/store';
-
-import type { IconProps } from '@mathesar-component-library/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { DisplayColumn } from '@mathesar/components/column/types';
-import { uniqueWith, type ValidationFn } from '@mathesar/components/form';
+import type { Column } from '@mathesar/api/rpc/columns';
+import type { ConstraintType } from '@mathesar/api/rpc/constraints';
+import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
+import type { Table } from '@mathesar/models/Table';
 import {
-  currentDbAbstractTypes,
+  abstractTypesMap,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
-import { getAvailableName } from '@mathesar/utils/db';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
+import { getAvailableName } from '@mathesar/utils/db';
+import type { IconProps } from '@mathesar-component-library/types';
+
 import { makeSingular } from './languageUtils';
 
-export function getColumnIconProps(
-  _column: DisplayColumn,
-): IconProps | IconProps[] {
-  if (_column.constraintsType?.includes('primary')) {
+export function getColumnIconProps(column: {
+  type: Column['type'];
+  type_options: Column['type_options'];
+  constraintsType?: ConstraintType[];
+}): IconProps | IconProps[] {
+  if (column.constraintsType?.includes('primary')) {
     return iconConstraint;
   }
 
-  if (_column.constraintsType?.includes('foreignkey')) {
+  if (column.constraintsType?.includes('foreignkey')) {
     return iconTableLink;
   }
 
-  return getAbstractTypeForDbType(
-    _column.type,
-    get(currentDbAbstractTypes)?.data,
-  ).getIcon({
-    dbType: _column.type,
-    typeOptions: _column.type_options,
+  return getAbstractTypeForDbType(column.type, abstractTypesMap).getIcon({
+    dbType: column.type,
+    typeOptions: column.type_options,
   });
 }
 
 export function getSuggestedFkColumnName(
-  targetTable: Pick<TableEntry, 'name'> | undefined,
+  targetTable: Pick<Table, 'name'> | undefined,
   existingColumns: { name: string }[] = [{ name: 'id' }],
 ): string {
   const columnNames = new Set(existingColumns.map((c) => c.name));

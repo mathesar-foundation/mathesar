@@ -1,6 +1,16 @@
 <script lang="ts">
-  import { router } from 'tinro';
   import { _ } from 'svelte-i18n';
+  import { router } from 'tinro';
+
+  import { iconDeleteMajor, iconExploration } from '@mathesar/icons';
+  import { getSchemaPageUrl } from '@mathesar/routes/urls';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
+  import { deleteTable } from '@mathesar/stores/tables';
+  import {
+    constructDataExplorerUrlToSummarizeFromGroup,
+    createDataExplorerUrlToExploreATable,
+  } from '@mathesar/systems/data-explorer';
   import {
     AnchorButton,
     Button,
@@ -8,51 +18,32 @@
     Icon,
     iconExternalLink,
   } from '@mathesar-component-library';
-  import { iconDeleteMajor, iconExploration } from '@mathesar/icons';
-  import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { currentTable, deleteTable, tables } from '@mathesar/stores/tables';
-  import {
-    constructDataExplorerUrlToSummarizeFromGroup,
-    createDataExplorerUrlToExploreATable,
-  } from '@mathesar/systems/data-explorer';
-  import TableDeleteConfirmationBody from './TableDeleteConfirmationBody.svelte';
 
-  export let canExecuteDDL: boolean;
+  import TableDeleteConfirmationBody from './TableDeleteConfirmationBody.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ id, columnsDataStore, meta } = $tabularData);
+  $: ({ table, columnsDataStore, meta } = $tabularData);
   $: ({ grouping } = meta);
   $: ({ columns } = columnsDataStore);
-  $: explorationPageUrl =
-    $currentDatabase && $currentSchema
-      ? createDataExplorerUrlToExploreATable(
-          $currentDatabase?.id,
-          $currentSchema.id,
-          {
-            id: $tabularData.id,
-            name: $tables.data.get($tabularData.id)?.name ?? '',
-          },
-        )
-      : '';
-  $: summarizationUrl = (() => {
-    if (!$currentTable || !$currentDatabase || !$currentSchema) {
-      return undefined;
-    }
-    return constructDataExplorerUrlToSummarizeFromGroup(
-      $currentDatabase.id,
-      $currentSchema.id,
+  $: explorationPageUrl = createDataExplorerUrlToExploreATable(
+    table.schema.database.id,
+    table.schema.oid,
+    table,
+  );
+  $: summarizationUrl = (() =>
+    constructDataExplorerUrlToSummarizeFromGroup(
+      table.schema.database.id,
+      table.schema.oid,
       {
-        baseTable: { id, name: $currentTable.name },
+        databaseId: table.schema.database.id,
+        schemaOid: table.schema.oid,
+        baseTable: table,
         columns: $columns,
         terseGrouping: $grouping.terse(),
       },
-    );
-  })();
+    ))();
+  $: ({ currentRoleOwns } = table.currentAccess);
 
   function handleDeleteTable() {
     void confirmDelete({
@@ -60,58 +51,55 @@
       body: {
         component: TableDeleteConfirmationBody,
         props: {
-          tableName: $currentTable?.name,
+          tableName: table.name,
         },
       },
       onProceed: async () => {
-        // TODO handle error when deleting
-        // TODO: Get db and schema from prop or context
-        const database = $currentDatabase;
-        const schema = $currentSchema;
-        if (database && schema) {
-          await deleteTable(database, schema, $tabularData.id);
-          router.goto(getSchemaPageUrl(database.id, schema.id), true);
-        }
+        await deleteTable(table.schema, table.oid);
+        router.goto(
+          getSchemaPageUrl(table.schema.database.id, table.schema.oid),
+          true,
+        );
       },
     });
   }
 </script>
 
 <div class="actions-container">
-  {#if $currentDatabase && $currentSchema}
-    <AnchorButton href={explorationPageUrl}>
+  <AnchorButton href={explorationPageUrl} appearance="action">
+    <div class="action-item">
+      <div>
+        <Icon {...iconExploration} /> <span>{$_('explore_data')}</span>
+        <Help>
+          {$_('open_table_in_data_explorer')}
+        </Help>
+      </div>
+      <Icon {...iconExternalLink} />
+    </div>
+  </AnchorButton>
+  {#if summarizationUrl}
+    <AnchorButton href={summarizationUrl}>
       <div class="action-item">
         <div>
-          <Icon {...iconExploration} /> <span>{$_('explore_data')}</span>
+          <Icon {...iconExploration} />
+          <span>{$_('summarize_in_data_explorer')}</span>
           <Help>
-            {$_('open_table_in_data_explorer')}
+            {$_('summarize_in_data_explorer_help')}
           </Help>
         </div>
         <Icon {...iconExternalLink} />
       </div>
     </AnchorButton>
-    {#if summarizationUrl}
-      <AnchorButton href={summarizationUrl}>
-        <div class="action-item">
-          <div>
-            <Icon {...iconExploration} />
-            <span>{$_('summarize_in_data_explorer')}</span>
-            <Help>
-              {$_('summarize_in_data_explorer_help')}
-            </Help>
-          </div>
-          <Icon {...iconExternalLink} />
-        </div>
-      </AnchorButton>
-    {/if}
   {/if}
 
-  {#if canExecuteDDL}
-    <Button appearance="outline-primary" on:click={handleDeleteTable}>
-      <Icon {...iconDeleteMajor} />
-      <span>{$_('delete_table')}</span>
-    </Button>
-  {/if}
+  <Button
+    appearance="outline-primary"
+    on:click={handleDeleteTable}
+    disabled={!$currentRoleOwns}
+  >
+    <Icon {...iconDeleteMajor} />
+    <span>{$_('delete_table')}</span>
+  </Button>
 </div>
 
 <style lang="scss">

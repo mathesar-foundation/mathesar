@@ -1,10 +1,12 @@
+import { compare } from 'compare-versions';
 import { getContext, setContext } from 'svelte';
 
 import {
-  gitHubReleases,
   type GitHubRelease,
+  gitHubReleases,
 } from '@mathesar/3rd-party-apis/github-releases';
 import { CachedFetchStore } from '@mathesar/utils/cachedFetchStore';
+
 import { LOCAL_STORAGE_KEYS } from './localStorage';
 
 export interface Release {
@@ -30,20 +32,6 @@ function buildRelease(gh: GitHubRelease | undefined): Release | undefined {
   };
 }
 
-function orderableTag(tagName: string): number | undefined {
-  try {
-    const [major, minor, patch] = tagName
-      .split('.')
-      .map((s) => parseInt(s, 10));
-    if (Number.isNaN(major) || Number.isNaN(minor) || Number.isNaN(patch)) {
-      return undefined;
-    }
-    return major * 1000000 + minor * 1000 + patch;
-  } catch (e) {
-    return undefined;
-  }
-}
-
 type UpgradeStatus = 'upgradable' | 'up-to-date';
 
 function getUpgradeStatus(
@@ -53,12 +41,9 @@ function getUpgradeStatus(
   if (current === undefined || latest === undefined) {
     return undefined;
   }
-  const currentNum = orderableTag(current.tagName);
-  const LatestNum = orderableTag(latest.tagName);
-  if (currentNum && LatestNum && LatestNum > currentNum) {
-    return 'upgradable';
-  }
-  return 'up-to-date';
+  return compare(latest.tagName, current.tagName, '>')
+    ? 'upgradable'
+    : 'up-to-date';
 }
 
 export class ReleaseData {

@@ -1,14 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { iconExploration } from '@mathesar/icons';
-  import ExplorationItem from './ExplorationItem.svelte';
-  import EmptyEntity from './EmptyEntity.svelte';
 
-  export let explorations: QueryInstance[];
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
+  import { iconExploration } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+
+  import EmptyEntity from './EmptyEntity.svelte';
+  import ExplorationItem from './ExplorationItem.svelte';
+
+  export let explorations: SavedExploration[];
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let bordered = true;
 </script>
 

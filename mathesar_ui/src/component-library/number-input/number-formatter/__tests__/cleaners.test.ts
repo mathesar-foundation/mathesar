@@ -1,11 +1,11 @@
 import {
-  removeExtraneousMinusSigns,
-  factoryToRemoveExtraneousDecimalSeparators,
   factoryToPrependShorthandDecimalWithZero,
+  factoryToRemoveExtraneousDecimalSeparators,
   factoryToSimplify,
+  removeExtraneousMinusSigns,
   removePrecedingZeros,
-  removeTrailingDecimalZeros,
   removeTrailingDecimalSeparator,
+  removeTrailingDecimalZeros,
 } from '../cleaners';
 
 test.each([

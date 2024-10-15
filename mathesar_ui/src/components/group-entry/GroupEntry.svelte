@@ -1,16 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
   import { _ } from 'svelte-i18n';
+
+  import type { ConstraintType } from '@mathesar/api/rpc/constraints';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import { iconDeleteMajor } from '@mathesar/icons';
+  import type { ReadableMapLike } from '@mathesar/typeUtils';
   import {
     Button,
     Icon,
     InputGroup,
     Select,
   } from '@mathesar-component-library';
-  import { iconDeleteMajor } from '@mathesar/icons';
-  import type { ReadableMapLike } from '@mathesar/typeUtils';
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
-  import type { ConstraintType } from '@mathesar/api/types/tables/constraints';
+
   import type { GroupEntryColumnLike } from './types';
 
   type T = $$Generic;
@@ -120,7 +122,6 @@
         name: getColumnLabel(columnInfo),
         type: columnInfo?.column.type ?? 'unknown',
         type_options: columnInfo?.column.type_options ?? null,
-        display_options: columnInfo?.column.display_options ?? null,
         constraintsType: getColumnConstraintTypeFromColumnId(option),
       }}
     />

@@ -1,27 +1,28 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import TablesList from './TablesList.svelte';
-  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
-  import CreateNewTableButton from './CreateNewTableButton.svelte';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+  import type { Table } from '@mathesar/models/Table';
 
-  export let tablesMap: Map<number, TableEntry>;
+  import CreateNewTableButton from './CreateNewTableButton.svelte';
+  import CreateNewTableTutorial from './CreateNewTableTutorial.svelte';
+  import TablesList from './TablesList.svelte';
+
+  export let tablesMap: Map<number, Table>;
 
   export let database: Database;
-  export let schema: SchemaEntry;
-  export let canExecuteDDL: boolean;
+  export let schema: Schema;
 
-  $: showTutorial = tablesMap.size === 0 && canExecuteDDL;
+  $: ({ currentRolePrivileges } = schema.currentAccess);
+  $: showTutorial =
+    tablesMap.size === 0 && $currentRolePrivileges.has('CREATE');
 
   let tableSearchQuery = '';
 
-  function filterTables(
-    _tablesMap: Map<number, TableEntry>,
-    searchQuery: string,
-  ) {
+  function filterTables(_tablesMap: Map<number, Table>, searchQuery: string) {
     return [..._tablesMap.values()].filter((table) =>
       table.name.toLowerCase().includes(searchQuery.trim().toLowerCase()),
     );
@@ -40,9 +41,7 @@
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
-    {#if canExecuteDDL}
-      <CreateNewTableButton {database} {schema} />
-    {/if}
+    <CreateNewTableButton {database} {schema} />
   </svelte:fragment>
   <svelte:fragment slot="resultInfo">
     <p>
@@ -62,7 +61,7 @@
     {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} />
     {:else}
-      <TablesList {canExecuteDDL} tables={filteredTables} {database} {schema} />
+      <TablesList tables={filteredTables} {database} {schema} />
     {/if}
   </svelte:fragment>
 </EntityContainerWithFilterBar>

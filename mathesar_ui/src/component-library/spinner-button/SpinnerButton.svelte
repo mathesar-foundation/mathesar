@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
-  import Spinner from '@mathesar-component-library-dir/spinner/Spinner.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
+  import Spinner from '@mathesar-component-library-dir/spinner/Spinner.svelte';
+
   import type { Appearance } from '../commonTypes';
 
   /** TODO: Improve typing to ensure there's either a label or an icon */

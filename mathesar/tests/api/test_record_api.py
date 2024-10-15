@@ -14,8 +14,8 @@ from mathesar.state import reset_reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
-from mathesar.models import base as models_base
-from mathesar.models.base import compute_default_preview_template
+from mathesar.models import deprecated as models_deprecated
+from mathesar.models.deprecated import compute_default_preview_template
 from mathesar.models.query import DBQuery
 from mathesar.utils.preview import compute_path_prefix, compute_path_str
 
@@ -235,7 +235,7 @@ def test_filter_with_added_columns(create_patents_table, client):
         table.add_column({"name": new_column_name, "type": new_column_type})
         row_values_list = []
         # Get a new instance with clean cache, so that the new column is added to the _sa_column list
-        table = models_base.Table.objects.get(oid=table.oid)
+        table = models_deprecated.Table.objects.get(oid=table.oid)
         response_data = client.get(f'/api/db/v0/tables/{table.id}/records/').json()
         existing_records = response_data['results']
 

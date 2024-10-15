@@ -1,4 +1,4 @@
-import type { GetRequestParams } from '@mathesar/api/types/tables/records';
+import type { RecordsListParams } from '@mathesar/api/rpc/records';
 import { isDefinedNonNullable } from '@mathesar/component-library';
 
 export interface GroupEntry {
@@ -75,23 +75,15 @@ export class Grouping {
     });
   }
 
-  recordsRequestParams(): Pick<GetRequestParams, 'grouping'> {
+  recordsRequestParams(): Pick<RecordsListParams, 'grouping'> {
     if (!this.entries.length) {
       return {};
     }
-    const request: GetRequestParams['grouping'] = {
-      columns: [],
-      preproc: [],
-    };
-    this.entries.forEach((entry) => {
-      request.columns.push(entry.columnId);
-      request.preproc?.push(entry.preprocFnId ?? null);
-    });
-    if (request.preproc?.every((entry) => !isDefinedNonNullable(entry))) {
-      request.preproc = null;
-    }
     return {
-      grouping: request,
+      grouping: {
+        columns: this.entries.map((e) => e.columnId),
+        preproc: this.entries.map((e) => e.preprocFnId ?? null),
+      },
     };
   }
 

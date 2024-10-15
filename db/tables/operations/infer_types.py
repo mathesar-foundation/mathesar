@@ -5,7 +5,8 @@ from sqlalchemy import select
 from db import constants
 from db.columns.base import MathesarColumn
 from db.columns.operations.infer_types import infer_column_type
-from db.schemas.operations.create import create_schema
+from db.connection import exec_msar_func
+from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
 from db.tables.operations.create import CreateTableAs
 from db.tables.operations.select import reflect_table
 from db.types.operations.convert import get_db_type_enum_from_class
@@ -14,6 +15,25 @@ from db.metadata import get_empty_metadata
 
 TEMP_SCHEMA = constants.INFERENCE_SCHEMA
 TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
+
+
+def infer_table_column_data_types(conn, table_oid):
+    """
+    Infer the best type for each column in the table.
+
+    Currently we only suggest different types for columns which originate
+    as type `text`.
+
+    Args:
+        tab_id: The OID of the table whose columns we're inferring types for.
+
+    The response JSON will have attnum keys, and values will be the
+    result of `format_type` for the inferred type of each column.
+    Restricted to columns to which the user has access.
+    """
+    return exec_msar_func(
+        conn, 'infer_table_column_data_types', table_oid
+    ).fetchone()[0]
 
 
 def update_table_column_types(schema, table_name, engine, metadata=None, columns_might_have_defaults=True):
@@ -43,7 +63,7 @@ def infer_table_column_types(schema, table_name, engine, metadata=None, columns_
     table = reflect_table(table_name, schema, engine, metadata=metadata)
 
     temp_name = TEMP_TABLE % (int(time()))
-    create_schema(TEMP_SCHEMA, engine, if_not_exists=True)
+    create_schema_if_not_exists_via_sql_alchemy(TEMP_SCHEMA, engine)
     with engine.begin() as conn:
         while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
             temp_name = TEMP_TABLE.format(int(time()))

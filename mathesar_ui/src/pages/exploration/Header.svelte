@@ -1,18 +1,18 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { Button, Icon } from '@mathesar-component-library';
+
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import { iconExploration, iconInspector } from '@mathesar/icons';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getExplorationEditorPageUrl } from '@mathesar/routes/urls';
-  import ShareExplorationDropdown from './ShareExplorationDropdown.svelte';
+  import { Button, Icon } from '@mathesar-component-library';
 
   export let database: Database;
-  export let schema: SchemaEntry;
-  export let query: QueryInstance;
+  export let schema: Schema;
+  export let query: SavedExploration;
   export let isInspectorOpen = true;
-  export let canEditMetadata: boolean;
   export let context: 'page' | 'shared-consumer-page' = 'page';
 </script>
 
@@ -25,15 +25,14 @@
 >
   <svelte:fragment slot="actions-right">
     {#if context !== 'shared-consumer-page'}
-      {#if canEditMetadata}
-        <a
-          class="btn btn-primary"
-          href={getExplorationEditorPageUrl(database.id, schema.id, query.id)}
-        >
-          <span>{$_('edit_in_data_explorer')}</span>
-        </a>
-      {/if}
-      <ShareExplorationDropdown id={query.id} />
+      <a
+        class="btn btn-primary"
+        href={getExplorationEditorPageUrl(database.id, schema.oid, query.id)}
+      >
+        <span>{$_('edit_in_data_explorer')}</span>
+      </a>
+      <!-- TODO: Display Share option when we re-implement it with the new permissions structure -->
+      <!-- <ShareExplorationDropdown id={query.id} /> -->
     {/if}
     <Button
       appearance="secondary"

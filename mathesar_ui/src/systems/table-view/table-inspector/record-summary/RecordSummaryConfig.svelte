@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { RadioGroup, Spinner } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+
   import {
     FormSubmit,
     makeForm,
@@ -13,14 +12,13 @@
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
+  import type { Table } from '@mathesar/models/Table';
   import type { RecordRow, TabularData } from '@mathesar/stores/table-data';
-  import { renderRecordSummaryForRow } from '@mathesar/stores/table-data/record-summaries/recordSummaryUtils';
-  import { saveRecordSummaryTemplate } from '@mathesar/stores/tables';
+  import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { getErrorMessage } from '@mathesar/utils/errors';
+  import { RadioGroup, Spinner } from '@mathesar-component-library';
+
   import {
     columnIsConformant,
     getColumnsInTemplate,
@@ -28,19 +26,15 @@
   } from './recordSummaryTemplateUtils';
   import TemplateInput from './TemplateInput.svelte';
 
-  export let table: TableEntry;
+  export let table: Table;
   export let tabularData: TabularData;
 
-  const userProfile = getUserProfileStoreFromContext();
-
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
   $: ({ recordsData, columnsDataStore, isLoading } = tabularData);
   $: ({ columns } = columnsDataStore);
-  $: ({ savedRecords, recordSummaries } = recordsData);
+  $: ({ savedRecords, linkedRecordSummaries: recordSummaries } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
-  $: initialCustomized = table.settings.preview_settings.customized ?? false;
-  $: initialTemplate = table.settings.preview_settings.template ?? '';
+  $: initialCustomized = table.metadata?.record_summary_customized ?? false;
+  $: initialTemplate = table.metadata?.record_summary_template ?? '';
   $: customized = requiredField(initialCustomized);
   $: customizedDisabled = customized.disabled;
   $: template = optionalField(initialTemplate, [hasColumnReferences($columns)]);
@@ -54,24 +48,31 @@
       return undefined;
     }
     const { record } = firstRow;
-    return renderRecordSummaryForRow({
-      template: $template,
-      record,
-      transitiveData: $recordSummaries,
-    });
+
+    // TODO: Fully re-implement record summary previews across the stack, now
+    // with a new backend-centric approach since we're no longer rendering the
+    // record summary on the front end.
+
+    // return renderRecordSummaryForRow({
+    //   template: $template,
+    //   record,
+    //   transitiveData: $recordSummaries,
+    // });
+    return '';
   })();
-  $: canEditMetadata = $userProfile?.hasPermission(
-    {
-      database,
-      schema,
-    },
-    'canEditMetadata',
-  );
-  $: showNullState = !canEditMetadata && !previewRecordSummary;
 
   async function save() {
     try {
-      await saveRecordSummaryTemplate(table, $form.values);
+      await updateTable({
+        schema: table.schema,
+        table: {
+          oid: table.oid,
+          metadata: {
+            record_summary_customized: $customized,
+            record_summary_template: $template,
+          },
+        },
+      });
     } catch (e) {
       toast.error(`${$_('unable_to_save_changes')} ${getErrorMessage(e)}`);
     }
@@ -82,65 +83,66 @@
   {#if $isLoading}
     <Spinner />
   {:else}
-    {#if previewRecordSummary}
-      <div class="heading">{$_('preview')}</div>
-      <div class="content">
-        <div class="help">
-          <RichText text={$_('record_summary_help')} let:slotName>
-            {#if slotName === 'tableName'}
-              <Identifier>{table.name}</Identifier>
-            {/if}
-          </RichText>
-        </div>
-        <LinkedRecord recordSummary={previewRecordSummary} />
-      </div>
-    {/if}
+    <div class="content">
+      <RadioGroup
+        options={[false, true]}
+        getRadioLabel={(v) =>
+          v ? $_('use_custom_template') : $_('use_default')}
+        ariaLabel={$_('template_type')}
+        isInline
+        bind:value={$customized}
+        disabled={$customizedDisabled}
+      />
 
-    {#if canEditMetadata}
-      <div class="heading">{$_('template')}</div>
-      <div class="content">
-        <RadioGroup
-          options={[false, true]}
-          getRadioLabel={(v) => (v ? $_('custom') : $_('default'))}
-          ariaLabel={$_('template_type')}
-          isInline
-          bind:value={$customized}
-          disabled={$customizedDisabled}
+      {#if previewRecordSummary}
+        <div class="preview">
+          <div class="preview-record-summary">
+            <LinkedRecord recordSummary={previewRecordSummary} />
+          </div>
+          <div class="help">
+            <RichText text={$_('record_summary_help')} let:slotName>
+              {#if slotName === 'tableName'}
+                <Identifier>{table.name}</Identifier>
+              {/if}
+            </RichText>
+          </div>
+        </div>
+      {/if}
+
+      {#if $customized}
+        <Field
+          field={template}
+          input={{ component: TemplateInput, props: { columns: $columns } }}
         />
 
-        {#if $customized}
-          <Field
-            field={template}
-            input={{ component: TemplateInput, props: { columns: $columns } }}
-          />
-
-          {#if nonconformantColumns.length}
-            <InfoBox>
-              <div class="nonconformant-columns">
-                <p>
-                  {$_('record_summary_non_conformant_columns_help')}:
-                </p>
-                <ul>
-                  {#each nonconformantColumns as column}
-                    <li>
-                      <RichText
-                        text={$_('column_id_references_column_name')}
-                        let:slotName
-                      >
-                        {#if slotName === 'columnId'}
-                          <Identifier>{column.id}</Identifier>
-                        {:else if slotName === 'columnName'}
-                          <Identifier>{column.name}</Identifier>
-                        {/if}
-                      </RichText>
-                    </li>
-                  {/each}
-                </ul>
-              </div>
-            </InfoBox>
-          {/if}
+        {#if nonconformantColumns.length}
+          <InfoBox>
+            <div class="nonconformant-columns">
+              <p>
+                {$_('record_summary_non_conformant_columns_help')}:
+              </p>
+              <ul>
+                {#each nonconformantColumns as column}
+                  <li>
+                    <RichText
+                      text={$_('column_id_references_column_name')}
+                      let:slotName
+                    >
+                      {#if slotName === 'columnId'}
+                        <Identifier>{column.id}</Identifier>
+                      {:else if slotName === 'columnName'}
+                        <Identifier>{column.name}</Identifier>
+                      {/if}
+                    </RichText>
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          </InfoBox>
         {/if}
+      {/if}
 
+      {#if $customized !== initialCustomized || $template !== initialTemplate}
         <FormSubmit
           {form}
           onProceed={save}
@@ -149,28 +151,30 @@
           initiallyHidden
           size="small"
         />
-      </div>
-    {/if}
-
-    {#if showNullState}
-      <span class="null-text">{$_('no_record_summary_available')}</span>
-    {/if}
+      {/if}
+      {#if !previewRecordSummary}
+        <span class="null-text">{$_('no_record_summary_available')}</span>
+      {/if}
+    </div>
   {/if}
 </div>
 
 <style>
-  .heading {
-    margin-block: 0.75rem 0.5rem;
-  }
   .content > :global(* + *) {
-    margin-top: 0.5rem;
-  }
-  .content {
-    margin-left: 0.5rem;
+    margin-top: 1rem;
   }
   .help {
     font-size: var(--text-size-small);
     color: var(--color-text-muted);
+    margin-top: 0.5rem;
+  }
+  .preview-record-summary {
+    border: 1px solid var(--slate-200);
+    padding: 0.4rem;
+    width: 100%;
+    border-radius: 0.25rem;
+    background-color: var(--slate-50);
+    margin-top: 0.5rem;
   }
   .nonconformant-columns > :global(:first-child) {
     margin-top: 0;
@@ -183,5 +187,6 @@
   }
   .null-text {
     color: var(--color-text-muted);
+    display: block;
   }
 </style>

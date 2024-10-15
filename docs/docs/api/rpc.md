@@ -2,16 +2,12 @@
 
 Mathesar has an API available at `/api/rpc/v0/` which follows the [JSON-RPC](https://www.jsonrpc.org/specification) spec version 2.0.
 
-## About
+!!! danger "Not yet stable"
+    The RPC API is not yet stable and may change in the future. If you build logic that depends on this API, be mindful that it may change in the future without warning or notice.
 
-### Status
+## Usage
 
-We are currently in the process of [transitioning](https://wiki.mathesar.org/projects/2024/architecture-transition/rpc/) our API architecture from a [RESTful](rest.md) API to this RPC-style API, and we hope to have all functionality available through the RPC API by Mathesar's beta release.
-
-!!! caution "Stability"
-    The RPC API is not yet stable and may change in the future, even after we've completed the transition to the RPC API architecture. If you build logic that depends on this API, be mindful that it may change in the future without warning or notice.
-
-### Usage
+### Requests
 
 To use an RPC function:
 
@@ -23,7 +19,7 @@ To use an RPC function:
 
     To call function `add_from_known_connection` from the `connections` section of this page, you'd send something like:
 
-    `POST /api/rpc/v0/`
+    `POST /api/rpc/v0/`b
 
     ```json
     {
@@ -37,18 +33,9 @@ To use an RPC function:
     }
     ```
 
----
+### Responses
 
-::: mathesar.rpc.connections
-    options:
-      members:
-      - add_from_known_connection
-      - add_from_scratch
-      - DBModelReturn
-
-## Responses
-
-### Success
+#### Success
 
 Upon a successful call to an RPC function, the API will return a success object. Such an object has the following form:
 
@@ -62,7 +49,7 @@ Upon a successful call to an RPC function, the API will return a success object.
 
 The `result` is whatever was returned by the underlying function.
 
-### Errors
+#### Errors
 
 When an error is produced by a call to the RPC endpoint, we produce an error of the following form:
 
@@ -90,3 +77,261 @@ Other error codes are grouped according to the library that produced the Excepti
 - other: -25xxx
 
 Unrecognized errors from a given library return a "round number" code, so an unknown `builtins` error gets the code -31000.
+
+---
+
+## Collaborators
+
+::: collaborators
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_role
+      - CollaboratorInfo
+
+## Columns
+
+::: columns
+    options:
+      members:
+      - list_
+      - add
+      - patch
+      - delete
+      - list_with_metadata
+      - ColumnInfo
+      - ColumnListReturn
+      - CreatableColumnInfo
+      - PreviewableColumnInfo
+      - SettableColumnInfo
+      - TypeOptions
+      - ColumnDefault
+ 
+## Column Metadata
+
+::: columns.metadata
+    options:
+      members:
+      - list_
+      - set_
+      - ColumnMetaDataRecord
+      - ColumnMetaDataBlob
+
+## Configured Databases
+
+::: databases.configured
+    options:
+      members:
+      - list_
+      - disconnect
+      - ConfiguredDatabaseInfo
+
+
+## Connections
+
+::: connections
+    options:
+      members:
+      - add_from_known_connection
+      - add_from_scratch
+      - grant_access_to_user
+      - ConnectionReturn
+
+## Constraints
+
+::: constraints
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - Constraint
+      - ForeignKeyConstraint
+      - PrimaryKeyConstraint
+      - UniqueConstraint
+      - CreatableConstraintInfo
+
+## Data Modeling
+
+:::data_modeling
+    options:
+      members:
+      - add_foreign_key_column
+      - add_mapping_table
+      - suggest_types
+      - split_table
+      - move_columns
+      - MappingColumn
+      - SplitTableInfo
+
+## Databases
+
+::: databases
+    options:
+      members:
+      - get
+      - delete
+      - DatabaseInfo
+
+## Database Privileges
+
+::: databases.privileges
+    options:
+      members:
+      - list_direct
+      - replace_for_roles
+      - transfer_ownership
+      - DBPrivileges
+
+## Database Setup
+
+::: databases.setup
+    options:
+      members:
+      - create_new
+      - connect_existing
+      - DatabaseConnectionResult
+
+## Explorations
+
+::: explorations
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - replace
+      - run
+      - run_saved
+      - ExplorationInfo
+      - ExplorationDef
+      - ExplorationResult
+
+## Records
+
+:::records
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - patch
+      - delete
+      - search
+      - RecordList
+      - RecordAdded
+      - OrderBy
+      - Filter
+      - FilterAttnum
+      - FilterLiteral
+      - Grouping
+      - Group
+      - GroupingResponse
+      - SearchParam
+
+## Roles
+
+::: roles
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - get_current_role
+      - set_members
+      - RoleInfo
+      - RoleMember
+
+## Roles Configured
+
+::: roles.configured
+    options:
+      members:
+      - list_
+      - add
+      - delete
+      - set_password
+      - ConfiguredRoleInfo
+
+## Schemas
+
+::: schemas
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - patch
+      - SchemaInfo
+      - SchemaPatch
+
+## Schema Privileges
+
+::: schemas.privileges
+    options:
+      members:
+      - list_direct
+      - replace_for_roles
+      - transfer_ownership
+      - SchemaPrivileges
+
+## Servers
+
+::: servers
+    options:
+      members:
+      - list_
+      - ConfiguredServerInfo
+
+## Tables
+
+::: tables
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - patch
+      - import_
+      - get_import_preview
+      - list_joinable
+      - list_with_metadata
+      - get_with_metadata
+      - TableInfo
+      - AddedTableInfo
+      - SettableTableInfo
+      - JoinableTableRecord
+      - JoinableTableInfo
+
+## Table Metadata
+
+::: tables.metadata
+    options:
+      members:
+      - list_
+      - set_
+      - TableMetaDataBlob
+      - TableMetaDataRecord
+
+## Table Privileges
+
+::: tables.privileges
+    options:
+      members:
+      - list_direct
+      - replace_for_roles
+      - transfer_ownership
+      - TablePrivileges
+
+## Types
+
+::: types
+    options:
+      members:
+      - list_
+      - TypeInfo

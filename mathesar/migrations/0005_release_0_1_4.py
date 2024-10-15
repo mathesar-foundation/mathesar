@@ -1,7 +1,7 @@
 from django.db import migrations, models, connection
 import django.contrib.postgres.fields
 import encrypted_fields.fields
-import mathesar.models.base
+import mathesar.models.deprecated
 
 
 def column_order_to_jsonb_postgres_fwd(apps, schema_editor):
@@ -12,7 +12,7 @@ def column_order_to_jsonb_postgres_fwd(apps, schema_editor):
     migrations.AlterField(
         model_name='tablesettings',
         name='column_order',
-        field=models.JSONField(blank=True, default=None, null=True, validators=[mathesar.models.base.validate_column_order]),
+        field=models.JSONField(blank=True, default=None, null=True, validators=[mathesar.models.deprecated.validate_column_order]),
     ),
 
 

@@ -2,83 +2,88 @@ import {
   faAlignLeft,
   faArrowLeft,
   faArrowRight,
+  faArrowRightFromBracket,
   faBackspace,
   faCalendarDay,
   faCalendarWeek,
   faCheck,
   faCheckSquare,
   faChevronRight,
+  faCircleArrowLeft,
+  faCircleArrowRight,
+  faCircleExclamation,
+  faCircleInfo,
   faClock,
   faClone,
   faCogs,
   faCopy,
   faDatabase,
+  faDiagramNext,
   faDollarSign,
+  faEllipsisV,
   faEnvelope,
+  faExternalLink,
   faExternalLinkAlt,
   faFileAlt,
   faFilter,
+  faFilterCircleXmark,
   faGear,
   faGlobe,
+  faGrip,
   faHammer,
   faHashtag,
   faICursor,
+  faInfo,
   faKey,
   faLink,
+  faListUl,
   faLock,
+  faMicroscope,
   faPalette,
+  faPaste,
   faPencilAlt,
   faPlug,
   faPlus,
   faProjectDiagram,
   faQuestion,
   faRedo,
+  faSave,
   faSearchPlus,
   faShapes,
+  faShareFromSquare,
+  faSlash,
   faSnowflake,
   faSort,
   faSortAmountDown,
   faSortAmountDownAlt,
+  faStar,
   faStopwatch,
   faSync,
+  faTimes,
   faTrashAlt,
   faUndo,
   faUnlink,
+  faUpRightFromSquare,
   faUpload,
   faUser,
-  faUsers,
-  faSave,
-  faTimes,
-  faCircleExclamation,
-  faCircleArrowRight,
-  faCircleArrowLeft,
-  faListUl,
-  faInfo,
-  faSlash,
-  faStar,
-  faPaste,
-  faEllipsisV,
-  faArrowRightFromBracket,
   faUserEdit,
-  faUserPlus,
-  faUpRightFromSquare,
-  faCircleInfo,
   faUserGear,
-  faFilterCircleXmark,
-  faMicroscope,
-  faDiagramNext,
+  faUserPlus,
+  faUsers,
   faWandSparkles,
-  faShareFromSquare,
   faXmark,
-  faExternalLink,
-  faGrip,
 } from '@fortawesome/free-solid-svg-icons';
+
 import type { IconProps } from '@mathesar-component-library/types';
+
 import {
   arrayIcon,
-  tableIcon,
+  connectDatabaseIcon,
+  createDatabaseIcon,
   explorationIcon,
   outcomeIcon,
+  tableIcon,
+  treeChildNodeArrowIcon,
 } from './customIcons';
 
 /**
@@ -101,10 +106,13 @@ export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
+export const iconConfigurePassword = { data: faKey };
+export const iconConnectDatabase = { data: connectDatabaseIcon };
 export const iconCopyMajor: IconProps = { data: faCopy };
 /** TODO: use faBinary once it's available (via newer FontAwesome version) */
 export const iconCopyRawContent: IconProps = { data: faCopy };
 export const iconCopyFormattedContent: IconProps = { data: faCopy };
+export const iconCreateDatabase = { data: createDatabaseIcon };
 /** When you're deleting something significant or difficult to recover */
 export const iconDeleteMajor: IconProps = { data: faTrashAlt };
 /** When you're deleting something smaller or more ephemeral */
@@ -112,10 +120,8 @@ export const iconDeleteMinor: IconProps = { data: faTimes };
 export const iconEdit: IconProps = { data: faPencilAlt };
 export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
-export const iconGoToMarketingSite: IconProps = { data: faGlobe };
 export const iconImportData: IconProps = { data: faUpload };
 export const iconInferColumnType: IconProps = { data: faMicroscope };
-export const iconJoinEmailList: IconProps = { data: faEnvelope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
 export const iconMoveColumnsToNewLinkedTable = { data: faLink };
 export const iconMoveColumnsToExistingLinkedTable = { data: faLink };
@@ -173,13 +179,16 @@ export const iconTable: IconProps = { data: tableIcon };
 export const iconInspector: IconProps = { data: faInfo };
 export const iconTableLink: IconProps = { data: faLink };
 export const iconTechnicalExplanation: IconProps = { data: faHammer };
+export const iconTreeChildNodeArrow: IconProps = {
+  data: treeChildNodeArrowIcon,
+};
 export const iconUpgradeAvailable: IconProps = { data: faCircleInfo };
 export const iconCurrentlyInstalledVersion: IconProps = { data: faCheck };
 export const iconUser: IconProps = { data: faUser };
 export const iconMultipleUsers: IconProps = { data: faUsers };
 export const iconAdminUser: IconProps = { data: faUserGear };
-export const iconLinksInThisTable: IconProps = { data: faCircleArrowRight };
-export const iconLinksFromOtherTables: IconProps = { data: faCircleArrowLeft };
+export const iconLinksInThisTable: IconProps = { data: faArrowRight };
+export const iconLinksFromOtherTables: IconProps = { data: faArrowLeft };
 export const iconForwardSeparator: IconProps = { data: faSlash };
 export const iconUrl: IconProps = { data: faLink };
 

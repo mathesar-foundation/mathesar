@@ -3,6 +3,7 @@
 
   import MarginTrim from '@mathesar-component-library-dir/margin-trim/MarginTrim.svelte';
   import type { ComponentWithProps } from '@mathesar-component-library-dir/types';
+
   import RenderComponentWithProps from './RenderComponentWithProps.svelte';
 
   type T = $$Generic<SvelteComponent>;

@@ -1,12 +1,14 @@
 <script lang="ts">
   import { router } from 'tinro';
-  import { createTable } from '@mathesar/stores/tables';
+
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
   import { getTablePageUrl } from '@mathesar/routes/urls';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
+  import { createTable } from '@mathesar/stores/tables';
   import { Button, Spinner } from '@mathesar-component-library';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
 
   let classes = '';
   export { classes as class };
@@ -15,9 +17,9 @@
 
   async function handleCreateEmptyTable() {
     isCreatingNewTable = true;
-    const tableInfo = await createTable(database, schema, {});
+    const table = await createTable({ schema });
     isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.id, schema.id, tableInfo.id), false);
+    router.goto(getTablePageUrl(database.id, schema.oid, table.oid), false);
   }
 </script>
 

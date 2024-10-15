@@ -8,5 +8,5 @@ $$ LANGUAGE plpgsql;
 CALL raise_notice('Creating testing DB');
 CREATE DATABASE mathesar_testing;
 \c mathesar_testing
-\ir 0_msar.sql
-\ir test_0_msar.sql
+\ir 00_msar.sql
+\ir test_00_msar.sql

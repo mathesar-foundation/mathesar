@@ -1,45 +1,44 @@
 import * as Papa from 'papaparse';
-import { get } from 'svelte/store';
 
-import { ImmutableSet, type MakeToast } from '@mathesar-component-library';
-import SheetSelection, {
-  isCellSelected,
-} from '@mathesar/components/sheet/SheetSelection';
 import type { AbstractTypeCategoryIdentifier } from '@mathesar/stores/abstract-types/types';
 import type { ClipboardHandler } from '@mathesar/stores/clipboard';
-import type {
-  ProcessedColumn,
-  RecordRow,
-  RecordSummariesForSheet,
-} from '@mathesar/stores/table-data';
-import type { QueryRow } from '@mathesar/systems/data-explorer/QueryRunner';
-import type { ProcessedQueryOutputColumn } from '@mathesar/systems/data-explorer/utils';
+import type { RecordSummariesForSheet } from '@mathesar/stores/table-data';
 import type { ReadableMapLike } from '@mathesar/typeUtils';
 import { labeledCount } from '@mathesar/utils/languageUtils';
+import type { ImmutableSet } from '@mathesar-component-library';
 
 const MIME_PLAIN_TEXT = 'text/plain';
 const MIME_MATHESAR_SHEET_CLIPBOARD =
   'application/x-vnd.mathesar-sheet-clipboard';
 
-/** Keys are row ids, values are records */
-type IndexedRecords = Map<number, Record<string, unknown>>;
-
-function getRawCellValue<
-  Column extends ProcessedQueryOutputColumn | ProcessedColumn,
->(
-  indexedRecords: IndexedRecords,
-  rowId: number,
-  columnId: Column['id'],
-): unknown {
-  return indexedRecords.get(rowId)?.[String(columnId)];
+/**
+ * A column which allows the cells in it to be copied.
+ */
+interface CopyableColumn {
+  abstractType: { identifier: AbstractTypeCategoryIdentifier };
+  formatCellValue: (
+    cellValue: unknown,
+    recordSummaries?: RecordSummariesForSheet,
+  ) => string | null | undefined;
 }
 
-function getFormattedCellValue<
-  Column extends ProcessedQueryOutputColumn | ProcessedColumn,
->(
+/**
+ * This is the stuff we need to know from the sheet in order to copy the content
+ * of cells to the clipboard.
+ */
+interface CopyingContext {
+  /** Keys are row ids, values are records */
+  rowsMap: Map<string, Record<string, unknown>>;
+  columnsMap: ReadableMapLike<string, CopyableColumn>;
+  recordSummaries: RecordSummariesForSheet;
+  selectedRowIds: ImmutableSet<string>;
+  selectedColumnIds: ImmutableSet<string>;
+}
+
+function getFormattedCellValue(
   rawCellValue: unknown,
-  columnsMap: ReadableMapLike<Column['id'], Column>,
-  columnId: Column['id'],
+  columnsMap: CopyingContext['columnsMap'],
+  columnId: string,
   recordSummaries: RecordSummariesForSheet,
 ): string {
   if (rawCellValue === undefined || rawCellValue === null) {
@@ -62,7 +61,19 @@ function getFormattedCellValue<
 function serializeTsv(data: string[][]): string {
   return Papa.unparse(data, {
     delimiter: '\t',
-    escapeFormulae: true,
+    // From the [Papa Parse][1] library, `escapeFormulae` helps defend against
+    // formula [injection attacks][2]. We modify the default value though
+    // because it [didn't work][3] for negative numbers. We're supplying our own
+    // regex that uses the default behavior plus special handling for negative
+    // numbers. It doesn't escape negative numbers because they are valid. But
+    // it does escape anything else that begins with a hyphen.
+    //
+    // [1]: https://www.papaparse.com/docs
+    //
+    // [2]: https://owasp.org/www-community/attacks/CSV_Injection
+    //
+    // [3]: https://github.com/mathesar-foundation/mathesar/issues/3576
+    escapeFormulae: /^=|^\+|^@|^\t|^\r|^-(?!\d+(\.\d+)?$)/,
   });
 }
 
@@ -76,70 +87,37 @@ export interface StructuredCell {
   formatted: string;
 }
 
-interface SheetClipboardHandlerDeps<
-  Row extends QueryRow | RecordRow,
-  Column extends ProcessedQueryOutputColumn | ProcessedColumn,
-> {
-  selection: SheetSelection<Row, Column>;
-  toast: MakeToast;
-  getRows(): Row[];
-  getColumnsMap(): ReadableMapLike<Column['id'], Column>;
-  getRecordSummaries(): RecordSummariesForSheet;
+interface Dependencies {
+  getCopyingContext(): CopyingContext;
+  showToastInfo(msg: string): void;
 }
 
-export class SheetClipboardHandler<
-  Row extends QueryRow | RecordRow,
-  Column extends ProcessedQueryOutputColumn | ProcessedColumn,
-> implements ClipboardHandler
-{
-  private readonly deps: SheetClipboardHandlerDeps<Row, Column>;
+export class SheetClipboardHandler implements ClipboardHandler {
+  private readonly deps: Dependencies;
 
-  constructor(deps: SheetClipboardHandlerDeps<Row, Column>) {
+  constructor(deps: Dependencies) {
     this.deps = deps;
   }
 
-  private getColumnIds(cells: ImmutableSet<string>) {
-    return this.deps.selection.getSelectedUniqueColumnsId(
-      cells,
-      // We don't care about the columns selected when the table is empty,
-      // because we only care about cells selected that have content.
-      new ImmutableSet(),
-    );
-  }
-
-  private getRowIds(cells: ImmutableSet<string>) {
-    return this.deps.selection.getSelectedUniqueRowsId(cells);
-  }
-
   private getCopyContent(): { structured: string; tsv: string } {
-    const cells = get(this.deps.selection.selectedCells);
-    const indexedRecords = new Map(
-      this.deps.getRows().map((r) => [r.rowIndex, r.record]),
-    );
-    const columns = this.deps.getColumnsMap();
-    const recordSummaries = this.deps.getRecordSummaries();
-
+    const context = this.deps.getCopyingContext();
     const tsvRows: string[][] = [];
     const structuredRows: StructuredCell[][] = [];
-    for (const rowId of this.getRowIds(cells)) {
+    for (const rowId of context.selectedRowIds) {
       const tsvRow: string[] = [];
       const structuredRow: StructuredCell[] = [];
-      for (const columnId of this.getColumnIds(cells)) {
-        const column = columns.get(columnId);
-        if (!isCellSelected(cells, { rowIndex: rowId }, { id: columnId })) {
-          // Ignore cells that are not selected.
-          continue;
-        }
+      for (const columnId of context.selectedColumnIds) {
+        const column = context.columnsMap.get(columnId);
         if (!column) {
           // Ignore cells with no associated column. This should never happen.
           continue;
         }
-        const rawCellValue = getRawCellValue(indexedRecords, rowId, columnId);
+        const rawCellValue = context.rowsMap.get(rowId)?.[columnId];
         const formattedCellValue = getFormattedCellValue(
           rawCellValue,
-          columns,
+          context.columnsMap,
           columnId,
-          recordSummaries,
+          context.recordSummaries,
         );
         const type = column.abstractType.identifier;
         structuredRow.push({
@@ -152,7 +130,9 @@ export class SheetClipboardHandler<
       tsvRows.push(tsvRow);
       structuredRows.push(structuredRow);
     }
-    this.deps.toast.info(`Copied ${labeledCount(cells.size, 'cells')}.`);
+    const cellCount =
+      context.selectedRowIds.size * context.selectedColumnIds.size;
+    this.deps.showToastInfo(`Copied ${labeledCount(cellCount, 'cells')}.`);
     return {
       structured: JSON.stringify(structuredRows),
       tsv: serializeTsv(tsvRows),

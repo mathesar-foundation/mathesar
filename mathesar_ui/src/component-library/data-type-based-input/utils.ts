@@ -1,6 +1,6 @@
 import type {
-  DataTypeBasedInputType,
   DataTypeBasedInputSelectElement,
+  DataTypeBasedInputType,
   EnumSelectOption,
 } from './types';
 

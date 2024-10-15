@@ -1,19 +1,17 @@
-import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-import { dataFilesApi } from '@mathesar/api/dataFiles';
-import type { DataFile } from '@mathesar/api/types/dataFiles';
-import type {
-  MinimalColumnDetails,
-  TableEntry,
-} from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
+import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
+import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
+import type { Column } from '@mathesar/api/rpc/columns';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
-import AsyncStore from '@mathesar/stores/AsyncStore';
+import type { Database } from '@mathesar/models/Database';
+import type { Schema } from '@mathesar/models/Schema';
+import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type {
   AbstractType,
   AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
-import { createTable, deleteTable } from '@mathesar/stores/tables';
+import AsyncStore from '@mathesar/stores/AsyncStore';
+import { createTableFromDataFile, deleteTable } from '@mathesar/stores/tables';
 
 /**
  * This is to improve loading experience by seeding the table with empty
@@ -48,37 +46,35 @@ export function processColumns(
   });
 }
 
-export function makeHeaderUpdateRequest() {
-  interface Props {
-    database: Database;
-    schema: SchemaEntry;
-    table: Pick<TableEntry, 'id'>;
-    dataFile: Pick<DataFile, 'id'>;
+export function makeHeaderUpdateRequest({
+  schema,
+  table,
+  dataFile,
+}: {
+  schema: Schema;
+  table: Pick<Table, 'oid'>;
+  dataFile: Pick<DataFile, 'id'>;
+}) {
+  async function updateHeader({
+    firstRowIsHeader,
+    customizedTableName,
+  }: {
     firstRowIsHeader: boolean;
     customizedTableName: string;
-  }
-  async function updateHeader(p: Props) {
+  }) {
     await Promise.all([
-      deleteTable(p.database, p.schema, p.table.id),
-      dataFilesApi.update(p.dataFile.id, { header: p.firstRowIsHeader }),
+      deleteTable(schema, table.oid),
+      dataFilesApi.update(dataFile.id, {
+        header: firstRowIsHeader,
+      }),
     ]);
-    return createTable(p.database, p.schema, {
-      name: p.customizedTableName,
-      dataFiles: [p.dataFile.id],
+    return createTableFromDataFile({
+      schema,
+      dataFile,
+      name: customizedTableName,
     });
   }
   return new AsyncStore(updateHeader);
-}
-
-export function makeDeleteTableRequest() {
-  interface Props {
-    database: Database;
-    schema: SchemaEntry;
-    table: Pick<TableEntry, 'id'>;
-  }
-  return new AsyncStore((props: Props) =>
-    deleteTable(props.database, props.schema, props.table.id),
-  );
 }
 
 export interface ColumnProperties {
@@ -103,7 +99,7 @@ export function buildColumnPropertiesMap(
 export function finalizeColumns(
   columns: Column[],
   columnPropertiesMap: ColumnPropertiesMap,
-): MinimalColumnDetails[] {
+) {
   return columns
     .filter((column) => columnPropertiesMap[column.id]?.selected)
     .map((column) => ({
@@ -111,6 +107,6 @@ export function finalizeColumns(
       name: columnPropertiesMap[column.id]?.displayName ?? '',
       type: column.type,
       type_options: column.type_options,
-      display_options: column.display_options,
+      metadata: column.metadata,
     }));
 }

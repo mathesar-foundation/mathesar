@@ -1,135 +1,77 @@
+from functools import wraps
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from modernrpc.views import RPCEntryPoint
+from modernrpc.exceptions import RPCException
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from demo.utils import get_is_live_demo_mode, get_live_demo_db_name
-
-from mathesar.api.db.permissions.database import DatabaseAccessPolicy
-from mathesar.api.db.permissions.query import QueryAccessPolicy
-from mathesar.api.db.permissions.schema import SchemaAccessPolicy
-from mathesar.api.db.permissions.table import TableAccessPolicy
-from mathesar.api.serializers.databases import ConnectionSerializer, TypeSerializer
-from mathesar.api.serializers.schemas import SchemaSerializer
-from mathesar.api.serializers.tables import TableSerializer
-from mathesar.api.serializers.queries import QuerySerializer
+from mathesar.rpc.databases.configured import list_ as databases_list
+from mathesar.rpc.explorations import list_ as explorations_list
+from mathesar.rpc.schemas import list_ as schemas_list
+from mathesar.rpc.servers.configured import list_ as get_servers_list
+from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.api.ui.serializers.users import UserSerializer
-from mathesar.api.utils import is_valid_uuid_v4
-from mathesar.database.types import UIType
-from mathesar.models.base import Database, Schema, Table
-from mathesar.models.query import UIQuery
-from mathesar.models.shares import SharedTable, SharedQuery
 from mathesar.state import reset_reflection
 from mathesar import __version__
 
 
-def get_schema_list(request, database):
-    qs = Schema.objects.filter(database=database)
-    permission_restricted_qs = SchemaAccessPolicy.scope_queryset(request, qs)
-    schema_serializer = SchemaSerializer(
-        permission_restricted_qs,
-        many=True,
-        context={'request': request}
-    )
-    return schema_serializer.data
-
-
-def _get_permissible_db_queryset(request):
-    """
-    Returns the queryset for connections a user is permitted to access.
-
-    Note, connections that a user is permitted to access is the union of those
-    permitted by DatabaseAccessPolicy and those containing Schemas permitted by
-    SchemaAccessPolicy.
-
-    Note, the live demo mode is an exception where the user is only permitted to
-    access the database generated for him. We treat that as a subset of the
-    connections the user can normally access, just in case someone finds a way
-    to manipulate how we define whether we're in demo mode and which db is a
-    user's demo db.
-    """
-    for deleted in (True, False):
-        dbs_qs = Database.objects.filter(deleted=deleted)
-        permitted_dbs_qs = DatabaseAccessPolicy.scope_queryset(request, dbs_qs)
-        schemas_qs = Schema.objects.all()
-        permitted_schemas_qs = SchemaAccessPolicy.scope_queryset(request, schemas_qs)
-        dbs_containing_permitted_schemas_qs = Database.objects.filter(schemas__in=permitted_schemas_qs, deleted=deleted)
-        permitted_dbs_qs = permitted_dbs_qs | dbs_containing_permitted_schemas_qs
-        permitted_dbs_qs = permitted_dbs_qs.distinct()
-        if get_is_live_demo_mode():
-            live_demo_db_name = get_live_demo_db_name(request)
-            if live_demo_db_name:
-                permitted_dbs_qs = permitted_dbs_qs.filter(name=live_demo_db_name)
-            else:
-                raise Exception('This should never happen')
-        if deleted:
-            failed_permitted_dbs_qs = permitted_dbs_qs
-        else:
-            successful_permitted_dbs_qs = permitted_dbs_qs
-    return successful_permitted_dbs_qs, failed_permitted_dbs_qs
-
-
 def get_database_list(request):
-    permission_restricted_db_qs, permission_restricted_failed_db_qs = _get_permissible_db_queryset(request)
-    database_serializer = ConnectionSerializer(
-        permission_restricted_db_qs,
-        many=True,
-        context={'request': request}
-    )
-    failed_db_data = []
-    for db in permission_restricted_failed_db_qs:
-        failed_db_data.append({
-            'id': db.id,
-            'username': db.username,
-            'port': db.port,
-            'host': db.host,
-            'nickname': db.name,
-            'database': db.db_name,
-            'error': 'Error connecting to the database'
-        })
-    return database_serializer.data + failed_db_data
+    return databases_list(request=request)
 
 
-def get_table_list(request, schema):
-    if schema is None:
+def wrap_data_and_rpc_exceptions(f):
+    @wraps(f)
+    def safe_func(*args, **kwargs):
+        try:
+            return {
+                'state': 'success',
+                'data': f(*args, **kwargs)
+            }
+        except RPCException as exp:
+            return {
+                'state': 'failure',
+                'error': {
+                    'code': exp.code,
+                    'message': exp.message
+                }
+            }
+    return safe_func
+
+
+@wrap_data_and_rpc_exceptions
+def get_schema_list(request, database_id):
+    if database_id is not None:
+        return schemas_list(request=request, database_id=database_id)
+    else:
         return []
-    qs = Table.objects.filter(schema=schema)
-    permission_restricted_qs = TableAccessPolicy.scope_queryset(request, qs)
-    table_serializer = TableSerializer(
-        permission_restricted_qs,
-        many=True,
-        context={'request': request}
-    )
-    return table_serializer.data
 
 
-def get_queries_list(request, schema):
-    if schema is None:
+@wrap_data_and_rpc_exceptions
+def get_table_list(request, database_id, schema_oid):
+    if database_id is not None and schema_oid is not None:
+        return tables_list(
+            request=request,
+            database_id=database_id,
+            schema_oid=schema_oid
+        )
+    else:
         return []
-    qs = UIQuery.objects.filter(base_table__schema=schema)
-    permission_restricted_qs = QueryAccessPolicy.scope_queryset(request, qs)
-
-    query_serializer = QuerySerializer(
-        permission_restricted_qs,
-        many=True,
-        context={'request': request}
-    )
-    return query_serializer.data
 
 
-def get_ui_type_list(request, database):
-    if database is None:
+def get_queries_list(request, database_id, schema_oid):
+    if database_id is not None and schema_oid is not None:
+        return explorations_list(
+            request=request,
+            database_id=database_id,
+            schema_oid=schema_oid
+        )
+    else:
         return []
-    type_serializer = TypeSerializer(
-        UIType,
-        many=True,
-        context={'request': request}
-    )
-    return type_serializer.data
 
 
 def get_user_data(request):
@@ -141,138 +83,45 @@ def get_user_data(request):
     return user_serializer.data
 
 
-def get_base_data_all_routes(request, database=None, schema=None):
-    return {
-        'current_connection': database.id if database else None,
-        'current_schema': schema.id if schema else None,
-        'schemas': [],
-        'connections': [],
-        'tables': [],
-        'queries': [],
-        'abstract_types': get_ui_type_list(request, database),
-        'user': get_user_data(request),
-        'is_authenticated': not request.user.is_anonymous,
-        'live_demo_mode': get_is_live_demo_mode(),
-        'current_release_tag_name': __version__,
-        'internal_db_connection': _get_internal_db_meta(),
-    }
-
-
 def _get_internal_db_meta():
-    internal_db = Database.create_from_settings_key('default')
+    internal_db = settings.DATABASES['default']
     if internal_db is not None:
         return {
             'type': 'postgres',
-            'user': internal_db.username,
-            'host': internal_db.host,
-            'port': internal_db.port,
-            'database': internal_db.db_name
+            'host': internal_db['HOST'],
+            'port': internal_db['PORT'],
+            'database_name': internal_db['NAME']
         }
     else:
         return {'type': 'sqlite'}
 
 
-def get_common_data(request, database=None, schema=None):
+def get_common_data(request, database_id=None, schema_oid=None):
+    databases = get_database_list(request)
+    database_id_int = int(database_id) if database_id else None
+    current_database = next((database for database in databases if database['id'] == database_id_int), None)
+    current_database_id = current_database['id'] if current_database else None
+
+    schemas = get_schema_list(request, current_database_id)
+    schema_oid_int = int(schema_oid) if schema_oid else None
+    schemas_data = schemas['data'] if 'data' in schemas else []
+    current_schema = next((schema for schema in schemas_data if schema['oid'] == schema_oid_int), None)
+    current_schema_oid = current_schema['oid'] if current_schema else None
+
     return {
-        **get_base_data_all_routes(request, database, schema),
-        'schemas': get_schema_list(request, database),
-        'connections': get_database_list(request),
-        'tables': get_table_list(request, schema),
-        'queries': get_queries_list(request, schema),
+        'current_database': current_database_id,
+        'current_schema': current_schema_oid,
+        'current_release_tag_name': __version__,
+        'databases': databases,
+        'internal_db': _get_internal_db_meta(),
+        'is_authenticated': not request.user.is_anonymous,
+        'servers': get_servers_list(),
+        'schemas': schemas,
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
+        'tables': get_table_list(request, current_database_id, current_schema_oid),
+        'user': get_user_data(request),
+        'queries': get_queries_list(request, current_database_id, current_schema_oid),
         'routing_context': 'normal',
-    }
-
-
-def get_current_database(request, connection_id):
-    """Get database from passed name, with fall back behavior."""
-    successful_dbs, failed_dbs = _get_permissible_db_queryset(request)
-    permitted_databases = successful_dbs | failed_dbs
-    if connection_id is not None:
-        current_database = get_object_or_404(permitted_databases, id=connection_id)
-    else:
-        request_database_name = get_live_demo_db_name(request)
-        try:
-            if request_database_name is not None:
-                # Try to get the database named specified in the request
-                current_database = permitted_databases.get(name=request_database_name)
-            else:
-                # Try to get the first database available
-                current_database = permitted_databases.order_by('id').first()
-        except Database.DoesNotExist:
-            current_database = None
-    return current_database
-
-
-def get_current_schema(request, schema_id, database):
-    # if there's a schema ID passed in, try to retrieve the schema, or return a 404 error.
-    if schema_id is not None:
-        permitted_schemas = SchemaAccessPolicy.scope_queryset(request, Schema.objects.all())
-        return get_object_or_404(permitted_schemas, id=schema_id)
-    else:
-        try:
-            # Try to get the first schema in the DB
-            return Schema.objects.filter(database=database).order_by('id').first()
-        except Schema.DoesNotExist:
-            return None
-
-
-def render_schema(request, database, schema):
-    # if there's no schema available, redirect to the schemas page.
-    if not schema:
-        return redirect('schemas', db_name=database.name)
-    else:
-        # We are redirecting so that the correct URL is passed to the frontend.
-        return redirect('schema_home', db_name=database.name, schema_id=schema.id)
-
-
-def get_common_data_for_shared_entity(request, schema=None):
-    database = schema.database if schema else None
-    schemas = [schema] if schema else []
-    databases = [database] if database else []
-    serialized_schemas = SchemaSerializer(
-        schemas,
-        many=True,
-        context={'request': request}
-    ).data
-    serialized_databases = ConnectionSerializer(
-        databases,
-        many=True,
-        context={'request': request}
-    ).data
-    return {
-        **get_base_data_all_routes(request, database, schema),
-        'schemas': serialized_schemas,
-        'connections': serialized_databases,
-        'routing_context': 'anonymous',
-    }
-
-
-def get_common_data_for_shared_table(request, table):
-    tables = [table] if table else []
-    serialized_tables = TableSerializer(
-        tables,
-        many=True,
-        context={'request': request}
-    ).data
-    schema = table.schema if table else None
-    return {
-        **get_common_data_for_shared_entity(request, schema),
-        'tables': serialized_tables,
-    }
-
-
-def get_common_data_for_shared_query(request, query):
-    queries = [query] if query else []
-    serialized_queries = QuerySerializer(
-        queries,
-        many=True,
-        context={'request': request}
-    ).data
-    schema = query.base_table.schema if query else None
-    return {
-        **get_common_data_for_shared_entity(request, schema),
-        'queries': serialized_queries,
     }
 
 
@@ -289,13 +138,13 @@ def reflect_all(_):
 
 @login_required
 def home(request):
-    connection_list = get_database_list(request)
-    number_of_connections = len(connection_list)
-    if number_of_connections > 1:
-        return redirect('connections')
-    elif number_of_connections == 1:
-        db = connection_list[0]
-        return redirect('schemas', connection_id=db['id'])
+    database_list = get_database_list(request)
+    number_of_databases = len(database_list)
+    if number_of_databases > 1:
+        return redirect('databases_list_route')
+    elif number_of_databases == 1:
+        db = database_list[0]
+        return redirect('database_route', database_id=db['id'])
     else:
         return render(request, 'mathesar/index.html', {
             'common_data': get_common_data(request)
@@ -303,7 +152,7 @@ def home(request):
 
 
 @login_required
-def connections(request):
+def databases_list_route(request):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)
     })
@@ -324,43 +173,16 @@ def admin_home(request, **kwargs):
 
 
 @login_required
-def schema_home(request, connection_id, schema_id, **kwargs):
-    database = get_current_database(request, connection_id)
-    schema = get_current_schema(request, schema_id, database)
+def database_route(request, database_id, **kwargs):
     return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request, database, schema)
+        'common_data': get_common_data(request, database_id, None)
     })
 
 
 @login_required
-def schemas(request, connection_id):
-    database = get_current_database(request, connection_id)
+def schema_route(request, database_id, schema_id, **kwargs):
     return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data(request, database, None)
-    })
-
-
-def shared_table(request, slug):
-    shared_table_link = SharedTable.get_by_slug(slug) if is_valid_uuid_v4(slug) else None
-    table = shared_table_link.table if shared_table_link else None
-
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data_for_shared_table(request, table),
-        'route_specific_data': {
-            'shared_table': {'table_id': table.id if table else None}
-        }
-    })
-
-
-def shared_query(request, slug):
-    shared_query_link = SharedQuery.get_by_slug(slug) if is_valid_uuid_v4(slug) else None
-    query = shared_query_link.query if shared_query_link else None
-
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data_for_shared_query(request, query),
-        'route_specific_data': {
-            'shared_query': {'query_id': query.id if query else None}
-        }
+        'common_data': get_common_data(request, database_id, schema_id)
     })
 
 

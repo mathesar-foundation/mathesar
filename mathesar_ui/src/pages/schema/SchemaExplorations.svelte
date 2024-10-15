@@ -1,27 +1,28 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { AnchorButton } from '@mathesar-component-library';
-  import type { QueryInstance } from '@mathesar/api/types/queries';
+
+  import type { SavedExploration } from '@mathesar/api/rpc/explorations';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import ExplorationsList from './ExplorationsList.svelte';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+  import { getDataExplorerPageUrl } from '@mathesar/routes/urls';
+  import { AnchorButton } from '@mathesar-component-library';
+
   import CreateNewExplorationTutorial from './CreateNewExplorationTutorial.svelte';
+  import ExplorationsList from './ExplorationsList.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
-  export let explorationsMap: Map<number, QueryInstance>;
+  export let schema: Schema;
+  export let explorationsMap: Map<number, SavedExploration>;
   export let hasTablesToExplore: boolean;
-  export let canEditMetadata: boolean;
 
-  $: showTutorial =
-    explorationsMap.size === 0 && hasTablesToExplore && canEditMetadata;
+  $: showTutorial = explorationsMap.size === 0 && hasTablesToExplore;
 
   let explorationsSearchQuery = '';
 
   function filterExplorations(
-    _explorationsMap: Map<number, QueryInstance>,
+    _explorationsMap: Map<number, SavedExploration>,
     searchQuery: string,
   ) {
     return [..._explorationsMap.values()].filter((exploration) =>
@@ -45,7 +46,7 @@
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
-    <AnchorButton href={getDataExplorerPageUrl(database.id, schema.id)}>
+    <AnchorButton href={getDataExplorerPageUrl(database.id, schema.oid)}>
       {$_('open_data_explorer')}
     </AnchorButton>
   </svelte:fragment>

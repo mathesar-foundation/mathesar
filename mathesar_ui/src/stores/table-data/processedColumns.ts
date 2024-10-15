@@ -1,7 +1,7 @@
-import type { ComponentAndProps } from '@mathesar-component-library/types';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import type { Constraint } from '@mathesar/api/types/tables/constraints';
+import type { Readable } from 'svelte/store';
+
+import type { Column, ColumnPrivilege } from '@mathesar/api/rpc/columns';
+import type { Constraint } from '@mathesar/api/rpc/constraints';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
@@ -10,9 +10,10 @@ import {
   getInitialInputValue,
 } from '@mathesar/components/cell-fabric/utils';
 import { retrieveFilters } from '@mathesar/components/filter-entry/utils';
+import type { Table } from '@mathesar/models/Table';
 import {
   getAbstractTypeForDbType,
-  getFiltersForAbstractType,
+  type getFiltersForAbstractType,
   getPreprocFunctionsForAbstractType,
 } from '@mathesar/stores/abstract-types';
 import type {
@@ -20,7 +21,8 @@ import type {
   AbstractTypePreprocFunctionDefinition,
   AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
-import type { Readable } from 'svelte/store';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+
 import { findFkConstraintsForColumn } from './constraintsUtils';
 import type { RecordSummariesForSheet } from './record-summaries/recordSummaryUtils';
 
@@ -45,6 +47,7 @@ export interface ProcessedColumn extends CellColumnFabric {
     cellValue: unknown,
     recordSummaries?: RecordSummariesForSheet,
   ) => string | null | undefined;
+  currentRolePrivileges: Set<ColumnPrivilege>;
 }
 
 /** Maps column ids to processed columns */
@@ -59,7 +62,7 @@ export function processColumn({
   abstractTypeMap,
   hasEnhancedPrimaryKeyCell,
 }: {
-  tableId: TableEntry['id'];
+  tableId: Table['oid'];
   column: Column;
   columnIndex: number;
   constraints: Constraint[];
@@ -85,7 +88,7 @@ export function processColumn({
   );
   const linkFk = findFkConstraintsForColumn(exclusiveConstraints, column.id)[0];
   const isPk = (hasEnhancedPrimaryKeyCell ?? true) && column.primary_key;
-  const fkTargetTableId = linkFk ? linkFk.referent_table : undefined;
+  const fkTargetTableId = linkFk ? linkFk.referent_table_oid : undefined;
   return {
     id: column.id,
     column,
@@ -115,5 +118,6 @@ export function processColumn({
       abstractType.identifier,
     ),
     formatCellValue: getDisplayFormatter(column, column.id),
+    currentRolePrivileges: new Set(column.current_role_priv),
   };
 }

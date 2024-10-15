@@ -1,16 +1,17 @@
-import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 import type { SvelteComponent } from 'svelte';
 import { linear } from 'svelte/easing';
-import type { Writable, Readable } from 'svelte/store';
-import { writable, derived } from 'svelte/store';
-import type { PauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
-import { pauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
+import type { Readable, Writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
+
 import {
-  iconSuccess,
-  iconLoading,
   iconError,
   iconInfo,
+  iconLoading,
+  iconSuccess,
 } from '@mathesar-component-library-dir/common/icons';
+import type { PauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
+import { pauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
+import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
 /**
  * Allows control of the toast message after it is displayed

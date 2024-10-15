@@ -1,8 +1,8 @@
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from mathesar.models.base import Schema, Table, Database, DataFile
-from mathesar.models.query import UIQuery
+from mathesar.models.deprecated import Schema, Table, Connection, DataFile
+from mathesar.models.query import Exploration
 
 
 class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
@@ -19,7 +19,7 @@ class DatabaseFilter(PropertyFilterSet):
     )
 
     class Meta:
-        model = Database
+        model = Connection
         fields = ['deleted']
 
 
@@ -77,7 +77,7 @@ class TableFilter(PropertyFilterSet):
         fields = ['name', 'schema', 'created_at', 'updated_at', 'import_verified']
 
 
-class UIQueryFilter(PropertyFilterSet):
+class ExplorationFilter(PropertyFilterSet):
     database = CharInFilter(field_name='base_table__schema__database__name', lookup_expr='in')
     name = CharInFilter(field_name='name', lookup_expr='in')
 
@@ -90,5 +90,5 @@ class UIQueryFilter(PropertyFilterSet):
     )
 
     class Meta:
-        model = UIQuery
+        model = Exploration
         fields = ['name']

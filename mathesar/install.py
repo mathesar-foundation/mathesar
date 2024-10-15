@@ -37,20 +37,11 @@ def main(skip_static_collection=False):
             install_on_db_with_key(database_key, skip_confirm)
         except IntegrityError:
             continue
-    if getattr(settings, 'MATHESAR_LIVE_DEMO', False) is True:
-        management.call_command(
-            'createsuperuser',
-            '--no-input',
-            '--username', 'demo',
-            '--email', 'admin@example.com',
-        )
-        management.call_command('setup_demo_template_db')
 
 
 def install_on_db_with_key(database_key, skip_confirm):
-    from mathesar.models.base import Database
-    db_model = Database.create_from_settings_key(database_key)
-    db_model.save()
+    from mathesar.models.deprecated import Connection
+    db_model = Connection.create_from_settings_key(database_key)
     try:
         install.install_mathesar(
             database_name=db_model.db_name,
@@ -63,6 +54,7 @@ def install_on_db_with_key(database_key, skip_confirm):
     except OperationalError as e:
         db_model.delete()
         raise e
+    db_model.save()
 
 
 if __name__ == "__main__":

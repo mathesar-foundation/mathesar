@@ -1,6 +1,9 @@
+import json
+from unittest.mock import patch
 from sqlalchemy import Column, select, Table, MetaData, VARCHAR, INTEGER
 
 from db import constants
+from db.columns.operations import alter as col_alt
 from db.columns.operations.alter import batch_update_columns, rename_column
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_name_from_attnum,
@@ -16,6 +19,44 @@ from db.types.base import PostgresType
 from db.types.operations.convert import get_db_type_enum_from_class
 from db.metadata import get_empty_metadata
 from db.schemas.utils import get_schema_oid_from_name
+
+
+def test_alter_columns_in_table_basic():
+    with patch.object(col_alt.db_conn, 'exec_msar_func') as mock_exec:
+        col_alt.alter_columns_in_table(
+            123,
+            [
+                {
+                    "id": 3, "name": "colname3", "type": "numeric",
+                    "type_options": {"precision": 8}, "nullable": True,
+                    "default": {"value": 8, "is_dynamic": False},
+                    "description": "third column"
+                }, {
+                    "id": 6, "name": "colname6", "type": "character varying",
+                    "type_options": {"length": 32}, "nullable": True,
+                    "default": {"value": "blahblah", "is_dynamic": False},
+                    "description": "textual column"
+                }
+            ],
+            'conn'
+        )
+        expect_json_arg = [
+            {
+                "attnum": 3, "name": "colname3",
+                "type": {"name": "numeric", "options": {"precision": 8}},
+                "not_null": False, "default": 8, "description": "third column",
+            }, {
+                "attnum": 6, "name": "colname6",
+                "type": {
+                    "name": "character varying", "options": {"length": 32},
+                },
+                "not_null": False, "default": "blahblah",
+                "description": "textual column"
+            }
+        ]
+        assert mock_exec.call_args.args[:3] == ('conn', 'alter_columns', 123)
+        # Necessary since `json.dumps` mangles dict ordering, but we don't care.
+        assert json.loads(mock_exec.call_args.args[3]) == expect_json_arg
 
 
 def _rename_column_and_assert(table, old_col_name, new_col_name, engine):

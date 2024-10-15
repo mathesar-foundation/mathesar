@@ -1,23 +1,25 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+
   import { Icon } from '@mathesar/component-library';
   import { iconSelectRecord } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
+
   import { getRecordSelectorFromContext } from './RecordSelectorController';
 
   const recordSelector = getRecordSelectorFromContext();
   const dispatch = createEventDispatcher();
 
-  export let table: { id: TableEntry['id']; name?: TableEntry['name'] };
+  export let table: { oid: Table['oid']; name?: Table['name'] };
 
-  $: ({ id, name } = table);
+  $: ({ oid, name } = table);
   $: label = name
     ? $_('navigate_to_table_record', { values: { tableName: name } })
     : $_('navigate_to_record');
 
   function handleClick() {
-    recordSelector.navigateToRecordPage({ tableId: id });
+    recordSelector.navigateToRecordPage({ tableId: oid });
     dispatch('click');
   }
 </script>

@@ -57,6 +57,14 @@ export function defined<T, U>(
 }
 
 /**
+ * This function is used to assert that the value passed in has been narrowed
+ * down to `never` by checking all possible variants.
+ */
+export function assertExhaustive(value: never): never {
+  throw new Error(`Exhaustive condition error: ${JSON.stringify(value)}`);
+}
+
+/**
  * From https://stackoverflow.com/a/51365037/895563
  */
 export type RecursivePartial<T> = {

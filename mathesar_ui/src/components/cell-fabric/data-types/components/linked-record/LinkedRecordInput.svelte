@@ -4,26 +4,27 @@
 
   // TODO remove dependency cycle
   // eslint-disable-next-line import/no-cycle
-  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
 
-  import {
-    getGloballyUniqueId,
-    getLabelControllerFromContainingLabel,
-    getLabelIdFromInputId,
-    Icon,
-    iconExpandDown,
-    type AccompanyingElements,
-  } from '@mathesar-component-library';
   import BaseInput from '@mathesar/component-library/common/base-components/BaseInput.svelte';
   import type { LinkedRecordCellProps } from '@mathesar/components/cell-fabric/data-types/components/typeDefinitions';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
+  import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
+  import {
+    type AccompanyingElements,
+    Icon,
+    getGloballyUniqueId,
+    getLabelControllerFromContainingLabel,
+    getLabelIdFromInputId,
+    iconExpandDown,
+  } from '@mathesar-component-library';
+
   import type { LinkedRecordInputElement } from './LinkedRecordUtils';
 
   interface $$Props
     extends Omit<
       LinkedRecordCellProps,
-      'isActive' | 'isSelectedInRange' | 'isProcessing' | 'isIndependentOfSheet'
+      'isActive' | 'isSelected' | 'isProcessing' | 'isIndependentOfSheet'
     > {
     class?: string;
     id?: string;

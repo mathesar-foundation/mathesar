@@ -1,5 +1,5 @@
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { FkConstraint } from '@mathesar/api/types/tables/constraints';
+import type { FkConstraint } from '@mathesar/api/rpc/constraints';
+import type { Table } from '@mathesar/models/Table';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 
 export type ColumnExtractionTargetType = 'newTable' | 'existingTable';
@@ -14,5 +14,5 @@ export interface LinkedTable {
   /** The columns specified in the FK constraint. */
   columns: ProcessedColumn[];
   /** The table to which the FK constraint points. */
-  table: TableEntry;
+  table: Table;
 }

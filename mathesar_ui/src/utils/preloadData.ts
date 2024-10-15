@@ -1,26 +1,38 @@
-import type { SchemaResponse, AbstractTypeResponse } from '@mathesar/AppTypes';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { QueryInstance } from '@mathesar/api/types/queries';
-import type { Connection } from '@mathesar/api/connections';
-import type { User } from '@mathesar/api/users';
+import type { User } from '@mathesar/api/rest/users';
+import type { RawDatabase } from '@mathesar/api/rpc/databases';
+import type { SavedExploration } from '@mathesar/api/rpc/explorations';
+import type { RawSchema } from '@mathesar/api/rpc/schemas';
+import type { RawServer } from '@mathesar/api/rpc/servers';
+import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
+
+type WithStatus<D> =
+  | {
+      state: 'success';
+      data: D;
+    }
+  | {
+      state: 'failure';
+      error: {
+        code: number;
+        message: string;
+      };
+    };
 
 export interface CommonData {
-  connections: Connection[];
-  schemas: SchemaResponse[];
-  tables: TableEntry[];
-  queries: QueryInstance[];
-  current_connection: Connection['id'] | null;
-  internal_db_connection: {
-    database: Connection['database'];
-    host: Connection['host'];
-    port: Connection['port'];
+  databases: RawDatabase[];
+  servers: RawServer[];
+  schemas: WithStatus<RawSchema[]>;
+  tables: WithStatus<RawTableWithMetadata[]>;
+  queries: SavedExploration[];
+  current_database: RawDatabase['id'] | null;
+  internal_db: {
+    database_name: string;
+    host: string;
+    port: number;
     type: string;
-    user: string;
   };
   current_schema: number | null;
-  abstract_types: AbstractTypeResponse[];
   user: User;
-  live_demo_mode: boolean;
   current_release_tag_name: string;
   supported_languages: Record<string, string>;
   is_authenticated: boolean;

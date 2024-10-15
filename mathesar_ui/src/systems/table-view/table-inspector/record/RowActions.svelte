@@ -1,83 +1,74 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import {
-    AnchorButton,
-    Button,
-    Icon,
-    iconExternalLink,
-  } from '@mathesar-component-library';
+
   import { iconDeleteMajor, iconRecord } from '@mathesar/icons';
+  import type { Table } from '@mathesar/models/Table';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import type {
     ColumnsDataStore,
     RecordsData,
-    TabularDataSelection,
   } from '@mathesar/stores/table-data';
   import { getPkValueInRecord } from '@mathesar/stores/table-data/records';
   import { toast } from '@mathesar/stores/toast';
+  import { takeFirstAndOnly } from '@mathesar/utils/iterUtils';
+  import {
+    AnchorButton,
+    Button,
+    Icon,
+    type ImmutableSet,
+    iconExternalLink,
+  } from '@mathesar-component-library';
 
-  export let selectedRowIndices: number[];
+  export let selectedRowIds: ImmutableSet<string>;
   export let recordsData: RecordsData;
-  export let selection: TabularDataSelection;
   export let columnsDataStore: ColumnsDataStore;
-  export let canEditTableRecords: boolean;
+  export let table: Table;
+
+  $: ({ currentRolePrivileges } = table.currentAccess);
+  $: selectedRowCount = selectedRowIds.size;
+  $: ({ columns } = columnsDataStore);
+  $: ({ selectableRowsMap } = recordsData);
+  $: recordPageLink = (() => {
+    const id = takeFirstAndOnly(selectedRowIds);
+    if (!id) return undefined;
+    const row = $selectableRowsMap.get(id);
+    if (!row) return undefined;
+    try {
+      const recordId = getPkValueInRecord(row.record, $columns);
+      return $storeToGetRecordPageUrl({ recordId });
+    } catch (e) {
+      return undefined;
+    }
+  })();
 
   async function handleDeleteRecords() {
     void confirmDelete({
       identifierType: $_('multiple_records', {
-        values: { count: selectedRowIndices.length },
+        values: { count: selectedRowCount },
       }),
       body: [
         $_('deleted_records_cannot_be_recovered', {
-          values: { count: selectedRowIndices.length },
+          values: { count: selectedRowCount },
         }),
         $_('are_you_sure_to_proceed'),
       ],
-      onProceed: () => recordsData.deleteSelected(selectedRowIndices),
+      onProceed: () => recordsData.deleteSelected(selectedRowIds),
       onError: (e) => toast.fromError(e),
-      onSuccess: () => {
+      onSuccess: (count) => {
         toast.success({
           title: $_('count_records_deleted_successfully', {
-            values: { count: selectedRowIndices.length },
+            values: { count },
           }),
         });
-        selection.resetSelection();
       },
     });
   }
-
-  $: ({ columns } = columnsDataStore);
-  $: recordPageLink = (() => {
-    const selectedRowIndex = selectedRowIndices[0];
-    const recordRow = recordsData.getRecordRows()[selectedRowIndex];
-
-    if (!recordRow) {
-      return '';
-    }
-
-    let recordId: string | number;
-    try {
-      recordId = getPkValueInRecord(recordRow.record, $columns);
-    } catch (e) {
-      return '';
-    }
-
-    return (
-      $storeToGetRecordPageUrl({
-        recordId,
-      }) || ''
-    );
-  })();
-
-  $: showOpenRecordLink = selectedRowIndices.length === 1 && recordPageLink;
-  $: showDeleteRecordButton = canEditTableRecords;
-  $: showNullStateText = !showDeleteRecordButton && !showOpenRecordLink;
 </script>
 
 <div class="actions-container">
-  {#if showOpenRecordLink}
-    <AnchorButton href={recordPageLink}>
+  {#if recordPageLink}
+    <AnchorButton href={recordPageLink} appearance="action">
       <div class="action-item">
         <div>
           <Icon {...iconRecord} />
@@ -87,19 +78,16 @@
       </div>
     </AnchorButton>
   {/if}
-  {#if showDeleteRecordButton}
-    <Button on:click={handleDeleteRecords}>
-      <Icon {...iconDeleteMajor} />
-      <span>
-        {$_('delete_records', { values: { count: selectedRowIndices.length } })}
-      </span>
-    </Button>
-  {/if}
-  {#if showNullStateText}
-    <span class="null-text">
-      {$_('no_actions_selected_record')}
+  <Button
+    on:click={handleDeleteRecords}
+    disabled={!$currentRolePrivileges.has('DELETE')}
+    appearance="action"
+  >
+    <Icon {...iconDeleteMajor} />
+    <span>
+      {$_('delete_records', { values: { count: selectedRowCount } })}
     </span>
-  {/if}
+  </Button>
 </div>
 
 <style lang="scss">
@@ -117,9 +105,5 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-
-  .null-text {
-    color: var(--color-text-muted);
   }
 </style>

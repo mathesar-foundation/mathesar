@@ -1,12 +1,17 @@
 <script lang="ts">
-  import type { SvelteComponent } from 'svelte';
+  import { type SvelteComponent, createEventDispatcher } from 'svelte';
 
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
   import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import FieldsetGroup from '@mathesar-component-library-dir/fieldset-group/FieldsetGroup.svelte';
+
   import type { ComponentWithProps } from '../types';
 
   type Option = $$Generic;
+
+  const dispatch = createEventDispatcher<{
+    artificialChange: Option[];
+  }>();
 
   export let values: Option[] = [];
   export let isInline = false;
@@ -20,6 +25,7 @@
   ) => string | ComponentWithProps<C> | undefined = () => undefined;
   export let getCheckboxDisabled: (value: Option | undefined) => boolean = () =>
     false;
+  export let boxed = false;
   /**
    * By default, options will be compared by equality. If you're using objects as
    * options, you can supply a custom function here to compare them.
@@ -43,6 +49,7 @@
     } else {
       values = values.filter((value) => !valuesAreEqual(value, option));
     }
+    dispatch('artificialChange', values);
   }
 </script>
 
@@ -52,6 +59,7 @@
   {label}
   {ariaLabel}
   {disabled}
+  {boxed}
   let:option
   let:disabled={innerDisabled}
   on:change

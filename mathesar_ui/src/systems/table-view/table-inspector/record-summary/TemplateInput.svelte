@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
+  import type { Column } from '@mathesar/api/rpc/columns';
   import { FormattedInput } from '@mathesar-component-library';
-  import type { Column } from '@mathesar/api/types/tables/columns';
-  import TemplateInputFormatter from './TemplateInputFormatter';
+
   import AppendColumn from './AppendColumn.svelte';
+  import TemplateInputFormatter from './TemplateInputFormatter';
 
   interface $$Props
     extends Omit<ComponentProps<FormattedInput<string>>, 'formatter'> {
@@ -31,5 +32,6 @@
   .column-insert {
     display: block;
     text-align: right;
+    margin-top: 0.5rem;
   }
 </style>

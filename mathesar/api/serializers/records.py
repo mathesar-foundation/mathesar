@@ -6,7 +6,7 @@ from db.records.exceptions import InvalidDate, InvalidDateFormat
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.models.base import Column
+from mathesar.models.deprecated import Column
 from mathesar.api.utils import follows_json_number_spec
 from mathesar.database.types import UIType
 

@@ -1,12 +1,12 @@
+import pytest
+
+from psycopg.errors import BadCopyFileFormat
+from django.core.exceptions import FieldDoesNotExist
+from mathesar.utils.connections import BadInstallationTarget
+from db.functions.exceptions import UnknownDBFunctionID
+from sqlalchemy.exc import IntegrityError
 from http.client import CannotSendRequest
 
-from django.core.exceptions import FieldDoesNotExist
-from psycopg.errors import BadCopyFileFormat
-import pytest
-from sqlalchemy.exc import IntegrityError
-
-from db.functions.exceptions import UnknownDBFunctionID
-from mathesar.utils.connections import BadInstallationTarget
 import mathesar.rpc.exceptions.error_codes as err_codes
 
 

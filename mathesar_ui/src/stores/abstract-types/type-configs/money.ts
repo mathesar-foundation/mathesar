@@ -1,20 +1,20 @@
-import type {
-  MoneyDisplayOptions,
-  NumberFormat,
-  Column,
-} from '@mathesar/api/types/tables/columns';
-import type { FormValues } from '@mathesar-component-library/types';
+import {
+  type Column,
+  type CurrencyLocation,
+  type NumberFormat,
+  type NumberGrouping,
+  getColumnMetadataValue,
+} from '@mathesar/api/rpc/columns';
 import { iconUiTypeMoney } from '@mathesar/icons';
+import type { FormValues } from '@mathesar-component-library/types';
+
+import { DB_TYPES } from '../dbTypes';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
-import { getDecimalPlaces } from './number';
 
-const DB_TYPES = {
-  MONEY: 'MONEY',
-  MATHESAR_TYPES__MATHESAR_MONEY: 'MATHESAR_TYPES.MATHESAR_MONEY',
-};
+import { getDecimalPlaces } from './number';
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
@@ -38,8 +38,8 @@ const displayForm: AbstractTypeConfigForm = {
     },
     useGrouping: {
       type: 'string',
-      enum: ['true', 'false'],
-      default: 'true',
+      enum: ['auto', 'always', 'never'],
+      default: 'auto',
     },
   },
   layout: {
@@ -69,8 +69,9 @@ const displayForm: AbstractTypeConfigForm = {
         variable: 'useGrouping',
         label: 'Digit Grouping',
         options: {
-          true: { label: 'On' },
-          false: { label: 'Off' },
+          auto: { label: 'Auto' },
+          always: { label: 'Always' },
+          never: { label: 'Never' },
         },
       },
       {
@@ -91,41 +92,43 @@ const displayForm: AbstractTypeConfigForm = {
 };
 
 interface MoneyFormValues extends Record<string, unknown> {
-  currencySymbol: MoneyDisplayOptions['currency_symbol'];
-  decimalPlaces: MoneyDisplayOptions['minimum_fraction_digits'];
-  currencySymbolLocation: MoneyDisplayOptions['currency_symbol_location'];
+  currencySymbol: string;
+  decimalPlaces: number | null;
+  currencySymbolLocation: CurrencyLocation;
   numberFormat: NumberFormat | 'none';
-  useGrouping: MoneyDisplayOptions['use_grouping'];
+  useGrouping: NumberGrouping;
 }
 
-function determineDisplayOptions(form: FormValues): Column['display_options'] {
+function determineDisplayOptions(form: FormValues): Column['metadata'] {
   const f = form as MoneyFormValues;
-  const opts: Partial<MoneyDisplayOptions> = {
-    currency_symbol: f.currencySymbol,
-    currency_symbol_location: f.currencySymbolLocation,
-    number_format: f.numberFormat === 'none' ? null : f.numberFormat,
-    use_grouping: f.useGrouping,
-    minimum_fraction_digits: f.decimalPlaces ?? undefined,
-    maximum_fraction_digits: f.decimalPlaces ?? undefined,
+  const opts: Partial<Column['metadata']> = {
+    mon_currency_symbol: f.currencySymbol,
+    mon_currency_location: f.currencySymbolLocation,
+    num_format: f.numberFormat === 'none' ? null : f.numberFormat,
+    num_grouping: f.useGrouping,
+    num_min_frac_digits: f.decimalPlaces ?? undefined,
+    num_max_frac_digits: f.decimalPlaces ?? undefined,
   };
   return opts;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
-  columnDisplayOpts: Column['display_options'],
+  metadata: Column['metadata'],
 ): MoneyFormValues {
-  const displayOptions = columnDisplayOpts as MoneyDisplayOptions | null;
+  const column = { metadata };
   const decimalPlaces = getDecimalPlaces(
-    displayOptions?.minimum_fraction_digits ?? null,
-    displayOptions?.maximum_fraction_digits ?? null,
+    metadata?.num_min_frac_digits ?? null,
+    metadata?.num_max_frac_digits ?? null,
   );
   const displayFormValues: MoneyFormValues = {
-    numberFormat: displayOptions?.number_format ?? 'none',
-    currencySymbol: displayOptions?.currency_symbol ?? '',
+    numberFormat: getColumnMetadataValue(column, 'num_format') ?? 'none',
+    currencySymbol: getColumnMetadataValue(column, 'mon_currency_symbol') ?? '',
     decimalPlaces,
-    currencySymbolLocation:
-      displayOptions?.currency_symbol_location ?? 'after-minus',
-    useGrouping: displayOptions?.use_grouping ?? 'true',
+    currencySymbolLocation: getColumnMetadataValue(
+      column,
+      'mon_currency_location',
+    ),
+    useGrouping: getColumnMetadataValue(column, 'num_grouping'),
   };
   return displayFormValues;
 }
@@ -135,7 +138,7 @@ const moneyType: AbstractTypeConfiguration = {
   cellInfo: {
     type: 'money',
   },
-  defaultDbType: DB_TYPES.MATHESAR_TYPES__MATHESAR_MONEY,
+  defaultDbType: DB_TYPES.MSAR__MATHESAR_MONEY,
   getDisplayConfig: () => ({
     form: displayForm,
     determineDisplayOptions,

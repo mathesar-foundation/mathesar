@@ -9,8 +9,8 @@ button.dropdown.trigger {
     text-overflow: ellipsis;
     white-space: nowrap;
     box-sizing: content-box;
-    line-height: 1.2;
-    min-height: 1.2em;
+    line-height: 1;
+    min-height: 1em;
     flex-grow: 1;
     > *:not(:last-child) {
       margin-right: 0.25rem;

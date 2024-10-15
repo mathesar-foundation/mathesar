@@ -9,7 +9,7 @@ from mathesar.api.db.permissions.records import RecordAccessPolicy
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 
 from mathesar.api.utils import get_table_or_404
-from mathesar.models.base import Table
+from mathesar.models.deprecated import Table
 
 
 class RecordViewSet(AccessViewSetMixin, viewsets.GenericViewSet):

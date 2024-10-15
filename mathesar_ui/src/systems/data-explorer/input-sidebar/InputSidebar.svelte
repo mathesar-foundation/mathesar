@@ -1,14 +1,17 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { TabContainer, Spinner } from '@mathesar-component-library';
-  import { getAvailableName } from '@mathesar/utils/db';
-  import { confirm } from '@mathesar/stores/confirmation';
+
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
-  import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
-  import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
+  import { confirm } from '@mathesar/stores/confirmation';
+  import { getAvailableName } from '@mathesar/utils/db';
+  import { Spinner, TabContainer } from '@mathesar-component-library';
+
   import type QueryManager from '../QueryManager';
   import type { ColumnWithLink } from '../utils';
+
+  import ColumnSelectionPane from './column-selection-pane/ColumnSelectionPane.svelte';
+  import TransformationsPane from './transformations-pane/TransformationsPane.svelte';
 
   export let queryManager: QueryManager;
   export let linkCollapsibleOpenState: Record<ColumnWithLink['id'], boolean> =
@@ -59,8 +62,8 @@
     await queryManager.update((q) => {
       const newQuery = q.withInitialColumn({
         alias,
-        id: column.id,
-        jp_path: column.jpPath,
+        attnum: column.id,
+        join_path: column.jpPath,
       });
       if (addNewAutoSummarization) {
         const autoSummarization =

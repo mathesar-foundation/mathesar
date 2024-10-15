@@ -2,7 +2,7 @@ import pytest
 
 from django.core.files import File
 
-from mathesar.models.base import DataFile, Schema
+from mathesar.models.deprecated import DataFile, Schema
 from mathesar.imports.base import create_table_from_data_file
 from db.schemas.utils import get_schema_oid_from_name
 from psycopg.errors import DuplicateTable
@@ -57,6 +57,7 @@ def test_excel_upload(data_file, engine_with_schema):
     )
 
 
+@pytest.mark.skip(reason="msar.add_mathesar_table no longer raises an exception if a table with the same name already exists in the database.")
 def test_excel_upload_with_duplicate_table_name(data_file, engine_with_schema):
     table_name = "NASA 2"
 

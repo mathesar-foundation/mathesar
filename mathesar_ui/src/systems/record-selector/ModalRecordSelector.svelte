@@ -1,9 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
   import { fade } from 'svelte/transition';
-  import { portal, type ModalController } from '@mathesar-component-library';
-  import RecordSelectorWindow from './RecordSelectorWindow.svelte';
+
+  import { type ModalController, portal } from '@mathesar-component-library';
+
   import type { RecordSelectorController } from './RecordSelectorController';
+  import RecordSelectorWindow from './RecordSelectorWindow.svelte';
 
   const dispatch = createEventDispatcher();
 

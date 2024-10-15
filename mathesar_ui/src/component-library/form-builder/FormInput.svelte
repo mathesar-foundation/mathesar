@@ -1,12 +1,13 @@
 <script lang="ts">
   // TODO: Use FormField component here
-  import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
   import DataTypeBasedInput from '@mathesar/component-library/data-type-based-input/DataTypeBasedInput.svelte';
   import type { DataTypeBasedInputType } from '@mathesar/component-library/data-type-based-input/types';
+  import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
+
   import type {
     FormInputElement,
-    FormValueStore,
     FormValidationCheck,
+    FormValueStore,
   } from './types';
 
   export let type: DataTypeBasedInputType;

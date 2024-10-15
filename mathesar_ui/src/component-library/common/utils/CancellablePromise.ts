@@ -56,4 +56,13 @@ export default class CancellablePromise<T> extends Promise<T> {
     }
     return super.then(resolve, reject);
   }
+
+  transformResolved<S>(f: (v: T) => S): CancellablePromise<S> {
+    return new CancellablePromise(
+      (resolve, reject) => {
+        this.then((v) => resolve(f(v)), reject).catch(reject);
+      },
+      () => this.cancel(),
+    );
+  }
 }

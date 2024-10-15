@@ -1,33 +1,47 @@
-export function getDatabasePageUrl(connectionId: number): string {
-  return `/db/${connectionId}/`;
+export function getDatabasePageUrl(databaseId: number): string {
+  return `/db/${databaseId}/`;
 }
 
-export function getSchemaPageUrl(
-  connectionId: number,
-  schemaId: number,
-): string {
-  return `${getDatabasePageUrl(connectionId)}${schemaId}/`;
+export function getDatabasePageSchemasSectionUrl(databaseId: number): string {
+  return `/db/${databaseId}/schemas/`;
+}
+
+export function getDatabasePageSettingsSectionUrl(databaseId: number): string {
+  return `/db/${databaseId}/settings/`;
+}
+
+export function getDatabaseRoleConfigurationUrl(databaseId: number): string {
+  return `${getDatabasePageSettingsSectionUrl(databaseId)}role-configuration/`;
+}
+
+export function getDatabaseCollaboratorsUrl(databaseId: number): string {
+  return `${getDatabasePageSettingsSectionUrl(databaseId)}collaborators/`;
+}
+
+export function getDatabaseRolesUrl(databaseId: number): string {
+  return `${getDatabasePageSettingsSectionUrl(databaseId)}roles/`;
+}
+
+export function getSchemaPageUrl(databaseId: number, schemaId: number): string {
+  return `${getDatabasePageSchemasSectionUrl(databaseId)}${schemaId}/`;
 }
 
 export function getSchemaPageTablesSectionUrl(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(connectionId, schemaId)}tables/`;
+  return `${getSchemaPageUrl(databaseId, schemaId)}tables/`;
 }
 
 export function getSchemaPageExplorationsSectionUrl(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(connectionId, schemaId)}explorations/`;
+  return `${getSchemaPageUrl(databaseId, schemaId)}explorations/`;
 }
 
-export function getImportPageUrl(
-  connectionId: number,
-  schemaId: number,
-): string {
-  return `${getSchemaPageUrl(connectionId, schemaId)}import/`;
+export function getImportPageUrl(databaseId: number, schemaId: number): string {
+  return `${getSchemaPageUrl(databaseId, schemaId)}import/`;
 }
 
 interface ImportPreviewPageQueryParams {
@@ -53,59 +67,57 @@ export function getImportPreviewPageQueryParams(
 }
 
 export function getImportPreviewPageUrl(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   previewTableId: number,
   options: ImportPreviewPageQueryParams,
 ): string {
-  const importPageUrl = getImportPageUrl(connectionId, schemaId);
+  const importPageUrl = getImportPageUrl(databaseId, schemaId);
   const q = serializeImportPreviewPageQueryParams(options);
   return `${importPageUrl}${previewTableId}/?${q}`;
 }
 
 export function getDataExplorerPageUrl(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
 ): string {
-  return `${getSchemaPageUrl(connectionId, schemaId)}data-explorer/`;
+  return `${getSchemaPageUrl(databaseId, schemaId)}data-explorer/`;
 }
 
 export function getExplorationPageUrl(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   queryId: number,
 ): string {
   return `${getSchemaPageExplorationsSectionUrl(
-    connectionId,
+    databaseId,
     schemaId,
   )}${queryId}/`;
 }
 
 export function getExplorationEditorPageUrl(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   queryId: number,
 ): string {
-  return `${getExplorationPageUrl(connectionId, schemaId, queryId)}edit/`;
+  return `${getExplorationPageUrl(databaseId, schemaId, queryId)}edit/`;
 }
 
 export function getTablePageUrl(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   tableId: number,
 ): string {
-  return `${getSchemaPageTablesSectionUrl(connectionId, schemaId)}${tableId}/`;
+  return `${getSchemaPageTablesSectionUrl(databaseId, schemaId)}${tableId}/`;
 }
 
 export function getRecordPageUrl(
-  connectionId: number,
+  databaseId: number,
   schemaId: number,
   tableId: number,
   recordId: unknown,
 ): string {
-  return `${getTablePageUrl(connectionId, schemaId, tableId)}${String(
-    recordId,
-  )}`;
+  return `${getTablePageUrl(databaseId, schemaId, tableId)}${String(recordId)}`;
 }
 
 export const USER_PROFILE_URL = '/profile/';
@@ -114,7 +126,7 @@ export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
 export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
 export const LOGOUT_URL = '/auth/logout/';
-export const CONNECTIONS_URL = '/connections/';
+export const HOME_URL = '/databases/';
 export const WELCOME_URL = '/welcome';
 
 export function getEditUsersPageUrl(userId: number) {

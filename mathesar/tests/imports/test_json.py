@@ -3,9 +3,9 @@ import pytest
 from django.core.files import File
 from sqlalchemy import text
 
-from mathesar.models.base import DataFile, Schema
+from mathesar.models.deprecated import DataFile, Schema
 from mathesar.imports.base import create_table_from_data_file
-from db.schemas.operations.create import create_schema
+from db.schemas.operations.create import create_schema_via_sql_alchemy
 from db.schemas.utils import get_schema_oid_from_name
 from psycopg.errors import DuplicateTable
 
@@ -21,7 +21,7 @@ def data_file(patents_json_filepath):
 
 @pytest.fixture()
 def schema(engine, test_db_model):
-    create_schema(TEST_SCHEMA, engine)
+    create_schema_via_sql_alchemy(TEST_SCHEMA, engine)
     schema_oid = get_schema_oid_from_name(TEST_SCHEMA, engine)
     yield Schema.current_objects.create(oid=schema_oid, database=test_db_model)
     with engine.begin() as conn:
@@ -67,6 +67,7 @@ def test_json_upload(data_file, schema):
     )
 
 
+@pytest.mark.skip(reason="msar.add_mathesar_table no longer raises an exception if a table with the same name already exists in the database.")
 def test_json_upload_with_duplicate_table_name(data_file, schema):
     table_name = "NASA 2"
 

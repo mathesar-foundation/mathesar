@@ -1,7 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { AnchorButton } from '@mathesar-component-library';
+
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { AnchorButton } from '@mathesar-component-library';
 
   export let showGoToRoot = true;
 </script>

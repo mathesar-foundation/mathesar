@@ -1,40 +1,45 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { Connection } from '@mathesar/api/connections';
-  import { iconDatabase, iconConnection } from '@mathesar/icons';
-  import { getDatabasePageUrl, CONNECTIONS_URL } from '@mathesar/routes/urls';
-  import { connectionsStore } from '@mathesar/stores/databases';
+
+  import { iconConnectDatabase, iconDatabase } from '@mathesar/icons';
+  import type { Database } from '@mathesar/models/Database';
+  import { HOME_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { databasesStore } from '@mathesar/stores/databases';
+
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type { BreadcrumbSelectorEntry } from './breadcrumbTypes';
 
-  const { connections, currentConnectionId } = connectionsStore;
+  const { databases, currentDatabase } = databasesStore;
 
   function makeBreadcrumbSelectorEntry(
-    connection: Connection,
+    database: Database,
   ): BreadcrumbSelectorEntry {
     return {
       type: 'simple',
-      label: connection.nickname,
-      href: getDatabasePageUrl(connection.id),
+      label: database.name,
+      href: getDatabasePageUrl(database.id),
       icon: iconDatabase,
-      isActive: () => connection.id === $currentConnectionId,
+      isActive: () => database.id === $currentDatabase?.id,
     };
   }
 
-  $: breadcrumbEntries = [...$connections.values()].map(
+  $: breadcrumbEntries = [...$databases.values()].map(
     makeBreadcrumbSelectorEntry,
   );
 </script>
 
 <BreadcrumbSelector
-  data={new Map([[$_('connections'), breadcrumbEntries]])}
-  triggerLabel={$_('choose_connection')}
+  data={new Map([[$_('databases'), breadcrumbEntries]])}
+  triggerLabel={$_('choose_database')}
   persistentLinks={[
     {
       type: 'simple',
-      label: $_('manage_connections'),
-      href: CONNECTIONS_URL,
-      icon: iconConnection,
+      label: $_('manage_databases'),
+      href: HOME_URL,
+      icon: {
+        ...iconConnectDatabase,
+        size: '1.4rem',
+      },
       // TODO: Handle active states for persistent links
       isActive: () => false,
     },

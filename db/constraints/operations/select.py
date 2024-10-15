@@ -1,7 +1,12 @@
+from sqlalchemy import select, and_
+
+from db.connection import select_from_msar_func
 from db.utils import get_pg_catalog_table
 from db.metadata import get_empty_metadata
 
-from sqlalchemy import select, and_
+
+def get_constraints_for_table(table_oid, conn):
+    return select_from_msar_func(conn, 'get_constraints_for_table', table_oid)
 
 
 def get_constraints_with_oids(engine, table_oid=None):

@@ -1,29 +1,32 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import TableName from '@mathesar/components/TableName.svelte';
-  import type { Constraint } from '@mathesar/stores/table-data';
-  import { tables } from '@mathesar/stores/tables';
-  import type { PaginatedResponse } from '@mathesar/api/utils/requestUtils';
-  import { getAPI } from '@mathesar/api/utils/requestUtils';
-  import type { Column } from '@mathesar/api/types/tables/columns';
-  import { Icon, iconError, Spinner } from '@mathesar/component-library';
+
+  import { api } from '@mathesar/api/rpc';
+  import type { Constraint } from '@mathesar/api/rpc/constraints';
+  import { Icon, Spinner, iconError } from '@mathesar/component-library';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import TableName from '@mathesar/components/TableName.svelte';
+  import { currentDatabase } from '@mathesar/stores/databases';
+  import { currentTablesData } from '@mathesar/stores/tables';
 
   export let constraint: Constraint;
 
   $: referentTable =
     constraint.type === 'foreignkey'
-      ? $tables.data.get(constraint.referent_table)
+      ? $currentTablesData.tablesMap.get(constraint.referent_table_oid)
       : undefined;
 
   async function getReferentColumns(_constraint: Constraint) {
     if (_constraint.type !== 'foreignkey') {
       return [];
     }
-    const tableId = _constraint.referent_table;
-    const url = `/api/db/v0/tables/${tableId}/columns/?limit=500`;
-    const referentTableColumns = await getAPI<PaginatedResponse<Column>>(url);
-    return referentTableColumns.results.filter((c) =>
+    const referentTableColumns = await api.columns
+      .list({
+        database_id: $currentDatabase.id,
+        table_oid: _constraint.referent_table_oid,
+      })
+      .run();
+    return referentTableColumns.filter((c) =>
       _constraint.referent_columns.includes(c.id),
     );
   }
@@ -88,6 +91,7 @@
 
   .target-details {
     display: flex;
+    align-items: center;
 
     > :global(* + *) {
       margin-left: 0.25rem;

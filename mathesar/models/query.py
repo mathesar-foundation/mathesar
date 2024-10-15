@@ -28,13 +28,14 @@ from mathesar.models.validators import (
     ListOfDictValidator,
     TransformationsValidator,
 )
+from mathesar.models.base import BaseModel
 from mathesar.state.cached_property import cached_property
-from mathesar.models.base import BaseModel, Column
+from mathesar.models.deprecated import Column
 from mathesar.models.relation import Relation
 from mathesar.state import get_cached_metadata
 
 
-class UIQuery(BaseModel, Relation):
+class Exploration(BaseModel, Relation):
     name = models.CharField(
         max_length=128,
     )
@@ -175,7 +176,7 @@ class UIQuery(BaseModel, Relation):
 
         Whereas before the transformations attribute was a one-way flow from the client,
         now it's something that the backend may redefine. This a significant complication of the
-        data flow. For example, if you replace transformations on a saved UIQuery and save it
+        data flow. For example, if you replace transformations on a saved Exploration and save it
         again, we must trigger a reflection, which can have a performance impact. Also, frontend
         must expect that certain transformations might alter the transformation pipeline, which
         would then need reflecting by frontend; that might be a breaking change.

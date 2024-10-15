@@ -1,30 +1,27 @@
-import { get, writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
-import type { CancellablePromise } from '@mathesar-component-library';
-import { getAPI } from '@mathesar/api/utils/requestUtils';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-import CacheManager from '@mathesar/utils/CacheManager';
-import type {
-  QueryInstance,
-  QueryRunResponse,
-} from '@mathesar/api/types/queries';
-import type { TableEntry } from '@mathesar/api/types/tables';
-import type { JoinableTablesResult } from '@mathesar/api/types/tables/joinable_tables';
-import { createQuery, putQuery } from '@mathesar/stores/queries';
-import { getTable } from '@mathesar/stores/tables';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
-import QueryModel from './QueryModel';
-import type { QueryModelUpdateDiff } from './QueryModel';
-import QueryUndoRedoManager from './QueryUndoRedoManager';
+
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import {
-  getTablesThatReferenceBaseTable,
-  getBaseTableColumnsWithLinks,
-  getColumnInformationMap,
-} from './utils';
-import type { InputColumnsStoreSubstance } from './utils';
+  type ExplorationResult,
+  type SavedExploration,
+  explorationIsAddable,
+  explorationIsSaved,
+} from '@mathesar/api/rpc/explorations';
+import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
+import { currentDatabase } from '@mathesar/stores/databases';
+import { addExploration, replaceExploration } from '@mathesar/stores/queries';
+import CacheManager from '@mathesar/utils/CacheManager';
+import type { CancellablePromise } from '@mathesar-component-library';
+
+import type { QueryModelUpdateDiff } from './QueryModel';
+import QueryModel from './QueryModel';
 import QueryRunner from './QueryRunner';
 import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
+import QueryUndoRedoManager from './QueryUndoRedoManager';
+import type { InputColumnsStoreSubstance, QueryTableStructure } from './utils';
+import { getInputColumns, getQueryTableStructure } from './utils';
 
 export default class QueryManager extends QueryRunner {
   private undoRedoManager: QueryUndoRedoManager;
@@ -61,15 +58,13 @@ export default class QueryManager extends QueryRunner {
 
   // Promises
 
-  private baseTableFetchPromise: CancellablePromise<TableEntry> | undefined;
-
-  private joinableColumnsfetchPromise:
-    | CancellablePromise<JoinableTablesResult>
+  private tableStructurePromise:
+    | CancellablePromise<QueryTableStructure>
     | undefined;
 
-  private querySavePromise: CancellablePromise<QueryInstance> | undefined;
+  private querySavePromise: CancellablePromise<SavedExploration> | undefined;
 
-  private onSaveCallback: (instance: QueryInstance) => unknown;
+  private onSaveCallback: (instance: SavedExploration) => unknown;
 
   constructor({
     query,
@@ -78,14 +73,18 @@ export default class QueryManager extends QueryRunner {
   }: {
     query: QueryModel;
     abstractTypeMap: AbstractTypesMap;
-    onSave?: (instance: QueryInstance) => unknown;
+    onSave?: (instance: SavedExploration) => unknown;
   }) {
     super({
       query,
       abstractTypeMap,
-      onRunWithObject: (response: QueryRunResponse) => {
+      onRunWithObject: (response: ExplorationResult) => {
         this.checkAndUpdateSummarizationAfterRun(
-          new QueryModel(response.query),
+          new QueryModel({
+            database_id: query.database_id,
+            schema_oid: query.schema_oid,
+            ...response.query,
+          }),
         );
       },
     });
@@ -97,7 +96,7 @@ export default class QueryManager extends QueryRunner {
   }
 
   private async calculateInputColumnTree(): Promise<void> {
-    const baseTableId = get(this.query).base_table;
+    const baseTableId = get(this.query).base_table_oid;
     if (!baseTableId) {
       this.inputColumns.set({
         baseTableColumns: new Map(),
@@ -113,9 +112,7 @@ export default class QueryManager extends QueryRunner {
 
     const cachedResult = this.cacheManagers.inputColumns.get(baseTableId);
     if (cachedResult) {
-      this.inputColumns.set({
-        ...cachedResult,
-      });
+      this.inputColumns.set({ ...cachedResult });
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'success' },
@@ -125,39 +122,19 @@ export default class QueryManager extends QueryRunner {
     }
 
     try {
-      this.baseTableFetchPromise?.cancel();
-      this.joinableColumnsfetchPromise?.cancel();
-
+      const database = get(currentDatabase);
       this.state.update((state) => ({
         ...state,
         inputColumnsFetchState: { state: 'processing' },
       }));
 
-      this.baseTableFetchPromise = getTable(baseTableId);
-      this.joinableColumnsfetchPromise = getAPI<JoinableTablesResult>(
-        `/api/db/v0/tables/${baseTableId}/joinable_tables/`,
-      );
-      const [baseTableResult, joinableColumnsResult] = await Promise.all([
-        this.baseTableFetchPromise,
-        this.joinableColumnsfetchPromise,
-      ]);
-      const baseTableColumns = getBaseTableColumnsWithLinks(
-        joinableColumnsResult,
-        baseTableResult,
-      );
-      const tablesThatReferenceBaseTable = getTablesThatReferenceBaseTable(
-        joinableColumnsResult,
-        baseTableResult,
-      );
-      const inputColumnInformationMap = getColumnInformationMap(
-        joinableColumnsResult,
-        baseTableResult,
-      );
-      const inputColumns = {
-        baseTableColumns,
-        tablesThatReferenceBaseTable,
-        inputColumnInformationMap,
-      };
+      this.tableStructurePromise?.cancel();
+      this.tableStructurePromise = getQueryTableStructure({
+        database,
+        baseTableId,
+      });
+      const inputColumns = getInputColumns(await this.tableStructurePromise);
+
       this.cacheManagers.inputColumns.set(baseTableId, inputColumns);
       this.inputColumns.set(inputColumns);
       this.speculateColumns();
@@ -314,7 +291,8 @@ export default class QueryManager extends QueryRunner {
    * @throws Error if unable to save
    */
   async save(): Promise<QueryModel> {
-    const queryJSON = this.getQueryModel().toJson();
+    const maybeSavedExploration =
+      this.getQueryModel().toMaybeSavedExploration();
     this.state.update((_state) => ({
       ..._state,
       saveState: { state: 'processing' },
@@ -322,11 +300,12 @@ export default class QueryManager extends QueryRunner {
     try {
       this.querySavePromise?.cancel();
       // TODO: Check for latest validation status here
-      if (queryJSON.id !== undefined) {
-        // TODO: Figure out a better way to help TS identify this as a saved instance
-        this.querySavePromise = putQuery(queryJSON as QueryInstance);
+      if (explorationIsSaved(maybeSavedExploration)) {
+        this.querySavePromise = replaceExploration(maybeSavedExploration);
+      } else if (explorationIsAddable(maybeSavedExploration)) {
+        this.querySavePromise = addExploration(maybeSavedExploration);
       } else {
-        this.querySavePromise = createQuery(queryJSON);
+        throw new Error(get(_)('error_saving_query'));
       }
       const result = await this.querySavePromise;
       this.query.update((qr) => qr.withId(result.id).model);
@@ -357,7 +336,7 @@ export default class QueryManager extends QueryRunner {
     const { baseTableColumns } = get(this.inputColumns);
     const firstBaseTableInitialColumn =
       this.getQueryModel().initial_columns.find((initialColumn) =>
-        baseTableColumns.has(initialColumn.id),
+        baseTableColumns.has(initialColumn.attnum),
       );
     if (firstBaseTableInitialColumn) {
       return new QuerySummarizationTransformationModel({
@@ -372,8 +351,7 @@ export default class QueryManager extends QueryRunner {
 
   destroy(): void {
     super.destroy();
-    this.baseTableFetchPromise?.cancel();
-    this.joinableColumnsfetchPromise?.cancel();
+    this.tableStructurePromise?.cancel();
     this.querySavePromise?.cancel();
   }
 }

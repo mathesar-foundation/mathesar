@@ -1,70 +1,70 @@
 <script>
   import { _ } from 'svelte-i18n';
-  import { Collapsible } from '@mathesar-component-library';
+
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { currentTable } from '@mathesar/stores/tables';
-  import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { currentDatabase } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
-  import TableName from './TableName.svelte';
-  import TableActions from './TableActions.svelte';
+  import { Collapsible } from '@mathesar-component-library';
+
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
+
   import AdvancedActions from './AdvancedActions.svelte';
   import TableLinks from './links/TableLinks.svelte';
+  import TableActions from './TableActions.svelte';
   import TableDescription from './TableDescription.svelte';
+  import TableName from './TableName.svelte';
+  import TablePermissions from './TablePermissions.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
-  const userProfile = getUserProfileStoreFromContext();
-
-  $: database = $currentDatabase;
-  $: schema = $currentSchema;
-
-  $: canExecuteDDL = !!$userProfile?.hasPermission(
-    { database, schema },
-    'canExecuteDDL',
-  );
+  $: ({ table } = $tabularData);
+  $: ({ currentRoleOwns } = table.currentAccess);
 </script>
 
 <div class="table-mode-container">
-  <Collapsible isOpen triggerAppearance="plain">
+  <Collapsible isOpen triggerAppearance="inspector">
     <CollapsibleHeader
       slot="header"
       title={$_('properties')}
       isDbLevelConfiguration
     />
     <div slot="content" class="content-container">
-      <TableName disabled={!canExecuteDDL} />
-      <TableDescription disabled={!canExecuteDDL} />
+      <TableName disabled={!$currentRoleOwns} />
+      <TableDescription disabled={!$currentRoleOwns} />
     </div>
   </Collapsible>
 
-  <Collapsible isOpen triggerAppearance="plain">
+  <Collapsible isOpen triggerAppearance="inspector">
+    <CollapsibleHeader slot="header" title={$_('table_permissions')} />
+    <div slot="content" class="content-container">
+      <TablePermissions />
+    </div>
+  </Collapsible>
+
+  <Collapsible isOpen triggerAppearance="inspector">
     <CollapsibleHeader
       slot="header"
       title={$_('links')}
       isDbLevelConfiguration
     />
     <div slot="content" class="content-container">
-      <TableLinks {canExecuteDDL} />
+      <TableLinks />
     </div>
   </Collapsible>
 
-  <Collapsible triggerAppearance="plain">
+  <!-- TODO_BETA: re-enable this once we make the record summary template configurable -->
+  <!-- <Collapsible triggerAppearance="plain">
     <CollapsibleHeader slot="header" title={$_('record_summary')} />
     <div slot="content" class="content-container">
       <RecordSummaryConfig table={$currentTable} tabularData={$tabularData} />
     </div>
-  </Collapsible>
+  </Collapsible> -->
 
-  <Collapsible isOpen triggerAppearance="plain">
+  <Collapsible isOpen triggerAppearance="inspector">
     <CollapsibleHeader slot="header" title={$_('actions')} />
     <div slot="content" class="content-container">
-      <TableActions {canExecuteDDL} />
+      <TableActions />
     </div>
   </Collapsible>
 
-  <Collapsible triggerAppearance="plain">
+  <Collapsible triggerAppearance="inspector">
     <CollapsibleHeader slot="header" title={$_('advanced')} />
     <div slot="content" class="content-container">
       <AdvancedActions />
@@ -74,11 +74,15 @@
 
 <style lang="scss">
   .table-mode-container {
-    padding-bottom: 1rem;
+    padding-bottom: var(--size-small);
+
+    > :global(* + *) {
+      margin-top: var(--size-super-ultra-small);
+    }
   }
 
   .content-container {
-    padding: 1rem;
+    padding: var(--size-small);
     display: flex;
     flex-direction: column;
 

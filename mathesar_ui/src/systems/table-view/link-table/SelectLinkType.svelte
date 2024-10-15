@@ -1,9 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { TableEntry } from '@mathesar/api/types/tables';
+
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
+  import type { Table } from '@mathesar/models/Table';
+
   import Pill from './LinkTablePill.svelte';
   import type { LinkType } from './linkTableUtils';
   import LinkTypeOption from './LinkTypeOption.svelte';
@@ -11,8 +13,8 @@
   export let linkTypes: LinkType[];
   export let isSelfReferential: boolean;
   export let field: FieldStore<LinkType>;
-  export let base: Pick<TableEntry, 'name'>;
-  export let target: Pick<TableEntry, 'name'>;
+  export let base: Pick<Table, 'name'>;
+  export let target: Pick<Table, 'name'>;
 </script>
 
 <FieldLayout>
@@ -46,6 +48,7 @@
   }
   legend {
     margin-bottom: 0.5rem;
+    font-weight: var(--font-weight-medium);
   }
   .options {
     display: grid;

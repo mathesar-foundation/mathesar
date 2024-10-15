@@ -1,4 +1,5 @@
 import { iconUiTypeUnknown } from '@mathesar/icons';
+
 import type { AbstractTypeConfiguration } from '../types';
 
 const fallbackType: AbstractTypeConfiguration = {

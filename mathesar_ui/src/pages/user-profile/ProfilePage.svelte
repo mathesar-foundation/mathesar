@@ -1,14 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
-  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+
   import InsetPageSection from '@mathesar/components/InsetPageSection.svelte';
-  import {
-    UserDetailsForm,
-    PasswordChangeForm,
-  } from '@mathesar/systems/users-and-permissions';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import InsetPageLayout from '@mathesar/layouts/InsetPageLayout.svelte';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { PasswordChangeForm, UserDetailsForm } from '@mathesar/systems/users';
 
   const userProfileStore = getUserProfileStoreFromContext();
 
@@ -42,7 +40,7 @@
         <PasswordChangeForm userId={userProfile.id} />
       </InsetPageSection>
 
-      {#if !userProfile.isSuperUser}
+      {#if !userProfile.isMathesarAdmin}
         <InsetPageSection>
           <h2 class="large-bold-header" slot="header">
             {$_('delete_account')}

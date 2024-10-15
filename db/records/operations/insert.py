@@ -5,6 +5,7 @@ import tempfile
 from psycopg2 import sql
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from psycopg2.errors import NotNullViolation, ForeignKeyViolation, DatatypeMismatch, UniqueViolation, ExclusionViolation
+from db import connection as db_conn
 from db.columns.exceptions import NotNullError, ForeignKeyError, TypeMismatchError, UniqueValueError, ExclusionError
 from db.columns.base import MathesarColumn
 from db.constants import ID, ID_ORIGINAL
@@ -13,6 +14,18 @@ from db.records.operations.select import get_record
 from sqlalchemy import select
 
 READ_SIZE = 20000
+
+
+def add_record_to_table(conn, record_def, table_oid, return_record_summaries=False):
+    """Add a record to a table."""
+    result = db_conn.exec_msar_func(
+        conn,
+        'add_record_to_table',
+        table_oid,
+        json.dumps(record_def),
+        return_record_summaries
+    ).fetchone()[0]
+    return result
 
 
 def insert_record_or_records(table, engine, record_data):

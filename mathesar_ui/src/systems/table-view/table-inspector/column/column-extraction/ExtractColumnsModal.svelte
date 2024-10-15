@@ -2,28 +2,28 @@
   import { tick } from 'svelte';
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
-  import { ControlledModal } from '@mathesar-component-library';
+
+  import { api } from '@mathesar/api/rpc';
   import {
-    comboValidator,
     Field,
     FormSubmit,
+    comboValidator,
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import SelectProcessedColumns from '@mathesar/components/SelectProcessedColumns.svelte';
   import { scrollBasedOnSelection } from '@mathesar/components/sheet';
   import TableName from '@mathesar/components/TableName.svelte';
   import {
-    getTabularDataStoreFromContext,
     type ProcessedColumn,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import {
     getTableFromStoreOrApi,
-    moveColumns,
-    splitTable,
-    tables as tablesDataStore,
+    currentTablesData as tablesDataStore,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -32,7 +32,8 @@
     getSuggestedFkColumnName,
   } from '@mathesar/utils/columnUtils';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { RichText } from '@mathesar/components/rich-text';
+  import { ControlledModal } from '@mathesar-component-library';
+
   import type { LinkedTable } from './columnExtractionTypes';
   import {
     getLinkedTables,
@@ -82,7 +83,7 @@
   $: linkedTables = getLinkedTables({
     constraints,
     columns: $processedColumns,
-    tables: $tablesDataStore.data,
+    tables: $tablesDataStore.tablesMap,
   });
   $: selectedColumnsHelpText = (() => {
     if ($targetType === 'existingTable') {
@@ -119,7 +120,10 @@
       // unmounting this component.
       return;
     }
-    selection.intersectSelectedRowsWithGivenColumns(_columns);
+    const columnIds = _columns.map((c) => String(c.id));
+    selection.updateWithoutFocus((s) =>
+      s.ofRowColumnIntersection(s.rowIds, columnIds),
+    );
   }
   $: handleColumnsChange($columns);
 
@@ -136,11 +140,18 @@
     const extractedColumnIds = extractedColumns.map((c) => c.id);
     try {
       if ($targetType === 'existingTable') {
-        const targetTableId = $linkedTable?.table.id;
+        const targetTableId = $linkedTable?.table.oid;
         if (!targetTableId) {
           throw new Error($_('no_target_table_selected'));
         }
-        await moveColumns($tabularData.id, extractedColumnIds, targetTableId);
+        await api.data_modeling
+          .move_columns({
+            database_id: currentTable.schema.database.id,
+            source_table_oid: currentTable.oid,
+            move_column_attnums: extractedColumnIds,
+            target_table_oid: targetTableId,
+          })
+          .run();
         const fkColumns = $linkedTable?.columns ?? [];
         let fkColumnId: number | undefined = undefined;
         if (fkColumns.length === 1) {
@@ -153,17 +164,25 @@
           ),
         );
       } else {
-        const response = await splitTable({
-          id: $tabularData.id,
-          idsOfColumnsToExtract: extractedColumnIds,
-          extractedTableName: newTableName,
-          newFkColumnName: $newFkColumnName,
-        });
-        followUps.push(getTableFromStoreOrApi(response.extracted_table));
+        const response = await api.data_modeling
+          .split_table({
+            database_id: currentTable.schema.database.id,
+            table_oid: currentTable.oid,
+            column_attnums: extractedColumnIds,
+            extracted_table_name: newTableName,
+            relationship_fk_column_name: $newFkColumnName,
+          })
+          .run();
+        followUps.push(
+          getTableFromStoreOrApi({
+            schema: currentTable.schema,
+            tableOid: response.extracted_table_oid,
+          }),
+        );
         followUps.push(
           $tabularData.refreshAfterColumnExtraction(
             extractedColumnIds,
-            response.fk_column,
+            response.new_fkey_attnum,
           ),
         );
       }
@@ -213,7 +232,7 @@
         // will need to modify this logic when we position the new column where
         // the old columns were.
         const newFkColumn = allColumns.slice(-1)[0];
-        selection.toggleColumnSelection(newFkColumn);
+        selection.update((s) => s.ofOneColumn(String(newFkColumn.id)));
         await tick();
         scrollBasedOnSelection();
       }
@@ -310,7 +329,7 @@
             {/if}
           </RichText>
         </p>
-        <Field field={newFkColumnName} label={$_('column_name')} />
+        <Field field={newFkColumnName} label={$_('name_of_link_column')} />
       {/if}
     </OutcomeBox>
   </FieldLayout>

@@ -1,51 +1,37 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
-  import { queries } from '@mathesar/stores/queries';
-  import {
-    tables as tablesStore,
-    importVerifiedTables as importVerifiedTablesStore,
-  } from '@mathesar/stores/tables';
-  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconSchema, iconEdit, iconManageAccess } from '@mathesar/icons';
-  import { modal } from '@mathesar/stores/modal';
-  import { Button, TabContainer, Icon } from '@mathesar-component-library';
+  import { iconEdit, iconSchema } from '@mathesar/icons';
+  import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Schema } from '@mathesar/models/Schema';
+  import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     getSchemaPageExplorationsSectionUrl,
     getSchemaPageTablesSectionUrl,
     getSchemaPageUrl,
   } from '@mathesar/routes/urls';
-  import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import { modal } from '@mathesar/stores/modal';
+  import { queries } from '@mathesar/stores/queries';
+  import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
+  import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import { logEvent } from '@mathesar/utils/telemetry';
-  import AddEditSchemaModal from '../database/AddEditSchemaModal.svelte';
-  import SchemaOverview from './SchemaOverview.svelte';
-  import SchemaTables from './SchemaTables.svelte';
-  import SchemaExplorations from './SchemaExplorations.svelte';
-  import TableSkeleton from './TableSkeleton.svelte';
+  import { Button, Icon, TabContainer } from '@mathesar-component-library';
+
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
-  import SchemaAccessControlModal from './SchemaAccessControlModal.svelte';
+  import SchemaExplorations from './SchemaExplorations.svelte';
+  import SchemaOverview from './SchemaOverview.svelte';
+  import SchemaPermissionsModal from './SchemaPermissionsModal.svelte';
+  import SchemaTables from './SchemaTables.svelte';
+  import TableSkeleton from './TableSkeleton.svelte';
 
   export let database: Database;
-  export let schema: SchemaEntry;
+  export let schema: Schema;
   export let section: string;
 
-  const userProfileStore = getUserProfileStoreFromContext();
-  $: userProfile = $userProfileStore;
-
-  $: canExecuteDDL =
-    userProfile?.hasPermission({ database, schema }, 'canExecuteDDL') ?? false;
-  $: canEditMetadata =
-    userProfile?.hasPermission({ database, schema }, 'canEditMetadata') ??
-    false;
-  $: canEditPermissions = userProfile?.hasPermission(
-    { database, schema },
-    'canEditPermissions',
-  );
-
   const addEditModal = modal.spawnModalController();
-  const accessControlModal = modal.spawnModalController();
+  const permissionsModal = modal.spawnModalController();
 
   // NOTE: This has to be same as the name key in the paths prop of Route component
   type TabsKey = 'overview' | 'tables' | 'explorations';
@@ -56,7 +42,7 @@
     href: string;
   };
 
-  $: tablesMap = canExecuteDDL ? $tablesStore.data : $importVerifiedTablesStore;
+  $: tablesMap = $tablesStore.tablesMap;
   $: explorationsMap = $queries.data;
   $: tablesRequestStatus = $tablesStore.requestStatus;
   $: explorationsRequestStatus = $queries.requestStatus;
@@ -65,19 +51,21 @@
     {
       label: $_('overview'),
       id: 'overview',
-      href: getSchemaPageUrl(database.id, schema.id),
+      href: getSchemaPageUrl(database.id, schema.oid),
     },
     {
       label: $_('tables'),
       id: 'tables',
+      showCount: tablesRequestStatus.state === 'success',
       count: tablesMap.size,
-      href: getSchemaPageTablesSectionUrl(database.id, schema.id),
+      href: getSchemaPageTablesSectionUrl(database.id, schema.oid),
     },
     {
       label: $_('explorations'),
       id: 'explorations',
+      showCount: explorationsRequestStatus.state === 'success',
       count: explorationsMap.size,
-      href: getSchemaPageExplorationsSectionUrl(database.id, schema.id),
+      href: getSchemaPageExplorationsSectionUrl(database.id, schema.oid),
     },
   ] as TabItem[];
 
@@ -87,55 +75,50 @@
     addEditModal.open();
   }
 
-  $: isDefault = schema.name === 'public';
-
-  function manageAccess() {
-    accessControlModal.open();
-  }
+  $: ({ name, description, tableCount, currentAccess } = schema);
+  $: ({ currentRoleOwns } = currentAccess);
 
   logEvent('opened_schema', {
-    database_name: database.nickname,
-    schema_name: schema.name,
+    database_name: database.name,
+    schema_name: $name,
     source: 'schema_page',
   });
 </script>
 
-<svelte:head><title>{makeSimplePageTitle(schema.name)}</title></svelte:head>
+<svelte:head><title>{makeSimplePageTitle($name)}</title></svelte:head>
 
 <LayoutWithHeader
   restrictWidth
   cssVariables={{
     '--max-layout-width': 'var(--max-layout-width-console-pages)',
+    '--layout-background-color': 'var(--sand-50)',
   }}
 >
   <AppSecondaryHeader
     slot="secondary-header"
-    theme="light"
     pageTitleAndMetaProps={{
-      name: schema.name,
-      type: 'schema',
+      name: $name,
       icon: iconSchema,
     }}
   >
     <div slot="action">
-      {#if !isDefault && canExecuteDDL}
-        <Button on:click={handleEditSchema} appearance="secondary">
-          <Icon {...iconEdit} />
-          <span>{$_('edit_schema')}</span>
-        </Button>
-      {/if}
-      {#if canEditPermissions}
-        <Button on:click={manageAccess} appearance="secondary">
-          <Icon {...iconManageAccess} />
-          <span>{$_('manage_access')}</span>
-        </Button>
-      {/if}
+      <Button
+        on:click={handleEditSchema}
+        appearance="secondary"
+        disabled={!$currentRoleOwns}
+      >
+        <Icon {...iconEdit} />
+        <span>{$_('edit_schema')}</span>
+      </Button>
+      <Button appearance="secondary" on:click={() => permissionsModal.open()}>
+        <span>{$_('schema_permissions')}</span>
+      </Button>
     </div>
 
     <svelte:fragment slot="bottom">
-      {#if schema.description}
+      {#if $description}
         <span class="description">
-          {schema.description}
+          {$description}
         </span>
       {/if}
     </svelte:fragment>
@@ -144,15 +127,13 @@
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div slot="tab" let:tab class="tab-header-container">
       <span>{tab.label}</span>
-      {#if tab.count !== undefined}
+      {#if tab.count !== undefined && tab.showCount}
         <span class="count">{tab.count}</span>
       {/if}
     </div>
     {#if activeTab?.id === 'overview'}
       <div class="tab-container">
         <SchemaOverview
-          {canExecuteDDL}
-          {canEditMetadata}
           {tablesRequestStatus}
           {tablesMap}
           {explorationsMap}
@@ -164,9 +145,9 @@
     {:else if activeTab?.id === 'tables'}
       <div class="tab-container">
         {#if tablesRequestStatus.state === 'processing'}
-          <TableSkeleton numTables={schema.num_tables} />
+          <TableSkeleton numTables={$tableCount} />
         {:else}
-          <SchemaTables {canExecuteDDL} {tablesMap} {database} {schema} />
+          <SchemaTables {tablesMap} {database} {schema} />
         {/if}
       </div>
     {:else if activeTab?.id === 'explorations'}
@@ -175,7 +156,6 @@
           <ExplorationSkeleton />
         {:else}
           <SchemaExplorations
-            {canEditMetadata}
             hasTablesToExplore={!!tablesMap.size}
             {explorationsMap}
             {database}
@@ -188,12 +168,12 @@
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={addEditModal} {database} {schema} />
-<SchemaAccessControlModal controller={accessControlModal} {database} {schema} />
+
+<SchemaPermissionsModal controller={permissionsModal} {schema} />
 
 <style lang="scss">
   .tab-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding: var(--size-xx-large) 0;
   }
 
   .tab-header-container {

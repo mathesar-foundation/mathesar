@@ -1,32 +1,34 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+
   import {
-    ensureReadable,
-    RadioGroup,
-    Spinner,
-  } from '@mathesar-component-library';
-  import type { TableEntry } from '@mathesar/api/types/tables';
-  import {
+    type FilledFormValues,
     FormSubmit,
     makeForm,
     requiredField,
     uniqueWith,
-    type FilledFormValues,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
+  import type { Table } from '@mathesar/models/Table';
+  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import {
-    getTabularDataStoreFromContext,
-    TableStructure,
     type ProcessedColumn,
+    TableStructure,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { importVerifiedTables } from '@mathesar/stores/tables';
   import { getAvailableName } from '@mathesar/utils/db';
+  import {
+    RadioGroup,
+    Spinner,
+    ensureReadable,
+  } from '@mathesar-component-library';
+
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
   export let onClose: (() => void) | undefined = undefined;
@@ -55,7 +57,7 @@
   );
 
   $: baseColumn = requiredField<ProcessedColumn | undefined>(undefined);
-  $: targetTable = requiredField<TableEntry | undefined>(undefined);
+  $: targetTable = requiredField<Table | undefined>(undefined);
   $: targetColumn = requiredField<ProcessedColumn | undefined>(undefined);
   $: namingStrategy = requiredField<NamingStrategy>('auto');
   $: constraintName = requiredField<string | undefined>(undefined, [
@@ -70,14 +72,15 @@
   });
 
   $: tables = [...$importVerifiedTables.values()];
-  $: baseTableName = $importVerifiedTables.get($tabularData.id)?.name ?? '';
+  $: baseTableName = $tabularData.table.name;
   $: ({ processedColumns } = $tabularData);
   $: baseTableColumns = [...$processedColumns.values()];
 
   $: targetTableStructure = $targetTable
     ? new TableStructure({
-        id: $targetTable.id,
-        abstractTypesMap: $currentDbAbstractTypes.data,
+        database: $targetTable.schema.database,
+        table: $targetTable,
+        abstractTypesMap,
       })
     : undefined;
   $: targetTableStructureIsLoading = ensureReadable(
@@ -102,10 +105,10 @@
   async function handleSave(values: FilledFormValues<typeof form>) {
     await constraintsDataStore.add({
       columns: [values.baseColumn.id],
-      type: 'foreignkey',
+      type: 'f',
       name: values.constraintName,
-      referent_table: values.targetTable.id,
-      referent_columns: [values.targetColumn.id],
+      fkey_relation_id: values.targetTable.oid,
+      fkey_columns: [values.targetColumn.id],
     });
     // Why reset before close when the form is automatically reset during
     // mount? Because without reset here, there's a weird UI state during the
@@ -117,8 +120,6 @@
 </script>
 
 <div class="add-new-fk-constraint">
-  <span class="title">{$_('new_foreign_key_constraint')}</span>
-
   <Field
     field={baseColumn}
     input={{
@@ -126,8 +127,12 @@
       props: { columns: baseTableColumns },
     }}
     layout="stacked"
-    label={$_('column_references_target_table')}
-  />
+    label={$_('referencing_column')}
+  >
+    <span slot="help">
+      {$_('column_references_target_table')}
+    </span>
+  </Field>
 
   <Field
     field={targetTable}
@@ -186,7 +191,7 @@
     onProceed={handleSave}
     onCancel={onClose}
     size="small"
-    proceedButton={{ label: $_('add') }}
+    proceedButton={{ label: $_('add_foreign_key_constraint') }}
   />
 </div>
 

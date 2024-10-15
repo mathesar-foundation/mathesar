@@ -1,12 +1,14 @@
 import { concat } from 'iter-tools';
+
+import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { getMostImportantRequestStatusState } from '@mathesar/api/rest/utils/requestUtils';
+import type { Column } from '@mathesar/api/rpc/columns';
 import {
   ImmutableMap,
   ImmutableSet,
   WritableMap,
 } from '@mathesar-component-library';
-import type { Column } from '@mathesar/api/types/tables/columns';
-import type { RequestStatus } from '@mathesar/api/utils/requestUtils';
-import { getMostImportantRequestStatusState } from '@mathesar/api/utils/requestUtils';
+
 import type { RowStatus } from './meta';
 import type { RecordRow } from './records';
 

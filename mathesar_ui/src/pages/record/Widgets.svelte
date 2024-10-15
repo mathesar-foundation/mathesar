@@ -1,33 +1,29 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { Help, isDefinedNonNullable } from '@mathesar-component-library';
+
   import type {
     JoinableTable,
     JoinableTablesResult,
-  } from '@mathesar/api/types/tables/joinable_tables';
+  } from '@mathesar/api/rpc/tables';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconRecord } from '@mathesar/icons';
-  import { tables } from '@mathesar/stores/tables';
+  import { currentTablesData } from '@mathesar/stores/tables';
+  import { Help, isDefinedNonNullable } from '@mathesar-component-library';
+
   import TableWidget from './TableWidget.svelte';
 
   export let recordPk: string;
   export let recordSummary: string;
   export let joinableTablesResult: JoinableTablesResult;
 
-  $: columnNameMap = new Map(
-    Object.entries(joinableTablesResult.columns).map(([columnId, column]) => [
-      parseInt(columnId, 10),
-      column.name,
-    ]),
-  );
-
   function buildWidgetInput(joinableTable: JoinableTable) {
-    const table = $tables.data.get(joinableTable.target);
+    const table = $currentTablesData.tablesMap.get(joinableTable.target);
     if (!table) return undefined;
-    const id = joinableTable.jp_path[0].slice(-1)[0];
-    const name = columnNameMap.get(id) ?? `(${$_('unknown_column')})`;
-    return { table, fkColumn: { id, name } };
+    const fkColumnId = joinableTable.join_path[0].slice(-1)[0][1];
+    const { name } =
+      joinableTablesResult.target_table_info[table.oid].columns[fkColumnId];
+    return { table, fkColumn: { id: fkColumnId, name } };
   }
 
   $: tableWidgetInputs = joinableTablesResult.joinable_tables
@@ -52,7 +48,7 @@
       </Help>
     </h2>
     <div class="widgets">
-      {#each tableWidgetInputs as { table, fkColumn } (`${table.id}-${fkColumn.id}`)}
+      {#each tableWidgetInputs as { table, fkColumn } (`${table.oid}-${fkColumn.id}`)}
         <section class="table-widget-positioner">
           <TableWidget {recordPk} {table} {fkColumn} />
         </section>
@@ -83,10 +79,6 @@
 
     :global(.sheet) {
       background: var(--white);
-    }
-
-    :global(.sheet [data-sheet-element='header']) {
-      background: var(--slate-100);
     }
   }
 
