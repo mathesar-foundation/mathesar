@@ -9,7 +9,6 @@ import django.db.models.deletion
 import django.db.models.manager
 import django.utils.timezone
 import mathesar.models.relation
-import mathesar.models.validators
 import mathesar.utils.models
 
 
@@ -116,10 +115,10 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=128)),
                 ('description', models.TextField(blank=True, null=True)),
-                ('initial_columns', models.JSONField(validators=[mathesar.models.validators.ListOfDictValidator(field_name='initial_columns'), mathesar.models.validators.InitialColumnsValidator(field_name='initial_columns')])),
-                ('transformations', models.JSONField(blank=True, null=True, validators=[mathesar.models.validators.ListOfDictValidator(field_name='transformations'), mathesar.models.validators.TransformationsValidator(field_name='transformations')])),
-                ('display_options', models.JSONField(blank=True, null=True, validators=[mathesar.models.validators.DictValidator(field_name='display_options')])),
-                ('display_names', models.JSONField(blank=True, null=True, validators=[mathesar.models.validators.DictValidator(field_name='display_names')])),
+                ('initial_columns', models.JSONField()),
+                ('transformations', models.JSONField(blank=True, null=True)),
+                ('display_options', models.JSONField(blank=True, null=True)),
+                ('display_names', models.JSONField(blank=True, null=True)),
                 ('base_table', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='queries', to='mathesar.table')),
             ],
             options={
