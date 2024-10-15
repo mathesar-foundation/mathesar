@@ -20,13 +20,15 @@
 
   export let role: Role;
   export let rolesMap: ImmutableMap<number, Role>;
-  export let modifyMembersForRole: (role: Role) => unknown;
+  export let onClickEditMembers: (role: Role) => void;
+  export let onDrop: (role: Role) => void;
 
   $: members = role.members;
 
   async function dropRole() {
     try {
-      await $routeContext.deleteRoleAndResetDependents(role);
+      await $routeContext.databaseRouteContext.deleteRole(role);
+      onDrop(role);
       toast.success($_('role_dropped_successfully'));
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -50,10 +52,7 @@
       {/each}
     </div>
     <div class="actions">
-      <Button
-        appearance="secondary"
-        on:click={() => modifyMembersForRole(role)}
-      >
+      <Button appearance="secondary" on:click={() => onClickEditMembers(role)}>
         <Icon {...iconEdit} size="0.8em" />
       </Button>
     </div>

@@ -23,8 +23,8 @@
   } from '@mathesar/stores/table-data';
   import {
     currentTables,
+    fetchTablesForCurrentSchema,
     importVerifiedTables as importVerifiedTablesStore,
-    refetchTablesForSchema,
     validateNewTableName,
   } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
@@ -161,7 +161,7 @@
 
   async function reFetchOtherThingsThatChanged() {
     if ($linkType === 'manyToMany') {
-      await refetchTablesForSchema(base.schema);
+      await fetchTablesForCurrentSchema();
       return;
     }
     const tableWithNewColumn = $linkType === 'oneToMany' ? target : base;

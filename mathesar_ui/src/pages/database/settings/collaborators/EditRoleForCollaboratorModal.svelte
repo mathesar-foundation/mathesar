@@ -23,6 +23,7 @@
   export let collaborator: Collaborator;
   export let configuredRolesMap: ImmutableMap<number, ConfiguredRole>;
   export let usersMap: ImmutableMap<number, User>;
+  export let onUpdateRole: (collaborator: Collaborator) => void;
 
   $: savedConfiguredRoleId = collaborator.configuredRoleId;
   $: configuredRoleId = requiredField<number>($savedConfiguredRoleId);
@@ -33,6 +34,7 @@
 
   async function updateRoleForCollaborator() {
     await collaborator.setConfiguredRole($configuredRoleId);
+    onUpdateRole(collaborator);
     controller.close();
     toast.success($_('collaborator_role_updated_successfully'));
   }

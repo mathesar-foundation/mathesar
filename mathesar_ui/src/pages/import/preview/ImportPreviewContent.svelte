@@ -227,7 +227,7 @@
           on:retry={init}
           on:delete={cancel}
         />
-      {:else if !$previewRequest.hasInitialized}
+      {:else if !$previewRequest.hasSettled}
         <div class="loading"><Spinner /></div>
       {:else if $previewRequest.error}
         <ErrorInfo

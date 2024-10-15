@@ -39,7 +39,7 @@
   $: ({ database, databaseRouteContext, configuredRoles, combinedLoginRoles } =
     $routeContext);
   $: ({ roles } = databaseRouteContext);
-  $: void AsyncRpcApiStore.runBatched([
+  $: void AsyncRpcApiStore.runBatchConservatively([
     configuredRoles.batchRunner({ server_id: database.server.id }),
     roles.batchRunner({ database_id: database.id }),
   ]);

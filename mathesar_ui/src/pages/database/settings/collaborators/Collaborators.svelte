@@ -10,6 +10,7 @@
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
+  import { fetchSchemasForCurrentDatabase } from '@mathesar/stores/schemas';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     Button,
@@ -30,13 +31,19 @@
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
 
-  $: ({ database, configuredRoles, collaborators, users } = $routeContext);
+  $: ({
+    database,
+    configuredRoles,
+    collaborators,
+    users,
+    databaseRouteContext,
+  } = $routeContext);
 
-  $: void AsyncRpcApiStore.runBatched([
+  $: void AsyncRpcApiStore.runBatchConservatively([
     collaborators.batchRunner({ database_id: database.id }),
     configuredRoles.batchRunner({ server_id: database.server.id }),
   ]);
-  $: void users.runIfNotInitialized();
+  $: void users.runConservatively();
   $: isLoading =
     $collaborators.isLoading || $configuredRoles.isLoading || $users.isLoading;
   $: isSuccess = $collaborators.isOk && $configuredRoles.isOk && $users.isOk;
@@ -51,6 +58,18 @@
   function editRoleForCollaborator(collaborator: Collaborator) {
     targetCollaborator = collaborator;
     editCollaboratorRoleModal.open();
+  }
+
+  function checkAndHandleSideEffects(collaborator: Collaborator) {
+    if (collaborator.userId === $userProfileStore.id) {
+      void AsyncRpcApiStore.runBatch([
+        databaseRouteContext.underlyingDatabase.batchRunner({
+          database_id: database.id,
+        }),
+        databaseRouteContext.roles.batchRunner({ database_id: database.id }),
+      ]);
+      void fetchSchemasForCurrentDatabase();
+    }
   }
 </script>
 
@@ -79,7 +98,11 @@
         <GridTableCell header>{$_('role')}</GridTableCell>
         <GridTableCell header>{$_('actions')}</GridTableCell>
         {#each [...($collaborators.resolvedValue?.values() ?? [])] as collaborator (collaborator.id)}
-          <CollaboratorRow {collaborator} {editRoleForCollaborator} />
+          <CollaboratorRow
+            {collaborator}
+            onClickEditRole={editRoleForCollaborator}
+            onDelete={checkAndHandleSideEffects}
+          />
         {/each}
       </GridTable>
     </div>
@@ -94,6 +117,7 @@
     usersMap={$users.resolvedValue}
     configuredRolesMap={$configuredRoles.resolvedValue}
     collaboratorsMap={$collaborators.resolvedValue}
+    onAdd={checkAndHandleSideEffects}
   />
 {/if}
 
@@ -103,6 +127,7 @@
     usersMap={$users.resolvedValue}
     controller={editCollaboratorRoleModal}
     configuredRolesMap={$configuredRoles.resolvedValue}
+    onUpdateRole={checkAndHandleSideEffects}
   />
 {/if}
 

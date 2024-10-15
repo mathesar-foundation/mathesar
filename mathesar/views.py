@@ -12,12 +12,10 @@ from mathesar.rpc.explorations import list_ as explorations_list
 from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
-from mathesar.api.serializers.databases import TypeSerializer
 from mathesar.api.serializers.tables import TableSerializer
 from mathesar.api.serializers.queries import QuerySerializer
 from mathesar.api.ui.serializers.users import UserSerializer
 from mathesar.api.utils import is_valid_uuid_v4
-from mathesar.database.types import UIType
 from mathesar.models.shares import SharedTable, SharedQuery
 from mathesar.state import reset_reflection
 from mathesar import __version__
@@ -45,19 +43,15 @@ def get_table_list(request, database_id, schema_oid):
         return []
 
 
-def get_queries_list(request, database_id, schema_id):
-    return explorations_list(request=request, database_id=database_id, schema_oid=schema_id)
-
-
-def get_ui_type_list(request, database_id):
-    if database_id is None:
+def get_queries_list(request, database_id, schema_oid):
+    if database_id is not None and schema_oid is not None:
+        return explorations_list(
+            request=request,
+            database_id=database_id,
+            schema_oid=schema_oid
+        )
+    else:
         return []
-    type_serializer = TypeSerializer(
-        UIType,
-        many=True,
-        context={'request': request}
-    )
-    return type_serializer.data
 
 
 def get_user_data(request):
@@ -84,7 +78,6 @@ def _get_internal_db_meta():
 
 def _get_base_data_all_routes(request, database_id=None, schema_id=None):
     return {
-        'abstract_types': get_ui_type_list(request, database_id),
         'current_database': int(database_id) if database_id else None,
         'current_schema': int(schema_id) if schema_id else None,
         'current_release_tag_name': __version__,
