@@ -135,16 +135,16 @@
     lightText={hasError || isProcessing}
   />
   <ContextMenu>
+    <MenuHeading>{$_('cell')}</MenuHeading>
+    <ButtonMenuItem
+      icon={iconSetToNull}
+      disabled={!canSetNull}
+      on:click={() => setValue(null)}
+    >
+      {$_('set_to')}
+      <Null />
+    </ButtonMenuItem>
     {#if showLinkedRecordHyperLink}
-      <MenuHeading>{$_('cell')}</MenuHeading>
-      <ButtonMenuItem
-        icon={iconSetToNull}
-        disabled={!canSetNull}
-        on:click={() => setValue(null)}
-      >
-        {$_('set_to')}
-        <Null />
-      </ButtonMenuItem>
       {#if showLinkedRecordHyperLink && linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
           <RichText text={$_('open_named_record')} let:slotName>
@@ -154,19 +154,17 @@
           </RichText>
         </LinkMenuItem>
       {/if}
-      <MenuDivider />
     {/if}
+    <MenuDivider />
 
     <!-- Column Attributes -->
     <MenuHeading>{$_('column')}</MenuHeading>
     <ColumnHeaderContextMenu {processedColumn} />
 
     <!-- Row -->
-    {#if showLinkedRecordHyperLink}
-      <MenuDivider />
-      <MenuHeading>{$_('row')}</MenuHeading>
-      <RowContextOptions recordPk={rowKey} {recordsData} {row} />
-    {/if}
+    <MenuDivider />
+    <MenuHeading>{$_('row')}</MenuHeading>
+    <RowContextOptions recordPk={rowKey} {recordsData} {row} />
   </ContextMenu>
   {#if errors.length}
     <CellErrors {errors} forceShowErrors={isActive} />
