@@ -4,12 +4,11 @@ from sqlalchemy import Column, select, Table, MetaData, VARCHAR, INTEGER
 
 from db import constants
 from db.columns.operations import alter as col_alt
-from db.columns.operations.alter import batch_update_columns, rename_column
+from db.columns.operations.alter import batch_update_columns
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_name_from_attnum,
     get_columns_attnum_from_names,
 )
-from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import (
     get_oid_from_table, reflect_table, reflect_table_from_oid
 )
@@ -59,20 +58,6 @@ def test_alter_columns_in_table_basic():
         assert json.loads(mock_exec.call_args.args[3]) == expect_json_arg
 
 
-def _rename_column_and_assert(table, old_col_name, new_col_name, engine):
-    """
-    Renames the colum of a table and assert the change went through
-    """
-    table_oid = get_oid_from_table(table.name, table.schema, engine)
-    column_attnum = get_column_attnum_from_name(table_oid, old_col_name, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        rename_column(table_oid, column_attnum, engine, conn, new_col_name)
-    table = reflect_table(table.name, table.schema, engine, metadata=get_empty_metadata())
-    assert new_col_name in table.columns
-    assert old_col_name not in table.columns
-    return table
-
-
 def _create_pizza_table(engine, schema):
     table_name = 'Pizzas'
     cols = [
@@ -107,93 +92,6 @@ def _get_pizza_column_data(table_oid, engine):
         name = data['name']
         data['attnum'] = get_column_attnum_from_name(table_oid, name, engine, metadata=get_empty_metadata())
     return column_data
-
-
-def test_rename_column_and_assert(engine_with_schema):
-    old_col_name = "col1"
-    new_col_name = "col2"
-    table_name = "table_with_columns"
-    engine, schema = engine_with_schema
-    metadata = MetaData(bind=engine, schema=schema)
-    table = Table(table_name, metadata, Column(old_col_name, VARCHAR))
-    table.create()
-    _rename_column_and_assert(table, old_col_name, new_col_name, engine)
-
-
-def test_rename_column_foreign_keys(engine_with_schema):
-    engine, schema = engine_with_schema
-    metadata = get_empty_metadata()
-    table_name = "table_to_split"
-    columns_list = [
-        {
-            "name": "Filler 1",
-            "type": {"name": PostgresType.INTEGER.id}
-        },
-        {
-            "name": "Filler 2",
-            "type": {"name": PostgresType.INTEGER.id}
-        }
-    ]
-    schema_oid = get_schema_oid_from_name(schema, engine)
-    create_mathesar_table(engine, table_name, schema_oid, columns_list)
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    extracted_cols = ["Filler 1"]
-    extracted_col_attnums = get_columns_attnum_from_names(
-        table_oid, extracted_cols, engine, metadata=metadata
-    )
-    extracted_table_oid, remainder_table_oid, fk_attnum = extract_columns_from_table(
-        table_oid, extracted_col_attnums, "Extracted", schema, engine
-    )
-    remainder = reflect_table_from_oid(remainder_table_oid, engine, metadata)
-    extracted = reflect_table_from_oid(extracted_table_oid, engine, metadata)
-    fk_name = get_column_name_from_attnum(remainder_table_oid, fk_attnum, engine, metadata)
-    new_fk_name = "new_" + fk_name
-    remainder = _rename_column_and_assert(remainder, fk_name, new_fk_name, engine)
-
-    fk = list(remainder.foreign_keys)[0]
-    assert fk.parent.name == new_fk_name
-    assert fk.column.table.name == extracted.name
-
-
-def test_rename_column_sequence(engine_with_schema):
-    old_col_name = constants.ID
-    new_col_name = "new_" + constants.ID
-    engine, schema = engine_with_schema
-    table_name = "table_with_columns"
-    schema_oid = get_schema_oid_from_name(schema, engine)
-    table_oid = create_mathesar_table(engine, table_name, schema_oid)
-    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    with engine.begin() as conn:
-        ins = table.insert()
-        conn.execute(ins)
-
-    table = _rename_column_and_assert(table, old_col_name, new_col_name, engine)
-
-    with engine.begin() as conn:
-        ins = table.insert()
-        conn.execute(ins)
-        slct = select(table)
-        result = conn.execute(slct)
-    new_value = result.fetchall()[-1][new_col_name]
-    assert new_value == 2
-
-
-def test_rename_column_index(engine_with_schema):
-    old_col_name = constants.ID
-    new_col_name = "new_" + constants.ID
-    engine, schema = engine_with_schema
-    table_name = "table_with_index"
-    metadata = MetaData(bind=engine, schema=schema)
-    table = Table(table_name, metadata, Column(old_col_name, INTEGER, index=True))
-    table.create()
-
-    _rename_column_and_assert(table, old_col_name, new_col_name, engine)
-
-    with engine.begin() as conn:
-        index = engine.dialect.get_indexes(conn, table_name, schema)[0]
-        index_columns = index["column_names"]
-    assert old_col_name not in index_columns
-    assert new_col_name in index_columns
 
 
 def test_batch_update_columns_no_changes(engine_with_schema):

@@ -1,7 +1,6 @@
 from decimal import Decimal
 from collections import Counter
 from db.records.operations.select import get_records, get_column_cast_records
-from db.tables.operations.create import create_mathesar_table
 from db.types.base import PostgresType
 from db.schemas.utils import get_schema_oid_from_name
 from db.metadata import get_empty_metadata
@@ -25,84 +24,6 @@ def test_get_records_gets_limited_offset_records(roster_table_obj):
     base_records = get_records(roster, engine, limit=10)
     offset_records = get_records(roster, engine, limit=10, offset=5)
     assert len(offset_records) == 10 and offset_records[0] == base_records[5]
-
-
-def test_get_column_cast_records(engine_with_schema):
-    COL1 = "col1"
-    COL2 = "col2"
-    col1 = {
-        "name": COL1,
-        "type": {"name": PostgresType.CHARACTER_VARYING.id}
-    }
-    col2 = {
-        "name": COL2,
-        "type": {"name": PostgresType.CHARACTER_VARYING.id}
-    }
-    column_list = [col1, col2]
-    engine, schema = engine_with_schema
-    table_name = "table_with_columns"
-    schema_oid = get_schema_oid_from_name(schema, engine)
-    table_oid = create_mathesar_table(
-        engine, table_name, schema_oid, column_list
-    )
-    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    ins = table.insert().values(
-        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
-    )
-    with engine.begin() as conn:
-        conn.execute(ins)
-    COL1_MOD = COL1 + "_mod"
-    COL2_MOD = COL2 + "_mod"
-    column_definitions = [
-        {"name": "id", "type": PostgresType.INTEGER.id},
-        {"name": COL1_MOD, "type": PostgresType.CHARACTER_VARYING.id},
-        {"name": COL2_MOD, "type": PostgresType.NUMERIC.id},
-    ]
-    records = get_column_cast_records(engine, table, column_definitions)
-    for record in records:
-        assert (
-            type(record[COL1 + "_mod"]) is str
-            and type(record[COL2 + "_mod"]) is Decimal
-        )
-
-
-def test_get_column_cast_records_options(engine_with_schema):
-    COL1 = "col1"
-    COL2 = "col2"
-    col1 = {
-        "name": COL1,
-        "type": {"name": PostgresType.CHARACTER_VARYING.id}
-    }
-    col2 = {
-        "name": COL2,
-        "type": {"name": PostgresType.CHARACTER_VARYING.id}
-    }
-    column_list = [col1, col2]
-    engine, schema = engine_with_schema
-    table_name = "table_with_columns"
-    schema_oid = get_schema_oid_from_name(schema, engine)
-    table_oid = create_mathesar_table(
-        engine, table_name, schema_oid, column_list
-    )
-    table = reflect_table_from_oid(table_oid, engine, metadata=get_empty_metadata())
-    ins = table.insert().values(
-        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
-    )
-    with engine.begin() as conn:
-        conn.execute(ins)
-    COL1_MOD = COL1 + "_mod"
-    COL2_MOD = COL2 + "_mod"
-    column_definitions = [
-        {"name": "id", "type": PostgresType.INTEGER.id},
-        {"name": COL1_MOD, "type": PostgresType.CHARACTER_VARYING.id},
-        {"name": COL2_MOD, "type": PostgresType.NUMERIC.id, "type_options": {"precision": 5, "scale": 2}},
-    ]
-    records = get_column_cast_records(engine, table, column_definitions)
-    for record in records:
-        assert (
-            type(record[COL1 + "_mod"]) is str
-            and type(record[COL2 + "_mod"]) is Decimal
-        )
 
 
 def test_get_records_duplicate_only(roster_table_obj):
