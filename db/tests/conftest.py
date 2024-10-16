@@ -7,7 +7,6 @@ from db import constants
 from db.columns.operations.select import (
     get_columns_attnum_from_names, get_column_attnum_from_name
 )
-from db.tables.operations.split import extract_columns_from_table
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import MathesarCustomType
 from db.columns.operations.alter import alter_column_type
@@ -185,24 +184,6 @@ def books_import_from_table_name():
 @pytest.fixture(scope='session')
 def books_import_target_table_name():
     return "books_target"
-
-
-@pytest.fixture
-def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_extracted_cols, teachers_table_name):
-    engine, schema = engine_with_roster
-    roster_table_oid = get_oid_from_table(roster_table_name, schema, engine)
-    roster_extracted_col_attnums = get_columns_attnum_from_names(roster_table_oid, roster_extracted_cols, engine, metadata=get_empty_metadata())
-    extract_columns_from_table(
-        roster_table_oid,
-        roster_extracted_col_attnums,
-        teachers_table_name,
-        schema,
-        engine,
-    )
-    metadata = get_empty_metadata()
-    extracted = Table(teachers_table_name, metadata, schema=schema, autoload_with=engine)
-    remainder = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
-    return extracted, remainder, engine, schema
 
 
 @pytest.fixture
