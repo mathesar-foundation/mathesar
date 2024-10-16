@@ -8,7 +8,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.db.models.manager
 import django.utils.timezone
-import mathesar.utils.models
 
 
 class Migration(migrations.Migration):
@@ -162,7 +161,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('file', models.FileField(upload_to=mathesar.utils.models.user_directory_path)),
+                ('file', models.FileField()),
                 ('created_from', models.CharField(choices=[('FILE', 'File'), ('PASTE', 'Paste'), ('URL', 'Url')], max_length=128)),
                 ('base_name', models.CharField(max_length=100)),
                 ('header', models.BooleanField(default=True)),
