@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from db.functions.operations.apply import apply_db_function_by_id, apply_db_function_spec_as_filter
 from db.functions.packed import DistinctArrayAgg
-from db.records.operations import group, relevance, sort as rec_sort
+from db.records.operations import group, sort as rec_sort
 
 
 class UniqueConstraintMapping:
@@ -175,26 +175,6 @@ class DuplicateOnly(Transform):
             select(duplicate_flag_cte)
             .where(duplicate_flag_cte.c[DUPLICATE_LABEL])
         )
-        return _to_non_executable(executable)
-
-
-class Search(Transform):
-    type = "search"
-    spec = []
-
-    @property
-    def search_spec(self):
-        return self.spec[0]
-
-    @property
-    def limit_spec(self):
-        return self.spec[1]
-
-    def apply_to_relation(self, relation):
-        search = self.search_spec
-        limit = self.limit_spec
-        search_params = {search_obj['column']: search_obj['literal'] for search_obj in search}
-        executable = relevance.get_rank_and_filter_rows_query(relation, search_params, limit)
         return _to_non_executable(executable)
 
 
