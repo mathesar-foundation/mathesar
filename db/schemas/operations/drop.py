@@ -1,6 +1,7 @@
 from db.connection import execute_msar_func_with_engine, exec_msar_func
 
 
+# TODO Remove (only used in testing)
 def drop_schema_via_name(engine, name, cascade=False):
     """
     Drop a schema by its name.

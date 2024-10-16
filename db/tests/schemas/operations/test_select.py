@@ -1,5 +1,5 @@
 import warnings
-from sqlalchemy import select, Table, MetaData, text
+from sqlalchemy import select, Table, MetaData
 
 from db.constants import TYPES_SCHEMA
 from db.schemas.operations import select as ssel
@@ -41,14 +41,3 @@ def test_get_mathesar_schemas_with_oids_gets_correct_oid(engine_with_schema):
     actual_schemata = ssel.get_mathesar_schemas_with_oids(engine)
     actual_oid = [oid for schm, oid in actual_schemata if schm == schema][0]
     assert actual_oid == expect_oid
-
-
-def test_get_schema_description(engine_with_schema):
-    engine, schema = engine_with_schema
-    schema_oid = ssel.reflect_schema(engine, name=schema)['oid']
-    expect_description = 'test schema description'
-    with engine.begin() as conn:
-        conn.execute(text(f'''COMMENT ON SCHEMA "{schema}" IS '{expect_description}';'''))
-    actual_description = ssel.get_schema_description(schema_oid, engine)
-
-    assert actual_description == expect_description
