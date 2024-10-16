@@ -1,8 +1,4 @@
-from db.connection import execute_msar_func_with_engine, exec_msar_func
-
-
-def drop_table(name, schema, engine, cascade=False, if_exists=False):
-    execute_msar_func_with_engine(engine, 'drop_table', schema, name, cascade, if_exists)
+from db.connection import exec_msar_func
 
 
 def drop_table_from_database(table_oid, conn, cascade=False):
