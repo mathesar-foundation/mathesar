@@ -2,14 +2,8 @@ from io import TextIOWrapper
 
 import clevercsv as csv
 
-from db.tables.operations.alter import update_pk_sequence_to_latest
-from db.records.operations.insert import insert_records_from_csv
-from db.tables.operations.create import create_string_column_table
-from db.tables.operations.drop import drop_table
 from mathesar.errors import InvalidTableError
-from mathesar.imports.utils import get_alternate_column_names, process_column_names
 from db.constants import COLUMN_NAME_TEMPLATE
-from psycopg2.errors import IntegrityError, DataError
 
 # The user-facing documentation replicates these delimiter characters. If you
 # change this variable, please update the documentation as well.

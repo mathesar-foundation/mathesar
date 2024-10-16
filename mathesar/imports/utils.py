@@ -1,5 +1,5 @@
 from db.identifiers import truncate_if_necessary
-from db.constants import COLUMN_NAME_TEMPLATE, ID, ID_ORIGINAL
+from db.constants import COLUMN_NAME_TEMPLATE
 
 
 def process_column_names(column_names):
@@ -19,10 +19,3 @@ def process_column_names(column_names):
         in enumerate(column_names)
     )
     return list(column_names)
-
-
-def get_alternate_column_names(column_names):
-    return [
-        fieldname if fieldname != ID else ID_ORIGINAL
-        for fieldname in column_names
-    ]

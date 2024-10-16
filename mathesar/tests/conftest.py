@@ -5,20 +5,12 @@ import pytest
 import responses
 from copy import deepcopy
 
-from django.core.files import File
-from django.core.cache import cache
 from django.conf import settings
-from django.db import connection as dj_connection
 from rest_framework.test import APIClient
 
-from db.tables.operations.create import create_mathesar_table as actual_create_mathesar_table
-from db.schemas.utils import get_schema_oid_from_name
-
-import mathesar.tests.conftest
-from mathesar.models.base import DataFile
 from mathesar.models.users import User
 
-from fixtures.utils import create_scoped_fixtures, get_fixture_value
+from fixtures.utils import create_scoped_fixtures
 
 
 @pytest.fixture

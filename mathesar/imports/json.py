@@ -1,16 +1,9 @@
 import json
 from json.decoder import JSONDecodeError
 
-from db.tables.operations.alter import update_pk_sequence_to_latest
-from db.records.operations.insert import insert_records_from_json
-from db.tables.operations.create import create_string_column_table
-from db.tables.operations.drop import drop_table
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions
 )
-from mathesar.imports.utils import get_alternate_column_names, process_column_names
-from psycopg2.errors import IntegrityError, DataError
-from sqlalchemy.exc import IntegrityError as sqlalchemy_integrity_error
 
 
 def is_valid_json(data):
