@@ -8,7 +8,8 @@ from db.columns.operations.alter import _transform_column_alter_dict
 from db.tables.operations.create import prepare_table_for_import
 from db.encoding_utils import get_sql_compatible_encoding
 from mathesar.models.base import DataFile
-from mathesar.imports.csv import get_file_encoding, get_sv_reader, process_column_names
+from mathesar.imports.csv import get_file_encoding, get_sv_reader
+from mathesar.imports.utils import process_column_names
 
 
 def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
