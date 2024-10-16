@@ -2,7 +2,6 @@ import json
 from json.decoder import JSONDecodeError
 
 from db.tables.operations.alter import update_pk_sequence_to_latest
-from mathesar.database.base import create_mathesar_engine
 from db.records.operations.insert import insert_records_from_json
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.drop import drop_table
@@ -60,40 +59,3 @@ def get_column_names_from_json(data_file, max_level):
         return all_keys
     else:
         return get_flattened_keys(data, max_level)
-
-
-def insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level):
-    table = create_string_column_table(
-        name=name,
-        schema_oid=schema.oid,
-        column_names=column_names,
-        engine=engine,
-        comment=comment,
-    )
-    insert_records_from_json(
-        table,
-        engine,
-        json_filepath,
-        column_names,
-        max_level
-    )
-    return table
-
-
-def create_db_table_from_json_data_file(data_file, name, schema, comment=None):
-    db_model = schema.database
-    engine = create_mathesar_engine(db_model)
-    json_filepath = data_file.file.path
-    max_level = data_file.max_level
-    column_names = process_column_names(
-        get_column_names_from_json(json_filepath, max_level)
-    )
-    try:
-        table = insert_records_from_json_data_file(name, schema, column_names, engine, comment, json_filepath, max_level)
-        update_pk_sequence_to_latest(engine, table)
-    except (IntegrityError, DataError, sqlalchemy_integrity_error):
-        drop_table(name=name, schema=schema.name, engine=engine)
-        column_names_alt = get_alternate_column_names(column_names)
-        table = insert_records_from_json_data_file(name, schema, column_names_alt, engine, comment, json_filepath, max_level)
-
-    return table
