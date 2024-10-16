@@ -8,6 +8,7 @@ from db.columns.defaults import NAME, NULLABLE, DESCRIPTION
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 
 
+# TODO Remove; only used in testing
 def alter_column(engine, table_oid, column_attnum, column_data, connection=None):
     """
     Alter a column of the a table.
@@ -67,6 +68,7 @@ def alter_column(engine, table_oid, column_attnum, column_data, connection=None)
         )
 
 
+# TODO Remove; only used in testing
 def alter_column_type(
     table_oid, column_attnum, engine, connection, target_type, type_options=None
 ):
@@ -88,96 +90,6 @@ def alter_column_type(
         {"type": target_type.id, "type_options": type_options},
         connection=connection
     )
-
-
-# TODO remove once table splitting logic is moved to SQL.
-def rename_column(table_oid, column_attnum, engine, connection, new_name):
-    """
-    Rename a single column.
-
-    Args:
-        table_oid: integer giving the OID of the table with the column.
-        column_attnum: integer giving the attnum of the column.
-        engine: SQLAlchemy engine defining the connection string for the DB.
-        connection: psycopg2 connection object.
-        new_name: string giving the new name for the column.
-    """
-    alter_column(
-        engine,
-        table_oid,
-        column_attnum,
-        {"name": new_name},
-        connection=connection
-    )
-
-
-def _validate_columns_for_batch_update(column_data):
-    ALLOWED_KEYS = ['attnum', 'name', 'type', 'type_options', 'delete']
-    for single_column_data in column_data:
-        if 'attnum' not in single_column_data.keys():
-            raise ValueError('Key "attnum" is required')
-        for key in single_column_data.keys():
-            if key not in ALLOWED_KEYS:
-                allowed_key_list = ', '.join(ALLOWED_KEYS)
-                raise ValueError(f'Key "{key}" found in columns. Keys allowed are: {allowed_key_list}')
-
-
-def batch_alter_table_drop_columns(table_oid, column_data_list, connection, engine):
-    """
-    Drop the given columns from the given table.
-
-    Args:
-        table_oid: OID of the table whose columns we'll drop.
-        column_data_list: List of dictionaries describing columns to alter.
-        connection: the connection (if any) to use with the database.
-        engine: the SQLAlchemy engine to use with the database.
-
-    Returns:
-        A string of the command that was executed.
-    """
-    columns_to_drop = [
-        int(col['attnum']) for col in column_data_list
-        if col.get('attnum') is not None and col.get('delete') is not None
-    ]
-
-    if connection is not None and columns_to_drop:
-        return db_conn.execute_msar_func_with_psycopg2_conn(
-            connection, 'drop_columns', int(table_oid), *columns_to_drop
-        )
-    elif columns_to_drop:
-        return db_conn.execute_msar_func_with_engine(
-            engine, 'drop_columns', int(table_oid), *columns_to_drop
-        )
-
-
-def batch_update_columns(table_oid, engine, column_data_list):
-    """
-    Alter the given columns of the table.
-
-    For details on the column_data_list format, see _process_column_alter_dict_dep.
-
-    Args:
-        table_oid: the OID of the table whose columns we'll alter.
-        engine: The SQLAlchemy engine to use with the database.
-        column_data_list: A list of dictionaries describing alterations.
-    """
-    _validate_columns_for_batch_update(column_data_list)
-    try:
-        db_conn.execute_msar_func_with_engine(
-            engine, 'alter_columns',
-            table_oid,
-            json.dumps(
-                [_process_column_alter_dict_dep(column) for column in column_data_list]
-            )
-        )
-    except InvalidParameterValue:
-        raise InvalidTypeOptionError
-    except InvalidTextRepresentation:
-        raise InvalidTypeError(None, None)
-    except RaiseException:
-        raise InvalidTypeError(None, None)
-    except SyntaxError:
-        raise InvalidTypeOptionError
 
 
 def alter_columns_in_table(table_oid, column_data_list, conn):
