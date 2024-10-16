@@ -1,15 +1,4 @@
-from time import time
-
-from sqlalchemy import select
-
-from db import constants
-from db.columns.base import MathesarColumn
 from db.connection import exec_msar_func
-from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
-from db.tables.operations.create import CreateTableAs
-from db.tables.operations.select import reflect_table
-from db.types.operations.convert import get_db_type_enum_from_class
-from db.metadata import get_empty_metadata
 
 
 def infer_table_column_data_types(conn, table_oid):

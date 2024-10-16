@@ -1,23 +1,17 @@
 import json
 from unittest.mock import patch
-from sqlalchemy import Column, select, Table, MetaData, VARCHAR, INTEGER
+from sqlalchemy import Column, VARCHAR
 
-from db import constants
 from db.columns.operations import alter as col_alt
 from db.columns.operations.alter import batch_update_columns
-from db.columns.operations.select import (
-    get_column_attnum_from_name, get_column_name_from_attnum,
-    get_columns_attnum_from_names,
-)
+from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import (
-    get_oid_from_table, reflect_table, reflect_table_from_oid
+    get_oid_from_table, reflect_table
 )
-from db.tables.operations.split import extract_columns_from_table
 from db.tests.columns.utils import create_test_table
 from db.types.base import PostgresType
 from db.types.operations.convert import get_db_type_enum_from_class
 from db.metadata import get_empty_metadata
-from db.schemas.utils import get_schema_oid_from_name
 
 
 def test_alter_columns_in_table_basic():
