@@ -4,13 +4,10 @@ import pytest
 from sqlalchemy import MetaData, text, Table
 
 from db import constants
-from db.columns.operations.select import (
-    get_columns_attnum_from_names, get_column_attnum_from_name
-)
+from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
 from db.types.base import MathesarCustomType
 from db.columns.operations.alter import alter_column_type
-from db.metadata import get_empty_metadata
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
