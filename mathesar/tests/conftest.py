@@ -37,14 +37,6 @@ def enable_db_access_for_all_tests(db):
     pass
 
 
-@pytest.fixture(scope="session")
-def django_db_modify_db_settings(
-        ignore_all_dbs_except_default,  # noqa: F841
-        django_db_modify_db_settings,   # noqa: F841
-):
-    return
-
-
 @pytest.fixture(scope="session", autouse=True)
 def ignore_all_dbs_except_default(SES_dj_databases):
     """
@@ -54,31 +46,6 @@ def ignore_all_dbs_except_default(SES_dj_databases):
     for entry_name in set(SES_dj_databases.keys()):
         if entry_name != entry_name_to_keep:
             del SES_dj_databases[entry_name]
-
-
-def add_db_to_dj_settings(request):
-    """
-    If the Django layer should be aware of a db, it should be added to settings.DATABASES dict.
-    """
-    dj_databases = get_fixture_value(request, mathesar.tests.conftest.dj_databases)
-    added_dbs = set()
-
-    def _add(db_name):
-        reference_entry = dj_connection.settings_dict
-        dj_databases[db_name] = reference_entry
-        dj_databases[db_name]['NAME'] = db_name
-        cache.clear()
-        added_dbs.add(db_name)
-        return db_name
-    yield _add
-
-
-# defines:
-# FUN_add_db_to_dj_settings
-# CLA_add_db_to_dj_settings
-# MOD_add_db_to_dj_settings
-# SES_add_db_to_dj_settings
-create_scoped_fixtures(globals(), add_db_to_dj_settings)
 
 
 def dj_databases():
@@ -120,11 +87,6 @@ def paste_filename():
 
 
 @pytest.fixture(scope='session')
-def headerless_patents_csv_filepath():
-    return 'mathesar/tests/data/headerless_patents.csv'
-
-
-@pytest.fixture(scope='session')
 def patents_url():
     return 'https://thisisafakeurl.com'
 
@@ -135,74 +97,8 @@ def patents_url_filename():
 
 
 @pytest.fixture(scope='session')
-def col_names_with_spaces_csv_filepath():
-    return 'mathesar/tests/data/col_names_with_spaces.csv'
-
-
-@pytest.fixture(scope='session')
-def col_headers_empty_csv_filepath():
-    return 'mathesar/tests/data/col_headers_empty.csv'
-
-
-@pytest.fixture(scope='session')
 def non_unicode_csv_filepath():
     return 'mathesar/tests/data/non_unicode_files/utf_16_le.csv'
-
-
-@pytest.fixture(scope='session')
-def duplicate_id_table_csv_filepath():
-    return 'mathesar/tests/data/csv_parsing/duplicate_id_table.csv'
-
-
-@pytest.fixture(scope='session')
-def null_id_table_csv_filepath():
-    return 'mathesar/tests/data/csv_parsing/null_id_table.csv'
-
-
-@pytest.fixture(scope='session')
-def duplicate_id_table_json_filepath():
-    return 'mathesar/tests/data/json_parsing/duplicate_id_table.json'
-
-
-@pytest.fixture(scope='session')
-def null_id_table_json_filepath():
-    return 'mathesar/tests/data/json_parsing/null_id_table.json'
-
-
-@pytest.fixture(scope='session')
-def duplicate_id_table_excel_filepath():
-    return 'mathesar/tests/data/excel_parsing/duplicate_id_table.xlsx'
-
-
-@pytest.fixture(scope='session')
-def null_id_table_excel_filepath():
-    return 'mathesar/tests/data/excel_parsing/null_id_table.xlsx'
-
-
-@pytest.fixture(scope='session')
-def multiple_sheets_excel_filepath():
-    return 'mathesar/tests/data/excel_parsing/multiple_sheets.xlsx'
-
-
-# TODO rename to create_mathesar_db_table
-@pytest.fixture
-def create_mathesar_table(create_db_schema):
-    def _create_mathesar_table(
-        table_name, schema_name, columns, engine, metadata=None,
-    ):
-        # We use a fixture for schema creation, so that it gets cleaned up.
-        create_db_schema(schema_name, engine, schema_mustnt_exist=False)
-        schema_oid = get_schema_oid_from_name(schema_name, engine)
-        return actual_create_mathesar_table(
-            engine=engine, table_name=table_name, schema_oid=schema_oid, columns=columns,
-        )
-    yield _create_mathesar_table
-
-
-def _get_datafile_for_path(path):
-    with open(path, 'rb') as file:
-        datafile = DataFile.objects.create(file=File(file), type='csv')
-        return datafile
 
 
 @pytest.fixture
@@ -258,45 +154,3 @@ def client_alice(user_alice):
     client = APIClient()
     client.login(username=user_alice.username, password='password')
     return client
-
-
-@pytest.fixture
-def user_jerry():
-    user = User.objects.create(
-        username='jerry',
-        email='jerry@example.com',
-        full_name='JerrySmith',
-        short_name='Jerry'
-    )
-    user.set_password('password')
-    user.save()
-    yield user
-    user.delete()
-
-
-@pytest.fixture
-def user_turdy():
-    user = User.objects.create(
-        username='turdy',
-        email='turdy@example.com',
-        full_name='Turdy',
-        short_name='Turdy'
-    )
-    user.set_password('password')
-    user.save()
-    yield user
-    user.delete()
-
-
-@pytest.fixture
-def user_tom():
-    user = User.objects.create(
-        username='tom',
-        email='tom@example.com',
-        full_name='Tom James',
-        short_name='Tom'
-    )
-    user.set_password('password')
-    user.save()
-    yield user
-    user.delete()
