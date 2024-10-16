@@ -1,23 +1,4 @@
-from db.connection import execute_msar_func_with_engine, exec_msar_func
-
-
-# TODO Remove (only used in testing)
-def drop_schema_via_name(engine, name, cascade=False):
-    """
-    Drop a schema by its name.
-
-    If no schema exists with the given name, an exception will be raised.
-
-    Deprecated:
-        Use drop_schema_via_oid instead. This function is deprecated because we
-        are phasing out name-based operations in favor of OID-based operations
-        and we are phasing out SQLAlchemy in favor of psycopg.
-
-    Args:
-        engine: SQLAlchemy engine object for connecting. name: Name of the
-        schema to drop. cascade: Whether to drop the dependent objects.
-    """
-    execute_msar_func_with_engine(engine, 'drop_schema', name, cascade).fetchone()
+from db.connection import exec_msar_func
 
 
 def drop_schema_via_oid(conn, id, cascade=False):

@@ -7,15 +7,15 @@ import psycopg
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
 from django.db import connection as dj_connection
 
-from sqlalchemy import MetaData, text, Table
+from sqlalchemy import MetaData, text, Table, select, or_
 from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
+from db.connection import execute_msar_func_with_engine
 from db.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
 from db.sql import install as sql_install
-from db.schemas.operations.drop import drop_schema_via_name as drop_sa_schema
-from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
-from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
+from db.utils import get_pg_catalog_table
+from db.metadata import get_empty_metadata
 
 from fixtures.utils import create_scoped_fixtures
 
@@ -210,8 +210,8 @@ def create_db_schema(SES_engine_cache):
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
         logger.debug(f'creating {schema_name}')
-        create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
-        schema_oid = get_schema_oid_from_name(schema_name, engine)
+        _create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
+        schema_oid = _get_schema_oid_from_name(schema_name, engine)
         db_name = engine.url.database
         created_schemas_in_this_engine = created_schemas.setdefault(db_name, {})
         created_schemas_in_this_engine[schema_name] = schema_oid
@@ -223,13 +223,53 @@ def create_db_schema(SES_engine_cache):
         try:
             for _, schema_oid in created_schemas_in_this_engine.items():
                 # Handle schemas being renamed during test
-                schema_name = get_schema_name_from_oid(schema_oid, engine)
+                schema_name = _get_schema_name_from_oid(schema_oid, engine)
                 if schema_name:
-                    drop_sa_schema(engine, schema_name, cascade=True)
+                    _drop_schema_via_name(engine, schema_name, cascade=True)
                     logger.debug(f'dropping {schema_name}')
         except OperationalError as e:
             logger.debug(f'ignoring operational error: {e}')
     logger.debug('exit')
+
+
+def _create_schema_if_not_exists_via_sql_alchemy(schema_name, engine):
+    return execute_msar_func_with_engine(
+        engine, 'create_schema_if_not_exists', schema_name
+    ).fetchone()[0]
+
+
+def _get_schema_name_from_oid(oid, engine, metadata=None):
+    schema_info = _reflect_schema(engine, oid=oid, metadata=metadata)
+    if schema_info:
+        return schema_info["name"]
+
+
+def _get_schema_oid_from_name(name, engine):
+    schema_info = _reflect_schema(engine, name=name)
+    if schema_info:
+        return schema_info["oid"]
+
+
+def _reflect_schema(engine, name=None, oid=None, metadata=None):
+    # If we have both arguments, the behavior is undefined.
+    try:
+        assert name is None or oid is None
+    except AssertionError as e:
+        raise e
+    # TODO reuse metadata
+    metadata = metadata if metadata else get_empty_metadata()
+    pg_namespace = get_pg_catalog_table("pg_namespace", engine, metadata=metadata)
+    sel = (
+        select(pg_namespace.c.oid, pg_namespace.c.nspname.label("name"))
+        .where(or_(pg_namespace.c.nspname == name, pg_namespace.c.oid == oid))
+    )
+    with engine.begin() as conn:
+        schema_info = conn.execute(sel).fetchone()
+    return schema_info
+
+
+def _drop_schema_via_name(engine, name, cascade=False):
+    execute_msar_func_with_engine(engine, 'drop_schema', name, cascade).fetchone()
 
 
 # Seems to be roughly equivalent to mathesar/database/base.py::create_mathesar_engine
