@@ -1,9 +1,7 @@
 from sqlalchemy import Column, ForeignKey, inspect
 
 from db.columns.defaults import TYPE, PRIMARY_KEY, NULLABLE, DEFAULT_COLUMNS
-from db.columns.operations.select import (
-    get_column_attnum_from_name, get_column_default, get_column_default_dict,
-)
+from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
 from db.types.operations.convert import get_db_type_enum_from_class
@@ -193,31 +191,6 @@ class MathesarColumn(Column):
             return get_column_attnum_from_name(
                 self.table_oid,
                 self.name,
-                self.engine,
-                metadata=metadata,
-            )
-
-    @property
-    def column_default_dict(self):
-        if self.table_ is None:
-            return
-        metadata = self.table_.metadata
-        default_dict = get_column_default_dict(
-            self.table_oid, self.column_attnum, self.engine, metadata=metadata,
-        )
-        if default_dict:
-            return {
-                'is_dynamic': default_dict['is_dynamic'],
-                'value': default_dict['value']
-            }
-
-    @property
-    def default_value(self):
-        if self.table_ is not None:
-            metadata = self.table_.metadata
-            return get_column_default(
-                self.table_oid,
-                self.column_attnum,
                 self.engine,
                 metadata=metadata,
             )
