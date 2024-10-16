@@ -8,7 +8,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.db.models.manager
 import django.utils.timezone
-import mathesar.models.relation
 import mathesar.utils.models
 
 
@@ -102,7 +101,7 @@ class Migration(migrations.Migration):
                 ('import_target', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='mathesar.table')),
                 ('schema', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tables', to='mathesar.schema')),
             ],
-            bases=(models.Model, mathesar.models.relation.Relation),
+            bases=(models.Model,),
             managers=[
                 ('current_objects', django.db.models.manager.Manager()),
             ],
@@ -124,7 +123,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(models.Model, mathesar.models.relation.Relation),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='TableSettings',
