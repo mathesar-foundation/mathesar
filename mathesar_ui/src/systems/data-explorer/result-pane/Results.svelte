@@ -20,8 +20,7 @@
   import { ImmutableMap } from '@mathesar-component-library';
 
   import type QueryManager from '../QueryManager';
-  import type QueryRunner from '../QueryRunner';
-  import { getRowSelectionId } from '../QueryRunner';
+  import { type QueryRunner, getRowSelectionId } from '../QueryRunner';
 
   import QueryRefreshButton from './QueryRefreshButton.svelte';
   import QueryRunErrors from './QueryRunErrors.svelte';

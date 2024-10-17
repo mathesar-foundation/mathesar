@@ -266,7 +266,7 @@ class ColumnNamePrefetcher(Prefetcher):
 
 
 class ColumnPrefetcher(Prefetcher):
-    def filter(self, table_ids, tables):
+    def filter(self, _, tables):
         if len(tables) < 1:
             return []
         columns = reduce(lambda column_objs, table: column_objs + list(table.columns.all()), tables, [])

@@ -9,8 +9,6 @@ import {
   faCheck,
   faCheckSquare,
   faChevronRight,
-  faCircleArrowLeft,
-  faCircleArrowRight,
   faCircleExclamation,
   faCircleInfo,
   faClock,

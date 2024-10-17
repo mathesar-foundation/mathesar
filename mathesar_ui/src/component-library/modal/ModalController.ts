@@ -1,11 +1,11 @@
-import type {
-  Readable,
-  Subscriber,
-  Unsubscriber,
-  Updater,
-  Writable,
+import {
+  type Readable,
+  type Subscriber,
+  type Unsubscriber,
+  type Updater,
+  type Writable,
+  derived,
 } from 'svelte/store';
-import { derived } from 'svelte/store';
 
 import type ModalStack from './ModalStack';
 

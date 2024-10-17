@@ -6,7 +6,7 @@
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type RecordRow,
-    RecordsData,
+    type RecordsData,
     rowHasRecord,
   } from '@mathesar/stores/table-data';
   import { getRowSelectionId } from '@mathesar/stores/table-data/records';

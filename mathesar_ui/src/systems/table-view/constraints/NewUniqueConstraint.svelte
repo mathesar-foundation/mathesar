@@ -12,8 +12,8 @@
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
   import { getAvailableName } from '@mathesar/utils/db';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { CancelOrProceedButtonPair } from '@mathesar-component-library';
   import {
+    CancelOrProceedButtonPair,
     LabeledInput,
     MultiSelect,
     RadioGroup,

@@ -25,6 +25,7 @@ def check_excel_upload(table, table_name, schema, num_records, row, cols):
         assert col in table.sa_column_names
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_excel_upload(data_file, engine_with_schema):
     engine, schema_name = engine_with_schema
     schema_oid = get_schema_oid_from_name(schema_name, engine)
@@ -58,6 +59,7 @@ def test_excel_upload(data_file, engine_with_schema):
 
 
 @pytest.mark.skip(reason="msar.add_mathesar_table no longer raises an exception if a table with the same name already exists in the database.")
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_excel_upload_with_duplicate_table_name(data_file, engine_with_schema):
     table_name = "NASA 2"
 
@@ -74,6 +76,7 @@ def test_excel_upload_with_duplicate_table_name(data_file, engine_with_schema):
         create_table_from_data_file(data_file, table_name, schema)
 
 
+@pytest.mark.skip(reason="We removed models used in the `create_table_from_data_file` setup function")
 def test_excel_upload_table_imported_to(data_file, engine_with_schema):
     engine, schema_name = engine_with_schema
     schema_oid = get_schema_oid_from_name(schema_name, engine)

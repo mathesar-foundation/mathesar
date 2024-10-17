@@ -6,20 +6,13 @@ from db.install import install_mathesar
 from mathesar.examples.library_dataset import load_library_dataset
 from mathesar.examples.movies_dataset import load_movies_dataset
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
-from mathesar.models.deprecated import Connection
-from mathesar.models.users import User
-from mathesar.utils.connections import BadInstallationTarget
 
 INTERNAL_DB_KEY = 'default'
 
 
-def migrate_connection_for_user(connection_id, user_id):
-    """Move data from old-style connection model to new models."""
-    conn = Connection.current_objects.get(id=connection_id)
-    user = User.objects.get(id=user_id)
-    return _setup_connection_models(
-        conn.host, conn.port, conn.db_name, conn.username, conn.password, user
-    )
+class BadInstallationTarget(Exception):
+    """Raise when an attempt is made to install on a disallowed target"""
+    pass
 
 
 @transaction.atomic

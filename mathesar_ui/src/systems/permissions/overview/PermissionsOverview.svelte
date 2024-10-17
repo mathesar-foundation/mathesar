@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import type { ModalController } from '@mathesar-component-library';
 
   import type {

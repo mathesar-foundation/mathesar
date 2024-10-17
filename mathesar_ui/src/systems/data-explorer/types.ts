@@ -1,2 +1,2 @@
 export type { default as QueryManager } from './QueryManager';
-export type { default as QueryRunner } from './QueryRunner';
+export type { QueryRunner } from './QueryRunner';
