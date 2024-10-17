@@ -13,14 +13,11 @@ import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 
 import { ColumnsDataStore } from './columns';
-import type { ConstraintsData } from './constraints';
-import { ConstraintsDataStore } from './constraints';
+import { type ConstraintsData, ConstraintsDataStore } from './constraints';
 import { Display } from './display';
 import { Meta } from './meta';
-import type { ProcessedColumnsStore } from './processedColumns';
-import { processColumn } from './processedColumns';
-import type { TableRecordsData } from './records';
-import { RecordsData } from './records';
+import { type ProcessedColumnsStore, processColumn } from './processedColumns';
+import { RecordsData, type TableRecordsData } from './records';
 
 export interface TabularDataProps {
   database: Pick<Database, 'id'>;

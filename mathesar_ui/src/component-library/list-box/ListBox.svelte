@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { createEventDispatcher, setContext } from 'svelte';
-  import type { Writable } from 'svelte/store';
-  import { writable } from 'svelte/store';
+  import { createEventDispatcher, onMount, setContext } from 'svelte';
+  import { type Writable, writable } from 'svelte/store';
 
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
 

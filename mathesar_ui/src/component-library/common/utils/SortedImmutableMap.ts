@@ -15,7 +15,7 @@ export default class SortedImmutableMap<Key, Value> extends ImmutableMap<
     this.sortFn = sortFn;
   }
 
-  protected getNewInstance(...args: any[]): this {
+  protected getNewInstance(...args: unknown[]): this {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
     return new (this.constructor as any)(this.sortFn, ...args) as this;
   }

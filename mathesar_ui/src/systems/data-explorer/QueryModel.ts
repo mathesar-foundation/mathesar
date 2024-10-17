@@ -10,7 +10,7 @@ import { assertExhaustive } from '@mathesar-component-library';
 import QueryFilterTransformationModel from './QueryFilterTransformationModel';
 import QueryHideTransformationModel from './QueryHideTransformationModel';
 import QuerySortTransformationModel from './QuerySortTransformationModel';
-import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
+import { QuerySummarizationTransformationModel } from './QuerySummarizationTransformationModel';
 import type { ColumnWithLink } from './utils';
 
 export interface QueryModelUpdateDiff {

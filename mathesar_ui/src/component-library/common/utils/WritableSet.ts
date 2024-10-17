@@ -1,10 +1,12 @@
-import type {
-  Readable,
-  Subscriber,
-  Unsubscriber,
-  Writable,
+import {
+  type Readable,
+  type Subscriber,
+  type Unsubscriber,
+  type Writable,
+  derived,
+  get,
+  writable,
 } from 'svelte/store';
-import { derived, get, writable } from 'svelte/store';
 
 import ImmutableSet from './ImmutableSet';
 

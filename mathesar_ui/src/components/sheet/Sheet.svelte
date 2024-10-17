@@ -2,8 +2,10 @@
   import { onMount, tick } from 'svelte';
   import { writable } from 'svelte/store';
 
-  import type { ClipboardHandler } from '@mathesar/stores/clipboard';
-  import { getClipboardHandlerStoreFromContext } from '@mathesar/stores/clipboard';
+  import {
+    type ClipboardHandler,
+    getClipboardHandlerStoreFromContext,
+  } from '@mathesar/stores/clipboard';
   import { getModifierKeyCombo } from '@mathesar/utils/pointerUtils';
   import { ImmutableMap } from '@mathesar-component-library/types';
 

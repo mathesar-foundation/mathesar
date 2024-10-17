@@ -16,7 +16,7 @@
   import type QueryManager from '../../QueryManager';
   import type { QueryTransformationModel } from '../../QueryModel';
   import QuerySortTransformationModel from '../../QuerySortTransformationModel';
-  import QuerySummarizationTransformationModel from '../../QuerySummarizationTransformationModel';
+  import { QuerySummarizationTransformationModel } from '../../QuerySummarizationTransformationModel';
 
   import FilterTransformation from './FilterTransformation.svelte';
   import HideTransformation from './HideTransformation.svelte';

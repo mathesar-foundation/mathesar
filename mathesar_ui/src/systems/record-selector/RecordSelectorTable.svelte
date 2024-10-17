@@ -6,7 +6,7 @@
   import { storeToGetRecordPageUrl } from '@mathesar/stores/storeBasedUrls';
   import {
     type RecordRow,
-    TabularData,
+    type TabularData,
     constraintIsFk,
     setTabularDataStoreInContext,
   } from '@mathesar/stores/table-data';
@@ -18,11 +18,11 @@
 
   import Cell from './RecordSelectorCellWrapper.svelte';
   import RecordSelectorColumnHeaderCell from './RecordSelectorColumnHeaderCell.svelte';
-  import type {
-    RecordSelectorController,
-    RecordSelectorResult,
+  import {
+    type RecordSelectorController,
+    type RecordSelectorResult,
+    setRecordSelectorControllerInContext,
   } from './RecordSelectorController';
-  import { setRecordSelectorControllerInContext } from './RecordSelectorController';
   import RecordSelectorDataCell from './RecordSelectorDataCell.svelte';
   import RecordSelectorDataRow from './RecordSelectorDataRow.svelte';
   import RecordSelectorSubmitButton from './RecordSelectorSubmitButton.svelte';
