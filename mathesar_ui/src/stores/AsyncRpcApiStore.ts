@@ -9,6 +9,7 @@ import {
 
 import AsyncStore, { type AsyncStoreValue } from './AsyncStore';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BatchRunner<T = any, U = any> = {
   send: RpcRequest<T>;
   beforeRequest: () => void;

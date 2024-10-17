@@ -29,10 +29,8 @@
 
   import type { SheetVirtualRowsApi } from '../types';
 
-  import type { ItemInfo, Props } from './listUtils';
-  import listUtils from './listUtils';
-  import type { Timeout } from './timer';
-  import { cancelTimeout, requestTimeout } from './timer';
+  import listUtils, { type ItemInfo, type Props } from './listUtils';
+  import { type Timeout, cancelTimeout, requestTimeout } from './timer';
 
   const dispatch = createEventDispatcher();
 

@@ -3,8 +3,10 @@ import { _ } from 'svelte-i18n';
 
 import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
 import { iconDeleteMajor } from '@mathesar/icons';
-import type { ConfirmationProps } from '@mathesar-component-library';
-import { makeConfirm } from '@mathesar-component-library';
+import {
+  type ConfirmationProps,
+  makeConfirm,
+} from '@mathesar-component-library';
 
 import { modal } from './modal';
 import { toast } from './toast';

@@ -1,5 +1,4 @@
-import type { Rule } from '../ruleExecuter';
-import { executeRule } from '../ruleExecuter';
+import { type Rule, executeRule } from '../ruleExecuter';
 
 describe('Rule executer', () => {
   test('Single term rule', () => {

@@ -6,7 +6,7 @@
   } from '@mathesar/components/sheet';
   import { Button } from '@mathesar-component-library';
 
-  import type QueryRunner from '../QueryRunner';
+  import type { QueryRunner } from '../QueryRunner';
   import type { ProcessedQueryOutputColumn } from '../utils';
 
   export let queryRunner: QueryRunner;

@@ -1,5 +1,4 @@
-import type { Writable } from 'svelte/store';
-import { get, writable } from 'svelte/store';
+import { type Writable, get, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
@@ -15,13 +14,16 @@ import { addExploration, replaceExploration } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
 import type { CancellablePromise } from '@mathesar-component-library';
 
-import type { QueryModelUpdateDiff } from './QueryModel';
-import QueryModel from './QueryModel';
-import QueryRunner from './QueryRunner';
-import QuerySummarizationTransformationModel from './QuerySummarizationTransformationModel';
+import QueryModel, { type QueryModelUpdateDiff } from './QueryModel';
+import { QueryRunner } from './QueryRunner';
+import { QuerySummarizationTransformationModel } from './QuerySummarizationTransformationModel';
 import QueryUndoRedoManager from './QueryUndoRedoManager';
-import type { InputColumnsStoreSubstance, QueryTableStructure } from './utils';
-import { getInputColumns, getQueryTableStructure } from './utils';
+import {
+  type InputColumnsStoreSubstance,
+  type QueryTableStructure,
+  getInputColumns,
+  getQueryTableStructure,
+} from './utils';
 
 export default class QueryManager extends QueryRunner {
   private undoRedoManager: QueryUndoRedoManager;

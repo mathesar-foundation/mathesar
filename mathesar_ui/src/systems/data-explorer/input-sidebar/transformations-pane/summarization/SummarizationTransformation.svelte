@@ -10,8 +10,10 @@
     MultiSelect,
   } from '@mathesar-component-library';
 
-  import type QuerySummarizationTransformationModel from '../../../QuerySummarizationTransformationModel';
-  import type { QuerySummarizationAggregationEntry } from '../../../QuerySummarizationTransformationModel';
+  import type {
+    QuerySummarizationAggregationEntry,
+    QuerySummarizationTransformationModel,
+  } from '../../../QuerySummarizationTransformationModel';
   import type { ProcessedQueryResultColumnMap } from '../../../utils';
 
   import Aggregation from './Aggregation.svelte';
