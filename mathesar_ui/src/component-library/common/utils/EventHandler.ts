@@ -40,13 +40,7 @@ export default class EventHandler<Events extends Record<string, unknown>> {
     value?: Events[EventName],
   ): Promise<void> {
     const callbacks = this.listeners.get(eventName);
-    if (!callbacks) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `No listeners found when dispatching event '${String(eventName)}'.`,
-      );
-      return;
-    }
+    if (!callbacks) return;
     await Promise.all(
       [...callbacks.values()].map((callback) => callback(value)),
     );
