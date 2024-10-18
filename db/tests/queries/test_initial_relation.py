@@ -3,8 +3,6 @@
 
 # Initial columns is an ordered set of columns sourced either from the base table, or from linked
 # tables.
-import pytest
-
 from db.columns.operations.select import get_column_attnum_from_name as get_attnum
 from db.tables.operations.select import get_oid_from_table
 from db.queries.base import DBQuery, InitialColumn, JoinParameter

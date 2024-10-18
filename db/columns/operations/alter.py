@@ -1,7 +1,7 @@
 import json
 
 from db import connection as db_conn
-from db.columns.defaults import NAME, NULLABLE, DESCRIPTION
+from db.columns.defaults import NAME, NULLABLE
 
 
 def alter_columns_in_table(table_oid, column_data_list, conn):

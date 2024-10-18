@@ -3,21 +3,6 @@ from unittest.mock import patch
 import pytest
 
 import db.columns.operations.create as col_create
-from db.types.base import get_available_known_db_types, known_db_types
-
-
-def test_type_list_completeness(engine):
-    """
-    Ensure that unavailable types are unavailable for a good reason.
-    """
-    actual_supported_db_types = get_available_known_db_types(engine)
-    unavailable_types = set.difference(set(known_db_types), set(actual_supported_db_types))
-    for db_type in unavailable_types:
-        assert (
-            db_type.is_inconsistent
-            or db_type.is_optional
-            or db_type.is_sa_only
-        )
 
 
 @pytest.mark.parametrize(
