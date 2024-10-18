@@ -4,11 +4,8 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
-from modernrpc.views import RPCEntryPoint
 from modernrpc.exceptions import RPCException
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from modernrpc.views import RPCEntryPoint
 
 from mathesar.rpc.databases.configured import list_ as databases_list
 from mathesar.rpc.explorations import list_ as explorations_list
@@ -16,7 +13,6 @@ from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.api.ui.serializers.users import UserSerializer
-from mathesar.state import reset_reflection
 from mathesar import __version__
 
 
@@ -127,13 +123,6 @@ def get_common_data(request, database_id=None, schema_oid=None):
 
 class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
     pass
-
-
-@login_required
-@api_view(['POST'])
-def reflect_all(_):
-    reset_reflection()
-    return Response(status=status.HTTP_200_OK)
 
 
 @login_required

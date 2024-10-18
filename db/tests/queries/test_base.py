@@ -1,6 +1,6 @@
+from sqlalchemy import inspect
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.columns.operations.select import get_column_attnum_from_name as get_attnum
-from db.tables.operations.select import get_oid_from_table
 from db.transforms import base as tbase
 from db.metadata import get_empty_metadata
 
@@ -12,9 +12,14 @@ def _extract_col_properties_dict(col):
     }
 
 
+def _get_oid_from_table(name, schema, engine):
+    inspector = inspect(engine)
+    return inspector.get_table_oid(name, schema=schema)
+
+
 def test_DBQuery_all_sa_columns_map_initial_columns(engine_with_academics):
     engine, schema = engine_with_academics
-    acad_oid = get_oid_from_table("academics", schema, engine)
+    acad_oid = _get_oid_from_table("academics", schema, engine)
     metadata = get_empty_metadata()
     initial_columns = [
         InitialColumn(
@@ -70,7 +75,7 @@ def test_DBQuery_all_sa_columns_map_initial_columns(engine_with_academics):
 
 def test_DBQuery_all_sa_columns_map_output_columns(engine_with_academics):
     engine, schema = engine_with_academics
-    acad_oid = get_oid_from_table("academics", schema, engine)
+    acad_oid = _get_oid_from_table("academics", schema, engine)
     metadata = get_empty_metadata()
     initial_columns = [
         InitialColumn(
@@ -136,7 +141,7 @@ def test_DBQuery_all_sa_columns_map_output_columns(engine_with_academics):
 
 def test_DBQuery_all_sa_columns_map_summarized_columns(engine_with_library):
     engine, schema = engine_with_library
-    checkouts_oid = get_oid_from_table("Checkouts", schema, engine)
+    checkouts_oid = _get_oid_from_table("Checkouts", schema, engine)
     metadata = get_empty_metadata()
     initial_columns = [
         InitialColumn(
@@ -221,7 +226,7 @@ def test_DBQuery_all_sa_columns_map_summarized_columns(engine_with_library):
 
 def test_DBQuery_all_sa_columns_map_overwriting(engine_with_library):
     engine, schema = engine_with_library
-    checkouts_oid = get_oid_from_table("Checkouts", schema, engine)
+    checkouts_oid = _get_oid_from_table("Checkouts", schema, engine)
     metadata = get_empty_metadata()
     initial_columns = [
         InitialColumn(
