@@ -1,6 +1,5 @@
 from db.engine import create_future_engine_with_custom_types
 from db.metadata import get_empty_metadata
-from db.records.operations.select import get_count
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.tables.operations.select import get_table
@@ -121,11 +120,8 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         transformations,
         exploration_def.get("display_names", {})
     )
-    records = db_query.get_records(
-        limit=limit,
-        offset=offset
-    )
-    processed_records = [r._asdict() for r in records]
+    query_results = db_query.get_records(limit=limit, offset=offset)
+
     column_metadata = _get_exploration_column_metadata(
         exploration_def,
         processed_initial_columns,
@@ -137,12 +133,8 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
     return {
         "query": exploration_def,
         "records": {
-            "count": get_count(
-                table=db_query.transformed_relation,
-                engine=engine,
-                filter=exploration_def.get('filter', None)
-            ),
-            "results": processed_records
+            "count": db_query.count,
+            "results": [r._asdict() for r in query_results],
         },
         "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
         "column_metadata": column_metadata,

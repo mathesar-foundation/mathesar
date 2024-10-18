@@ -1,11 +1,6 @@
 import json
-from sqlalchemy import select
-from sqlalchemy.sql.functions import count
 
 from db import connection as db_conn
-from db.tables.utils import get_primary_key_column
-from db.utils import execute_pg_query
-from db.transforms.operations.apply import apply_transformations_deprecated
 
 
 def list_records_from_table(
@@ -100,76 +95,3 @@ def search_records_from_table(
         table_oid, json.dumps(search), limit, return_record_summaries
     ).fetchone()[0]
     return result
-
-
-def get_record(table, engine, id_value):
-    primary_key_column = get_primary_key_column(table)
-    pg_query = select(table).where(primary_key_column == id_value)
-    result = execute_pg_query(engine, pg_query)
-    assert len(result) <= 1
-    return result[0] if result else None
-
-
-# TODO consider using **kwargs instead of manually redefining defaults and piping all these arguments
-def get_records(
-    table,
-    engine,
-    limit=None,
-    offset=None,
-    order_by=None,
-    filter=None,
-    group_by=None,
-    search=None,
-    fallback_to_default_ordering=False,
-):
-    """
-    Returns annotated records from a table.
-
-    Args:
-        table:           SQLAlchemy table object
-        engine:          SQLAlchemy engine object
-        limit:           int, gives number of rows to return
-        offset:          int, gives number of rows to skip
-        order_by:        list of dictionaries, where each dictionary has a 'field' and
-                         'direction' field.
-        search:          list of dictionaries, where each dictionary has a 'column' and
-                         'literal' field.
-        filter:          a dictionary with one key-value pair, where the key is the filter id and
-                         the value is a list of parameters; supports composition/nesting.
-        group_by:        group.GroupBy object
-    """
-    if order_by is None:
-        order_by = []
-    if search is None:
-        search = []
-    relation = apply_transformations_deprecated(
-        table=table,
-        limit=limit,
-        offset=offset,
-        order_by=order_by,
-        fallback_to_default_ordering=fallback_to_default_ordering,
-        filter=filter,
-        group_by=group_by,
-        search=search,
-    )
-    return execute_pg_query(engine, relation)
-
-
-def get_count(table, engine, filter=None, search=None):
-    if search is None:
-        search = []
-    col_name = "_count"
-    columns_to_select = [
-        count(1).label(col_name)
-    ]
-    relation = apply_transformations_deprecated(
-        table=table,
-        limit=None,
-        offset=None,
-        # TODO does it make sense to order, when we're only interested in row count?
-        order_by=None,
-        filter=filter,
-        columns_to_select=columns_to_select,
-        search=search,
-    )
-    return execute_pg_query(engine, relation)[0][col_name]
