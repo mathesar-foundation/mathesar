@@ -118,8 +118,3 @@ def get_map_of_table_oid_to_schema_name_and_table_name(
         in result_rows
     }
     return table_oids_to_schema_names_and_table_names
-
-
-def get_oid_from_table(name, schema, engine):
-    inspector = inspect(engine)
-    return inspector.get_table_oid(name, schema=schema)

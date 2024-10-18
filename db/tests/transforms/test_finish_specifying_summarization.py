@@ -1,8 +1,8 @@
 import pytest
+from sqlalchemy import inspect
 import types
 import functools
 
-from db.tables.operations.select import get_oid_from_table
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.metadata import get_empty_metadata
 from db.transforms.base import Summarize, SelectSubsetOfColumns, Limit
@@ -92,7 +92,7 @@ def academics_ids(engine_with_academics, metadata):
 
     @functools.cache
     def get_oid(table_name):
-        return get_oid_from_table(table_name, schema, engine)
+        return inspect(engine).get_table_oid(table_name, schema=schema)
 
     @functools.cache
     def get_attnum(table_name, column_name):

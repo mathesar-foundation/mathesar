@@ -2,7 +2,6 @@
 from sqlalchemy import Column, ForeignKey, inspect
 
 from db.columns.operations.select import get_column_attnum_from_name
-from db.tables.operations.select import get_oid_from_table
 from db.types.operations.convert import get_db_type_enum_from_class
 
 
@@ -112,8 +111,8 @@ class MathesarColumn(Column):
     @property
     def table_oid(self):
         if self.table_ is not None:
-            oid = get_oid_from_table(
-                self.table_.name, self.table_.schema, self.engine
+            oid = inspect(self.engine).get_table_oid(
+                self.table_.name, schema=self.table_.schema
             )
         else:
             oid = None

@@ -3,15 +3,20 @@
 
 # Initial columns is an ordered set of columns sourced either from the base table, or from linked
 # tables.
+from sqlalchemy import inspect
 from db.columns.operations.select import get_column_attnum_from_name as get_attnum
-from db.tables.operations.select import get_oid_from_table
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.metadata import get_empty_metadata
 
 
+def _get_oid_from_table(name, schema, engine):
+    inspector = inspect(engine)
+    return inspector.get_table_oid(name, schema=schema)
+
+
 def test_local_columns(engine_with_academics):
     engine, schema = engine_with_academics
-    oid = get_oid_from_table("academics", schema, engine)
+    oid = _get_oid_from_table("academics", schema, engine)
     metadata = get_empty_metadata()
     initial_columns = [
         InitialColumn(
@@ -42,9 +47,9 @@ def test_shallow_link(shallow_link_dbquery):
 
 def test_deep_link(engine_with_academics):
     engine, schema = engine_with_academics
-    art_oid = get_oid_from_table("articles", schema, engine)
-    acad_oid = get_oid_from_table("academics", schema, engine)
-    uni_oid = get_oid_from_table("universities", schema, engine)
+    art_oid = _get_oid_from_table("articles", schema, engine)
+    acad_oid = _get_oid_from_table("academics", schema, engine)
+    uni_oid = _get_oid_from_table("universities", schema, engine)
     metadata = get_empty_metadata()
     initial_columns = [
         InitialColumn(
@@ -79,7 +84,7 @@ def test_deep_link(engine_with_academics):
 
 def test_self_referencing_table(engine_with_academics):
     engine, schema = engine_with_academics
-    acad_oid = get_oid_from_table("academics", schema, engine)
+    acad_oid = _get_oid_from_table("academics", schema, engine)
     metadata = get_empty_metadata()
     initial_columns = [
         InitialColumn(
