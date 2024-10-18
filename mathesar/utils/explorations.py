@@ -20,7 +20,6 @@ from db.functions.base import (
     PeakMonth,
 )
 from db.functions.packed import DistinctArrayAgg
-from mathesar.api.utils import process_annotated_records
 from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
 
@@ -126,7 +125,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         limit=limit,
         offset=offset
     )
-    processed_records = process_annotated_records(records)[0]
+    processed_records = [r._asdict() for r in records]
     column_metadata = _get_exploration_column_metadata(
         exploration_def,
         processed_initial_columns,
