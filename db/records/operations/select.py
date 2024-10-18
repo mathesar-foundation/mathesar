@@ -120,7 +120,6 @@ def get_records(
     filter=None,
     group_by=None,
     search=None,
-    duplicate_only=None,
     fallback_to_default_ordering=False,
 ):
     """
@@ -138,8 +137,6 @@ def get_records(
         filter:          a dictionary with one key-value pair, where the key is the filter id and
                          the value is a list of parameters; supports composition/nesting.
         group_by:        group.GroupBy object
-        duplicate_only:  list of column names; only rows that have duplicates across those rows
-                         will be returned
     """
     if order_by is None:
         order_by = []
@@ -154,7 +151,6 @@ def get_records(
         filter=filter,
         group_by=group_by,
         search=search,
-        duplicate_only=duplicate_only,
     )
     return execute_pg_query(engine, relation)
 

@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from db.functions.operations.apply import apply_db_function_by_id, apply_db_function_spec_as_filter
 from db.functions.packed import DistinctArrayAgg
-from db.records.operations import group, sort as rec_sort
+from db.records.operations import sort as rec_sort
 
 
 class UniqueConstraintMapping:
@@ -151,45 +151,6 @@ class Offset(Transform):
         executable = _to_executable(relation)
         executable = executable.offset(offset)
         return _to_non_executable(executable)
-
-
-class DuplicateOnly(Transform):
-    type = "duplicate_only"
-
-    def apply_to_relation(self, relation):
-        duplicate_columns = self.spec
-        enforce_relation_type_expectations(relation)
-        DUPLICATE_LABEL = "_is_dupe"
-        duplicate_flag_col = (
-            sqlalchemy.func
-            .count(1)
-            .over(partition_by=duplicate_columns) > 1
-        ).label(DUPLICATE_LABEL)
-        duplicate_flag_cte = (
-            select(
-                *relation.c,
-                duplicate_flag_col,
-            ).select_from(relation)
-        ).cte()
-        executable = (
-            select(duplicate_flag_cte)
-            .where(duplicate_flag_cte.c[DUPLICATE_LABEL])
-        )
-        return _to_non_executable(executable)
-
-
-class Group(Transform):
-    type = "group"
-
-    def apply_to_relation(self, relation):
-        group_by = self.spec
-        # TODO maybe keep this as json, and convert to GroupBy at last moment?
-        # other transform specs are json at this point in the pipeline
-        if isinstance(group_by, group.GroupBy):
-            executable = group.get_group_augmented_records_pg_query(relation, group_by)
-            return _to_non_executable(executable)
-        else:
-            return relation
 
 
 class Summarize(Transform):

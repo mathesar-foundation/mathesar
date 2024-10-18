@@ -25,7 +25,6 @@ def apply_transformations_deprecated(
     filter=None,
     columns_to_select=None,
     group_by=None,
-    duplicate_only=None,
     search=None,
     fallback_to_default_ordering=False,
 ):
@@ -51,8 +50,6 @@ def apply_transformations_deprecated(
 
     if filter:
         transforms.append(base.Filter(filter))
-    if duplicate_only:
-        transforms.append(base.DuplicateOnly(duplicate_only))
     if group_by:
         transforms.append(base.Group(group_by))
     if order_by or fallback_to_default_ordering:
