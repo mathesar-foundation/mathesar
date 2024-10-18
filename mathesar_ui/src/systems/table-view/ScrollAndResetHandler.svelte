@@ -4,10 +4,10 @@
   import type { States } from '@mathesar/api/rest/utils/requestUtils';
   import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
   import {
-    Filtering,
-    Grouping,
+    type Filtering,
+    type Grouping,
     type Row,
-    Sorting,
+    type Sorting,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import type Pagination from '@mathesar/utils/Pagination';

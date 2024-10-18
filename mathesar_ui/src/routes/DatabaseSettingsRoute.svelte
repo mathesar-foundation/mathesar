@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
   import { Route } from 'tinro';
 
   import EventfulRoute from '@mathesar/components/routing/EventfulRoute.svelte';

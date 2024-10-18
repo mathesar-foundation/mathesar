@@ -1,7 +1,6 @@
 import type { SvelteComponent } from 'svelte';
 import { linear } from 'svelte/easing';
-import type { Readable, Writable } from 'svelte/store';
-import { derived, writable } from 'svelte/store';
+import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import {
   iconError,
@@ -9,8 +8,10 @@ import {
   iconLoading,
   iconSuccess,
 } from '@mathesar-component-library-dir/common/icons';
-import type { PauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
-import { pauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
+import {
+  type PauseableTweened,
+  pauseableTweened,
+} from '@mathesar-component-library-dir/common/utils/pauseableTweened';
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 
 /**

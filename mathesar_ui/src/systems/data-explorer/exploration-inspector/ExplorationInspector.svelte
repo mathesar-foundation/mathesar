@@ -4,7 +4,7 @@
 
   import type { ExplorationInspectorTab } from '../QueryInspector';
   import type QueryManager from '../QueryManager';
-  import type QueryRunner from '../QueryRunner';
+  import type { QueryRunner } from '../QueryRunner';
 
   import CellTab from './cell/CellTab.svelte';
   import ColumnTab from './column-tab/ColumnTab.svelte';

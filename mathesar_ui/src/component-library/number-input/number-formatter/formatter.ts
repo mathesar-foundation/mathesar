@@ -1,6 +1,5 @@
 import { forceAsciiMinusSign } from './cleaners';
-import type { DerivedOptions } from './options';
-import { getDerivedOptions } from './options';
+import { type DerivedOptions, getDerivedOptions } from './options';
 
 type Parts = Intl.NumberFormatPart[];
 

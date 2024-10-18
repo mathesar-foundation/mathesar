@@ -5,7 +5,7 @@
   import {
     type ProcessedColumn,
     type RecordRow,
-    SearchFuzzy,
+    type SearchFuzzy,
     rowHasSavedRecord,
   } from '@mathesar/stores/table-data';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';

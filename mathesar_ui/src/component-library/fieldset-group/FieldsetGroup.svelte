@@ -1,8 +1,10 @@
 <script lang="ts">
   import type { SvelteComponent } from 'svelte';
 
-  import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
-  import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
+  import {
+    type LabelGetter,
+    getLabel as defaultGetLabel,
+  } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
   import Render from '@mathesar-component-library-dir/render/Render.svelte';
   import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';

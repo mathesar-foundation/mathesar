@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
 
   import type { JoinableTablesResult } from '@mathesar/api/rpc/tables';
-  import { iconAddNew } from '@mathesar/icons';
   import {
+    iconAddNew,
     iconLinksFromOtherTables,
     iconLinksInThisTable,
   } from '@mathesar/icons';
