@@ -264,7 +264,6 @@ class DBQuery:
     def get_input_alias_for_output_alias(self, output_alias):
         return self.map_of_output_alias_to_input_alias.get(output_alias)
 
-    # TODO consider caching; not urgent, since redundant calls don't trigger IO, it seems
     @property
     def map_of_output_alias_to_input_alias(self):
         m = dict()

@@ -42,8 +42,6 @@ def test_shallow_link(shallow_link_dbquery):
     assert records == [(1, 'uni1'), (2, 'uni1'), (3, 'uni2')]
 
 
-# TODO determine why this is failing when all run, but not the individual file
-@pytest.mark.skipif
 def test_deep_link(engine_with_academics):
     engine, schema = engine_with_academics
     art_oid = get_oid_from_table("articles", schema, engine)

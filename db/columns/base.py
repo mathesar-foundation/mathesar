@@ -1,3 +1,4 @@
+# TODO Remove this file once explorations are in the database
 from sqlalchemy import Column, ForeignKey, inspect
 
 from db.columns.operations.select import get_column_attnum_from_name
@@ -5,8 +6,6 @@ from db.tables.operations.select import get_oid_from_table
 from db.types.operations.convert import get_db_type_enum_from_class
 
 
-# TODO consider renaming to DbColumn or DatabaseColumn
-# We are attempting to reserve the term Mathesar for types in the mathesar namespace.
 class MathesarColumn(Column):
     """
     This class constrains the possible arguments, enabling us to include
@@ -131,8 +130,6 @@ class MathesarColumn(Column):
         """
         engine_exists = self.engine is not None
         table_exists = self.table_ is not None
-        # TODO are we checking here that the table exists on the database? explain why we have to do
-        # that.
         engine_has_table = inspect(self.engine).has_table(
             self.table_.name,
             schema=self.table_.schema,

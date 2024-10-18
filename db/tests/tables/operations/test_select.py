@@ -207,8 +207,6 @@ JOINABLE_TABLES_PARAMS = [
 ]
 
 
-# TODO Figure out how to test fkey paths
-
 @pytest.mark.parametrize('table,depth', JOINABLE_TABLES_PARAMS)
 def test_get_joinable_tables_query_paths(engine_with_academics, table, depth):
     engine, schema = engine_with_academics

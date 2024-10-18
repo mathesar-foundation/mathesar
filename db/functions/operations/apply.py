@@ -61,9 +61,6 @@ def _db_function_to_sa_expression(db_function_or_literal):
             for raw_parameter in raw_parameters
         ]
         db_function_subclass = type(db_function)
-        # TODO do we need to keep to_sa_expression as a static method?
-        # TODO maybe make it an instance method and then rewrite DBFunctionPacked.to_sa_expression
-        # to call to_sa_expression on result of self.unpack().
         sa_expression = db_function_subclass.to_sa_expression(*sa_expression_parameters)
         return sa_expression
     else:

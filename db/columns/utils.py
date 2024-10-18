@@ -12,7 +12,6 @@ def get_column_obj_from_relation(relation, column):
     return column
 
 
-# TODO deal with quotes; still better than the default
 def find_column_by_name_in_relation(relation, col_name_string):
     """
     Because we may have to look for the column by a name with an

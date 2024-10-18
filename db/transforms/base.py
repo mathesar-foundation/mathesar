@@ -66,7 +66,6 @@ class Transform(ABC):
             and self.__dict__ == other.__dict__
         )
 
-    # TODO refactor to use `get_unique_constraint_mappings`
     @property
     def map_of_output_alias_to_input_alias(self):
         """

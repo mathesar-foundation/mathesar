@@ -1,3 +1,4 @@
+# TODO Move SQLAlchemy-base column attribute getters to separate module
 from sqlalchemy import and_, asc, select
 
 from db.connection import exec_msar_func
