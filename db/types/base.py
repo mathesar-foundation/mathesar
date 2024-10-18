@@ -3,10 +3,9 @@ from enum import Enum
 from sqlalchemy import create_engine as sa_create_engine
 
 from db.constants import TYPES_SCHEMA
-from db.utils import OrderByIds
 
 
-class DatabaseType(OrderByIds):
+class DatabaseType:
 
     @property
     def id(self):
