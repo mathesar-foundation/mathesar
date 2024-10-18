@@ -1,6 +1,4 @@
-from sqlalchemy import (
-    Table, select, join, inspect,
-)
+from sqlalchemy import Table, select, join
 
 from db.connection import exec_msar_func
 from db.utils import execute_statement, get_pg_catalog_table

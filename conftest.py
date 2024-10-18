@@ -162,28 +162,6 @@ def _test_schema_name():
     return "_test_schema_name"
 
 
-# TODO does testing this make sense?
-@pytest.fixture(scope="module")
-def engine_without_ischema_names_updated(test_db_name, MOD_engine_cache):
-    """
-    For testing environments where an engine might not be fully setup.
-
-    We instantiate a new engine cache, without updating its ischema_names dict.
-    """
-    return MOD_engine_cache(test_db_name)
-
-
-# TODO seems unneeded: remove
-@pytest.fixture
-def engine_with_schema_without_ischema_names_updated(
-    engine_without_ischema_names_updated, _test_schema_name, create_db_schema
-):
-    engine = engine_without_ischema_names_updated
-    schema_name = _test_schema_name
-    create_db_schema(schema_name, engine)
-    return engine, schema_name
-
-
 @pytest.fixture
 def engine_with_schema(engine, _test_schema_name, create_db_schema):
     schema_name = _test_schema_name
@@ -300,9 +278,6 @@ RESOURCES = os.path.join(FILE_DIR, "db", "tests", "resources")
 ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
 LIBRARY_SQL = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_CHECKOUTS_SQL = os.path.join(RESOURCES, "library_add_checkouts.sql")
-FRAUDULENT_PAYMENTS_SQL = os.path.join(RESOURCES, "fraudulent_payments.sql")
-PLAYER_PROFILES_SQL = os.path.join(RESOURCES, "player_profiles.sql")
-MARATHON_ATHLETES_SQL = os.path.join(RESOURCES, "marathon_athletes.sql")
 
 
 @pytest.fixture
@@ -374,54 +349,3 @@ def library_db_tables(engine_with_library):
         in table_names
     }
     return tables
-
-
-@pytest.fixture
-def engine_with_fraudulent_payment(engine_with_schema):
-    engine, schema = engine_with_schema
-    with engine.begin() as conn, open(FRAUDULENT_PAYMENTS_SQL) as f:
-        conn.execute(text(f"SET search_path={schema}"))
-        conn.execute(text(f.read()))
-    yield engine, schema
-
-
-@pytest.fixture
-def payments_db_table(engine_with_fraudulent_payment):
-    engine, schema = engine_with_fraudulent_payment
-    metadata = MetaData(bind=engine)
-    table = Table("Payments", metadata, schema=schema, autoload_with=engine)
-    return table
-
-
-@pytest.fixture
-def engine_with_player_profiles(engine_with_schema):
-    engine, schema = engine_with_schema
-    with engine.begin() as conn, open(PLAYER_PROFILES_SQL) as f:
-        conn.execute(text(f"SET search_path={schema}"))
-        conn.execute(text(f.read()))
-    yield engine, schema
-
-
-@pytest.fixture
-def players_db_table(engine_with_player_profiles):
-    engine, schema = engine_with_player_profiles
-    metadata = MetaData(bind=engine)
-    table = Table("Players", metadata, schema=schema, autoload_with=engine)
-    return table
-
-
-@pytest.fixture
-def engine_with_marathon_athletes(engine_with_schema):
-    engine, schema = engine_with_schema
-    with engine.begin() as conn, open(MARATHON_ATHLETES_SQL) as f:
-        conn.execute(text(f"SET search_path={schema}"))
-        conn.execute(text(f.read()))
-    yield engine, schema
-
-
-@pytest.fixture
-def athletes_db_table(engine_with_marathon_athletes):
-    engine, schema = engine_with_marathon_athletes
-    metadata = MetaData(bind=engine)
-    table = Table("Marathon", metadata, schema=schema, autoload_with=engine)
-    return table
