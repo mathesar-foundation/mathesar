@@ -13,7 +13,7 @@ from sqlalchemy.dialects.postgresql import array_agg, TEXT, array, DATE
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
 
-from db.engine import get_dummy_engine
+from db.deprecated.engine import get_dummy_engine
 from db.functions.exceptions import BadDBFunctionFormat
 from db.types.base import PostgresType
 from db.types.custom.json_array import MathesarJsonArray

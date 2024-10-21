@@ -1,6 +1,6 @@
 import inspect
 from sqlalchemy.types import NullType
-from db.engine import get_dummy_engine
+from db.deprecated.engine import get_dummy_engine
 from db.types.base import PostgresType, MathesarCustomType, UnknownType
 
 
