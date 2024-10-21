@@ -2,14 +2,58 @@ from io import TextIOWrapper
 
 import clevercsv as csv
 
-from mathesar.errors import InvalidTableError
 from db.constants import COLUMN_NAME_TEMPLATE
+from db.encoding_utils import get_sql_compatible_encoding
+from db.tables.operations.create import prepare_table_for_import
+from db.tables.operations.import_ import insert_csv_records
+
+from mathesar.errors import InvalidTableError
+from mathesar.models.base import DataFile
+from mathesar.imports.utils import process_column_names
 
 # The user-facing documentation replicates these delimiter characters. If you
-# change this variable, please update the documentation as well.
+# c, process_column_nameshange this variable, please update the documentation as well.
 ALLOWED_DELIMITERS = ",\t:|;"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
+
+
+def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
+    data_file = DataFile.objects.get(id=data_file_id)
+    file_path = data_file.file.path
+    header = data_file.header
+    if table_name is None or table_name == '':
+        table_name = data_file.base_name
+    dialect = csv.dialect.SimpleDialect(
+        data_file.delimiter,
+        data_file.quotechar,
+        data_file.escapechar
+    )
+    encoding = get_file_encoding(data_file.file)
+    conversion_encoding, sql_encoding = get_sql_compatible_encoding(encoding)
+    with open(file_path, 'rb') as csv_file:
+        csv_reader = get_sv_reader(csv_file, header, dialect)
+        column_names = process_column_names(csv_reader.fieldnames)
+    copy_sql, table_oid, db_table_name = prepare_table_for_import(
+        table_name,
+        schema_oid,
+        column_names,
+        header,
+        conn,
+        dialect.delimiter,
+        dialect.escapechar,
+        dialect.quotechar,
+        sql_encoding,
+        comment
+    )
+    insert_csv_records(
+        copy_sql,
+        file_path,
+        encoding,
+        conversion_encoding,
+        conn
+    )
+    return {"oid": table_oid, "name": db_table_name}
 
 
 def is_valid_csv(data):

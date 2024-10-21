@@ -10,7 +10,8 @@ from db.tables.operations.select import get_table_info, get_table, list_joinable
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
 from db.tables.operations.alter import alter_table_on_database
-from db.tables.operations.import_ import import_csv, get_preview
+from db.tables.operations.import_ import get_preview
+from mathesar.imports.csv import import_csv
 from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
