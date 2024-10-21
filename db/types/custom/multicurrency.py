@@ -3,7 +3,7 @@ from sqlalchemy import cast, text, func
 from sqlalchemy.types import UserDefinedType
 
 from db.types.base import MathesarCustomType
-from db.utils import ignore_duplicate_wrapper
+from db.deprecated.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.MULTICURRENCY_MONEY.id
 VALUE = 'value'

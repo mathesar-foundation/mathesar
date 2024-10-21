@@ -7,7 +7,7 @@ from db.tables.operations.select import reflect_table_from_oid
 from db.types.base import get_ma_qualified_schema
 from db.metadata import get_empty_metadata
 from db.types.custom.underlying_type import HasUnderlyingType
-from db.utils import ignore_duplicate_wrapper
+from db.deprecated.utils import ignore_duplicate_wrapper
 
 MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 DB_TYPE = MathesarCustomType.MATHESAR_MONEY.id

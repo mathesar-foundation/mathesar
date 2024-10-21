@@ -3,7 +3,7 @@ from sqlalchemy import and_, asc, select
 
 from db.connection import exec_msar_func
 from db.tables.operations.select import reflect_table_from_oid
-from db.utils import execute_statement, get_pg_catalog_table
+from db.deprecated.utils import execute_statement, get_pg_catalog_table
 
 
 def get_column_info_for_table(table, conn):

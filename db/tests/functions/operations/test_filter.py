@@ -1,7 +1,7 @@
 import re
 import pytest
 
-from db.utils import execute_pg_query
+from db.deprecated.utils import execute_pg_query
 
 from db.functions.base import (
     ColumnName, Not, Literal, Null, Equal, Greater, And, Or, StartsWith, Contains, StartsWithCaseInsensitive, ContainsCaseInsensitive

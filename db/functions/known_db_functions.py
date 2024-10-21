@@ -8,7 +8,7 @@ These variables were broken off into a discrete module to avoid circular imports
 
 import inspect
 
-from db.utils import get_module_members_that_satisfy
+from db.deprecated.utils import get_module_members_that_satisfy
 
 import db.functions.base
 import db.functions.packed

@@ -4,7 +4,7 @@ from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.compiler import compiles
 
 from db.types.base import MathesarCustomType
-from db.utils import ignore_duplicate_wrapper
+from db.deprecated.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_OBJECT.id
 

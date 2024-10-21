@@ -8,7 +8,7 @@ from psycopg import sql
 
 from db.types.base import MathesarCustomType, PostgresType, get_qualified_name
 from db.types.custom.underlying_type import HasUnderlyingType
-from db.utils import ignore_duplicate_wrapper
+from db.deprecated.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.URI.id
 

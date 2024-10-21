@@ -5,7 +5,7 @@ from sqlalchemy.ext.compiler import compiles
 
 from db.types.base import MathesarCustomType
 from db.types.custom.underlying_type import HasUnderlyingType
-from db.utils import ignore_duplicate_wrapper
+from db.deprecated.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 

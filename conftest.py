@@ -13,7 +13,7 @@ from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from db.deprecated.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
 from db.sql import install as sql_install
-from db.utils import get_pg_catalog_table
+from db.deprecated.utils import get_pg_catalog_table
 from db.metadata import get_empty_metadata
 
 from fixtures.utils import create_scoped_fixtures
