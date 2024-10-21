@@ -3,17 +3,17 @@ from django.urls import include, path, re_path
 from rest_framework_nested import routers
 
 from mathesar import views
-from mathesar.api.db import viewsets as db_viewsets
-from mathesar.api.ui import viewsets as ui_viewsets
+from mathesar.api.viewsets.data_files import DataFileViewSet
+from mathesar.api.viewsets.users import UserViewSet
 from mathesar.users.decorators import superuser_exist, superuser_must_not_exist
 from mathesar.users.password_reset import MathesarPasswordResetConfirmView
 from mathesar.users.superuser_create import SuperuserFormView
 
 db_router = routers.DefaultRouter()
-db_router.register(r'data_files', db_viewsets.DataFileViewSet, basename='data-file')
+db_router.register(r'data_files', DataFileViewSet, basename='data-file')
 
 ui_router = routers.DefaultRouter()
-ui_router.register(r'users', ui_viewsets.UserViewSet, basename='user')
+ui_router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),

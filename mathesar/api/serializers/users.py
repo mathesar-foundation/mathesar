@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import IncorrectOldPassword
-from mathesar.api.ui.permissions.users import UserAccessPolicy
+from mathesar.api.permissions.users import UserAccessPolicy
 from mathesar.models.users import User
 
 

@@ -5,11 +5,11 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from mathesar.api.ui.serializers.users import (
+from mathesar.api.serializers.users import (
     ChangePasswordSerializer, PasswordResetSerializer, UserSerializer,
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.ui.permissions.users import UserAccessPolicy
+from mathesar.api.permissions.users import UserAccessPolicy
 
 
 class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):

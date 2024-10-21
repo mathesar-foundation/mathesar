@@ -12,7 +12,7 @@ from mathesar.rpc.explorations import list_ as explorations_list
 from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
-from mathesar.api.ui.serializers.users import UserSerializer
+from mathesar.api.serializers.users import UserSerializer
 from mathesar import __version__
 
 
