@@ -2,7 +2,7 @@ import ast
 import os
 
 import psycopg
-import psycopg.sql
+from psycopg import sql
 import pytest
 
 
@@ -24,7 +24,7 @@ def get_msar_func_names(psycopg_connection):
         [...]
     }
     """
-    query = psycopg.sql.SQL(
+    query = sql.SQL(
         """
         WITH cte AS (
         SELECT proname AS name, jsonb_agg(pronargs) AS args
@@ -36,8 +36,6 @@ def get_msar_func_names(psycopg_connection):
     msar_func_args_count_map = {}
     with psycopg_connection as conn:
         msar_func_args_count_map = conn.execute(query).fetchone()[0]
-    # print(msar_func_args_count_map)
-    # assert True == False
     return msar_func_args_count_map
 
 
@@ -88,8 +86,8 @@ def find_exec_calls_in_project(directory):
     return all_exec_calling_functions
 
 
-@pytest.mark.parametrize("py_func_name,exec_sql_func_name,exec_sql_arg_count", find_exec_calls_in_project("db/"))
-def test_db_wrapper(get_msar_func_names, py_func_name, exec_sql_func_name, exec_sql_arg_count):
+@pytest.mark.parametrize("_,exec_sql_func_name,exec_sql_arg_count", find_exec_calls_in_project("db/"))
+def test_db_wrapper(get_msar_func_names, _, exec_sql_func_name, exec_sql_arg_count):
     """Tests to make sure every SQL function is correctly wired up."""
     assert exec_sql_func_name in get_msar_func_names.keys()
     assert exec_sql_arg_count in get_msar_func_names[exec_sql_func_name]
