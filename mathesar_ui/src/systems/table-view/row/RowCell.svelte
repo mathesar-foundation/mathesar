@@ -54,7 +54,11 @@
   export let currentRoleTablePrivileges: Set<TablePrivilege>;
 
   $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
+
+  // To be used in case of publicly shared links where user should not be able
+  // to view linked tables & explorations
   const canViewLinkedEntities = true;
+
   $: recordsDataState = recordsData.state;
   $: ({ linkedRecordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
@@ -64,15 +68,16 @@
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
   $: clientErrors = $clientSideErrorMap.get(key) ?? [];
   $: errors = [...serverErrors, ...clientErrors];
-  $: canSetNull = column.nullable && value !== null;
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
+  $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
   // TODO_BETA: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
   $: isEditable =
+    isTableEditable &&
     !column.primary_key &&
-    currentRoleTablePrivileges.has('UPDATE') &&
     processedColumn.currentRolePrivileges.has('UPDATE');
+  $: canSetNull = isEditable && column.nullable && value !== null;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table_oid, recordId: value })
@@ -166,7 +171,12 @@
     <!-- Row -->
     <MenuDivider />
     <MenuHeading>{$_('row')}</MenuHeading>
-    <RowContextOptions recordPk={rowKey} {recordsData} {row} />
+    <RowContextOptions
+      recordPk={rowKey}
+      {recordsData}
+      {row}
+      {isTableEditable}
+    />
   </ContextMenu>
   {#if errors.length}
     <CellErrors {errors} forceShowErrors={isActive} />
