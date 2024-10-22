@@ -42,9 +42,8 @@ def get_msar_func_names(psycopg_connection):
 def find_exec_calls_in_project(directory):
     """
     Returns a list of tuples specifing all the python function calling exec_msar_func in a given directory.
-    Each tuple signify a different file in the directory and the file in which no exec calls are made is filtered out from the result.
     Each tuple has the following form:
-        ('name_of_python_function', 'name_of_sql_function_in_exec_call', count_of_args_for_sql_function_in_exec_call), [...])
+        ('name_of_python_function', 'name_of_sql_function_in_exec_call', count_of_args_for_sql_function_in_exec_call), [...]
     """
     def find_exec_calls_in_file(filepath):
         exec_calling_functions = []
@@ -93,4 +92,6 @@ def test_db_wrapper(get_msar_func_names, _, exec_sql_func_name, exec_sql_arg_cou
     assert exec_sql_arg_count in get_msar_func_names[exec_sql_func_name]
 
 
-# TODO: ensure that we never have a call to exec_msar_func from mathesar/
+def test_no_exec_calls_from_mathesar():
+    """Test to ensure that we never have a call to exec_msar_func from mathesar/"""
+    assert len(find_exec_calls_in_project("mathesar/")) == 0
