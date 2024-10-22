@@ -4,12 +4,10 @@ import pytest
 from sqlalchemy import (
     INTEGER, ForeignKey, VARCHAR, CHAR, NUMERIC
 )
-from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSON
+from sqlalchemy.dialects.postgresql import ARRAY, JSON
 from sqlalchemy.sql.sqltypes import NullType
 
 from db.columns.base import MathesarColumn
-from db.columns.defaults import DEFAULT_COLUMNS
-from db.columns.utils import get_default_mathesar_column_list
 from db.types.custom import email, datetime
 from db.types.base import MathesarCustomType, PostgresType, UnknownType
 
@@ -108,73 +106,6 @@ def test_MC_inits_with_server_default_none(column_builder):
 def test_MC_inits_with_engine_empty(column_builder):
     col = column_builder("some_col", VARCHAR)
     assert col.server_default is None
-
-
-def test_MC_is_default_when_true():
-    for default_col in get_default_mathesar_column_list():
-        assert default_col.is_default
-
-
-def test_MC_is_default_with_uuid_col():
-    col = MathesarColumn('id', UUID, primary_key=True, nullable=False)
-    assert not col.is_default
-
-
-def test_MC_is_default_when_false_for_name():
-    for default_col in DEFAULT_COLUMNS:
-        dc_definition = DEFAULT_COLUMNS[default_col]
-        col = MathesarColumn(
-            "definitely_not_a_default",
-            dc_definition["sa_type"],
-            primary_key=dc_definition.get("primary_key", False),
-            nullable=dc_definition.get("nullable", True),
-        )
-        assert not col.is_default
-
-
-def test_MC_is_default_when_false_for_type():
-    for default_col in DEFAULT_COLUMNS:
-        dc_definition = DEFAULT_COLUMNS[default_col]
-        changed_type = INTEGER if dc_definition["sa_type"] == VARCHAR else VARCHAR
-        col = MathesarColumn(
-            default_col,
-            changed_type,
-            primary_key=dc_definition.get("primary_key", False),
-            nullable=dc_definition.get("nullable", True),
-        )
-        assert not col.is_default
-
-
-def test_MC_is_default_when_false_for_pk():
-    for default_col in DEFAULT_COLUMNS:
-        dc_definition = DEFAULT_COLUMNS[default_col]
-        not_pk = not dc_definition.get("primary_key", False),
-        col = MathesarColumn(
-            default_col,
-            dc_definition["sa_type"],
-            primary_key=not_pk,
-            nullable=dc_definition.get("nullable", True),
-        )
-        assert not col.is_default
-
-
-def test_MC_valid_target_types_no_engine():
-    mc = MathesarColumn('testable_col', VARCHAR)
-    assert mc.valid_target_types is None
-
-
-def test_MC_valid_target_types_default_engine(engine):
-    mc = MathesarColumn('testable_col', PostgresType.CHARACTER_VARYING.get_sa_class(engine))
-    mc.add_engine(engine)
-    assert mc.valid_target_types is not None
-    assert PostgresType.CHARACTER_VARYING in mc.valid_target_types
-
-
-def test_MC_valid_target_types_custom_engine(engine):
-    mc = MathesarColumn('testable_col', VARCHAR)
-    mc.add_engine(engine)
-    assert mc.valid_target_types is not None
-    assert MathesarCustomType.EMAIL in mc.valid_target_types
 
 
 def test_MC_type_no_opts(engine):

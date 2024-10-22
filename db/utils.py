@@ -32,38 +32,6 @@ def execute_pg_query(engine, query, connection_to_use=None):
     return execute_statement(engine, executable, connection_to_use=connection_to_use).fetchall()
 
 
-# TODO refactor to use @functools.total_ordering
-class OrderByIds:
-    """
-    A mixin for ordering based on ids; useful at least for type enums in testing.
-    """
-
-    id = None
-
-    def __ge__(self, other):
-        if self._ordering_supported(other):
-            return self.id >= other.id
-        return NotImplemented
-
-    def __gt__(self, other):
-        if self._ordering_supported(other):
-            return self.id > other.id
-        return NotImplemented
-
-    def __le__(self, other):
-        if self._ordering_supported(other):
-            return self.id <= other.id
-        return NotImplemented
-
-    def __lt__(self, other):
-        if self._ordering_supported(other):
-            return self.id < other.id
-        return NotImplemented
-
-    def _ordering_supported(self, other):
-        return hasattr(other, 'id')
-
-
 def get_module_members_that_satisfy(module, predicate):
     """
     Looks at the members of the provided module and filters them using the provided predicate.
@@ -103,6 +71,7 @@ def get_pg_catalog_table(table_name, engine, metadata):
     return table
 
 
+# TODO REMOVE THIS!!
 def ignore_duplicate_wrapper(stmt):
     return f"""
     DO $$ BEGIN

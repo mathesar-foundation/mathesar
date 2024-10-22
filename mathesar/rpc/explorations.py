@@ -100,10 +100,6 @@ class ExplorationResult(TypedDict):
         column_metadata: A dict describing the metadata applied to included columns.
         limit: Specifies the max number of rows returned.(default 100)
         offset: Specifies the number of rows skipped.(default 0)
-        filter: A dict describing filters applied to an exploration.
-        order_by: The ordering applied to the columns of an exploration.
-        search: Specifies a list of dicts containing column names and searched expression.
-        duplicate_only: A list of column names for which you want duplicate records.
     """
     query: dict
     records: dict
@@ -111,10 +107,6 @@ class ExplorationResult(TypedDict):
     column_metadata: dict
     limit: Optional[int]
     offset: Optional[int]
-    filter: Optional[dict]
-    order_by: Optional[list[dict]]
-    search: Optional[list[dict]]
-    duplicate_only: Optional[list]
 
     @classmethod
     def from_dict(cls, e):
@@ -125,10 +117,6 @@ class ExplorationResult(TypedDict):
             column_metadata=e["column_metadata"],
             limit=e.get("limit", None),
             offset=e.get("offset", None),
-            filter=e.get("filter", None),
-            order_by=e.get("order_by", None),
-            search=e.get("search", None),
-            duplicate_only=e.get("duplicate_only", None),
         )
 
 

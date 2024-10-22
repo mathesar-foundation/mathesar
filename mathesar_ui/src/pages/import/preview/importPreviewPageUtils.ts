@@ -2,7 +2,6 @@ import { dataFilesApi } from '@mathesar/api/rest/dataFiles';
 import type { DataFile } from '@mathesar/api/rest/types/dataFiles';
 import type { Column } from '@mathesar/api/rpc/columns';
 import { getCellCap } from '@mathesar/components/cell-fabric/utils';
-import type { Database } from '@mathesar/models/Database';
 import type { Schema } from '@mathesar/models/Schema';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';

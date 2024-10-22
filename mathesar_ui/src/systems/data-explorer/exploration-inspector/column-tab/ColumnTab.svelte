@@ -11,7 +11,7 @@
   } from '@mathesar-component-library';
 
   import QueryManager from '../../QueryManager';
-  import type QueryRunner from '../../QueryRunner';
+  import type { QueryRunner } from '../../QueryRunner';
 
   import ColumnSource from './ColumnSource.svelte';
   import DeleteColumnAction from './DeleteColumnAction.svelte';

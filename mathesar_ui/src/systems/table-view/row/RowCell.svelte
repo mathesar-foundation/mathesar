@@ -2,8 +2,10 @@
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import {
+    type RequestStatus,
+    States,
+  } from '@mathesar/api/rest/utils/requestUtils';
   import type { TablePrivilege } from '@mathesar/api/rpc/tables';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
@@ -31,7 +33,7 @@
     LinkMenuItem,
     MenuDivider,
     MenuHeading,
-    WritableMap,
+    type WritableMap,
   } from '@mathesar-component-library';
 
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';

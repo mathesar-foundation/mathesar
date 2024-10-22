@@ -4,10 +4,7 @@ from sqlalchemy import text, select, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
 from db.types.custom import email
 from db.types.base import PostgresType
-from db.utils import execute_pg_query
-from db.functions.base import ColumnName, Literal, sa_call_sql_function
-from db.functions.packed import EmailDomainContains, EmailDomainEquals
-from db.functions.operations.apply import apply_db_function_as_filter
+from db.functions.base import sa_call_sql_function
 
 
 def test_domain_func_wrapper(engine_with_schema):
@@ -102,22 +99,3 @@ def test_create_email_type_domain_checks_broken_emails(engine_with_schema):
                 )
             )
         assert type(e.orig) is CheckViolation
-
-
-@pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
-    (EmailDomainContains, "mail", 588),
-    (EmailDomainEquals, "gmail.com", 303),
-    (EmailDomainContains, "krista", 0),
-    (EmailDomainEquals, "kristaramirez@yahoo.com", 0),
-])
-def test_email_db_functions(roster_table_obj, main_db_function, literal_param, expected_count):
-    table, engine = roster_table_obj
-    selectable = table.select()
-    email_column_name = "Teacher Email"
-    db_function = main_db_function([
-        ColumnName([email_column_name]),
-        Literal([literal_param]),
-    ])
-    query = apply_db_function_as_filter(selectable, db_function)
-    record_list = execute_pg_query(engine, query)
-    assert len(record_list) == expected_count
