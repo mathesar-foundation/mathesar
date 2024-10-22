@@ -1,9 +1,10 @@
 from enum import Enum
-from sqlalchemy import case, func, and_
+from sqlalchemy import case, func, and_, cast
 from sqlalchemy.dialects.postgresql import (
     CHAR as SA_CHAR,
     DATE as SA_DATE,
     INTERVAL as SA_INTERVAL,
+    JSONB as SA_JSONB,
     TIME as SA_TIME,
     TIMESTAMP as SA_TIMESTAMP,
     TEXT as SA_TEXT,
@@ -12,11 +13,18 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.types import TypeDecorator, UserDefinedType
 
 from db.types.base import PostgresType, MathesarCustomType
-from db.types.custom import money, multicurrency, json_object, json_array
+from db.types.custom import money, multicurrency
 from db.types.custom.underlying_type import HasUnderlyingType
 from db.types.exceptions import InvalidTypeParameters
 
 from frozendict import frozendict
+
+
+EMAIL_DB_TYPE = MathesarCustomType.EMAIL.id
+EMAIL_DOMAIN_NAME = EMAIL_DB_TYPE + "_domain_name"
+JSON_ARR_DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
+JSON_OBJ_DB_TYPE = MathesarCustomType.MATHESAR_JSON_OBJECT.id
+URI_DB_TYPE = MathesarCustomType.URI.id
 
 
 class CHAR(TypeDecorator):
@@ -45,10 +53,6 @@ class DATE(TypeDecorator):
         format_str = "YYYY-MM-DD AD"
 
         return func.to_char(column, format_str)
-
-
-EMAIL_DB_TYPE = MathesarCustomType.EMAIL.id
-EMAIL_DOMAIN_NAME = EMAIL_DB_TYPE + "_domain_name"
 
 
 class Email(UserDefinedType, HasUnderlyingType):
@@ -129,6 +133,53 @@ class Interval(TypeDecorator, HasUnderlyingType):
                 'S',
             )
         )
+
+
+class MathesarJsonArray(TypeDecorator, HasUnderlyingType):
+    impl = SA_JSONB
+    cache_ok = True
+    underlying_type = impl
+
+    def get_col_spec(self, **_):
+        return JSON_ARR_DB_TYPE.upper()
+
+    def column_expression(self, column):
+        return cast(column, SA_TEXT)
+
+    def coerce_compared_value(self, op, value):
+        return self.impl.coerce_compared_value(op, value)
+
+
+@compiles(MathesarJsonArray, 'postgresql')
+def _compile_mathesarjsonarray(element, compiler, **kw):
+    unchanged_compiled_string = compiler.visit_JSONB(element, **kw)
+    unchanged_id = "JSONB"
+    changed_id = MathesarCustomType.MATHESAR_JSON_ARRAY.id.upper()
+    changed_compiled_string = unchanged_compiled_string.replace(unchanged_id, changed_id)
+    return changed_compiled_string
+
+
+class MathesarJsonObject(TypeDecorator):
+    impl = SA_JSONB
+    cache_ok = True
+
+    def get_col_spec(self, **_):
+        return JSON_OBJ_DB_TYPE.upper()
+
+    def column_expression(self, column):
+        return cast(column, SA_TEXT)
+
+    def coerce_compared_value(self, op, value):
+        return self.impl.coerce_compared_value(op, value)
+
+
+@compiles(MathesarJsonObject, 'postgresql')
+def _compile_mathesarjsonobject(element, compiler, **kw):
+    unchanged_compiled_string = compiler.visit_JSONB(element, **kw)
+    unchanged_id = "JSONB"
+    changed_id = MathesarCustomType.MATHESAR_JSON_OBJECT.id.upper()
+    changed_compiled_string = unchanged_compiled_string.replace(unchanged_id, changed_id)
+    return changed_compiled_string
 
 
 class TIME_WITH_TIME_ZONE(TypeDecorator):
@@ -299,9 +350,6 @@ class TIMESTAMP_WITHOUT_TIME_ZONE(TypeDecorator):
         )
 
 
-URI_DB_TYPE = MathesarCustomType.URI.id
-
-
 class URIFunction(Enum):
     PARTS = URI_DB_TYPE + "_parts"
     SCHEME = URI_DB_TYPE + "_scheme"
@@ -334,7 +382,7 @@ CUSTOM_DB_TYPE_TO_SA_CLASS = frozendict(
         PostgresType.TIMESTAMP_WITH_TIME_ZONE: TIMESTAMP_WITH_TIME_ZONE,
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE: TIMESTAMP_WITHOUT_TIME_ZONE,
         MathesarCustomType.URI: URI,
-        MathesarCustomType.MATHESAR_JSON_OBJECT: json_object.MathesarJsonObject,
-        MathesarCustomType.MATHESAR_JSON_ARRAY: json_array.MathesarJsonArray,
+        MathesarCustomType.MATHESAR_JSON_OBJECT: MathesarJsonObject,
+        MathesarCustomType.MATHESAR_JSON_ARRAY: MathesarJsonArray,
     }
 )
