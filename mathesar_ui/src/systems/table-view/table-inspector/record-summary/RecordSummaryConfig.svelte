@@ -31,7 +31,7 @@
 
   $: ({ recordsData, columnsDataStore, isLoading } = tabularData);
   $: ({ columns } = columnsDataStore);
-  $: ({ savedRecords, linkedRecordSummaries: recordSummaries } = recordsData);
+  $: ({ savedRecords, linkedRecordSummaries } = recordsData);
   $: firstRow = $savedRecords[0] as RecordRow | undefined;
   $: initialCustomized = table.metadata?.record_summary_customized ?? false;
   $: initialTemplate = table.metadata?.record_summary_template ?? '';
@@ -56,7 +56,7 @@
     // return renderRecordSummaryForRow({
     //   template: $template,
     //   record,
-    //   transitiveData: $recordSummaries,
+    //   transitiveData: $linkedRecordSummaries,
     // });
     return '';
   })();

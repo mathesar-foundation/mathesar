@@ -2,8 +2,12 @@ import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { ImmutableMap } from '@mathesar/component-library';
 
 import type { RowStatus } from '../meta';
-import type { CellKey, RowKey } from '../utils';
-import { ROW_HAS_CELL_ERROR_MSG, getRowStatus } from '../utils';
+import {
+  type CellKey,
+  ROW_HAS_CELL_ERROR_MSG,
+  type RowKey,
+  getRowStatus,
+} from '../utils';
 
 describe('getRowStatus', () => {
   interface TestCase {

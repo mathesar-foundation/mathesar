@@ -25,7 +25,7 @@
   } from '@mathesar-component-library';
 
   import QueryManager from '../QueryManager';
-  import type QueryRunner from '../QueryRunner';
+  import type { QueryRunner } from '../QueryRunner';
 
   const dispatch = createEventDispatcher();
 

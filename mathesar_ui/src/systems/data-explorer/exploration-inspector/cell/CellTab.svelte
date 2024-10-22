@@ -1,7 +1,7 @@
 <script lang="ts">
   import CellInspector from '@mathesar/components/inspector/cell/CellInspector.svelte';
 
-  import type QueryRunner from '../../QueryRunner';
+  import type { QueryRunner } from '../../QueryRunner';
 
   import { getSelectedCellData } from './cellTabUtils';
 

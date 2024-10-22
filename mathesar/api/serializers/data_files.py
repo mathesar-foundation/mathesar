@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.errors import URLNotReachable, URLInvalidContentTypeError
-from mathesar.models.deprecated import DataFile
+from mathesar.models.base import DataFile
 
 SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
 
@@ -21,7 +21,7 @@ class DataFileSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
     class Meta:
         model = DataFile
         fields = [
-            'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter',
+            'id', 'file', 'user', 'header', 'delimiter',
             'escapechar', 'quotechar', 'paste', 'url', 'created_from', 'max_level', 'sheet_index'
         ]
         extra_kwargs = {
@@ -32,7 +32,7 @@ class DataFileSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         }
         # We only currently support importing to a new table, so setting a table via API is invalid.
         # User should be set automatically, not submitted via the API.
-        read_only_fields = ['user', 'table_imported_to', 'created_from']
+        read_only_fields = ['user', 'created_from']
         write_only_fields = ['paste', 'url']
 
     def save(self, **kwargs):

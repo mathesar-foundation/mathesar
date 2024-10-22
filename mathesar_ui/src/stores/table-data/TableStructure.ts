@@ -1,5 +1,4 @@
-import type { Readable } from 'svelte/store';
-import { derived } from 'svelte/store';
+import { type Readable, derived } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
@@ -9,10 +8,8 @@ import type { Table } from '@mathesar/models/Table';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 
 import { ColumnsDataStore } from './columns';
-import type { ConstraintsData } from './constraints';
-import { ConstraintsDataStore } from './constraints';
-import type { ProcessedColumnsStore } from './processedColumns';
-import { processColumn } from './processedColumns';
+import { type ConstraintsData, ConstraintsDataStore } from './constraints';
+import { type ProcessedColumnsStore, processColumn } from './processedColumns';
 
 export interface TableStructureProps {
   database: Pick<Database, 'id'>;

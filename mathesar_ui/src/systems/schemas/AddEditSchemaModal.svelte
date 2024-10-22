@@ -3,7 +3,6 @@
   import { _ } from 'svelte-i18n';
 
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import NameAndDescInputModalForm from '@mathesar/components/NameAndDescInputModalForm.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';

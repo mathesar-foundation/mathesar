@@ -3,10 +3,7 @@ import pytest
 from sqlalchemy import text, select, Table, MetaData, Column
 from sqlalchemy.exc import IntegrityError
 from db.types.custom import uri
-from db.utils import execute_pg_query
-from db.functions.base import ColumnName, Contains, Literal, sa_call_sql_function
-from db.functions.packed import URIAuthorityContains, URISchemeEquals
-from db.functions.operations.apply import apply_db_function_as_filter
+from db.functions.base import sa_call_sql_function
 from db.types.base import PostgresType
 
 
@@ -225,22 +222,3 @@ def test_uri_type_domain_rejects_malformed_uris(engine_with_schema, test_str):
         with engine.begin() as conn:
             conn.execute(text(f"SELECT '{test_str}'::{uri.DB_TYPE}"))
         assert type(e.orig) is CheckViolation
-
-
-@pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
-    (URIAuthorityContains, "soundcloud", 4),
-    (URIAuthorityContains, "http", 0),
-    (URISchemeEquals, "ftp", 2),
-    (Contains, ".com/31421017", 1),
-])
-def test_uri_db_functions(uris_table_obj, main_db_function, literal_param, expected_count):
-    table, engine = uris_table_obj
-    selectable = table.select()
-    uris_column_name = "uri"
-    db_function = main_db_function([
-        ColumnName([uris_column_name]),
-        Literal([literal_param]),
-    ])
-    query = apply_db_function_as_filter(selectable, db_function)
-    record_list = execute_pg_query(engine, query)
-    assert len(record_list) == expected_count

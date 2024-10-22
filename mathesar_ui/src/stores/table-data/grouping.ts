@@ -1,5 +1,4 @@
 import type { RecordsListParams } from '@mathesar/api/rpc/records';
-import { isDefinedNonNullable } from '@mathesar/component-library';
 
 export interface GroupEntry {
   readonly columnId: number;

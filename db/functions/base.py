@@ -1,15 +1,8 @@
 """
-This namespace defines the DBFunction abstract class and its subclasses. These subclasses
-represent functions that have identifiers, display names and hints, and their instances
-hold parameters. Each DBFunction subclass defines how its instance can be converted into an
-SQLAlchemy expression.
-
-Hints hold information about what kind of input the function might expect and what output
-can be expected from it. This is used to provide interface information without constraining its
-user.
-
-These classes might be used, for example, to define a filter for an SQL query, or to
-access hints on what composition of functions and parameters should be valid.
+This namespace defines the DBFunction abstract class and its subclasses. These
+subclasses represent functions that have identifiers and display names, and
+their instances hold parameters. Each DBFunction subclass defines how its
+instance can be converted into an SQLAlchemy expression.
 """
 
 from abc import ABC, abstractmethod
@@ -21,7 +14,6 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
 
 from db.engine import get_dummy_engine
-from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
 from db.types.base import PostgresType
 from db.types.custom.json_array import MathesarJsonArray
@@ -70,7 +62,6 @@ def sa_call_sql_function(function_name, *parameters, return_type=None):
 class DBFunction(ABC):
     id = None
     name = None
-    hints = None
 
     # Optionally lists the SQL functions this DBFunction depends on.
     # Will be checked against SQL functions defined on a database to tell if it
@@ -117,10 +108,6 @@ class DBFunction(ABC):
 class Literal(DBFunction):
     id = 'literal'
     name = 'as literal'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(0, hints.literal),
-    ])
 
     @staticmethod
     def to_sa_expression(primitive):
@@ -133,10 +120,6 @@ class Noop(DBFunction):
     which doesn't play nicely with the type conversion between python classes and db types in psycopg2."""
     id = 'noop'
     name = 'no wrapping'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(0, hints.literal),
-    ])
 
     @staticmethod
     def to_sa_expression(primitive):
@@ -153,10 +136,6 @@ class ColumnName(DBFunction):
     """
     id = 'column_name'
     name = 'as column name'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(0, hints.column),
-    ])
 
     @property
     def column(self):
@@ -179,12 +158,6 @@ class List(DBFunction):
 class Null(DBFunction):
     id = 'null'
     name = 'is null'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(1),
-        hints.parameter(0, hints.any),
-        hints.mathesar_filter,
-    ])
 
     @staticmethod
     def to_sa_expression(value):
@@ -194,9 +167,6 @@ class Null(DBFunction):
 class Not(DBFunction):
     id = 'not'
     name = 'negate'
-    hints = tuple([
-        hints.returns(hints.boolean),
-    ])
 
     @staticmethod
     def to_sa_expression(*values):
@@ -210,13 +180,6 @@ class Not(DBFunction):
 class Equal(DBFunction):
     id = 'equal'
     name = 'is equal to'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.any),
-        hints.mathesar_filter,
-        hints.use_this_alias_when("is same as", hints.point_in_time),
-    ])
 
     @staticmethod
     def to_sa_expression(value1, value2):
@@ -226,13 +189,6 @@ class Equal(DBFunction):
 class Greater(DBFunction):
     id = 'greater'
     name = 'is greater than'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.comparable),
-        hints.mathesar_filter,
-        hints.use_this_alias_when("is after", hints.point_in_time),
-    ])
 
     @staticmethod
     def to_sa_expression(value1, value2):
@@ -242,13 +198,6 @@ class Greater(DBFunction):
 class Lesser(DBFunction):
     id = 'lesser'
     name = 'is lesser than'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.comparable),
-        hints.mathesar_filter,
-        hints.use_this_alias_when("is before", hints.point_in_time),
-    ])
 
     @staticmethod
     def to_sa_expression(value1, value2):
@@ -258,12 +207,6 @@ class Lesser(DBFunction):
 class In(DBFunction):
     id = 'in'
     name = 'is in'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.any),
-        hints.parameter(1, hints.array),
-    ])
 
     @staticmethod
     def to_sa_expression(value1, value2):
@@ -273,9 +216,6 @@ class In(DBFunction):
 class And(DBFunction):
     id = 'and'
     name = 'and'
-    hints = tuple([
-        hints.returns(hints.boolean),
-    ])
 
     @staticmethod
     def to_sa_expression(*values):
@@ -285,9 +225,6 @@ class And(DBFunction):
 class Or(DBFunction):
     id = 'or'
     name = 'or'
-    hints = tuple([
-        hints.returns(hints.boolean),
-    ])
 
     @staticmethod
     def to_sa_expression(*values):
@@ -297,11 +234,6 @@ class Or(DBFunction):
 class StartsWith(DBFunction):
     id = 'starts_with'
     name = 'starts with'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.string_like),
-    ])
 
     @staticmethod
     def to_sa_expression(string, prefix):
@@ -312,11 +244,6 @@ class StartsWith(DBFunction):
 class Contains(DBFunction):
     id = 'contains'
     name = 'contains'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.string_like),
-    ])
 
     @staticmethod
     def to_sa_expression(string, sub_string):
@@ -327,12 +254,6 @@ class Contains(DBFunction):
 class StartsWithCaseInsensitive(DBFunction):
     id = 'starts_with_case_insensitive'
     name = 'starts with'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.string_like),
-        hints.mathesar_filter,
-    ])
 
     @staticmethod
     def to_sa_expression(string, prefix):
@@ -343,12 +264,6 @@ class StartsWithCaseInsensitive(DBFunction):
 class ContainsCaseInsensitive(DBFunction):
     id = 'contains_case_insensitive'
     name = 'contains'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.string_like),
-        hints.mathesar_filter,
-    ])
 
     @staticmethod
     def to_sa_expression(string, sub_string):
@@ -359,12 +274,6 @@ class ContainsCaseInsensitive(DBFunction):
 class ToLowercase(DBFunction):
     id = 'to_lowercase'
     name = 'to lowercase'
-    hints = tuple([
-        hints.returns(hints.string_like),
-        hints.parameter_count(1),
-        hints.all_parameters(hints.string_like),
-        hints.mathesar_filter,
-    ])
 
     @staticmethod
     def to_sa_expression(string):
@@ -374,9 +283,6 @@ class ToLowercase(DBFunction):
 class Count(DBFunction):
     id = 'count'
     name = 'count'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -386,9 +292,6 @@ class Count(DBFunction):
 class Max(DBFunction):
     id = 'max'
     name = 'max'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -398,9 +301,6 @@ class Max(DBFunction):
 class Mode(DBFunction):
     id = 'mode'
     name = 'mode'
-    hints = tuple([
-        hints.aggregation
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -410,9 +310,6 @@ class Mode(DBFunction):
 class PeakTime(DBFunction):
     id = 'peak_time'
     name = 'peak_time'
-    hints = tuple([
-        hints.aggregation
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -423,9 +320,6 @@ class PeakTime(DBFunction):
 class PeakMonth(DBFunction):
     id = 'peak_month'
     name = 'peak_month'
-    hints = tuple([
-        hints.aggregation
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -436,9 +330,6 @@ class PeakMonth(DBFunction):
 class Min(DBFunction):
     id = 'min'
     name = 'min'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -448,9 +339,6 @@ class Min(DBFunction):
 class Mean(DBFunction):
     id = 'mean'
     name = 'mean'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -460,9 +348,6 @@ class Mean(DBFunction):
 class ArrayAgg(DBFunction):
     id = 'aggregate_to_array'
     name = 'aggregate to array'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -473,9 +358,6 @@ class ArrayAgg(DBFunction):
 class Sum(DBFunction):
     id = 'sum'
     name = 'sum'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -485,9 +367,6 @@ class Sum(DBFunction):
 class Percentage_True(DBFunction):
     id = 'percentage_true'
     name = 'percentage_true'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -498,9 +377,6 @@ class Percentage_True(DBFunction):
 class Median(DBFunction):
     id = 'median'
     name = 'median'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     @staticmethod
     def to_sa_expression(column_expr):
@@ -519,12 +395,6 @@ class Distinct(DBFunction):
 class ArrayContains(DBFunction):
     id = 'array_contains'
     name = 'contains'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.array),
-        hints.parameter(1, hints.array),
-    ])
 
     @staticmethod
     def to_sa_expression(value1, value2):
@@ -539,13 +409,6 @@ class ArrayContains(DBFunction):
 class ArrayLength(DBFunction):
     id = 'array_length'
     name = 'length'
-    hints = tuple([
-        hints.returns(hints.comparable),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.array),
-        hints.parameter(1, hints.any),
-        hints.mathesar_filter
-    ])
 
     @staticmethod
     def to_sa_expression(value, dimension):
@@ -570,10 +433,6 @@ class ArrayLength(DBFunction):
 class Alias(DBFunction):
     id = 'alias'
     name = 'alias'
-    hints = tuple([
-        hints.parameter_count(2),
-        hints.parameter(0, hints.column),
-    ])
 
     @staticmethod
     def to_sa_expression(expr, alias):
@@ -583,12 +442,6 @@ class Alias(DBFunction):
 class JsonArrayLength(DBFunction):
     id = 'json_array_length'
     name = 'length'
-    hints = tuple([
-        hints.returns(hints.comparable),
-        hints.parameter_count(1),
-        hints.parameter(0, hints.json_array),
-        hints.mathesar_filter,
-    ])
 
     @staticmethod
     def to_sa_expression(value):
@@ -598,12 +451,6 @@ class JsonArrayLength(DBFunction):
 class JsonArrayContains(DBFunction):
     id = 'json_array_contains'
     name = 'contains'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.json_array),
-        hints.parameter(1, hints.array),
-    ])
 
     @staticmethod
     def to_sa_expression(value1, value2):
@@ -618,10 +465,6 @@ class JsonArrayContains(DBFunction):
 class ExtractURIAuthority(DBFunction):
     id = 'extract_uri_authority'
     name = 'extract URI authority'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(1, hints.uri),
-    ])
     depends_on = tuple([URIFunction.AUTHORITY])
 
     @staticmethod
@@ -632,10 +475,6 @@ class ExtractURIAuthority(DBFunction):
 class ExtractURIScheme(DBFunction):
     id = 'extract_uri_scheme'
     name = 'extract URI scheme'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(1, hints.uri),
-    ])
     depends_on = tuple([URIFunction.SCHEME])
 
     @staticmethod
@@ -646,7 +485,6 @@ class ExtractURIScheme(DBFunction):
 class TruncateToYear(DBFunction):
     id = 'truncate_to_year'
     name = 'Truncate to Year'
-    hints = tuple([hints.parameter_count(1)])  # TODO extend hints
 
     @staticmethod
     def to_sa_expression(col):
@@ -656,7 +494,6 @@ class TruncateToYear(DBFunction):
 class TruncateToMonth(DBFunction):
     id = 'truncate_to_month'
     name = 'Truncate to Month'
-    hints = tuple([hints.parameter_count(1)])  # TODO extend hints
 
     @staticmethod
     def to_sa_expression(col):
@@ -666,7 +503,6 @@ class TruncateToMonth(DBFunction):
 class TruncateToDay(DBFunction):
     id = 'truncate_to_day'
     name = 'Truncate to Day'
-    hints = tuple([hints.parameter_count(1)])  # TODO extend hints
 
     @staticmethod
     def to_sa_expression(col):
@@ -676,7 +512,6 @@ class TruncateToDay(DBFunction):
 class CurrentDate(DBFunction):
     id = 'current_date'
     name = 'current date'
-    hints = tuple([hints.returns(hints.date), hints.parameter_count(0)])
 
     @staticmethod
     def to_sa_expression():
@@ -686,7 +521,6 @@ class CurrentDate(DBFunction):
 class CurrentTime(DBFunction):
     id = 'current_time'
     name = 'current time'
-    hints = tuple([hints.returns(hints.time), hints.parameter_count(0)])
 
     @staticmethod
     def to_sa_expression():
@@ -698,7 +532,6 @@ class CurrentTime(DBFunction):
 class CurrentDateTime(DBFunction):
     id = 'current_datetime'
     name = 'current datetime'
-    hints = tuple([hints.returns(hints.date, hints.time), hints.parameter_count(0)])
 
     @staticmethod
     def to_sa_expression():
@@ -710,10 +543,6 @@ class CurrentDateTime(DBFunction):
 class ExtractEmailDomain(DBFunction):
     id = 'extract_email_domain'
     name = 'extract email domain'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(1, hints.email),
-    ])
     depends_on = tuple([EMAIL_DOMAIN_NAME])
 
     @staticmethod
