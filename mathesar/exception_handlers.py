@@ -8,7 +8,7 @@ from rest_framework.views import exception_handler
 from rest_framework_friendly_errors.settings import FRIENDLY_EXCEPTION_DICT
 from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError as sqla_OperationalError
 from psycopg.errors import OperationalError as pspg_OperationalError
-from db.types.exceptions import UnsupportedTypeException
+from db.deprecated.types.exceptions import UnsupportedTypeException
 from mathesar.api.exceptions.database_exceptions import (
     base_exceptions as base_api_exceptions,
     exceptions as database_api_exceptions,

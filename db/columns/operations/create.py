@@ -3,7 +3,7 @@ import json
 
 from db import connection as db_conn
 from db.columns.defaults import DEFAULT, NAME, NULLABLE, DESCRIPTION
-from db.types.base import PostgresType
+from db.deprecated.types.base import PostgresType
 
 
 def add_columns_to_table(table_oid, column_data_list, conn):

@@ -1,6 +1,6 @@
 import json
 from db.connection import exec_msar_func
-from db.types.base import PostgresType
+from db.deprecated.types.base import PostgresType
 
 
 def create_table_on_database(

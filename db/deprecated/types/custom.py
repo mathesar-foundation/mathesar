@@ -14,9 +14,8 @@ from sqlalchemy.dialects.postgresql import (
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.types import TypeDecorator, UserDefinedType
 
-from db.types.base import PostgresType, MathesarCustomType
-from db.types.custom.underlying_type import HasUnderlyingType
-from db.types.exceptions import InvalidTypeParameters
+from db.deprecated.types.base import PostgresType, MathesarCustomType
+from db.deprecated.types.exceptions import InvalidTypeParameters
 
 from frozendict import frozendict
 
@@ -28,6 +27,13 @@ JSON_OBJ_DB_TYPE = MathesarCustomType.MATHESAR_JSON_OBJECT.id
 MONEY_DB_TYPE = MathesarCustomType.MATHESAR_MONEY.id
 MULTICURRENCY_DB_TYPE = MathesarCustomType.MULTICURRENCY_MONEY.id
 URI_DB_TYPE = MathesarCustomType.URI.id
+
+
+class HasUnderlyingType:
+    underlying_type = None
+
+    def downcast_to_underlying_type(self, column_expr):
+        return cast(column_expr, self.underlying_type)
 
 
 class CHAR(TypeDecorator):

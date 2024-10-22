@@ -14,10 +14,11 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
 
 from db.deprecated.engine import get_dummy_engine
-from db.deprecated.types.custom import EMAIL_DOMAIN_NAME, URIFunction, MathesarJsonArray
+from db.deprecated.types.custom import (
+    EMAIL_DOMAIN_NAME, URIFunction, MathesarJsonArray, HasUnderlyingType
+)
 from db.functions.exceptions import BadDBFunctionFormat
-from db.types.base import PostgresType
-from db.types.custom.underlying_type import HasUnderlyingType
+from db.deprecated.types.base import PostgresType
 
 
 def sa_call_sql_function(function_name, *parameters, return_type=None):

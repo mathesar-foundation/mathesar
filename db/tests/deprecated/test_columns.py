@@ -13,7 +13,7 @@ from db.deprecated.columns import (
 )
 from db.metadata import get_empty_metadata
 from db.deprecated.types.custom import Email, Interval
-from db.types.base import MathesarCustomType, PostgresType, UnknownType
+from db.deprecated.types.base import MathesarCustomType, PostgresType, UnknownType
 
 
 def init_column(*args, **kwargs):

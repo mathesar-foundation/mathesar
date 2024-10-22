@@ -8,8 +8,8 @@ from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
 from sqlalchemy.exc import IntegrityError
 from db.deprecated.types import custom
 from db.functions.base import sa_call_sql_function
-from db.types import exceptions
-from db.types.base import PostgresType
+from db.deprecated.types import exceptions
+from db.deprecated.types.base import PostgresType
 
 
 def test_char_type_column_creation(engine_with_schema):

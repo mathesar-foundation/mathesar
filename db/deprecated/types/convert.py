@@ -1,7 +1,7 @@
 import inspect
 from sqlalchemy.types import NullType
 from db.deprecated.engine import get_dummy_engine
-from db.types.base import PostgresType, MathesarCustomType, UnknownType
+from db.deprecated.types.base import PostgresType, MathesarCustomType, UnknownType
 
 
 def get_db_type_enum_from_id(db_type_id):
