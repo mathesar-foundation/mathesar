@@ -47,21 +47,13 @@
   let previousNewRecordsCount = 0;
   let previousAllRecordsCount = 0;
   let prevGrouping: Grouping;
-  let prevRecordState: States;
 
-  async function resetIndex(_recordState: States, _displayableRecords: Row[]) {
-    if (
-      _recordState !== States.Loading &&
-      (prevGrouping !== $grouping || $grouping.entries.length > 0)
-    ) {
-      await tick();
-      // Reset if grouping is active
-      api.recalculateHeightsAfterIndex(0);
-      prevGrouping = $grouping;
-      prevRecordState = _recordState;
-      return;
-    }
+  async function recalculateAllRowHeights() {
+    await tick();
+    api.recalculateHeightsAfterIndex(0);
+  }
 
+  async function caculateHeightsForNewRows(_displayableRecords: Row[]) {
     const allRecordCount = _displayableRecords.length ?? 0;
     const newRecordCount = $newRecords.length ?? 0;
     if (previousNewRecordsCount !== newRecordCount) {
@@ -79,5 +71,33 @@
     }
   }
 
-  $: void resetIndex($state, $displayableRecords);
+  async function recalculateRowHeights(
+    _recordState: States,
+    _displayableRecords: Row[],
+  ) {
+    /**
+     * Only perform full recalculation of heights when,
+     * 1. Grouping is applied
+     * 2. Grouping is removed
+     * 3. Grouping changes
+     * 4. Any kind of refetch occurs when grouping is present
+     *    - Pagination
+     *    - Filtering
+     *    - Sorting
+     *    - Clicking on refresh button etc.,
+     */
+    const isCompleteRowHeightRecalcNeeded =
+      _recordState !== States.Loading &&
+      (prevGrouping !== $grouping || $grouping.entries.length > 0);
+
+    if (isCompleteRowHeightRecalcNeeded) {
+      await recalculateAllRowHeights();
+      prevGrouping = $grouping;
+      return;
+    }
+
+    await caculateHeightsForNewRows(_displayableRecords);
+  }
+
+  $: void recalculateRowHeights($state, $displayableRecords);
 </script>
