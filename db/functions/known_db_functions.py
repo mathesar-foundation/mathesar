@@ -12,8 +12,7 @@ from db.deprecated.utils import get_module_members_that_satisfy
 
 import db.functions.base
 import db.functions.packed
-import db.types.custom.datetime
-import db.types.custom.email
+import db.deprecated.types.custom
 import db.types.custom.uri
 import db.types.custom.json_array
 import db.types.custom.json_object
@@ -30,10 +29,9 @@ def _is_concrete_db_function_subclass(member):
 
 
 _modules_to_search_in = tuple([
+    db.deprecated.types.custom,
     db.functions.base,
     db.functions.packed,
-    db.types.custom.datetime,
-    db.types.custom.email,
     db.types.custom.uri,
     db.types.custom.json_array,
     db.types.custom.json_object,

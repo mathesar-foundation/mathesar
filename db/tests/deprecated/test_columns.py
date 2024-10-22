@@ -12,7 +12,7 @@ from db.deprecated.columns import (
     MathesarColumn, get_column_attnum_from_name, get_column_name_from_attnum
 )
 from db.metadata import get_empty_metadata
-from db.types.custom import email, datetime
+from db.deprecated.types.custom import Email, Interval
 from db.types.base import MathesarCustomType, PostgresType, UnknownType
 
 
@@ -121,7 +121,7 @@ def test_MC_type_no_opts(engine):
 @pytest.mark.parametrize(
     "sa_type,db_type",
     [
-        (email.Email, MathesarCustomType.EMAIL),
+        (Email, MathesarCustomType.EMAIL),
         (NUMERIC(5, 2), PostgresType.NUMERIC),
         (NullType(), UnknownType()),
         (ARRAY(INTEGER), PostgresType._ARRAY),
@@ -163,7 +163,7 @@ def test_MC_type_options_str(engine, target_type, type_options):
 
 
 def test_MC_type_options_interval(engine):
-    target_type = datetime.Interval(precision=3, fields='SECOND')
+    target_type = Interval(precision=3, fields='SECOND')
     mc = MathesarColumn('testable_col', target_type)
     mc.add_engine(engine)
     assert mc.type_options == {'precision': 3, 'fields': 'SECOND'}

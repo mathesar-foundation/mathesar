@@ -1,17 +1,52 @@
+from psycopg2.errors import CheckViolation
 import pytest
-from sqlalchemy import text, Table, Column, MetaData, select, cast
+from sqlalchemy import cast, Column, MetaData, select, Table, text
 from sqlalchemy.dialects.postgresql import DATE as SA_DATE
 from sqlalchemy.dialects.postgresql import INTERVAL as SA_INTERVAL
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
 from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
-
-from db.types.custom import datetime
+from sqlalchemy.exc import IntegrityError
+from db.deprecated.types import custom
+from db.functions.base import sa_call_sql_function
 from db.types import exceptions
+from db.types.base import PostgresType
+
+
+def test_char_type_column_creation(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn:
+        conn.execute(text(f"SET search_path={schema}"))
+        metadata = MetaData(bind=conn)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("char_col", custom.CHAR),
+        )
+        test_table.create()
+
+
+def test_char_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("char_col", custom.CHAR),
+        )
+        test_table.create()
+
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        reflect_table = Table("test_table", metadata, autoload_with=conn)
+    expect_cls = custom.CHAR
+    actual_cls = reflect_table.columns["char_col"].type.__class__
+    assert actual_cls == expect_cls
 
 
 datetime_types = [
     (
-        datetime.DATE, SA_DATE(),
+        custom.DATE, SA_DATE(),
         {
             '2021-01-03 AD': [
                 '2021-01-03', '3 Jan, 2021', 'Jan 3, 2021', '3 Jan, 2021 AD'
@@ -20,7 +55,7 @@ datetime_types = [
         },
     ),
     (
-        datetime.Interval, SA_INTERVAL(),
+        custom.Interval, SA_INTERVAL(),
         {
             # The keys are expected output, the list of strings are
             # various inputs that should map to the output denoted by the
@@ -71,7 +106,7 @@ datetime_types = [
         }
     ),
     (
-        datetime.TIME_WITH_TIME_ZONE, SA_TIME(timezone=True),
+        custom.TIME_WITH_TIME_ZONE, SA_TIME(timezone=True),
         {
             '12:30:45.0+05:30': ['12:30:45+05:30'],
             '12:30:45.0Z': ['12:30:45', '12:30:45 UTC'],
@@ -79,13 +114,13 @@ datetime_types = [
         }
     ),
     (
-        datetime.TIME_WITHOUT_TIME_ZONE, SA_TIME(timezone=False),
+        custom.TIME_WITHOUT_TIME_ZONE, SA_TIME(timezone=False),
         {
             '12:30:00.0': ['12:30'],
         }
     ),
     (
-        datetime.TIMESTAMP_WITH_TIME_ZONE, SA_TIMESTAMP(timezone=True),
+        custom.TIMESTAMP_WITH_TIME_ZONE, SA_TIMESTAMP(timezone=True),
         {
             '2000-07-30T19:15:03.65Z AD': [
                 '30 July, 2000 19:15:03.65', '07-30-2000 19:15:03.65+00'
@@ -95,7 +130,7 @@ datetime_types = [
         }
     ),
     (
-        datetime.TIMESTAMP_WITHOUT_TIME_ZONE, SA_TIMESTAMP(timezone=False),
+        custom.TIMESTAMP_WITHOUT_TIME_ZONE, SA_TIMESTAMP(timezone=False),
         {
             '17654-03-02T01:00:00.0 AD': ['17654-03-02 01:00:00']
         }
@@ -187,7 +222,7 @@ def test_interval_type_column_args(engine_with_schema):
             metadata,
             Column(
                 'time_intervals',
-                datetime.Interval(precision=5, fields='SECOND')
+                custom.Interval(precision=5, fields='SECOND')
             )
         )
         test_table.create()
@@ -195,7 +230,7 @@ def test_interval_type_column_args(engine_with_schema):
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table('test_table', metadata, autoload_with=conn)
-    expect_cls = datetime.Interval
+    expect_cls = custom.Interval
     actual_cls = reflect_table.columns['time_intervals'].type.__class__
     assert actual_cls == expect_cls
     actual_interval = reflect_table.columns['time_intervals'].type
@@ -209,7 +244,7 @@ invalid_args_list = [(None, 'SECONDS'), (1.34, None), (5, 'HOURS')]
 @pytest.mark.parametrize('precision,fields', invalid_args_list)
 def test_interval_type_column_invalid_args(precision, fields):
     with pytest.raises(exceptions.InvalidTypeParameters):
-        datetime.Interval(precision=precision, fields=fields)
+        custom.Interval(precision=precision, fields=fields)
 
 
 types_self_map = [
@@ -262,14 +297,14 @@ def test_interval_insert_select(engine_with_schema, type_, out_in_map):
 
 
 def test_interval_datetime_addition(engine):
-    three_days_interval = cast('3 days 4 hours 30 minutes', datetime.Interval)
-    the_date = cast('2020-01-01', datetime.TIMESTAMP_WITHOUT_TIME_ZONE)
+    three_days_interval = cast('3 days 4 hours 30 minutes', custom.Interval)
+    the_date = cast('2020-01-01', custom.TIMESTAMP_WITHOUT_TIME_ZONE)
     with engine.begin() as conn:
         res = conn.execute(
             select(
                 cast(
                     the_date + three_days_interval,
-                    datetime.TIMESTAMP_WITHOUT_TIME_ZONE
+                    custom.TIMESTAMP_WITHOUT_TIME_ZONE
                 )
             )
         ).scalar()
@@ -277,10 +312,104 @@ def test_interval_datetime_addition(engine):
 
 
 def test_interval_interval_addition(engine):
-    three_days_interval = cast('3 days 4 hours 30 minutes', datetime.Interval)
-    five_days_interval = cast('5 days', datetime.Interval)
+    three_days_interval = cast('3 days 4 hours 30 minutes', custom.Interval)
+    five_days_interval = cast('5 days', custom.Interval)
     with engine.begin() as conn:
         res = conn.execute(
-            select(cast(three_days_interval + five_days_interval, datetime.Interval))
+            select(cast(three_days_interval + five_days_interval, custom.Interval))
         ).scalar()
     assert res == 'P0Y0M8DT4H30M0S'
+
+
+def test_domain_func_wrapper(engine_with_schema):
+    engine, _ = engine_with_schema
+    sel = select(
+        sa_call_sql_function(
+            custom.EMAIL_DOMAIN_NAME,
+            text("'test@example.com'"),
+            return_type=PostgresType.TEXT
+        )
+    )
+    with engine.begin() as conn:
+        res = conn.execute(sel)
+        assert res.fetchone()[0] == "example.com"
+
+
+def test_local_part_func_wrapper(engine_with_schema):
+    engine, _ = engine_with_schema
+    sel = select(
+        sa_call_sql_function(
+            'mathesar_types.email_local_part',
+            text("'test@example.com'"),
+            return_type=PostgresType.TEXT
+        )
+    )
+    with engine.begin() as conn:
+        res = conn.execute(sel)
+        assert res.fetchone()[0] == "test"
+
+
+def test_email_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    with engine.begin() as conn:
+        conn.execute(text(f"SET search_path={app_schema}"))
+        metadata = MetaData(bind=conn)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("email_addresses", custom.Email),
+        )
+        test_table.create()
+
+
+def test_email_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("email_addresses", custom.Email),
+        )
+        test_table.create()
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        reflect_table = Table("test_table", metadata, autoload_with=conn)
+    expect_cls = custom.Email
+    actual_cls = reflect_table.columns["email_addresses"].type.__class__
+    assert actual_cls == expect_cls
+
+
+def test_create_email_type_domain_passes_correct_emails(engine_with_schema):
+    engine, _ = engine_with_schema
+    email_addresses_correct = ["alice@example.com", "alice@example"]
+    for address in email_addresses_correct:
+        with engine.begin() as conn:
+            res = conn.execute(
+                text(f"SELECT '{address}'::{custom.EMAIL_DB_TYPE};")
+            )
+            assert res.fetchone()[0] == address
+
+
+def test_create_email_type_domain_accepts_uppercase(engine_with_schema):
+    engine, _ = engine_with_schema
+    email_addresses_correct = ["alice@example.com", "alice@example"]
+    for address in email_addresses_correct:
+        with engine.begin() as conn:
+            res = conn.execute(
+                text(f"SELECT '{address}'::{custom.EMAIL_DB_TYPE.upper()};")
+            )
+            assert res.fetchone()[0] == address
+
+
+def test_create_email_type_domain_checks_broken_emails(engine_with_schema):
+    engine, _ = engine_with_schema
+    address_incorrect = "aliceexample.com"
+    with pytest.raises(IntegrityError) as e:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    f"SELECT '{address_incorrect}'::{custom.EMAIL_DB_TYPE};"
+                )
+            )
+        assert type(e.orig) is CheckViolation

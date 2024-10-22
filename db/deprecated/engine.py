@@ -3,7 +3,7 @@ import copy
 from sqlalchemy import create_engine as sa_create_engine
 from sqlalchemy.engine import URL
 
-from db.types.custom.base import CUSTOM_DB_TYPE_TO_SA_CLASS
+from db.deprecated.types.custom import CUSTOM_DB_TYPE_TO_SA_CLASS
 
 
 def create_future_engine_with_custom_types(

@@ -8,7 +8,7 @@ from abc import abstractmethod
 
 from db.functions import base
 from db.types.custom.uri import URIFunction
-from db.types.custom.email import EMAIL_DOMAIN_NAME
+from db.deprecated.types.custom import EMAIL_DOMAIN_NAME
 
 
 class DBFunctionPacked(base.DBFunction):
