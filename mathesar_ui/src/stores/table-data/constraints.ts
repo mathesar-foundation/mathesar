@@ -1,11 +1,13 @@
-import type {
-  Readable,
-  Subscriber,
-  Unsubscriber,
-  Updater,
-  Writable,
+import {
+  type Readable,
+  type Subscriber,
+  type Unsubscriber,
+  type Updater,
+  type Writable,
+  derived,
+  get as getStoreValue,
+  writable,
 } from 'svelte/store';
-import { derived, get as getStoreValue, writable } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';

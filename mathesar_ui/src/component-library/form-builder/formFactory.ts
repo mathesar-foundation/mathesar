@@ -1,5 +1,4 @@
-import type { Readable } from 'svelte/store';
-import { derived, get, readable, writable } from 'svelte/store';
+import { type Readable, derived, get, readable, writable } from 'svelte/store';
 
 import type {
   FormBuildConfiguration,

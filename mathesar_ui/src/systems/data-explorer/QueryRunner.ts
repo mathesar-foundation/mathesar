@@ -1,5 +1,10 @@
-import type { Readable, Writable } from 'svelte/store';
-import { derived, get, writable } from 'svelte/store';
+import {
+  type Readable,
+  type Writable,
+  derived,
+  get,
+  writable,
+} from 'svelte/store';
 
 import { ApiMultiError } from '@mathesar/api/rest/utils/errors';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
@@ -16,7 +21,10 @@ import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { runSavedExploration } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
-import { CancellablePromise, ImmutableMap } from '@mathesar-component-library';
+import {
+  type CancellablePromise,
+  ImmutableMap,
+} from '@mathesar-component-library';
 
 import QueryInspector from './QueryInspector';
 import type QueryModel from './QueryModel';
@@ -45,7 +53,7 @@ export interface QueryRowsData {
 
 type QueryRunMode = 'queryId' | 'queryObject';
 
-export default class QueryRunner {
+export class QueryRunner {
   query: Writable<QueryModel>;
 
   abstractTypeMap: AbstractTypesMap;

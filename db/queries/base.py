@@ -1,12 +1,13 @@
 from frozendict import frozendict
 from sqlalchemy import select
+from sqlalchemy.sql.functions import count
 
-from db.records.operations import select as records_select
 from db.columns.base import MathesarColumn
 from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations.select import reflect_table_from_oid
-from db.transforms.operations.apply import apply_transformations
-from db.transforms.base import Order
+from db.transforms.operations import apply
+from db.transforms import base
+from db.utils import execute_pg_query
 from db.metadata import get_empty_metadata
 
 
@@ -113,12 +114,12 @@ class DBQuery:
         that would override the transformation).
         """
         fallback_to_default_ordering = not self._is_sorting_transform_used
-        return records_select.get_records(
+        final_relation = apply.apply_transformations_deprecated(
             table=self.transformed_relation,
-            engine=self.engine,
             fallback_to_default_ordering=fallback_to_default_ordering,
-            **kwargs,
+            **kwargs
         )
+        return execute_pg_query(self.engine, final_relation)
 
     @property
     def _is_sorting_transform_used(self):
@@ -126,16 +127,20 @@ class DBQuery:
         Checks if any of the transforms define a sorting for the results.
         """
         return any(
-            type(transform) is Order
+            type(transform) is base.Order
             for transform
             in self.transformations
         )
 
     # mirrors a method in db.records.operations.select
-    def get_count(self, **kwargs):
-        return records_select.get_count(
-            table=self.transformed_relation, engine=self.engine, **kwargs,
+    @property
+    def count(self):
+        col_name = "_count"
+        relation = apply.apply_transformations_deprecated(
+            table=self.transformed_relation,
+            columns_to_select=[count(1).label(col_name)],
         )
+        return execute_pg_query(self.engine, relation)[0][col_name]
 
     # NOTE if too expensive, can be rewritten to parse DBQuery spec, instead of leveraging sqlalchemy
     @property
@@ -184,7 +189,7 @@ class DBQuery:
         """
         transformations = self.transformations
         if transformations:
-            transformed = apply_transformations(
+            transformed = apply.apply_transformations(
                 self.initial_relation,
                 transformations,
             )
@@ -259,7 +264,6 @@ class DBQuery:
     def get_input_alias_for_output_alias(self, output_alias):
         return self.map_of_output_alias_to_input_alias.get(output_alias)
 
-    # TODO consider caching; not urgent, since redundant calls don't trigger IO, it seems
     @property
     def map_of_output_alias_to_input_alias(self):
         m = dict()

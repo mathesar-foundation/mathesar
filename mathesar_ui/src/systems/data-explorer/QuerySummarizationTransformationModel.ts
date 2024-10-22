@@ -26,7 +26,7 @@ export interface QuerySummarizationTransformationEntry {
   aggregations: ImmutableMap<string, QuerySummarizationAggregationEntry>;
 }
 
-export default class QuerySummarizationTransformationModel
+export class QuerySummarizationTransformationModel
   implements QuerySummarizationTransformationEntry
 {
   type = 'summarize' as const;

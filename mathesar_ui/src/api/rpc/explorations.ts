@@ -185,12 +185,6 @@ export interface ExplorationResult {
   };
   limit: number;
   offset: number;
-  filter: unknown;
-  order_by: unknown;
-  /** Specifies a list of dicts containing column names and searched expression. */
-  search: unknown;
-  /** A list of column names for which you want duplicate records. */
-  duplicate_only: unknown;
 }
 
 export const explorations = {

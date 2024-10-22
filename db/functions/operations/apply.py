@@ -26,11 +26,6 @@ def apply_db_function_as_filter(relation, db_function):
     return relation
 
 
-def get_sa_expression_from_db_function_spec(ma_function_spec):
-    db_function = get_db_function_from_ma_function_spec(ma_function_spec)
-    return _db_function_to_sa_expression(db_function)
-
-
 def _assert_that_all_referenced_columns_exist(relation, db_function):
     columns_that_exist = _get_columns_that_exist(relation)
     referenced_columns = db_function.referenced_columns
@@ -66,9 +61,6 @@ def _db_function_to_sa_expression(db_function_or_literal):
             for raw_parameter in raw_parameters
         ]
         db_function_subclass = type(db_function)
-        # TODO do we need to keep to_sa_expression as a static method?
-        # TODO maybe make it an instance method and then rewrite DBFunctionPacked.to_sa_expression
-        # to call to_sa_expression on result of self.unpack().
         sa_expression = db_function_subclass.to_sa_expression(*sa_expression_parameters)
         return sa_expression
     else:

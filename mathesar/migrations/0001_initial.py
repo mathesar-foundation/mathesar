@@ -8,9 +8,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.db.models.manager
 import django.utils.timezone
-import mathesar.models.relation
-import mathesar.models.validators
-import mathesar.utils.models
 
 
 class Migration(migrations.Migration):
@@ -103,7 +100,7 @@ class Migration(migrations.Migration):
                 ('import_target', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='mathesar.table')),
                 ('schema', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tables', to='mathesar.schema')),
             ],
-            bases=(models.Model, mathesar.models.relation.Relation),
+            bases=(models.Model,),
             managers=[
                 ('current_objects', django.db.models.manager.Manager()),
             ],
@@ -116,16 +113,16 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=128)),
                 ('description', models.TextField(blank=True, null=True)),
-                ('initial_columns', models.JSONField(validators=[mathesar.models.validators.ListOfDictValidator(field_name='initial_columns'), mathesar.models.validators.InitialColumnsValidator(field_name='initial_columns')])),
-                ('transformations', models.JSONField(blank=True, null=True, validators=[mathesar.models.validators.ListOfDictValidator(field_name='transformations'), mathesar.models.validators.TransformationsValidator(field_name='transformations')])),
-                ('display_options', models.JSONField(blank=True, null=True, validators=[mathesar.models.validators.DictValidator(field_name='display_options')])),
-                ('display_names', models.JSONField(blank=True, null=True, validators=[mathesar.models.validators.DictValidator(field_name='display_names')])),
+                ('initial_columns', models.JSONField()),
+                ('transformations', models.JSONField(blank=True, null=True)),
+                ('display_options', models.JSONField(blank=True, null=True)),
+                ('display_names', models.JSONField(blank=True, null=True)),
                 ('base_table', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='queries', to='mathesar.table')),
             ],
             options={
                 'abstract': False,
             },
-            bases=(models.Model, mathesar.models.relation.Relation),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='TableSettings',
@@ -164,7 +161,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('file', models.FileField(upload_to=mathesar.utils.models.user_directory_path)),
+                ('file', models.FileField()),
                 ('created_from', models.CharField(choices=[('FILE', 'File'), ('PASTE', 'Paste'), ('URL', 'Url')], max_length=128)),
                 ('base_name', models.CharField(max_length=100)),
                 ('header', models.BooleanField(default=True)),

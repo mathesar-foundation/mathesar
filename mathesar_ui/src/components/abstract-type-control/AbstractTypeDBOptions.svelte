@@ -11,8 +11,7 @@
   import type { FormValues } from '@mathesar-component-library/types';
 
   import DbTypeIndicator from './DbTypeIndicator.svelte';
-  import type { ColumnWithAbstractType } from './utils';
-  import { constructDbForm } from './utils';
+  import { type ColumnWithAbstractType, constructDbForm } from './utils';
 
   export let selectedAbstractType: AbstractType;
   export let selectedDbType: DbType;
