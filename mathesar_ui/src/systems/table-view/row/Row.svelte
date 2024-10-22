@@ -55,6 +55,7 @@
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
   $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
+  $: isTableEditable = $currentRolePrivileges.has('UPDATE');
 
   function handleMouseDown(e: MouseEvent) {
     if (isPlaceholderRow(row)) {
@@ -92,7 +93,12 @@
           hasErrors={hasAnyErrors}
         />
         <ContextMenu>
-          <RowContextOptions recordPk={rowKey} {recordsData} {row} />
+          <RowContextOptions
+            recordPk={rowKey}
+            {recordsData}
+            {row}
+            {isTableEditable}
+          />
         </ContextMenu>
       </SheetRowHeaderCell>
     {/if}

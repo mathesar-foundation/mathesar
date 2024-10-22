@@ -20,7 +20,10 @@
   export let row: RecordRow;
   export let recordPk: string;
   export let recordsData: RecordsData;
+  export let isTableEditable: boolean;
 
+  // To be used in case of publicly shared links where user should not be able
+  // to view linked tables & explorations
   const canViewLinkedEntities = true;
 
   async function handleDeleteRecords() {
@@ -50,6 +53,10 @@
     {$_('go_to_record_page')}
   </LinkMenuItem>
 {/if}
-<ButtonMenuItem on:click={handleDeleteRecords} icon={iconDeleteMajor}>
+<ButtonMenuItem
+  on:click={handleDeleteRecords}
+  icon={iconDeleteMajor}
+  disabled={!isTableEditable}
+>
   {$_('delete_records', { values: { count: 1 } })}
 </ButtonMenuItem>
