@@ -2,8 +2,8 @@ from frozendict import frozendict
 from sqlalchemy import select
 from sqlalchemy.sql.functions import count
 
-from db.columns.base import MathesarColumn
-from db.columns.operations.select import get_column_name_from_attnum
+from db.deprecated.columns import MathesarColumn
+from db.deprecated.columns import get_column_name_from_attnum
 from db.tables.operations.select import reflect_table_from_oid
 from db.transforms.operations import apply
 from db.transforms import base

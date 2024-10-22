@@ -4,7 +4,7 @@
 # Initial columns is an ordered set of columns sourced either from the base table, or from linked
 # tables.
 from sqlalchemy import inspect
-from db.columns.operations.select import get_column_attnum_from_name as get_attnum
+from db.deprecated.columns import get_column_attnum_from_name as get_attnum
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.metadata import get_empty_metadata
 

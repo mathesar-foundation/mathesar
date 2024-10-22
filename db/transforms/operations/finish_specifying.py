@@ -3,7 +3,7 @@ from sqlalchemy import inspect
 
 from db.tables.operations import select as tables_select
 from db.transforms.base import Summarize
-from db.columns.operations.select import get_column_from_oid_and_attnum
+from db.deprecated.columns import get_column_from_oid_and_attnum
 
 
 def finish_specifying_summarize_transform(

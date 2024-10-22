@@ -2,12 +2,16 @@ import re
 
 import pytest
 from sqlalchemy import (
-    INTEGER, ForeignKey, VARCHAR, CHAR, NUMERIC
+    INTEGER, ForeignKey, VARCHAR, CHAR, NUMERIC, String, Integer, Column, Table,
+    MetaData, inspect
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
 from sqlalchemy.sql.sqltypes import NullType
 
-from db.columns.base import MathesarColumn
+from db.deprecated.columns import (
+    MathesarColumn, get_column_attnum_from_name, get_column_name_from_attnum
+)
+from db.metadata import get_empty_metadata
 from db.types.custom import email, datetime
 from db.types.base import MathesarCustomType, PostgresType, UnknownType
 
@@ -186,3 +190,28 @@ def test_test_columns_covers_MathesarColumn(mathesar_col_arg):
         [func for func in test_funcs if pattern.match(func) is not None]
     )
     assert number_tests > 0
+
+
+def _get_oid_from_table(name, schema, engine):
+    inspector = inspect(engine)
+    return inspector.get_table_oid(name, schema=schema)
+
+
+def test_get_attnum_from_name(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    zero_name = "colzero"
+    one_name = "colone"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(zero_name, Integer),
+        Column(one_name, String),
+    )
+    table.create()
+    table_oid = _get_oid_from_table(table_name, schema, engine)
+    metadata = get_empty_metadata()
+    column_zero_attnum = get_column_attnum_from_name(table_oid, zero_name, engine, metadata=metadata)
+    column_one_attnum = get_column_attnum_from_name(table_oid, one_name, engine, metadata=metadata)
+    assert get_column_name_from_attnum(table_oid, column_zero_attnum, engine, metadata=metadata) == zero_name
+    assert get_column_name_from_attnum(table_oid, column_one_attnum, engine, metadata=metadata) == one_name

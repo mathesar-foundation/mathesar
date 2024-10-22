@@ -1,6 +1,6 @@
 from collections import namedtuple
 from sqlalchemy import select
-from db.columns import utils as col_utils
+from db.deprecated import columns as col_utils
 from db.records.exceptions import BadSortFormat, SortFieldNotFound
 
 

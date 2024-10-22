@@ -6,7 +6,7 @@ import functools
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.metadata import get_empty_metadata
 from db.transforms.base import Summarize, SelectSubsetOfColumns, Limit
-from db.columns.operations.select import get_column_attnum_from_name
+from db.deprecated.columns import get_column_attnum_from_name
 from db.transforms.operations.finish_specifying import finish_specifying_summarize_transform
 
 

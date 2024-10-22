@@ -1,7 +1,8 @@
 # TODO Remove this file once explorations are in the database
-from sqlalchemy import Column, ForeignKey, inspect
+from sqlalchemy import Column, ForeignKey, inspect, and_, asc, select
 
-from db.columns.operations.select import get_column_attnum_from_name
+from db.deprecated.utils import execute_statement, get_pg_catalog_table
+from db.tables.operations.select import reflect_table_from_oid
 from db.types.operations.convert import get_db_type_enum_from_class
 
 
@@ -171,3 +172,104 @@ class MathesarColumn(Column):
     def _assert_that_engine_is_present(self):
         if self.engine is None:
             raise Exception("Engine should not be None.")
+
+
+def get_column_obj_from_relation(relation, column):
+    """
+    This function can look for anything that's reasonably referred to as
+    a column, such as MathesarColumns, SA Columns, or just a column name
+    string in the given relation
+    """
+    try:
+        column = _find_column_by_name_in_relation(relation, column)
+    except AttributeError:
+        column = relation.columns[column.name]
+
+    return column
+
+
+def _find_column_by_name_in_relation(relation, col_name_string):
+    """
+    Because we may have to look for the column by a name with an
+    inappropriate namespacing (i.e., there may be an errant table or
+    schema attached), we iteratively peel any possible namespace off the
+    front of the column name string at each call.
+    """
+    try:
+        return relation.columns[col_name_string]
+    except KeyError:
+        col_name_split = col_name_string.split(sep='.', maxsplit=1)
+        if len(col_name_split) <= 1:
+            raise KeyError(col_name_string)
+        else:
+            return _find_column_by_name_in_relation(relation, col_name_split[-1])
+
+
+def get_primary_key_column_collection_from_relation(relation):
+    """
+    This logic is needed since some "relations" have a primary_key
+    attribute that has a column attribute that is a ColumnCollection
+    subtype, whereas some relations have a primary_key attribute that is
+    itself a ColumnCollection subtype.
+
+    If there is no primary key in the relation, we return NoneType
+    """
+    pkey = getattr(relation, 'primary_key', None)
+    pk_cols = getattr(pkey, 'columns', pkey)
+    return pk_cols
+
+
+def get_column_attnum_from_name(table_oid, column_name, engine, metadata, connection_to_use=None):
+    statement = _get_columns_attnum_from_names(table_oid, [column_name], engine=engine, metadata=metadata)
+    return execute_statement(engine, statement, connection_to_use).scalar()
+
+
+def _get_columns_attnum_from_names(table_oid, column_names, engine, metadata):
+    pg_attribute = get_pg_catalog_table("pg_attribute", engine=engine, metadata=metadata)
+    sel = select(pg_attribute.c.attnum, pg_attribute.c.attname).where(
+        and_(
+            pg_attribute.c.attrelid == table_oid,
+            pg_attribute.c.attname.in_(column_names)
+        )
+    ).order_by(asc(pg_attribute.c.attnum))
+    return sel
+
+
+def get_column_from_oid_and_attnum(table_oid, attnum, engine, metadata, connection_to_use=None):
+    sa_table = reflect_table_from_oid(table_oid, engine, metadata=metadata, connection_to_use=connection_to_use)
+    column_name = get_column_name_from_attnum(table_oid, attnum, engine, metadata=metadata, connection_to_use=connection_to_use)
+    sa_column = sa_table.columns[column_name]
+    return sa_column
+
+
+def get_column_name_from_attnum(table_oid, attnum, engine, metadata, connection_to_use=None):
+    statement = _statement_for_triples_of_column_name_and_attnum_and_table_oid(
+        [table_oid], [attnum], engine, metadata=metadata,
+    )
+    column_name = execute_statement(engine, statement, connection_to_use).scalar()
+    return column_name
+
+
+def _statement_for_triples_of_column_name_and_attnum_and_table_oid(
+    table_oids, attnums, engine, metadata
+):
+    """
+    Returns (column name, column attnum, column table's oid) tuples for each column that's in the
+    tables specified via `table_oids`, and, when `attnums` is not None, that has an attnum
+    specified in `attnums`.
+
+    The order is based on the column order in the table and not on the order of the arguments.
+    """
+    pg_attribute = get_pg_catalog_table("pg_attribute", engine, metadata=metadata)
+    sel = select(pg_attribute.c.attname, pg_attribute.c.attnum, pg_attribute.c.attrelid)
+    wasnt_dropped = pg_attribute.c.attisdropped.is_(False)
+    table_oid_matches = pg_attribute.c.attrelid.in_(table_oids)
+    conditions = [wasnt_dropped, table_oid_matches]
+    if attnums is not None:
+        attnum_matches = pg_attribute.c.attnum.in_(attnums)
+        conditions.append(attnum_matches)
+    else:
+        attnum_positive = pg_attribute.c.attnum > 0
+        conditions.append(attnum_positive)
+    sel = sel.where(and_(*conditions))
+    return sel
