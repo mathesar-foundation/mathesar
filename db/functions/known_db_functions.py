@@ -13,7 +13,6 @@ from db.deprecated.utils import get_module_members_that_satisfy
 import db.functions.base
 import db.functions.packed
 import db.deprecated.types.custom
-import db.types.custom.uri
 import db.types.custom.json_array
 import db.types.custom.json_object
 
@@ -32,7 +31,6 @@ _modules_to_search_in = tuple([
     db.deprecated.types.custom,
     db.functions.base,
     db.functions.packed,
-    db.types.custom.uri,
     db.types.custom.json_array,
     db.types.custom.json_object,
 ])

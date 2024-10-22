@@ -14,11 +14,10 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction, concat, percentile_disc, mode, max, min
 
 from db.deprecated.engine import get_dummy_engine
-from db.deprecated.types.custom import EMAIL_DOMAIN_NAME
+from db.deprecated.types.custom import EMAIL_DOMAIN_NAME, URIFunction
 from db.functions.exceptions import BadDBFunctionFormat
 from db.types.base import PostgresType
 from db.types.custom.json_array import MathesarJsonArray
-from db.types.custom.uri import URIFunction
 from db.types.custom.underlying_type import HasUnderlyingType
 
 

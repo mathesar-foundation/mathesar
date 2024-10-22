@@ -1,3 +1,4 @@
+from enum import Enum
 from sqlalchemy import case, func, and_
 from sqlalchemy.dialects.postgresql import (
     CHAR as SA_CHAR,
@@ -11,7 +12,7 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.types import TypeDecorator, UserDefinedType
 
 from db.types.base import PostgresType, MathesarCustomType
-from db.types.custom import money, multicurrency, uri, json_object, json_array
+from db.types.custom import money, multicurrency, json_object, json_array
 from db.types.custom.underlying_type import HasUnderlyingType
 from db.types.exceptions import InvalidTypeParameters
 
@@ -298,6 +299,27 @@ class TIMESTAMP_WITHOUT_TIME_ZONE(TypeDecorator):
         )
 
 
+URI_DB_TYPE = MathesarCustomType.URI.id
+
+
+class URIFunction(Enum):
+    PARTS = URI_DB_TYPE + "_parts"
+    SCHEME = URI_DB_TYPE + "_scheme"
+    AUTHORITY = URI_DB_TYPE + "_authority"
+    PATH = URI_DB_TYPE + "_path"
+    QUERY = URI_DB_TYPE + "_query"
+    FRAGMENT = URI_DB_TYPE + "_fragment"
+
+
+class URI(UserDefinedType, HasUnderlyingType):
+    underlying_type = SA_TEXT
+
+    def get_col_spec(self, **_):
+        # This results in the type name being upper case when viewed.
+        # Actual usage in the DB is case-insensitive.
+        return URI_DB_TYPE.upper()
+
+
 # Mapping of database type enums to SQLAlchemy classes. Primarily to be added to the SA ischema_names dict.
 CUSTOM_DB_TYPE_TO_SA_CLASS = frozendict(
     {
@@ -311,7 +333,7 @@ CUSTOM_DB_TYPE_TO_SA_CLASS = frozendict(
         PostgresType.TIME_WITHOUT_TIME_ZONE: TIME_WITHOUT_TIME_ZONE,
         PostgresType.TIMESTAMP_WITH_TIME_ZONE: TIMESTAMP_WITH_TIME_ZONE,
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE: TIMESTAMP_WITHOUT_TIME_ZONE,
-        MathesarCustomType.URI: uri.URI,
+        MathesarCustomType.URI: URI,
         MathesarCustomType.MATHESAR_JSON_OBJECT: json_object.MathesarJsonObject,
         MathesarCustomType.MATHESAR_JSON_ARRAY: json_array.MathesarJsonArray,
     }
