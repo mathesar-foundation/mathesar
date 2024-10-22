@@ -1,7 +1,7 @@
 <script lang="ts">
   import { beforeUpdate, tick } from 'svelte';
 
-  import type { States } from '@mathesar/api/rest/utils/requestUtils';
+  import { States } from '@mathesar/api/rest/utils/requestUtils';
   import type { SheetVirtualRowsApi } from '@mathesar/components/sheet/types';
   import {
     type Filtering,
@@ -51,8 +51,8 @@
 
   async function resetIndex(_recordState: States, _displayableRecords: Row[]) {
     if (
-      prevGrouping !== $grouping ||
-      ($grouping.entries.length > 0 && prevRecordState !== _recordState)
+      _recordState !== States.Loading &&
+      (prevGrouping !== $grouping || $grouping.entries.length > 0)
     ) {
       await tick();
       // Reset if grouping is active
