@@ -1,10 +1,12 @@
 from enum import Enum
+from psycopg2.extras import Json
 from sqlalchemy import case, func, and_, cast
 from sqlalchemy.dialects.postgresql import (
     CHAR as SA_CHAR,
     DATE as SA_DATE,
     INTERVAL as SA_INTERVAL,
     JSONB as SA_JSONB,
+    NUMERIC as SA_NUMERIC,
     TIME as SA_TIME,
     TIMESTAMP as SA_TIMESTAMP,
     TEXT as SA_TEXT,
@@ -13,7 +15,6 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.types import TypeDecorator, UserDefinedType
 
 from db.types.base import PostgresType, MathesarCustomType
-from db.types.custom import money, multicurrency
 from db.types.custom.underlying_type import HasUnderlyingType
 from db.types.exceptions import InvalidTypeParameters
 
@@ -24,6 +25,8 @@ EMAIL_DB_TYPE = MathesarCustomType.EMAIL.id
 EMAIL_DOMAIN_NAME = EMAIL_DB_TYPE + "_domain_name"
 JSON_ARR_DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 JSON_OBJ_DB_TYPE = MathesarCustomType.MATHESAR_JSON_OBJECT.id
+MONEY_DB_TYPE = MathesarCustomType.MATHESAR_MONEY.id
+MULTICURRENCY_DB_TYPE = MathesarCustomType.MULTICURRENCY_MONEY.id
 URI_DB_TYPE = MathesarCustomType.URI.id
 
 
@@ -180,6 +183,28 @@ def _compile_mathesarjsonobject(element, compiler, **kw):
     changed_id = MathesarCustomType.MATHESAR_JSON_OBJECT.id.upper()
     changed_compiled_string = unchanged_compiled_string.replace(unchanged_id, changed_id)
     return changed_compiled_string
+
+
+class MathesarMoney(UserDefinedType, HasUnderlyingType):
+    underlying_type = SA_NUMERIC
+
+    def get_col_spec(self, **_):
+        return MONEY_DB_TYPE.upper()
+
+
+class MulticurrencyMoney(UserDefinedType):
+
+    def get_col_spec(self, **_):
+        return MULTICURRENCY_DB_TYPE.upper()
+
+    def bind_processor(self, _):
+        return lambda x: Json(x)
+
+    def bind_expression(self, bindvalue):
+        return func.json_populate_record(cast(None, self.__class__), bindvalue)
+
+    def column_expression(self, col):
+        return func.to_json(col)
 
 
 class TIME_WITH_TIME_ZONE(TypeDecorator):
@@ -373,8 +398,8 @@ CUSTOM_DB_TYPE_TO_SA_CLASS = frozendict(
     {
         PostgresType.INTERVAL: Interval,
         MathesarCustomType.EMAIL: Email,
-        MathesarCustomType.MULTICURRENCY_MONEY: multicurrency.MulticurrencyMoney,
-        MathesarCustomType.MATHESAR_MONEY: money.MathesarMoney,
+        MathesarCustomType.MULTICURRENCY_MONEY: MulticurrencyMoney,
+        MathesarCustomType.MATHESAR_MONEY: MathesarMoney,
         PostgresType.CHAR: CHAR,
         PostgresType.DATE: DATE,
         PostgresType.TIME_WITH_TIME_ZONE: TIME_WITH_TIME_ZONE,

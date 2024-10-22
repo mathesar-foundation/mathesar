@@ -630,3 +630,123 @@ def test_uri_type_domain_rejects_malformed_uris(engine_with_schema, test_str):
         with engine.begin() as conn:
             conn.execute(text(f"SELECT '{test_str}'::{custom.URI_DB_TYPE}"))
         assert type(e.orig) is CheckViolation
+
+
+def test_money_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    with engine.begin() as conn:
+        conn.execute(text(f"SET search_path={app_schema}"))
+        metadata = MetaData(bind=conn)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("money_col", custom.MathesarMoney),
+        )
+        test_table.create()
+
+
+def test_money_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("money_col", custom.MathesarMoney),
+        )
+        test_table.create()
+
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        reflect_table = Table("test_table", metadata, autoload_with=conn)
+    expect_cls = custom.MathesarMoney
+    actual_cls = reflect_table.columns["money_col"].type.__class__
+    assert actual_cls == expect_cls
+
+
+def test_multicurrency_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    with engine.begin() as conn:
+        conn.execute(text(f"SET search_path={app_schema}"))
+        metadata = MetaData(bind=conn)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("multicurrency_col", custom.MulticurrencyMoney),
+        )
+        test_table.create()
+
+
+def test_multicurrency_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("sales_amounts", custom.MulticurrencyMoney),
+        )
+        test_table.create()
+
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        reflect_table = Table("test_table", metadata, autoload_with=conn)
+    expect_cls = custom.MulticurrencyMoney
+    actual_cls = reflect_table.columns["sales_amounts"].type.__class__
+    assert actual_cls == expect_cls
+
+
+def test_multicurrency_type_raw_selecting(engine_with_schema):
+    engine, _ = engine_with_schema
+    multicurrency_str = '(1234.12,USD)'
+    with engine.begin() as conn:
+        res = conn.execute(
+            text(f"SELECT '{multicurrency_str}'::{custom.MULTICURRENCY_DB_TYPE};")
+        )
+        assert res.fetchone()[0] == multicurrency_str
+
+
+def test_multicurrency_type_insert_from_dict(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    metadata = MetaData(bind=engine, schema=app_schema)
+    test_table = Table(
+        "test_table",
+        metadata,
+        Column("sales_amounts", custom.MulticurrencyMoney),
+    )
+    test_table.create()
+    ins = test_table.insert().values(
+        sales_amounts={'value': 1234.12, 'currency': 'EUR'}
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+
+    # we use raw select to ensure the tuple is correct in the DB
+    with engine.begin() as conn:
+        res = conn.execute(
+            text(f"SELECT * FROM {app_schema}.{test_table.name};")
+        )
+        actual_val = res.fetchone()[0]
+        expect_val = '(1234.12,EUR)'
+        assert actual_val == expect_val
+
+
+def test_multicurrency_type_select_to_dict(engine_with_schema):
+    engine, app_schema = engine_with_schema
+    metadata = MetaData(bind=engine, schema=app_schema)
+    test_table = Table(
+        "test_table",
+        metadata,
+        Column("sales_amounts", custom.MulticurrencyMoney),
+    )
+    test_table.create()
+    with engine.begin() as conn:
+        conn.execute(
+            text(f"INSERT INTO {app_schema}.{test_table.name} VALUES ('(11.11,HKD)');")
+        )
+    sel = select(test_table)
+    with engine.begin() as conn:
+        res = conn.execute(sel)
+        actual_val = res.fetchone()[0]
+        expect_val = {'value': 11.11, 'currency': 'HKD'}
+        assert actual_val == expect_val
