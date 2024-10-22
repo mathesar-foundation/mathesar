@@ -3,7 +3,7 @@ from django_property_filter import (
     PropertyOrderingFilter
 )
 
-from mathesar.models.deprecated import DataFile
+from mathesar.models.base import DataFile
 
 
 class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
@@ -11,7 +11,6 @@ class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
 
 
 class DataFileFilter(PropertyFilterSet):
-    database = CharInFilter(field_name='table_imported_to__schema__database__name', lookup_expr='in')
     name = CharInFilter(field_name='name', lookup_expr='in')
 
     sort_by = PropertyOrderingFilter(

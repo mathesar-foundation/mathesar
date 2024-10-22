@@ -1,7 +1,7 @@
+import psycopg
 from sqlalchemy import inspect
 
 from db.tables.operations import select as tables_select
-from db.tables.operations.select import get_joinable_tables
 from db.transforms.base import Summarize
 from db.columns.operations.select import get_column_from_oid_and_attnum
 
@@ -155,8 +155,12 @@ def _should_group_by(
 def _get_oids_of_joinable_tables_with_single_results(
     db_query, engine, metadata,
 ):
-    joinable_tables = \
-        get_joinable_tables(engine, metadata, db_query.base_table_oid)
+    with psycopg.connect(str(engine.url)) as conn:
+        joinable_tables = tables_select.list_joinable_tables(
+            db_query.base_table_oid,
+            conn,
+            3
+        )['joinable_tables']
     return set(
         _get_oid_of_joinable_table(joinable_table)
         for joinable_table

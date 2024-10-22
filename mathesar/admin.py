@@ -1,9 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from mathesar.models.deprecated import Table, Schema, DataFile
+from mathesar.models.base import DataFile
 from mathesar.models.users import User
-from mathesar.models.query import Exploration
 
 
 class MathesarUserAdmin(UserAdmin):
@@ -19,8 +18,5 @@ class MathesarUserAdmin(UserAdmin):
     )
 
 
-admin.site.register(Table)
-admin.site.register(Schema)
 admin.site.register(DataFile)
 admin.site.register(User, MathesarUserAdmin)
-admin.site.register(Exploration)

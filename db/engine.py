@@ -18,7 +18,6 @@ def create_future_engine_with_custom_types(
     return engine
 
 
-# TODO would an engine without ischema names updated ever be used? make it private if not
 def create_future_engine(
         username, password, hostname, database, port, *args, **kwargs
 ):
@@ -46,7 +45,6 @@ def create_engine(conn_url, *args, **kwargs):
     return engine
 
 
-# TODO should refactor for this to be private
 def add_custom_types_to_ischema_names(engine):
     """
     Updating the ischema_names dict changes which Postgres types are reflected into which SA

@@ -4,8 +4,7 @@ This file tests the table metadata RPC functions.
 Fixtures:
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
 """
-from mathesar.models.base import TableMetaData, Database, Server
-from mathesar.models.deprecated import DataFile
+from mathesar.models.base import TableMetaData, Database, Server, DataFile
 from mathesar.rpc.tables import metadata
 
 
