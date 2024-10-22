@@ -64,8 +64,6 @@
   })();
   $: form = makeForm(formFields);
 
-  $: form.subscribe((v) => console.log(v));
-
   async function saveUser() {
     const formValues = $form.values;
     const request = {
