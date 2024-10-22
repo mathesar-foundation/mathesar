@@ -54,7 +54,7 @@ def test_multicurrency_type_insert_from_dict(engine_with_schema):
     )
     test_table.create()
     ins = test_table.insert().values(
-        sales_amounts={multicurrency.VALUE: 1234.12, multicurrency.CURRENCY: 'EUR'}
+        sales_amounts={'value': 1234.12, 'currency': 'EUR'}
     )
     with engine.begin() as conn:
         conn.execute(ins)
@@ -86,5 +86,5 @@ def test_multicurrency_type_select_to_dict(engine_with_schema):
     with engine.begin() as conn:
         res = conn.execute(sel)
         actual_val = res.fetchone()[0]
-        expect_val = {multicurrency.VALUE: 11.11, multicurrency.CURRENCY: 'HKD'}
+        expect_val = {'value': 11.11, 'currency': 'HKD'}
         assert actual_val == expect_val

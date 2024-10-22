@@ -1,10 +1,9 @@
-from sqlalchemy import cast, text
+from sqlalchemy import cast
 from sqlalchemy.dialects.postgresql import JSONB as SA_JSONB, TEXT
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.compiler import compiles
 
 from db.types.base import MathesarCustomType
-from db.deprecated.utils import ignore_duplicate_wrapper
 
 DB_TYPE = MathesarCustomType.MATHESAR_JSON_OBJECT.id
 
@@ -30,14 +29,3 @@ def _compile_mathesarjsonobject(element, compiler, **kw):
     changed_id = MathesarCustomType.MATHESAR_JSON_OBJECT.id.upper()
     changed_compiled_string = unchanged_compiled_string.replace(unchanged_id, changed_id)
     return changed_compiled_string
-
-
-def install(engine):
-    create_domain_query = f"""
-    CREATE DOMAIN {DB_TYPE} AS JSONB CHECK (jsonb_typeof(VALUE) = 'object');
-    """
-    create_if_not_exist_domain_query = ignore_duplicate_wrapper(create_domain_query)
-
-    with engine.begin() as conn:
-        conn.execute(text(create_if_not_exist_domain_query))
-        conn.commit()

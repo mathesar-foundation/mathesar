@@ -1,3 +1,4 @@
+# TODO move these to SQL tests or delete.
 from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, select, Table, Column, MetaData
@@ -25,7 +26,7 @@ def test_local_part_func_wrapper(engine_with_schema):
     engine, _ = engine_with_schema
     sel = select(
         sa_call_sql_function(
-            email.EMAIL_LOCAL_PART,
+            'mathesar_types.email_local_part',
             text("'test@example.com'"),
             return_type=PostgresType.TEXT
         )

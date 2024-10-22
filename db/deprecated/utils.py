@@ -69,14 +69,3 @@ def get_pg_catalog_table(table_name, engine, metadata):
     if len(table.c) < 1:
         table = sqlalchemy.Table(table_name, metadata, autoload_with=engine, schema='pg_catalog', extend_existing=True)
     return table
-
-
-# TODO REMOVE THIS!!
-def ignore_duplicate_wrapper(stmt):
-    return f"""
-    DO $$ BEGIN
-    {stmt}
-    EXCEPTION
-    WHEN duplicate_object THEN null;
-    END $$;
-    """

@@ -1,7 +1,5 @@
 from enum import Enum
 
-from sqlalchemy import create_engine as sa_create_engine
-
 from db.constants import TYPES_SCHEMA
 
 
@@ -94,25 +92,6 @@ class PostgresType(DatabaseType, Enum):
     UUID = 'uuid'
 
 
-# Since we want to have our identifiers quoted appropriately for use in
-# PostgreSQL, we want to use the postgres dialect preparer to set this up.
-_preparer = sa_create_engine("postgresql://").dialect.identifier_preparer
-
-
-def get_ma_qualified_schema():
-    """
-    Should usually return `mathesar_types`
-    """
-    return _preparer.quote_schema(TYPES_SCHEMA)
-
-
-# TODO rename to get_qualified_mathesar_obj_name
-# it's not only used for types. it's also used for qualifying sql function ids
-def get_qualified_name(unqualified_name):
-    qualifier_prefix = get_ma_qualified_schema()
-    return ".".join([qualifier_prefix, unqualified_name])
-
-
 # TODO big misnomer!
 # we already have a concept of Mathesar types (UI types) in the mathesar namespace.
 # maybe rename to just CustomType?
@@ -133,7 +112,7 @@ class MathesarCustomType(DatabaseType, Enum):
         Prefixes a qualifier to this Enum's values.
         `email` becomes something akin to `mathesar_types.email`.
         """
-        qualified_id = get_qualified_name(unqualified_id)
+        qualified_id = f"{TYPES_SCHEMA}.{unqualified_id}"
         instance = object.__new__(cls)
         instance._value_ = qualified_id
         return instance
