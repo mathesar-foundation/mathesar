@@ -8,7 +8,7 @@ from django.core.files import File
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.imports import csv
-from mathesar.models.deprecated import DataFile
+from mathesar.models.base import DataFile
 from mathesar.errors import InvalidTableError
 
 
@@ -16,10 +16,6 @@ def verify_data_file_data(data_file, data_file_dict):
     assert data_file_dict['id'] == data_file.id
     assert data_file_dict['file'] == f'http://testserver/media/{data_file.file.name}'
     assert data_file_dict['created_from'] == data_file.created_from
-    if data_file.table_imported_to:
-        assert data_file_dict['table_imported_to'] == data_file.table_imported_to.id
-    else:
-        assert data_file_dict['table_imported_to'] is None
     if data_file.user:
         assert data_file_dict['user'] == data_file.user.id
     else:

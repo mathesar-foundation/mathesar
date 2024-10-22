@@ -32,7 +32,6 @@ def install(engine):
 
 
 def get_money_array_select_statement(table_oid, engine, column_attnum):
-    # TODO reuse metadata
     metadata = get_empty_metadata()
     table = reflect_table_from_oid(table_oid, engine, metadata=metadata)
     column_name = get_column_name_from_attnum(table_oid, column_attnum, engine, metadata=metadata)

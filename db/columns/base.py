@@ -1,16 +1,10 @@
+# TODO Remove this file once explorations are in the database
 from sqlalchemy import Column, ForeignKey, inspect
 
-from db.columns.defaults import TYPE, PRIMARY_KEY, NULLABLE, DEFAULT_COLUMNS
-from db.columns.operations.select import (
-    get_column_attnum_from_name, get_column_default, get_column_default_dict,
-)
-from db.tables.operations.select import get_oid_from_table
-from db.types.operations.cast import get_full_cast_map
+from db.columns.operations.select import get_column_attnum_from_name
 from db.types.operations.convert import get_db_type_enum_from_class
 
 
-# TODO consider renaming to DbColumn or DatabaseColumn
-# We are attempting to reserve the term Mathesar for types in the mathesar namespace.
 class MathesarColumn(Column):
     """
     This class constrains the possible arguments, enabling us to include
@@ -102,17 +96,6 @@ class MathesarColumn(Column):
             )
         return new_column
 
-    def to_sa_column(self):
-        """
-        MathesarColumn sometimes is not interchangeable with SQLAlchemy's Column.
-        For use in those situations, this method attempts to recreate an SA Column.
-
-        NOTE: this method is incomplete: it does not account for all properties of MathesarColumn.
-        """
-        sa_column = Column(name=self.name, type_=self.type)
-        sa_column.table = self.table_
-        return sa_column
-
     @property
     def table_(self):
         """
@@ -128,51 +111,15 @@ class MathesarColumn(Column):
     @property
     def table_oid(self):
         if self.table_ is not None:
-            oid = get_oid_from_table(
-                self.table_.name, self.table_.schema, self.engine
+            oid = inspect(self.engine).get_table_oid(
+                self.table_.name, schema=self.table_.schema
             )
         else:
             oid = None
         return oid
 
-    @property
-    def is_default(self):
-        default_def = DEFAULT_COLUMNS.get(self.name, False)
-        try:
-            self.type.python_type
-        except NotImplementedError:
-            return False
-        return (
-            default_def
-            and self.type.python_type == default_def[TYPE]().python_type
-            and self.primary_key == default_def.get(PRIMARY_KEY, False)
-            and self.nullable == default_def.get(NULLABLE, True)
-        )
-
     def add_engine(self, engine):
         self.engine = engine
-
-    @property
-    def valid_target_types(self):
-        """
-        Returns a set of valid types to which the type of the column can be
-        altered.
-        """
-        if (
-            self.engine is not None
-            and not self.is_default
-            and self.db_type is not None
-        ):
-            db_type = self.db_type
-            valid_target_types = sorted(
-                list(
-                    set(
-                        get_full_cast_map(self.engine).get(db_type, [])
-                    )
-                ),
-                key=lambda db_type: db_type.id
-            )
-            return valid_target_types if valid_target_types else []
 
     @property
     def column_attnum(self):
@@ -182,8 +129,6 @@ class MathesarColumn(Column):
         """
         engine_exists = self.engine is not None
         table_exists = self.table_ is not None
-        # TODO are we checking here that the table exists on the database? explain why we have to do
-        # that.
         engine_has_table = inspect(self.engine).has_table(
             self.table_.name,
             schema=self.table_.schema,
@@ -193,31 +138,6 @@ class MathesarColumn(Column):
             return get_column_attnum_from_name(
                 self.table_oid,
                 self.name,
-                self.engine,
-                metadata=metadata,
-            )
-
-    @property
-    def column_default_dict(self):
-        if self.table_ is None:
-            return
-        metadata = self.table_.metadata
-        default_dict = get_column_default_dict(
-            self.table_oid, self.column_attnum, self.engine, metadata=metadata,
-        )
-        if default_dict:
-            return {
-                'is_dynamic': default_dict['is_dynamic'],
-                'value': default_dict['value']
-            }
-
-    @property
-    def default_value(self):
-        if self.table_ is not None:
-            metadata = self.table_.metadata
-            return get_column_default(
-                self.table_oid,
-                self.column_attnum,
                 self.engine,
                 metadata=metadata,
             )

@@ -3,21 +3,6 @@ from unittest.mock import patch
 import pytest
 
 import db.columns.operations.create as col_create
-from db.types.base import get_available_known_db_types, known_db_types
-
-
-def test_type_list_completeness(engine):
-    """
-    Ensure that unavailable types are unavailable for a good reason.
-    """
-    actual_supported_db_types = get_available_known_db_types(engine)
-    unavailable_types = set.difference(set(known_db_types), set(actual_supported_db_types))
-    for db_type in unavailable_types:
-        assert (
-            db_type.is_inconsistent
-            or db_type.is_optional
-            or db_type.is_sa_only
-        )
 
 
 @pytest.mark.parametrize(
@@ -73,20 +58,3 @@ def test_add_columns_type_options(in_options, out_options):
     assert call_args[2] == 123
     assert json.loads(call_args[3])[0]["type"]["name"] == "character varying"
     assert json.loads(call_args[3])[0]["type"]["options"] == out_options
-
-
-def test_duplicate_column_smoke(engine_with_schema):
-    """This is just a smoke test, since the underlying function is trivial."""
-    engine, schema = engine_with_schema
-    with patch.object(col_create.db_conn, "execute_msar_func_with_engine") as mock_exec:
-        col_create.duplicate_column(
-            12345,
-            4,
-            engine,
-            new_column_name='newcol',
-            copy_data=False,
-            copy_constraints=True
-        )
-    mock_exec.assert_called_once_with(
-        engine, 'copy_column', 12345, 4, 'newcol', False, True
-    )

@@ -6,7 +6,7 @@ Mathesar filters not supporting composition.
 
 from abc import abstractmethod
 
-from db.functions import hints, base
+from db.functions import base
 from db.types.custom.uri import URIFunction
 from db.types.custom.email import EMAIL_DOMAIN_NAME
 
@@ -38,9 +38,6 @@ class DistinctArrayAgg(DBFunctionPacked):
     """
     id = 'distinct_aggregate_to_array'
     name = 'distinct aggregate to array'
-    hints = tuple([
-        hints.aggregation,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -53,12 +50,6 @@ class DistinctArrayAgg(DBFunctionPacked):
 class NotNull(DBFunctionPacked):
     id = 'not_null'
     name = 'Is not null'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(1),
-        hints.parameter(0, hints.any),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -70,13 +61,6 @@ class NotNull(DBFunctionPacked):
 class LesserOrEqual(DBFunctionPacked):
     id = 'lesser_or_equal'
     name = 'is lesser or equal to'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.comparable),
-        hints.mathesar_filter,
-        hints.use_this_alias_when("is before or same as", hints.point_in_time),
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -90,13 +74,6 @@ class LesserOrEqual(DBFunctionPacked):
 class GreaterOrEqual(DBFunctionPacked):
     id = 'greater_or_equal'
     name = 'is greater or equal to'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.comparable),
-        hints.mathesar_filter,
-        hints.use_this_alias_when("is before or same as", hints.point_in_time),
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -110,15 +87,6 @@ class GreaterOrEqual(DBFunctionPacked):
 class ArrayLengthEquals(DBFunctionPacked):
     id = 'array_length_equals'
     name = 'Number of elements is'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(3),
-        hints.parameter(0, hints.array),
-        # TODO any is too generic
-        hints.parameter(1, hints.any),
-        hints.parameter(2, hints.numeric),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -133,15 +101,6 @@ class ArrayLengthEquals(DBFunctionPacked):
 class ArrayLengthGreaterThan(DBFunctionPacked):
     id = 'array_length_greater_than'
     name = 'Number of elements is greater than'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(3),
-        hints.parameter(0, hints.array),
-        # TODO any is too generic
-        hints.parameter(1, hints.any),
-        hints.parameter(2, hints.numeric),
-        hints.mathesar_filter
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -156,15 +115,6 @@ class ArrayLengthGreaterThan(DBFunctionPacked):
 class ArrayLengthLessThan(DBFunctionPacked):
     id = 'array_length_lesser_than'
     name = 'Number of elements is lesser than'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(3),
-        hints.parameter(0, hints.array),
-        # TODO any is too generic
-        hints.parameter(1, hints.any),
-        hints.parameter(2, hints.numeric),
-        hints.mathesar_filter
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -179,15 +129,6 @@ class ArrayLengthLessThan(DBFunctionPacked):
 class ArrayLengthGreaterOrEqual(DBFunctionPacked):
     id = 'array_length_greater_than_or_equal'
     name = 'Number of elements is greater than or equal to'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(3),
-        hints.parameter(0, hints.array),
-        # TODO any is too generic
-        hints.parameter(1, hints.any),
-        hints.parameter(2, hints.numeric),
-        hints.mathesar_filter
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -202,15 +143,6 @@ class ArrayLengthGreaterOrEqual(DBFunctionPacked):
 class ArrayLengthLessOrEqual(DBFunctionPacked):
     id = 'array_length_lesser_than_or_equal'
     name = 'Number of elements is lesser than or equal to'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(3),
-        hints.parameter(0, hints.array),
-        # TODO any is too generic
-        hints.parameter(1, hints.any),
-        hints.parameter(2, hints.numeric),
-        hints.mathesar_filter
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -225,14 +157,6 @@ class ArrayLengthLessOrEqual(DBFunctionPacked):
 class ArrayNotEmpty(DBFunctionPacked):
     id = 'array_not_empty'
     name = 'Is not empty'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.array),
-        # TODO any is too generic
-        hints.parameter(1, hints.any),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -246,14 +170,6 @@ class ArrayNotEmpty(DBFunctionPacked):
 class JsonLengthEquals(DBFunctionPacked):
     id = 'json_array_length_equals'
     name = 'Number of elements is'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.json_array),
-        # TODO any is too generic
-        hints.parameter(1, hints.any),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -267,13 +183,6 @@ class JsonLengthEquals(DBFunctionPacked):
 class JsonLengthGreaterThan(DBFunctionPacked):
     id = 'json_array_length_greater_than'
     name = 'Number of elements is greater than'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.json_array),
-        hints.parameter(1, hints.numeric),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -287,13 +196,6 @@ class JsonLengthGreaterThan(DBFunctionPacked):
 class JsonLengthGreaterorEqual(DBFunctionPacked):
     id = 'json_array_length_greater_or_equal'
     name = 'Number of elements is greater than or equal to'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.json_array),
-        hints.parameter(1, hints.numeric),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -307,13 +209,6 @@ class JsonLengthGreaterorEqual(DBFunctionPacked):
 class JsonLengthLessThan(DBFunctionPacked):
     id = 'json_array_length_less_than'
     name = 'Number of elements is less than'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.json_array),
-        hints.parameter(1, hints.numeric),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -327,13 +222,6 @@ class JsonLengthLessThan(DBFunctionPacked):
 class JsonLengthLessorEqual(DBFunctionPacked):
     id = 'json_array_length_less_or_equal'
     name = 'Number of elements is less than or equal to'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.json_array),
-        hints.parameter(1, hints.numeric),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -347,12 +235,6 @@ class JsonLengthLessorEqual(DBFunctionPacked):
 class JsonNotEmpty(DBFunctionPacked):
     id = 'json_array_not_empty'
     name = 'Is not empty'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(1),
-        hints.parameter(0, hints.json_array),
-        hints.mathesar_filter,
-    ])
 
     def unpack(self):
         param0 = self.parameters[0]
@@ -365,13 +247,6 @@ class JsonNotEmpty(DBFunctionPacked):
 class URIAuthorityContains(DBFunctionPacked):
     id = 'uri_authority_contains'
     name = 'URI authority contains'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.uri),
-        hints.parameter(1, hints.string_like),
-        hints.mathesar_filter,
-    ])
     depends_on = tuple([URIFunction.AUTHORITY])
 
     def unpack(self):
@@ -386,13 +261,6 @@ class URIAuthorityContains(DBFunctionPacked):
 class URISchemeEquals(DBFunctionPacked):
     id = 'uri_scheme_equals'
     name = 'URI scheme is'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.uri),
-        hints.parameter(1, hints.string_like),
-        hints.mathesar_filter,
-    ])
     depends_on = tuple([URIFunction.SCHEME])
 
     def unpack(self):
@@ -407,13 +275,6 @@ class URISchemeEquals(DBFunctionPacked):
 class EmailDomainContains(DBFunctionPacked):
     id = 'email_domain_contains'
     name = 'email domain contains'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.email),
-        hints.parameter(1, hints.string_like),
-        hints.mathesar_filter,
-    ])
     depends_on = tuple([EMAIL_DOMAIN_NAME])
 
     def unpack(self):
@@ -428,13 +289,6 @@ class EmailDomainContains(DBFunctionPacked):
 class EmailDomainEquals(DBFunctionPacked):
     id = 'email_domain_equals'
     name = 'email domain is'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.parameter(0, hints.email),
-        hints.parameter(1, hints.string_like),
-        hints.mathesar_filter,
-    ])
     depends_on = tuple([EMAIL_DOMAIN_NAME])
 
     def unpack(self):

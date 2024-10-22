@@ -7,15 +7,14 @@ import psycopg
 # These imports come from the mathesar namespace, because our DB setup logic depends on it.
 from django.db import connection as dj_connection
 
-from sqlalchemy import MetaData, text, Table
+from sqlalchemy import MetaData, text, Table, select, or_
 from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from db.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
 from db.sql import install as sql_install
-from db.schemas.operations.drop import drop_schema_via_name as drop_sa_schema
-from db.schemas.operations.create import create_schema_if_not_exists_via_sql_alchemy
-from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
+from db.utils import get_pg_catalog_table
+from db.metadata import get_empty_metadata
 
 from fixtures.utils import create_scoped_fixtures
 
@@ -162,28 +161,6 @@ def _test_schema_name():
     return "_test_schema_name"
 
 
-# TODO does testing this make sense?
-@pytest.fixture(scope="module")
-def engine_without_ischema_names_updated(test_db_name, MOD_engine_cache):
-    """
-    For testing environments where an engine might not be fully setup.
-
-    We instantiate a new engine cache, without updating its ischema_names dict.
-    """
-    return MOD_engine_cache(test_db_name)
-
-
-# TODO seems unneeded: remove
-@pytest.fixture
-def engine_with_schema_without_ischema_names_updated(
-    engine_without_ischema_names_updated, _test_schema_name, create_db_schema
-):
-    engine = engine_without_ischema_names_updated
-    schema_name = _test_schema_name
-    create_db_schema(schema_name, engine)
-    return engine, schema_name
-
-
 @pytest.fixture
 def engine_with_schema(engine, _test_schema_name, create_db_schema):
     schema_name = _test_schema_name
@@ -210,8 +187,8 @@ def create_db_schema(SES_engine_cache):
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
         logger.debug(f'creating {schema_name}')
-        create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
-        schema_oid = get_schema_oid_from_name(schema_name, engine)
+        _create_schema_if_not_exists_via_sql_alchemy(schema_name, engine)
+        schema_oid = _get_schema_oid_from_name(schema_name, engine)
         db_name = engine.url.database
         created_schemas_in_this_engine = created_schemas.setdefault(db_name, {})
         created_schemas_in_this_engine[schema_name] = schema_oid
@@ -223,13 +200,72 @@ def create_db_schema(SES_engine_cache):
         try:
             for _, schema_oid in created_schemas_in_this_engine.items():
                 # Handle schemas being renamed during test
-                schema_name = get_schema_name_from_oid(schema_oid, engine)
+                schema_name = _get_schema_name_from_oid(schema_oid, engine)
                 if schema_name:
-                    drop_sa_schema(engine, schema_name, cascade=True)
+                    _drop_schema_via_name(engine, schema_name, cascade=True)
                     logger.debug(f'dropping {schema_name}')
         except OperationalError as e:
             logger.debug(f'ignoring operational error: {e}')
     logger.debug('exit')
+
+
+def _create_schema_if_not_exists_via_sql_alchemy(schema_name, engine):
+    return _execute_msar_func_with_engine(
+        engine, 'create_schema_if_not_exists', schema_name
+    ).fetchone()[0]
+
+
+def _execute_msar_func_with_engine(engine, func_name, *args):
+    """
+    Execute an msar function using an SQLAlchemy engine.
+
+    This is temporary scaffolding.
+
+    Args:
+        engine: an SQLAlchemy engine for connecting to a DB
+        func_name: The unqualified msar function name (danger; not sanitized)
+        *args: The list of parameters to pass
+    """
+    conn_str = str(engine.url)
+    with psycopg.connect(conn_str) as conn:
+        return conn.execute(
+            f"SELECT msar.{func_name}({','.join(['%s'] * len(args))})",
+            args
+        )
+
+
+def _get_schema_name_from_oid(oid, engine, metadata=None):
+    schema_info = _reflect_schema(engine, oid=oid, metadata=metadata)
+    if schema_info:
+        return schema_info["name"]
+
+
+def _get_schema_oid_from_name(name, engine):
+    schema_info = _reflect_schema(engine, name=name)
+    if schema_info:
+        return schema_info["oid"]
+
+
+def _reflect_schema(engine, name=None, oid=None, metadata=None):
+    # If we have both arguments, the behavior is undefined.
+    try:
+        assert name is None or oid is None
+    except AssertionError as e:
+        raise e
+    # TODO reuse metadata
+    metadata = metadata if metadata else get_empty_metadata()
+    pg_namespace = get_pg_catalog_table("pg_namespace", engine, metadata=metadata)
+    sel = (
+        select(pg_namespace.c.oid, pg_namespace.c.nspname.label("name"))
+        .where(or_(pg_namespace.c.nspname == name, pg_namespace.c.oid == oid))
+    )
+    with engine.begin() as conn:
+        schema_info = conn.execute(sel).fetchone()
+    return schema_info
+
+
+def _drop_schema_via_name(engine, name, cascade=False):
+    _execute_msar_func_with_engine(engine, 'drop_schema', name, cascade).fetchone()
 
 
 # Seems to be roughly equivalent to mathesar/database/base.py::create_mathesar_engine
@@ -260,9 +296,6 @@ RESOURCES = os.path.join(FILE_DIR, "db", "tests", "resources")
 ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
 LIBRARY_SQL = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_CHECKOUTS_SQL = os.path.join(RESOURCES, "library_add_checkouts.sql")
-FRAUDULENT_PAYMENTS_SQL = os.path.join(RESOURCES, "fraudulent_payments.sql")
-PLAYER_PROFILES_SQL = os.path.join(RESOURCES, "player_profiles.sql")
-MARATHON_ATHLETES_SQL = os.path.join(RESOURCES, "marathon_athletes.sql")
 
 
 @pytest.fixture
@@ -334,54 +367,3 @@ def library_db_tables(engine_with_library):
         in table_names
     }
     return tables
-
-
-@pytest.fixture
-def engine_with_fraudulent_payment(engine_with_schema):
-    engine, schema = engine_with_schema
-    with engine.begin() as conn, open(FRAUDULENT_PAYMENTS_SQL) as f:
-        conn.execute(text(f"SET search_path={schema}"))
-        conn.execute(text(f.read()))
-    yield engine, schema
-
-
-@pytest.fixture
-def payments_db_table(engine_with_fraudulent_payment):
-    engine, schema = engine_with_fraudulent_payment
-    metadata = MetaData(bind=engine)
-    table = Table("Payments", metadata, schema=schema, autoload_with=engine)
-    return table
-
-
-@pytest.fixture
-def engine_with_player_profiles(engine_with_schema):
-    engine, schema = engine_with_schema
-    with engine.begin() as conn, open(PLAYER_PROFILES_SQL) as f:
-        conn.execute(text(f"SET search_path={schema}"))
-        conn.execute(text(f.read()))
-    yield engine, schema
-
-
-@pytest.fixture
-def players_db_table(engine_with_player_profiles):
-    engine, schema = engine_with_player_profiles
-    metadata = MetaData(bind=engine)
-    table = Table("Players", metadata, schema=schema, autoload_with=engine)
-    return table
-
-
-@pytest.fixture
-def engine_with_marathon_athletes(engine_with_schema):
-    engine, schema = engine_with_schema
-    with engine.begin() as conn, open(MARATHON_ATHLETES_SQL) as f:
-        conn.execute(text(f"SET search_path={schema}"))
-        conn.execute(text(f.read()))
-    yield engine, schema
-
-
-@pytest.fixture
-def athletes_db_table(engine_with_marathon_athletes):
-    engine, schema = engine_with_marathon_athletes
-    metadata = MetaData(bind=engine)
-    table = Table("Marathon", metadata, schema=schema, autoload_with=engine)
-    return table
