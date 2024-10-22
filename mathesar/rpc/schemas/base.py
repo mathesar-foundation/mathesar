@@ -118,7 +118,7 @@ def get(*, schema_oid: int, database_id: int, **kwargs) -> SchemaInfo:
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        schema_info = get_schema(conn)
+        schema_info = get_schema(schema_oid, conn)
     return schema_info
 
 
