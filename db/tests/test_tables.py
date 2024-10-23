@@ -1,12 +1,19 @@
 import json
-
 from unittest.mock import patch
-import db.tables.operations.alter as tab_alter
+from db import tables
+
+
+def test_get_table_info():
+    with patch.object(tables, 'exec_msar_func') as mock_exec:
+        mock_exec.return_value.fetchone = lambda: ('a', 'b')
+        result = tables.get_table_info('schema', 'conn')
+    mock_exec.assert_called_once_with('conn', 'get_table_info', 'schema')
+    assert result == 'a'
 
 
 def test_alter_table():
-    with patch.object(tab_alter.db_conn, 'exec_msar_func') as mock_exec:
-        tab_alter.alter_table_on_database(
+    with patch.object(tables, 'exec_msar_func') as mock_exec:
+        tables.alter_table_on_database(
             12345,
             {"name": "newname", "description": "this is a comment", "columns": {}},
             "conn"

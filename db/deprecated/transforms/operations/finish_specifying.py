@@ -1,7 +1,7 @@
 import psycopg
 from sqlalchemy import inspect
 
-from db.tables.operations import select as tables_select
+from db.tables import list_joinable_tables
 from db.deprecated.transforms.base import Summarize
 from db.deprecated.columns import get_column_from_oid_and_attnum
 
@@ -156,7 +156,7 @@ def _get_oids_of_joinable_tables_with_single_results(
     db_query, engine, metadata,
 ):
     with psycopg.connect(str(engine.url)) as conn:
-        joinable_tables = tables_select.list_joinable_tables(
+        joinable_tables = list_joinable_tables(
             db_query.base_table_oid,
             conn,
             3

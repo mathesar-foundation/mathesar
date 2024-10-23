@@ -6,8 +6,7 @@ from typing import TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db import links
-from db.tables.operations import infer_types, split, move_columns as move_cols
+from db import links, tables
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -103,7 +102,7 @@ def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> dict:
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return infer_types.infer_table_column_data_types(conn, table_oid)
+        return tables.infer_table_column_data_types(conn, table_oid)
 
 
 class SplitTableInfo(TypedDict):
@@ -146,7 +145,7 @@ def split_table(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        return split.split_table(
+        return tables.split_table(
             conn,
             table_oid,
             column_attnums,
@@ -177,7 +176,7 @@ def move_columns(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        move_cols.move_columns_to_referenced_table(
+        tables.move_columns_to_referenced_table(
             conn,
             source_table_oid,
             target_table_oid,

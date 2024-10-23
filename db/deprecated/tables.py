@@ -1,7 +1,7 @@
 import psycopg
 from sqlalchemy import Table
 from db.schemas import get_schema
-from db.tables.operations.select import get_table
+from db.tables import get_table
 
 
 def reflect_table_from_oid(oid, engine, metadata, connection_to_use=None, keep_existing=False):

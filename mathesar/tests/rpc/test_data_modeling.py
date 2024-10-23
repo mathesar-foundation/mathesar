@@ -126,7 +126,7 @@ def test_suggest_types(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
 
     monkeypatch.setattr(data_modeling, 'connect', mock_connect)
-    monkeypatch.setattr(data_modeling.infer_types, 'infer_table_column_data_types', mock_suggest_types)
+    monkeypatch.setattr(data_modeling.tables, 'infer_table_column_data_types', mock_suggest_types)
     data_modeling.suggest_types(
         table_oid=_table_oid,
         database_id=_database_id,
@@ -171,7 +171,7 @@ def test_split_table(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
 
     monkeypatch.setattr(data_modeling, 'connect', mock_connect)
-    monkeypatch.setattr(data_modeling.split, 'split_table', mock_split_table)
+    monkeypatch.setattr(data_modeling.tables, 'split_table', mock_split_table)
     data_modeling.split_table(
         table_oid=_table_oid,
         column_attnums=_column_attnums,
@@ -216,7 +216,7 @@ def test_move_columns(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
 
     monkeypatch.setattr(data_modeling, 'connect', mock_connect)
-    monkeypatch.setattr(data_modeling.move_cols, 'move_columns_to_referenced_table', mock_move_columns)
+    monkeypatch.setattr(data_modeling.tables, 'move_columns_to_referenced_table', mock_move_columns)
     data_modeling.move_columns(
         source_table_oid=_source_table_oid,
         target_table_oid=_target_table_oid,

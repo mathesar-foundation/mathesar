@@ -5,7 +5,7 @@ import clevercsv as csv
 
 from db.constants import COLUMN_NAME_TEMPLATE
 from db.encoding_utils import get_sql_compatible_encoding
-from db.tables.operations.create import prepare_table_for_import
+from db.tables import prepare_table_for_import
 
 from mathesar.errors import InvalidTableError
 from mathesar.models.base import DataFile
