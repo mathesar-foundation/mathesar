@@ -1,6 +1,6 @@
 import json
 from db.connection import exec_msar_func
-from db.columns.operations.alter import _transform_column_alter_dict
+from db.columns import _transform_column_alter_dict
 
 
 def get_table(table, conn):
