@@ -21,7 +21,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: constraintsDataStore = $tabularData.constraintsDataStore;
+  $: ({ constraintsDataStore, table } = $tabularData);
 
   const CONSTRAINT_TYPE_SUPPORTING_CAN_ADD: ConstraintType[] = [
     'unique',
@@ -67,8 +67,13 @@
     });
   }
 
-  $: canAdd = CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType);
-  $: canDrop = CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType);
+  $: currentRoleOwnsTable = table.currentAccess.currentRoleOwns;
+  $: canAdd =
+    $currentRoleOwnsTable &&
+    CONSTRAINT_TYPE_SUPPORTING_CAN_ADD.includes(constraintType);
+  $: canDrop =
+    $currentRoleOwnsTable &&
+    CONSTRAINT_TYPE_SUPPORTING_CAN_DROP.includes(constraintType);
 </script>
 
 <div class="constraint-type-section">
