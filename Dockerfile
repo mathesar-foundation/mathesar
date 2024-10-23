@@ -92,7 +92,7 @@ ENTRYPOINT ["./dev-run.sh"]
 from base as production
 
 # Install prod requirements
-RUN pip install --no-cache-dir -r requirements-prod.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Compile translation files
 RUN python manage.py compilemessages
