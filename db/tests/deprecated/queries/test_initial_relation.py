@@ -5,7 +5,7 @@
 # tables.
 from sqlalchemy import inspect
 from db.deprecated.columns import get_column_attnum_from_name as get_attnum
-from db.queries.base import DBQuery, InitialColumn, JoinParameter
+from db.deprecated.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.deprecated.metadata import get_empty_metadata
 
 

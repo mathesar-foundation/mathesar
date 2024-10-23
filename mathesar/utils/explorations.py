@@ -1,7 +1,7 @@
 from db.deprecated.engine import create_future_engine_with_custom_types
 from db.deprecated.metadata import get_empty_metadata
-from db.queries.base import DBQuery, InitialColumn, JoinParameter
-from db.queries.operations.process import get_transforms_with_summarizes_speced
+from db.deprecated.queries.base import DBQuery, InitialColumn, JoinParameter
+from db.deprecated.queries.operations.process import get_transforms_with_summarizes_speced
 from db.tables.operations.select import get_table
 from db.transforms.base import Summarize
 from db.transforms.operations.deserialize import deserialize_transformation
