@@ -7,7 +7,7 @@ from sqlalchemy import select
 
 from db.deprecated.functions.operations.apply import apply_db_function_by_id, apply_db_function_spec_as_filter
 from db.deprecated.functions.packed import DistinctArrayAgg
-from db.records.operations import sort as rec_sort
+from db.deprecated import sort as rec_sort
 
 
 class UniqueConstraintMapping:
