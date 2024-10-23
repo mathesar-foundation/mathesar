@@ -193,13 +193,13 @@
   }
 
   &.btn-action {
-    background: var(--sand-100);
+    background: var(--color-white);
     border-color: var(--sand-300);
 
     &:not(:disabled) {
       &:hover,
       &.hover {
-        border-color: var(--sand-400);
+        border-color: var(--sand-600);
       }
 
       &:active,
