@@ -6,9 +6,11 @@ from typing import Optional, TypedDict, Union
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.constraints.operations.select import get_constraints_for_table
-from db.constraints.operations.create import create_constraint
-from db.constraints.operations.drop import drop_constraint_via_oid
+from db.constraints import(
+    get_constraints_for_table,
+    create_constraint,
+    drop_constraint_via_oid,
+)
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
