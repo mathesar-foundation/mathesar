@@ -202,11 +202,11 @@ def _get_oid_of_initial_column(initial_column):
 
 
 def _get_oid_of_joinable_table(joinable_table):
-    joinable_table_oid = joinable_table[tables_select.TARGET]
+    joinable_table_oid = joinable_table['target']
     return joinable_table_oid
 
 
 def _has_single_result(joinable_table):
-    has_multiple_results = joinable_table[tables_select.MULTIPLE_RESULTS]
+    has_multiple_results = joinable_table['multiple_results']
     assert type(has_multiple_results) is bool
     return not has_multiple_results

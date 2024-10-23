@@ -4,7 +4,7 @@ from sqlalchemy.sql.functions import count
 
 from db.deprecated.columns import MathesarColumn
 from db.deprecated.columns import get_column_name_from_attnum
-from db.tables.operations.select import reflect_table_from_oid
+from db.deprecated.tables import reflect_table_from_oid
 from db.transforms.operations import apply
 from db.transforms import base
 from db.deprecated.utils import execute_pg_query

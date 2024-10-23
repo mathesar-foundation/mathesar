@@ -2,7 +2,7 @@
 from sqlalchemy import Column, ForeignKey, inspect, and_, asc, select
 
 from db.deprecated.utils import execute_statement, get_pg_catalog_table
-from db.tables.operations.select import reflect_table_from_oid
+from db.deprecated.tables import reflect_table_from_oid
 from db.deprecated.types.convert import get_db_type_enum_from_class
 
 
