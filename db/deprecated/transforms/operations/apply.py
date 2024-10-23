@@ -1,5 +1,5 @@
-from db.transforms.base import enforce_relation_type_expectations, Transform
-from db.transforms import base
+from db.deprecated.transforms.base import enforce_relation_type_expectations, Transform
+from db.deprecated.transforms import base
 
 
 def apply_transformations(relation, transformations):

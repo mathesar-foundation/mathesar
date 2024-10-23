@@ -1,4 +1,4 @@
-from db.transforms.known_transforms import get_transform_subclass_from_type_id
+from db.deprecated.transforms.known_transforms import get_transform_subclass_from_type_id
 
 
 def deserialize_transformation(json):

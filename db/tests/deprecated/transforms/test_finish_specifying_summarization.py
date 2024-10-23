@@ -5,9 +5,9 @@ import functools
 
 from db.deprecated.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.deprecated.metadata import get_empty_metadata
-from db.transforms.base import Summarize, SelectSubsetOfColumns, Limit
+from db.deprecated.transforms.base import Summarize, SelectSubsetOfColumns, Limit
 from db.deprecated.columns import get_column_attnum_from_name
-from db.transforms.operations.finish_specifying import finish_specifying_summarize_transform
+from db.deprecated.transforms.operations.finish_specifying import finish_specifying_summarize_transform
 
 
 def generate_attribute_accessor(getattr):

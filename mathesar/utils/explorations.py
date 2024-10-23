@@ -3,8 +3,8 @@ from db.deprecated.metadata import get_empty_metadata
 from db.deprecated.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.deprecated.queries.operations.process import get_transforms_with_summarizes_speced
 from db.tables.operations.select import get_table
-from db.transforms.base import Summarize
-from db.transforms.operations.deserialize import deserialize_transformation
+from db.deprecated.transforms.base import Summarize
+from db.deprecated.transforms.operations.deserialize import deserialize_transformation
 from db.functions.base import (
     Count,
     ArrayAgg,

@@ -1,4 +1,4 @@
-from db.transforms import base as transforms_base
+from db.deprecated.transforms import base as transforms_base
 
 
 def test_basic_transforms(shallow_link_dbquery):

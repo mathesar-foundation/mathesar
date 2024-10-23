@@ -9,9 +9,9 @@ import inspect
 
 from db.deprecated.utils import get_module_members_that_satisfy
 
-import db.transforms.base
+import db.deprecated.transforms.base
 
-from db.transforms.base import Transform
+from db.deprecated.transforms.base import Transform
 
 
 def _is_concrete_transform_subclass(member):
@@ -23,7 +23,7 @@ def _is_concrete_transform_subclass(member):
 
 
 _modules_to_search_in = tuple([
-    db.transforms.base,
+    db.deprecated.transforms.base,
 ])
 
 

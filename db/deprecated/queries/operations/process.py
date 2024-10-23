@@ -1,5 +1,5 @@
-from db.transforms.base import Summarize
-from db.transforms.operations.finish_specifying import finish_specifying_summarize_transform
+from db.deprecated.transforms.base import Summarize
+from db.deprecated.transforms.operations.finish_specifying import finish_specifying_summarize_transform
 
 
 def get_transforms_with_summarizes_speced(db_query, engine, metadata):
