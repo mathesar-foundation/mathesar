@@ -58,7 +58,6 @@ MIDDLEWARE = [
     "mathesar.middleware.CursorClosedHandlerMiddleware",
     "mathesar.middleware.PasswordChangeNeededMiddleware",
     'django_userforeignkey.middleware.UserForeignKeyMiddleware',
-    'django_request_cache.middleware.RequestCacheMiddleware',
 ]
 
 ROOT_URLCONF = "config.urls"

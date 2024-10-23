@@ -9,3 +9,4 @@ pytest-xdist[psutil]==2.5.0
 mkdocs-material==8.5.11
 mkdocs-redirects==1.2.0
 responses==0.22.0
+SQLAlchemy-Utils==0.38.2
