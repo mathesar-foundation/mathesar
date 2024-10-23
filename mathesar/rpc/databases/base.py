@@ -4,8 +4,7 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.utils import connect
-from db.databases.operations.select import get_database
-from db.databases.operations.drop import drop_database
+from db.databases import get_database, drop_database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
