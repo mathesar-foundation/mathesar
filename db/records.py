@@ -95,3 +95,46 @@ def search_records_from_table(
         table_oid, json.dumps(search), limit, return_record_summaries
     ).fetchone()[0]
     return result
+
+
+def delete_records_from_table(conn, record_ids, table_oid):
+    """
+    Delete records from table by id.
+
+    Args:
+        tab_id: The OID of the table whose record we'll delete.
+        record_ids: A list of primary values
+
+    The table must have a single primary key column.
+    """
+    return db_conn.exec_msar_func(
+        conn,
+        'delete_records_from_table',
+        table_oid,
+        json.dumps(record_ids),
+    ).fetchone()[0]
+
+
+def add_record_to_table(conn, record_def, table_oid, return_record_summaries=False):
+    """Add a record to a table."""
+    result = db_conn.exec_msar_func(
+        conn,
+        'add_record_to_table',
+        table_oid,
+        json.dumps(record_def),
+        return_record_summaries
+    ).fetchone()[0]
+    return result
+
+
+def patch_record_in_table(conn, record_def, record_id, table_oid, return_record_summaries=False):
+    """Update a record in a table."""
+    result = db_conn.exec_msar_func(
+        conn,
+        'patch_record_in_table',
+        table_oid,
+        record_id,
+        json.dumps(record_def),
+        return_record_summaries
+    ).fetchone()[0]
+    return result
