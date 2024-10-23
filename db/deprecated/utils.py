@@ -1,12 +1,14 @@
 import inspect
 import warnings
 
-from psycopg2.errors import UndefinedFunction
+from psycopg2 import errors as p_errors
 
 import sqlalchemy
 from sqlalchemy.exc import ProgrammingError
 
-from db.records import exceptions
+
+class UndefinedFunction(Exception):
+    pass
 
 
 def execute_statement(engine, statement, connection_to_use=None):
@@ -17,9 +19,9 @@ def execute_statement(engine, statement, connection_to_use=None):
             with engine.begin() as conn:
                 return conn.execute(statement)
     except ProgrammingError as e:
-        if isinstance(e.orig, UndefinedFunction):
+        if isinstance(e.orig, p_errors.UndefinedFunction):
             message = e.orig.args[0].split('\n')[0]
-            raise exceptions.UndefinedFunction(message)
+            raise UndefinedFunction(message)
         else:
             raise e
 

@@ -1,7 +1,6 @@
 from collections import namedtuple
 from sqlalchemy import select
 from db.deprecated import columns as col_utils
-from db.records.exceptions import BadSortFormat, SortFieldNotFound
 
 
 def make_order_by_deterministic(relation, order_by=None):
@@ -125,3 +124,11 @@ def _build_directed_column_expr(column, sort_spec):
     elif sort_spec.nullslast:
         directed_col = directed_col.nulls_last()
     return directed_col
+
+
+class BadSortFormat(Exception):
+    pass
+
+
+class SortFieldNotFound(Exception):
+    pass
