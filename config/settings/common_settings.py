@@ -114,7 +114,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
     db_key: db_url(url_string)
-    for db_key, url_string in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',')]
+    for db_key, url_string in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']
 }
 
 # POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST & POSTGRES_PORT are required env variables for forming a pg connection string for the django database
@@ -143,7 +143,7 @@ for db_key, db_dict in DATABASES.items():
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
 TEST = bool(os.environ.get('TEST', default=False))
 if TEST:
-    for db_key, _ in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',')]:
+    for db_key, _ in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']:
         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
 
 
