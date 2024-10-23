@@ -6,4 +6,4 @@ def list_schemas(conn):
 
 
 def get_schema(schema_oid, conn):
-    return exec_msar_func(conn, 'get_schema').fetchone()[0]
+    return exec_msar_func(conn, 'get_schema', schema_oid).fetchone()[0]

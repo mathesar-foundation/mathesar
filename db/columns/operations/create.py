@@ -22,7 +22,8 @@ def add_columns_to_table(table_oid, column_data_list, conn):
         _transform_column_create_dict(col) for col in column_data_list
     ]
     result = db_conn.exec_msar_func(
-        conn, 'add_columns', table_oid, json.dumps(transformed_column_data)
+        conn, 'add_columns', table_oid, json.dumps(transformed_column_data),
+        False  # Whether to treat defaults as raw SQL. DANGER! Defaults to False & not exposed to add_columns_to_table
     ).fetchone()[0]
     return result
 
