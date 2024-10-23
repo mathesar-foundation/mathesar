@@ -57,7 +57,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
     "mathesar.middleware.PasswordChangeNeededMiddleware",
-    'django_userforeignkey.middleware.UserForeignKeyMiddleware',
 ]
 
 ROOT_URLCONF = "config.urls"
