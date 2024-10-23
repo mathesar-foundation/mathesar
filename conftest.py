@@ -292,7 +292,7 @@ def _get_connection_string(username, password, hostname, database):
 
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
-RESOURCES = os.path.join(FILE_DIR, "db", "tests", "resources")
+RESOURCES = os.path.join(FILE_DIR, "db", "tests", "deprecated", "resources")
 ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
 LIBRARY_SQL = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_CHECKOUTS_SQL = os.path.join(RESOURCES, "library_add_checkouts.sql")
