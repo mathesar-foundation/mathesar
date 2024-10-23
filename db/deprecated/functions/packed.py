@@ -6,7 +6,7 @@ Mathesar filters not supporting composition.
 
 from abc import abstractmethod
 
-from db.functions import base
+from db.deprecated.functions import base
 from db.deprecated.types.custom import EMAIL_DOMAIN_NAME, URIFunction
 
 

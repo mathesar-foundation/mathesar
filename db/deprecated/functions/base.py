@@ -17,7 +17,7 @@ from db.deprecated.engine import get_dummy_engine
 from db.deprecated.types.custom import (
     EMAIL_DOMAIN_NAME, URIFunction, MathesarJsonArray, HasUnderlyingType
 )
-from db.functions.exceptions import BadDBFunctionFormat
+from db.deprecated.functions.exceptions import BadDBFunctionFormat
 from db.deprecated.types.base import PostgresType
 
 

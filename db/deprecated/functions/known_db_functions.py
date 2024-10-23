@@ -10,11 +10,11 @@ import inspect
 
 from db.deprecated.utils import get_module_members_that_satisfy
 
-import db.functions.base
-import db.functions.packed
+import db.deprecated.functions.base
+import db.deprecated.functions.packed
 import db.deprecated.types.custom
 
-from db.functions.base import DBFunction
+from db.deprecated.functions.base import DBFunction
 
 
 def _is_concrete_db_function_subclass(member):
@@ -27,8 +27,8 @@ def _is_concrete_db_function_subclass(member):
 
 _modules_to_search_in = tuple([
     db.deprecated.types.custom,
-    db.functions.base,
-    db.functions.packed,
+    db.deprecated.functions.base,
+    db.deprecated.functions.packed,
 ])
 
 

@@ -3,7 +3,7 @@ import pytest
 from psycopg.errors import BadCopyFileFormat
 from django.core.exceptions import FieldDoesNotExist
 from mathesar.utils.permissions import BadInstallationTarget
-from db.functions.exceptions import UnknownDBFunctionID
+from db.deprecated.functions.exceptions import UnknownDBFunctionID
 from sqlalchemy.exc import IntegrityError
 from http.client import CannotSendRequest
 

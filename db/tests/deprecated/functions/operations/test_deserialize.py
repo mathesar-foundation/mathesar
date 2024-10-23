@@ -1,6 +1,6 @@
 import pytest
-from db.functions.exceptions import UnknownDBFunctionID, BadDBFunctionFormat
-from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
+from db.deprecated.functions.exceptions import UnknownDBFunctionID, BadDBFunctionFormat
+from db.deprecated.functions.operations.deserialize import get_db_function_from_ma_function_spec
 
 
 exceptions_test_list = [

@@ -1,7 +1,7 @@
-from db.functions.base import DBFunction
-from db.functions.exceptions import ReferencedColumnsDontExist
-from db.functions.packed import DBFunctionPacked
-from db.functions.operations.deserialize import get_db_function_from_ma_function_spec, get_db_function_subclass_by_id
+from db.deprecated.functions.base import DBFunction
+from db.deprecated.functions.exceptions import ReferencedColumnsDontExist
+from db.deprecated.functions.packed import DBFunctionPacked
+from db.deprecated.functions.operations.deserialize import get_db_function_from_ma_function_spec, get_db_function_subclass_by_id
 
 
 def apply_db_function_by_id(db_function_subclass_id, parameters):

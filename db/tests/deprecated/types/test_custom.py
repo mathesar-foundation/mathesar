@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import TIME as SA_TIME
 from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
 from sqlalchemy.exc import IntegrityError
 from db.deprecated.types import custom
-from db.functions.base import sa_call_sql_function
+from db.deprecated.functions.base import sa_call_sql_function
 from db.deprecated.types import exceptions
 from db.deprecated.types.base import PostgresType
 

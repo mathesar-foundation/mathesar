@@ -1,6 +1,6 @@
-from db.functions.base import Literal, ColumnName, Alias
-from db.functions.known_db_functions import known_db_functions
-from db.functions.exceptions import UnknownDBFunctionID, BadDBFunctionFormat
+from db.deprecated.functions.base import Literal, ColumnName, Alias
+from db.deprecated.functions.known_db_functions import known_db_functions
+from db.deprecated.functions.exceptions import UnknownDBFunctionID, BadDBFunctionFormat
 
 
 def get_db_function_from_ma_function_spec(spec):

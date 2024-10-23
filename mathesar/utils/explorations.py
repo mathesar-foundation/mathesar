@@ -5,7 +5,7 @@ from db.deprecated.queries.operations.process import get_transforms_with_summari
 from db.tables.operations.select import get_table
 from db.deprecated.transforms.base import Summarize
 from db.deprecated.transforms.operations.deserialize import deserialize_transformation
-from db.functions.base import (
+from db.deprecated.functions.base import (
     Count,
     ArrayAgg,
     Sum,
@@ -18,7 +18,7 @@ from db.functions.base import (
     PeakTime,
     PeakMonth,
 )
-from db.functions.packed import DistinctArrayAgg
+from db.deprecated.functions.packed import DistinctArrayAgg
 from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
 

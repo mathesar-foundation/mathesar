@@ -3,13 +3,13 @@ import pytest
 
 from db.deprecated.utils import execute_pg_query
 
-from db.functions.base import (
+from db.deprecated.functions.base import (
     ColumnName, Not, Literal, Null, Equal, Greater, And, Or, StartsWith, Contains, StartsWithCaseInsensitive, ContainsCaseInsensitive
 )
-from db.functions.packed import (
+from db.deprecated.functions.packed import (
     GreaterOrEqual, LesserOrEqual, NotNull
 )
-from db.functions.operations.apply import apply_db_function_as_filter
+from db.deprecated.functions.operations.apply import apply_db_function_as_filter
 
 
 def _like(x, v):

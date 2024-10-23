@@ -1,11 +1,11 @@
 import pytest
 from db.deprecated.utils import execute_pg_query
-from db.functions.base import ColumnName, Noop, ArrayContains
-from db.functions.packed import (
+from db.deprecated.functions.base import ColumnName, Noop, ArrayContains
+from db.deprecated.functions.packed import (
     ArrayLengthEquals, ArrayLengthGreaterThan, ArrayLengthGreaterOrEqual,
     ArrayLengthLessThan, ArrayLengthLessOrEqual, ArrayNotEmpty
 )
-from db.functions.operations.apply import apply_db_function_as_filter
+from db.deprecated.functions.operations.apply import apply_db_function_as_filter
 
 
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
