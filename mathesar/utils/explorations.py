@@ -1,5 +1,5 @@
 from db.deprecated.engine import create_future_engine_with_custom_types
-from db.metadata import get_empty_metadata
+from db.deprecated.metadata import get_empty_metadata
 from db.queries.base import DBQuery, InitialColumn, JoinParameter
 from db.queries.operations.process import get_transforms_with_summarizes_speced
 from db.tables.operations.select import get_table

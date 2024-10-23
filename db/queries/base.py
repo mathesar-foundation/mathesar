@@ -8,7 +8,7 @@ from db.deprecated.tables import reflect_table_from_oid
 from db.transforms.operations import apply
 from db.transforms import base
 from db.deprecated.utils import execute_pg_query
-from db.metadata import get_empty_metadata
+from db.deprecated.metadata import get_empty_metadata
 
 
 class DBQuery:

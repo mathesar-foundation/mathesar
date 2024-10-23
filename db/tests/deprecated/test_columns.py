@@ -11,7 +11,7 @@ from sqlalchemy.sql.sqltypes import NullType
 from db.deprecated.columns import (
     MathesarColumn, get_column_attnum_from_name, get_column_name_from_attnum
 )
-from db.metadata import get_empty_metadata
+from db.deprecated.metadata import get_empty_metadata
 from db.deprecated.types.custom import Email, Interval
 from db.deprecated.types.base import MathesarCustomType, PostgresType, UnknownType
 
