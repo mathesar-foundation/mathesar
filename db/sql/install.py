@@ -1,7 +1,6 @@
 import os
 
 from db.connection import load_file_with_conn
-from db.types.custom.uri import install_tld_lookup_table
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -24,7 +23,6 @@ INSTALL_STEPS = [
     _install_sql_file("10_msar_joinable_tables.sql"),
     _install_sql_file("30_msar_custom_aggregates.sql"),
     _install_sql_file("40_msar_types.sql"),
-    install_tld_lookup_table,
     _install_sql_file("50_msar_permissions.sql"),
 ]
 

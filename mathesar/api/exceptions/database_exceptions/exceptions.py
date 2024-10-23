@@ -1,6 +1,5 @@
 from rest_framework import status
 
-from db.columns.exceptions import InvalidTypeError
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
     MathesarAPIException,
@@ -57,8 +56,6 @@ class InvalidTypeCastAPIException(MathesarAPIException):
 
     @staticmethod
     def err_msg(exception):
-        if type(exception) is InvalidTypeError and exception.column_name and exception.new_type:
-            return f'"{exception.column_name}" cannot be cast to {exception.new_type}.'
         return 'Invalid type cast requested.'
 
 

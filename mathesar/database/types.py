@@ -1,9 +1,9 @@
 """
 This file describes UI data types and how they map to DB-layer database types (subclasses
-of db.types.base.DatabaseType).
+of db.deprecated.types.base.DatabaseType).
 """
 from enum import Enum
-from db.types.base import (
+from db.deprecated.types.base import (
     PostgresType, MathesarCustomType
 )
 

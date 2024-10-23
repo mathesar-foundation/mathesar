@@ -11,10 +11,10 @@ from sqlalchemy import MetaData, text, Table, select, or_
 from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
-from db.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
+from db.deprecated.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
 from db.sql import install as sql_install
-from db.utils import get_pg_catalog_table
-from db.metadata import get_empty_metadata
+from db.deprecated.utils import get_pg_catalog_table
+from db.deprecated.metadata import get_empty_metadata
 
 from fixtures.utils import create_scoped_fixtures
 
@@ -292,7 +292,7 @@ def _get_connection_string(username, password, hostname, database):
 
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
-RESOURCES = os.path.join(FILE_DIR, "db", "tests", "resources")
+RESOURCES = os.path.join(FILE_DIR, "db", "tests", "deprecated", "resources")
 ACADEMICS_SQL = os.path.join(RESOURCES, "academics_create.sql")
 LIBRARY_SQL = os.path.join(RESOURCES, "library_without_checkouts.sql")
 LIBRARY_CHECKOUTS_SQL = os.path.join(RESOURCES, "library_add_checkouts.sql")
