@@ -134,7 +134,11 @@
       size="small"
     >
       {#if !requiresImportConfirmation}
-        <LinkMenuItem href={explorationPageUrl} icon={iconExploration}>
+        <LinkMenuItem
+          href={explorationPageUrl}
+          icon={iconExploration}
+          disabled={!$currentRolePrivileges.has('SELECT')}
+        >
           {$_('explore_table')}
         </LinkMenuItem>
         <ButtonMenuItem
