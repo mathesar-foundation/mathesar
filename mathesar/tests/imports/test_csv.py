@@ -1,7 +1,7 @@
 import pytest
 
 from mathesar.errors import InvalidTableError
-from mathesar.imports.csv import get_sv_dialect, get_sv_reader
+from mathesar.imports.csv import get_sv_dialect, _get_sv_reader
 
 
 get_dialect_test_list = [
@@ -44,7 +44,7 @@ get_header_test_list = [
 @pytest.mark.parametrize("file", get_header_test_list)
 def test_sv_get_header(file):
     with open(file, "rb") as sv_file:
-        table = get_sv_reader(file=sv_file, header=True)
+        table = _get_sv_reader(file=sv_file, header=True)
         assert table.fieldnames == [
             "\"Center \"NASA\" USA\"",
             "\"Status\"",

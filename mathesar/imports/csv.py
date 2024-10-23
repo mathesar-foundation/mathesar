@@ -1,11 +1,11 @@
 from io import TextIOWrapper
+import tempfile
 
 import clevercsv as csv
 
 from db.constants import COLUMN_NAME_TEMPLATE
 from db.encoding_utils import get_sql_compatible_encoding
 from db.tables.operations.create import prepare_table_for_import
-from db.tables.operations.import_ import insert_csv_records
 
 from mathesar.errors import InvalidTableError
 from mathesar.models.base import DataFile
@@ -32,7 +32,7 @@ def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
     encoding = get_file_encoding(data_file.file)
     conversion_encoding, sql_encoding = get_sql_compatible_encoding(encoding)
     with open(file_path, 'rb') as csv_file:
-        csv_reader = get_sv_reader(csv_file, header, dialect)
+        csv_reader = _get_sv_reader(csv_file, header, dialect)
         column_names = process_column_names(csv_reader.fieldnames)
     copy_sql, table_oid, db_table_name = prepare_table_for_import(
         table_name,
@@ -46,7 +46,7 @@ def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
         sql_encoding,
         comment
     )
-    insert_csv_records(
+    _insert_csv_records(
         copy_sql,
         file_path,
         encoding,
@@ -54,6 +54,49 @@ def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
         conn
     )
     return {"oid": table_oid, "name": db_table_name}
+
+
+def _get_sv_reader(file, header, dialect=None):
+    encoding = get_file_encoding(file)
+    file = TextIOWrapper(file, encoding=encoding)
+    if dialect:
+        reader = csv.DictReader(file, dialect=dialect)
+    else:
+        reader = csv.DictReader(file)
+    if not header:
+        reader.fieldnames = [
+            f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(reader.fieldnames))
+        ]
+        file.seek(0)
+
+    return reader
+
+
+def _insert_csv_records(
+    copy_sql,
+    file_path,
+    encoding,
+    conversion_encoding,
+    conn
+):
+    cursor = conn.cursor()
+    with open(file_path, 'r', encoding=encoding) as csv_file:
+        if conversion_encoding == encoding:
+            with cursor.copy(copy_sql) as copy:
+                while data := csv_file.read():
+                    copy.write(data)
+        else:
+            # File needs to be converted to compatible database supported encoding
+            with tempfile.SpooledTemporaryFile(mode='wb+', encoding=conversion_encoding) as temp_file:
+                while True:
+                    contents = csv_file.read().encode(conversion_encoding, "replace")
+                    if not contents:
+                        break
+                    temp_file.write(contents)
+                temp_file.seek(0)
+                with cursor.copy(copy_sql) as copy:
+                    while data := temp_file.read():
+                        copy.write(data)
 
 
 def is_valid_csv(data):
@@ -79,7 +122,33 @@ def get_file_encoding(file):
     return "utf-8"
 
 
-def check_dialect(file, dialect):
+def get_sv_dialect(file):
+    """
+    Given a *sv file, generate a dialect to parse it.
+
+    Args:
+        file: _io.TextIOWrapper object, an already opened file
+
+    Returns:
+        dialect: csv.Dialect object, the dialect to parse the file
+
+    Raises:
+        InvalidTableError: If the generated dialect was unable to parse the file
+    """
+    dialect = csv.detect.Detector().detect(file.read(SAMPLE_SIZE),
+                                           delimiters=ALLOWED_DELIMITERS)
+    if dialect is None:
+        raise InvalidTableError
+
+    file.seek(0)
+    if _check_dialect(file, dialect):
+        file.seek(0)
+        return dialect
+    else:
+        raise InvalidTableError
+
+
+def _check_dialect(file, dialect):
     """
     Checks to see if we can parse the given file with the given dialect
 
@@ -108,45 +177,3 @@ def check_dialect(file, dialect):
         elif prev_num_columns != num_columns:
             return False
     return True
-
-
-def get_sv_dialect(file):
-    """
-    Given a *sv file, generate a dialect to parse it.
-
-    Args:
-        file: _io.TextIOWrapper object, an already opened file
-
-    Returns:
-        dialect: csv.Dialect object, the dialect to parse the file
-
-    Raises:
-        InvalidTableError: If the generated dialect was unable to parse the file
-    """
-    dialect = csv.detect.Detector().detect(file.read(SAMPLE_SIZE),
-                                           delimiters=ALLOWED_DELIMITERS)
-    if dialect is None:
-        raise InvalidTableError
-
-    file.seek(0)
-    if check_dialect(file, dialect):
-        file.seek(0)
-        return dialect
-    else:
-        raise InvalidTableError
-
-
-def get_sv_reader(file, header, dialect=None):
-    encoding = get_file_encoding(file)
-    file = TextIOWrapper(file, encoding=encoding)
-    if dialect:
-        reader = csv.DictReader(file, dialect=dialect)
-    else:
-        reader = csv.DictReader(file)
-    if not header:
-        reader.fieldnames = [
-            f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(reader.fieldnames))
-        ]
-        file.seek(0)
-
-    return reader

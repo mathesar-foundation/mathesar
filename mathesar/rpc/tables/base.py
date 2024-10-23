@@ -6,11 +6,10 @@ from typing import Literal, Optional, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.tables.operations.select import get_table_info, get_table, list_joinable_tables
+from db.tables.operations.select import get_table_info, get_table, list_joinable_tables, get_preview
 from db.tables.operations.drop import drop_table_from_database
 from db.tables.operations.create import create_table_on_database
 from db.tables.operations.alter import alter_table_on_database
-from db.tables.operations.import_ import get_preview
 from mathesar.imports.csv import import_csv
 from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
