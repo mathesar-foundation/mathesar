@@ -1,6 +1,6 @@
 import psycopg
 from sqlalchemy import Table
-from db.schemas.operations.select import get_schema
+from db.schemas import get_schema
 from db.tables.operations.select import get_table
 
 
