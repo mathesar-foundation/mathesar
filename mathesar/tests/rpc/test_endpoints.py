@@ -19,7 +19,6 @@ from mathesar.rpc import roles
 from mathesar.rpc import schemas
 from mathesar.rpc import servers
 from mathesar.rpc import tables
-from mathesar.rpc import types
 
 METHODS = [
     (
@@ -330,13 +329,6 @@ METHODS = [
     (
         servers.configured.list_,
         "servers.configured.list",
-        [user_is_authenticated]
-    ),
-
-    (
-
-        types.list_,
-        "types.list",
         [user_is_authenticated]
     ),
 
