@@ -137,7 +137,13 @@ def add_columns_to_table(table_oid, column_data_list, conn):
         _transform_column_create_dict(col) for col in column_data_list
     ]
     result = exec_msar_func(
-        conn, 'add_columns', table_oid, json.dumps(transformed_column_data)
+        conn,
+        'add_columns',
+        table_oid,
+        json.dumps(transformed_column_data),
+        # Whether to treat defaults as raw SQL. DANGER!
+        False,
+
     ).fetchone()[0]
     return result
 
