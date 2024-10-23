@@ -46,7 +46,7 @@ def test_add_foreign_key_column(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
 
     monkeypatch.setattr(data_modeling, 'connect', mock_connect)
-    monkeypatch.setattr(data_modeling.links_create, 'add_foreign_key_column', mock_add_fkey_col)
+    monkeypatch.setattr(data_modeling.links, 'add_foreign_key_column', mock_add_fkey_col)
     data_modeling.add_foreign_key_column(
         column_name=_column_name,
         referrer_table_oid=_referrer_table_oid,
@@ -93,7 +93,7 @@ def test_add_mapping_table(rf, monkeypatch):
             raise AssertionError('incorrect parameters passed')
 
     monkeypatch.setattr(data_modeling, 'connect', mock_connect)
-    monkeypatch.setattr(data_modeling.links_create, 'add_mapping_table', mock_add_mapping_table)
+    monkeypatch.setattr(data_modeling.links, 'add_mapping_table', mock_add_mapping_table)
     data_modeling.add_mapping_table(
         table_name=_table_name,
         mapping_columns=_mapping_columns,

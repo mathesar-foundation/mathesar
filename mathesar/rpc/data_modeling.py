@@ -6,7 +6,7 @@ from typing import TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.links.operations import create as links_create
+from db import links
 from db.tables.operations import infer_types, split, move_columns as move_cols
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
@@ -36,7 +36,7 @@ def add_foreign_key_column(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        links_create.add_foreign_key_column(
+        links.add_foreign_key_column(
             conn, column_name, referrer_table_oid, referent_table_oid
         )
 
@@ -78,7 +78,7 @@ def add_mapping_table(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        links_create.add_mapping_table(
+        links.add_mapping_table(
             conn, schema_oid, table_name, mapping_columns
         )
 
