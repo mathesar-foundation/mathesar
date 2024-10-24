@@ -1,37 +1,67 @@
 CREATE SCHEMA IF NOT EXISTS __msar;
 CREATE SCHEMA IF NOT EXISTS msar;
 
-CREATE OR REPLACE FUNCTION msar.drop_all_msar_functions() RETURNS void AS $$/*
-Drop all functions in the `msar` schema, except for this one.
+CREATE OR REPLACE FUNCTION msar.drop_all_msar_functions(retries integer) RETURNS void AS $$/*
+Drop all functions in the `msar` and `__msar` schemas, including this one.
 */
 DECLARE
   fn RECORD;
-  schema_name CONSTANT TEXT := 'msar';
+  detail text;
+  hint text;
+  stack text;
+  message text;
+  failed boolean := false;
+  retry boolean := false;
 BEGIN
+  RAISE NOTICE E'\n\nstart of function retry val: %', retry;
   FOR fn IN
     SELECT oid, prokind
     FROM pg_catalog.pg_proc
     WHERE
-      pronamespace = schema_name::regnamespace::oid AND
-      proname <> 'drop_all_msar_functions'
+      (pronamespace = 'msar'::regnamespace::oid OR pronamespace = '__msar'::regnamespace::oid)
+      AND NOT ( -- Keep this up to date with this function's name and arguments.
+        proname = 'drop_all_msar_functions'
+        AND proargtypes=ARRAY['integer'::regtype]::oidvector
+      )
+    ORDER BY oid
   LOOP
     IF EXISTS (SELECT 1 FROM pg_proc WHERE oid = fn.oid) THEN
-      EXECUTE format(
-        $q$ DROP %s %s CASCADE $q$,
-        CASE fn.prokind
-          WHEN 'p' THEN 'PROCEDURE'
-          WHEN 'a' THEN 'AGGREGATE'
-          ELSE 'FUNCTION'
-        END,
-        fn.oid::regprocedure::text
-      );
+      RAISE NOTICE 'dropping % with OID %', fn.oid::regprocedure::text, fn.oid;
+      BEGIN
+        EXECUTE format(
+          $q$ DROP %s %s $q$,
+          CASE fn.prokind
+            WHEN 'p' THEN 'PROCEDURE'
+            WHEN 'a' THEN 'AGGREGATE'
+            ELSE 'FUNCTION'
+          END,
+          fn.oid::regprocedure::text
+        );
+      EXCEPTION WHEN dependent_objects_still_exist THEN
+        failed = true;
+        GET STACKED DIAGNOSTICS
+          message = MESSAGE_TEXT,
+          detail = PG_EXCEPTION_DETAIL;
+        RAISE NOTICE E'% \nDETAIL: %\n\n', message, detail;
+        IF retries > 0 THEN
+          retry = true;
+        END IF;
+      END;
     END IF;
   END LOOP;
+  IF retry IS true THEN
+    PERFORM msar.drop_all_msar_functions(retries - 1);
+  ELSIF failed IS TRUE THEN
+    RAISE NOTICE 'Some objects not dropped!';
+  ELSE
+    RAISE NOTICE 'All objects dropped successfully!\n\nDropping myself...\n\n';
+    DROP FUNCTION msar.drop_all_msar_functions(integer);
+  END IF;
 END;
 $$ LANGUAGE plpgsql;
 
 
-SELECT msar.drop_all_msar_functions();
+SELECT msar.drop_all_msar_functions(4);
 
 
 ----------------------------------------------------------------------------------------------------
