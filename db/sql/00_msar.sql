@@ -4756,11 +4756,11 @@ SELECT ', '
               %3$s AS summary
             FROM %4$I.%5$I
           )$c$,
-          conkey,
-          msar.get_column_name(target_oid, confkey),
-          msar.build_summary_expr(target_oid),
-          msar.get_relation_schema_name(target_oid),
-          msar.get_relation_name(target_oid)
+          /* %1 */ conkey,
+          /* %2 */ msar.get_column_name(target_oid, confkey),
+          /* %3 */ msar.build_summary_expr(target_oid),
+          /* %4 */ msar.get_relation_schema_name(target_oid),
+          /* %5 */ msar.get_relation_name(target_oid)
         ), ', '
       )
     ),
@@ -4983,19 +4983,19 @@ BEGIN
     FROM results_cte %8$s
       CROSS JOIN count_cte
     $q$,
-    msar.build_selectable_column_expr(tab_id),
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id),
-    'WHERE ' || msar.get_score_expr(tab_id, search_) || ' > 0',
-    limit_,
-    concat(
+    /* %1 */ msar.build_selectable_column_expr(tab_id),
+    /* %2 */ msar.get_relation_schema_name(tab_id),
+    /* %3 */ msar.get_relation_name(tab_id),
+    /* %4 */ 'WHERE ' || msar.get_score_expr(tab_id, search_) || ' > 0',
+    /* %5 */ limit_,
+    /* %6 */ concat(
       msar.get_score_expr(tab_id, search_) || ' DESC, ',
       msar.build_total_order_expr(tab_id, null)
     ),
-    msar.build_summary_cte_expr_for_table(tab_id),
-    msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
-    COALESCE(
+    /* %7 */ msar.build_summary_cte_expr_for_table(tab_id),
+    /* %8 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
+    /* %9 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    /* %10 */ COALESCE(
       CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
       'NULL'
     )
