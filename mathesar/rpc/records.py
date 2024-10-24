@@ -16,6 +16,7 @@ from db.records import (
 )
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
+from mathesar.utils.tables import get_table_record_summary_templates
 
 
 class OrderBy(TypedDict):
@@ -239,6 +240,7 @@ def list_(
             filter=filter,
             group=grouping,
             return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)
 
@@ -273,7 +275,8 @@ def get(
             conn,
             record_id,
             table_oid,
-            return_record_summaries=return_record_summaries
+            return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)
 
@@ -316,6 +319,7 @@ def add(
             record_def,
             table_oid,
             return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordAdded.from_dict(record_info)
 
@@ -360,6 +364,7 @@ def patch(
             record_id,
             table_oid,
             return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordAdded.from_dict(record_info)
 
@@ -435,5 +440,6 @@ def search(
             search=search_params,
             limit=limit,
             return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)
