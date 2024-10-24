@@ -1,6 +1,39 @@
 CREATE SCHEMA IF NOT EXISTS __msar;
 CREATE SCHEMA IF NOT EXISTS msar;
 
+CREATE OR REPLACE FUNCTION msar.drop_all_msar_functions() RETURNS void AS $$/*
+Drop all functions in the `msar` schema, except for this one.
+*/
+DECLARE
+  fn RECORD;
+  schema_name CONSTANT TEXT := 'msar';
+BEGIN
+  FOR fn IN
+    SELECT oid, prokind
+    FROM pg_catalog.pg_proc
+    WHERE
+      pronamespace = schema_name::regnamespace::oid AND
+      proname <> 'drop_all_msar_functions'
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_proc WHERE oid = fn.oid) THEN
+      EXECUTE format(
+        $q$ DROP %s %s CASCADE $q$,
+        CASE fn.prokind
+          WHEN 'p' THEN 'PROCEDURE'
+          WHEN 'a' THEN 'AGGREGATE'
+          ELSE 'FUNCTION'
+        END,
+        fn.oid::regprocedure::text
+      );
+    END IF;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+SELECT msar.drop_all_msar_functions();
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- GENERAL DDL FUNCTIONS
