@@ -12,7 +12,6 @@ gunicorn==22.0.0
 psycopg==3.1.18
 psycopg-binary==3.1.18
 psycopg2-binary==2.9.7
-pandas==2.2.2
 requests==2.32.0
 SQLAlchemy==1.4.26
 whitenoise==6.4.0
