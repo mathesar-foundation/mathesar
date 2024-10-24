@@ -4715,58 +4715,54 @@ LIMIT 1;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.build_summary_expr(tab_id oid) RETURNS TEXT AS $$/*
-Given a table, return an SQL expression that will build a summary for each row of the table.
+CREATE OR REPLACE FUNCTION
+msar.build_record_summary_query_for_table(tab_id oid, key_col_id smallint) RETURNS TEXT AS $$/*
+Return text for an SQL query that will summarize records from a table.
 
 Args:
-  tab_id: The OID of the table being summarized.
+  tab_id: the OID of the table for which we're getting summaries.
+  key_col_id: (optional) This is a column attnum in the table. When given, this column will be used
+    as the key in the summary. If not given, the table's PK column will be used.
 */
 SELECT format(
-  'msar.format_data(%I)::text',
-  msar.get_column_name(tab_id, msar.get_default_summary_column(tab_id))
+  $q$
+    SELECT
+      msar.format_data(%1$I) AS key,
+      msar.format_data(%2$I) AS summary
+    FROM %3$I.%4$I
+  $q$,
+  /* %1 */ msar.get_column_name(
+    tab_id,
+    COALESCE(key_col_id, msar.get_selectable_pkey_attnum(tab_id))
+  ),
+  /* %2 */ msar.get_column_name(tab_id, msar.get_default_summary_column(tab_id)),
+  /* %3 */ msar.get_relation_schema_name(tab_id),
+  /* %4 */ msar.get_relation_name(tab_id)
 );
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE;
 
 
-CREATE OR REPLACE FUNCTION msar.build_summary_cte_expr_for_table(tab_id oid) RETURNS TEXT AS $$/*
+CREATE OR REPLACE FUNCTION
+msar.build_linked_record_summaries_ctes(tab_id oid) RETURNS TEXT AS $$/*
 Build an SQL text expression defining a sequence of CTEs that give summaries for linked records.
-
-This summary amounts to just the first string-like column value for that linked record.
 
 Args:
   tab_id: The table for whose fkey values' linked records we'll get summaries.
 */
-WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
-SELECT ', '
-  || NULLIF(
-    concat_ws(', ',
-      'summary_cte_self AS (SELECT msar.format_data('
-        || quote_ident(msar.get_column_name(tab_id, msar.get_selectable_pkey_attnum(tab_id)))
-        || format(
-          ') AS key, %1$s AS summary FROM %2$I.%3$I)',
-          msar.build_summary_expr(tab_id),
-          msar.get_relation_schema_name(tab_id),
-          msar.get_relation_name(tab_id)
-        ),
-      string_agg(
-        format(
-          $c$summary_cte_%1$s AS (
-            SELECT
-              msar.format_data(%2$I) AS fkey,
-              %3$s AS summary
-            FROM %4$I.%5$I
-          )$c$,
-          /* %1 */ conkey,
-          /* %2 */ msar.get_column_name(target_oid, confkey),
-          /* %3 */ msar.build_summary_expr(target_oid),
-          /* %4 */ msar.get_relation_schema_name(target_oid),
-          /* %5 */ msar.get_relation_name(target_oid)
-        ), ', '
-      )
+SELECT
+  ', ' ||
+  NULLIF(
+    string_agg(
+      format(
+        $q$summary_cte_%1$s AS (%2$s)$q$,
+        conkey,
+        msar.build_record_summary_query_for_table(target_oid, confkey)
+      ),
+      ', '
     ),
     ''
   )
-FROM fkey_map_cte;
+FROM msar.get_fkey_map_table(tab_id)
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -4786,7 +4782,7 @@ SELECT concat(
   string_agg(
     format(
       $j$
-      LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.fkey$j$,
+      LEFT JOIN summary_cte_%1$s ON %2$I.%1$I = summary_cte_%1$s.key$j$,
       conkey,
       cte_name
     ), ' '
@@ -4809,8 +4805,8 @@ SELECT 'jsonb_build_object(' || string_agg(
     $j$
     %1$L, COALESCE(
       jsonb_object_agg(
-        summary_cte_%1$s.fkey, summary_cte_%1$s.summary
-      ) FILTER (WHERE summary_cte_%1$s.fkey IS NOT NULL), '{}'::jsonb
+        summary_cte_%1$s.key, summary_cte_%1$s.summary
+      ) FILTER (WHERE summary_cte_%1$s.key IS NOT NULL), '{}'::jsonb
     )
     $j$,
     conkey
@@ -4864,25 +4860,30 @@ DECLARE
 BEGIN
   EXECUTE format(
     $q$
-    WITH count_cte AS (
+    WITH
+    count_cte AS (
       SELECT count(1) AS count FROM %2$I.%3$I %7$s
-    ), enriched_results_cte AS (
+    ),
+    enriched_results_cte AS (
       SELECT %1$s, %8$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L
-    ), results_ranked_cte AS (
+    ),
+    results_ranked_cte AS (
       SELECT *, row_number() OVER (%6$s) - 1 AS __mathesar_result_idx FROM enriched_results_cte
-    ), groups_cte AS (
+    ),
+    groups_cte AS (
       SELECT %11$s
-    )%12$s
+    ),
+    summary_cte_self AS (%12$s) %13$s
     SELECT jsonb_build_object(
       'results', %9$s,
       'count', coalesce(max(count_cte.count), 0),
       'grouping', %10$s,
-      'linked_record_summaries', %14$s,
-      'record_summaries', %15$s,
+      'linked_record_summaries', %15$s,
+      'record_summaries', %16$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
     )
     FROM enriched_results_cte
-      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %13$s
+      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %14$s
       CROSS JOIN count_cte
     $q$,
     /* %1 */ msar.build_selectable_column_expr(tab_id),
@@ -4902,10 +4903,11 @@ BEGIN
       msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_),
       'NULL AS id'
     ),
-    /* %12 */ msar.build_summary_cte_expr_for_table(tab_id),
-    /* %13 */ msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    /* %14 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
-    /* %15 */ COALESCE(
+    /* %12 */ msar.build_record_summary_query_for_table(tab_id, null),
+    /* %13 */ msar.build_linked_record_summaries_ctes(tab_id),
+    /* %14 */ msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
+    /* %15 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    /* %16 */ COALESCE(
       CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
       'NULL'
     )
@@ -4968,19 +4970,22 @@ DECLARE
 BEGIN
   EXECUTE format(
     $q$
-    WITH count_cte AS (
+    WITH
+    count_cte AS (
       SELECT count(1) AS count FROM %2$I.%3$I %4$s
-    ), results_cte AS (
+    ),
+    results_cte AS (
       SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L
-    )%7$s
+    ),
+    summary_cte_self AS (%7$s) %8$s
     SELECT jsonb_build_object(
       'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
       'count', coalesce(max(count_cte.count), 0),
-      'linked_record_summaries', %9$s,
-      'record_summaries', %10$s,
+      'linked_record_summaries', %10$s,
+      'record_summaries', %11$s,
       'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
     )
-    FROM results_cte %8$s
+    FROM results_cte %9$s
       CROSS JOIN count_cte
     $q$,
     /* %1 */ msar.build_selectable_column_expr(tab_id),
@@ -4992,10 +4997,11 @@ BEGIN
       msar.get_score_expr(tab_id, search_) || ' DESC, ',
       msar.build_total_order_expr(tab_id, null)
     ),
-    /* %7 */ msar.build_summary_cte_expr_for_table(tab_id),
-    /* %8 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
-    /* %9 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
-    /* %10 */ COALESCE(
+    /* %7 */ msar.build_record_summary_query_for_table(tab_id, null),
+    /* %8 */ msar.build_linked_record_summaries_ctes(tab_id),
+    /* %9 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
+    /* %10 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    /* %11 */ COALESCE(
       CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
       'NULL'
     )
