@@ -138,8 +138,7 @@ class TableMetaData(BaseModel):
     data_file = models.ForeignKey("DataFile", on_delete=models.SET_NULL, null=True)
     import_verified = models.BooleanField(null=True)
     column_order = models.JSONField(null=True)
-    record_summary_customized = models.BooleanField(null=True)
-    record_summary_template = models.CharField(max_length=255, null=True)
+    record_summary_template = models.JSONField(null=True)
 
     class Meta:
         constraints = [
