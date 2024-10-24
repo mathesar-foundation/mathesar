@@ -254,6 +254,7 @@ def get(
         table_oid: int,
         database_id: int,
         return_record_summaries: bool = False,
+        table_record_summary_templates: dict[str, Any] = None,
         **kwargs
 ) -> RecordList:
     """
@@ -265,10 +266,16 @@ def get(
         database_id: The Django id of the database containing the table.
         return_record_summaries: Whether to return summaries of the
             retrieved record.
-
+        table_record_summary_templates: A dict of record summary templates.
+            If none are provided, then the templates will be take from the
+            Django metadata. Any templates provided will take precedence on a
+            per-table basis over the stored metadata templates. The purpose of
+            this function parameter is to allow clients to generate record
+            summary previews without persisting any metadata.
     Returns:
         The requested record, along with some metadata.
     """
+
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         record_info = get_record_from_table(
@@ -276,7 +283,10 @@ def get(
             record_id,
             table_oid,
             return_record_summaries=return_record_summaries,
-            table_record_summary_templates=get_table_record_summary_templates(database_id),
+            table_record_summary_templates={
+                **get_table_record_summary_templates(database_id),
+                **(table_record_summary_templates or {}),
+            },
         )
     return RecordList.from_dict(record_info)
 
