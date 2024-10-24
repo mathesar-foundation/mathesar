@@ -123,6 +123,7 @@
           options={[...privilegeInfoMap.keys()]}
           getCheckboxLabel={(o) => String(o)}
           getCheckboxHelp={(o) => privilegeInfoMap.get(o)?.help ?? ''}
+          disabled={!$currentRoleOwns}
         />
       </div>
     </Collapsible>

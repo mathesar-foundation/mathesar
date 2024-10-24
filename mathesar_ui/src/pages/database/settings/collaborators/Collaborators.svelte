@@ -5,6 +5,7 @@
   import Errors from '@mathesar/components/Errors.svelte';
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
+  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { Collaborator } from '@mathesar/models/Collaborator';
@@ -52,6 +53,7 @@
     $configuredRoles.error,
     $users.error,
   ].filter((entry): entry is string => isDefinedNonNullable(entry));
+  $: collaboratorsList = [...($collaborators.resolvedValue?.values() ?? [])];
 
   let targetCollaborator: Collaborator | undefined;
 
@@ -93,18 +95,24 @@
     <Spinner />
   {:else if isSuccess}
     <div class="collaborators-table">
-      <GridTable>
-        <GridTableCell header>{$_('mathesar_user')}</GridTableCell>
-        <GridTableCell header>{$_('role')}</GridTableCell>
-        <GridTableCell header>{$_('actions')}</GridTableCell>
-        {#each [...($collaborators.resolvedValue?.values() ?? [])] as collaborator (collaborator.id)}
-          <CollaboratorRow
-            {collaborator}
-            onClickEditRole={editRoleForCollaborator}
-            onDelete={checkAndHandleSideEffects}
-          />
-        {/each}
-      </GridTable>
+      {#if collaboratorsList.length > 0}
+        <GridTable>
+          <GridTableCell header>{$_('mathesar_user')}</GridTableCell>
+          <GridTableCell header>{$_('role')}</GridTableCell>
+          <GridTableCell header>{$_('actions')}</GridTableCell>
+          {#each collaboratorsList as collaborator (collaborator.id)}
+            <CollaboratorRow
+              {collaborator}
+              onClickEditRole={editRoleForCollaborator}
+              onDelete={checkAndHandleSideEffects}
+            />
+          {/each}
+        </GridTable>
+      {:else}
+        <WarningBox fullWidth>
+          {$_('no_collaborators_added')}
+        </WarningBox>
+      {/if}
     </div>
   {:else}
     <Errors {errors} />
