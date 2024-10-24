@@ -1,12 +1,20 @@
 from rest_framework.serializers import ListSerializer, Serializer
 from rest_framework.utils.serializer_helpers import ReturnList
-from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import ValidationError as RestValidationError
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import ErrorBody
+from mathesar.api.exceptions.error_codes import FRIENDLY_FIELD_ERRORS, FRIENDLY_VALIDATOR_ERRORS
 
 
-class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
+class MathesarErrorMessageMixin():
+
+    FIELD_VALIDATION_ERRORS = {}
+    NON_FIELD_ERRORS = {}
+
+    def __init__(self, *args, **kwargs):
+        self.registered_errors = {}
+        super(MathesarErrorMessageMixin, self).__init__(*args, **kwargs)
+
     def is_pretty(self, error):
         return isinstance(error, dict) and tuple(error.keys()) == ErrorBody._fields
 
@@ -69,48 +77,73 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
     def get_serializer_fields(self, data):
         return self.fields
 
-    def _run_validator(self, validator, field, message):
-        """
-        This method build on top of `_run_validator` method of the superclass
-        It provides the following additional features
-        1. Includes serializer if `required_context` is True similar to the behaviour of drf
-        """
-        try:
-            args = []
-            if getattr(validator, 'requires_context', False):
-                args.append(field)
-            validator(self.initial_data[field.field_name], *args)
-        except (DjangoValidationError, RestValidationError) as err:
-            if hasattr(err, 'detail'):
-                err_message = err.detail[0]
-            elif hasattr(err, 'message'):
-                err_message = err.message
-            elif hasattr(err, 'messages'):
-                err_message = err.messages[0]
-            return err_message == message
-
     @property
     def errors(self):
         """
         This method build on top of `errors` property of the superclass to return a list instead of a dictionary
         """
-        ugly_errors = super(FriendlyErrorMessagesMixin, self).errors
+        ugly_errors = super(MathesarErrorMessageMixin, self).errors
         pretty_errors = self.build_pretty_errors(ugly_errors)
         return ReturnList(pretty_errors, serializer=self)
 
     @property
     def field_map(self):
-        """
-        This method build on top of `field_map` property of the superclass
-        It provides the following additional features
-        1. Adds `ListSerializer` to `relation` field list
-        """
-        parent_field_map = super(FriendlyErrorMessagesMixin, self).field_map
-        # Add missing `ListSerializer to existing relation list`
-        parent_field_map['relation'].append('ListSerializer')
-        parent_field_map['relation'].append('PermittedPkRelatedField')
-        parent_field_map['relation'].append('PermittedSlugRelatedField')
+        parent_field_map = {
+            'boolean': ['BooleanField', 'NullBooleanField'],
+            'string': ['CharField', 'EmailField', 'RegexField', 'SlugField',
+                       'URLField', 'UUIDField', 'FilePathField',
+                       'IPAddressField'],
+            'numeric': ['IntegerField', 'FloatField', 'DecimalField'],
+            'date': {'DateTimeField': 'YYYY-MM-DDThh:mm[:ss[.uuuuuu]][+HH:MM|-HH:MM|Z]',
+                     'DateField': 'YYYY[-MM[-DD]]',
+                     'TimeField': 'hh:mm[:ss[.uuuuuu]]',
+                     'DurationField': '[DD] [HH:[MM:]]ss[.uuuuuu]'},
+            'choice': ['ChoiceField', 'MultipleChoiceField'],
+            'file': ['FileField', 'ImageField'],
+            'composite': ['ListField', 'DictField', 'JSONField'],
+            'relation': ['StringRelatedField', 'PrimaryKeyRelatedField',
+                         'HyperlinkedRelatedField', 'SlugRelatedField',
+                         'HyperlinkedIdentityField', 'ManyRelatedField',
+                         'ListSerializer', 'PermittedPkRelatedField',
+                         'PermittedSlugRelatedField'],
+            'miscellaneous': ['ReadOnlyField', 'HiddenField', 'ModelField',
+                              'SerializerMethodField']
+        }
         return parent_field_map
+
+    def register_error(self, error_message, field_name=None,
+                       error_key=None, error_code=None):
+        if field_name is None:
+            if error_code is None:
+                raise ValueError('For non field error you must provide '
+                                 'an error code')
+            error = {'code': error_code, 'message': error_message,
+                     'field': None}
+        else:
+            field_instance = self.fields.get(field_name)
+            if field_instance is None:
+                raise ValueError('Incorrect field name')
+            field_type = field_instance.__class__.__name__
+            if error_key is None and error_code is None:
+                raise ValueError('You have to provide either error key'
+                                 ' or error code')
+            if error_code is not None:
+                error_code = error_code
+            else:
+                try:
+                    error_code = FRIENDLY_FIELD_ERRORS[field_type].get(
+                        error_key)
+                except KeyError:
+                    raise ValueError('Unknown field type: "%s"' % field_type)
+                if error_code is None:
+                    raise ValueError('Unknown error key: "%s" '
+                                     'for field type: "%s"' %
+                                     (error_key, field_type))
+            error = {'code': error_code, 'field': field_name,
+                     'message': error_message}
+        key = '%s_%s_%s' % (error_message, error_code, field_name)
+        self.registered_errors[key] = error
+        raise RestValidationError(key)
 
     def get_field_kwargs(self, field, field_data):
         """
@@ -190,3 +223,103 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         else:
             kwargs.update({'max_length': getattr(field, 'max_length', None)})
         return kwargs
+
+    def does_not_exist_many_to_many_handler(self, field, message, kwargs):
+        unformatted = field.error_messages['does_not_exist']
+        new_kwargs = kwargs
+        for value in kwargs['value']:
+            new_kwargs['value'] = value
+            if unformatted.format(**new_kwargs) == message:
+                return True
+        return False
+
+    def find_key(self, field, message, field_name):
+        kwargs = self.get_field_kwargs(
+            field, self.initial_data.get(field_name)
+        )
+        for key in field.error_messages:
+            if key == 'does_not_exist' \
+                and isinstance(kwargs.get('value'), list) \
+                and self.does_not_exist_many_to_many_handler(
+                    field, message, kwargs):
+                return key
+            unformatted = field.error_messages[key]
+            if unformatted.format(**kwargs) == message:
+                return key
+        if getattr(field, 'child_relation', None):
+            return self.find_key(field=field.child_relation, message=message,
+                                 field_name=field_name)
+        return None
+
+    def _run_validator(self, validator, field, message):
+        """
+        This method build on top of `_run_validator` method of the superclass
+        It provides the following additional features
+        1. Includes serializer if `required_context` is True similar to the behaviour of drf
+        """
+        try:
+            args = []
+            if getattr(validator, 'requires_context', False):
+                args.append(field)
+            validator(self.initial_data[field.field_name], *args)
+        except (DjangoValidationError, RestValidationError) as err:
+            if hasattr(err, 'detail'):
+                err_message = err.detail[0]
+            elif hasattr(err, 'message'):
+                err_message = err.message
+            elif hasattr(err, 'messages'):
+                err_message = err.messages[0]
+            return err_message == message
+
+    def find_validator(self, field, message):
+        for validator in field.validators:
+            if self._run_validator(validator, field, message):
+                return validator
+
+    def get_field_error_entry(self, error, field):
+        if error in self.registered_errors:
+            return self.registered_errors[error]
+        field_type = field.__class__.__name__
+        key = self.find_key(field, error, field.field_name)
+        if not key:
+            # Here we know that error was raised by a custom field validator
+            validator = self.find_validator(field, error)
+            if validator:
+                try:
+                    name = validator.__name__
+                except AttributeError:
+                    name = validator.__class__.__name__
+                code = self.FIELD_VALIDATION_ERRORS.get(name) or FRIENDLY_VALIDATOR_ERRORS.get(name)
+                return {'code': code,
+                        'field': field.field_name,
+                        'message': error}
+            # Here we know that error was raised by custom validate method
+            # in serializer
+            validator = getattr(self, "validate_%s" % field.field_name)
+            if self._run_validator(validator, field, error):
+                name = validator.__name__
+                code = self.FIELD_VALIDATION_ERRORS.get(name) or FRIENDLY_VALIDATOR_ERRORS.get(name)
+                return {'code': code, 'field': field.field_name,
+                        'message': error}
+        return {'code': FRIENDLY_FIELD_ERRORS.get(
+                field_type, {}).get(key),
+                'field': field.field_name,
+                'message': error}
+
+    def get_field_error_entries(self, errors, field):
+        return [self.get_field_error_entry(error, field) for error in errors]
+
+    def get_non_field_error_entry(self, error):
+        if error in self.registered_errors:
+            return self.registered_errors[error]
+
+        if 'Invalid data. Expected a dictionary, but got {data_type}.'.format(
+                data_type=type(self.initial_data).__name__) == error:
+            return {'code': 1001,
+                    'field': None,
+                    'message': error}
+        code = self.NON_FIELD_ERRORS.get(error)
+        return {'code': code, 'field': None, 'message': error}
+
+    def get_non_field_error_entries(self, errors):
+        return [self.get_non_field_error_entry(error) for error in errors]

@@ -222,31 +222,7 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER':
         'mathesar.exception_handlers.mathesar_exception_handler',
 }
-FRIENDLY_ERRORS = {
-    'FIELD_ERRORS': {
-        # By default drf-friendly-errors does contain error codes for ListSerializer type
-        'ListSerializer': {
-            'required': 2007,
-            'null': 2027,
-            'invalid_choice': 2083,
-            'not_a_list': 2123,
-            'empty': 2093
-        },
-        'PermittedPkRelatedField': {
-            'required': 2007,
-            'null': 2027,
-            'does_not_exist': 2151,
-            'incorrect_type': 2161
-        },
-        'PermittedSlugRelatedField': {
-            'required': 2007, 'invalid': 2002, 'null': 2027,
-            'does_not_exist': 2151, 'incorrect_type': 2161
-        },
-    },
-    'EXCEPTION_DICT': {
-        'Http404': 4005
-    }
-}
+
 # Mathesar settings
 MATHESAR_MODE = os.environ.get('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')

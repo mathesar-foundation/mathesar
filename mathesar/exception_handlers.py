@@ -5,7 +5,6 @@ from django.conf import settings
 from django.db import IntegrityError as DjangoIntegrityError
 from django.utils.encoding import force_str
 from rest_framework.views import exception_handler
-from rest_framework_friendly_errors.settings import FRIENDLY_EXCEPTION_DICT
 from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError as sqla_OperationalError
 from psycopg.errors import OperationalError as pspg_OperationalError
 from db.deprecated.types.exceptions import UnsupportedTypeException
@@ -74,7 +73,7 @@ def mathesar_exception_handler(exc, context):
         # so we convert those into proper format
         else:
             warnings.warn("Error Response does not conform to the api spec. Please handle the exception properly")
-            error_code = FRIENDLY_EXCEPTION_DICT.get(
+            error_code = {i.name: i.value for i in ErrorCodes}.get(
                 exc.__class__.__name__, None
             )
             if error_code is None and settings.MATHESAR_MODE != "PRODUCTION":
