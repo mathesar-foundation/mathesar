@@ -502,6 +502,8 @@ Get the attnum of the single-column primary key for a relation if it has one. If
 
 The attnum will only be returned if the current user has SELECT on that column.
 
+TODO: resolve potential code duplication between this function and `get_pk_column`.
+
 Args:
   rel_id:  The OID of the relation.
 */
@@ -711,6 +713,8 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 msar.get_pk_column(rel_id oid) RETURNS smallint AS $$/*
 Return the first column attnum in the primary key of a given relation (e.g., table).
+
+TODO: resolve potential code duplication between this function and `get_selectable_pkey_attnum`.
 
 Args:
   rel_id: The OID of the relation.
@@ -4763,9 +4767,9 @@ LIMIT 1;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.build_record_summary_query_from_template(
+CREATE OR REPLACE FUNCTION msar.build_record_summary_query_from_template(
   tab_id oid,
+  key_col_id smallint,
   template jsonb
 ) RETURNS text AS $$/*
   Given a table OID and a record summary template, this function returns a query that can be used to
@@ -4804,13 +4808,15 @@ DECLARE
   expr text;
   base_sch_name text := msar.get_relation_schema_name(tab_id);
   base_tab_name text := msar.get_relation_name(tab_id);
-  base_pk_name text := msar.get_column_name(tab_id, msar.get_pk_column(tab_id));
+  base_key_col_name text := msar.get_column_name(tab_id, key_col_id);
   template_part jsonb;
   join_clauses text[] := ARRAY[]::text[];
   join_section text;
 BEGIN
-  IF base_pk_name IS NULL THEN
-    RAISE EXCEPTION 'Unable to find primary key column for table with oid %.', tab_id;
+  IF key_col_id IS NULL THEN
+    -- If the key column is NULL, then we can't generate a record summary query. We return a query
+    -- that will return no rows.
+    RETURN $q$ SELECT NULL AS key, NULL AS summary WHERE FALSE $q$;
   END IF;
   IF jsonb_typeof(template) <> 'array' THEN
     RAISE EXCEPTION 'Record summary template must be a JSON array.';
@@ -4910,7 +4916,7 @@ BEGIN
 
   RETURN concat(
     'SELECT ', chr(10),
-    '  ', base_alias, '.', quote_ident(base_pk_name), ' AS key, ', chr(10),
+    '  ', base_alias, '.', quote_ident(base_key_col_name), ' AS key, ', chr(10),
     '  ', expr, ' AS summary', chr(10),
     'FROM ',
     quote_ident(base_sch_name), '.', quote_ident(base_tab_name),
@@ -4921,7 +4927,7 @@ BEGIN
   -- TODO:
   -- - Handle columns which can't be automatically cast to TEXT
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql STABLE;
 
 
 CREATE OR REPLACE FUNCTION
@@ -4945,7 +4951,7 @@ $$ LANGUAGE sql STABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION msar.build_record_summary_query_for_table(
   tab_id oid,
-  key_col_id smallint,
+  key_col_id smallint DEFAULT NULL,
   table_record_summary_templates jsonb DEFAULT '{}'::jsonb
 ) RETURNS TEXT AS $$/*
 Return text for an SQL query that will summarize records from a table.
@@ -4954,9 +4960,12 @@ Args:
   tab_id: the OID of the table for which we're getting summaries.
   key_col_id: (optional) This is a column attnum in the table. When given, this column will be used
     as the key in the summary. If not given, the table's PK column will be used.
+  table_record_summary_templates: (optional) A JSON object that maps table OIDs to record summary
+    templates.
 */
 SELECT msar.build_record_summary_query_from_template(
   tab_id,
+  COALESCE(key_col_id, msar.get_selectable_pkey_attnum(tab_id)),
   COALESCE(
     table_record_summary_templates -> tab_id::text,
     msar.auto_generate_record_summary_template(tab_id)
@@ -5234,7 +5243,7 @@ BEGIN
     ),
     /* %7 */ msar.build_record_summary_query_for_table(
       tab_id,
-      null,
+      msar.get_selectable_pkey_attnum(tab_id),
       table_record_summary_templates
     ),
     /* %8 */ msar.build_linked_record_summaries_ctes(tab_id),
