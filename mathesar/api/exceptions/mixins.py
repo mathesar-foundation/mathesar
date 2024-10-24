@@ -77,6 +77,26 @@ class MathesarErrorMessageMixin():
     def get_serializer_fields(self, data):
         return self.fields
 
+    def _run_validator(self, validator, field, message):
+        """
+        This method build on top of `_run_validator` method of the superclass
+        It provides the following additional features
+        1. Includes serializer if `required_context` is True similar to the behaviour of drf
+        """
+        try:
+            args = []
+            if getattr(validator, 'requires_context', False):
+                args.append(field)
+            validator(self.initial_data[field.field_name], *args)
+        except (DjangoValidationError, RestValidationError) as err:
+            if hasattr(err, 'detail'):
+                err_message = err.detail[0]
+            elif hasattr(err, 'message'):
+                err_message = err.message
+            elif hasattr(err, 'messages'):
+                err_message = err.messages[0]
+            return err_message == message
+
     @property
     def errors(self):
         """
@@ -250,26 +270,6 @@ class MathesarErrorMessageMixin():
             return self.find_key(field=field.child_relation, message=message,
                                  field_name=field_name)
         return None
-
-    def _run_validator(self, validator, field, message):
-        """
-        This method build on top of `_run_validator` method of the superclass
-        It provides the following additional features
-        1. Includes serializer if `required_context` is True similar to the behaviour of drf
-        """
-        try:
-            args = []
-            if getattr(validator, 'requires_context', False):
-                args.append(field)
-            validator(self.initial_data[field.field_name], *args)
-        except (DjangoValidationError, RestValidationError) as err:
-            if hasattr(err, 'detail'):
-                err_message = err.detail[0]
-            elif hasattr(err, 'message'):
-                err_message = err.message
-            elif hasattr(err, 'messages'):
-                err_message = err.messages[0]
-            return err_message == message
 
     def find_validator(self, field, message):
         for validator in field.validators:
