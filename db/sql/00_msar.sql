@@ -5389,7 +5389,7 @@ BEGIN
     'linked_record_summaries', rec_created -> 'linked_record_summaries'
   );
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION
@@ -5460,4 +5460,4 @@ BEGIN
     'linked_record_summaries', rec_modified -> 'linked_record_summaries'
   );
 END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql;
