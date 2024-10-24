@@ -4889,7 +4889,7 @@ BEGIN
         IF ref_column_name IS NOT NULL THEN
           expr_parts := array_append(
             expr_parts,
-            concat('cast(', prev_alias,'.', quote_ident(ref_column_name), ' AS text)')
+            concat('msar.format_data(', prev_alias,'.', quote_ident(ref_column_name), ')')
           );
         END IF;
 
@@ -4923,9 +4923,6 @@ BEGIN
     ' AS ', base_alias,
     join_section
   );
-
-  -- TODO:
-  -- - Handle columns which can't be automatically cast to TEXT
 END;
 $$ LANGUAGE plpgsql STABLE;
 
