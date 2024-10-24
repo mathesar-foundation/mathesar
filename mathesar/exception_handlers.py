@@ -13,7 +13,7 @@ from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions,
 )
 from mathesar.api.exceptions.data_import_exceptions import exceptions as data_import_api_exceptions
-from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.api.exceptions.error_codes import ErrorCodes, FRIENDLY_EXCEPTION_DICT
 from mathesar.api.exceptions.exception_mappers import integrity_error_mapper
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import get_default_api_exception
 from mathesar.errors import URLDownloadError, URLNotReachable, URLInvalidContentTypeError
@@ -73,8 +73,7 @@ def mathesar_exception_handler(exc, context):
         # so we convert those into proper format
         else:
             warnings.warn("Error Response does not conform to the api spec. Please handle the exception properly")
-            print("HERERERER", type(exc.__class__.__name__), {i.name: i.value for i in ErrorCodes})
-            error_code = {i.name: i.value for i in ErrorCodes}.get(
+            error_code = FRIENDLY_EXCEPTION_DICT.get(
                 exc.__class__.__name__, None
             )
             if error_code is None and settings.MATHESAR_MODE != "PRODUCTION":
