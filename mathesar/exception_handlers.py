@@ -5,7 +5,6 @@ from django.conf import settings
 from django.db import IntegrityError as DjangoIntegrityError
 from django.utils.encoding import force_str
 from rest_framework.views import exception_handler
-from rest_framework_friendly_errors.settings import FRIENDLY_EXCEPTION_DICT
 from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError as sqla_OperationalError
 from psycopg.errors import OperationalError as pspg_OperationalError
 from db.deprecated.types.exceptions import UnsupportedTypeException
@@ -14,7 +13,7 @@ from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions,
 )
 from mathesar.api.exceptions.data_import_exceptions import exceptions as data_import_api_exceptions
-from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.api.exceptions.error_codes import ErrorCodes, FRIENDLY_EXCEPTION_DICT
 from mathesar.api.exceptions.exception_mappers import integrity_error_mapper
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import get_default_api_exception
 from mathesar.errors import URLDownloadError, URLNotReachable, URLInvalidContentTypeError

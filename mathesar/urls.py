@@ -1,6 +1,6 @@
 from django.contrib.auth.views import LoginView
 from django.urls import include, path, re_path
-from rest_framework_nested import routers
+from rest_framework import routers
 
 from mathesar import views
 from mathesar.api.viewsets.data_files import DataFileViewSet

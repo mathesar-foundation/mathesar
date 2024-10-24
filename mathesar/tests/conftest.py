@@ -69,11 +69,6 @@ def patents_json_filepath():
 
 
 @pytest.fixture(scope='session')
-def patents_excel_filepath():
-    return 'mathesar/tests/data/patents.xlsx'
-
-
-@pytest.fixture(scope='session')
 def paste_filename():
     return 'mathesar/tests/data/patents.txt'
 
