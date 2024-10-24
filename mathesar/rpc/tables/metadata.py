@@ -1,7 +1,7 @@
 """
 Classes and functions exposed to the RPC endpoint for managing table metadata.
 """
-from typing import Optional, TypedDict
+from typing import Optional, TypedDict, Union
 
 from modernrpc.core import rpc_method
 from modernrpc.auth.basic import http_basic_auth_login_required
@@ -23,8 +23,7 @@ class TableMetaDataRecord(TypedDict):
         data_file_id: Specifies the DataFile model id used for the import.
         import_verified: Specifies whether a file has been successfully imported into a table.
         column_order: The order in which columns of a table are displayed.
-        record_summary_customized: Specifies whether the record summary has been customized.
-        record_summary_template: Record summary template for a referent column.
+        record_summary_template: The record summary template
     """
     id: int
     database_id: int
@@ -32,8 +31,7 @@ class TableMetaDataRecord(TypedDict):
     data_file_id: Optional[int]
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
-    record_summary_customized: Optional[bool]
-    record_summary_template: Optional[str]
+    record_summary_template: Optional[dict[str, Union[str, list[int]]]]
 
     @classmethod
     def from_model(cls, model):
@@ -44,7 +42,6 @@ class TableMetaDataRecord(TypedDict):
             data_file_id=model.data_file_id,
             import_verified=model.import_verified,
             column_order=model.column_order,
-            record_summary_customized=model.record_summary_customized,
             record_summary_template=model.record_summary_template,
         )
 
@@ -57,14 +54,12 @@ class TableMetaDataBlob(TypedDict):
         data_file_id: Specifies the DataFile model id used for the import.
         import_verified: Specifies whether a file has been successfully imported into a table.
         column_order: The order in which columns of a table are displayed.
-        record_summary_customized: Specifies whether the record summary has been customized.
-        record_summary_template: Record summary template for a referent column.
+        record_summary_template: The record summary template
     """
     data_file_id: Optional[int]
     import_verified: Optional[bool]
     column_order: Optional[list[int]]
-    record_summary_customized: Optional[bool]
-    record_summary_template: Optional[str]
+    record_summary_template: Optional[dict[str, Union[str, list[int]]]]
 
     @classmethod
     def from_model(cls, model):
@@ -72,7 +67,6 @@ class TableMetaDataBlob(TypedDict):
             data_file_id=model.data_file_id,
             import_verified=model.import_verified,
             column_order=model.column_order,
-            record_summary_customized=model.record_summary_customized,
             record_summary_template=model.record_summary_template,
         )
 
