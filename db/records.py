@@ -8,15 +8,15 @@ def _json_or_none(value):
 
 
 def list_records_from_table(
-        conn,
-        table_oid,
-        limit=None,
-        offset=None,
-        order=None,
-        filter=None,
-        group=None,
-        return_record_summaries=False,
-        table_record_summary_templates=None,
+    conn,
+    table_oid,
+    limit=None,
+    offset=None,
+    order=None,
+    filter=None,
+    group=None,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
 ):
     """
     Get records from a table.
@@ -53,11 +53,11 @@ def list_records_from_table(
 
 
 def get_record_from_table(
-        conn,
-        record_id,
-        table_oid,
-        return_record_summaries=False,
-        table_record_summary_templates=None,
+    conn,
+    record_id,
+    table_oid,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
 ):
     """
     Get single record from a table by its primary key
@@ -82,12 +82,12 @@ def get_record_from_table(
 
 
 def search_records_from_table(
-        conn,
-        table_oid,
-        search=[],
-        limit=10,
-        return_record_summaries=False,
-        table_record_summary_templates=None,
+    conn,
+    table_oid,
+    search=[],
+    limit=10,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
 ):
     """
     Get records from a table, according to a search specification
@@ -136,12 +136,12 @@ def delete_records_from_table(conn, record_ids, table_oid):
 
 
 def add_record_to_table(
-        conn,
-        record_def,
-        table_oid,
-        return_record_summaries=False,
-        table_record_summary_templates=None,
-    ):
+    conn,
+    record_def,
+    table_oid,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
+):
     """Add a record to a table."""
     result = db_conn.exec_msar_func(
         conn,
@@ -155,13 +155,13 @@ def add_record_to_table(
 
 
 def patch_record_in_table(
-        conn,
-        record_def,
-        record_id,
-        table_oid,
-        return_record_summaries=False,
-        table_record_summary_templates=None,
-    ):
+    conn,
+    record_def,
+    record_id,
+    table_oid,
+    return_record_summaries=False,
+    table_record_summary_templates=None,
+):
     """Update a record in a table."""
     result = db_conn.exec_msar_func(
         conn,
