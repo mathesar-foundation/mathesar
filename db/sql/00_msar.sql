@@ -1,6 +1,39 @@
 CREATE SCHEMA IF NOT EXISTS __msar;
 CREATE SCHEMA IF NOT EXISTS msar;
 
+CREATE OR REPLACE FUNCTION msar.drop_all_msar_functions() RETURNS void AS $$/*
+Drop all functions in the `msar` schema, except for this one.
+*/
+DECLARE
+  fn RECORD;
+  schema_name CONSTANT TEXT := 'msar';
+BEGIN
+  FOR fn IN
+    SELECT oid, prokind
+    FROM pg_catalog.pg_proc
+    WHERE
+      pronamespace = schema_name::regnamespace::oid AND
+      proname <> 'drop_all_msar_functions'
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_proc WHERE oid = fn.oid) THEN
+      EXECUTE format(
+        $q$ DROP %s %s CASCADE $q$,
+        CASE fn.prokind
+          WHEN 'p' THEN 'PROCEDURE'
+          WHEN 'a' THEN 'AGGREGATE'
+          ELSE 'FUNCTION'
+        END,
+        fn.oid::regprocedure::text
+      );
+    END IF;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+SELECT msar.drop_all_msar_functions();
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- GENERAL DDL FUNCTIONS
@@ -4852,21 +4885,27 @@ BEGIN
       LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %13$s
       CROSS JOIN count_cte
     $q$,
-    msar.build_selectable_column_expr(tab_id),
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id),
-    limit_,
-    offset_,
-    msar.build_order_by_expr(tab_id, order_),
-    msar.build_where_clause(tab_id, filter_),
-    msar.build_grouping_expr(tab_id, group_),
-    msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_),
-    COALESCE(msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_), 'NULL'),
-    COALESCE(msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_), 'NULL AS id'),
-    msar.build_summary_cte_expr_for_table(tab_id),
-    msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
-    COALESCE(
+    /* %1 */ msar.build_selectable_column_expr(tab_id),
+    /* %2 */ msar.get_relation_schema_name(tab_id),
+    /* %3 */ msar.get_relation_name(tab_id),
+    /* %4 */ limit_,
+    /* %5 */ offset_,
+    /* %6 */ msar.build_order_by_expr(tab_id, order_),
+    /* %7 */ msar.build_where_clause(tab_id, filter_),
+    /* %8 */ msar.build_grouping_expr(tab_id, group_),
+    /* %9 */ msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_),
+    /* %10 */ COALESCE(
+      msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_),
+      'NULL'
+    ),
+    /* %11 */ COALESCE(
+      msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_),
+      'NULL AS id'
+    ),
+    /* %12 */ msar.build_summary_cte_expr_for_table(tab_id),
+    /* %13 */ msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
+    /* %14 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    /* %15 */ COALESCE(
       CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
       'NULL'
     )
