@@ -22,8 +22,7 @@ def test_tables_meta_data_list(monkeypatch):
                 data_file=None,
                 import_verified=True,
                 column_order=[8, 9, 10],
-                record_summary_customized=False,
-                record_summary_template="{5555}",
+                record_summary_template=None,
             ),
             TableMetaData(
                 id=2,
@@ -32,8 +31,7 @@ def test_tables_meta_data_list(monkeypatch):
                 data_file=DataFile(id=11),
                 import_verified=False,
                 column_order=[],
-                record_summary_customized=True,
-                record_summary_template="{5512} {1223}",
+                record_summary_template=None,
             ),
         ]
 
@@ -47,8 +45,7 @@ def test_tables_meta_data_list(monkeypatch):
             data_file_id=None,
             import_verified=True,
             column_order=[8, 9, 10],
-            record_summary_customized=False,
-            record_summary_template="{5555}",
+            record_summary_template=None,
         ),
         metadata.TableMetaDataRecord(
             id=2,
@@ -57,8 +54,7 @@ def test_tables_meta_data_list(monkeypatch):
             data_file_id=11,
             import_verified=False,
             column_order=[],
-            record_summary_customized=True,
-            record_summary_template="{5512} {1223}",
+            record_summary_template=None,
         ),
     ]
     actual_metadata_list = metadata.list_(database_id=database_id)
