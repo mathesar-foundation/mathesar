@@ -76,7 +76,6 @@ def get_record_from_table(
         table_oid,
         record_id,
         return_record_summaries,
-        table_record_summary_templates,
         _json_or_none(table_record_summary_templates),
     ).fetchone()[0]
     return result
