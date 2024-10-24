@@ -64,6 +64,15 @@ services:
       - "8000:8000"
       - "3000:3000"
       - "6006:6006"
+  dev_service_secured:
+    container_name: mathesar_service_dev_secured
+    image: nginx:latest
+    # This service needs the config variables defined above.
+    environment: 
+      - DOMAIN_NAME=localhost
+    ports:
+      - "80:80"
+      - "443:443"
   test-service:
     container_name: mathesar_service_test
     image: mathesar/mathesar-test:latest
