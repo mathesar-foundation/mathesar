@@ -84,7 +84,6 @@ MODERNRPC_METHODS_MODULES = [
     'mathesar.rpc.tables',
     'mathesar.rpc.tables.metadata',
     'mathesar.rpc.tables.privileges',
-    'mathesar.rpc.types',
 ]
 
 TEMPLATES = [
