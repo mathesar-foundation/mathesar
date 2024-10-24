@@ -4,15 +4,15 @@ from enum import Enum, unique
 @unique
 class ErrorCodes(Enum):
     # Matches with default code of drf-friendly-errors library
-    APIException: 4000
-    ParseError: 4001
-    AuthenticationFailed: 4002
-    NotAuthenticated: 4003
-    PermissionDenied: 4004
-    NotAcceptable: 4007
-    UnsupportedMediaType: 4008
-    Throttled: 4009
-    Http404: 4010
+    APIException = 4000
+    ParseError = 4001
+    AuthenticationFailed = 4002
+    NotAuthenticated = 4003
+    PermissionDenied = 4004
+    NotAcceptable = 4007
+    UnsupportedMediaType = 4008
+    Throttled = 4009
+    Http404 = 4010
 
     # API Error
     MethodNotAllowed = 4006

@@ -155,7 +155,7 @@ def test_user_create_no_superuser(client_bob):
         'full_name': 'Alice Jones'
     }
     response = client_bob.post('/api/ui/v0/users/', data)
-
+    print(response.json())
     assert response.status_code == 403
     assert response.json()[0]['code'] == 4004
 

@@ -73,6 +73,7 @@ def mathesar_exception_handler(exc, context):
         # so we convert those into proper format
         else:
             warnings.warn("Error Response does not conform to the api spec. Please handle the exception properly")
+            print("HERERERER", type(exc.__class__.__name__), {i.name: i.value for i in ErrorCodes})
             error_code = {i.name: i.value for i in ErrorCodes}.get(
                 exc.__class__.__name__, None
             )
