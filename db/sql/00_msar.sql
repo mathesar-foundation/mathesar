@@ -5248,7 +5248,7 @@ SELECT msar.list_records_from_table(
   null,
   return_record_summaries
 )
-$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
