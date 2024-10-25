@@ -4909,15 +4909,15 @@ BEGIN
 
   join_section := CASE
     WHEN array_length(join_clauses, 1) = 0 THEN ''
-    ELSE chr(10) || array_to_string(join_clauses, chr(10))
+    ELSE E'\n' || array_to_string(join_clauses, E'\n')
   END;
 
   expr := array_to_string(expr_parts, E'\n    || ');
 
   RETURN concat(
-    'SELECT ', chr(10),
-    '  ', base_alias, '.', quote_ident(base_key_col_name), ' AS key, ', chr(10),
-    '  ', expr, ' AS summary', chr(10),
+    E'SELECT \n',
+    '  ', base_alias, '.', quote_ident(base_key_col_name), E' AS key, \n',
+    '  ', expr, E' AS summary \n',
     'FROM ',
     quote_ident(base_sch_name), '.', quote_ident(base_tab_name),
     ' AS ', base_alias,
