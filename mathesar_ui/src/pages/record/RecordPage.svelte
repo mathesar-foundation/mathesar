@@ -5,7 +5,6 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Table } from '@mathesar/models/Table';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import { TableStructure } from '@mathesar/stores/table-data';
   import { currentTable } from '@mathesar/stores/tables';
 
@@ -21,7 +20,6 @@
   $: tableStructure = new TableStructure({
     database: table.schema.database,
     table,
-    abstractTypesMap,
   });
   $: tableStructureIsLoading = tableStructure.isLoading;
   $: recordStoreFetchRequest = record.fetchRequest;

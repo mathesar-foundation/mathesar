@@ -5,7 +5,6 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Table } from '@mathesar/models/Table';
-  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import {
     Meta,
     TabularData,
@@ -31,7 +30,6 @@
   $: tabularData = new TabularData({
     database: table.schema.database,
     table,
-    abstractTypesMap,
     meta,
     contextualFilters: new Map([[fkColumn.id, recordPk]]),
   });

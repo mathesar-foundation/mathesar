@@ -5,7 +5,6 @@ import type { Column } from '@mathesar/api/rpc/columns';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 
 import { ColumnsDataStore } from './columns';
 import { type ConstraintsData, ConstraintsDataStore } from './constraints';
@@ -14,7 +13,6 @@ import { type ProcessedColumnsStore, processColumn } from './processedColumns';
 export interface TableStructureProps {
   database: Pick<Database, 'id'>;
   table: Pick<Table, 'oid'>;
-  abstractTypesMap: AbstractTypesMap;
 }
 
 export class TableStructure {
@@ -43,7 +41,6 @@ export class TableStructure {
               column,
               columnIndex,
               constraints: constraintsData.constraints,
-              abstractTypeMap: props.abstractTypesMap,
             }),
           ]),
         ),
@@ -57,6 +54,7 @@ export class TableStructure {
   }
 
   refresh(): Promise<[Column[] | undefined, ConstraintsData | undefined]> {
+    // TODO batch these request via RPC batching
     return Promise.all([
       this.columnsDataStore.fetch(),
       this.constraintsDataStore.fetch(),

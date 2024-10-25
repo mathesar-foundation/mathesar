@@ -8,7 +8,6 @@ import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
 
@@ -22,7 +21,6 @@ import { RecordsData, type TableRecordsData } from './records';
 export interface TabularDataProps {
   database: Pick<Database, 'id'>;
   table: Table;
-  abstractTypesMap: AbstractTypesMap;
   meta?: Meta;
   shareConsumer?: ShareConsumer;
   /**
@@ -116,7 +114,6 @@ export class TabularData {
                 column,
                 columnIndex,
                 constraints: constraintsData.constraints,
-                abstractTypeMap: props.abstractTypesMap,
                 hasEnhancedPrimaryKeyCell: props.hasEnhancedPrimaryKeyCell,
               }),
             ]),
