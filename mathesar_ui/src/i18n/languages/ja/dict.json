@@ -514,7 +514,6 @@
   "target_table": "ターゲットテーブル",
   "template": "テンプレート",
   "template_refer_atleast_one_column_error": "テンプレートは少なくとも1つの列を参照する必要があります。そうしない限り、レコードサマリーはすべてのレコードで同じものになります。",
-  "template_type": "テンプレートタイプ",
   "ten_best_matches_shown": "最も適合する10件が表示されています。さらに見るにはフィルタリングを続けてください。",
   "the_credentials_will_be_copied_from_this_connection": "ユーザー名、パスワード、ホスト、ポートがこの接続からコピーされます。",
   "this_database_must_exist_already": "このデータベースはすでに存在している必要があります。",

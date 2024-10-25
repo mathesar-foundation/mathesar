@@ -605,7 +605,6 @@
   "target_table": "Target Table",
   "template": "Template",
   "template_refer_atleast_one_column_error": "The template must reference at least one column, otherwise the record summary will be the same for all records.",
-  "template_type": "Template type",
   "ten_best_matches_shown": "The 10 best matches are shown. Continue filtering to see more.",
   "the_credentials_will_be_copied_from_this_connection": "The username, password, host, and port will be copied from this connection.",
   "this_will_remove_following_columns": "This will remove the following column(s):",
