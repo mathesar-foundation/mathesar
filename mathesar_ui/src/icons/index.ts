@@ -6,6 +6,7 @@ import {
   faBackspace,
   faCalendarDay,
   faCalendarWeek,
+  faCaretRight,
   faCheck,
   faCheckSquare,
   faChevronRight,
@@ -192,6 +193,7 @@ export const iconForwardSeparator: IconProps = { data: faSlash };
 export const iconUrl: IconProps = { data: faLink };
 export const iconText: IconProps = { data: faT };
 export const iconField: IconProps = { data: faDatabase };
+export const iconFieldDelimiter: IconProps = { data: faCaretRight };
 
 // STATUSES
 

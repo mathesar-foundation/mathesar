@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { defined } from '@mathesar/component-library';
+  import { Icon, defined } from '@mathesar/component-library';
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
+  import { iconFieldDelimiter } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import {
     type ProcessedColumns,
@@ -21,8 +22,24 @@
 </script>
 
 {#if column}
-  <SelectProcessedColumn columns={[...columns.values()]} value={column} />
+  <div class="column-select">
+    <SelectProcessedColumn columns={[...columns.values()]} value={column} />
+    {#if referentTable}
+      <div class="delimiter"><Icon {...iconFieldDelimiter} /></div>
+    {/if}
+  </div>
   {#if referentTable}
     <FieldChainTail {database} columnIds={columnIds.slice(1)} {referentTable} />
   {/if}
 {/if}
+
+<style>
+  .column-select {
+    display: flex;
+    align-items: center;
+  }
+  .delimiter {
+    color: var(--sand-600);
+    margin: 0 0.1rem;
+  }
+</style>

@@ -11,6 +11,17 @@
   export let onDelete: () => void;
 </script>
 
-<Part label="Column" {onDelete}>
-  <FieldChain {columns} {columnIds} {database} />
+<Part {onDelete}>
+  <div class="chain">
+    <FieldChain {columns} {columnIds} {database} />
+  </div>
 </Part>
+
+<style>
+  .chain {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: var(--text-size-small);
+  }
+</style>
