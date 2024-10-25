@@ -34,7 +34,6 @@
 <FieldsetGroup
   {isInline}
   {options}
-  {label}
   {ariaLabel}
   {disabled}
   {boxed}
@@ -53,6 +52,6 @@
       }
     }}
   />
-  <slot slot="label" />
+  <slot slot="label" name="label">{label}</slot>
   <slot slot="extra" name="extra" />
 </FieldsetGroup>
