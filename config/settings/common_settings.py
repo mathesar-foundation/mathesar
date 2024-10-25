@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
-from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
 
 
@@ -58,8 +57,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mathesar.middleware.CursorClosedHandlerMiddleware",
     "mathesar.middleware.PasswordChangeNeededMiddleware",
-    'django_userforeignkey.middleware.UserForeignKeyMiddleware',
-    'django_request_cache.middleware.RequestCacheMiddleware',
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -115,16 +112,16 @@ WSGI_APPLICATION = "config.wsgi.application"
 # See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
     db_key: db_url(url_string)
-    for db_key, url_string in decouple_config('MATHESAR_DATABASES', default='', cast=Csv(pipe_delim))
+    for db_key, url_string in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']
 }
 
 # POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST & POSTGRES_PORT are required env variables for forming a pg connection string for the django database
 # lack of any one of these will result in the internal django database to be sqlite.
-POSTGRES_DB = decouple_config('POSTGRES_DB', default=None)
-POSTGRES_USER = decouple_config('POSTGRES_USER', default=None)
-POSTGRES_PASSWORD = decouple_config('POSTGRES_PASSWORD', default=None)
-POSTGRES_HOST = decouple_config('POSTGRES_HOST', default=None)
-POSTGRES_PORT = decouple_config('POSTGRES_PORT', default=None)
+POSTGRES_DB = os.environ.get('POSTGRES_DB', default=None)
+POSTGRES_USER = os.environ.get('POSTGRES_USER', default=None)
+POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default=None)
+POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default=None)
+POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default=None)
 
 if POSTGRES_DB and POSTGRES_USER and POSTGRES_PASSWORD and POSTGRES_HOST and POSTGRES_PORT:
     DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}')
@@ -142,19 +139,19 @@ for db_key, db_dict in DATABASES.items():
 
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
-TEST = decouple_config('TEST', default=False, cast=bool)
+TEST = bool(os.environ.get('TEST', default=False))
 if TEST:
-    for db_key, _ in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim)):
+    for db_key, _ in [pipe_delim(i) for i in os.environ.get('MATHESAR_DATABASES', default='').split(',') if i != '']:
         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = decouple_config('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")
+SECRET_KEY = os.environ.get('SECRET_KEY', default="2gr6ud88x=(p855_5nbj_+7^gw-iz&n7ldqv%94mjaecl+b9=4")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = decouple_config('DEBUG', default=False, cast=bool)
+DEBUG = bool(os.environ.get('DEBUG', default=False))
 
-ALLOWED_HOSTS = decouple_config('ALLOWED_HOSTS', cast=Csv(), default=".localhost, 127.0.0.1, [::1]")
+ALLOWED_HOSTS = [i.strip() for i in os.environ.get('ALLOWED_HOSTS', default=".localhost, 127.0.0.1, [::1]").split(',')]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -200,7 +197,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Media files (uploaded by the user)
 DEFAULT_MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
-MEDIA_ROOT = decouple_config('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', default=DEFAULT_MEDIA_ROOT)
 
 MEDIA_URL = "/media/"
 
@@ -225,41 +222,17 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER':
         'mathesar.exception_handlers.mathesar_exception_handler',
 }
-FRIENDLY_ERRORS = {
-    'FIELD_ERRORS': {
-        # By default drf-friendly-errors does contain error codes for ListSerializer type
-        'ListSerializer': {
-            'required': 2007,
-            'null': 2027,
-            'invalid_choice': 2083,
-            'not_a_list': 2123,
-            'empty': 2093
-        },
-        'PermittedPkRelatedField': {
-            'required': 2007,
-            'null': 2027,
-            'does_not_exist': 2151,
-            'incorrect_type': 2161
-        },
-        'PermittedSlugRelatedField': {
-            'required': 2007, 'invalid': 2002, 'null': 2027,
-            'does_not_exist': 2151, 'incorrect_type': 2161
-        },
-    },
-    'EXCEPTION_DICT': {
-        'Http404': 4005
-    }
-}
+
 # Mathesar settings
-MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
+MATHESAR_MODE = os.environ.get('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
 MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
-MATHESAR_CLIENT_DEV_URL = decouple_config(
+MATHESAR_CLIENT_DEV_URL = os.environ.get(
     'MATHESAR_CLIENT_DEV_URL',
     default='http://localhost:3000'
 )
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
-MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=False)
+MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = os.environ.get('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

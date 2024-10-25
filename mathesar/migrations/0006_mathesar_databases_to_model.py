@@ -1,4 +1,5 @@
-from decouple import config as decouple_config
+import os
+
 from django.conf import settings
 from django.db import migrations
 
@@ -6,7 +7,7 @@ from django.db import migrations
 def update_conn_info(apps, _):
     """Add info from MATHESAR_DATABASES to new model fields."""
     Database = apps.get_model('mathesar', 'Database')
-    django_db_key = decouple_config('DJANGO_DATABASE_KEY', default="default")
+    django_db_key = os.environ.get('DJANGO_DATABASE_KEY', default="default")
     user_databases = [key for key in settings.DATABASES if key != django_db_key]
     for database_key in user_databases:
         try:
