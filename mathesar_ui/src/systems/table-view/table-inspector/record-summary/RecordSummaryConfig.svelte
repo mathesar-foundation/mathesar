@@ -54,13 +54,13 @@
   {#if $isLoading}
     <Spinner />
   {:else}
-    <Preview {tabularData} context="table" template={$template} />
-
     <Template
       bind:template={$template}
       columns={$processedColumns}
       {database}
     />
+
+    <Preview {tabularData} context="table" template={$template} />
 
     <FormSubmit
       {form}

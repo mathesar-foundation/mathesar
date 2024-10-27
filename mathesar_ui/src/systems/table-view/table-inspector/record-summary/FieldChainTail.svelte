@@ -8,6 +8,7 @@
   export let database: Pick<Database, 'id'>;
   export let columnIds: number[];
   export let referentTable: TableStructure;
+  export let onUpdate: (columnIds: number[]) => void;
 
   $: ({ isLoading, processedColumns } = referentTable);
 </script>
@@ -15,5 +16,5 @@
 {#if $isLoading}
   <Spinner />
 {:else}
-  <FieldChain {database} {columnIds} columns={$processedColumns} />
+  <FieldChain {database} {columnIds} columns={$processedColumns} {onUpdate} />
 {/if}

@@ -1,9 +1,14 @@
 <script lang="ts">
+  import { first } from 'iter-tools';
+
   import type { RecordSummaryTemplate } from '@mathesar/api/rpc/tables';
   import { sortableContainer } from '@mathesar/components/sortable/sortable';
   import { iconAddNew, iconField, iconText } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
-  import type { ProcessedColumns } from '@mathesar/stores/table-data';
+  import type {
+    ProcessedColumn,
+    ProcessedColumns,
+  } from '@mathesar/stores/table-data';
   import {
     ButtonMenuItem,
     DropdownMenu,
@@ -18,17 +23,26 @@
   export let columns: ProcessedColumns;
 
   function deletePart(index: number) {
-    template.splice(index, 1);
+    template = [...template.slice(0, index), ...template.slice(index + 1)];
+  }
+
+  function replacePart(index: number, part: string | number[]) {
+    template = [
+      ...template.slice(0, index),
+      part,
+      ...template.slice(index + 1),
+    ];
   }
 
   function addText() {
     // TODO focus the new text input after its added
-    template.push('');
+    template = [...template, ''];
   }
 
   function addColumn() {
     // TODO be smarter about picking a default column
-    template.push([]);
+    const column = first(columns.values()) as ProcessedColumn;
+    template = [...template, [column.id]];
   }
 </script>
 
@@ -37,20 +51,25 @@
     class="parts"
     use:sortableContainer={{
       getItems: () => template,
-      onSort: () => {
-        /* TODO */
+      onSort: (newTemplate) => {
+        template = newTemplate;
       },
     }}
   >
-    {#each template as part, i}
+    {#each template as part, index}
       {#if typeof part === 'string'}
-        <TextPart text={part} onDelete={() => deletePart(i)} />
+        <TextPart
+          text={part}
+          onUpdate={(text) => replacePart(index, text)}
+          onDelete={() => deletePart(index)}
+        />
       {:else}
         <FieldPart
           columnIds={part}
           {columns}
-          onDelete={() => deletePart(i)}
           {database}
+          onDelete={() => deletePart(index)}
+          onUpdate={(columnIds) => replacePart(index, columnIds)}
         />
       {/if}
     {/each}
@@ -58,8 +77,8 @@
 
   <div class="add">
     <DropdownMenu label="Add Part" icon={iconAddNew} size="small">
-      <ButtonMenuItem label="Text" icon={iconText} on:click={addText} />
       <ButtonMenuItem label="Column" icon={iconField} on:click={addColumn} />
+      <ButtonMenuItem label="Text" icon={iconText} on:click={addText} />
     </DropdownMenu>
   </div>
 </Fieldset>

@@ -9,11 +9,12 @@
   export let columnIds: number[];
   export let columns: ProcessedColumns;
   export let onDelete: () => void;
+  export let onUpdate: (columnIds: number[]) => void;
 </script>
 
 <Part {onDelete}>
   <div class="chain">
-    <FieldChain {columns} {columnIds} {database} />
+    <FieldChain {columns} {columnIds} {database} {onUpdate} />
   </div>
 </Part>
 

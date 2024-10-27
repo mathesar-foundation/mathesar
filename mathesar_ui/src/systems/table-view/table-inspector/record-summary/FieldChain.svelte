@@ -13,6 +13,7 @@
   export let database: Pick<Database, 'id'>;
   export let columnIds: number[];
   export let columns: ProcessedColumns;
+  export let onUpdate: (columnIds: number[]) => void;
 
   $: column = defined(columnIds[0], (c) => columns.get(c));
   $: referentTable = defined(
@@ -21,16 +22,24 @@
   );
 </script>
 
-{#if column}
-  <div class="column-select">
-    <SelectProcessedColumn columns={[...columns.values()]} value={column} />
-    {#if referentTable}
-      <div class="delimiter"><Icon {...iconFieldDelimiter} /></div>
-    {/if}
-  </div>
+<div class="column-select">
+  <SelectProcessedColumn
+    columns={[...columns.values()]}
+    value={column}
+    onUpdate={(column) => onUpdate(column ? [column.id] : [])}
+  />
   {#if referentTable}
-    <FieldChainTail {database} columnIds={columnIds.slice(1)} {referentTable} />
+    <div class="delimiter"><Icon {...iconFieldDelimiter} /></div>
   {/if}
+</div>
+{#if referentTable}
+  <FieldChainTail
+    {database}
+    columnIds={columnIds.slice(1)}
+    {referentTable}
+    onUpdate={(ids) =>
+      onUpdate([...(defined(column, (c) => [c.id]) ?? []), ...ids])}
+  />
 {/if}
 
 <style>
