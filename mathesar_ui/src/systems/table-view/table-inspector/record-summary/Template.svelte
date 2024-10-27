@@ -7,12 +7,11 @@
   import type { ProcessedColumns } from '@mathesar/stores/table-data';
 
   import CustomTemplate from './CustomTemplate.svelte';
+  import { makeNewCustomTemplate } from './utils';
 
   export let database: Pick<Database, 'id'>;
   export let template: RecordSummaryTemplate | null;
   export let columns: ProcessedColumns;
-
-  $: customized = template !== null;
 </script>
 
 <RadioGroup
@@ -20,8 +19,11 @@
   options={[false, true]}
   getRadioLabel={(v) => (v ? 'Customize' : $_('use_default'))}
   isInline
-  value={customized}
+  value={template !== null}
   boxed
+  on:change={({ detail: { value: checked } }) => {
+    template = checked ? makeNewCustomTemplate(columns) : null;
+  }}
 />
 
 {#if template}

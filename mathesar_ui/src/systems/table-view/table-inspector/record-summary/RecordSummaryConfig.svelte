@@ -7,6 +7,7 @@
     optionalField,
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import { iconUndo } from '@mathesar/icons';
   import type { TabularData } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -55,13 +56,18 @@
   {:else}
     <Preview {tabularData} context="table" template={$template} />
 
-    <Template template={$template} columns={$processedColumns} {database} />
+    <Template
+      bind:template={$template}
+      columns={$processedColumns}
+      {database}
+    />
 
     <FormSubmit
       {form}
       onProceed={save}
       onCancel={form.reset}
       proceedButton={{ label: $_('save') }}
+      cancelButton={{ label: $_('reset'), icon: iconUndo }}
       initiallyHidden
       size="small"
     />
