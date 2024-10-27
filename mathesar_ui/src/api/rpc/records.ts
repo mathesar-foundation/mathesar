@@ -140,7 +140,7 @@ export const records = {
        * */
       table_record_summary_templates?: Record<
         string,
-        RecordSummaryTemplate
+        RecordSummaryTemplate | null
       > | null;
     },
     RecordsResponse

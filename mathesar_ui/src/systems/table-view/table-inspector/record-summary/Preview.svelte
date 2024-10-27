@@ -47,9 +47,7 @@
       table_oid: tabularData.table.oid,
       return_record_summaries: true,
       record_id: recordId,
-      table_record_summary_templates: template
-        ? { [tabularData.table.oid]: template }
-        : null,
+      table_record_summary_templates: { [tabularData.table.oid]: template },
     });
   }
 
