@@ -6,15 +6,13 @@
     makeForm,
     optionalField,
   } from '@mathesar/components/form';
-  import Identifier from '@mathesar/components/Identifier.svelte';
-  import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
-  import { RichText } from '@mathesar/components/rich-text';
   import type { TabularData } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { Fieldset, Spinner } from '@mathesar-component-library';
+  import { Spinner } from '@mathesar-component-library';
 
+  import Preview from './Preview.svelte';
   import Template from './Template.svelte';
 
   export let tabularData: TabularData;
@@ -55,19 +53,7 @@
   {#if $isLoading}
     <Spinner />
   {:else}
-    <Fieldset label="Preview" boxed>
-      <LinkedRecord recordSummary="Foo bar" />
-      <div class="help">
-        <RichText
-          text={'This is how [tableName] records will be summarized.'}
-          let:slotName
-        >
-          {#if slotName === 'tableName'}
-            <Identifier>{table.name}</Identifier>
-          {/if}
-        </RichText>
-      </div>
-    </Fieldset>
+    <Preview {tabularData} context="table" template={$template} />
 
     <Template template={$template} columns={$processedColumns} {database} />
 
@@ -85,10 +71,5 @@
 <style>
   .record-summary-config > :global(* + *) {
     margin-top: 1rem;
-  }
-  .help {
-    font-size: var(--text-size-small);
-    color: var(--color-text-muted);
-    margin-top: 0.5rem;
   }
 </style>
