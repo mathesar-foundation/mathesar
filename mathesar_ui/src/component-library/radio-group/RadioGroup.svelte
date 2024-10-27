@@ -1,9 +1,13 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+
   import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import FieldsetGroup from '@mathesar-component-library-dir/fieldset-group/FieldsetGroup.svelte';
   import Radio from '@mathesar-component-library-dir/radio/Radio.svelte';
 
   type Option = $$Generic;
+
+  const dispatch = createEventDispatcher<{ change: { value: Option } }>();
 
   export let value: Option | undefined = undefined;
   export let isInline = false;
@@ -39,7 +43,6 @@
   {boxed}
   let:option
   let:disabled={innerDisabled}
-  on:change
   labelKey={radioLabelKey}
   getLabel={getRadioLabel}
 >
@@ -50,6 +53,7 @@
       if (checked) {
         value = option;
       }
+      dispatch('change', { value: option });
     }}
   />
   <slot slot="label" name="label">{label}</slot>
