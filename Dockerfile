@@ -59,7 +59,12 @@ COPY . .
 
 #=========== STAGE: TESTING ==================================================#
 
-FROM base AS testing
+ARG PYTHON_VERSION=3.9-bookworm
+FROM python:$PYTHON_VERSION AS testing
+
+# Mathesar source
+WORKDIR /code/
+COPY . .
 
 # Install dev requirements
 RUN pip install --no-cache-dir -r requirements-dev.txt
