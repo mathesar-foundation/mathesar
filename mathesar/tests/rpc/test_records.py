@@ -38,6 +38,7 @@ def test_records_list(rf, monkeypatch):
             filter=None,
             group=None,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if _table_oid != table_oid or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
@@ -103,6 +104,7 @@ def test_records_get(rf, monkeypatch):
             _record_id,
             _table_oid,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if _table_oid != table_oid or _record_id != record_id or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
@@ -159,6 +161,7 @@ def test_records_add(rf, monkeypatch):
             _record_def,
             _table_oid,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if _table_oid != table_oid or _record_def != record_def or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
@@ -211,6 +214,7 @@ def test_records_patch(rf, monkeypatch):
             _record_id,
             _table_oid,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if (
                 _table_oid != table_oid
@@ -238,6 +242,7 @@ def test_records_patch(rf, monkeypatch):
         table_oid=table_oid,
         database_id=database_id,
         return_record_summaries=True,
+        table_record_summary_templates=None,
         request=request
     )
     assert actual_record == expect_record
@@ -304,6 +309,7 @@ def test_records_search(rf, monkeypatch):
             search=[],
             limit=10,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if _table_oid != table_oid or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
