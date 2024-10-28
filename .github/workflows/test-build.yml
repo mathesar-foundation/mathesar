@@ -1,4 +1,4 @@
-name: Test build mathesar
+name: Test build
 on:  [pull_request, merge_group]
 jobs:
   build_tests:
