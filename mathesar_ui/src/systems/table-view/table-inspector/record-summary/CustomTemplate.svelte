@@ -46,7 +46,7 @@
   }
 </script>
 
-<Fieldset label="Custom Parts" boxed>
+<Fieldset label="Custom Fields" boxed>
   <div
     class="parts"
     use:sortableContainer={{
@@ -76,7 +76,7 @@
   </div>
 
   <div class="add">
-    <DropdownMenu label="Add Part" icon={iconAddNew} size="small">
+    <DropdownMenu label="Add Field" icon={iconAddNew} size="small">
       <ButtonMenuItem label="Column" icon={iconField} on:click={addColumn} />
       <ButtonMenuItem label="Text" icon={iconText} on:click={addText} />
     </DropdownMenu>

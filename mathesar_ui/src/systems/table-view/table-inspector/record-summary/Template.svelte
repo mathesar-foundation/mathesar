@@ -17,7 +17,7 @@
 <RadioGroup
   label="Customization"
   options={[false, true]}
-  getRadioLabel={(v) => (v ? 'Customize' : $_('use_default'))}
+  getRadioLabel={(v) => (v ? 'Customize Fields' : 'Use Default')}
   isInline
   value={template !== null}
   boxed
