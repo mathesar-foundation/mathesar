@@ -9,6 +9,7 @@
     ProcessedColumn,
     ProcessedColumns,
   } from '@mathesar/stores/table-data';
+  import { makeUniqueKeys } from '@mathesar/utils/svelteHelpers';
   import {
     ButtonMenuItem,
     DropdownMenu,
@@ -56,7 +57,7 @@
       },
     }}
   >
-    {#each template as part, index}
+    {#each [...makeUniqueKeys(template)] as [part, key], index (key)}
       {#if typeof part === 'string'}
         <TextPart
           text={part}
