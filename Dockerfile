@@ -57,6 +57,18 @@ WORKDIR /code/
 COPY . .
 
 
+#=========== STAGE: TESTING ==================================================#
+
+FROM base AS testing
+
+# Install dev requirements
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+EXPOSE 8000
+
+ENTRYPOINT ["./dev-run.sh"]
+
+
 #=========== STAGE: DEVELOPMENT ==============================================#
 
 FROM base AS development
