@@ -46,6 +46,10 @@
   .column-select {
     display: flex;
     align-items: center;
+    /* We need some margin here in order to vertically multiple column select
+    elements when there are so many that they wrap within the same template
+    part. */
+    margin: var(--column-select-margin) 0;
   }
   .delimiter {
     color: var(--sand-600);

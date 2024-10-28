@@ -86,9 +86,13 @@
 
 <style>
   .parts {
+    --column-select-margin: 0.25rem;
     margin: 0.5rem 0;
     display: grid;
-    gap: 1rem;
+    /* We want a visual gap of 1rem but we already have some margin set on each
+    column select (to take effect when flex wrapping happens), so we need to
+    subtract that. */
+    gap: calc(1rem - var(--column-select-margin));
   }
   .add {
     margin-top: 1rem;

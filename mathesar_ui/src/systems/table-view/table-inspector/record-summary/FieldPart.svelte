@@ -23,6 +23,5 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    font-size: var(--text-size-small);
   }
 </style>

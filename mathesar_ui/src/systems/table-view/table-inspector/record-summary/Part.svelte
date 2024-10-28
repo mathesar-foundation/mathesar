@@ -24,17 +24,20 @@
 <style>
   .part {
     display: grid;
-    align-items: center;
+    /* You might think we'd want `center` here, but we use flex-start because we
+    want the grip, label, and delete elements to be centered with the first line
+    of select elements when there are multiple (wrapped) lines. */
+    align-items: flex-start;
     grid-template-columns: auto auto 1fr auto;
   }
   .grip {
-    margin-right: 0.5rem;
+    margin: 0.65rem 0.5rem 0 0;
   }
   .label:not(:empty) {
-    margin-right: 0.5rem;
+    margin: 0.65rem 0.5rem 0 0;
   }
   .delete {
-    margin-right: -0.5rem;
+    margin: 0.3rem -0.5rem 0 0;
   }
   .delete:not(:hover) {
     color: var(--slate-400);
