@@ -76,7 +76,7 @@ services:
       - POSTGRES_PORT=5432
     build:
       context: .
-      target: development
+      target: testing
       dockerfile: Dockerfile
       args:
         PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
