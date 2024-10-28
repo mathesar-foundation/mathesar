@@ -194,7 +194,7 @@ def test_data_file_404(client, data_file):
     data_file_id = data_file.id
     data_file.delete()
     response = client.get(f'/api/db/v0/data_files/{data_file_id}/')
-    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['message'] == 'No DataFile matches the given query.'
     assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
