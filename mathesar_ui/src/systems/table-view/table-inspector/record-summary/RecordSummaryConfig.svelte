@@ -9,6 +9,7 @@
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconUndo } from '@mathesar/icons';
   import type { TabularData } from '@mathesar/stores/table-data';
+  import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { Spinner } from '@mathesar-component-library';
@@ -24,15 +25,15 @@
 
   async function save() {
     try {
-      // await updateTable({
-      //   schema: table.schema,
-      //   table: {
-      //     oid: table.oid,
-      //     metadata: {
-      //       record_summary_template: $template,
-      //     },
-      //   },
-      // });
+      await updateTable({
+        schema: table.schema,
+        table: {
+          oid: table.oid,
+          metadata: {
+            record_summary_template: $template,
+          },
+        },
+      });
     } catch (e) {
       toast.error(`${$_('unable_to_save_changes')} ${getErrorMessage(e)}`);
     }
