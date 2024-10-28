@@ -1,6 +1,6 @@
 -r requirements.txt
 flake8==7.1.1
-ipython==8.29.0
+ipython==7.34.0
 pytest==8.3.3
 pytest-django==4.9.0
 pytest-env==1.1.5
