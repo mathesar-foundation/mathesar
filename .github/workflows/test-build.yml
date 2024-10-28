@@ -1,4 +1,4 @@
-name: Test build
+name: Test Build
 on:  [pull_request, merge_group]
 jobs:
   build_tests:
