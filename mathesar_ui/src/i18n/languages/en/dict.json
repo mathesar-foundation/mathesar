@@ -374,6 +374,7 @@
   "newest_to_oldest_sort": "Newest-Oldest",
   "no": "No",
   "no_actions_selected_record": "There are no actions to perform on the selected record(s).",
+  "no_collaborators_added": "No collaborators have been added to this database.",
   "no_constraints": "No Constraints",
   "no_continue_without_summarization": "No, continue without summarizing",
   "no_databases_connected": "No Databases Connected",
