@@ -26,7 +26,7 @@
   <SelectProcessedColumn
     columns={[...columns.values()]}
     value={column}
-    onUpdate={(column) => onUpdate(column ? [column.id] : [])}
+    onUpdate={(c) => onUpdate(c ? [c.id] : [])}
   />
   {#if referentTable}
     <div class="delimiter"><Icon {...iconFieldDelimiter} /></div>

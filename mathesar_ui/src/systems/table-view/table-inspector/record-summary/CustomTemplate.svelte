@@ -1,7 +1,6 @@
 <script lang="ts">
   import { first } from 'iter-tools';
 
-  import type { RecordSummaryTemplate } from '@mathesar/api/rpc/tables';
   import { sortableContainer } from '@mathesar/components/sortable/sortable';
   import { iconAddNew, iconField, iconText } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -9,7 +8,6 @@
     ProcessedColumn,
     ProcessedColumns,
   } from '@mathesar/stores/table-data';
-  import { makeUniqueKeys } from '@mathesar/utils/svelteHelpers';
   import {
     ButtonMenuItem,
     DropdownMenu,
@@ -17,33 +15,30 @@
   } from '@mathesar-component-library';
 
   import FieldPart from './FieldPart.svelte';
+  import { TemplateConfig } from './TemplateConfig';
   import TextPart from './TextPart.svelte';
 
   export let database: Pick<Database, 'id'>;
-  export let template: RecordSummaryTemplate;
+  export let templateConfig: TemplateConfig;
   export let columns: ProcessedColumns;
 
-  function deletePart(index: number) {
-    template = [...template.slice(0, index), ...template.slice(index + 1)];
+  function deletePart(key: number) {
+    templateConfig = templateConfig.withoutPart(key);
   }
 
-  function replacePart(index: number, part: string | number[]) {
-    template = [
-      ...template.slice(0, index),
-      part,
-      ...template.slice(index + 1),
-    ];
+  function replacePart(key: number, part: string | number[]) {
+    templateConfig = templateConfig.withPartReplaced(key, part);
   }
 
   function addText() {
     // TODO focus the new text input after its added
-    template = [...template, ''];
+    templateConfig = templateConfig.withPartAppended('');
   }
 
   function addColumn() {
     // TODO be smarter about picking a default column
     const column = first(columns.values()) as ProcessedColumn;
-    template = [...template, [column.id]];
+    templateConfig = templateConfig.withPartAppended([column.id]);
   }
 </script>
 
@@ -51,26 +46,26 @@
   <div
     class="parts"
     use:sortableContainer={{
-      getItems: () => template,
-      onSort: (newTemplate) => {
-        template = newTemplate;
+      getItems: () => [...templateConfig],
+      onSort: (items) => {
+        templateConfig = new TemplateConfig(items);
       },
     }}
   >
-    {#each [...makeUniqueKeys(template)] as [part, key], index (key)}
+    {#each [...templateConfig] as [key, part] (key)}
       {#if typeof part === 'string'}
         <TextPart
           text={part}
-          onUpdate={(text) => replacePart(index, text)}
-          onDelete={() => deletePart(index)}
+          onUpdate={(text) => replacePart(key, text)}
+          onDelete={() => deletePart(key)}
         />
       {:else}
         <FieldPart
           columnIds={part}
           {columns}
           {database}
-          onDelete={() => deletePart(index)}
-          onUpdate={(columnIds) => replacePart(index, columnIds)}
+          onDelete={() => deletePart(key)}
+          onUpdate={(columnIds) => replacePart(key, columnIds)}
         />
       {/if}
     {/each}

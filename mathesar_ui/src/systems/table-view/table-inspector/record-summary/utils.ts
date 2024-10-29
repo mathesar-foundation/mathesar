@@ -1,14 +1,9 @@
-import { filter, first } from 'iter-tools';
+import { first } from 'iter-tools';
 
 import type { ResultValue } from '@mathesar/api/rpc/records';
-import type { RecordSummaryTemplate } from '@mathesar/api/rpc/tables';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
-import type {
-  ProcessedColumn,
-  ProcessedColumns,
-  RecordRow,
-} from '@mathesar/stores/table-data';
+import type { ProcessedColumns, RecordRow } from '@mathesar/stores/table-data';
 import { defined } from '@mathesar-component-library';
 
 /**
@@ -32,21 +27,4 @@ export function getTableRecordId(p: {
     defined(rowId, (r) => p.selectableRowsMap.get(r)) ??
     first(p.selectableRowsMap.values());
   return row?.record[pk.id];
-}
-
-export function makeNewCustomTemplate(
-  columns: ProcessedColumns,
-): RecordSummaryTemplate {
-  const textColumns = filter(
-    (c) => c.abstractType.identifier === 'text',
-    columns.values(),
-  );
-  const firstTextColumn = first(textColumns);
-  if (firstTextColumn) {
-    return [[firstTextColumn.id]];
-  }
-  // Type assertion here because we know that every table has at least one
-  // column.
-  const firstColumn = first(columns.values()) as ProcessedColumn;
-  return [[firstColumn.id]];
 }

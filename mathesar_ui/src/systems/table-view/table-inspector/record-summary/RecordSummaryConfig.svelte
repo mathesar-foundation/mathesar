@@ -12,16 +12,20 @@
   import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { Spinner } from '@mathesar-component-library';
+  import { Spinner, defined } from '@mathesar-component-library';
 
   import Preview from './Preview.svelte';
   import Template from './Template.svelte';
+  import { TemplateConfig } from './TemplateConfig';
 
   export let tabularData: TabularData;
 
   $: ({ isLoading, table, processedColumns, database } = tabularData);
-  $: template = optionalField(table?.metadata?.record_summary_template ?? null);
-  $: form = makeForm({ template });
+  $: template = table?.metadata?.record_summary_template ?? undefined;
+  $: templateConfig = optionalField(
+    defined(template, (t) => TemplateConfig.fromTemplate(t)),
+  );
+  $: form = makeForm({ templateConfig });
 
   async function save() {
     try {
@@ -30,7 +34,7 @@
         table: {
           oid: table.oid,
           metadata: {
-            record_summary_template: $template,
+            record_summary_template: $templateConfig?.template ?? null,
           },
         },
       });
@@ -56,12 +60,16 @@
     <Spinner />
   {:else}
     <Template
-      bind:template={$template}
+      bind:templateConfig={$templateConfig}
       columns={$processedColumns}
       {database}
     />
 
-    <Preview {tabularData} context="table" template={$template} />
+    <Preview
+      {tabularData}
+      context="table"
+      template={$templateConfig?.template ?? null}
+    />
 
     <FormSubmit
       {form}
