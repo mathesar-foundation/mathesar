@@ -3,7 +3,7 @@
 # For deployments, the DockerFile is configured to build the
 # client. Hence, instead of using this script, the web server
 # can be directly started.
-if [ -z "$NODE_MAJOR" ]; then
+if [ -n "$NODE_MAJOR" ]; then
     cd mathesar_ui
 
     # Run vite dev server only in dev mode
