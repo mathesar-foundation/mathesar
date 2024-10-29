@@ -53,6 +53,7 @@
       0 4px 6px -2px rgba(0, 0, 0, 0.05);
     position: relative;
     background-color: var(--sand-100);
+    border-left: solid var(--slate-300) 1px;
     isolation: isolate;
 
     .tabs-container {
