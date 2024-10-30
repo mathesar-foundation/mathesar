@@ -7,12 +7,12 @@
 
   export let table: Table;
 
-  $: tabularData = new TabularData({
-    database: table.schema.database,
-    table,
-    abstractTypesMap,
-    meta: new Meta({ pagination: new Pagination({ size: 1 }) }),
-  });
+  // $: tabularData = new TabularData({
+  //   database: table.schema.database,
+  //   table,
+  //   meta: new Meta({ pagination: new Pagination({ size: 1 }) }),
+  // });
 </script>
 
-<RecordSummaryConfig {table} {tabularData} />
+<!-- <RecordSummaryConfig {tabularData} /> -->
+TODO
