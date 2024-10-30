@@ -4472,7 +4472,8 @@ INSERT INTO "Teachers"
 ( /* id */   "Counselor", "Name"          , "Email"                ) VALUES
   /* 1  */ ( 1.234      , 'Carol Carlson' , 'ccarlson@example.edu' ),
   /* 2  */ ( 2.345      , 'Dave Davidson' , 'ddavison@example.edu' ),
-  /* 3  */ ( 1.234      , 'Eve Evilson'   , 'eevilson@example.edu' );
+  /* 3  */ ( 1.234      , 'Eve Evilson'   , 'eevilson@example.edu' ),
+  /* 4  */ ( 1.234      , 'Neil Smith'    , NULL                   );
 
 INSERT INTO "Students"
 ( /* id */  "Counselor", "Teacher", "Name"            , "Grade", "Email"                   ) VALUES
@@ -4481,7 +4482,8 @@ INSERT INTO "Students"
   /* 3  */ ( 1.234     , 2        , 'Hank Hankson'    , 75     , 'hhankson@example.edu'    ),
   /* 4  */ ( 2.345     , 1        , 'Ida Idalia'      , 90     , 'iidalia@example.edu'     ),
   /* 5  */ ( 2.345     , 2        , 'James Jameson'   , 80     , 'jjameson@example.edu'    ),
-  /* 6  */ ( 1.234     , 3        , 'Kelly Kellison'  , 80     , 'kkellison@example.edu'   );
+  /* 6  */ ( 1.234     , 3        , 'Kelly Kellison'  , 80     , 'kkellison@example.edu'   ),
+  /* 7  */ ( 1.234     , 4        , 'Arnold Baker'    , NULL   , 'ab@example.edu'          );
 
 END;
 $$ LANGUAGE plpgsql;
@@ -4637,6 +4639,27 @@ BEGIN
       )
     ) -> 'record_summaries' ->> '4', 
     'Ida Idalia 90% - (Carol Carlson / Alice Alison)'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_record_summary_with_null_values() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+
+  -- NULL cell values should be rendered as empty strings within the record summary
+  RETURN NEXT is(
+    msar.get_record_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      rec_id => 7,
+      return_record_summaries => true,
+      table_record_summary_templates => jsonb_build_object(
+        '"Students"'::regclass::oid,
+        '[[4], " ", [5], "% - \"", [3, 3], " <", [3, 4], ">\""]'::jsonb
+      )
+    ) -> 'record_summaries' ->> '7', 
+    'Arnold Baker % - "Neil Smith <>"'
   );
 END;
 $$ LANGUAGE plpgsql;

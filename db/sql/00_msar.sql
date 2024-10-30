@@ -4889,7 +4889,11 @@ BEGIN
         IF ref_column_name IS NOT NULL THEN
           expr_parts := array_append(
             expr_parts,
-            concat('msar.format_data(', prev_alias,'.', quote_ident(ref_column_name), ')')
+            concat(
+              'COALESCE(msar.format_data(',
+              prev_alias, '.', quote_ident(ref_column_name),
+              E')::text, \'\')'
+            )
           );
         END IF;
 
