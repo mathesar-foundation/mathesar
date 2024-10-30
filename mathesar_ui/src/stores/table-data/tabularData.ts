@@ -3,13 +3,22 @@ import { type Readable, type Writable, derived, writable } from 'svelte/store';
 
 import { States } from '@mathesar/api/rest/utils/requestUtils';
 import type { Column } from '@mathesar/api/rpc/columns';
+import { parseCellId } from '@mathesar/components/sheet/cellIds';
+import type { SelectedCellData } from '@mathesar/components/sheet/selection';
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
+import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
 import type { Database } from '@mathesar/models/Database';
 import type { Table } from '@mathesar/models/Table';
+import type {
+  ProcessedColumns,
+  RecordRow,
+  RecordSummariesForSheet,
+} from '@mathesar/stores/table-data';
 import type { ShareConsumer } from '@mathesar/utils/shares';
 import { orderProcessedColumns } from '@mathesar/utils/tables';
+import { defined } from '@mathesar-component-library';
 
 import { ColumnsDataStore } from './columns';
 import { type ConstraintsData, ConstraintsDataStore } from './constraints';
@@ -17,6 +26,37 @@ import { Display } from './display';
 import { Meta } from './meta';
 import { type ProcessedColumnsStore, processColumn } from './processedColumns';
 import { RecordsData, type TableRecordsData } from './records';
+
+function getSelectedCellData(
+  selection: SheetSelection,
+  selectableRowsMap: Map<string, RecordRow>,
+  processedColumns: ProcessedColumns,
+  linkedRecordSummaries: RecordSummariesForSheet,
+): SelectedCellData {
+  const { activeCellId } = selection;
+  const selectionData = {
+    cellCount: selection.cellIds.size,
+  };
+  if (activeCellId === undefined) {
+    return { selectionData };
+  }
+  const { rowId, columnId } = parseCellId(activeCellId);
+  const row = selectableRowsMap.get(rowId);
+  const value = row?.record[columnId];
+  const column = processedColumns.get(Number(columnId));
+  const recordSummary = defined(
+    value,
+    (v) => linkedRecordSummaries.get(columnId)?.get(String(v)),
+  );
+  return {
+    activeCellData: column && {
+      column,
+      value,
+      recordSummary,
+    },
+    selectionData,
+  };
+}
 
 export interface TabularDataProps {
   database: Pick<Database, 'id'>;
@@ -64,6 +104,8 @@ export class TabularData {
   isLoading: Readable<boolean>;
 
   selection: SheetSelectionStore;
+
+  selectedCellData: Readable<SelectedCellData>;
 
   shareConsumer?: ShareConsumer;
 
@@ -147,6 +189,16 @@ export class TabularData {
         columnsStatus?.state === 'processing' ||
         constraintsData.state === States.Loading ||
         recordsDataState === States.Loading,
+    );
+
+    this.selectedCellData = derived(
+      [
+        this.selection,
+        this.recordsData.selectableRowsMap,
+        this.processedColumns,
+        this.recordsData.linkedRecordSummaries,
+      ],
+      (args) => getSelectedCellData(...args),
     );
 
     this.columnsDataStore.on('columnRenamed', async () => {

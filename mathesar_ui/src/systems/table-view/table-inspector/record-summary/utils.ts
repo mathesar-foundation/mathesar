@@ -6,15 +6,6 @@ import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelec
 import type { ProcessedColumns, RecordRow } from '@mathesar/stores/table-data';
 import { defined } from '@mathesar-component-library';
 
-/**
- * 'table' - We're editing the record summary template directly for the table
- * we're viewing.
- *
- * 'fk-column' - We're editing the record summary template for the table linked
- * from a foreign key column within the table we're viewing.
- */
-export type RecordSummaryTemplateEditingContext = 'table' | 'fk-column';
-
 export function getTableRecordId(p: {
   processedColumns: ProcessedColumns;
   selection: SheetSelection;

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import type { ResultValue } from '@mathesar/api/rpc/records';
   import {
     FormSubmit,
     makeForm,
@@ -8,7 +9,9 @@
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconUndo } from '@mathesar/icons';
-  import type { TabularData } from '@mathesar/stores/table-data';
+  import type { Database } from '@mathesar/models/Database';
+  import type { Table } from '@mathesar/models/Table';
+  import type { ProcessedColumns } from '@mathesar/stores/table-data';
   import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -18,9 +21,12 @@
   import Template from './Template.svelte';
   import { TemplateConfig } from './TemplateConfig';
 
-  export let tabularData: TabularData;
+  export let database: Pick<Database, 'id'>;
+  export let table: Table;
+  export let processedColumns: ProcessedColumns;
+  export let isLoading = false;
+  export let previewRecordId: ResultValue | undefined;
 
-  $: ({ isLoading, table, processedColumns, database } = tabularData);
   $: template = table?.metadata?.record_summary_template ?? undefined;
   $: templateConfig = optionalField(
     defined(template, (t) => TemplateConfig.fromTemplate(t)),
@@ -56,20 +62,23 @@
       Use the form below to customize the fields included in the record summary.
     </p>
   </InfoBox>
-  {#if $isLoading}
+  {#if isLoading}
     <Spinner />
   {:else}
     <Template
       bind:templateConfig={$templateConfig}
-      columns={$processedColumns}
+      columns={processedColumns}
       {database}
     />
 
-    <Preview
-      {tabularData}
-      context="table"
-      template={$templateConfig?.template ?? null}
-    />
+    {#if previewRecordId !== undefined}
+      <Preview
+        {database}
+        {table}
+        recordId={previewRecordId}
+        template={$templateConfig?.template ?? null}
+      />
+    {/if}
 
     <FormSubmit
       {form}

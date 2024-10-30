@@ -12,7 +12,7 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { currentTablesData } from '@mathesar/stores/tables';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
-  import { Collapsible } from '@mathesar-component-library';
+  import { Collapsible, defined } from '@mathesar-component-library';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
 
@@ -26,7 +26,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ table, processedColumns, selection } = $tabularData);
+  $: ({ table, processedColumns, selection, selectedCellData } = $tabularData);
   $: ({ currentRoleOwns } = table.currentAccess);
   $: selectedColumns = (() => {
     const ids = $selection.columnIds;
@@ -50,6 +50,9 @@
   })();
   /** When only one column is selected */
   $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
+  $: linkedTable = defined(column?.linkFk?.referent_table_oid, (id) =>
+    $currentTablesData.tablesMap.get(id),
+  );
 </script>
 
 <div class="column-mode-container">
@@ -146,26 +149,19 @@
       </Collapsible>
     {/if}
 
-    {#if column}
-      {@const referentTableId = column.linkFk?.referent_table_oid}
-      {@const referentTable =
-        referentTableId === undefined
-          ? undefined
-          : $currentTablesData.tablesMap.get(referentTableId)}
-      {#if referentTable !== undefined}
-        <Collapsible
-          bind:isOpen={$tableInspectorColumnRecordSummaryVisible}
-          triggerAppearance="inspector"
-        >
-          <CollapsibleHeader
-            slot="header"
-            title={$_('linked_record_summary')}
+    {#if linkedTable}
+      <Collapsible
+        bind:isOpen={$tableInspectorColumnRecordSummaryVisible}
+        triggerAppearance="inspector"
+      >
+        <CollapsibleHeader slot="header" title={$_('linked_record_summary')} />
+        <div slot="content" class="content-container">
+          <FkRecordSummaryConfig
+            {linkedTable}
+            previewRecordId={$selectedCellData.activeCellData?.value}
           />
-          <div slot="content" class="content-container">
-            <FkRecordSummaryConfig table={referentTable} />
-          </div>
-        </Collapsible>
-      {/if}
+        </div>
+      </Collapsible>
     {/if}
 
     <Collapsible
