@@ -4665,6 +4665,29 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_record_summary_with_null_template() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+
+  -- Passing a JSON null template should cause the record summary to fall back to the default. This
+  -- is necessary to ensure that the front end can render a preview of the default template when a
+  -- customized template is already saved.
+  RETURN NEXT is(
+    msar.get_record_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      rec_id => 2,
+      return_record_summaries => true,
+      table_record_summary_templates => jsonb_build_object(
+        '"Students"'::regclass::oid,
+        'null'::jsonb
+      )
+    ) -> 'record_summaries' ->> '2', 
+    'Gabby Gabberson'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_record_summary_for_non_pk_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_preview_fkey_cols();

@@ -4968,7 +4968,7 @@ SELECT msar.build_record_summary_query_from_template(
   tab_id,
   COALESCE(key_col_id, msar.get_selectable_pkey_attnum(tab_id)),
   COALESCE(
-    table_record_summary_templates -> tab_id::text,
+    NULLIF(table_record_summary_templates -> tab_id::text, 'null'::jsonb),
     msar.auto_generate_record_summary_template(tab_id)
   )
 );
