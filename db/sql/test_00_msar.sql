@@ -4505,14 +4505,15 @@ BEGIN
       return_record_summaries => true
     ),
     $j${
-      "count": 6,
+      "count": 7,
       "results": [
         {"1": 1, "2": 2.345, "3": 3, "4": "Fred Fredrickson", "5": 95, "6": "ffredrickson@example.edu"},
         {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
         {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"},
         {"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"},
         {"1": 5, "2": 2.345, "3": 2, "4": "James Jameson", "5": 80, "6": "jjameson@example.edu"},
-        {"1": 6, "2": 1.234, "3": 3, "4": "Kelly Kellison", "5": 80, "6": "kkellison@example.edu"}
+        {"1": 6, "2": 1.234, "3": 3, "4": "Kelly Kellison", "5": 80, "6": "kkellison@example.edu"},
+        {"1": 7, "2": 1.234, "3": 4, "4": "Arnold Baker", "5": null, "6": "ab@example.edu"}
       ],
       "grouping": null,
       "linked_record_summaries": {
@@ -4523,7 +4524,8 @@ BEGIN
         "3": {
           "1": "Carol Carlson",
           "2": "Dave Davidson",
-          "3": "Eve Evilson"
+          "3": "Eve Evilson",
+          "4": "Neil Smith"
         }
       },
       "record_summaries":  {
@@ -4532,7 +4534,8 @@ BEGIN
         "3": "Hank Hankson",
         "4": "Ida Idalia",
         "5": "James Jameson",
-        "6": "Kelly Kellison"
+        "6": "Kelly Kellison",
+        "7": "Arnold Baker"
       }
     }$j$ || jsonb_build_object(
       'query', concat(
@@ -4553,7 +4556,7 @@ BEGIN
       group_ => null
     ),
     $j${
-      "count": 6,
+      "count": 7,
       "results": [
         {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
         {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"},
@@ -4590,7 +4593,7 @@ BEGIN
       group_ => '{"columns": [2]}'
     ),
     $j${
-      "count": 6,
+      "count": 7,
       "results": [
         {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
         {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"}
@@ -4598,7 +4601,7 @@ BEGIN
       "grouping": {
         "columns": [2],
         "preproc": null,
-        "groups": [{"id": 1, "count": 3, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
+        "groups": [{"id": 1, "count": 4, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
       },
       "linked_record_summaries": {
         "2": {
@@ -4722,13 +4725,13 @@ BEGIN
     ),
     $a${
       "results": [
-        {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
+        {"1": 8, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
       ],
       "linked_record_summaries": {
         "2": {"2.345": "Bob Bobinson"},
         "3": {"1": "Carol Carlson"}
       },
-      "record_summaries": {"7": "Larry Laurelson"}
+      "record_summaries": {"8": "Larry Laurelson"}
     }$a$
   );
 END;
