@@ -5,6 +5,7 @@
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
   import Pagination from '@mathesar/utils/Pagination';
 
+  // eslint-disable-next-line svelte/valid-compile
   export let table: Table;
 
   // $: tabularData = new TabularData({
