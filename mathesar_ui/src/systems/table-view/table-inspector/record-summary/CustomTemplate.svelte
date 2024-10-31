@@ -1,5 +1,6 @@
 <script lang="ts">
   import { first } from 'iter-tools';
+  import { _ } from 'svelte-i18n';
 
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { sortableContainer } from '@mathesar/components/sortable/sortable';
@@ -42,7 +43,7 @@
   }
 </script>
 
-<Fieldset label="Custom Fields" boxed>
+<Fieldset label={$_('custom_fields')} boxed>
   <div
     class="parts"
     use:sortableContainer={{
@@ -69,14 +70,18 @@
         />
       {/if}
     {:else}
-      <div class="no-fields">No fields added yet</div>
+      <div class="no-fields">{$_('no_fields_added_yet')}</div>
     {/each}
   </div>
 
   <div class="add">
-    <DropdownMenu label="Add Field" icon={iconAddNew} size="small">
-      <ButtonMenuItem label="Column" icon={iconField} on:click={addColumn} />
-      <ButtonMenuItem label="Text" icon={iconText} on:click={addText} />
+    <DropdownMenu label={$_('add_field')} icon={iconAddNew} size="small">
+      <ButtonMenuItem
+        label={$_('column')}
+        icon={iconField}
+        on:click={addColumn}
+      />
+      <ButtonMenuItem label={$_('text')} icon={iconText} on:click={addText} />
     </DropdownMenu>
   </div>
 

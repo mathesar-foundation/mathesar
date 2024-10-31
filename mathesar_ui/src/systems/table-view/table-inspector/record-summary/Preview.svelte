@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import { api } from '@mathesar/api/rpc';
   import type { ResultValue } from '@mathesar/api/rpc/records';
   import type { RecordSummaryTemplate } from '@mathesar/api/rpc/tables';
@@ -31,7 +33,7 @@
     $preview.resolvedValue?.record_summaries?.[String(recordId)];
 </script>
 
-<Fieldset label="Preview" boxed>
+<Fieldset label={$_('preview')} boxed>
   {#if $preview.isLoading}
     <Spinner />
   {:else if recordSummary !== undefined}
@@ -39,14 +41,11 @@
   {:else if $preview.error}
     <ErrorBox>{$preview.error}</ErrorBox>
   {:else}
-    <ErrorBox>An unknown error occurred.</ErrorBox>
+    <ErrorBox>{$_('unknown_error')}</ErrorBox>
   {/if}
 
   <div class="help">
-    <RichText
-      text={'This is how the currently selected [tableName] record will be summarized.'}
-      let:slotName
-    >
+    <RichText text={$_('record_summary_preview_help')} let:slotName>
       {#if slotName === 'tableName'}
         <Identifier>{table.name}</Identifier>
       {/if}

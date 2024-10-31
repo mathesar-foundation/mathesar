@@ -15,9 +15,9 @@
 </script>
 
 <RadioGroup
-  label="Customization"
+  label={$_('customization')}
   options={[false, true]}
-  getRadioLabel={(v) => (v ? 'Customize Fields' : 'Use Default')}
+  getRadioLabel={(v) => (v ? $_('customize_fields') : $_('use_default'))}
   isInline
   value={templateConfig !== undefined}
   boxed

@@ -10,6 +10,7 @@
   } from '@mathesar/components/form';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { iconUndo } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Table } from '@mathesar/models/Table';
@@ -35,7 +36,7 @@
     [
       validIf(
         (t) => !!t?.hasAnyColumnParts,
-        'Template cannot be static. Add at least one column field in order to save the template.',
+        $_('static_record_summary_template_error'),
       ),
     ],
   );
@@ -62,18 +63,19 @@
 <div class="record-summary-config">
   <div class="help">
     <InfoBox>
-      Configure <Identifier>{table.name}</Identifier> record summaries here.
-      <Help>
-        <p>
-          Mathesar helps you identify records in a table by generating a short
-          piece of text to summarize each record. These record summaries display
-          in various places throughout the app, such as foreign key cells and
-          record page titles.
-        </p>
-        <p>
-          Use the form below to customize the fields included in the
+      <RichText text={$_('record_summary_config_help')} let:slotName>
+        {#if slotName === 'tableName'}
           <Identifier>{table.name}</Identifier>
-          record summary.
+        {/if}
+      </RichText>
+      <Help>
+        <p>{$_('record_summary_detail_help_1')}</p>
+        <p>
+          <RichText text={$_('record_summary_detail_help_2')} let:slotName>
+            {#if slotName === 'tableName'}
+              <Identifier>{table.name}</Identifier>
+            {/if}
+          </RichText>
         </p>
       </Help>
     </InfoBox>

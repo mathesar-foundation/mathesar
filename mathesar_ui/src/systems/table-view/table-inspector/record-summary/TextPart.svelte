@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import { TextInput } from '@mathesar-component-library';
 
   import Part from './Part.svelte';
@@ -13,6 +15,6 @@
   }
 </script>
 
-<Part label="Text" {onDelete}>
+<Part label={$_('text')} {onDelete}>
   <TextInput value={text} on:input={handleInput} />
 </Part>
