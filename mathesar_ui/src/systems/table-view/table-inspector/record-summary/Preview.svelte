@@ -34,7 +34,7 @@
 <Fieldset label="Preview" boxed>
   {#if $preview.isLoading}
     <Spinner />
-  {:else if recordSummary}
+  {:else if recordSummary !== undefined}
     <LinkedRecord {recordSummary} />
   {:else if $preview.error}
     <ErrorBox>{$preview.error}</ErrorBox>
