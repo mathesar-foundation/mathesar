@@ -29,6 +29,7 @@
   export let processedColumns: ProcessedColumns;
   export let isLoading = false;
   export let previewRecordId: ResultValue | undefined;
+  export let onSave: (() => void) | undefined = undefined;
 
   $: template = table?.metadata?.record_summary_template ?? undefined;
   $: templateConfig = optionalField(
@@ -54,6 +55,7 @@
           },
         },
       });
+      onSave?.();
     } catch (e) {
       toast.error(`${$_('unable_to_save_changes')} ${getErrorMessage(e)}`);
     }

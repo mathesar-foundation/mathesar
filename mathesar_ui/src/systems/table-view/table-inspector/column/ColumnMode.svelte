@@ -159,6 +159,7 @@
           <FkRecordSummaryConfig
             {linkedTable}
             previewRecordId={$selectedCellData.activeCellData?.value}
+            onSave={() => $tabularData.recordsData.fetch()}
           />
         </div>
       </Collapsible>

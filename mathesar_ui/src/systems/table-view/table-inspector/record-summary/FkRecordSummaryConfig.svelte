@@ -6,6 +6,7 @@
 
   export let linkedTable: Table;
   export let previewRecordId: ResultValue | undefined;
+  export let onSave: (() => void) | undefined = undefined;
 
   $: ({ database } = linkedTable.schema);
   $: structure = new TableStructure({ database, table: linkedTable });
@@ -18,4 +19,5 @@
   processedColumns={$processedColumns}
   isLoading={$isLoading}
   {previewRecordId}
+  {onSave}
 />
