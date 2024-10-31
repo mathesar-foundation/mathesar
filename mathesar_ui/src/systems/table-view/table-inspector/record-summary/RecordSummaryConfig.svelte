@@ -28,7 +28,7 @@
   export let database: Pick<Database, 'id'>;
   export let table: Table;
   export let processedColumns: ProcessedColumns;
-  export let isLoading = false;
+  export let isLoading: boolean;
   export let previewRecordId: ResultValue | undefined;
   export let onSave: (() => void) | undefined = undefined;
 
@@ -65,7 +65,9 @@
 </script>
 
 <div class="record-summary-config">
-  {#if !hasPk}
+  {#if isLoading}
+    <Spinner />
+  {:else if !hasPk}
     <ErrorBox>
       <RichText text={$_('record_summary_no_pk_error')} let:slotName>
         {#if slotName === 'tableName'}
@@ -94,35 +96,31 @@
       </InfoBox>
     </div>
 
-    {#if isLoading}
-      <Spinner />
-    {:else}
-      <Template
-        bind:templateConfig={$templateConfig}
-        columns={processedColumns}
+    <Template
+      bind:templateConfig={$templateConfig}
+      columns={processedColumns}
+      {database}
+      errorsDisplayed={$form.hasChanges ? $templateErrors : []}
+    />
+
+    {#if previewRecordId !== undefined}
+      <Preview
         {database}
-        errorsDisplayed={$form.hasChanges ? $templateErrors : []}
-      />
-
-      {#if previewRecordId !== undefined}
-        <Preview
-          {database}
-          {table}
-          recordId={previewRecordId}
-          template={$templateConfig?.template ?? null}
-        />
-      {/if}
-
-      <FormSubmit
-        {form}
-        onProceed={save}
-        onCancel={form.reset}
-        proceedButton={{ label: $_('save') }}
-        cancelButton={{ label: $_('reset'), icon: iconUndo }}
-        initiallyHidden
-        size="small"
+        {table}
+        recordId={previewRecordId}
+        template={$templateConfig?.template ?? null}
       />
     {/if}
+
+    <FormSubmit
+      {form}
+      onProceed={save}
+      onCancel={form.reset}
+      proceedButton={{ label: $_('save') }}
+      cancelButton={{ label: $_('reset'), icon: iconUndo }}
+      initiallyHidden
+      size="small"
+    />
   {/if}
 </div>
 

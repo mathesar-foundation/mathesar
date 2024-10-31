@@ -6,7 +6,7 @@
 
   export let tabularData: TabularData;
 
-  $: ({ table, processedColumns, database, recordsData, selection } =
+  $: ({ table, processedColumns, database, recordsData, selection, isLoading } =
     tabularData);
   $: ({ selectableRowsMap } = recordsData);
   $: previewRecordId = getTableRecordId({
@@ -21,4 +21,5 @@
   {table}
   processedColumns={$processedColumns}
   {previewRecordId}
+  isLoading={$isLoading}
 />
