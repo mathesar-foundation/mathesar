@@ -33,12 +33,10 @@
   }
 
   function addText() {
-    // TODO focus the new text input after its added
     templateConfig = templateConfig.withPartAppended('');
   }
 
   function addColumn() {
-    // TODO be smarter about picking a default column
     const column = first(columns.values()) as ProcessedColumn;
     templateConfig = templateConfig.withPartAppended([column.id]);
   }
