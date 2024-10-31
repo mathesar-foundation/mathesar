@@ -460,6 +460,7 @@
   "record_summary_config_help": "Configure [tableName] record summaries here.",
   "record_summary_detail_help_1": "Mathesar helps you identify records in a table by generating a short piece of text to summarize each record. These record summaries display in various places throughout the app, such as foreign key cells and record page titles.",
   "record_summary_detail_help_2": "Use the form below to customize the fields included in the [tableName] record summary.",
+  "record_summary_no_pk_error": "The [tableName] table's record summaries cannot be configured because it does not have a primary key column.",
   "record_summary_preview_help": "This is how the currently selected [tableName] record will be summarized.",
   "recover_query_click_button": "You can attempt to recover the query by clicking on the button below.",
   "redirected_login_page_password_change": "You'll be redirected to the login page once you change your password.",

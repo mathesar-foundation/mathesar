@@ -9,6 +9,7 @@
     validIf,
   } from '@mathesar/components/form';
   import Identifier from '@mathesar/components/Identifier.svelte';
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconUndo } from '@mathesar/icons';
@@ -43,6 +44,7 @@
   );
   $: form = makeForm({ templateConfig });
   $: templateErrors = templateConfig.fieldErrors;
+  $: hasPk = [...processedColumns].some(([, c]) => c.column.primary_key);
 
   async function save() {
     try {
@@ -63,54 +65,64 @@
 </script>
 
 <div class="record-summary-config">
-  <div class="help">
-    <InfoBox>
-      <RichText text={$_('record_summary_config_help')} let:slotName>
+  {#if !hasPk}
+    <ErrorBox>
+      <RichText text={$_('record_summary_no_pk_error')} let:slotName>
         {#if slotName === 'tableName'}
           <Identifier>{table.name}</Identifier>
         {/if}
       </RichText>
-      <Help>
-        <p>{$_('record_summary_detail_help_1')}</p>
-        <p>
-          <RichText text={$_('record_summary_detail_help_2')} let:slotName>
-            {#if slotName === 'tableName'}
-              <Identifier>{table.name}</Identifier>
-            {/if}
-          </RichText>
-        </p>
-      </Help>
-    </InfoBox>
-  </div>
-
-  {#if isLoading}
-    <Spinner />
+    </ErrorBox>
   {:else}
-    <Template
-      bind:templateConfig={$templateConfig}
-      columns={processedColumns}
-      {database}
-      errorsDisplayed={$form.hasChanges ? $templateErrors : []}
-    />
+    <div class="help">
+      <InfoBox>
+        <RichText text={$_('record_summary_config_help')} let:slotName>
+          {#if slotName === 'tableName'}
+            <Identifier>{table.name}</Identifier>
+          {/if}
+        </RichText>
+        <Help>
+          <p>{$_('record_summary_detail_help_1')}</p>
+          <p>
+            <RichText text={$_('record_summary_detail_help_2')} let:slotName>
+              {#if slotName === 'tableName'}
+                <Identifier>{table.name}</Identifier>
+              {/if}
+            </RichText>
+          </p>
+        </Help>
+      </InfoBox>
+    </div>
 
-    {#if previewRecordId !== undefined}
-      <Preview
+    {#if isLoading}
+      <Spinner />
+    {:else}
+      <Template
+        bind:templateConfig={$templateConfig}
+        columns={processedColumns}
         {database}
-        {table}
-        recordId={previewRecordId}
-        template={$templateConfig?.template ?? null}
+        errorsDisplayed={$form.hasChanges ? $templateErrors : []}
+      />
+
+      {#if previewRecordId !== undefined}
+        <Preview
+          {database}
+          {table}
+          recordId={previewRecordId}
+          template={$templateConfig?.template ?? null}
+        />
+      {/if}
+
+      <FormSubmit
+        {form}
+        onProceed={save}
+        onCancel={form.reset}
+        proceedButton={{ label: $_('save') }}
+        cancelButton={{ label: $_('reset'), icon: iconUndo }}
+        initiallyHidden
+        size="small"
       />
     {/if}
-
-    <FormSubmit
-      {form}
-      onProceed={save}
-      onCancel={form.reset}
-      proceedButton={{ label: $_('save') }}
-      cancelButton={{ label: $_('reset'), icon: iconUndo }}
-      initiallyHidden
-      size="small"
-    />
   {/if}
 </div>
 
