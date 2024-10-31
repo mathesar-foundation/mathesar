@@ -8,6 +8,7 @@
     optionalField,
     validIf,
   } from '@mathesar/components/form';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconUndo } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -16,7 +17,7 @@
   import { updateTable } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
-  import { Spinner, defined } from '@mathesar-component-library';
+  import { Help, Spinner, defined } from '@mathesar-component-library';
 
   import Preview from './Preview.svelte';
   import Template from './Template.svelte';
@@ -59,17 +60,25 @@
 </script>
 
 <div class="record-summary-config">
-  <InfoBox>
-    <p>
-      Mathesar helps you identify records in a table by generating a short piece
-      of text to summarize each record. These record summaries display in
-      various places throughout the app, such as foreign key cells and record
-      page titles.
-    </p>
-    <p>
-      Use the form below to customize the fields included in the record summary.
-    </p>
-  </InfoBox>
+  <div class="help">
+    <InfoBox>
+      Configure <Identifier>{table.name}</Identifier> record summaries here.
+      <Help>
+        <p>
+          Mathesar helps you identify records in a table by generating a short
+          piece of text to summarize each record. These record summaries display
+          in various places throughout the app, such as foreign key cells and
+          record page titles.
+        </p>
+        <p>
+          Use the form below to customize the fields included in the
+          <Identifier>{table.name}</Identifier>
+          record summary.
+        </p>
+      </Help>
+    </InfoBox>
+  </div>
+
   {#if isLoading}
     <Spinner />
   {:else}
@@ -102,6 +111,9 @@
 </div>
 
 <style>
+  .help {
+    font-size: var(--text-size-small);
+  }
   .record-summary-config > :global(* + *) {
     margin-top: 1rem;
   }
