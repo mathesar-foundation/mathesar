@@ -70,6 +70,8 @@
           onUpdate={(columnIds) => replacePart(key, columnIds)}
         />
       {/if}
+    {:else}
+      <div class="no-fields">No fields added yet</div>
     {/each}
   </div>
 
@@ -100,6 +102,11 @@
     column select (to take effect when flex wrapping happens), so we need to
     subtract that. */
     gap: calc(1rem - var(--column-select-margin));
+  }
+  .no-fields {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: var(--text-size-small);
   }
   .add {
     margin-top: 1rem;
