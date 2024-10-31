@@ -18,7 +18,7 @@
   options={[false, true]}
   getRadioLabel={(v) => (v ? 'Customize Fields' : 'Use Default')}
   isInline
-  value={templateConfig !== null}
+  value={templateConfig !== undefined}
   boxed
   on:change={({ detail: { value: checked } }) => {
     templateConfig = checked ? TemplateConfig.newCustom(columns) : undefined;
