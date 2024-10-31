@@ -4472,7 +4472,8 @@ INSERT INTO "Teachers"
 ( /* id */   "Counselor", "Name"          , "Email"                ) VALUES
   /* 1  */ ( 1.234      , 'Carol Carlson' , 'ccarlson@example.edu' ),
   /* 2  */ ( 2.345      , 'Dave Davidson' , 'ddavison@example.edu' ),
-  /* 3  */ ( 1.234      , 'Eve Evilson'   , 'eevilson@example.edu' );
+  /* 3  */ ( 1.234      , 'Eve Evilson'   , 'eevilson@example.edu' ),
+  /* 4  */ ( 1.234      , 'Neil Smith'    , NULL                   );
 
 INSERT INTO "Students"
 ( /* id */  "Counselor", "Teacher", "Name"            , "Grade", "Email"                   ) VALUES
@@ -4481,7 +4482,8 @@ INSERT INTO "Students"
   /* 3  */ ( 1.234     , 2        , 'Hank Hankson'    , 75     , 'hhankson@example.edu'    ),
   /* 4  */ ( 2.345     , 1        , 'Ida Idalia'      , 90     , 'iidalia@example.edu'     ),
   /* 5  */ ( 2.345     , 2        , 'James Jameson'   , 80     , 'jjameson@example.edu'    ),
-  /* 6  */ ( 1.234     , 3        , 'Kelly Kellison'  , 80     , 'kkellison@example.edu'   );
+  /* 6  */ ( 1.234     , 3        , 'Kelly Kellison'  , 80     , 'kkellison@example.edu'   ),
+  /* 7  */ ( 1.234     , 4        , 'Arnold Baker'    , NULL   , 'ab@example.edu'          );
 
 END;
 $$ LANGUAGE plpgsql;
@@ -4503,14 +4505,15 @@ BEGIN
       return_record_summaries => true
     ),
     $j${
-      "count": 6,
+      "count": 7,
       "results": [
         {"1": 1, "2": 2.345, "3": 3, "4": "Fred Fredrickson", "5": 95, "6": "ffredrickson@example.edu"},
         {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
         {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"},
         {"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"},
         {"1": 5, "2": 2.345, "3": 2, "4": "James Jameson", "5": 80, "6": "jjameson@example.edu"},
-        {"1": 6, "2": 1.234, "3": 3, "4": "Kelly Kellison", "5": 80, "6": "kkellison@example.edu"}
+        {"1": 6, "2": 1.234, "3": 3, "4": "Kelly Kellison", "5": 80, "6": "kkellison@example.edu"},
+        {"1": 7, "2": 1.234, "3": 4, "4": "Arnold Baker", "5": null, "6": "ab@example.edu"}
       ],
       "grouping": null,
       "linked_record_summaries": {
@@ -4521,7 +4524,8 @@ BEGIN
         "3": {
           "1": "Carol Carlson",
           "2": "Dave Davidson",
-          "3": "Eve Evilson"
+          "3": "Eve Evilson",
+          "4": "Neil Smith"
         }
       },
       "record_summaries":  {
@@ -4530,7 +4534,8 @@ BEGIN
         "3": "Hank Hankson",
         "4": "Ida Idalia",
         "5": "James Jameson",
-        "6": "Kelly Kellison"
+        "6": "Kelly Kellison",
+        "7": "Arnold Baker"
       }
     }$j$ || jsonb_build_object(
       'query', concat(
@@ -4551,7 +4556,7 @@ BEGIN
       group_ => null
     ),
     $j${
-      "count": 6,
+      "count": 7,
       "results": [
         {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
         {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"},
@@ -4588,7 +4593,7 @@ BEGIN
       group_ => '{"columns": [2]}'
     ),
     $j${
-      "count": 6,
+      "count": 7,
       "results": [
         {"1": 2, "2": 1.234, "3": 1, "4": "Gabby Gabberson", "5": 100, "6": "ggabberson@example.edu"},
         {"1": 3, "2": 1.234, "3": 2, "4": "Hank Hankson", "5": 75, "6": "hhankson@example.edu"}
@@ -4596,7 +4601,7 @@ BEGIN
       "grouping": {
         "columns": [2],
         "preproc": null,
-        "groups": [{"id": 1, "count": 3, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
+        "groups": [{"id": 1, "count": 4, "results_eq": {"2": 1.234}, "result_indices": [0, 1]}]
       },
       "linked_record_summaries": {
         "2": {
@@ -4642,6 +4647,50 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_record_summary_with_null_values() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+
+  -- NULL cell values should be rendered as empty strings within the record summary
+  RETURN NEXT is(
+    msar.get_record_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      rec_id => 7,
+      return_record_summaries => true,
+      table_record_summary_templates => jsonb_build_object(
+        '"Students"'::regclass::oid,
+        '[[4], " ", [5], "% - \"", [3, 3], " <", [3, 4], ">\""]'::jsonb
+      )
+    ) -> 'record_summaries' ->> '7', 
+    'Arnold Baker % - "Neil Smith <>"'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_record_summary_with_null_template() RETURNS SETOF TEXT AS $$
+BEGIN
+  PERFORM __setup_preview_fkey_cols();
+
+  -- Passing a JSON null template should cause the record summary to fall back to the default. This
+  -- is necessary to ensure that the front end can render a preview of the default template when a
+  -- customized template is already saved.
+  RETURN NEXT is(
+    msar.get_record_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      rec_id => 2,
+      return_record_summaries => true,
+      table_record_summary_templates => jsonb_build_object(
+        '"Students"'::regclass::oid,
+        'null'::jsonb
+      )
+    ) -> 'record_summaries' ->> '2', 
+    'Gabby Gabberson'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_record_summary_for_non_pk_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_preview_fkey_cols();
@@ -4676,13 +4725,13 @@ BEGIN
     ),
     $a${
       "results": [
-        {"1": 7, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
+        {"1": 8, "2": 2.345, "3": 1, "4": "Larry Laurelson", "5": 70, "6": "llaurelson@example.edu"}
       ],
       "linked_record_summaries": {
         "2": {"2.345": "Bob Bobinson"},
         "3": {"1": "Carol Carlson"}
       },
-      "record_summaries": {"7": "Larry Laurelson"}
+      "record_summaries": {"8": "Larry Laurelson"}
     }$a$
   );
 END;
