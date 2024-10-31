@@ -6,6 +6,7 @@
     FormSubmit,
     makeForm,
     optionalField,
+    validIf,
   } from '@mathesar/components/form';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import { iconUndo } from '@mathesar/icons';
@@ -30,8 +31,15 @@
   $: template = table?.metadata?.record_summary_template ?? undefined;
   $: templateConfig = optionalField(
     defined(template, (t) => TemplateConfig.fromTemplate(t)),
+    [
+      validIf(
+        (t) => !!t?.hasAnyColumnParts,
+        'Template cannot be static. Add at least one column field in order to save the template.',
+      ),
+    ],
   );
   $: form = makeForm({ templateConfig });
+  $: templateErrors = templateConfig.fieldErrors;
 
   async function save() {
     try {
@@ -69,6 +77,7 @@
       bind:templateConfig={$templateConfig}
       columns={processedColumns}
       {database}
+      errorsDisplayed={$form.hasChanges ? $templateErrors : []}
     />
 
     {#if previewRecordId !== undefined}

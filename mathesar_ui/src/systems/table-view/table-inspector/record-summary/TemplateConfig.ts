@@ -1,4 +1,4 @@
-import { filter, first } from 'iter-tools';
+import { filter, first, some } from 'iter-tools';
 
 import type {
   RecordSummaryTemplate,
@@ -9,6 +9,10 @@ import type {
   ProcessedColumns,
 } from '@mathesar/stores/table-data';
 import { ImmutableMap } from '@mathesar-component-library';
+
+function partIsColumn(part: RecordSummaryTemplatePart): part is number[] {
+  return Array.isArray(part);
+}
 
 /**
  * This holds the UI state to configure a record summary template.
@@ -78,6 +82,10 @@ export class TemplateConfig {
 
   withoutPart(key: number): TemplateConfig {
     return new TemplateConfig(this.parts.without(key));
+  }
+
+  get hasAnyColumnParts(): boolean {
+    return some(partIsColumn, this.parts.values());
   }
 
   [Symbol.iterator]() {

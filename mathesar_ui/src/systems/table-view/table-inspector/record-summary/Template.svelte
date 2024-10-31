@@ -11,6 +11,7 @@
   export let database: Pick<Database, 'id'>;
   export let templateConfig: TemplateConfig | undefined;
   export let columns: ProcessedColumns;
+  export let errorsDisplayed: string[] = [];
 </script>
 
 <RadioGroup
@@ -27,7 +28,12 @@
 
 {#if templateConfig}
   <div class="custom-template">
-    <CustomTemplate bind:templateConfig {columns} {database} />
+    <CustomTemplate
+      bind:templateConfig
+      {columns}
+      {database}
+      {errorsDisplayed}
+    />
   </div>
 {/if}
 

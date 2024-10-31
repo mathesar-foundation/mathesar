@@ -1,6 +1,7 @@
 <script lang="ts">
   import { first } from 'iter-tools';
 
+  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { sortableContainer } from '@mathesar/components/sortable/sortable';
   import { iconAddNew, iconField, iconText } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -21,6 +22,7 @@
   export let database: Pick<Database, 'id'>;
   export let templateConfig: TemplateConfig;
   export let columns: ProcessedColumns;
+  export let errorsDisplayed: string[] = [];
 
   function deletePart(key: number) {
     templateConfig = templateConfig.withoutPart(key);
@@ -77,6 +79,16 @@
       <ButtonMenuItem label="Text" icon={iconText} on:click={addText} />
     </DropdownMenu>
   </div>
+
+  {#if errorsDisplayed.length > 0}
+    <div class="errors">
+      <ErrorBox>
+        {#each errorsDisplayed as error}
+          <p>{error}</p>
+        {/each}
+      </ErrorBox>
+    </div>
+  {/if}
 </Fieldset>
 
 <style>
@@ -93,5 +105,8 @@
     margin-top: 1rem;
     display: flex;
     justify-content: flex-end;
+  }
+  .errors {
+    margin: 1rem 0 0 1rem;
   }
 </style>
