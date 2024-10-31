@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
+
   import { Icon, defined } from '@mathesar/component-library';
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
   import { iconFieldDelimiter } from '@mathesar/icons';
@@ -22,16 +24,22 @@
   );
 </script>
 
-<div class="column-select">
-  <SelectProcessedColumn
-    columns={[...columns.values()]}
-    value={column}
-    onUpdate={(c) => onUpdate(c ? [c.id] : [])}
-  />
-  {#if referentTable}
-    <div class="delimiter"><Icon {...iconFieldDelimiter} /></div>
-  {/if}
-</div>
+{#if columnIds[0] !== undefined && column === undefined}
+  <div class="deleted-column">{$_('deleted_column')}</div>
+{:else}
+  <div class="column-select">
+    <SelectProcessedColumn
+      columns={[...columns.values()]}
+      value={column}
+      onUpdate={(c) => onUpdate(c ? [c.id] : [])}
+      allowEmpty
+    />
+    {#if referentTable}
+      <div class="delimiter"><Icon {...iconFieldDelimiter} /></div>
+    {/if}
+  </div>
+{/if}
+
 {#if referentTable}
   <FieldChainTail
     {database}
@@ -50,6 +58,12 @@
     elements when there are so many that they wrap within the same template
     part. */
     margin: var(--column-select-margin) 0;
+  }
+  .deleted-column {
+    margin-top: 0.7rem;
+    color: var(--sand-600);
+    font-size: var(--text-size-small);
+    font-style: italic;
   }
   .delimiter {
     color: var(--sand-600);

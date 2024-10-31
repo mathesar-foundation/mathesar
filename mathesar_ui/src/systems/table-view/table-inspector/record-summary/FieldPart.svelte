@@ -21,7 +21,6 @@
 <style>
   .chain {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
   }
 </style>

@@ -189,6 +189,7 @@
   "delete_schema": "Delete Schema",
   "delete_table": "Delete Table",
   "delete_user": "Delete User",
+  "deleted_column": "Deleted column",
   "deleted_records_cannot_be_recovered": "{count, plural, one {Once deleted, the record cannot be recovered.} other {Once deleted, the records cannot be recovered.}}",
   "descending": "Descending",
   "descending_id": "Descending ID",

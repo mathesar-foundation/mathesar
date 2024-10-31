@@ -14,7 +14,15 @@
 </script>
 
 {#if $isLoading}
-  <Spinner />
+  <div class="loading">
+    <Spinner />
+  </div>
 {:else}
   <FieldChain {database} {columnIds} columns={$processedColumns} {onUpdate} />
 {/if}
+
+<style>
+  .loading {
+    margin: 0.6rem 0 0 0.5rem;
+  }
+</style>

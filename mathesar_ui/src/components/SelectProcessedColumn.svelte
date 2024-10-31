@@ -9,10 +9,11 @@
   export let disabled = false;
   export let onUpdate: ((v: ProcessedColumn | undefined) => void) | undefined =
     undefined;
+  export let allowEmpty = false;
 </script>
 
 <Select
-  options={columns}
+  options={[...(allowEmpty ? [undefined] : []), ...columns]}
   labelKey="name"
   valuesAreEqual={(a, b) => a?.id === b?.id}
   bind:value
@@ -22,5 +23,13 @@
 >
   {#if option}
     <ProcessedColumnName processedColumn={option} />
+  {:else}
+    <div class="empty"></div>
   {/if}
 </Select>
+
+<style>
+  .empty {
+    min-width: 3rem;
+  }
+</style>
