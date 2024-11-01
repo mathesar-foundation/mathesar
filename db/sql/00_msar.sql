@@ -5123,15 +5123,15 @@ BEGIN
       LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %14$s
       CROSS JOIN count_cte
     $q$,
-    /* %1 */ msar.build_selectable_column_expr(tab_id),
+    /* %1 */ COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
     /* %2 */ msar.get_relation_schema_name(tab_id),
     /* %3 */ msar.get_relation_name(tab_id),
     /* %4 */ limit_,
     /* %5 */ offset_,
     /* %6 */ msar.build_order_by_expr(tab_id, order_),
     /* %7 */ msar.build_where_clause(tab_id, filter_),
-    /* %8 */ msar.build_grouping_expr(tab_id, group_),
-    /* %9 */ msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_),
+    /* %8 */ COALESCE(msar.build_grouping_expr(tab_id, group_), 'NULL'),
+    /* %9 */ COALESCE(msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_), 'NULL'),
     /* %10 */ COALESCE(
       msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_),
       'NULL'

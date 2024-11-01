@@ -3249,6 +3249,20 @@ BEGIN
       )
     )
   );
+  SET ROLE NONE;
+  CREATE ROLE intern_no_access;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_access;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_access;
+  SET ROLE intern_no_access;
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.list_records_from_table(%s, null, null, null, null, null);',
+      rel_id
+    ),
+    '42501',
+    'permission denied for table atable',
+    'Records lister throws permission error'
+  );
 END;
 $$ LANGUAGE plpgsql;
 
