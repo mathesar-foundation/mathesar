@@ -4,10 +4,12 @@ This inherits the fixtures in the root conftest.py
 import pytest
 import responses
 from copy import deepcopy
+from unittest.mock import patch
 
 from django.conf import settings
 from rest_framework.test import APIClient
 
+from db import connection
 from mathesar.models.users import User
 
 from fixtures.utils import create_scoped_fixtures
@@ -22,6 +24,13 @@ def mocked_responses():
     """
     with responses.RequestsMock() as rsps:
         yield rsps
+
+
+@pytest.fixture
+def mocked_exec_msar_func():
+    with patch.object(connection, "exec_msar_func") as mock:
+        mock.return_value = mock
+        yield mock
 
 
 @pytest.fixture(autouse=True)
