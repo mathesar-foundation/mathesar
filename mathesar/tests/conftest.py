@@ -28,6 +28,9 @@ def mocked_responses():
 
 @pytest.fixture
 def mocked_exec_msar_func():
+    """
+    Lets you patch the db.connection.exec_msar_func() for testing.
+    """
     with patch.object(connection, "exec_msar_func") as mock:
         mock.return_value = mock
         yield mock
@@ -35,6 +38,9 @@ def mocked_exec_msar_func():
 
 @pytest.fixture
 def mocked_select_from_msar_func():
+    """
+    Lets you patch the db.connection.select_from_msar_func() for testing.
+    """
     with patch.object(connection, "select_from_msar_func") as mock:
         mock.return_value = mock
         yield mock
