@@ -1,5 +1,8 @@
 # Install Mathesar via Docker Compose
 
+!!! danger "Not a stable release"
+    This is a testing build released with the goal of gathering feedback from our community. It has **[many known issues](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aissue+milestone%3Av0.2.0-testing.2+)** and is not recommended for production use.
+
 ## Prerequisites
 
 {% include 'snippets/docker-compose-prerequisites.md' %}

@@ -2,8 +2,10 @@
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import { States } from '@mathesar/api/rest/utils/requestUtils';
+  import {
+    type RequestStatus,
+    States,
+  } from '@mathesar/api/rest/utils/requestUtils';
   import type { TablePrivilege } from '@mathesar/api/rpc/tables';
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
   import CellBackground from '@mathesar/components/CellBackground.svelte';
@@ -31,7 +33,7 @@
     LinkMenuItem,
     MenuDivider,
     MenuHeading,
-    WritableMap,
+    type WritableMap,
   } from '@mathesar-component-library';
 
   import ColumnHeaderContextMenu from '../header/header-cell/ColumnHeaderContextMenu.svelte';
@@ -52,7 +54,11 @@
   export let currentRoleTablePrivileges: Set<TablePrivilege>;
 
   $: cellId = makeCellId(getRowSelectionId(row), String(processedColumn.id));
+
+  // To be used in case of publicly shared links where user should not be able
+  // to view linked tables & explorations
   const canViewLinkedEntities = true;
+
   $: recordsDataState = recordsData.state;
   $: ({ linkedRecordSummaries } = recordsData);
   $: ({ column, linkFk } = processedColumn);
@@ -62,15 +68,16 @@
     modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
   $: clientErrors = $clientSideErrorMap.get(key) ?? [];
   $: errors = [...serverErrors, ...clientErrors];
-  $: canSetNull = column.nullable && value !== null;
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
+  $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
   // TODO_BETA: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
   $: isEditable =
+    isTableEditable &&
     !column.primary_key &&
-    currentRoleTablePrivileges.has('UPDATE') &&
     processedColumn.currentRolePrivileges.has('UPDATE');
+  $: canSetNull = isEditable && column.nullable && value !== null;
   $: getRecordPageUrl = $storeToGetRecordPageUrl;
   $: linkedRecordHref = linkFk
     ? getRecordPageUrl({ tableId: linkFk.referent_table_oid, recordId: value })
@@ -135,16 +142,16 @@
     lightText={hasError || isProcessing}
   />
   <ContextMenu>
+    <MenuHeading>{$_('cell')}</MenuHeading>
+    <ButtonMenuItem
+      icon={iconSetToNull}
+      disabled={!canSetNull}
+      on:click={() => setValue(null)}
+    >
+      {$_('set_to')}
+      <Null />
+    </ButtonMenuItem>
     {#if showLinkedRecordHyperLink}
-      <MenuHeading>{$_('cell')}</MenuHeading>
-      <ButtonMenuItem
-        icon={iconSetToNull}
-        disabled={!canSetNull}
-        on:click={() => setValue(null)}
-      >
-        {$_('set_to')}
-        <Null />
-      </ButtonMenuItem>
       {#if showLinkedRecordHyperLink && linkedRecordHref}
         <LinkMenuItem icon={iconLinkToRecordPage} href={linkedRecordHref}>
           <RichText text={$_('open_named_record')} let:slotName>
@@ -154,19 +161,22 @@
           </RichText>
         </LinkMenuItem>
       {/if}
-      <MenuDivider />
     {/if}
+    <MenuDivider />
 
     <!-- Column Attributes -->
     <MenuHeading>{$_('column')}</MenuHeading>
     <ColumnHeaderContextMenu {processedColumn} />
 
     <!-- Row -->
-    {#if showLinkedRecordHyperLink}
-      <MenuDivider />
-      <MenuHeading>{$_('row')}</MenuHeading>
-      <RowContextOptions recordPk={rowKey} {recordsData} {row} />
-    {/if}
+    <MenuDivider />
+    <MenuHeading>{$_('row')}</MenuHeading>
+    <RowContextOptions
+      recordPk={rowKey}
+      {recordsData}
+      {row}
+      {isTableEditable}
+    />
   </ContextMenu>
   {#if errors.length}
     <CellErrors {errors} forceShowErrors={isActive} />

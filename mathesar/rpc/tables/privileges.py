@@ -3,9 +3,11 @@ from typing import Literal, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.roles.operations.ownership import transfer_table_ownership
-from db.roles.operations.select import list_table_privileges
-from db.roles.operations.update import replace_table_privileges_for_roles
+from db.roles import (
+    transfer_table_ownership,
+    list_table_privileges,
+    replace_table_privileges_for_roles,
+)
 from mathesar.rpc.utils import connect
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.tables.base import TableInfo

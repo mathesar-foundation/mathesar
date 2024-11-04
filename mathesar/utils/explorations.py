@@ -1,11 +1,11 @@
-from db.engine import create_future_engine_with_custom_types
-from db.records.operations.select import get_count
-from db.queries.base import DBQuery, InitialColumn, JoinParameter
-from db.queries.operations.process import get_transforms_with_summarizes_speced
-from db.tables.operations.select import get_table
-from db.transforms.base import Summarize
-from db.transforms.operations.deserialize import deserialize_transformation
-from db.functions.base import (
+from db.deprecated.engine import create_future_engine_with_custom_types
+from db.deprecated.metadata import get_empty_metadata
+from db.deprecated.queries.base import DBQuery, InitialColumn, JoinParameter
+from db.deprecated.queries.operations.process import get_transforms_with_summarizes_speced
+from db.tables import get_table
+from db.deprecated.transforms.base import Summarize
+from db.deprecated.transforms.operations.deserialize import deserialize_transformation
+from db.deprecated.functions.base import (
     Count,
     ArrayAgg,
     Sum,
@@ -18,11 +18,9 @@ from db.functions.base import (
     PeakTime,
     PeakMonth,
 )
-from db.functions.packed import DistinctArrayAgg
-from mathesar.api.utils import process_annotated_records
+from db.deprecated.functions.packed import DistinctArrayAgg
 from mathesar.models.base import Explorations, ColumnMetaData, Database
 from mathesar.rpc.columns.metadata import ColumnMetaDataRecord
-from mathesar.state import get_cached_metadata
 
 
 def list_explorations(database_id, schema_oid=None):
@@ -76,7 +74,7 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         conn.info.dbname,
         conn.info.port
     )
-    metadata = get_cached_metadata()
+    metadata = get_empty_metadata()
     base_table_oid = exploration_def["base_table_oid"]
     initial_columns = exploration_def['initial_columns']
     processed_initial_columns = []
@@ -122,11 +120,8 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
         transformations,
         exploration_def.get("display_names", {})
     )
-    records = db_query.get_records(
-        limit=limit,
-        offset=offset
-    )
-    processed_records = process_annotated_records(records)[0]
+    query_results = db_query.get_records(limit=limit, offset=offset)
+
     column_metadata = _get_exploration_column_metadata(
         exploration_def,
         processed_initial_columns,
@@ -138,12 +133,8 @@ def run_exploration(exploration_def, conn, limit=100, offset=0):
     return {
         "query": exploration_def,
         "records": {
-            "count": get_count(
-                table=db_query.transformed_relation,
-                engine=engine,
-                filter=exploration_def.get('filter', None)
-            ),
-            "results": processed_records
+            "count": db_query.count,
+            "results": [r._asdict() for r in query_results],
         },
         "output_columns": tuple(sa_col.name for sa_col in db_query.sa_output_columns),
         "column_metadata": column_metadata,

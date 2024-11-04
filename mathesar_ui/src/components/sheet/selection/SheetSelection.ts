@@ -14,7 +14,7 @@ import {
   basisFromZeroEmptyColumns,
   emptyBasis,
 } from './basis';
-import { Direction, getColumnOffset } from './Direction';
+import { type Direction, getColumnOffset } from './Direction';
 import Plane from './Plane';
 import {
   type SheetCellDetails,
@@ -458,7 +458,11 @@ export default class SheetSelection {
   withActiveCellAdvanced(
     direction: 'forward' | 'back' = 'forward',
   ): SheetSelection {
-    throw new Error('Not implemented');
+    // TODO
+
+    // eslint-disable-next-line no-console
+    console.log(direction, 'Active cell advancing is not yet implemented');
+    return this;
   }
 
   /**
@@ -478,7 +482,9 @@ export default class SheetSelection {
    */
   resized(direction: Direction): SheetSelection {
     // TODO
-    console.log('Sheet selection resizing is not yet implemented');
+
+    // eslint-disable-next-line no-console
+    console.log(direction, 'Sheet selection resizing is not yet implemented');
     return this;
   }
 }

@@ -22,7 +22,17 @@ export default class SheetSelectionStore
       focus: () => this.focus(),
     });
     this.cleanupFunctions.push(
-      plane.subscribe((p) => this.selection.update((s) => s.forNewPlane(p))),
+      plane.subscribe((p) =>
+        // Prevent auto-focusing the new active cell when the plane changes.
+        // Originally I had allowed the auto-focus to happen, but it was causing
+        // a [bug][1] in the Data Explorer. I think it makes sense to err on the
+        // side of caution here and prevent the auto-focus. There might be some
+        // cases where we want to auto-focus the new active cell, but we can
+        // handle those cases imperatively as needed.
+        //
+        // [1]: https://github.com/mathesar-foundation/mathesar/issues/3955
+        this.selection.update((s) => s.forNewPlane(p), { prevent: ['focus'] }),
+      ),
     );
   }
 

@@ -8,10 +8,13 @@ from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
-from db.roles.operations.select import list_roles, get_current_role_from_db
-from db.roles.operations.create import create_role
-from db.roles.operations.drop import drop_role
-from db.roles.operations.membership import set_members_to_role
+from db.roles import (
+    create_role,
+    drop_role,
+    get_current_role_from_db,
+    list_roles,
+    set_members_to_role,
+)
 
 
 class RoleMember(TypedDict):

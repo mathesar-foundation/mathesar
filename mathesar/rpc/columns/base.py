@@ -6,10 +6,12 @@ from typing import Literal, Optional, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.columns.operations.alter import alter_columns_in_table
-from db.columns.operations.create import add_columns_to_table
-from db.columns.operations.drop import drop_columns_from_table
-from db.columns.operations.select import get_column_info_for_table
+from db.columns import (
+    add_columns_to_table,
+    alter_columns_in_table,
+    drop_columns_from_table,
+    get_column_info_for_table,
+)
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect

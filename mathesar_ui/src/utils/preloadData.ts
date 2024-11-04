@@ -5,11 +5,24 @@ import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { RawServer } from '@mathesar/api/rpc/servers';
 import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
 
+type WithStatus<D> =
+  | {
+      state: 'success';
+      data: D;
+    }
+  | {
+      state: 'failure';
+      error: {
+        code: number;
+        message: string;
+      };
+    };
+
 export interface CommonData {
   databases: RawDatabase[];
   servers: RawServer[];
-  schemas: RawSchema[];
-  tables: RawTableWithMetadata[];
+  schemas: WithStatus<RawSchema[]>;
+  tables: WithStatus<RawTableWithMetadata[]>;
   queries: SavedExploration[];
   current_database: RawDatabase['id'] | null;
   internal_db: {

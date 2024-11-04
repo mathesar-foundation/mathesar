@@ -3,8 +3,8 @@ import pytest
 from modernrpc.exceptions import RPCException
 from psycopg.errors import BadCopyFileFormat
 from django.core.exceptions import FieldDoesNotExist
-from mathesar.utils.connections import BadInstallationTarget
-from db.functions.exceptions import UnknownDBFunctionID
+from mathesar.utils.permissions import BadInstallationTarget
+from db.deprecated.functions.exceptions import UnknownDBFunctionID
 from http.client import CannotSendRequest
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions

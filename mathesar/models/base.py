@@ -1,3 +1,6 @@
+import os
+
+from django.conf import settings
 from django.db import models
 from encrypted_fields.fields import EncryptedCharField
 import psycopg
@@ -135,8 +138,7 @@ class TableMetaData(BaseModel):
     data_file = models.ForeignKey("DataFile", on_delete=models.SET_NULL, null=True)
     import_verified = models.BooleanField(null=True)
     column_order = models.JSONField(null=True)
-    record_summary_customized = models.BooleanField(null=True)
-    record_summary_template = models.CharField(max_length=255, null=True)
+    record_summary_template = models.JSONField(null=True)
 
     class Meta:
         constraints = [
@@ -157,3 +159,25 @@ class Explorations(BaseModel):
     display_options = models.JSONField(null=True)
     display_names = models.JSONField(null=True)
     description = models.CharField(null=True)
+
+
+class DataFile(BaseModel):
+    def _user_directory_path(instance, filename):
+        user_identifier = instance.user.username if instance.user else 'anonymous'
+        # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+        return os.path.join(user_identifier, filename)
+
+    created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
+    file_type_choices = models.TextChoices("type", "CSV TSV JSON")
+
+    file = models.FileField(upload_to=_user_directory_path)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
+    created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
+    type = models.CharField(max_length=128, choices=file_type_choices.choices)
+    base_name = models.CharField(max_length=100)
+    header = models.BooleanField(default=True)
+    max_level = models.IntegerField(default=0, blank=True)
+    sheet_index = models.IntegerField(default=0)
+    delimiter = models.CharField(max_length=1, default=',', blank=True)
+    escapechar = models.CharField(max_length=1, blank=True)
+    quotechar = models.CharField(max_length=1, default='"', blank=True)

@@ -1,26 +1,45 @@
+from functools import wraps
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
+from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 
 from mathesar.rpc.databases.configured import list_ as databases_list
 from mathesar.rpc.explorations import list_ as explorations_list
 from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
-from mathesar.api.serializers.tables import TableSerializer
-from mathesar.api.serializers.queries import QuerySerializer
-from mathesar.api.ui.serializers.users import UserSerializer
-from mathesar.api.utils import is_valid_uuid_v4
-from mathesar.models.shares import SharedTable, SharedQuery
-from mathesar.state import reset_reflection
+from mathesar.api.serializers.users import UserSerializer
 from mathesar import __version__
 
 
+def get_database_list(request):
+    return databases_list(request=request)
+
+
+def wrap_data_and_rpc_exceptions(f):
+    @wraps(f)
+    def safe_func(*args, **kwargs):
+        try:
+            return {
+                'state': 'success',
+                'data': f(*args, **kwargs)
+            }
+        except RPCException as exp:
+            return {
+                'state': 'failure',
+                'error': {
+                    'code': exp.code,
+                    'message': exp.message
+                }
+            }
+    return safe_func
+
+
+@wrap_data_and_rpc_exceptions
 def get_schema_list(request, database_id):
     if database_id is not None:
         return schemas_list(request=request, database_id=database_id)
@@ -28,10 +47,7 @@ def get_schema_list(request, database_id):
         return []
 
 
-def get_database_list(request):
-    return databases_list(request=request)
-
-
+@wrap_data_and_rpc_exceptions
 def get_table_list(request, database_id, schema_oid):
     if database_id is not None and schema_oid is not None:
         return tables_list(
@@ -76,71 +92,32 @@ def _get_internal_db_meta():
         return {'type': 'sqlite'}
 
 
-def _get_base_data_all_routes(request, database_id=None, schema_id=None):
+def get_common_data(request, database_id=None, schema_oid=None):
+    databases = get_database_list(request)
+    database_id_int = int(database_id) if database_id else None
+    current_database = next((database for database in databases if database['id'] == database_id_int), None)
+    current_database_id = current_database['id'] if current_database else None
+
+    schemas = get_schema_list(request, current_database_id)
+    schema_oid_int = int(schema_oid) if schema_oid else None
+    schemas_data = schemas['data'] if 'data' in schemas else []
+    current_schema = next((schema for schema in schemas_data if schema['oid'] == schema_oid_int), None)
+    current_schema_oid = current_schema['oid'] if current_schema else None
+
     return {
-        'current_database': int(database_id) if database_id else None,
-        'current_schema': int(schema_id) if schema_id else None,
+        'current_database': current_database_id,
+        'current_schema': current_schema_oid,
         'current_release_tag_name': __version__,
-        'databases': get_database_list(request),
-        'servers': get_servers_list(),
+        'databases': databases,
         'internal_db': _get_internal_db_meta(),
         'is_authenticated': not request.user.is_anonymous,
-        'queries': [],
-        'schemas': get_schema_list(request, database_id),
+        'servers': get_servers_list(),
+        'schemas': schemas,
         'supported_languages': dict(getattr(settings, 'LANGUAGES', [])),
-        'tables': [],
-        'user': get_user_data(request)
-    }
-
-
-def get_common_data(request, database_id=None, schema_id=None):
-    return {
-        **_get_base_data_all_routes(request, database_id, schema_id),
-        'tables': get_table_list(request, database_id, schema_id),
-        'queries': get_queries_list(request, database_id, schema_id),
+        'tables': get_table_list(request, current_database_id, current_schema_oid),
+        'user': get_user_data(request),
+        'queries': get_queries_list(request, current_database_id, current_schema_oid),
         'routing_context': 'normal',
-    }
-
-
-def get_common_data_for_shared_entity(request, schema=None):
-    # TODO: Provide only authorized schemas & databases
-    # database = schema.database if schema else None
-    # schemas = [schema] if schema else []
-    # databases = [database] if database else []
-    return {
-        # **_get_base_data_all_routes(request, database, schema),
-        # 'schemas': serialized_schemas,
-        # 'databases': serialized_databases,
-        **_get_base_data_all_routes(request),
-        'routing_context': 'anonymous',
-    }
-
-
-def get_common_data_for_shared_table(request, table):
-    tables = [table] if table else []
-    serialized_tables = TableSerializer(
-        tables,
-        many=True,
-        context={'request': request}
-    ).data
-    schema = table.schema if table else None
-    return {
-        **get_common_data_for_shared_entity(request, schema),
-        'tables': serialized_tables,
-    }
-
-
-def get_common_data_for_shared_query(request, query):
-    queries = [query] if query else []
-    serialized_queries = QuerySerializer(
-        queries,
-        many=True,
-        context={'request': request}
-    ).data
-    schema = query.base_table.schema if query else None
-    return {
-        **get_common_data_for_shared_entity(request, schema),
-        'queries': serialized_queries,
     }
 
 
@@ -149,21 +126,14 @@ class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
 
 
 @login_required
-@api_view(['POST'])
-def reflect_all(_):
-    reset_reflection()
-    return Response(status=status.HTTP_200_OK)
-
-
-@login_required
 def home(request):
     database_list = get_database_list(request)
     number_of_databases = len(database_list)
     if number_of_databases > 1:
-        return redirect('databases')
+        return redirect('databases_list_route')
     elif number_of_databases == 1:
         db = database_list[0]
-        return redirect('schemas', database_id=db['id'])
+        return redirect('database_route', database_id=db['id'])
     else:
         return render(request, 'mathesar/index.html', {
             'common_data': get_common_data(request)
@@ -171,7 +141,7 @@ def home(request):
 
 
 @login_required
-def databases(request):
+def databases_list_route(request):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)
     })
@@ -192,40 +162,16 @@ def admin_home(request, **kwargs):
 
 
 @login_required
-def schemas(request, database_id, **kwargs):
+def database_route(request, database_id, **kwargs):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database_id, None)
     })
 
 
 @login_required
-def schemas_home(request, database_id, schema_id, **kwargs):
+def schema_route(request, database_id, schema_id, **kwargs):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database_id, schema_id)
-    })
-
-
-def shared_table(request, slug):
-    shared_table_link = SharedTable.get_by_slug(slug) if is_valid_uuid_v4(slug) else None
-    table = shared_table_link.table if shared_table_link else None
-
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data_for_shared_table(request, table),
-        'route_specific_data': {
-            'shared_table': {'table_id': table.id if table else None}
-        }
-    })
-
-
-def shared_query(request, slug):
-    shared_query_link = SharedQuery.get_by_slug(slug) if is_valid_uuid_v4(slug) else None
-    query = shared_query_link.query if shared_query_link else None
-
-    return render(request, 'mathesar/index.html', {
-        'common_data': get_common_data_for_shared_query(request, query),
-        'route_specific_data': {
-            'shared_query': {'query_id': query.id if query else None}
-        }
     })
 
 

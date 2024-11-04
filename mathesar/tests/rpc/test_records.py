@@ -38,6 +38,7 @@ def test_records_list(rf, monkeypatch):
             filter=None,
             group=None,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if _table_oid != table_oid or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
@@ -56,7 +57,7 @@ def test_records_list(rf, monkeypatch):
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
-    monkeypatch.setattr(records.record_select, 'list_records_from_table', mock_list_records)
+    monkeypatch.setattr(records, 'list_records_from_table', mock_list_records)
     expect_records_list = {
         "count": 50123,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
@@ -103,6 +104,7 @@ def test_records_get(rf, monkeypatch):
             _record_id,
             _table_oid,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if _table_oid != table_oid or _record_id != record_id or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
@@ -116,7 +118,7 @@ def test_records_get(rf, monkeypatch):
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
-    monkeypatch.setattr(records.record_select, 'get_record_from_table', mock_get_record)
+    monkeypatch.setattr(records, 'get_record_from_table', mock_get_record)
     expect_record = {
         "count": 1,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],
@@ -159,6 +161,7 @@ def test_records_add(rf, monkeypatch):
             _record_def,
             _table_oid,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if _table_oid != table_oid or _record_def != record_def or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
@@ -169,7 +172,7 @@ def test_records_add(rf, monkeypatch):
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
-    monkeypatch.setattr(records.record_insert, 'add_record_to_table', mock_add_record)
+    monkeypatch.setattr(records, 'add_record_to_table', mock_add_record)
     expect_record = {
         "results": [record_def],
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
@@ -211,6 +214,7 @@ def test_records_patch(rf, monkeypatch):
             _record_id,
             _table_oid,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if (
                 _table_oid != table_oid
@@ -226,7 +230,7 @@ def test_records_patch(rf, monkeypatch):
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
-    monkeypatch.setattr(records.record_update, 'patch_record_in_table', mock_patch_record)
+    monkeypatch.setattr(records, 'patch_record_in_table', mock_patch_record)
     expect_record = {
         "results": [record_def | {"3": "another"}],
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
@@ -238,6 +242,7 @@ def test_records_patch(rf, monkeypatch):
         table_oid=table_oid,
         database_id=database_id,
         return_record_summaries=True,
+        table_record_summary_templates=None,
         request=request
     )
     assert actual_record == expect_record
@@ -272,7 +277,7 @@ def test_records_delete(rf, monkeypatch):
         return 2
 
     monkeypatch.setattr(records, 'connect', mock_connect)
-    monkeypatch.setattr(records.record_delete, 'delete_records_from_table', mock_delete_records)
+    monkeypatch.setattr(records, 'delete_records_from_table', mock_delete_records)
     expect_result = 2
     actual_result = records.delete(
         record_ids=record_ids, table_oid=table_oid, database_id=database_id, request=request
@@ -304,6 +309,7 @@ def test_records_search(rf, monkeypatch):
             search=[],
             limit=10,
             return_record_summaries=False,
+            table_record_summary_templates=None,
     ):
         if _table_oid != table_oid or return_record_summaries is False:
             raise AssertionError('incorrect parameters passed')
@@ -316,7 +322,7 @@ def test_records_search(rf, monkeypatch):
         }
 
     monkeypatch.setattr(records, 'connect', mock_connect)
-    monkeypatch.setattr(records.record_select, 'search_records_from_table', mock_search_records)
+    monkeypatch.setattr(records, 'search_records_from_table', mock_search_records)
     expect_records_list = {
         "count": 50123,
         "results": [{"1": "abcde", "2": 12345}, {"1": "fghij", "2": 67890}],

@@ -6,12 +6,17 @@ from typing import Any, Literal, Optional, TypedDict, Union
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
-from db.records.operations import delete as record_delete
-from db.records.operations import insert as record_insert
-from db.records.operations import select as record_select
-from db.records.operations import update as record_update
+from db.records import (
+    list_records_from_table,
+    get_record_from_table,
+    search_records_from_table,
+    delete_records_from_table,
+    add_record_to_table,
+    patch_record_in_table,
+)
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
+from mathesar.utils.tables import get_table_record_summary_templates
 
 
 class OrderBy(TypedDict):
@@ -226,7 +231,7 @@ def list_(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        record_info = record_select.list_records_from_table(
+        record_info = list_records_from_table(
             conn,
             table_oid,
             limit=limit,
@@ -235,6 +240,7 @@ def list_(
             filter=filter,
             group=grouping,
             return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)
 
@@ -248,6 +254,7 @@ def get(
         table_oid: int,
         database_id: int,
         return_record_summaries: bool = False,
+        table_record_summary_templates: dict[str, Any] = None,
         **kwargs
 ) -> RecordList:
     """
@@ -259,17 +266,27 @@ def get(
         database_id: The Django id of the database containing the table.
         return_record_summaries: Whether to return summaries of the
             retrieved record.
-
+        table_record_summary_templates: A dict of record summary templates.
+            If none are provided, then the templates will be take from the
+            Django metadata. Any templates provided will take precedence on a
+            per-table basis over the stored metadata templates. The purpose of
+            this function parameter is to allow clients to generate record
+            summary previews without persisting any metadata.
     Returns:
         The requested record, along with some metadata.
     """
+
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        record_info = record_select.get_record_from_table(
+        record_info = get_record_from_table(
             conn,
             record_id,
             table_oid,
-            return_record_summaries=return_record_summaries
+            return_record_summaries=return_record_summaries,
+            table_record_summary_templates={
+                **get_table_record_summary_templates(database_id),
+                **(table_record_summary_templates or {}),
+            },
         )
     return RecordList.from_dict(record_info)
 
@@ -307,11 +324,12 @@ def add(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        record_info = record_insert.add_record_to_table(
+        record_info = add_record_to_table(
             conn,
             record_def,
             table_oid,
             return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordAdded.from_dict(record_info)
 
@@ -350,12 +368,13 @@ def patch(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        record_info = record_update.patch_record_in_table(
+        record_info = patch_record_in_table(
             conn,
             record_def,
             record_id,
             table_oid,
             return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordAdded.from_dict(record_info)
 
@@ -383,7 +402,7 @@ def delete(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        num_deleted = record_delete.delete_records_from_table(
+        num_deleted = delete_records_from_table(
             conn,
             record_ids,
             table_oid,
@@ -425,11 +444,12 @@ def search(
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        record_info = record_select.search_records_from_table(
+        record_info = search_records_from_table(
             conn,
             table_oid,
             search=search_params,
             limit=limit,
             return_record_summaries=return_record_summaries,
+            table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)

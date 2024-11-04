@@ -27,6 +27,7 @@
 
   import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
   import SelectUserType from './SelectUserType.svelte';
+  import type { UserType } from './utils';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -50,8 +51,8 @@
   ]);
   $: email = optionalField(user?.email ?? '', [isEmail()]);
   $: displayLanguage = requiredField(user?.display_language ?? 'en');
-  $: userType = requiredField<'user' | 'admin' | undefined>(
-    user?.is_superuser ? 'admin' : 'user',
+  $: userType = requiredField<UserType | undefined>(
+    user?.is_superuser ? 'admin' : 'standard',
   );
 
   const password = requiredField('');

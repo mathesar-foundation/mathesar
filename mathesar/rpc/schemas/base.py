@@ -7,10 +7,13 @@ from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from db.constants import INTERNAL_SCHEMAS
-from db.schemas.operations.create import create_schema
-from db.schemas.operations.select import list_schemas, get_schema
-from db.schemas.operations.drop import drop_schema_via_oid
-from db.schemas.operations.alter import patch_schema
+from db.schemas import (
+    create_schema,
+    drop_schema_via_oid,
+    get_schema,
+    list_schemas,
+    patch_schema,
+)
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.utils import connect
 
@@ -118,7 +121,7 @@ def get(*, schema_oid: int, database_id: int, **kwargs) -> SchemaInfo:
     """
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
-        schema_info = get_schema(conn)
+        schema_info = get_schema(schema_oid, conn)
     return schema_info
 
 
