@@ -4109,34 +4109,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_delete_records_from_table_no_pkey() RETURNS SETOF TEXT AS $$
-DECLARE
-  rel_id oid;
-  delete_result integer;
-BEGIN
-  PERFORM __setup_list_records_table();
-  rel_id := 'atable'::regclass::oid;
-  CREATE ROLE intern_no_pkey;
-  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
-  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
-  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO INTERN_no_pkey;
-  GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
-  SET ROLE intern_no_pkey;
-  RETURN NEXT throws_ok(
-    format('SELECT msar.delete_records_from_table(%s, ''[2, 3]'')', rel_id),
-    '42501',
-    'permission denied for table atable',
-    'Throw error when trying to delete without permission'
-  );
-  SET ROLE NONE;
-  RETURN NEXT results_eq(
-    'SELECT id FROM atable ORDER BY id',
-    $v$VALUES ('1'::integer), ('2'::integer), ('3'::integer)$v$
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_delete_records_from_table_stringy_pkey() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
@@ -5537,8 +5509,10 @@ SELECT permissions on some proper subset.
 */
 DECLARE
   rel_id oid;
+  jsonb_result jsonb;
 BEGIN
   PERFORM __setup_list_records_table();
+  PERFORM __setup_preview_fkey_cols();
   rel_id := 'atable'::regclass::oid;
 
   CREATE ROLE intern_no_pkey;
@@ -5630,8 +5604,6 @@ BEGIN
     ]$j$,
     'filtering without specifying column without permissions works'
   );
-
-
   RETURN NEXT throws_ok(
     format(
       $s$SELECT
@@ -5656,10 +5628,71 @@ BEGIN
     'permission denied for table atable',
     'Records lister throws permission error when filtering on column without privilege'
   );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => '[{"attnum": 3, "direction": "asc"}, {"attnum": 1, "direction": "asc"}]',
+      filter_ => null,
+      group_ => '{"columns": [3, 1]}'
+    ) -> 'grouping',
+    $j${
+      "groups": [
+        {"id": 1, "count": 1, "results_eq": {"3": "abcde"}, "result_indices": [0]},
+        {"id": 2, "count": 1, "results_eq": {"3": "sdflfflsk"}, "result_indices": [1]},
+        {"id": 3, "count": 1, "results_eq": {"3": "sdflkj"}, "result_indices": [2]}
+      ],
+      "columns": [3, 1],
+      "preproc": null
+    }$j$,
+    'ignore group column without permissions, use one with permissions'
+  );
+  RETURN NEXT throws_ok(
+    format('SELECT msar.delete_records_from_table(%s, ''[2, 3]'')', rel_id),
+    '42501',
+    'permission denied for table atable',
+    'Throw error when trying to delete without permission'
+  );
+
+  SET ROLE NONE;
+  CREATE ROLE intern_students_only;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_students_only;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_students_only;
+  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO intern_students_only;
+  GRANT SELECT ON TABLE "Students" TO intern_students_only;
+  SET ROLE intern_students_only;
+  jsonb_result = msar.get_record_from_table(
+    tab_id => '"Students"'::regclass::oid,
+    rec_id => 4
+  );
+  RETURN NEXT is(
+    jsonb_result -> 'results',
+    '[{"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"}]',
+    'Record results work when no access to linked table'
+  );
+  RETURN NEXT is(
+    jsonb_result -> 'linked_record_summaries',
+    'null',
+    'Record summaries are ignored when no access to linked tables'
+  );
+  RETURN NEXT is(
+    msar.get_record_from_table(
+      tab_id => '"Students"'::regclass::oid,
+      rec_id => 4,
+      table_record_summary_templates => jsonb_build_object(
+        '"Teachers"'::regclass::oid,
+        '[[3], " / ", [2, 2]]'::jsonb
+      )
+    ) -> 'results',
+    '[{"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"}]',
+    'Record results work when no access to linked table having custom summary'
+  );
 
   SET ROLE NONE;
   CREATE ROLE intern_no_access;
   GRANT USAGE ON SCHEMA msar, __msar TO intern_no_access;
+  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO intern_no_access;
   GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_access;
   SET ROLE intern_no_access;
   RETURN NEXT throws_ok(
@@ -5670,6 +5703,15 @@ BEGIN
     '42501',
     'permission denied for table atable',
     'Records lister throws permission error'
+  );
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.get_record_from_table(%s, 1, true);',
+      rel_id
+    ),
+    '42501',
+    'permission denied for table atable',
+    'Records getter throws permission error'
   );
 END;
 $$ LANGUAGE plpgsql;
