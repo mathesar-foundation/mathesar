@@ -33,6 +33,13 @@ def mocked_exec_msar_func():
         yield mock
 
 
+@pytest.fixture
+def mocked_select_from_msar_func():
+    with patch.object(connection, "select_from_msar_func") as mock:
+        mock.return_value = mock
+        yield mock
+
+
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):
     pass
