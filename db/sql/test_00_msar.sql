@@ -3190,79 +3190,6 @@ BEGIN
       )
     )
   );
-  CREATE ROLE intern_no_pkey;
-  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
-  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
-  GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
-  SET ROLE intern_no_pkey;
-  RETURN NEXT is(
-    msar.list_records_from_table(
-      tab_id => rel_id,
-      limit_ => null,
-      offset_ => null,
-      order_ => null,
-      filter_ => null,
-      group_ => null
-    ),
-    $j${
-      "count": 3,
-      "results": [
-        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true},
-        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
-        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
-      ],
-      "grouping": null,
-      "linked_record_summaries": null,
-      "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
-        ' msar.format_data(col3) AS "4", msar.format_data(col4) AS "5" FROM public.atable',
-        '  ORDER BY "2" ASC, "3" ASC, "5" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
-  );
-  RETURN NEXT is(
-    msar.list_records_from_table(
-      tab_id => rel_id,
-      limit_ => null,
-      offset_ => null,
-      order_ => '[{"attnum": 3, "direction": "desc"}]',
-      filter_ => null,
-      group_ => null
-    ),
-    $j${
-      "count": 3,
-      "results": [
-        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
-        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
-        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
-      ],
-      "grouping": null,
-      "linked_record_summaries": null,
-      "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(col1) AS "2", msar.format_data(col2) AS "3",',
-        ' msar.format_data(col3) AS "4", msar.format_data(col4) AS "5" FROM public.atable',
-        '  ORDER BY "3" DESC, "2" ASC, "3" ASC, "5" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
-  );
-  SET ROLE NONE;
-  CREATE ROLE intern_no_access;
-  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_access;
-  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_access;
-  SET ROLE intern_no_access;
-  RETURN NEXT throws_ok(
-    format(
-      'SELECT msar.list_records_from_table(%s, null, null, null, null, null);',
-      rel_id
-    ),
-    '42501',
-    'permission denied for table atable',
-    'Records lister throws permission error'
-  );
 END;
 $$ LANGUAGE plpgsql;
 
@@ -5595,6 +5522,154 @@ BEGIN
       '"Alice"'::regrole::oid, ARRAY['"Bob"'::regrole::oid, 'carol'::regrole::oid]
     ),
     E'REVOKE "Alice" FROM "Bob";\nREVOKE "Alice" FROM carol;\n'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_table_select_permissions() RETURNS SETOF TEXT AS $$/*
+This test is to check behavior whenever we're selecting from a user table where the calling user has
+SELECT permissions on some proper subset.
+
+- when a user has SELECT on some, but not all, columns we should return results only for the
+  columns for which they have access.
+- when a user doesn't have SELECT on any columns of a table, we should raise a permissions error.
+*/
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_list_records_table();
+  rel_id := 'atable'::regclass::oid;
+
+  CREATE ROLE intern_no_pkey;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO intern_no_pkey;
+  GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
+  SET ROLE intern_no_pkey;
+  RETURN NEXT is(
+    msar.list_records_from_table(
+        tab_id => rel_id,
+        limit_ => null,
+        offset_ => null,
+        order_ => null,
+        filter_ => null,
+        group_ => null
+    ) -> 'results',
+    $j$[
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true},
+        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
+    ]$j$,
+    'Results should not have column 1, and should be ordered by remaining columns'
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => '[{"attnum": 3, "direction": "desc"}]',
+      filter_ => null,
+      group_ => null
+    ) -> 'results',
+    $j$[
+        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+    ]$j$,
+    'Results should not have a column 1, and ordering spec should work'
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => '[{"attnum": 1, "direction": "asc"}]',
+      filter_ => null,
+      group_ => null
+    ) -> 'results',
+    $j$[
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true},
+        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}
+    ]$j$,
+    'specifying that you want to order by a column without permissions is ignored'
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => '[{"attnum": 1, "direction": "asc", "attnum": 3, "direction": "desc"}]',
+      filter_ => null,
+      group_ => null
+    ) -> 'results',
+    $j$[
+        {"2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}},
+        {"2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]},
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+    ]$j$,
+    'ignore order by column without permissions, use one with permissions'
+  );
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => jsonb_build_object(
+        'type', 'equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'attnum', 'value', 2),
+          jsonb_build_object('type', 'literal', 'value', 2)
+        )
+      ),
+      group_ => null
+    ) -> 'results',
+    $j$[
+        {"2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}
+    ]$j$,
+    'filtering without specifying column without permissions works'
+  );
+
+
+  RETURN NEXT throws_ok(
+    format(
+      $s$SELECT
+        msar.list_records_from_table(
+          tab_id => %s,
+          limit_ => null,
+          offset_ => null,
+          order_ => null,
+          filter_ => %L,
+          group_ => null
+        );
+      $s$,
+      rel_id,
+      jsonb_build_object(
+        'type', 'equal', 'args', jsonb_build_array(
+          jsonb_build_object('type', 'attnum', 'value', 1),
+          jsonb_build_object('type', 'literal', 'value', 2)
+        )
+      )
+    ),
+    '42501',
+    'permission denied for table atable',
+    'Records lister throws permission error when filtering on column without privilege'
+  );
+
+  SET ROLE NONE;
+  CREATE ROLE intern_no_access;
+  GRANT USAGE ON SCHEMA msar, __msar TO intern_no_access;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_access;
+  SET ROLE intern_no_access;
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.list_records_from_table(%s, null, null, null, null, null);',
+      rel_id
+    ),
+    '42501',
+    'permission denied for table atable',
+    'Records lister throws permission error'
   );
 END;
 $$ LANGUAGE plpgsql;
