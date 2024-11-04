@@ -5652,7 +5652,20 @@ BEGIN
     format('SELECT msar.delete_records_from_table(%s, ''[2, 3]'')', rel_id),
     '42501',
     'permission denied for table atable',
-    'Throw error when trying to delete without permission'
+    'Throw error when trying to delete without SELECT on id'
+  );
+  RETURN NEXT throws_ok(
+    format(
+      $s$SELECT msar.patch_record_in_table(
+        tab_id => %s,
+        rec_id => 1,
+        rec_def => '{"2": 10}'::jsonb
+      );$s$,
+      rel_id
+    ),
+    '42501',
+    'permission denied for table atable',
+    'Records patcher throws permission error when trying to patch without SELECT on id'
   );
 
   SET ROLE NONE;

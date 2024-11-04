@@ -5443,8 +5443,8 @@ DECLARE
 BEGIN
   EXECUTE format(
     $p$
-    WITH update_cte AS (%1$s %2$s RETURNING %3$s)
-    SELECT msar.format_data(%4$I)::text FROM update_cte
+    WITH update_cte AS (%1$s %2$s RETURNING %3$I)
+    SELECT * FROM update_cte
     $p$,
     msar.build_update_expr(tab_id, rec_def),
     msar.build_where_clause(
@@ -5455,8 +5455,7 @@ BEGIN
         )
       )
     ),
-    msar.build_selectable_column_expr(tab_id),
-    msar.get_pk_column(tab_id)
+    msar.get_column_name(tab_id, msar.get_pk_column(tab_id))
   ) INTO rec_modified_id;
   rec_modified := msar.get_record_from_table(
     tab_id,
