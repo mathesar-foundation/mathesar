@@ -4767,6 +4767,14 @@ LIMIT 1;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.build_empty_record_summary_query() RETURNS TEXT AS $$/*
+  Returns a stringified query structured consistently with a record summary query but which will
+  yield no record summaries when run.
+*/
+  SELECT $q$ SELECT NULL AS key, NULL AS summary WHERE FALSE $q$;
+$$ LANGUAGE SQL IMMUTABLE PARALLEL SAFE;
+
+
 CREATE OR REPLACE FUNCTION msar.build_record_summary_query_from_template(
   tab_id oid,
   key_col_id smallint,
@@ -4814,10 +4822,15 @@ DECLARE
   join_section text;
 BEGIN
   IF key_col_id IS NULL THEN
-    -- If the key column is NULL, then we can't generate a record summary query. We return a query
-    -- that will return no rows.
-    RETURN $q$ SELECT NULL AS key, NULL AS summary WHERE FALSE $q$;
+    -- If we don't have a key column, then we can't generate a record summary query.
+    RETURN msar.build_empty_record_summary_query();
   END IF;
+
+  IF NOT pg_catalog.has_column_privilege(tab_id, key_col_id, 'SELECT') THEN
+    -- If we don't have permission to select the key column, then we can't generate a record
+    RETURN msar.build_empty_record_summary_query();
+  END IF;
+
   IF jsonb_typeof(template) <> 'array' THEN
     RAISE EXCEPTION 'Record summary template must be a JSON array.';
   END IF;
@@ -4830,7 +4843,8 @@ BEGIN
       fk_col_id smallint;
       contextual_tab_id oid := tab_id;
       prev_alias text := base_alias;
-      ref_column_name text;
+      ref_col_id smallint;
+      ref_col_name text;
     BEGIN
       -- Column reference template parts
       IF ref_chain_length > 0 THEN
@@ -4838,15 +4852,20 @@ BEGIN
         -- columns.
         FOREACH fk_col_id IN ARRAY ref_chain[1:ref_chain_length-1] LOOP
           DECLARE
-            fk_col_name text := msar.get_column_name(contextual_tab_id, fk_col_id);
+            fk_col_name text;
             ref_tab_id oid;
-            ref_col_id smallint;
             ref_sch_name text;
             ref_tab_name text;
-            ref_col_name text;
             alias text;
             join_clause text;
           BEGIN
+            IF NOT pg_catalog.has_column_privilege(contextual_tab_id, fk_col_id, 'SELECT') THEN
+              -- Silently ignore FK columns that we don't have permissions to select.
+              CONTINUE template_parts_loop;
+            END IF;
+
+            fk_col_name := msar.get_column_name(contextual_tab_id, fk_col_id);
+
             IF fk_col_name IS NULL THEN
               -- Silently ignore references to non-existing FK columns. This can happen if a column
               -- has been deleted.
@@ -4860,6 +4879,12 @@ BEGIN
             IF ref_tab_id IS NULL THEN
               -- Silently ignore references to non-FK columns. This can happen if the constraint
               -- has been dropped.
+              CONTINUE template_parts_loop;
+            END IF;
+
+            IF NOT pg_catalog.has_column_privilege(ref_tab_id, ref_col_id, 'SELECT') THEN
+              -- Silently ignore FK columns which point to columns that we don't have permission to
+              -- select.
               CONTINUE template_parts_loop;
             END IF;
 
@@ -4885,13 +4910,20 @@ BEGIN
           END;
         END LOOP;
 
-        ref_column_name := msar.get_column_name(contextual_tab_id, ref_chain[ref_chain_length]);
-        IF ref_column_name IS NOT NULL THEN
+        ref_col_id := ref_chain[ref_chain_length];
+
+        IF NOT pg_catalog.has_column_privilege(contextual_tab_id, ref_col_id, 'SELECT') THEN
+          -- Silently ignore the final column reference if we don't have permission to select it.
+          CONTINUE template_parts_loop;
+        END IF;
+
+        ref_col_name := msar.get_column_name(contextual_tab_id, ref_col_id);
+        IF ref_col_name IS NOT NULL THEN
           expr_parts := array_append(
             expr_parts,
             concat(
               'COALESCE(msar.format_data(',
-              prev_alias, '.', quote_ident(ref_column_name),
+              prev_alias, '.', quote_ident(ref_col_name),
               E')::text, \'\')'
             )
           );
