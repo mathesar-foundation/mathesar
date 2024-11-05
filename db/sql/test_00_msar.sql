@@ -4714,6 +4714,118 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_record_summary_with_limited_privileges() RETURNS SETOF TEXT AS $$
+DECLARE result jsonb;
+BEGIN
+  CREATE ROLE roland;
+
+  GRANT USAGE ON SCHEMA __msar, msar TO roland;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO roland;
+  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO roland;
+
+  -- Tables:
+  --
+  -- widget
+  -- ┣━ doodad
+  -- ┃  ┗━ frobnicator
+  -- ┣━ apparatus
+  -- ┣━ configuration
+  -- ┗━ projection
+  --
+  -- ✅ = roland can SELECT
+  -- ❌ = roland cannot SELECT
+
+  CREATE TABLE frobnicator (
+    /* ❌ */ id INT PRIMARY KEY,
+    /* ❌ */ frequency INT
+  );
+  INSERT INTO frobnicator (id, frequency) VALUES (7, 7);
+
+  CREATE TABLE doodad (
+    /* ✅ */ id INT PRIMARY KEY,
+    /* ❌ */ size INT,
+    /* ✅ */ color TEXT,
+    /* ✅ */ frobnicator INT REFERENCES frobnicator(id)
+  );
+  INSERT INTO doodad (id, size, color, frobnicator) VALUES (4, 3, 'chartruse', 7);
+  GRANT SELECT (id, color, frobnicator) ON doodad TO roland;
+
+  CREATE TABLE apparatus (
+    /* ✅ */ id INT PRIMARY KEY,
+    /* ✅ */ phase INT
+  );
+  INSERT INTO apparatus (id, phase) VALUES (9, 4);
+  GRANT SELECT ON apparatus TO roland;
+
+  CREATE TABLE configuration (
+    /* ❌ */ id INT PRIMARY KEY,
+    /* ❌ */ astral_plane TEXT
+  );
+  INSERT INTO configuration (id, astral_plane) VALUES (13, 'Etheric');
+
+  CREATE TABLE projection (
+    /* ❌ */ id INT PRIMARY KEY,
+    /* ✅ */ sensitivity INT
+  );
+  INSERT INTO projection (id, sensitivity) VALUES (57, 27);
+  GRANT SELECT (sensitivity) ON projection TO roland;
+
+  CREATE TABLE widget (
+    /* ✅ 1 */ id INT PRIMARY KEY,
+    /* ✅ 2 */ name TEXT NOT NULL,
+    /* ✅ 3 */ doodad INT REFERENCES doodad(id),
+    /* ❌ 4 */ apparatus INT REFERENCES apparatus(id),
+    /* ✅ 5 */ configuration INT REFERENCES configuration(id),
+    /* ✅ 6 */ projection INT REFERENCES projection(id)
+  );
+  INSERT INTO widget (id, name, doodad, apparatus, configuration, projection) VALUES
+  (2, 'wow', 4, 9, 13, 57);
+  GRANT SELECT (id, name, doodad, configuration, projection) ON widget TO roland;
+
+  SET ROLE roland;
+
+  SELECT msar.get_record_from_table(
+    tab_id => 'widget'::regclass::oid,
+    rec_id => 2,
+    return_record_summaries => true,
+    table_record_summary_templates => jsonb_build_object(
+      'widget'::regclass::oid,
+      json_build_array(
+        '/', '[2]'::jsonb,       -- ✅ widget.name
+        '/', '[3, 2]'::jsonb,    -- ❌ widget.doodad.size
+        '/', '[3, 3]'::jsonb,    -- ✅ widget.doodad.color
+        '/', '[3, 4]'::jsonb,    -- ✅ widget.doodad.frobnicator
+        '/', '[3, 4, 1]'::jsonb, -- ❌ widget.doodad.frobnicator.id
+        '/', '[4]'::jsonb,       -- ❌ widget.apparatus
+        '/', '[4, 2]'::jsonb,    -- ❌ widget.apparatus.phase
+        '/', '[5]'::jsonb,       -- ✅ widget.configuration
+        '/', '[5, 2]'::jsonb,    -- ❌ widget.configuration.astral_plane
+        '/', '[6]'::jsonb,       -- ✅ widget.projection
+        '/', '[6, 2]'::jsonb     -- ❌ widget.projection.sensitivity (❌ because can't join)
+      )
+    )
+  ) INTO result;
+
+  RETURN NEXT is(
+    result -> 'record_summaries' ->> '2',
+    concat(
+      '/wow',       -- ✅ widget.name
+      '/',          -- ❌ widget.doodad.size
+      '/chartruse', -- ✅ widget.doodad.color
+      '/7',         -- ✅ widget.doodad.frobnicator
+      '/',          -- ❌ widget.doodad.frobnicator.id
+      '/',          -- ❌ widget.apparatus
+      '/',          -- ❌ widget.apparatus.phase
+      '/13',        -- ✅ widget.configuration
+      '/',          -- ❌ widget.configuration.astral_plane
+      '/57',        -- ✅ widget.projection
+      '/'           -- ❌ widget.projection.sensitivity (❌ because can't join)
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_record_to_table_with_preview() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_preview_fkey_cols();
