@@ -5380,12 +5380,11 @@ BEGIN
   EXECUTE format(
     $q$
     WITH insert_cte AS (%1$s RETURNING %2$s)
-    SELECT msar.format_data(%3$I)::text
+    SELECT *
     FROM insert_cte
     $q$,
     /* %1 */ msar.build_single_insert_expr(tab_id, rec_def),
-    /* %2 */ msar.build_selectable_column_expr(tab_id),
-    /* %3 */ msar.get_pk_column(tab_id)
+    /* %2 */ msar.get_column_name(tab_id, msar.get_pk_column(tab_id))
   ) INTO rec_created_id;
   rec_created := msar.get_record_from_table(
     tab_id,

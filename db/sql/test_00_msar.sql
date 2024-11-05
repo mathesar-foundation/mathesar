@@ -5665,8 +5665,22 @@ BEGIN
     ),
     '42501',
     'permission denied for table atable',
-    'Records patcher throws permission error when trying to patch without SELECT on id'
+    'Records patcher throws permission error when trying to patch without SELECT on pkey'
   );
+
+  RETURN NEXT throws_ok(
+    format(
+      $s$SELECT msar.add_record_to_table(
+        tab_id => %s,
+        rec_def => '{"2": 234, "3": "ab234", "4": {"key": "val"}, "5": {"key2": "val2"}}'::jsonb
+      );$s$,
+      rel_id
+    ),
+    '42501',
+    'permission denied for table atable',
+    'Record adder throws permission error when adding a record without SELECT on pkey'
+  );
+
 
   SET ROLE NONE;
   CREATE ROLE intern_students_only;
