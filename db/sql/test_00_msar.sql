@@ -3828,14 +3828,14 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION __setup_search_records_table() RETURNS SETOF TEXT AS $$
 BEGIN
-  CREATE TABLE atable (
+  CREATE TABLE search_table (
     id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     col1 integer,
     col2 varchar,
     coltodrop integer
   );
-  ALTER TABLE atable DROP COLUMN coltodrop;
-  INSERT INTO atable (col1, col2) VALUES
+  ALTER TABLE search_table DROP COLUMN coltodrop;
+  INSERT INTO search_table (col1, col2) VALUES
     (1, 'bcdea'),
     (12, 'vwxyz'),
     (1, 'edcba'),
@@ -3850,7 +3850,7 @@ DECLARE
   search_result jsonb;
 BEGIN
   PERFORM __setup_search_records_table();
-  rel_id := 'atable'::regclass::oid;
+  rel_id := 'search_table'::regclass::oid;
   search_result := msar.search_records_from_table(
     rel_id,
     jsonb_build_array(
@@ -5513,6 +5513,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   PERFORM __setup_preview_fkey_cols();
+  PERFORM __setup_search_records_table();
   rel_id := 'atable'::regclass::oid;
 
   CREATE ROLE intern_no_pkey;
@@ -5520,6 +5521,7 @@ BEGIN
   GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO intern_no_pkey;
   GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO intern_no_pkey;
   GRANT SELECT (col1, col2, col3, col4) ON TABLE atable TO intern_no_pkey;
+  GRANT SELECT (col1, col2) ON TABLE search_table TO intern_no_pkey;
   SET ROLE intern_no_pkey;
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -5648,12 +5650,44 @@ BEGIN
     }$j$,
     'ignore group column without permissions, use one with permissions'
   );
+
+  RETURN NEXT is(
+    msar.search_records_from_table(
+      'search_table'::regclass::oid,
+      jsonb_build_array(
+        jsonb_build_object('attnum', 3, 'literal', 'bc')
+      ),
+      null
+    ) -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('2', 1, '3', 'bcdea'),
+      jsonb_build_object('2', 2, '3', 'abcde')
+    ),
+    'search ignores unspecified columns without permissions'
+  );
+  RETURN NEXT is(
+    msar.search_records_from_table(
+      'search_table'::regclass::oid,
+      jsonb_build_array(
+        jsonb_build_object('attnum', 1, 'literal', 2),
+        jsonb_build_object('attnum', 3, 'literal', 'bc')
+      ),
+      null
+    ) -> 'results',
+    jsonb_build_array(
+      jsonb_build_object('2', 1, '3', 'bcdea'),
+      jsonb_build_object('2', 2, '3', 'abcde')
+    ),
+    'search ignores specified columns without permissions, uses other'
+  );
+
   RETURN NEXT throws_ok(
     format('SELECT msar.delete_records_from_table(%s, ''[2, 3]'')', rel_id),
     '42501',
     'permission denied for table atable',
     'Throw error when trying to delete without SELECT on id'
   );
+
   RETURN NEXT throws_ok(
     format(
       $s$SELECT msar.patch_record_in_table(
@@ -5756,6 +5790,25 @@ BEGIN
     '42501',
     'permission denied for table atable',
     'Records getter throws permission error'
+  );
+
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.search_records_from_table(%s, ''[{"attnum": 3, "literal": "bc"}]'', null);',
+      'search_table'::regclass::oid
+    ),
+    '42501',
+    'permission denied for table search_table',
+    'Records search throws permission error with nonempty search terms'
+  );
+  RETURN NEXT throws_ok(
+    format(
+      'SELECT msar.search_records_from_table(%s, ''[]'', null);',
+      'search_table'::regclass::oid
+    ),
+    '42501',
+    'permission denied for table search_table',
+    'Records search throws permission error with empty search terms'
   );
 END;
 $$ LANGUAGE plpgsql;

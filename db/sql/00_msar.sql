@@ -5220,7 +5220,7 @@ BEGIN
       SELECT count(1) AS count FROM %2$I.%3$I %4$s
     ),
     results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L
+      SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L
     ),
     summary_cte_self AS (%7$s) %8$s
     SELECT jsonb_build_object(
@@ -5228,19 +5228,22 @@ BEGIN
       'count', coalesce(max(count_cte.count), 0),
       'linked_record_summaries', %10$s,
       'record_summaries', %11$s,
-      'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
+      'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L$iq$
     )
     FROM results_cte %9$s
       CROSS JOIN count_cte
     $q$,
-    /* %1 */ msar.build_selectable_column_expr(tab_id),
+    /* %1 */ COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
     /* %2 */ msar.get_relation_schema_name(tab_id),
     /* %3 */ msar.get_relation_name(tab_id),
     /* %4 */ 'WHERE ' || msar.get_score_expr(tab_id, search_) || ' > 0',
     /* %5 */ limit_,
-    /* %6 */ concat(
-      msar.get_score_expr(tab_id, search_) || ' DESC, ',
-      msar.build_total_order_expr(tab_id, null)
+    /* %6 */ 'ORDER BY ' || NULLIF(
+      concat(
+        msar.get_score_expr(tab_id, search_) || ' DESC, ',
+        msar.build_total_order_expr(tab_id, null)
+      ),
+      ''
     ),
     /* %7 */ msar.build_record_summary_query_for_table(
       tab_id,
