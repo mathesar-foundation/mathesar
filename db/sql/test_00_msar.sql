@@ -1112,12 +1112,12 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION __setup_link_tables() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE actors (id SERIAL PRIMARY KEY, actor_name text);
-  INSERT INTO actors(actor_name) VALUES 
+  INSERT INTO actors(actor_name) VALUES
   ('Cillian Murphy'),
   ('Leonardo DiCaprio'),
   ('Margot Robbie'),
   ('Ryan Gosling'),
-  ('Ana de Armas'); 
+  ('Ana de Armas');
   CREATE TABLE movies (id SERIAL PRIMARY KEY, movie_name text);
   INSERT INTO movies(movie_name) VALUES
   ('The Wolf of Wall Street'),
@@ -1228,7 +1228,7 @@ CREATE OR REPLACE FUNCTION test_drop_schema_using_name() RETURNS SETOF TEXT AS $
 BEGIN
   PERFORM __setup_drop_schema();
   PERFORM msar.drop_schema(
-    sch_name => 'drop_test_schema', 
+    sch_name => 'drop_test_schema',
     cascade_ => false
   );
   RETURN NEXT hasnt_schema('drop_test_schema');
@@ -1238,7 +1238,7 @@ BEGIN
         sch_name => 'drop_non_existing_schema',
         cascade_ => false
       )
-    $d$, 
+    $d$,
     '3F000'
   );
 END;
@@ -2567,7 +2567,7 @@ BEGIN
 
   RETURN NEXT ok(msar.get_valid_target_type_strings('text'::regtype::oid) @> '["numeric", "text"]');
   RETURN NEXT is(jsonb_array_length(msar.get_valid_target_type_strings('text'::regtype::oid)), 2);
-  
+
   RETURN NEXT is(msar.get_valid_target_type_strings('interval'), NULL);
 END;
 $$ LANGUAGE plpgsql;
@@ -2738,7 +2738,7 @@ BEGIN
   COMMENT ON TABLE pi.one IS 'first decimal digit of pi';
 
   CREATE SCHEMA alice;
-  -- No tables in the schema  
+  -- No tables in the schema
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3535,7 +3535,7 @@ BEGIN
             "create_db": false,
             "create_role": false,
             "description": null
-          }, 
+          },
           {
             "oid": %3$s,
             "name": "parent2",
@@ -4055,7 +4055,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  
+
   -- We should be able to retrieve a single record
   RETURN NEXT is(msar.get_record_from_table(rel_id, 2) -> 'results', record_2_results);
 
@@ -4463,7 +4463,7 @@ CREATE TABLE "Students" (
   /* attnum: 6 */ "Email" text
 );
 
-INSERT INTO "Counselors" 
+INSERT INTO "Counselors"
   ( coid  , "Name"         , "Email"                 ) VALUES
   ( 1.234 , 'Alice Alison' , 'aalison@example.edu'   ),
   ( 2.345 , 'Bob Bobinson' , 'bbobinson@example.edu' );
@@ -4640,7 +4640,7 @@ BEGIN
         '"Students"'::regclass::oid,
         '[[4], " ", [5], "% - (", [3, 3], " / ", [3, 2, 2], ")"]'::jsonb
       )
-    ) -> 'record_summaries' ->> '4', 
+    ) -> 'record_summaries' ->> '4',
     'Ida Idalia 90% - (Carol Carlson / Alice Alison)'
   );
 END;
@@ -4661,7 +4661,7 @@ BEGIN
         '"Students"'::regclass::oid,
         '[[4], " ", [5], "% - \"", [3, 3], " <", [3, 4], ">\""]'::jsonb
       )
-    ) -> 'record_summaries' ->> '7', 
+    ) -> 'record_summaries' ->> '7',
     'Arnold Baker % - "Neil Smith <>"'
   );
 END;
@@ -4684,7 +4684,7 @@ BEGIN
         '"Students"'::regclass::oid,
         'null'::jsonb
       )
-    ) -> 'record_summaries' ->> '2', 
+    ) -> 'record_summaries' ->> '2',
     'Gabby Gabberson'
   );
 END;

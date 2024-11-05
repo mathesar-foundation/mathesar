@@ -144,7 +144,7 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 __msar.exec_dql(command text) RETURNS jsonb AS $$/*
 Execute the given command, returning a JSON object describing the records in the following form:
-[ 
+[
   {"id": 1, "col1_name": "value1", "col2_name": "value2"},
   {"id": 2, "col1_name": "value1", "col2_name": "value2"},
   {"id": 3, "col1_name": "value1", "col2_name": "value2"},
@@ -172,7 +172,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION
 __msar.exec_dql(command_template text, arguments variadic anyarray) RETURNS jsonb AS $$/*
 Execute a templated command, returning a JSON object describing the records in the following form:
-[ 
+[
   {"id": 1, "col1_name": "value1", "col2_name": "value2"},
   {"id": 2, "col1_name": "value1", "col2_name": "value2"},
   {"id": 3, "col1_name": "value1", "col2_name": "value2"},
@@ -1063,7 +1063,7 @@ SELECT coalesce(
   ),
   '[]'::jsonb
 )
-FROM pg_catalog.pg_class AS pgc 
+FROM pg_catalog.pg_class AS pgc
   LEFT JOIN pg_catalog.pg_namespace AS pgn ON pgc.relnamespace = pgn.oid
 WHERE pgc.relnamespace = sch_id AND pgc.relkind = 'r';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -1093,7 +1093,7 @@ CREATE OR REPLACE FUNCTION msar.schema_info_table() RETURNS TABLE
   current_role_owns boolean, -- Whether the current role owns the schema.
   table_count integer -- The number of tables in the schema.
 ) AS $$
-SELECT 
+SELECT
   s.oid::bigint AS oid,
   s.nspname AS name,
   pg_catalog.obj_description(s.oid) AS description,
@@ -3144,7 +3144,7 @@ BEGIN
   relation_name := __msar.get_qualified_relation_name_or_null(tab_id);
   -- if_exists doesn't work while working with oids because
   -- the SQL query gets parameterized with tab_id instead of relation_name
-  -- since we're unable to find the relation_name for a non existing table. 
+  -- since we're unable to find the relation_name for a non existing table.
   PERFORM __msar.drop_table(relation_name, cascade_, if_exists => false);
   RETURN relation_name;
 END;
@@ -3449,7 +3449,7 @@ BEGIN
     ) AS cast_expr
     FROM jsonb_array_elements(col_cast_def) AS col_cast
   )
-  SELECT 
+  SELECT
     __msar.exec_dql(sel_query, cast_expr, tab_name, rec_limit::text)
   INTO records FROM preview_cte;
   RETURN records;
@@ -3883,7 +3883,7 @@ BEGIN
   END IF;
 
   -- Here, we perform all description-changing alterations.
-  FOR description_alter IN 
+  FOR description_alter IN
     SELECT
       (col_alter->>'attnum')::integer AS col_id,
       col_alter->>'description' AS comment_
@@ -4019,7 +4019,7 @@ msar.add_foreign_key_column(
   rel_id oid,
   frel_id oid,
   unique_link boolean DEFAULT false
-) RETURNS smallint AS $$/* 
+) RETURNS smallint AS $$/*
 Create a many-to-one or a one-to-one link between tables, returning the attnum of the newly created
 column, returning the attnum of the added column.
 
@@ -4778,7 +4778,7 @@ CREATE OR REPLACE FUNCTION msar.build_record_summary_query_from_template(
   Args:
     tab_id: The OID of the table for which to generate a record summary query.
     template: A JSON array that represents the record summary template (described in detail below).
-    
+
   Example template:
 
     [
@@ -4798,7 +4798,7 @@ CREATE OR REPLACE FUNCTION msar.build_record_summary_query_from_template(
   contains more than one column reference, it represents a chain of FK columns starting from
   the base table and ending with a non-FK column. This function follows the foreign keys to
   produce the joins. Multi-column FK constraints are not supported.
-  
+
   Return value: a stringified query which produces a result set matching the structure described
     in the return value of msar.get_record_summaries_via_query.
 */
