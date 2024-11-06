@@ -5155,15 +5155,15 @@ BEGIN
       LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %14$s
       CROSS JOIN count_cte
     $q$,
-    /* %1 */ msar.build_selectable_column_expr(tab_id),
+    /* %1 */ COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
     /* %2 */ msar.get_relation_schema_name(tab_id),
     /* %3 */ msar.get_relation_name(tab_id),
     /* %4 */ limit_,
     /* %5 */ offset_,
     /* %6 */ msar.build_order_by_expr(tab_id, order_),
     /* %7 */ msar.build_where_clause(tab_id, filter_),
-    /* %8 */ msar.build_grouping_expr(tab_id, group_),
-    /* %9 */ msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_),
+    /* %8 */ COALESCE(msar.build_grouping_expr(tab_id, group_), 'NULL'),
+    /* %9 */ COALESCE(msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_), 'NULL'),
     /* %10 */ COALESCE(
       msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_),
       'NULL'
@@ -5252,7 +5252,7 @@ BEGIN
       SELECT count(1) AS count FROM %2$I.%3$I %4$s
     ),
     results_cte AS (
-      SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L
+      SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L
     ),
     summary_cte_self AS (%7$s) %8$s
     SELECT jsonb_build_object(
@@ -5260,19 +5260,22 @@ BEGIN
       'count', coalesce(max(count_cte.count), 0),
       'linked_record_summaries', %10$s,
       'record_summaries', %11$s,
-      'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s ORDER BY %6$s LIMIT %5$L$iq$
+      'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L$iq$
     )
     FROM results_cte %9$s
       CROSS JOIN count_cte
     $q$,
-    /* %1 */ msar.build_selectable_column_expr(tab_id),
+    /* %1 */ COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
     /* %2 */ msar.get_relation_schema_name(tab_id),
     /* %3 */ msar.get_relation_name(tab_id),
     /* %4 */ 'WHERE ' || msar.get_score_expr(tab_id, search_) || ' > 0',
     /* %5 */ limit_,
-    /* %6 */ concat(
-      msar.get_score_expr(tab_id, search_) || ' DESC, ',
-      msar.build_total_order_expr(tab_id, null)
+    /* %6 */ 'ORDER BY ' || NULLIF(
+      concat(
+        msar.get_score_expr(tab_id, search_) || ' DESC, ',
+        msar.build_total_order_expr(tab_id, null)
+      ),
+      ''
     ),
     /* %7 */ msar.build_record_summary_query_for_table(
       tab_id,
@@ -5412,12 +5415,11 @@ BEGIN
   EXECUTE format(
     $q$
     WITH insert_cte AS (%1$s RETURNING %2$s)
-    SELECT msar.format_data(%3$I)::text
+    SELECT *
     FROM insert_cte
     $q$,
     /* %1 */ msar.build_single_insert_expr(tab_id, rec_def),
-    /* %2 */ msar.build_selectable_column_expr(tab_id),
-    /* %3 */ msar.get_pk_column(tab_id)
+    /* %2 */ msar.get_column_name(tab_id, msar.get_pk_column(tab_id))
   ) INTO rec_created_id;
   rec_created := msar.get_record_from_table(
     tab_id,
@@ -5475,8 +5477,8 @@ DECLARE
 BEGIN
   EXECUTE format(
     $p$
-    WITH update_cte AS (%1$s %2$s RETURNING %3$s)
-    SELECT msar.format_data(%4$I)::text FROM update_cte
+    WITH update_cte AS (%1$s %2$s RETURNING %3$I)
+    SELECT * FROM update_cte
     $p$,
     msar.build_update_expr(tab_id, rec_def),
     msar.build_where_clause(
@@ -5487,8 +5489,7 @@ BEGIN
         )
       )
     ),
-    msar.build_selectable_column_expr(tab_id),
-    msar.get_pk_column(tab_id)
+    msar.get_column_name(tab_id, msar.get_pk_column(tab_id))
   ) INTO rec_modified_id;
   rec_modified := msar.get_record_from_table(
     tab_id,
