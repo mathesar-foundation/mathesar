@@ -1112,12 +1112,12 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION __setup_link_tables() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE actors (id SERIAL PRIMARY KEY, actor_name text);
-  INSERT INTO actors(actor_name) VALUES 
+  INSERT INTO actors(actor_name) VALUES
   ('Cillian Murphy'),
   ('Leonardo DiCaprio'),
   ('Margot Robbie'),
   ('Ryan Gosling'),
-  ('Ana de Armas'); 
+  ('Ana de Armas');
   CREATE TABLE movies (id SERIAL PRIMARY KEY, movie_name text);
   INSERT INTO movies(movie_name) VALUES
   ('The Wolf of Wall Street'),
@@ -1228,7 +1228,7 @@ CREATE OR REPLACE FUNCTION test_drop_schema_using_name() RETURNS SETOF TEXT AS $
 BEGIN
   PERFORM __setup_drop_schema();
   PERFORM msar.drop_schema(
-    sch_name => 'drop_test_schema', 
+    sch_name => 'drop_test_schema',
     cascade_ => false
   );
   RETURN NEXT hasnt_schema('drop_test_schema');
@@ -1238,7 +1238,7 @@ BEGIN
         sch_name => 'drop_non_existing_schema',
         cascade_ => false
       )
-    $d$, 
+    $d$,
     '3F000'
   );
 END;
@@ -2567,7 +2567,7 @@ BEGIN
 
   RETURN NEXT ok(msar.get_valid_target_type_strings('text'::regtype::oid) @> '["numeric", "text"]');
   RETURN NEXT is(jsonb_array_length(msar.get_valid_target_type_strings('text'::regtype::oid)), 2);
-  
+
   RETURN NEXT is(msar.get_valid_target_type_strings('interval'), NULL);
 END;
 $$ LANGUAGE plpgsql;
@@ -2738,7 +2738,7 @@ BEGIN
   COMMENT ON TABLE pi.one IS 'first decimal digit of pi';
 
   CREATE SCHEMA alice;
-  -- No tables in the schema  
+  -- No tables in the schema
 END;
 $$ LANGUAGE plpgsql;
 
@@ -3535,7 +3535,7 @@ BEGIN
             "create_db": false,
             "create_role": false,
             "description": null
-          }, 
+          },
           {
             "oid": %3$s,
             "name": "parent2",
@@ -4055,7 +4055,7 @@ DECLARE
 BEGIN
   PERFORM __setup_list_records_table();
   rel_id := 'atable'::regclass::oid;
-  
+
   -- We should be able to retrieve a single record
   RETURN NEXT is(msar.get_record_from_table(rel_id, 2) -> 'results', record_2_results);
 
@@ -4463,7 +4463,7 @@ CREATE TABLE "Students" (
   /* attnum: 6 */ "Email" text
 );
 
-INSERT INTO "Counselors" 
+INSERT INTO "Counselors"
   ( coid  , "Name"         , "Email"                 ) VALUES
   ( 1.234 , 'Alice Alison' , 'aalison@example.edu'   ),
   ( 2.345 , 'Bob Bobinson' , 'bbobinson@example.edu' );
@@ -4640,7 +4640,7 @@ BEGIN
         '"Students"'::regclass::oid,
         '[[4], " ", [5], "% - (", [3, 3], " / ", [3, 2, 2], ")"]'::jsonb
       )
-    ) -> 'record_summaries' ->> '4', 
+    ) -> 'record_summaries' ->> '4',
     'Ida Idalia 90% - (Carol Carlson / Alice Alison)'
   );
 END;
@@ -4661,7 +4661,7 @@ BEGIN
         '"Students"'::regclass::oid,
         '[[4], " ", [5], "% - \"", [3, 3], " <", [3, 4], ">\""]'::jsonb
       )
-    ) -> 'record_summaries' ->> '7', 
+    ) -> 'record_summaries' ->> '7',
     'Arnold Baker % - "Neil Smith <>"'
   );
 END;
@@ -4684,7 +4684,7 @@ BEGIN
         '"Students"'::regclass::oid,
         'null'::jsonb
       )
-    ) -> 'record_summaries' ->> '2', 
+    ) -> 'record_summaries' ->> '2',
     'Gabby Gabberson'
   );
 END;
@@ -4709,6 +4709,118 @@ BEGIN
       return_record_summaries => true
     ) -> 'record_summaries',
     'null'::jsonb
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_record_summary_with_limited_privileges() RETURNS SETOF TEXT AS $$
+DECLARE result jsonb;
+BEGIN
+  CREATE ROLE roland;
+
+  GRANT USAGE ON SCHEMA __msar, msar TO roland;
+  GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA msar, __msar TO roland;
+  GRANT SELECT ON ALL TABLES IN SCHEMA msar, __msar TO roland;
+
+  -- Tables:
+  --
+  -- widget
+  -- ┣━ doodad
+  -- ┃  ┗━ frobnicator
+  -- ┣━ apparatus
+  -- ┣━ configuration
+  -- ┗━ projection
+  --
+  -- ✅ = roland can SELECT
+  -- ❌ = roland cannot SELECT
+
+  CREATE TABLE frobnicator (
+    /* ❌ */ id INT PRIMARY KEY,
+    /* ❌ */ frequency INT
+  );
+  INSERT INTO frobnicator (id, frequency) VALUES (7, 7);
+
+  CREATE TABLE doodad (
+    /* ✅ */ id INT PRIMARY KEY,
+    /* ❌ */ size INT,
+    /* ✅ */ color TEXT,
+    /* ✅ */ frobnicator INT REFERENCES frobnicator(id)
+  );
+  INSERT INTO doodad (id, size, color, frobnicator) VALUES (4, 3, 'chartruse', 7);
+  GRANT SELECT (id, color, frobnicator) ON doodad TO roland;
+
+  CREATE TABLE apparatus (
+    /* ✅ */ id INT PRIMARY KEY,
+    /* ✅ */ phase INT
+  );
+  INSERT INTO apparatus (id, phase) VALUES (9, 4);
+  GRANT SELECT ON apparatus TO roland;
+
+  CREATE TABLE configuration (
+    /* ❌ */ id INT PRIMARY KEY,
+    /* ❌ */ astral_plane TEXT
+  );
+  INSERT INTO configuration (id, astral_plane) VALUES (13, 'Etheric');
+
+  CREATE TABLE projection (
+    /* ❌ */ id INT PRIMARY KEY,
+    /* ✅ */ sensitivity INT
+  );
+  INSERT INTO projection (id, sensitivity) VALUES (57, 27);
+  GRANT SELECT (sensitivity) ON projection TO roland;
+
+  CREATE TABLE widget (
+    /* ✅ 1 */ id INT PRIMARY KEY,
+    /* ✅ 2 */ name TEXT NOT NULL,
+    /* ✅ 3 */ doodad INT REFERENCES doodad(id),
+    /* ❌ 4 */ apparatus INT REFERENCES apparatus(id),
+    /* ✅ 5 */ configuration INT REFERENCES configuration(id),
+    /* ✅ 6 */ projection INT REFERENCES projection(id)
+  );
+  INSERT INTO widget (id, name, doodad, apparatus, configuration, projection) VALUES
+  (2, 'wow', 4, 9, 13, 57);
+  GRANT SELECT (id, name, doodad, configuration, projection) ON widget TO roland;
+
+  SET ROLE roland;
+
+  SELECT msar.get_record_from_table(
+    tab_id => 'widget'::regclass::oid,
+    rec_id => 2,
+    return_record_summaries => true,
+    table_record_summary_templates => jsonb_build_object(
+      'widget'::regclass::oid,
+      json_build_array(
+        '/', '[2]'::jsonb,       -- ✅ widget.name
+        '/', '[3, 2]'::jsonb,    -- ❌ widget.doodad.size
+        '/', '[3, 3]'::jsonb,    -- ✅ widget.doodad.color
+        '/', '[3, 4]'::jsonb,    -- ✅ widget.doodad.frobnicator
+        '/', '[3, 4, 1]'::jsonb, -- ❌ widget.doodad.frobnicator.id
+        '/', '[4]'::jsonb,       -- ❌ widget.apparatus
+        '/', '[4, 2]'::jsonb,    -- ❌ widget.apparatus.phase
+        '/', '[5]'::jsonb,       -- ✅ widget.configuration
+        '/', '[5, 2]'::jsonb,    -- ❌ widget.configuration.astral_plane
+        '/', '[6]'::jsonb,       -- ✅ widget.projection
+        '/', '[6, 2]'::jsonb     -- ❌ widget.projection.sensitivity (❌ because can't join)
+      )
+    )
+  ) INTO result;
+
+  RETURN NEXT is(
+    result -> 'record_summaries' ->> '2',
+    concat(
+      '/wow',       -- ✅ widget.name
+      '/',          -- ❌ widget.doodad.size
+      '/chartruse', -- ✅ widget.doodad.color
+      '/7',         -- ✅ widget.doodad.frobnicator
+      '/',          -- ❌ widget.doodad.frobnicator.id
+      '/',          -- ❌ widget.apparatus
+      '/',          -- ❌ widget.apparatus.phase
+      '/13',        -- ✅ widget.configuration
+      '/',          -- ❌ widget.configuration.astral_plane
+      '/57',        -- ✅ widget.projection
+      '/'           -- ❌ widget.projection.sensitivity (❌ because can't join)
+    )
   );
 END;
 $$ LANGUAGE plpgsql;
