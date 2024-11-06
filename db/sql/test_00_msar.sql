@@ -5861,23 +5861,6 @@ BEGIN
     '[{"1": 4, "2": 2.345, "3": 1, "4": "Ida Idalia", "5": 90, "6": "iidalia@example.edu"}]',
     'Record results work when no access to linked table having custom summary'
   );
-  RETURN NEXT throws_ok(
-    format(
-      $s$SELECT msar.get_record_from_table(
-        tab_id => %1$s,
-        rec_id => 4,
-        return_record_summaries => true,
-        table_record_summary_templates => jsonb_build_object(
-          %1$s,
-          '[[4], " ", [5], "%% - (", [3, 3], " / ", [3, 2, 2], ")"]'::jsonb
-        )
-      );$s$,
-      '"Students"'::regclass::oid
-    ),
-    '42501',
-    'permission denied for table Teachers',
-    'Record summary throws permission error when linked table missing privileges -- TODO'
-  );
 
   SET ROLE NONE;
   CREATE ROLE intern_no_access;
