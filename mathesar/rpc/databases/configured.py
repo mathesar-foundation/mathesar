@@ -1,11 +1,27 @@
 from typing import TypedDict
 
+from opentelemetry import metrics
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import ConsoleMetricExporter
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.models.base import Database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
+
+_meter = metrics.get_meter(__name__)
+_readers = [PeriodicExportingMetricReader(OTLPMetricExporter(endpoint="http://host.docker.internal:4318/v1/metrics"), \
+                                                                export_interval_millis=1000, \
+                                                                export_timeout_millis=2000),
+            PeriodicExportingMetricReader(ConsoleMetricExporter())
+            ]
+metrics.set_meter_provider(MeterProvider( metric_readers= _readers))
+_number_of_api_calls_counter = _meter.create_counter("configureddatabases.count", \
+                                                description="Number of count of configured databases", \
+                                                unit="1")
 
 class ConfiguredDatabaseInfo(TypedDict):
     """
@@ -56,7 +72,7 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
         ) if server_id is not None else Database.objects.filter(
             userdatabaserolemap__user=user
         )
-
+    _number_of_api_calls_counter.add(1, { "database": "db" })
     return [ConfiguredDatabaseInfo.from_model(db_model) for db_model in database_qs]
 
 
