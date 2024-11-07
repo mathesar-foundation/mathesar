@@ -42,6 +42,15 @@ class Database(BaseModel):
             )
         ]
 
+    def connect(self, role, password):
+        return psycopg.connect(
+            host=self.server.host,
+            port=self.server.port,
+            dbname=self.name,
+            user=role,
+            password=password,
+        )
+
 
 class ConfiguredRole(BaseModel):
     name = models.CharField(max_length=255)
