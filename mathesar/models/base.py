@@ -5,6 +5,8 @@ from django.db import models
 from encrypted_fields.fields import EncryptedCharField
 import psycopg
 
+from mathesar.models import exceptions
+
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -42,7 +44,16 @@ class Database(BaseModel):
             )
         ]
 
-    def connect(self, role, password):
+    def connect_user(self, user):
+        """Return the given user's connection to the database."""
+        try:
+            role_map = UserDatabaseRoleMap.objects.get(user=user, database=self)
+        except UserDatabaseRoleMap.DoesNotExist:
+            raise exceptions.NoConnectionAvailable
+        return role_map.connection
+
+    def connect_manually(self, role, password):
+        """Return a connection to the Database using the role and password."""
         return psycopg.connect(
             host=self.server.host,
             port=self.server.port,
@@ -50,6 +61,39 @@ class Database(BaseModel):
             user=role,
             password=password,
         )
+
+    def connect_admin(self):
+        """
+        Return a connection using the role that installed Mathesar.
+
+        Note that this function should be used with care, since the
+        connection has privileges to modify Mathesar's system schemata.
+        """
+        admin_role_query = """
+        SELECT nspowner::regrole::text
+        FROM pg_namespace
+        WHERE nspname='msar';
+        """
+
+        for role_map in UserDatabaseRoleMap.objects.filter(database=self):
+            try:
+                with role_map.connection as conn:
+                    admin_role_name = conn.execute(admin_role_query).fetchone()[0]
+                    assert admin_role_name is not None
+                    break
+            except Exception:
+                pass
+        else:
+            raise exceptions.NoConnectionAvailable
+
+        try:
+            role = ConfiguredRole.objects.get(
+                name=admin_role_name, server=self.server
+            )
+        except ConfiguredRole.DoesNotExist:
+            raise exceptions.NoAdminConnectionAvailable
+
+        return self.connect_manually(role.name, role.password)
 
 
 class ConfiguredRole(BaseModel):
