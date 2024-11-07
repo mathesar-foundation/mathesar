@@ -1,4 +1,4 @@
-from django.db import connection as internal_conn, transaction
+from django.db import transaction
 from django.conf import settings
 import psycopg
 from psycopg.errors import DuplicateSchema

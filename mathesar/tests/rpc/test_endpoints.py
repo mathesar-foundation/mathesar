@@ -131,6 +131,11 @@ METHODS = [
         "databases.delete",
         [user_is_authenticated]
     ),
+    (
+        databases.upgrade_sql,
+        "databases.upgrade_sql",
+        [user_is_superuser]
+    ),
 
     (
         databases.configured.list_,

@@ -162,6 +162,7 @@ Unrecognized errors from a given library return a "round number" code, so an unk
       members:
       - get
       - delete
+      - upgrade_sql
       - DatabaseInfo
 
 ## Database Privileges
