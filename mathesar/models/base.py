@@ -5,6 +5,8 @@ from django.db import models
 from encrypted_fields.fields import EncryptedCharField
 import psycopg
 
+from db.sql.install import install as install_sql
+from mathesar import __version__
 from mathesar.models import exceptions
 
 
@@ -33,6 +35,7 @@ class Database(BaseModel):
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='databases'
     )
+    last_confirmed_sql_version = models.CharField(default='0.0.0')
 
     class Meta:
         constraints = [
@@ -43,6 +46,22 @@ class Database(BaseModel):
                 fields=["id", "server"], name="database_id_server_index"
             )
         ]
+
+    @property
+    def needs_upgrade_attention(self):
+        return self.last_confirmed_sql_version != __version__
+
+    def install_sql(self, username = None, password = None):
+        if username is not None and password is not None:
+            with self.connect_manually(username, password) as conn:
+                install_sql(conn)
+        else:
+            with self.connect_admin() as conn:
+                install_sql(conn)
+
+        self.last_confirmed_sql_version=__version__
+        self.save()
+
 
     def connect_user(self, user):
         """Return the given user's connection to the database."""
