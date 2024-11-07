@@ -19,13 +19,17 @@ class ConfiguredDatabaseInfo(TypedDict):
     id: int
     name: str
     server_id: int
+    last_confirmed_sql_version: str
+    needs_upgrade_attention: bool
 
     @classmethod
     def from_model(cls, model):
         return cls(
             id=model.id,
             name=model.name,
-            server_id=model.server.id
+            server_id=model.server.id,
+            last_confirmed_sql_version=model.last_confirmed_sql_version,
+            needs_upgrade_attention=model.needs_upgrade_attention,
         )
 
 

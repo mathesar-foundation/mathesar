@@ -4,7 +4,6 @@ import psycopg
 from psycopg.errors import DuplicateSchema
 
 from db.databases import create_database
-from db.sql.install import install as install_sql
 from mathesar.examples.library_dataset import load_library_dataset
 from mathesar.examples.movies_dataset import load_movies_dataset
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
@@ -52,8 +51,10 @@ def set_up_new_database_for_user_on_internal_server(
             password=conn_info[PASSWORD],
     ) as root_conn:
         create_database(database_name, root_conn)
+    user_database_role.database.install_sql(
+        username=conn_info[USER], password=conn_info[PASSWORD]
+    )
     with user_database_role.connection as conn:
-        install_sql(conn)
         _load_sample_data(conn, sample_data)
     return user_database_role
 
@@ -74,8 +75,11 @@ def set_up_preexisting_database_for_user(
     user_database_role = _setup_connection_models(
         host, port, database_name, role_name, password, user
     )
+    user_database_role.database.install_sql(
+        username=user_database_role.configured_role.name,
+        password=user_database_role.configured_role.password,
+    )
     with user_database_role.connection as conn:
-        install_sql(conn)
         _load_sample_data(conn, sample_data)
     return user_database_role
 

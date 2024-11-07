@@ -7,7 +7,6 @@ from modernrpc.auth.basic import (
 )
 
 from db.databases import get_database, drop_database
-from db.sql.install import install as install_sql
 from mathesar.models.base import Database
 from mathesar.rpc.utils import connect
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -83,7 +82,10 @@ def upgrade_sql(
         *, database_id: int, username: str = None, password: str = None
 ) -> None:
     """
-    Upgrade the Mathesar SQL on a database
+    Install, Upgrade, or Reinstall the Mathesar SQL on a database.
+
+    The default is to first determine the role which owns the `msar`
+    schema on the database, then use that role for the upgrade.
 
     Args:
         database_id: The Django id of the database.
@@ -91,9 +93,4 @@ def upgrade_sql(
         password: The password of the role used for upgrading.
     """
     database = Database.objects.get(id=database_id)
-    if username is not None and password is not None:
-        with database.connect_manually(username, password) as conn:
-            install_sql(conn)
-    else:
-        with database.connect_admin() as conn:
-            install_sql(conn)
+    database.install_sql(username=username, password=password)

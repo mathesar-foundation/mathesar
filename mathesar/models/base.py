@@ -51,7 +51,7 @@ class Database(BaseModel):
     def needs_upgrade_attention(self):
         return self.last_confirmed_sql_version != __version__
 
-    def install_sql(self, username = None, password = None):
+    def install_sql(self, username=None, password=None):
         if username is not None and password is not None:
             with self.connect_manually(username, password) as conn:
                 install_sql(conn)
@@ -59,9 +59,8 @@ class Database(BaseModel):
             with self.connect_admin() as conn:
                 install_sql(conn)
 
-        self.last_confirmed_sql_version=__version__
+        self.last_confirmed_sql_version = __version__
         self.save()
-
 
     def connect_user(self, user):
         """Return the given user's connection to the database."""
