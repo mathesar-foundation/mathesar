@@ -9,7 +9,6 @@ Fixtures:
 import json
 from contextlib import contextmanager
 
-from db.columns import _transform_column_alter_dict, _transform_column_create_dict
 from mathesar.rpc import columns
 from mathesar.models.users import User
 
@@ -109,9 +108,7 @@ def test_columns_patch(rf, monkeypatch, mocked_exec_msar_func):
         request=request
     )
     call_args = mocked_exec_msar_func.call_args_list[0][0]
-    transformed_column_data = [
-        _transform_column_alter_dict(column) for column in column_data_list
-    ]
+    transformed_column_data = [{'attnum': 3, 'name': 'newname'}]
     assert actual_result == 1
     assert call_args[2] == table_oid
     assert call_args[3] == json.dumps(transformed_column_data)
@@ -144,7 +141,10 @@ def test_columns_add(rf, monkeypatch, mocked_exec_msar_func):
     )
     call_args = mocked_exec_msar_func.call_args_list[0][0]
     transformed_column_data = [
-        _transform_column_create_dict(column) for column in column_data_list
+        {
+            'name': 'newname', 'type': {'name': 'character varying', 'options': {}},
+            'not_null': False, 'default': None, 'description': None
+        }
     ]
     assert actual_result == [3, 4]
     assert call_args[2] == table_oid

@@ -10,7 +10,6 @@ import json
 from decimal import Decimal
 from contextlib import contextmanager
 
-from db.columns import _transform_column_alter_dict
 from db.tables import prepare_table_for_import
 from db.deprecated.types.base import PostgresType
 from mathesar.rpc import tables
@@ -283,7 +282,11 @@ def test_tables_preview(rf, monkeypatch, mocked_exec_msar_func):
         request=request
     )
     call_args = mocked_exec_msar_func.call_args_list[0][0]
-    transformed_col_list = [_transform_column_alter_dict(col) for col in column_list]
+    transformed_col_list = [
+        {
+            'attnum': 2, 'type': {'name': 'numeric', 'options': {'precision': 3, 'scale': 2}}
+        }
+    ]
     assert records == expected_records_list
     assert call_args[2] == table_oid
     assert call_args[3] == json.dumps(transformed_col_list)
