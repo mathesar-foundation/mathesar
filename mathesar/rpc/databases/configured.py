@@ -15,6 +15,10 @@ class ConfiguredDatabaseInfo(TypedDict):
         id: the Django ID of the database model instance.
         name: The name of the database on the server.
         server_id: the Django ID of the server model instance for the database.
+        last_confirmed_sql_version: The last version of the SQL scripts which
+            were confirmed to have been run on this database.
+        needs_upgrade_attention: This is `True` if the SQL version isn't the
+            same as the service version.
     """
     id: int
     name: str
