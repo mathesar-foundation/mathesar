@@ -77,6 +77,15 @@ module.exports = {
         ignoreDeclarationSort: true,
       },
     ],
+    'svelte/block-lang': [
+      'error',
+      {
+        enforceScriptPresent: true,
+        enforceStylePresent: false,
+        script: ['ts'],
+        style: ['scss', null],
+      },
+    ],
   },
   overrides: [
     {
@@ -225,6 +234,12 @@ module.exports = {
         '@typescript-eslint/no-unused-expressions': 'off',
         '@typescript-eslint/semi': 'off',
         '@typescript-eslint/comma-dangle': 'off',
+      },
+    },
+    {
+      files: ['**/__meta__/*.svelte'],
+      rules: {
+        'svelte/block-lang': 'off',
       },
     },
   ],

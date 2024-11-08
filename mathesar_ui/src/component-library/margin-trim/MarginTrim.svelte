@@ -1,6 +1,7 @@
 <!--
   @component Trims the outer margins of its children.
 -->
+<script lang="ts"></script>
 
 <div class="margin-trim">
   <slot />
