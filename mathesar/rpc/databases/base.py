@@ -84,8 +84,9 @@ def upgrade_sql(
     """
     Install, Upgrade, or Reinstall the Mathesar SQL on a database.
 
-    The default is to first determine the role which owns the `msar`
-    schema on the database, then use that role for the upgrade.
+    If no `username` and `password` are submitted, we will determine the
+    role which owns the `msar` schema on the database, then use that role
+    for the upgrade.
 
     Args:
         database_id: The Django id of the database.
