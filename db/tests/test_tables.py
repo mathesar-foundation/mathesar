@@ -1,10 +1,10 @@
 import json
 from unittest.mock import patch
-from db import tables
+from db import connection, tables
 
 
 def test_get_table_info():
-    with patch.object(tables, 'exec_msar_func') as mock_exec:
+    with patch.object(connection, 'exec_msar_func') as mock_exec:
         mock_exec.return_value.fetchone = lambda: ('a', 'b')
         result = tables.get_table_info('schema', 'conn')
     mock_exec.assert_called_once_with('conn', 'get_table_info', 'schema')
@@ -12,7 +12,7 @@ def test_get_table_info():
 
 
 def test_alter_table():
-    with patch.object(tables, 'exec_msar_func') as mock_exec:
+    with patch.object(connection, 'exec_msar_func') as mock_exec:
         tables.alter_table_on_database(
             12345,
             {"name": "newname", "description": "this is a comment", "columns": {}},
