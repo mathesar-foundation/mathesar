@@ -1,26 +1,55 @@
+import uuid
+
 from typing import TypedDict
 
 from opentelemetry import metrics
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
-from opentelemetry.sdk.metrics.export import ConsoleMetricExporter
+from opentelemetry.sdk.metrics.export import (
+    ConsoleMetricExporter,
+    PeriodicExportingMetricReader,
+)
+
 from modernrpc.core import rpc_method, REQUEST_KEY
 from modernrpc.auth.basic import http_basic_auth_login_required
 
 from mathesar.models.base import Database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
+# Each installation needs to have an unique uuid
+# Delta is more reasonable for us when we use counters, but Prometheus only supports cummulative
+# For cummulative, we need a unique uuid for each restart i.e. each runtime session, and the querying becomes complex.
+#   - We need to get the sum of max_over_time (value) in the selected range
 
+session_uuid = str(uuid.uuid4())
 _meter = metrics.get_meter(__name__)
-_readers = [PeriodicExportingMetricReader(OTLPMetricExporter(endpoint="http://host.docker.internal:4318/v1/metrics"), \
-                                                                export_interval_millis=1000, \
-                                                                export_timeout_millis=2000),
-            PeriodicExportingMetricReader(ConsoleMetricExporter())
+
+# deltaTemporality = {
+#     Counter: AggregationTemporality.DELTA,
+#     UpDownCounter: AggregationTemporality.CUMULATIVE,
+#     Histogram: AggregationTemporality.DELTA,
+#     ObservableCounter: AggregationTemporality.DELTA,
+#     ObservableUpDownCounter: AggregationTemporality.CUMULATIVE,
+#     ObservableGauge: AggregationTemporality.CUMULATIVE,
+# }
+# _exporter = OTLPMetricExporter(
+#     endpoint="http://host.docker.internal:4318/v1/metrics",
+#     preferred_temporality=deltaTemporality
+# )
+# _console_exporter=ConsoleMetricExporter(preferred_temporality=deltaTemporality)
+
+_exporter = OTLPMetricExporter(
+    endpoint="http://host.docker.internal:4318/v1/metrics"
+)
+_console_exporter=ConsoleMetricExporter()
+
+_readers = [PeriodicExportingMetricReader(_exporter, export_interval_millis=1000, export_timeout_millis=2000),
+            PeriodicExportingMetricReader(_console_exporter, export_interval_millis=1000)
             ]
-metrics.set_meter_provider(MeterProvider( metric_readers= _readers))
-_number_of_api_calls_counter = _meter.create_counter("configureddatabases.count", \
-                                                description="Number of count of configured databases", \
+metrics.set_meter_provider(MeterProvider(metric_readers=_readers))
+
+_number_of_api_calls_counter = _meter.create_counter("configured_databases_new.count", \
+                                                description="Number of configured databases", \
                                                 unit="1")
 
 class ConfiguredDatabaseInfo(TypedDict):
@@ -72,7 +101,7 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
         ) if server_id is not None else Database.objects.filter(
             userdatabaserolemap__user=user
         )
-    _number_of_api_calls_counter.add(1, { "database": "db" })
+    _number_of_api_calls_counter.add(1, { "session-uuid": session_uuid })
     return [ConfiguredDatabaseInfo.from_model(db_model) for db_model in database_qs]
 
 
