@@ -1,4 +1,4 @@
-from mathesar.models.base import UserDatabaseRoleMap
+from mathesar.models.base import Database
 
 
 def connect(database_id, user):
@@ -9,7 +9,4 @@ def connect(database_id, user):
         database_id: The Django id of the Database used for connecting.
         user: A user model instance who'll connect to the database.
     """
-    user_database_role = UserDatabaseRoleMap.objects.get(
-        user=user, database__id=database_id
-    )
-    return user_database_role.connection
+    return Database.objects.get(id=database_id).connect_user(user)

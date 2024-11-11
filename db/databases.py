@@ -17,3 +17,13 @@ def drop_database(database_oid, conn):
     ).fetchone()[0]
     cursor.execute(sql.SQL(drop_database_query))
     cursor.close()
+    conn.autocommit = False
+
+
+def create_database(database_name, conn):
+    """Use the given connection to create a database."""
+    conn.autocommit = True
+    conn.execute(
+        sql.SQL('CREATE DATABASE {}').format(sql.Identifier(database_name))
+    )
+    conn.autocommit = False

@@ -5,6 +5,10 @@ from django.db import models
 from encrypted_fields.fields import EncryptedCharField
 import psycopg
 
+from db.sql.install import install as install_sql
+from mathesar import __version__
+from mathesar.models import exceptions
+
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -31,6 +35,7 @@ class Database(BaseModel):
     server = models.ForeignKey(
         'Server', on_delete=models.CASCADE, related_name='databases'
     )
+    last_confirmed_sql_version = models.CharField(default='0.0.0')
 
     class Meta:
         constraints = [
@@ -41,6 +46,72 @@ class Database(BaseModel):
                 fields=["id", "server"], name="database_id_server_index"
             )
         ]
+
+    @property
+    def needs_upgrade_attention(self):
+        return self.last_confirmed_sql_version != __version__
+
+    def install_sql(self, username=None, password=None):
+        if username is not None and password is not None:
+            with self.connect_manually(username, password) as conn:
+                install_sql(conn)
+        else:
+            with self.connect_admin() as conn:
+                install_sql(conn)
+
+        self.last_confirmed_sql_version = __version__
+        self.save()
+
+    def connect_user(self, user):
+        """Return the given user's connection to the database."""
+        try:
+            role_map = UserDatabaseRoleMap.objects.get(user=user, database=self)
+        except UserDatabaseRoleMap.DoesNotExist:
+            raise exceptions.NoConnectionAvailable
+        return role_map.connection
+
+    def connect_manually(self, role, password):
+        """Return a connection to the Database using the role and password."""
+        return psycopg.connect(
+            host=self.server.host,
+            port=self.server.port,
+            dbname=self.name,
+            user=role,
+            password=password,
+        )
+
+    def connect_admin(self):
+        """
+        Return a connection using the role that installed Mathesar.
+
+        Note that this function should be used with care, since the
+        connection has privileges to modify Mathesar's system schemata.
+        """
+        admin_role_query = """
+        SELECT nspowner::regrole::text
+        FROM pg_catalog.pg_namespace
+        WHERE nspname='msar';
+        """
+
+        for role_map in UserDatabaseRoleMap.objects.filter(database=self):
+            try:
+                with role_map.connection as conn:
+                    admin_role_name = conn.execute(admin_role_query).fetchone()[0]
+                    assert admin_role_name is not None
+                    break
+            except Exception:
+                pass
+        else:
+            raise exceptions.NoConnectionAvailable
+
+        try:
+            role = ConfiguredRole.objects.get(
+                name=admin_role_name, server=self.server
+            )
+        except ConfiguredRole.DoesNotExist:
+            raise exceptions.NoAdminConnectionAvailable
+
+        return self.connect_manually(role.name, role.password)
 
 
 class ConfiguredRole(BaseModel):

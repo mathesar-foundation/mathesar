@@ -15,17 +15,25 @@ class ConfiguredDatabaseInfo(TypedDict):
         id: the Django ID of the database model instance.
         name: The name of the database on the server.
         server_id: the Django ID of the server model instance for the database.
+        last_confirmed_sql_version: The last version of the SQL scripts which
+            were confirmed to have been run on this database.
+        needs_upgrade_attention: This is `True` if the SQL version isn't the
+            same as the service version.
     """
     id: int
     name: str
     server_id: int
+    last_confirmed_sql_version: str
+    needs_upgrade_attention: bool
 
     @classmethod
     def from_model(cls, model):
         return cls(
             id=model.id,
             name=model.name,
-            server_id=model.server.id
+            server_id=model.server.id,
+            last_confirmed_sql_version=model.last_confirmed_sql_version,
+            needs_upgrade_attention=model.needs_upgrade_attention,
         )
 
 
