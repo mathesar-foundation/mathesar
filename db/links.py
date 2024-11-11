@@ -1,6 +1,6 @@
 import json
 
-from db.connection import exec_msar_func
+from db import connection as db_conn
 
 
 def add_foreign_key_column(
@@ -22,7 +22,7 @@ def add_foreign_key_column(
         unique_link: Whether to make the link one-to-one
                      instead of many-to-one.
     """
-    exec_msar_func(
+    db_conn.exec_msar_func(
         conn,
         'add_foreign_key_column',
         column_name,
@@ -51,7 +51,7 @@ def add_mapping_table(
     The elements of the mapping_columns list must have the form
         {"column_name": <str>, "referent_table_oid": <int>}
     """
-    exec_msar_func(
+    db_conn.exec_msar_func(
         conn,
         'add_mapping_table',
         schema_oid,
