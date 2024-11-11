@@ -1,9 +1,8 @@
 #!/usr/bin/env sh
 
-docker compose -f docker-compose.test.yml up \
-    --abort-on-container-exit \
-    --timeout 0 \
-    --force-recreate \
-    -V \
-    --exit-code-from test-runner \
-    test-runner test-user-db test-db api-test-service
+EXIT_CODE=0
+docker compose -f docker-compose.test.yml run --rm test-runner pytest -svv test_happy_db_setups.py
+# Needed once (if) we have multiple scenarios to test. This accumulates the max exit code.
+EXIT_CODE=$(( EXIT_CODE > $? ? EXIT_CODE : $? ))
+docker compose -f docker-compose.test.yml down -v -t 1
+exit $EXIT_CODE
