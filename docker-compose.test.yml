@@ -1,0 +1,57 @@
+---
+services:
+  test-db:
+    container_name: mathesar-test-db
+    extends:
+      file: docker-compose.dev.yml
+      service: dev-db-base
+    expose:
+      - "5432"
+    volumes:
+      - ./db/sql:/sql/
+    healthcheck:
+      interval: 1s
+      start_period: 2s
+  api-test-service:
+    container_name: mathesar-api-test-service
+    build:
+      context: .
+      target: testing
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
+    environment:
+      - MODE=DEVELOPMENT
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - SECRET_KEY=${SECRET_KEY}
+      - DJANGO_SUPERUSER_PASSWORD=password
+      - POSTGRES_DB=mathesar_django
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
+      - POSTGRES_HOST=mathesar-test-db
+      - POSTGRES_PORT=5432
+    volumes:
+      - .:/code/
+    depends_on:
+      test-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8000/ || exit 1"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+      start_period: 3s
+    expose:
+      - "8000"
+  test-runner:
+    container_name: mathesar-api-test-runner
+    build:
+      context: api_tests
+    depends_on:
+      api-test-service:
+        condition: service_healthy
+    volumes:
+      - ./api_tests/:/code/
+volumes:
+  ui_node_modules_test:
