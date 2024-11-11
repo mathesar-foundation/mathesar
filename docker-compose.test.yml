@@ -7,11 +7,17 @@ services:
       service: dev-db-base
     expose:
       - "5432"
-    volumes:
-      - ./db/sql:/sql/
     healthcheck:
       interval: 1s
       start_period: 2s
+  test-user-db:
+    container_name: mathesar-test-user-db
+    extends:
+      service: test-db
+    environment:
+      - POSTGRES_DB=my_data
+      - POSTGRES_USER=data_admin
+      - POSTGRES_PASSWORD=data1234
   api-test-service:
     container_name: mathesar-api-test-service
     build:
@@ -50,6 +56,8 @@ services:
       context: api_tests
     depends_on:
       api-test-service:
+        condition: service_healthy
+      test-user-db:
         condition: service_healthy
     volumes:
       - ./api_tests/:/code/
