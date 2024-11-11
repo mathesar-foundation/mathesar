@@ -89,7 +89,7 @@ class Database(BaseModel):
         """
         admin_role_query = """
         SELECT nspowner::regrole::text
-        FROM pg_namespace
+        FROM pg_catalog.pg_namespace
         WHERE nspname='msar';
         """
 
