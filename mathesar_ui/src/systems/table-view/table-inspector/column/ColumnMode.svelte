@@ -160,6 +160,10 @@
     padding-bottom: var(--size-small);
     display: flex;
     flex-direction: column;
+
+    > :global(* + *) {
+      margin-top: var(--size-super-ultra-small);
+    }
   }
 
   .no-cell-selected {
