@@ -116,13 +116,14 @@ DATABASES = {
 }
 
 # POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST & POSTGRES_PORT are required env variables for forming a pg connection string for the django database
-POSTGRES_DB = os.environ['POSTGRES_DB']
-POSTGRES_USER = os.environ['POSTGRES_USER']
-POSTGRES_PASSWORD = os.environ['POSTGRES_PASSWORD']
-POSTGRES_HOST = os.environ['POSTGRES_HOST']
-POSTGRES_PORT = os.environ['POSTGRES_PORT']
+POSTGRES_DB = os.environ.get('POSTGRES_DB', default=None)
+POSTGRES_USER = os.environ.get('POSTGRES_USER', default=None)
+POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default=None)
+POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default=None)
+POSTGRES_PORT = os.environ.get('POSTGRES_PORT', default=None)
 
-DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}')
+if POSTGRES_DB and POSTGRES_USER and POSTGRES_PASSWORD and POSTGRES_HOST and POSTGRES_PORT:
+    DATABASES['default'] = db_url(f'postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}')
 
 for db_key, db_dict in DATABASES.items():
     # Engine should be '.postgresql' or '.postgresql_psycopg2' for all db(s)
