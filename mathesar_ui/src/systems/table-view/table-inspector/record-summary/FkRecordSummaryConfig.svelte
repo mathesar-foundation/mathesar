@@ -5,14 +5,15 @@
   import RecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/RecordSummaryConfig.svelte';
   import Pagination from '@mathesar/utils/Pagination';
 
+  // eslint-disable-next-line svelte/valid-compile
   export let table: Table;
 
-  $: tabularData = new TabularData({
-    database: table.schema.database,
-    table,
-    abstractTypesMap,
-    meta: new Meta({ pagination: new Pagination({ size: 1 }) }),
-  });
+  // $: tabularData = new TabularData({
+  //   database: table.schema.database,
+  //   table,
+  //   meta: new Meta({ pagination: new Pagination({ size: 1 }) }),
+  // });
 </script>
 
-<RecordSummaryConfig {table} {tabularData} />
+<!-- <RecordSummaryConfig {tabularData} /> -->
+TODO
