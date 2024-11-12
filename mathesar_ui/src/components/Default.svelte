@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import PostgresKeyword from './PostgresKeyword.svelte';
 </script>
 

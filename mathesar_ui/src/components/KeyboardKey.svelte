@@ -1,3 +1,5 @@
+<script lang="ts"></script>
+
 <span class="keyboard-key"><slot /></span>
 
 <style>

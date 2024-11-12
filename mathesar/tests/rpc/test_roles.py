@@ -4,6 +4,7 @@ This file tests the roles RPC functions.
 Fixtures:
     rf(pytest-django): Provides mocked `Request` objects.
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
+    mocked_exec_msar_func(mathesar/tests/conftest.py): Lets you patch the exec_msar_func() for testing.
 """
 from contextlib import contextmanager
 
@@ -70,7 +71,7 @@ def test_roles_list(rf, monkeypatch):
     roles.list_(database_id=_database_id, request=request)
 
 
-def test_roles_add(rf, monkeypatch):
+def test_roles_add(rf, monkeypatch, mocked_exec_msar_func):
     _username = 'alice'
     _password = 'pass1234'
     _database_id = 2
@@ -87,30 +88,15 @@ def test_roles_add(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
-    def mock_create_role(rolename, password, login, conn):
-        if (
-            rolename != _username
-            or password != _password
-        ):
-            raise AssertionError('incorrect parameters passed')
-        return {
-            'oid': '2573190',
-            'name': 'alice',
-            'login': False,
-            'super': False,
-            'members': None,
-            'inherits': True,
-            'create_db': False,
-            'create_role': False,
-            'description': None
-        }
-
     monkeypatch.setattr(roles.base, 'connect', mock_connect)
-    monkeypatch.setattr(roles.base, 'create_role', mock_create_role)
     roles.add(rolename=_username, database_id=_database_id, password=_password, login=True, request=request)
+    call_args = mocked_exec_msar_func.call_args_list[0][0]
+    assert call_args[2] == _username
+    assert call_args[3] == _password
+    assert call_args[4] is True  # login role?
 
 
-def test_roles_delete(rf, monkeypatch):
+def test_roles_delete(rf, monkeypatch, mocked_exec_msar_func):
     _username = 'alice'
     _password = 'pass1234'
     _database_id = 2
@@ -128,16 +114,10 @@ def test_roles_delete(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
-    def mock_drop_role(role_oid, conn):
-        if (
-            role_oid != _role_oid
-        ):
-            raise AssertionError('incorrect parameters passed')
-        return None
-
     monkeypatch.setattr(roles.base, 'connect', mock_connect)
-    monkeypatch.setattr(roles.base, 'drop_role', mock_drop_role)
     roles.delete(role_oid=_role_oid, database_id=_database_id, request=request)
+    call_args = mocked_exec_msar_func.call_args_list[0][0]
+    assert call_args[2] == _role_oid
 
 
 def test_get_current_role(rf, monkeypatch):
@@ -189,7 +169,7 @@ def test_get_current_role(rf, monkeypatch):
     roles.get_current_role(database_id=_database_id, request=request)
 
 
-def test_roles_set_members(rf, monkeypatch):
+def test_roles_set_members(rf, monkeypatch, mocked_exec_msar_func):
     _username = 'alice'
     _password = 'pass1234'
     _database_id = 2
@@ -208,24 +188,8 @@ def test_roles_set_members(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
-    def mock_set_roles(parent_role_oid, members, conn):
-        if (
-            parent_role_oid != _parent_role_oid
-            or members != _members
-        ):
-            raise AssertionError('incorrect parameters passed')
-        return {
-            'oid': 10,
-            'name': 'mathesar',
-            'login': True,
-            'super': True,
-            'members': [{'oid': 2573031, 'admin': False}, {'oid': 2573040, 'admin': False}],
-            'inherits': True,
-            'create_db': True,
-            'create_role': True,
-            'description': None
-        }
-
     monkeypatch.setattr(roles.base, 'connect', mock_connect)
-    monkeypatch.setattr(roles.base, 'set_members_to_role', mock_set_roles)
     roles.set_members(parent_role_oid=_parent_role_oid, database_id=_database_id, members=_members, request=request)
+    call_args = mocked_exec_msar_func.call_args_list[0][0]
+    assert call_args[2] == _parent_role_oid
+    assert call_args[3] == _members

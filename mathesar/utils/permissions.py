@@ -1,13 +1,19 @@
 from django.db import transaction
 from django.conf import settings
+import psycopg
 from psycopg.errors import DuplicateSchema
 
-from db.install import install_mathesar
+from db.databases import create_database
 from mathesar.examples.library_dataset import load_library_dataset
 from mathesar.examples.movies_dataset import load_movies_dataset
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
 
 INTERNAL_DB_KEY = 'default'
+HOST = "HOST"
+PORT = "PORT"
+USER = "USER"
+PASSWORD = "PASSWORD"
+NAME = "NAME"
 
 
 class BadInstallationTarget(Exception):
@@ -25,26 +31,28 @@ def set_up_new_database_for_user_on_internal_server(
     This database will be set up to be accessible for the given user.
     """
     conn_info = settings.DATABASES[INTERNAL_DB_KEY]
-    if database_name == conn_info["NAME"]:
+    if database_name == conn_info[NAME]:
         raise BadInstallationTarget(
             "Mathesar can't be installed in the internal database."
         )
     user_database_role = _setup_connection_models(
-        conn_info["HOST"],
-        conn_info["PORT"],
+        conn_info[HOST],
+        conn_info[PORT],
         database_name,
-        conn_info["USER"],
-        conn_info["PASSWORD"],
+        conn_info[USER],
+        conn_info[PASSWORD],
         user
     )
-    install_mathesar(
-        database_name,
-        conn_info["USER"],
-        conn_info["PASSWORD"],
-        conn_info["HOST"],
-        conn_info["PORT"],
-        True,
-        root_db=conn_info["NAME"],
+    with psycopg.connect(
+            host=conn_info[HOST],
+            port=conn_info[PORT],
+            dbname=conn_info[NAME],
+            user=conn_info[USER],
+            password=conn_info[PASSWORD],
+    ) as root_conn:
+        create_database(database_name, root_conn)
+    user_database_role.database.install_sql(
+        username=conn_info[USER], password=conn_info[PASSWORD]
     )
     with user_database_role.connection as conn:
         _load_sample_data(conn, sample_data)
@@ -57,9 +65,9 @@ def set_up_preexisting_database_for_user(
 ):
     internal_conn_info = settings.DATABASES[INTERNAL_DB_KEY]
     if (
-            host == internal_conn_info["HOST"]
-            and port == internal_conn_info["PORT"]
-            and database_name == internal_conn_info["NAME"]
+            host == internal_conn_info[HOST]
+            and port == internal_conn_info[PORT]
+            and database_name == internal_conn_info[NAME]
     ):
         raise BadInstallationTarget(
             "Mathesar can't be installed in the internal database."
@@ -67,8 +75,9 @@ def set_up_preexisting_database_for_user(
     user_database_role = _setup_connection_models(
         host, port, database_name, role_name, password, user
     )
-    install_mathesar(
-        database_name, role_name, password, host, port, True, create_db=False,
+    user_database_role.database.install_sql(
+        username=user_database_role.configured_role.name,
+        password=user_database_role.configured_role.password,
     )
     with user_database_role.connection as conn:
         _load_sample_data(conn, sample_data)

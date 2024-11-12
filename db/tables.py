@@ -1,5 +1,5 @@
 import json
-from db.connection import exec_msar_func
+from db import connection as db_conn
 from db.columns import _transform_column_alter_dict
 from db.deprecated.types.base import PostgresType
 
@@ -14,7 +14,7 @@ def get_table(table, conn):
     Args:
         table: The table for which we want table info.
     """
-    return exec_msar_func(conn, 'get_table', table).fetchone()[0]
+    return db_conn.exec_msar_func(conn, 'get_table', table).fetchone()[0]
 
 
 def get_table_info(schema, conn):
@@ -27,11 +27,11 @@ def get_table_info(schema, conn):
     Args:
         schema: The schema for which we want table info.
     """
-    return exec_msar_func(conn, 'get_table_info', schema).fetchone()[0]
+    return db_conn.exec_msar_func(conn, 'get_table_info', schema).fetchone()[0]
 
 
 def list_joinable_tables(table_oid, conn, max_depth):
-    return exec_msar_func(conn, 'get_joinable_tables', max_depth, table_oid).fetchone()[0]
+    return db_conn.exec_msar_func(conn, 'get_joinable_tables', max_depth, table_oid).fetchone()[0]
 
 
 def get_preview(table_oid, column_list, conn, limit=20):
@@ -47,7 +47,7 @@ def get_preview(table_oid, column_list, conn, limit=20):
     if you wish to alter these settings permanantly for the columns see tables/alter.py.
     """
     transformed_column_data = [_transform_column_alter_dict(col) for col in column_list]
-    return exec_msar_func(
+    return db_conn.exec_msar_func(
         conn, 'get_preview', table_oid, json.dumps(transformed_column_data), limit
     ).fetchone()[0]
 
@@ -67,7 +67,7 @@ def alter_table_on_database(table_oid, table_data_dict, conn):
         "columns": <list> of column_data describing columns to alter.
     }
     """
-    return exec_msar_func(
+    return db_conn.exec_msar_func(
         conn, 'alter_table', table_oid, json.dumps(table_data_dict)
     ).fetchone()[0]
 
@@ -95,7 +95,7 @@ def create_table_on_database(
     Returns:
         Returns the OID and name of the created table.
     """
-    return exec_msar_func(
+    return db_conn.exec_msar_func(
         conn,
         'add_mathesar_table',
         schema_oid,
@@ -131,7 +131,7 @@ def prepare_table_for_import(
             "type": {"name": PostgresType.TEXT.id}
         } for column_name in column_names
     ]
-    import_info = exec_msar_func(
+    import_info = db_conn.exec_msar_func(
         conn,
         'prepare_table_for_import',
         schema_oid,
@@ -162,7 +162,7 @@ def drop_table_from_database(table_oid, conn, cascade=False):
     Returns:
         Returns the fully qualified name of the dropped table.
     """
-    return exec_msar_func(
+    return db_conn.exec_msar_func(
         conn, 'drop_table', table_oid, cascade
     ).fetchone()[0]
 
@@ -181,7 +181,7 @@ def infer_table_column_data_types(conn, table_oid):
     result of `format_type` for the inferred type of each column.
     Restricted to columns to which the user has access.
     """
-    return exec_msar_func(
+    return db_conn.exec_msar_func(
         conn, 'infer_table_column_data_types', table_oid
     ).fetchone()[0]
 
@@ -189,7 +189,7 @@ def infer_table_column_data_types(conn, table_oid):
 def move_columns_to_referenced_table(
         conn, source_table_oid, target_table_oid, move_column_attnums
 ):
-    exec_msar_func(
+    db_conn.exec_msar_func(
         conn,
         'move_columns_to_referenced_table',
         source_table_oid,
@@ -205,7 +205,7 @@ def split_table(
     extracted_table_name,
     relationship_fk_column_name=None
 ):
-    extracted_table_oid, new_fkey_attnum = exec_msar_func(
+    extracted_table_oid, new_fkey_attnum = db_conn.exec_msar_func(
         conn,
         'extract_columns_from_table',
         old_table_oid,
