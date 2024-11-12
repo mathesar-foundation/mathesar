@@ -28,7 +28,6 @@ import type {
   AbstractType,
   AbstractTypePreprocFunctionDefinition,
   AbstractTypeSummarizationFunction,
-  AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
 import { ImmutableMap } from '@mathesar-component-library';
 import type {
@@ -335,7 +334,6 @@ function processColumn(
   columnInfo: Pick<QueryColumnMetaData, 'alias'> &
     ProcessedQueryResultColumnSource &
     Partial<QueryColumnMetaData>,
-  abstractTypeMap: AbstractTypesMap,
 ): ProcessedQueryResultColumn {
   const column: QueryResultColumn = {
     alias: columnInfo.alias,
@@ -345,7 +343,7 @@ function processColumn(
     metadata: columnInfo.metadata ?? null,
   };
 
-  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  const abstractType = getAbstractTypeForDbType(column.type);
   const source: ProcessedQueryResultColumnSource = columnInfo.is_initial_column
     ? {
         is_initial_column: true,
@@ -389,12 +387,11 @@ function processColumn(
 
 export function processColumnMetaData(
   columnMetaData: ExplorationResult['column_metadata'],
-  abstractTypeMap: AbstractTypesMap,
 ): ProcessedQueryResultColumnMap {
   return new ImmutableMap(
     Object.entries(columnMetaData).map(([alias, columnMeta]) => [
       alias,
-      processColumn(columnMeta, abstractTypeMap),
+      processColumn(columnMeta),
     ]),
   );
 }
@@ -403,12 +400,10 @@ export function speculateColumnMetaData({
   currentProcessedColumnsMetaData,
   inputColumnInformationMap,
   queryModel,
-  abstractTypeMap,
 }: {
   currentProcessedColumnsMetaData: ProcessedQueryResultColumnMap;
   inputColumnInformationMap: InputColumnsStoreSubstance['inputColumnInformationMap'];
   queryModel: QueryModel;
-  abstractTypeMap: AbstractTypesMap;
 }): ProcessedQueryResultColumnMap {
   const initialColumns = queryModel.initial_columns;
   const summarizationTransforms = queryModel.getSummarizationTransforms();
@@ -443,17 +438,14 @@ export function speculateColumnMetaData({
       );
       updatedColumnsMetaData = updatedColumnsMetaData.with(
         initialColumn.alias,
-        processColumn(
-          {
-            alias: initialColumn.alias,
-            type: inputColumnInformation?.type,
-            is_initial_column: true,
-            input_column_name: inputColumnInformation?.name,
-            input_table_name: inputColumnInformation?.tableName,
-            input_table_id: inputColumnInformation?.tableId,
-          },
-          abstractTypeMap,
-        ),
+        processColumn({
+          alias: initialColumn.alias,
+          type: inputColumnInformation?.type,
+          is_initial_column: true,
+          input_column_name: inputColumnInformation?.name,
+          input_table_name: inputColumnInformation?.tableName,
+          input_table_id: inputColumnInformation?.tableId,
+        }),
       );
     });
   }
@@ -465,18 +457,15 @@ export function speculateColumnMetaData({
             ?.column;
           updatedColumnsMetaData = updatedColumnsMetaData.with(
             group.outputAlias,
-            processColumn(
-              {
-                alias: group.outputAlias,
-                display_name: null,
-                type: inputColumn?.type ?? 'unknown',
-                type_options: inputColumn?.type_options ?? null,
-                metadata: inputColumn?.metadata ?? null,
-                is_initial_column: false,
-                input_alias: group.inputAlias,
-              },
-              abstractTypeMap,
-            ),
+            processColumn({
+              alias: group.outputAlias,
+              display_name: null,
+              type: inputColumn?.type ?? 'unknown',
+              type_options: inputColumn?.type_options ?? null,
+              metadata: inputColumn?.metadata ?? null,
+              is_initial_column: false,
+              input_alias: group.inputAlias,
+            }),
           );
         }
       });
@@ -484,33 +473,30 @@ export function speculateColumnMetaData({
         if (!updatedColumnsMetaData.has(aggregation.outputAlias)) {
           updatedColumnsMetaData = updatedColumnsMetaData.with(
             aggregation.outputAlias,
-            processColumn(
-              {
-                alias: aggregation.outputAlias,
-                type:
-                  aggregation.function === 'distinct_aggregate_to_array'
-                    ? '_array'
-                    : 'integer',
-                type_options:
-                  aggregation.function === 'distinct_aggregate_to_array'
-                    ? {
-                        // TODO_BETA: Ask Pavish.
-                        //
-                        // `Column['type_options']` was previously typed loosely
-                        // as `Record<string, unknown> | null`. Now it's more
-                        // strict and it doesn't have a `type` property.
-                        //
-                        // type:
-                        //   updatedColumnsMetaData.get(aggregation.inputAlias)
-                        //     ?.column.type ?? 'unknown',
-                      }
-                    : null,
-                metadata: null,
-                is_initial_column: false,
-                input_alias: aggregation.inputAlias,
-              },
-              abstractTypeMap,
-            ),
+            processColumn({
+              alias: aggregation.outputAlias,
+              type:
+                aggregation.function === 'distinct_aggregate_to_array'
+                  ? '_array'
+                  : 'integer',
+              type_options:
+                aggregation.function === 'distinct_aggregate_to_array'
+                  ? {
+                      // TODO_BETA: Ask Pavish.
+                      //
+                      // `Column['type_options']` was previously typed loosely
+                      // as `Record<string, unknown> | null`. Now it's more
+                      // strict and it doesn't have a `type` property.
+                      //
+                      // type:
+                      //   updatedColumnsMetaData.get(aggregation.inputAlias)
+                      //     ?.column.type ?? 'unknown',
+                    }
+                  : null,
+              metadata: null,
+              is_initial_column: false,
+              input_alias: aggregation.inputAlias,
+            }),
           );
         }
       });
@@ -545,7 +531,7 @@ export function getProcessedOutputColumns(
       alias,
       {
         ...(processedColumnMetaData.get(alias) ??
-          processColumn({ alias, is_initial_column: true }, new Map())),
+          processColumn({ alias, is_initial_column: true })),
         columnIndex: index,
       },
     ]),

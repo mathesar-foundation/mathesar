@@ -13,6 +13,7 @@
   import { Collapsible } from '@mathesar-component-library';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
+  import TableRecordSummaryConfig from '../record-summary/TableRecordSummaryConfig.svelte';
 
   import AdvancedActions from './AdvancedActions.svelte';
   import TableLinks from './links/TableLinks.svelte';
@@ -72,7 +73,7 @@
   >
     <CollapsibleHeader slot="header" title={$_('record_summary')} />
     <div slot="content" class="content-container">
-      <!-- <RecordSummaryConfig tabularData={$tabularData} /> -->
+      <TableRecordSummaryConfig tabularData={$tabularData} />
     </div>
   </Collapsible>
 

@@ -85,9 +85,7 @@ export interface AbstractType
 
 export type AbstractTypesMap = Map<AbstractType['identifier'], AbstractType>;
 
-export type AbstractTypeConfigurationFactory = (
-  map: AbstractTypesMap,
-) => AbstractTypeConfiguration;
+export type AbstractTypeConfigurationFactory = () => AbstractTypeConfiguration;
 
 /**
  * These filter ids represent the filter functions used for the _old_ filtering

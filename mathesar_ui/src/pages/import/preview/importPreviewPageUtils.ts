@@ -5,10 +5,7 @@ import { getCellCap } from '@mathesar/components/cell-fabric/utils';
 import type { Schema } from '@mathesar/models/Schema';
 import type { Table } from '@mathesar/models/Table';
 import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
-import type {
-  AbstractType,
-  AbstractTypesMap,
-} from '@mathesar/stores/abstract-types/types';
+import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 import AsyncStore from '@mathesar/stores/AsyncStore';
 import { createTableFromDataFile, deleteTable } from '@mathesar/stores/tables';
 
@@ -27,12 +24,9 @@ export interface ProcessedPreviewColumn {
   cellComponentAndProps: ReturnType<typeof getCellCap>;
 }
 
-export function processColumns(
-  columns: Column[],
-  abstractTypeMap: AbstractTypesMap,
-): ProcessedPreviewColumn[] {
+export function processColumns(columns: Column[]): ProcessedPreviewColumn[] {
   return columns.map((column) => {
-    const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+    const abstractType = getAbstractTypeForDbType(column.type);
     return {
       id: column.id,
       column,

@@ -18,7 +18,6 @@
     getDataExplorerPageUrl,
     getExplorationEditorPageUrl,
   } from '@mathesar/routes/urls';
-  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import { getExploration } from '@mathesar/stores/queries';
   import {
     QueryManager,
@@ -40,7 +39,6 @@
     queryManager?.destroy();
     queryManager = new QueryManager({
       query: new QueryModel(queryInstance),
-      abstractTypeMap: abstractTypesMap,
       onSave: async (instance) => {
         try {
           const url = getExplorationEditorPageUrl(

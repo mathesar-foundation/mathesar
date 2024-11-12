@@ -7,8 +7,6 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
-  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
-  import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
   import {
     ExplorationResult,
     QueryModel,
@@ -29,14 +27,10 @@
   let queryRunner: QueryRunner | undefined;
   let isInspectorOpen = true;
 
-  function createQueryRunner(
-    _query: SavedExploration,
-    abstractTypeMap: AbstractTypesMap,
-  ) {
+  function createQueryRunner(_query: SavedExploration) {
     queryRunner?.destroy();
     queryRunner = new QueryRunner({
       query: new QueryModel(_query),
-      abstractTypeMap,
       runMode: 'queryId',
       shareConsumer,
     });
@@ -44,7 +38,7 @@
 
   let context: 'shared-consumer-page' | 'page' = 'page';
   $: context = shareConsumer ? 'shared-consumer-page' : 'page';
-  $: createQueryRunner(query, abstractTypesMap);
+  $: createQueryRunner(query);
 
   function gotoSchemaPage() {
     router.goto(getSchemaPageUrl(database.id, schema.oid));

@@ -1,5 +1,7 @@
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
+import type { RecordSummaryTemplate } from './tables';
+
 export type ResultValue = string | number | boolean | null;
 
 export type SortDirection = 'asc' | 'desc';
@@ -130,6 +132,16 @@ export const records = {
       table_oid: number;
       record_id: ResultValue;
       return_record_summaries?: boolean;
+      /**
+       * Keys are stringified table OIDs. Values are record summary templates
+       * that will override the templates stored in table metadata. These
+       * overrides can be used to render a of a record summary using an
+       * ephemeral template before any template is stored.
+       * */
+      table_record_summary_templates?: Record<
+        string,
+        RecordSummaryTemplate | null
+      > | null;
     },
     RecordsResponse
   >(),
