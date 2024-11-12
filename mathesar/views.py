@@ -88,8 +88,6 @@ def _get_internal_db_meta():
             'port': internal_db['PORT'],
             'database_name': internal_db['NAME']
         }
-    else:
-        return {'type': 'sqlite'}
 
 
 def get_common_data(request, database_id=None, schema_oid=None):
