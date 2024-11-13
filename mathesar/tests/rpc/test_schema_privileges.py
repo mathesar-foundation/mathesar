@@ -4,14 +4,16 @@ This file tests the schema_privileges RPC functions.
 Fixtures:
     rf(pytest-django): Provides mocked `Request` objects.
     monkeypatch(pytest): Lets you monkeypatch an object for testing.
+    mocked_exec_msar_func(mathesar/tests/conftest.py): Lets you patch the exec_msar_func() for testing.
 """
+import json
 from contextlib import contextmanager
 
 from mathesar.rpc.schemas import privileges as schema_privileges
 from mathesar.models.users import User
 
 
-def test_schema_privileges_list_direct(rf, monkeypatch):
+def test_schema_privileges_list_direct(rf, monkeypatch, mocked_exec_msar_func):
     _username = 'alice'
     _password = 'pass1234'
     _database_id = 2
@@ -30,28 +32,18 @@ def test_schema_privileges_list_direct(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
-    def mock_list_privileges(
-            schema_oid,
-            conn,
-    ):
-        if schema_oid != _schema_oid:
-            raise AssertionError('incorrect parameters passed')
-        return _privileges
-
     monkeypatch.setattr(schema_privileges, 'connect', mock_connect)
-    monkeypatch.setattr(
-        schema_privileges,
-        'list_schema_privileges',
-        mock_list_privileges
-    )
     expect_response = _privileges
+    mocked_exec_msar_func.fetchone.return_value = [expect_response]
     actual_response = schema_privileges.list_direct(
         schema_oid=_schema_oid, database_id=_database_id, request=request
     )
+    call_args = mocked_exec_msar_func.call_args_list[0][0]
     assert actual_response == expect_response
+    assert call_args[2] == _schema_oid
 
 
-def test_schema_privileges_replace_for_roles(rf, monkeypatch):
+def test_schema_privileges_replace_for_roles(rf, monkeypatch, mocked_exec_msar_func):
     _username = 'alice'
     _password = 'pass1234'
     _schema_oid = 654321
@@ -70,33 +62,23 @@ def test_schema_privileges_replace_for_roles(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
-    def mock_replace_privileges(
-            conn,
-            schema_oid,
-            privileges,
-    ):
-        if privileges != _privileges or schema_oid != _schema_oid:
-            raise AssertionError('incorrect parameters passed')
-        return _privileges + [{"role_oid": 67890, "direct": ["USAGE", "CREATE"]}]
-
     monkeypatch.setattr(schema_privileges, 'connect', mock_connect)
-    monkeypatch.setattr(
-        schema_privileges,
-        'replace_schema_privileges_for_roles',
-        mock_replace_privileges
-    )
     expect_response = [
         {"role_oid": 12345, "direct": ["USAGE"]},
         {"role_oid": 67890, "direct": ["USAGE", "CREATE"]}
     ]
+    mocked_exec_msar_func.fetchone.return_value = [expect_response]
     actual_response = schema_privileges.replace_for_roles(
         privileges=_privileges, schema_oid=_schema_oid, database_id=_database_id,
         request=request
     )
+    call_args = mocked_exec_msar_func.call_args_list[0][0]
     assert actual_response == expect_response
+    assert call_args[2] == _schema_oid
+    assert call_args[3] == json.dumps(_privileges)
 
 
-def test_transfer_schema_ownership(rf, monkeypatch):
+def test_transfer_schema_ownership(rf, monkeypatch, mocked_exec_msar_func):
     _username = 'alice'
     _password = 'pass1234'
     _database_id = 2
@@ -115,29 +97,10 @@ def test_transfer_schema_ownership(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
-    def mock_tansfer_schema_ownership(
-            schema_oid,
-            new_owner_oid,
-            conn
-    ):
-        if schema_oid != _schema_oid and new_owner_oid != _new_owner_oid:
-            raise AssertionError('incorrect parameters passed')
-        return {
-            'oid': schema_oid,
-            'name': 'testingpriv',
-            'owner_oid': 2573031,
-            'description': None,
-            'table_count': 2,
-            'current_role_owns': True,
-            'current_role_priv': ['USAGE', 'CREATE']
-        }
-
     monkeypatch.setattr(schema_privileges, 'connect', mock_connect)
-    monkeypatch.setattr(
-        schema_privileges,
-        'transfer_schema_ownership',
-        mock_tansfer_schema_ownership
-    )
     schema_privileges.transfer_ownership(
         schema_oid=_schema_oid, new_owner_oid=_new_owner_oid, database_id=_database_id, request=request
     )
+    call_args = mocked_exec_msar_func.call_args_list[0][0]
+    assert call_args[2] == _schema_oid
+    assert call_args[3] == _new_owner_oid

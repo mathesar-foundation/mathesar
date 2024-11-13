@@ -8,6 +8,7 @@
   import { SheetClipboardHandler } from '@mathesar/components/sheet/SheetClipboardHandler';
   import { rowHeaderWidthPx } from '@mathesar/geometry';
   import type { Table } from '@mathesar/models/Table';
+  import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import {
     ID_ADD_NEW_COLUMN,
     ID_ROW_CONTROL_COLUMN,
@@ -49,8 +50,7 @@
     }),
     showToastInfo: toast.info,
   });
-  $: ({ horizontalScrollOffset, scrollOffset, isTableInspectorVisible } =
-    display);
+  $: ({ horizontalScrollOffset, scrollOffset } = display);
   $: columnOrder = table.metadata?.column_order ?? [];
   $: hasNewColumnButton = context !== 'widget' && $currentRoleOwns;
   /**
@@ -74,7 +74,7 @@
     [ID_ROW_CONTROL_COLUMN, rowHeaderWidthPx],
     [ID_ADD_NEW_COLUMN, 32],
   ]);
-  $: showTableInspector = $isTableInspectorVisible && supportsTableInspector;
+  $: showTableInspector = $tableInspectorVisible && supportsTableInspector;
 </script>
 
 <div class="table-view">

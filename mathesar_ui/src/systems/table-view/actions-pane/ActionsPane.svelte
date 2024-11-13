@@ -4,6 +4,7 @@
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
   import { iconInspector, iconTable } from '@mathesar/icons';
+  import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { Button, Icon } from '@mathesar-component-library';
 
@@ -17,17 +18,16 @@
 
   export let context: TableActionsContext = 'page';
 
-  $: ({ table, meta, isLoading, display } = $tabularData);
+  $: ({ table, meta, isLoading } = $tabularData);
   $: ({ currentRolePrivileges } = table.currentAccess);
   $: ({ filtering, sorting, grouping, sheetState } = meta);
-  $: ({ isTableInspectorVisible } = display);
 
   $: isSelectable = $currentRolePrivileges.has('SELECT');
 
   const canViewLinkedEntities = true;
 
   function toggleTableInspector() {
-    isTableInspectorVisible.set(!$isTableInspectorVisible);
+    tableInspectorVisible.update((v) => !v);
   }
 </script>
 
@@ -60,7 +60,7 @@
         size="medium"
         disabled={$isLoading}
         on:click={toggleTableInspector}
-        active={$isTableInspectorVisible}
+        active={$tableInspectorVisible}
         aria-label={$_('inspector')}
       >
         <Icon {...iconInspector} />

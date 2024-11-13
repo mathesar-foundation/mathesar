@@ -32,6 +32,17 @@ export interface RawTablePrivilegesForRole {
   direct: TablePrivilege[];
 }
 
+/**
+ * A string is static text to be displayed in the summary.
+ *
+ * An array of numbers indicates a reference to a column in the table. Each
+ * number is a column attnum. A sequence of multiple numbers indicates a chain
+ * of FK references, column-by-column.
+ *
+ */
+export type RecordSummaryTemplatePart = string | number[];
+export type RecordSummaryTemplate = RecordSummaryTemplatePart[];
+
 interface TableMetadata {
   /** The id of the data file used during import while creating the table */
   data_file_id: number | null;
@@ -45,8 +56,7 @@ interface TableMetadata {
    */
   import_verified: boolean | null;
   column_order: number[] | null;
-  record_summary_customized: boolean | null;
-  record_summary_template: string | null;
+  record_summary_template: RecordSummaryTemplate | null;
 }
 
 export interface RawTableWithMetadata extends RawTable {

@@ -3,10 +3,7 @@
   import { _ } from 'svelte-i18n';
 
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
-  import {
-    abstractTypesMap,
-    getAllowedAbstractTypesForDbTypeAndItsTargetTypes,
-  } from '@mathesar/stores/abstract-types';
+  import { getAllowedAbstractTypesForDbTypeAndItsTargetTypes } from '@mathesar/stores/abstract-types';
   import { typeCastMap } from '@mathesar/stores/abstract-types/typeCastMap';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import { LabeledInput, Select } from '@mathesar-component-library';
@@ -28,7 +25,6 @@
   $: allowedTypeConversions = getAllowedAbstractTypesForDbTypeAndItsTargetTypes(
     column.type,
     typeCastMap[column.type] ?? [],
-    abstractTypesMap,
   ).filter((item) => !['jsonlist', 'map'].includes(item.identifier));
 
   function selectAbstractType(

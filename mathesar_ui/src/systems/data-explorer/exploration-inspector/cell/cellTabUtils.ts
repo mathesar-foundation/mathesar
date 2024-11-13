@@ -1,5 +1,6 @@
-import type { SelectedCellData } from '@mathesar/components/inspector/cell/cellInspectorUtils';
+import type { ResultValue } from '@mathesar/api/rpc/records';
 import { parseCellId } from '@mathesar/components/sheet/cellIds';
+import type { SelectedCellData } from '@mathesar/components/sheet/selection';
 import type SheetSelection from '@mathesar/components/sheet/selection/SheetSelection';
 
 import { type QueryRow, getRowSelectionId } from '../../QueryRunner';
@@ -19,7 +20,7 @@ export function getSelectedCellData(
   // rows in a map for faster lookup.
   const row = rows.find((r) => getRowSelectionId(r) === rowId);
   if (!row) return fallback;
-  const value = row.record[columnId];
+  const value = row.record[columnId] as ResultValue | undefined;
   const column = processedColumns.get(columnId);
   const activeCellData = column && { column, value };
   return { activeCellData, selectionData };

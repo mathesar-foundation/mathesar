@@ -15,7 +15,6 @@
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import TableName from '@mathesar/components/TableName.svelte';
   import type { Table } from '@mathesar/models/Table';
-  import { abstractTypesMap } from '@mathesar/stores/abstract-types';
   import {
     type ProcessedColumn,
     TableStructure,
@@ -80,7 +79,6 @@
     ? new TableStructure({
         database: $targetTable.schema.database,
         table: $targetTable,
-        abstractTypesMap,
       })
     : undefined;
   $: targetTableStructureIsLoading = ensureReadable(

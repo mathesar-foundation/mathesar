@@ -20,13 +20,13 @@
   let isHoveringRecordPageLink = false;
 
   $: label = (() => {
-    if (recordSummary) {
+    if (recordSummary && recordSummary.trim() !== '') {
       return recordSummary;
     }
     if (recordId !== undefined) {
       return String(recordId);
     }
-    return '(Unknown)';
+    return '?';
   })();
 
   function handleDeleteButtonClick() {

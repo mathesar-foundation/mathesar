@@ -1,13 +1,13 @@
 import json
-from db.connection import exec_msar_func
+from db import connection as db_conn
 
 
 def list_schemas(conn):
-    return exec_msar_func(conn, 'list_schemas').fetchone()[0]
+    return db_conn.exec_msar_func(conn, 'list_schemas').fetchone()[0]
 
 
 def get_schema(schema_oid, conn):
-    return exec_msar_func(conn, 'get_schema', schema_oid).fetchone()[0]
+    return db_conn.exec_msar_func(conn, 'get_schema', schema_oid).fetchone()[0]
 
 
 def patch_schema(schema_oid, conn, patch):
@@ -24,7 +24,7 @@ def patch_schema(schema_oid, conn, patch):
     Returns:
         The SchemaInfo describing the user-defined schema in the database.
     """
-    return exec_msar_func(conn, "patch_schema", schema_oid, json.dumps(patch)).fetchone()[0]
+    return db_conn.exec_msar_func(conn, "patch_schema", schema_oid, json.dumps(patch)).fetchone()[0]
 
 
 def create_schema(schema_name, conn, owner_oid, description=None):
@@ -42,7 +42,7 @@ def create_schema(schema_name, conn, owner_oid, description=None):
     Returns:
         The SchemaInfo describing the user-defined schema in the database.
     """
-    return exec_msar_func(conn, 'create_schema', schema_name, owner_oid, description).fetchone()[0]
+    return db_conn.exec_msar_func(conn, 'create_schema', schema_name, owner_oid, description).fetchone()[0]
 
 
 def drop_schema_via_oid(conn, id, cascade=False):
@@ -56,4 +56,4 @@ def drop_schema_via_oid(conn, id, cascade=False):
         id: the OID of the schema to drop.
         cascade: Whether to drop the dependent objects.
     """
-    exec_msar_func(conn, 'drop_schema', id, cascade).fetchone()
+    db_conn.exec_msar_func(conn, 'drop_schema', id, cascade).fetchone()

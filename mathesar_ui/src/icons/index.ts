@@ -6,6 +6,7 @@ import {
   faBackspace,
   faCalendarDay,
   faCalendarWeek,
+  faCaretRight,
   faCheck,
   faCheckSquare,
   faChevronRight,
@@ -57,6 +58,7 @@ import {
   faStar,
   faStopwatch,
   faSync,
+  faT,
   faTimes,
   faTrashAlt,
   faUndo,
@@ -189,6 +191,9 @@ export const iconLinksInThisTable: IconProps = { data: faArrowRight };
 export const iconLinksFromOtherTables: IconProps = { data: faArrowLeft };
 export const iconForwardSeparator: IconProps = { data: faSlash };
 export const iconUrl: IconProps = { data: faLink };
+export const iconText: IconProps = { data: faT };
+export const iconField: IconProps = { data: faDatabase };
+export const iconFieldDelimiter: IconProps = { data: faCaretRight };
 
 // STATUSES
 

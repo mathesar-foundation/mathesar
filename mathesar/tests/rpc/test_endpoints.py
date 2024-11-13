@@ -145,7 +145,7 @@ METHODS = [
     (
         databases.configured.disconnect,
         "databases.configured.disconnect",
-        [user_is_authenticated]
+        [user_is_superuser]
     ),
 
     (
