@@ -3,6 +3,7 @@
 import { getContext, setContext } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
+import { api } from '@mathesar/api/rpc';
 import userApi, { type UnsavedUser, type User } from '@mathesar/api/rest/users';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { getErrorMessage } from '@mathesar/utils/errors';
@@ -128,7 +129,7 @@ class WritableUsersStore {
     this.requestStatus.set({
       state: 'processing',
     });
-    await userApi.delete(userId);
+    await api.users.delete({ user_id: userId }).run();
     this.users.update((users) => users.filter((user) => user.id !== userId));
     this.count.update((count) => count - 1);
     this.requestStatus.set({
