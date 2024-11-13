@@ -3,7 +3,10 @@ Classes and functions exposed to the RPC endpoint for managing mathesar users.
 """
 from typing import Optional, TypedDict
 from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required, http_basic_auth_superuser_required
+from modernrpc.auth.basic import (
+    http_basic_auth_login_required,
+    http_basic_auth_superuser_required
+)
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from modernrpc.exceptions import AuthenticationFailed
