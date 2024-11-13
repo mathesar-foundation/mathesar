@@ -57,6 +57,21 @@ class SettableUserInfo(TypedDict):
     display_language: Optional[str]
 
 
+@rpc_method(name='users.add')
+@http_basic_auth_superuser_required
+@handle_rpc_exceptions
+def add(*, user_def: UserDef) -> UserInfo:
+    user = add_user(user_def)
+    return UserInfo.from_model(user)
+
+
+@rpc_method(name='users.delete')
+@http_basic_auth_superuser_required
+@handle_rpc_exceptions
+def delete(*, user_id: int) -> None:
+    delete_user(user_id)
+
+
 @rpc_method(name="users.get")
 @http_basic_auth_login_required
 @handle_rpc_exceptions
@@ -68,17 +83,9 @@ def get(*, user_id: int) -> UserInfo:
 @rpc_method(name='users.list')
 @http_basic_auth_login_required
 @handle_rpc_exceptions
-def list() -> list[UserInfo]:
+def list_() -> list[UserInfo]:
     users = list_user_info()
     return [UserInfo.from_model(user) for user in users]
-
-
-@rpc_method(name='users.add')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
-def add(*, user_def: UserDef) -> UserInfo:
-    user = add_user(user_def)
-    return UserInfo.from_model(user)
 
 
 @rpc_method(name='users.patch')
@@ -95,10 +102,3 @@ def patch(
         raise AuthenticationFailed('users.patch')
     updated_user_info = update_user_info(user_id, user_info)
     return UserInfo.from_model(updated_user_info)
-
-
-@rpc_method(name='users.delete')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
-def delete(*, user_id: int) -> None:
-    delete_user(user_id)
