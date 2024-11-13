@@ -9,22 +9,19 @@ export interface UnsavedUser {
     display_language: Language;
 }
 
-/* export interface User extends Omit<UnsavedUser, 'password'> {
+export interface User extends Omit<UnsavedUser, 'password'> {
     readonly id: number;
     readonly is_superuser: boolean;
-} */
-
-interface UserInfo {}
+}
 
 export const users = {
     list: rpcMethodTypeContainer<
-        {},
-        UserInfo[]
+        void, User[]
     >(),
-    get: rpcMethodTypeContainer<{ user_id: number }, UserInfo>(),
+    get: rpcMethodTypeContainer<{ user_id: number }, User>(),
     add: rpcMethodTypeContainer<
-        {},
-        UserInfo
+        {user_def: UnsavedUser},
+        User
     >(),
     delete: rpcMethodTypeContainer<{ user_id: number }, void>(),
     /* patch: rpcMethodTypeContainer<

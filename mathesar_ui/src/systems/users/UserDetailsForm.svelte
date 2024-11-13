@@ -3,6 +3,7 @@
   import { _ } from 'svelte-i18n';
   import type { UnionToIntersection } from 'type-fest';
 
+  import { api } from '@mathesar/api/rpc';
   import userApi, { type User } from '@mathesar/api/rest/users';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/rest/utils/errors';
   import {
@@ -75,10 +76,12 @@
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
-      const newUser = await userApi.add({
-        ...request,
-        password: formValues.password,
-      });
+      const newUser = await api.users.add({
+          user_def: {
+            ...request,
+            password: formValues.password,
+          },
+      }).run();
       dispatch('create', newUser);
       return;
     }
