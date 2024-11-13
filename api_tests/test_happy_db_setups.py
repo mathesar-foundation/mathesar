@@ -1,6 +1,5 @@
 import pytest
 import requests
-from urllib import parse as urlparse
 
 SERVICE_HOST = 'http://mathesar-api-test-service:8000'
 EXTERNAL_HOST = 'mathesar-test-user-db'
@@ -12,7 +11,7 @@ USERS_ENDPOINT = f'{SERVICE_HOST}/api/ui/v0/users/'
 def admin_session():
     login_payload = {"username": "admin", "password": "password"}
     s = requests.Session()
-    r = s.get(f'{SERVICE_HOST}/auth/login/')
+    s.get(f'{SERVICE_HOST}/auth/login/')
     s.headers['X-CSRFToken'] = s.cookies['csrftoken']
     s.post(f'{SERVICE_HOST}/auth/login/', data=login_payload)
     s.headers['X-CSRFToken'] = s.cookies['csrftoken']
@@ -46,7 +45,7 @@ def intern_session():
     s.headers['X-CSRFToken'] = s.cookies['csrftoken']
     s.post(f'{SERVICE_HOST}/auth/login/', data=init_login_payload)
     s.headers['X-CSRFToken'] = s.cookies['csrftoken']
-    reset_payload={
+    reset_payload = {
         "new_password1": "myinternpass1234",
         "new_password2": "myinternpass1234"
     }
@@ -178,7 +177,6 @@ def test_add_user(admin_session):
     ][0]
 
 
-
 def test_intern_no_databases(intern_rpc_call):
     db_list = intern_rpc_call('databases.configured.list')
     assert db_list == []
@@ -224,7 +222,7 @@ def test_add_collaborator(admin_rpc_call):
     )
     # Should only have the admin so far
     assert len(before_collaborators) == 1
-    result = admin_rpc_call(
+    admin_rpc_call(
         'collaborators.add',
         configured_role_id=intern_configured_role_id,
         database_id=internal_db_id,
