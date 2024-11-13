@@ -1,7 +1,7 @@
 from typing import TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.auth.basic import http_basic_auth_login_required, http_basic_auth_superuser_required
 
 from mathesar.models.base import Database
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
@@ -69,7 +69,7 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
 
 
 @rpc_method(name="databases.configured.disconnect")
-@http_basic_auth_login_required
+@http_basic_auth_superuser_required
 @handle_rpc_exceptions
 def disconnect(*, database_id: int, **kwargs) -> None:
     """
