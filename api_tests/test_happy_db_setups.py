@@ -153,7 +153,8 @@ def test_get_current_role(admin_rpc_call):
 # Now the scenario proper starts. The admin will add an `intern` user to
 # Mathesar, an `intern` role to the internal `mathesar` DB, then grant
 # `CONNECT` to that role on the DB, `USAGE` on "Library Management", and
-# `SELECT` on "Books".
+# `SELECT` on "Books". We'll make sure the intern has the correct
+# privileges at each step.
 #
 # We'll follow along with the API calls made by the front end.
 
