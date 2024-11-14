@@ -18,13 +18,14 @@ export const users = {
     list: rpcMethodTypeContainer<
         void, User[]
     >(),
-    get: rpcMethodTypeContainer<{ user_id: number }, User>(),
+    get: rpcMethodTypeContainer<{ user_id: User['id'] }, User>(),
     add: rpcMethodTypeContainer<
-        {user_def: UnsavedUser},
+        { user_def: UnsavedUser },
         User
     >(),
-    delete: rpcMethodTypeContainer<{ user_id: number }, void>(),
-    /* patch: rpcMethodTypeContainer<
-        { user_id: number, user_info: }
-    >(), */
-}
+    delete: rpcMethodTypeContainer<{ user_id: User['id'] }, void>(),
+    patch: rpcMethodTypeContainer<
+        { user_id: User['id'], user_info: Partial<Omit<UnsavedUser, 'password'>>},
+        User
+    >(),
+};
