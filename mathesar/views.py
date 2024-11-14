@@ -71,8 +71,7 @@ def get_queries_list(request, database_id, schema_oid):
 
 
 def get_user_data(request):
-    user_info = get_user_info(user_id=request.user.id)
-    return user_info
+    return get_user_info(user_id=request.user.id)
 
 
 def _get_internal_db_meta():
