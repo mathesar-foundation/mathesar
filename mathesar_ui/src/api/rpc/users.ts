@@ -16,11 +16,35 @@ export interface User extends Omit<UnsavedUser, 'password'> {
 
 export const users = {
   list: rpcMethodTypeContainer<void, User[]>(),
+
   get: rpcMethodTypeContainer<{ user_id: User['id'] }, User>(),
+
   add: rpcMethodTypeContainer<{ user_def: UnsavedUser }, User>(),
+
   delete: rpcMethodTypeContainer<{ user_id: User['id'] }, void>(),
+
   patch: rpcMethodTypeContainer<
-    { user_id: User['id']; user_info: Partial<Omit<UnsavedUser, 'password'>> },
+    {
+      user_id: User['id'];
+      user_info: Partial<Omit<UnsavedUser, 'password'>>;
+    },
     User
+  >(),
+
+  replace_own: rpcMethodTypeContainer<
+    {
+      user_id: User['id'];
+      old_password: string;
+      new_password: string;
+    },
+    void
+  >(),
+
+  revoke: rpcMethodTypeContainer<
+    {
+      user_id: User['id'];
+      new_password: string;
+    },
+    void
   >(),
 };
