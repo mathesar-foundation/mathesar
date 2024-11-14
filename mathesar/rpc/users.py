@@ -15,7 +15,8 @@ from mathesar.utils.users import (
     list_user_info,
     add_user,
     update_user_info,
-    delete_user
+    delete_user,
+    revoke_password
 )
 
 
@@ -109,3 +110,14 @@ def patch(
         requesting_user=user
     )
     return UserInfo.from_model(updated_user_info)
+
+
+@rpc_method(name='users.password.revoke')
+@http_basic_auth_superuser_required
+@handle_rpc_exceptions
+def revoke(
+    *,
+    user_id: int,
+    new_password: str,
+) -> None:
+    revoke_password(user_id, new_password)
