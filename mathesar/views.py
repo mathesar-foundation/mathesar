@@ -12,7 +12,7 @@ from mathesar.rpc.explorations import list_ as explorations_list
 from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
-from mathesar.api.serializers.users import UserSerializer
+from mathesar.rpc.users import get as get_user_info
 from mathesar import __version__
 
 
@@ -71,12 +71,8 @@ def get_queries_list(request, database_id, schema_oid):
 
 
 def get_user_data(request):
-    user_serializer = UserSerializer(
-        request.user,
-        many=False,
-        context={'request': request}
-    )
-    return user_serializer.data
+    user_info = get_user_info(user_id=request.user.id)
+    return user_info
 
 
 def _get_internal_db_meta():
