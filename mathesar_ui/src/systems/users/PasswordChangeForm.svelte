@@ -1,7 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import userApi, { type User } from '@mathesar/api/rest/users';
+  import { api } from '@mathesar/api/rpc';
+  import type { User } from '@mathesar/api/rpc/users';
   import {
     FormSubmit,
     comboMustBeEqual,
@@ -61,7 +62,13 @@
       hasProperty(formValues, 'oldPassword')
     ) {
       // logged in user is updating their own password
-      await userApi.changePassword(formValues.oldPassword, formValues.password);
+      await api.users
+        .replace_own({
+          user_id: userId,
+          old_password: formValues.oldPassword,
+          new_password: formValues.password,
+        })
+        .run();
       /**
        * Once password changes, the session gets invalided.
        * We reload the page so that the user can login again.
@@ -69,7 +76,9 @@
       window.location.reload();
     } else {
       // logged in user is updating someone else's password
-      await userApi.resetPassword(userId, formValues.password);
+      await api.users
+        .revoke({ user_id: userId, new_password: formValues.password })
+        .run();
       showChangePasswordForm = false;
     }
   }
