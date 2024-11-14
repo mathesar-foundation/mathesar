@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import F
 
 from mathesar.models import User
@@ -11,16 +12,21 @@ def list_users():
     return User.objects.all()
 
 
+@transaction.atomic
 def add_user(user_def):
-    return User.objects.create(
+    user = User.objects.create(
         username=user_def["username"],
-        password=user_def["password"],
         is_superuser=user_def["is_superuser"],
         email=user_def.get("email", ""),
         full_name=user_def.get("full_name", ""),
         short_name=user_def.get("short_name", ""),
         display_language=user_def.get("display_language", "en"),
+        password_change_needed=True
     )
+    user.set_password(user_def["password"])
+    user.password_change_needed = True
+    user.save()
+    return user
 
 
 def update_user_info(user_id, user_info, requesting_user):
