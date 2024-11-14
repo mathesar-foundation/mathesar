@@ -41,6 +41,14 @@ def delete_user(user_id):
     User.objects.get(id=user_id).delete()
 
 
+def change_password(user_id, old_password, new_password):
+    user = get_user(user_id)
+    if not user.check_password(old_password):
+        raise Exception('Old password is not correct')
+    user.set_password(new_password)
+    user.save()
+
+
 def revoke_password(user_id, new_password):
     user = get_user(user_id)
     user.set_password(new_password)
