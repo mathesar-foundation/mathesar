@@ -440,6 +440,16 @@ METHODS = [
         users.patch,
         "users.patch",
         [user_is_authenticated]
+    ),
+    (
+        users.replace_own,
+        "users.password.replace_own",
+        [user_is_authenticated]
+    ),
+    (
+        users.revoke,
+        "users.password.revoke",
+        [user_is_superuser]
     )
 ]
 
