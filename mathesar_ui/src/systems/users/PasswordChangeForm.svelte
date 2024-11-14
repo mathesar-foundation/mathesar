@@ -62,7 +62,7 @@
       hasProperty(formValues, 'oldPassword')
     ) {
       // logged in user is updating their own password
-      await api.users
+      await api.users.password
         .replace_own({
           user_id: userId,
           old_password: formValues.oldPassword,
@@ -76,7 +76,7 @@
       window.location.reload();
     } else {
       // logged in user is updating someone else's password
-      await api.users
+      await api.users.password
         .revoke({ user_id: userId, new_password: formValues.password })
         .run();
       showChangePasswordForm = false;

@@ -31,20 +31,22 @@ export const users = {
     User
   >(),
 
-  replace_own: rpcMethodTypeContainer<
-    {
-      user_id: User['id'];
-      old_password: string;
-      new_password: string;
-    },
-    void
-  >(),
+  password: {
+    replace_own: rpcMethodTypeContainer<
+      {
+        user_id: User['id'];
+        old_password: string;
+        new_password: string;
+      },
+      void
+    >(),
 
-  revoke: rpcMethodTypeContainer<
-    {
-      user_id: User['id'];
-      new_password: string;
-    },
-    void
-  >(),
+    revoke: rpcMethodTypeContainer<
+      {
+        user_id: User['id'];
+        new_password: string;
+      },
+      void
+    >(),
+  },
 };
