@@ -24,7 +24,7 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     filterset_class = DataFileFilter
     parser_classes = [MultiPartParser, JSONParser]
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, **kwargs):
         serializer = DataFileSerializer(
             data=request.data, context={'request': request}, partial=True
         )
