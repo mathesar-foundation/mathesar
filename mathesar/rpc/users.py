@@ -11,8 +11,8 @@ from modernrpc.auth.basic import (
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from modernrpc.exceptions import AuthenticationFailed
 from mathesar.utils.users import (
-    get_user_info,
-    list_user_info,
+    get_user,
+    list_users,
     add_user,
     update_user_info,
     delete_user,
@@ -80,7 +80,7 @@ def delete(*, user_id: int) -> None:
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def get(*, user_id: int) -> UserInfo:
-    user = get_user_info(user_id)
+    user = get_user(user_id)
     return UserInfo.from_model(user)
 
 
@@ -88,7 +88,7 @@ def get(*, user_id: int) -> UserInfo:
 @http_basic_auth_login_required
 @handle_rpc_exceptions
 def list_() -> list[UserInfo]:
-    users = list_user_info()
+    users = list_users()
     return [UserInfo.from_model(user) for user in users]
 
 

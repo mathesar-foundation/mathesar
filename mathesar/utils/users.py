@@ -3,11 +3,11 @@ from django.db.models import F
 from mathesar.models import User
 
 
-def get_user_info(user_id):
+def get_user(user_id):
     return User.objects.get(id=user_id)
 
 
-def list_user_info():
+def list_users():
     return User.objects.all()
 
 
@@ -34,7 +34,7 @@ def update_user_info(user_id, user_info, requesting_user):
         short_name=user_info.get("short_name", F("short_name")),
         display_language=user_info.get("display_language", F("display_language"))
     )
-    return get_user_info(user_id)
+    return get_user(user_id)
 
 
 def delete_user(user_id):
@@ -42,7 +42,7 @@ def delete_user(user_id):
 
 
 def revoke_password(user_id, new_password):
-    User.objects.filter(id=user_id).update(
-        password=new_password,
-        password_change_needed=True
-    )
+    user = get_user(user_id)
+    user.set_password(new_password)
+    user.password_change_needed = True
+    user.save()
