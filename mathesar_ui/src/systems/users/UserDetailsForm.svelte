@@ -76,12 +76,14 @@
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
-      const newUser = await api.users.add({
+      const newUser = await api.users
+        .add({
           user_def: {
             ...request,
             password: formValues.password,
           },
-      }).run();
+        })
+        .run();
       dispatch('create', newUser);
       return;
     }

@@ -28,9 +28,7 @@ const getUsersPromise = () => {
       promise
         .then(
           (response) =>
-            resolve(
-              new ImmutableMap(response.map((user) => [user.id, user])),
-            ),
+            resolve(new ImmutableMap(response.map((user) => [user.id, user]))),
           (err) => reject(err),
         )
         .catch((err) => reject(err));
