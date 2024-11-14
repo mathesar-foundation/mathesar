@@ -3,9 +3,9 @@
   import { _ } from 'svelte-i18n';
   import type { UnionToIntersection } from 'type-fest';
 
-  import { api } from '@mathesar/api/rpc';
-  import userApi, { type User } from '@mathesar/api/rest/users';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/rest/utils/errors';
+  import { api } from '@mathesar/api/rpc';
+  import { type User } from '@mathesar/api/rpc/users';
   import {
     type FieldStore,
     FormSubmit,
@@ -87,7 +87,7 @@
     }
 
     if (user) {
-      await userApi.update(user.id, request);
+      await api.users.patch({ user_id: user.id, user_info: request }).run();
       if (isUserUpdatingThemselves && userProfileStore) {
         userProfileStore.update((details) => details.with(request));
         const updatedLocale = request.display_language;
