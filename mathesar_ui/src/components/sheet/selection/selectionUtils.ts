@@ -1,5 +1,7 @@
 import type { Writable } from 'svelte/store';
 
+import type { ResultValue } from '@mathesar/api/rpc/records';
+import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import { type ImmutableSet, defined } from '@mathesar-component-library';
 
 import type Series from './Series';
@@ -113,4 +115,15 @@ export function fitSelectedValuesToSeriesTransformation<T>(
   const newStartingValue = newSeries.at(newStartingIndex) as T;
   const newEndingValue = newSeries.at(newStartingIndex + width - 1) as T;
   return [newStartingValue, newEndingValue];
+}
+
+export interface SelectedCellData {
+  activeCellData?: {
+    column: CellColumnFabric;
+    value: ResultValue | undefined;
+    recordSummary?: string;
+  };
+  selectionData: {
+    cellCount: number;
+  };
 }

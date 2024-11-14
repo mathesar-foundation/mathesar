@@ -1,7 +1,6 @@
 <script lang="ts">
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
   import {
-    abstractTypesMap,
     defaultDbType,
     getAbstractTypeForDbType,
     getAllowedAbstractTypesForNewColumn,
@@ -12,8 +11,8 @@
   export let value = defaultDbType;
   export let disabled = false;
 
-  $: abstractType = getAbstractTypeForDbType(value, abstractTypesMap);
-  $: options = getAllowedAbstractTypesForNewColumn(abstractTypesMap);
+  $: abstractType = getAbstractTypeForDbType(value);
+  $: options = getAllowedAbstractTypesForNewColumn();
 </script>
 
 <SelectionList

@@ -17,7 +17,6 @@ import type {
 import Plane from '@mathesar/components/sheet/selection/Plane';
 import Series from '@mathesar/components/sheet/selection/Series';
 import SheetSelectionStore from '@mathesar/components/sheet/selection/SheetSelectionStore';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { runSavedExploration } from '@mathesar/stores/queries';
 import Pagination from '@mathesar/utils/Pagination';
 import type { ShareConsumer } from '@mathesar/utils/shares';
@@ -56,8 +55,6 @@ type QueryRunMode = 'queryId' | 'queryObject';
 export class QueryRunner {
   query: Writable<QueryModel>;
 
-  abstractTypeMap: AbstractTypesMap;
-
   runState: Writable<RequestStatus<string[] | ApiMultiError> | undefined> =
     writable();
 
@@ -92,20 +89,17 @@ export class QueryRunner {
 
   constructor({
     query,
-    abstractTypeMap,
     runMode,
     onRunWithObject,
     onRunWithId,
     shareConsumer,
   }: {
     query: QueryModel;
-    abstractTypeMap: AbstractTypesMap;
     runMode?: QueryRunMode;
     onRunWithObject?: (instance: ExplorationResult) => unknown;
     onRunWithId?: (instance: ExplorationResult) => unknown;
     shareConsumer?: ShareConsumer;
   }) {
-    this.abstractTypeMap = abstractTypeMap;
     this.runMode = runMode ?? 'queryObject';
     this.query = writable(query);
     this.onRunWithObjectCallback = onRunWithObject;
@@ -146,7 +140,6 @@ export class QueryRunner {
         inputColumnInformationMap ??
         (new Map() as InputColumnsStoreSubstance['inputColumnInformationMap']),
       queryModel: this.getQueryModel(),
-      abstractTypeMap: this.abstractTypeMap,
     });
     this.columnsMetaData.set(speculatedMetaData);
     this.processedColumns.set(
@@ -204,10 +197,7 @@ export class QueryRunner {
         triggerCallback = () => this.onRunWithIdCallback?.(response);
       }
 
-      const columnsMetaData = processColumnMetaData(
-        response.column_metadata,
-        this.abstractTypeMap,
-      );
+      const columnsMetaData = processColumnMetaData(response.column_metadata);
       this.columnsMetaData.set(columnsMetaData);
       this.processedColumns.set(
         new ImmutableMap(

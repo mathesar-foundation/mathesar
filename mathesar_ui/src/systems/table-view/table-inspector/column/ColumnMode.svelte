@@ -1,10 +1,18 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import {
+    tableInspectorColumnActionsVisible,
+    tableInspectorColumnDataTypeVisible,
+    tableInspectorColumnDefaultValueVisible,
+    tableInspectorColumnFormattingVisible,
+    tableInspectorColumnPropertiesVisible,
+    tableInspectorColumnRecordSummaryVisible,
+  } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { currentTablesData } from '@mathesar/stores/tables';
   import FkRecordSummaryConfig from '@mathesar/systems/table-view/table-inspector/record-summary/FkRecordSummaryConfig.svelte';
-  import { Collapsible } from '@mathesar-component-library';
+  import { Collapsible, defined } from '@mathesar-component-library';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
 
@@ -18,7 +26,7 @@
 
   const tabularData = getTabularDataStoreFromContext();
 
-  $: ({ table, processedColumns, selection } = $tabularData);
+  $: ({ table, processedColumns, selection, selectedCellData } = $tabularData);
   $: ({ currentRoleOwns } = table.currentAccess);
   $: selectedColumns = (() => {
     const ids = $selection.columnIds;
@@ -42,6 +50,9 @@
   })();
   /** When only one column is selected */
   $: column = selectedColumns.length === 1 ? selectedColumns[0] : undefined;
+  $: linkedTable = defined(column?.linkFk?.referent_table_oid, (id) =>
+    $currentTablesData.tablesMap.get(id),
+  );
 </script>
 
 <div class="column-mode-container">
@@ -59,7 +70,10 @@
     {/if}
     {#if column}
       {#key column}
-        <Collapsible isOpen triggerAppearance="inspector">
+        <Collapsible
+          bind:isOpen={$tableInspectorColumnPropertiesVisible}
+          triggerAppearance="inspector"
+        >
           <CollapsibleHeader
             slot="header"
             title={$_('properties')}
@@ -90,7 +104,10 @@
     {/if}
 
     {#if column}
-      <Collapsible isOpen triggerAppearance="inspector">
+      <Collapsible
+        bind:isOpen={$tableInspectorColumnDataTypeVisible}
+        triggerAppearance="inspector"
+      >
         <CollapsibleHeader
           slot="header"
           title={$_('data_type')}
@@ -103,7 +120,10 @@
     {/if}
 
     {#if column && !column.column.default?.is_dynamic}
-      <Collapsible isOpen triggerAppearance="inspector">
+      <Collapsible
+        bind:isOpen={$tableInspectorColumnDefaultValueVisible}
+        triggerAppearance="inspector"
+      >
         <CollapsibleHeader
           slot="header"
           title={$_('default_value')}
@@ -116,7 +136,10 @@
     {/if}
 
     {#if column}
-      <Collapsible isOpen triggerAppearance="inspector">
+      <Collapsible
+        bind:isOpen={$tableInspectorColumnFormattingVisible}
+        triggerAppearance="inspector"
+      >
         <CollapsibleHeader slot="header" title={$_('formatting')} />
         <div slot="content" class="content-container">
           {#key column}
@@ -126,27 +149,26 @@
       </Collapsible>
     {/if}
 
-    <!-- TODO_BETA: Re-enable this once we make the record summary configurable -->
-    <!-- {#if column}
-      {@const referentTableId = column.linkFk?.referent_table_oid}
-      {@const referentTable =
-        referentTableId === undefined
-          ? undefined
-          : $currentTablesData.tablesMap.get(referentTableId)}
-      {#if referentTable !== undefined}
-        <Collapsible triggerAppearance="inspector">
-          <CollapsibleHeader
-            slot="header"
-            title={$_('linked_record_summary')}
+    {#if linkedTable}
+      <Collapsible
+        bind:isOpen={$tableInspectorColumnRecordSummaryVisible}
+        triggerAppearance="inspector"
+      >
+        <CollapsibleHeader slot="header" title={$_('linked_record_summary')} />
+        <div slot="content" class="content-container">
+          <FkRecordSummaryConfig
+            {linkedTable}
+            previewRecordId={$selectedCellData.activeCellData?.value}
+            onSave={() => $tabularData.recordsData.fetch()}
           />
-          <div slot="content" class="content-container">
-            <FkRecordSummaryConfig table={referentTable} />
-          </div>
-        </Collapsible>
-      {/if}
-    {/if} -->
+        </div>
+      </Collapsible>
+    {/if}
 
-    <Collapsible isOpen triggerAppearance="inspector">
+    <Collapsible
+      bind:isOpen={$tableInspectorColumnActionsVisible}
+      triggerAppearance="inspector"
+    >
       <CollapsibleHeader slot="header" title={$_('actions')} />
       <div slot="content" class="content-container">
         <ColumnActions columns={selectedColumns} />
