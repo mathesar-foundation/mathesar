@@ -23,9 +23,9 @@ def add_user(user_def):
     )
 
 
-def update_user_info(user_id, user_info):
-    if not get_user_info(user_id).is_superuser:
-        user_info.pop("is_superuser")
+def update_user_info(user_id, user_info, requesting_user):
+    if not requesting_user.is_superuser:
+        user_info.pop("is_superuser", None)
     User.objects.filter(id=user_id).update(
         username=user_info.get("username", F("username")),
         is_superuser=user_info.get("is_superuser", F("is_superuser")),

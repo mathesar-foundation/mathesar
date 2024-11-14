@@ -103,5 +103,9 @@ def patch(
     user = kwargs.get(REQUEST_KEY).user
     if not (user.id == user_id or user.is_superuser):
         raise AuthenticationFailed('users.patch')
-    updated_user_info = update_user_info(user_id, user_info)
+    updated_user_info = update_user_info(
+        user_id,
+        user_info,
+        requesting_user=user
+    )
     return UserInfo.from_model(updated_user_info)
