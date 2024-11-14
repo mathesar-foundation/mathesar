@@ -3,9 +3,9 @@
 import { getContext, setContext } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
-import { api } from '@mathesar/api/rpc';
-import userApi, { type UnsavedUser, type User } from '@mathesar/api/rest/users';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import { type UnsavedUser, type User } from '@mathesar/api/rpc/users';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
@@ -76,7 +76,7 @@ class WritableUsersStore {
 
   readonly count = writable(0);
 
-  private request: ReturnType<typeof userApi.list> | undefined;
+  private request: ReturnType<typeof api.users.list> | undefined;
 
   constructor() {
     void this.fetchUsers();
@@ -86,11 +86,10 @@ class WritableUsersStore {
    * @throws Error
    */
   private async fetchUsersSilently() {
-    this.request?.cancel();
-    this.request = userApi.list();
-    const response = await this.request;
-    this.users.set(response.results.map((user) => new UserModel(user)));
-    this.count.set(response.count);
+    this.request = api.users.list();
+    const response = await this.request.run();
+    this.users.set(response.map((user) => new UserModel(user)));
+    this.count.set(response.length);
   }
 
   async fetchUsers() {
@@ -116,8 +115,8 @@ class WritableUsersStore {
       return get(this.users).find((user) => user.id === userId);
     }
     if (requestStatus?.state === 'processing') {
-      const result = await this.request;
-      const user = result?.results.find((entry) => entry.id === userId);
+      const result = await this.request?.run();
+      const user = result?.find((entry) => entry.id === userId);
       if (user) {
         return new UserModel(user);
       }
