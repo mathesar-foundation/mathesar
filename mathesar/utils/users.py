@@ -24,7 +24,6 @@ def add_user(user_def):
         password_change_needed=True
     )
     user.set_password(user_def["password"])
-    user.password_change_needed = True
     user.save()
     return user
 
