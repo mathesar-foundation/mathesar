@@ -16,6 +16,7 @@ from mathesar.utils.users import (
     add_user,
     update_user_info,
     delete_user,
+    change_password,
     revoke_password
 )
 
@@ -110,6 +111,22 @@ def patch(
         requesting_user=user
     )
     return UserInfo.from_model(updated_user_info)
+
+
+@rpc_method(name='users.password.replace_own')
+@http_basic_auth_login_required
+@handle_rpc_exceptions
+def replace_own(
+    *,
+    user_id: int,
+    old_password: str,
+    new_password: str,
+    **kwargs
+) -> None:
+    user = kwargs.get(REQUEST_KEY).user
+    if not user.id == user_id:
+        raise AuthenticationFailed('users.password.replace_own')
+    change_password(user_id, old_password, new_password)
 
 
 @rpc_method(name='users.password.revoke')
