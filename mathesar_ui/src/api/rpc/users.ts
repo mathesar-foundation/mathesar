@@ -1,5 +1,5 @@
-import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 import type { Language } from '@mathesar/i18n/languages/utils';
+import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
 export interface UnsavedUser {
   full_name: string | null;
