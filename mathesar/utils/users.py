@@ -39,3 +39,10 @@ def update_user_info(user_id, user_info, requesting_user):
 
 def delete_user(user_id):
     User.objects.get(id=user_id).delete()
+
+
+def revoke_password(user_id, new_password):
+    User.objects.filter(id=user_id).update(
+        password=new_password,
+        password_change_needed=True
+    )
