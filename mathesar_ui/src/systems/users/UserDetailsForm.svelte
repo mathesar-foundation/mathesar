@@ -5,7 +5,7 @@
 
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/rest/utils/errors';
   import { api } from '@mathesar/api/rpc';
-  import { type User } from '@mathesar/api/rpc/users';
+  import type { User } from '@mathesar/api/rpc/users';
   import {
     type FieldStore,
     FormSubmit,

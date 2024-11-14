@@ -1,7 +1,7 @@
 import { type Readable, derived } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import { type User } from '@mathesar/api/rpc/users';
+import type { User } from '@mathesar/api/rpc/users';
 import type { Collaborator } from '@mathesar/models/Collaborator';
 import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
 import type { Database } from '@mathesar/models/Database';

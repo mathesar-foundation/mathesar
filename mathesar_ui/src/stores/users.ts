@@ -5,7 +5,7 @@ import { type Writable, get, writable } from 'svelte/store';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import { type UnsavedUser, type User } from '@mathesar/api/rpc/users';
+import type { UnsavedUser, User } from '@mathesar/api/rpc/users';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 
