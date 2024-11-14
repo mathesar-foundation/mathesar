@@ -1,6 +1,7 @@
 import { type Readable, derived } from 'svelte/store';
 
-import userApi, { type User } from '@mathesar/api/rest/users';
+import { api } from '@mathesar/api/rpc';
+import { type User } from '@mathesar/api/rpc/users';
 import type { Collaborator } from '@mathesar/models/Collaborator';
 import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
 import type { Database } from '@mathesar/models/Database';
@@ -21,14 +22,14 @@ export type CombinedLoginRole = {
 
 // TODO: Make CancellablePromise chainable
 const getUsersPromise = () => {
-  const promise = userApi.list();
+  const promise = api.users.list().run();
   return new CancellablePromise<ImmutableMap<User['id'], User>>(
     (resolve, reject) => {
       promise
         .then(
           (response) =>
             resolve(
-              new ImmutableMap(response.results.map((user) => [user.id, user])),
+              new ImmutableMap(response.map((user) => [user.id, user])),
             ),
           (err) => reject(err),
         )
