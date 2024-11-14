@@ -46,6 +46,7 @@ def change_password(user_id, old_password, new_password):
     if not user.check_password(old_password):
         raise Exception('Old password is not correct')
     user.set_password(new_password)
+    user.password_change_needed = False
     user.save()
 
 
