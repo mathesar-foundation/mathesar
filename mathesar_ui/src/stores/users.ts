@@ -8,6 +8,7 @@ import { api } from '@mathesar/api/rpc';
 import type { UnsavedUser, User } from '@mathesar/api/rpc/users';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 export class UserModel {
   readonly id: User['id'];
@@ -76,7 +77,7 @@ class WritableUsersStore {
 
   readonly count = writable(0);
 
-  private request: ReturnType<typeof api.users.list> | undefined;
+  private request: CancellablePromise<User[]> | undefined;
 
   constructor() {
     void this.fetchUsers();
@@ -86,8 +87,9 @@ class WritableUsersStore {
    * @throws Error
    */
   private async fetchUsersSilently() {
-    this.request = api.users.list();
-    const response = await this.request.run();
+    this.request?.cancel();
+    this.request = api.users.list().run();
+    const response = await this.request;
     this.users.set(response.map((user) => new UserModel(user)));
     this.count.set(response.length);
   }
@@ -115,7 +117,7 @@ class WritableUsersStore {
       return get(this.users).find((user) => user.id === userId);
     }
     if (requestStatus?.state === 'processing') {
-      const result = await this.request?.run();
+      const result = await this.request;
       const user = result?.find((entry) => entry.id === userId);
       if (user) {
         return new UserModel(user);
