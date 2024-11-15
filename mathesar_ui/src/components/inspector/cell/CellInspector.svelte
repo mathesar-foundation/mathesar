@@ -2,8 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import CellFabric from '@mathesar/components/cell-fabric/CellFabric.svelte';
-
-  import type { SelectedCellData } from './cellInspectorUtils';
+  import type { SelectedCellData } from '@mathesar/components/sheet/selection';
 
   export let selectedCellData: SelectedCellData;
 

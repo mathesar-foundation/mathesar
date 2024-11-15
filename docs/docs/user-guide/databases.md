@@ -10,9 +10,6 @@ Every PostgreSQL database lives within a PostgreSQL server.
 
 - The **Internal Server:** Most Mathesar installations have an internal PostgreSQL server which the Mathesar application controls and utilizes for storage of application-specific metadata.
 
-    !!! info "Some Mathesar installations don't have an internal server"
-        It's possible (though not recommended) to configure Mathesar to store its internal metadata in SQLite, thereby circumventing the need for an internal server.
-
 ## Creating a new database
 
 If you're starting your database from scratch with Mathesar you can either:

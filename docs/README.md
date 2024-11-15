@@ -22,7 +22,7 @@ This directory contains the source code for Mathesar's user and administrator do
 
 ## Contribution process
 
-- For small documentation improvements, we welcome PRs without any prior issues. For larger edits, please [open an issue](https://github.com/centerofci/mathesar/issues/new/choose) first to discuss your changes and get approval from the team before proceeding.
+- For small documentation improvements, we welcome PRs without any prior issues. For larger edits, please [open an issue](https://github.com/mathesar-foundation/mathesar/issues/new/choose) first to discuss your changes and get approval from the team before proceeding.
 
 - Take care when choosing the git branch on which to base your edits
     - **Target `master`** if you have an important fix which needs to be published for the _currently-released_ version of Mathesar.

@@ -21,6 +21,7 @@ export { default as Chip } from './chip/Chip.svelte';
 export { default as Collapsible } from './collapsible/Collapsible.svelte';
 export { default as ContextMenu } from './context-menu/ContextMenu.svelte';
 export { default as Debounce } from './debounce/Debounce.svelte';
+export { default as Fieldset } from './fieldset/Fieldset.svelte';
 export { default as Help } from './help/Help.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';

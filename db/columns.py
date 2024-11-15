@@ -1,6 +1,6 @@
 import json
 
-from db.connection import exec_msar_func
+from db import connection as db_conn
 from db.deprecated.types.base import PostgresType
 
 
@@ -45,7 +45,7 @@ def get_column_info_for_table(table, conn):
     Args:
         table: The table for which we want column info.
     """
-    return exec_msar_func(conn, 'get_column_info', table).fetchone()[0]
+    return db_conn.exec_msar_func(conn, 'get_column_info', table).fetchone()[0]
 
 
 def alter_columns_in_table(table_oid, column_data_list, conn):
@@ -61,7 +61,7 @@ def alter_columns_in_table(table_oid, column_data_list, conn):
     transformed_column_data = [
         _transform_column_alter_dict(column) for column in column_data_list
     ]
-    exec_msar_func(
+    db_conn.exec_msar_func(
         conn, 'alter_columns', table_oid, json.dumps(transformed_column_data)
     )
     return len(column_data_list)
@@ -136,7 +136,7 @@ def add_columns_to_table(table_oid, column_data_list, conn):
     transformed_column_data = [
         _transform_column_create_dict(col) for col in column_data_list
     ]
-    result = exec_msar_func(
+    result = db_conn.exec_msar_func(
         conn,
         'add_columns',
         table_oid,
@@ -194,6 +194,6 @@ def drop_columns_from_table(table_oid, column_attnums, conn):
         column_attnums: The attnums of the columns to drop.
         conn: A psycopg connection to the relevant database.
     """
-    return exec_msar_func(
+    return db_conn.exec_msar_func(
         conn, 'drop_columns', table_oid, *column_attnums
     ).fetchone()[0]

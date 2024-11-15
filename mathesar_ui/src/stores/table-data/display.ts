@@ -40,8 +40,6 @@ export class Display {
 
   horizontalScrollOffset: Writable<number>;
 
-  isTableInspectorVisible: Writable<boolean>;
-
   /**
    * @deprecated
    * Keys are column ids. Values are column widths in px.
@@ -76,7 +74,6 @@ export class Display {
     this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
     this.scrollOffset = writable(0);
-    this.isTableInspectorVisible = writable(true);
 
     this.customizedColumnWidths = new WritableMap();
 

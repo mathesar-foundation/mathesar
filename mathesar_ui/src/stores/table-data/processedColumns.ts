@@ -19,7 +19,6 @@ import {
 import type {
   AbstractType,
   AbstractTypePreprocFunctionDefinition,
-  AbstractTypesMap,
 } from '@mathesar/stores/abstract-types/types';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 
@@ -59,14 +58,12 @@ export function processColumn({
   column,
   columnIndex,
   constraints,
-  abstractTypeMap,
   hasEnhancedPrimaryKeyCell,
 }: {
   tableId: Table['oid'];
   column: Column;
   columnIndex: number;
   constraints: Constraint[];
-  abstractTypeMap: AbstractTypesMap;
   /**
    * - When true, the primary key cells will be rendered via the PrimaryKeyCell
    *   component, which provides additional functionality (e.g. hyperlink to
@@ -76,7 +73,7 @@ export function processColumn({
    */
   hasEnhancedPrimaryKeyCell?: boolean;
 }): ProcessedColumn {
-  const abstractType = getAbstractTypeForDbType(column.type, abstractTypeMap);
+  const abstractType = getAbstractTypeForDbType(column.type);
   const relevantConstraints = constraints.filter((c) =>
     c.columns.includes(column.id),
   );

@@ -1,10 +1,12 @@
 -r requirements.txt
-flake8==3.9.0
+flake8==7.1.1
 ipython==8.10.0
-pytest==8.0.2
-pytest-django==4.2.0
-pytest-env==0.6.2
-pytest-cov==3.0.0
-pytest-xdist[psutil]==2.5.0
-mkdocs-material==8.5.11
-mkdocs-redirects==1.2.0
+pytest==8.3.3
+pytest-django==4.9.0
+pytest-env==1.1.5
+pytest-cov==5.0.0
+pytest-xdist[psutil]==3.6.1
+mkdocs-material==9.5.42
+mkdocs-redirects==1.2.1
+responses==0.25.3
+SQLAlchemy-Utils==0.41.2

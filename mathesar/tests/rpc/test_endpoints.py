@@ -131,6 +131,11 @@ METHODS = [
         "databases.delete",
         [user_is_authenticated]
     ),
+    (
+        databases.upgrade_sql,
+        "databases.upgrade_sql",
+        [user_is_superuser]
+    ),
 
     (
         databases.configured.list_,
@@ -140,7 +145,7 @@ METHODS = [
     (
         databases.configured.disconnect,
         "databases.configured.disconnect",
-        [user_is_authenticated]
+        [user_is_superuser]
     ),
 
     (

@@ -1,3 +1,5 @@
+<script lang="ts"></script>
+
 <span class="field-help"><slot /></span>
 
 <style>

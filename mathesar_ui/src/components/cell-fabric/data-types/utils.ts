@@ -1,15 +1,9 @@
 import type { DbType } from '@mathesar/AppTypes';
-import {
-  abstractTypesMap,
-  getAbstractTypeForDbType,
-} from '@mathesar/stores/abstract-types';
+import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { CellInfo } from '@mathesar/stores/abstract-types/types';
 
 export function getCellInfo(dbType: DbType): CellInfo | undefined {
-  const abstractTypeOfColumn = getAbstractTypeForDbType(
-    dbType,
-    abstractTypesMap,
-  );
+  const abstractTypeOfColumn = getAbstractTypeForDbType(dbType);
   return abstractTypeOfColumn?.cellInfo;
 }
 

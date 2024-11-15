@@ -4,10 +4,12 @@ This inherits the fixtures in the root conftest.py
 import pytest
 import responses
 from copy import deepcopy
+from unittest.mock import patch
 
 from django.conf import settings
 from rest_framework.test import APIClient
 
+from db import connection
 from mathesar.models.users import User
 
 from fixtures.utils import create_scoped_fixtures
@@ -22,6 +24,26 @@ def mocked_responses():
     """
     with responses.RequestsMock() as rsps:
         yield rsps
+
+
+@pytest.fixture
+def mocked_exec_msar_func():
+    """
+    Lets you patch the db.connection.exec_msar_func() for testing.
+    """
+    with patch.object(connection, "exec_msar_func") as mock:
+        mock.return_value = mock
+        yield mock
+
+
+@pytest.fixture
+def mocked_select_from_msar_func():
+    """
+    Lets you patch the db.connection.select_from_msar_func() for testing.
+    """
+    with patch.object(connection, "select_from_msar_func") as mock:
+        mock.return_value = mock
+        yield mock
 
 
 @pytest.fixture(autouse=True)
@@ -66,11 +88,6 @@ def patents_csv_filepath():
 @pytest.fixture(scope='session')
 def patents_json_filepath():
     return 'mathesar/tests/data/patents.json'
-
-
-@pytest.fixture(scope='session')
-def patents_excel_filepath():
-    return 'mathesar/tests/data/patents.xlsx'
 
 
 @pytest.fixture(scope='session')

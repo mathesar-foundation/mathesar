@@ -1,3 +1,5 @@
+<script lang="ts"></script>
+
 <svg width="1em" height="1em" viewBox="0 0 26 26">
   <path
     class="outer"

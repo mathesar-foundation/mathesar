@@ -57,6 +57,23 @@ WORKDIR /code/
 COPY . .
 
 
+#=========== STAGE: TESTING ==================================================#
+
+ARG PYTHON_VERSION=3.9-bookworm
+FROM python:$PYTHON_VERSION AS testing
+
+# Mathesar source
+WORKDIR /code/
+COPY . .
+
+# Install dev requirements
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+EXPOSE 8000
+
+ENTRYPOINT ["./dev-run.sh"]
+
+
 #=========== STAGE: DEVELOPMENT ==============================================#
 
 FROM base AS development
@@ -92,7 +109,7 @@ ENTRYPOINT ["./dev-run.sh"]
 from base as production
 
 # Install prod requirements
-RUN pip install --no-cache-dir -r requirements-prod.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Compile translation files
 RUN python manage.py compilemessages
