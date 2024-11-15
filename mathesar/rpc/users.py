@@ -9,7 +9,10 @@ from modernrpc.auth.basic import (
 )
 
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from modernrpc.exceptions import AuthenticationFailed
+from mathesar.utils.auth import (
+    http_basic_auth_is_self_or_superuser,
+    http_basic_auth_is_self
+)
 from mathesar.utils.users import (
     get_user,
     list_users,
@@ -94,7 +97,7 @@ def list_() -> list[UserInfo]:
 
 
 @rpc_method(name='users.patch')
-@http_basic_auth_login_required
+@http_basic_auth_is_self_or_superuser
 @handle_rpc_exceptions
 def patch(
     *,
@@ -103,18 +106,17 @@ def patch(
     **kwargs
 ) -> UserInfo:
     user = kwargs.get(REQUEST_KEY).user
-    if not (user.id == user_id or user.is_superuser):
-        raise AuthenticationFailed('users.patch')
+    if not user.is_superuser:
+        user_info.pop("is_superuser", None)
     updated_user_info = update_user_info(
         user_id,
-        user_info,
-        requesting_user=user
+        user_info
     )
     return UserInfo.from_model(updated_user_info)
 
 
 @rpc_method(name='users.password.replace_own')
-@http_basic_auth_login_required
+@http_basic_auth_is_self
 @handle_rpc_exceptions
 def replace_own(
     *,
@@ -124,9 +126,9 @@ def replace_own(
     **kwargs
 ) -> None:
     user = kwargs.get(REQUEST_KEY).user
-    if not user.id == user_id:
-        raise AuthenticationFailed('users.password.replace_own')
-    change_password(user_id, old_password, new_password)
+    if not user.check_password(old_password):
+        raise Exception('Old password is not correct')
+    change_password(user_id, new_password)
 
 
 @rpc_method(name='users.password.revoke')
