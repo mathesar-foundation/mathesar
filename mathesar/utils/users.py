@@ -1,5 +1,4 @@
 from django.db import transaction
-from django.db.models import F
 
 from mathesar.models import User
 
@@ -28,14 +27,23 @@ def add_user(user_def):
     return user
 
 
-def update_user_info(user_id, user_info):
+def update_self_user_info(user_id, username, email, full_name, display_language):
     User.objects.filter(id=user_id).update(
-        username=user_info.get("username", F("username")),
-        is_superuser=user_info.get("is_superuser", F("is_superuser")),
-        email=user_info.get("email", F("email")),
-        full_name=user_info.get("full_name", F("full_name")),
-        short_name=user_info.get("short_name", F("short_name")),
-        display_language=user_info.get("display_language", F("display_language"))
+        username=username,
+        email=email,
+        full_name=full_name,
+        display_language=display_language
+    )
+    return get_user(user_id)
+
+
+def update_other_user_info(user_id, username, is_superuser, email, full_name, display_language):
+    User.objects.filter(id=user_id).update(
+        username=username,
+        is_superuser=is_superuser,
+        email=email,
+        full_name=full_name,
+        display_language=display_language
     )
     return get_user(user_id)
 
