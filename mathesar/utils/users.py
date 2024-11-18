@@ -18,7 +18,6 @@ def add_user(user_def):
         is_superuser=user_def["is_superuser"],
         email=user_def.get("email", ""),
         full_name=user_def.get("full_name", ""),
-        short_name=user_def.get("short_name", ""),
         display_language=user_def.get("display_language", "en"),
         password_change_needed=True
     )

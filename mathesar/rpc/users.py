@@ -47,7 +47,6 @@ class UserDef(TypedDict):
     is_superuser: bool
     email: Optional[str]
     full_name: Optional[str]
-    short_name: Optional[str]
     display_language: Optional[str]
 
 
