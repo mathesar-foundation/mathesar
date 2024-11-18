@@ -1,7 +1,8 @@
 CREATE SCHEMA IF NOT EXISTS __msar;
 CREATE SCHEMA IF NOT EXISTS msar;
 
-CREATE OR REPLACE FUNCTION msar.drop_all_msar_functions(retries integer) RETURNS void AS $$/*
+CREATE OR REPLACE FUNCTION
+msar.drop_all_msar_objects(retries integer DEFAULT 5) RETURNS void AS $$/*
 Drop all functions in the `msar` and `__msar` schemas, including this one.
 */
 DECLARE
@@ -13,14 +14,13 @@ DECLARE
   failed boolean := false;
   retry boolean := false;
 BEGIN
-  RAISE NOTICE E'\n\nstart of function retry val: %', retry;
   FOR fn IN
     SELECT oid, prokind
     FROM pg_catalog.pg_proc
     WHERE
       (pronamespace = 'msar'::regnamespace::oid OR pronamespace = '__msar'::regnamespace::oid)
       AND NOT ( -- Keep this up to date with this function's name and arguments.
-        proname = 'drop_all_msar_functions'
+        proname = 'drop_all_msar_objects'
         AND proargtypes=ARRAY['integer'::regtype]::oidvector
       )
     ORDER BY oid
@@ -50,18 +50,18 @@ BEGIN
     END IF;
   END LOOP;
   IF retry IS true THEN
-    PERFORM msar.drop_all_msar_functions(retries - 1);
+    PERFORM msar.drop_all_msar_objects(retries - 1);
   ELSIF failed IS TRUE THEN
     RAISE NOTICE 'Some objects not dropped!';
   ELSE
-    RAISE NOTICE 'All objects dropped successfully!\n\nDropping myself...\n\n';
-    DROP FUNCTION msar.drop_all_msar_functions(integer);
+    RAISE NOTICE E'All objects dropped successfully!\n\nDropping myself...\n\n';
+    DROP FUNCTION msar.drop_all_msar_objects(integer);
   END IF;
 END;
 $$ LANGUAGE plpgsql;
 
 
-SELECT msar.drop_all_msar_functions(4);
+SELECT msar.drop_all_msar_objects(4);
 
 
 ----------------------------------------------------------------------------------------------------
