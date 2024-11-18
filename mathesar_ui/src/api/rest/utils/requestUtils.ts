@@ -225,7 +225,7 @@ export function uploadFile<T>(
             resolve(request.response as T);
           }
         } else {
-          reject(new Error('An error has occurred while uploading a file.'));
+          reject(new Error('Uploaded file type is not supported. Please upload CSV/TSV/JSON files'));
         }
       });
     },
