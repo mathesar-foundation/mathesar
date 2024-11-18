@@ -23,10 +23,24 @@ export const users = {
 
   delete: rpcMethodTypeContainer<{ user_id: User['id'] }, void>(),
 
-  patch: rpcMethodTypeContainer<
+  patch_self: rpcMethodTypeContainer<
+    {
+      username: UnsavedUser['username'];
+      email: UnsavedUser['email'];
+      full_name: UnsavedUser['full_name'];
+      display_language: UnsavedUser['display_language'];
+    },
+    User
+  >(),
+
+  patch_other: rpcMethodTypeContainer<
     {
       user_id: User['id'];
-      user_info: Partial<Omit<UnsavedUser, 'password'>>;
+      username: UnsavedUser['username'];
+      is_superuser: User['is_superuser'];
+      email: UnsavedUser['email'];
+      full_name: UnsavedUser['full_name'];
+      display_language: UnsavedUser['display_language'];
     },
     User
   >(),
@@ -34,7 +48,6 @@ export const users = {
   password: {
     replace_own: rpcMethodTypeContainer<
       {
-        user_id: User['id'];
         old_password: string;
         new_password: string;
       },

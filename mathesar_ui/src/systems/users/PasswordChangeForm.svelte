@@ -64,7 +64,6 @@
       // logged in user is updating their own password
       await api.users.password
         .replace_own({
-          user_id: userId,
           old_password: formValues.oldPassword,
           new_password: formValues.password,
         })

@@ -74,6 +74,7 @@
       is_superuser: formValues.userType === 'admin',
       display_language: formValues.displayLanguage,
     };
+    const { is_superuser: isSuperuser, ...updateSelfRequest } = request;
 
     if (isNewUser && hasProperty(formValues, 'password')) {
       const newUser = await api.users
@@ -89,11 +90,13 @@
     }
 
     if (user) {
-      await api.users.patch({ user_id: user.id, user_info: request }).run();
       if (isUserUpdatingThemselves && userProfileStore) {
-        userProfileStore.update((details) => details.with(request));
-        const updatedLocale = request.display_language;
+        await api.users.patch_self({ ...updateSelfRequest }).run();
+        userProfileStore.update((details) => details.with(updateSelfRequest));
+        const updatedLocale = updateSelfRequest.display_language;
         await setLanguage(updatedLocale);
+      } else {
+        await api.users.patch_other({ user_id: user.id, ...request }).run();
       }
 
       dispatch('update');
