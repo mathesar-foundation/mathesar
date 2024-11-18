@@ -20,7 +20,6 @@ from mathesar.rpc import schemas
 from mathesar.rpc import servers
 from mathesar.rpc import tables
 from mathesar.rpc import users
-from mathesar.utils.auth import http_basic_auth_is_self, http_basic_auth_is_self_or_superuser
 
 METHODS = [
     (
@@ -438,14 +437,19 @@ METHODS = [
         [user_is_authenticated]
     ),
     (
-        users.patch,
-        "users.patch",
-        [http_basic_auth_is_self_or_superuser.__name__]
+        users.patch_self,
+        "users.patch_self",
+        [user_is_authenticated]
+    ),
+    (
+        users.patch_other,
+        "users.patch_other",
+        [user_is_superuser]
     ),
     (
         users.replace_own,
         "users.password.replace_own",
-        [http_basic_auth_is_self.__name__]
+        [user_is_authenticated]
     ),
     (
         users.revoke,
@@ -478,8 +482,4 @@ def test_correctly_exposed(func, exposed_name, auth_pred_params):
     assert func.modernrpc_name == exposed_name
     # Make sure other decorators are set as expected.
     assert func.rpc_exceptions_handled is True
-    try:
-        assert func.modernrpc_auth_predicates_params == [auth_pred_params]
-    except AttributeError:
-        for auth_decorators in auth_pred_params:
-            assert auth_decorators in [http_basic_auth_is_self.__name__, http_basic_auth_is_self_or_superuser.__name__]
+    assert func.modernrpc_auth_predicates_params == [auth_pred_params]
