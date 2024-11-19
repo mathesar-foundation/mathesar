@@ -5,7 +5,7 @@ import { type Writable, get, writable } from 'svelte/store';
 
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
 import { api } from '@mathesar/api/rpc';
-import type { UnsavedUser, User } from '@mathesar/api/rpc/users';
+import type { BaseUser, User } from '@mathesar/api/rpc/users';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
 import type { CancellablePromise } from '@mathesar-component-library';
@@ -47,7 +47,7 @@ export class UserModel {
     };
   }
 
-  with(userDetails: Partial<Omit<UnsavedUser, 'password'>>): UserModel {
+  with(userDetails: Partial<BaseUser>): UserModel {
     return new UserModel({
       ...this.getUser(),
       ...userDetails,

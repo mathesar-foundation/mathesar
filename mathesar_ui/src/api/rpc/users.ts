@@ -1,15 +1,19 @@
 import type { Language } from '@mathesar/i18n/languages/utils';
 import { rpcMethodTypeContainer } from '@mathesar/packages/json-rpc-client-builder';
 
-export interface UnsavedUser {
-  full_name: string | null;
-  email: string | null;
-  username: string;
-  password: string;
-  display_language: Language;
+export interface BaseUser {
+  readonly full_name: string | null;
+  readonly email: string | null;
+  readonly username: string;
+  readonly display_language: Language;
 }
 
-export interface User extends Omit<UnsavedUser, 'password'> {
+interface UserDef extends BaseUser {
+  readonly password: string;
+  readonly is_superuser: boolean;
+}
+
+export interface User extends BaseUser {
   readonly id: number;
   readonly is_superuser: boolean;
 }
@@ -19,29 +23,14 @@ export const users = {
 
   get: rpcMethodTypeContainer<{ user_id: User['id'] }, User>(),
 
-  add: rpcMethodTypeContainer<{ user_def: UnsavedUser }, User>(),
+  add: rpcMethodTypeContainer<{ user_def: UserDef }, User>(),
 
   delete: rpcMethodTypeContainer<{ user_id: User['id'] }, void>(),
 
-  patch_self: rpcMethodTypeContainer<
-    {
-      username: UnsavedUser['username'];
-      email: UnsavedUser['email'];
-      full_name: UnsavedUser['full_name'];
-      display_language: UnsavedUser['display_language'];
-    },
-    User
-  >(),
+  patch_self: rpcMethodTypeContainer<BaseUser, User>(),
 
   patch_other: rpcMethodTypeContainer<
-    {
-      user_id: User['id'];
-      username: UnsavedUser['username'];
-      is_superuser: User['is_superuser'];
-      email: UnsavedUser['email'];
-      full_name: UnsavedUser['full_name'];
-      display_language: UnsavedUser['display_language'];
-    },
+    Partial<Omit<User, 'id'>> & { user_id: User['id'] },
     User
   >(),
 
