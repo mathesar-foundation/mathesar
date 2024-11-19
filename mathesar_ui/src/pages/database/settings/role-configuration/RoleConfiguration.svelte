@@ -5,15 +5,12 @@
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
+  import Yes from '@mathesar/components/Yes.svelte';
   import {
     type CombinedLoginRole,
     DatabaseSettingsRouteContext,
   } from '@mathesar/contexts/DatabaseSettingsRouteContext';
-  import {
-    iconConfigurePassword,
-    iconDeleteMajor,
-    iconEdit,
-  } from '@mathesar/icons';
+  import { iconAddNew, iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { confirm } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
@@ -68,7 +65,7 @@
 
 <SettingsContentLayout>
   <svelte:fragment slot="title">
-    {$_('role_configuration')}
+    {$_('stored_role_passwords')}
   </svelte:fragment>
   {#if isLoading}
     <Spinner />
@@ -77,7 +74,7 @@
       <div class="role-configuration-table">
         <GridTable>
           <GridTableCell header>{$_('role')}</GridTableCell>
-          <GridTableCell header>{$_('actions')}</GridTableCell>
+          <GridTableCell header>{$_('stored_password')}</GridTableCell>
 
           {#each $combinedLoginRoles as combinedLoginRole (combinedLoginRole.name)}
             <GridTableCell>
@@ -86,55 +83,64 @@
               </span>
             </GridTableCell>
             <GridTableCell>
-              {#if combinedLoginRole.configuredRole}
+              <div class="password-saved-cell">
                 <div>
-                  <Button
-                    appearance="secondary"
-                    on:click={() => configureRole(combinedLoginRole)}
-                    disabled={!isMathesarAdmin}
-                  >
-                    <Icon {...iconEdit} size="0.8em" />
-                    <span>{$_('configure_password')}</span>
-                  </Button>
-                  <SpinnerButton
-                    appearance="secondary"
-                    disabled={!isMathesarAdmin}
-                    confirm={() =>
-                      confirm({
-                        title: {
-                          component: PhraseContainingIdentifier,
-                          props: {
-                            identifier: combinedLoginRole.name,
-                            wrappingString: $_(
-                              'remove_configuration_for_identifier',
-                            ),
-                          },
-                        },
-                        body: $_('removing_role_configuration_warning', {
-                          values: {
-                            server:
-                              combinedLoginRole.configuredRole?.database.server.getConnectionString(),
-                          },
-                        }),
-                        proceedButton: {
-                          label: $_('remove_configuration'),
-                          icon: iconDeleteMajor,
-                        },
-                      })}
-                    label={$_('remove')}
-                    onClick={() => removeConfiguredRole(combinedLoginRole)}
-                  />
+                  {#if combinedLoginRole.configuredRole}
+                    <Yes />
+                  {/if}
                 </div>
-              {:else if combinedLoginRole.role}
-                <Button
-                  appearance="secondary"
-                  on:click={() => configureRole(combinedLoginRole)}
-                  disabled={!isMathesarAdmin}
-                >
-                  <Icon {...iconConfigurePassword} size="0.8em" />
-                  <span>{$_('configure_in_mathesar')}</span>
-                </Button>
-              {/if}
+                <div>
+                  {#if combinedLoginRole.configuredRole}
+                    <Button
+                      appearance="secondary"
+                      on:click={() => configureRole(combinedLoginRole)}
+                      disabled={!isMathesarAdmin}
+                      tooltip={$_('update_stored_password')}
+                    >
+                      <Icon {...iconEdit} size="0.8em" />
+                    </Button>
+                    <SpinnerButton
+                      appearance="outline-primary"
+                      disabled={!isMathesarAdmin}
+                      confirm={() =>
+                        confirm({
+                          title: {
+                            component: PhraseContainingIdentifier,
+                            props: {
+                              identifier: combinedLoginRole.name,
+                              wrappingString: $_(
+                                'remove_stored_password_for_identifier',
+                              ),
+                            },
+                          },
+                          body: $_('removing_role_configuration_warning', {
+                            values: {
+                              server:
+                                combinedLoginRole.configuredRole?.database.server.getConnectionString(),
+                            },
+                          }),
+                          proceedButton: {
+                            label: $_('remove_configuration'),
+                            icon: iconDeleteMajor,
+                          },
+                        })}
+                      label=""
+                      tooltip={$_('remove_stored_password')}
+                      icon={iconDeleteMajor}
+                      onClick={() => removeConfiguredRole(combinedLoginRole)}
+                    />
+                  {:else if combinedLoginRole.role}
+                    <Button
+                      appearance="secondary"
+                      on:click={() => configureRole(combinedLoginRole)}
+                      disabled={!isMathesarAdmin}
+                      tooltip={$_('store_a_password')}
+                    >
+                      <Icon {...iconAddNew} size="0.8em" />
+                    </Button>
+                  {/if}
+                </div>
+              </div>
             </GridTableCell>
           {/each}
         </GridTable>
@@ -164,10 +170,16 @@
 <style lang="scss">
   .role-configuration-table {
     background: var(--white);
-    --Grid-table__template-columns: 3fr 2fr;
+    --Grid-table__template-columns: auto auto;
 
     .role-name {
       font-weight: 500;
     }
+  }
+  .password-saved-cell {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
   }
 </style>

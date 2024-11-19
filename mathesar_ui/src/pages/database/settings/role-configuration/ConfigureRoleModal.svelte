@@ -8,7 +8,9 @@
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import RichText from '@mathesar/components/rich-text/RichText.svelte';
   import {
     type CombinedLoginRole,
     DatabaseSettingsRouteContext,
@@ -43,9 +45,11 @@
 
 <ControlledModal {controller} on:close={() => form.reset()}>
   <span slot="title">
-    {$_('configure_value', {
-      values: { value: combinedLoginRole.name },
-    })}
+    <RichText text={$_('update_stored_password_for_role')} let:slotName>
+      {#if slotName === 'role'}
+        <Identifier>{combinedLoginRole.name}</Identifier>
+      {/if}
+    </RichText>
   </span>
   <div>
     <Field
@@ -75,7 +79,7 @@
         controller.close();
       }}
       onProceed={configureRole}
-      proceedButton={{ label: $_('authenticate') }}
+      proceedButton={{ label: $_('save_password') }}
       cancelButton={{ label: $_('cancel') }}
     />
   </div>

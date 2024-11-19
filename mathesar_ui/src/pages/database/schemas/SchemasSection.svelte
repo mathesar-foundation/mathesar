@@ -83,12 +83,6 @@
 </script>
 
 <div class="schema-list-wrapper">
-  <div class="schema-list-title-container">
-    <h2 class="schema-list-title">
-      {$_('schemas')}
-      {schemasMap.size ? `(${schemasMap.size})` : ''}
-    </h2>
-  </div>
   <EntityContainerWithFilterBar
     searchPlaceholder={$_('search_schemas')}
     bind:searchQuery={filterQuery}
@@ -154,18 +148,6 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-
-    .schema-list-title-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .schema-list-title {
-      font-size: var(--text-size-ultra-large);
-      margin-top: var(--size-super-ultra-small);
-      font-weight: var(--font-weight-medium);
-    }
 
     .schema-list {
       width: 100%;

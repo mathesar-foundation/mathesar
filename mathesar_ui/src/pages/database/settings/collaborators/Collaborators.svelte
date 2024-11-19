@@ -102,6 +102,7 @@
           <GridTableCell header>{$_('actions')}</GridTableCell>
           {#each collaboratorsList as collaborator (collaborator.id)}
             <CollaboratorRow
+              {database}
               {collaborator}
               onClickEditRole={editRoleForCollaborator}
               onDelete={checkAndHandleSideEffects}
