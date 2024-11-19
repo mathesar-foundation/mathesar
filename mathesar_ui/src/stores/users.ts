@@ -3,10 +3,12 @@
 import { getContext, setContext } from 'svelte';
 import { type Writable, get, writable } from 'svelte/store';
 
-import userApi, { type UnsavedUser, type User } from '@mathesar/api/rest/users';
 import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
+import { api } from '@mathesar/api/rpc';
+import type { BaseUser, User } from '@mathesar/api/rpc/users';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import type { MakeWritablePropertiesReadable } from '@mathesar/utils/typeUtils';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 export class UserModel {
   readonly id: User['id'];
@@ -45,7 +47,7 @@ export class UserModel {
     };
   }
 
-  with(userDetails: Partial<Omit<UnsavedUser, 'password'>>): UserModel {
+  with(userDetails: Partial<BaseUser>): UserModel {
     return new UserModel({
       ...this.getUser(),
       ...userDetails,
@@ -75,7 +77,7 @@ class WritableUsersStore {
 
   readonly count = writable(0);
 
-  private request: ReturnType<typeof userApi.list> | undefined;
+  private request: CancellablePromise<User[]> | undefined;
 
   constructor() {
     void this.fetchUsers();
@@ -86,10 +88,10 @@ class WritableUsersStore {
    */
   private async fetchUsersSilently() {
     this.request?.cancel();
-    this.request = userApi.list();
+    this.request = api.users.list().run();
     const response = await this.request;
-    this.users.set(response.results.map((user) => new UserModel(user)));
-    this.count.set(response.count);
+    this.users.set(response.map((user) => new UserModel(user)));
+    this.count.set(response.length);
   }
 
   async fetchUsers() {
@@ -116,7 +118,7 @@ class WritableUsersStore {
     }
     if (requestStatus?.state === 'processing') {
       const result = await this.request;
-      const user = result?.results.find((entry) => entry.id === userId);
+      const user = result?.find((entry) => entry.id === userId);
       if (user) {
         return new UserModel(user);
       }
@@ -128,7 +130,7 @@ class WritableUsersStore {
     this.requestStatus.set({
       state: 'processing',
     });
-    await userApi.delete(userId);
+    await api.users.delete({ user_id: userId }).run();
     this.users.update((users) => users.filter((user) => user.id !== userId));
     this.count.update((count) => count - 1);
     this.requestStatus.set({
