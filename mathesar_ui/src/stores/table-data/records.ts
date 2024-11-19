@@ -592,7 +592,16 @@ export class RecordsData {
     const cellKey = getCellKey(rowKey, column.id);
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
-
+    const nullableColumnTypes = new Set([
+      "mathesar_types.email",
+      "date",
+      "timestamp with time zone",
+      "mathesar_types.uri",
+      "time with time zone",
+    ]);
+    if (nullableColumnTypes.has(column.type) && record[column.id] === "") {
+      record[column.id] = null;
+    }
     const promise = api.records
       .patch({
         ...this.apiContext,
