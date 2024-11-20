@@ -57,7 +57,7 @@
         {
           id: 'read_and_create',
           privileges: new Set(['USAGE', 'CREATE']),
-          name: $_('create'),
+          name: $_('read_and_create'),
           help: $_('schema_access_create_help'),
         },
       ],

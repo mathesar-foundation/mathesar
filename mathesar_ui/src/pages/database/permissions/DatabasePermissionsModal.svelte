@@ -56,7 +56,7 @@
         {
           id: 'connect_and_create',
           privileges: new Set(['CONNECT', 'CREATE']),
-          name: $_('create'),
+          name: $_('connect_and_create'),
           help: $_('database_access_create_help'),
         },
       ],
