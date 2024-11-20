@@ -27,6 +27,7 @@ services:
       args:
         PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
     environment:
+      - ALLOWED_HOSTS=*
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
