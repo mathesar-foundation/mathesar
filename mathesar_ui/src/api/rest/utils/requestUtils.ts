@@ -225,7 +225,11 @@ export function uploadFile<T>(
             resolve(request.response as T);
           }
         } else {
-          reject(new Error('An error occurred while processing the file. Supported file types are CSV and TSV.'));
+          const msg = [
+            'An error occurred while processing the file.',
+            'Supported file types are CSV and TSV.',
+          ].join(' ');
+          reject(new Error(msg));
         }
       });
     },
