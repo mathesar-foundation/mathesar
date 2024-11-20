@@ -27,11 +27,6 @@ services:
       args:
         PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
     environment:
-      - MODE=DEVELOPMENT
-      - DEBUG=True
-      - ALLOWED_HOSTS=*
-      - SECRET_KEY=${SECRET_KEY}
-      - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
       - POSTGRES_USER=mathesar
       - POSTGRES_PASSWORD=mathesar
