@@ -54,6 +54,8 @@ services:
     container_name: mathesar-api-test-runner
     build:
       context: api_tests
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
     depends_on:
       api-test-service:
         condition: service_healthy
