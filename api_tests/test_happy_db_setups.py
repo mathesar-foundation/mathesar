@@ -4,7 +4,6 @@ import requests
 SERVICE_HOST = 'http://mathesar-api-test-service:8000'
 EXTERNAL_HOST = 'mathesar-test-user-db'
 RPC_ENDPOINT = f'{SERVICE_HOST}/api/rpc/v0/'
-USERS_ENDPOINT = f'{SERVICE_HOST}/api/ui/v0/users/'
 
 
 @pytest.fixture(scope="module")
@@ -30,7 +29,6 @@ def admin_rpc_call(admin_session):
                 "id": 0,
             }
         ).json()
-        # print(response)
         return response['result']
     return _admin_rpc_request
 
@@ -69,7 +67,6 @@ def intern_rpc_call(intern_session):
                 "id": 0,
             }
         ).json()
-        # print(response)
         return response['result']
     return _intern_rpc_request
 
@@ -158,9 +155,9 @@ def test_get_current_role(admin_rpc_call):
 # We'll follow along with the API calls made by the front end.
 
 
-def test_add_user(admin_session):
+def test_add_user(admin_rpc_call):
     global intern_user_id
-    before_users = admin_session.get(USERS_ENDPOINT).json()['results']
+    before_users = admin_rpc_call('users.list')
     assert len(before_users) == 1
     intern_add = {
         'display_language': 'en',
@@ -169,8 +166,8 @@ def test_add_user(admin_session):
         'password': 'password',
         'username': 'intern',
     }
-    admin_session.post(USERS_ENDPOINT, json=intern_add)
-    after_users = admin_session.get(USERS_ENDPOINT).json()['results']
+    admin_rpc_call('users.add', user_def=intern_add)
+    after_users = admin_rpc_call('users.list')
     assert len(after_users) == 2
     intern_user_id = [
         u['id'] for u in after_users if u['username'] == 'intern'
@@ -251,7 +248,6 @@ def test_database_privileges_add(admin_rpc_call):
         'databases.privileges.list_direct',
         database_id=internal_db_id,
     )
-    print(before_result)
     # `intern` shouldn't have any privileges yet.
     assert intern_role_oid not in [r['role_oid'] for r in before_result]
     after_result = admin_rpc_call(
