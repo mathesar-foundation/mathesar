@@ -152,13 +152,6 @@ def anonymous_client():
 
 
 @pytest.fixture
-def client_bob(user_bob):
-    client = APIClient()
-    client.login(username='bob', password='password')
-    return client
-
-
-@pytest.fixture
 def client_alice(user_alice):
     client = APIClient()
     client.login(username=user_alice.username, password='password')

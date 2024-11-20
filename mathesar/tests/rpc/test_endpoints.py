@@ -19,6 +19,7 @@ from mathesar.rpc import roles
 from mathesar.rpc import schemas
 from mathesar.rpc import servers
 from mathesar.rpc import tables
+from mathesar.rpc import users
 
 METHODS = [
     (
@@ -413,6 +414,47 @@ METHODS = [
         tables.metadata.set_,
         "tables.metadata.set",
         [user_is_authenticated]
+    ),
+
+    (
+        users.add,
+        "users.add",
+        [user_is_superuser]
+    ),
+    (
+        users.delete,
+        "users.delete",
+        [user_is_superuser]
+    ),
+    (
+        users.get,
+        "users.get",
+        [user_is_authenticated]
+    ),
+    (
+        users.list_,
+        "users.list",
+        [user_is_authenticated]
+    ),
+    (
+        users.patch_self,
+        "users.patch_self",
+        [user_is_authenticated]
+    ),
+    (
+        users.patch_other,
+        "users.patch_other",
+        [user_is_superuser]
+    ),
+    (
+        users.replace_own,
+        "users.password.replace_own",
+        [user_is_authenticated]
+    ),
+    (
+        users.revoke,
+        "users.password.revoke",
+        [user_is_superuser]
     )
 ]
 

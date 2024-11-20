@@ -1,7 +1,7 @@
 import { getContext, setContext } from 'svelte';
 import { type Writable, writable } from 'svelte/store';
 
-import type { User } from '@mathesar/api/rest/users';
+import type { User } from '@mathesar/api/rpc/users';
 
 import { UserModel } from './users';
 

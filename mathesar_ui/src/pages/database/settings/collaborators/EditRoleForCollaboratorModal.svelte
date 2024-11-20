@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import type { User } from '@mathesar/api/rest/users';
+  import type { User } from '@mathesar/api/rpc/users';
   import {
     FormSubmit,
     makeForm,
