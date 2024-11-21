@@ -12,8 +12,6 @@ from rest_framework.test import APIClient
 from db import connection
 from mathesar.models.users import User
 
-from fixtures.utils import create_scoped_fixtures
-
 
 @pytest.fixture
 def mocked_responses():
@@ -52,16 +50,17 @@ def enable_db_access_for_all_tests(db):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def ignore_all_dbs_except_default(SES_dj_databases):
+def ignore_all_dbs_except_default(dj_databases):
     """
     Ignore the default test database: we're creating and tearing down our own databases dynamically.
     """
     entry_name_to_keep = "default"
-    for entry_name in set(SES_dj_databases.keys()):
+    for entry_name in set(dj_databases.keys()):
         if entry_name != entry_name_to_keep:
-            del SES_dj_databases[entry_name]
+            del dj_databases[entry_name]
 
 
+@pytest.fixture(scope="session")
 def dj_databases():
     """
     Returns django.conf.settings.DATABASES by reference. During cleanup, restores it to the state
@@ -70,14 +69,6 @@ def dj_databases():
     dj_databases_deep_copy = deepcopy(settings.DATABASES)
     yield settings.DATABASES
     settings.DATABASES = dj_databases_deep_copy
-
-
-# defines:
-# FUN_dj_databases
-# CLA_dj_databases
-# MOD_dj_databases
-# SES_dj_databases
-create_scoped_fixtures(globals(), dj_databases)
 
 
 @pytest.fixture(scope='session')
