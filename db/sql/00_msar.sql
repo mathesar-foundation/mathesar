@@ -1083,6 +1083,32 @@ WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.get_object_counts(exclude_schemas text[] DEFAULT ARRAY['msar', '__msar', 'mathesar_types'])
+RETURNS jsonb AS $$/*
+Return a JSON object with counts of some objects in the database.
+
+Args:
+  exclude_schemas: Schemas which should not be included for object counts.
+
+The objects counted are:
+- total schemas, excluding Mathesar internal schemas
+- total tables in the included schemas
+- total rows of tables included
+*/
+SELECT jsonb_build_object(
+  'schema_count', COUNT(DISTINCT s.oid),
+  'table_count', COUNT(c.oid),
+  'row_count', SUM(c.reltuples)
+)
+FROM pg_catalog.pg_namespace s
+LEFT JOIN pg_catalog.pg_class c ON c.relnamespace = s.oid AND c.relkind = 'r'
+WHERE s.nspname <> 'information_schema'
+AND NOT (s.nspname = ANY(exclude_schemas))
+AND s.nspname NOT LIKE 'pg_%';
+$$ LANGUAGE SQL STABLE;
+
+
 CREATE OR REPLACE FUNCTION msar.schema_info_table() RETURNS TABLE
 (
   oid bigint, -- The OID of the schema.
