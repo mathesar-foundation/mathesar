@@ -231,7 +231,7 @@ def replace_own(
     """
     user = kwargs.get(REQUEST_KEY).user
     if not user.check_password(old_password):
-        raise Exception('Old password is not correct')
+        raise Exception('Old password is incorrect')
     change_password(user.id, new_password)
 
 
