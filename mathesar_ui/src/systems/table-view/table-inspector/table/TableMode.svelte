@@ -59,7 +59,7 @@
   >
     <CollapsibleHeader
       slot="header"
-      title={$_('links')}
+      title={$_('references')}
       isDbLevelConfiguration
     />
     <div slot="content" class="content-container">

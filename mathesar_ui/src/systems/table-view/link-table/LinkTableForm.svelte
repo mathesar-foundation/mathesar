@@ -394,7 +394,7 @@
     catchErrors
     {canProceed}
     onCancel={close}
-    proceedButton={{ label: $_('create_link'), icon: iconTableLink }}
+    proceedButton={{ label: $_('create_reference'), icon: iconTableLink }}
     onProceed={handleSave}
   />
 </div>
