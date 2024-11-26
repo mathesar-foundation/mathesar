@@ -7,7 +7,14 @@
 <script lang="ts">
   import { getDocsLink } from '@mathesar/routes/urls';
 
-  /** Should begin with a forward slash */
+  /**
+   * - Should begin with a forward slash
+   * - Should **not** include the base URL
+   * - Should **not** include the `.md` extension
+   * - Should **not** include the language prefix
+   *
+   * Example: `/user-guide/references/`
+   */
   export let path: string;
 
   $: href = getDocsLink(path);
