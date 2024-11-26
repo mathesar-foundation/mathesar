@@ -47,7 +47,11 @@
     bind:isOpen={$tableInspectorTablePermissionsVisible}
     triggerAppearance="inspector"
   >
-    <CollapsibleHeader slot="header" title={$_('table_permissions')} />
+    <CollapsibleHeader
+      slot="header"
+      title={$_('table_permissions')}
+      isDbLevelConfiguration
+    />
     <div slot="content" class="content-container">
       <TablePermissions />
     </div>

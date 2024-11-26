@@ -437,7 +437,6 @@
   "search_tables": "テーブルの検索",
   "search_users": "ユーザーの検索",
   "seconds": "秒",
-  "section_affects_database_config": "このセクションはデータベースの設定に影響します。",
   "select_cell_view_properties": "プロパティを表示するにはセルを選択してください。",
   "select_cells_view_record_props": "関連するレコードのプロパティを表示するには、1 つ以上のセルを選択してください。",
   "select_columns": "列を選択",
