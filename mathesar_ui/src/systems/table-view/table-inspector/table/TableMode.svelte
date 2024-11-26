@@ -64,9 +64,9 @@
   >
     <CollapsibleHeader slot="header" isDbLevelConfiguration>
       <div slot="title">
-        {$_('references')}
+        {$_('relationships')}
         <Help>
-          <p>{$_('references_help_1')}</p>
+          <p>{$_('references_help')}</p>
           <p><SeeDocsToLearnMore path="/user-guide/references/" /></p>
         </Help>
       </div>

@@ -14,6 +14,7 @@
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
@@ -227,13 +228,14 @@
 </script>
 
 <div class="description">
-  {$_('link_table_description')}
+  {$_('references_help')}
+  <SeeDocsToLearnMore path="/user-guide/references/" />
 </div>
 
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
-      {$_('links_info')}
+      {$_('create_reference_help_info_2')}
     </InfoBox>
   </FieldLayout>
 
@@ -245,7 +247,7 @@
     }}
   >
     <span slot="label">
-      <RichText text={$_('link_table_to')} let:slotName>
+      <RichText text={$_('create_relationship_between')} let:slotName>
         {#if slotName === 'tablePill'}
           <Pill table={base} which="base" />
         {/if}
@@ -394,7 +396,7 @@
     catchErrors
     {canProceed}
     onCancel={close}
-    proceedButton={{ label: $_('create_reference'), icon: iconTableLink }}
+    proceedButton={{ label: $_('create_relationship'), icon: iconTableLink }}
     onProceed={handleSave}
   />
 </div>

@@ -37,7 +37,15 @@
     <div>
       <div class="header">
         <Icon {...iconLinksInThisTable} />
-        <span>{$_('in_this_table')}</span>
+        <RichText
+          text={$_('references_in_this_table')}
+          let:slotName
+          let:translatedArg
+        >
+          {#if slotName === 'bold'}
+            <strong>{translatedArg}</strong>
+          {/if}
+        </RichText>
         <Help>
           <RichText
             text={$_('table_can_have_one')}
@@ -68,7 +76,15 @@
     <div>
       <div class="header">
         <Icon {...iconLinksFromOtherTables} />
-        <span>{$_('to_this_table')}</span>
+        <RichText
+          text={$_('references_to_this_table')}
+          let:slotName
+          let:translatedArg
+        >
+          {#if slotName === 'bold'}
+            <strong>{translatedArg}</strong>
+          {/if}
+        </RichText>
         <Help>
           <RichText
             text={$_('table_can_have_many')}
@@ -107,7 +123,7 @@
       size="small"
     >
       <Icon {...iconAddNew} />
-      <span>{$_('create_reference')}</span>
+      <span>{$_('create_relationship')}</span>
     </Button>
     <LinkTableModal controller={linkTableModal} />
   </div>
@@ -122,7 +138,6 @@
   }
   .header {
     margin-bottom: 0.5rem;
-    font-weight: var(--font-weight-medium);
   }
   .links > :global(* + *) {
     margin-top: 0.7rem;
