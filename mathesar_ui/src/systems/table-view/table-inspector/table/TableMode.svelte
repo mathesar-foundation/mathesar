@@ -67,7 +67,7 @@
         {$_('relationships')}
         <Help>
           <p>{$_('references_help')}</p>
-          <p><SeeDocsToLearnMore path="/user-guide/references/" /></p>
+          <p><SeeDocsToLearnMore page="references" /></p>
         </Help>
       </div>
     </CollapsibleHeader>

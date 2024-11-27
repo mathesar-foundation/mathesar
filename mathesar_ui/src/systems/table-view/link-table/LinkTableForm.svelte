@@ -229,7 +229,7 @@
 
 <div class="description">
   {$_('references_help')}
-  <SeeDocsToLearnMore path="/user-guide/references/" />
+  <SeeDocsToLearnMore page="references" />
 </div>
 
 <div class="form" class:self-referential={isSelfReferential}>
