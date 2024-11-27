@@ -9,7 +9,7 @@
 
   const pages = {
     import: '/user-guide/importing-data/',
-    references: '/user-guide/references/',
+    relationships: '/user-guide/relationships/',
   };
   type Page = keyof typeof pages;
 
