@@ -59,7 +59,6 @@ class Database(BaseModel):
         else:
             raise exceptions.NoConnectionAvailable
 
-
     @property
     def needs_upgrade_attention(self):
         return self.last_confirmed_sql_version != __version__
