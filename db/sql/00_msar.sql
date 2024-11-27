@@ -42,6 +42,16 @@ SELECT msar.drop_all_msar_functions();
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+
+CREATE OR REPLACE FUNCTION msar.mathesar_system_schemas() RETURNS text[] AS $$/*
+Return a text array of the Mathesar System schemas.
+
+Update this function whenever the list changes.
+*/
+SELECT ARRAY['msar', '__msar', 'mathesar_types']
+$$ LANGUAGE SQL STABLE;
+
+
 CREATE OR REPLACE FUNCTION msar.extract_smallints(v jsonb) RETURNS smallint[] AS $$/*
 From the supplied JSONB value, extract all top-level JSONB array elements which can be successfully
 cast to PostgreSQL smallint values. Return the resulting array of smallint values.
@@ -1084,12 +1094,10 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_object_counts(exclude_schemas text[] DEFAULT ARRAY['msar', '__msar', 'mathesar_types'])
-RETURNS jsonb AS $$/*
+msar.get_object_counts() RETURNS jsonb AS $$/*
 Return a JSON object with counts of some objects in the database.
 
-Args:
-  exclude_schemas: Schemas which should not be included for object counts.
+We exclude the mathesar-system schemas.
 
 The objects counted are:
 - total schemas, excluding Mathesar internal schemas
@@ -1099,12 +1107,12 @@ The objects counted are:
 SELECT jsonb_build_object(
   'schema_count', COUNT(DISTINCT s.oid),
   'table_count', COUNT(c.oid),
-  'row_count', SUM(c.reltuples)
+  'record_count', SUM(c.reltuples)
 )
 FROM pg_catalog.pg_namespace s
 LEFT JOIN pg_catalog.pg_class c ON c.relnamespace = s.oid AND c.relkind = 'r'
 WHERE s.nspname <> 'information_schema'
-AND NOT (s.nspname = ANY(exclude_schemas))
+AND NOT (s.nspname = ANY(msar.mathesar_system_schemas()))
 AND s.nspname NOT LIKE 'pg_%';
 $$ LANGUAGE SQL STABLE;
 
