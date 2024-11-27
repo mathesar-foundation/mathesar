@@ -6,6 +6,7 @@
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { Collaborator } from '@mathesar/models/Collaborator';
@@ -15,6 +16,7 @@
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
     Button,
+    Help,
     Spinner,
     isDefinedNonNullable,
   } from '@mathesar-component-library';
@@ -78,6 +80,10 @@
 <SettingsContentLayout>
   <svelte:fragment slot="title">
     {$_('collaborators')}
+    <Help>
+      {$_('collaborators_help')}
+      <SeeDocsToLearnMore page="collaborators" />
+    </Help>
   </svelte:fragment>
   <svelte:fragment slot="actions">
     {#if isSuccess}

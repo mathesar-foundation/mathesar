@@ -10,6 +10,11 @@
   const pages = {
     import: '/user-guide/importing-data/',
     relationships: '/user-guide/relationships/',
+    roles: '/user-guide/roles/',
+    rolesLogin: '/user-guide/roles/#login',
+    rolesInheritance: '/user-guide/roles/#inheritance',
+    storedRolePasswords: '/user-guide/stored-role-passwords/',
+    collaborators: '/user-guide/collaborators/',
   };
   type Page = keyof typeof pages;
 

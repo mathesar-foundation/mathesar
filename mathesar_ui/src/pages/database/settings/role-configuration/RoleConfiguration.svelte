@@ -5,6 +5,7 @@
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import Yes from '@mathesar/components/Yes.svelte';
   import {
     type CombinedLoginRole,
@@ -19,6 +20,7 @@
   import { getErrorMessage } from '@mathesar/utils/errors';
   import {
     Button,
+    Help,
     Icon,
     Spinner,
     SpinnerButton,
@@ -66,6 +68,10 @@
 <SettingsContentLayout>
   <svelte:fragment slot="title">
     {$_('stored_role_passwords')}
+    <Help>
+      {$_('stored_role_passwords_help')}
+      <SeeDocsToLearnMore page="storedRolePasswords" />
+    </Help>
   </svelte:fragment>
   {#if isLoading}
     <Spinner />
