@@ -1,3 +1,5 @@
+<script lang="ts"></script>
+
 <div class="settings-content">
   <header>
     <div class="title">

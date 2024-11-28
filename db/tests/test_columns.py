@@ -2,11 +2,11 @@ import json
 from unittest.mock import patch
 import pytest
 
-from db import columns
+from db import connection, columns
 
 
 def test_get_column_info_for_table():
-    with patch.object(columns, 'exec_msar_func') as mock_exec:
+    with patch.object(connection, 'exec_msar_func') as mock_exec:
         mock_exec.return_value.fetchone = lambda: ('a', 'b')
         result = columns.get_column_info_for_table('table', 'conn')
     mock_exec.assert_called_once_with('conn', 'get_column_info', 'table')
@@ -14,7 +14,7 @@ def test_get_column_info_for_table():
 
 
 def test_alter_columns_in_table_basic():
-    with patch.object(columns, 'exec_msar_func') as mock_exec:
+    with patch.object(connection, 'exec_msar_func') as mock_exec:
         columns.alter_columns_in_table(
             123,
             [
@@ -59,7 +59,7 @@ def test_add_columns_name(in_name, out_name):
     Here, we just check that the PostgreSQL function is called properly, when
     given a (maybe empty) name param
     """
-    with patch.object(columns, "exec_msar_func") as mock_exec:
+    with patch.object(connection, "exec_msar_func") as mock_exec:
         columns.add_columns_to_table(123, [{"name": in_name}], "conn")
     call_args = mock_exec.call_args_list[0][0]
     assert call_args[0] == "conn"
@@ -76,7 +76,7 @@ def test_add_columns_type(in_type, out_type):
     Here, we just check that the PostgreSQL function is called properly when
     given a (maybe empty) type
     """
-    with patch.object(columns, "exec_msar_func") as mock_exec:
+    with patch.object(connection, "exec_msar_func") as mock_exec:
         columns.add_columns_to_table(123, [{"type": in_type}], "conn")
     call_args = mock_exec.call_args_list[0][0]
     assert call_args[0] == "conn"
@@ -96,7 +96,7 @@ def test_add_columns_type_options(in_options, out_options):
     Here, we just check that the PostgreSQL function is called properly when
     given a (maybe empty) type options dict.
     """
-    with patch.object(columns, "exec_msar_func") as mock_exec:
+    with patch.object(connection, "exec_msar_func") as mock_exec:
         columns.add_columns_to_table(123, [{"type_options": in_options}], "conn")
     call_args = mock_exec.call_args_list[0][0]
     assert call_args[0] == "conn"
@@ -107,7 +107,7 @@ def test_add_columns_type_options(in_options, out_options):
 
 
 def test_drop_columns():
-    with patch.object(columns, 'exec_msar_func') as mock_exec:
+    with patch.object(connection, 'exec_msar_func') as mock_exec:
         mock_exec.return_value.fetchone = lambda: (3,)
         result = columns.drop_columns_from_table(123, [1, 3, 5], 'conn')
     mock_exec.assert_called_once_with('conn', 'drop_columns', 123, 1, 3, 5)
@@ -115,7 +115,7 @@ def test_drop_columns():
 
 
 def test_drop_columns_single():
-    with patch.object(columns, 'exec_msar_func') as mock_exec:
+    with patch.object(connection, 'exec_msar_func') as mock_exec:
         mock_exec.return_value.fetchone = lambda: (1,)
         result = columns.drop_columns_from_table(123, [1], 'conn')
     mock_exec.assert_called_once_with('conn', 'drop_columns', 123, 1)

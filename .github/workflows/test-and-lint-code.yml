@@ -155,6 +155,30 @@ jobs:
       - name: Run tests with pg_prove
         run: docker exec mathesar_dev_db /bin/bash /sql/run_tests.sh
 
+  api_tests:
+    name: Run API scenario tests
+    runs-on: ubuntu-latest
+    needs: [python_tests_required, all_be_tests_required]
+    if: needs.python_tests_required.outputs.tests_should_run == 'true' ||
+        needs.all_be_tests_required.outputs.tests_should_run
+    strategy:
+      matrix:
+        py-version: [3.9-bookworm, 3.10-bookworm, 3.11-bookworm, 3.12-bookworm, 3.13-bookworm]
+        pg-version: [13, 14, 15, 16, 17]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy env file
+        run: cp .env.example .env
+      # The code is checked out under uid 1001 - reset this to 1000 for the
+      # container to run tests successfully
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+      - name: Run tests
+        run: sh run_api_tests.sh
+        env:
+          PYTHON_VERSION: ${{ matrix.py-version }}
+          PG_VERSION: ${{ matrix.pg-version }}
+
   python_lint:
     name: Run Python linter
     runs-on: ubuntu-latest

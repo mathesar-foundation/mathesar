@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { router } from 'tinro';
 
-  import type { User } from '@mathesar/api/rest/users';
+  import type { User } from '@mathesar/api/rpc/users';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
   import FormBox from '@mathesar/components/form/FormBox.svelte';
   import { iconAddUser } from '@mathesar/icons';

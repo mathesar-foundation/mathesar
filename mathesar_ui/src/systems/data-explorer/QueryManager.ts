@@ -8,7 +8,6 @@ import {
   explorationIsAddable,
   explorationIsSaved,
 } from '@mathesar/api/rpc/explorations';
-import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import { currentDatabase } from '@mathesar/stores/databases';
 import { addExploration, replaceExploration } from '@mathesar/stores/queries';
 import CacheManager from '@mathesar/utils/CacheManager';
@@ -70,16 +69,13 @@ export default class QueryManager extends QueryRunner {
 
   constructor({
     query,
-    abstractTypeMap,
     onSave,
   }: {
     query: QueryModel;
-    abstractTypeMap: AbstractTypesMap;
     onSave?: (instance: SavedExploration) => unknown;
   }) {
     super({
       query,
-      abstractTypeMap,
       onRunWithObject: (response: ExplorationResult) => {
         this.checkAndUpdateSummarizationAfterRun(
           new QueryModel({

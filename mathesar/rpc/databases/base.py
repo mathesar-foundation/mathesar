@@ -1,10 +1,14 @@
 from typing import Literal, TypedDict
 
 from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.auth.basic import (
+    http_basic_auth_login_required,
+    http_basic_auth_superuser_required,
+)
 
-from mathesar.rpc.utils import connect
 from db.databases import get_database, drop_database
+from mathesar.models.base import Database
+from mathesar.rpc.utils import connect
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 
 
@@ -69,3 +73,25 @@ def delete(*, database_oid: int, database_id: int, **kwargs) -> None:
     user = kwargs.get(REQUEST_KEY).user
     with connect(database_id, user) as conn:
         drop_database(database_oid, conn)
+
+
+@rpc_method(name="databases.upgrade_sql")
+@http_basic_auth_superuser_required
+@handle_rpc_exceptions
+def upgrade_sql(
+        *, database_id: int, username: str = None, password: str = None
+) -> None:
+    """
+    Install, Upgrade, or Reinstall the Mathesar SQL on a database.
+
+    If no `username` and `password` are submitted, we will determine the
+    role which owns the `msar` schema on the database, then use that role
+    for the upgrade.
+
+    Args:
+        database_id: The Django id of the database.
+        username: The username of the role used for upgrading.
+        password: The password of the role used for upgrading.
+    """
+    database = Database.objects.get(id=database_id)
+    database.install_sql(username=username, password=password)

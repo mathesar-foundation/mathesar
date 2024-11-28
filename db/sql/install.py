@@ -8,7 +8,7 @@ FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 def _install_sql_file(file_name):
     """
     Return a function that installs the SQL file with the given name. The
-    returned function accepts a psycopg2 connection as its only argument.
+    returned function accepts a psycopg connection as its only argument.
     """
 
     def _install(conn):

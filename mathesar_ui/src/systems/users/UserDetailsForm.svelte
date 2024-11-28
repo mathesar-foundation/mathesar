@@ -3,8 +3,9 @@
   import { _ } from 'svelte-i18n';
   import type { UnionToIntersection } from 'type-fest';
 
-  import userApi, { type User } from '@mathesar/api/rest/users';
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/rest/utils/errors';
+  import { api } from '@mathesar/api/rpc';
+  import type { BaseUser, User } from '@mathesar/api/rpc/users';
   import {
     type FieldStore,
     FormSubmit,
@@ -66,29 +67,41 @@
 
   async function saveUser() {
     const formValues = $form.values;
-    const request = {
+    const baseUser: BaseUser = {
       full_name: formValues.fullName,
       username: formValues.username,
       email: formValues.email,
-      is_superuser: formValues.userType === 'admin',
       display_language: formValues.displayLanguage,
     };
 
     if (isNewUser && hasProperty(formValues, 'password')) {
-      const newUser = await userApi.add({
-        ...request,
-        password: formValues.password,
-      });
+      const newUser = await api.users
+        .add({
+          user_def: {
+            ...baseUser,
+            password: formValues.password,
+            is_superuser: formValues.userType === 'admin',
+          },
+        })
+        .run();
       dispatch('create', newUser);
       return;
     }
 
     if (user) {
-      await userApi.update(user.id, request);
       if (isUserUpdatingThemselves && userProfileStore) {
-        userProfileStore.update((details) => details.with(request));
-        const updatedLocale = request.display_language;
+        await api.users.patch_self(baseUser).run();
+        userProfileStore.update((details) => details.with(baseUser));
+        const updatedLocale = formValues.displayLanguage;
         await setLanguage(updatedLocale);
+      } else {
+        await api.users
+          .patch_other({
+            ...baseUser,
+            user_id: user.id,
+            is_superuser: formValues.userType === 'admin',
+          })
+          .run();
       }
 
       dispatch('update');

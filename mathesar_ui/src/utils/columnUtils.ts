@@ -3,10 +3,7 @@ import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
 import type { Table } from '@mathesar/models/Table';
-import {
-  abstractTypesMap,
-  getAbstractTypeForDbType,
-} from '@mathesar/stores/abstract-types';
+import { getAbstractTypeForDbType } from '@mathesar/stores/abstract-types';
 import type { ProcessedColumn } from '@mathesar/stores/table-data';
 import { getAvailableName } from '@mathesar/utils/db';
 import type { IconProps } from '@mathesar-component-library/types';
@@ -26,7 +23,7 @@ export function getColumnIconProps(column: {
     return iconTableLink;
   }
 
-  return getAbstractTypeForDbType(column.type, abstractTypesMap).getIcon({
+  return getAbstractTypeForDbType(column.type).getIcon({
     dbType: column.type,
     typeOptions: column.type_options,
   });
