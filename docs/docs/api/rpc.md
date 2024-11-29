@@ -317,3 +317,19 @@ Unrecognized errors from a given library return a "round number" code, so an unk
       - replace_for_roles
       - transfer_ownership
       - TablePrivileges
+
+## Users
+
+::: users
+    options:
+      members:
+      - list_
+      - get
+      - add
+      - delete
+      - patch_self
+      - patch_other
+      - replace_own
+      - revoke
+      - UserInfo
+      - UserDef
