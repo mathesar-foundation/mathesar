@@ -3,10 +3,7 @@ Classes and functions exposed to the RPC endpoint for managing table metadata.
 """
 from typing import Optional, TypedDict, Union
 
-from modernrpc.core import rpc_method
-from modernrpc.auth.basic import http_basic_auth_login_required
-
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.utils.tables import list_tables_meta_data, set_table_meta_data
 
 
@@ -71,9 +68,7 @@ class TableMetaDataBlob(TypedDict):
         )
 
 
-@rpc_method(name="tables.metadata.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.metadata.list", auth="login")
 def list_(*, database_id: int, **kwargs) -> list[TableMetaDataRecord]:
     """
     List metadata associated with tables for a database.
@@ -90,9 +85,7 @@ def list_(*, database_id: int, **kwargs) -> list[TableMetaDataRecord]:
     ]
 
 
-@rpc_method(name="tables.metadata.set")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.metadata.set", auth="login")
 def set_(
     *, table_oid: int, metadata: TableMetaDataBlob, database_id: int, **kwargs
 ) -> None:

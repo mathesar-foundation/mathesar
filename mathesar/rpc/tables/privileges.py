@@ -1,15 +1,14 @@
 from typing import Literal, TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
 from db.roles import (
     transfer_table_ownership,
     list_table_privileges,
     replace_table_privileges_for_roles,
 )
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.tables.base import TableInfo
 
 
@@ -31,9 +30,7 @@ class TablePrivileges(TypedDict):
         )
 
 
-@rpc_method(name="tables.privileges.list_direct")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.privileges.list_direct", auth="login")
 def list_direct(
         *, table_oid: int, database_id: int, **kwargs
 ) -> list[TablePrivileges]:
@@ -51,9 +48,7 @@ def list_direct(
     return [TablePrivileges.from_dict(i) for i in raw_priv]
 
 
-@rpc_method(name="tables.privileges.replace_for_roles")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.privileges.replace_for_roles", auth="login")
 def replace_for_roles(
     *,
     privileges: list[TablePrivileges], table_oid: int, database_id: int,
@@ -87,9 +82,7 @@ def replace_for_roles(
     return [TablePrivileges.from_dict(i) for i in raw_priv]
 
 
-@rpc_method(name="tables.privileges.transfer_ownership")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.privileges.transfer_ownership", auth="login")
 def transfer_ownership(*, table_oid: int, new_owner_oid: int, database_id: int, **kwargs) -> TableInfo:
     """
     Transfers ownership of a given table to a new owner.
