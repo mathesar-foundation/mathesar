@@ -3,10 +3,7 @@ Classes and functions exposed to the RPC endpoint for managing column metadata.
 """
 from typing import Literal, Optional, TypedDict
 
-from modernrpc.core import rpc_method
-from modernrpc.auth.basic import http_basic_auth_login_required
-
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.utils.columns import get_columns_meta_data, set_columns_meta_data
 
 
@@ -128,9 +125,7 @@ class ColumnMetaDataBlob(TypedDict):
         )
 
 
-@rpc_method(name="columns.metadata.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="columns.metadata.list", auth="login")
 def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnMetaDataRecord]:
     """
     List metadata associated with columns for a table. Exposed as `list`.
@@ -148,9 +143,7 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnMetaDataR
     ]
 
 
-@rpc_method(name="columns.metadata.set")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="columns.metadata.set", auth="login")
 def set_(
     *,
     column_meta_data_list: list[ColumnMetaDataBlob],

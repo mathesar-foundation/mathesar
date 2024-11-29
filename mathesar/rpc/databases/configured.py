@@ -1,10 +1,9 @@
 from typing import TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required, http_basic_auth_superuser_required
+from modernrpc.core import REQUEST_KEY
 
 from mathesar.models.base import Database
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 
 
 class ConfiguredDatabaseInfo(TypedDict):
@@ -37,9 +36,7 @@ class ConfiguredDatabaseInfo(TypedDict):
         )
 
 
-@rpc_method(name="databases.configured.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="databases.configured.list", auth='login')
 def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
     """
     List information about databases for a server. Exposed as `list`.
@@ -68,9 +65,7 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
     return [ConfiguredDatabaseInfo.from_model(db_model) for db_model in database_qs]
 
 
-@rpc_method(name="databases.configured.disconnect")
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="databases.configured.disconnect")
 def disconnect(*, database_id: int, **kwargs) -> None:
     """
     Disconnect a configured database.

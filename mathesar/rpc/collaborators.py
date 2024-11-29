@@ -1,11 +1,8 @@
 from typing import TypedDict
 
-from modernrpc.core import rpc_method
-from modernrpc.auth.basic import http_basic_auth_login_required, http_basic_auth_superuser_required
-
 from mathesar.models.base import UserDatabaseRoleMap, Database, ConfiguredRole
 from mathesar.models.users import User
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 
 
 class CollaboratorInfo(TypedDict):
@@ -33,9 +30,7 @@ class CollaboratorInfo(TypedDict):
         )
 
 
-@rpc_method(name="collaborators.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="collaborators.list", auth="login")
 def list_(*, database_id: int = None, **kwargs) -> list[CollaboratorInfo]:
     """
     List information about collaborators. Exposed as `list`.
@@ -56,9 +51,7 @@ def list_(*, database_id: int = None, **kwargs) -> list[CollaboratorInfo]:
     return [CollaboratorInfo.from_model(db_model) for db_model in user_database_role_map_qs]
 
 
-@rpc_method(name='collaborators.add')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="collaborators.add")
 def add(
         *,
         database_id: int,
@@ -86,9 +79,7 @@ def add(
     return CollaboratorInfo.from_model(collaborator)
 
 
-@rpc_method(name='collaborators.delete')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="collaborators.delete")
 def delete(*, collaborator_id: int, **kwargs):
     """
     Delete a collaborator from a database.
@@ -100,9 +91,7 @@ def delete(*, collaborator_id: int, **kwargs):
     collaborator.delete()
 
 
-@rpc_method(name='collaborators.set_role')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="collaborators.set_role")
 def set_role(
         *,
         collaborator_id: int,
