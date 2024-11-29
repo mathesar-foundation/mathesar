@@ -1,4 +1,3 @@
-from functools import wraps
 from modernrpc.core import rpc_method
 from modernrpc.auth.basic import (
     http_basic_auth_login_required,
@@ -23,6 +22,7 @@ def mathesar_rpc_method(*, name, auth="superuser"):
         auth_wrap = http_basic_auth_superuser_required
     else:
         raise Exception("`auth` must be 'superuser' or 'login'")
+
     def combo_decorator(f):
         return rpc_method(name=name)(auth_wrap(handle_rpc_exceptions(f)))
     return combo_decorator

@@ -3,14 +3,13 @@ RPC functions for setting up database connections.
 """
 from typing import TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_superuser_required
+from modernrpc.core import REQUEST_KEY
 
 from mathesar.utils import permissions
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.servers.configured import ConfiguredServerInfo
 from mathesar.rpc.databases.configured import ConfiguredDatabaseInfo
 from mathesar.rpc.roles.configured import ConfiguredRoleInfo
+from mathesar.rpc.decorators import mathesar_rpc_method
 
 
 class DatabaseConnectionResult(TypedDict):
@@ -38,9 +37,7 @@ class DatabaseConnectionResult(TypedDict):
         )
 
 
-@rpc_method(name='databases.setup.create_new')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='databases.setup.create_new')
 def create_new(
         *,
         database: str,
@@ -66,9 +63,7 @@ def create_new(
     return DatabaseConnectionResult.from_model(result)
 
 
-@rpc_method(name='databases.setup.connect_existing')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='databases.setup.connect_existing')
 def connect_existing(
         *,
         host: str,
