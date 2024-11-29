@@ -3,8 +3,7 @@ Classes and functions exposed to the RPC endpoint for managing table records.
 """
 from typing import Any, Literal, Optional, TypedDict, Union
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
 from db.records import (
     list_records_from_table,
@@ -14,7 +13,7 @@ from db.records import (
     add_record_to_table,
     patch_record_in_table,
 )
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.tables import get_table_record_summary_templates
 
@@ -196,9 +195,7 @@ class RecordAdded(TypedDict):
         )
 
 
-@rpc_method(name="records.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="records.list", auth="login")
 def list_(
         *,
         table_oid: int,
@@ -245,9 +242,7 @@ def list_(
     return RecordList.from_dict(record_info)
 
 
-@rpc_method(name="records.get")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="records.get", auth="login")
 def get(
         *,
         record_id: Any,
@@ -291,9 +286,7 @@ def get(
     return RecordList.from_dict(record_info)
 
 
-@rpc_method(name="records.add")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="records.add", auth="login")
 def add(
         *,
         record_def: dict,
@@ -334,9 +327,7 @@ def add(
     return RecordAdded.from_dict(record_info)
 
 
-@rpc_method(name="records.patch")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="records.patch", auth="login")
 def patch(
         *,
         record_def: dict,
@@ -379,9 +370,7 @@ def patch(
     return RecordAdded.from_dict(record_info)
 
 
-@rpc_method(name="records.delete")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="records.delete", auth="login")
 def delete(
         *,
         record_ids: list[Any],
@@ -410,9 +399,7 @@ def delete(
     return num_deleted
 
 
-@rpc_method(name="records.search")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="records.search", auth="login")
 def search(
         *,
         table_oid: int,
