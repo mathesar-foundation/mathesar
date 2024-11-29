@@ -3,8 +3,7 @@ Classes and functions exposed to the RPC endpoint for managing table columns.
 """
 from typing import Literal, Optional, TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
 from db.columns import (
     add_columns_to_table,
@@ -13,7 +12,7 @@ from db.columns import (
     get_column_info_for_table,
 )
 from mathesar.rpc.columns.metadata import ColumnMetaDataBlob
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.columns import get_columns_meta_data
 
@@ -195,9 +194,7 @@ class ColumnInfo(TypedDict):
         )
 
 
-@rpc_method(name="columns.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="columns.list", auth="login")
 def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnInfo]:
     """
     List information about columns for a table. Exposed as `list`.
@@ -215,9 +212,7 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ColumnInfo]:
     return [ColumnInfo.from_dict(col) for col in raw_column_info]
 
 
-@rpc_method(name="columns.add")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="columns.add", auth="login")
 def add(
         *,
         column_data_list: list[CreatableColumnInfo],
@@ -245,9 +240,7 @@ def add(
         return add_columns_to_table(table_oid, column_data_list, conn)
 
 
-@rpc_method(name="columns.patch")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="columns.patch", auth="login")
 def patch(
         *,
         column_data_list: list[SettableColumnInfo],
@@ -273,9 +266,7 @@ def patch(
         return alter_columns_in_table(table_oid, column_data_list, conn)
 
 
-@rpc_method(name="columns.delete")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="columns.delete", auth="login")
 def delete(
         *, column_attnums: list[int], table_oid: int, database_id: int, **kwargs
 ) -> int:
@@ -295,9 +286,7 @@ def delete(
         return drop_columns_from_table(table_oid, column_attnums, conn)
 
 
-@rpc_method(name="columns.list_with_metadata")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="columns.list_with_metadata", auth="login")
 def list_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> list:
     """
     List information about columns for a table, along with the metadata associated with each column.
