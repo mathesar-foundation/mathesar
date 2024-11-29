@@ -1,10 +1,7 @@
 from typing import TypedDict
 
-from modernrpc.core import rpc_method
-from modernrpc.auth.basic import http_basic_auth_login_required, http_basic_auth_superuser_required
-
 from mathesar.models.base import ConfiguredRole, Server
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 
 
 class ConfiguredRoleInfo(TypedDict):
@@ -29,9 +26,7 @@ class ConfiguredRoleInfo(TypedDict):
         )
 
 
-@rpc_method(name="roles.configured.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="roles.configured.list", auth="login")
 def list_(*, server_id: int, **kwargs) -> list[ConfiguredRoleInfo]:
     """
     List information about roles configured in Mathesar. Exposed as `list`.
@@ -47,9 +42,7 @@ def list_(*, server_id: int, **kwargs) -> list[ConfiguredRoleInfo]:
     return [ConfiguredRoleInfo.from_model(db_model) for db_model in configured_role_qs]
 
 
-@rpc_method(name='roles.configured.add')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='roles.configured.add')
 def add(
         *,
         server_id: int,
@@ -77,9 +70,7 @@ def add(
     return ConfiguredRoleInfo.from_model(configured_role)
 
 
-@rpc_method(name='roles.configured.delete')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='roles.configured.delete')
 def delete(*, configured_role_id: int, **kwargs):
     """
     Delete a configured role for a server.
@@ -91,9 +82,7 @@ def delete(*, configured_role_id: int, **kwargs):
     configured_role.delete()
 
 
-@rpc_method(name='roles.configured.set_password')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='roles.configured.set_password')
 def set_password(
         *,
         configured_role_id: int,
