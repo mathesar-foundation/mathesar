@@ -3,11 +3,10 @@ Classes and functions exposed to the RPC endpoint for managing explorations.
 """
 from typing import Optional, TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
 from mathesar.models.base import Explorations
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 from mathesar.utils.explorations import (
     list_explorations,
@@ -120,9 +119,7 @@ class ExplorationResult(TypedDict):
         )
 
 
-@rpc_method(name="explorations.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="explorations.list", auth="login")
 def list_(*, database_id: int, schema_oid: int = None, **kwargs) -> list[ExplorationInfo]:
     """
     List information about explorations for a database. Exposed as `list`.
@@ -138,9 +135,7 @@ def list_(*, database_id: int, schema_oid: int = None, **kwargs) -> list[Explora
     return [ExplorationInfo.from_model(exploration) for exploration in explorations]
 
 
-@rpc_method(name="explorations.get")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="explorations.get", auth="login")
 def get(*, exploration_id: int, **kwargs) -> ExplorationInfo:
     """
     List information about an exploration.
@@ -155,9 +150,7 @@ def get(*, exploration_id: int, **kwargs) -> ExplorationInfo:
     return ExplorationInfo.from_model(exploration)
 
 
-@rpc_method(name="explorations.delete")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="explorations.delete", auth="login")
 def delete(*, exploration_id: int, **kwargs) -> None:
     """
     Delete an exploration.
@@ -168,9 +161,7 @@ def delete(*, exploration_id: int, **kwargs) -> None:
     delete_exploration(exploration_id)
 
 
-@rpc_method(name="explorations.run")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="explorations.run", auth="login")
 def run(*, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
     """
     Run an exploration.
@@ -184,14 +175,12 @@ def run(*, exploration_def: ExplorationDef, limit: int = 100, offset: int = 0, *
         The result of the exploration run.
     """
     user = kwargs.get(REQUEST_KEY).user
-    with connect(exploration_def['database_id'], user) as conn:
+    with connect(exploration_def["database_id"], user) as conn:
         exploration_result = run_exploration(exploration_def, conn, limit, offset)
     return ExplorationResult.from_dict(exploration_result)
 
 
-@rpc_method(name='explorations.run_saved')
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="explorations.run_saved", auth="login")
 def run_saved(*, exploration_id: int, limit: int = 100, offset: int = 0, **kwargs) -> ExplorationResult:
     """
     Run a saved exploration.
@@ -211,9 +200,7 @@ def run_saved(*, exploration_id: int, limit: int = 100, offset: int = 0, **kwarg
     return ExplorationResult.from_dict(exploration_result)
 
 
-@rpc_method(name='explorations.replace')
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="explorations.replace", auth="login")
 def replace(*, new_exploration: ExplorationInfo) -> ExplorationInfo:
     """
     Replace a saved exploration.
@@ -228,9 +215,7 @@ def replace(*, new_exploration: ExplorationInfo) -> ExplorationInfo:
     return ExplorationInfo.from_model(replaced_exp_model)
 
 
-@rpc_method(name='explorations.add')
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="explorations.add", auth="login")
 def add(*, exploration_def: ExplorationDef) -> ExplorationInfo:
     """
     Add a new exploration.

@@ -3,17 +3,14 @@ Classes and functions exposed to the RPC endpoint for managing data models.
 """
 from typing import TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
 from db import links, tables
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 
 
-@rpc_method(name="data_modeling.add_foreign_key_column")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="data_modeling.add_foreign_key_column", auth="login")
 def add_foreign_key_column(
         *,
         column_name: str,
@@ -52,9 +49,7 @@ class MappingColumn(TypedDict):
     referent_table_oid: int
 
 
-@rpc_method(name="data_modeling.add_mapping_table")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="data_modeling.add_mapping_table", auth="login")
 def add_mapping_table(
         *,
         table_name: str,
@@ -82,9 +77,7 @@ def add_mapping_table(
         )
 
 
-@rpc_method(name="data_modeling.suggest_types")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="data_modeling.suggest_types", auth="login")
 def suggest_types(*, table_oid: int, database_id: int, **kwargs) -> dict:
     """
     Infer the best type for each column in the table.
@@ -118,9 +111,7 @@ class SplitTableInfo(TypedDict):
     new_fkey_attnum: int
 
 
-@rpc_method(name="data_modeling.split_table")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="data_modeling.split_table", auth="login")
 def split_table(
     *,
     table_oid: int,
@@ -154,9 +145,7 @@ def split_table(
         )
 
 
-@rpc_method(name="data_modeling.move_columns")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="data_modeling.move_columns", auth="login")
 def move_columns(
     *,
     source_table_oid: int,

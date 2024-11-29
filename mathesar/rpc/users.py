@@ -2,13 +2,9 @@
 Classes and functions exposed to the RPC endpoint for managing mathesar users.
 """
 from typing import Optional, TypedDict
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import (
-    http_basic_auth_login_required,
-    http_basic_auth_superuser_required
-)
+from modernrpc.core import REQUEST_KEY
 
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.utils.users import (
     get_user,
     list_users,
@@ -72,9 +68,7 @@ class UserDef(TypedDict):
     display_language: Optional[str]
 
 
-@rpc_method(name='users.add')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='users.add')
 def add(*, user_def: UserDef) -> UserInfo:
     """
     Add a new mathesar user.
@@ -92,9 +86,7 @@ def add(*, user_def: UserDef) -> UserInfo:
     return UserInfo.from_model(user)
 
 
-@rpc_method(name='users.delete')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='users.delete')
 def delete(*, user_id: int) -> None:
     """
     Delete a mathesar user.
@@ -108,9 +100,7 @@ def delete(*, user_id: int) -> None:
     delete_user(user_id)
 
 
-@rpc_method(name="users.get")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="users.get", auth="login")
 def get(*, user_id: int) -> UserInfo:
     """
     List information about a mathesar user.
@@ -125,9 +115,7 @@ def get(*, user_id: int) -> UserInfo:
     return UserInfo.from_model(user)
 
 
-@rpc_method(name='users.list')
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='users.list', auth="login")
 def list_() -> list[UserInfo]:
     """
     List information about all mathesar users. Exposed as `list`.
@@ -139,9 +127,7 @@ def list_() -> list[UserInfo]:
     return [UserInfo.from_model(user) for user in users]
 
 
-@rpc_method(name='users.patch_self')
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='users.patch_self', auth="login")
 def patch_self(
     *,
     username: str,
@@ -173,9 +159,7 @@ def patch_self(
     return UserInfo.from_model(updated_user_info)
 
 
-@rpc_method(name='users.patch_other')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='users.patch_other')
 def patch_other(
     *,
     user_id: int,
@@ -213,9 +197,7 @@ def patch_other(
     return UserInfo.from_model(updated_user_info)
 
 
-@rpc_method(name='users.password.replace_own')
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='users.password.replace_own', auth="login")
 def replace_own(
     *,
     old_password: str,
@@ -235,9 +217,7 @@ def replace_own(
     change_password(user.id, new_password)
 
 
-@rpc_method(name='users.password.revoke')
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name='users.password.revoke')
 def revoke(
     *,
     user_id: int,
