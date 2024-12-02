@@ -7,8 +7,11 @@ The basic principle is: If there is an installation_id, analytics are
 Thus, the `disable_analytics` function simply deletes that ID, if it
 exists.
 """
+from functools import wraps
+import threading
 from uuid import uuid4
 
+from django.core.cache import cache
 from django.conf import settings
 from django.utils import timezone
 import requests
@@ -22,6 +25,30 @@ from mathesar.models import (
     InstallationID,
     User,
 )
+
+ANALYTICS_DONE = "analytics_done"
+
+
+def wire_analytics(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if cache.get(ANALYTICS_DONE) is None:
+            cache.set(ANALYTICS_DONE, True, 10)
+            threading.Thread(target=run_analytics).start()
+        return f(*args, **kwargs)
+    return wrapped
+
+
+def run_analytics():
+    if (
+            InstallationID.objects.first() is not None
+            and not AnalyticsReport.objects.filter(
+                created_at__gte=timezone.now() - timezone.timedelta(days=1)
+            )
+    ):
+        save_analytics_report()
+        upload_analytics_reports()
+        delete_stale_reports()
 
 
 def initialize_analytics():
@@ -92,4 +119,12 @@ def upload_analytics_reports():
 
 
 def delete_stale_reports():
-    AnalyticsReport.objects.filter(uploaded=True).delete()
+    # Delete uploaded analytics objects older than 2 days
+    AnalyticsReport.objects.filter(
+        uploaded=True,
+        created_on__gte=timezone.now() - timezone.timedelta(days=2)
+    ).delete()
+    # Delete analytics objects after some time regardless of upload status
+    AnalyticsReport.objects.filter(
+        updated_at__gte=timezone.now() - timezone.timedelta(days=30)
+    ).delete()
