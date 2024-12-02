@@ -69,12 +69,12 @@
     return false; // Parent element not found in the hierarchy
   }
 
-  // Prevents the RecordSelector Modal from closing for 500ms
+  // Prevents the RecordSelector Modal from closing for 300ms
   // after mounting to preserve double click behaviour
   onMount(() => {
     setTimeout(() => {
       controllerCanCancel = true;
-    }, 500);
+    }, 300);
   });
 
 
