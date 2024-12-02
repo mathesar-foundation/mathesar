@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import { RichText } from '@mathesar/components/rich-text';
@@ -24,6 +25,7 @@
   export let windowPositionerElement: HTMLElement;
 
   let contentHeight = 0;
+  let controllerCanCancel = false;
 
   $: nestedController = new RecordSelectorController({
     nestingLevel: controller.nestingLevel + 1,
@@ -67,6 +69,15 @@
     return false; // Parent element not found in the hierarchy
   }
 
+  // Prevents the RecordSelector Modal from closing for 500ms
+  // after mounting to preserve double click behaviour
+  onMount(() => {
+    setTimeout(() => {
+      controllerCanCancel = true;
+    }, 500);
+  });
+
+
   function onWindowClick(event: MouseEvent) {
     if ($nestedSelectorIsOpen) return;
 
@@ -77,8 +88,10 @@
       currentWindow,
     );
 
-    if (!isElementInside) controller.cancel();
+    if (!isElementInside && controllerCanCancel) controller.cancel();
   }
+
+
 </script>
 
 <svelte:window on:keydown={handleKeydown} on:click|capture={onWindowClick} />
