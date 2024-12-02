@@ -33,7 +33,7 @@ def wire_analytics(f):
     @wraps(f)
     def wrapped(*args, **kwargs):
         if cache.get(ANALYTICS_DONE) is None:
-            cache.set(ANALYTICS_DONE, True, 10)
+            cache.set(ANALYTICS_DONE, True, 300)
             threading.Thread(target=run_analytics).start()
         return f(*args, **kwargs)
     return wrapped
