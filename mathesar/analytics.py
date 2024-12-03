@@ -27,13 +27,16 @@ from mathesar.models import (
 )
 
 ANALYTICS_DONE = "analytics_done"
+CACHE_TIMEOUT = 1800  # seconds
+ACTIVE_USER_DAYS = 14
+ANALYTICS_REPORT_MAX_AGE = 30  # days
 
 
 def wire_analytics(f):
     @wraps(f)
     def wrapped(*args, **kwargs):
-        if cache.get(ANALYTICS_DONE) is None:
-            cache.set(ANALYTICS_DONE, True, 300)
+        if settings.TEST is False and cache.get(ANALYTICS_DONE) is None:
+            cache.set(ANALYTICS_DONE, True, CACHE_TIMEOUT)
             threading.Thread(target=run_analytics).start()
         return f(*args, **kwargs)
     return wrapped
@@ -83,7 +86,8 @@ def save_analytics_report():
         mathesar_version=__version__,
         user_count=User.objects.filter(is_active=True).count(),
         active_user_count=User.objects.filter(
-            is_active=True, last_login__gte=timezone.now() - timezone.timedelta(days=14)
+            is_active=True,
+            last_login__gte=timezone.now() - timezone.timedelta(days=ACTIVE_USER_DAYS)
         ).count(),
         configured_role_count=ConfiguredRole.objects.count(),
         connected_database_count=connected_database_count,
@@ -126,5 +130,5 @@ def delete_stale_reports():
     ).delete()
     # Delete analytics objects after some time regardless of upload status
     AnalyticsReport.objects.filter(
-        updated_at__gte=timezone.now() - timezone.timedelta(days=30)
+        updated_at__gte=timezone.now() - timezone.timedelta(days=ANALYTICS_REPORT_MAX_AGE)
     ).delete()
