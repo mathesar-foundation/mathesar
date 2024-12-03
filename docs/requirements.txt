@@ -6,3 +6,4 @@ mkdocs-macros-plugin==0.7.0
 mkdocs-placeholder-plugin==0.3.1
 mkdocstrings==0.25.2
 mkdocstrings-python==1.10.8
+setuptools==75.5.0

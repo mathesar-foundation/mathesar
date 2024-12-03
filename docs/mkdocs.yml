@@ -5,55 +5,67 @@ repo_name: mathesar-foundation/mathesar
 edit_uri: edit/develop/docs/docs/
 
 nav:
-  - Introduction:
-      - Welcome: index.md
-  - Installation:
-      - Install using Docker Compose: installation/docker-compose/index.md
-      - Install from scratch: installation/build-from-source/index.md
-  - Configuration:
-      - Environment variables: configuration/env-variables.md
+  - Introduction: index.md
   - Administration:
-      - Upgrade:
-        - To 0.1.7: administration/upgrade/0.1.7.md
-        - To 0.1.6: administration/upgrade/0.1.6.md
-        - To 0.1.5: administration/upgrade/0.1.5.md
-        - To 0.1.4: administration/upgrade/0.1.4.md
-        - To older versions: administration/upgrade/older.md
+      - Install using Docker Compose: administration/install-via-docker-compose.md
+      - Install from scratch: administration/install-from-scratch.md
+      - Configuration: administration/configuration.md
+      - Backup & Restore: administration/backup-restore.md
       - Uninstall Mathesar: administration/uninstall.md
       - Debug Mathesar: administration/debug.md
-  - Using Mathesar:
+  - User Guide:
       - Introduction: user-guide/index.md
-      - Databases: user-guide/databases.md
-      - Users: user-guide/users.md
-      - Permissions: user-guide/permissions.md
-      - Importing data: user-guide/importing-data.md
-      - Glossary: user-guide/glossary.md
+      - Your data in PostgreSQL:
+          - Databases: user-guide/databases.md
+          - Schemas: user-guide/schemas.md
+          - Tables: user-guide/tables.md
+          - Data types: user-guide/data-types.md
+          - Relationships: user-guide/relationships.md
+      - Access Control:
+          - Overview: user-guide/access-control.md
+          - Mathesar Users: user-guide/users.md
+          - PostgreSQL Roles: user-guide/roles.md
+          - Stored Role Passwords: user-guide/stored-role-passwords.md
+          - Collaborators: user-guide/collaborators.md
+      - Mathesar constructs:
+          - Metadata: user-guide/metadata.md
+          - Data Explorer: user-guide/data-explorer.md
+      - Data management:
+          - Importing data: user-guide/importing-data.md
+          - Exporting data: user-guide/exporting-data.md
   - API:
-      - RPC: api/rpc.md
-      - REST: api/rest.md
-  - Test Builds:
-      - '0.2.0-testing.1': releases/0.2.0-testing.1.md
+      - Overview: api/index.md
+      - Methods: api/methods.md
   - Releases:
-      - '0.1.7': releases/0.1.7.md
-      - '0.1.6': releases/0.1.6.md
-      - '0.1.5': releases/0.1.5.md
-      - '0.1.4': releases/0.1.4.md
-      - '0.1.3': releases/0.1.3.md
-      - '0.1.2': releases/0.1.2.md
-      - '0.1.1': releases/0.1.1.md
-      - '0.1.0': releases/0.1.0.md
+      - '0.2.0': releases/0.2.0.md
+      - Previous Releases:
+          - '0.1.7': releases/0.1.7.md
+          - '0.1.6': releases/0.1.6.md
+          - '0.1.5': releases/0.1.5.md
+          - '0.1.4': releases/0.1.4.md
+          - '0.1.3': releases/0.1.3.md
+          - '0.1.2': releases/0.1.2.md
+          - '0.1.1': releases/0.1.1.md
+          - '0.1.0': releases/0.1.0.md
 
 plugins:
   - search:
       lang: en
   - redirects:
       redirect_maps:
-        "installation-dc/ansible-setup.md": "installation/docker-compose/index.md"
+        "installation-dc/ansible-setup.md": "administration/install-via-docker-compose.md"
         "product/intro.md": "user-guide/index.md"
         "product/users.md": "user-guide/users.md"
         "install/index.md": "index.md"
-        "install/docker-compose/index.md": "installation/docker-compose/index.md"
-        "install/build-from-source/index.md": "installation/build-from-source/index.md"
+        "install/docker-compose/index.md": "administration/install-via-docker-compose.md"
+        "install/build-from-source/index.md": "administration/install-from-scratch.md"
+        "api/rpc.md": "api/index.md"
+        "api/rest.md": "api/index.md"
+        "user-guide/glossary.md": "user-guide/index.md"
+        "user-guide/permissions.md": "user-guide/access-control.md"
+        "configuration/env-variables.md": "administration/configuration.md"
+        "installation/docker-compose/index.md": "administration/install-via-docker-compose.md"
+        "installation/build-from-source/index.md": "administration/install-from-scratch.md"
   - macros
   - placeholder
   - mkdocstrings:
@@ -120,7 +132,7 @@ markdown_extensions:
       permalink: true
 
 extra:
-  mathesar_version: 0.2.0-testing.1
+  mathesar_version: 0.2.0
   version:
     provider: mike
     alias: true
