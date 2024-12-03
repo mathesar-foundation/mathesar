@@ -8,7 +8,6 @@
   import type { Table } from '@mathesar/models/Table';
   import { storeToGetTablePageUrl } from '@mathesar/stores/storeBasedUrls';
 
-
   import LinkCard from './LinkCard.svelte';
 
   export let referentTable: Pick<Table, 'name' | 'oid'>;
