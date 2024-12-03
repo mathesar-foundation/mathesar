@@ -9,7 +9,7 @@
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
-  import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import RichText from '@mathesar/components/rich-text/RichText.svelte';
   import {
     type CombinedLoginRole,
@@ -62,13 +62,13 @@
       }}
     />
     <FieldLayout>
-      <WarningBox>
+      <InfoBox>
         {$_('role_configured_all_databases_in_server', {
           values: {
             server: database.server.getConnectionString(),
           },
         })}
-      </WarningBox>
+      </InfoBox>
     </FieldLayout>
   </div>
   <div use:portalToWindowFooter class="footer">

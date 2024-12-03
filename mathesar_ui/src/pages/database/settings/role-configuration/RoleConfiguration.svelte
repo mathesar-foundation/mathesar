@@ -57,7 +57,7 @@
         await $routeContext.removeConfiguredRole(
           combinedLoginRole.configuredRole,
         );
-        toast.success($_('role_configuration_removed'));
+        toast.success($_('stored_password_removed'));
       } catch (err) {
         toast.error(getErrorMessage(err));
       }
@@ -119,14 +119,14 @@
                               ),
                             },
                           },
-                          body: $_('removing_role_configuration_warning', {
+                          body: $_('remove_stored_password_help', {
                             values: {
                               server:
                                 combinedLoginRole.configuredRole?.database.server.getConnectionString(),
                             },
                           }),
                           proceedButton: {
-                            label: $_('remove_configuration'),
+                            label: $_('remove_stored_password'),
                             icon: iconDeleteMajor,
                           },
                         })}

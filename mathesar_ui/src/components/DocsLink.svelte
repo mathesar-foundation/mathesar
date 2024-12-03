@@ -15,6 +15,7 @@
     rolesInheritance: '/user-guide/roles/#inheritance',
     storedRolePasswords: '/user-guide/stored-role-passwords/',
     collaborators: '/user-guide/collaborators/',
+    internalSchemas: '/user-guide/schemas/#internal',
   };
   type Page = keyof typeof pages;
 

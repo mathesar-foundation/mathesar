@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import Help from '@mathesar/component-library/help/Help.svelte';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { currentTable } from '@mathesar/stores/tables';
   import {
     ControlledModal,
@@ -13,7 +15,14 @@
 </script>
 
 {#if $currentTable}
-  <ControlledModal {controller} size="large" title={$_('create_relationship')}>
+  <ControlledModal {controller} size="large">
+    <span slot="title">
+      {$_('create_relationship')}
+      <Help>
+        {$_('references_help')}
+        <SeeDocsToLearnMore page="relationships" />
+      </Help>
+    </span>
     <LinkTableForm base={$currentTable} close={() => controller.close()} />
   </ControlledModal>
 {/if}

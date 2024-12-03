@@ -14,7 +14,6 @@
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import OutcomeBox from '@mathesar/components/message-boxes/OutcomeBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import SelectTable from '@mathesar/components/SelectTable.svelte';
   import { iconTableLink } from '@mathesar/icons';
   import type { Table } from '@mathesar/models/Table';
@@ -227,15 +226,18 @@
   let isNewColumnsOpen = false;
 </script>
 
-<div class="description">
-  {$_('references_help')}
-  <SeeDocsToLearnMore page="relationships" />
-</div>
-
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
-      {$_('create_reference_help_info_2')}
+      <RichText
+        text={$_('create_reference_help_info_2')}
+        let:slotName
+        let:translatedArg
+      >
+        {#if slotName === 'italic'}
+          <em>{translatedArg}</em>
+        {/if}
+      </RichText>
     </InfoBox>
   </FieldLayout>
 
@@ -414,9 +416,6 @@
   .form.self-referential {
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);
-  }
-  .description {
-    margin-bottom: 1rem;
   }
   .collapsible-detail {
     padding: var(--size-xx-small);
