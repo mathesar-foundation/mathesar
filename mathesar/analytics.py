@@ -13,6 +13,7 @@ from uuid import uuid4
 
 from django.core.cache import cache
 from django.conf import settings
+from django.db.models import Q
 from django.utils import timezone
 import requests
 
@@ -87,7 +88,8 @@ def save_analytics_report():
         user_count=User.objects.filter(is_active=True).count(),
         active_user_count=User.objects.filter(
             is_active=True,
-            last_login__gte=timezone.now() - timezone.timedelta(days=ACTIVE_USER_DAYS)
+            last_login__gte=timezone.now()
+            - timezone.timedelta(days=ACTIVE_USER_DAYS)
         ).count(),
         configured_role_count=ConfiguredRole.objects.count(),
         connected_database_count=connected_database_count,
@@ -123,12 +125,14 @@ def upload_analytics_reports():
 
 
 def delete_stale_reports():
-    # Delete uploaded analytics objects older than 2 days
     AnalyticsReport.objects.filter(
-        uploaded=True,
-        created_on__gte=timezone.now() - timezone.timedelta(days=2)
-    ).delete()
-    # Delete analytics objects after some time regardless of upload status
-    AnalyticsReport.objects.filter(
-        updated_at__gte=timezone.now() - timezone.timedelta(days=ANALYTICS_REPORT_MAX_AGE)
+        Q(
+            # Delete uploaded analytics objects older than 2 days
+            uploaded=True,
+            created_at__gte=timezone.now() - timezone.timedelta(days=2)
+        ) | Q(
+            # Delete analytics reports after a time regardless of upload status
+            updated_at__gte=timezone.now()
+            - timezone.timedelta(days=ANALYTICS_REPORT_MAX_AGE)
+        )
     ).delete()
