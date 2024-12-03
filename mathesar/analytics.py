@@ -31,6 +31,7 @@ ANALYTICS_DONE = "analytics_done"
 CACHE_TIMEOUT = 1800  # seconds
 ACTIVE_USER_DAYS = 14
 ANALYTICS_REPORT_MAX_AGE = 30  # days
+ANALYTICS_FREQUENCY = 1  # a report is saved at most once per day.
 
 
 def wire_analytics(f):
@@ -47,7 +48,8 @@ def run_analytics():
     if (
             InstallationID.objects.first() is not None
             and not AnalyticsReport.objects.filter(
-                created_at__gte=timezone.now() - timezone.timedelta(days=1)
+                created_at__gte=timezone.now()
+                - timezone.timedelta(days=ANALYTICS_FREQUENCY)
             )
     ):
         save_analytics_report()
