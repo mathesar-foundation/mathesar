@@ -21,7 +21,7 @@
 <FieldLayout>
   <fieldset>
     <legend>
-      <RichText text={$_('type_of_relatiohship_with_table')} let:slotName>
+      <RichText text={$_('type_of_relationship_with_table')} let:slotName>
         {#if slotName === 'tableName'}
           <Pill table={target} which="target" />:
         {/if}
