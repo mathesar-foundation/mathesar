@@ -68,6 +68,17 @@ plugins:
             show_root_members_full_path: true
             show_source: false
             group_by_category: false
+  - spellcheck:
+      backends:
+      - codespell:
+          dictionaries: [clear]
+      known_words:
+      - Mathesar
+      ignore_code: yes
+      min_length: 2
+      max_capital: 1
+      allow_unicode: yes
+      strict_only: yes
 
 theme:
   name: material
