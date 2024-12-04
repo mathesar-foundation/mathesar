@@ -80,5 +80,3 @@ Other error codes are grouped according to the library that produced the Excepti
 - other: -25xxx
 
 Unrecognized errors from a given library return a "round number" code, so an unknown `builtins` error gets the code -31000.
-
-
