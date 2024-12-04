@@ -77,7 +77,7 @@ class UniqueConstraint(TypedDict):
 
 CreatableConstraintInfo = list[Union[ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint]]
 """
-Type alias for a list of createable constraints which can be unique, primary key, or foreign key constraints.
+Type alias for a list of creatable constraints which can be unique, primary key, or foreign key constraints.
 """
 
 

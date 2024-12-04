@@ -25,7 +25,7 @@ A Foreign Key path gives the same information in a different form:
 ]
 
 In this form, `constraint_idN` is a foreign key constraint, and `reversed` is a boolean giving
-whether to travel from referrer to referant (when False) or from referant to referrer (when True).
+whether to travel from referrer to referent (when False) or from referent to referrer (when True).
 */
 
 

@@ -18,7 +18,7 @@ class SchemaPrivileges(TypedDict):
 
     Attributes:
         role_oid: The `oid` of the role.
-        direct: A list of schema privileges for the afforementioned role_oid.
+        direct: A list of schema privileges for the aforementioned role_oid.
     """
     role_oid: int
     direct: list[Literal['USAGE', 'CREATE']]
