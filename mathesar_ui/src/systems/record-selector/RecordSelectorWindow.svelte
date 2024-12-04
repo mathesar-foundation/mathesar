@@ -77,7 +77,6 @@
     }, 300);
   });
 
-
   function onWindowClick(event: MouseEvent) {
     if ($nestedSelectorIsOpen) return;
 
@@ -90,8 +89,6 @@
 
     if (!isElementInside && controllerCanCancel) controller.cancel();
   }
-
-
 </script>
 
 <svelte:window on:keydown={handleKeydown} on:click|capture={onWindowClick} />
