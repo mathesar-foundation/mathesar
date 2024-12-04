@@ -43,7 +43,7 @@ class RoleInfo(TypedDict):
         description: A description of the role
         members: The member roles that directly inherit the role.
 
-    Refer PostgreSQL documenation on:
+    Refer PostgreSQL documentation on:
         - [pg_roles table](https://www.postgresql.org/docs/current/view-pg-roles.html).
         - [Role attributes](https://www.postgresql.org/docs/current/role-attributes.html)
         - [Role membership](https://www.postgresql.org/docs/current/role-membership.html)

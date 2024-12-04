@@ -17,7 +17,7 @@ class TablePrivileges(TypedDict):
     Information about table privileges for a role.
     Attributes:
         role_oid: The `oid` of the role.
-        direct: A list of table privileges for the afforementioned role_oid.
+        direct: A list of table privileges for the aforementioned role_oid.
     """
     role_oid: int
     direct: list[Literal['INSERT', 'SELECT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER']]

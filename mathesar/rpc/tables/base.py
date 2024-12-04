@@ -111,7 +111,7 @@ class JoinableTableRecord(TypedDict):
             ]
 
             In this form, `constraint_idN` is a foreign key constraint, and `reversed` is a boolean giving
-            whether to travel from referrer to referant (when False) or from referant to referrer (when True).
+            whether to travel from referrer to referent (when False) or from referent to referrer (when True).
         depth: Specifies how far to search for joinable tables.
         multiple_results: Specifies whether the path included is reversed.
     """

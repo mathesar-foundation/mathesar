@@ -891,7 +891,7 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION msar.get_fkey_map_table(tab_id oid)
   RETURNS TABLE (target_oid oid, conkey smallint, confkey smallint)
 AS $$/*
-Generate a table mapping foreign key values from refererrer to referant tables.
+Generate a table mapping foreign key values from refererrer to referent tables.
 
 Given an input table (identified by OID), we return a table with each row representing a foreign key
 constraint on that table. We return only single-column foreign keys, and only one per foreign key
