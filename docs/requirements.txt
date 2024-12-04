@@ -4,6 +4,7 @@ mkdocs-material==8.5.11
 mkdocs-redirects==1.2.0
 mkdocs-macros-plugin==0.7.0
 mkdocs-placeholder-plugin==0.3.1
+mkdocs-spellcheck[codespell]==1.1.0
 mkdocstrings==0.25.2
 mkdocstrings-python==1.10.8
 setuptools==75.5.0

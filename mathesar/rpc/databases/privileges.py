@@ -18,7 +18,7 @@ class DBPrivileges(TypedDict):
 
     Attributes:
         role_oid: The `oid` of the role on the database server.
-        direct: A list of database privileges for the afforementioned role_oid.
+        direct: A list of database privileges for the aforementioned role_oid.
     """
     role_oid: int
     direct: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]

@@ -21,7 +21,7 @@
   For example:
 
   ```
-  The documenation can be found [anchorComponent](here).
+  The documentation can be found [anchorComponent](here).
   ```
 
   The argument 'here' would be translated, and passed to the 'anchorComponent' slot.

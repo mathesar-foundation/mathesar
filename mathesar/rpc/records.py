@@ -89,7 +89,7 @@ class Grouping(TypedDict):
 
     Attributes:
         columns: The columns to be grouped by.
-        preproc: The preprocessing funtions to apply (if any).
+        preproc: The preprocessing functions to apply (if any).
     """
     columns: list[int]
     preproc: list[str]
@@ -123,7 +123,7 @@ class GroupingResponse(TypedDict):
 
     Attributes:
         columns: The columns to be grouped by.
-        preproc: The preprocessing funtions to apply (if any).
+        preproc: The preprocessing functions to apply (if any).
         groups: The groups applicable to the records being returned.
     """
     columns: list[int]
