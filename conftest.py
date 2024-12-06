@@ -1,6 +1,5 @@
 import pytest
 import random
-import responses
 import string
 import os
 import psycopg

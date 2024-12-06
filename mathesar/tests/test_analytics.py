@@ -10,7 +10,6 @@ from unittest.mock import patch
 from django.core.cache import cache
 from django.db import IntegrityError
 import pytest
-import requests
 from mathesar import analytics
 from mathesar.models.analytics import AnalyticsReport, InstallationID
 from mathesar.models.base import Database, Server
