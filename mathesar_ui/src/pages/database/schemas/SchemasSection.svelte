@@ -13,7 +13,7 @@
   import {
     type SchemaStoreData,
     deleteSchema as deleteSchemaAPI,
-    schemas as schemasStore,
+    sortedSchemas as schemasStore,
   } from '@mathesar/stores/schemas';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import {

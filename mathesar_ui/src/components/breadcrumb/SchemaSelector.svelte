@@ -8,7 +8,7 @@
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import {
     currentSchemaId,
-    schemas as schemasStore,
+    sortedSchemas as schemasStore,
   } from '@mathesar/stores/schemas';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';

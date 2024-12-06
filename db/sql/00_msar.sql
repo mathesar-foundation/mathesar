@@ -1106,7 +1106,8 @@ LEFT JOIN pg_catalog.pg_class c ON c.relnamespace = s.oid AND c.relkind = 'r'
 GROUP BY
   s.oid,
   s.nspname,
-  s.nspowner;
+  s.nspowner
+ORDER BY s.nspname;
 -- Filter on relkind so that we only count tables. This must be done in the ON clause so that
 -- we still get a row for schemas with no tables.
 $$ LANGUAGE SQL STABLE;
