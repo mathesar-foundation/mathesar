@@ -58,8 +58,7 @@ def run_analytics():
 
 
 def initialize_analytics():
-    installation_id = InstallationID(value=uuid4())
-    installation_id.save()
+    InstallationID.objects.create(value=uuid4())
 
 
 def disable_analytics():
@@ -131,10 +130,10 @@ def delete_stale_reports():
         Q(
             # Delete uploaded analytics objects older than 2 days
             uploaded=True,
-            created_at__gte=timezone.now() - timezone.timedelta(days=2)
+            created_at__lte=timezone.now() - timezone.timedelta(days=2)
         ) | Q(
             # Delete analytics reports after a time regardless of upload status
-            updated_at__gte=timezone.now()
+            updated_at__lte=timezone.now()
             - timezone.timedelta(days=ANALYTICS_REPORT_MAX_AGE)
         )
     ).delete()

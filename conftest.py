@@ -1,5 +1,6 @@
 import pytest
 import random
+import responses
 import string
 import os
 import psycopg
@@ -37,6 +38,13 @@ def engine_cache(request):
         logger.debug(f'cleaning up engine for {db_name}')
         engine.dispose()
     logger.debug('exit')
+
+
+@pytest.fixture(autouse=True)
+def disable_http_requests(monkeypatch):
+    def mock_urlopen(self, method, url, *args, **kwargs):
+        raise Exception("Requests to 3rd party addresses make bad tests")
+    monkeypatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", mock_urlopen)
 
 
 @pytest.fixture(scope="session")
