@@ -4,7 +4,7 @@
 
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
   import { toast } from '@mathesar/stores/toast';
-  import { objectsAreDeeplyEqual } from '@mathesar/utils/objectUtils';
+  import { columnTypeOptionsAreEqual } from '@mathesar/utils/columnUtils';
   import {
     CancelOrProceedButtonPair,
     createValidationContext,
@@ -38,7 +38,7 @@
   $: actionButtonsVisible =
     selectedAbstractType !== column.abstractType ||
     selectedDbType !== column.type ||
-    !objectsAreDeeplyEqual(savedTypeOptions, typeOptions);
+    !columnTypeOptionsAreEqual(savedTypeOptions, typeOptions ?? {});
 
   let typeChangeState: RequestStatus;
 

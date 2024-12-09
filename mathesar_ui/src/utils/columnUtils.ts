@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/api/rpc/columns';
+import type { Column, ColumnTypeOptions } from '@mathesar/api/rpc/columns';
 import type { ConstraintType } from '@mathesar/api/rpc/constraints';
 import { type ValidationFn, uniqueWith } from '@mathesar/components/form';
 import { iconConstraint, iconTableLink } from '@mathesar/icons';
@@ -65,4 +65,33 @@ export function getColumnConstraintTypeByColumnId(
     ),
   );
   return constraintsType;
+}
+
+export function columnTypeOptionsAreEqual(
+  a: ColumnTypeOptions,
+  b: ColumnTypeOptions,
+): boolean {
+  type TypeOption = keyof ColumnTypeOptions;
+  // This weird object exists for type safety purposes. This way, if a new field
+  // is added to ColumnTypeOptions, we'll get a type error here if we don't
+  // update this object.
+  const fieldsObj: Record<TypeOption, unknown> = {
+    precision: null,
+    scale: null,
+    length: null,
+    fields: null,
+    item_type: null,
+  };
+  const fields = Object.keys(fieldsObj) as TypeOption[];
+
+  for (const field of fields) {
+    // The nullish coalescing here is important and kind of the main reason this
+    // function exists. We need to make sure that if a field is missing from one
+    // object while present but `null` in the other object, then the two objects
+    // are still considered equal as far as comparing column type options goes.
+    if ((a[field] ?? null) !== (b[field] ?? null)) {
+      return false;
+    }
+  }
+  return true;
 }
