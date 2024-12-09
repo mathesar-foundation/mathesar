@@ -5,7 +5,6 @@
     tableInspectorTableActionsVisible,
     tableInspectorTableAdvancedVisible,
     tableInspectorTableLinksVisible,
-    tableInspectorTablePermissionsVisible,
     tableInspectorTablePropertiesVisible,
     tableInspectorTableRecordSummaryVisible,
   } from '@mathesar/stores/localStorage';
@@ -34,21 +33,12 @@
   >
     <CollapsibleHeader
       slot="header"
-      title={$_('properties')}
+      title={$_('table_properties')}
       isDbLevelConfiguration
     />
     <div slot="content" class="content-container">
       <TableName disabled={!$currentRoleOwns} />
       <TableDescription disabled={!$currentRoleOwns} />
-    </div>
-  </Collapsible>
-
-  <Collapsible
-    bind:isOpen={$tableInspectorTablePermissionsVisible}
-    triggerAppearance="inspector"
-  >
-    <CollapsibleHeader slot="header" title={$_('table_permissions')} />
-    <div slot="content" class="content-container">
       <TablePermissions />
     </div>
   </Collapsible>

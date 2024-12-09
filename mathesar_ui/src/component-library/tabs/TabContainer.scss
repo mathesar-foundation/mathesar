@@ -23,10 +23,11 @@
       list-style: none;
       overflow: hidden;
       border-radius: 2px 2px 0px 0px;
-      border-bottom: 2px solid transparent;
+      border-bottom: 0.25em solid transparent;
       margin-bottom: -1px;
       margin-right: var(--Tab_margin-right, 2rem);
       font-size: var(--text-size-large);
+      opacity: 0.75;
 
       > div,
       a {
@@ -42,6 +43,7 @@
 
       &:hover {
         border-bottom-color: var(--slate-300);
+        opacity: 1;
       }
 
       & + li.tab {
@@ -50,6 +52,7 @@
 
       &.active {
         border-bottom-color: var(--brand-500);
+        opacity: 1;
       }
 
       &.focused {

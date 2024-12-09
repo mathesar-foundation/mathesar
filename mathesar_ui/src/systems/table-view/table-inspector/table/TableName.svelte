@@ -27,7 +27,7 @@
 </script>
 
 <div class="rename-table-property-container">
-  <span class="label">{$_('name')}</span>
+  <span class="label">{$_('table_name')}</span>
   <EditableTextWithActions
     initialValue={table.name}
     onSubmit={handleSubmit}
