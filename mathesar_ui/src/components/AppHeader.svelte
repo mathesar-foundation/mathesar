@@ -1,15 +1,11 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { router } from 'tinro';
 
   import {
-    iconAddNew,
     iconConnection,
     iconDatabase,
-    iconExploration,
     iconLogout,
     iconSettingsMajor,
-    iconShortcuts,
     iconUser,
   } from '@mathesar/icons';
   import {
@@ -17,25 +13,18 @@
     HOME_URL,
     LOGOUT_URL,
     USER_PROFILE_URL,
-    getDataExplorerPageUrl,
     getDatabasePageUrl,
-    getImportPageUrl,
-    getTablePageUrl,
   } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
-  import { currentSchema } from '@mathesar/stores/schemas';
-  import { createTable } from '@mathesar/stores/tables';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
-    ButtonMenuItem,
     DropdownMenu,
     Icon,
     LinkMenuItem,
     MenuDivider,
     MenuHeading,
-    iconLoading,
   } from '@mathesar-component-library';
 
   import Breadcrumb from './breadcrumb/Breadcrumb.svelte';
@@ -46,23 +35,8 @@
   const { currentDatabase } = databasesStore;
 
   $: database = $currentDatabase;
-  $: schema = $currentSchema;
   $: upgradable = $releaseDataStore?.value?.upgradeStatus === 'upgradable';
   $: isNormalRoutingContext = commonData.routing_context === 'normal';
-  $: currentRolePrivileges = schema?.currentAccess.currentRolePrivileges;
-  $: canCreateTable = $currentRolePrivileges?.has('CREATE');
-
-  let isCreatingNewEmptyTable = false;
-
-  async function handleCreateEmptyTable() {
-    if (!schema || !database) {
-      return;
-    }
-    isCreatingNewEmptyTable = true;
-    const table = await createTable({ schema });
-    isCreatingNewEmptyTable = false;
-    router.goto(getTablePageUrl(database.id, schema.oid, table.oid), false);
-  }
 </script>
 
 <header class="app-header">
@@ -72,39 +46,6 @@
 
   {#if isNormalRoutingContext}
     <div class="right">
-      {#if schema && database}
-        <DropdownMenu
-          triggerAppearance="ghost"
-          size="small"
-          closeOnInnerClick={true}
-          icon={isCreatingNewEmptyTable ? iconLoading : undefined}
-        >
-          <span slot="trigger" class="shortcuts">
-            <span class="icon"><Icon {...iconShortcuts} /></span>
-            <span class="text">{$_('shortcuts')}</span>
-          </span>
-          <ButtonMenuItem
-            icon={iconAddNew}
-            on:click={handleCreateEmptyTable}
-            disabled={!canCreateTable}
-          >
-            {$_('new_table_from_scratch')}
-          </ButtonMenuItem>
-          <LinkMenuItem
-            icon={iconAddNew}
-            href={getImportPageUrl(database.id, schema.oid)}
-            disabled={!canCreateTable}
-          >
-            {$_('new_table_from_data_import')}
-          </LinkMenuItem>
-          <LinkMenuItem
-            icon={iconExploration}
-            href={getDataExplorerPageUrl(database.id, schema.oid)}
-          >
-            {$_('open_data_explorer')}
-          </LinkMenuItem>
-        </DropdownMenu>
-      {/if}
       {#if $userProfile}
         <DropdownMenu
           triggerAppearance="ghost"
@@ -174,10 +115,6 @@
     font-size: var(--text-size-large);
   }
 
-  .shortcuts .text {
-    display: none;
-  }
-  .shortcuts .icon,
   .user-switcher {
     background-color: var(--slate-200);
     color: var(--slate-800);
@@ -185,14 +122,5 @@
     padding: 0.5rem;
     display: flex;
     align-items: center;
-  }
-
-  @media (min-width: 45rem) {
-    .shortcuts .text {
-      display: unset;
-    }
-    .shortcuts .icon {
-      display: none;
-    }
   }
 </style>
