@@ -1,4 +1,4 @@
-mathesar-foundation/mathesar-ansible:
+mathesar-foundation/mathesar-infrastructure:
   - .github/workflows/toc.yml
   - .github/workflows/stale.yml
 mathesar-foundation/mathesar-data-playground:

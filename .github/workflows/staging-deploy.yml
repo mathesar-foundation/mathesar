@@ -11,7 +11,7 @@ jobs:
     - name: Checkout ansible repo
       uses: actions/checkout@v2
       with:
-        repository: 'mathesar-foundation/mathesar-ansible'
+        repository: 'mathesar-foundation/mathesar-infrastructure'
         token: ${{ secrets.MATHESAR_ORG_GITHUB_TOKEN }} # Repo is private, so an access token is used
     # This checkout is used for getting the 'action' from the current repo
     - name: Checkout mathesar repo
