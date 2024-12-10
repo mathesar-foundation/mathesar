@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
 
   import {
-    iconConnection,
     iconDatabase,
     iconLogout,
     iconSettingsMajor,
@@ -10,7 +9,6 @@
   } from '@mathesar/icons';
   import {
     ADMIN_URL,
-    HOME_URL,
     LOGOUT_URL,
     USER_PROFILE_URL,
     getDatabasePageUrl,
@@ -71,9 +69,6 @@
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
           <MenuDivider />
-          <LinkMenuItem icon={iconConnection} href={HOME_URL}>
-            {$_('databases')}
-          </LinkMenuItem>
           {#if $userProfile.isMathesarAdmin}
             <LinkMenuItem
               icon={iconSettingsMajor}

@@ -14,7 +14,6 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
-    HOME_URL,
     getDatabasePageSchemasSectionUrl,
     getDatabasePageSettingsSectionUrl,
   } from '@mathesar/routes/urls';
@@ -96,7 +95,7 @@
       },
       onSuccess: () => {
         toast.success($_('database_disconnect_success'));
-        router.goto(HOME_URL);
+        router.goto('/');
       },
       onError: (e) =>
         toast.error({
