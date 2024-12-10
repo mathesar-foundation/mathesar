@@ -1105,15 +1105,15 @@ The objects counted are:
 - total rows of tables included
 */
 SELECT jsonb_build_object(
-  'schema_count', COUNT(DISTINCT s.oid),
-  'table_count', COUNT(c.oid),
-  'record_count', SUM(c.reltuples)
+  'schema_count', COUNT(DISTINCT pgn.oid),
+  'table_count', COUNT(pgc.oid),
+  'record_count', SUM(pgc.reltuples)
 )
-FROM pg_catalog.pg_namespace s
-LEFT JOIN pg_catalog.pg_class c ON c.relnamespace = s.oid AND c.relkind = 'r'
-WHERE s.nspname <> 'information_schema'
-AND NOT (s.nspname = ANY(msar.mathesar_system_schemas()))
-AND s.nspname NOT LIKE 'pg_%';
+FROM pg_catalog.pg_namespace pgn
+LEFT JOIN pg_catalog.pg_class pgc ON pgc.relnamespace = pgn.oid AND pgc.relkind = 'r'
+WHERE pgn.nspname <> 'information_schema'
+AND NOT (pgn.nspname = ANY(msar.mathesar_system_schemas()))
+AND pgn.nspname NOT LIKE 'pg_%';
 $$ LANGUAGE SQL STABLE;
 
 
