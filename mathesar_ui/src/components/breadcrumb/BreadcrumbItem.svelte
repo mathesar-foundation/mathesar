@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   import { StringOrComponent } from '@mathesar/component-library';
   import DatabaseName from '@mathesar/components/DatabaseName.svelte';
   import NameWithIcon from '@mathesar/components/NameWithIcon.svelte';
@@ -19,7 +17,6 @@
   import BreadcrumbPageSeparator from './BreadcrumbPageSeparator.svelte';
   import BreadcrumbRecordSelector from './BreadcrumbRecordSelector.svelte';
   import type { BreadcrumbItem } from './breadcrumbTypes';
-  import DatabaseSelector from './DatabaseSelector.svelte';
   import EntitySelector from './EntitySelector.svelte';
   import SchemaSelector from './SchemaSelector.svelte';
 
@@ -27,21 +24,20 @@
 </script>
 
 {#if item.type === 'database'}
-  <DatabaseSelector />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={getDatabasePageUrl(item.database.id)}>
       <DatabaseName database={item.database} />
     </BreadcrumbLink>
   </div>
-{:else if item.type === 'schema'}
   <SchemaSelector database={item.database} />
+{:else if item.type === 'schema'}
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={getSchemaPageUrl(item.database.id, item.schema.oid)}>
       <SchemaName schema={item.schema} />
     </BreadcrumbLink>
   </div>
-{:else if item.type === 'table'}
   <EntitySelector database={item.database} schema={item.schema} />
+{:else if item.type === 'table'}
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
       href={getLinkForTableItem(item.database.id, item.schema.oid, item.table)}
@@ -64,7 +60,6 @@
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'exploration'}
-  <EntitySelector database={item.database} schema={item.schema} />
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink
       href={getExplorationPageUrl(
@@ -77,7 +72,9 @@
     </BreadcrumbLink>
   </div>
 {:else if item.type === 'simple'}
-  <BreadcrumbPageSeparator />
+  {#if item.prependSeparator}
+    <BreadcrumbPageSeparator />
+  {/if}
   <div class="breadcrumb-item truncate">
     <BreadcrumbLink href={item.href}>
       {#if item.icon}

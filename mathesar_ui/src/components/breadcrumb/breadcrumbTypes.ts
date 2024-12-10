@@ -30,6 +30,7 @@ export interface BreadcrumbItemSimple {
   href: string;
   label: string | ComponentAndProps;
   icon?: IconProps;
+  prependSeparator?: boolean;
 }
 
 export interface BreadcrumbItemRecord {
