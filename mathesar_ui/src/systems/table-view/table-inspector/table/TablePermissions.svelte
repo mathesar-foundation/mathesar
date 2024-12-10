@@ -7,7 +7,9 @@
     RawTablePrivilegesForRole,
     TablePrivilege,
   } from '@mathesar/api/rpc/tables';
+  import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
+  import { iconPermissions } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
   import type { Table } from '@mathesar/models/Table';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
@@ -138,6 +140,7 @@
     on:click={() => controller.open()}
     size="small"
   >
+    <Icon {...iconPermissions} />
     <span>{$_('table_permissions')}</span>
   </Button>
 </div>

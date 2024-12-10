@@ -76,7 +76,7 @@
         >
           <CollapsibleHeader
             slot="header"
-            title={$_('properties')}
+            title={$_('column_properties')}
             isDbLevelConfiguration
           />
           <div slot="content" class="content-container column-properties">
