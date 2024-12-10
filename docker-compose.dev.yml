@@ -49,6 +49,7 @@ services:
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE-config.settings.development}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS-*}
       - SECRET_KEY=${SECRET_KEY}
+      - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com}
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
       - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
