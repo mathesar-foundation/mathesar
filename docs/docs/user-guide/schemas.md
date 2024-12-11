@@ -1,6 +1,6 @@
 # Schemas
 
-## What is a schema
+## What is a schema?
 
 "Schema" is one of those funny words that can mean different things in different contexts, even within the word of relational database systems.
 
