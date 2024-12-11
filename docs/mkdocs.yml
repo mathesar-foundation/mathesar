@@ -11,6 +11,7 @@ nav:
       - Install from scratch: administration/install-from-scratch.md
       - Configuration: administration/configuration.md
       - Backup & Restore: administration/backup-restore.md
+      - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
       - Debug Mathesar: administration/debug.md
   - User Guide:
