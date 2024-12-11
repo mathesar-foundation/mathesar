@@ -429,7 +429,6 @@
   "pick_table_record": "Pick a Record from [tableName]",
   "port": "Port",
   "port_invalid": "The port is invalid",
-  "postgresql_role_name": "PostgreSQL Role Name",
   "prepare_downtime": "Prepare your users for up to five minutes of downtime.",
   "preview": "Preview",
   "preview_truncated_at_limit": "Preview is truncated at {limit} rows",

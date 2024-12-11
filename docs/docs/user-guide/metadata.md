@@ -1,6 +1,6 @@
 # Mathesar Metadata
 
-Mathesar's philosophy is to keep as much of your data as possible inside your connected PostgreSQL database, structured consistently with the way it appears in the Mathesar interface. However, some of the customization that Mathesar offers doesn't fit neatly into the PostgreSQL model, so Mathesar stores a thin layer of metadata in its [internal database](./databases.md#internal) to support these features.
+Mathesar keeps as much of your data as possible inside your connected PostgreSQL database, structured consistently with the way it appears in the Mathesar interface. However, some of the customization that Mathesar offers doesn't fit neatly into the PostgreSQL model, so Mathesar stores a thin layer of metadata in its [internal database](./databases.md#internal) to support these features.
 
 ## Table metadata
 

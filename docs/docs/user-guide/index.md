@@ -18,5 +18,5 @@ While the choice to support PostgreSQL in a product like Mathesar would be obvio
 
 A short-term consequence of this development strategy is that, for the time being, Mathesar _only_ works with PostgreSQL databases. However we are hopeful that in the future we'll have the opportunity to leverage PostgreSQL's powerful [Foreign Data Wrapper](https://www.postgresql.org/docs/current/postgres-fdw.html) functionality to connect to other kinds of databases such as MySQL, SQLite, Oracle, MongoDB, and more.
 
-Mathesar's tight integration with PostgreSQL also means that, in order to function, Mathesar needs to install a few [Mathesar-specific schemas](./schemas.md#internal) upon connecting to your PostgreSQL database.
+In order to function, Mathesar needs to install some functions on your PostgreSQL database. We install these functions inside [Mathesar-specific schemas](./schemas.md#internal) to separate them from any user defined functions on the database.
 

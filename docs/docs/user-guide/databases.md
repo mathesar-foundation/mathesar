@@ -8,7 +8,7 @@ If you're using Mathesar as a spreadsheet alternative, you might be curious what
 
 Within a database, you can have multiple [tables](./tables.md) &mdash; much like you might have multiple _sheets_ within a spreadsheet. And within each table in your database, you'll have rows and columns, similar to a spreadsheet. But while a spreadsheet gives you a blank canvas to freely enter any data into any cell you choose, a database is more structured. Rows and columns must be explicitly added before you can enter data, and each column must have a name and a [data type](./data-types.md). In a database, rows are sometimes called "records".
 
-The biggest superpower of databases (specifically _relational_ databases like PostgreSQL) is the ability for cells to reference records from another table. In PostgreSQL, this concept is called foreign key constraints, and Mathesar leverages it so you can model your data with [relationships](./relationships.md). If you've ever used `VLOOKUP` in a spreadsheet, you'll love using relationships in Mathesar!
+One superpower of PostgreSQL is that cells from one table can reference records from another table. This concept is called foreign key constraints, and Mathesar leverages it so you can model your data with [relationships](./relationships.md). If you've ever used `VLOOKUP` in a spreadsheet, you'll love using relationships in Mathesar!
 
 ## Connecting a database {:#connection}
 
@@ -55,7 +55,7 @@ To manage the owner and granted privileges for a database, navigate to the datab
 1. From the Mathesar home page, click on your database to its database page.
 1. At the top right, click on the dropdown menu, and select "Disconnect Database".
 
-Disconnecting a database will _not_ delete the database. It will still be accessible outside Mathesar, and you reconnect it in the future.
+Disconnecting a database will _not_ delete the database. It will still be accessible outside Mathesar, and you can reconnect it in the future.
 
 However, disconnecting your database will delete the Mathesar-specific metadata associated with objects in the database. This includes saved explorations, customized column display options, and customized record summary templates.
 
@@ -67,7 +67,7 @@ We plan to add support for dropping databases in the future. If this is a featur
 
 ## Mathesar's internal database {:#internal}
 
-Mathesar's philosophy is to keep as much of your data as possible inside your connected PostgreSQL database, structured consistently with the way it appears in the Mathesar interface.
+Mathesar keeps as much of your data as possible inside your connected PostgreSQL database, structured consistently with the way it appears in the Mathesar interface.
 
 Separate from your connected PostgreSQL database, Mathesar also maintains an internal database to store configuration relevant to the Mathesar application itself. While Mathesar does not allow you to work directly with this internal database, you might be interested to understand the distinction between it and your connected database. Below is a comparison of the data stored in each:
 

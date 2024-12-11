@@ -77,7 +77,7 @@
     field={databaseName}
     help={$_('make_sure_database_exists')}
   />
-  <Field label={$_('postgresql_role_name')} layout="stacked" field={role}>
+  <Field label={$_('role_name')} layout="stacked" field={role}>
     <svelte:fragment slot="help">
       {$_('role_needs_create_connect_privileges')}
       <Help>

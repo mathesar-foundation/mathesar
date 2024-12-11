@@ -4,7 +4,7 @@ PostgreSQL uses roles to manage access to data, and each PostgreSQL server has m
 
 ## What is a role
 
-PostgreSQL role system is elegant and powerful, if albeit somewhat idiosyncratic.
+PostgreSQL role system is elegant and powerful, albeit somewhat idiosyncratic.
 
 Many permissioning systems utilize the concept of "users" to control access, and PostgreSQL roles work in much the same way. You connect to a PostgreSQL server by supplying your role's name and password. Then your role will dictate your access throughout the server.
 

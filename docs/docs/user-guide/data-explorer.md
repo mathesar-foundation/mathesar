@@ -1,6 +1,6 @@
 # Mathesar's Data Explorer
 
-The Data Explorer provides rudimentary support for some basic reporting and analytics tasks.
+The Data Explorer lets you create reports from your data.
 
 You can: 
 
@@ -13,9 +13,9 @@ After you've constructed an exploration, you can save it to easily run it later 
 
 ## Exploration and access controls
 
-- The Data Explorer will now allow you to modify any data. It is a read-only reporting tool.
+- The Data Explorer will not allow you to modify any data. It is a read-only reporting tool.
 
-- Your ability to view data in the Data Explorer is determined by the privileges of your PostgreSQL [role](./roles.md).
+- Your ability to view data in the Data Explorer is determined by the privileges of the PostgreSQL [role](./roles.md) you're using.
 
 - All [collaborators](./collaborators.md) can see (and modify) the same set of explorations. (This is the same way that access control works for [metadata](./metadata.md)).
 

@@ -1,6 +1,6 @@
 # Relationships
 
-Relationships allow a single cell in one table to reference a row in another table. When one table references another in this manner, the two tables are said to be "related". This is a core feature of relational databases, and it allows us to model complex data structures using multiple tables.
+Relationships allow a single cell in one table to reference a row in another table. When one table references another in this manner, the two tables are said to be "related". This is a core feature of PostgreSQL, and it allows us to model complex data structures using multiple tables.
 
 ## Example
 
@@ -100,7 +100,7 @@ Reference columns also provide a "record selector" tool which helps you search t
 
 ### Limitations of Mathesar's reference columns
 
-- Mathesar does not support supports "composite" foreign keys &mdash; foreign keys that reference _multiple_ columns in the referenced table at once.
+- Mathesar does not support "composite" foreign keys &mdash; foreign keys that reference _multiple_ columns in the referenced table at once.
 
 - Some PostgreSQL databases might contain normalized data which is implicitly structured to utilize the concept of references but which lacks the foreign key constraints necessary to ensure data integrity. Mathesar will not treat such columns as references. It only recognizes foreign key columns as references.
 

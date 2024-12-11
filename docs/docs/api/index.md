@@ -6,7 +6,7 @@ Mathesar has an API available at `/api/rpc/v0/` which follows the [JSON-RPC](htt
 
 - The Mathesar API is **not yet stable**. If you build logic that depends on it, be mindful that future Mathesar versions will likely bring breaking changes to the API without warning or notice.
 
-- This API _documentation_ is nascent and somewhat rough. We encourage you to report any docs inaccuracies via GitHub [issues](https://github.com/mathesar-foundation/mathesar/issues).
+- This API _documentation_ is somewhat rough. We encourage you to report any docs inaccuracies via GitHub [issues](https://github.com/mathesar-foundation/mathesar/issues).
 
 - A small subset of functionality in Mathesar still relies on a legacy REST API which is gradually being phased out. It is not documented here.
 
