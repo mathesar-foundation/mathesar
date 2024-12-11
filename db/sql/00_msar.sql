@@ -5195,6 +5195,32 @@ $$ LANGUAGE plpgsql STABLE;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_select_query_for_table_records(
+  tab_id oid,
+  limit_ integer,
+  offset_ integer,
+  order_ jsonb,
+  filter_ jsonb
+) RETURNS TEXT AS $$
+DECLARE
+  select_string TEXT;
+BEGIN
+  SELECT format(
+    'SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L',
+    COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    limit_,
+    offset_,
+    msar.build_order_by_expr(tab_id, order_),
+    msar.build_where_clause(tab_id, filter_)
+  ) INTO select_string;
+RETURN select_string;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION
 msar.get_score_expr(tab_id oid, parameters_ jsonb) RETURNS text AS $$
 SELECT string_agg(
   CASE WHEN pgt.typcategory = 'S' THEN

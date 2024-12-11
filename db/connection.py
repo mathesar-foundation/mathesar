@@ -35,3 +35,22 @@ def select_from_msar_func(conn, func_name, *args):
 def load_file_with_conn(conn, file_handle):
     """Run an SQL script from a file, using psycopg."""
     conn.execute(file_handle.read())
+
+
+def copy_results_of_msar_func_as_csv(conn, func_name, *args):
+    cursor = conn.cursor()
+    with cursor.copy(
+        f"COPY (SELECT msar.{func_name}({','.join(['%s'] * len(args))})) TO STDOUT with CSV HEADER",
+        args
+    ) as cp:
+        while data := cp.read():
+            yield data
+
+
+def copy_results_of_query_as_csv(conn, query):
+    cursor = conn.cursor()
+    with cursor.copy(
+        f"COPY ({query}) TO STDOUT with CSV HEADER",
+    ) as cp:
+        while data := cp.read():
+            yield data

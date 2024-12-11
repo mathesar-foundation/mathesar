@@ -2,6 +2,7 @@
 Classes and functions exposed to the RPC endpoint for managing table records.
 """
 from typing import Any, Literal, Optional, TypedDict, Union
+from django.http import StreamingHttpResponse
 
 from modernrpc.core import REQUEST_KEY
 
@@ -12,6 +13,7 @@ from db.records import (
     delete_records_from_table,
     add_record_to_table,
     patch_record_in_table,
+    export_records_from_table,
 )
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
@@ -240,6 +242,43 @@ def list_(
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)
+
+
+def stream_records(
+    user,
+    database_id: int,
+    table_oid: int,
+    **kwargs
+):
+    with connect(database_id, user) as conn:
+        yield from export_records_from_table(conn, table_oid, **kwargs)
+
+
+def export(
+    *,
+    database_id: int,
+    table_oid: int,
+    limit: int = None,
+    offset: int = None,
+    order: list[OrderBy] = None,
+    filter: Filter = None,
+    **kwargs
+) -> StreamingHttpResponse:
+    user = kwargs.get(REQUEST_KEY).user
+    response = StreamingHttpResponse(
+        stream_records(
+            user,
+            database_id,
+            table_oid,
+            limit=limit,
+            offset=offset,
+            order=order,
+            filter=filter,
+        ),
+        content_type="text/csv"
+    )
+    response['Content-Disposition'] = f'attachment; filename="export.csv"'
+    return response
 
 
 @mathesar_rpc_method(name="records.get", auth="login")

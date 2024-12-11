@@ -173,3 +173,29 @@ def patch_record_in_table(
         _json_or_none(table_record_summary_templates),
     ).fetchone()[0]
     return result
+
+
+def export_records_from_table(
+    conn,
+    table_oid,
+    limit=None,
+    offset=None,
+    order=None,
+    filter=None,
+):
+    query = db_conn.exec_msar_func(
+        conn,
+        'build_select_query_for_table_records',
+        table_oid,
+        limit,
+        offset,
+        _json_or_none(order),
+        _json_or_none(filter),
+    ).fetchone()[0]
+
+    # Throw error if query is None
+
+    yield from db_conn.copy_results_of_query_as_csv(
+        conn,
+        query
+    )
