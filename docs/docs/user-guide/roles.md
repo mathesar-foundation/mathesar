@@ -8,7 +8,7 @@ PostgreSQL role system is elegant and powerful, albeit somewhat idiosyncratic.
 
 Many permissioning systems utilize the concept of "users" to control access, and PostgreSQL roles work in much the same way. You connect to a PostgreSQL server by supplying your role's name and password. Then your role will dictate your access throughout the server.
 
-Other permissioning systems also commonly have a _separate_ concept of "groups", wherein multiple users can be members of a single group, and permissions can be granted to the group as a whole. Interestingly, PostgreSQL roles can _also_ function as groups! Through [role inheritance](#inheritance), any role can be granted to any other role.
+Other permission systems commonly have a _separate_ concept of "groups", wherein multiple users can be members of a single group. Permissions can be granted to the group as a whole. Interestingly, PostgreSQL roles can _also_ function as groups! Through [role inheritance](#inheritance), the permissions of any role can be granted to any other role.
 
 !!! warning "Users vs Roles"
     Outside of Mathesar, it’s not uncommon for people to say _user_ when referring to a PostgreSQL _role_. However, within the context of Mathesar, users and roles are different things! Our documentation maintains this distinction pedantically. When we say "user", we mean a _Mathesar_ user, and when we say "role", we mean a _PostgreSQL_ role.
