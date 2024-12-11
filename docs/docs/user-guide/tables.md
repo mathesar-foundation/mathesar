@@ -1,6 +1,6 @@
 # Tables
 
-## What is a table
+## What is a table?
 
 All relational databases, including PostgreSQL, organize data into tables (also known as "relations") containing rows, columns, and cells. Much like a single spreadsheet might have multiple _sheets_ within it, a single database will typically have several &mdash; or sometimes several _dozen_ &mdash; tables within it. Unlike most spreadsheets though, database tables are usually highly interconnected. In a database, [relationships](./relationships.md) offer a robust mechanism for one cell to reference one record in another table. By leveraging relationships, we can unlock the ability to model complex data structures via multiple linked tables.
 
