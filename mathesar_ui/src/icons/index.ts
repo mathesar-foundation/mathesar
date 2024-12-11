@@ -82,6 +82,7 @@ import {
   createDatabaseIcon,
   explorationIcon,
   outcomeIcon,
+  permissionsIcon,
   tableIcon,
   treeChildNodeArrowIcon,
 } from './customIcons';
@@ -193,6 +194,7 @@ export const iconUrl: IconProps = { data: faLink };
 export const iconText: IconProps = { data: faT };
 export const iconField: IconProps = { data: faDatabase };
 export const iconFieldDelimiter: IconProps = { data: faCaretRight };
+export const iconPermissions: IconProps = { data: permissionsIcon };
 
 // STATUSES
 

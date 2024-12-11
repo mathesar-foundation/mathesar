@@ -9,6 +9,7 @@
     iconDatabase,
     iconDeleteMajor,
     iconMoreActions,
+    iconPermissions,
   } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
@@ -27,6 +28,7 @@
     Button,
     ButtonMenuItem,
     DropdownMenu,
+    Icon,
     TabContainer,
   } from '@mathesar-component-library';
 
@@ -127,6 +129,7 @@
   >
     <div slot="action">
       <Button appearance="secondary" on:click={() => permissionsModal.open()}>
+        <Icon {...iconPermissions} />
         <span>{$_('database_permissions')}</span>
       </Button>
 

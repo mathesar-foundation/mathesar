@@ -13,7 +13,11 @@ import type { Database } from '@mathesar/models/Database';
 import { Schema } from '@mathesar/models/Schema';
 import { getErrorMessage } from '@mathesar/utils/errors';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { type CancellablePromise, collapse } from '@mathesar-component-library';
+import {
+  type CancellablePromise,
+  collapse,
+  unite,
+} from '@mathesar-component-library';
 
 import { databasesStore } from './databases';
 
@@ -174,6 +178,26 @@ export const schemas = collapse(
     return schemasStore;
   }),
 );
+
+function sortSchemas(_schemas: Iterable<Schema>): Schema[] {
+  return [..._schemas].sort((a, b) => get(a.name).localeCompare(get(b.name)));
+}
+
+export const schemaNames = collapse(
+  derived(schemas, ($schemas) =>
+    unite([...$schemas.data.values()].map((s) => s.name)),
+  ),
+);
+
+export const sortedSchemas = derived([schemas, schemaNames], ([$schemas]) => {
+  const schemasMap = new Map(
+    sortSchemas($schemas.data.values()).map((s) => [s.oid, s]),
+  );
+  return {
+    ...$schemas,
+    data: schemasMap,
+  };
+});
 
 export const currentSchema: Readable<Schema | undefined> = derived(
   [currentSchemaId, schemas],
