@@ -8,7 +8,7 @@ jobs:
   staging-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout ansible repo
+    - name: Checkout infrastructure repo
       uses: actions/checkout@v2
       with:
         repository: 'mathesar-foundation/mathesar-infrastructure'
