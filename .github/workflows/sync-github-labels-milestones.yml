@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: composer global require 'vanilla/github-sync'
-    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-ansible -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-infrastructure -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-data-playground -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-design -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-internal-crm -d
@@ -21,7 +21,7 @@ jobs:
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-scripts -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-website -d
     - run: /home/runner/.composer/vendor/bin/github-sync labels -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-wiki -d
-    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-ansible -s open
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-infrastructure -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-data-playground -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-design -s open
     - run: /home/runner/.composer/vendor/bin/github-sync milestones -f mathesar-foundation/mathesar -t mathesar-foundation/mathesar-internal-crm -s open
