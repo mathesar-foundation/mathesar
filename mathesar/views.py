@@ -16,7 +16,7 @@ from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.rpc.users import get as get_user_info
-from mathesar.rpc.records import export as export_table_records
+from mathesar.rpc.records import export_via_batching
 from mathesar import __version__
 
 
@@ -180,11 +180,11 @@ class ExportTableQueryForm(forms.Form):
 
 
 @login_required
-def export_table(request):
+def export_table_via_batching(request):
     form = ExportTableQueryForm(request.GET)
     if form.is_valid():
         data = form.cleaned_data
-        return export_table_records(
+        return export_via_batching(
             request=request,
             database_id=data['database_id'],
             table_oid=data['table_oid'],

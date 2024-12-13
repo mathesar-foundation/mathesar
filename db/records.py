@@ -175,7 +175,7 @@ def patch_record_in_table(
     return result
 
 
-def export_records_from_table(
+def query_records_in_batch(
     conn,
     table_oid,
     limit=None,
@@ -183,19 +183,12 @@ def export_records_from_table(
     order=None,
     filter=None,
 ):
-    query = db_conn.exec_msar_func(
+    yield from db_conn.select_from_msar_func_in_batch(
         conn,
-        'build_select_query_for_table_records',
+        'query_table_records',
         table_oid,
         limit,
         offset,
         _json_or_none(order),
         _json_or_none(filter),
-    ).fetchone()[0]
-
-    # Throw error if query is None
-
-    yield from db_conn.copy_results_of_query_as_csv(
-        conn,
-        query
     )
