@@ -144,7 +144,10 @@
           <ButtonMenuItem icon={iconDeleteMajor} on:click={disconnectDatabase}>
             {$_('disconnect_database')}
           </ButtonMenuItem>
-          <!-- TODO_BETA: Allow dropping databases -->
+          <!--
+            TODO: Allow dropping databases
+            https://github.com/mathesar-foundation/mathesar/issues/3862
+          -->
           <!-- {#if isDatabaseInInternalServer}
             <ButtonMenuItem
               icon={iconDeleteMajor}

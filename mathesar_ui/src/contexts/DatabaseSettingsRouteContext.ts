@@ -120,7 +120,7 @@ export class DatabaseSettingsRouteContext {
      * When a configured role is removed from the Role Configuration page,
      * Collaborators list needs to be reset, since the drop statement cascades.
      *
-     * TODO_BETA: Discuss on whether we should cascade or throw error?
+     * TODO: Discuss on whether we should cascade or throw error?
      */
     this.collaborators.reset();
   }
