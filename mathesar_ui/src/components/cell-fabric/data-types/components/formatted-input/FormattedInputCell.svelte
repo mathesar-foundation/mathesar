@@ -13,11 +13,6 @@
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
   export let formatter: $$Props['formatter'];
   export let formatForDisplay: $$Props['formatForDisplay'];
-
-  $: cssVariables = {
-    '--input-element-text-align': 'right',
-    ...($$restProps.cssVariables || {}),
-  };
 </script>
 
 <SteppedInputCell
@@ -39,7 +34,6 @@
     {...$$restProps}
     bind:value
     {formatter}
-    {cssVariables}
     on:blur={handleInputBlur}
     on:keydown={handleInputKeydown}
   />
