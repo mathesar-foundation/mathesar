@@ -2662,7 +2662,7 @@ BEGIN
         "name": "txt",
         "type": "text",
         "default": {
-          "value": "'abc'::text",
+          "value": "abc",
           "is_dynamic": false
         },
         "nullable": true,
