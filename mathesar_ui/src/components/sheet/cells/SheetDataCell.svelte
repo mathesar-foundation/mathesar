@@ -59,7 +59,7 @@
 
   [data-cell-active] {
     z-index: var(--z-index__sheet__active-cell);
-    border-color: transparent;
+    /* border-color: transparent; */
     min-height: 100%;
     height: auto;
   }
