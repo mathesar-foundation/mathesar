@@ -29,6 +29,7 @@
     Icon,
     Truncate,
   } from '@mathesar-component-library';
+    import TablePermissions from '@mathesar/systems/table-view/table-inspector/table/TablePermissions.svelte';
 
   const recordSelector = getRecordSelectorFromContext();
 
@@ -127,7 +128,7 @@
       showArrow={false}
       triggerAppearance="ghost"
       triggerClass="dropdown-menu-button"
-      closeOnInnerClick={true}
+      closeOnInnerClick={false}
       placements={['bottom-end', 'right-start', 'left-start']}
       label=""
       icon={iconMoreActions}
@@ -148,6 +149,8 @@
         >
           {$_('edit_table')}
         </ButtonMenuItem>
+        <TablePermissions {table} fromTableCard={true}/>
+          
       {/if}
       <ButtonMenuItem
         on:click={handleDeleteTable}

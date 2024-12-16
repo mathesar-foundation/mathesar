@@ -15,7 +15,6 @@
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
   import { modal } from '@mathesar/stores/modal';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import {
     type AccessControlConfig,
@@ -23,12 +22,12 @@
     PermissionsOverview,
     TransferOwnership,
   } from '@mathesar/systems/permissions';
-  import { Button, ImmutableMap } from '@mathesar-component-library';
+  import { Button, ButtonMenuItem, ImmutableMap } from '@mathesar-component-library';
 
   const controller = modal.spawnModalController();
-  const tabularData = getTabularDataStoreFromContext();
-
-  $: table = $tabularData.table;
+  
+  export let table: Table;
+  export let fromTableCard = false;
   $: tablePrivileges = table.constructTablePrivilegesStore();
 
   const databaseContext = DatabaseRouteContext.get();
@@ -135,14 +134,23 @@
 </script>
 
 <div>
-  <Button
-    appearance="secondary"
-    on:click={() => controller.open()}
-    size="small"
-  >
-    <Icon {...iconPermissions} />
-    <span>{$_('table_permissions')}</span>
-  </Button>
+  {#if fromTableCard}
+    <ButtonMenuItem
+      on:click={() => controller.open()}
+      icon={iconPermissions}
+    >
+      {$_('table_permissions')}
+    </ButtonMenuItem>
+  {:else}
+    <Button
+      appearance="secondary"
+      on:click={() => controller.open()}
+      size="small"
+    >
+      <Icon {...iconPermissions} />
+      <span>{$_('table_permissions')}</span>
+    </Button>
+  {/if}
 </div>
 
 <PermissionsModal

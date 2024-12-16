@@ -39,7 +39,7 @@
     <div slot="content" class="content-container">
       <TableName disabled={!$currentRoleOwns} />
       <TableDescription disabled={!$currentRoleOwns} />
-      <TablePermissions />
+      <TablePermissions {table}/>
     </div>
   </Collapsible>
 
