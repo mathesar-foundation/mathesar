@@ -131,7 +131,6 @@
 
       &:focus {
         outline: 2px solid var(--sky-700);
-
       }
     }
 
