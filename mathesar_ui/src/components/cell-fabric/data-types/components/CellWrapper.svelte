@@ -127,11 +127,9 @@
 
     &[data-active-cell] {
       outline: 2px solid var(--slate-300);
-      // box-shadow: 0 0 0 2px var(--slate-300);
       border-radius: 2px;
 
       &:focus {
-        // box-shadow: 0 0 0 2px var(--sky-700);
         outline: 2px solid var(--sky-700);
 
       }
@@ -144,9 +142,6 @@
 
     &.is-edit-mode {
       padding: 0px;
-      // box-shadow:
-      //   0 0 0 3px var(--sky-700),
-      //   0 0 8px #000000 !important;
       outline: 3px solid var(--sky-700);
       outline-offset: -3px;
     }
