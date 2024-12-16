@@ -16,9 +16,8 @@ from db.sql import install as sql_install
 from db.deprecated.utils import get_pg_catalog_table
 from db.deprecated.metadata import get_empty_metadata
 
-from fixtures.utils import create_scoped_fixtures
 
-
+@pytest.fixture(scope="session")
 def engine_cache(request):
     import logging
     logger = logging.getLogger(f'engine_cache-{request.scope}')
@@ -40,15 +39,15 @@ def engine_cache(request):
     logger.debug('exit')
 
 
-# defines:
-# FUN_engine_cache
-# CLA_engine_cache
-# MOD_engine_cache
-# SES_engine_cache
-create_scoped_fixtures(globals(), engine_cache)
+@pytest.fixture(autouse=True)
+def disable_http_requests(monkeypatch):
+    def mock_urlopen(self, *args, **kwargs):
+        raise Exception("Requests to 3rd party addresses make bad tests")
+    monkeypatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", mock_urlopen)
 
 
-def create_db(request, SES_engine_cache):
+@pytest.fixture(scope="session")
+def create_db(request, engine_cache):
     """
     A factory for Postgres mathesar-installed databases. A fixture made of this method tears down
     created dbs when leaving scope.
@@ -56,8 +55,6 @@ def create_db(request, SES_engine_cache):
     This method is used to create fixtures with different scopes, that's why it's not a fixture
     itself.
     """
-    engine_cache = SES_engine_cache
-
     import logging
     logger = logging.getLogger(f'create_db-{request.scope}')
     logger.debug('enter')
@@ -87,14 +84,6 @@ def create_db(request, SES_engine_cache):
         else:
             logger.debug(f'{db_name} already gone')
     logger.debug('exit')
-
-
-# defines:
-# FUN_create_db
-# CLA_create_db
-# MOD_create_db
-# SES_create_db
-create_scoped_fixtures(globals(), create_db)
 
 
 @pytest.fixture(scope="session")
@@ -136,12 +125,11 @@ def uid(get_uid):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def test_db_name(worker_id, SES_create_db):
+def test_db_name(worker_id, create_db):
     """
     A dynamic, yet non-random, db_name is used so that subsequent runs would automatically clean up
     test databases that we failed to tear down.
     """
-    create_db = SES_create_db
     default_test_db_name = "mathesar_db_test"
     db_name = f"{default_test_db_name}_{worker_id}"
     create_db(db_name)
@@ -149,8 +137,7 @@ def test_db_name(worker_id, SES_create_db):
 
 
 @pytest.fixture(scope="session")
-def engine(test_db_name, SES_engine_cache):
-    engine_cache = SES_engine_cache
+def engine(test_db_name, engine_cache):
     engine = engine_cache(test_db_name)
     add_custom_types_to_ischema_names(engine)
     return engine
@@ -169,15 +156,13 @@ def engine_with_schema(engine, _test_schema_name, create_db_schema):
 
 
 @pytest.fixture
-def create_db_schema(SES_engine_cache):
+def create_db_schema(engine_cache):
     """
     Creates a DB schema factory, making sure to track and clean up new instances.
 
     Schema setup and teardown is very fast, so we'll only use this fixture with the default
     "function" scope.
     """
-    engine_cache = SES_engine_cache
-
     import logging
     logger = logging.getLogger('create_db_schema')
     logger.debug('enter')

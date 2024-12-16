@@ -8,7 +8,6 @@ export const LOCAL_STORAGE_KEYS = {
   tableInspectorVisible: 'table-inspector-visible',
   tableInspectorWidth: 'table-inspector-width',
   tableInspectorTablePropertiesVisible: 'table-inspector-table-properties-visible',
-  tableInspectorTablePermissionsVisible: 'table-inspector-table-permissions-visible',
   tableInspectorTableLinksVisible: 'table-inspector-table-links-visible',
   tableInspectorTableRecordSummaryVisible: 'table-inspector-table-record-summary-visible',
   tableInspectorTableActionsVisible: 'table-inspector-table-actions-visible',
@@ -37,11 +36,6 @@ export const tableInspectorVisible = new LocalStorageStore({
 
 export const tableInspectorTablePropertiesVisible = new LocalStorageStore({
   key: LOCAL_STORAGE_KEYS.tableInspectorTablePropertiesVisible,
-  defaultValue: true,
-});
-
-export const tableInspectorTablePermissionsVisible = new LocalStorageStore({
-  key: LOCAL_STORAGE_KEYS.tableInspectorTablePermissionsVisible,
   defaultValue: true,
 });
 

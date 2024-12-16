@@ -3,15 +3,14 @@ Classes and functions exposed to the RPC endpoint for managing table constraints
 """
 from typing import Optional, TypedDict, Union
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
 from db.constraints import (
     get_constraints_for_table,
     create_constraint,
     drop_constraint_via_oid,
 )
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
 
 
@@ -78,7 +77,7 @@ class UniqueConstraint(TypedDict):
 
 CreatableConstraintInfo = list[Union[ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint]]
 """
-Type alias for a list of createable constraints which can be unique, primary key, or foreign key constraints.
+Type alias for a list of creatable constraints which can be unique, primary key, or foreign key constraints.
 """
 
 
@@ -113,9 +112,7 @@ class ConstraintInfo(TypedDict):
         )
 
 
-@rpc_method(name="constraints.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="constraints.list", auth="login")
 def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]:
     """
     List information about constraints in a table. Exposed as `list`.
@@ -133,9 +130,7 @@ def list_(*, table_oid: int, database_id: int, **kwargs) -> list[ConstraintInfo]
         return [ConstraintInfo.from_dict(con) for con in con_info]
 
 
-@rpc_method(name="constraints.add")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="constraints.add", auth="login")
 def add(
     *,
     table_oid: int,
@@ -158,9 +153,7 @@ def add(
         return create_constraint(table_oid, constraint_def_list, conn)
 
 
-@rpc_method(name="constraints.delete")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="constraints.delete", auth="login")
 def delete(*, table_oid: int, constraint_oid: int, database_id: int, **kwargs) -> str:
     """
     Delete a constraint from a table.

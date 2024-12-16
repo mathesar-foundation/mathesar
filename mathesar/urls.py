@@ -4,7 +4,6 @@ from rest_framework import routers
 
 from mathesar import views
 from mathesar.api.viewsets.data_files import DataFileViewSet
-from mathesar.api.viewsets.users import UserViewSet
 from mathesar.users.decorators import superuser_exist, superuser_must_not_exist
 from mathesar.users.password_reset import MathesarPasswordResetConfirmView
 from mathesar.users.superuser_create import SuperuserFormView
@@ -12,13 +11,9 @@ from mathesar.users.superuser_create import SuperuserFormView
 db_router = routers.DefaultRouter()
 db_router.register(r'data_files', DataFileViewSet, basename='data-file')
 
-ui_router = routers.DefaultRouter()
-ui_router.register(r'users', UserViewSet, basename='user')
-
 urlpatterns = [
     path('api/rpc/v0/', views.MathesarRPCEntryPoint.as_view()),
     path('api/db/v0/', include(db_router.urls)),
-    path('api/ui/v0/', include(ui_router.urls)),
     path('auth/password_reset_confirm', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('auth/login/', superuser_exist(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
     path('auth/create_superuser/', superuser_must_not_exist(SuperuserFormView.as_view()), name='superuser_create'),

@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import { iconEdit, iconSchema } from '@mathesar/icons';
+  import { iconEdit, iconPermissions, iconSchema } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
@@ -111,6 +111,7 @@
         <span>{$_('edit_schema')}</span>
       </Button>
       <Button appearance="secondary" on:click={() => permissionsModal.open()}>
+        <Icon {...iconPermissions} />
         <span>{$_('schema_permissions')}</span>
       </Button>
     </div>

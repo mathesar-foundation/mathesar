@@ -20,7 +20,7 @@
 </script>
 
 <div class="update-table-description-property-container">
-  <span class="label">{$_('description')}</span>
+  <span class="label">{$_('table_description')}</span>
   <EditableTextWithActions
     initialValue={table.description ?? ''}
     onSubmit={handleSave}

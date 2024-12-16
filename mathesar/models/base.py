@@ -6,6 +6,7 @@ from encrypted_fields.fields import EncryptedCharField
 import psycopg
 
 from db.sql.install import install as install_sql
+from db.analytics import get_object_counts
 from mathesar import __version__
 from mathesar.models import exceptions
 
@@ -46,6 +47,17 @@ class Database(BaseModel):
                 fields=["id", "server"], name="database_id_server_index"
             )
         ]
+
+    @property
+    def object_counts(self):
+        for role_map in UserDatabaseRoleMap.objects.filter(database=self):
+            try:
+                with role_map.connection as conn:
+                    return get_object_counts(conn)
+            except Exception:
+                pass
+        else:
+            raise exceptions.NoConnectionAvailable
 
     @property
     def needs_upgrade_attention(self):

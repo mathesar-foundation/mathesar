@@ -1,15 +1,11 @@
 from typing import Literal, TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import (
-    http_basic_auth_login_required,
-    http_basic_auth_superuser_required,
-)
+from modernrpc.core import REQUEST_KEY
 
 from db.databases import get_database, drop_database
 from mathesar.models.base import Database
 from mathesar.rpc.utils import connect
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 
 
 class DatabaseInfo(TypedDict):
@@ -26,7 +22,7 @@ class DatabaseInfo(TypedDict):
     oid: int
     name: str
     owner_oid: int
-    current_role_priv: list[Literal['CONNECT', 'CREATE', 'TEMPORARY']]
+    current_role_priv: list[Literal["CONNECT", "CREATE", "TEMPORARY"]]
     current_role_owns: bool
 
     @classmethod
@@ -40,9 +36,7 @@ class DatabaseInfo(TypedDict):
         )
 
 
-@rpc_method(name="databases.get")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="databases.get", auth="login")
 def get(*, database_id: int, **kwargs) -> DatabaseInfo:
     """
     Get information about a database.
@@ -59,9 +53,7 @@ def get(*, database_id: int, **kwargs) -> DatabaseInfo:
     return DatabaseInfo.from_dict(db_info)
 
 
-@rpc_method(name="databases.delete")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="databases.delete", auth="login")
 def delete(*, database_oid: int, database_id: int, **kwargs) -> None:
     """
     Drop a database from the server.
@@ -75,9 +67,7 @@ def delete(*, database_oid: int, database_id: int, **kwargs) -> None:
         drop_database(database_oid, conn)
 
 
-@rpc_method(name="databases.upgrade_sql")
-@http_basic_auth_superuser_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="databases.upgrade_sql")
 def upgrade_sql(
         *, database_id: int, username: str = None, password: str = None
 ) -> None:

@@ -1,15 +1,14 @@
 from typing import Literal, TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
 from db.roles import (
     list_schema_privileges,
     replace_schema_privileges_for_roles,
     transfer_schema_ownership,
 )
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
 from mathesar.rpc.schemas.base import SchemaInfo
 
 
@@ -19,7 +18,7 @@ class SchemaPrivileges(TypedDict):
 
     Attributes:
         role_oid: The `oid` of the role.
-        direct: A list of schema privileges for the afforementioned role_oid.
+        direct: A list of schema privileges for the aforementioned role_oid.
     """
     role_oid: int
     direct: list[Literal['USAGE', 'CREATE']]
@@ -32,9 +31,7 @@ class SchemaPrivileges(TypedDict):
         )
 
 
-@rpc_method(name="schemas.privileges.list_direct")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="schemas.privileges.list_direct", auth="login")
 def list_direct(
         *, schema_oid: int, database_id: int, **kwargs
 ) -> list[SchemaPrivileges]:
@@ -54,9 +51,7 @@ def list_direct(
     return [SchemaPrivileges.from_dict(i) for i in raw_priv]
 
 
-@rpc_method(name="schemas.privileges.replace_for_roles")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="schemas.privileges.replace_for_roles", auth="login")
 def replace_for_roles(
         *,
         privileges: list[SchemaPrivileges], schema_oid: int, database_id: int,
@@ -90,9 +85,7 @@ def replace_for_roles(
     return [SchemaPrivileges.from_dict(i) for i in raw_priv]
 
 
-@rpc_method(name="schemas.privileges.transfer_ownership")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="schemas.privileges.transfer_ownership", auth="login")
 def transfer_ownership(*, schema_oid: int, new_owner_oid: int, database_id: int, **kwargs) -> SchemaInfo:
     """
     Transfers ownership of a given schema to a new owner.

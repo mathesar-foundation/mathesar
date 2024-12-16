@@ -51,7 +51,7 @@
 </script>
 
 <div class="column-property column-name">
-  <span class="label">{$_('name')}</span>
+  <span class="label">{$_('column_name')}</span>
   <EditableTextWithActions
     initialValue={column.column.name}
     onSubmit={handleColumnNameChange}
@@ -61,7 +61,7 @@
 </div>
 
 <div class="column-property column-description">
-  <span class="label">{$_('description')}</span>
+  <span class="label">{$_('column_description')}</span>
   <EditableTextWithActions
     initialValue={column.column.description ?? ''}
     onSubmit={handleColumnDescriptionChange}

@@ -152,6 +152,23 @@ We have some custom code in `overrides/404.html` which is pretty weird!
 - We have some customizations to the version switcher which are applied within the `extra.css` file.
 - If you modify this, you'll need to port those modifications to all published versions so that the user experience is consistent when switching between versions.
 
+## Spell-checking
+
+We use the [`mkdocs-spellcheck`](https://github.com/pawamoy/mkdocs-spellcheck) plugin to spell-check our documentation.
+
+- CI will fail if there are any spelling errors.
+
+- To check for spelling errors locally, run:
+
+    ```
+    mkdocs build --strict
+    ```
+
+    Spelling errors will be reported as warnings when building in strict mode.
+
+- To configure ignored words, see the `spellcheck` section in `mkdocs.yml` and refer to the [plugin docs](https://github.com/pawamoy/mkdocs-spellcheck) as needed.
+
+- If you happen to be writing documentation content using VS Code, we recommend the Code Spell Checker extension (id: `streetsidesoftware.code-spell-checker`). It will highlight spelling errors in real-time as you type.
 
 ## Page redirects
 

@@ -1,9 +1,9 @@
-import type { User } from '@mathesar/api/rest/users';
 import type { RawDatabase } from '@mathesar/api/rpc/databases';
 import type { SavedExploration } from '@mathesar/api/rpc/explorations';
 import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { RawServer } from '@mathesar/api/rpc/servers';
 import type { RawTableWithMetadata } from '@mathesar/api/rpc/tables';
+import type { User } from '@mathesar/api/rpc/users';
 
 type WithStatus<D> =
   | {

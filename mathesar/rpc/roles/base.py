@@ -3,11 +3,8 @@ Classes and functions exposed to the RPC endpoint for managing table columns.
 """
 from typing import Optional, TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
-from mathesar.rpc.utils import connect
 from db.roles import (
     create_role,
     drop_role,
@@ -15,6 +12,8 @@ from db.roles import (
     list_roles,
     set_members_to_role,
 )
+from mathesar.rpc.decorators import mathesar_rpc_method
+from mathesar.rpc.utils import connect
 
 
 class RoleMember(TypedDict):
@@ -44,7 +43,7 @@ class RoleInfo(TypedDict):
         description: A description of the role
         members: The member roles that directly inherit the role.
 
-    Refer PostgreSQL documenation on:
+    Refer PostgreSQL documentation on:
         - [pg_roles table](https://www.postgresql.org/docs/current/view-pg-roles.html).
         - [Role attributes](https://www.postgresql.org/docs/current/role-attributes.html)
         - [Role membership](https://www.postgresql.org/docs/current/role-membership.html)
@@ -74,9 +73,7 @@ class RoleInfo(TypedDict):
         )
 
 
-@rpc_method(name="roles.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="roles.list", auth="login")
 def list_(*, database_id: int, **kwargs) -> list[RoleInfo]:
     """
     List information about roles for a database server. Exposed as `list`.
@@ -94,9 +91,7 @@ def list_(*, database_id: int, **kwargs) -> list[RoleInfo]:
     return [RoleInfo.from_dict(role) for role in roles]
 
 
-@rpc_method(name="roles.add")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="roles.add", auth="login")
 def add(
     *,
     rolename: str,
@@ -123,9 +118,7 @@ def add(
     return RoleInfo.from_dict(role)
 
 
-@rpc_method(name="roles.delete")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="roles.delete", auth="login")
 def delete(
     *,
     role_oid: int,
@@ -144,9 +137,7 @@ def delete(
         drop_role(role_oid, conn)
 
 
-@rpc_method(name="roles.get_current_role")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="roles.get_current_role", auth="login")
 def get_current_role(*, database_id: int, **kwargs) -> dict:
     """
     Get information about the current role and all the parent role(s) whose
@@ -167,9 +158,7 @@ def get_current_role(*, database_id: int, **kwargs) -> dict:
     }
 
 
-@rpc_method(name="roles.set_members")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="roles.set_members", auth="login")
 def set_members(
     *,
     parent_role_oid: int,

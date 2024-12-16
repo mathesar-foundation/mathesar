@@ -3,8 +3,7 @@ Classes and functions exposed to the RPC endpoint for managing tables in a datab
 """
 from typing import Literal, Optional, TypedDict
 
-from modernrpc.core import rpc_method, REQUEST_KEY
-from modernrpc.auth.basic import http_basic_auth_login_required
+from modernrpc.core import REQUEST_KEY
 
 from db.tables import (
     alter_table_on_database,
@@ -18,7 +17,7 @@ from db.tables import (
 from mathesar.imports.csv import import_csv
 from mathesar.rpc.columns import CreatableColumnInfo, SettableColumnInfo, PreviewableColumnInfo
 from mathesar.rpc.constraints import CreatableConstraintInfo
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.tables.metadata import TableMetaDataBlob
 from mathesar.rpc.utils import connect
 from mathesar.utils.tables import list_tables_meta_data, get_table_meta_data
@@ -112,7 +111,7 @@ class JoinableTableRecord(TypedDict):
             ]
 
             In this form, `constraint_idN` is a foreign key constraint, and `reversed` is a boolean giving
-            whether to travel from referrer to referant (when False) or from referant to referrer (when True).
+            whether to travel from referrer to referent (when False) or from referent to referrer (when True).
         depth: Specifies how far to search for joinable tables.
         multiple_results: Specifies whether the path included is reversed.
     """
@@ -154,9 +153,7 @@ class JoinableTableInfo(TypedDict):
         )
 
 
-@rpc_method(name="tables.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.list", auth="login")
 def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableInfo]:
     """
     List information about tables for a schema. Exposed as `list`.
@@ -176,9 +173,7 @@ def list_(*, schema_oid: int, database_id: int, **kwargs) -> list[TableInfo]:
     ]
 
 
-@rpc_method(name="tables.get")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.get", auth="login")
 def get(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
     """
     List information about a table for a schema.
@@ -196,9 +191,7 @@ def get(*, table_oid: int, database_id: int, **kwargs) -> TableInfo:
     return TableInfo(raw_table_info)
 
 
-@rpc_method(name="tables.add")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.add", auth="login")
 def add(
     *,
     schema_oid: int,
@@ -234,9 +227,7 @@ def add(
     return created_table_oid
 
 
-@rpc_method(name="tables.delete")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.delete", auth="login")
 def delete(
     *, table_oid: int, database_id: int, cascade: bool = False, **kwargs
 ) -> str:
@@ -256,9 +247,7 @@ def delete(
         return drop_table_from_database(table_oid, conn, cascade)
 
 
-@rpc_method(name="tables.patch")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.patch", auth="login")
 def patch(
     *, table_oid: str, table_data_dict: SettableTableInfo, database_id: int, **kwargs
 ) -> str:
@@ -278,9 +267,7 @@ def patch(
         return alter_table_on_database(table_oid, table_data_dict, conn)
 
 
-@rpc_method(name="tables.import")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.import", auth="login")
 def import_(
     *,
     data_file_id: int,
@@ -308,9 +295,7 @@ def import_(
         return import_csv(data_file_id, table_name, schema_oid, conn, comment)
 
 
-@rpc_method(name="tables.get_import_preview")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.get_import_preview", auth="login")
 def get_import_preview(
     *,
     table_oid: int,
@@ -336,9 +321,7 @@ def get_import_preview(
         return get_preview(table_oid, columns, conn, limit)
 
 
-@rpc_method(name="tables.list_joinable")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.list_joinable", auth="login")
 def list_joinable(
     *,
     table_oid: int,
@@ -363,9 +346,7 @@ def list_joinable(
         return JoinableTableInfo.from_dict(joinable_dict)
 
 
-@rpc_method(name="tables.list_with_metadata")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.list_with_metadata", auth="login")
 def list_with_metadata(*, schema_oid: int, database_id: int, **kwargs) -> list:
     """
     List tables in a schema, along with the metadata associated with each table
@@ -389,9 +370,7 @@ def list_with_metadata(*, schema_oid: int, database_id: int, **kwargs) -> list:
     return [table | {"metadata": metadata_map.get(table["oid"])} for table in tables]
 
 
-@rpc_method(name="tables.get_with_metadata")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="tables.get_with_metadata", auth="login")
 def get_with_metadata(*, table_oid: int, database_id: int, **kwargs) -> dict:
     """
     Get information about a table in a schema, along with the associated table metadata.

@@ -1,10 +1,7 @@
 from typing import TypedDict
 
-from modernrpc.core import rpc_method
-from modernrpc.auth.basic import http_basic_auth_login_required
-
 from mathesar.models.base import Server
-from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.rpc.decorators import mathesar_rpc_method
 
 
 class ConfiguredServerInfo(TypedDict):
@@ -29,9 +26,7 @@ class ConfiguredServerInfo(TypedDict):
         )
 
 
-@rpc_method(name="servers.configured.list")
-@http_basic_auth_login_required
-@handle_rpc_exceptions
+@mathesar_rpc_method(name="servers.configured.list", auth="login")
 def list_() -> list[ConfiguredServerInfo]:
     """
     List information about servers. Exposed as `list`.
