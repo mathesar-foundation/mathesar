@@ -8,6 +8,7 @@
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { Schema } from '@mathesar/models/Schema';
+  import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import {
@@ -116,7 +117,11 @@
         {/if}
       </RichText>
     </p>
-    <ul class="schema-list" slot="content">
+    <ul
+      class="schema-list"
+      slot="content"
+      use:highlightNewItems={{ scrollHint: $_('schema_new_items_scroll_hint') }}
+    >
       {#if schemasRequestStatus.state === 'success'}
         {#each displayList as schema (schema.oid)}
           <li class="schema-list-item">

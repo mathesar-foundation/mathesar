@@ -523,6 +523,7 @@
   "schema_name_already_exists": "A schema with that name already exists.",
   "schema_name_cannot_be_empty": "Schema name cannot be empty",
   "schema_name_placeholder": "Eg. Personal Finances, Movies",
+  "schema_new_items_scroll_hint": "Scroll or click here to see the schema.",
   "schema_not_found": "Schema not found.",
   "schema_ownership_updated_successfully": "Schema ownership has been updated successfully.",
   "schema_permissions": "Schema Permissions",
