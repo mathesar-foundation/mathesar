@@ -39,6 +39,13 @@ def engine_cache(request):
     logger.debug('exit')
 
 
+@pytest.fixture(autouse=True)
+def disable_http_requests(monkeypatch):
+    def mock_urlopen(self, *args, **kwargs):
+        raise Exception("Requests to 3rd party addresses make bad tests")
+    monkeypatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", mock_urlopen)
+
+
 @pytest.fixture(scope="session")
 def create_db(request, engine_cache):
     """

@@ -4,6 +4,7 @@ from modernrpc.auth.basic import (
     http_basic_auth_superuser_required,
 )
 from mathesar.rpc.exceptions.handlers import handle_rpc_exceptions
+from mathesar.analytics import wire_analytics
 
 
 def mathesar_rpc_method(*, name, auth="superuser"):
@@ -24,5 +25,5 @@ def mathesar_rpc_method(*, name, auth="superuser"):
         raise Exception("`auth` must be 'superuser' or 'login'")
 
     def combo_decorator(f):
-        return rpc_method(name=name)(auth_wrap(handle_rpc_exceptions(f)))
+        return rpc_method(name=name)(auth_wrap(wire_analytics(handle_rpc_exceptions(f))))
     return combo_decorator

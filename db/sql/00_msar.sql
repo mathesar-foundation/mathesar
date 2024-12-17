@@ -42,6 +42,16 @@ SELECT msar.drop_all_msar_functions();
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
+
+CREATE OR REPLACE FUNCTION msar.mathesar_system_schemas() RETURNS text[] AS $$/*
+Return a text array of the Mathesar System schemas.
+
+Update this function whenever the list changes.
+*/
+SELECT ARRAY['msar', '__msar', 'mathesar_types']
+$$ LANGUAGE SQL STABLE;
+
+
 CREATE OR REPLACE FUNCTION msar.extract_smallints(v jsonb) RETURNS smallint[] AS $$/*
 From the supplied JSONB value, extract all top-level JSONB array elements which can be successfully
 cast to PostgreSQL smallint values. Return the resulting array of smallint values.
@@ -924,6 +934,46 @@ WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION
+msar.describe_column_default(tab_id regclass, col_id smallint) RETURNS jsonb AS $$/*
+Return a JSONB object describing the default (if any) of the given column in the given table.
+
+The returned JSON will have the form:
+  {
+    "value": <any>,
+    "is_dynamic": <bool>,
+  }
+
+If the default is possibly dynamic, i.e., if "is_dynamic" is true, then "value" will be a text SQL
+expression that generates the default value if evaluated. If it is not dynamic, then "value" is the
+actual default value.
+*/
+DECLARE
+  def_expr text;
+  def_json jsonb;
+BEGIN
+def_expr = CASE
+  WHEN attidentity='' THEN pg_catalog.pg_get_expr(adbin, tab_id)
+  ELSE 'identity'
+END
+FROM pg_catalog.pg_attribute LEFT JOIN pg_catalog.pg_attrdef ON attrelid=adrelid AND attnum=adnum
+WHERE attrelid=tab_id AND attnum=col_id;
+IF def_expr IS NULL THEN
+  RETURN NULL;
+ELSIF msar.is_default_possibly_dynamic(tab_id, col_id) THEN
+  EXECUTE format(
+    'SELECT jsonb_build_object(''value'', %L, ''is_dynamic'', true)', def_expr
+  ) INTO def_json;
+ELSE
+  EXECUTE format(
+    'SELECT jsonb_build_object(''value'', msar.format_data(%s), ''is_dynamic'', false)', def_expr
+  ) INTO def_json;
+END IF;
+RETURN def_json;
+END;
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION msar.get_column_info(tab_id regclass) RETURNS jsonb AS $$/*
 Given a table identifier, return an array of objects describing the columns of the table.
 
@@ -955,20 +1005,7 @@ SELECT jsonb_agg(
     'type_options', msar.get_type_options(atttypid, atttypmod, attndims),
     'nullable', NOT attnotnull,
     'primary_key', COALESCE(pgi.indisprimary, false),
-    'default',
-    nullif(
-      jsonb_strip_nulls(
-        jsonb_build_object(
-          'value',
-          CASE
-            WHEN attidentity='' THEN pg_get_expr(adbin, tab_id)
-            ELSE 'identity'
-          END,
-          'is_dynamic', msar.is_default_possibly_dynamic(tab_id, attnum)
-        )
-      ),
-      jsonb_build_object()
-    ),
+    'default', msar.describe_column_default(tab_id, attnum),
     'has_dependents', msar.has_dependents(tab_id, attnum),
     'description', msar.col_description(tab_id, attnum),
     'current_role_priv', msar.list_column_privileges_for_current_role(tab_id, attnum),
@@ -1081,6 +1118,30 @@ FROM
   pg_catalog.has_schema_privilege(sch_id, privilege) as has_privilege
 WHERE has_privilege;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_object_counts() RETURNS jsonb AS $$/*
+Return a JSON object with counts of some objects in the database.
+
+We exclude the mathesar-system schemas.
+
+The objects counted are:
+- total schemas, excluding Mathesar internal schemas
+- total tables in the included schemas
+- total rows of tables included
+*/
+SELECT jsonb_build_object(
+  'schema_count', COUNT(DISTINCT pgn.oid),
+  'table_count', COUNT(pgc.oid),
+  'record_count', SUM(pgc.reltuples)
+)
+FROM pg_catalog.pg_namespace pgn
+LEFT JOIN pg_catalog.pg_class pgc ON pgc.relnamespace = pgn.oid AND pgc.relkind = 'r'
+WHERE pgn.nspname <> 'information_schema'
+AND NOT (pgn.nspname = ANY(msar.mathesar_system_schemas()))
+AND pgn.nspname NOT LIKE 'pg_%';
+$$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION msar.schema_info_table() RETURNS TABLE
