@@ -19,6 +19,7 @@ import {
   faDatabase,
   faDiagramNext,
   faDollarSign,
+  faDownload,
   faEllipsisV,
   faEnvelope,
   faExternalLink,
@@ -121,6 +122,7 @@ export const iconDeleteMinor: IconProps = { data: faTimes };
 export const iconEdit: IconProps = { data: faPencilAlt };
 export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
+export const iconExport: IconProps = { data: faDownload };
 export const iconImportData: IconProps = { data: faUpload };
 export const iconInferColumnType: IconProps = { data: faMicroscope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };

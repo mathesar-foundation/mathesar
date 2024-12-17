@@ -1,12 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { getQueryStringFromParams } from '@mathesar/api/rest/utils/requestUtils';
   import EntityPageHeader from '@mathesar/components/EntityPageHeader.svelte';
   import ModificationStatus from '@mathesar/components/ModificationStatus.svelte';
-  import { iconInspector, iconTable } from '@mathesar/icons';
+  import { iconExport, iconInspector, iconTable } from '@mathesar/icons';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { AnchorButton, Button, Icon } from '@mathesar-component-library';
 
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
@@ -23,6 +24,12 @@
   $: ({ filtering, sorting, grouping, sheetState } = meta);
 
   $: isSelectable = $currentRolePrivileges.has('SELECT');
+  $: exportLinkParams = getQueryStringFromParams({
+    database_id: table.schema.database.id,
+    table_oid: table.oid,
+    ...$sorting.recordsRequestParamsIncludingGrouping($grouping),
+    ...$filtering.recordsRequestParams(),
+  });
 
   const canViewLinkedEntities = true;
 
@@ -54,6 +61,18 @@
     {#if context === 'page' && isSelectable}
       <!-- TODO: Display Share option when we re-implement it with the new permissions structure -->
       <!-- <ShareTableDropdown id={table.oid} /> -->
+
+      <AnchorButton
+        href="/api/export/v0/tables/?{exportLinkParams}"
+        data-tinro-ignore
+        appearance="secondary"
+        size="medium"
+        aria-label={$_('export')}
+        download="{table.name}.csv"
+      >
+        <Icon {...iconExport} />
+        <span class="responsive-button-label">{$_('export')}</span>
+      </AnchorButton>
 
       <Button
         appearance="secondary"
@@ -87,7 +106,7 @@
     align-items: center;
 
     > :global(* + *) {
-      margin-left: 1rem;
+      margin-left: 0.5rem;
     }
   }
 </style>

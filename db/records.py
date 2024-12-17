@@ -173,22 +173,3 @@ def patch_record_in_table(
         _json_or_none(table_record_summary_templates),
     ).fetchone()[0]
     return result
-
-
-def query_records_in_batch(
-    conn,
-    table_oid,
-    limit=None,
-    offset=None,
-    order=None,
-    filter=None,
-):
-    yield from db_conn.select_from_msar_func_in_batch(
-        conn,
-        'query_table_records',
-        table_oid,
-        limit,
-        offset,
-        _json_or_none(order),
-        _json_or_none(filter),
-    )

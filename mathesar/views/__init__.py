@@ -4,9 +4,6 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
-from django import forms
-from django.http import JsonResponse
-from django.core.serializers.json import DjangoJSONEncoder
 from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
 
@@ -16,8 +13,12 @@ from mathesar.rpc.schemas import list_ as schemas_list
 from mathesar.rpc.servers.configured import list_ as get_servers_list
 from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.rpc.users import get as get_user_info
-from mathesar.rpc.records import export_via_batching
 from mathesar import __version__
+
+from . import export
+
+
+__all__ = [export]
 
 
 def get_database_list(request):
@@ -170,29 +171,6 @@ def schema_route(request, database_id, schema_id, **kwargs):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database_id, schema_id)
     })
-
-
-class ExportTableQueryForm(forms.Form):
-    database_id = forms.IntegerField(required=True)
-    table_oid = forms.IntegerField(required=True)
-    filter = forms.JSONField(required=False)
-    order = forms.JSONField(required=False)
-
-
-@login_required
-def export_table_via_batching(request):
-    form = ExportTableQueryForm(request.GET)
-    if form.is_valid():
-        data = form.cleaned_data
-        return export_via_batching(
-            request=request,
-            database_id=data['database_id'],
-            table_oid=data['table_oid'],
-            filter=data['filter'],
-            order=data['order']
-        )
-    else:
-        return JsonResponse({ 'errors': form.errors }, status=400)
 
 
 def page_not_found_view(request, exception):

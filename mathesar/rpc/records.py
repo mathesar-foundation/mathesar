@@ -2,9 +2,6 @@
 Classes and functions exposed to the RPC endpoint for managing table records.
 """
 from typing import Any, Literal, Optional, TypedDict, Union
-from django.http import StreamingHttpResponse
-import csv
-from io import StringIO
 
 from modernrpc.core import REQUEST_KEY
 
@@ -15,7 +12,6 @@ from db.records import (
     delete_records_from_table,
     add_record_to_table,
     patch_record_in_table,
-    query_records_in_batch,
 )
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.rpc.utils import connect
@@ -244,50 +240,6 @@ def list_(
             table_record_summary_templates=get_table_record_summary_templates(database_id),
         )
     return RecordList.from_dict(record_info)
-
-
-def query_csv_in_batch(
-    user,
-    database_id: int,
-    table_oid: int,
-    **kwargs
-):
-    with connect(database_id, user) as conn:
-        csv_buffer = StringIO()
-        csv_writer = csv.writer(csv_buffer)
-        for rows in query_records_in_batch(conn, table_oid, **kwargs):
-            csv_writer.writerows(rows)
-            value = csv_buffer.getvalue()
-            yield value
-            csv_buffer.seek(0)
-            csv_buffer.truncate(0)
-
-
-def export_via_batching(
-    *,
-    database_id: int,
-    table_oid: int,
-    limit: int = None,
-    offset: int = None,
-    order: list[OrderBy] = None,
-    filter: Filter = None,
-    **kwargs
-) -> StreamingHttpResponse:
-    user = kwargs.get(REQUEST_KEY).user
-    response = StreamingHttpResponse(
-        query_csv_in_batch(
-            user,
-            database_id,
-            table_oid,
-            limit=limit,
-            offset=offset,
-            order=order,
-            filter=filter,
-        ),
-        content_type="text/csv"
-    )
-    response['Content-Disposition'] = f'attachment; filename="export.csv"'
-    return response
 
 
 @mathesar_rpc_method(name="records.get", auth="login")

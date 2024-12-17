@@ -4725,6 +4725,39 @@ $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
+msar.build_selectable_columns(tab_id oid) RETURNS jsonb AS $$/*
+Build a jsonb object with attnum and attname of the columns to which the user has access.
+
+Given columns with attnums 2, 3, and 4, and assuming the user has access only to columns 2 and 4,
+this function will return an expression of the form:
+
+{
+  "attnum": 2, "attname": <column name of 2>,
+  "attnum": 4, "attname": <column name of 4>,
+}
+
+Args:
+  tab_id: The OID of the table containing the columns to select.
+*/
+SELECT coalesce(
+  jsonb_agg(
+    jsonb_build_object(
+      'attnum', attnum,
+      'attname', attname
+    )
+  ),
+  '[]'::jsonb
+)
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
 msar.build_selectable_column_expr(tab_id oid) RETURNS text AS $$/*
 Build an SQL select-target expression of only columns to which the user has access.
 
@@ -4736,13 +4769,8 @@ column_name AS "2", another_column_name AS "4"
 Args:
   tab_id: The OID of the table containing the columns to select.
 */
-SELECT string_agg(format('msar.format_data(%I) AS %I', attname, attnum), ', ')
-FROM pg_catalog.pg_attribute
-WHERE
-  attrelid = tab_id
-  AND attnum > 0
-  AND NOT attisdropped
-  AND has_column_privilege(attrelid, attnum, 'SELECT');
+SELECT string_agg(format('msar.format_data(%I) AS %I', columns->>'attname', columns->>'attnum'), ', ')
+FROM jsonb_array_elements(msar.build_selectable_columns(tab_id)) as columns;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -5195,20 +5223,32 @@ $$ LANGUAGE plpgsql STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.query_table_records(
+msar.get_table_columns_and_records_cursor(
   tab_id oid,
   limit_ integer,
   offset_ integer,
   order_ jsonb,
   filter_ jsonb
-) RETURNS REFCURSOR AS $$
+) RETURNS TABLE (name text, columns jsonb, records_cursor refcursor) AS $$
 DECLARE
-  records_cursor REFCURSOR;
+  name text;
+  columns jsonb;
+  columns_sql text;
+  records_cursor refcursor;
 BEGIN
+  SELECT pgc.relname FROM pg_catalog.pg_class AS pgc WHERE pgc.oid=tab_id INTO name;
+  SELECT msar.build_selectable_columns(tab_id) INTO columns;
+  SELECT string_agg(
+    format('msar.format_data(%I) AS %I', column_result->>'attname', column_result->>'attnum'),
+    ', '
+  )
+  FROM jsonb_array_elements(columns) as column_result
+  INTO columns_sql;
+
   OPEN records_cursor FOR
   EXECUTE format(
     'SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L',
-    COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
+    COALESCE(columns_sql, 'NULL'),
     msar.get_relation_schema_name(tab_id),
     msar.get_relation_name(tab_id),
     limit_,
@@ -5216,7 +5256,8 @@ BEGIN
     msar.build_order_by_expr(tab_id, order_),
     msar.build_where_clause(tab_id, filter_)
   );
-  RETURN records_cursor;
+
+  RETURN QUERY SELECT name, columns, records_cursor;
 END;
 $$ LANGUAGE plpgsql STABLE;
 
