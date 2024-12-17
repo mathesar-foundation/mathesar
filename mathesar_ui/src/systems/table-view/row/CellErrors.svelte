@@ -9,11 +9,17 @@
   let errorIndicatorElement: SVGSVGElement | undefined;
   let cellElementIsHovered = false;
 
+  let hideTimeout: number;
+
   function setHover() {
+    clearTimeout(hideTimeout);
     cellElementIsHovered = true;
   }
+
   function unsetHover() {
-    cellElementIsHovered = false;
+    hideTimeout = setTimeout(() => {
+      cellElementIsHovered = false;
+    }, 1);
   }
   onMount(() => {
     const cell = errorIndicatorElement?.parentElement;
@@ -47,6 +53,8 @@
       reference: cellElement,
       options: { placement: 'top-start' },
     }}
+    on:mouseenter={() => setHover()}
+    on:mouseleave={() => unsetHover()}
   >
     {errors.join(' ')}
   </div>
