@@ -6,7 +6,8 @@ msar.drop_all_msar_objects(retries integer DEFAULT 5) RETURNS void AS $$/*
 Drop all functions in the `msar` and `__msar` schemas, including this one.
 */
 DECLARE
-  fn RECORD;
+  obj RECORD;
+  rm_schemas regnamespace[] := ARRAY['msar', '__msar'];
   detail text;
   hint text;
   stack text;
@@ -14,30 +15,36 @@ DECLARE
   failed boolean := false;
   retry boolean := false;
 BEGIN
-  FOR fn IN
-    SELECT oid, prokind
-    FROM pg_catalog.pg_proc
-    WHERE
-      (pronamespace = 'msar'::regnamespace::oid OR pronamespace = '__msar'::regnamespace::oid)
+  FOR obj IN
+    (
+      SELECT oid, oid::regprocedure::text AS obj_name,
+        CASE prokind
+          WHEN 'a' THEN 'AGGREGATE'
+          WHEN 'p' THEN 'PROCEDURE'
+          ELSE 'FUNCTION'
+        END AS obj_kind
+      FROM pg_proc
+      WHERE pronamespace=ANY(rm_schemas)
       AND NOT ( -- Keep this up to date with this function's name and arguments.
         proname = 'drop_all_msar_objects'
         AND proargtypes=ARRAY['integer'::regtype]::oidvector
       )
+    ) UNION (
+      SELECT oid, oid::regtype::text AS obj_name, 'TYPE' AS obj_kind
+      FROM pg_type
+      WHERE typnamespace=ANY(rm_schemas) AND typcategory <> 'A'
+    ) UNION (
+      SELECT oid, oid::regclass::text AS obj_name, 'TABLE' AS obj_kind
+      FROM pg_class
+      WHERE relnamespace=ANY(rm_schemas) AND relkind='r'
+    )
     ORDER BY oid
   LOOP
-    IF EXISTS (SELECT 1 FROM pg_proc WHERE oid = fn.oid) THEN
-      RAISE NOTICE 'dropping % with OID %', fn.oid::regprocedure::text, fn.oid;
-      BEGIN
-        EXECUTE format(
-          $q$ DROP %s %s $q$,
-          CASE fn.prokind
-            WHEN 'p' THEN 'PROCEDURE'
-            WHEN 'a' THEN 'AGGREGATE'
-            ELSE 'FUNCTION'
-          END,
-          fn.oid::regprocedure::text
-        );
-      EXCEPTION WHEN dependent_objects_still_exist THEN
+    RAISE NOTICE 'dropping % with OID %', obj.obj_name, obj.oid;
+    BEGIN
+      EXECUTE format('DROP %s %s', obj.obj_kind, obj.obj_name);
+    EXCEPTION
+      WHEN dependent_objects_still_exist THEN
         failed = true;
         GET STACKED DIAGNOSTICS
           message = MESSAGE_TEXT,
@@ -46,8 +53,9 @@ BEGIN
         IF retries > 0 THEN
           retry = true;
         END IF;
-      END;
-    END IF;
+      WHEN undefined_function OR undefined_table OR undefined_object THEN
+        -- Do nothing.
+    END;
   END LOOP;
   IF retry IS true THEN
     PERFORM msar.drop_all_msar_objects(retries - 1);
@@ -56,6 +64,8 @@ BEGIN
   ELSE
     RAISE NOTICE E'All objects dropped successfully!\n\nDropping myself...\n\n';
     DROP FUNCTION msar.drop_all_msar_objects(integer);
+    DROP SCHEMA msar;
+    DROP SCHEMA __msar;
   END IF;
 END;
 $$ LANGUAGE plpgsql;
@@ -63,6 +73,8 @@ $$ LANGUAGE plpgsql;
 
 SELECT msar.drop_all_msar_objects(4);
 
+CREATE SCHEMA IF NOT EXISTS __msar;
+CREATE SCHEMA IF NOT EXISTS msar;
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
