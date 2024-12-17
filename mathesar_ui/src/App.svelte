@@ -35,6 +35,7 @@
 -->
 <style global lang="scss">
   @import 'component-library/styles.scss';
+  @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   :root {
     /** BASE COLORS **/
@@ -137,7 +138,8 @@
     --modal-z-index: 1;
     --dropdown-z-index: 1;
     --cell-errors-z-index: 1;
-    --toast-z-index: 2;
+    --new-item-highlighter-z-index: 2;
+    --toast-z-index: 3;
     --app-header-z-index: 1;
 
     overflow: hidden;

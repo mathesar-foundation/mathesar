@@ -447,6 +447,7 @@
   "primary_key_column_cannot_be_moved": "The primary key column cannot be moved.",
   "primary_key_help": "A primary key constraint uniquely identifies each record in a table.",
   "primary_keys": "Primary Keys",
+  "privileges_new_items_scroll_hint": "Scroll or click here to see the role.",
   "processing_data": "Processing Data",
   "prompt_new_password_next_login": "Resetting the password will prompt the user to change their password on their next login.",
   "properties": "Properties",
