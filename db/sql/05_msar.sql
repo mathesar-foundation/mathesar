@@ -4,6 +4,8 @@ CREATE SCHEMA IF NOT EXISTS msar;
 CREATE OR REPLACE FUNCTION
 msar.drop_all_msar_objects(retries integer DEFAULT 5) RETURNS void AS $$/*
 Drop all functions in the `msar` and `__msar` schemas, including this one.
+
+Then drop the schemas themselves
 */
 DECLARE
   obj RECORD;
