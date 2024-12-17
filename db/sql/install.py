@@ -19,6 +19,7 @@ def _install_sql_file(file_name):
 
 
 INSTALL_STEPS = [
+    _install_sql_file("01_msar_remove.sql"),
     _install_sql_file("05_msar.sql"),
     _install_sql_file("10_msar_joinable_tables.sql"),
     _install_sql_file("30_msar_custom_aggregates.sql"),
