@@ -151,7 +151,6 @@
     // If yes, pass down column's calculated cap.
     // If no, pass down the type directly.
     const abstractTypeId = _selectedColumn?.abstractType.identifier;
-    console.log({ abstractTypeId, parameterTypeId, selectedColumnInputCap });
     if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
       return selectedColumnInputCap;
     }
