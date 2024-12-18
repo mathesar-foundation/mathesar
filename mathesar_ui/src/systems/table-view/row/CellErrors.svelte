@@ -12,12 +12,12 @@
   let hideTimeout: number;
 
   function setHover() {
-    clearTimeout(hideTimeout);
+    window.clearTimeout(hideTimeout);
     cellElementIsHovered = true;
   }
 
   function unsetHover() {
-    hideTimeout = setTimeout(() => {
+    hideTimeout = window.setTimeout(() => {
       cellElementIsHovered = false;
     }, 1);
   }
