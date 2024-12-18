@@ -24,6 +24,7 @@
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
   import TablePermissionsModal from '@mathesar/systems/table-view/table-inspector/table/TablePermissionsModal.svelte';
+  import { modal } from '@mathesar/stores/modal';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import {
     ButtonMenuItem,
@@ -31,7 +32,6 @@
     Icon,
     Truncate,
   } from '@mathesar-component-library';
-    import { modal } from '@mathesar/stores/modal';
 
   const recordSelector = getRecordSelectorFromContext();
 

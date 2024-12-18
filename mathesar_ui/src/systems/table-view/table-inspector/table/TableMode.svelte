@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { iconPermissions } from '@mathesar/icons';
   import {
     tableInspectorTableActionsVisible,
     tableInspectorTableAdvancedVisible,
@@ -9,7 +10,8 @@
     tableInspectorTableRecordSummaryVisible,
   } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { Collapsible } from '@mathesar-component-library';
+  import { Button, Collapsible, Icon } from '@mathesar-component-library';
+  import { modal } from '@mathesar/stores/modal';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import TableRecordSummaryConfig from '../record-summary/TableRecordSummaryConfig.svelte';
@@ -20,10 +22,6 @@
   import TableDescription from './TableDescription.svelte';
   import TableName from './TableName.svelte';
   import TablePermissionsModal from './TablePermissionsModal.svelte';
-    import { modal } from '@mathesar/stores/modal';
-    import Button from '@mathesar/component-library/button/Button.svelte';
-    import { iconPermissions } from '@mathesar/icons';
-    import Icon from '@mathesar/component-library/icon/Icon.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
   const permissionModal = modal.spawnModalController();
@@ -54,8 +52,7 @@
           <Icon {...iconPermissions} />
           <span>{$_('table_permissions')}</span>
         </Button>
-      </div>
-      
+      </div>  
     </div>
   </Collapsible>
 

@@ -21,7 +21,6 @@
   } from '@mathesar/systems/permissions';
   import { ImmutableMap, ModalController } from '@mathesar-component-library';
 
-  
   export let controller: ModalController;
   export let table: Table;
   $: tablePrivileges = table.constructTablePrivilegesStore();
