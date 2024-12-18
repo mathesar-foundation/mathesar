@@ -482,15 +482,9 @@ export function speculateColumnMetaData({
               type_options:
                 aggregation.function === 'distinct_aggregate_to_array'
                   ? {
-                      // TODO_BETA: Ask Pavish.
-                      //
-                      // `Column['type_options']` was previously typed loosely
-                      // as `Record<string, unknown> | null`. Now it's more
-                      // strict and it doesn't have a `type` property.
-                      //
-                      // type:
-                      //   updatedColumnsMetaData.get(aggregation.inputAlias)
-                      //     ?.column.type ?? 'unknown',
+                      item_type:
+                        updatedColumnsMetaData.get(aggregation.inputAlias)
+                          ?.column.type ?? 'unknown',
                     }
                   : null,
               metadata: null,
