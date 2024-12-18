@@ -5,6 +5,7 @@ import type { Constraint } from '@mathesar/api/rpc/constraints';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
+  getDbTypeBasedFilterCap,
   getDbTypeBasedInputCap,
   getDisplayFormatter,
   getInitialInputValue,
@@ -40,6 +41,7 @@ export interface ProcessedColumn extends CellColumnFabric {
   abstractType: AbstractType;
   initialInputValue: unknown;
   inputComponentAndProps: ComponentAndProps;
+  filterComponentAndProps: ComponentAndProps;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
   formatCellValue: (
@@ -106,6 +108,11 @@ export function processColumn({
       pkTargetTableId: isPk ? tableId : undefined,
     }),
     inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      fkTargetTableId,
+      abstractType.cellInfo,
+    ),
+    filterComponentAndProps: getDbTypeBasedFilterCap(
       column,
       fkTargetTableId,
       abstractType.cellInfo,
