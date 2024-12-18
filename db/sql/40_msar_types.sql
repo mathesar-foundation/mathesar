@@ -75,8 +75,16 @@ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 DO $$
 BEGIN
   CREATE DOMAIN mathesar_types.uri AS text CHECK (
-    (value IS NULL) OR (mathesar_types.uri_scheme(value) IS NOT NULL
-    AND mathesar_types.uri_path(value) IS NOT NULL)
+    (value IS NULL) OR (
+      -- Check that the 2nd and 5th groups from the URI RFC spec are non-null.
+      array_position(
+        regexp_match(
+          value,
+          '^(?:([^:/?#]+):)?(?://(?:[^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?'
+        ),
+        null
+      ) IS NULL
+    )
   );
 EXCEPTION
   WHEN duplicate_object THEN null;
