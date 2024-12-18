@@ -1,4 +1,6 @@
 <script lang="ts">
+    import Truncate from '../truncate/Truncate.svelte';
+
   import { createEventDispatcher } from 'svelte';
 
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
@@ -172,7 +174,9 @@
       {:else if $$slots.default}
         <slot option={value} label={getLabel(value)} />
       {:else}
+      <Truncate >
         <StringOrComponent arg={getLabel(value)} />
+      </Truncate>
       {/if}
     </svelte:fragment>
 
