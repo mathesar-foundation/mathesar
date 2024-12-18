@@ -11,6 +11,7 @@ import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
+  getDbTypeBasedFilterCap,
   getDbTypeBasedInputCap,
   getDisplayFormatter,
   getInitialInputValue,
@@ -47,6 +48,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   column: QueryResultColumn;
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
+  filterComponentAndProps: ComponentAndProps;
   initialInputValue: unknown;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
@@ -364,6 +366,11 @@ function processColumn(
       column,
     }),
     inputComponentAndProps: getDbTypeBasedInputCap(
+      column,
+      undefined,
+      abstractType.cellInfo,
+    ),
+    filterComponentAndProps: getDbTypeBasedFilterCap(
       column,
       undefined,
       abstractType.cellInfo,
