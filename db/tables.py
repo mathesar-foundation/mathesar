@@ -223,14 +223,14 @@ def split_table(
     }
 
 
-def export_table(
+def fetch_table_in_chunks(
     conn,
     table_oid,
-    with_column_header=True,
     limit=None,
     offset=None,
     order=None,
     filter=None,
+    with_column_header=True,
 ):
     with conn.transaction():
         with conn.cursor() as cursor:

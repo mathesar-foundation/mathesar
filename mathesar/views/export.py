@@ -8,7 +8,7 @@ from django.http import StreamingHttpResponse, JsonResponse
 from mathesar.rpc.utils import connect
 from mathesar.rpc.records import Filter, OrderBy
 
-from db.tables import export_table as export_table_gen
+from db.tables import fetch_table_in_chunks
 
 
 class ExportTableQueryForm(forms.Form):
@@ -18,7 +18,7 @@ class ExportTableQueryForm(forms.Form):
     order = forms.JSONField(required=False)
 
 
-def export_table_csv_in_batches(
+def export_table_csv_in_chunks(
     user,
     database_id: int,
     table_oid: int,
@@ -27,7 +27,7 @@ def export_table_csv_in_batches(
     with connect(database_id, user) as conn:
         csv_buffer = StringIO()
         csv_writer = csv.writer(csv_buffer)
-        for rows in export_table_gen(conn, table_oid, **kwargs):
+        for rows in fetch_table_in_chunks(conn, table_oid, **kwargs):
             csv_writer.writerows(rows)
             value = csv_buffer.getvalue()
             yield value
@@ -46,7 +46,7 @@ def stream_table_as_csv(
 ) -> StreamingHttpResponse:
     user = request.user
     response = StreamingHttpResponse(
-        export_table_csv_in_batches(
+        export_table_csv_in_chunks(
             user,
             database_id,
             table_oid,
