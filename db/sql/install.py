@@ -24,6 +24,7 @@ INSTALL_STEPS = [
     _install_sql_file("10_msar_joinable_tables.sql"),
     _install_sql_file("30_msar_custom_aggregates.sql"),
     _install_sql_file("40_msar_types.sql"),
+    _install_sql_file("45_msar_type_casting.sql"),
     _install_sql_file("50_msar_permissions.sql"),
 ]
 
