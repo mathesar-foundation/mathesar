@@ -19,7 +19,10 @@
     PermissionsOverview,
     TransferOwnership,
   } from '@mathesar/systems/permissions';
-  import { ImmutableMap, ModalController } from '@mathesar-component-library';
+  import {
+    ImmutableMap,
+    type ModalController,
+  } from '@mathesar-component-library';
 
   export let controller: ModalController;
   export let table: Table;
@@ -126,7 +129,6 @@
     toast.success($_('table_ownership_updated_successfully'));
   }
 </script>
-
 
 <PermissionsModal
   {controller}

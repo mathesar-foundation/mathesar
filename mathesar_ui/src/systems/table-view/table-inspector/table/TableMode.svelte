@@ -9,9 +9,9 @@
     tableInspectorTablePropertiesVisible,
     tableInspectorTableRecordSummaryVisible,
   } from '@mathesar/stores/localStorage';
+  import { modal } from '@mathesar/stores/modal';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { Button, Collapsible, Icon } from '@mathesar-component-library';
-  import { modal } from '@mathesar/stores/modal';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import TableRecordSummaryConfig from '../record-summary/TableRecordSummaryConfig.svelte';
@@ -52,7 +52,7 @@
           <Icon {...iconPermissions} />
           <span>{$_('table_permissions')}</span>
         </Button>
-      </div>  
+      </div>
     </div>
   </Collapsible>
 

@@ -19,12 +19,12 @@
     getTablePageUrl,
   } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { modal } from '@mathesar/stores/modal';
   import { deleteTable } from '@mathesar/stores/tables';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
   import TablePermissionsModal from '@mathesar/systems/table-view/table-inspector/table/TablePermissionsModal.svelte';
-  import { modal } from '@mathesar/stores/modal';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import {
     ButtonMenuItem,
@@ -186,8 +186,7 @@
     </button>
   {/if}
 </div>
-<TablePermissionsModal {table} controller={permissionModal}/>
-
+<TablePermissionsModal {table} controller={permissionModal} />
 
 <style>
   .table-card {
