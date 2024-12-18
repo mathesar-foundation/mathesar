@@ -8,16 +8,15 @@
 
   let errorIndicatorElement: SVGSVGElement | undefined;
   let cellElementIsHovered = false;
-
-  let hideTimeout: number;
+  let hiderTimeoutId: number;
 
   function setHover() {
-    window.clearTimeout(hideTimeout);
+    window.clearTimeout(hiderTimeoutId);
     cellElementIsHovered = true;
   }
 
   function unsetHover() {
-    hideTimeout = window.setTimeout(() => {
+    hiderTimeoutId = window.setTimeout(() => {
       cellElementIsHovered = false;
     }, 1);
   }
