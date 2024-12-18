@@ -3,6 +3,7 @@ This file has msar-namespaced functions related to type casting.
 
 Depends on 05_msar.sql
 */
+DROP TABLE IF EXISTS mathesar_types.top_level_domains;
 CREATE TABLE mathesar_types.top_level_domains (tld text PRIMARY KEY);
 INSERT INTO mathesar_types.top_level_domains VALUES
 ('aaa'), ('aarp'), ('abarth'), ('abb'), ('abbott'), ('abbvie'), ('abc'), ('able'), ('abogado'),
@@ -190,6 +191,62 @@ INSERT INTO mathesar_types.top_level_domains VALUES
 ('yodobashi'), ('yoga'), ('yokohama'), ('you'), ('youtube'), ('yt'), ('yun'), ('za'), ('zappos'),
 ('zara'), ('zero'), ('zip'), ('zm'), ('zone'), ('zuerich'), ('zw');
 
+
+CREATE OR REPLACE FUNCTION mathesar_types.email_domain_name(mathesar_types.email)
+RETURNS text AS $$
+    SELECT split_part($1, '@', 2);
+$$
+LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION mathesar_types.email_local_part(mathesar_types.email)
+RETURNS text AS $$
+    SELECT split_part($1, '@', 1);
+$$
+LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+-- mathesar_types.uri
+CREATE OR REPLACE FUNCTION mathesar_types.uri_parts(text)
+RETURNS text[] AS $$
+    SELECT regexp_match($1, '^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?');
+$$
+LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION mathesar_types.uri_scheme(text)
+RETURNS text AS $$
+    SELECT (mathesar_types.uri_parts($1))[2];
+$$
+LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION mathesar_types.uri_authority(text)
+RETURNS text AS $$
+    SELECT (mathesar_types.uri_parts($1))[4];
+$$
+LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION mathesar_types.uri_path(text)
+RETURNS text AS $$
+    SELECT (mathesar_types.uri_parts($1))[5];
+$$
+LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION mathesar_types.uri_query(text)
+RETURNS text AS $$
+    SELECT (mathesar_types.uri_parts($1))[7];
+$$
+LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION mathesar_types.uri_fragment(text)
+RETURNS text AS $$
+    SELECT (mathesar_types.uri_parts($1))[9];
+$$
+LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
+
+/*
+------------------------------------------------------------------------
+CASTING FUNCTIONS
+------------------------------------------------------------------------
+*/
 
 -- mathesar_types.cast_to_boolean
 CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(boolean)

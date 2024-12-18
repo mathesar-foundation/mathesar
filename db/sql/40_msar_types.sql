@@ -7,18 +7,6 @@ EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
-CREATE OR REPLACE FUNCTION mathesar_types.email_domain_name(mathesar_types.email)
-RETURNS text AS $$
-    SELECT split_part($1, '@', 2);
-$$
-LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION mathesar_types.email_local_part(mathesar_types.email)
-RETURNS text AS $$
-    SELECT split_part($1, '@', 1);
-$$
-LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
 -- mathesar_types.money
 DO $$
 BEGIN
@@ -36,42 +24,6 @@ EXCEPTION
 END $$;
 
 -- mathesar_types.uri
-CREATE OR REPLACE FUNCTION mathesar_types.uri_parts(text)
-RETURNS text[] AS $$
-    SELECT regexp_match($1, '^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?');
-$$
-LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION mathesar_types.uri_scheme(text)
-RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[2];
-$$
-LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION mathesar_types.uri_authority(text)
-RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[4];
-$$
-LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION mathesar_types.uri_path(text)
-RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[5];
-$$
-LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION mathesar_types.uri_query(text)
-RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[7];
-$$
-LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
-CREATE OR REPLACE FUNCTION mathesar_types.uri_fragment(text)
-RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[9];
-$$
-LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
-
 DO $$
 BEGIN
   CREATE DOMAIN mathesar_types.uri AS text CHECK (
@@ -87,7 +39,24 @@ BEGIN
     )
   );
 EXCEPTION
-  WHEN duplicate_object THEN null;
+  WHEN duplicate_object THEN
+    ALTER DOMAIN mathesar_types.uri
+    ADD CONSTRAINT uri_check_new  CHECK (
+      (value IS NULL) OR (
+        -- Check that the 2nd and 5th groups from the URI RFC spec are non-null.
+        array_position(
+          regexp_match(
+            value,
+            '^(?:([^:/?#]+):)?(?://(?:[^/?#]*))?([^?#]*)(?:\?(?:[^#]*))?(?:#(?:.*))?'
+          ),
+          null
+        ) IS NULL
+      )
+    ) NOT VALID;
+    ALTER DOMAIN mathesar_types.uri
+    DROP CONSTRAINT uri_check;
+    ALTER DOMAIN mathesar_types.uri
+    RENAME CONSTRAINT uri_check_new TO uri_check;
 END $$;
 
 -- mathesar_types.json_array
