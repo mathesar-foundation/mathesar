@@ -7,14 +7,11 @@
     RawTablePrivilegesForRole,
     TablePrivilege,
   } from '@mathesar/api/rpc/tables';
-  import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
-  import { iconPermissions } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
   import type { Table } from '@mathesar/models/Table';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
-  import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import {
     type AccessControlConfig,
@@ -22,14 +19,12 @@
     PermissionsOverview,
     TransferOwnership,
   } from '@mathesar/systems/permissions';
-  import { Button, ButtonMenuItem, ImmutableMap } from '@mathesar-component-library';
+  import { ImmutableMap, ModalController } from '@mathesar-component-library';
 
-  const controller = modal.spawnModalController();
   
+  export let controller: ModalController;
   export let table: Table;
-  export let fromTableCard = false;
   $: tablePrivileges = table.constructTablePrivilegesStore();
-
   const databaseContext = DatabaseRouteContext.get();
   $: ({ roles, currentRole } = $databaseContext);
 
@@ -133,25 +128,6 @@
   }
 </script>
 
-<div>
-  {#if fromTableCard}
-    <ButtonMenuItem
-      on:click={() => controller.open()}
-      icon={iconPermissions}
-    >
-      {$_('table_permissions')}
-    </ButtonMenuItem>
-  {:else}
-    <Button
-      appearance="secondary"
-      on:click={() => controller.open()}
-      size="small"
-    >
-      <Icon {...iconPermissions} />
-      <span>{$_('table_permissions')}</span>
-    </Button>
-  {/if}
-</div>
 
 <PermissionsModal
   {controller}

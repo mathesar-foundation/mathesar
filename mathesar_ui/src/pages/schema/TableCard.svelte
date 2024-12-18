@@ -8,6 +8,7 @@
     iconEdit,
     iconExploration,
     iconMoreActions,
+    iconPermissions,
     iconSelectRecord,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -22,6 +23,7 @@
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
+  import TablePermissionsModal from '@mathesar/systems/table-view/table-inspector/table/TablePermissionsModal.svelte';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import {
     ButtonMenuItem,
@@ -29,7 +31,7 @@
     Icon,
     Truncate,
   } from '@mathesar-component-library';
-    import TablePermissions from '@mathesar/systems/table-view/table-inspector/table/TablePermissions.svelte';
+    import { modal } from '@mathesar/stores/modal';
 
   const recordSelector = getRecordSelectorFromContext();
 
@@ -43,6 +45,7 @@
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
   let isTableCardFocused = false;
+  const permissionModal = modal.spawnModalController();
 
   $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
   $: tablePageUrl = requiresImportConfirmation
@@ -128,7 +131,7 @@
       showArrow={false}
       triggerAppearance="ghost"
       triggerClass="dropdown-menu-button"
-      closeOnInnerClick={false}
+      closeOnInnerClick={true}
       placements={['bottom-end', 'right-start', 'left-start']}
       label=""
       icon={iconMoreActions}
@@ -149,8 +152,12 @@
         >
           {$_('edit_table')}
         </ButtonMenuItem>
-        <TablePermissions {table} fromTableCard={true}/>
-          
+        <ButtonMenuItem
+          on:click={() => permissionModal.open()}
+          icon={iconPermissions}
+        >
+          {$_('table_permissions')}
+        </ButtonMenuItem>
       {/if}
       <ButtonMenuItem
         on:click={handleDeleteTable}
@@ -179,6 +186,8 @@
     </button>
   {/if}
 </div>
+<TablePermissionsModal {table} controller={permissionModal}/>
+
 
 <style>
   .table-card {
