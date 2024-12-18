@@ -247,6 +247,7 @@
   "explore_your_data": "Explore your Data",
   "exploring_from": "Exploring from",
   "export": "Export",
+  "export_csv_help": "Export the {tableName} table as a CSV file. Your current filters and sorting will be applied to the exported data.",
   "extract_columns_to_new_table": "{count, plural, one {Extract Column Into a New Table} other {Extract Columns Into a New Table}}",
   "failed_load_preview": "Failed to load preview",
   "failed_to_fetch_column_information": "Failed to fetch column information.",

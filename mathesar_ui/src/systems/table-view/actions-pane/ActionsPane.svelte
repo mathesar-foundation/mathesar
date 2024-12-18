@@ -7,7 +7,12 @@
   import { iconExport, iconInspector, iconTable } from '@mathesar/icons';
   import { tableInspectorVisible } from '@mathesar/stores/localStorage';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { AnchorButton, Button, Icon } from '@mathesar-component-library';
+  import {
+    AnchorButton,
+    Button,
+    Icon,
+    Tooltip,
+  } from '@mathesar-component-library';
 
   import FilterDropdown from './record-operations/filter/FilterDropdown.svelte';
   import GroupDropdown from './record-operations/group/GroupDropdown.svelte';
@@ -62,17 +67,25 @@
       <!-- TODO: Display Share option when we re-implement it with the new permissions structure -->
       <!-- <ShareTableDropdown id={table.oid} /> -->
 
-      <AnchorButton
-        href="/api/export/v0/tables/?{exportLinkParams}"
-        data-tinro-ignore
-        appearance="secondary"
-        size="medium"
-        aria-label={$_('export')}
-        download="{table.name}.csv"
-      >
-        <Icon {...iconExport} />
-        <span class="responsive-button-label">{$_('export')}</span>
-      </AnchorButton>
+      <Tooltip allowHover>
+        <AnchorButton
+          slot="trigger"
+          href="/api/export/v0/tables/?{exportLinkParams}"
+          data-tinro-ignore
+          appearance="secondary"
+          size="medium"
+          aria-label={$_('export')}
+          download="{table.name}.csv"
+        >
+          <Icon {...iconExport} />
+          <span class="responsive-button-label">{$_('export')}</span>
+        </AnchorButton>
+        <span slot="content">
+          {$_('export_csv_help', {
+            values: { tableName: table.name },
+          })}
+        </span>
+      </Tooltip>
 
       <Button
         appearance="secondary"
