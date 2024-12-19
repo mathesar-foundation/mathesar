@@ -33,6 +33,10 @@ export function highlightNewItems(
   function init() {
     // Use a MutationObserver to watch for new items added to the container
     const mutationObserver = new MutationObserver((mutations) => {
+      // Don't highlight the first item added to the container since it will
+      // already be easy for the user to identify.
+      if (container.children.length < 2) return;
+
       for (const item of getNewlyAddedItemsFromMutations(mutations)) {
         cleanupFns.push(setupHighlighter(item, options));
       }
