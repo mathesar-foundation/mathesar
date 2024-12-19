@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Truncate from '../truncate/Truncate.svelte';
 
   import { createEventDispatcher } from 'svelte';
 
@@ -13,6 +12,7 @@
   } from '@mathesar-component-library-dir/list-box';
 
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
+  import Truncate from '../truncate/Truncate.svelte';
 
   import type { SelectProps } from './SelectTypes';
 
@@ -174,9 +174,9 @@
       {:else if $$slots.default}
         <slot option={value} label={getLabel(value)} />
       {:else}
-      <Truncate >
-        <StringOrComponent arg={getLabel(value)} />
-      </Truncate>
+        <Truncate>
+          <StringOrComponent arg={getLabel(value)} />
+        </Truncate>
       {/if}
     </svelte:fragment>
 
