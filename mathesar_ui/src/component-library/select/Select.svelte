@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import { createEventDispatcher } from 'svelte';
 
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
