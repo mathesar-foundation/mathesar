@@ -57,7 +57,7 @@ function constructParamMapForAllTypes(
 const equalityFiltersResponse: AbstractTypeFilterDefinitionResponse[] = [
   {
     id: 'equal',
-    name: 'equals',
+    name: 'equals (case sensitive)',
     aliases: constructAliasMapForTypes(allDateTimeTypes, 'is same as'),
     uiTypeParameterMap: constructParamMapForAllTypes((category) => [category]),
     hasParams: true,
@@ -79,10 +79,9 @@ const equalityFiltersResponse: AbstractTypeFilterDefinitionResponse[] = [
 // This is the API response expected from the server
 // Might be better if we can have this with the types endpoint
 const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
-  ...equalityFiltersResponse,
   {
     id: 'contains_case_insensitive',
-    name: 'contains',
+    name: 'contains (case insensitive)',
     uiTypeParameterMap: {
       [abstractTypeCategory.Text]: [abstractTypeCategory.Text],
       [abstractTypeCategory.Email]: [abstractTypeCategory.Text],
@@ -90,9 +89,10 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     },
     hasParams: true,
   },
+  ...equalityFiltersResponse,
   {
     id: 'starts_with_case_insensitive',
-    name: 'starts with',
+    name: 'starts with (case insensitive)',
     uiTypeParameterMap: {
       [abstractTypeCategory.Text]: [abstractTypeCategory.Text],
       [abstractTypeCategory.Email]: [abstractTypeCategory.Text],

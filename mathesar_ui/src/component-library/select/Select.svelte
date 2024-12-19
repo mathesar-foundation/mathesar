@@ -13,6 +13,7 @@
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
 
   import type { SelectProps } from './SelectTypes';
+    import { Truncate } from '..';
 
   type Option = $$Generic;
   type $$Props = SelectProps<Option>;
@@ -172,7 +173,9 @@
       {:else if $$slots.default}
         <slot option={value} label={getLabel(value)} />
       {:else}
-        <StringOrComponent arg={getLabel(value)} />
+        <Truncate>
+          <StringOrComponent arg={getLabel(value)} />
+        </Truncate>
       {/if}
     </svelte:fragment>
 
