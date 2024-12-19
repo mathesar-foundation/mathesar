@@ -13,7 +13,7 @@
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
 
   import type { SelectProps } from './SelectTypes';
-    import { Truncate } from '..';
+  import { Truncate } from '..';
 
   type Option = $$Generic;
   type $$Props = SelectProps<Option>;
