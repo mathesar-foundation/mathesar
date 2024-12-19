@@ -161,6 +161,7 @@
   "database_disconnect_failed": "Unable to disconnect database",
   "database_disconnect_success": "The database has been disconnected successfully",
   "database_name": "Database Name",
+  "database_new_items_scroll_hint": "Scroll or click here to see the database.",
   "database_not_found": "Database with id [connectionId] is not found.",
   "database_ownership_updated_successfully": "Database ownership has been updated successfully.",
   "database_permissions": "Database Permissions",
