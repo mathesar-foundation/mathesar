@@ -11,9 +11,9 @@
   } from '@mathesar-component-library-dir/list-box';
 
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
+  import Truncate from '../truncate/Truncate.svelte';
 
   import type { SelectProps } from './SelectTypes';
-  import { Truncate } from '..';
 
   type Option = $$Generic;
   type $$Props = SelectProps<Option>;
