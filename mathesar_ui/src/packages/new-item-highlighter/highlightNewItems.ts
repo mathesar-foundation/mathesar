@@ -31,6 +31,7 @@ export function highlightNewItems(
   const cleanupFns: (() => void)[] = [];
 
   function init() {
+    // Use a MutationObserver to watch for new items added to the container
     const mutationObserver = new MutationObserver((mutations) => {
       for (const item of getNewlyAddedItemsFromMutations(mutations)) {
         cleanupFns.push(setupHighlighter(item, options));

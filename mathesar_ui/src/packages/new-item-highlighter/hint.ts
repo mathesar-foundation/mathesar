@@ -62,6 +62,12 @@ export function displayHint(target: HTMLElement, message: string): () => void {
     hintElement.style.left = `${left}px`;
   }
 
+  // Use a ResizeObserver to reposition the hint when the container or the body
+  // resizes. In theory, there could be other user interactions that would cause
+  // the container to move around. For example the container could be inside
+  // another element that is scrolling. But we're guessing that's unlikely since
+  // in that case there would be double scrollbars. So we're guessing that
+  // ResizeObserver is sufficient here.
   const resizeObserver = new ResizeObserver(positionHint);
   resizeObserver.observe(container);
   resizeObserver.observe(document.body);

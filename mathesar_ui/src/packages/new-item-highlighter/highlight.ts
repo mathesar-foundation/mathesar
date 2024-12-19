@@ -18,6 +18,9 @@ function displayHighlight(target: HTMLElement): void {
   highlight.style.setProperty('--duration', `${HIGHLIGHT_TRANSITION_MS}ms`);
   document.body.appendChild(highlight);
 
+  // While the highlight is in effect, we use a requestAnimationFrame loop to
+  // track the target's position and update the highlight's position
+  // accordingly.
   function trackPosition() {
     if (!target.isConnected) return;
     const rect = target.getBoundingClientRect();
@@ -42,6 +45,8 @@ export function setupHighlighter(
 ): () => void {
   let cleanupHint: (() => void) | undefined;
 
+  // Use an IntersectionObserver to detect when the target is in view. When it
+  // is, display the highlight. If it's not, then display the scroll hint.
   const intersectionObserver = new IntersectionObserver(
     (entries) => {
       const entry = entries[0];
