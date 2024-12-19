@@ -27,9 +27,9 @@
   export let explorationsMap: Map<number, SavedExploration>;
   export let tablesRequestStatus: RequestStatus;
   export let explorationsRequestStatus: RequestStatus;
-
   export let database: Database;
   export let schema: Schema;
+  export let onCreateEmptyTable: () => void;
 
   $: hasTables = tablesMap.size > 0;
   $: hasExplorations = explorationsMap.size > 0;
@@ -48,7 +48,7 @@
   <div class="vertical-container tables">
     <OverviewHeader title={$_('tables')}>
       <svelte:fragment slot="action">
-        <CreateNewTableButton {database} {schema} />
+        <CreateNewTableButton {database} {schema} {onCreateEmptyTable} />
       </svelte:fragment>
     </OverviewHeader>
     {#if tablesRequestStatus.state === 'processing'}
@@ -72,7 +72,7 @@
         </div>
       </ErrorBox>
     {:else if showTableCreationTutorial}
-      <CreateNewTableTutorial {database} {schema} />
+      <CreateNewTableTutorial {database} {schema} {onCreateEmptyTable} />
     {:else}
       <TablesList tables={[...tablesMap.values()]} {database} {schema} />
     {/if}

@@ -285,13 +285,19 @@ export async function updateTable({
 
 export async function createTable({
   schema,
+  name,
+  description,
 }: {
   schema: Schema;
+  name?: string;
+  description?: string;
 }): Promise<Table> {
   const created = await api.tables
     .add({
       database_id: schema.database.id,
       schema_oid: schema.oid,
+      table_name: name,
+      comment: description,
     })
     .run();
 

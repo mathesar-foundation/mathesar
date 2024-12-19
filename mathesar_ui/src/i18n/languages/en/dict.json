@@ -135,6 +135,7 @@
   "create_new_database": "Create a New Database",
   "create_new_pg_user": "Create a new PostgreSQL user",
   "create_new_schema": "Create New Schema",
+  "create_new_table": "Create New Table",
   "create_record_from_search": "Create Record From Search Criteria",
   "create_role": "Create Role",
   "create_schema": "Create Schema",

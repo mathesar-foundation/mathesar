@@ -7,11 +7,11 @@
   import type { Table } from '@mathesar/models/Table';
   import { modal } from '@mathesar/stores/modal';
 
-  import EditTable from './EditTable.svelte';
+  import EditTableModal from './EditTableModal.svelte';
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';
 
-  const editTableModalController = modal.spawnModalController();
+  const editTableModal = modal.spawnModalController();
 
   export let tables: Table[];
   export let database: Database;
@@ -21,7 +21,7 @@
 
   function openEditTableModal(table: Table) {
     selectedTable = table;
-    editTableModalController.open();
+    editTableModal.open();
   }
 </script>
 
@@ -40,7 +40,7 @@
 </div>
 
 {#if selectedTable}
-  <EditTable modalController={editTableModalController} table={selectedTable} />
+  <EditTableModal controller={editTableModal} table={selectedTable} />
 {/if}
 
 <style lang="scss">
