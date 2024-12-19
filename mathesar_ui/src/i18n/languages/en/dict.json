@@ -600,6 +600,7 @@
   "table_name": "Table Name",
   "table_name_already_exists": "A table with that name already exists.",
   "table_name_cannot_be_empty": "The table name cannot be empty.",
+  "table_new_items_scroll_hint": "Scroll or click here to see the table.",
   "table_not_found": "Table not found.",
   "table_not_shared": "This table is currently not shared.",
   "table_ownership_updated_successfully": "Table ownership has been updated successfully.",

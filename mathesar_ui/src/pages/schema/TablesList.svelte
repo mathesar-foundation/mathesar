@@ -5,6 +5,7 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import type { Table } from '@mathesar/models/Table';
+  import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { modal } from '@mathesar/stores/modal';
 
   import EditTableModal from './EditTableModal.svelte';
@@ -27,7 +28,10 @@
 
 <div class="tables-list">
   {#if tables.length > 0}
-    <div class="container">
+    <div
+      class="container"
+      use:highlightNewItems={{ scrollHint: $_('table_new_items_scroll_hint') }}
+    >
       {#each tables as table (table.oid)}
         <TableCard {table} {database} {schema} {openEditTableModal} />
       {/each}
