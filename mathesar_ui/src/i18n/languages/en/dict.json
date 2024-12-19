@@ -55,6 +55,7 @@
   "cell": "Cell",
   "change_password": "Change Password",
   "check_for_updates": "Check for Updates",
+  "child_role_new_items_scroll_hint": "Scroll or click here to see the child role.",
   "child_roles": "Child Roles",
   "child_roles_count": "{count, plural, one {{count} child role} other {{count} child roles}}",
   "child_roles_saved_successfully": "The Child Roles have been successfully saved.",
