@@ -8,7 +8,7 @@ Then drop the schemas themselves
 */
 DECLARE
   obj RECORD;
-  rm_schemas text[] := ARRAY['msar', '__msar'];
+  rm_schemas text[] := ARRAY['msar', '__msar', 'mathesar_types'];
   detail text;
   hint text;
   stack text;
@@ -33,7 +33,7 @@ BEGIN
     ) UNION (
       SELECT oid, oid::regtype::text AS obj_name, 'TYPE' AS obj_kind
       FROM pg_type
-      WHERE typnamespace::regnamespace::text=ANY(rm_schemas) AND typcategory <> 'A'
+      WHERE typnamespace::regnamespace::text=ANY(ARRAY['msar', '__msar']) AND typcategory <> 'A'
     ) UNION (
       SELECT oid, oid::regclass::text AS obj_name, 'TABLE' AS obj_kind
       FROM pg_class
