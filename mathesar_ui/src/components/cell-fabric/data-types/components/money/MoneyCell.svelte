@@ -15,7 +15,7 @@
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
 
-  const isMoneyCell: boolean = true;
+  const isMoneyCell = true;
 </script>
 
 <SteppedInputCell
