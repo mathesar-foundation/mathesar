@@ -22,6 +22,7 @@
   type Props = CellTypeProps<Value>;
 
   export let isActive: Props['isActive'];
+  export let isMoneyCell = false;
   export let value: Props['value'];
   export let disabled: Props['disabled'];
   export let multiLineTruncate = false;
@@ -164,6 +165,7 @@
   {:else}
     <div
       class="content"
+      class:money-text-align={isMoneyCell}
       class:nowrap={!isActive && !isIndependentOfSheet}
       class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
     >
@@ -185,6 +187,10 @@
     position: relative;
     text-overflow: ellipsis;
     text-align: inherit;
+
+    &.money-text-align {
+      font-variant-numeric: tabular-nums;
+    }
 
     &.nowrap {
       white-space: nowrap;
