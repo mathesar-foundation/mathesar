@@ -4,7 +4,7 @@
 
   import type { ConstraintType } from '@mathesar/api/rpc/constraints';
   import DynamicInput from '@mathesar/components/cell-fabric/DynamicInput.svelte';
-  import { getDbTypeBasedInputCap } from '@mathesar/components/cell-fabric/utils';
+  import { getDbTypeBasedFilterCap } from '@mathesar/components/cell-fabric/utils';
   import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type {
@@ -69,7 +69,7 @@
   $: selectedCondition = conditionIdentifier
     ? selectedColumnFiltersMap.get(conditionIdentifier)
     : undefined;
-  $: selectedColumnInputCap = selectedColumn?.inputComponentAndProps;
+  $: selectedColumnInputCap = selectedColumn?.filterComponentAndProps;
 
   const initialNoOfFilters = numberOfFilters;
   let showError = false;
@@ -154,7 +154,7 @@
     if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
       return selectedColumnInputCap;
     }
-    return getDbTypeBasedInputCap({
+    return getDbTypeBasedFilterCap({
       type: parameterTypeId,
       type_options: {},
       metadata: {},

@@ -2662,7 +2662,7 @@ BEGIN
         "name": "txt",
         "type": "text",
         "default": {
-          "value": "'abc'::text",
+          "value": "abc",
           "is_dynamic": false
         },
         "nullable": true,
@@ -5905,5 +5905,23 @@ BEGIN
     'permission denied for table search_table',
     'Records search throws permission error with empty search terms'
   );
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_object_counts() RETURNS SETOF TEXT AS $$
+DECLARE
+  object_counts jsonb;
+BEGIN
+  CREATE SCHEMA anewone;
+  CREATE TABLE anewone.mytab (col1 text);
+  CREATE TABLE "12345" (bleh text, bleh2 numeric);
+  CREATE TABLE tableno3 (id INTEGER);
+  object_counts = msar.get_object_counts();
+  RETURN NEXT is((object_counts ->> 'schema_count')::integer, 2);
+  RETURN NEXT is((object_counts ->> 'table_count')::integer, 3);
+  -- Can't check actual record count without a vacuum, since we just estimate based on catalog.
+  -- So, we just check that the expected key exists.
+  RETURN NEXT is(object_counts ? 'record_count', true);
 END;
 $$ LANGUAGE plpgsql;
