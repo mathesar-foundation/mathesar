@@ -401,8 +401,6 @@ export class RecordsData {
           .withEntries(contextualFilterEntries)
           .recordsRequestParams(),
         return_record_summaries: this.loadIntrinsicRecordSummaries,
-        // TODO_BETA Do we need shareConsumer here? Previously we had been
-        // passing `...this.shareConsumer?.getQueryParams()`
       };
 
       const fuzzySearchParams = params.searchFuzzy.getSearchParams();
