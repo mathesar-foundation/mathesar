@@ -566,7 +566,6 @@
   "share_exploration": "Share Exploration",
   "share_exploration_help": "Give read-only access to this exploration to anyone via a link.",
   "share_table": "Share Table",
-  "shortcuts": "Shortcuts",
   "showing_n_to_m_of_total": "Showing {leftBound}-{rightBound} of {totalCount}",
   "showing_n_to_m_of_total_records": "{totalCount, plural, one {Showing {leftBound}-{rightBound} of {totalCount} record} other {Showing {leftBound}-{rightBound} of {totalCount} records}}",
   "signed_in_as": "Signed in as",

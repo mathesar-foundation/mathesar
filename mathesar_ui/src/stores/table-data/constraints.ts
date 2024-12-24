@@ -127,17 +127,8 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
     try {
       this.promise?.cancel();
-
-      // TODO_BETA Do we need shareConsumer here? Previously we had been
-      // passing:
-      //
-      // ```
-      // ...this.shareConsumer?.getQueryParams()
-      // ```
       this.promise = api.constraints.list(this.apiContext).run();
-
       const constraints = await this.promise;
-
       const storeData: ConstraintsData = { state: States.Done, constraints };
       this.set(storeData);
       return storeData;

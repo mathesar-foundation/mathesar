@@ -38,6 +38,12 @@ const stringType: CellComponentFactory = {
       },
     };
   },
+  getFilterInput: (column: Column): ComponentAndProps<TextInputProps> => ({
+    component: TextInput,
+    props: {
+      maxlength: optionalNonNullable(column.type_options?.length),
+    },
+  }),
   getDisplayFormatter: () => String,
 };
 
