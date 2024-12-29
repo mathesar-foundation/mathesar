@@ -9,7 +9,10 @@
   } from '@mathesar/component-library';
   import TextInputWithPrefix from '@mathesar/component-library/text-input/TextInputWithPrefix.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { iconExpandRight } from '@mathesar/icons';
+  import { iconAddNew, iconExpandRight } from '@mathesar/icons';
+  import { modal } from '@mathesar/stores/modal';
+
+  import ConnectDatabaseModal from '../../systems/databases/create-database/ConnectDatabaseModal.svelte';
 
   import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
   import type {
@@ -17,6 +20,8 @@
     BreadcrumbSelectorEntry,
   } from './breadcrumbTypes';
   import { filterBreadcrumbSelectorData } from './breadcrumbUtils';
+
+  const connectDatabaseModalController = modal.spawnModalController();
 
   export let data: BreadcrumbSelectorData;
   export let triggerLabel: string;
@@ -118,6 +123,21 @@
                 />
               {/each}
             </ul>
+          {:else if entries.length === 0}
+            <div class="section-name">
+              {`No ${categoryName} configured`}
+              {#if categoryName === 'Databases'}
+                <div class="db-connect-button">
+                  <Button
+                    appearance="primary"
+                    on:click={() => connectDatabaseModalController.open()}
+                  >
+                    <Icon {...iconAddNew} />
+                    <span>{$_('connect_database')}</span>
+                  </Button>
+                </div>
+              {/if}
+            </div>
           {/if}
         {:else}
           {#if filterString.length > 0}
@@ -146,6 +166,8 @@
     </div>
   </AttachableDropdown>
 </div>
+
+<ConnectDatabaseModal controller={connectDatabaseModalController} />
 
 <style lang="scss">
   :global(.breadcrumb-selector-dropdown) {
@@ -193,5 +215,8 @@
       color: var(--slate-500);
       border-color: var(--slate-300);
     }
+  }
+  .db-connect-button {
+    margin-top: 0.5rem;
   }
 </style>
