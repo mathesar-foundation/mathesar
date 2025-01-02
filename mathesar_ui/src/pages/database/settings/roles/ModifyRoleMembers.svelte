@@ -10,6 +10,7 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
+  import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { toast } from '@mathesar/stores/toast';
   import {
     Button,
@@ -87,7 +88,12 @@
         </div>
       {/if}
     </div>
-    <div class="member-list">
+    <div
+      class="member-list"
+      use:highlightNewItems={{
+        scrollHint: $_('child_role_new_items_scroll_hint'),
+      }}
+    >
       {#if $memberOids.size > 0}
         {#each [...$memberOids] as memberOid (memberOid)}
           <div class="member">
