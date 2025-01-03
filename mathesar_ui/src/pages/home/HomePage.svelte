@@ -9,7 +9,6 @@
   import Welcome from './Welcome.svelte';
 
   $: ({ databases } = databasesStore);
-  $: console.log($databases);
 </script>
 
 <svelte:head>
