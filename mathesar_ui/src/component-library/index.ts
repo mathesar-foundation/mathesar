@@ -16,6 +16,7 @@ export { default as Tutorial } from './tutorial/Tutorial.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
+export { default as BooleanCheckbox } from './checkbox/BooleanCheckbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
 export { default as Chip } from './chip/Chip.svelte';
 export { default as Collapsible } from './collapsible/Collapsible.svelte';
