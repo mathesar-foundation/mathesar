@@ -5,6 +5,7 @@
   import { RichText } from '@mathesar/components/rich-text';
   import { iconConnection } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
+  import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
@@ -78,7 +79,12 @@
 
       <svelte:fragment slot="content">
         {#if filteredDatabases.length}
-          <div data-identifier="databases-list-grid">
+          <div
+            data-identifier="databases-list-grid"
+            use:highlightNewItems={{
+              scrollHint: $_('database_new_items_scroll_hint'),
+            }}
+          >
             {#each filteredDatabases as database (database.id)}
               <DatabaseRow {database} />
             {/each}
