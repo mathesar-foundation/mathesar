@@ -12,9 +12,9 @@
   import TablesList from './TablesList.svelte';
 
   export let tablesMap: Map<number, Table>;
-
   export let database: Database;
   export let schema: Schema;
+  export let onCreateEmptyTable: () => void;
 
   $: ({ currentRolePrivileges } = schema.currentAccess);
   $: showTutorial =
@@ -41,7 +41,7 @@
   on:clear={clearQuery}
 >
   <svelte:fragment slot="action">
-    <CreateNewTableButton {database} {schema} />
+    <CreateNewTableButton {database} {schema} {onCreateEmptyTable} />
   </svelte:fragment>
   <svelte:fragment slot="resultInfo">
     <p>
@@ -59,7 +59,7 @@
   </svelte:fragment>
   <svelte:fragment slot="content">
     {#if showTutorial}
-      <CreateNewTableTutorial {database} {schema} />
+      <CreateNewTableTutorial {database} {schema} {onCreateEmptyTable} />
     {:else}
       <TablesList tables={filteredTables} {database} {schema} />
     {/if}
