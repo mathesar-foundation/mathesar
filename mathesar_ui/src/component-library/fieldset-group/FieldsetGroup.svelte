@@ -30,7 +30,7 @@
 </script>
 
 <Fieldset {ariaLabel} {boxed}>
-  <slot name="label" slot="label">{label}</slot>
+  <slot name="label" slot="label">{label ?? ''}</slot>
   <ul
     class="fieldset-group-options"
     class:inline={isInline}
