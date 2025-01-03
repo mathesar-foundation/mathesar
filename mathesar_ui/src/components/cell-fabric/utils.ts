@@ -69,6 +69,20 @@ export function getDbTypeBasedInputCap(
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
 
+export function getDbTypeBasedFilterCap(
+  column: CellColumnLike,
+  fkTargetTableId?: Table['oid'],
+  optionalCellInfo?: CellInfo,
+): ComponentAndProps {
+  const cellInfo = optionalCellInfo ?? getCellInfo(column.type);
+  const factory = DataTypes[cellInfo?.type ?? 'string'];
+  if (factory.getFilterInput) {
+    const config = getCellConfiguration(column.type, cellInfo);
+    return factory.getFilterInput(column, config);
+  }
+  return getDbTypeBasedInputCap(column, fkTargetTableId, cellInfo);
+}
+
 export function getInitialInputValue(
   column: CellColumnLike,
   fkTargetTableId?: Table['oid'],

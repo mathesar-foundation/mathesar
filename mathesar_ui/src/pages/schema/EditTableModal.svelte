@@ -12,7 +12,7 @@
   import type { ModalController } from '@mathesar-component-library';
 
   export let table: Table;
-  export let modalController: ModalController;
+  export let controller: ModalController;
 
   $: getNameValidationErrors = factoryToGetTableNameValidationErrors(table);
 
@@ -29,7 +29,7 @@
 </script>
 
 <NameAndDescInputModalForm
-  controller={modalController}
+  {controller}
   save={handleSave}
   getNameValidationErrors={$getNameValidationErrors}
   getInitialName={() => table.name}

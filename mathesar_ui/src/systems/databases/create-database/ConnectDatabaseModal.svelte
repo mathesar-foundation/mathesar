@@ -1,10 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { router } from 'tinro';
 
   import { iconConnectDatabase, iconCreateDatabase } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
-  import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import {
     ControlledModal,
     type ModalController,
@@ -39,10 +36,8 @@
     controller.close();
   }
 
-  function handleSuccess(database: Database) {
+  function handleSuccess() {
     controller.close();
-    const url = getDatabasePageUrl(database.id);
-    router.goto(url);
   }
 </script>
 

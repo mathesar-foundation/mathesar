@@ -19,6 +19,7 @@
     href: ADMIN_USERS_PAGE_URL,
     label: $_('users'),
     icon: iconMultipleUsers,
+    prependSeparator: true,
   }}
 />
 

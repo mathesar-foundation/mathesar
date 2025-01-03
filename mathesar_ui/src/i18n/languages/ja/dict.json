@@ -468,7 +468,6 @@
   "share_exploration": "探索を共有する",
   "share_exploration_help": "リンクを介して、誰にでもこの探索への読み取り専用アクセスを与えます。",
   "share_table": "テーブルを共有する",
-  "shortcuts": "ショートカット",
   "showing_n_to_m_of_total": "{totalCount}の{leftBound}-{rightBound}を表示中",
   "showing_n_to_m_of_total_records": "{totalCount, plural, other {{totalCount} のレコードの{leftBound}-{rightBound}を表示中}}",
   "signed_in_as": "サインイン名",
