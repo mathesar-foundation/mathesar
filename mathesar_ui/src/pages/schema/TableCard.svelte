@@ -19,12 +19,10 @@
     getTablePageUrl,
   } from '@mathesar/routes/urls';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { modal } from '@mathesar/stores/modal';
   import { deleteTable } from '@mathesar/stores/tables';
   import { createDataExplorerUrlToExploreATable } from '@mathesar/systems/data-explorer';
   import { getRecordSelectorFromContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import TableDeleteConfirmationBody from '@mathesar/systems/table-view/table-inspector/table/TableDeleteConfirmationBody.svelte';
-  import TablePermissionsModal from '@mathesar/systems/table-view/table-inspector/table/TablePermissionsModal.svelte';
   import { tableRequiresImportConfirmation } from '@mathesar/utils/tables';
   import {
     ButtonMenuItem,
@@ -39,13 +37,13 @@
   export let database: Database;
   export let schema: Schema;
   export let openEditTableModal: (_table: Table) => void;
+  export let openTablePermissionsModal: (_table: Table) => void;
 
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
 
   let isHoveringMenuTrigger = false;
   let isHoveringBottomButton = false;
   let isTableCardFocused = false;
-  const permissionModal = modal.spawnModalController();
 
   $: requiresImportConfirmation = tableRequiresImportConfirmation(table);
   $: tablePageUrl = requiresImportConfirmation
@@ -153,7 +151,7 @@
           {$_('edit_table')}
         </ButtonMenuItem>
         <ButtonMenuItem
-          on:click={() => permissionModal.open()}
+          on:click={() => openTablePermissionsModal(table)}
           icon={iconPermissions}
         >
           {$_('table_permissions')}
@@ -186,7 +184,6 @@
     </button>
   {/if}
 </div>
-<TablePermissionsModal {table} controller={permissionModal} />
 
 <style>
   .table-card {
