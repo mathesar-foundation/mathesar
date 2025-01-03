@@ -9,6 +9,7 @@
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
+  import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import {
     ButtonMenuItem,
     DropdownMenu,
@@ -144,25 +145,33 @@
     {/if}
   </svelte:fragment>
 
-  {#each [...$roleAccessField.values()] as roleAccess (roleAccess.roleOid)}
-    <div class="access-control-row">
-      <AccessControlRow
-        rolesMap={roles}
-        {permissionsMetaData}
-        {accessLevelsInfoMap}
-        {privilegeInfoMap}
-        {roleAccess}
-        {setAccess}
-        {removeAccess}
-      />
-    </div>
-  {:else}
-    <div class="no-access">
-      <WarningBox>
-        {$_('access_not_granted_for_any_role')}
-      </WarningBox>
-    </div>
-  {/each}
+  <div
+    class="access-control-rows"
+    class:empty={$roleAccessField.size === 0}
+    use:highlightNewItems={{
+      scrollHint: $_('privileges_new_items_scroll_hint'),
+    }}
+  >
+    {#each [...$roleAccessField.values()] as roleAccess (roleAccess.roleOid)}
+      <div class="access-control-row">
+        <AccessControlRow
+          rolesMap={roles}
+          {permissionsMetaData}
+          {accessLevelsInfoMap}
+          {privilegeInfoMap}
+          {roleAccess}
+          {setAccess}
+          {removeAccess}
+        />
+      </div>
+    {:else}
+      <div class="no-access">
+        <WarningBox>
+          {$_('access_not_granted_for_any_role')}
+        </WarningBox>
+      </div>
+    {/each}
+  </div>
 </OverviewSection>
 
 {#if $currentRoleOwns}
@@ -182,16 +191,12 @@
 {/if}
 
 <style lang="scss">
+  .access-control-rows:not(.empty) {
+    margin-block: calc(-1 * var(--size-base));
+  }
+
   .access-control-row {
     padding: var(--size-base) 0;
-
-    &:first-child {
-      padding-top: 0;
-    }
-
-    &:last-child {
-      padding-bottom: 0;
-    }
 
     & + .access-control-row {
       border-top: 1px solid var(--slate-100);

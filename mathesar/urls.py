@@ -24,7 +24,6 @@ urlpatterns = [
     path('administration/users/', views.admin_home, name='admin_users_home'),
     path('administration/users/<int:user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
-    path('databases/', views.databases_list_route, name='databases_list_route'),
     path('i18n/', include('django.conf.urls.i18n')),
     re_path(
         r'^db/(?P<database_id>\d+)/schemas/(?P<schema_id>\d+)/',
