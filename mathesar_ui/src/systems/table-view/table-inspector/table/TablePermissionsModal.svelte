@@ -7,6 +7,8 @@
     RawTablePrivilegesForRole,
     TablePrivilege,
   } from '@mathesar/api/rpc/tables';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Role } from '@mathesar/models/Role';
   import type { Table } from '@mathesar/models/Table';
@@ -136,7 +138,11 @@
   onClose={() => tablePrivileges.reset()}
 >
   <span slot="title">
-    {$_('table_permissions')}
+    <RichText text={$_('permissions_for_named_table')} let:slotName>
+      {#if slotName === 'tableName'}
+        <Identifier>{table.name}</Identifier>
+      {/if}
+    </RichText>
   </span>
   <PermissionsOverview
     slot="share"
