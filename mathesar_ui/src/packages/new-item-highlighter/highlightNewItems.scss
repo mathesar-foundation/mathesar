@@ -1,0 +1,77 @@
+body > .new-item-highlighter {
+  position: absolute;
+  z-index: var(--new-item-highlighter-z-index, 1000);
+  pointer-events: none;
+  --easing: cubic-bezier(0.5, 0, 1, 0.5);
+
+  .effect {
+    position: absolute;
+    inset: -3rem;
+    border-radius: 3rem;
+    background: transparent;
+    mix-blend-mode: darken;
+    transition:
+      background var(--duration) var(--easing),
+      border-radius var(--duration) var(--easing),
+      inset var(--duration) var(--easing);
+    pointer-events: none;
+    filter: blur(0.2rem);
+  }
+
+  @starting-style {
+    .effect {
+      background: rgba(254, 221, 72, 0.3);
+      border-radius: 0.5rem;
+      inset: 0;
+    }
+  }
+}
+
+body > .new-item-highlighter__hint {
+  position: absolute;
+  z-index: var(--new-item-highlighter-z-index, 1000);
+  --background: rgba(0, 0, 0, 0.7);
+  inset: 0px auto auto 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+
+  @starting-style {
+    opacity: 1;
+  }
+
+  .message {
+    background-color: var(--background);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    max-width: 15rem;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  &:hover {
+    --background: black;
+  }
+
+  svg {
+    height: 1.5rem;
+    width: 1.5rem;
+    margin-bottom: -1px;
+    cursor: pointer;
+
+    path {
+      fill: var(--background);
+    }
+  }
+
+  &.down {
+    flex-direction: column-reverse;
+    svg {
+      transform: rotate(180deg);
+      margin-bottom: 0;
+      margin-top: -1px;
+    }
+  }
+}
