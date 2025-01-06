@@ -38,11 +38,11 @@
 </script>
 
 <div class="databases-list">
-  <div data-identifier="databases-header">
+  <div class="databases-header">
     <span>{$_('databases')}</span>
   </div>
 
-  <section data-identifier="databases-container">
+  <section class="databases-container">
     <EntityContainerWithFilterBar
       searchPlaceholder={$_('search_databases')}
       bind:searchQuery={filterQuery}
@@ -78,7 +78,7 @@
       <svelte:fragment slot="content">
         {#if filteredDatabases.length}
           <div
-            data-identifier="databases-list-grid"
+            class="databases-list-grid"
             use:highlightNewItems={{
               scrollHint: $_('database_new_items_scroll_hint'),
             }}
@@ -100,7 +100,7 @@
     padding: var(--size-xx-large) var(--size-x-large);
   }
 
-  [data-identifier='databases-header'] {
+  .databases-header {
     display: flex;
     align-items: center;
 
@@ -112,7 +112,7 @@
     }
   }
 
-  [data-identifier='databases-container'] {
+  .databases-container {
     display: flex;
     margin-top: var(--size-x-large);
     flex-direction: column;
@@ -120,7 +120,7 @@
     gap: var(--size-x-small);
   }
 
-  [data-identifier='databases-list-grid'] {
+  .databases-list-grid {
     display: grid;
     gap: 1rem;
     margin-top: var(--size-x-large);
