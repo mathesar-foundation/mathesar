@@ -7,6 +7,8 @@
     RawSchemaPrivilegesForRole,
     SchemaPrivilege,
   } from '@mathesar/api/rpc/schemas';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Role } from '@mathesar/models/Role';
   import type { Schema } from '@mathesar/models/Schema';
@@ -28,6 +30,7 @@
   export let schema: Schema;
 
   $: schemaPrivileges = schema.constructSchemaPrivilegesStore();
+  $: schemaName = schema.name;
 
   const databaseContext = DatabaseRouteContext.get();
   $: ({ roles, currentRole } = $databaseContext);
@@ -118,7 +121,11 @@
   onClose={() => schemaPrivileges.reset()}
 >
   <span slot="title">
-    {$_('schema_permissions')}
+    <RichText text={$_('permissions_for_named_schema')} let:slotName>
+      {#if slotName === 'schemaName'}
+        <Identifier>{$schemaName}</Identifier>
+      {/if}
+    </RichText>
   </span>
   <PermissionsOverview
     slot="share"

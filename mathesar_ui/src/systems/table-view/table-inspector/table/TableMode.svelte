@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import { iconPermissions } from '@mathesar/icons';
   import {
     tableInspectorTableActionsVisible,
     tableInspectorTableAdvancedVisible,
@@ -8,8 +9,9 @@
     tableInspectorTablePropertiesVisible,
     tableInspectorTableRecordSummaryVisible,
   } from '@mathesar/stores/localStorage';
+  import { modal } from '@mathesar/stores/modal';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { Collapsible } from '@mathesar-component-library';
+  import { Button, Collapsible, Icon } from '@mathesar-component-library';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import TableRecordSummaryConfig from '../record-summary/TableRecordSummaryConfig.svelte';
@@ -19,9 +21,10 @@
   import TableActions from './TableActions.svelte';
   import TableDescription from './TableDescription.svelte';
   import TableName from './TableName.svelte';
-  import TablePermissions from './TablePermissions.svelte';
+  import TablePermissionsModal from './TablePermissionsModal.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
+  const permissionModal = modal.spawnModalController();
   $: ({ table } = $tabularData);
   $: ({ currentRoleOwns } = table.currentAccess);
 </script>
@@ -39,7 +42,17 @@
     <div slot="content" class="content-container">
       <TableName disabled={!$currentRoleOwns} />
       <TableDescription disabled={!$currentRoleOwns} />
-      <TablePermissions />
+      <div>
+        <Button
+          appearance="secondary"
+          on:click={() => permissionModal.open()}
+          size="small"
+          class="permissions-button"
+        >
+          <Icon {...iconPermissions} />
+          <span>{$_('table_permissions')}</span>
+        </Button>
+      </div>
     </div>
   </Collapsible>
 
@@ -87,6 +100,8 @@
     </div>
   </Collapsible>
 </div>
+
+<TablePermissionsModal {table} controller={permissionModal} />
 
 <style lang="scss">
   .table-mode-container {

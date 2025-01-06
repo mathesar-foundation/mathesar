@@ -14,7 +14,6 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
-    HOME_URL,
     getDatabasePageSchemasSectionUrl,
     getDatabasePageSettingsSectionUrl,
   } from '@mathesar/routes/urls';
@@ -96,7 +95,7 @@
       },
       onSuccess: () => {
         toast.success($_('database_disconnect_success'));
-        router.goto(HOME_URL);
+        router.goto('/');
       },
       onError: (e) =>
         toast.error({
@@ -144,7 +143,10 @@
           <ButtonMenuItem icon={iconDeleteMajor} on:click={disconnectDatabase}>
             {$_('disconnect_database')}
           </ButtonMenuItem>
-          <!-- TODO_BETA: Allow dropping databases -->
+          <!--
+            TODO: Allow dropping databases
+            https://github.com/mathesar-foundation/mathesar/issues/3862
+          -->
           <!-- {#if isDatabaseInInternalServer}
             <ButtonMenuItem
               icon={iconDeleteMajor}

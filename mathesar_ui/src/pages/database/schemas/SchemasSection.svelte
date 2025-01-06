@@ -8,6 +8,7 @@
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { Schema } from '@mathesar/models/Schema';
+  import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import {
@@ -116,30 +117,42 @@
         {/if}
       </RichText>
     </p>
-    <ul class="schema-list" slot="content">
-      {#if schemasRequestStatus.state === 'success'}
-        {#each displayList as schema (schema.oid)}
-          <li class="schema-list-item">
-            <SchemaRow
-              {database}
-              {schema}
-              on:edit={() => editSchema(schema)}
-              on:delete={() => deleteSchema(schema)}
+    <div slot="content">
+      <!--
+      Re-render when changing databases to prevent re-highlighting schemas
+      -->
+      {#key database.id}
+        <ul
+          class="schema-list"
+          use:highlightNewItems={{
+            scrollHint: $_('schema_new_items_scroll_hint'),
+          }}
+        >
+          {#if schemasRequestStatus.state === 'success'}
+            {#each displayList as schema (schema.oid)}
+              <li class="schema-list-item">
+                <SchemaRow
+                  {database}
+                  {schema}
+                  on:edit={() => editSchema(schema)}
+                  on:delete={() => deleteSchema(schema)}
+                />
+              </li>
+            {/each}
+          {:else if schemasRequestStatus.state === 'processing' || isLoading}
+            <SchemaListSkeleton />
+          {:else if schemasRequestStatus.state === 'failure' || $underlyingDatabase.error}
+            <Errors
+              fullWidth
+              errors={[
+                ...schemasRequestStatus.errors,
+                $underlyingDatabase.error,
+              ].filter(isDefinedNonNullable)}
             />
-          </li>
-        {/each}
-      {:else if schemasRequestStatus.state === 'processing' || isLoading}
-        <SchemaListSkeleton />
-      {:else if schemasRequestStatus.state === 'failure' || $underlyingDatabase.error}
-        <Errors
-          fullWidth
-          errors={[
-            ...schemasRequestStatus.errors,
-            $underlyingDatabase.error,
-          ].filter(isDefinedNonNullable)}
-        />
-      {/if}
-    </ul>
+          {/if}
+        </ul>
+      {/key}
+    </div>
   </EntityContainerWithFilterBar>
 </div>
 
@@ -173,7 +186,6 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      margin-top: var(--size-x-large);
 
       .schema-list-item + .schema-list-item {
         margin-top: var(--size-base);

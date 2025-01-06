@@ -3,7 +3,7 @@ from functools import wraps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from modernrpc.exceptions import RPCException
 from modernrpc.views import RPCEntryPoint
 
@@ -125,21 +125,6 @@ class MathesarRPCEntryPoint(LoginRequiredMixin, RPCEntryPoint):
 
 @login_required
 def home(request):
-    database_list = get_database_list(request)
-    number_of_databases = len(database_list)
-    if number_of_databases > 1:
-        return redirect('databases_list_route')
-    elif number_of_databases == 1:
-        db = database_list[0]
-        return redirect('database_route', database_id=db['id'])
-    else:
-        return render(request, 'mathesar/index.html', {
-            'common_data': get_common_data(request)
-        })
-
-
-@login_required
-def databases_list_route(request):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request)
     })

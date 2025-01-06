@@ -7,10 +7,6 @@ import type { Database } from '@mathesar/models/Database';
 import type { Schema } from '@mathesar/models/Schema';
 import type { Table } from '@mathesar/models/Table';
 
-export interface BreadcrumbItemHome {
-  type: 'home';
-}
-
 export interface BreadcrumbItemDatabase {
   type: 'database';
   database: Database;
@@ -34,6 +30,7 @@ export interface BreadcrumbItemSimple {
   href: string;
   label: string | ComponentAndProps;
   icon?: IconProps;
+  prependSeparator?: boolean;
 }
 
 export interface BreadcrumbItemRecord {
@@ -55,7 +52,6 @@ export interface BreadcrumbItemExploration {
 }
 
 export type BreadcrumbItem =
-  | BreadcrumbItemHome
   | BreadcrumbItemDatabase
   | BreadcrumbItemSchema
   | BreadcrumbItemTable
