@@ -8,6 +8,7 @@
     iconEdit,
     iconExploration,
     iconMoreActions,
+    iconPermissions,
     iconSelectRecord,
   } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
@@ -36,6 +37,7 @@
   export let database: Database;
   export let schema: Schema;
   export let openEditTableModal: (_table: Table) => void;
+  export let openTablePermissionsModal: (_table: Table) => void;
 
   $: ({ currentRoleOwns, currentRolePrivileges } = table.currentAccess);
 
@@ -147,6 +149,12 @@
           disabled={!$currentRoleOwns}
         >
           {$_('edit_table')}
+        </ButtonMenuItem>
+        <ButtonMenuItem
+          on:click={() => openTablePermissionsModal(table)}
+          icon={iconPermissions}
+        >
+          {$_('table_permissions')}
         </ButtonMenuItem>
       {/if}
       <ButtonMenuItem
