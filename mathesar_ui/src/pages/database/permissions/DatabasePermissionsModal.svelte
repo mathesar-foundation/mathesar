@@ -6,6 +6,8 @@
     DatabasePrivilege,
     RawDatabasePrivilegesForRole,
   } from '@mathesar/api/rpc/databases';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Role } from '@mathesar/models/Role';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
@@ -106,7 +108,11 @@
   onClose={() => databasePrivileges.reset()}
 >
   <span slot="title">
-    {$_('database_permissions')}
+    <RichText text={$_('permissions_for_named_database')} let:slotName>
+      {#if slotName === 'databaseName'}
+        <Identifier>{database.name}</Identifier>
+      {/if}
+    </RichText>
   </span>
   <PermissionsOverview
     slot="share"

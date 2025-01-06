@@ -7,22 +7,30 @@
   import type { Table } from '@mathesar/models/Table';
   import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { modal } from '@mathesar/stores/modal';
+  import TablePermissionsModal from '@mathesar/systems/table-view/table-inspector/table/TablePermissionsModal.svelte';
 
   import EditTableModal from './EditTableModal.svelte';
   import EmptyEntity from './EmptyEntity.svelte';
   import TableCard from './TableCard.svelte';
 
   const editTableModal = modal.spawnModalController();
+  const tablePermissionsModal = modal.spawnModalController();
 
   export let tables: Table[];
   export let database: Database;
   export let schema: Schema;
 
-  let selectedTable: Table | undefined;
+  let tableForEditing: Table | undefined;
+  let tableForPermissions: Table | undefined;
 
   function openEditTableModal(table: Table) {
-    selectedTable = table;
+    tableForEditing = table;
     editTableModal.open();
+  }
+
+  function openTablePermissionsModal(table: Table) {
+    tableForPermissions = table;
+    tablePermissionsModal.open();
   }
 </script>
 
@@ -33,7 +41,13 @@
       use:highlightNewItems={{ scrollHint: $_('table_new_items_scroll_hint') }}
     >
       {#each tables as table (table.oid)}
-        <TableCard {table} {database} {schema} {openEditTableModal} />
+        <TableCard
+          {table}
+          {database}
+          {schema}
+          {openEditTableModal}
+          {openTablePermissionsModal}
+        />
       {/each}
     </div>
   {:else}
@@ -43,8 +57,15 @@
   {/if}
 </div>
 
-{#if selectedTable}
-  <EditTableModal controller={editTableModal} table={selectedTable} />
+{#if tableForEditing}
+  <EditTableModal controller={editTableModal} table={tableForEditing} />
+{/if}
+
+{#if tableForPermissions}
+  <TablePermissionsModal
+    controller={tablePermissionsModal}
+    table={tableForPermissions}
+  />
 {/if}
 
 <style lang="scss">
