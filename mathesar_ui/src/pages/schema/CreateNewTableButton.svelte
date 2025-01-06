@@ -1,33 +1,19 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { router } from 'tinro';
 
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
   import LinkMenuItem from '@mathesar/component-library/menu/LinkMenuItem.svelte';
   import { iconAddNew } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
-  import { getImportPageUrl, getTablePageUrl } from '@mathesar/routes/urls';
-  import { createTable } from '@mathesar/stores/tables';
-  import {
-    ButtonMenuItem,
-    DropdownMenu,
-    Spinner,
-  } from '@mathesar-component-library';
+  import { getImportPageUrl } from '@mathesar/routes/urls';
+  import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
 
   export let database: Database;
   export let schema: Schema;
+  export let onCreateEmptyTable: () => void;
 
   $: ({ currentRolePrivileges } = schema.currentAccess);
-
-  let isCreatingNewTable = false;
-
-  async function handleCreateEmptyTable() {
-    isCreatingNewTable = true;
-    const table = await createTable({ schema });
-    isCreatingNewTable = false;
-    router.goto(getTablePageUrl(database.id, schema.oid, table.oid), false);
-  }
 </script>
 
 <DropdownMenu
@@ -38,14 +24,10 @@
   disabled={!$currentRolePrivileges.has('CREATE')}
 >
   <div slot="trigger">
-    {#if isCreatingNewTable}
-      <Spinner />
-    {:else}
-      <Icon {...iconAddNew} />
-    {/if}
-    <span>{$_('new_table')}</span>
+    <Icon {...iconAddNew} />
+    {$_('new_table')}
   </div>
-  <ButtonMenuItem on:click={handleCreateEmptyTable}>
+  <ButtonMenuItem on:click={onCreateEmptyTable}>
     {$_('from_scratch')}
   </ButtonMenuItem>
   <LinkMenuItem href={getImportPageUrl(database.id, schema.oid)}>

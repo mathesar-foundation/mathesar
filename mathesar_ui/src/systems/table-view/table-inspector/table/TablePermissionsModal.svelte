@@ -7,15 +7,13 @@
     RawTablePrivilegesForRole,
     TablePrivilege,
   } from '@mathesar/api/rpc/tables';
-  import Icon from '@mathesar/component-library/icon/Icon.svelte';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
-  import { iconPermissions } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
   import type { Table } from '@mathesar/models/Table';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
-  import { modal } from '@mathesar/stores/modal';
-  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { toast } from '@mathesar/stores/toast';
   import {
     type AccessControlConfig,
@@ -23,14 +21,14 @@
     PermissionsOverview,
     TransferOwnership,
   } from '@mathesar/systems/permissions';
-  import { Button, ImmutableMap } from '@mathesar-component-library';
+  import {
+    ImmutableMap,
+    type ModalController,
+  } from '@mathesar-component-library';
 
-  const controller = modal.spawnModalController();
-  const tabularData = getTabularDataStoreFromContext();
-
-  $: table = $tabularData.table;
+  export let controller: ModalController;
+  export let table: Table;
   $: tablePrivileges = table.constructTablePrivilegesStore();
-
   const databaseContext = DatabaseRouteContext.get();
   $: ({ roles, currentRole } = $databaseContext);
 
@@ -134,24 +132,17 @@
   }
 </script>
 
-<div>
-  <Button
-    appearance="secondary"
-    on:click={() => controller.open()}
-    size="small"
-  >
-    <Icon {...iconPermissions} />
-    <span>{$_('table_permissions')}</span>
-  </Button>
-</div>
-
 <PermissionsModal
   {controller}
   getAsyncStores={getAsyncStoresForPermissions}
   onClose={() => tablePrivileges.reset()}
 >
   <span slot="title">
-    {$_('table_permissions')}
+    <RichText text={$_('permissions_for_named_table')} let:slotName>
+      {#if slotName === 'tableName'}
+        <Identifier>{table.name}</Identifier>
+      {/if}
+    </RichText>
   </span>
   <PermissionsOverview
     slot="share"
