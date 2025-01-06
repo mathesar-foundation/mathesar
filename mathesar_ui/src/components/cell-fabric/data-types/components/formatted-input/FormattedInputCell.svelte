@@ -13,6 +13,7 @@
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
   export let formatter: $$Props['formatter'];
   export let formatForDisplay: $$Props['formatForDisplay'];
+  export let useTabularNumbers: $$Props['useTabularNumbers'] = undefined;
 
   $: cssVariables = {
     '--input-element-text-align': 'right',
@@ -26,7 +27,7 @@
   {disabled}
   {isIndependentOfSheet}
   {showTruncationPopover}
-  useTabularNumbers={true}
+  {useTabularNumbers}
   horizontalAlignment="right"
   let:handleInputBlur
   let:handleInputKeydown
