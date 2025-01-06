@@ -22,6 +22,7 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('administration/', views.admin_home, name='admin_home'),
     path('administration/users/', views.admin_home, name='admin_users_home'),
+    path('administration/users/new/', views.admin_home, name='admin_users_new'),
     path('administration/users/<int:user_id>/', views.admin_home, name='admin_users_edit'),
     path('administration/update/', views.admin_home, name='admin_update'),
     path('i18n/', include('django.conf.urls.i18n')),
