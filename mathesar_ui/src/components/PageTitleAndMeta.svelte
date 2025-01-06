@@ -4,7 +4,7 @@
 
   export let icon: IconProps;
   export let name: string;
-  export let description: string | undefined = undefined;
+  export let subText: string | undefined = undefined;
 </script>
 
 <div class="container">
@@ -16,8 +16,8 @@
         </div>
         <div class="left-meta-container">
           <span class="entity-name">{name}</span>
-          {#if description}
-            <span class="entity-description">{description}</span>
+          {#if subText}
+            <span>{subText}</span>
           {/if}
         </div>
       </div>

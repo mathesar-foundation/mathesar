@@ -121,9 +121,7 @@
     pageTitleAndMetaProps={{
       name: database.name,
       icon: iconDatabase,
-      description: `${$_(
-        'db_server',
-      )}: ${database.server.getConnectionString()}`,
+      subText: `${$_('db_server')}: ${database.server.getConnectionString()}`,
     }}
   >
     <div slot="action">
