@@ -16,6 +16,7 @@
     storedRolePasswords: '/user-guide/stored-role-passwords/',
     collaborators: '/user-guide/collaborators/',
     internalSchemas: '/user-guide/schemas/#internal',
+    databases: '/user-guide/databases/',
   };
   type Page = keyof typeof pages;
 

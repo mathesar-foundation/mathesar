@@ -10,9 +10,10 @@
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { ConnectDatabaseModal } from '@mathesar/systems/databases';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Button, Icon, Help } from '@mathesar-component-library';
 
   import DatabaseRow from './DatabaseRow.svelte';
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
 
   const connectDbModalController = modal.spawnModalController();
 
@@ -38,8 +39,21 @@
 </script>
 
 <div class="databases-list">
-  <div class="databases-header">
-    <span>{$_('databases')}</span>
+  <div class="header">
+    <span class="title">{$_('databases')}</span>
+    <span class="help">
+      <Help>
+        <RichText
+          text={$_('databases_list_help')}
+          let:slotName
+          let:translatedArg
+        >
+          {#if slotName === 'docsLink'}
+            <DocsLink page="databases">{translatedArg}</DocsLink>
+          {/if}
+        </RichText>
+      </Help>
+    </span>
   </div>
 
   <section class="databases-container">
@@ -100,16 +114,15 @@
     padding: var(--size-xx-large) var(--size-x-large);
   }
 
-  .databases-header {
-    display: flex;
-    align-items: center;
-
-    span {
-      flex: 1 0 0;
-      color: var(--slate-900);
-      font-size: var(--text-size-ultra-large);
-      font-weight: var(--font-weight-medium);
-    }
+  .title {
+    flex: 1 0 0;
+    color: var(--slate-900);
+    font-size: var(--text-size-ultra-large);
+    font-weight: var(--font-weight-medium);
+  }
+  .help {
+    margin-left: 0.5rem;
+    vertical-align: super;
   }
 
   .databases-container {

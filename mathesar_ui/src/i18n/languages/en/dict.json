@@ -181,6 +181,7 @@
   "database_settings": "Database Settings",
   "database_type": "Database Type",
   "databases": "Databases",
+  "databases_list_help": "See our [docsLink](documentation) to learn more about how databases work.",
   "databases_matching_search": "{count, plural, one {{count} database matches [searchValue]} other {{count} databases match [searchValue]}}",
   "days": "Days",
   "db_server": "DB server",
