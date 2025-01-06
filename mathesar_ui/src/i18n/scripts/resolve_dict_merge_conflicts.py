@@ -30,12 +30,12 @@ incoming_rev = None
 with open(DICT_PATH, "r") as f:
     for line in f:
         if not current_rev:
-            match = re.search("^<<<<<<< (\w+)", line)
+            match = re.search(r"^<<<<<<< (\w+)", line)
             if match:
                 current_rev = match.group(1)
                 continue
         if not incoming_rev:
-            match = re.search("^>>>>>>> (\w+)", line)
+            match = re.search(r"^>>>>>>> (\w+)", line)
             if match:
                 incoming_rev = match.group(1)
                 continue
