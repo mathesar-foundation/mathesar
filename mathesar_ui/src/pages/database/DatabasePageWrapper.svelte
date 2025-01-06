@@ -120,6 +120,7 @@
     slot="secondary-header"
     pageTitleAndMetaProps={{
       name: database.name,
+      entityTypeName: $_('database'),
       icon: iconDatabase,
       subText: `${$_('db_server')}: ${database.server.getConnectionString()}`,
     }}
