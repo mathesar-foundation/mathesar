@@ -9,6 +9,7 @@
   } from '@mathesar/api/rpc/tables';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Role } from '@mathesar/models/Role';
   import type { Table } from '@mathesar/models/Table';
@@ -22,6 +23,7 @@
     TransferOwnership,
   } from '@mathesar/systems/permissions';
   import {
+    Help,
     ImmutableMap,
     type ModalController,
   } from '@mathesar-component-library';
@@ -143,6 +145,10 @@
         <Identifier>{table.name}</Identifier>
       {/if}
     </RichText>
+    <Help>
+      <p>{$_('table_permissions_help')}</p>
+      <p><SeeDocsToLearnMore page="tablePermissions" /></p>
+    </Help>
   </span>
   <PermissionsOverview
     slot="share"
