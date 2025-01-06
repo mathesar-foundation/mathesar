@@ -71,7 +71,7 @@
   $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isTableEditable = currentRoleTablePrivileges.has('UPDATE');
-  // TODO_BETA: Handle case where INSERT is allowed, but UPDATE isn't
+  // TODO: Handle case where INSERT is allowed, but UPDATE isn't
   // i.e. row is a placeholder row and record isn't saved yet
   $: isEditable =
     isTableEditable &&
