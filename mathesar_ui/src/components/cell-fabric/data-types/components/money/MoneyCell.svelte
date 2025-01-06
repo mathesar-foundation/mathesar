@@ -14,8 +14,6 @@
   export let formatForDisplay: $$Props['formatForDisplay'];
   export let isIndependentOfSheet: $$Props['isIndependentOfSheet'];
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
-
-  const isMoneyCell = true;
 </script>
 
 <SteppedInputCell
@@ -25,7 +23,7 @@
   {searchValue}
   {isIndependentOfSheet}
   {showTruncationPopover}
-  {isMoneyCell}
+  useTabularNumbers={true}
   formatValue={formatForDisplay}
   horizontalAlignment="right"
   let:handleInputBlur

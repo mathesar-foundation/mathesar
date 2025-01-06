@@ -26,6 +26,7 @@
   highlightSubstringMatches={false}
   {isIndependentOfSheet}
   {showTruncationPopover}
+  useTabularNumbers={true}
   let:handleInputBlur
   let:handleInputKeydown
   formatValue={formatForDisplay}

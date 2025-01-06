@@ -22,7 +22,6 @@
   type Props = CellTypeProps<Value>;
 
   export let isActive: Props['isActive'];
-  export let isMoneyCell = false;
   export let value: Props['value'];
   export let disabled: Props['disabled'];
   export let multiLineTruncate = false;
@@ -32,6 +31,7 @@
   export let isIndependentOfSheet = false;
   export let showTruncationPopover = false;
   export let highlightSubstringMatches = true;
+  export let useTabularNumbers = false;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
@@ -155,6 +155,7 @@
   on:keydown={handleKeyDown}
   on:mouseenter
   mode={isEditMode ? 'edit' : 'default'}
+  {useTabularNumbers}
   {multiLineTruncate}
   {horizontalAlignment}
   {valueComparisonOutcome}
@@ -165,7 +166,6 @@
   {:else}
     <div
       class="content"
-      class:money-text-align={isMoneyCell}
       class:nowrap={!isActive && !isIndependentOfSheet}
       class:truncate={isActive && multiLineTruncate && !isIndependentOfSheet}
     >
@@ -187,10 +187,6 @@
     position: relative;
     text-overflow: ellipsis;
     text-align: inherit;
-
-    &.money-text-align {
-      font-variant-numeric: tabular-nums;
-    }
 
     &.nowrap {
       white-space: nowrap;

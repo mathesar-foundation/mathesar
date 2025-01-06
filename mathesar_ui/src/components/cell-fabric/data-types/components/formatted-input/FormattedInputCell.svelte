@@ -26,6 +26,7 @@
   {disabled}
   {isIndependentOfSheet}
   {showTruncationPopover}
+  useTabularNumbers={true}
   horizontalAlignment="right"
   let:handleInputBlur
   let:handleInputKeydown
