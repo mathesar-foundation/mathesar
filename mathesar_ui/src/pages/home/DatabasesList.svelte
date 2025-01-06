@@ -39,9 +39,7 @@
 
 <div class="databases-list">
   <div data-identifier="databases-header">
-    <span>
-      {$_('databases')} ({$databases.size})
-    </span>
+    <span>{$_('databases')}</span>
   </div>
 
   <section data-identifier="databases-container">
