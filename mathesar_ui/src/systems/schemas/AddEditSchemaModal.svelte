@@ -76,10 +76,3 @@
     {/if}
   </span>
 </NameAndDescInputModalForm>
-
-<style>
-  .description {
-    display: inline-block;
-    margin-bottom: 1rem;
-  }
-</style>
