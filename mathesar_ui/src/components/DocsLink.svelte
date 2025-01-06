@@ -17,6 +17,7 @@
     collaborators: '/user-guide/collaborators/',
     internalSchemas: '/user-guide/schemas/#internal',
     databases: '/user-guide/databases/',
+    schemas: '/user-guide/schemas/',
   };
   type Page = keyof typeof pages;
 

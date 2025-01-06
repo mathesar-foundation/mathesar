@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconConnection } from '@mathesar/icons';
@@ -10,10 +11,9 @@
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { ConnectDatabaseModal } from '@mathesar/systems/databases';
-  import { Button, Icon, Help } from '@mathesar-component-library';
+  import { Button, Help, Icon } from '@mathesar-component-library';
 
   import DatabaseRow from './DatabaseRow.svelte';
-  import DocsLink from '@mathesar/components/DocsLink.svelte';
 
   const connectDbModalController = modal.spawnModalController();
 
