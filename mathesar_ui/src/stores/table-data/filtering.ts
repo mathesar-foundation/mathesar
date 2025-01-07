@@ -140,6 +140,10 @@ export class Filtering {
     this.entries = entries ?? [];
   }
 
+  hasColumn(columnId: FilterEntry['columnId']): boolean {
+    return this.entries.some((entry) => entry.columnId === columnId);
+  }
+
   withEntries(entries: Iterable<FilterEntry>): Filtering {
     return new Filtering({
       combination: this.combination,

@@ -1,25 +1,27 @@
 <script lang="ts">
   import { takeLast } from 'iter-tools';
-  import { onMount, tick } from 'svelte';
+  import { createEventDispatcher, onMount, tick } from 'svelte';
   import { type Writable, writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
+  import DropdownMenu from '@mathesar/component-library/dropdown-menu/DropdownMenu.svelte';
   import type { LinkedRecordInputElement } from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordUtils';
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
+  import FilterEntry from '@mathesar/components/filter-entry/FilterEntry.svelte';
   import { FILTER_INPUT_CLASS } from '@mathesar/components/filter-entry/utils';
-  import { iconAddNew } from '@mathesar/icons';
   import { getImperativeFilterControllerFromContext } from '@mathesar/pages/table/ImperativeFilterController';
-  import type {
-    Filtering,
-    ProcessedColumns,
+  import {
+    type Filtering,
+    type ProcessedColumns,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/stores/table-data/filtering';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
+  import { ButtonMenuItem } from '@mathesar-component-library';
 
   import { deepCloneFiltering } from '../utils';
-
-  import FilterEntries from './FilterEntries.svelte';
 
   const imperativeFilterController = getImperativeFilterControllerFromContext();
 
@@ -37,6 +39,14 @@
   let element: HTMLElement;
 
   $: filterCount = $internalFiltering.entries.length;
+  // $: availableColumns =  processedColumns.values().toArray()
+
+  const tabularData = getTabularDataStoreFromContext();
+  const processedColumnStore = $tabularData.processedColumns;
+  /** Columns which are not already used as a filtering entry */
+  $: availableColumns = [...$processedColumnStore.values()].filter(
+    (column) => !$internalFiltering.hasColumn(column.id),
+  );
 
   function checkAndSetExternalFiltering() {
     const validFilters = $internalFiltering.entries.filter((filter) => {
@@ -114,40 +124,75 @@
       activateLastFilterInput,
     ),
   );
+
+  const dispatch = createEventDispatcher<{
+    remove: number;
+    update: number;
+    updateCombination: FilterCombination;
+  }>();
 </script>
 
 <div class="filters" class:filtered={filterCount} bind:this={element}>
   <div class="header">{$_('filter_records')}</div>
   <div class="content">
     {#if filterCount}
-      <FilterEntries
-        {processedColumns}
-        {recordSummaries}
-        bind:entries={$internalFiltering.entries}
-        bind:filterCombination={$internalFiltering.combination}
-        on:remove={(e) => removeFilter(e.detail)}
-        on:update={updateFilter}
-        on:updateCombination={(e) => setCombination(e.detail)}
-      />
+      {#each $internalFiltering.entries as entry, index}
+        <FilterEntry
+          columns={processedColumns}
+          getColumnLabel={(column) =>
+            processedColumns.get(column.id)?.column.name ?? ''}
+          disableColumnChange
+          getColumnConstraintType={(column) =>
+            getColumnConstraintTypeByColumnId(column.id, processedColumns)}
+          bind:columnIdentifier={entry.columnId}
+          bind:conditionIdentifier={entry.conditionId}
+          bind:value={entry.value}
+          numberOfFilters={filterCount}
+          on:update={() => {
+            updateFilter();
+            dispatch('update');
+          }}
+          on:removeFilter={() => {
+            removeFilter(index);
+            dispatch('remove');
+          }}
+          recordSummaryStore={recordSummaries}
+        />
+      {/each}
     {:else}
       <span class="muted">{$_('no_filters_added')}</span>
     {/if}
   </div>
-  {#if processedColumns.size}
-    <div class="footer">
-      <Button
-        appearance="secondary"
-        on:click={async () => {
-          addFilter();
-          await tick();
-          activateLastFilterInput();
-        }}
-      >
-        <Icon {...iconAddNew} />
-        <span>{$_('add_new_filter')}</span>
-      </Button>
-    </div>
-  {/if}
+  <div class="footer">
+    <DropdownMenu
+      label={$_('add_new_filter')}
+      disabled={!availableColumns}
+      triggerAppearance="secondary"
+    >
+      {#each availableColumns as column (column.id)}
+        <ButtonMenuItem
+          on:click={async () => {
+            addFilter(column.id);
+            await tick();
+            activateLastFilterInput();
+          }}
+        >
+          <ColumnName
+            column={{
+              name: processedColumns.get(column.id)?.column.name ?? '',
+              type: processedColumns.get(column.id)?.column.type ?? '',
+              type_options:
+                processedColumns.get(column.id)?.column.type_options ?? null,
+              constraintsType: getColumnConstraintTypeByColumnId(
+                column.id,
+                processedColumns,
+              ),
+            }}
+          />
+        </ButtonMenuItem>
+      {/each}
+    </DropdownMenu>
+  </div>
 </div>
 
 <style lang="scss">
@@ -162,6 +207,10 @@
 
     .header {
       font-weight: bolder;
+    }
+
+    .footer {
+      margin-top: 1rem;
     }
 
     .muted {
