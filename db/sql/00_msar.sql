@@ -4711,17 +4711,10 @@ Build an SQL expresson string that, when added to the record listing query, prod
 with the records resulting from the request.
 */
 SELECT format(
-  'coalesce(jsonb_agg(json_build_object('
-  || string_agg(format('%1$L, %2$I.%1$I', attnum, cte_name), ', ')
-  || ') %1$s), jsonb_build_array())',
-  msar.build_order_by_expr(tab_id, order_)
+  $j$
+    coalesce(jsonb_agg(to_jsonb(%2$I) - %3$L - %4$L %1$s), jsonb_build_array())
+  $j$, msar.build_order_by_expr(tab_id, order_), cte_name, '__mathesar_gid', '__mathesar_gcount'
 )
-FROM pg_catalog.pg_attribute
-WHERE
-  attrelid = tab_id
-  AND attnum > 0
-  AND NOT attisdropped
-  AND has_column_privilege(attrelid, attnum, 'SELECT');
 $$ LANGUAGE SQL STABLE;
 
 
