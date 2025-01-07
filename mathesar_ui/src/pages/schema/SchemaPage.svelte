@@ -12,7 +12,7 @@
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
   import AddEditSchemaModal from '@mathesar/systems/schemas/AddEditSchemaModal.svelte';
   import { logEvent } from '@mathesar/utils/telemetry';
-  import { Button, Icon, TabContainer } from '@mathesar-component-library';
+  import { Button, Icon } from '@mathesar-component-library';
 
   import AddTableModal from './AddTableModal.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
@@ -34,7 +34,7 @@
     editSchemaModal.open();
   }
 
-  $: ({ name, description, tableCount, currentAccess } = schema);
+  $: ({ name, description, currentAccess } = schema);
   $: ({ currentRoleOwns } = currentAccess);
 
   logEvent('opened_schema', {
@@ -97,27 +97,3 @@
 <AddEditSchemaModal controller={editSchemaModal} {database} {schema} />
 <AddTableModal controller={addTableModal} {schema} {tablesMap} />
 <SchemaPermissionsModal controller={permissionsModal} {schema} />
-
-<style lang="scss">
-  .tab-container {
-    padding: var(--size-xx-large) 0;
-  }
-
-  .tab-header-container {
-    display: flex;
-    align-items: center;
-
-    > :global(* + *) {
-      margin-left: 0.25rem;
-    }
-
-    .count {
-      border-radius: var(--border-radius-l);
-      background: var(--slate-200);
-      font-size: var(--text-size-small);
-      text-align: center;
-      padding: 0.071rem 0.5rem;
-      margin-left: 0.5rem;
-    }
-  }
-</style>
