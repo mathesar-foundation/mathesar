@@ -5480,8 +5480,7 @@ BEGIN
       'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
       'count', coalesce(max(count_cte.count), 0),
       'linked_record_summaries', %10$s,
-      'record_summaries', %11$s,
-      'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L$iq$
+      'record_summaries', %11$s
     )
     FROM results_cte %9$s
       CROSS JOIN count_cte

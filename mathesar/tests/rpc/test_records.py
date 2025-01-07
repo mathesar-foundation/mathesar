@@ -248,7 +248,6 @@ def test_records_search(rf, monkeypatch, mocked_exec_msar_func):
         "grouping": None,
         "linked_record_summaries": {"2": {"12345": "blkjdfslkj"}},
         "record_summaries": {"3": "abcde"},
-        "query": 'SELECT mycol AS "1", anothercol AS "2" FROM mytable LIMIT 2',
     }
     mocked_exec_msar_func.fetchone.return_value = [expect_records_list]
     actual_records_list = records.search(
