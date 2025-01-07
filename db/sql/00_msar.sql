@@ -5329,8 +5329,7 @@ BEGIN
       'count', coalesce(max(count_cte.count), 0),
       'grouping', %5$s,
       'linked_record_summaries', %10$s,
-      'record_summaries', %11$s,
-      'query', $iq$ %2$s $iq$
+      'record_summaries', %11$s
     )
     FROM enriched_results_cte
       LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %9$s
