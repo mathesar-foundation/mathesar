@@ -4712,8 +4712,16 @@ with the records resulting from the request.
 */
 SELECT format(
   $j$
-    coalesce(jsonb_agg(to_jsonb(%2$I) - %3$L - %4$L %1$s), jsonb_build_array())
-  $j$, msar.build_order_by_expr(tab_id, order_), cte_name, '__mathesar_gid', '__mathesar_gcount'
+    COALESCE(
+      jsonb_agg(
+        to_jsonb(%2$I) - %3$L - %4$L %1$s
+      ), jsonb_build_array()
+    )
+  $j$, 
+  /* %1 */ msar.build_order_by_expr(tab_id, order_),
+  /* %2 */ cte_name,
+  /* %3 */ '__mathesar_gid',
+  /* %4 */ '__mathesar_gcount'
 )
 $$ LANGUAGE SQL STABLE;
 
