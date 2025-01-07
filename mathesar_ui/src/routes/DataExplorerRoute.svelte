@@ -142,6 +142,7 @@
         href: getExplorationEditorPageUrl(database.id, schema.oid, $query.id),
         label: $_('edit'),
         icon: iconEdit,
+        prependSeparator: true,
       }}
     />
   {:else}

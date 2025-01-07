@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { iconConnectDatabase, iconDatabase } from '@mathesar/icons';
+  import { iconDatabase } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
-  import { HOME_URL, getDatabasePageUrl } from '@mathesar/routes/urls';
+  import { getDatabasePageUrl } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
@@ -31,17 +31,4 @@
 <BreadcrumbSelector
   data={new Map([[$_('databases'), breadcrumbEntries]])}
   triggerLabel={$_('choose_database')}
-  persistentLinks={[
-    {
-      type: 'simple',
-      label: $_('manage_databases'),
-      href: HOME_URL,
-      icon: {
-        ...iconConnectDatabase,
-        size: '1.4rem',
-      },
-      // TODO: Handle active states for persistent links
-      isActive: () => false,
-    },
-  ]}
 />
