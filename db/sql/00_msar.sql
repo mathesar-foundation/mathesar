@@ -4785,36 +4785,40 @@ SELECT format(
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.build_selectable_columns(tab_id oid) RETURNS jsonb AS $$/*
-Build a jsonb object with attnum and attname of the columns to which the user has access.
+CREATE OR REPLACE FUNCTION msar.get_selectable_columns(tab_id oid) RETURNS jsonb AS $$/*
+Returns a jsonb object with the columns to which the user has access.
 
 Given columns with attnums 2, 3, and 4, and assuming the user has access only to columns 2 and 4,
-this function will return an expression of the form:
+this function will return a jsonb as follows:
 
-{
-  "attnum": 2, "attname": <column name of 2>,
-  "attnum": 4, "attname": <column name of 4>,
-}
+{ "2": <name of column with oid 2>, "4": <name of column with oid 4> }
 
 Args:
   tab_id: The OID of the table containing the columns to select.
 */
-SELECT coalesce(
-  jsonb_agg(
-    jsonb_build_object(
-      'attnum', attnum,
-      'attname', attname
-    )
-  ),
-  '[]'::jsonb
-)
+SELECT coalesce(jsonb_object_agg(attnum, attname), '{}'::jsonb)
 FROM pg_catalog.pg_attribute
 WHERE
   attrelid = tab_id
   AND attnum > 0
   AND NOT attisdropped
   AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_column_expr(columns jsonb) RETURNS text AS $$/*
+Build an SQL select-target expression of columns from the argument.
+This is meant to work together with output of functions like msar.get_selectable_columns.
+
+Returns an expr in the form: msar.format_data("<column name>") as "<oid>", ...
+
+Args:
+  columns: The columns to build the expr for, in the following jsonb sample format:
+           { "2": <name of column with oid 2>, "4": <name of column with oid 4> }
+
+*/
+SELECT string_agg(format('msar.format_data(%I) AS %I', sel_column.value, sel_column.key), ', ')
+FROM jsonb_each_text(columns) as sel_column;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -4825,13 +4829,12 @@ Build an SQL select-target expression of only columns to which the user has acce
 Given columns with attnums 2, 3, and 4, and assuming the user has access only to columns 2 and 4,
 this function will return an expression of the form:
 
-column_name AS "2", another_column_name AS "4"
+msar.format_data("column_name") AS "2", msar.format_data("another_column_name") AS "4"
 
 Args:
   tab_id: The OID of the table containing the columns to select.
 */
-SELECT string_agg(format('msar.format_data(%I) AS %I', columns->>'attname', columns->>'attnum'), ', ')
-FROM jsonb_array_elements(msar.build_selectable_columns(tab_id)) as columns;
+SELECT msar.build_column_expr(msar.get_selectable_columns(tab_id));
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
