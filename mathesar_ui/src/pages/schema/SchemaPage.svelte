@@ -7,11 +7,6 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
-  import {
-    getSchemaPageExplorationsSectionUrl,
-    getSchemaPageTablesSectionUrl,
-    getSchemaPageUrl,
-  } from '@mathesar/routes/urls';
   import { modal } from '@mathesar/stores/modal';
   import { queries } from '@mathesar/stores/queries';
   import { currentTablesData as tablesStore } from '@mathesar/stores/tables';
@@ -20,58 +15,20 @@
   import { Button, Icon, TabContainer } from '@mathesar-component-library';
 
   import AddTableModal from './AddTableModal.svelte';
-  import ExplorationSkeleton from './ExplorationSkeleton.svelte';
-  import SchemaExplorations from './SchemaExplorations.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
   import SchemaPermissionsModal from './SchemaPermissionsModal.svelte';
-  import SchemaTables from './SchemaTables.svelte';
-  import TableSkeleton from './TableSkeleton.svelte';
 
   export let database: Database;
   export let schema: Schema;
-  export let section: string;
 
   const editSchemaModal = modal.spawnModalController();
   const addTableModal = modal.spawnModalController();
   const permissionsModal = modal.spawnModalController();
 
-  // NOTE: This has to be same as the name key in the paths prop of Route component
-  type TabsKey = 'overview' | 'tables' | 'explorations';
-  type TabItem = {
-    label: string;
-    id: TabsKey;
-    count?: number;
-    href: string;
-  };
-
   $: tablesMap = $tablesStore.tablesMap;
   $: explorationsMap = $queries.data;
   $: tablesRequestStatus = $tablesStore.requestStatus;
   $: explorationsRequestStatus = $queries.requestStatus;
-
-  $: tabs = [
-    {
-      label: $_('overview'),
-      id: 'overview',
-      href: getSchemaPageUrl(database.id, schema.oid),
-    },
-    {
-      label: $_('tables'),
-      id: 'tables',
-      showCount: tablesRequestStatus.state === 'success',
-      count: tablesMap.size,
-      href: getSchemaPageTablesSectionUrl(database.id, schema.oid),
-    },
-    {
-      label: $_('explorations'),
-      id: 'explorations',
-      showCount: explorationsRequestStatus.state === 'success',
-      count: explorationsMap.size,
-      href: getSchemaPageExplorationsSectionUrl(database.id, schema.oid),
-    },
-  ] as TabItem[];
-
-  $: activeTab = tabs.find((tab) => tab.id === section) || tabs[0];
 
   function handleEditSchema() {
     editSchemaModal.open();
@@ -135,53 +92,6 @@
     {explorationsRequestStatus}
     onCreateEmptyTable={() => addTableModal.open()}
   />
-  <!-- <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
-    <div slot="tab" let:tab class="tab-header-container">
-      <span>{tab.label}</span>
-      {#if tab.count !== undefined && tab.showCount}
-        <span class="count">{tab.count}</span>
-      {/if}
-    </div>
-    {#if activeTab?.id === 'overview'}
-      <div class="tab-container">
-        <SchemaOverview
-          {tablesRequestStatus}
-          {tablesMap}
-          {explorationsMap}
-          {database}
-          {schema}
-          {explorationsRequestStatus}
-          onCreateEmptyTable={() => addTableModal.open()}
-        />
-      </div>
-    {:else if activeTab?.id === 'tables'}
-      <div class="tab-container">
-        {#if tablesRequestStatus.state === 'processing'}
-          <TableSkeleton numTables={$tableCount} />
-        {:else}
-          <SchemaTables
-            {tablesMap}
-            {database}
-            {schema}
-            onCreateEmptyTable={() => addTableModal.open()}
-          />
-        {/if}
-      </div>
-    {:else if activeTab?.id === 'explorations'}
-      <div class="tab-container">
-        {#if explorationsRequestStatus.state === 'processing'}
-          <ExplorationSkeleton />
-        {:else}
-          <SchemaExplorations
-            hasTablesToExplore={!!tablesMap.size}
-            {explorationsMap}
-            {database}
-            {schema}
-          />
-        {/if}
-      </div>
-    {/if}
-  </TabContainer> -->
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={editSchemaModal} {database} {schema} />
