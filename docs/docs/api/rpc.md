@@ -80,6 +80,14 @@ Unrecognized errors from a given library return a "round number" code, so an unk
 
 ---
 
+## Analytics
+::: analytics
+    options:
+      members:
+      - initialize
+      - disable
+      - view_report
+
 ## Collaborators
 
 ::: collaborators
