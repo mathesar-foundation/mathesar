@@ -17,7 +17,7 @@
   export let valueComparisonOutcome: ValueComparisonOutcome | undefined =
     undefined;
   export let isIndependentOfSheet = false;
-
+  export let useTabularNumbers = false;
   /**
    * This only affects the alignment of the displayed value while in
    * select-mode. It does not affect the alignment of the value within an input
@@ -85,6 +85,7 @@
   class:exact-match={valueComparisonOutcome === 'exactMatch'}
   class:substring-match={valueComparisonOutcome === 'substringMatch'}
   class:no-match={valueComparisonOutcome === 'noMatch'}
+  class:is-tabular-number={useTabularNumbers}
   data-active-cell={isActive ? '' : undefined}
   bind:this={element}
   on:click
@@ -150,6 +151,10 @@
         resize: vertical;
         min-height: 5em;
       }
+    }
+
+    &.is-tabular-number {
+      font-variant-numeric: tabular-nums;
     }
   }
   .exact-match {

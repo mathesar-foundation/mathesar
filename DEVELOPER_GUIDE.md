@@ -187,6 +187,11 @@ Django uses gettext, which require the `.po` files to be compiled into a more ef
 - To handle pluralization and other complexities, the source translation strings may utilize a special syntax called [JSON with ICU Plurals](https://help.transifex.com/en/articles/6220806-json-with-icu-plurals) (a subset of the [ICU format](https://unicode-org.github.io/icu/userguide/icu/i18n.html)).
 - After making changes to your code, ensure that the source `/en/dict.json` file contains new translation strings, if any.
 - Do not update other translation files. They will be pulled from our translation service provider when the translation process is complete.
+- If you encounter merge conflicts in `en/dict.json`, run this script to automatically resolve them:
+
+    ```
+    python3 mathesar_ui/src/i18n/scripts/resolve_dict_merge_conflicts.py
+    ```
 
 ## Translation process
 
