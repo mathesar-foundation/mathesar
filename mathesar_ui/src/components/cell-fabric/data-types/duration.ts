@@ -23,6 +23,7 @@ function getProps(column: Column): FormattedInputCellExternalProps {
   const durationSpecification = new DurationSpecification({ max, min });
   const formatter = new DurationFormatter(durationSpecification);
   return {
+    useTabularNumbers: true,
     formatter,
     placeholder: durationSpecification.getFormattingString(),
     formatForDisplay: (

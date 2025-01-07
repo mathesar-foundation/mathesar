@@ -31,6 +31,7 @@
   export let isIndependentOfSheet = false;
   export let showTruncationPopover = false;
   export let highlightSubstringMatches = true;
+  export let useTabularNumbers = false;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
@@ -154,6 +155,7 @@
   on:keydown={handleKeyDown}
   on:mouseenter
   mode={isEditMode ? 'edit' : 'default'}
+  {useTabularNumbers}
   {multiLineTruncate}
   {horizontalAlignment}
   {valueComparisonOutcome}
