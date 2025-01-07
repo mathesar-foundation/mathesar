@@ -12,9 +12,28 @@ Mathesar has an API available at `/api/rpc/v0/` which follows the [JSON-RPC](htt
 
 ## Usage
 
+You can find a full list of Mathesar's RPC methods on the [API Methods page](./methods.md).
+
+!!! tip "Converting Functions to API requests"
+    The methods are shown as Python function definitions to make them easier to understand, but they need to be converted into JSON payloads for API calls.
+
+    Here's how to convert a function call like this: `tables.list_(*, database_id=None, **kwargs)` into an API payload.
+
+    1. The function name becomes the method path:
+        - `tables.list_` converts to `"method": "tables.list"`
+    2. Named parameters become part of the `"parameters"` object:
+       ```json
+       {
+         "method": "tables.list",
+         "parameters": {
+           "database_id": 1
+         }
+       }
+       ```
+
 ### Requests
 
-To use an RPC function:
+To use an RPC method:
 
 - Call it with a dot path starting from its root path.
 - Always use named parameters.
@@ -22,9 +41,9 @@ To use an RPC function:
 
 !!! example
 
-    To call function `tables.list` from the Tables section of this page, you'd send something like:
+    To list information about tables for a schema, call the [`tables.list`](./methods/#tables.list_) method with a payload like this:
 
-    `POST /api/rpc/v0/`b
+    `POST /api/rpc/v0/`
 
     ```json
     {
@@ -40,7 +59,7 @@ To use an RPC function:
 
 ### Success Responses
 
-Upon a successful call to an RPC function, the API will return a success object. Such an object has the following form:
+Upon a successful RPC method call, the API will return a success object with the following form:
 
 ```json
 {
@@ -50,11 +69,11 @@ Upon a successful call to an RPC function, the API will return a success object.
 }
 ```
 
-The `result` is whatever was returned by the underlying function.
+The `result` is whatever was returned by the underlying method.
 
 ### Error Responses
 
-When an error is produced by a call to the RPC endpoint, we produce an error of the following form:
+When an RPC method call fails, it generates an error response of the following form:
 
 ```json
 {

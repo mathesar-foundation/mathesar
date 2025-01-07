@@ -1,6 +1,6 @@
 # Overview of Access Control in Mathesar
 
-To manage access to data, Mathesar utilizes PostgreSQL's powerful role-based permissions system. Each user accesses a database through a specific PostgreSQL role, and the user's access is determined by the role's privileges within PostgreSQL.
+Mathesar manages data access using PostgreSQL's powerful role-based permissions system. Users interact with the database through designated PostgreSQL roles, with their access determined by the privileges assigned to those roles.
 
 Here's how it works:
 
@@ -13,4 +13,3 @@ Here's how it works:
 1. **[Collaborators](./collaborators.md):** For a user to access a given database, an [admin](./users.md#admin) must add the user as a collaborator on that database and assign the user to a specific PostgreSQL role. You can configure separate Mathesar users to share the same PostgreSQL role if you like. Or you can use dedicated PostgreSQL roles for different users.
 
 {% include 'snippets/metadata-access-control.md' %}
-
