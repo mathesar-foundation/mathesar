@@ -67,17 +67,7 @@
         : undefined}
     />
   </MultiPathRoute>
-
-  <MultiPathRoute
-    paths={[
-      { name: 'tables', path: '/tables/' },
-      { name: 'explorations', path: '/explorations/' },
-      { name: 'overview', path: '/' },
-    ]}
-    let:path
-  >
-    <SchemaPage {database} {schema} section={path} />
-  </MultiPathRoute>
+  <SchemaPage {database} {schema} />
 {:else}
   <ErrorPage>{$_('schema_not_found')}</ErrorPage>
 {/if}
