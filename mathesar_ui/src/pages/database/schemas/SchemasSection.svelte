@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { get } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
@@ -41,6 +42,16 @@
 
   let filterQuery = '';
   let targetSchema: Schema | undefined;
+  let highlightingEnabled = true;
+
+  async function momentarilyPauseHighlighting() {
+    highlightingEnabled = false;
+    await tick();
+    highlightingEnabled = true;
+  }
+
+  // Don't highlight items when the filter query changes
+  $: filterQuery, void momentarilyPauseHighlighting();
 
   function filterSchemas(
     schemaData: SchemaStoreData['data'],
@@ -126,6 +137,7 @@
           class="schema-list"
           use:highlightNewItems={{
             scrollHint: $_('schema_new_items_scroll_hint'),
+            enabled: highlightingEnabled,
           }}
         >
           {#if schemasRequestStatus.state === 'success'}

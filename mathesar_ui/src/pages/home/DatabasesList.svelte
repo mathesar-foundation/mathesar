@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
@@ -20,6 +21,16 @@
   $: ({ isMathesarAdmin } = $userProfileStore);
 
   let filterQuery = '';
+  let highlightingEnabled = true;
+
+  async function momentarilyPauseHighlighting() {
+    highlightingEnabled = false;
+    await tick();
+    highlightingEnabled = true;
+  }
+
+  // Don't highlight items when the filter query changes
+  $: filterQuery, void momentarilyPauseHighlighting();
 
   $: ({ databases } = databasesStore);
 
@@ -83,6 +94,7 @@
             data-identifier="databases-list-grid"
             use:highlightNewItems={{
               scrollHint: $_('database_new_items_scroll_hint'),
+              enabled: highlightingEnabled,
             }}
           >
             {#each filteredDatabases as database (database.id)}

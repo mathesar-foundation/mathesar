@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
@@ -21,6 +22,16 @@
     tablesMap.size === 0 && $currentRolePrivileges.has('CREATE');
 
   let tableSearchQuery = '';
+  let highlightingEnabled = true;
+
+  async function momentarilyPauseHighlighting() {
+    highlightingEnabled = false;
+    await tick();
+    highlightingEnabled = true;
+  }
+
+  // Don't highlight items when the filter query changes
+  $: tableSearchQuery, void momentarilyPauseHighlighting();
 
   function filterTables(_tablesMap: Map<number, Table>, searchQuery: string) {
     return [..._tablesMap.values()].filter((table) =>
@@ -61,7 +72,12 @@
     {#if showTutorial}
       <CreateNewTableTutorial {database} {schema} {onCreateEmptyTable} />
     {:else}
-      <TablesList tables={filteredTables} {database} {schema} />
+      <TablesList
+        tables={filteredTables}
+        {database}
+        {schema}
+        {highlightingEnabled}
+      />
     {/if}
   </svelte:fragment>
 </EntityContainerWithFilterBar>
