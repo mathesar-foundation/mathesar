@@ -4,12 +4,11 @@
   import type { Database } from '@mathesar/models/Database';
   import type { Schema } from '@mathesar/models/Schema';
   import { getImportPageUrl } from '@mathesar/routes/urls';
-  import { AnchorButton, Tutorial } from '@mathesar-component-library';
-
-  import CreateEmptyTableButton from './CreateEmptyTableButton.svelte';
+  import { AnchorButton, Button, Tutorial } from '@mathesar-component-library';
 
   export let database: Database;
   export let schema: Schema;
+  export let onCreateEmptyTable: () => void;
 </script>
 
 <Tutorial>
@@ -20,9 +19,9 @@
   <div class="new-table-tutorial-footer" slot="footer">
     <span>{$_('how_do_you_want_to_create_table')}</span>
     <div class="new-table-tutorial-actions">
-      <CreateEmptyTableButton class="padding-zero" {database} {schema}>
-        <span>{$_('from_scratch')}</span>
-      </CreateEmptyTableButton>
+      <Button on:click={onCreateEmptyTable}>
+        {$_('from_scratch')}
+      </Button>
       <AnchorButton href={getImportPageUrl(database.id, schema.oid)}>
         {$_('import_from_file')}
       </AnchorButton>
