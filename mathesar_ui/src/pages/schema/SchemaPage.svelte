@@ -126,8 +126,16 @@
       {/if}
     </svelte:fragment>
   </AppSecondaryHeader>
-
-  <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
+  <SchemaOverview
+    {tablesRequestStatus}
+    {tablesMap}
+    {explorationsMap}
+    {database}
+    {schema}
+    {explorationsRequestStatus}
+    onCreateEmptyTable={() => addTableModal.open()}
+  />
+  <!-- <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div slot="tab" let:tab class="tab-header-container">
       <span>{tab.label}</span>
       {#if tab.count !== undefined && tab.showCount}
@@ -173,7 +181,7 @@
         {/if}
       </div>
     {/if}
-  </TabContainer>
+  </TabContainer> -->
 </LayoutWithHeader>
 
 <AddEditSchemaModal controller={editSchemaModal} {database} {schema} />
