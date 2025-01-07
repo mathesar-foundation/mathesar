@@ -26,9 +26,19 @@ def export_table_csv_in_chunks(
 ):
     with connect(database_id, user) as conn:
         csv_buffer = StringIO()
-        csv_writer = csv.writer(csv_buffer)
-        for rows in fetch_table_in_chunks(conn, table_oid, **kwargs):
-            csv_writer.writerows(rows)
+
+        table_fetch_gen = fetch_table_in_chunks(conn, table_oid, **kwargs)
+        columns = next(table_fetch_gen)
+        csv_writer = csv.DictWriter(csv_buffer, fieldnames=columns.keys())
+
+        csv_writer.writerow(columns)
+        value = csv_buffer.getvalue()
+        yield value
+        csv_buffer.seek(0)
+        csv_buffer.truncate(0)
+
+        for records in table_fetch_gen:
+            csv_writer.writerows(records)
             value = csv_buffer.getvalue()
             yield value
             csv_buffer.seek(0)

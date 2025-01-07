@@ -231,25 +231,23 @@ def fetch_table_in_chunks(
     order=None,
     filter=None,
     with_column_header=True,
+    batch_size=2000
 ):
     with conn.transaction():
-        with conn.cursor() as cursor:
-            db_conn.exec_msar_func(
-                cursor,
-                'get_table_columns_and_records_cursor',
-                table_oid,
-                limit,
-                offset,
-                _json_or_none(order),
-                _json_or_none(filter),
-            )
-            result = cursor.fetchone()[0]
-            columns = result[1]
-            records_cursor = result[2]
+        with db_conn.exec_msar_func_server_cursor(
+            conn,
+            'get_table_columns_and_records',
+            table_oid,
+            limit,
+            offset,
+            _json_or_none(order),
+            _json_or_none(filter),
+        ) as server_cursor:
             if with_column_header:
-                column_names = [tuple(column['attname'] for column in json.loads(columns))]
-                yield column_names
-            yield from db_conn.select_from_db_cursor(
-                cursor,
-                records_cursor
-            )
+                columns = server_cursor.fetchone()[0]
+                yield columns
+            while True:
+                records = server_cursor.fetchmany(batch_size)
+                if not records:
+                    break
+                yield [record[0] for record in records]
