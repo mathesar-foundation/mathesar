@@ -39,7 +39,6 @@
   "based_on": "ベース",
   "before_upgrading": "アップグレード前",
   "bootstrap_connection_help": "これらの接続認証情報は、新規ユーザーの作成に使用されます。既存のユーザーはCREATEROLE権限を持っている必要があります。",
-  "build_your_exploration": "探索を構築",
   "cancel": "キャンセル",
   "cancel_upload": "アップロードをキャンセル",
   "cannot_modify_own_access_warning": "自分のアクセスレベルは変更できません。管理者にご連絡ください。",

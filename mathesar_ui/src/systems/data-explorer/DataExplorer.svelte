@@ -8,7 +8,8 @@
   import { WithExplorationInspector } from './exploration-inspector';
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
   import type QueryManager from './QueryManager';
-  import ResultPane from './result-pane/ResultPane.svelte';
+  import ExplorationResults from './result-pane/ExplorationResults.svelte';
+  import StatusBar from './StatusBar.svelte';
   import type { ColumnWithLink } from './utils';
 
   export let queryManager: QueryManager;
@@ -59,10 +60,11 @@
             queryHandler={queryManager}
             on:delete
           >
-            <ResultPane queryHandler={queryManager} />
+            <ExplorationResults queryHandler={queryManager} />
           </WithExplorationInspector>
         {/if}
       </WithInputSidebar>
+      <StatusBar queryHandler={queryManager} />
     </div>
   {/if}
 </div>
@@ -100,7 +102,8 @@
     }
 
     .content-pane {
-      display: flex;
+      display: grid;
+      grid-template: 1fr auto / 1fr;
       overflow: hidden;
       overflow-x: auto;
       .help-text {

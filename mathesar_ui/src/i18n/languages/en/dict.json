@@ -47,7 +47,6 @@
   "based_on": "Based on",
   "before_upgrading": "Before Upgrading",
   "bootstrap_connection_help": "These connection credentials will be used to create the new user. The existing user will need to have the CREATEROLE privilege.",
-  "build_your_exploration": "Build your Exploration",
   "cancel": "Cancel",
   "cancel_upload": "Cancel upload",
   "cannot_modify_own_access_warning": "You cannot modify your own access levels. Please contact an administrator.",
