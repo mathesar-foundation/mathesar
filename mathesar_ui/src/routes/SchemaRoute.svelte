@@ -67,7 +67,10 @@
         : undefined}
     />
   </MultiPathRoute>
-  <SchemaPage {database} {schema} />
+
+  <Route path="/">
+    <SchemaPage {database} {schema} />
+  </Route>
 {:else}
   <ErrorPage>{$_('schema_not_found')}</ErrorPage>
 {/if}
