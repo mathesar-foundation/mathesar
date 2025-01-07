@@ -3374,6 +3374,130 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- msar.get_table_columns_and_records ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_get_table_columns_records() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE table_for_export (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    col1 integer,
+    col2 varchar,
+    col3 json,
+    col4 jsonb
+  );
+  INSERT INTO table_for_export (col1, col2, col3, col4) VALUES
+    (5, 'sdflkj', '"s"', '{"a": "val"}'),
+    (34, 'sdflfflsk', null, '[1, 2, 3, 4]'),
+    (2, 'abcde', '{"k": 3242348}', 'true');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_table_columns_and_records() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_get_table_columns_records();
+  rel_id := 'table_for_export'::regclass::oid;
+  RETURN NEXT results_eq(
+    format(
+      $q$
+      SELECT msar.get_table_columns_and_records(
+        tab_id => %1$L,
+        limit_ => %2$L,
+        offset_ => %3$L,
+        order_ => %4$L,
+        filter_ => %5$L
+      )
+      $q$,
+      rel_id,
+      null,
+      null,
+      null,
+      null
+    ),
+    ARRAY[
+      '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
+      '{"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}'::JSONB
+    ]
+  );
+  RETURN NEXT results_eq(
+    format(
+      $q$
+      SELECT msar.get_table_columns_and_records(
+        tab_id => %1$L,
+        limit_ => %2$L,
+        offset_ => %3$L,
+        order_ => %4$L,
+        filter_ => %5$L
+      )
+      $q$,
+      rel_id,
+      2,
+      null,
+      '[{"attnum": 2, "direction": "desc"}]',
+      null
+    ),
+    ARRAY[
+      '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB
+    ]
+  );
+  RETURN NEXT results_eq(
+    format(
+      $q$
+      SELECT msar.get_table_columns_and_records(
+        tab_id => %1$L,
+        limit_ => %2$L,
+        offset_ => %3$L,
+        order_ => %4$L,
+        filter_ => %5$L
+      )
+      $q$,
+      rel_id,
+      null,
+      1,
+      '[{"attnum": 1, "direction": "desc"}]',
+      null
+    ),
+    ARRAY[
+      '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB
+    ]
+  );
+  RETURN NEXT results_eq(
+    format(
+      $q$
+      SELECT msar.get_table_columns_and_records(
+        tab_id => %1$L,
+        limit_ => %2$L,
+        offset_ => %3$L,
+        order_ => %4$L,
+        filter_ => %5$L
+      )
+      $q$,
+      rel_id,
+      null,
+      null,
+      null,
+      concat(
+        '{"type":"contains_case_insensitive","args":[',
+        '{"type":"attnum","value":3},'
+        '{"type":"literal","value":"sdfl"}',
+      ']}')::JSONB
+    ),
+    ARRAY[
+      '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB
+    ]
+  );
+END;
+$$ LANGUAGE plpgsql;
 
 -- msar.get_current_role ---------------------------------------------------------------------------
 
