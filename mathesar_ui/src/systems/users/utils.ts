@@ -7,7 +7,7 @@ import {
 
 export type UserType = 'admin' | 'standard';
 
-export function getDisplayNameForUserType(userType: UserType): string {
+function getDisplayNameForUserType(userType: UserType): string {
   switch (userType) {
     case 'admin':
       return 'Admin';
