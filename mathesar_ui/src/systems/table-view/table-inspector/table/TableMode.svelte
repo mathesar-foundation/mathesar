@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { iconPermissions } from '@mathesar/icons';
   import {
     tableInspectorTableActionsVisible,
@@ -11,7 +12,7 @@
   } from '@mathesar/stores/localStorage';
   import { modal } from '@mathesar/stores/modal';
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
-  import { Button, Collapsible, Icon } from '@mathesar-component-library';
+  import { Button, Collapsible, Help, Icon } from '@mathesar-component-library';
 
   import CollapsibleHeader from '../CollapsibleHeader.svelte';
   import TableRecordSummaryConfig from '../record-summary/TableRecordSummaryConfig.svelte';
@@ -60,11 +61,15 @@
     bind:isOpen={$tableInspectorTableLinksVisible}
     triggerAppearance="inspector"
   >
-    <CollapsibleHeader
-      slot="header"
-      title={$_('links')}
-      isDbLevelConfiguration
-    />
+    <CollapsibleHeader slot="header" isDbLevelConfiguration>
+      <div slot="title">
+        {$_('relationships')}
+        <Help>
+          <p>{$_('references_help')}</p>
+          <p><SeeDocsToLearnMore page="relationships" /></p>
+        </Help>
+      </div>
+    </CollapsibleHeader>
     <div slot="content" class="content-container">
       <TableLinks />
     </div>

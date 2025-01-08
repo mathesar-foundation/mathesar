@@ -36,7 +36,7 @@
   {trigger}
   {isOpen}
   placements={['top', 'right', 'bottom', 'left']}
-  class="tooltip {tooltipClass}"
+  class="tooltip trim-child-margins {tooltipClass}"
   on:mouseenter={() => {
     contentIsHovered = true;
   }}

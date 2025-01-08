@@ -1,4 +1,4 @@
-# Environment Variables
+# Configuring Mathesar with environment variables
 
 This page contains all available environment variables supported by Mathesar. See the specific installation guides for the applicable environment variables and instructions on how to set them.
 
@@ -51,7 +51,7 @@ This page contains all available environment variables supported by Mathesar. Se
 ## Caddy reverse proxy configuration {: #caddy}
 
 !!!note
-    These variables are only needed if you're using the Caddy configuration in our [default Docker Compose](../../installation/docker-compose/#steps) file.
+    These variables are only needed if you're using the Caddy configuration in our [default Docker Compose](install-via-docker-compose.md#steps) file.
 
 ### `DOMAIN_NAME`
 

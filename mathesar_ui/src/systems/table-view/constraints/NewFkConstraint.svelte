@@ -170,8 +170,10 @@
       on:change={handleNamingStrategyChange}
       getRadioLabel={(s) => namingStrategyLabelMap.get(s) ?? ''}
     >
-      {$_('set_constraint_name')}
-      <ConstraintNameHelp />
+      <span slot="label">
+        {$_('set_constraint_name')}
+        <ConstraintNameHelp />
+      </span>
     </RadioGroup>
   </FieldLayout>
 

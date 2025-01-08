@@ -3,6 +3,8 @@
 
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
+  import RichText from '@mathesar/components/rich-text/RichText.svelte';
+  import Yes from '@mathesar/components/Yes.svelte';
   import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
@@ -14,6 +16,7 @@
     Icon,
     type ImmutableMap,
     SpinnerButton,
+    isDefinedNonNullable,
   } from '@mathesar-component-library';
 
   const routeContext = DatabaseSettingsRouteContext.get();
@@ -23,7 +26,12 @@
   export let onClickEditMembers: (role: Role) => void;
   export let onDrop: (role: Role) => void;
 
-  $: members = role.members;
+  $: membersMap = role.members;
+  $: memberIds = [...$membersMap.keys()];
+  $: memberNames = memberIds
+    .map((id) => rolesMap.get(id)?.name)
+    .filter(isDefinedNonNullable)
+    .sort();
 
   async function dropRole() {
     try {
@@ -39,20 +47,25 @@
 <GridTableCell>{role.name}</GridTableCell>
 <GridTableCell>
   {#if role.login}
-    {$_('yes')}
+    <Yes />
   {/if}
 </GridTableCell>
 <GridTableCell>
   <div class="child-roles">
-    <div class="role-list">
-      {#each [...$members.values()] as member (member.oid)}
-        <span class="role-name">
-          {rolesMap.get(member.oid)?.name ?? ''}
-        </span>
+    <ul class="role-list">
+      {#each memberNames as member (member)}
+        <li>{member}</li>
       {/each}
-    </div>
+    </ul>
     <div class="actions">
       <Button appearance="secondary" on:click={() => onClickEditMembers(role)}>
+        <div slot="tooltip">
+          <RichText text={$_('edit_child_roles_for_parent')} let:slotName>
+            {#if slotName === 'parent'}
+              <b>{role.name}</b>
+            {/if}
+          </RichText>
+        </div>
         <Icon {...iconEdit} size="0.8em" />
       </Button>
     </div>
@@ -66,8 +79,9 @@
         title: {
           component: PhraseContainingIdentifier,
           props: {
+            identifierKey: 'name',
             identifier: role.name,
-            wrappingString: $_('drop_role_with_identifier'),
+            wrappingString: $_('drop_role_name_question'),
           },
         },
         body: [
@@ -80,7 +94,9 @@
           icon: iconDeleteMajor,
         },
       })}
-    label={$_('drop_role')}
+    label=""
+    tooltip={$_('drop_role')}
+    icon={iconDeleteMajor}
     onClick={dropRole}
   />
 </GridTableCell>
@@ -90,14 +106,14 @@
     display: flex;
     width: 100%;
     align-items: center;
+  }
 
-    .role-list {
-      display: flex;
-      gap: 6px;
-    }
+  .role-list {
+    margin: 0;
+    padding: 0 0 0 1rem;
+  }
 
-    .actions {
-      margin-left: auto;
-    }
+  .actions {
+    margin-left: auto;
   }
 </style>

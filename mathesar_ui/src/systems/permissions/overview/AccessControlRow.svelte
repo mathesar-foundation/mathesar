@@ -114,7 +114,7 @@
   <div class="role-permissions">
     <Collapsible bind:isOpen={isRolePermissionsOpen} triggerAppearance="plain">
       <div slot="header">
-        {$_('role_permissions')}
+        {$_('role_privileges')}
       </div>
       <div class="content" slot="content">
         <CheckboxGroup

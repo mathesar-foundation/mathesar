@@ -5,13 +5,15 @@
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
+  import { staticText } from '@mathesar/i18n/staticText';
   import { iconAddNew } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
   import { fetchSchemasForCurrentDatabase } from '@mathesar/stores/schemas';
-  import { Button, Icon, Spinner } from '@mathesar-component-library';
+  import { Button, Help, Icon, Spinner } from '@mathesar-component-library';
 
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
 
@@ -60,6 +62,10 @@
 <SettingsContentLayout>
   <svelte:fragment slot="title">
     {$_('roles')}
+    <Help>
+      {$_('roles_help')}
+      <SeeDocsToLearnMore page="roles" />
+    </Help>
   </svelte:fragment>
   <svelte:fragment slot="actions">
     {#if !$roles.isLoading}
@@ -78,10 +84,23 @@
     <div class="roles-table">
       <GridTable>
         <GridTableCell header>{$_('role')}</GridTableCell>
-        <!--eslint-disable-next-line @intlify/svelte/no-raw-text -->
-        <GridTableCell header>LOGIN</GridTableCell>
         <GridTableCell header>
-          {$_('child_roles')}
+          <div>
+            {staticText.LOGIN}
+            <Help>
+              {$_('roles_login_help')}
+              <SeeDocsToLearnMore page="rolesLogin" />
+            </Help>
+          </div>
+        </GridTableCell>
+        <GridTableCell header>
+          <div>
+            {$_('child_roles')}
+            <Help>
+              {$_('role_inheritance_help')}
+              <SeeDocsToLearnMore page="rolesInheritance" />
+            </Help>
+          </div>
         </GridTableCell>
         <GridTableCell header>{$_('actions')}</GridTableCell>
         {#each roleList as role (role.oid)}
