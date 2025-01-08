@@ -5364,7 +5364,6 @@ BEGIN
     /* %4 */ COALESCE(
       msar.build_results_jsonb_array_expr(
         'enriched_results_cte',
-        msar.jsonb_keys_to_array(expr_and_ctes -> 'selectable_columns'),
         expr_and_ctes ->> 'order_by_expr'
       ),
       'NULL'
