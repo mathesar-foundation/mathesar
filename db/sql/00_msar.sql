@@ -4722,9 +4722,9 @@ Build an SQL expresson string that, when added to the record listing query, prod
 with the records resulting from the request.
 */
 SELECT format(
-  'coalesce(jsonb_agg(jsonb_build_object('
-  || string_agg(format('%1$L, %2$I.%1$I', column_, cte_name), ', ')
-  || ') %1$s), jsonb_build_array())',
+  'coalesce(jsonb_agg('
+  || string_agg(format('jsonb_build_object(%1$L, %2$I.%1$I)', column_, cte_name), ' || ')
+  || ' %1$s), jsonb_build_array())',
   order_by_expr
 )
 FROM unnest(columns) AS column_
@@ -4739,11 +4739,7 @@ msar.build_results_setof_jsonb_expr(
 Build an SQL expresson string that, when added to the record listing query, produces a setof jsonb
 results with the records resulting from the request.
 */
-SELECT format(
-  'jsonb_build_object('
-  || string_agg(format('%1$L, %2$I.%1$I', column_, cte_name), ', ')
-  || ')'
-)
+SELECT string_agg(format('jsonb_build_object(%1$L, %2$I.%1$I)', column_, cte_name), ' || ')
 FROM unnest(columns) AS column_
 $$ LANGUAGE SQL STABLE;
 
@@ -5187,18 +5183,21 @@ Args:
   tab_oid: The OID of the table for which we're getting linked record summaries.
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
-SELECT 'jsonb_build_object(' || string_agg(
+SELECT string_agg(
   format(
     $j$
-    %1$L, COALESCE(
-      jsonb_object_agg(
-        summary_cte_%1$s.key, summary_cte_%1$s.summary
-      ) FILTER (WHERE summary_cte_%1$s.key IS NOT NULL), '{}'::jsonb
+    jsonb_build_object(
+      %1$L,
+      COALESCE(
+        jsonb_object_agg(
+          summary_cte_%1$s.key, summary_cte_%1$s.summary
+        ) FILTER (WHERE summary_cte_%1$s.key IS NOT NULL), '{}'::jsonb
+      )
     )
     $j$,
     conkey
-  ), ', '
-) || ')'
+  ), ' || '
+)
 FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
