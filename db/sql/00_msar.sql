@@ -5220,14 +5220,33 @@ END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION msar.build_expr_and_ctes_for_enriched_results(
+CREATE OR REPLACE FUNCTION msar.build_record_list_query_components_with_ctes(
   tab_id oid,
   limit_ integer,
   offset_ integer,
   order_ jsonb,
   filter_ jsonb,
   group_ jsonb
-) RETURNS jsonb AS $$
+) RETURNS jsonb AS $$/*
+  Constructs the components necessary for generating enriched query results,
+  including expressions, clauses, selectable_column list, and CTEs, for a table.
+
+  Args:
+    tab_id: The OID of the table whose records we'll get
+    limit_: The maximum number of rows we'll return
+    offset_: The number of rows to skip before returning records from following rows
+    order_: An array of ordering definition objects
+    filter_: An array of filter definition objects
+    group_: An array of group definition objects
+
+  Behavior:
+    Fetches metadata about the table (selectable_column list, schema name, table name etc.,)
+    Constructs expressions and SQL snippets (SELECT, WHERE, GROUP BY, etc.,)
+    Generates two SQL queries:
+      1. A query for paginated results (`results_cte_query`).
+      2. A query to count the total matching rows (`count_cte_query`).
+    Returns a jsonb object combining metadata, the expressions, and the generated SQL queries.
+*/
 DECLARE
   selectable_columns jsonb;
   expr_object jsonb;
@@ -5304,7 +5323,7 @@ DECLARE
   expr_and_ctes jsonb;
   records jsonb;
 BEGIN
-  SELECT msar.build_expr_and_ctes_for_enriched_results(
+  SELECT msar.build_record_list_query_components_with_ctes(
     tab_id,
     limit_,
     offset_,
@@ -5386,7 +5405,7 @@ msar.get_table_columns_and_records(
 DECLARE
   expr_and_ctes jsonb;
 BEGIN
-  SELECT msar.build_expr_and_ctes_for_enriched_results(
+  SELECT msar.build_record_list_query_components_with_ctes(
     tab_id,
     limit_,
     offset_,
