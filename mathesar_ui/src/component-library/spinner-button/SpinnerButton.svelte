@@ -31,6 +31,7 @@
   export let disabled = false;
   export let isProcessing = false;
   export let appearance: Appearance = 'primary';
+  export let tooltip: string | undefined = undefined;
 
   /**
    * Bind to this function if you want to be able to programmatically call the
@@ -55,6 +56,8 @@
   on:click={proceed}
   {appearance}
   disabled={disabled || isProcessing}
+  {tooltip}
+  aria-label={label ? undefined : tooltip}
   {...$$restProps}
 >
   {#if isProcessing}

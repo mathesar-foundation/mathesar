@@ -61,7 +61,7 @@
     },
     {
       id: 'settings',
-      label: $_('settings'),
+      label: $_('database_settings'),
       href: getDatabasePageSettingsSectionUrl(database.id),
     },
   ];

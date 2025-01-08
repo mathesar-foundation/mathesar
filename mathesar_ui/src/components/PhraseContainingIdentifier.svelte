@@ -4,10 +4,11 @@
 
   export let identifier: string;
   export let wrappingString = '';
+  export let identifierKey = 'identifier';
 </script>
 
 <RichText text={wrappingString} let:slotName>
-  {#if slotName === 'identifier'}
+  {#if slotName === identifierKey}
     <Identifier>{identifier}</Identifier>
   {/if}
 </RichText>
