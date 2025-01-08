@@ -28,7 +28,7 @@
   "add_user": "Add User",
   "admin": "Admin",
   "admin_access": "Admin Access",
-  "admin_user_checkbox_help": "Admin users have some additional privileges, but only for high-level Mathesar-specific operations like connecting databases and managing other users. A user's admin status does not affect their access to the data within the connected databases.",
+  "admin_user_checkbox_help": "Admin users can perform some additional Mathesar-specific operations (like connecting databases and managing other users), but admin status doesn't automatically grant full access to the data in those databases.",
   "administration": "Administration",
   "advanced": "Advanced",
   "after_upgrading": "After Upgrading",
