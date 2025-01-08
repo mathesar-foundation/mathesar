@@ -95,10 +95,8 @@ $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 CREATE OR REPLACE FUNCTION msar.jsonb_keys_to_array(obj jsonb) RETURNS text[] AS $$/*
 Similar to jsonb_object_keys but returns text[] instead of setof text.
 */
-BEGIN
-  RETURN ARRAY(SELECT key FROM jsonb_object_keys(obj) AS key);
-END
-$$ LANGUAGE plpgsql STABLE;
+SELECT array_agg(x) FROM jsonb_object_keys(obj) as x;
+$$ LANGUAGE SQL STABLE;
 
 
 ----------------------------------------------------------------------------------------------------
