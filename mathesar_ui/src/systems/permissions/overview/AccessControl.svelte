@@ -125,7 +125,7 @@
   }
 </script>
 
-<OverviewSection title={$_('granted_access')}>
+<OverviewSection title={$_('granted_privileges')}>
   <svelte:fragment slot="actions">
     {#if $currentRoleOwns}
       <DropdownMenu

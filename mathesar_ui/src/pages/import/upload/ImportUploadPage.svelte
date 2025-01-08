@@ -203,9 +203,7 @@
                 let:translatedArg
               >
                 {#if slotName === 'documentationLink'}
-                  <DocsLink path="/user-guide/importing-data/">
-                    {translatedArg}
-                  </DocsLink>
+                  <DocsLink page="import">{translatedArg}</DocsLink>
                 {/if}
               </RichText>
             </div>

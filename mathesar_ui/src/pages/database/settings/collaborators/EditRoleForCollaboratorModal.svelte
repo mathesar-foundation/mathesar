@@ -7,6 +7,8 @@
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
+  import Identifier from '@mathesar/components/Identifier.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import type { Collaborator } from '@mathesar/models/Collaborator';
   import type { ConfiguredRole } from '@mathesar/models/ConfiguredRole';
   import { toast } from '@mathesar/stores/toast';
@@ -42,11 +44,11 @@
 
 <ControlledModal {controller} on:close={() => form.reset()}>
   <span slot="title">
-    {$_('edit_role_for_collaborator_value', {
-      values: {
-        collaborator: userName,
-      },
-    })}
+    <RichText text={$_('edit_role_for_collaborator_value')} let:slotName>
+      {#if slotName === 'userName'}
+        <Identifier>{userName}</Identifier>
+      {/if}
+    </RichText>
   </span>
   <div>
     <SelectConfiguredRoleField {configuredRoleId} {configuredRolesMap} />

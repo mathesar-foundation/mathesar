@@ -7,10 +7,21 @@
 <script lang="ts">
   import { getDocsLink } from '@mathesar/routes/urls';
 
-  /** Should begin with a forward slash */
-  export let path: string;
+  const pages = {
+    import: '/user-guide/importing-data/',
+    relationships: '/user-guide/relationships/',
+    roles: '/user-guide/roles/',
+    rolesLogin: '/user-guide/roles/#login',
+    rolesInheritance: '/user-guide/roles/#inheritance',
+    storedRolePasswords: '/user-guide/stored-role-passwords/',
+    collaborators: '/user-guide/collaborators/',
+    internalSchemas: '/user-guide/schemas/#internal',
+  };
+  type Page = keyof typeof pages;
 
-  $: href = getDocsLink(path);
+  export let page: Page;
+
+  $: href = getDocsLink(pages[page]);
 </script>
 
 <a {href} target="_blank">

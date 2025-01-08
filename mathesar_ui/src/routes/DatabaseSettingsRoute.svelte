@@ -14,7 +14,7 @@
 </script>
 
 <DatabasePageSettingsWrapper let:setSection>
-  <Route path="/" redirect="role-configuration/" />
+  <Route path="/" redirect="roles/" />
   <EventfulRoute
     path="/role-configuration"
     onLoad={() => setSection('roleConfiguration')}
