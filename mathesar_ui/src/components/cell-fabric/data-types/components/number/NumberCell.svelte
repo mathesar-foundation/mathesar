@@ -27,6 +27,7 @@
   {isIndependentOfSheet}
   {showTruncationPopover}
   {searchValue}
+  useTabularNumbers={true}
   formatValue={formatForDisplay}
   {horizontalAlignment}
   let:handleInputBlur

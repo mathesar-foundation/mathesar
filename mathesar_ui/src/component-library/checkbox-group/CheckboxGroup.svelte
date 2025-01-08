@@ -72,5 +72,5 @@
     checked={values.some((o) => valuesAreEqual(o, option))}
     disabled={innerDisabled}
   />
-  <slot name="label" slot="label">{label}</slot>
+  <slot name="label" slot="label">{label ?? ''}</slot>
 </FieldsetGroup>
