@@ -14,22 +14,22 @@ Mathesar has an API available at `/api/rpc/v0/` which follows the [JSON-RPC](htt
 
 You can find a full list of Mathesar's RPC methods on the [API Methods page](./methods.md).
 
-!!! tip "Converting Functions to API requests"
-    The methods are shown as Python function definitions to make them easier to understand, but they need to be converted into JSON payloads for API calls.
-
-    Here's how to convert a function call like this: `tables.list_(*, database_id=None, **kwargs)` into an API payload.
-
-    1. The function name becomes the method path:
-        - `tables.list_` converts to `"method": "tables.list"`
-    2. Named parameters become part of the `"parameters"` object:
-       ```json
-       {
-         "method": "tables.list",
-         "parameters": {
-           "database_id": 1
-         }
-       }
-       ```
+> [!TIP]
+>    The methods are shown as Python function definitions to make them easier to understand, but they need to be converted into JSON payloads for API calls.
+>
+>    Here's how to convert a function call like this: `tables.list_(*, database_id=None, **kwargs)` into an API payload.
+>
+>    1. The function name becomes the method path:
+>        - `tables.list_` converts to `"method": "tables.list"`
+>    2. Named parameters become part of the `"parameters"` object:
+>       ```json
+>       {
+>         "method": "tables.list",
+>         "parameters": {
+>         "database_id": 1
+>         }
+>       }
+>       ```
 
 ### Requests
 
@@ -39,23 +39,22 @@ To use an RPC method:
 - Always use named parameters.
 - Ensure that your request includes HTTP headers for valid session IDs, as well as CSRF cookies and tokens.
 
-!!! example
-
-    To list information about tables for a schema, call the [`tables.list`](./methods/#tables.list_) method with a payload like this:
-
-    `POST /api/rpc/v0/`
-
-    ```json
-    {
-      "jsonrpc": "2.0",
-      "id": 234,
-      "method": "tables.list",
-      "params": {
-        "schema_oid": 47324,
-        "database_id": 1
-      }
-    }
-    ```
+> [!NOTE]
+>    To list information about tables for a schema, call the [`tables.list`](./methods/#tables.list_) method with a payload like this:
+>
+>    `POST /api/rpc/v0/`
+>
+>    ```json
+>    {
+>      "jsonrpc": "2.0",
+>      "id": 234,
+>      "method": "tables.list",
+>      "params": {
+>        "schema_oid": 47324,
+>        "database_id": 1
+>      }
+>    }
+>    ```
 
 ### Success Responses
 
