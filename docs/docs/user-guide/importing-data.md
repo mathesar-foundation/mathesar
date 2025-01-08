@@ -1,6 +1,6 @@
 # Importing data into Mathesar
 
-Mathesar allows importing data in CSV and JSON format. It also attempts to automatically infer the data type of the columns.
+Mathesar allows importing data in CSV format. It also attempts to automatically infer the data type of the columns.
 
 ## Importing CSV data {:#csv}
 
@@ -21,6 +21,9 @@ Fields in the CSV data may be delimited by any of the following characters:
 By default, Mathesar will use the first row of CSV data to name the columns.
 
 If you un-check **"Use first row as header"**, then Mathesar will generate default names for the columns which you can edit later.
+
+<!-- TODO: Uncomment the content below when we've fully implemented JSON import across the stack -->
+<!--
 
 ## Importing JSON data {:#json}
 
@@ -60,3 +63,5 @@ The JSON data must be structured in one of the following ways:
     ```
 
 Our goal is to support whatever [`pandas.json_normalize`](https://pandas.pydata.org/docs/reference/api/pandas.json_normalize.html) supports.
+
+-->
