@@ -19,6 +19,7 @@ import {
   faDatabase,
   faDiagramNext,
   faDollarSign,
+  faDownload,
   faEllipsisV,
   faEnvelope,
   faExternalLink,
@@ -107,7 +108,6 @@ export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
-export const iconConfigurePassword = { data: faKey };
 export const iconConnectDatabase = { data: connectDatabaseIcon };
 export const iconCopyMajor: IconProps = { data: faCopy };
 /** TODO: use faBinary once it's available (via newer FontAwesome version) */
@@ -121,6 +121,7 @@ export const iconDeleteMinor: IconProps = { data: faTimes };
 export const iconEdit: IconProps = { data: faPencilAlt };
 export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
+export const iconExport: IconProps = { data: faDownload };
 export const iconImportData: IconProps = { data: faUpload };
 export const iconInferColumnType: IconProps = { data: faMicroscope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
@@ -201,6 +202,7 @@ export const iconPermissions: IconProps = { data: permissionsIcon };
 
 export const iconNotEditable: IconProps = { data: faLock };
 export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
+export const iconYes: IconProps = { data: faCheck };
 
 // UI TYPES
 

@@ -2,16 +2,21 @@
   import { _ } from 'svelte-i18n';
 
   import { iconDatabase } from '@mathesar/icons';
-  import { Icon } from '@mathesar-component-library';
+  import { Icon, Tooltip } from '@mathesar-component-library';
 
-  export let title: string;
+  export let title: string | undefined = undefined;
   export let isDbLevelConfiguration = false;
 </script>
 
 <div class="collapsible-header-container">
-  <span>{title}</span>
+  <div>
+    <slot name="title">{title}</slot>
+  </div>
   {#if isDbLevelConfiguration}
-    <Icon {...iconDatabase} title={$_('section_affects_database_config')} />
+    <Tooltip aria-label={$_('help')} class="help-trigger" allowHover>
+      <Icon slot="trigger" {...iconDatabase} />
+      <span slot="content">{$_('section_affects_postgresql_config')}</span>
+    </Tooltip>
   {/if}
 </div>
 

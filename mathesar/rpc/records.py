@@ -153,7 +153,6 @@ class RecordList(TypedDict):
     grouping: GroupingResponse
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
-    query: str
 
     @classmethod
     def from_dict(cls, d):
@@ -163,7 +162,6 @@ class RecordList(TypedDict):
             grouping=d.get("grouping"),
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
-            query=d["query"],
         )
 
 

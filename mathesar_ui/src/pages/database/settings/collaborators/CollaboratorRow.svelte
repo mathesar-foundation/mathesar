@@ -6,12 +6,17 @@
   import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconDeleteMajor, iconEdit } from '@mathesar/icons';
   import type { Collaborator } from '@mathesar/models/Collaborator';
-  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import type { Database } from '@mathesar/models/Database';
+  import { confirm } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { Button, SpinnerButton } from '@mathesar-component-library';
 
+  import RemoveCollaboratorBody from './RemoveCollaboratorBody.svelte';
+  import RemoveCollaboratorTitle from './RemoveCollaboratorTitle.svelte';
+
   export let collaborator: Collaborator;
+  export let database: Pick<Database, 'name'>;
   export let onClickEditRole: (collaborator: Collaborator) => void;
   export let onDelete: (collaborator: Collaborator) => void;
 
@@ -57,23 +62,42 @@
         appearance="secondary"
         on:click={() => onClickEditRole(collaborator)}
         disabled={!isMathesarAdmin}
+        tooltip={$_('change_role')}
       >
         <Icon {...iconEdit} size="0.8em" />
       </Button>
     </div>
   </div>
 </GridTableCell>
+
 <GridTableCell>
   <SpinnerButton
+    appearance="outline-primary"
     confirm={() =>
-      confirmDelete({
-        identifierName: userName,
-        identifierType: $_('collaborator'),
+      confirm({
+        title: {
+          component: RemoveCollaboratorTitle,
+          props: {
+            userName,
+            databaseName: database.name,
+          },
+        },
+        body: {
+          component: RemoveCollaboratorBody,
+          props: {
+            userName,
+            databaseName: database.name,
+            roleName: configuredRole?.name,
+          },
+        },
+        proceedButton: {
+          label: $_('remove_collaborator'),
+        },
       })}
     onClick={deleteCollaborator}
     icon={{ ...iconDeleteMajor, size: '0.8em' }}
     label=""
-    appearance="secondary"
+    tooltip={$_('remove_collaborator')}
     disabled={!isMathesarAdmin}
   />
 </GridTableCell>

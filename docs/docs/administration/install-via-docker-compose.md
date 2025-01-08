@@ -1,8 +1,5 @@
 # Install Mathesar via Docker Compose
 
-!!! danger "Not a stable release"
-    This is a testing build released with the goal of gathering feedback from our community. It has **[many known issues](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aissue+milestone%3Av0.2.0-testing.2+)** and is not recommended for production use.
-
 ## Prerequisites
 
 {% include 'snippets/docker-compose-prerequisites.md' %}
@@ -119,4 +116,4 @@ If you'd like to use an external PostgreSQL server for Mathesar's internal datab
     psql -c 'create database mathesar_django;'
     ```
 
-1. Configure the [internal database environment variables](../../configuration/env-variables.md#db) to point to the database you just created. Ensure that you change the default values for the user, password, and host.
+1. Configure the [internal database environment variables](./configuration.md#db) to point to the database you just created. Ensure that you change the default values for the user, password, and host.
