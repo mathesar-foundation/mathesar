@@ -1,6 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import Help from '@mathesar/component-library/help/Help.svelte';
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import {
     FieldLayout,
     FormSubmit,
@@ -8,6 +10,7 @@
     requiredField,
   } from '@mathesar/components/form';
   import Field from '@mathesar/components/form/Field.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';
   import { databasesStore } from '@mathesar/stores/databases';
   import {
@@ -74,12 +77,27 @@
     field={databaseName}
     help={$_('make_sure_database_exists')}
   />
-  <Field
-    label={$_('username')}
-    layout="stacked"
-    field={role}
-    help={$_('user_needs_create_connect_privileges')}
-  />
+  <Field label={$_('role_name')} layout="stacked" field={role}>
+    <svelte:fragment slot="help">
+      {$_('role_needs_create_connect_privileges')}
+      <Help>
+        <p>{$_('role_needs_create_connect_privileges_detail_1')}</p>
+        <p>
+          <RichText
+            text={$_('role_needs_create_connect_privileges_detail_2')}
+            let:slotName
+            let:translatedArg
+          >
+            {#if slotName === 'italic'}
+              <em>{translatedArg}</em>
+            {:else if slotName === 'docsLink'}
+              <DocsLink page="internalSchemas">{translatedArg}</DocsLink>
+            {/if}
+          </RichText>
+        </p>
+      </Help>
+    </svelte:fragment>
+  </Field>
   <Field
     label={$_('password')}
     layout="stacked"
@@ -88,7 +106,19 @@
       component: PasswordInput,
       props: { autocomplete: 'new-password' },
     }}
-  />
+  >
+    <svelte:fragment slot="help">
+      <RichText
+        text={$_('connect_db_password_help')}
+        let:slotName
+        let:translatedArg
+      >
+        {#if slotName === 'docsLink'}
+          <DocsLink page="storedRolePasswords">{translatedArg}</DocsLink>
+        {/if}
+      </RichText>
+    </svelte:fragment>
+  </Field>
   <FieldLayout>
     <InstallationSchemaSelector {installationSchemas} />
   </FieldLayout>
