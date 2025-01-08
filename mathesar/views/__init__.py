@@ -15,6 +15,11 @@ from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.rpc.users import get as get_user_info
 from mathesar import __version__
 
+from . import export
+
+
+__all__ = [export]
+
 
 def get_database_list(request):
     return databases_list(request=request)
