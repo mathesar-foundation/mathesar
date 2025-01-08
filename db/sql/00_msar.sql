@@ -4712,10 +4712,10 @@ SELECT concat(
 $$ LANGUAGE SQL STABLE;
 
 
+DROP FUNCTION IF EXISTS msar.build_results_jsonb_array_expr(text, text[], text);
 CREATE OR REPLACE FUNCTION
 msar.build_results_jsonb_array_expr(
   cte_name text,
-  columns text[],
   order_by_expr text
 ) RETURNS TEXT AS $$/*
 Build an SQL expresson string that, when added to the record listing query, produces a JSON array
