@@ -11,7 +11,7 @@
   $: userProfile = $userProfileStore;
 </script>
 
-<div data-identifier="welcome-header">
+<div class="welcome-header">
   <span>
     {$_('welcome_to_mathesar_user', {
       values: { user: userProfile?.getDisplayName() },
@@ -19,7 +19,7 @@
   </span>
 </div>
 
-<div data-identifier="welcome-container">
+<div class="welcome-container">
   <section>
     <div class="header">
       {$_('databases')}
@@ -31,7 +31,7 @@
     <div class="header">
       {$_('documentation_and_resources')}
     </div>
-    <div class="content" data-identifier="documentation-links">
+    <div class="content documentation-links">
       <div class="document-block">
         <div class="header">{$_('getting_started')}</div>
         <div class="content">
@@ -69,7 +69,7 @@
 </div>
 
 <style lang="scss">
-  [data-identifier='welcome-header'] {
+  .welcome-header {
     display: flex;
     padding: var(--size-xx-large);
     align-items: center;
@@ -83,7 +83,7 @@
     }
   }
 
-  [data-identifier='welcome-container'] {
+  .welcome-container {
     display: flex;
     padding: var(--size-xx-large);
     flex-direction: column;
@@ -105,7 +105,7 @@
       margin: var(--size-large) 0;
     }
 
-    [data-identifier='documentation-links'] {
+    .documentation-links {
       display: flex;
       flex-direction: row;
       gap: var(--size-large);
@@ -133,7 +133,7 @@
     }
 
     @media screen and (max-width: 50rem) {
-      [data-identifier='documentation-links'] {
+      .documentation-links {
         flex-direction: column;
       }
     }
