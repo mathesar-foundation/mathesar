@@ -1,5 +1,13 @@
 # API Methods
 
+## Analytics
+::: analytics
+    options:
+      members:
+      - initialize
+      - disable
+      - view_report
+
 ## Collaborators
 
 ::: collaborators
