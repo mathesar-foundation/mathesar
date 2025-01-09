@@ -226,14 +226,18 @@
   let isNewColumnsOpen = false;
 </script>
 
-<div class="description">
-  {$_('link_table_description')}
-</div>
-
 <div class="form" class:self-referential={isSelfReferential}>
   <FieldLayout>
     <InfoBox>
-      {$_('links_info')}
+      <RichText
+        text={$_('create_reference_help_info_2')}
+        let:slotName
+        let:translatedArg
+      >
+        {#if slotName === 'italic'}
+          <em>{translatedArg}</em>
+        {/if}
+      </RichText>
     </InfoBox>
   </FieldLayout>
 
@@ -245,7 +249,7 @@
     }}
   >
     <span slot="label">
-      <RichText text={$_('link_table_to')} let:slotName>
+      <RichText text={$_('create_relationship_between')} let:slotName>
         {#if slotName === 'tablePill'}
           <Pill table={base} which="base" />
         {/if}
@@ -394,7 +398,7 @@
     catchErrors
     {canProceed}
     onCancel={close}
-    proceedButton={{ label: $_('create_link'), icon: iconTableLink }}
+    proceedButton={{ label: $_('create_relationship'), icon: iconTableLink }}
     onProceed={handleSave}
   />
 </div>
@@ -412,9 +416,6 @@
   .form.self-referential {
     --target-fill: var(--base-fill);
     --target-stroke: var(--base-stroke);
-  }
-  .description {
-    margin-bottom: 1rem;
   }
   .collapsible-detail {
     padding: var(--size-xx-small);

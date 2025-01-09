@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { Icon, defined } from '@mathesar/component-library';
+  import { defined } from '@mathesar/component-library';
+  import FieldDelimiter from '@mathesar/components/FieldDelimiter.svelte';
   import SelectProcessedColumn from '@mathesar/components/SelectProcessedColumn.svelte';
-  import { iconFieldDelimiter } from '@mathesar/icons';
   import type { Database } from '@mathesar/models/Database';
   import {
     type ProcessedColumns,
@@ -35,7 +35,9 @@
       allowEmpty
     />
     {#if referentTable}
-      <div class="delimiter"><Icon {...iconFieldDelimiter} /></div>
+      <div class="delimiter">
+        <FieldDelimiter />
+      </div>
     {/if}
   </div>
 {/if}
@@ -66,7 +68,6 @@
     font-style: italic;
   }
   .delimiter {
-    color: var(--sand-600);
     margin: 0 0.1rem;
   }
 </style>

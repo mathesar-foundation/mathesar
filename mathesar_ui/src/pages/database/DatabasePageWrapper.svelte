@@ -61,7 +61,7 @@
     },
     {
       id: 'settings',
-      label: $_('settings'),
+      label: $_('database_settings'),
       href: getDatabasePageSettingsSectionUrl(database.id),
     },
   ];
@@ -120,10 +120,9 @@
     slot="secondary-header"
     pageTitleAndMetaProps={{
       name: database.name,
+      entityTypeName: $_('database'),
       icon: iconDatabase,
-      description: `${$_(
-        'db_server',
-      )}: ${database.server.getConnectionString()}`,
+      subText: `${$_('db_server')}: ${database.server.getConnectionString()}`,
     }}
   >
     <div slot="action">
