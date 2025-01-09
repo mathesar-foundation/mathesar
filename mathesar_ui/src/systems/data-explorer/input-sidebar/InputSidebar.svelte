@@ -85,7 +85,6 @@
 </script>
 
 <aside class="input-sidebar">
-  <header>{$_('build_your_exploration')}</header>
   <section class="input-pane">
     <TabContainer
       {tabs}
@@ -133,12 +132,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-
-    header {
-      padding: var(--size-xx-small) var(--size-large);
-      border-bottom: 1px solid var(--slate-200);
-      font-weight: 590;
-    }
 
     .input-pane {
       flex-grow: 1;

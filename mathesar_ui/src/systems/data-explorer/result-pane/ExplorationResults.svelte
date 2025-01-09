@@ -4,7 +4,6 @@
   import { _ } from 'svelte-i18n';
 
   import CellBackground from '@mathesar/components/CellBackground.svelte';
-  import PaginationGroup from '@mathesar/components/PaginationGroup.svelte';
   import {
     Sheet,
     SheetHeader,
@@ -22,13 +21,11 @@
   import type QueryManager from '../QueryManager';
   import { type QueryRunner, getRowSelectionId } from '../QueryRunner';
 
-  import QueryRefreshButton from './QueryRefreshButton.svelte';
   import QueryRunErrors from './QueryRunErrors.svelte';
   import ResultHeaderCell from './ResultHeaderCell.svelte';
   import ResultRowCell from './ResultRowCell.svelte';
 
   export let queryHandler: QueryRunner | QueryManager;
-  export let isExplorationPage = false;
 
   const ID_ROW_CONTROL_COLUMN = 'row-control';
   const columnWidths = new ImmutableMap([
@@ -64,7 +61,6 @@
     ? [{ id: ID_ROW_CONTROL_COLUMN }, ...columnList]
     : [];
   $: rows = $rowsData.rows;
-  $: totalCount = $rowsData.totalCount;
   // Show a dummy ghost row when there are no records
   $: showDummyGhostRow =
     (recordRunState === 'success' || recordRunState === 'processing') &&
@@ -149,33 +145,6 @@
         {/each}
       </SheetVirtualRows>
     </Sheet>
-    <div data-identifier="status-bar">
-      {#if totalCount}
-        <div>
-          {$_('showing_n_to_m_of_total', {
-            values: {
-              leftBound: $pagination.leftBound,
-              rightBound: Math.min(totalCount, $pagination.rightBound),
-              totalCount,
-            },
-          })}
-        </div>
-      {:else if recordRunState === 'success'}
-        {$_('no_results_found')}
-      {/if}
-      <div class="pagination-controls">
-        <PaginationGroup
-          pagination={$pagination}
-          {totalCount}
-          on:change={(e) => {
-            void queryHandler.setPagination(e.detail);
-          }}
-        />
-        {#if isExplorationPage}
-          <QueryRefreshButton queryRunner={queryHandler} />
-        {/if}
-      </div>
-    </div>
   {/if}
 </div>
 
@@ -186,7 +155,6 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    --status-bar-height: 3rem;
 
     .empty-state {
       padding: 1rem;
@@ -196,32 +164,6 @@
       bottom: 0;
       top: 0;
       overflow: auto;
-    }
-
-    :global(.sheet) {
-      bottom: var(--status-bar-height);
-    }
-
-    [data-identifier='status-bar'] {
-      flex-grow: 0;
-      flex-shrink: 0;
-      border-top: 1px solid var(--slate-300);
-      background-color: var(--slate-100);
-      padding: 0.2rem 0.6rem;
-      display: flex;
-      align-items: center;
-      margin-top: auto;
-      height: var(--status-bar-height);
-
-      .pagination-controls {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-
-        :global(.refresh-button) {
-          margin-left: var(--size-xx-small);
-        }
-      }
     }
 
     :global(button.column-name-wrapper) {
