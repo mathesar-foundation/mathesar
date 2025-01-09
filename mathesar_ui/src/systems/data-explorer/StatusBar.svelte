@@ -48,7 +48,7 @@
     flex-shrink: 0;
     border-top: 1px solid var(--slate-300);
     background-color: var(--slate-100);
-    padding: 0.2rem 0.6rem;
+    padding: var(--status-bar-padding);
     display: flex;
     align-items: center;
   }
