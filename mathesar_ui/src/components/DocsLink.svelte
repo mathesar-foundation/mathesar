@@ -21,6 +21,7 @@
     schemaPermissions: '/user-guide/schemas/#permissions',
     tablePermissions: '/user-guide/tables/#permissions',
     schemas: '/user-guide/schemas/',
+    userAdmin: '/user-guide/users/#admin',
   };
   type Page = keyof typeof pages;
 

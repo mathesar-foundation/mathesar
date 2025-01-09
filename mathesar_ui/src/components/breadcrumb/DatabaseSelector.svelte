@@ -23,12 +23,16 @@
     };
   }
 
-  $: breadcrumbEntries = [...$databases.values()].map(
-    makeBreadcrumbSelectorEntry,
-  );
+  $: entries = [...$databases.values()].map(makeBreadcrumbSelectorEntry);
 </script>
 
 <BreadcrumbSelector
-  data={new Map([[$_('databases'), breadcrumbEntries]])}
+  sections={[
+    {
+      label: $_('databases'),
+      entries,
+      emptyMessage: $_('no_databases_connected'),
+    },
+  ]}
   triggerLabel={$_('choose_database')}
 />

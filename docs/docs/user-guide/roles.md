@@ -4,9 +4,9 @@ PostgreSQL uses roles to manage access to data, and each PostgreSQL server has m
 
 ## What is a role?
 
-PostgreSQL role system is elegant and powerful, albeit somewhat idiosyncratic.
+PostgreSQL's role system is elegant and powerful, albeit somewhat idiosyncratic.
 
-Many permissioning systems utilize the concept of "users" to control access, and PostgreSQL roles work in much the same way. You connect to a PostgreSQL server by supplying your role's name and password. Then your role will dictate your access throughout the server.
+Many permission systems utilize the concept of "users" to control access, and PostgreSQL roles work similarly. You connect to a PostgreSQL server by supplying your role's name and password. Then your role will dictate your access throughout the server.
 
 Other permission systems commonly have a _separate_ concept of "groups", wherein multiple users can be members of a single group. Permissions can be granted to the group as a whole. Interestingly, PostgreSQL roles can _also_ function as groups! Through [role inheritance](#inheritance), the permissions of any role can be granted to any other role.
 
@@ -40,7 +40,7 @@ The owner generally can do anything directly to the object, but not necessarily 
 
 ## Privileges
 
-Specific privileges on objects can be granted to roles, allowing non-owning roles to perform certain actions. See the following sections for more information on configuring these privileges:
+Privileges are specific, granular rights that can be granted on database objects. Privileges can be granted to roles, allowing non-owning roles to perform certain actions. See the following sections for more information on configuring these privileges:
 
 - [Database permissions](./databases.md#permissions)
 - [Schema permissions](./schemas.md#permissions)
@@ -61,4 +61,3 @@ Although every object in PostgreSQL has only one owner, it's still possible conf
 1. Those child roles will then have permission do things _as if they were the owner themselves_.
 
 You can use Mathesar to configure an arrangement like the above, though it will require many steps.
-

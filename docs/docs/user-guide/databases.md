@@ -1,6 +1,6 @@
 # Databases
 
-Each installation of Mathesar can connect to multiple PostgreSQL databases. Connecting or creating your first database will likely be your first step in using Mathesar.
+Each installation of Mathesar can connect to multiple PostgreSQL databases. When you begin using Mathesar, your first step will likely be connecting to or creating a database. But what exactly is a database, and how does it differ from tools you might be more familiar with, like spreadsheets?
 
 ## What is a database
 
@@ -8,7 +8,9 @@ If you're using Mathesar as a spreadsheet alternative, you might be curious what
 
 Within a database, you can have multiple [tables](./tables.md) &mdash; much like you might have multiple _sheets_ within a spreadsheet. And within each table in your database, you'll have rows and columns, similar to a spreadsheet. But while a spreadsheet gives you a blank canvas to freely enter any data into any cell you choose, a database is more structured. Rows and columns must be explicitly added before you can enter data, and each column must have a name and a [data type](./data-types.md). In a database, rows are sometimes called "records".
 
-One superpower of PostgreSQL is that cells from one table can reference records from another table. This concept is called foreign key constraints, and Mathesar leverages it so you can model your data with [relationships](./relationships.md). If you've ever used `VLOOKUP` in a spreadsheet, you'll love using relationships in Mathesar!
+One superpower of PostgreSQL is that cells from one table can reference records from another table. These references are called _foreign key constraints_, and Mathesar leverages them so you can model your data with [relationships](./relationships.md).
+
+If you've ever used `VLOOKUP` in a spreadsheet, you'll love using relationships in Mathesar!
 
 ## Connecting a database {:#connection}
 
@@ -16,7 +18,7 @@ Click the **Connect Database** button from the home page of your Mathesar applic
 
 Once you've connected a database, you can navigate to Mathesar's page for it where you can browse the database's [schemas](./schemas.md) and configure various settings for it.
 
-Mathesar will remember the connection even after the application is shut down. Your Mathesar [user](./users.md) will be added as a [collaborator](./collaborators.md) on the database (along with the PostgreSQL [role](./roles.md) you entered). And the password you entered for that role will be stored in Mathesar's [internal database](#internal), encrypted using Mathesar's [SECRET_KEY](../administration/configuration.md#secret_key).
+Mathesar will remember the connection even after the application is shut down. Your Mathesar [user](./users.md) will be added as a [collaborator](./collaborators.md) on the database (along with the PostgreSQL [role](./roles.md) you entered). The password you entered for that role will be stored in Mathesar's [internal database](#internal), encrypted using Mathesar's [SECRET_KEY](../administration/configuration.md#secret_key).
 
 ## Creating a new database
 
@@ -30,10 +32,12 @@ If you're starting your database from scratch with Mathesar you can either:
 
 ## Database Permissions {:#permissions}
 
+PostgreSQL databases use a careful system of privileges (colloquially referred to as "permissions") to control what different users can do. Understanding these permissions is crucial for keeping your data secure while ensuring everyone has the access they need to do their work.
+
 - **Owner:** In PostgreSQL, every database has a role set as its [owner](./roles.md#ownership).
 
     Only the owner can:
-    
+
     - Drop the database
     - Manage database-level privileges
     - Transfer ownership
@@ -110,4 +114,3 @@ Separate from your connected PostgreSQL database, Mathesar also maintains an int
   </tr>
   </tbody>
 </table>
-

@@ -4,6 +4,10 @@ from db.columns import _transform_column_alter_dict
 from db.deprecated.types.base import PostgresType
 
 
+def _json_or_none(value):
+    return json.dumps(value) if value is not None else None
+
+
 def get_table(table, conn):
     """
     Return a dictionary describing a table of a schema.
@@ -217,3 +221,33 @@ def split_table(
         'extracted_table_oid': extracted_table_oid,
         'new_fkey_attnum': new_fkey_attnum
     }
+
+
+def fetch_table_in_chunks(
+    conn,
+    table_oid,
+    limit=None,
+    offset=None,
+    order=None,
+    filter=None,
+    with_column_header=True,
+    batch_size=2000
+):
+    with conn.transaction():
+        with db_conn.exec_msar_func_server_cursor(
+            conn,
+            'get_table_columns_and_records',
+            table_oid,
+            limit,
+            offset,
+            _json_or_none(order),
+            _json_or_none(filter),
+        ) as server_cursor:
+            if with_column_header:
+                columns = server_cursor.fetchone()[0]
+                yield columns
+            while True:
+                records = server_cursor.fetchmany(batch_size)
+                if not records:
+                    break
+                yield [record[0] for record in records]
