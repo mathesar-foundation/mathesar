@@ -4733,24 +4733,24 @@ SELECT format(
   /* %2 */ cte_name,
   /* %3 */ '__mathesar_gid',
   /* %4 */ '__mathesar_gcount'
-)
+);
 $$ LANGUAGE SQL STABLE;
 
 
+DROP FUNCTION IF EXISTS msar.build_results_setof_jsonb_expr(text, text[]);
 CREATE OR REPLACE FUNCTION
 msar.build_results_setof_jsonb_expr(
-  cte_name text,
-  columns text[]
+  cte_name text
 ) RETURNS TEXT AS $$/*
 Build an SQL expresson string that, when added to the record listing query, produces a setof jsonb
 results with the records resulting from the request.
 */
 SELECT format(
-  'jsonb_build_object('
-  || string_agg(format('%1$L, %2$I.%1$I', column_, cte_name), ', ')
-  || ')'
-)
-FROM unnest(columns) AS column_
+  'to_jsonb(%1$I) - %2$L - %3$L',
+  /* %1 */ cte_name,
+  /* %2 */ '__mathesar_gid',
+  /* %3 */ '__mathesar_gcount'
+);
 $$ LANGUAGE SQL STABLE;
 
 
@@ -5425,10 +5425,7 @@ BEGIN
     $q$,
     expr_and_ctes ->> 'results_cte_query',
     COALESCE(
-      msar.build_results_setof_jsonb_expr(
-        'results_cte',
-        msar.jsonb_keys_to_array(expr_and_ctes -> 'selectable_columns')
-      ),
+      msar.build_results_setof_jsonb_expr('results_cte'),
       'NULL'
     )
   );
