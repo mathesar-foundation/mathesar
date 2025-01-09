@@ -5,37 +5,34 @@
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconConnection } from '@mathesar/icons';
-  import type { Database } from '@mathesar/models/Database';
   import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { ConnectDatabaseModal } from '@mathesar/systems/databases';
-  import { Button, Help, Icon } from '@mathesar-component-library';
+  import {
+    Button,
+    Help,
+    Icon,
+    filterViaTextQuery,
+  } from '@mathesar-component-library';
 
   import DatabaseRow from './DatabaseRow.svelte';
 
   const connectDbModalController = modal.spawnModalController();
-
   const userProfileStore = getUserProfileStoreFromContext();
-  $: ({ isMathesarAdmin } = $userProfileStore);
 
   let filterQuery = '';
 
+  $: ({ isMathesarAdmin } = $userProfileStore);
   $: ({ databases } = databasesStore);
-
-  function filterDatabases(allDatabases: Database[], query: string) {
-    if (!query) return allDatabases;
-    const sanitizedQuery = query.trim().toLowerCase();
-    const match = (t: string) => t.toLowerCase().includes(sanitizedQuery);
-    return allDatabases.filter((d) => match(d.name));
-  }
+  $: filteredDatabases = [
+    ...filterViaTextQuery($databases.values(), filterQuery, (d) => d.name),
+  ];
 
   function handleClearFilterQuery() {
     filterQuery = '';
   }
-
-  $: filteredDatabases = filterDatabases([...$databases.values()], filterQuery);
 </script>
 
 <div class="databases-list">
