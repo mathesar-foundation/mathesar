@@ -39,7 +39,7 @@
       <Icon {...iconCurrentlyInstalledVersion} />
       {$_('currently_installed')}
     {:else if type === 'latest'}
-      {$_('latest_availabe_version_not_installed')}
+      {$_('latest_available_version_not_installed')}
     {:else}
       {assertExhaustive(type)}
     {/if}

@@ -58,6 +58,7 @@
     pageTitleAndMetaProps={{
       name: $name,
       icon: iconSchema,
+      entityTypeName: $_('schema'),
     }}
   >
     <div slot="action">

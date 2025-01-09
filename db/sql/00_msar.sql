@@ -92,6 +92,13 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
+CREATE OR REPLACE FUNCTION msar.jsonb_keys_to_array(obj jsonb) RETURNS text[] AS $$/*
+Similar to jsonb_object_keys but returns text[] instead of setof text.
+*/
+SELECT array_agg(x) FROM jsonb_object_keys(obj) as x;
+$$ LANGUAGE SQL STABLE;
+
+
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- GENERAL DDL FUNCTIONS
@@ -4706,22 +4713,38 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_results_jsonb_expr(tab_id oid, cte_name text, order_ jsonb) RETURNS TEXT AS $$/*
+msar.build_results_jsonb_array_expr(
+  cte_name text,
+  columns text[],
+  order_by_expr text
+) RETURNS TEXT AS $$/*
 Build an SQL expresson string that, when added to the record listing query, produces a JSON array
 with the records resulting from the request.
 */
 SELECT format(
-  'coalesce(jsonb_agg(json_build_object('
-  || string_agg(format('%1$L, %2$I.%1$I', attnum, cte_name), ', ')
+  'coalesce(jsonb_agg(jsonb_build_object('
+  || string_agg(format('%1$L, %2$I.%1$I', column_, cte_name), ', ')
   || ') %1$s), jsonb_build_array())',
-  msar.build_order_by_expr(tab_id, order_)
+  order_by_expr
 )
-FROM pg_catalog.pg_attribute
-WHERE
-  attrelid = tab_id
-  AND attnum > 0
-  AND NOT attisdropped
-  AND has_column_privilege(attrelid, attnum, 'SELECT');
+FROM unnest(columns) AS column_
+$$ LANGUAGE SQL STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_results_setof_jsonb_expr(
+  cte_name text,
+  columns text[]
+) RETURNS TEXT AS $$/*
+Build an SQL expresson string that, when added to the record listing query, produces a setof jsonb
+results with the records resulting from the request.
+*/
+SELECT format(
+  'jsonb_build_object('
+  || string_agg(format('%1$L, %2$I.%1$I', column_, cte_name), ', ')
+  || ')'
+)
+FROM unnest(columns) AS column_
 $$ LANGUAGE SQL STABLE;
 
 
@@ -4785,6 +4808,43 @@ SELECT format(
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.get_selectable_columns(tab_id oid) RETURNS jsonb AS $$/*
+Returns a jsonb object with the columns to which the user has access.
+
+Given columns with attnums 2, 3, and 4, and assuming the user has access only to columns 2 and 4,
+this function will return a jsonb as follows:
+
+{ "2": <name of column with oid 2>, "4": <name of column with oid 4> }
+
+Args:
+  tab_id: The OID of the table containing the columns to select.
+*/
+SELECT coalesce(jsonb_object_agg(attnum, attname), '{}'::jsonb)
+FROM pg_catalog.pg_attribute
+WHERE
+  attrelid = tab_id
+  AND attnum > 0
+  AND NOT attisdropped
+  AND has_column_privilege(attrelid, attnum, 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION msar.build_column_expr(columns jsonb) RETURNS text AS $$/*
+Build an SQL select-target expression of columns from the argument.
+This is meant to work together with output of functions like msar.get_selectable_columns.
+
+Returns an expr in the form: msar.format_data("<column name>") as "<oid>", ...
+
+Args:
+  columns: The columns to build the expr for, in the following jsonb sample format:
+           { "2": <name of column with oid 2>, "4": <name of column with oid 4> }
+
+*/
+SELECT string_agg(format('msar.format_data(%I) AS %I', sel_column.value, sel_column.key), ', ')
+FROM jsonb_each_text(columns) as sel_column;
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
 CREATE OR REPLACE FUNCTION
 msar.build_selectable_column_expr(tab_id oid) RETURNS text AS $$/*
 Build an SQL select-target expression of only columns to which the user has access.
@@ -4792,18 +4852,12 @@ Build an SQL select-target expression of only columns to which the user has acce
 Given columns with attnums 2, 3, and 4, and assuming the user has access only to columns 2 and 4,
 this function will return an expression of the form:
 
-column_name AS "2", another_column_name AS "4"
+msar.format_data("column_name") AS "2", msar.format_data("another_column_name") AS "4"
 
 Args:
   tab_id: The OID of the table containing the columns to select.
 */
-SELECT string_agg(format('msar.format_data(%I) AS %I', attname, attnum), ', ')
-FROM pg_catalog.pg_attribute
-WHERE
-  attrelid = tab_id
-  AND attnum > 0
-  AND NOT attisdropped
-  AND has_column_privilege(attrelid, attnum, 'SELECT');
+SELECT msar.build_column_expr(msar.get_selectable_columns(tab_id));
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -5164,6 +5218,78 @@ END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+CREATE OR REPLACE FUNCTION msar.build_record_list_query_components_with_ctes(
+  tab_id oid,
+  limit_ integer,
+  offset_ integer,
+  order_ jsonb,
+  filter_ jsonb,
+  group_ jsonb
+) RETURNS jsonb AS $$/*
+  Constructs the components necessary for generating enriched query results,
+  including expressions, clauses, selectable_column list, and CTEs, for a table.
+
+  Args:
+    tab_id: The OID of the table whose records we'll get
+    limit_: The maximum number of rows we'll return
+    offset_: The number of rows to skip before returning records from following rows
+    order_: An array of ordering definition objects
+    filter_: An array of filter definition objects
+    group_: An array of group definition objects
+
+  Behavior:
+    Fetches metadata about the table (selectable_column list, schema name, table name etc.,)
+    Constructs expressions and SQL snippets (SELECT, WHERE, GROUP BY, etc.,)
+    Generates two SQL queries:
+      1. A query for paginated results (`results_cte_query`).
+      2. A query to count the total matching rows (`count_cte_query`).
+    Returns a jsonb object combining metadata, the expressions, and the generated SQL queries.
+*/
+DECLARE
+  selectable_columns jsonb;
+  expr_object jsonb;
+  results_cte_query text;
+  count_cte_query text;
+BEGIN
+  SELECT msar.get_selectable_columns(tab_id) INTO selectable_columns;
+
+  SELECT jsonb_build_object(
+    'relation_name', msar.get_relation_name(tab_id),
+    'relation_schema_name', msar.get_relation_schema_name(tab_id),
+    'selectable_columns', selectable_columns,
+    'selectable_columns_expr', msar.build_column_expr(selectable_columns),
+    'grouping_expr', msar.build_grouping_expr(tab_id, group_),
+    'order_by_expr', msar.build_order_by_expr(tab_id, order_),
+    'where_clause', msar.build_where_clause(tab_id, filter_)
+  ) INTO expr_object;
+
+  SELECT format(
+    $q$SELECT %1$s, %2$s FROM %3$I.%4$I %5$s %6$s LIMIT %7$L OFFSET %8$L$q$,
+    COALESCE(expr_object ->> 'selectable_columns_expr', 'NULL'),
+    COALESCE(expr_object ->> 'grouping_expr', 'NULL'),
+    expr_object ->> 'relation_schema_name',
+    expr_object ->> 'relation_name',
+    expr_object ->> 'where_clause',
+    expr_object ->> 'order_by_expr',
+    limit_,
+    offset_
+  ) INTO results_cte_query;
+
+  SELECT format(
+    $q$SELECT count(1) AS count FROM %1$I.%2$I %3$s$q$,
+    expr_object ->> 'relation_schema_name',
+    expr_object ->> 'relation_name',
+    expr_object ->> 'where_clause'
+  ) INTO count_cte_query;
+
+  RETURN expr_object || jsonb_build_object(
+    'results_cte_query', results_cte_query,
+    'count_cte_query', count_cte_query
+  );
+END
+$$ LANGUAGE plpgsql STABLE;
+
+
 CREATE OR REPLACE FUNCTION
 msar.list_records_from_table(
   tab_id oid,
@@ -5192,65 +5318,115 @@ The order definition objects should have the form
   {"attnum": <int>, "direction": <text>}
 */
 DECLARE
+  expr_and_ctes jsonb;
   records jsonb;
 BEGIN
+  SELECT msar.build_record_list_query_components_with_ctes(
+    tab_id,
+    limit_,
+    offset_,
+    order_,
+    filter_,
+    group_
+  ) INTO expr_and_ctes;
+
   EXECUTE format(
     $q$
     WITH
-    count_cte AS ( SELECT count(1) AS count FROM %2$I.%3$I %7$s ),
-    enriched_results_cte AS ( SELECT %1$s, %8$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L ),
+    count_cte AS ( %1$s ),
+    enriched_results_cte AS ( %2$s ),
     results_ranked_cte AS (
-      SELECT *, row_number() OVER (%6$s) - 1 AS __mathesar_result_idx FROM enriched_results_cte
+      SELECT *, row_number() OVER (%3$s) - 1 AS __mathesar_result_idx FROM enriched_results_cte
     ),
-    groups_cte AS ( SELECT %11$s ),
-    summary_cte_self AS (%12$s)
-    %13$s
+    groups_cte AS ( SELECT %6$s ),
+    summary_cte_self AS (%7$s)
+    %8$s
     SELECT jsonb_build_object(
-      'results', %9$s,
+      'results', %4$s,
       'count', coalesce(max(count_cte.count), 0),
-      'grouping', %10$s,
-      'linked_record_summaries', %15$s,
-      'record_summaries', %16$s,
-      'query', $iq$SELECT %1$s FROM %2$I.%3$I %7$s %6$s LIMIT %4$L OFFSET %5$L$iq$
+      'grouping', %5$s,
+      'linked_record_summaries', %10$s,
+      'record_summaries', %11$s
     )
     FROM enriched_results_cte
-      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %14$s
+      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %9$s
       CROSS JOIN count_cte
     $q$,
-    /* %1 */ COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
-    /* %2 */ msar.get_relation_schema_name(tab_id),
-    /* %3 */ msar.get_relation_name(tab_id),
-    /* %4 */ limit_,
-    /* %5 */ offset_,
-    /* %6 */ msar.build_order_by_expr(tab_id, order_),
-    /* %7 */ msar.build_where_clause(tab_id, filter_),
-    /* %8 */ COALESCE(msar.build_grouping_expr(tab_id, group_), 'NULL'),
-    /* %9 */ COALESCE(msar.build_results_jsonb_expr(tab_id, 'enriched_results_cte', order_), 'NULL'),
-    /* %10 */ COALESCE(
+    /* %1 */ expr_and_ctes ->> 'count_cte_query',
+    /* %2 */ expr_and_ctes ->> 'results_cte_query',
+    /* %3 */ expr_and_ctes ->> 'order_by_expr',
+    /* %4 */ COALESCE(
+      msar.build_results_jsonb_array_expr(
+        'enriched_results_cte',
+        msar.jsonb_keys_to_array(expr_and_ctes -> 'selectable_columns'),
+        expr_and_ctes ->> 'order_by_expr'
+      ),
+      'NULL'
+    ),
+    /* %5 */ COALESCE(
       msar.build_grouping_results_jsonb_expr(tab_id, 'groups_cte', group_),
       'NULL'
     ),
-    /* %11 */ COALESCE(
+    /* %6 */ COALESCE(
       msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_),
       'NULL AS id'
     ),
-    /* %12 */ msar.build_record_summary_query_for_table(
+    /* %7 */ msar.build_record_summary_query_for_table(
       tab_id,
       null,
       table_record_summary_templates
     ),
-    /* %13 */ msar.build_linked_record_summaries_ctes(
+    /* %8 */ msar.build_linked_record_summaries_ctes(
       tab_id,
       table_record_summary_templates
     ),
-    /* %14 */ msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    /* %15 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
-    /* %16 */ COALESCE(
+    /* %9 */ msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
+    /* %10 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    /* %11 */ COALESCE(
       CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
       'NULL'
     )
   ) INTO records;
   RETURN records;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+
+CREATE OR REPLACE FUNCTION
+msar.get_table_columns_and_records(
+  tab_id oid,
+  limit_ integer,
+  offset_ integer,
+  order_ jsonb,
+  filter_ jsonb
+) RETURNS SETOF jsonb AS $$
+DECLARE
+  expr_and_ctes jsonb;
+BEGIN
+  SELECT msar.build_record_list_query_components_with_ctes(
+    tab_id,
+    limit_,
+    offset_,
+    order_,
+    filter_,
+    null
+  ) INTO expr_and_ctes;
+
+  RETURN QUERY SELECT expr_and_ctes -> 'selectable_columns';
+  RETURN QUERY EXECUTE format(
+    $q$
+    WITH results_cte AS ( %1$s )
+    SELECT %2$s AS records FROM results_cte;
+    $q$,
+    expr_and_ctes ->> 'results_cte_query',
+    COALESCE(
+      msar.build_results_setof_jsonb_expr(
+        'results_cte',
+        msar.jsonb_keys_to_array(expr_and_ctes -> 'selectable_columns')
+      ),
+      'NULL'
+    )
+  );
 END;
 $$ LANGUAGE plpgsql STABLE;
 
@@ -5321,8 +5497,7 @@ BEGIN
       'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
       'count', coalesce(max(count_cte.count), 0),
       'linked_record_summaries', %10$s,
-      'record_summaries', %11$s,
-      'query', $iq$SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L$iq$
+      'record_summaries', %11$s
     )
     FROM results_cte %9$s
       CROSS JOIN count_cte
