@@ -64,14 +64,6 @@
   namePlaceholder={$_('schema_name_placeholder')}
   disabled={isEditMode && !$currentRoleOwns}
 >
-  <svelte:fragment slot="helpText">
-    {#if !schema}
-      <span class="description">
-        {$_('schema_description')}
-      </span>
-    {/if}
-  </svelte:fragment>
-
   <span slot="title" let:initialName>
     {#if schema}
       <RichText text={$_('edit_schema_with_name')} let:slotName>
@@ -84,10 +76,3 @@
     {/if}
   </span>
 </NameAndDescInputModalForm>
-
-<style>
-  .description {
-    display: inline-block;
-    margin-bottom: 1rem;
-  }
-</style>

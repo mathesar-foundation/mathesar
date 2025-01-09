@@ -8,6 +8,7 @@
   } from '@mathesar/api/rpc/databases';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Role } from '@mathesar/models/Role';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
@@ -19,6 +20,7 @@
     TransferOwnership,
   } from '@mathesar/systems/permissions';
   import {
+    Help,
     ImmutableMap,
     type ModalController,
   } from '@mathesar-component-library';
@@ -113,6 +115,18 @@
         <Identifier>{database.name}</Identifier>
       {/if}
     </RichText>
+    <Help>
+      <p>{$_('database_permissions_help_1')}</p>
+      <p>{$_('database_permissions_help_2')}</p>
+      <p><SeeDocsToLearnMore page="databasePermissions" /></p>
+      <p>
+        <RichText text={$_('database_permissions_help_3')} let:slotName>
+          {#if slotName === 'databaseSettings'}
+            {$_('database_settings')}
+          {/if}
+        </RichText>
+      </p>
+    </Help>
   </span>
   <PermissionsOverview
     slot="share"
