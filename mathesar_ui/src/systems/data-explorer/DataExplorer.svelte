@@ -17,7 +17,7 @@
     {};
 
   $: ({ query } = queryManager);
-  $: hasNoColumns = $query.initial_columns.length === 0;
+  $: hasColumns = !!$query.initial_columns.length;
 
   let isInspectorOpen = true;
 </script>
@@ -50,7 +50,7 @@
   {:else}
     <div class="content-pane">
       <WithInputSidebar {queryManager} {linkCollapsibleOpenState}>
-        {#if hasNoColumns}
+        {#if !hasColumns}
           <div class="help-text">
             {$_('get_started_by_adding_columns_from_left')}
           </div>
@@ -64,7 +64,9 @@
           </WithExplorationInspector>
         {/if}
       </WithInputSidebar>
-      <StatusBar queryHandler={queryManager} />
+      {#if hasColumns}
+        <StatusBar queryHandler={queryManager} />
+      {/if}
     </div>
   {/if}
 </div>
