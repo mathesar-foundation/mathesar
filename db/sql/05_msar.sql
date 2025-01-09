@@ -509,7 +509,7 @@ node.
 
 For example, the following would return 'True', even though they're not dynamic:
   3 + 5
-  mathesar_types.cast_to_integer('8')
+  msar.cast_to_integer('8')
 
 Args:
   tab_id: The OID of the table with the column.
@@ -555,7 +555,7 @@ changed. Given a qualified, potentially capitalized type name, we
 - Remove the namespace (schema),
 - Replace any white space in the type name with underscores,
 - Replace double quotes in the type name (e.g., the "char" type) with '_double_quote_'
-- Use the prepped type name in the name `mathesar_types.cast_to_%s`.
+- Use the prepped type name in the name `msar.cast_to_%s`.
 
 Args:
   target_type: This should be a type that exists.
@@ -573,7 +573,7 @@ BEGIN
   SELECT replace(unspaced_type, '"', '_double_quote_')
   FROM unspacer
   INTO target_type_prepped;
-  RETURN format('mathesar_types.cast_to_%s', target_type_prepped);
+  RETURN format('msar.cast_to_%s', target_type_prepped);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -847,7 +847,7 @@ Args:
 SELECT jsonb_agg(prorettype::regtype::text)
 FROM pg_proc
 WHERE
-  pronamespace=msar.get_schema_oid('mathesar_types')
+  pronamespace=msar.get_schema_oid('msar')
   AND proargtypes[0]=typ_id
   AND left(proname, 5) = 'cast_';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -3544,21 +3544,12 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION __msar.build_cast_expr(val text, type_ text) RETURNS text AS $$/*
 Build an expression for casting a column in Mathesar, returning the text of that expression.
 
-We fall back silently to default casting behavior if the mathesar_types namespace is missing.
-However, we do throw an error in cases where the schema exists, but the type casting function
-doesn't. This is assumed to be an error the user should know about.
-
 Args:
   val: This is quite general, and isn't sanitized in any way. It can be either a literal or a column
        identifier, since we want to be able to produce a casting expression in either case.
   type_: This type name string must cast properly to a regtype.
 */
-SELECT CASE
-  WHEN msar.schema_exists('mathesar_types') THEN
-    msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
-  ELSE
-    val || '::' || type_::regtype::text
-END;
+SELECT msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -3566,24 +3557,18 @@ CREATE OR REPLACE FUNCTION
 msar.build_cast_expr(tab_id regclass, col_id smallint, typ_id regtype) RETURNS text AS $$/*
 Build an expression for casting a column in Mathesar, returning the text of that expression.
 
-We fall back silently to default casting behavior if the mathesar_types namespace is missing.
-However, we do throw an error in cases where the schema exists, but the type casting function
-doesn't. This is assumed to be an error the user should know about.
+We throw an error in cases where the casting function doesn't exist. This is assumed to be an error
+the user should know about.
 
 Args:
   tab_id: The OID of the table whose column we're casting.
   col_id: The attnum of the column in the table.
   typ_id: The OID of the type we will cast to.
 */
-SELECT CASE
-  WHEN msar.schema_exists('mathesar_types') THEN
-    msar.get_cast_function_name(typ_id)
-    || '('
-    || format('%I', msar.get_column_name(tab_id, col_id))
-    || ')'
-  ELSE
-    format('%I', msar.get_column_name(tab_id, col_id)) || '::' || typ_id::text
-END;
+SELECT msar.get_cast_function_name(typ_id)
+  || '('
+  || format('%I', msar.get_column_name(tab_id, col_id))
+  || ')';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -3710,7 +3695,7 @@ __msar.build_col_retype_expr(tab_id oid, col_id integer, new_type text) RETURNS 
 Build an expression to change a column's type, returning the text of that expression.
 
 Note that this function wraps the type alteration in a cast expression. If we have the custom
-mathesar_types cast functions available, we prefer those to the default PostgreSQL casting behavior.
+cast functions available, we prefer those to the default PostgreSQL casting behavior.
 
 Args:
   tab_id: The OID of the table containing the column whose type we'll alter.
@@ -3765,7 +3750,7 @@ BEGIN
   ELSEIF msar.is_default_possibly_dynamic(tab_id, col_id) AND new_type IS NOT NULL THEN
     -- We add casting the possibly dynamic expression to the new type as part of the default
     -- expression in this case.
-    default_expr := __msar.build_cast_expr(old_default, new_type);
+    default_expr := format('%s::%s', old_default, new_type);
   ELSEIF old_default IS NOT NULL AND new_type IS NOT NULL THEN
     -- If we arrive here, then we know the old_default is a constant value, and we want to cast the
     -- old default value to the new type *before* setting it as the new default. This avoids
@@ -4504,10 +4489,10 @@ INSERT INTO msar.expr_templates VALUES
   ('truncate_to_month', 'to_char((%s)::date, ''YYYY-MM AD'')'),
   ('truncate_to_day', 'to_char((%s)::date, ''YYYY-MM-DD AD'')'),
   -- URI part getters
-  ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
-  ('uri_authority', 'mathesar_types.uri_authority(%s)'),
+  ('uri_scheme', 'msar.uri_scheme(%s)'),
+  ('uri_authority', 'msar.uri_authority(%s)'),
   -- Email part getters
-  ('email_domain', 'mathesar_types.email_domain_name(%s)'),
+  ('email_domain', 'msar.email_domain_name(%s)'),
   -- Data formatter which is sometimes useful in comparison
   ('format_data', 'msar.format_data(%s)')
 ;

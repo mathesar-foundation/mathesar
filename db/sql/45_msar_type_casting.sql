@@ -3,9 +3,9 @@ This file has msar-namespaced functions related to type casting.
 
 Depends on 05_msar.sql
 */
-DROP TABLE IF EXISTS mathesar_types.top_level_domains;
-CREATE TABLE mathesar_types.top_level_domains (tld text PRIMARY KEY);
-INSERT INTO mathesar_types.top_level_domains VALUES
+DROP TABLE IF EXISTS msar.top_level_domains;
+CREATE TABLE msar.top_level_domains (tld text PRIMARY KEY);
+INSERT INTO msar.top_level_domains VALUES
 ('aaa'), ('aarp'), ('abarth'), ('abb'), ('abbott'), ('abbvie'), ('abc'), ('able'), ('abogado'),
 ('abudhabi'), ('ac'), ('academy'), ('accenture'), ('accountant'), ('accountants'), ('aco'),
 ('actor'), ('ad'), ('adac'), ('ads'), ('adult'), ('ae'), ('aeg'), ('aero'), ('aetna'), ('af'),
@@ -192,52 +192,52 @@ INSERT INTO mathesar_types.top_level_domains VALUES
 ('zara'), ('zero'), ('zip'), ('zm'), ('zone'), ('zuerich'), ('zw');
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.email_domain_name(mathesar_types.email)
+CREATE OR REPLACE FUNCTION msar.email_domain_name(mathesar_types.email)
 RETURNS text AS $$
     SELECT split_part($1, '@', 2);
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.email_local_part(mathesar_types.email)
+CREATE OR REPLACE FUNCTION msar.email_local_part(mathesar_types.email)
 RETURNS text AS $$
     SELECT split_part($1, '@', 1);
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- mathesar_types.uri
-CREATE OR REPLACE FUNCTION mathesar_types.uri_parts(text)
+CREATE OR REPLACE FUNCTION msar.uri_parts(text)
 RETURNS text[] AS $$
     SELECT regexp_match($1, '^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?');
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.uri_scheme(text)
+CREATE OR REPLACE FUNCTION msar.uri_scheme(text)
 RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[2];
+    SELECT (msar.uri_parts($1))[2];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.uri_authority(text)
+CREATE OR REPLACE FUNCTION msar.uri_authority(text)
 RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[4];
+    SELECT (msar.uri_parts($1))[4];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.uri_path(text)
+CREATE OR REPLACE FUNCTION msar.uri_path(text)
 RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[5];
+    SELECT (msar.uri_parts($1))[5];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.uri_query(text)
+CREATE OR REPLACE FUNCTION msar.uri_query(text)
 RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[7];
+    SELECT (msar.uri_parts($1))[7];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.uri_fragment(text)
+CREATE OR REPLACE FUNCTION msar.uri_fragment(text)
 RETURNS text AS $$
-    SELECT (mathesar_types.uri_parts($1))[9];
+    SELECT (msar.uri_parts($1))[9];
 $$
 LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
@@ -248,8 +248,8 @@ CASTING FUNCTIONS
 ------------------------------------------------------------------------
 */
 
--- mathesar_types.cast_to_boolean
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(boolean)
+-- msar.cast_to_boolean
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(boolean)
 RETURNS boolean
 AS $$
 
@@ -260,7 +260,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(smallint)
 RETURNS boolean
 AS $$
   BEGIN
@@ -271,7 +271,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(real)
 RETURNS boolean
 AS $$
   BEGIN
@@ -282,7 +282,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(bigint)
 RETURNS boolean
 AS $$
   BEGIN
@@ -293,7 +293,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(double precision)
 RETURNS boolean
 AS $$
 
@@ -306,7 +306,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(numeric)
 RETURNS boolean
 AS $$
   BEGIN
@@ -317,7 +317,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(integer)
 RETURNS boolean
 AS $$
   BEGIN
@@ -328,7 +328,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(character varying)
 RETURNS boolean
 AS $$
   DECLARE
@@ -351,7 +351,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(text)
 RETURNS boolean
 AS $$
   DECLARE
@@ -374,7 +374,7 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_boolean(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_boolean(character)
 RETURNS boolean
 AS $$
   DECLARE
@@ -397,9 +397,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_real
+-- msar.cast_to_real
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(smallint)
 RETURNS real
 AS $$
 
@@ -409,7 +409,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(bigint)
 RETURNS real
 AS $$
 
@@ -419,7 +419,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(double precision)
 RETURNS real
 AS $$
 
@@ -429,7 +429,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(character)
 RETURNS real
 AS $$
 
@@ -439,7 +439,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(integer)
 RETURNS real
 AS $$
 
@@ -449,7 +449,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(real)
 RETURNS real
 AS $$
 
@@ -459,7 +459,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(character varying)
 RETURNS real
 AS $$
 
@@ -469,7 +469,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(mathesar_types.mathesar_money)
 RETURNS real
 AS $$
 
@@ -479,7 +479,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(numeric)
 RETURNS real
 AS $$
 
@@ -489,7 +489,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(text)
 RETURNS real
 AS $$
 
@@ -499,7 +499,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(money)
 RETURNS real
 AS $$
 
@@ -509,7 +509,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_real(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_real(boolean)
 RETURNS real
 AS $$
 
@@ -523,9 +523,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_double_precision
+-- msar.cast_to_double_precision
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(smallint)
 RETURNS double precision
 AS $$
 
@@ -535,7 +535,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(bigint)
 RETURNS double precision
 AS $$
 
@@ -545,7 +545,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(double precision)
 RETURNS double precision
 AS $$
 
@@ -555,7 +555,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(character)
 RETURNS double precision
 AS $$
 
@@ -565,7 +565,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(integer)
 RETURNS double precision
 AS $$
 
@@ -575,7 +575,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(real)
 RETURNS double precision
 AS $$
 
@@ -585,7 +585,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(character varying)
 RETURNS double precision
 AS $$
 
@@ -595,7 +595,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(mathesar_types.mathesar_money)
 RETURNS double precision
 AS $$
 
@@ -605,7 +605,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(numeric)
 RETURNS double precision
 AS $$
 
@@ -615,7 +615,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(text)
 RETURNS double precision
 AS $$
 
@@ -625,7 +625,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(money)
 RETURNS double precision
 AS $$
 
@@ -635,7 +635,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_double_precision(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_double_precision(boolean)
 RETURNS double precision
 AS $$
 
@@ -649,9 +649,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_email
+-- msar.cast_to_email
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_email(mathesar_types.email)
+CREATE OR REPLACE FUNCTION msar.cast_to_email(mathesar_types.email)
 RETURNS mathesar_types.email
 AS $$
 
@@ -661,7 +661,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_email(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_email(character varying)
 RETURNS mathesar_types.email
 AS $$
 
@@ -671,7 +671,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_email(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_email(text)
 RETURNS mathesar_types.email
 AS $$
 
@@ -681,7 +681,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_email(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_email(character)
 RETURNS mathesar_types.email
 AS $$
 
@@ -692,9 +692,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_smallint
+-- msar.cast_to_smallint
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(smallint)
 RETURNS smallint
 AS $$
 
@@ -704,7 +704,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(character varying)
 RETURNS smallint
 AS $$
 
@@ -714,7 +714,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(bigint)
 RETURNS smallint
 AS $$
 
@@ -724,7 +724,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(character)
 RETURNS smallint
 AS $$
 
@@ -734,7 +734,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(text)
 RETURNS smallint
 AS $$
 
@@ -744,7 +744,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(integer)
 RETURNS smallint
 AS $$
 
@@ -754,7 +754,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(real)
 RETURNS smallint
 AS $$
 
@@ -769,7 +769,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(mathesar_types.mathesar_money)
 RETURNS smallint
 AS $$
 
@@ -784,7 +784,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(double precision)
 RETURNS smallint
 AS $$
 
@@ -799,7 +799,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(numeric)
 RETURNS smallint
 AS $$
 
@@ -814,7 +814,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(money)
 RETURNS smallint
 AS $$
 
@@ -829,7 +829,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_smallint(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_smallint(boolean)
 RETURNS smallint
 AS $$
 
@@ -842,7 +842,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(smallint)
 RETURNS bigint
 AS $$
 
@@ -853,9 +853,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_bigint
+-- msar.cast_to_bigint
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(character varying)
 RETURNS bigint
 AS $$
 
@@ -865,7 +865,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(bigint)
 RETURNS bigint
 AS $$
 
@@ -875,7 +875,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(character)
 RETURNS bigint
 AS $$
 
@@ -885,7 +885,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(text)
 RETURNS bigint
 AS $$
 
@@ -895,7 +895,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(integer)
 RETURNS bigint
 AS $$
 
@@ -905,7 +905,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(real)
 RETURNS bigint
 AS $$
 
@@ -920,7 +920,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(mathesar_types.mathesar_money)
 RETURNS bigint
 AS $$
 
@@ -935,7 +935,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(double precision)
 RETURNS bigint
 AS $$
 
@@ -950,7 +950,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(numeric)
 RETURNS bigint
 AS $$
 
@@ -965,7 +965,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(money)
 RETURNS bigint
 AS $$
 
@@ -980,7 +980,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_bigint(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_bigint(boolean)
 RETURNS bigint
 AS $$
 
@@ -994,9 +994,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_integer
+-- msar.cast_to_integer
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(smallint)
 RETURNS integer
 AS $$
 
@@ -1006,7 +1006,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(character varying)
 RETURNS integer
 AS $$
 
@@ -1016,7 +1016,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(bigint)
 RETURNS integer
 AS $$
 
@@ -1026,7 +1026,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(character)
 RETURNS integer
 AS $$
 
@@ -1036,7 +1036,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(text)
 RETURNS integer
 AS $$
 
@@ -1046,7 +1046,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(integer)
 RETURNS integer
 AS $$
 
@@ -1056,7 +1056,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(real)
 RETURNS integer
 AS $$
 
@@ -1071,7 +1071,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(mathesar_types.mathesar_money)
 RETURNS integer
 AS $$
 
@@ -1086,7 +1086,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(double precision)
 RETURNS integer
 AS $$
 
@@ -1101,7 +1101,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(numeric)
 RETURNS integer
 AS $$
 
@@ -1116,7 +1116,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(money)
 RETURNS integer
 AS $$
 
@@ -1131,7 +1131,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_integer(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_integer(boolean)
 RETURNS integer
 AS $$
 
@@ -1145,9 +1145,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_interval
+-- msar.cast_to_interval
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_interval(interval)
+CREATE OR REPLACE FUNCTION msar.cast_to_interval(interval)
 RETURNS interval
 AS $$
 
@@ -1157,7 +1157,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_interval(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_interval(character varying)
 RETURNS interval
 AS $$
  BEGIN
@@ -1170,7 +1170,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_interval(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_interval(text)
 RETURNS interval
 AS $$
  BEGIN
@@ -1183,7 +1183,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_interval(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_interval(character)
 RETURNS interval
 AS $$
  BEGIN
@@ -1197,9 +1197,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_time_without_time_zone
+-- msar.cast_to_time_without_time_zone
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_time_without_time_zone(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(text)
 RETURNS time without time zone
 AS $$
 
@@ -1209,7 +1209,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_time_without_time_zone(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(character varying)
 RETURNS time without time zone
 AS $$
 
@@ -1219,7 +1219,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_time_without_time_zone(time without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(time without time zone)
 RETURNS time without time zone
 AS $$
 
@@ -1229,7 +1229,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_time_without_time_zone(time with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_time_without_time_zone(time with time zone)
 RETURNS time without time zone
 AS $$
 
@@ -1240,9 +1240,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_time_with_time_zone
+-- msar.cast_to_time_with_time_zone
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_time_with_time_zone(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(text)
 RETURNS time with time zone
 AS $$
 
@@ -1252,7 +1252,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_time_with_time_zone(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(character varying)
 RETURNS time with time zone
 AS $$
 
@@ -1262,7 +1262,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_time_with_time_zone(time without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(time without time zone)
 RETURNS time with time zone
 AS $$
 
@@ -1272,7 +1272,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_time_with_time_zone(time with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_time_with_time_zone(time with time zone)
 RETURNS time with time zone
 AS $$
 
@@ -1283,9 +1283,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_timestamp_with_time_zone
+-- msar.cast_to_timestamp_with_time_zone
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_with_time_zone(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(character varying)
 RETURNS timestamp with time zone
 AS $$
 
@@ -1295,7 +1295,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_with_time_zone(timestamp with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(timestamp with time zone)
 RETURNS timestamp with time zone
 AS $$
 
@@ -1305,7 +1305,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_with_time_zone(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(character)
 RETURNS timestamp with time zone
 AS $$
 
@@ -1315,7 +1315,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_with_time_zone(timestamp without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(timestamp without time zone)
 RETURNS timestamp with time zone
 AS $$
 
@@ -1325,7 +1325,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_with_time_zone(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_with_time_zone(text)
 RETURNS timestamp with time zone
 AS $$
 
@@ -1336,9 +1336,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_timestamp_without_time_zone
+-- msar.cast_to_timestamp_without_time_zone
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_without_time_zone(timestamp without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(timestamp without time zone)
 RETURNS timestamp without time zone
 AS $$
 
@@ -1348,7 +1348,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_without_time_zone(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(character varying)
 RETURNS timestamp without time zone
 AS $$
 
@@ -1371,7 +1371,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_without_time_zone(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(text)
 RETURNS timestamp without time zone
 AS $$
 
@@ -1394,7 +1394,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_without_time_zone(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(character)
 RETURNS timestamp without time zone
 AS $$
 
@@ -1417,7 +1417,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_without_time_zone(date)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(date)
 RETURNS timestamp without time zone
 AS $$
 
@@ -1440,7 +1440,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_timestamp_without_time_zone(timestamp with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_timestamp_without_time_zone(timestamp with time zone)
 RETURNS timestamp without time zone
 AS $$
 
@@ -1464,9 +1464,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_date
+-- msar.cast_to_date
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_date(date)
+CREATE OR REPLACE FUNCTION msar.cast_to_date(date)
 RETURNS date
 AS $$
 
@@ -1476,7 +1476,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_date(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_date(character varying)
 RETURNS date
 AS $$
 
@@ -1499,7 +1499,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_date(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_date(text)
 RETURNS date
 AS $$
 
@@ -1522,7 +1522,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_date(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_date(character)
 RETURNS date
 AS $$
 
@@ -1545,7 +1545,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_date(timestamp without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_date(timestamp without time zone)
 RETURNS date
 AS $$
 
@@ -1568,7 +1568,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_date(timestamp with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_date(timestamp with time zone)
 RETURNS date
 AS $$
 
@@ -1592,9 +1592,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_mathesar_money
+-- msar.cast_to_mathesar_money
 
-CREATE OR REPLACE FUNCTION mathesar_types.get_mathesar_money_array(text) RETURNS text[]
+CREATE OR REPLACE FUNCTION msar.get_mathesar_money_array(text) RETURNS text[]
 AS $$
   DECLARE
     raw_arr text[];
@@ -1619,7 +1619,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(mathesar_types.mathesar_money)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1629,7 +1629,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(smallint)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1639,7 +1639,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(real)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1649,7 +1649,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(bigint)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1659,7 +1659,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(double precision)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1669,7 +1669,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(numeric)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1679,7 +1679,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(integer)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1689,7 +1689,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(character varying)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1698,7 +1698,7 @@ AS $$
     DECLARE money_arr text[];
     DECLARE money_num text;
     BEGIN
-      SELECT mathesar_types.get_mathesar_money_array($1::text) INTO money_arr;
+      SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
       IF money_arr IS NULL THEN
         RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
       END IF;
@@ -1719,7 +1719,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(text)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1728,7 +1728,7 @@ AS $$
     DECLARE money_arr text[];
     DECLARE money_num text;
     BEGIN
-      SELECT mathesar_types.get_mathesar_money_array($1::text) INTO money_arr;
+      SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
       IF money_arr IS NULL THEN
         RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
       END IF;
@@ -1749,7 +1749,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(money)
 RETURNS mathesar_types.mathesar_money
 AS $$
 
@@ -1758,7 +1758,37 @@ AS $$
     DECLARE money_arr text[];
     DECLARE money_num text;
     BEGIN
-      SELECT mathesar_types.get_mathesar_money_array($1::text) INTO money_arr;
+      SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
+      IF money_arr IS NULL THEN
+        RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
+      END IF;
+      SELECT money_arr[1] INTO money_num;
+      SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
+      SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
+      IF money_arr[2] IS NOT NULL THEN
+        SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
+      END IF;
+      IF money_arr[3] IS NOT NULL THEN
+        SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
+      END IF;
+      IF is_negative THEN
+        RETURN ('-' || money_num)::msar.mathesar_money;
+      END IF;
+      RETURN money_num::msar.mathesar_money;
+    END;
+
+$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
+
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_money(character)
+RETURNS mathesar_types.mathesar_money
+AS $$
+
+    DECLARE decimal_point text;
+    DECLARE is_negative boolean;
+    DECLARE money_arr text[];
+    DECLARE money_num text;
+    BEGIN
+      SELECT msar.get_mathesar_money_array($1::text) INTO money_arr;
       IF money_arr IS NULL THEN
         RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
       END IF;
@@ -1779,40 +1809,10 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_money(character)
-RETURNS mathesar_types.mathesar_money
-AS $$
 
-    DECLARE decimal_point text;
-    DECLARE is_negative boolean;
-    DECLARE money_arr text[];
-    DECLARE money_num text;
-    BEGIN
-      SELECT mathesar_types.get_mathesar_money_array($1::text) INTO money_arr;
-      IF money_arr IS NULL THEN
-        RAISE EXCEPTION '% cannot be cast to mathesar_types.mathesar_money', $1;
-      END IF;
-      SELECT money_arr[1] INTO money_num;
-      SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-      SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
-      IF money_arr[2] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
-      END IF;
-      IF money_arr[3] IS NOT NULL THEN
-        SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
-      END IF;
-      IF is_negative THEN
-        RETURN ('-' || money_num)::mathesar_types.mathesar_money;
-      END IF;
-      RETURN money_num::mathesar_types.mathesar_money;
-    END;
+-- msar.cast_to_money
 
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
--- mathesar_types.cast_to_money
-
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(mathesar_types.mathesar_money)
 RETURNS money
 AS $$
 
@@ -1822,7 +1822,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(money)
 RETURNS money
 AS $$
 
@@ -1832,7 +1832,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(smallint)
 RETURNS money
 AS $$
 
@@ -1842,7 +1842,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(real)
 RETURNS money
 AS $$
 
@@ -1852,7 +1852,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(bigint)
 RETURNS money
 AS $$
 
@@ -1862,7 +1862,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(double precision)
 RETURNS money
 AS $$
 
@@ -1872,7 +1872,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(numeric)
 RETURNS money
 AS $$
 
@@ -1882,7 +1882,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(integer)
 RETURNS money
 AS $$
 
@@ -1892,7 +1892,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(character varying)
 RETURNS money
 AS $$
 
@@ -1907,7 +1907,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(text)
 RETURNS money
 AS $$
 
@@ -1922,7 +1922,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_money(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_money(character)
 RETURNS money
 AS $$
 
@@ -1938,9 +1938,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_multicurrency_money
+-- msar.cast_to_multicurrency_money
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(mathesar_types.multicurrency_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(mathesar_types.multicurrency_money)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -1950,7 +1950,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(smallint)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -1960,7 +1960,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(real)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -1970,7 +1970,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(mathesar_types.mathesar_money)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -1980,7 +1980,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(bigint)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -1990,7 +1990,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(double precision)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -2000,7 +2000,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(numeric)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -2010,7 +2010,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(integer)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -2020,7 +2020,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(character varying)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -2030,7 +2030,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(text)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -2040,7 +2040,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(money)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -2050,7 +2050,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_multicurrency_money(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_multicurrency_money(character)
 RETURNS mathesar_types.multicurrency_money
 AS $$
 
@@ -2061,9 +2061,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_character_varying
+-- msar.cast_to_character_varying
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(time without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(time without time zone)
 RETURNS character varying
 AS $$
 
@@ -2073,7 +2073,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(bigint)
 RETURNS character varying
 AS $$
 
@@ -2083,7 +2083,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(double precision)
 RETURNS character varying
 AS $$
 
@@ -2093,7 +2093,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(mathesar_types.multicurrency_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.multicurrency_money)
 RETURNS character varying
 AS $$
 
@@ -2103,7 +2103,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(mathesar_types.uri)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.uri)
 RETURNS character varying
 AS $$
 
@@ -2113,7 +2113,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(time with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(time with time zone)
 RETURNS character varying
 AS $$
 
@@ -2123,7 +2123,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(integer)
 RETURNS character varying
 AS $$
 
@@ -2133,7 +2133,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(real)
 RETURNS character varying
 AS $$
 
@@ -2143,7 +2143,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.mathesar_money)
 RETURNS character varying
 AS $$
 
@@ -2153,7 +2153,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(tsvector)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(tsvector)
 RETURNS character varying
 AS $$
 
@@ -2163,7 +2163,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(jsonb)
 RETURNS character varying
 AS $$
 
@@ -2173,7 +2173,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying("char")
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying("char")
 RETURNS character varying
 AS $$
 
@@ -2183,7 +2183,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(interval)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(interval)
 RETURNS character varying
 AS $$
 
@@ -2193,7 +2193,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(macaddr)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(macaddr)
 RETURNS character varying
 AS $$
 
@@ -2203,7 +2203,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(smallint)
 RETURNS character varying
 AS $$
 
@@ -2213,7 +2213,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(timestamp with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(timestamp with time zone)
 RETURNS character varying
 AS $$
 
@@ -2223,7 +2223,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(inet)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(inet)
 RETURNS character varying
 AS $$
 
@@ -2233,7 +2233,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(boolean)
 RETURNS character varying
 AS $$
 
@@ -2243,7 +2243,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(int4range)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(int4range)
 RETURNS character varying
 AS $$
 
@@ -2253,7 +2253,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.mathesar_json_object)
 RETURNS character varying
 AS $$
 
@@ -2263,7 +2263,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(tstzrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(tstzrange)
 RETURNS character varying
 AS $$
 
@@ -2273,7 +2273,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(regclass)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(regclass)
 RETURNS character varying
 AS $$
 
@@ -2283,7 +2283,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(character)
 RETURNS character varying
 AS $$
 
@@ -2293,7 +2293,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(tsrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(tsrange)
 RETURNS character varying
 AS $$
 
@@ -2303,7 +2303,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(numrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(numrange)
 RETURNS character varying
 AS $$
 
@@ -2313,7 +2313,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(cidr)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(cidr)
 RETURNS character varying
 AS $$
 
@@ -2323,7 +2323,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(character varying)
 RETURNS character varying
 AS $$
 
@@ -2333,7 +2333,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(numeric)
 RETURNS character varying
 AS $$
 
@@ -2343,7 +2343,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(mathesar_types.email)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.email)
 RETURNS character varying
 AS $$
 
@@ -2353,7 +2353,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(bit)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(bit)
 RETURNS character varying
 AS $$
 
@@ -2363,7 +2363,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(money)
 RETURNS character varying
 AS $$
 
@@ -2373,7 +2373,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(int8range)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(int8range)
 RETURNS character varying
 AS $$
 
@@ -2383,7 +2383,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(oid)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(oid)
 RETURNS character varying
 AS $$
 
@@ -2393,7 +2393,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(json)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(json)
 RETURNS character varying
 AS $$
 
@@ -2403,7 +2403,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(daterange)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(daterange)
 RETURNS character varying
 AS $$
 
@@ -2413,7 +2413,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(timestamp without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(timestamp without time zone)
 RETURNS character varying
 AS $$
 
@@ -2423,7 +2423,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(bytea)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(bytea)
 RETURNS character varying
 AS $$
 
@@ -2433,7 +2433,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(date)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(date)
 RETURNS character varying
 AS $$
 
@@ -2443,7 +2443,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(mathesar_types.mathesar_json_array)
 RETURNS character varying
 AS $$
 
@@ -2453,7 +2453,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(text)
 RETURNS character varying
 AS $$
 
@@ -2463,7 +2463,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character_varying(uuid)
+CREATE OR REPLACE FUNCTION msar.cast_to_character_varying(uuid)
 RETURNS character varying
 AS $$
 
@@ -2474,9 +2474,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_character
+-- msar.cast_to_character
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(time without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(time without time zone)
 RETURNS character
 AS $$
 
@@ -2486,7 +2486,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(bigint)
 RETURNS character
 AS $$
 
@@ -2496,7 +2496,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(double precision)
 RETURNS character
 AS $$
 
@@ -2506,7 +2506,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(mathesar_types.multicurrency_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(mathesar_types.multicurrency_money)
 RETURNS character
 AS $$
 
@@ -2516,7 +2516,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(mathesar_types.uri)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(mathesar_types.uri)
 RETURNS character
 AS $$
 
@@ -2526,7 +2526,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(time with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(time with time zone)
 RETURNS character
 AS $$
 
@@ -2536,7 +2536,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(integer)
 RETURNS character
 AS $$
 
@@ -2546,7 +2546,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(real)
 RETURNS character
 AS $$
 
@@ -2556,7 +2556,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(mathesar_types.mathesar_money)
 RETURNS character
 AS $$
 
@@ -2566,7 +2566,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(tsvector)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(tsvector)
 RETURNS character
 AS $$
 
@@ -2576,7 +2576,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(jsonb)
 RETURNS character
 AS $$
 
@@ -2586,7 +2586,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character("char")
+CREATE OR REPLACE FUNCTION msar.cast_to_character("char")
 RETURNS character
 AS $$
 
@@ -2596,7 +2596,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(interval)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(interval)
 RETURNS character
 AS $$
 
@@ -2606,7 +2606,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(macaddr)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(macaddr)
 RETURNS character
 AS $$
 
@@ -2616,7 +2616,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(smallint)
 RETURNS character
 AS $$
 
@@ -2626,7 +2626,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(timestamp with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(timestamp with time zone)
 RETURNS character
 AS $$
 
@@ -2636,7 +2636,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(inet)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(inet)
 RETURNS character
 AS $$
 
@@ -2646,7 +2646,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(boolean)
 RETURNS character
 AS $$
 
@@ -2656,7 +2656,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(int4range)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(int4range)
 RETURNS character
 AS $$
 
@@ -2666,7 +2666,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(mathesar_types.mathesar_json_object)
 RETURNS character
 AS $$
 
@@ -2676,7 +2676,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(tstzrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(tstzrange)
 RETURNS character
 AS $$
 
@@ -2686,7 +2686,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(regclass)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(regclass)
 RETURNS character
 AS $$
 
@@ -2696,7 +2696,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(character)
 RETURNS character
 AS $$
 
@@ -2706,7 +2706,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(tsrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(tsrange)
 RETURNS character
 AS $$
 
@@ -2716,7 +2716,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(numrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(numrange)
 RETURNS character
 AS $$
 
@@ -2726,7 +2726,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(cidr)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(cidr)
 RETURNS character
 AS $$
 
@@ -2736,7 +2736,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(character varying)
 RETURNS character
 AS $$
 
@@ -2746,7 +2746,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(numeric)
 RETURNS character
 AS $$
 
@@ -2756,7 +2756,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(mathesar_types.email)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(mathesar_types.email)
 RETURNS character
 AS $$
 
@@ -2766,7 +2766,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(bit)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(bit)
 RETURNS character
 AS $$
 
@@ -2776,7 +2776,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(money)
 RETURNS character
 AS $$
 
@@ -2786,7 +2786,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(int8range)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(int8range)
 RETURNS character
 AS $$
 
@@ -2796,7 +2796,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(oid)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(oid)
 RETURNS character
 AS $$
 
@@ -2806,7 +2806,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(json)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(json)
 RETURNS character
 AS $$
 
@@ -2816,7 +2816,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(daterange)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(daterange)
 RETURNS character
 AS $$
 
@@ -2826,7 +2826,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(timestamp without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(timestamp without time zone)
 RETURNS character
 AS $$
 
@@ -2836,7 +2836,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(bytea)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(bytea)
 RETURNS character
 AS $$
 
@@ -2846,7 +2846,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(date)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(date)
 RETURNS character
 AS $$
 
@@ -2856,7 +2856,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(mathesar_types.mathesar_json_array)
 RETURNS character
 AS $$
 
@@ -2866,7 +2866,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(text)
 RETURNS character
 AS $$
 
@@ -2876,7 +2876,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_character(uuid)
+CREATE OR REPLACE FUNCTION msar.cast_to_character(uuid)
 RETURNS character
 AS $$
 
@@ -2887,9 +2887,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to__double_quote_char_double_quote_
+-- msar.cast_to__double_quote_char_double_quote_
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(time without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(time without time zone)
 RETURNS "char"
 AS $$
 
@@ -2899,7 +2899,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bigint)
 RETURNS "char"
 AS $$
 
@@ -2909,7 +2909,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(double precision)
 RETURNS "char"
 AS $$
 
@@ -2919,7 +2919,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(mathesar_types.multicurrency_money)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.multicurrency_money)
 RETURNS "char"
 AS $$
 
@@ -2929,7 +2929,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(mathesar_types.uri)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.uri)
 RETURNS "char"
 AS $$
 
@@ -2939,7 +2939,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(time with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(time with time zone)
 RETURNS "char"
 AS $$
 
@@ -2949,7 +2949,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(integer)
 RETURNS "char"
 AS $$
 
@@ -2959,7 +2959,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(real)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(real)
 RETURNS "char"
 AS $$
 
@@ -2969,7 +2969,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_money)
 RETURNS "char"
 AS $$
 
@@ -2979,7 +2979,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(tsvector)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tsvector)
 RETURNS "char"
 AS $$
 
@@ -2989,7 +2989,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(jsonb)
 RETURNS "char"
 AS $$
 
@@ -2999,7 +2999,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_("char")
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_("char")
 RETURNS "char"
 AS $$
 
@@ -3009,7 +3009,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(interval)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(interval)
 RETURNS "char"
 AS $$
 
@@ -3019,7 +3019,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(macaddr)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(macaddr)
 RETURNS "char"
 AS $$
 
@@ -3029,7 +3029,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(smallint)
 RETURNS "char"
 AS $$
 
@@ -3039,7 +3039,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(timestamp with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(timestamp with time zone)
 RETURNS "char"
 AS $$
 
@@ -3049,7 +3049,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(inet)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(inet)
 RETURNS "char"
 AS $$
 
@@ -3059,7 +3059,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(boolean)
 RETURNS "char"
 AS $$
 
@@ -3069,7 +3069,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(int4range)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(int4range)
 RETURNS "char"
 AS $$
 
@@ -3079,7 +3079,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_json_object)
 RETURNS "char"
 AS $$
 
@@ -3089,7 +3089,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(tstzrange)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tstzrange)
 RETURNS "char"
 AS $$
 
@@ -3099,7 +3099,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(regclass)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(regclass)
 RETURNS "char"
 AS $$
 
@@ -3109,7 +3109,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(character)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(character)
 RETURNS "char"
 AS $$
 
@@ -3119,7 +3119,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(tsrange)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(tsrange)
 RETURNS "char"
 AS $$
 
@@ -3129,7 +3129,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(numrange)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(numrange)
 RETURNS "char"
 AS $$
 
@@ -3139,7 +3139,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(cidr)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(cidr)
 RETURNS "char"
 AS $$
 
@@ -3149,7 +3149,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(character varying)
 RETURNS "char"
 AS $$
 
@@ -3159,7 +3159,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(numeric)
 RETURNS "char"
 AS $$
 
@@ -3169,7 +3169,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(mathesar_types.email)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.email)
 RETURNS "char"
 AS $$
 
@@ -3179,7 +3179,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(bit)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bit)
 RETURNS "char"
 AS $$
 
@@ -3189,7 +3189,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(money)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(money)
 RETURNS "char"
 AS $$
 
@@ -3199,7 +3199,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(int8range)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(int8range)
 RETURNS "char"
 AS $$
 
@@ -3209,7 +3209,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(oid)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(oid)
 RETURNS "char"
 AS $$
 
@@ -3219,7 +3219,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(json)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(json)
 RETURNS "char"
 AS $$
 
@@ -3229,7 +3229,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(daterange)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(daterange)
 RETURNS "char"
 AS $$
 
@@ -3239,7 +3239,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(timestamp without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(timestamp without time zone)
 RETURNS "char"
 AS $$
 
@@ -3249,7 +3249,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(bytea)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(bytea)
 RETURNS "char"
 AS $$
 
@@ -3259,7 +3259,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(date)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(date)
 RETURNS "char"
 AS $$
 
@@ -3269,7 +3269,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(mathesar_types.mathesar_json_array)
 RETURNS "char"
 AS $$
 
@@ -3279,7 +3279,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(text)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(text)
 RETURNS "char"
 AS $$
 
@@ -3289,7 +3289,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to__double_quote_char_double_quote_(uuid)
+CREATE OR REPLACE FUNCTION msar.cast_to__double_quote_char_double_quote_(uuid)
 RETURNS "char"
 AS $$
 
@@ -3300,9 +3300,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_text
+-- msar.cast_to_text
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(time without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(time without time zone)
 RETURNS text
 AS $$
 
@@ -3312,7 +3312,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(bigint)
 RETURNS text
 AS $$
 
@@ -3322,7 +3322,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(double precision)
 RETURNS text
 AS $$
 
@@ -3332,7 +3332,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(mathesar_types.multicurrency_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.multicurrency_money)
 RETURNS text
 AS $$
 
@@ -3342,7 +3342,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(mathesar_types.uri)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.uri)
 RETURNS text
 AS $$
 
@@ -3352,7 +3352,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(time with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(time with time zone)
 RETURNS text
 AS $$
 
@@ -3362,7 +3362,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(integer)
 RETURNS text
 AS $$
 
@@ -3372,7 +3372,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(real)
 RETURNS text
 AS $$
 
@@ -3382,7 +3382,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.mathesar_money)
 RETURNS text
 AS $$
 
@@ -3392,7 +3392,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(tsvector)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(tsvector)
 RETURNS text
 AS $$
 
@@ -3402,7 +3402,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(jsonb)
 RETURNS text
 AS $$
 
@@ -3412,7 +3412,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text("char")
+CREATE OR REPLACE FUNCTION msar.cast_to_text("char")
 RETURNS text
 AS $$
 
@@ -3422,7 +3422,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(interval)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(interval)
 RETURNS text
 AS $$
 
@@ -3432,7 +3432,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(macaddr)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(macaddr)
 RETURNS text
 AS $$
 
@@ -3442,7 +3442,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(smallint)
 RETURNS text
 AS $$
 
@@ -3452,7 +3452,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(timestamp with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(timestamp with time zone)
 RETURNS text
 AS $$
 
@@ -3462,7 +3462,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(inet)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(inet)
 RETURNS text
 AS $$
 
@@ -3472,7 +3472,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(boolean)
 RETURNS text
 AS $$
 
@@ -3482,7 +3482,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(int4range)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(int4range)
 RETURNS text
 AS $$
 
@@ -3492,7 +3492,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.mathesar_json_object)
 RETURNS text
 AS $$
 
@@ -3502,7 +3502,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(tstzrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(tstzrange)
 RETURNS text
 AS $$
 
@@ -3512,7 +3512,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(regclass)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(regclass)
 RETURNS text
 AS $$
 
@@ -3522,7 +3522,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(character)
 RETURNS text
 AS $$
 
@@ -3532,7 +3532,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(tsrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(tsrange)
 RETURNS text
 AS $$
 
@@ -3542,7 +3542,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(numrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(numrange)
 RETURNS text
 AS $$
 
@@ -3552,7 +3552,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(cidr)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(cidr)
 RETURNS text
 AS $$
 
@@ -3562,7 +3562,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(character varying)
 RETURNS text
 AS $$
 
@@ -3572,7 +3572,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(numeric)
 RETURNS text
 AS $$
 
@@ -3582,7 +3582,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(mathesar_types.email)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.email)
 RETURNS text
 AS $$
 
@@ -3592,7 +3592,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(bit)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(bit)
 RETURNS text
 AS $$
 
@@ -3602,7 +3602,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(money)
 RETURNS text
 AS $$
 
@@ -3612,7 +3612,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(int8range)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(int8range)
 RETURNS text
 AS $$
 
@@ -3622,7 +3622,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(oid)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(oid)
 RETURNS text
 AS $$
 
@@ -3632,7 +3632,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(json)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(json)
 RETURNS text
 AS $$
 
@@ -3642,7 +3642,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(daterange)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(daterange)
 RETURNS text
 AS $$
 
@@ -3652,7 +3652,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(timestamp without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(timestamp without time zone)
 RETURNS text
 AS $$
 
@@ -3662,7 +3662,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(bytea)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(bytea)
 RETURNS text
 AS $$
 
@@ -3672,7 +3672,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(date)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(date)
 RETURNS text
 AS $$
 
@@ -3682,7 +3682,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(mathesar_types.mathesar_json_array)
 RETURNS text
 AS $$
 
@@ -3692,7 +3692,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(text)
 RETURNS text
 AS $$
 
@@ -3702,7 +3702,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_text(uuid)
+CREATE OR REPLACE FUNCTION msar.cast_to_text(uuid)
 RETURNS text
 AS $$
 
@@ -3713,9 +3713,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_name
+-- msar.cast_to_name
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(time without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(time without time zone)
 RETURNS name
 AS $$
 
@@ -3725,7 +3725,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(bigint)
 RETURNS name
 AS $$
 
@@ -3735,7 +3735,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(double precision)
 RETURNS name
 AS $$
 
@@ -3745,7 +3745,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(mathesar_types.multicurrency_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(mathesar_types.multicurrency_money)
 RETURNS name
 AS $$
 
@@ -3755,7 +3755,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(mathesar_types.uri)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(mathesar_types.uri)
 RETURNS name
 AS $$
 
@@ -3765,7 +3765,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(time with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(time with time zone)
 RETURNS name
 AS $$
 
@@ -3775,7 +3775,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(integer)
 RETURNS name
 AS $$
 
@@ -3785,7 +3785,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(real)
 RETURNS name
 AS $$
 
@@ -3795,7 +3795,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(mathesar_types.mathesar_money)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(mathesar_types.mathesar_money)
 RETURNS name
 AS $$
 
@@ -3805,7 +3805,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(tsvector)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(tsvector)
 RETURNS name
 AS $$
 
@@ -3815,7 +3815,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(jsonb)
 RETURNS name
 AS $$
 
@@ -3825,7 +3825,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name("char")
+CREATE OR REPLACE FUNCTION msar.cast_to_name("char")
 RETURNS name
 AS $$
 
@@ -3835,7 +3835,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(interval)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(interval)
 RETURNS name
 AS $$
 
@@ -3845,7 +3845,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(macaddr)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(macaddr)
 RETURNS name
 AS $$
 
@@ -3855,7 +3855,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(smallint)
 RETURNS name
 AS $$
 
@@ -3865,7 +3865,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(timestamp with time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(timestamp with time zone)
 RETURNS name
 AS $$
 
@@ -3875,7 +3875,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(inet)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(inet)
 RETURNS name
 AS $$
 
@@ -3885,7 +3885,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(boolean)
 RETURNS name
 AS $$
 
@@ -3895,7 +3895,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(int4range)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(int4range)
 RETURNS name
 AS $$
 
@@ -3905,7 +3905,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(mathesar_types.mathesar_json_object)
 RETURNS name
 AS $$
 
@@ -3915,7 +3915,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(tstzrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(tstzrange)
 RETURNS name
 AS $$
 
@@ -3925,7 +3925,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(regclass)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(regclass)
 RETURNS name
 AS $$
 
@@ -3935,7 +3935,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(character)
 RETURNS name
 AS $$
 
@@ -3945,7 +3945,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(tsrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(tsrange)
 RETURNS name
 AS $$
 
@@ -3955,7 +3955,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(numrange)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(numrange)
 RETURNS name
 AS $$
 
@@ -3965,7 +3965,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(cidr)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(cidr)
 RETURNS name
 AS $$
 
@@ -3975,7 +3975,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(character varying)
 RETURNS name
 AS $$
 
@@ -3985,7 +3985,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(numeric)
 RETURNS name
 AS $$
 
@@ -3995,7 +3995,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(mathesar_types.email)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(mathesar_types.email)
 RETURNS name
 AS $$
 
@@ -4005,7 +4005,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(bit)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(bit)
 RETURNS name
 AS $$
 
@@ -4015,7 +4015,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(money)
 RETURNS name
 AS $$
 
@@ -4025,7 +4025,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(int8range)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(int8range)
 RETURNS name
 AS $$
 
@@ -4035,7 +4035,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(oid)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(oid)
 RETURNS name
 AS $$
 
@@ -4045,7 +4045,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(json)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(json)
 RETURNS name
 AS $$
 
@@ -4055,7 +4055,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(daterange)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(daterange)
 RETURNS name
 AS $$
 
@@ -4065,7 +4065,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(timestamp without time zone)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(timestamp without time zone)
 RETURNS name
 AS $$
 
@@ -4075,7 +4075,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(bytea)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(bytea)
 RETURNS name
 AS $$
 
@@ -4085,7 +4085,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(date)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(date)
 RETURNS name
 AS $$
 
@@ -4095,7 +4095,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(mathesar_types.mathesar_json_array)
 RETURNS name
 AS $$
 
@@ -4105,7 +4105,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(text)
 RETURNS name
 AS $$
 
@@ -4115,7 +4115,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_name(uuid)
+CREATE OR REPLACE FUNCTION msar.cast_to_name(uuid)
 RETURNS name
 AS $$
 
@@ -4126,9 +4126,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_uri
+-- msar.cast_to_uri
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_uri(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_uri(character varying)
 RETURNS mathesar_types.uri
 AS $$
 
@@ -4138,9 +4138,9 @@ AS $$
       RETURN $1::mathesar_types.uri;
       EXCEPTION WHEN SQLSTATE '23514' THEN
           SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-          SELECT (regexp_match(mathesar_types.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
+          SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
             INTO uri_tld;
-          IF EXISTS(SELECT 1 FROM mathesar_types.top_level_domains WHERE tld = uri_tld) THEN
+          IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
             RETURN uri_res;
           END IF;
       RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
@@ -4148,7 +4148,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_uri(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_uri(text)
 RETURNS mathesar_types.uri
 AS $$
 
@@ -4158,9 +4158,9 @@ AS $$
       RETURN $1::mathesar_types.uri;
       EXCEPTION WHEN SQLSTATE '23514' THEN
           SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-          SELECT (regexp_match(mathesar_types.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
+          SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
             INTO uri_tld;
-          IF EXISTS(SELECT 1 FROM mathesar_types.top_level_domains WHERE tld = uri_tld) THEN
+          IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
             RETURN uri_res;
           END IF;
       RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
@@ -4168,7 +4168,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_uri(mathesar_types.uri)
+CREATE OR REPLACE FUNCTION msar.cast_to_uri(mathesar_types.uri)
 RETURNS mathesar_types.uri
 AS $$
 
@@ -4178,9 +4178,9 @@ AS $$
       RETURN $1::mathesar_types.uri;
       EXCEPTION WHEN SQLSTATE '23514' THEN
           SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-          SELECT (regexp_match(mathesar_types.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
+          SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
             INTO uri_tld;
-          IF EXISTS(SELECT 1 FROM mathesar_types.top_level_domains WHERE tld = uri_tld) THEN
+          IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
             RETURN uri_res;
           END IF;
       RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
@@ -4188,7 +4188,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_uri(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_uri(character)
 RETURNS mathesar_types.uri
 AS $$
 
@@ -4198,9 +4198,9 @@ AS $$
       RETURN $1::mathesar_types.uri;
       EXCEPTION WHEN SQLSTATE '23514' THEN
           SELECT lower(('http://' || $1)::mathesar_types.uri) INTO uri_res;
-          SELECT (regexp_match(mathesar_types.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
+          SELECT (regexp_match(msar.uri_authority(uri_res), '(?<=\.)(?:.(?!\.))+$'))[1]
             INTO uri_tld;
-          IF EXISTS(SELECT 1 FROM mathesar_types.top_level_domains WHERE tld = uri_tld) THEN
+          IF EXISTS(SELECT 1 FROM msar.top_level_domains WHERE tld = uri_tld) THEN
             RETURN uri_res;
           END IF;
       RAISE EXCEPTION '% is not a mathesar_types.uri', $1;
@@ -4209,9 +4209,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_numeric
+-- msar.cast_to_numeric
 
-CREATE OR REPLACE FUNCTION mathesar_types.get_numeric_array(text) RETURNS text[]
+CREATE OR REPLACE FUNCTION msar.get_numeric_array(text) RETURNS text[]
 AS $$
   DECLARE
     raw_arr text[];
@@ -4236,7 +4236,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(smallint)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(smallint)
 RETURNS numeric
 AS $$
 
@@ -4246,7 +4246,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(real)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(real)
 RETURNS numeric
 AS $$
 
@@ -4256,7 +4256,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(bigint)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(bigint)
 RETURNS numeric
 AS $$
 
@@ -4266,7 +4266,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(double precision)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(double precision)
 RETURNS numeric
 AS $$
 
@@ -4276,7 +4276,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(numeric)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(numeric)
 RETURNS numeric
 AS $$
 
@@ -4286,7 +4286,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(money)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(money)
 RETURNS numeric
 AS $$
 
@@ -4296,7 +4296,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(integer)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(integer)
 RETURNS numeric
 AS $$
 
@@ -4306,7 +4306,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(character varying)
 RETURNS numeric
 AS $$
 
@@ -4315,7 +4315,7 @@ DECLARE is_negative boolean;
 DECLARE numeric_arr text[];
 DECLARE numeric text;
 BEGIN
-    SELECT mathesar_types.get_numeric_array($1::text) INTO numeric_arr;
+    SELECT msar.get_numeric_array($1::text) INTO numeric_arr;
     IF numeric_arr IS NULL THEN
         RAISE EXCEPTION '% cannot be cast to numeric', $1;
     END IF;
@@ -4336,7 +4336,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(text)
 RETURNS numeric
 AS $$
 
@@ -4345,7 +4345,7 @@ DECLARE is_negative boolean;
 DECLARE numeric_arr text[];
 DECLARE numeric text;
 BEGIN
-    SELECT mathesar_types.get_numeric_array($1::text) INTO numeric_arr;
+    SELECT msar.get_numeric_array($1::text) INTO numeric_arr;
     IF numeric_arr IS NULL THEN
         RAISE EXCEPTION '% cannot be cast to numeric', $1;
     END IF;
@@ -4366,7 +4366,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(character)
 RETURNS numeric
 AS $$
 
@@ -4375,7 +4375,7 @@ DECLARE is_negative boolean;
 DECLARE numeric_arr text[];
 DECLARE numeric text;
 BEGIN
-    SELECT mathesar_types.get_numeric_array($1::text) INTO numeric_arr;
+    SELECT msar.get_numeric_array($1::text) INTO numeric_arr;
     IF numeric_arr IS NULL THEN
         RAISE EXCEPTION '% cannot be cast to numeric', $1;
     END IF;
@@ -4396,7 +4396,7 @@ END;
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_numeric(boolean)
+CREATE OR REPLACE FUNCTION msar.cast_to_numeric(boolean)
 RETURNS numeric
 AS $$
 
@@ -4410,9 +4410,9 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_jsonb
+-- msar.cast_to_jsonb
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_jsonb(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(character varying)
 RETURNS jsonb
 AS $$
 
@@ -4422,7 +4422,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_jsonb(json)
+CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(json)
 RETURNS jsonb
 AS $$
 
@@ -4432,7 +4432,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_jsonb(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(character)
 RETURNS jsonb
 AS $$
 
@@ -4442,7 +4442,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_jsonb(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(jsonb)
 RETURNS jsonb
 AS $$
 
@@ -4452,7 +4452,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_jsonb(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(mathesar_types.mathesar_json_array)
 RETURNS jsonb
 AS $$
 
@@ -4462,7 +4462,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_jsonb(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(text)
 RETURNS jsonb
 AS $$
 
@@ -4472,7 +4472,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_jsonb(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to_jsonb(mathesar_types.mathesar_json_object)
 RETURNS jsonb
 AS $$
 
@@ -4483,9 +4483,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_mathesar_json_array
+-- msar.cast_to_mathesar_json_array
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_array(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(character varying)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4495,7 +4495,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_array(json)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(json)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4505,7 +4505,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_array(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(character)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4515,7 +4515,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_array(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(jsonb)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4525,7 +4525,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_array(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(mathesar_types.mathesar_json_array)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4535,7 +4535,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_array(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(text)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4545,7 +4545,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_array(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_array(mathesar_types.mathesar_json_object)
 RETURNS mathesar_types.mathesar_json_array
 AS $$
 
@@ -4556,9 +4556,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_mathesar_json_object
+-- msar.cast_to_mathesar_json_object
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_object(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(character varying)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
@@ -4568,7 +4568,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_object(json)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(json)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
@@ -4578,7 +4578,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_object(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(character)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
@@ -4588,7 +4588,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_object(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(jsonb)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
@@ -4598,7 +4598,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_object(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(mathesar_types.mathesar_json_array)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
@@ -4608,7 +4608,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_object(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(text)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
@@ -4618,7 +4618,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_mathesar_json_object(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to_mathesar_json_object(mathesar_types.mathesar_json_object)
 RETURNS mathesar_types.mathesar_json_object
 AS $$
 
@@ -4629,9 +4629,9 @@ AS $$
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
--- mathesar_types.cast_to_json
+-- msar.cast_to_json
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_json(character varying)
+CREATE OR REPLACE FUNCTION msar.cast_to_json(character varying)
 RETURNS json
 AS $$
 
@@ -4641,7 +4641,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_json(json)
+CREATE OR REPLACE FUNCTION msar.cast_to_json(json)
 RETURNS json
 AS $$
 
@@ -4651,7 +4651,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_json(character)
+CREATE OR REPLACE FUNCTION msar.cast_to_json(character)
 RETURNS json
 AS $$
 
@@ -4661,7 +4661,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_json(jsonb)
+CREATE OR REPLACE FUNCTION msar.cast_to_json(jsonb)
 RETURNS json
 AS $$
 
@@ -4671,7 +4671,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_json(mathesar_types.mathesar_json_array)
+CREATE OR REPLACE FUNCTION msar.cast_to_json(mathesar_types.mathesar_json_array)
 RETURNS json
 AS $$
 
@@ -4681,7 +4681,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_json(text)
+CREATE OR REPLACE FUNCTION msar.cast_to_json(text)
 RETURNS json
 AS $$
 
@@ -4691,7 +4691,7 @@ AS $$
 
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION mathesar_types.cast_to_json(mathesar_types.mathesar_json_object)
+CREATE OR REPLACE FUNCTION msar.cast_to_json(mathesar_types.mathesar_json_object)
 RETURNS json
 AS $$
 
