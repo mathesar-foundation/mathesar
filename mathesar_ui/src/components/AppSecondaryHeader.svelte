@@ -25,7 +25,7 @@
   .content {
     padding: var(
       --AppSecondaryHeader__padding,
-      var(--size-x-large) var(--page-padding-x)
+      var(--size-large) var(--page-padding-x)
     );
   }
   .content.restrict-width {
