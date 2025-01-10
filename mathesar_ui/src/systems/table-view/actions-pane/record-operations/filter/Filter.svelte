@@ -94,10 +94,11 @@
     checkAndSetExternalFiltering();
   }
 
-  function setCombination(combination: FilterCombination) {
-    internalFiltering.update((f) => f.withCombination(combination));
-    checkAndSetExternalFiltering();
-  }
+  // This code has been commented due to not being used in current code. But may be used in the future.
+  // function setCombination(combination: FilterCombination) {
+  //   internalFiltering.update((f) => f.withCombination(combination));
+  //   checkAndSetExternalFiltering();
+  // }
 
   function updateFilter() {
     checkAndSetExternalFiltering();

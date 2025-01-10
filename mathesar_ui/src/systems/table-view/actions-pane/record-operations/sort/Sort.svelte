@@ -2,6 +2,7 @@
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
+  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
   import SortEntry from '@mathesar/components/sort-entry/SortEntry.svelte';
   import type { SortDirection } from '@mathesar/components/sort-entry/utils';
   import {
@@ -9,14 +10,17 @@
     sortableItem,
     sortableTrigger,
   } from '@mathesar/components/sortable/sortable';
-  import { iconAddNew, iconGrip } from '@mathesar/icons';
+  import { iconGrip } from '@mathesar/icons';
   import {
     Sorting,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
-  import { Button, ButtonMenuItem, DropdownMenu, Icon } from '@mathesar-component-library';
-    import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import {
+    ButtonMenuItem,
+    DropdownMenu,
+    Icon,
+  } from '@mathesar-component-library';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -27,9 +31,10 @@
   $: availableColumnIds = [...$processedColumns.values()]
     .filter((column) => !$sorting.has(column.id))
     .map((entry) => entry.id);
-  
-  $: availableColumns = [...$processedColumns.values()]
-    .filter((column) => !$sorting.has(column.id));
+
+  $: availableColumns = [...$processedColumns.values()].filter(
+    (column) => !$sorting.has(column.id),
+  );
 
   function addSortColumn() {
     const [newSortColumnId] = availableColumnIds;
@@ -112,16 +117,16 @@
         </Button> -->
         {#each availableColumns as column (column.id)}
           <ButtonMenuItem on:click={addSortColumn}>
-            <ColumnName 
+            <ColumnName
               column={{
-              name: $processedColumns.get(column.id)?.column.name ?? '',
-              type: $processedColumns.get(column.id)?.column.type ?? '',
-              type_options:
-                $processedColumns.get(column.id)?.column.type_options ?? null,
-              constraintsType: getColumnConstraintTypeByColumnId(
-                column.id,
-                $processedColumns,
-              ),
+                name: $processedColumns.get(column.id)?.column.name ?? '',
+                type: $processedColumns.get(column.id)?.column.type ?? '',
+                type_options:
+                  $processedColumns.get(column.id)?.column.type_options ?? null,
+                constraintsType: getColumnConstraintTypeByColumnId(
+                  column.id,
+                  $processedColumns,
+                ),
               }}
             />
           </ButtonMenuItem>
