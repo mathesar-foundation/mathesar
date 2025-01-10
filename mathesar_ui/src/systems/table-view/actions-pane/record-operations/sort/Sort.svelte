@@ -15,7 +15,8 @@
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import { getColumnConstraintTypeByColumnId } from '@mathesar/utils/columnUtils';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Button, ButtonMenuItem, DropdownMenu, Icon } from '@mathesar-component-library';
+    import ColumnName from '@mathesar/components/column/ColumnName.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -26,6 +27,9 @@
   $: availableColumnIds = [...$processedColumns.values()]
     .filter((column) => !$sorting.has(column.id))
     .map((entry) => entry.id);
+  
+  $: availableColumns = [...$processedColumns.values()]
+    .filter((column) => !$sorting.has(column.id));
 
   function addSortColumn() {
     const [newSortColumnId] = availableColumnIds;
@@ -97,10 +101,32 @@
   </div>
   {#if availableColumnIds.length > 0}
     <div class="footer">
-      <Button appearance="secondary" on:click={addSortColumn}>
-        <Icon {...iconAddNew} />
-        <span>{$_('add_new_sort_condition')}</span>
-      </Button>
+      <DropdownMenu
+        label={$_('add_new_sort_condition')}
+        disabled={availableColumnIds.length === 0}
+        triggerAppearance="secondary"
+      >
+        <!-- <Button appearance="secondary" on:click={addSortColumn}>
+          <Icon {...iconAddNew} />
+          <span>{$_('add_new_sort_condition')}</span>
+        </Button> -->
+        {#each availableColumns as column (column.id)}
+          <ButtonMenuItem on:click={addSortColumn}>
+            <ColumnName 
+              column={{
+              name: $processedColumns.get(column.id)?.column.name ?? '',
+              type: $processedColumns.get(column.id)?.column.type ?? '',
+              type_options:
+                $processedColumns.get(column.id)?.column.type_options ?? null,
+              constraintsType: getColumnConstraintTypeByColumnId(
+                column.id,
+                $processedColumns,
+              ),
+              }}
+            />
+          </ButtonMenuItem>
+        {/each}
+      </DropdownMenu>
     </div>
   {/if}
 </div>
