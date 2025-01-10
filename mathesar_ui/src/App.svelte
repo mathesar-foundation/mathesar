@@ -132,6 +132,7 @@
     --header-height: 3.7378rem;
 
     --table-title-header-height: 4.6428rem;
+    --status-bar-padding: 0.3rem;
 
     color: var(--slate-800);
 
@@ -173,13 +174,6 @@
 
   .block {
     display: block;
-  }
-
-  .trim-child-margins > :first-child {
-    margin-top: 0;
-  }
-  .trim-child-margins > :last-child {
-    margin-bottom: 0;
   }
 
   /**

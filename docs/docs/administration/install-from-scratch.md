@@ -1,7 +1,4 @@
-# Install Mathesar from source on Linux
-
-!!! danger "Not a stable release"
-    This is a testing build released with the goal of gathering feedback from our community. It has **[many known issues](https://github.com/mathesar-foundation/mathesar/issues?q=is%3Aissue+milestone%3Av0.2.0-testing.2+)** and is not recommended for production use.
+# Install Mathesar From Scratch on Linux
 
 !!! warning "For experienced Linux sysadmins"
     To follow this guide you need be experienced with Linux server administration, including the command line interface and some common utilities.
@@ -176,7 +173,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
         touch .env
         ```
 
-    1. Edit your `.env` file, adding [environment variables](../../configuration/env-variables.md) to configure Mathesar.
+    1. Edit your `.env` file, adding [environment variables](./configuration.md) to configure Mathesar.
 
         !!! example
             Your `.env` file should look something like this
@@ -193,7 +190,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
             ```
 
         !!! tip
-            To generate a [`SECRET_KEY`](../../configuration/env-variables.md#secret_key) you can use this [browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
+            To generate a [`SECRET_KEY`](./configuration.md#secret_key) you can use this [browser-based generator](https://djecrety.ir/) or run this command on MacOS or Linux:
 
             ```
             echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)

@@ -4,7 +4,8 @@
 
   export let icon: IconProps;
   export let name: string;
-  export let description: string | undefined = undefined;
+  export let entityTypeName: string | undefined = undefined;
+  export let subText: string | undefined = undefined;
 </script>
 
 <div class="container">
@@ -15,9 +16,12 @@
           <Icon {...icon} size="1.5em" />
         </div>
         <div class="left-meta-container">
+          {#if entityTypeName}
+            <span class="entity-type-name">{entityTypeName}</span>
+          {/if}
           <span class="entity-name">{name}</span>
-          {#if description}
-            <span class="entity-description">{description}</span>
+          {#if subText}
+            <span>{subText}</span>
           {/if}
         </div>
       </div>
@@ -65,6 +69,14 @@
     flex-direction: column;
     margin-left: 0.75rem;
     gap: var(--size-super-ultra-small);
+  }
+
+  .entity-type-name {
+    font-size: var(--text-size-x-small);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--sand-700);
+    text-transform: uppercase;
   }
 
   .entity-name {

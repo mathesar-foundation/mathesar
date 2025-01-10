@@ -1,2 +1,9 @@
 @import './variables.scss';
 @import 'components/input.scss';
+
+.trim-child-margins > :first-child {
+  margin-top: 0;
+}
+.trim-child-margins > :last-child {
+  margin-bottom: 0;
+}

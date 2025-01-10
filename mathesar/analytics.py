@@ -66,9 +66,14 @@ def disable_analytics():
 
 
 def save_analytics_report():
+    raw_analytics_report = prepare_analytics_report()
+    if raw_analytics_report["installation_id"] is not None:
+        analytics_report = AnalyticsReport(**raw_analytics_report)
+        analytics_report.save()
+
+
+def prepare_analytics_report():
     installation_id = InstallationID.objects.first()
-    if installation_id is None:
-        return
     connected_database_count = 0
     connected_database_schema_count = 0
     connected_database_table_count = 0
@@ -83,7 +88,7 @@ def save_analytics_report():
         except Exception:
             print(f"Couldn't retrieve object counts for {d.name}")
 
-    analytics_report = AnalyticsReport(
+    return dict(
         installation_id=installation_id,
         mathesar_version=__version__,
         user_count=User.objects.filter(is_active=True).count(),
@@ -99,7 +104,6 @@ def save_analytics_report():
         connected_database_record_count=connected_database_record_count,
         exploration_count=Explorations.objects.count(),
     )
-    analytics_report.save()
 
 
 def upload_analytics_reports():
@@ -137,3 +141,11 @@ def delete_stale_reports():
             - timezone.timedelta(days=ANALYTICS_REPORT_MAX_AGE)
         )
     ).delete()
+
+
+def upload_initial_report():
+    """Upload an initial report when Mathesar is installed"""
+    requests.post(
+        settings.MATHESAR_INIT_REPORT_URL,
+        json={"mathesar_version": __version__}
+    )

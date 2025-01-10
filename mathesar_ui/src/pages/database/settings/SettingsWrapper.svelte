@@ -14,7 +14,7 @@
   $: ({ database } = $databaseSettingsContext);
 
   type Section = 'roleConfiguration' | 'collaborators' | 'roles';
-  let section = 'roleConfiguration';
+  let section = 'roles';
 
   export function setSection(_section: Section) {
     section = _section;
@@ -25,29 +25,31 @@
   <div class="navigation" slot="sidebar">
     <Menu>
       <MenuHeading>
-        <div class="heading">{$_('in_mathesar')}</div>
-      </MenuHeading>
-      <LinkMenuItem
-        href={getDatabaseRoleConfigurationUrl(database.id)}
-        class={section === 'roleConfiguration' ? 'active' : ''}
-      >
-        {$_('role_configuration')}
-      </LinkMenuItem>
-      <LinkMenuItem
-        href={getDatabaseCollaboratorsUrl(database.id)}
-        class={section === 'collaborators' ? 'active' : ''}
-      >
-        {$_('collaborators')}
-      </LinkMenuItem>
-      <div class="menu-divider" />
-      <MenuHeading>
-        <div class="heading">{$_('on_the_server')}</div>
+        <div class="heading">{$_('in_postgresql')}</div>
       </MenuHeading>
       <LinkMenuItem
         href={getDatabaseRolesUrl(database.id)}
         class={section === 'roles' ? 'active' : ''}
       >
         {$_('roles')}
+      </LinkMenuItem>
+
+      <div class="menu-divider" />
+
+      <MenuHeading>
+        <div class="heading">{$_('in_mathesar')}</div>
+      </MenuHeading>
+      <LinkMenuItem
+        href={getDatabaseRoleConfigurationUrl(database.id)}
+        class={section === 'roleConfiguration' ? 'active' : ''}
+      >
+        {$_('stored_role_passwords')}
+      </LinkMenuItem>
+      <LinkMenuItem
+        href={getDatabaseCollaboratorsUrl(database.id)}
+        class={section === 'collaborators' ? 'active' : ''}
+      >
+        {$_('collaborators')}
       </LinkMenuItem>
     </Menu>
   </div>
@@ -67,13 +69,12 @@
     padding: var(--size-x-small) 0;
 
     .heading {
-      font-size: var(--text-size-small);
+      color: var(--slate-400);
       font-weight: 500;
-      text-transform: uppercase;
       margin-bottom: var(--size-ultra-small);
     }
     .menu-divider {
-      margin: 0.5rem 0.1rem 0.8rem 0.1rem;
+      margin: 1rem 0;
     }
   }
 </style>
