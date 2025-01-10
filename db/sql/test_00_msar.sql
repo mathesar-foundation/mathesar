@@ -3105,7 +3105,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION __setup_wide_table() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE wide_table (
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- Auto-incremented primary key
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     col_1 VARCHAR(50),
     col_2 INT,
     col_3 DATE,
@@ -3223,23 +3223,68 @@ BEGIN
     col_91, col_92, col_93, col_94, col_95, col_96, col_97, col_98, col_99, col_100,
     col_101
   ) VALUES (
-    'Sample1', 1, '2023-01-01', TRUE, 'Sample2', 2, 'Sample3', 3, '2023-01-02', FALSE,
-    'Sample4', 4, 'Sample5', 5, '2023-01-03', TRUE, 'Sample6', 6, 'Sample7', 7,
-    '2023-01-04', FALSE, 'Sample8', 8, 'Sample9', 9, '2023-01-05', TRUE, 'Sample10', 10,
-    'Sample11', 11, 'Sample12', 12, '2023-01-06', FALSE, 'Sample13', 13, 'Sample14', 14,
-    '2023-01-07', TRUE, 'Sample15', 15, 'Sample16', 16, '2023-01-08', FALSE, 'Sample17', 17,
-    'Sample18', 18, '2023-01-09', TRUE, 'Sample19', 19, 'Sample20', 20, '2023-01-10', FALSE,
-    'Sample21', 21, 'Sample22', 22, '2023-01-11', TRUE, 'Sample23', 23, 'Sample24', 24,
-    '2023-01-12', FALSE, 'Sample25', 25, 'Sample26', 26, '2023-01-13', TRUE, 'Sample27', 27,
-    'Sample28', 28, '2023-01-14', FALSE, 'Sample29', 29, 'Sample30', 30, '2023-01-15', TRUE,
-    'Sample31', 31, 'Sample32', 32, '2023-01-16', FALSE, 'Sample33', 33, 'Sample34', 34,
-    '2023-01-17', TRUE, 'Sample35', 35, 'Sample36', 36, '2023-01-18', FALSE, 'Sample37', 37,
-    'Sample38', 38, '2023-01-19', TRUE, 'Sample39', 39, 'Sample40', 40, '2023-01-20', FALSE,
-    'Sample41'
+    'John', 42, '1980-05-12', TRUE, 'Developer', 50000, 'New York', 10, '2025-01-01', TRUE,
+    'Alice', 35, 'Bob', 28, '1995-12-14', TRUE, 'Analyst', 40000, 'Chicago', 15,
+    '2025-01-03', TRUE, 'Eve', 31, 'Dave', 29, '1994-06-10', TRUE, 'Engineer', 48000,
+    'Austin', 18, '2025-01-05', TRUE, 'Grace', 33, 'Frank', 40, '1983-03-15', TRUE,
+    'Consultant', 60000, 'Denver', 30, '2025-01-07', TRUE, 'Carol', 27, 'Henry', 36,
+    '1987-09-20', TRUE, 'Technician', 42000, 'Phoenix', 17, '2025-01-09', TRUE, 'Judy', 45,
+    'Zara', 32, '1991-01-25', TRUE, 'Data Scientist', 70000, 'Houston', 35, '2025-01-11', TRUE,
+    'Product Manager', 65000, 'San Diego', 40, '2025-01-12', FALSE, 'Grace', 33, 'Frank', 40,
+    '1983-03-15', TRUE, 'Technician', 42000, 'Phoenix', 17, '2025-01-09', TRUE, 'Engineer', 48000,
+    'Austin', 18, '2025-01-05', TRUE, 'Grace', 33, 'Frank', 40, '1983-03-15', FALSE,
+    'California'
   );
 END;
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION test_list_records_from_wide_table() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_wide_table();
+  rel_id := 'wide_table'::regclass::oid;
+  RETURN NEXT is(
+    msar.list_records_from_table(
+      tab_id => rel_id,
+      limit_ => null,
+      offset_ => null,
+      order_ => null,
+      filter_ => null,
+      group_ => null
+    ),
+    $j${
+      "count": 1,
+      "results": [
+        {
+          "1": 1, "2": "John", "3": 42, "4": "1980-05-12 AD", "5": true,
+          "6": "Developer", "7": 50000, "8": "New York", "9": 10, "10": "2025-01-01 AD", "11": true,
+          "12": "Alice", "13": 35, "14": "Bob", "15": 28, "16": "1995-12-14 AD", "17": true,
+          "18": "Analyst", "19": 40000, "20": "Chicago", "21": 15, "22": "2025-01-03 AD", "23": true,
+          "24": "Eve", "25": 31, "26": "Dave", "27": 29, "28": "1994-06-10 AD", "29": true,
+          "30": "Engineer", "31": 48000, "32": "Austin", "33": 18, "34": "2025-01-05 AD", "35": true,
+          "36": "Grace", "37": 33, "38": "Frank", "39": 40, "40": "1983-03-15 AD", "41": true,
+          "42": "Consultant", "43": 60000, "44": "Denver", "45": 30, "46": "2025-01-07 AD", "47": true,
+          "48": "Carol", "49": 27, "50": "Henry", "51": 36, "52": "1987-09-20 AD", "53": true,
+          "54": "Technician", "55": 42000, "56": "Phoenix", "57": 17, "58": "2025-01-09 AD", "59": true,
+          "60": "Judy", "61": 45, "62": "Zara", "63": 32, "64": "1991-01-25 AD", "65": true,
+          "66": "Data Scientist", "67": 70000, "68": "Houston", "69": 35, "70": "2025-01-11 AD", "71": true,
+          "72": "Product Manager", "73": 65000, "74": "San Diego", "75": 40, "76": "2025-01-12 AD", "77": false,
+          "78": "Grace", "79": 33, "80": "Frank", "81": 40, "82": "1983-03-15 AD", "83": true,
+          "84": "Technician", "85": 42000, "86": "Phoenix", "87": 17, "88": "2025-01-09 AD", "89": true,
+          "90": "Engineer", "91": 48000, "92": "Austin", "93": 18, "94": "2025-01-05 AD", "95": true,
+          "96": "Grace", "97": 33, "98": "Frank", "99": 40, "100": "1983-03-15 AD", "101": false,
+          "102": "California"
+        }
+      ],
+      "grouping": null,
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$j$
+  );
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION test_list_records_from_table() RETURNS SETOF TEXT AS $$
 DECLARE
