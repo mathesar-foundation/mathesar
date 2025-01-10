@@ -35,7 +35,18 @@ def install(conn):
         step(conn)
 
 
-def uninstall(conn):
+def uninstall(
+        conn,
+        schemas_to_remove=['msar', '__msar', 'mathesar_types'],
+        remove_custom_types=True,
+        strict=True
+):
     """Remove msar and __msar schemas safely."""
     _install_sql_file("02_msar_remove.sql")(conn)
-    exec_msar_func(conn, "drop_all_msar_objects")
+    exec_msar_func(
+        conn,
+        "drop_all_msar_objects",
+        schemas_to_remove,
+        remove_custom_types,
+        strict,
+    )

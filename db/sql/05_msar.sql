@@ -1,7 +1,11 @@
-SELECT msar.drop_all_msar_objects(4);
+SELECT msar.drop_all_msar_objects(
+  schemas_to_remove => ARRAY['msar', '__msar', 'mathesar_types'],
+  remove_custom_types => false,
+  strict => false
+);
 
-CREATE SCHEMA  __msar;
-CREATE SCHEMA  msar;
+CREATE SCHEMA IF NOT EXISTS __msar;
+CREATE SCHEMA IF NOT EXISTS msar;
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -360,7 +364,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.get_relation_oid(text, text) CASCADE;
 CREATE OR REPLACE FUNCTION
 msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
 Return the OID for a given relation (e.g., table).
@@ -649,7 +652,6 @@ END;
 $$ LANGUAGE SQL;
 
 
-DROP FUNCTION IF EXISTS msar.get_constraints_for_table(oid);
 CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TABLE
 (
   oid oid,
@@ -1223,7 +1225,6 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
   oid bigint, -- The OID of the role.
@@ -1712,7 +1713,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.transfer_database_ownership(regrole);
 CREATE OR REPLACE FUNCTION
 msar.transfer_database_ownership(new_owner_oid regrole) RETURNS jsonb AS $$/*
 Transfers ownership of the current database to a new owner.
@@ -1796,7 +1796,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
-DROP FUNCTION IF EXISTS msar.rename_schema(oid, text);
 CREATE OR REPLACE FUNCTION msar.rename_schema(sch_id oid, new_sch_name text) RETURNS void AS $$/*
 Change a schema's name
 
@@ -1834,7 +1833,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-DROP FUNCTION IF EXISTS msar.patch_schema(oid, jsonb);
 CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS jsonb AS $$/*
 Modify a schema according to the given patch.
 
@@ -1878,11 +1876,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
--- This gets rid of `msar.create_schema` as defined in Mathesar 0.1.7. We don't want that old
--- function definition hanging around because it will get invoked when passing NULL as the second
--- argument like `msar.create_schema('foo', NULL)`.
-DROP FUNCTION IF EXISTS msar.create_schema(text, boolean);
-
 CREATE OR REPLACE FUNCTION msar.create_schema_if_not_exists(sch_name text) RETURNS oid AS $$/*
 Ensure that a schema exists in the database.
 
@@ -1899,7 +1892,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-DROP FUNCTION IF EXISTS msar.create_schema(text, text);
 CREATE OR REPLACE FUNCTION msar.create_schema(
   sch_name text,
   own_id regrole,
@@ -2027,7 +2019,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Rename table ------------------------------------------------------------------------------------
 
-DROP FUNCTION IF EXISTS msar.rename_table(text, text, text);
 CREATE OR REPLACE FUNCTION
 msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS void AS $$/*
 Change a table's name, returning the command executed.
@@ -2047,7 +2038,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.rename_table(oid, text);
 CREATE OR REPLACE FUNCTION
 msar.rename_table(tab_id oid, new_tab_name text) RETURNS void AS $$/*
 Change a table's name, returning the command executed.
@@ -2277,7 +2267,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Column creation definition type -----------------------------------------------------------------
 
-DROP TYPE IF EXISTS __msar.col_def CASCADE;
 CREATE TYPE __msar.col_def AS (
   name_ text, -- The name of the column to create, quoted.
   type_ text, -- The type of the column to create, fully specced with arguments.
@@ -2788,7 +2777,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 -- Constraint creation definition type -------------------------------------------------------------
 
-DROP TYPE IF EXISTS __msar.con_def CASCADE;
 CREATE TYPE __msar.con_def AS (
 /*
 This should be used in the context of a single ALTER TABLE command. So, no need to reference the
@@ -3004,7 +2992,6 @@ SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs)
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-DROP TYPE IF EXISTS __msar.not_null_def CASCADE;
 CREATE TYPE __msar.not_null_def AS (
   col_name text, -- The column to be modified, quoted.
   not_null boolean -- The value to set for null or not null.
