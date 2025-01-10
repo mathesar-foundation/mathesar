@@ -7,5 +7,5 @@ export interface FilterEntryColumnLike
   extends Pick<CellColumnFabric, 'id' | 'column'> {
   abstractType: AbstractType;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
-  inputComponentAndProps: ComponentAndProps;
+  filterComponentAndProps: ComponentAndProps;
 }

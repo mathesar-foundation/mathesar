@@ -3161,14 +3161,7 @@ BEGIN
       "grouping": null,
       "linked_record_summaries": null,
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",'
-        ' msar.format_data(col4) AS "5" FROM public.atable'
-        '  ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
+    }$j$
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -3188,14 +3181,7 @@ BEGIN
       "grouping": null,
       "linked_record_summaries": null,
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",'
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",'
-        ' msar.format_data(col4) AS "5" FROM public.atable'
-        '  ORDER BY "2" DESC, "1" ASC LIMIT ''2'' OFFSET NULL'
-      )
-    )
+    }$j$
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -3215,14 +3201,7 @@ BEGIN
       "grouping": null,
       "linked_record_summaries": null,
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(col1) AS "2",',
-        ' msar.format_data(col2) AS "3", msar.format_data(col3) AS "4",',
-        ' msar.format_data(col4) AS "5" FROM public.atable',
-        '  ORDER BY "1" DESC, "1" ASC LIMIT NULL OFFSET ''1'''
-      )
-    )
+    }$j$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -3295,13 +3274,7 @@ BEGIN
       },
       "linked_record_summaries": null,
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
-        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
-        ' FROM public."Customers"  ORDER BY "3" ASC, "2" ASC, "1" ASC LIMIT ''10'' OFFSET NULL'
-      )
-    )
+    }$j$
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -3333,13 +3306,7 @@ BEGIN
       },
       "linked_record_summaries": null,
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
-        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
-        ' FROM public."Customers"  ORDER BY "3" ASC, "2" ASC, "1" ASC LIMIT ''3'' OFFSET NULL'
-      )
-    )
+    }$j$
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -3367,13 +3334,7 @@ BEGIN
       },
       "linked_record_summaries": null,
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
-        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
-        ' FROM public."Customers"  ORDER BY "4" ASC, "1" ASC LIMIT ''3'' OFFSET NULL'
-      )
-    )
+    }$j$
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -3402,13 +3363,7 @@ BEGIN
       },
       "linked_record_summaries": null,
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data("First Name") AS "2",'
-        ' msar.format_data("Last Name") AS "3", msar.format_data("Subscription Date") AS "4"'
-        ' FROM public."Customers"  ORDER BY "4" ASC, "1" ASC LIMIT ''5'' OFFSET NULL'
-      )
-    )
+    }$j$
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -3448,16 +3403,135 @@ BEGIN
           "3": "Hand tools"
         }
      }
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data(name) AS "2",'
-        ' msar.format_data(parent) AS "3" FROM public.categories  ORDER BY "1" ASC LIMIT ''10'' OFFSET NULL'
-      )
-    )
+    }$j$
   );
 END;
 $$ LANGUAGE plpgsql;
 
+-- msar.get_table_columns_and_records ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION __setup_get_table_columns_records() RETURNS SETOF TEXT AS $$
+BEGIN
+  CREATE TABLE table_for_export (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    col1 integer,
+    col2 varchar,
+    col3 json,
+    col4 jsonb
+  );
+  INSERT INTO table_for_export (col1, col2, col3, col4) VALUES
+    (5, 'sdflkj', '"s"', '{"a": "val"}'),
+    (34, 'sdflfflsk', null, '[1, 2, 3, 4]'),
+    (2, 'abcde', '{"k": 3242348}', 'true');
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION test_get_table_columns_and_records() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_get_table_columns_records();
+  rel_id := 'table_for_export'::regclass::oid;
+  RETURN NEXT results_eq(
+    format(
+      $q$
+      SELECT msar.get_table_columns_and_records(
+        tab_id => %1$L,
+        limit_ => %2$L,
+        offset_ => %3$L,
+        order_ => %4$L,
+        filter_ => %5$L
+      )
+      $q$,
+      rel_id,
+      null,
+      null,
+      null,
+      null
+    ),
+    ARRAY[
+      '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
+      '{"1": 3, "2": 2, "3": "abcde", "4": {"k": 3242348}, "5": true}'::JSONB
+    ]
+  );
+  RETURN NEXT results_eq(
+    format(
+      $q$
+      SELECT msar.get_table_columns_and_records(
+        tab_id => %1$L,
+        limit_ => %2$L,
+        offset_ => %3$L,
+        order_ => %4$L,
+        filter_ => %5$L
+      )
+      $q$,
+      rel_id,
+      2,
+      null,
+      '[{"attnum": 2, "direction": "desc"}]',
+      null
+    ),
+    ARRAY[
+      '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB
+    ]
+  );
+  RETURN NEXT results_eq(
+    format(
+      $q$
+      SELECT msar.get_table_columns_and_records(
+        tab_id => %1$L,
+        limit_ => %2$L,
+        offset_ => %3$L,
+        order_ => %4$L,
+        filter_ => %5$L
+      )
+      $q$,
+      rel_id,
+      null,
+      1,
+      '[{"attnum": 1, "direction": "desc"}]',
+      null
+    ),
+    ARRAY[
+      '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB
+    ]
+  );
+  RETURN NEXT results_eq(
+    format(
+      $q$
+      SELECT msar.get_table_columns_and_records(
+        tab_id => %1$L,
+        limit_ => %2$L,
+        offset_ => %3$L,
+        order_ => %4$L,
+        filter_ => %5$L
+      )
+      $q$,
+      rel_id,
+      null,
+      null,
+      null,
+      concat(
+        '{"type":"contains_case_insensitive","args":[',
+        '{"type":"attnum","value":3},'
+        '{"type":"literal","value":"sdfl"}',
+      ']}')::JSONB
+    ),
+    ARRAY[
+      '{"1": "id", "2": "col1", "3": "col2", "4": "col3", "5": "col4"}'::JSONB,
+      '{"1": 1, "2": 5, "3": "sdflkj", "4": "s", "5": {"a": "val"}}'::JSONB,
+      '{"1": 2, "2": 34, "3": "sdflfflsk", "4": null, "5": [1, 2, 3, 4]}'::JSONB
+    ]
+  );
+END;
+$$ LANGUAGE plpgsql;
 
 -- msar.get_current_role ---------------------------------------------------------------------------
 
@@ -4484,14 +4558,7 @@ BEGIN
         "6": "Kelly Kellison",
         "7": "Arnold Baker"
       }
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
-        ' msar.format_data("Teacher") AS "3", msar.format_data("Name") AS "4",',
-        ' msar.format_data("Grade") AS "5", msar.format_data("Email") AS "6"',
-        ' FROM public."Students"  ORDER BY "1" ASC LIMIT NULL OFFSET NULL'
-      )
-    )
+    }$j$
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -4521,14 +4588,7 @@ BEGIN
         }
       },
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
-        ' msar.format_data("Teacher") AS "3", msar.format_data("Name") AS "4",',
-        ' msar.format_data("Grade") AS "5", msar.format_data("Email") AS "6"',
-        ' FROM public."Students"  ORDER BY "1" ASC LIMIT ''3'' OFFSET ''1'''
-      )
-    )
+    }$j$
   );
   RETURN NEXT is(
     msar.list_records_from_table(
@@ -4560,14 +4620,7 @@ BEGIN
         }
       },
       "record_summaries": null
-    }$j$ || jsonb_build_object(
-      'query', concat(
-        'SELECT msar.format_data(id) AS "1", msar.format_data("Counselor") AS "2",',
-        ' msar.format_data("Teacher") AS "3", msar.format_data("Name") AS "4",',
-        ' msar.format_data("Grade") AS "5", msar.format_data("Email") AS "6"',
-        ' FROM public."Students"  ORDER BY "2" ASC, "1" ASC LIMIT ''2'' OFFSET NULL'
-      )
-    )
+    }$j$
   );
 END;
 $$ LANGUAGE plpgsql;

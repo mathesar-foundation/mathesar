@@ -14,7 +14,6 @@
 
   import BreadcrumbSelector from './BreadcrumbSelector.svelte';
   import type {
-    BreadcrumbSelectorEntry,
     BreadcrumbSelectorEntryForTable,
     SimpleBreadcrumbSelectorEntry,
   } from './breadcrumbTypes';
@@ -61,14 +60,20 @@
   }
 
   $: queries = [...$queriesStore.data.values()];
-
-  $: selectorData = new Map<string, BreadcrumbSelectorEntry[]>([
-    [$_('tables'), $currentTables.map(makeTableBreadcrumbSelectorItem)],
-    [$_('explorations'), queries.map(makeQueryBreadcrumbSelectorItem)],
-  ]);
 </script>
 
 <BreadcrumbSelector
-  data={selectorData}
+  sections={[
+    {
+      label: $_('tables'),
+      entries: $currentTables.map(makeTableBreadcrumbSelectorItem),
+      emptyMessage: $_('no_tables'),
+    },
+    {
+      label: $_('explorations'),
+      entries: queries.map(makeQueryBreadcrumbSelectorItem),
+      emptyMessage: $_('no_explorations'),
+    },
+  ]}
   triggerLabel={$_('choose_table_or_exploration')}
 />

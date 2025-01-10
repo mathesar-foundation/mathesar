@@ -6,10 +6,13 @@
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
+  import Identifier from '@mathesar/components/Identifier.svelte';
   import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';
+  import RichText from '@mathesar/components/rich-text/RichText.svelte';
   import { iconDeleteMajor } from '@mathesar/icons';
   import type { Role } from '@mathesar/models/Role';
+  import { highlightNewItems } from '@mathesar/packages/new-item-highlighter';
   import { toast } from '@mathesar/stores/toast';
   import {
     Button,
@@ -60,11 +63,11 @@
 
 <ControlledModal {controller} on:close={() => form.reset()}>
   <span slot="title">
-    {$_('edit_child_roles_for_parent', {
-      values: {
-        parent: parentRole.name,
-      },
-    })}
+    <RichText text={$_('edit_child_roles_for_parent')} let:slotName>
+      {#if slotName === 'parent'}
+        <Identifier>{parentRole.name}</Identifier>
+      {/if}
+    </RichText>
   </span>
   <div>
     <div class="menu-section">
@@ -87,7 +90,12 @@
         </div>
       {/if}
     </div>
-    <div class="member-list">
+    <div
+      class="member-list"
+      use:highlightNewItems={{
+        scrollHint: $_('child_role_new_items_scroll_hint'),
+      }}
+    >
       {#if $memberOids.size > 0}
         {#each [...$memberOids] as memberOid (memberOid)}
           <div class="member">

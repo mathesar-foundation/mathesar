@@ -47,6 +47,7 @@
           type: 'simple',
           href: ADMIN_UPDATE_PAGE_URL,
           label: $_('software_update'),
+          prependSeparator: true,
         }}
       />
       <SoftwareUpdate />

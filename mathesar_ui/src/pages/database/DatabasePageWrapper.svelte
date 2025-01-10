@@ -4,6 +4,7 @@
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import {
     iconDatabase,
@@ -14,7 +15,6 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
-    HOME_URL,
     getDatabasePageSchemasSectionUrl,
     getDatabasePageSettingsSectionUrl,
   } from '@mathesar/routes/urls';
@@ -28,6 +28,7 @@
     Button,
     ButtonMenuItem,
     DropdownMenu,
+    Help,
     Icon,
     TabContainer,
   } from '@mathesar-component-library';
@@ -62,7 +63,7 @@
     },
     {
       id: 'settings',
-      label: $_('settings'),
+      label: $_('database_settings'),
       href: getDatabasePageSettingsSectionUrl(database.id),
     },
   ];
@@ -96,7 +97,7 @@
       },
       onSuccess: () => {
         toast.success($_('database_disconnect_success'));
-        router.goto(HOME_URL);
+        router.goto('/');
       },
       onError: (e) =>
         toast.error({
@@ -121,10 +122,9 @@
     slot="secondary-header"
     pageTitleAndMetaProps={{
       name: database.name,
+      entityTypeName: $_('database'),
       icon: iconDatabase,
-      description: `${$_(
-        'db_server',
-      )}: ${database.server.getConnectionString()}`,
+      subText: `${$_('db_server')}: ${database.server.getConnectionString()}`,
     }}
   >
     <div slot="action">
@@ -144,7 +144,10 @@
           <ButtonMenuItem icon={iconDeleteMajor} on:click={disconnectDatabase}>
             {$_('disconnect_database')}
           </ButtonMenuItem>
-          <!-- TODO_BETA: Allow dropping databases -->
+          <!--
+            TODO: Allow dropping databases
+            https://github.com/mathesar-foundation/mathesar/issues/3862
+          -->
           <!-- {#if isDatabaseInInternalServer}
             <ButtonMenuItem
               icon={iconDeleteMajor}
@@ -162,6 +165,28 @@
   <TabContainer {activeTab} {tabs} uniformTabWidth={false}>
     <div class="tab-container">
       <slot {setSection} />
+    </div>
+    <div slot="tab" let:tab>
+      <!--
+        From Sean: I wrote this `{#if}` block because I needed to customize the
+        tab label using rich text, but I don't like the approach here.
+
+        I'd rather do something like pass a property from `tab` into our
+        `<Render>` component. But to do that we'd need to make the
+        `<TabContainer>` component generic over `Tab` or use a type assertion.
+        I'd argue that `TabContainer` should be generic anyway. But I don't want
+        to refactor that right now. And type assertions are tricky to put into
+        the Svelte template area. So I'm leaving this for now.
+       -->
+      {#if tab.id === 'schemas'}
+        {tab.label}
+        <Help placements={['top-start', 'bottom-start']}>
+          <p>{$_('schemas_list_help')}</p>
+          <p><SeeDocsToLearnMore page="schemas" /></p>
+        </Help>
+      {:else}
+        {tab.label}
+      {/if}
     </div>
   </TabContainer>
 </LayoutWithHeader>

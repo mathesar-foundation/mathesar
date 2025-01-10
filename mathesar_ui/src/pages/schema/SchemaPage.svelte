@@ -19,6 +19,7 @@
   import { logEvent } from '@mathesar/utils/telemetry';
   import { Button, Icon, TabContainer } from '@mathesar-component-library';
 
+  import AddTableModal from './AddTableModal.svelte';
   import ExplorationSkeleton from './ExplorationSkeleton.svelte';
   import SchemaExplorations from './SchemaExplorations.svelte';
   import SchemaOverview from './SchemaOverview.svelte';
@@ -30,7 +31,8 @@
   export let schema: Schema;
   export let section: string;
 
-  const addEditModal = modal.spawnModalController();
+  const editSchemaModal = modal.spawnModalController();
+  const addTableModal = modal.spawnModalController();
   const permissionsModal = modal.spawnModalController();
 
   // NOTE: This has to be same as the name key in the paths prop of Route component
@@ -72,7 +74,7 @@
   $: activeTab = tabs.find((tab) => tab.id === section) || tabs[0];
 
   function handleEditSchema() {
-    addEditModal.open();
+    editSchemaModal.open();
   }
 
   $: ({ name, description, tableCount, currentAccess } = schema);
@@ -99,6 +101,7 @@
     pageTitleAndMetaProps={{
       name: $name,
       icon: iconSchema,
+      entityTypeName: $_('schema'),
     }}
   >
     <div slot="action">
@@ -141,6 +144,7 @@
           {database}
           {schema}
           {explorationsRequestStatus}
+          onCreateEmptyTable={() => addTableModal.open()}
         />
       </div>
     {:else if activeTab?.id === 'tables'}
@@ -148,7 +152,12 @@
         {#if tablesRequestStatus.state === 'processing'}
           <TableSkeleton numTables={$tableCount} />
         {:else}
-          <SchemaTables {tablesMap} {database} {schema} />
+          <SchemaTables
+            {tablesMap}
+            {database}
+            {schema}
+            onCreateEmptyTable={() => addTableModal.open()}
+          />
         {/if}
       </div>
     {:else if activeTab?.id === 'explorations'}
@@ -168,8 +177,8 @@
   </TabContainer>
 </LayoutWithHeader>
 
-<AddEditSchemaModal controller={addEditModal} {database} {schema} />
-
+<AddEditSchemaModal controller={editSchemaModal} {database} {schema} />
+<AddTableModal controller={addTableModal} {schema} {tablesMap} />
 <SchemaPermissionsModal controller={permissionsModal} {schema} />
 
 <style lang="scss">

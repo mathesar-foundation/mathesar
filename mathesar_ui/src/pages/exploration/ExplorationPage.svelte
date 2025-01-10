@@ -8,11 +8,12 @@
   import type { Schema } from '@mathesar/models/Schema';
   import { getSchemaPageUrl } from '@mathesar/routes/urls';
   import {
-    ExplorationResult,
+    ExplorationResults,
     QueryModel,
     QueryRunner,
     WithExplorationInspector,
   } from '@mathesar/systems/data-explorer';
+  import StatusBar from '@mathesar/systems/data-explorer/StatusBar.svelte';
   import type { ShareConsumer } from '@mathesar/utils/shares';
 
   import Header from './Header.svelte';
@@ -58,8 +59,9 @@
         queryHandler={queryRunner}
         on:delete={gotoSchemaPage}
       >
-        <ExplorationResult queryHandler={queryRunner} isExplorationPage />
+        <ExplorationResults queryHandler={queryRunner} />
       </WithExplorationInspector>
+      <StatusBar queryHandler={queryRunner} />
     </div>
   {/if}
 </LayoutWithHeader>
@@ -67,7 +69,7 @@
 <style>
   .exploration-page {
     display: grid;
-    grid-template: auto 1fr / 1fr;
+    grid-template: auto 1fr auto / 1fr;
     height: 100%;
   }
 </style>

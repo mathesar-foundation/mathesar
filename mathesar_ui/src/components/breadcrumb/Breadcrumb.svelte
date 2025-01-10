@@ -1,6 +1,7 @@
 <script lang="ts">
   import BreadcrumbItem from './BreadcrumbItem.svelte';
   import { getBreadcrumbItemsFromContext } from './breadcrumbUtils';
+  import DatabaseSelector from './DatabaseSelector.svelte';
   import LogoAndNameWithLink from './LogoAndNameWithLink.svelte';
 
   const items = getBreadcrumbItemsFromContext();
@@ -14,6 +15,7 @@
 
 <div class="breadcrumb">
   <LogoAndNameWithLink href="/" {hasResponsiveAbridgement} />
+  <DatabaseSelector />
   {#each $items as item}
     <BreadcrumbItem {item} />
   {/each}

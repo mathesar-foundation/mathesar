@@ -62,6 +62,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = "config.urls"
 
 MODERNRPC_METHODS_MODULES = [
+    'mathesar.rpc.analytics',
     'mathesar.rpc.collaborators',
     'mathesar.rpc.columns',
     'mathesar.rpc.columns.metadata',
@@ -231,7 +232,8 @@ MATHESAR_CLIENT_DEV_URL = os.environ.get(
 MATHESAR_UI_SOURCE_LOCATION = os.path.join(BASE_DIR, 'mathesar_ui/')
 MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = os.environ.get('CAPTURE_UNHANDLED_EXCEPTION', default=False)
 MATHESAR_STATIC_NON_CODE_FILES_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/non-code/')
-MATHESAR_ANALYTICS_URL = os.environ.get('MATHESAR_ANALYTICS_URL', default='https://example.com')
+MATHESAR_ANALYTICS_URL = os.environ.get('MATHESAR_ANALYTICS_URL', default='https://example.com/collector')
+MATHESAR_INIT_REPORT_URL = os.environ.get('MATHESAR_INIT_REPORT_URL', default='https://example.com/hello')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 

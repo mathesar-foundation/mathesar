@@ -35,6 +35,7 @@
 -->
 <style global lang="scss">
   @import 'component-library/styles.scss';
+  @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   :root {
     /** BASE COLORS **/
@@ -131,13 +132,15 @@
     --header-height: 3.7378rem;
 
     --table-title-header-height: 4.6428rem;
+    --status-bar-padding: 0.3rem;
 
     color: var(--slate-800);
 
     --modal-z-index: 1;
     --dropdown-z-index: 1;
     --cell-errors-z-index: 1;
-    --toast-z-index: 2;
+    --new-item-highlighter-z-index: 1;
+    --toast-z-index: 3;
     --app-header-z-index: 1;
 
     overflow: hidden;
@@ -171,13 +174,6 @@
 
   .block {
     display: block;
-  }
-
-  .trim-child-margins > :first-child {
-    margin-top: 0;
-  }
-  .trim-child-margins > :last-child {
-    margin-bottom: 0;
   }
 
   /**
