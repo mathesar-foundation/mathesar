@@ -158,6 +158,10 @@ def schema_route(request, database_id, schema_id, **kwargs):
     })
 
 
+def analytics_sample_report(request):
+    return render(request, 'analytics/sample_report.html')
+
+
 def page_not_found_view(request, exception):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request),
