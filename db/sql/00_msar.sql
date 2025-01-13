@@ -5185,6 +5185,7 @@ FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
+DROP FUNCTION IF EXISTS msar.build_summary_json_expr_for_table(oid);
 CREATE OR REPLACE FUNCTION
 msar.build_summary_json_expr_for_table(tab_id oid) RETURNS TEXT AS $$/*
 Build a JSON object with the results of summarizing linked records.
@@ -5193,18 +5194,18 @@ Args:
   tab_oid: The OID of the table for which we're getting linked record summaries.
 */
 WITH fkey_map_cte AS (SELECT * FROM msar.get_fkey_map_table(tab_id))
-SELECT 'jsonb_build_object(' || string_agg(
+SELECT string_agg(
   format(
     $j$
-    %1$L, COALESCE(
-      jsonb_object_agg(
-        summary_cte_%1$s.key, summary_cte_%1$s.summary
-      ) FILTER (WHERE summary_cte_%1$s.key IS NOT NULL), '{}'::jsonb
-    )
+      COALESCE(
+        jsonb_object_agg(
+          summary_cte_%1$s.key, summary_cte_%1$s.summary
+        ) FILTER (WHERE summary_cte_%1$s.key IS NOT NULL), '{}'::jsonb
+      ) AS %1$I
     $j$,
     conkey
   ), ', '
-) || ')'
+)
 FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
