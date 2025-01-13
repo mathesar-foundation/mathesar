@@ -2611,153 +2611,123 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_get_column_info() RETURNS SETOF TEXT AS $$
+CREATE OR REPLACE FUNCTION test_get_column_info() RETURNS SETOF TEXT AS $$/*
+This test doesn't inspect the contents of the current_role_priv or valid_target_types arrays, since
+the functions that generate those contents are tested elsewhere. We just make sure the arrays exist,
+and are non-empty. All other contents of the returned jsonb are tested.
+*/
+DECLARE
+  col_info jsonb;
 BEGIN
   PERFORM __setup_get_column_info();
+  col_info = msar.get_column_info('column_variety');
+  RETURN NEXT is(jsonb_array_length(col_info), 7, 'Should have info for all 7 columns.');
+
+  -- Column 1
   RETURN NEXT is(
-    msar.get_column_info('column_variety'),
-    $j$[
-      {
-        "id": 1,
-        "name": "id",
-        "type": "integer",
-        "default": {
-          "value": "identity",
-          "is_dynamic": true
-        },
-        "nullable": false,
-        "description": null,
-        "primary_key": true,
-        "type_options": null,
-        "has_dependents": true,
-        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
-        "valid_target_types": [
-          "real", "double precision", "smallint", "boolean", "bigint", "integer",
-          "mathesar_types.mathesar_money", "money", "mathesar_types.multicurrency_money",
-          "character varying", "character", "\"char\"", "text", "name", "numeric"
-        ]
-      },
-      {
-        "id": 2,
-        "name": "num_plain",
-        "type": "numeric",
-        "default": null,
-        "nullable": false,
-        "description": null,
-        "primary_key": false,
-        "type_options": {
-          "scale": null,
-          "precision": null
-        },
-        "has_dependents": false,
-        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
-        "valid_target_types": [
-          "real", "double precision", "boolean", "smallint", "bigint", "integer",
-          "mathesar_types.mathesar_money", "money", "mathesar_types.multicurrency_money",
-          "character varying", "character", "\"char\"", "text", "name", "numeric"
-        ]
-      },
-      {
-        "id": 3,
-        "name": "var_128",
-        "type": "character varying",
-        "default": null,
-        "nullable": true,
-        "description": null,
-        "primary_key": false,
-        "type_options": {
-          "length": 128
-        },
-        "has_dependents": false,
-        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
-        "valid_target_types": [
-          "real", "double precision", "mathesar_types.email", "smallint", "boolean", "bigint",
-          "integer", "interval", "time without time zone", "time with time zone",
-          "timestamp with time zone", "timestamp without time zone", "date",
-          "mathesar_types.mathesar_money", "money", "mathesar_types.multicurrency_money",
-          "character varying", "character", "\"char\"", "text", "name", "mathesar_types.uri",
-          "numeric", "jsonb", "mathesar_types.mathesar_json_array",
-          "mathesar_types.mathesar_json_object", "json"
-        ]
-      },
-      {
-        "id": 4,
-        "name": "txt",
-        "type": "text",
-        "default": {
-          "value": "abc",
-          "is_dynamic": false
-        },
-        "nullable": true,
-        "description": "A super comment ;",
-        "primary_key": false,
-        "type_options": null,
-        "has_dependents": false,
-        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
-        "valid_target_types": [
-          "real", "double precision", "mathesar_types.email", "smallint", "boolean", "bigint",
-          "integer", "interval", "time without time zone", "time with time zone",
-          "timestamp with time zone", "timestamp without time zone", "date",
-          "mathesar_types.mathesar_money", "money", "mathesar_types.multicurrency_money",
-          "character varying", "character", "\"char\"", "text", "name", "mathesar_types.uri",
-          "numeric", "jsonb", "mathesar_types.mathesar_json_array",
-          "mathesar_types.mathesar_json_object", "json"
-        ]
-      },
-      {
-        "id": 5,
-        "name": "tst",
-        "type": "timestamp without time zone",
-        "default": {
-          "value": "now()",
-          "is_dynamic": true
-        },
-        "nullable": true,
-        "description": null,
-        "primary_key": false,
-        "type_options": {
-          "precision": null
-        },
-        "has_dependents": false,
-        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
-        "valid_target_types": [
-          "timestamp with time zone", "timestamp without time zone", "date", "character varying",
-          "character", "\"char\"", "text", "name"
-        ]
-      },
-      {
-        "id": 6,
-        "name": "int_arr",
-        "type": "_array",
-        "default": null,
-        "nullable": true,
-        "description": null,
-        "primary_key": false,
-        "type_options": {
-          "item_type": "integer"
-        },
-        "has_dependents": false,
-        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
-        "valid_target_types": null
-      },
-      {
-        "id": 7,
-        "name": "num_opt_arr",
-        "type": "_array",
-        "default": null,
-        "nullable": true,
-        "description": null,
-        "primary_key": false,
-        "type_options": {
-          "scale": 10,
-          "item_type": "numeric",
-          "precision": 15
-        },
-        "has_dependents": false,
-        "current_role_priv": ["SELECT", "INSERT", "UPDATE", "REFERENCES"],
-        "valid_target_types": null
-      }
-    ]$j$::jsonb
+    (col_info -> 0) - ARRAY['current_role_priv', 'valid_target_types'],
+    $j${
+      "id": 1, "name": "id", "type": "integer",
+      "default": {"value": "identity", "is_dynamic": true},
+      "nullable": false, "description": null, "primary_key": true, "type_options": null,
+      "has_dependents": true
+    }$j$
+  );
+  RETURN NEXT ok(
+    jsonb_array_length(col_info -> 0 -> 'current_role_priv') > 0
+    AND jsonb_array_length(col_info -> 0 -> 'valid_target_types') > 0,
+    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+  );
+
+  -- Column 2
+  RETURN NEXT is(
+    (col_info -> 1) - ARRAY['current_role_priv', 'valid_target_types'],
+    $j${
+      "id": 2, "name": "num_plain", "type": "numeric", "default": null, "nullable": false,
+      "description": null, "primary_key": false, "type_options": {"scale": null, "precision": null},
+      "has_dependents": false
+    }$j$
+  );
+  RETURN NEXT ok(
+    jsonb_array_length(col_info -> 1 -> 'current_role_priv') > 0
+    AND jsonb_array_length(col_info -> 1 -> 'valid_target_types') > 0,
+    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+  );
+
+  -- Column 3
+  RETURN NEXT is(
+    (col_info -> 2) - ARRAY['current_role_priv', 'valid_target_types'],
+    $j${
+      "id": 3, "name": "var_128", "type": "character varying", "default": null, "nullable": true,
+      "description": null, "primary_key": false, "type_options": {"length": 128},
+      "has_dependents": false
+    }$j$
+  );
+  RETURN NEXT ok(
+    jsonb_array_length(col_info -> 2 -> 'current_role_priv') > 0
+    AND jsonb_array_length(col_info -> 2 -> 'valid_target_types') > 0,
+    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+  );
+
+  -- Column 4
+  RETURN NEXT is(
+    (col_info -> 3) - ARRAY['current_role_priv', 'valid_target_types'],
+    $j${
+      "id": 4, "name": "txt", "type": "text", "default": {"value": "abc", "is_dynamic": false},
+      "nullable": true, "description": "A super comment ;", "primary_key": false,
+      "type_options": null, "has_dependents": false
+    }$j$
+  );
+  RETURN NEXT ok(
+    jsonb_array_length(col_info -> 3 -> 'current_role_priv') > 0
+    AND jsonb_array_length(col_info -> 3 -> 'valid_target_types') > 0,
+    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+  );
+
+  -- Column 5
+  RETURN NEXT is(
+    (col_info -> 4) - ARRAY['current_role_priv', 'valid_target_types'],
+    $j${
+      "id": 5, "name": "tst", "type": "timestamp without time zone",
+      "default": {"value": "now()", "is_dynamic": true}, "nullable": true, "description": null,
+      "primary_key": false, "type_options": {"precision": null}, "has_dependents": false
+    }$j$
+  );
+  RETURN NEXT ok(
+    jsonb_array_length(col_info -> 4 -> 'current_role_priv') > 0
+    AND jsonb_array_length(col_info -> 4 -> 'valid_target_types') > 0,
+    'current_role_priv and valid_target_types should be non-empty jsonb arrays'
+  );
+
+  -- Column 6
+  RETURN NEXT is(
+    (col_info -> 5) - ARRAY['current_role_priv', 'valid_target_types'],
+    $j${
+      "id": 6, "name": "int_arr", "type": "_array", "default": null, "nullable": true,
+      "description": null, "primary_key": false, "type_options": {"item_type": "integer"},
+      "has_dependents": false
+    }$j$
+  );
+  RETURN NEXT ok(
+    jsonb_array_length(col_info -> 5 -> 'current_role_priv') > 0
+    AND col_info -> 5 -> 'valid_target_types' = 'null'::jsonb,
+    'current_role_priv non-empty array, valid_target_types null'
+  );
+
+  -- Column 7
+  RETURN NEXT is(
+    (col_info -> 6) - ARRAY['current_role_priv', 'valid_target_types'],
+    $j${
+      "id": 7, "name": "num_opt_arr", "type": "_array", "default": null, "nullable": true,
+      "description": null, "primary_key": false,
+      "type_options": {"scale": 10, "item_type": "numeric", "precision": 15},
+      "has_dependents": false
+    }$j$
+  );
+  RETURN NEXT ok(
+    jsonb_array_length(col_info -> 6 -> 'current_role_priv') > 0
+    AND col_info -> 6 -> 'valid_target_types' = 'null'::jsonb,
+    'current_role_priv non-empty array, valid_target_types null'
   );
 END;
 $$ LANGUAGE plpgsql;
