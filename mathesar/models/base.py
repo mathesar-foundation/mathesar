@@ -77,17 +77,20 @@ class Database(BaseModel):
     def uninstall_sql(
             self,
             schemas_to_remove=['msar', '__msar', 'mathesar_types'],
-            remove_custom_types=True,
             strict=True,
             role_name=None,
             password=None,
     ):
         if role_name is not None and password is not None:
             with self.connect_manually(role_name, password) as conn:
-                uninstall(conn, schemas_to_remove, remove_custom_types, strict)
+                uninstall(
+                    conn, schemas_to_remove=schemas_to_remove, strict=strict,
+                )
         else:
             with self.connect_admin() as conn:
-                uninstall(conn, schemas_to_remove, remove_custom_types, strict)
+                uninstall(
+                    conn, schemas_to_remove=schemas_to_remove, strict=strict,
+                )
 
     def connect_user(self, user):
         """Return the given user's connection to the database."""

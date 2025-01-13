@@ -70,7 +70,6 @@ def disconnect(
         *,
         database_id: int,
         schemas_to_remove: list[str] = ['msar', '__msar', 'mathesar_types'],
-        remove_custom_types: bool = True,
         strict: bool = True,
         role_name: str = None,
         password: str = None,
@@ -82,15 +81,6 @@ def disconnect(
     role which owns the `msar` schema on the database, then use that role
     for the SQL removal.
 
-    Note that we never attempt to remove the custom Mathesar types, or
-    the `mathesar_types` schema, if `remove_custom_types` is `False`.
-    This is to allow one to remove all possible code from
-    `mathesar_types`, even if the user has some tables which use those
-    types. So, if `mathesar_types` is included in `schemas_to_remove`,
-    but `remove_custom_types` is `False`, then the function will remove
-    all other code from `mathesar_types`, but leave the custom types
-    themselves.
-
     All removals are performed safely, and without `CASCADE`. This is to
     make sure the user can't accidentally lose data calling this
     function.
@@ -98,14 +88,16 @@ def disconnect(
     Args:
         database_id: The Django id of the database.
         schemas_to_remove: Mathesar schemas we should remove SQL from.
-        remove_custom_types: Whether we should remove custom Mathesar types.
-        strict: If True, we throw an exception if we fail to remove
-            any objects which we expected to remove.
+        strict: If True, we throw an exception and roll back changes if
+            we fail to remove any objects which we expected to remove.
         role_name: the username of the role used for upgrading.
         password: the password of the role used for upgrading.
     """
     database = Database.objects.get(id=database_id)
-    database.uninstall(
-        schemas_to_remove, remove_custom_types, strict, role_name, password,
+    database.uninstall_sql(
+        schemas_to_remove=schemas_to_remove,
+        strict=strict,
+        role_name=role_name,
+        password=password,
     )
     database.delete()

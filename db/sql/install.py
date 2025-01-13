@@ -38,7 +38,6 @@ def install(conn):
 def uninstall(
         conn,
         schemas_to_remove=['msar', '__msar', 'mathesar_types'],
-        remove_custom_types=True,
         strict=True
 ):
     """Remove msar and __msar schemas safely."""
@@ -47,6 +46,6 @@ def uninstall(
         conn,
         "drop_all_msar_objects",
         schemas_to_remove,
-        remove_custom_types,
+        True,
         strict,
     )
