@@ -44,6 +44,8 @@ export interface RawDatabasePrivilegesForRole {
   direct: DatabasePrivilege[];
 }
 
+export type SystemSchema = 'msar' | '__msar' | 'mathesar_types';
+
 export const databases = {
   get: rpcMethodTypeContainer<
     {
@@ -69,6 +71,10 @@ export const databases = {
     disconnect: rpcMethodTypeContainer<
       {
         database_id: RawDatabase['id'];
+        schemas_to_remove?: SystemSchema[];
+        strict?: boolean;
+        role_name?: string;
+        password?: string;
       },
       void
     >(),
