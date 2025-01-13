@@ -5347,17 +5347,31 @@ BEGIN
     ),
     groups_cte AS ( SELECT %6$s ),
     summary_cte_self AS (%7$s)
-    %8$s
-    SELECT jsonb_build_object(
+    %8$s,
+    summary_cte AS ( SELECT %10$s FROM enriched_results_cte %9$s ),
+    record_summaries_cte AS ( 
+      SELECT
+      jsonb_build_object(
+        'linked_record_summaries',
+        NULLIF(
+          to_jsonb(summary_cte),
+          '{}'::jsonb
+        ),
+        'record_summaries', %11$s
+      )
+      AS lrs
+      FROM summary_cte
+    ),
+    records_cte AS ( SELECT jsonb_build_object(
       'results', %4$s,
       'count', coalesce(max(count_cte.count), 0),
-      'grouping', %5$s,
-      'linked_record_summaries', %10$s,
-      'record_summaries', %11$s
-    )
+      'grouping', %5$s
+    ) AS rc
     FROM enriched_results_cte
-      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id %9$s
+      LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id
       CROSS JOIN count_cte
+    )
+    SELECT records_cte.rc || record_summaries_cte.lrs FROM records_cte, record_summaries_cte;
     $q$,
     /* %1 */ expr_and_ctes ->> 'count_cte_query',
     /* %2 */ expr_and_ctes ->> 'results_cte_query',
@@ -5387,7 +5401,7 @@ BEGIN
       table_record_summary_templates
     ),
     /* %9 */ msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    /* %10 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
+    /* %10 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), ''),
     /* %11 */ COALESCE(
       CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
       'NULL'
