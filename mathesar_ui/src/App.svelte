@@ -101,6 +101,7 @@
     --header-height: 3.7378rem;
 
     --table-title-header-height: 4.6428rem;
+    --status-bar-padding: 0.3rem;
 
     color: var(--slate-800);
 

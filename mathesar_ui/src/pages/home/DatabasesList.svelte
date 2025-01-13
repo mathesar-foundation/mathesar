@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconConnection } from '@mathesar/icons';
@@ -10,7 +11,7 @@
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import { ConnectDatabaseModal } from '@mathesar/systems/databases';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Button, Help, Icon } from '@mathesar-component-library';
 
   import DatabaseRow from './DatabaseRow.svelte';
 
@@ -38,13 +39,24 @@
 </script>
 
 <div class="databases-list">
-  <div data-identifier="databases-header">
-    <span>
-      {$_('databases')} ({$databases.size})
+  <div class="header">
+    <span class="title">{$_('databases')}</span>
+    <span class="help">
+      <Help>
+        <RichText
+          text={$_('databases_list_help')}
+          let:slotName
+          let:translatedArg
+        >
+          {#if slotName === 'docsLink'}
+            <DocsLink page="databases">{translatedArg}</DocsLink>
+          {/if}
+        </RichText>
+      </Help>
     </span>
   </div>
 
-  <section data-identifier="databases-container">
+  <section class="databases-container">
     <EntityContainerWithFilterBar
       searchPlaceholder={$_('search_databases')}
       bind:searchQuery={filterQuery}
@@ -80,7 +92,7 @@
       <svelte:fragment slot="content">
         {#if filteredDatabases.length}
           <div
-            data-identifier="databases-list-grid"
+            class="databases-list-grid"
             use:highlightNewItems={{
               scrollHint: $_('database_new_items_scroll_hint'),
             }}
@@ -102,19 +114,18 @@
     padding: var(--size-xx-large) var(--size-x-large);
   }
 
-  [data-identifier='databases-header'] {
-    display: flex;
-    align-items: center;
-
-    span {
-      flex: 1 0 0;
-      color: var(--slate-900);
-      font-size: var(--text-size-ultra-large);
-      font-weight: var(--font-weight-medium);
-    }
+  .title {
+    flex: 1 0 0;
+    color: var(--slate-900);
+    font-size: var(--text-size-ultra-large);
+    font-weight: var(--font-weight-medium);
+  }
+  .help {
+    margin-left: 0.5rem;
+    vertical-align: super;
   }
 
-  [data-identifier='databases-container'] {
+  .databases-container {
     display: flex;
     margin-top: var(--size-x-large);
     flex-direction: column;
@@ -122,7 +133,7 @@
     gap: var(--size-x-small);
   }
 
-  [data-identifier='databases-list-grid'] {
+  .databases-list-grid {
     display: grid;
     gap: 1rem;
     margin-top: var(--size-x-large);
