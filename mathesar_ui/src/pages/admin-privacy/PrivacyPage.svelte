@@ -4,6 +4,7 @@
 
   import { api } from '@mathesar/api/rpc';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import DocsLink from '@mathesar/components/DocsLink.svelte';
   import { iconExternalHyperlink } from '@mathesar/icons';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
@@ -63,13 +64,13 @@
           on:change={(e) => setAnalyticsState(e.detail)}
         />
       {/if}
-      <span tabindex="-1" class="help" slot="help" on:click|stopPropagation>
+      <div slot="help">
         <div>{$_('anonymous_usage_data_collection_help')}</div>
-        <a href="/" target="_blank" on:click|stopPropagation>
+        <DocsLink page="analytics">
           <span>{$_('see_whats_shared')}</span>
           <Icon {...iconExternalHyperlink} />
-        </a>
-      </span>
+        </DocsLink>
+      </div>
     </LabeledInput>
   </div>
 </div>
