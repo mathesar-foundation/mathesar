@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-13 17:22+0000\n"
+"POT-Creation-Date: 2025-01-13 21:33+0000\n"
 "PO-Revision-Date: 2024-03-04 05:44+0000\n"
 "Last-Translator: Kriti Godey, 2024\n"
 "Language-Team: Japanese (https://app.transifex.com/mathesar/teams/172265/ja/)\n"
@@ -107,7 +107,7 @@ msgid "Enable anonymous usage data collection"
 msgstr ""
 
 #: mathesar/templates/installation/complete_installation.html:256
-msgid "Share ongoing, anonymous data collection to help us improve features."
+msgid "Share anonymous usage data periodically to help us improve features."
 msgstr ""
 
 #: mathesar/templates/installation/complete_installation.html:257
