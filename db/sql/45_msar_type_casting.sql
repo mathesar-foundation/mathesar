@@ -3,7 +3,6 @@ This file has msar-namespaced functions related to type casting.
 
 Depends on 05_msar.sql
 */
-DROP TABLE IF EXISTS msar.top_level_domains;
 CREATE TABLE msar.top_level_domains (tld text PRIMARY KEY);
 INSERT INTO msar.top_level_domains VALUES
 ('aaa'), ('aarp'), ('abarth'), ('abb'), ('abbott'), ('abbvie'), ('abc'), ('able'), ('abogado'),

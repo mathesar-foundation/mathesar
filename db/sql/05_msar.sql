@@ -3266,8 +3266,6 @@ SELECT __msar.exec_ddl(
 FROM col_cte, con_cte;
 $$ LANGUAGE SQL;
 
--- Drop function defined in Mathesar 0.1.7 with different argument names
-DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
 msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, own_id regrole, comment_ text)
@@ -4454,7 +4452,6 @@ SELECT val;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
-DROP TABLE IF EXISTS msar.expr_templates;
 CREATE TABLE msar.expr_templates (expr_key text PRIMARY KEY, expr_template text);
 INSERT INTO msar.expr_templates VALUES
   -- basic composition operators
@@ -5628,7 +5625,6 @@ FROM jsonb_each_text(rec_def);
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.patch_record_in_table(oid, anyelement, jsonb, boolean);
 CREATE OR REPLACE FUNCTION
 msar.patch_record_in_table(
   tab_id oid,
