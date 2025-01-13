@@ -2550,32 +2550,42 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION test_get_valid_target_type_strings() RETURNS SETOF TEXT AS $$
+DECLARE
+  target_type_strings jsonb;
 BEGIN
-  RETURN NEXT is(
-    msar.get_valid_target_type_strings('text'),
-    jsonb_build_array(
+  target_type_strings = msar.get_valid_target_type_strings('text');
+  RETURN NEXT is(jsonb_array_length(target_type_strings), 27);
+  RETURN NEXT ok(
+    target_type_strings @> jsonb_build_array(
       'real', 'double precision', 'mathesar_types.email', 'smallint', 'boolean', 'bigint',
       'integer', 'interval', 'time without time zone', 'time with time zone',
       'timestamp with time zone', 'timestamp without time zone', 'date',
       'mathesar_types.mathesar_money', 'money', 'mathesar_types.multicurrency_money',
       'character varying', 'character', '"char"', 'text', 'name', 'mathesar_types.uri', 'numeric',
       'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json'
-    )
+    ),
+    'containment plus length checks order-independent equality'
   );
-  RETURN NEXT is(
-    msar.get_valid_target_type_strings('text'::regtype::oid),
-    jsonb_build_array(
+  target_type_strings = msar.get_valid_target_type_strings('text'::regtype::oid);
+  RETURN NEXT is(jsonb_array_length(target_type_strings), 27);
+  RETURN NEXT ok(
+    target_type_strings @> jsonb_build_array(
       'real', 'double precision', 'mathesar_types.email', 'smallint', 'boolean', 'bigint',
       'integer', 'interval', 'time without time zone', 'time with time zone',
       'timestamp with time zone', 'timestamp without time zone', 'date',
       'mathesar_types.mathesar_money', 'money', 'mathesar_types.multicurrency_money',
       'character varying', 'character', '"char"', 'text', 'name', 'mathesar_types.uri', 'numeric',
       'jsonb', 'mathesar_types.mathesar_json_array', 'mathesar_types.mathesar_json_object', 'json'
-    )
+    ),
+    'containment plus length checks order-independent equality'
   );
-  RETURN NEXT is(
-    msar.get_valid_target_type_strings('interval'),
-    jsonb_build_array('interval', 'character varying', 'character', '"char"', 'text', 'name')
+  target_type_strings = msar.get_valid_target_type_strings('interval');
+  RETURN NEXT is(jsonb_array_length(target_type_strings), 6);
+  RETURN NEXT ok(
+    target_type_strings @> jsonb_build_array(
+      'interval', 'character varying', 'character', '"char"', 'text', 'name'
+    ),
+    'containment plus length checks order-independent equality'
   );
 END;
 $$ LANGUAGE plpgsql;
