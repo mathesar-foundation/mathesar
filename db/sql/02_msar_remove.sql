@@ -8,9 +8,9 @@ msar.drop_all_msar_objects(
   strict boolean DEFAULT true,
   retries integer DEFAULT 5
 ) RETURNS void AS $$/*
-Drop all functions in the `msar` and `__msar` schemas, including this one.
+Drop all functions in the passed schemas, including this one.
 
-Then drop the schemas themselves
+Then drop the schemas themselves.
 */
 DECLARE
   obj RECORD;
@@ -70,7 +70,12 @@ BEGIN
   ELSIF failed IS TRUE AND NOT strict THEN
     RAISE NOTICE 'Some objects not dropped!';
   ELSIF failed IS TRUE AND strict THEN
-    RAISE EXCEPTION 'Some objects not dropped! Reverting...';
+    RAISE EXCEPTION USING
+      MESSAGE = message,
+      DETAIL = detail,
+      HINT = 'All changes will be reverted.',
+      ERRCODE = 'dependent_objects_still_exist'
+    ;
   ELSE
     RAISE NOTICE E'All objects dropped successfully!\n\nDropping Mathesar schemas...\n\n';
     DROP FUNCTION msar.drop_all_msar_objects(text[], boolean, boolean, integer);
