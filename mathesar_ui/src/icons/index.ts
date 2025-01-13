@@ -70,6 +70,7 @@ import {
   faUserEdit,
   faUserGear,
   faUserPlus,
+  faUserSecret,
   faUsers,
   faWandSparkles,
   faXmark,
@@ -197,6 +198,7 @@ export const iconText: IconProps = { data: faT };
 export const iconField: IconProps = { data: faDatabase };
 export const iconFieldDelimiter: IconProps = { data: faCaretRight };
 export const iconPermissions: IconProps = { data: permissionsIcon };
+export const iconPrivacy: IconProps = { data: faUserSecret };
 
 // STATUSES
 
