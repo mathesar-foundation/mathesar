@@ -5,7 +5,7 @@ from django.db import models
 from encrypted_fields.fields import EncryptedCharField
 import psycopg
 
-from db.sql.install import install as install_sql
+from db.sql.install import uninstall, install
 from db.analytics import get_object_counts
 from mathesar import __version__
 from mathesar.models import exceptions
@@ -66,13 +66,28 @@ class Database(BaseModel):
     def install_sql(self, username=None, password=None):
         if username is not None and password is not None:
             with self.connect_manually(username, password) as conn:
-                install_sql(conn)
+                install(conn)
         else:
             with self.connect_admin() as conn:
-                install_sql(conn)
+                install(conn)
 
         self.last_confirmed_sql_version = __version__
         self.save()
+
+    def uninstall_sql(
+            self,
+            schemas_to_remove=['msar', '__msar', 'mathesar_types'],
+            remove_custom_types=True,
+            strict=True,
+            role_name=None,
+            password=None,
+    ):
+        if role_name is not None and password is not None:
+            with self.connect_manually(role_name, password) as conn:
+                uninstall(conn, schemas_to_remove, remove_custom_types, strict)
+        else:
+            with self.connect_admin() as conn:
+                uninstall(conn, schemas_to_remove, remove_custom_types, strict)
 
     def connect_user(self, user):
         """Return the given user's connection to the database."""

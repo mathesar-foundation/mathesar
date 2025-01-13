@@ -66,12 +66,46 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
 
 
 @mathesar_rpc_method(name="databases.configured.disconnect")
-def disconnect(*, database_id: int, **kwargs) -> None:
+def disconnect(
+        *,
+        database_id: int,
+        schemas_to_remove: list[str] = ['msar', '__msar', 'mathesar_types'],
+        remove_custom_types: bool = True,
+        strict: bool = True,
+        role_name: str = None,
+        password: str = None,
+) -> None:
     """
-    Disconnect a configured database.
+    Disconnect a configured database, after removing Mathesar SQL from it.
+
+    If no `role_name` and `password` are submitted, we will determine the
+    role which owns the `msar` schema on the database, then use that role
+    for the SQL removal.
+
+    Note that we never attempt to remove the custom Mathesar types, or
+    the `mathesar_types` schema, if `remove_custom_types` is `False`.
+    This is to allow one to remove all possible code from
+    `mathesar_types`, even if the user has some tables which use those
+    types. So, if `mathesar_types` is included in `schemas_to_remove`,
+    but `remove_custom_types` is `False`, then the function will remove
+    all other code from `mathesar_types`, but leave the custom types
+    themselves.
+
+    All removals are performed safely, and without `CASCADE`. This is to
+    make sure the user can't accidentally lose data calling this
+    function.
 
     Args:
         database_id: The Django id of the database.
+        schemas_to_remove: Mathesar schemas we should remove SQL from.
+        remove_custom_types: Whether we should remove custom Mathesar types.
+        strict: If True, we throw an exception if we fail to remove
+            any objects which we expected to remove.
+        role_name: the username of the role used for upgrading.
+        password: the password of the role used for upgrading.
     """
-    database_qs = Database.objects.get(id=database_id)
-    database_qs.delete()
+    database = Database.objects.get(id=database_id)
+    database.uninstall(
+        schemas_to_remove, remove_custom_types, strict, role_name, password,
+    )
+    database.delete()
