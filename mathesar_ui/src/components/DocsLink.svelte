@@ -22,6 +22,7 @@
     tablePermissions: '/user-guide/tables/#permissions',
     schemas: '/user-guide/schemas/',
     userAdmin: '/user-guide/users/#admin',
+    dataTypes: '/user-guide/data-types/',
   };
   type Page = keyof typeof pages;
 
