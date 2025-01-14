@@ -59,7 +59,7 @@ class Filter(TypedDict):
     An object defining a filter to be used in a `WHERE` clause.
 
     For valid `type` values, see the `msar.filter_templates` table
-    defined in `mathesar/db/sql/00_msar.sql`.
+    defined in `mathesar/db/sql/05_msar.sql`.
 
     Attributes:
       type: a function or operator to be used in filtering.
@@ -153,7 +153,6 @@ class RecordList(TypedDict):
     grouping: GroupingResponse
     linked_record_summaries: dict[str, dict[str, str]]
     record_summaries: dict[str, str]
-    query: str
 
     @classmethod
     def from_dict(cls, d):
@@ -163,7 +162,6 @@ class RecordList(TypedDict):
             grouping=d.get("grouping"),
             linked_record_summaries=d.get("linked_record_summaries"),
             record_summaries=d.get("record_summaries"),
-            query=d["query"],
         )
 
 

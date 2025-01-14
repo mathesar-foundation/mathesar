@@ -56,7 +56,6 @@
 <FieldsetGroup
   {isInline}
   {options}
-  {label}
   {ariaLabel}
   {disabled}
   {boxed}
@@ -73,5 +72,5 @@
     checked={values.some((o) => valuesAreEqual(o, option))}
     disabled={innerDisabled}
   />
-  <slot slot="label" />
+  <slot name="label" slot="label">{label ?? ''}</slot>
 </FieldsetGroup>

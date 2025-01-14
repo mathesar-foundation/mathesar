@@ -74,10 +74,6 @@ export class ColumnsDataStore extends EventHandler<{
     try {
       this.fetchStatus.set({ state: 'processing' });
       this.promise?.cancel();
-      // TODO_BETA: For some reason `...this.shareConsumer?.getQueryParams()`
-      // was getting passed into the API call when it was REST. I don't know
-      // why. We need to figure out if this is necessary to replicate for the
-      // RPC call.
       this.promise = api.columns
         .list_with_metadata({ ...this.apiContext })
         .run();

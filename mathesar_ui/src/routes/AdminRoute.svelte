@@ -4,13 +4,18 @@
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
   import AppendBreadcrumb from '@mathesar/components/breadcrumb/AppendBreadcrumb.svelte';
-  import { iconSettingsMajor } from '@mathesar/icons';
+  import { iconPrivacy, iconSettingsMajor } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import PageLayoutWithSidebar from '@mathesar/layouts/PageLayoutWithSidebar.svelte';
+  import PrivacyPage from '@mathesar/pages/admin-privacy/PrivacyPage.svelte';
   import SoftwareUpdate from '@mathesar/pages/admin-update/SoftwareUpdatePage.svelte';
   import AdminNavigation from '@mathesar/pages/admin-users/AdminNavigation.svelte';
 
-  import { ADMIN_UPDATE_PAGE_URL, ADMIN_URL } from './urls';
+  import {
+    ADMIN_PRIVACY_PAGE_URL,
+    ADMIN_UPDATE_PAGE_URL,
+    ADMIN_URL,
+  } from './urls';
   import UsersRoute from './UsersRoute.svelte';
 </script>
 
@@ -41,12 +46,14 @@
   />
   <PageLayoutWithSidebar>
     <AdminNavigation slot="sidebar" />
+
     <Route path="/update">
       <AppendBreadcrumb
         item={{
           type: 'simple',
           href: ADMIN_UPDATE_PAGE_URL,
           label: $_('software_update'),
+          prependSeparator: true,
         }}
       />
       <SoftwareUpdate />
@@ -54,6 +61,19 @@
 
     <Route path="/users/*" firstmatch>
       <UsersRoute />
+    </Route>
+
+    <Route path="/privacy" firstmatch>
+      <AppendBreadcrumb
+        item={{
+          type: 'simple',
+          href: ADMIN_PRIVACY_PAGE_URL,
+          label: $_('privacy'),
+          icon: iconPrivacy,
+          prependSeparator: true,
+        }}
+      />
+      <PrivacyPage />
     </Route>
   </PageLayoutWithSidebar>
 </LayoutWithHeader>

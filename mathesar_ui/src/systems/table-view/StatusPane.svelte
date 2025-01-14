@@ -107,7 +107,7 @@
 
 <style lang="scss">
   .status-pane {
-    padding: 0.5rem;
+    padding: var(--status-bar-padding);
     display: flex;
     align-items: center;
     justify-content: space-between;

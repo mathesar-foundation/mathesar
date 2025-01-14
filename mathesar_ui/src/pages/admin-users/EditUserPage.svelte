@@ -63,6 +63,7 @@
         href: getEditUsersPageUrl(userId),
         label: userModel.username,
         icon: iconEditUser,
+        prependSeparator: true,
       }}
     />
     <h1>

@@ -125,9 +125,8 @@ export const ADMIN_URL = '/administration/';
 export const ADMIN_UPDATE_PAGE_URL = `${ADMIN_URL}update/`;
 export const ADMIN_USERS_PAGE_URL = `${ADMIN_URL}users/`;
 export const ADMIN_USERS_PAGE_ADD_NEW_URL = `${ADMIN_URL}users/new/`;
+export const ADMIN_PRIVACY_PAGE_URL = `${ADMIN_URL}privacy/`;
 export const LOGOUT_URL = '/auth/logout/';
-export const HOME_URL = '/databases/';
-export const WELCOME_URL = '/welcome';
 
 export function getEditUsersPageUrl(userId: number) {
   return `${ADMIN_USERS_PAGE_URL}${userId}/`;

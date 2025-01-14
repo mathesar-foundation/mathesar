@@ -14,3 +14,27 @@ export function transliterateToAscii(input: string): string {
 export function toAsciiLowerCase(input: string): string {
   return transliterateToAscii(input).toLowerCase();
 }
+
+export function* filterViaTextQuery<I>(
+  items: Iterable<I>,
+  query: string | undefined | null,
+  getItemText: (item: I) => string,
+): Generator<I, void, undefined> {
+  if (query === undefined || query === null || query.trim() === '') {
+    yield* items;
+    return;
+  }
+
+  function normalize(s: string) {
+    return toAsciiLowerCase(s.trim());
+  }
+
+  const normalizedQuery = normalize(query);
+
+  for (const item of items) {
+    const itemText = getItemText(item);
+    if (normalize(itemText).includes(normalizedQuery)) {
+      yield item;
+    }
+  }
+}

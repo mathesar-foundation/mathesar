@@ -3,6 +3,8 @@ from config.settings.common_settings import * # noqa
 # Override default settings
 DEBUG = False
 MATHESAR_MODE = 'PRODUCTION'
+MATHESAR_ANALYTICS_URL = 'https://analytics.mathesar.dev/collect-analytics-reports'
+MATHESAR_INIT_REPORT_URL = 'https://analytics.mathesar.dev/collect-initial-report'
 
 '''
 This tells Django to trust the X-Forwarded-Proto header that comes from our proxy,

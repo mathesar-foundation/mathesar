@@ -8,6 +8,7 @@ Fixtures:
 import pytest
 from modernrpc.auth import user_is_authenticated, user_is_superuser
 
+from mathesar.rpc import analytics
 from mathesar.rpc import collaborators
 from mathesar.rpc import columns
 from mathesar.rpc import constraints
@@ -22,6 +23,26 @@ from mathesar.rpc import tables
 from mathesar.rpc import users
 
 METHODS = [
+    (
+        analytics.disable,
+        "analytics.disable",
+        [user_is_superuser]
+    ),
+    (
+        analytics.get_state,
+        "analytics.get_state",
+        [user_is_superuser]
+    ),
+    (
+        analytics.initialize,
+        "analytics.initialize",
+        [user_is_superuser]
+    ),
+    (
+        analytics.view_report,
+        "analytics.view_report",
+        [user_is_superuser]
+    ),
     (
         collaborators.add,
         "collaborators.add",

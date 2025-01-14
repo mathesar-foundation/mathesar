@@ -6,6 +6,7 @@
   import { extractDetailedFieldBasedErrors } from '@mathesar/api/rest/utils/errors';
   import { api } from '@mathesar/api/rpc';
   import type { BaseUser, User } from '@mathesar/api/rpc/users';
+  import Help from '@mathesar/component-library/help/Help.svelte';
   import {
     type FieldStore,
     FormSubmit,
@@ -16,19 +17,20 @@
     optionalField,
     requiredField,
   } from '@mathesar/components/form';
-  import GridFormInput from '@mathesar/components/form/GridFormInput.svelte';
+  import Field from '@mathesar/components/form/Field.svelte';
+  import { GridForm, GridFormLabelRow } from '@mathesar/components/grid-form';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { setLanguage } from '@mathesar/i18n';
   import { iconSave, iconUndo } from '@mathesar/icons';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import {
+    BooleanCheckbox,
     PasswordInput,
     TextInput,
     hasProperty,
   } from '@mathesar-component-library';
 
   import SelectDisplayLanguage from './SelectDisplayLanguage.svelte';
-  import SelectUserType from './SelectUserType.svelte';
-  import type { UserType } from './utils';
 
   const dispatch = createEventDispatcher<{ create: User; update: undefined }>();
   const userProfileStore = getUserProfileStoreFromContext();
@@ -52,15 +54,13 @@
   ]);
   $: email = optionalField(user?.email ?? '', [isEmail()]);
   $: displayLanguage = requiredField(user?.display_language ?? 'en');
-  $: userType = requiredField<UserType | undefined>(
-    user?.is_superuser ? 'admin' : 'standard',
-  );
+  $: isAdmin = requiredField(user?.is_superuser ?? false);
 
   const password = requiredField('');
   $: user, password.reset();
 
   $: formFields = (() => {
-    const fields = { fullName, username, email, userType, displayLanguage };
+    const fields = { fullName, username, email, isAdmin, displayLanguage };
     return isNewUser ? { ...fields, password } : fields;
   })();
   $: form = makeForm(formFields);
@@ -80,7 +80,7 @@
           user_def: {
             ...baseUser,
             password: formValues.password,
-            is_superuser: formValues.userType === 'admin',
+            is_superuser: formValues.isAdmin,
           },
         })
         .run();
@@ -99,7 +99,7 @@
           .patch_other({
             ...baseUser,
             user_id: user.id,
-            is_superuser: formValues.userType === 'admin',
+            is_superuser: formValues.isAdmin,
           })
           .run();
       }
@@ -116,7 +116,7 @@
     const { commonErrors, fieldSpecificErrors } =
       extractDetailedFieldBasedErrors<FieldKey>(e, {
         user_name: 'username',
-        is_superuser: 'userType',
+        is_superuser: 'isAdmin',
       });
     for (const [fieldKey, errors] of fieldSpecificErrors) {
       const combinedFields = form.fields as Partial<
@@ -138,56 +138,62 @@
   }
 </script>
 
-<div class="user-details-form">
-  <GridFormInput
-    label={$_('display_name')}
-    field={fullName}
-    input={{ component: TextInput }}
-  />
+<GridForm>
+  <GridFormLabelRow label={$_('display_name')}>
+    <Field field={fullName} />
+  </GridFormLabelRow>
 
-  <GridFormInput
-    label={$_('email')}
-    field={email}
-    input={{ component: TextInput }}
-  />
+  <GridFormLabelRow label={$_('email')}>
+    <Field field={email} />
+  </GridFormLabelRow>
 
-  <GridFormInput
-    label={`${$_('username')} *`}
-    field={username}
-    input={{
-      component: TextInput,
-      props: { autocomplete: isNewUser ? 'new-username' : 'on' },
-    }}
-  />
-
-  {#if isNewUser}
-    <GridFormInput
-      label={`${$_('password')} *`}
-      field={password}
+  <GridFormLabelRow label={`${$_('username')} *`}>
+    <Field
+      field={username}
       input={{
-        component: PasswordInput,
-        props: { autocomplete: isNewUser ? 'new-password' : 'on' },
+        component: TextInput,
+        props: { autocomplete: isNewUser ? 'new-username' : 'on' },
       }}
     />
+  </GridFormLabelRow>
+
+  {#if isNewUser}
+    <GridFormLabelRow label={`${$_('password')} *`}>
+      <Field
+        field={password}
+        input={{
+          component: PasswordInput,
+          props: { autocomplete: isNewUser ? 'new-password' : 'on' },
+        }}
+      />
+    </GridFormLabelRow>
   {/if}
 
-  <GridFormInput
-    label={`${$_('display_language')} *`}
-    field={displayLanguage}
-    input={{
-      component: SelectDisplayLanguage,
-    }}
-  />
+  <GridFormLabelRow label={`${$_('display_language')} *`}>
+    <Field
+      field={displayLanguage}
+      input={{
+        component: SelectDisplayLanguage,
+      }}
+    />
+  </GridFormLabelRow>
 
-  <GridFormInput
-    label={`${$_('role')} *`}
-    field={userType}
-    input={{
-      component: SelectUserType,
-      props: { disabled: isUserUpdatingThemselves },
-    }}
-  />
-</div>
+  <GridFormLabelRow label={$_('admin')}>
+    <div class="admin-checkbox">
+      <Field
+        field={isAdmin}
+        input={{
+          component: BooleanCheckbox,
+          props: { disabled: isUserUpdatingThemselves },
+        }}
+      />
+      <Help>
+        <p>{$_('admin_user_checkbox_help')}</p>
+        <p><SeeDocsToLearnMore page="userAdmin" /></p>
+      </Help>
+    </div>
+  </GridFormLabelRow>
+</GridForm>
 
 <div class="submit-section">
   <FormSubmit
@@ -203,9 +209,11 @@
 </div>
 
 <style lang="scss">
-  .user-details-form {
-    display: grid;
-    grid-template-columns: 1fr 3fr;
+  .admin-checkbox {
+    min-height: 100%;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.7rem;
   }
   .submit-section {
     --form-submit-margin: var(--size-xx-large) 0 0 0;

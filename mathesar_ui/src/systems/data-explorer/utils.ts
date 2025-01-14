@@ -11,6 +11,7 @@ import type { JoinPath, JoinableTablesResult } from '@mathesar/api/rpc/tables';
 import type { CellColumnFabric } from '@mathesar/components/cell-fabric/types';
 import {
   getCellCap,
+  getDbTypeBasedFilterCap,
   getDbTypeBasedInputCap,
   getDisplayFormatter,
   getInitialInputValue,
@@ -47,6 +48,7 @@ export interface ProcessedQueryResultColumn extends CellColumnFabric {
   column: QueryResultColumn;
   abstractType: AbstractType;
   inputComponentAndProps: ComponentAndProps;
+  filterComponentAndProps: ComponentAndProps;
   initialInputValue: unknown;
   allowedFiltersMap: ReturnType<typeof getFiltersForAbstractType>;
   preprocFunctions: AbstractTypePreprocFunctionDefinition[];
@@ -368,6 +370,11 @@ function processColumn(
       undefined,
       abstractType.cellInfo,
     ),
+    filterComponentAndProps: getDbTypeBasedFilterCap(
+      column,
+      undefined,
+      abstractType.cellInfo,
+    ),
     initialInputValue: getInitialInputValue(
       column,
       undefined,
@@ -482,15 +489,9 @@ export function speculateColumnMetaData({
               type_options:
                 aggregation.function === 'distinct_aggregate_to_array'
                   ? {
-                      // TODO_BETA: Ask Pavish.
-                      //
-                      // `Column['type_options']` was previously typed loosely
-                      // as `Record<string, unknown> | null`. Now it's more
-                      // strict and it doesn't have a `type` property.
-                      //
-                      // type:
-                      //   updatedColumnsMetaData.get(aggregation.inputAlias)
-                      //     ?.column.type ?? 'unknown',
+                      item_type:
+                        updatedColumnsMetaData.get(aggregation.inputAlias)
+                          ?.column.type ?? 'unknown',
                     }
                   : null,
               metadata: null,

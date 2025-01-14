@@ -4,6 +4,7 @@
   import type { FieldStore } from '@mathesar/components/form';
   import FieldErrors from '@mathesar/components/form/FieldErrors.svelte';
   import FieldLayout from '@mathesar/components/form/FieldLayout.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import type { Table } from '@mathesar/models/Table';
 
   import Pill from './LinkTablePill.svelte';
@@ -20,8 +21,11 @@
 <FieldLayout>
   <fieldset>
     <legend>
-      {$_('type_of_link_to')}
-      <Pill table={target} which="target" />:
+      <RichText text={$_('type_of_relationship_with_table')} let:slotName>
+        {#if slotName === 'tableName'}
+          <Pill table={target} which="target" />:
+        {/if}
+      </RichText>
     </legend>
     <div class="options">
       {#each linkTypes as linkType (linkType)}

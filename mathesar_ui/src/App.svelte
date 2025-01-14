@@ -35,41 +35,11 @@
 -->
 <style global lang="scss">
   @import 'component-library/styles.scss';
+  @import 'packages/new-item-highlighter/highlightNewItems.scss';
 
   :root {
-    /** BASE COLORS **/
-    --color-white: #ffffff;
-    --color-blue-light: #e6f0ff;
-    --color-blue-medium: #3b82f6;
-    --color-blue-dark: #1d4ed8;
-    --color-orange-dark: #7c2d12;
-    --color-green-medium: #10b981;
-    --color-gray-lighter: #fafafa;
-    --color-gray-light: #f4f4f5;
-    --color-gray-medium: #d4d4d8;
-    --color-gray-dark: #a1a1aa;
-    --color-gray-darker: #27272a;
-    --color-contrast: var(--color-blue-medium);
-    --color-contrast-light: var(--color-blue-light);
-    --color-link: var(--color-blue-dark);
-    --color-text: #171717;
-    --color-text-muted: #515662;
     --color-substring-match: rgb(254, 221, 72);
     --color-substring-match-light: rgba(254, 221, 72, 0.2);
-    --text-size-xx-small: var(--size-xx-small);
-    --text-size-x-small: var(--size-x-small);
-    --text-size-small: var(--size-small);
-    --text-size-base: var(--size-base);
-    --text-size-large: var(--size-large);
-    --text-size-x-large: var(--size-x-large);
-    --text-size-xx-large: var(--size-xx-large);
-    --text-size-ultra-large: var(--size-ultra-large);
-    --text-size-super-ultra-large: var(--size-super-ultra-large);
-    --font-weight-light: 300;
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-bold: 600;
-    --modal-z-index: 50;
     --modal-record-selector-z-index: 50;
 
     /** Component theming */
@@ -131,13 +101,15 @@
     --header-height: 3.7378rem;
 
     --table-title-header-height: 4.6428rem;
+    --status-bar-padding: 0.3rem;
 
     color: var(--slate-800);
 
     --modal-z-index: 1;
     --dropdown-z-index: 1;
     --cell-errors-z-index: 1;
-    --toast-z-index: 2;
+    --new-item-highlighter-z-index: 1;
+    --toast-z-index: 3;
     --app-header-z-index: 1;
 
     overflow: hidden;
@@ -171,13 +143,6 @@
 
   .block {
     display: block;
-  }
-
-  .trim-child-margins > :first-child {
-    margin-top: 0;
-  }
-  .trim-child-margins > :last-child {
-    margin-bottom: 0;
   }
 
   /**

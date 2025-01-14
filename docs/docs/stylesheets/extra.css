@@ -108,6 +108,10 @@
   width: max-content;
 }
 
+.md-nav--primary > .md-nav__title {
+  display: none;
+}
+
 .md-typeset a {
   color: var(--md-link-color);
   text-decoration: underline;

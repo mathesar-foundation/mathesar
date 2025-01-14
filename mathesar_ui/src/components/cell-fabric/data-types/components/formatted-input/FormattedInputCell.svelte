@@ -13,6 +13,7 @@
   export let showTruncationPopover: $$Props['showTruncationPopover'] = false;
   export let formatter: $$Props['formatter'];
   export let formatForDisplay: $$Props['formatForDisplay'];
+  export let useTabularNumbers: $$Props['useTabularNumbers'] = undefined;
 </script>
 
 <SteppedInputCell
@@ -21,6 +22,7 @@
   {disabled}
   {isIndependentOfSheet}
   {showTruncationPopover}
+  {useTabularNumbers}
   horizontalAlignment="right"
   let:handleInputBlur
   let:handleInputKeydown

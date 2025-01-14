@@ -28,6 +28,7 @@
     href: ADMIN_USERS_PAGE_ADD_NEW_URL,
     label: $_('new_user'),
     icon: iconAddUser,
+    prependSeparator: true,
   }}
 />
 

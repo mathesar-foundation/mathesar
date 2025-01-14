@@ -56,6 +56,6 @@
       dispatch('change', { value: option });
     }}
   />
-  <slot slot="label" name="label">{label}</slot>
+  <slot slot="label" name="label">{label ?? ''}</slot>
   <slot slot="extra" name="extra" />
 </FieldsetGroup>
