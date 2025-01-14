@@ -4650,7 +4650,6 @@ SELECT concat(
 $$ LANGUAGE SQL STABLE;
 
 
-DROP FUNCTION IF EXISTS msar.build_results_jsonb_array_expr(text, text[], text);
 CREATE OR REPLACE FUNCTION
 msar.build_results_jsonb_array_expr(
   cte_name text,
@@ -4675,7 +4674,6 @@ SELECT format(
 $$ LANGUAGE SQL STABLE;
 
 
-DROP FUNCTION IF EXISTS msar.build_results_setof_jsonb_expr(text, text[]);
 CREATE OR REPLACE FUNCTION
 msar.build_results_setof_jsonb_expr(
   cte_name text
@@ -5123,7 +5121,6 @@ FROM fkey_map_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.build_summary_json_expr_for_table(oid);
 CREATE OR REPLACE FUNCTION
 msar.build_summary_json_expr_for_table(tab_id oid) RETURNS TEXT AS $$/*
 Build a JSON object with the results of summarizing linked records.
