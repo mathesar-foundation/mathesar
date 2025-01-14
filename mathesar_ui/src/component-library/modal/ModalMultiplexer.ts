@@ -33,7 +33,7 @@ export default class ModalMultiplexer {
     };
   }
 
-  spawnModalController(): ModalController {
+  spawnModalController<Options = void>(): ModalController<Options> {
     return new ModalController(this.getPropsForNewModal());
   }
 }
