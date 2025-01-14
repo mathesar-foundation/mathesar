@@ -368,3 +368,29 @@ def test_intern_can_now_access_books_table(intern_rpc_call):
     )
     assert records['count'] == 1410
     assert len(records['results']) == 20
+
+
+def test_disconnect_fails_when_dependencies(admin_session):
+    response = admin_session.post(
+        RPC_ENDPOINT,
+        json={
+            "jsonrpc": "2.0",
+            "method": "databases.configured.disconnect",
+            "params": {
+                "database_id": internal_db_id,
+            },
+            "id": 0,
+        },
+    ).json()
+    assert response['error']['code'] == -30035  # DependentObjectsStillExist
+
+
+def test_disconnect_succeeds_when_no_dependencies(admin_rpc_call):
+    admin_rpc_call(
+        "databases.configured.disconnect",
+        database_id=internal_db_id,
+        schemas_to_remove=["msar", "__msar"]
+    )
+    result = admin_rpc_call('databases.configured.list')
+    assert len(result) == 1
+    assert internal_db_id not in [d["id"] for d in result]
