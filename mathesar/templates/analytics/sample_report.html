@@ -1,0 +1,55 @@
+{% extends 'mathesar/app_styled_base.html' %}
+{% load i18n static %}
+{% block title %}
+{% translate "Sample anonymous usage data report" %}
+{% endblock %}
+
+{% comment %}
+  This template is only for users who would like to see a sample usage data report.
+
+  There is no direct link to this page from the product, however the link will be mentioned
+  in our docs/site for advanced users who would like to make a more informed decision on
+  whether or not to enable analytics.
+{% endcomment %}
+
+{% block content %}
+  {% csrf_token %}
+  <pre>
+    <code id="content">
+    </code>
+  </pre>
+{% endblock %}
+
+{% block page_scripts %}
+<script defer>
+  function renderJsonInDocument(json) {
+    const text = document.createTextNode(JSON.stringify(json, null, 2));
+    document.getElementById("content").appendChild(text);
+  }
+
+  function getSampleReport() {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    fetch(
+      '/api/rpc/v0/',
+      {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          "jsonrpc": "2.0",
+          "method": "analytics.view_report",
+          "id": 0
+        })
+      }
+    )
+    .then((res) => res.json())
+    .then((res) => renderJsonInDocument(res))
+    .catch((error) => {
+      renderJsonInDocument(error)
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    getSampleReport();
+  });
+</script>
+{% endblock %}

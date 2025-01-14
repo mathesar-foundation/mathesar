@@ -1,38 +1,11 @@
+SELECT msar.drop_all_msar_objects(
+  schemas_to_remove => ARRAY['msar', '__msar', 'mathesar_types'],
+  remove_custom_types => false,
+  strict => false
+);
+
 CREATE SCHEMA IF NOT EXISTS __msar;
 CREATE SCHEMA IF NOT EXISTS msar;
-
-CREATE OR REPLACE FUNCTION msar.drop_all_msar_functions() RETURNS void AS $$/*
-Drop all functions in the `msar` schema, except for this one.
-*/
-DECLARE
-  fn RECORD;
-  schema_name CONSTANT TEXT := 'msar';
-BEGIN
-  FOR fn IN
-    SELECT oid, prokind
-    FROM pg_catalog.pg_proc
-    WHERE
-      pronamespace = schema_name::regnamespace::oid AND
-      proname <> 'drop_all_msar_functions'
-  LOOP
-    IF EXISTS (SELECT 1 FROM pg_proc WHERE oid = fn.oid) THEN
-      EXECUTE format(
-        $q$ DROP %s %s CASCADE $q$,
-        CASE fn.prokind
-          WHEN 'p' THEN 'PROCEDURE'
-          WHEN 'a' THEN 'AGGREGATE'
-          ELSE 'FUNCTION'
-        END,
-        fn.oid::regprocedure::text
-      );
-    END IF;
-  END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
-
-SELECT msar.drop_all_msar_functions();
-
 
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -391,7 +364,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.get_relation_oid(text, text) CASCADE;
 CREATE OR REPLACE FUNCTION
 msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
 Return the OID for a given relation (e.g., table).
@@ -547,7 +519,7 @@ node.
 
 For example, the following would return 'True', even though they're not dynamic:
   3 + 5
-  mathesar_types.cast_to_integer('8')
+  msar.cast_to_integer('8')
 
 Args:
   tab_id: The OID of the table with the column.
@@ -593,7 +565,7 @@ changed. Given a qualified, potentially capitalized type name, we
 - Remove the namespace (schema),
 - Replace any white space in the type name with underscores,
 - Replace double quotes in the type name (e.g., the "char" type) with '_double_quote_'
-- Use the prepped type name in the name `mathesar_types.cast_to_%s`.
+- Use the prepped type name in the name `msar.cast_to_%s`.
 
 Args:
   target_type: This should be a type that exists.
@@ -611,7 +583,7 @@ BEGIN
   SELECT replace(unspaced_type, '"', '_double_quote_')
   FROM unspacer
   INTO target_type_prepped;
-  RETURN format('mathesar_types.cast_to_%s', target_type_prepped);
+  RETURN format('msar.cast_to_%s', target_type_prepped);
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -680,7 +652,6 @@ END;
 $$ LANGUAGE SQL;
 
 
-DROP FUNCTION IF EXISTS msar.get_constraints_for_table(oid);
 CREATE OR REPLACE FUNCTION msar.get_constraints_for_table(tab_id oid) RETURNS TABLE
 (
   oid oid,
@@ -885,7 +856,7 @@ Args:
 SELECT jsonb_agg(prorettype::regtype::text)
 FROM pg_proc
 WHERE
-  pronamespace=msar.get_schema_oid('mathesar_types')
+  pronamespace=msar.get_schema_oid('msar')
   AND proargtypes[0]=typ_id
   AND left(proname, 5) = 'cast_';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
@@ -1254,7 +1225,6 @@ SELECT COALESCE(jsonb_agg(priv_cte.p), '[]'::jsonb) FROM priv_cte;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.role_info_table();
 CREATE OR REPLACE FUNCTION msar.role_info_table() RETURNS TABLE
 (
   oid bigint, -- The OID of the role.
@@ -1743,7 +1713,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.transfer_database_ownership(regrole);
 CREATE OR REPLACE FUNCTION
 msar.transfer_database_ownership(new_owner_oid regrole) RETURNS jsonb AS $$/*
 Transfers ownership of the current database to a new owner.
@@ -1827,7 +1796,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
-DROP FUNCTION IF EXISTS msar.rename_schema(oid, text);
 CREATE OR REPLACE FUNCTION msar.rename_schema(sch_id oid, new_sch_name text) RETURNS void AS $$/*
 Change a schema's name
 
@@ -1865,7 +1833,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-DROP FUNCTION IF EXISTS msar.patch_schema(oid, jsonb);
 CREATE OR REPLACE FUNCTION msar.patch_schema(sch_id oid, patch jsonb) RETURNS jsonb AS $$/*
 Modify a schema according to the given patch.
 
@@ -1909,11 +1876,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
--- This gets rid of `msar.create_schema` as defined in Mathesar 0.1.7. We don't want that old
--- function definition hanging around because it will get invoked when passing NULL as the second
--- argument like `msar.create_schema('foo', NULL)`.
-DROP FUNCTION IF EXISTS msar.create_schema(text, boolean);
-
 CREATE OR REPLACE FUNCTION msar.create_schema_if_not_exists(sch_name text) RETURNS oid AS $$/*
 Ensure that a schema exists in the database.
 
@@ -1930,7 +1892,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-DROP FUNCTION IF EXISTS msar.create_schema(text, text);
 CREATE OR REPLACE FUNCTION msar.create_schema(
   sch_name text,
   own_id regrole,
@@ -2058,7 +2019,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Rename table ------------------------------------------------------------------------------------
 
-DROP FUNCTION IF EXISTS msar.rename_table(text, text, text);
 CREATE OR REPLACE FUNCTION
 msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS void AS $$/*
 Change a table's name, returning the command executed.
@@ -2078,7 +2038,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.rename_table(oid, text);
 CREATE OR REPLACE FUNCTION
 msar.rename_table(tab_id oid, new_tab_name text) RETURNS void AS $$/*
 Change a table's name, returning the command executed.
@@ -2308,7 +2267,6 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Column creation definition type -----------------------------------------------------------------
 
-DROP TYPE IF EXISTS __msar.col_def CASCADE;
 CREATE TYPE __msar.col_def AS (
   name_ text, -- The name of the column to create, quoted.
   type_ text, -- The type of the column to create, fully specced with arguments.
@@ -2819,7 +2777,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 -- Constraint creation definition type -------------------------------------------------------------
 
-DROP TYPE IF EXISTS __msar.con_def CASCADE;
 CREATE TYPE __msar.con_def AS (
 /*
 This should be used in the context of a single ALTER TABLE command. So, no need to reference the
@@ -3035,7 +2992,6 @@ SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs)
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
-DROP TYPE IF EXISTS __msar.not_null_def CASCADE;
 CREATE TYPE __msar.not_null_def AS (
   col_name text, -- The column to be modified, quoted.
   not_null boolean -- The value to set for null or not null.
@@ -3310,8 +3266,6 @@ SELECT __msar.exec_ddl(
 FROM col_cte, con_cte;
 $$ LANGUAGE SQL;
 
--- Drop function defined in Mathesar 0.1.7 with different argument names
-DROP FUNCTION IF EXISTS msar.add_mathesar_table(oid, text, jsonb, jsonb, text);
 
 CREATE OR REPLACE FUNCTION
 msar.add_mathesar_table(sch_id oid, tab_name text, col_defs jsonb, con_defs jsonb, own_id regrole, comment_ text)
@@ -3582,21 +3536,12 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 CREATE OR REPLACE FUNCTION __msar.build_cast_expr(val text, type_ text) RETURNS text AS $$/*
 Build an expression for casting a column in Mathesar, returning the text of that expression.
 
-We fall back silently to default casting behavior if the mathesar_types namespace is missing.
-However, we do throw an error in cases where the schema exists, but the type casting function
-doesn't. This is assumed to be an error the user should know about.
-
 Args:
   val: This is quite general, and isn't sanitized in any way. It can be either a literal or a column
        identifier, since we want to be able to produce a casting expression in either case.
   type_: This type name string must cast properly to a regtype.
 */
-SELECT CASE
-  WHEN msar.schema_exists('mathesar_types') THEN
-    msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
-  ELSE
-    val || '::' || type_::regtype::text
-END;
+SELECT msar.get_cast_function_name(type_::regtype) || '(' || val || ')'
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -3604,24 +3549,18 @@ CREATE OR REPLACE FUNCTION
 msar.build_cast_expr(tab_id regclass, col_id smallint, typ_id regtype) RETURNS text AS $$/*
 Build an expression for casting a column in Mathesar, returning the text of that expression.
 
-We fall back silently to default casting behavior if the mathesar_types namespace is missing.
-However, we do throw an error in cases where the schema exists, but the type casting function
-doesn't. This is assumed to be an error the user should know about.
+We throw an error in cases where the casting function doesn't exist. This is assumed to be an error
+the user should know about.
 
 Args:
   tab_id: The OID of the table whose column we're casting.
   col_id: The attnum of the column in the table.
   typ_id: The OID of the type we will cast to.
 */
-SELECT CASE
-  WHEN msar.schema_exists('mathesar_types') THEN
-    msar.get_cast_function_name(typ_id)
-    || '('
-    || format('%I', msar.get_column_name(tab_id, col_id))
-    || ')'
-  ELSE
-    format('%I', msar.get_column_name(tab_id, col_id)) || '::' || typ_id::text
-END;
+SELECT msar.get_cast_function_name(typ_id)
+  || '('
+  || format('%I', msar.get_column_name(tab_id, col_id))
+  || ')';
 $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
@@ -3748,7 +3687,7 @@ __msar.build_col_retype_expr(tab_id oid, col_id integer, new_type text) RETURNS 
 Build an expression to change a column's type, returning the text of that expression.
 
 Note that this function wraps the type alteration in a cast expression. If we have the custom
-mathesar_types cast functions available, we prefer those to the default PostgreSQL casting behavior.
+cast functions available, we prefer those to the default PostgreSQL casting behavior.
 
 Args:
   tab_id: The OID of the table containing the column whose type we'll alter.
@@ -3803,7 +3742,7 @@ BEGIN
   ELSEIF msar.is_default_possibly_dynamic(tab_id, col_id) AND new_type IS NOT NULL THEN
     -- We add casting the possibly dynamic expression to the new type as part of the default
     -- expression in this case.
-    default_expr := __msar.build_cast_expr(old_default, new_type);
+    default_expr := format('%s::%s', old_default, new_type);
   ELSEIF old_default IS NOT NULL AND new_type IS NOT NULL THEN
     -- If we arrive here, then we know the old_default is a constant value, and we want to cast the
     -- old default value to the new type *before* setting it as the new default. This avoids
@@ -4513,7 +4452,6 @@ SELECT val;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT PARALLEL SAFE;
 
 
-DROP TABLE IF EXISTS msar.expr_templates;
 CREATE TABLE msar.expr_templates (expr_key text PRIMARY KEY, expr_template text);
 INSERT INTO msar.expr_templates VALUES
   -- basic composition operators
@@ -4542,10 +4480,10 @@ INSERT INTO msar.expr_templates VALUES
   ('truncate_to_month', 'to_char((%s)::date, ''YYYY-MM AD'')'),
   ('truncate_to_day', 'to_char((%s)::date, ''YYYY-MM-DD AD'')'),
   -- URI part getters
-  ('uri_scheme', 'mathesar_types.uri_scheme(%s)'),
-  ('uri_authority', 'mathesar_types.uri_authority(%s)'),
+  ('uri_scheme', 'msar.uri_scheme(%s)'),
+  ('uri_authority', 'msar.uri_authority(%s)'),
   -- Email part getters
-  ('email_domain', 'mathesar_types.email_domain_name(%s)'),
+  ('email_domain', 'msar.email_domain_name(%s)'),
   -- Data formatter which is sometimes useful in comparison
   ('format_data', 'msar.format_data(%s)')
 ;
@@ -5704,7 +5642,6 @@ FROM jsonb_each_text(rec_def);
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
-DROP FUNCTION IF EXISTS msar.patch_record_in_table(oid, anyelement, jsonb, boolean);
 CREATE OR REPLACE FUNCTION
 msar.patch_record_in_table(
   tab_id oid,

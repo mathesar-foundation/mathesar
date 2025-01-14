@@ -12,7 +12,6 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import {
-    type SchemaStoreData,
     deleteSchema as deleteSchemaAPI,
     sortedSchemas as schemasStore,
   } from '@mathesar/stores/schemas';
@@ -20,6 +19,7 @@
   import {
     Button,
     Icon,
+    filterViaTextQuery,
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
@@ -28,6 +28,9 @@
 
   const addEditModal = modal.spawnModalController();
   const databaseRouteContext = DatabaseRouteContext.get();
+
+  let filterQuery = '';
+  let targetSchema: Schema | undefined;
 
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
   $: void underlyingDatabase.runConservatively({ database_id: database.id });
@@ -38,24 +41,9 @@
     schemasRequestStatus.state === 'processing';
   $: currentRoleDatabasePrivileges =
     $underlyingDatabase.resolvedValue?.currentAccess.currentRolePrivileges;
-
-  let filterQuery = '';
-  let targetSchema: Schema | undefined;
-
-  function filterSchemas(
-    schemaData: SchemaStoreData['data'],
-    filter: string,
-  ): Schema[] {
-    const filtered: Schema[] = [];
-    schemaData.forEach((schema) => {
-      if (get(schema.name).toLowerCase().includes(filter.toLowerCase())) {
-        filtered.push(schema);
-      }
-    });
-    return filtered;
-  }
-
-  $: displayList = filterSchemas(schemasMap, filterQuery);
+  $: displayList = [
+    ...filterViaTextQuery(schemasMap.values(), filterQuery, (s) => get(s.name)),
+  ];
 
   function addSchema() {
     targetSchema = undefined;
