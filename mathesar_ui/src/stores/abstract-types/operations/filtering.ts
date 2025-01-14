@@ -79,7 +79,6 @@ const equalityFiltersResponse: AbstractTypeFilterDefinitionResponse[] = [
 // This is the API response expected from the server
 // Might be better if we can have this with the types endpoint
 const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
-  ...equalityFiltersResponse,
   {
     id: 'contains_case_insensitive',
     name: 'contains',
@@ -100,6 +99,7 @@ const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
     },
     hasParams: true,
   },
+  ...equalityFiltersResponse,
   {
     id: 'uri_scheme_equals',
     name: 'URI scheme is',
