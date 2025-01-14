@@ -29,7 +29,6 @@ whether to travel from referrer to referent (when False) or from referent to ref
 */
 
 
-DROP TYPE IF EXISTS msar.joinable_tables CASCADE;
 CREATE TYPE msar.joinable_tables AS (
   base bigint, -- The OID of the table from which the paths start
   target bigint, -- The OID of the table where the paths end
@@ -40,7 +39,6 @@ CREATE TYPE msar.joinable_tables AS (
 );
 
 
-DROP FUNCTION IF EXISTS msar.get_joinable_tables(integer);
 CREATE OR REPLACE FUNCTION
 msar.get_joinable_tables(max_depth integer) RETURNS SETOF msar.joinable_tables AS $$/*
 This function returns a table of msar.joinable_tables objects, giving paths to various
@@ -132,7 +130,6 @@ SELECT * FROM output_cte;
 $$ LANGUAGE SQL STABLE;
 
 
-DROP FUNCTION IF EXISTS msar.get_joinable_tables(integer, oid);
 CREATE OR REPLACE FUNCTION
 msar.get_joinable_tables(max_depth integer, table_id oid) RETURNS
 jsonb AS $$

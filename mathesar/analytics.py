@@ -65,6 +65,10 @@ def disable_analytics():
     InstallationID.objects.all().delete()
 
 
+def is_analytics_enabled():
+    return InstallationID.objects.exists()
+
+
 def save_analytics_report():
     raw_analytics_report = prepare_analytics_report()
     if raw_analytics_report["installation_id"] is not None:

@@ -4,6 +4,7 @@ Classes and functions exposed to the RPC endpoint for managing analytics.
 from typing import TypedDict, Optional
 from mathesar.rpc.decorators import mathesar_rpc_method
 from mathesar.analytics import (
+    is_analytics_enabled,
     initialize_analytics,
     disable_analytics,
     prepare_analytics_report,
@@ -45,6 +46,28 @@ class AnalyticsReport(TypedDict):
         if d["installation_id"] is not None:
             d["installation_id"] = str(d["installation_id"].value)
         return cls(d)
+
+
+class AnalyticsState(TypedDict):
+    """
+    Returns the current state of analytics.
+
+    Attributes:
+        enabled: A boolean representing if analytics is enabled.
+    """
+    enabled: bool
+
+    @classmethod
+    def from_boolean(cls, b):
+        return cls({"enabled": b})
+
+
+@mathesar_rpc_method(name="analytics.get_state")
+def get_state():
+    """
+    Returns a boolean to identify if analytics is enabled
+    """
+    return AnalyticsState.from_boolean(is_analytics_enabled())
 
 
 @mathesar_rpc_method(name="analytics.initialize")
