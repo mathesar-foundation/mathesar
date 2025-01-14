@@ -9,7 +9,7 @@
 
   const pages = {
     // TODO_BETA: Add correct link to analytics information docs-page/website
-    analytics: '/user-guide/analytics/',
+    analytics: '/analytics/',
     import: '/user-guide/importing-data/',
     relationships: '/user-guide/relationships/',
     roles: '/user-guide/roles/',
