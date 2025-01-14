@@ -5154,7 +5154,7 @@ SELECT CASE WHEN quote_ident(msar.get_selectable_pkey_attnum(tab_id)::text) IS N
     jsonb_object_agg(
       summary_cte_self.key, summary_cte_self.summary
     ) FILTER (WHERE summary_cte_self.key IS NOT NULL), '{}'::jsonb
-  )
+  ) AS summary_self
   $j$
 END;
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
@@ -5284,29 +5284,34 @@ BEGIN
     summary_cte_self AS (%7$s)
     %8$s,
     summary_cte AS ( SELECT %10$s FROM enriched_results_cte %9$s ),
-    record_summaries_cte AS ( 
+    summaries_json_cte AS ( 
       SELECT
-      jsonb_build_object(
-        'linked_record_summaries',
-        NULLIF(
-          to_jsonb(summary_cte),
-          '{}'::jsonb
-        ),
-        'record_summaries', %11$s
-      )
-      AS lrs
+        jsonb_build_object(
+          'linked_record_summaries',
+          NULLIF(
+            to_jsonb(summary_cte) - 'summary_self' - 'count_hack',
+            '{}'::jsonb
+          ),
+          'record_summaries',
+          NULLIF(
+            to_jsonb(summary_cte) - 'count_hack' -> 'summary_self',
+            '{}'::jsonb
+          )
+        )
+      AS sj
       FROM summary_cte
     ),
-    records_cte AS ( SELECT jsonb_build_object(
+    records_json_cte AS ( SELECT jsonb_build_object(
       'results', %4$s,
       'count', coalesce(max(count_cte.count), 0),
       'grouping', %5$s
-    ) AS rc
+    ) AS rj
     FROM enriched_results_cte
       LEFT JOIN groups_cte ON enriched_results_cte.__mathesar_gid = groups_cte.id
       CROSS JOIN count_cte
     )
-    SELECT records_cte.rc || record_summaries_cte.lrs FROM records_cte, record_summaries_cte;
+    SELECT records_json_cte.rj || summaries_json_cte.sj
+    FROM records_json_cte, summaries_json_cte;
     $q$,
     /* %1 */ expr_and_ctes ->> 'count_cte_query',
     /* %2 */ expr_and_ctes ->> 'results_cte_query',
@@ -5336,10 +5341,17 @@ BEGIN
       table_record_summary_templates
     ),
     /* %9 */ msar.build_summary_join_expr_for_table(tab_id, 'enriched_results_cte'),
-    /* %10 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), ''),
-    /* %11 */ COALESCE(
-      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
-      'NULL'
+    /* %10 */ COALESCE(
+      NULLIF(
+        concat_ws(', ',
+          msar.build_summary_json_expr_for_table(tab_id),
+          CASE WHEN return_record_summaries
+          THEN msar.build_self_summary_json_expr(tab_id)
+          END
+        ), ''
+      ), 'COUNT(1) AS count_hack' 
+      -- count_hack ensures that summary_cte is not empty,
+      -- which in turn helps to generate summaries_json_cte
     )
   ) INTO records;
   RETURN records;
@@ -5444,15 +5456,35 @@ BEGIN
     results_cte AS (
       SELECT %1$s FROM %2$I.%3$I %4$s %6$s LIMIT %5$L
     ),
-    summary_cte_self AS (%7$s) %8$s
-    SELECT jsonb_build_object(
-      'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
-      'count', coalesce(max(count_cte.count), 0),
-      'linked_record_summaries', %10$s,
-      'record_summaries', %11$s
+    summary_cte_self AS (%7$s)
+    %8$s,
+    summary_cte AS ( SELECT %10$s FROM results_cte %9$s ),
+    summaries_json_cte AS (
+      SELECT
+        jsonb_build_object(
+          'linked_record_summaries',
+          NULLIF(
+            to_jsonb(summary_cte) - 'summary_self' - 'count_hack',
+            '{}'::jsonb
+          ),
+          'record_summaries',
+          NULLIF(
+            to_jsonb(summary_cte) - 'count_summary' -> 'count_hack',
+            '{}'::jsonb
+          )
+        )
+      AS sj
+      FROM summary_cte
+    ),
+    results_json_cte AS (
+      SELECT jsonb_build_object(
+        'results', coalesce(jsonb_agg(row_to_json(results_cte.*)), jsonb_build_array()),
+        'count', coalesce(max(count_cte.count), 0)
+      ) AS rj
+      FROM results_cte CROSS JOIN count_cte
     )
-    FROM results_cte %9$s
-      CROSS JOIN count_cte
+    SELECT results_json_cte.rj || summaries_json_cte.sj
+    FROM results_json_cte, summaries_json_cte;
     $q$,
     /* %1 */ COALESCE(msar.build_selectable_column_expr(tab_id), 'NULL'),
     /* %2 */ msar.get_relation_schema_name(tab_id),
@@ -5473,10 +5505,17 @@ BEGIN
     ),
     /* %8 */ msar.build_linked_record_summaries_ctes(tab_id),
     /* %9 */ msar.build_summary_join_expr_for_table(tab_id, 'results_cte'),
-    /* %10 */ COALESCE(msar.build_summary_json_expr_for_table(tab_id), 'NULL'),
-    /* %11 */ COALESCE(
-      CASE WHEN return_record_summaries THEN msar.build_self_summary_json_expr(tab_id) END,
-      'NULL'
+    /* %10 */ COALESCE(
+      NULLIF(
+        concat_ws(', ',
+          msar.build_summary_json_expr_for_table(tab_id),
+          CASE WHEN return_record_summaries
+          THEN msar.build_self_summary_json_expr(tab_id)
+          END
+        ), ''
+      ), 'COUNT(1) AS count_hack'
+      -- count_hack ensures that summary_cte is not empty,
+      -- which in turn helps to generate summaries_json_cte
     )
   ) INTO records;
   RETURN records;
