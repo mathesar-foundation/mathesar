@@ -20,10 +20,13 @@ export class Database {
 
   readonly server: Server;
 
+  readonly needsUpgradeAttention: boolean;
+
   constructor(props: { server: Server; rawDatabase: RawDatabase }) {
     this.id = props.rawDatabase.id;
     this.name = props.rawDatabase.name;
     this.server = props.server;
+    this.needsUpgradeAttention = props.rawDatabase.needs_upgrade_attention;
   }
 
   constructConfiguredRolesStore() {

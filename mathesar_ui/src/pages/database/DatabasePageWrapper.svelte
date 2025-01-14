@@ -11,8 +11,10 @@
     iconDeleteMajor,
     iconMoreActions,
     iconPermissions,
+    iconReinstall,
   } from '@mathesar/icons';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
+  import type { Database } from '@mathesar/models/Database';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import {
     getDatabasePageSchemasSectionUrl,
@@ -23,6 +25,7 @@
   import { modal } from '@mathesar/stores/modal';
   import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
+  import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import {
     Button,
@@ -48,6 +51,7 @@
     database.server.port === commonData.internal_db.port;
 
   const permissionsModal = modal.spawnModalController();
+  const reinstallModal = modal.spawnModalController<Database>();
 
   const userProfileStore = getUserProfileStoreFromContext();
   $: ({ isMathesarAdmin } = $userProfileStore);
@@ -144,6 +148,12 @@
           <ButtonMenuItem icon={iconDeleteMajor} on:click={disconnectDatabase}>
             {$_('disconnect_database')}
           </ButtonMenuItem>
+          <ButtonMenuItem
+            icon={iconReinstall}
+            on:click={() => reinstallModal.open(database)}
+          >
+            {$_('reinstall_mathesar_schemas')}
+          </ButtonMenuItem>
           <!--
             TODO: Allow dropping databases
             https://github.com/mathesar-foundation/mathesar/issues/3862
@@ -192,6 +202,7 @@
 </LayoutWithHeader>
 
 <DatabasePermissionsModal controller={permissionsModal} />
+<UpgradeDatabaseModal controller={reinstallModal} isReinstall />
 
 <style>
   .tab-container {
