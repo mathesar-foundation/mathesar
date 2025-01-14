@@ -30,7 +30,7 @@
   function getSampleReport() {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     fetch(
-      'http://localhost:8000/api/rpc/v0/',
+      '/api/rpc/v0/',
       {
         method: 'POST',
         headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
