@@ -1,6 +1,6 @@
 import os
 
-from db.connection import load_file_with_conn
+from db.connection import load_file_with_conn, exec_msar_func
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,10 +19,12 @@ def _install_sql_file(file_name):
 
 
 INSTALL_STEPS = [
-    _install_sql_file("00_msar.sql"),
+    _install_sql_file("01_msar_types.sql"),
+    _install_sql_file("02_msar_remove.sql"),
+    _install_sql_file("05_msar.sql"),
     _install_sql_file("10_msar_joinable_tables.sql"),
     _install_sql_file("30_msar_custom_aggregates.sql"),
-    _install_sql_file("40_msar_types.sql"),
+    _install_sql_file("45_msar_type_casting.sql"),
     _install_sql_file("50_msar_permissions.sql"),
 ]
 
@@ -31,3 +33,19 @@ def install(conn):
     """Install SQL pieces using the given conn."""
     for step in INSTALL_STEPS:
         step(conn)
+
+
+def uninstall(
+        conn,
+        schemas_to_remove=['msar', '__msar', 'mathesar_types'],
+        strict=True
+):
+    """Remove msar and __msar schemas safely."""
+    _install_sql_file("02_msar_remove.sql")(conn)
+    exec_msar_func(
+        conn,
+        "drop_all_msar_objects",
+        schemas_to_remove,
+        True,
+        strict,
+    )
