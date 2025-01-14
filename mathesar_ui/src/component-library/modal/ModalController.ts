@@ -5,6 +5,7 @@ import {
   type Updater,
   type Writable,
   derived,
+  writable,
 } from 'svelte/store';
 
 import type ModalStack from './ModalStack';
@@ -56,7 +57,7 @@ function makeProxyForIsOpen({
 /**
  * Controls one modal.
  */
-export default class ModalController {
+export default class ModalController<Options = void> {
   readonly modalId: number;
 
   private modalStackStore: Writable<ModalStack>;
@@ -64,6 +65,8 @@ export default class ModalController {
   isOpen: Writable<boolean>;
 
   isOnTop: Readable<boolean>;
+
+  options: Writable<Options | undefined> = writable(undefined);
 
   constructor({
     modalId,
@@ -81,11 +84,13 @@ export default class ModalController {
     );
   }
 
-  open(): void {
+  open(...args: Options extends void ? [] : [Options]): void {
+    this.options.set(args[0]);
     this.isOpen.set(true);
   }
 
   close(): void {
     this.isOpen.set(false);
+    this.options.set(undefined);
   }
 }

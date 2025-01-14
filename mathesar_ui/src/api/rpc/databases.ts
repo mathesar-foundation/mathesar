@@ -7,6 +7,8 @@ export interface RawDatabase {
   id: number;
   name: string;
   server_id: RawServer['id'];
+  last_confirmed_sql_version: string;
+  needs_upgrade_attention: boolean;
 }
 
 export const allDatabasePrivileges = [
@@ -48,6 +50,14 @@ export const databases = {
       database_id: RawDatabase['id'];
     },
     RawUnderlyingDatabase
+  >(),
+  upgrade_sql: rpcMethodTypeContainer<
+    {
+      database_id: RawDatabase['id'];
+      username?: string;
+      password?: string;
+    },
+    void
   >(),
   configured: {
     list: rpcMethodTypeContainer<

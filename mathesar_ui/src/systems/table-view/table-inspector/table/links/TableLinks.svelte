@@ -5,7 +5,7 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { getErrorMessage } from '@mathesar/utils/errors';
 
-  import LinksSectionContainer from './LinksSectionContainer.svelte';
+  import LinksContent from './LinksContent.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -27,7 +27,8 @@
   {#await getJoinableTables(table.schema.database.id, table.oid)}
     <Spinner />
   {:then joinableTablesResult}
-    <LinksSectionContainer
+    <LinksContent
+      {table}
       currentTableColumns={$columns}
       {joinableTablesResult}
     />

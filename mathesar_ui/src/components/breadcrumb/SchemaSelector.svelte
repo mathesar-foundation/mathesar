@@ -33,6 +33,12 @@
 </script>
 
 <BreadcrumbSelector
-  data={new Map([[$_('schemas'), schemas.map(makeBreadcrumbSelectorItem)]])}
+  sections={[
+    {
+      label: $_('schemas'),
+      entries: schemas.map(makeBreadcrumbSelectorItem),
+      emptyMessage: $_('no_schemas_found'),
+    },
+  ]}
   triggerLabel={$_('choose_schema')}
 />

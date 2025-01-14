@@ -81,5 +81,8 @@ export type BreadcrumbSelectorEntry =
   | SimpleBreadcrumbSelectorEntry
   | BreadcrumbSelectorEntryForTable;
 
-/** Keys are category names */
-export type BreadcrumbSelectorData = Map<string, BreadcrumbSelectorEntry[]>;
+export interface BreadcrumbSelectorSectionData {
+  label: string;
+  entries: BreadcrumbSelectorEntry[];
+  emptyMessage: string;
+}

@@ -52,4 +52,8 @@
   &:disabled {
     cursor: not-allowed;
   }
+
+  &:not(:disabled):focus {
+    outline: 1px solid var(--slate-200);
+  }
 }

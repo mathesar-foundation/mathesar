@@ -19,6 +19,7 @@ import {
   faDatabase,
   faDiagramNext,
   faDollarSign,
+  faDownload,
   faEllipsisV,
   faEnvelope,
   faExternalLink,
@@ -46,6 +47,7 @@ import {
   faProjectDiagram,
   faQuestion,
   faRedo,
+  faRotateBack,
   faSave,
   faSearchPlus,
   faShapes,
@@ -61,6 +63,7 @@ import {
   faT,
   faTimes,
   faTrashAlt,
+  faTriangleExclamation,
   faUndo,
   faUnlink,
   faUpRightFromSquare,
@@ -69,6 +72,7 @@ import {
   faUserEdit,
   faUserGear,
   faUserPlus,
+  faUserSecret,
   faUsers,
   faWandSparkles,
   faXmark,
@@ -107,7 +111,6 @@ export const iconAddFilter: IconProps = { data: faFilter };
 export const iconAddNew: IconProps = { data: faPlus };
 export const iconAddUser: IconProps = { data: faUserPlus };
 export const iconConfigure: IconProps = { data: faCogs };
-export const iconConfigurePassword = { data: faKey };
 export const iconConnectDatabase = { data: connectDatabaseIcon };
 export const iconCopyMajor: IconProps = { data: faCopy };
 /** TODO: use faBinary once it's available (via newer FontAwesome version) */
@@ -121,6 +124,7 @@ export const iconDeleteMinor: IconProps = { data: faTimes };
 export const iconEdit: IconProps = { data: faPencilAlt };
 export const iconEditUser: IconProps = { data: faUserEdit };
 export const iconExpandRight: IconProps = { data: faChevronRight };
+export const iconExport: IconProps = { data: faDownload };
 export const iconImportData: IconProps = { data: faUpload };
 export const iconInferColumnType: IconProps = { data: faMicroscope };
 export const iconMoreActions: IconProps = { data: faEllipsisV };
@@ -151,6 +155,7 @@ export const iconRecreate: IconProps = { data: faRedo };
 export const iconDisable: IconProps = { data: faXmark };
 export const iconOpenLinkInNewTab = { data: faExternalLink };
 export const iconGrip = { data: faGrip };
+export const iconReinstall = { data: faRotateBack };
 
 // THINGS
 //
@@ -196,11 +201,14 @@ export const iconText: IconProps = { data: faT };
 export const iconField: IconProps = { data: faDatabase };
 export const iconFieldDelimiter: IconProps = { data: faCaretRight };
 export const iconPermissions: IconProps = { data: permissionsIcon };
+export const iconPrivacy: IconProps = { data: faUserSecret };
 
 // STATUSES
 
 export const iconNotEditable: IconProps = { data: faLock };
 export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
+export const iconYes: IconProps = { data: faCheck };
+export const iconRequiresUpgrade: IconProps = { data: faTriangleExclamation };
 
 // UI TYPES
 

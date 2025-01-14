@@ -1,9 +1,12 @@
 <script lang="ts">
+  import type { Placement } from '@popperjs/core/lib/enums';
+
   import AttachableDropdown from '@mathesar-component-library-dir/dropdown/AttachableDropdown.svelte';
 
   export let tooltipClass = '';
   /** When true, the tooltip will remain open when hovered */
   export let allowHover = false;
+  export let placements: Placement[] = ['top', 'right', 'bottom', 'left'];
 
   let trigger: HTMLElement | undefined;
   let triggerIsHovered = false;
@@ -35,8 +38,8 @@
 <AttachableDropdown
   {trigger}
   {isOpen}
-  placements={['top', 'right', 'bottom', 'left']}
-  class="tooltip {tooltipClass}"
+  {placements}
+  class="tooltip trim-child-margins {tooltipClass}"
   on:mouseenter={() => {
     contentIsHovered = true;
   }}

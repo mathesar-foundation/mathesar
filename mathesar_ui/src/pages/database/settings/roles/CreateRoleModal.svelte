@@ -9,11 +9,15 @@
     makeForm,
     requiredField,
   } from '@mathesar/components/form';
+  import InfoBox from '@mathesar/components/message-boxes/InfoBox.svelte';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
+  import { staticText } from '@mathesar/i18n/staticText';
   import { toast } from '@mathesar/stores/toast';
   import {
     Checkbox,
     ControlledModal,
+    Help,
     LabeledInput,
     type ModalController,
     PasswordInput,
@@ -72,8 +76,14 @@
   <div>
     <Field label={$_('role_name')} layout="stacked" field={roleName} />
     <FieldLayout>
-      <!-- eslint-disable-next-line @intlify/svelte/no-raw-text -->
-      <LabeledInput label="LOGIN" layout="inline-input-first">
+      <LabeledInput layout="inline-input-first">
+        <div slot="label">
+          {staticText.LOGIN}
+          <Help>
+            {$_('roles_login_help')}
+            <SeeDocsToLearnMore page="rolesLogin" />
+          </Help>
+        </div>
         <Checkbox bind:checked={login} />
       </LabeledInput>
     </FieldLayout>
@@ -96,6 +106,9 @@
           props: { autocomplete: 'new-password' },
         }}
       />
+      <FieldLayout>
+        <InfoBox>{$_('new_login_role_info_box')}</InfoBox>
+      </FieldLayout>
     {/if}
   </div>
 

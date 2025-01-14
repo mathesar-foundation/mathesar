@@ -9,6 +9,7 @@
   } from '@mathesar/api/rpc/schemas';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import { RichText } from '@mathesar/components/rich-text';
+  import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Role } from '@mathesar/models/Role';
   import type { Schema } from '@mathesar/models/Schema';
@@ -22,6 +23,7 @@
     TransferOwnership,
   } from '@mathesar/systems/permissions';
   import {
+    Help,
     ImmutableMap,
     type ModalController,
   } from '@mathesar-component-library';
@@ -60,7 +62,7 @@
         {
           id: 'read_and_create',
           privileges: new Set(['USAGE', 'CREATE']),
-          name: $_('create'),
+          name: $_('read_and_create'),
           help: $_('schema_access_create_help'),
         },
       ],
@@ -126,6 +128,11 @@
         <Identifier>{$schemaName}</Identifier>
       {/if}
     </RichText>
+    <Help>
+      <p>{$_('schema_permissions_help_1')}</p>
+      <p>{$_('schema_permissions_help_2')}</p>
+      <p><SeeDocsToLearnMore page="schemaPermissions" /></p>
+    </Help>
   </span>
   <PermissionsOverview
     slot="share"

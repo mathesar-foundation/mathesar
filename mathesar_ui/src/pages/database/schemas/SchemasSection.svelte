@@ -13,7 +13,6 @@
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
   import {
-    type SchemaStoreData,
     deleteSchema as deleteSchemaAPI,
     sortedSchemas as schemasStore,
   } from '@mathesar/stores/schemas';
@@ -21,6 +20,7 @@
   import {
     Button,
     Icon,
+    filterViaTextQuery,
     isDefinedNonNullable,
   } from '@mathesar-component-library';
 
@@ -29,6 +29,10 @@
 
   const addEditModal = modal.spawnModalController();
   const databaseRouteContext = DatabaseRouteContext.get();
+
+  let filterQuery = '';
+  let targetSchema: Schema | undefined;
+  let highlightingEnabled = true;
 
   $: ({ database, underlyingDatabase } = $databaseRouteContext);
   $: void underlyingDatabase.runConservatively({ database_id: database.id });
@@ -39,10 +43,9 @@
     schemasRequestStatus.state === 'processing';
   $: currentRoleDatabasePrivileges =
     $underlyingDatabase.resolvedValue?.currentAccess.currentRolePrivileges;
-
-  let filterQuery = '';
-  let targetSchema: Schema | undefined;
-  let highlightingEnabled = true;
+  $: displayList = [
+    ...filterViaTextQuery(schemasMap.values(), filterQuery, (s) => get(s.name)),
+  ];
 
   async function momentarilyPauseHighlighting() {
     highlightingEnabled = false;
@@ -52,21 +55,6 @@
 
   // Don't highlight items when the filter query changes
   $: filterQuery, void momentarilyPauseHighlighting();
-
-  function filterSchemas(
-    schemaData: SchemaStoreData['data'],
-    filter: string,
-  ): Schema[] {
-    const filtered: Schema[] = [];
-    schemaData.forEach((schema) => {
-      if (get(schema.name).toLowerCase().includes(filter.toLowerCase())) {
-        filtered.push(schema);
-      }
-    });
-    return filtered;
-  }
-
-  $: displayList = filterSchemas(schemasMap, filterQuery);
 
   function addSchema() {
     targetSchema = undefined;
@@ -95,12 +83,6 @@
 </script>
 
 <div class="schema-list-wrapper">
-  <div class="schema-list-title-container">
-    <h2 class="schema-list-title">
-      {$_('schemas')}
-      {schemasMap.size ? `(${schemasMap.size})` : ''}
-    </h2>
-  </div>
   <EntityContainerWithFilterBar
     searchPlaceholder={$_('search_schemas')}
     bind:searchQuery={filterQuery}
@@ -179,18 +161,6 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-
-    .schema-list-title-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .schema-list-title {
-      font-size: var(--text-size-ultra-large);
-      margin-top: var(--size-super-ultra-small);
-      font-weight: var(--font-weight-medium);
-    }
 
     .schema-list {
       width: 100%;

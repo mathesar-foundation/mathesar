@@ -19,7 +19,6 @@
   export let tables: Table[];
   export let database: Database;
   export let schema: Schema;
-  export let highlightingEnabled = true;
 
   let tableForEditing: Table | undefined;
   let tableForPermissions: Table | undefined;
@@ -41,7 +40,6 @@
       class="container"
       use:highlightNewItems={{
         scrollHint: $_('table_new_items_scroll_hint'),
-        enabled: highlightingEnabled,
       }}
     >
       {#each tables as table (table.oid)}

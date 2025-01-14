@@ -66,12 +66,38 @@ def list_(*, server_id: int = None, **kwargs) -> list[ConfiguredDatabaseInfo]:
 
 
 @mathesar_rpc_method(name="databases.configured.disconnect")
-def disconnect(*, database_id: int, **kwargs) -> None:
+def disconnect(
+        *,
+        database_id: int,
+        schemas_to_remove: list[str] = ['msar', '__msar', 'mathesar_types'],
+        strict: bool = True,
+        role_name: str = None,
+        password: str = None,
+) -> None:
     """
-    Disconnect a configured database.
+    Disconnect a configured database, after removing Mathesar SQL from it.
+
+    If no `role_name` and `password` are submitted, we will determine the
+    role which owns the `msar` schema on the database, then use that role
+    for the SQL removal.
+
+    All removals are performed safely, and without `CASCADE`. This is to
+    make sure the user can't accidentally lose data calling this
+    function.
 
     Args:
         database_id: The Django id of the database.
+        schemas_to_remove: Mathesar schemas we should remove SQL from.
+        strict: If True, we throw an exception and roll back changes if
+            we fail to remove any objects which we expected to remove.
+        role_name: the username of the role used for upgrading.
+        password: the password of the role used for upgrading.
     """
-    database_qs = Database.objects.get(id=database_id)
-    database_qs.delete()
+    database = Database.objects.get(id=database_id)
+    database.uninstall_sql(
+        schemas_to_remove=schemas_to_remove,
+        strict=strict,
+        role_name=role_name,
+        password=password,
+    )
+    database.delete()

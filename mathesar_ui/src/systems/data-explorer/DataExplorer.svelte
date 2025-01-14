@@ -8,7 +8,8 @@
   import { WithExplorationInspector } from './exploration-inspector';
   import WithInputSidebar from './input-sidebar/WithInputSidebar.svelte';
   import type QueryManager from './QueryManager';
-  import ResultPane from './result-pane/ResultPane.svelte';
+  import ExplorationResults from './result-pane/ExplorationResults.svelte';
+  import StatusBar from './StatusBar.svelte';
   import type { ColumnWithLink } from './utils';
 
   export let queryManager: QueryManager;
@@ -16,7 +17,7 @@
     {};
 
   $: ({ query } = queryManager);
-  $: hasNoColumns = $query.initial_columns.length === 0;
+  $: hasColumns = !!$query.initial_columns.length;
 
   let isInspectorOpen = true;
 </script>
@@ -49,7 +50,7 @@
   {:else}
     <div class="content-pane">
       <WithInputSidebar {queryManager} {linkCollapsibleOpenState}>
-        {#if hasNoColumns}
+        {#if !hasColumns}
           <div class="help-text">
             {$_('get_started_by_adding_columns_from_left')}
           </div>
@@ -59,10 +60,13 @@
             queryHandler={queryManager}
             on:delete
           >
-            <ResultPane queryHandler={queryManager} />
+            <ExplorationResults queryHandler={queryManager} />
           </WithExplorationInspector>
         {/if}
       </WithInputSidebar>
+      {#if hasColumns}
+        <StatusBar queryHandler={queryManager} />
+      {/if}
     </div>
   {/if}
 </div>
@@ -100,7 +104,8 @@
     }
 
     .content-pane {
-      display: flex;
+      display: grid;
+      grid-template: 1fr auto / 1fr;
       overflow: hidden;
       overflow-x: auto;
       .help-text {

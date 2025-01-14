@@ -131,6 +131,7 @@ export interface SingleSelectCellProps<Option>
 export interface FormattedInputCellExternalProps
   extends Omit<FormattedInputProps<string>, 'disabled' | 'value'> {
   formatForDisplay: CellValueFormatter<string>;
+  useTabularNumbers?: boolean;
 }
 
 export interface FormattedInputCellProps
