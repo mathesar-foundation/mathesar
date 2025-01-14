@@ -5,10 +5,11 @@ from django.shortcuts import redirect
 from django.urls import reverse
 
 
-def superuser_must_not_exist(view_function=None):
-    """
-    Decorator for views that redirects to the home page if at least one superuser exists
-    """
+# We're currently only identifiying if an installation is complete based on
+# if or not a superuser account is present
+
+
+def installation_incomplete(view_function=None):
     @functools.wraps(view_function)
     def wrapper(request, *args, **kwargs):
         if get_user_model().objects.filter(is_superuser=True).exists():
@@ -17,14 +18,10 @@ def superuser_must_not_exist(view_function=None):
     return wrapper
 
 
-def superuser_exist(view_function=None):
-    """
-    Decorator for views that checks if at least one superuser exists
-    and redirects to the superuser create screen if none exists
-    """
+def installation_complete(view_function=None):
     @functools.wraps(view_function)
     def wrapper(request, *args, **kwargs):
         if get_user_model().objects.filter(is_superuser=True).exists():
             return view_function(request, *args, **kwargs)
-        return redirect(reverse('superuser_create'))
+        return redirect(reverse('complete_installation'))
     return wrapper

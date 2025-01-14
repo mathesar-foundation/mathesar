@@ -2,8 +2,13 @@
   import { _ } from 'svelte-i18n';
   import { active } from 'tinro';
 
-  import { iconMultipleUsers, iconSettingsMajor } from '@mathesar/icons';
   import {
+    iconMultipleUsers,
+    iconPrivacy,
+    iconSettingsMajor,
+  } from '@mathesar/icons';
+  import {
+    ADMIN_PRIVACY_PAGE_URL,
     ADMIN_UPDATE_PAGE_URL,
     ADMIN_USERS_PAGE_URL,
   } from '@mathesar/routes/urls';
@@ -38,6 +43,16 @@
     >
       <MenuItemContents icon={iconMultipleUsers}>
         {$_('users')}
+      </MenuItemContents>
+    </a>
+    <a
+      role="menuitem"
+      href={ADMIN_PRIVACY_PAGE_URL}
+      class="menu-item menu-item-link"
+      use:active
+    >
+      <MenuItemContents icon={iconPrivacy}>
+        {$_('privacy')}
       </MenuItemContents>
     </a>
   </Menu>
