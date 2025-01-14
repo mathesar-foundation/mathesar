@@ -15,10 +15,10 @@ from mathesar.rpc.tables import list_with_metadata as tables_list
 from mathesar.rpc.users import get as get_user_info
 from mathesar import __version__
 
-from . import export
+from . import export, users
 
 
-__all__ = [export]
+__all__ = [export, users]
 
 
 def get_database_list(request):
@@ -156,6 +156,10 @@ def schema_route(request, database_id, schema_id, **kwargs):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database_id, schema_id)
     })
+
+
+def analytics_sample_report(request):
+    return render(request, 'analytics/sample_report.html')
 
 
 def page_not_found_view(request, exception):

@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
--- FUNCTIONS/COMMANDS RELATED TO GRANTING APPROPRIATE PERMISSIONS FOR msar, __msar AND mathesar_types
--- SCHEMAS TO PUBLIC. 
+-- FUNCTIONS/COMMANDS RELATED TO GRANTING APPROPRIATE PERMISSIONS FOR msar, __msar AND
+-- mathesar_types SCHEMAS TO PUBLIC.
 --
 -- !!! DO NOT ADD ANY FUNCTIONS PAST THIS POINT !!!
 ----------------------------------------------------------------------------------------------------

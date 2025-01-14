@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import { RichText } from '@mathesar/components/rich-text';
-  import { toAsciiLowerCase } from '@mathesar-component-library';
+  import { filterViaTextQuery } from '@mathesar-component-library';
 
   import BreadcrumbSelectorRow from './BreadcrumbSelectorRow.svelte';
   import type { BreadcrumbSelectorSectionData } from './breadcrumbTypes';
@@ -12,10 +12,9 @@
   export let closeSelector: () => void;
 
   $: ({ label, entries, emptyMessage } = section);
-  $: lowercaseFilterString = toAsciiLowerCase(filterString);
-  $: filteredEntries = entries.filter((entry) =>
-    toAsciiLowerCase(entry.label).includes(lowercaseFilterString),
-  );
+  $: filteredEntries = [
+    ...filterViaTextQuery(entries, filterString, (e) => e.label),
+  ];
 </script>
 
 <div class="breadcrumb-selector-section">

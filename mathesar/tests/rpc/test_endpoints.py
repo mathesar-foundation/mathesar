@@ -29,6 +29,11 @@ METHODS = [
         [user_is_superuser]
     ),
     (
+        analytics.get_state,
+        "analytics.get_state",
+        [user_is_superuser]
+    ),
+    (
         analytics.initialize,
         "analytics.initialize",
         [user_is_superuser]

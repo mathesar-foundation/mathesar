@@ -47,6 +47,7 @@ import {
   faProjectDiagram,
   faQuestion,
   faRedo,
+  faRotateBack,
   faSave,
   faSearchPlus,
   faShapes,
@@ -62,6 +63,7 @@ import {
   faT,
   faTimes,
   faTrashAlt,
+  faTriangleExclamation,
   faUndo,
   faUnlink,
   faUpRightFromSquare,
@@ -70,6 +72,7 @@ import {
   faUserEdit,
   faUserGear,
   faUserPlus,
+  faUserSecret,
   faUsers,
   faWandSparkles,
   faXmark,
@@ -152,6 +155,7 @@ export const iconRecreate: IconProps = { data: faRedo };
 export const iconDisable: IconProps = { data: faXmark };
 export const iconOpenLinkInNewTab = { data: faExternalLink };
 export const iconGrip = { data: faGrip };
+export const iconReinstall = { data: faRotateBack };
 
 // THINGS
 //
@@ -197,12 +201,14 @@ export const iconText: IconProps = { data: faT };
 export const iconField: IconProps = { data: faDatabase };
 export const iconFieldDelimiter: IconProps = { data: faCaretRight };
 export const iconPermissions: IconProps = { data: permissionsIcon };
+export const iconPrivacy: IconProps = { data: faUserSecret };
 
 // STATUSES
 
 export const iconNotEditable: IconProps = { data: faLock };
 export const iconUnsavedChanges: IconProps = { data: faCircleExclamation };
 export const iconYes: IconProps = { data: faCheck };
+export const iconRequiresUpgrade: IconProps = { data: faTriangleExclamation };
 
 // UI TYPES
 
