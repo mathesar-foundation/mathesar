@@ -33,26 +33,14 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION test_drop_columns_ne_oid() RETURNS SETOF TEXT AS $$
 BEGIN
   CREATE TABLE "12345" (bleh text, bleh2 numeric);
-  PERFORM msar.drop_columns(12345, 1);
+  RETURN NEXT throws_ok(
+    'SELECT msar.drop_columns(12345, 1);',
+    '42P01',
+    'Relation with OID 12345 does not exist',
+    'Column dropper throws when trying to drop from stupidly-named table'
+  );
   RETURN NEXT has_column(
     '12345', 'bleh', 'Doesn''t drop columns of stupidly-named table'
-  );
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_drop_columns_names() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_drop_columns();
-  PERFORM msar.drop_columns('public', 'atable', 'dodrop1', 'dodrop2');
-  RETURN NEXT has_column(
-    'atable', 'dontdrop', 'Dropper keeps correct columns'
-  );
-  RETURN NEXT hasnt_column(
-    'atable', 'dodrop1', 'Dropper drops correct columns 1'
-  );
-  RETURN NEXT hasnt_column(
-    'atable', 'dodrop2', 'Dropper drops correct columns 2'
   );
 END;
 $$ LANGUAGE plpgsql;

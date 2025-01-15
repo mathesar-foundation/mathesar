@@ -412,7 +412,7 @@ $$ LANGUAGE sql RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-__msar.get_column_names(rel_id oid, columns jsonb) RETURNS text[] AS $$/*
+msar.get_column_names(rel_id oid, columns jsonb) RETURNS text[] AS $$/*
 Return the QUOTED names for given columns in a given relation (e.g., table).
 
 - If the rel_id is given as 0, the assumption is that this is a new table, so we just apply normal
@@ -2060,25 +2060,7 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Drop columns from table -------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.drop_columns(tab_name text, col_names variadic text[]) RETURNS text AS $$/*
-Drop the given columns from the given table.
-
-Args:
-  tab_name: Fully-qualified, quoted table name.
-  col_names: The column names to be dropped, quoted.
-*/
-DECLARE column_drops text;
-BEGIN
-  SELECT string_agg(format('DROP COLUMN %s', col), ', ')
-  FROM unnest(col_names) AS col
-  INTO column_drops;
-  RETURN __msar.exec_ddl('ALTER TABLE %s %s', tab_name, column_drops);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_columns(tab_id oid, col_ids variadic integer[]) RETURNS text AS $$/*
+msar.drop_columns(tab_id oid, col_ids variadic integer[]) RETURNS void AS $$/*
 Drop the given columns from the given table.
 
 Args:
@@ -2087,34 +2069,14 @@ Args:
 */
 DECLARE col_names text[];
 BEGIN
-  SELECT array_agg(quote_ident(attname))
-  FROM pg_catalog.pg_attribute
-  WHERE attrelid=tab_id AND NOT attisdropped AND ARRAY[attnum::integer] <@ col_ids
-  INTO col_names;
-  PERFORM __msar.drop_columns(
-    __msar.get_qualified_relation_name_or_null(tab_id),
-    variadic col_names
-  );
-  RETURN array_length(col_names, 1);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
-msar.drop_columns(sch_name text, tab_name text, col_names variadic text[]) RETURNS text AS $$/*
-Drop the given columns from the given table.
-
-Args:
-  sch_name: The schema where the table whose columns we'll drop lives, unquoted.
-  tab_name: The table whose columns we'll drop, unquoted and unqualified.
-  col_names: The columns to drop, unquoted.
-*/
-DECLARE prepared_col_names text[];
-DECLARE fully_qualified_tab_name text;
-BEGIN
-  SELECT array_agg(quote_ident(col)) FROM unnest(col_names) AS col INTO prepared_col_names;
-  fully_qualified_tab_name := __msar.build_qualified_name_sql(sch_name, tab_name);
-  RETURN __msar.drop_columns(fully_qualified_tab_name, variadic prepared_col_names);
+  EXECUTE format(
+    'ALTER TABLE %I.%I %s',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    string_agg(format('DROP COLUMN %I', attname), ', ')
+  )
+  FROM pg_catalog.pg_attribute AS pga INNER JOIN unnest(col_ids) AS x(col) ON pga.attnum=x.col
+  WHERE attrelid=tab_id AND NOT attisdropped;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
@@ -2744,12 +2706,12 @@ SELECT array_agg(
     -- set the constraint type as a single char. See __msar.build_con_def_text for details.
     con_create_obj ->> 'type',
     -- Set the column names associated with the constraint.
-    __msar.get_column_names(tab_id, con_create_obj -> 'columns'),
+    msar.get_column_names(tab_id, con_create_obj -> 'columns'),
     -- Set whether the constraint is deferrable or not (boolean).
     con_create_obj ->> 'deferrable',
     __msar.get_qualified_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
     -- Build the array of foreign columns for an fkey constraint.
-    __msar.get_column_names(
+    msar.get_column_names(
       -- We validate that the given OID (if any) is correct.
       (con_create_obj -> 'fkey_relation_id')::bigint::oid,
       con_create_obj -> 'fkey_columns'
