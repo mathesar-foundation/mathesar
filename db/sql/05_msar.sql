@@ -730,22 +730,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_column_type(sch_name text, rel_name text, col_name text) RETURNS text AS $$/*
-Return the type of a given column in a relation.
-
-Args:
-  sch_name: The schema of the relation, unquoted.
-  rel_name: The name of the relation, unqualified and unquoted.
-  col_name: The name of the column in the relation, unquoted.
-*/
-SELECT atttypid::regtype
-FROM pg_attribute
-WHERE attname = quote_ident(col_name)
-AND attrelid = msar.get_relation_oid(sch_name, rel_name);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.get_interval_fields(typ_mod integer) RETURNS text AS $$/*
 Return the string giving the fields for an interval typmod integer.
 
