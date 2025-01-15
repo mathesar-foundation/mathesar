@@ -2740,9 +2740,7 @@ The con_create_arr should have the form:
     "columns": [<int:str>, <int:str>, ...],
     "deferrable": <bool> (optional),
     "fkey_relation_id": <int> (optional),
-    "fkey_relation_schema": <str> (optional),
-    "fkey_relation_name": <str> (optional),
-    "fkey_columns": [<int:str>, <int:str>, ...] (optional),
+    "fkey_columns": [<int>, <int>, ...] (optional),
     "fkey_update_action": <str> (optional),
     "fkey_delete_action": <str> (optional),
     "fkey_match_type": <str> (optional),
@@ -2751,8 +2749,7 @@ The con_create_arr should have the form:
     ...
   }
 ]
-If the constraint type is "f", then we require
-- fkey_relation_id or (fkey_relation_schema and fkey_relation_name).
+If the constraint type is "f", then we require fkey_relation_id.
 
 Numeric IDs are preferred over textual ones where both are accepted.
 */
@@ -2766,23 +2763,11 @@ SELECT array_agg(
     __msar.get_column_names(tab_id, con_create_obj -> 'columns'),
     -- Set whether the constraint is deferrable or not (boolean).
     con_create_obj ->> 'deferrable',
-    -- Build the relation name where the constraint will be applied. Prefer numeric ID.
-    COALESCE(
-      __msar.get_qualified_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
-      __msar.build_qualified_name_sql(
-        con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
-      )
-    ),
+    __msar.get_qualified_relation_name((con_create_obj -> 'fkey_relation_id')::integer::oid),
     -- Build the array of foreign columns for an fkey constraint.
     __msar.get_column_names(
-      COALESCE(
-        -- We validate that the given OID (if any) is correct.
-        (con_create_obj -> 'fkey_relation_id')::integer::oid,
-        -- If given a schema, name pair, we get the OID from that (and validate it).
-        msar.get_relation_oid(
-          con_create_obj ->> 'fkey_relation_schema', con_create_obj ->> 'fkey_relation_name'
-        )
-      ),
+      -- We validate that the given OID (if any) is correct.
+      (con_create_obj -> 'fkey_relation_id')::bigint::oid,
       con_create_obj -> 'fkey_columns'
     ),
     -- The below are passed directly. They define some parameters for FOREIGN KEY constraints.
