@@ -21,7 +21,7 @@ from frozendict import frozendict
 
 
 EMAIL_DB_TYPE = MathesarCustomType.EMAIL.id
-EMAIL_DOMAIN_NAME = EMAIL_DB_TYPE + "_domain_name"
+EMAIL_DOMAIN_NAME = "msar.email_domain_name"
 JSON_ARR_DB_TYPE = MathesarCustomType.MATHESAR_JSON_ARRAY.id
 JSON_OBJ_DB_TYPE = MathesarCustomType.MATHESAR_JSON_OBJECT.id
 MONEY_DB_TYPE = MathesarCustomType.MATHESAR_MONEY.id
@@ -382,12 +382,12 @@ class TIMESTAMP_WITHOUT_TIME_ZONE(TypeDecorator):
 
 
 class URIFunction(Enum):
-    PARTS = URI_DB_TYPE + "_parts"
-    SCHEME = URI_DB_TYPE + "_scheme"
-    AUTHORITY = URI_DB_TYPE + "_authority"
-    PATH = URI_DB_TYPE + "_path"
-    QUERY = URI_DB_TYPE + "_query"
-    FRAGMENT = URI_DB_TYPE + "_fragment"
+    PARTS = "msar.uri_parts"
+    SCHEME = "msar.uri_scheme"
+    AUTHORITY = "msar.uri_authority"
+    PATH = "msar.uri_path"
+    QUERY = "msar.uri_query"
+    FRAGMENT = "msar.uri_fragment"
 
 
 class URI(UserDefinedType, HasUnderlyingType):

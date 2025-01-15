@@ -59,7 +59,7 @@ class Filter(TypedDict):
     An object defining a filter to be used in a `WHERE` clause.
 
     For valid `type` values, see the `msar.filter_templates` table
-    defined in `mathesar/db/sql/00_msar.sql`.
+    defined in `mathesar/db/sql/05_msar.sql`.
 
     Attributes:
       type: a function or operator to be used in filtering.
