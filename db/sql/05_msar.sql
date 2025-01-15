@@ -364,22 +364,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.get_relation_oid(sch_name text, rel_name text) RETURNS oid AS $$/*
-Return the OID for a given relation (e.g., table).
-
-The relation *must* be in the pg_class table to use this function.
-
-Args:
-  sch_name: The schema of the relation, unquoted.
-  rel_name: The name of the relation, unqualified and unquoted.
-*/
-BEGIN
-  RETURN __msar.build_qualified_name_sql(sch_name, rel_name)::regclass::oid;
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
-
 CREATE OR REPLACE FUNCTION msar.get_relation_namespace_oid(rel_id oid) RETURNS oid AS $$/*
 Get the OID of the namespace containing the given relation.
 
