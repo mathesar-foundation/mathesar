@@ -2652,21 +2652,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.add_columns(sch_name text, tab_name text, col_defs jsonb, raw_default boolean)
-  RETURNS smallint[] AS $$/*
-Add columns to a table.
-
-Args:
-  sch_name: unquoted schema name of the table to which we'll add columns.
-  tab_name: unquoted, unqualified name of the table to which we'll add columns.
-  col_defs: a JSONB array defining columns to add. See __msar.process_col_def_jsonb for details.
-  raw_default: Whether to treat defaults as raw SQL. DANGER!
-*/
-SELECT msar.add_columns(msar.get_relation_oid(sch_name, tab_name), col_defs, raw_default);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- MATHESAR ADD CONSTRAINTS FUNCTIONS
