@@ -715,21 +715,6 @@ $$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
 
 
 CREATE OR REPLACE FUNCTION
-msar.get_pk_column(sch_name text, rel_name text) RETURNS smallint AS $$/*
-Return the first column attnum in the primary key of a given relation (e.g., table).
-
-Args:
-  sch_name: The schema of the relation, unquoted.
-  rel_name: The name of the relation, unqualified and unquoted.
-*/
-SELECT CASE WHEN array_length(conkey, 1) = 1 THEN conkey[1] END
-FROM pg_constraint
-WHERE contype='p'
-AND conrelid=msar.get_relation_oid(sch_name, rel_name);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
-CREATE OR REPLACE FUNCTION
 msar.get_column_type(rel_id oid, col_id smallint) RETURNS text AS $$/*
 Return the type of a given column in a relation.
 
