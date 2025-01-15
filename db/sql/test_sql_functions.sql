@@ -1402,19 +1402,6 @@ CREATE OR REPLACE FUNCTION test_comment_on_table() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
   PERFORM msar.comment_on_table(
-    sch_name =>'public',
-    tab_name => 'alter_this_table',
-    comment_ => 'This is a comment!'
-  );
-  RETURN NEXT is(obj_description('alter_this_table'::regclass::oid), 'This is a comment!');
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION test_comment_on_table_using_oid() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_table();
-  PERFORM msar.comment_on_table(
     tab_id => 'alter_this_table'::regclass::oid,
     comment_ => 'This is a comment!'
   );

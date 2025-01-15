@@ -2060,50 +2060,22 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 -- Comment on table --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
-__msar.comment_on_table(tab_name text, comment_ text) RETURNS text AS $$/*
-Change the description of a table, returning command executed.
-
-Args:
-  tab_name: The qualified, quoted name of the table whose comment we will change.
-  comment_: The new comment. Any quotes or special characters must be escaped.
-*/
-DECLARE
-  comment_or_null text := COALESCE(comment_, 'NULL');
-BEGIN
-RETURN __msar.exec_ddl('COMMENT ON TABLE %s IS %s', tab_name, comment_or_null);
-END;
-$$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE FUNCTION
-msar.comment_on_table(tab_id oid, comment_ text) RETURNS text AS $$/*
-Change the description of a table, returning command executed.
+msar.comment_on_table(tab_id oid, comment_ text) RETURNS VOID AS $$/*
+Change the description of a table, returning void.
 
 Args:
   tab_id: The OID of the table whose comment we will change.
   comment_: The new comment.
 */
-SELECT __msar.comment_on_table(
-  __msar.get_qualified_relation_name_or_null(tab_id),
-  quote_literal(comment_)
-);
-$$ LANGUAGE SQL;
-
-
-CREATE OR REPLACE FUNCTION
-msar.comment_on_table(sch_name text, tab_name text, comment_ text) RETURNS text AS $$/*
-Change the description of a table, returning command executed.
-
-Args:
-  sch_name: The schema of the table whose comment we will change.
-  tab_name: The name of the table whose comment we will change.
-  comment_: The new comment.
-*/
-SELECT __msar.comment_on_table(
-  __msar.build_qualified_name_sql(sch_name, tab_name),
-  quote_literal(comment_)
-);
-$$ LANGUAGE SQL;
+BEGIN
+  EXECUTE format(
+    'COMMENT ON TABLE %I.%I IS %L',
+    msar.get_relation_schema_name(tab_id),
+    msar.get_relation_name(tab_id),
+    comment_
+  );
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- Alter table -------------------------------------------------------------------------------------
