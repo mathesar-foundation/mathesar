@@ -18,10 +18,15 @@
   export let errors: (string | RpcError)[];
   export let fullWidth = false;
 
+  /**
+   * Our typescript version used in package.json is not smart enough
+   * to identify the types here. Until we uprade we would have to use the
+   * `as` keyword.
+   */
   $: [rpcErrors, stringErrors] = partitionAsArray(
     errors,
     (err) => err instanceof RpcError,
-  );
+  ) as [RpcError[], string[]];
   $: [rpcErrorsWithDedicatedUI, rpcErrorsWithoutDedicatedUI] = [
     ...partitionAsArray(rpcErrors, (err) =>
       RpcErrorsWithDedicatedUI.has(err.code),
