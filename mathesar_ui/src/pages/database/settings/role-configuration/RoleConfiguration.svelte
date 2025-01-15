@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import Errors from '@mathesar/components/Errors.svelte';
+  import Errors from '@mathesar/components/errors/Errors.svelte';
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';

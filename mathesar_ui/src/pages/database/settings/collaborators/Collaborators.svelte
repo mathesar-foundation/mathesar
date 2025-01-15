@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import Icon from '@mathesar/component-library/icon/Icon.svelte';
-  import Errors from '@mathesar/components/Errors.svelte';
+  import Errors from '@mathesar/components/errors/Errors.svelte';
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
   import WarningBox from '@mathesar/components/message-boxes/WarningBox.svelte';

@@ -5,7 +5,7 @@
   import type { ResultValue } from '@mathesar/api/rpc/records';
   import type { RecordSummaryTemplate } from '@mathesar/api/rpc/tables';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
-  import Errors from '@mathesar/components/Errors.svelte';
+  import Errors from '@mathesar/components/errors/Errors.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
   import { RichText } from '@mathesar/components/rich-text';

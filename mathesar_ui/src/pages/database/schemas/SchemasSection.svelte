@@ -3,7 +3,7 @@
   import { _ } from 'svelte-i18n';
 
   import EntityContainerWithFilterBar from '@mathesar/components/EntityContainerWithFilterBar.svelte';
-  import Errors from '@mathesar/components/Errors.svelte';
+  import Errors from '@mathesar/components/errors/Errors.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import { iconAddNew } from '@mathesar/icons';

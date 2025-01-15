@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ComponentProps } from 'svelte';
 
-  import Errors from '@mathesar/components/Errors.svelte';
+  import Errors from '@mathesar/components/errors/Errors.svelte';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
 
