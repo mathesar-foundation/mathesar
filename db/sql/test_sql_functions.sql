@@ -705,17 +705,6 @@ END;
 $f$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_add_constraint_pkey_tab_name_singlecol() RETURNS SETOF TEXT AS $f$
-DECLARE
-  con_create_arr jsonb := '[{"type": "p", "columns": [1]}]';
-BEGIN
-  PERFORM __setup_add_pkey();
-  PERFORM msar.add_constraints('public', 'add_pkeytest', con_create_arr);
-  RETURN NEXT col_is_pk('add_pkeytest', 'col1');
-END;
-$f$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_add_constraint_pkey_col_name_singlecol() RETURNS SETOF TEXT AS $f$
 DECLARE
   con_create_arr jsonb := '[{"type": "p", "columns": ["col1"]}]';

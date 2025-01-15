@@ -2818,20 +2818,6 @@ END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 
-CREATE OR REPLACE FUNCTION
-msar.add_constraints(sch_name text, tab_name text, con_defs jsonb)
-  RETURNS oid[] AS $$/*
-Add constraints to a table.
-
-Args:
-  sch_name: unquoted schema name of the table to which we'll add constraints.
-  tab_name: unquoted, unqualified name of the table to which we'll add constraints.
-  con_defs: a JSONB array defining constraints to add. See __msar.process_con_def_jsonb for details.
-*/
-SELECT msar.add_constraints(msar.get_relation_oid(sch_name, tab_name), con_defs);
-$$ LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-
-
 CREATE TYPE __msar.not_null_def AS (
   col_name text, -- The column to be modified, quoted.
   not_null boolean -- The value to set for null or not null.
