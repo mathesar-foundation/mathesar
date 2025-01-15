@@ -4691,35 +4691,49 @@ $$ LANGUAGE SQL STABLE;
 
 
 CREATE OR REPLACE FUNCTION
-msar.build_groups_cte_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
-*/
-SELECT format(
-  $gj$
-    __mathesar_gid AS id,
-    __mathesar_gcount AS count,
-    jsonb_build_object(%1$s) AS results_eq,
-    jsonb_agg(__mathesar_result_idx) AS result_indices
-  FROM %2$I
-  GROUP BY id, count, results_eq
-  $gj$,
-  string_agg(
-    format(
-      '%1$L, %2$s',
-      col_id,
-      COALESCE(
-        format(expr_template, quote_ident(cte_name) || '.' || quote_ident(col_id)),
-        quote_ident(cte_name) || '.' || quote_ident(col_id)
-      )
+msar.build_results_eq_cte_expr(tab_id oid, cte_name text, group_ jsonb) RETURNS TEXT AS $$
+SELECT string_agg(
+  format(
+    '%1$s AS %2$I',
+    COALESCE(
+      format(expr_template, quote_ident(cte_name) || '.' || quote_ident(col_id)),
+      quote_ident(cte_name) || '.' || quote_ident(col_id)
     ),
-    ', ' ORDER BY ordinality
+    col_id
   ),
-  cte_name
+  ', ' ORDER BY ordinality
+) || ', __mathesar_gid FROM ' || quote_ident(cte_name)
+|| ' GROUP BY __mathesar_gid, '
+|| string_agg(
+  format(
+    '%1$I',
+    col_id
+  ),
+  ', ' ORDER BY ordinality
 )
 FROM msar.expr_templates RIGHT JOIN ROWS FROM(
   jsonb_array_elements_text(group_ -> 'columns'),
   jsonb_array_elements_text(group_ -> 'preproc')
 ) WITH ORDINALITY AS x(col_id, preproc) ON expr_key = preproc
 WHERE has_column_privilege(tab_id, col_id::smallint, 'SELECT');
+$$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
+
+
+CREATE OR REPLACE FUNCTION
+msar.build_groups_cte_expr(tab_id oid, eq_cte_name text, ranked_cte_name text, group_ jsonb) RETURNS TEXT AS $$/*
+*/
+SELECT format(
+  $gj$
+    %1$I.__mathesar_gid AS id,
+    __mathesar_gcount AS count,
+    to_jsonb(%1$I) - '__mathesar_gid' AS results_eq,
+    jsonb_agg( DISTINCT __mathesar_result_idx) AS result_indices
+  FROM %1$I LEFT JOIN %2$I AS rcn ON %1$I.__mathesar_gid = rcn.__mathesar_gid
+  GROUP BY id, count, results_eq
+  $gj$,
+  eq_cte_name,
+  ranked_cte_name
+);
 $$ LANGUAGE SQL STABLE RETURNS NULL ON NULL INPUT;
 
 
@@ -5280,6 +5294,9 @@ BEGIN
     results_ranked_cte AS (
       SELECT *, row_number() OVER (%3$s) - 1 AS __mathesar_result_idx FROM enriched_results_cte
     ),
+    results_eq_cte AS (
+      SELECT %11$s
+    ),
     groups_cte AS ( SELECT %6$s ),
     summary_cte_self AS (%7$s)
     %8$s,
@@ -5328,7 +5345,7 @@ BEGIN
       'NULL'
     ),
     /* %6 */ COALESCE(
-      msar.build_groups_cte_expr(tab_id, 'results_ranked_cte', group_),
+      msar.build_groups_cte_expr(tab_id, 'results_eq_cte', 'results_ranked_cte', group_),
       'NULL AS id'
     ),
     /* %7 */ msar.build_record_summary_query_for_table(
@@ -5352,7 +5369,8 @@ BEGIN
       ), 'COUNT(1) AS count_hack' 
       -- count_hack ensures that summary_cte is not empty,
       -- which in turn helps to generate summaries_json_cte
-    )
+    ),
+    /* %11 */ msar.build_results_eq_cte_expr(tab_id, 'results_ranked_cte', group_)
   ) INTO records;
   RETURN records;
 END;
