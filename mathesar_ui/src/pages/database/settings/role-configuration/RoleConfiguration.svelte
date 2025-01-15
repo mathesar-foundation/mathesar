@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import Errors from '@mathesar/components/Errors.svelte';
   import GridTable from '@mathesar/components/grid-table/GridTable.svelte';
   import GridTableCell from '@mathesar/components/grid-table/GridTableCell.svelte';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
   import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import Yes from '@mathesar/components/Yes.svelte';
@@ -24,6 +24,7 @@
     Icon,
     Spinner,
     SpinnerButton,
+    isDefinedNonNullable,
   } from '@mathesar-component-library';
 
   import SettingsContentLayout from '../SettingsContentLayout.svelte';
@@ -43,6 +44,9 @@
     roles.batchRunner({ database_id: database.id }),
   ]);
   $: isLoading = $configuredRoles.isLoading || $roles.isLoading;
+  $: errors = [$configuredRoles.error, $roles.error].filter(
+    isDefinedNonNullable,
+  );
 
   let targetCombinedLoginRole: CombinedLoginRole | undefined;
 
@@ -153,15 +157,8 @@
       </div>
     {/if}
 
-    {#if $configuredRoles.error}
-      <ErrorBox fullWidth>
-        {$configuredRoles.error}
-      </ErrorBox>
-    {/if}
-    {#if $roles.error}
-      <ErrorBox fullWidth>
-        {$roles.error}
-      </ErrorBox>
+    {#if errors.length}
+      <Errors fullWidth {errors} />
     {/if}
   {/if}
 </SettingsContentLayout>

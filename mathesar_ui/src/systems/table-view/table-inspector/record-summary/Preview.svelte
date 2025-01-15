@@ -5,9 +5,9 @@
   import type { ResultValue } from '@mathesar/api/rpc/records';
   import type { RecordSummaryTemplate } from '@mathesar/api/rpc/tables';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
+  import Errors from '@mathesar/components/Errors.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import LinkedRecord from '@mathesar/components/LinkedRecord.svelte';
-  import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import type { Database } from '@mathesar/models/Database';
   import type { Table } from '@mathesar/models/Table';
@@ -38,10 +38,8 @@
     <Spinner />
   {:else if recordSummary !== undefined}
     <LinkedRecord {recordSummary} />
-  {:else if $preview.error}
-    <ErrorBox>{$preview.error}</ErrorBox>
   {:else}
-    <ErrorBox>{$_('unknown_error')}</ErrorBox>
+    <Errors errors={[$preview.error ?? $_('unknown_error')]} />
   {/if}
 
   <div class="help">

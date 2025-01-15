@@ -1,20 +1,25 @@
 <script lang="ts">
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
 
-  export let errors: string[];
+  export let errors: (string | RpcError)[];
   export let fullWidth = false;
+
+  $: errorStrings = errors.map((err) =>
+    err instanceof RpcError ? err.message : err,
+  );
 </script>
 
-{#if errors.length}
+{#if errorStrings.length}
   <ErrorBox {fullWidth}>
-    {#if errors.length === 1}
-      {errors[0]}
+    {#if errorStrings.length === 1}
+      {errorStrings[0]}
     {:else}
       <ul class="list">
         <!-- Do not use a key here since
           -- error messages could be the same.
           -->
-        {#each errors as error}
+        {#each errorStrings as error}
           <li>{error}</li>
         {/each}
       </ul>

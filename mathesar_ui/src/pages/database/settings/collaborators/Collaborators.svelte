@@ -10,6 +10,7 @@
   import { DatabaseSettingsRouteContext } from '@mathesar/contexts/DatabaseSettingsRouteContext';
   import { iconAddNew } from '@mathesar/icons';
   import type { Collaborator } from '@mathesar/models/Collaborator';
+  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { modal } from '@mathesar/stores/modal';
   import { fetchSchemasForCurrentDatabase } from '@mathesar/stores/schemas';
@@ -54,7 +55,7 @@
     $collaborators.error,
     $configuredRoles.error,
     $users.error,
-  ].filter((entry): entry is string => isDefinedNonNullable(entry));
+  ].filter((entry): entry is RpcError | string => isDefinedNonNullable(entry));
   $: collaboratorsList = [...($collaborators.resolvedValue?.values() ?? [])];
 
   let targetCollaborator: Collaborator | undefined;

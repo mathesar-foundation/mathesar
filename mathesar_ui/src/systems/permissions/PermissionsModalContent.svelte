@@ -38,7 +38,7 @@
     $privilegesForRoles.error,
     $permissionsMetaData.error,
     $currentRole.error,
-  ].filter((entry): entry is string => isDefinedNonNullable(entry));
+  ].filter(isDefinedNonNullable);
 
   $: rolesValue = new ImmutableMap($roles.resolvedValue);
   $: permissionsMetaDataValue = $permissionsMetaData.resolvedValue;
