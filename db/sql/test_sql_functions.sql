@@ -1358,26 +1358,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION test_rename_table() RETURNS SETOF TEXT AS $$
-BEGIN
-  PERFORM __setup_alter_table();
-  PERFORM msar.rename_table(
-    sch_name =>'public',
-    old_tab_name => 'alter_this_table',
-    new_tab_name => 'renamed_table'
-  );
-  RETURN NEXT hasnt_table('alter_this_table');
-  RETURN NEXT has_table('renamed_table');
-END;
-$$ LANGUAGE plpgsql;
-
-
 CREATE OR REPLACE FUNCTION test_rename_table_with_same_name() RETURNS SETOF TEXT AS $$
 BEGIN
   PERFORM __setup_alter_table();
   PERFORM msar.rename_table(
-    sch_name =>'public',
-    old_tab_name => 'alter_this_table',
+    tab_id => 'alter_this_table'::regclass::oid,
     new_tab_name => 'alter_this_table'
   );
   RETURN NEXT has_table('alter_this_table');

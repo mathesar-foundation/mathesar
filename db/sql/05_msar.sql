@@ -2019,49 +2019,35 @@ $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
 
 -- Rename table ------------------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION
-msar.rename_table(sch_name text, old_tab_name text, new_tab_name text) RETURNS void AS $$/*
-Change a table's name, returning the command executed.
-
-Args:
-  sch_name: unquoted schema name where the table lives
-  old_tab_name: unquoted, unqualified original table name
-  new_tab_name: unquoted, unqualified new table name
-*/
-BEGIN
-  IF old_tab_name = new_tab_name THEN
-    -- Return early if the names are the same. This avoids an error from Postgres.
-    RETURN;
-  END IF;
-  EXECUTE format('ALTER TABLE %I.%I RENAME TO %I', sch_name, old_tab_name, new_tab_name);
-END;
-$$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 
 CREATE OR REPLACE FUNCTION
 msar.rename_table(tab_id oid, new_tab_name text) RETURNS void AS $$/*
-Change a table's name, returning the command executed.
+Change a table's name.
 
 Args:
   tab_id: the OID of the table whose name we want to change
   new_tab_name: unquoted, unqualified table name
 */
+DECLARE
+  old_tab_name text := msar.get_relation_name(tab_id);
 BEGIN
-  PERFORM msar.rename_table(
-    msar.get_relation_schema_name(tab_id),
-    msar.get_relation_name(tab_id),
-    new_tab_name
-  );
+  IF old_tab_name <> new_tab_name THEN
+    EXECUTE format(
+      'ALTER TABLE %I.%I RENAME TO %I',
+      msar.get_relation_schema_name(tab_id),
+      old_tab_name,
+      new_tab_name
+    );
+  END IF;
 END;
 $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
-
 
 
 -- Comment on table --------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION
 msar.comment_on_table(tab_id oid, comment_ text) RETURNS VOID AS $$/*
-Change the description of a table, returning void.
+Change the description of a table.
 
 Args:
   tab_id: The OID of the table whose comment we will change.
