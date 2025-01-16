@@ -5,7 +5,7 @@
 </script>
 
 {#if uniqueErrors.length === 1}
-  {uniqueErrors[0]}
+  <p>{uniqueErrors[0]}</p>
 {:else}
   <ul class="list">
     {#each uniqueErrors as error (error)}
