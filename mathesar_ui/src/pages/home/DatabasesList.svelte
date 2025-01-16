@@ -69,22 +69,16 @@
 </script>
 
 <div class="databases-list">
-  <div class="header">
-    <span class="title">{$_('databases')}</span>
-    <span class="help">
-      <Help>
-        <RichText
-          text={$_('databases_list_help')}
-          let:slotName
-          let:translatedArg
-        >
-          {#if slotName === 'docsLink'}
-            <DocsLink page="databases">{translatedArg}</DocsLink>
-          {/if}
-        </RichText>
-      </Help>
-    </span>
-  </div>
+  <h2>
+    {$_('databases')}
+    <Help>
+      <RichText text={$_('databases_list_help')} let:slotName let:translatedArg>
+        {#if slotName === 'docsLink'}
+          <DocsLink page="databases">{translatedArg}</DocsLink>
+        {/if}
+      </RichText>
+    </Help>
+  </h2>
 
   <section class="databases-container">
     <EntityContainerWithFilterBar
@@ -211,17 +205,6 @@
     .button {
       flex: 0 0 auto;
     }
-  }
-
-  .title {
-    flex: 1 0 0;
-    color: var(--slate-900);
-    font-size: var(--text-size-ultra-large);
-    font-weight: var(--font-weight-medium);
-  }
-  .help {
-    margin-left: 0.5rem;
-    vertical-align: super;
   }
 
   .databases-container {

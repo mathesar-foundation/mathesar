@@ -31,9 +31,7 @@
     <h1 slot="header">{$_('user_profile')}</h1>
     {#if userProfile}
       <InsetPageSection>
-        <h2 class="large-bold-header" slot="header">
-          {$_('account_details')}
-        </h2>
+        <h2 slot="header">{$_('account_details')}</h2>
         <UserDetailsForm user={userProfile.getUser()} />
       </InsetPageSection>
       <InsetPageSection>
@@ -42,12 +40,8 @@
 
       {#if !userProfile.isMathesarAdmin}
         <InsetPageSection>
-          <h2 class="large-bold-header" slot="header">
-            {$_('delete_account')}
-          </h2>
-          <div>
-            {$_('delete_account_contact_admin')}
-          </div>
+          <h2 slot="header">{$_('delete_account')}</h2>
+          <div>{$_('delete_account_contact_admin')}</div>
         </InsetPageSection>
       {/if}
     {:else}
@@ -58,9 +52,3 @@
     {/if}
   </InsetPageLayout>
 </LayoutWithHeader>
-
-<style>
-  h2 {
-    margin: 0 0 1em 0;
-  }
-</style>

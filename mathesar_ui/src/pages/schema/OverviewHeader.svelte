@@ -3,7 +3,7 @@
 </script>
 
 <div class="container">
-  <span class="title">{title}</span>
+  <h2>{title}</h2>
   {#if $$slots.action}
     <div class="action-container">
       <slot name="action" />
@@ -20,15 +20,7 @@
     padding-bottom: 0.25rem;
     position: relative;
   }
-
-  .action-container {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-  }
-
-  .title {
-    font-size: var(--text-size-ultra-large);
-    font-weight: var(--font-weight-medium);
+  h2 {
+    margin: 0;
   }
 </style>
