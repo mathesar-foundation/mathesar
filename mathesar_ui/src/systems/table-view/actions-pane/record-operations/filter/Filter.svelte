@@ -5,6 +5,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { LinkedRecordInputElement } from '@mathesar/components/cell-fabric/data-types/components/linked-record/LinkedRecordUtils';
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import { validateFilterEntry } from '@mathesar/components/filter-entry';
   import { FILTER_INPUT_CLASS } from '@mathesar/components/filter-entry/utils';
   import { iconAddNew } from '@mathesar/icons';
@@ -15,7 +16,7 @@
   } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/stores/table-data/filtering';
   import type RecordSummaryStore from '@mathesar/stores/table-data/record-summaries/RecordSummaryStore';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { ButtonMenuItem, DropdownMenu } from '@mathesar-component-library';
 
   import { deepCloneFiltering } from '../utils';
 
@@ -57,11 +58,8 @@
     filtering.set(newFiltering);
   }
 
-  function addFilter(columnId?: number) {
-    const column =
-      columnId === undefined
-        ? [...processedColumns.values()][0]
-        : processedColumns.get(columnId);
+  function addFilter(columnId: number) {
+    const column = processedColumns.get(columnId);
     if (!column) {
       return;
     }
@@ -135,17 +133,24 @@
   </div>
   {#if processedColumns.size}
     <div class="footer">
-      <Button
-        appearance="secondary"
-        on:click={async () => {
-          addFilter();
-          await tick();
-          activateLastFilterInput();
-        }}
+      <DropdownMenu
+        icon={iconAddNew}
+        label={$_('add_new_filter')}
+        disabled={processedColumns.size === 0}
+        triggerAppearance="secondary"
       >
-        <Icon {...iconAddNew} />
-        <span>{$_('add_new_filter')}</span>
-      </Button>
+        {#each [...processedColumns.values()] as column (column.id)}
+          <ButtonMenuItem
+            on:click={async () => {
+              addFilter(column.id);
+              await tick();
+              activateLastFilterInput();
+            }}
+          >
+            <ProcessedColumnName processedColumn={column} />
+          </ButtonMenuItem>
+        {/each}
+      </DropdownMenu>
     </div>
   {/if}
 </div>
