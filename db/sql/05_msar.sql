@@ -5487,7 +5487,7 @@ BEGIN
           ),
           'record_summaries',
           NULLIF(
-            to_jsonb(summary_cte) - 'count_summary' -> 'count_hack',
+            to_jsonb(summary_cte) - 'count_hack' -> 'summary_self',
             '{}'::jsonb
           )
         )
