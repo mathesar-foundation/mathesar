@@ -1,2 +1,2 @@
-export const NoConnectionAvailable = -28030;
-export const PsycopgOperationalError = -30193;
+export const NO_CONNECTION_AVAILABLE = -28030;
+export const PSYCOPG_OPERATIONAL_ERROR = -30193;

@@ -7,12 +7,15 @@
   import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import { partitionAsArray } from '@mathesar/utils/iterUtils';
 
-  import { NoConnectionAvailable, PsycopgOperationalError } from './errorCodes';
+  import {
+    NO_CONNECTION_AVAILABLE,
+    PSYCOPG_OPERATIONAL_ERROR,
+  } from './errorCodes';
   import ErrorList from './ErrorList.svelte';
 
-  const RpcErrorsWithDedicatedUI = new Set([
-    NoConnectionAvailable,
-    PsycopgOperationalError,
+  const rpcErrorCodesWithDedicatedUi = new Set([
+    NO_CONNECTION_AVAILABLE,
+    PSYCOPG_OPERATIONAL_ERROR,
   ]);
 
   export let errors: (string | RpcError)[];
@@ -26,39 +29,39 @@
     errors,
     (err) => err instanceof RpcError,
   ) as [RpcError[], string[]];
-  $: [rpcErrorsWithDedicatedUI, rpcErrorsWithoutDedicatedUI] = [
+  $: [rpcErrorsWithDedicatedUi, rpcErrorsWithoutDedicatedUi] = [
     ...partitionAsArray(rpcErrors, (err) =>
-      RpcErrorsWithDedicatedUI.has(err.code),
+      rpcErrorCodesWithDedicatedUi.has(err.code),
     ),
   ];
-  $: rpcErrorsWithDedicatedUIGroupedByCode = new Map<number, RpcError[]>(
+  $: rpcErrorsWithDedicatedUiGroupedByCode = new Map<number, RpcError[]>(
     map(
       ([code, errs]) => [code, [...errs]],
-      splitGroups((rpcErr) => rpcErr.code, rpcErrorsWithDedicatedUI),
+      splitGroups((rpcErr) => rpcErr.code, rpcErrorsWithDedicatedUi),
     ),
   );
 
   $: errorStrings = [
-    ...map((err) => err.message, rpcErrorsWithoutDedicatedUI),
+    ...map((err) => err.message, rpcErrorsWithoutDedicatedUi),
     ...stringErrors,
   ];
 </script>
 
 <div class="errors">
-  {#if rpcErrorsWithDedicatedUIGroupedByCode.has(NoConnectionAvailable)}
+  {#if rpcErrorsWithDedicatedUiGroupedByCode.has(NO_CONNECTION_AVAILABLE)}
     <ErrorBox {fullWidth}>
       {$_('not_a_collaborator_help')}
       <SeeDocsToLearnMore page="collaborators" />
     </ErrorBox>
   {/if}
 
-  {#if rpcErrorsWithDedicatedUIGroupedByCode.has(PsycopgOperationalError)}
+  {#if rpcErrorsWithDedicatedUiGroupedByCode.has(PSYCOPG_OPERATIONAL_ERROR)}
     <ErrorBox {fullWidth}>
       <div>{$_('unable_to_connect_to_database')}</div>
       <div>
         <ErrorList
-          errorStrings={rpcErrorsWithDedicatedUIGroupedByCode
-            .get(PsycopgOperationalError)
+          errorStrings={rpcErrorsWithDedicatedUiGroupedByCode
+            .get(PSYCOPG_OPERATIONAL_ERROR)
             ?.map((err) => err.message) ?? []}
         />
       </div>
