@@ -38,7 +38,9 @@
   {#if tables.length > 0}
     <div
       class="container"
-      use:highlightNewItems={{ scrollHint: $_('table_new_items_scroll_hint') }}
+      use:highlightNewItems={{
+        scrollHint: $_('table_new_items_scroll_hint'),
+      }}
     >
       {#each tables as table (table.oid)}
         <TableCard
