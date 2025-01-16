@@ -4,10 +4,20 @@
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
   import { RichText } from '@mathesar/components/rich-text';
-  import { iconRefresh } from '@mathesar/icons';
+  import {
+    iconDonation,
+    iconExternalHyperlink,
+    iconRefresh,
+  } from '@mathesar/icons';
+  import { getMarketingLink } from '@mathesar/routes/urls';
   import type { ReleaseDataStore } from '@mathesar/stores/releases';
   import { toast } from '@mathesar/stores/toast';
-  import { SpinnerButton, assertExhaustive } from '@mathesar-component-library';
+  import {
+    AnchorButton,
+    Icon,
+    SpinnerButton,
+    assertExhaustive,
+  } from '@mathesar-component-library';
 
   import ReleaseBox from './ReleaseBox.svelte';
 
@@ -85,6 +95,21 @@
   {/if}
 </div>
 
+<div class="donate">
+  <div class="button">
+    <AnchorButton
+      appearance="default"
+      href={getMarketingLink('donate')}
+      target="_blank"
+    >
+      <Icon {...iconDonation} />
+      <span>{$_('donate_to_mathesar')}</span>
+      <Icon {...iconExternalHyperlink} />
+    </AnchorButton>
+  </div>
+  <div class="donate-text">{$_('donate_blurb')}</div>
+</div>
+
 <style>
   .releases > :global(*) {
     margin-bottom: 1rem;
@@ -96,5 +121,14 @@
   }
   .check-button {
     margin-bottom: 0.25rem;
+  }
+  .donate {
+    margin-top: 2rem;
+    margin-left: auto;
+    max-width: 30rem;
+    text-align: right;
+    color: var(--color-text-muted);
+    text-wrap: balance;
+    font-size: var(--text-size-small);
   }
 </style>
