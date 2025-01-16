@@ -19,9 +19,8 @@
   export let fullWidth = false;
 
   /**
-   * Our typescript version used in package.json is not smart enough
-   * to identify the types here. Until we uprade we would have to use the
-   * `as` keyword.
+   * Our typescript version used in package.json is not smart enough to identify
+   * the types here. Until we upgrade we would have to use the `as` keyword.
    */
   $: [rpcErrors, stringErrors] = partitionAsArray(
     errors,

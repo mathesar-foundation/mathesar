@@ -438,7 +438,7 @@
   "no_target_table_selected": "No target table selected",
   "no_type_constraints": "No {constraintType} Constraints",
   "no_users_found": "No users found",
-  "not_a_collaborator_help": "You have to be a collaborator on this database inorder to access its data.",
+  "not_a_collaborator_help": "You have to be a collaborator on this database in order to access its data.",
   "not_aggregated": "Not Aggregated",
   "now": "Now",
   "number_of_matches": "{count, plural, one {{count} match for [searchValue]} other {{count} matches for [searchValue]}}",
