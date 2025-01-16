@@ -2,7 +2,10 @@
   import { _ } from 'svelte-i18n';
 
   import {
+    iconCommunityChat,
     iconDatabase,
+    iconDocumentation,
+    iconDonation,
     iconLogout,
     iconSettingsMajor,
     iconUser,
@@ -12,6 +15,8 @@
     LOGOUT_URL,
     USER_PROFILE_URL,
     getDatabasePageUrl,
+    getDocsLink,
+    getMarketingLink,
   } from '@mathesar/routes/urls';
   import { databasesStore } from '@mathesar/stores/databases';
   import { getReleaseDataStoreFromContext } from '@mathesar/stores/releases';
@@ -68,7 +73,9 @@
           <LinkMenuItem icon={iconUser} href={USER_PROFILE_URL}>
             {$userProfile.getDisplayName()}
           </LinkMenuItem>
+
           <MenuDivider />
+
           {#if $userProfile.isMathesarAdmin}
             <LinkMenuItem
               icon={iconSettingsMajor}
@@ -77,7 +84,37 @@
             >
               {$_('administration')}
             </LinkMenuItem>
+            <MenuDivider />
           {/if}
+
+          <MenuHeading>{$_('resources')}</MenuHeading>
+          <LinkMenuItem
+            icon={iconDocumentation}
+            href={getDocsLink('userGuide')}
+            tinro-ignore
+            target="_blank"
+          >
+            {$_('user_guide')}
+          </LinkMenuItem>
+          <LinkMenuItem
+            icon={iconCommunityChat}
+            href={getMarketingLink('community')}
+            tinro-ignore
+            target="_blank"
+          >
+            {$_('community')}
+          </LinkMenuItem>
+          <LinkMenuItem
+            icon={iconDonation}
+            href={getMarketingLink('donate')}
+            tinro-ignore
+            target="_blank"
+          >
+            {$_('donate_to_mathesar')}
+          </LinkMenuItem>
+
+          <MenuDivider />
+
           <LinkMenuItem icon={iconLogout} href={LOGOUT_URL} tinro-ignore>
             {$_('log_out')}
           </LinkMenuItem>
