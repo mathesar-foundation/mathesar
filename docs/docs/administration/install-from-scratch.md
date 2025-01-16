@@ -23,15 +23,9 @@ You should have **root access** to the machine you're installing Mathesar on.
 
 You'll need to install the following system packages before you install Mathesar:
 
-- [Python](https://www.python.org/downloads/) 3.9, 3.10, or 3.11 (along with appropriate [`venv`](https://docs.python.org/3/library/venv.html) module)
+- [Python](https://www.python.org/downloads/), along with the appropriate [`venv`](https://docs.python.org/3/library/venv.html) module. See [version support](version-support.md).
 
-    !!! note "Python version"
-
-        Python _older_ than 3.9 will not run Mathesar.
-
-        Python 3.12 will run Mathesar, but you'll have to take extra steps to get some dependencies to build. Installing a package for your OS that provides the `libpq-fe.h` header file should be enough in most cases. On Debian 12, this header is provided by the `libpq-dev` package.
-
-- [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`)
+- [PostgreSQL](https://www.postgresql.org/download/linux/) 13 or newer (Verify by logging in, and running the query: `SELECT version();`). See [version support](version-support.md).
 
 - [Caddy](https://caddyserver.com/docs/install) (Verify with `caddy version`)
 
@@ -144,7 +138,7 @@ Then press <kbd>Enter</kbd> to customize this guide with your domain name.
 
     ```
     <path-to-python-binary> -m venv ./mathesar-venv
-    # /usr/bin/python3.9 -m venv ./mathesar-venv
+    # /usr/bin/python3.13 -m venv ./mathesar-venv
     ```
 
 1. Next we will activate our virtual environment:
