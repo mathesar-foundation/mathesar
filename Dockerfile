@@ -4,7 +4,7 @@ FROM python:$PYTHON_VERSION AS base
 
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
-ARG BUILD_PG_MAJOR=15
+ARG BUILD_PG_MAJOR=17
 ENV PG_MAJOR=$BUILD_PG_MAJOR
 
 RUN set -eux;
@@ -41,14 +41,6 @@ ENV PGDATA /var/lib/postgresql/mathesar
 
 VOLUME /etc/postgresql/
 VOLUME /var/lib/postgresql/
-
-# We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL
-# calls "Fast Shutdown mode" wherein new connections are disallowed and any
-# in-progress transactions are aborted, allowing PostgreSQL to stop cleanly and
-# flush tables to disk, which is the best compromise available to avoid data
-# corruption.
-
-STOPSIGNAL SIGINT
 
 EXPOSE 5432
 
