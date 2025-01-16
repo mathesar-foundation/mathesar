@@ -31,8 +31,6 @@ You'll need to install the following system packages before you install Mathesar
 
 - [git](https://git-scm.com/downloads) (Verify with `git --version`)
 
-- [GNU gettext](https://www.gnu.org/software/gettext/) (Verify with `gettext --version`)
-
 - [unzip](https://packages.debian.org/search?keywords=unzip) A utility tool to de-archive .zip files (Verify with `unzip -v`)
 
 ### Domain (optional)
