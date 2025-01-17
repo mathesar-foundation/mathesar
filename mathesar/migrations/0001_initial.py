@@ -169,7 +169,7 @@ class Migration(migrations.Migration):
                 ('escapechar', models.CharField(blank=True, max_length=1)),
                 ('quotechar', models.CharField(blank=True, default='"', max_length=1)),
                 ('table_imported_to', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='data_files', to='mathesar.table')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'abstract': False,
