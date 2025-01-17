@@ -94,8 +94,7 @@ def disconnect(
         role_name: the username of the role used for upgrading.
         password: the password of the role used for upgrading.
         disconnect_db_server: If True, will delete the stored server
-            metadata(host, port, role credentials) and also disconnect
-            all the databases associated with that server from Mathesar.
+            metadata(host, port, role credentials) from Mathesar.
             This is intended for optional use while disconnecting the
             last database on the server.
     """
@@ -107,5 +106,6 @@ def disconnect(
         password=password,
     )
     database.delete()
-    if disconnect_db_server:
+    server_db_count = len(Database.objects.filter(server=database.server))
+    if disconnect_db_server and server_db_count == 0:
         database.server.delete()
