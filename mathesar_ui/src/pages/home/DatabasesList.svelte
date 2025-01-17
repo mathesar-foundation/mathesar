@@ -1,5 +1,6 @@
 <script lang="ts">
   import { filter } from 'iter-tools';
+  import { tick } from 'svelte';
   import { _ } from 'svelte-i18n';
 
   import DocsLink from '@mathesar/components/DocsLink.svelte';
@@ -31,6 +32,7 @@
   const userProfileStore = getUserProfileStoreFromContext();
 
   let filterQuery = '';
+  let highlightingEnabled = true;
 
   $: ({ isMathesarAdmin } = $userProfileStore);
   $: ({ databases } = databasesStore);
@@ -51,6 +53,15 @@
     }
     return 'some' as const;
   })();
+
+  async function momentarilyPauseHighlighting() {
+    highlightingEnabled = false;
+    await tick();
+    highlightingEnabled = true;
+  }
+
+  // Don't highlight items when the filter query changes
+  $: filterQuery, void momentarilyPauseHighlighting();
 
   function handleClearFilterQuery() {
     filterQuery = '';
@@ -151,6 +162,7 @@
             class="databases-list-grid"
             use:highlightNewItems={{
               scrollHint: $_('database_new_items_scroll_hint'),
+              enabled: highlightingEnabled,
             }}
           >
             {#each filteredDatabases as database (database.id)}

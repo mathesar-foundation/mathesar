@@ -2,8 +2,9 @@
   import type { Writable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
 
-  import ColumnName from '@mathesar/components/column/ColumnName.svelte';
+  import ProcessedColumnName from '@mathesar/components/column/ProcessedColumnName.svelte';
   import GroupEntryComponent from '@mathesar/components/group-entry/GroupEntry.svelte';
+  import { iconAddNew } from '@mathesar/icons';
   import {
     type Grouping,
     type ProcessedColumn,
@@ -70,24 +71,14 @@
   </div>
   <footer>
     <DropdownMenu
+      icon={iconAddNew}
       label={$_('add_new_grouping')}
       disabled={availableColumns.length === 0}
       triggerAppearance="secondary"
     >
       {#each availableColumns as column (column.id)}
         <ButtonMenuItem on:click={() => addGroupColumn(column)}>
-          <ColumnName
-            column={{
-              name: $processedColumns.get(column.id)?.column.name ?? '',
-              type: $processedColumns.get(column.id)?.column.type ?? '',
-              type_options:
-                $processedColumns.get(column.id)?.column.type_options ?? null,
-              constraintsType: getColumnConstraintTypeByColumnId(
-                column.id,
-                $processedColumns,
-              ),
-            }}
-          />
+          <ProcessedColumnName processedColumn={column} />
         </ButtonMenuItem>
       {/each}
     </DropdownMenu>

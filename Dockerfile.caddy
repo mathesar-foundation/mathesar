@@ -1,5 +1,5 @@
 # Useful when we need to build a single dockerfile to run a complete webservice
-ARG BASE_IMAGE=python:3.9-buster
+ARG BASE_IMAGE=python:3.13-bookworm
 FROM $BASE_IMAGE as base_image
 
 ENV PORT=8000

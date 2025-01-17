@@ -5,7 +5,7 @@
   import type { Share, ShareApi } from '@mathesar/api/rest/shares';
   import { getApiErrorMessages } from '@mathesar/api/rest/utils/errors';
   import type { RequestStatus } from '@mathesar/api/rest/utils/requestUtils';
-  import Errors from '@mathesar/components/Errors.svelte';
+  import Errors from '@mathesar/components/errors/Errors.svelte';
   import {
     iconAddNew,
     iconCopyMajor,

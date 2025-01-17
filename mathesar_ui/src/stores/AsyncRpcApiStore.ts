@@ -1,25 +1,30 @@
 import { get } from 'svelte/store';
 
-import { CancellablePromise } from '@mathesar/component-library';
+import { CancellablePromise, hasProperty } from '@mathesar/component-library';
 import {
+  RpcError,
   type RpcRequest,
   type RpcResponse,
   batchSend,
 } from '@mathesar/packages/json-rpc-client-builder';
 
-import AsyncStore, { type AsyncStoreValue } from './AsyncStore';
+import AsyncStore, {
+  type AsyncStoreOptions,
+  type AsyncStoreValue,
+} from './AsyncStore';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BatchRunner<T = any, U = any> = {
   send: RpcRequest<T>;
   beforeRequest: () => void;
   onResponse: (response: RpcResponse<T>) => void;
-  getValue: () => AsyncStoreValue<U, string>;
+  getValue: () => AsyncStoreValue<U, RpcError>;
 };
 
 export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
   Props,
-  U
+  U,
+  RpcError
 > {
   apiRpcFn: (props: Props) => RpcRequest<T>;
 
@@ -28,13 +33,18 @@ export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
   constructor(
     rpcFn: (props: Props) => RpcRequest<T>,
     options?: Partial<{
-      getError: (caughtValue: unknown) => string;
       initialValue: U;
       postProcess: (response: T) => U;
     }>,
   ) {
     const postProcess =
       options?.postProcess ?? ((response: T) => response as unknown as U);
+    const asyncStoreOptions: AsyncStoreOptions<U, RpcError> = {
+      getError: (err: unknown) => RpcError.fromAnything(err),
+    };
+    if (hasProperty(options, 'initialValue')) {
+      asyncStoreOptions.initialValue = options.initialValue;
+    }
     super(
       (props: Props) =>
         new CancellablePromise((resolve, reject) => {
@@ -46,6 +56,7 @@ export default class AsyncRpcApiStore<Props, T, U = T> extends AsyncStore<
             )
             .catch((error) => reject(error));
         }),
+      asyncStoreOptions,
     );
     this.apiRpcFn = rpcFn;
     this.postProcess = postProcess;

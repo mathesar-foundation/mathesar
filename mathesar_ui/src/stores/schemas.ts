@@ -11,7 +11,7 @@ import { api } from '@mathesar/api/rpc';
 import type { RawSchema } from '@mathesar/api/rpc/schemas';
 import type { Database } from '@mathesar/models/Database';
 import { Schema } from '@mathesar/models/Schema';
-import { getErrorMessage } from '@mathesar/utils/errors';
+import { RpcError } from '@mathesar/packages/json-rpc-client-builder';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import {
   type CancellablePromise,
@@ -29,7 +29,7 @@ export const currentSchemaId: Writable<Schema['oid'] | undefined> = writable(
 
 export interface SchemaStoreData {
   databaseId?: Database['id'];
-  requestStatus: RequestStatus;
+  requestStatus: RequestStatus<RpcError[]>;
   data: Map<Schema['oid'], Schema>;
 }
 
@@ -115,12 +115,18 @@ export async function fetchSchemasForCurrentDatabase() {
       if ($schemasStore.databaseId === $currentDatabase.id) {
         return {
           ...$schemasStore,
-          requestStatus: { state: 'failure', errors: [getErrorMessage(err)] },
+          requestStatus: {
+            state: 'failure',
+            errors: [RpcError.fromAnything(err)],
+          },
         };
       }
       return {
         databaseId: $currentDatabase.id,
-        requestStatus: { state: 'failure', errors: [getErrorMessage(err)] },
+        requestStatus: {
+          state: 'failure',
+          errors: [RpcError.fromAnything(err)],
+        },
         data: new Map(),
       };
     });
@@ -163,7 +169,7 @@ export const schemas = collapse(
             databaseId: $currentDatabase.id,
             requestStatus: {
               state: 'failure',
-              errors: [getErrorMessage(commonData.schemas.error)],
+              errors: [RpcError.fromAnything(commonData.schemas.error)],
             },
             data: new Map(),
           });
