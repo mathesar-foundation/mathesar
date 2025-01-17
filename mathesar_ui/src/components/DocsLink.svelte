@@ -25,6 +25,7 @@
     schemas: '/user-guide/schemas/',
     userAdmin: '/user-guide/users/#admin',
     dataTypes: '/user-guide/data-types/',
+    metadata: '/user-guide/metadata/',
   };
   type Page = keyof typeof pages;
 

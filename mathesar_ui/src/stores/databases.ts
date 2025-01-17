@@ -102,6 +102,7 @@ class DatabasesStore {
     database: Pick<Database, 'id'>;
     schemas_to_remove?: SystemSchema[];
     role?: { name: string; password: string };
+    disconnect_db_server: boolean;
   }) {
     await api.databases.configured
       .disconnect({
@@ -110,6 +111,7 @@ class DatabasesStore {
         schemas_to_remove: p.schemas_to_remove,
         role_name: p.role?.name,
         password: p.role?.password,
+        disconnect_db_server: p.disconnect_db_server,
       })
       .run();
     this.unsortedDatabases.delete(p.database.id);

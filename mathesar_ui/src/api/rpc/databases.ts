@@ -75,6 +75,7 @@ export const databases = {
         strict?: boolean;
         role_name?: string;
         password?: string;
+        disconnect_db_server?: boolean;
       },
       void
     >(),
