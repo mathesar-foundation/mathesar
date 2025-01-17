@@ -45,6 +45,7 @@ class DataFileSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         return super().save(**kwargs)
 
     def validate(self, data):
+        data['user'] = self.context['request'].user
         if not self.partial:
             # Only perform validation on source files when we're not partial
             source_fields = ['file', 'paste', 'url']
