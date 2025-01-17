@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import Errors from '@mathesar/components/Errors.svelte';
+  import Errors from '@mathesar/components/errors/Errors.svelte';
   import {
     ImmutableMap,
     Spinner,
@@ -38,7 +38,7 @@
     $privilegesForRoles.error,
     $permissionsMetaData.error,
     $currentRole.error,
-  ].filter((entry): entry is string => isDefinedNonNullable(entry));
+  ].filter(isDefinedNonNullable);
 
   $: rolesValue = new ImmutableMap($roles.resolvedValue);
   $: permissionsMetaDataValue = $permissionsMetaData.resolvedValue;

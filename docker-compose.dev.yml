@@ -1,5 +1,4 @@
-version: "3.9"
-
+---
 services:
   # Mathesar App built with the same configurations as the production image
   # but with additional testing dependencies.
@@ -42,7 +41,7 @@ services:
       target: development
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
+        PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     environment:
       - MODE=${MODE-DEVELOPMENT}
       - DEBUG=${DEBUG-True}
@@ -84,7 +83,7 @@ services:
       target: ${TARGET-testing}
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
+        PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     depends_on:
       - dev-db
     ports:
