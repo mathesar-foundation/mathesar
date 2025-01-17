@@ -1,12 +1,16 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
+  import {
+    CommunityResource,
+    DocumentationResource,
+    DonateResource,
+  } from '@mathesar/components/resources';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
 
   import DatabasesList from './DatabasesList.svelte';
-  import Resources from './Resources.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
 </script>
@@ -30,7 +34,14 @@
   </h1>
   <div class="content">
     <DatabasesList />
-    <Resources />
+    <div class="resources">
+      <h2>{$_('resources')}</h2>
+      <div class="cards">
+        <DocumentationResource />
+        <CommunityResource />
+        <DonateResource />
+      </div>
+    </div>
   </div>
 </LayoutWithHeader>
 
@@ -40,6 +51,15 @@
     gap: 2rem;
     @media screen and (min-width: 50rem) {
       grid-template: auto / 1fr 20rem;
+    }
+  }
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    & > :global(*) {
+      flex: 1 0 15rem;
     }
   }
 </style>
