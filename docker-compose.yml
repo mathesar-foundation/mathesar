@@ -1,5 +1,4 @@
-version: "3.9"
-
+---
 # This file defines a viable production setup for Mathesar.
 #
 # It can be used in production directly, or used as an example to help define
