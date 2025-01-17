@@ -535,13 +535,15 @@ mathesar_error_map = frozendict({
     "MultipleDataFileAPIException": -28026,
     "MultipleObjectsReturned": -28027,
     "NetworkException": -28028,
-    "NotFoundAPIException": -28029,
-    "ProgrammingAPIException": -28030,
-    "TypeErrorAPIException": -28031,
-    "UnknownDatabaseTypeIdentifier": -28032,
-    "UnsupportedConstraintAPIException": -28033,
-    "UnsupportedInstallationDatabase": -28034,
-    "ValueAPIException": -28035,
+    "NoAdminConnectionAvailable": -28029,
+    "NoConnectionAvailable": -28030,
+    "NotFoundAPIException": -28031,
+    "ProgrammingAPIException": -28032,
+    "TypeErrorAPIException": -28033,
+    "UnknownDatabaseTypeIdentifier": -28034,
+    "UnsupportedConstraintAPIException": -28035,
+    "UnsupportedInstallationDatabase": -28036,
+    "ValueAPIException": -28037,
 })
 
 dblib_error_map = frozendict({

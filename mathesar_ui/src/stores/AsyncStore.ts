@@ -19,6 +19,11 @@ export type AsyncStoreSettlement<T, E> =
   | { state: 'resolved'; value: T }
   | { state: 'rejected'; error: E };
 
+export type AsyncStoreOptions<T, E> = Partial<{
+  getError: (caughtValue: unknown) => E;
+  initialValue: T;
+}>;
+
 export class AsyncStoreValue<T, E> {
   /**
    * This is the most recently settled value. It can be present even while the
@@ -103,14 +108,14 @@ export class AsyncStoreValue<T, E> {
   }
 }
 
-export default class AsyncStore<Props = void, T = unknown>
-  implements Readable<AsyncStoreValue<T, string>>
+export default class AsyncStore<Props = void, T = unknown, E = string>
+  implements Readable<AsyncStoreValue<T, E>>
 {
   private runFn: (props: Props) => Promise<T> | CancellablePromise<T>;
 
-  private getError: (caughtValue: unknown) => string;
+  private getError: (caughtValue: unknown) => E;
 
-  protected value: Writable<AsyncStoreValue<T, string>> = writable(
+  protected value: Writable<AsyncStoreValue<T, E>> = writable(
     new AsyncStoreValue({ isLoading: false }),
   );
 
@@ -118,16 +123,14 @@ export default class AsyncStore<Props = void, T = unknown>
 
   constructor(
     run: (props: Props) => Promise<T> | CancellablePromise<T>,
-    options?: Partial<{
-      getError: (caughtValue: unknown) => string;
-      initialValue: T;
-    }>,
+    options?: AsyncStoreOptions<T, E>,
   ) {
     this.runFn = run;
-    this.getError = options?.getError ?? getErrorMessage;
+    this.getError =
+      options?.getError ?? (getErrorMessage as (data: unknown) => E);
     if (hasProperty(options, 'initialValue')) {
       this.value = writable(
-        new AsyncStoreValue<T, string>({
+        new AsyncStoreValue<T, E>({
           isLoading: false,
           settlement: { state: 'resolved', value: options.initialValue as T },
         }),
@@ -136,15 +139,15 @@ export default class AsyncStore<Props = void, T = unknown>
   }
 
   subscribe(
-    subscriber: Subscriber<AsyncStoreValue<T, string>>,
+    subscriber: Subscriber<AsyncStoreValue<T, E>>,
     invalidate?:
-      | ((value?: AsyncStoreValue<T, string> | undefined) => void)
+      | ((value?: AsyncStoreValue<T, E> | undefined) => void)
       | undefined,
   ): Unsubscriber {
     return this.value.subscribe(subscriber, invalidate);
   }
 
-  async run(props: Props): Promise<AsyncStoreValue<T, string>> {
+  async run(props: Props): Promise<AsyncStoreValue<T, E>> {
     this.beforeRun();
     this.promise = this.runFn(props);
     try {
@@ -156,7 +159,7 @@ export default class AsyncStore<Props = void, T = unknown>
     }
   }
 
-  async runConservatively(props: Props): Promise<AsyncStoreValue<T, string>> {
+  async runConservatively(props: Props): Promise<AsyncStoreValue<T, E>> {
     const value = get(this.value);
     if (value.isIdleAndUnsettled) {
       return this.run(props);
