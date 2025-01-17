@@ -56,7 +56,7 @@
   .cards {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 2rem;
 
     & > :global(*) {
       flex: 1 0 15rem;

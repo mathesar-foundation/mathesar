@@ -20,13 +20,10 @@
 
 <style>
   .resource-card {
-    border: 1px solid var(--sand-300);
     border-radius: var(--border-radius-l);
-    padding: var(--size-large);
     display: flex;
     flex-direction: column;
     gap: var(--size-x-small);
-    background: var(--white);
   }
   .title {
     font-weight: 500;
