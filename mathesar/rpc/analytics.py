@@ -66,7 +66,8 @@ class AnalyticsState(TypedDict):
 @mathesar_rpc_method(name="analytics.get_state")
 def get_state() -> AnalyticsState:
     """
-    Returns a boolean to identify if analytics is enabled
+    Returns:
+        A boolean to identify if analytics is enabled.
     """
     return AnalyticsState.from_boolean(is_analytics_enabled())
 
