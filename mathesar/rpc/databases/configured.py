@@ -73,6 +73,7 @@ def disconnect(
         strict: bool = True,
         role_name: str = None,
         password: str = None,
+        disconnect_db_server: bool = False
 ) -> None:
     """
     Disconnect a configured database, after removing Mathesar SQL from it.
@@ -92,6 +93,10 @@ def disconnect(
             we fail to remove any objects which we expected to remove.
         role_name: the username of the role used for upgrading.
         password: the password of the role used for upgrading.
+        disconnect_db_server: If True, will delete the stored server
+            metadata(host, port, role credentials) from Mathesar.
+            This is intended for optional use while disconnecting the
+            last database on the server.
     """
     database = Database.objects.get(id=database_id)
     database.uninstall_sql(
@@ -101,3 +106,6 @@ def disconnect(
         password=password,
     )
     database.delete()
+    server_db_count = len(Database.objects.filter(server=database.server))
+    if disconnect_db_server and server_db_count == 0:
+        database.server.delete()

@@ -13,6 +13,7 @@
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import type { Role } from '@mathesar/models/Role';
   import type { Table } from '@mathesar/models/Table';
+  import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
   import { toast } from '@mathesar/stores/toast';
@@ -100,7 +101,7 @@
       roles,
       privilegesForRoles: tablePrivileges,
       permissionsMetaData: readable(
-        new AsyncStoreValue<Table, string>({
+        new AsyncStoreValue<Table, RpcError>({
           isLoading: false,
           settlement: {
             state: 'resolved',

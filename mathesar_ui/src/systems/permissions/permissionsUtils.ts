@@ -2,6 +2,7 @@ import type { Readable } from 'svelte/store';
 
 import type { ObjectCurrentAccess } from '@mathesar/models/internal/ObjectCurrentAccess';
 import type { Role } from '@mathesar/models/Role';
+import type { RpcError } from '@mathesar/packages/json-rpc-client-builder';
 import type { AsyncStoreValue } from '@mathesar/stores/AsyncStore';
 import type { ImmutableMap } from '@mathesar-component-library';
 
@@ -25,7 +26,7 @@ export interface PermissionsStoreValues<Privilege> {
   };
 }
 
-export interface PermissionsAsyncStores<Privilege, E = string> {
+export interface PermissionsAsyncStores<Privilege, E = RpcError> {
   roles: Readable<
     AsyncStoreValue<PermissionsStoreValues<Privilege>['roles'], E>
   >;
