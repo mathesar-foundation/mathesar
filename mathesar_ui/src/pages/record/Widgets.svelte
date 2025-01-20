@@ -35,7 +35,7 @@
 
 {#if tableWidgetInputs.length}
   <div class="widgets-area">
-    <h2 class="passthrough">
+    <h2>
       {$_('related_records')}
       <Help>
         <RichText text={$_('related_records_help')} let:slotName>
@@ -70,8 +70,6 @@
   h2 {
     padding: var(--size-small);
     border-bottom: 1px solid var(--slate-200);
-    font-weight: 600;
-    font-size: var(--size-large);
     background: var(--white);
   }
   .widgets {

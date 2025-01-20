@@ -140,10 +140,40 @@ export function getSharedExplorationPageUrl(slug: string): string {
   return `/shares/explorations/${slug}/`;
 }
 
-export function getDocsLink(path: string): string {
-  return `https://docs.mathesar.org${path}`;
+const docsPages = {
+  analytics: '/analytics/',
+  collaborators: '/user-guide/collaborators/',
+  databasePermissions: '/user-guide/databases/#permissions',
+  databases: '/user-guide/databases/',
+  dataTypes: '/user-guide/data-types/',
+  import: '/user-guide/importing-data/',
+  internalSchemas: '/user-guide/schemas/#internal',
+  metadata: '/user-guide/metadata/',
+  relationships: '/user-guide/relationships/',
+  roles: '/user-guide/roles/',
+  rolesInheritance: '/user-guide/roles/#inheritance',
+  rolesLogin: '/user-guide/roles/#login',
+  schemaPermissions: '/user-guide/schemas/#permissions',
+  schemas: '/user-guide/schemas/',
+  storedRolePasswords: '/user-guide/stored-role-passwords/',
+  tablePermissions: '/user-guide/tables/#permissions',
+  userAdmin: '/user-guide/users/#admin',
+  userGuide: '/user-guide/',
+};
+
+export type DocsPage = keyof typeof docsPages;
+
+export function getDocsLink(page: DocsPage): string {
+  return `https://docs.mathesar.org${docsPages[page]}`;
 }
 
-export function getWikiLink(path: string): string {
-  return `https://wiki.mathesar.org${path}`;
+const marketingPages = {
+  community: '/community/',
+  donate: '/donate/',
+};
+
+export type MarketingPage = keyof typeof marketingPages;
+
+export function getMarketingLink(page: MarketingPage): string {
+  return `https://mathesar.org${marketingPages[page]}`;
 }
