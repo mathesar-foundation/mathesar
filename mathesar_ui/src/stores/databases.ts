@@ -2,7 +2,7 @@ import { map } from 'iter-tools';
 import { type Readable, derived, writable } from 'svelte/store';
 
 import { api } from '@mathesar/api/rpc';
-import type { RawDatabase } from '@mathesar/api/rpc/databases';
+import type { RawDatabase, SystemSchema } from '@mathesar/api/rpc/databases';
 import type { RawServer } from '@mathesar/api/rpc/servers';
 import { Database } from '@mathesar/models/Database';
 import { Server } from '@mathesar/models/Server';
@@ -98,13 +98,23 @@ class DatabasesStore {
     return connectedDatabase;
   }
 
-  async disconnectDatabase(database: Database) {
+  async disconnectDatabase(p: {
+    database: Pick<Database, 'id'>;
+    schemas_to_remove?: SystemSchema[];
+    role?: { name: string; password: string };
+    disconnect_db_server: boolean;
+  }) {
     await api.databases.configured
       .disconnect({
-        database_id: database.id,
+        database_id: p.database.id,
+        strict: true,
+        schemas_to_remove: p.schemas_to_remove,
+        role_name: p.role?.name,
+        password: p.role?.password,
+        disconnect_db_server: p.disconnect_db_server,
       })
       .run();
-    this.unsortedDatabases.delete(database.id);
+    this.unsortedDatabases.delete(p.database.id);
   }
 
   async refresh() {
@@ -124,6 +134,8 @@ class DatabasesStore {
     this.currentDatabaseId.set(undefined);
   }
 }
+
+export type DatabaseDisconnectFn = typeof databasesStore.disconnectDatabase;
 
 export const databasesStore: MakeWritablePropertiesReadable<DatabasesStore> =
   new DatabasesStore(
