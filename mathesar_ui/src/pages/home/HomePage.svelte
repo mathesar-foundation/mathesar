@@ -9,6 +9,7 @@
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
   import { databasesStore } from '@mathesar/stores/databases';
+  import { useCaseFeedbackVisible } from '@mathesar/stores/localStorage';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
 
   import DatabasesList from './DatabasesList.svelte';
@@ -18,7 +19,7 @@
 
   $: ({ databases } = databasesStore);
   $: countDatabases = $databases.size;
-  $: showUseCaseFeedbackPanel = countDatabases === 0;
+  $: showUseCaseFeedbackPanel = countDatabases === 0 && $useCaseFeedbackVisible;
 </script>
 
 <svelte:head>

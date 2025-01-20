@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fade } from 'svelte/transition';
   import { _ } from 'svelte-i18n';
 
   import { api } from '@mathesar/api/rpc';
@@ -9,6 +10,7 @@
     requiredField,
   } from '@mathesar/components/form';
   import { iconMessage, iconSend } from '@mathesar/icons';
+  import { useCaseFeedbackVisible } from '@mathesar/stores/localStorage';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import { Icon, TextArea } from '@mathesar-component-library';
@@ -25,6 +27,7 @@
         .run();
       toast.success($_('usecase_feedback_sent_successfully'));
       form.reset();
+      useCaseFeedbackVisible.set(false);
     } catch (err) {
       toast.error(
         `${$_('usecase_feedback_failed_to_send')}. ${getErrorMessage(err)}`,
@@ -33,7 +36,7 @@
   }
 </script>
 
-<div class="use-case-feedback">
+<div class="use-case-feedback" transition:fade={{ duration: 120 }}>
   <div class="header">
     <div class="icon">
       <Icon {...iconMessage} />

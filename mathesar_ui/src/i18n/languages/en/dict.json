@@ -812,7 +812,7 @@
   "use_role_to_remove_schemas_help": "If your Mathesar internal schemas require extra privileges to remove, you may specify a role to use here. This role and password will not be stored in Mathesar.",
   "use_text_for_all_columns": "Use \"Text\" for all column data types",
   "usecase_feedback_failed_to_send": "There was an error sending your input.",
-  "usecase_feedback_sent_successfully": "Your input has been sent successfully",
+  "usecase_feedback_sent_successfully": "Your use case has been shared with the Mathesar team successfully.",
   "user": "User",
   "user_guide": "User Guide",
   "user_guide_description": "Our User Guide covers all aspects of Mathesar, from basic usage to advanced features.",
