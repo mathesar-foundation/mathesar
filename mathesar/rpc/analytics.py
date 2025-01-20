@@ -8,6 +8,7 @@ from mathesar.analytics import (
     initialize_analytics,
     disable_analytics,
     prepare_analytics_report,
+    upload_feedback_message,
 )
 
 
@@ -105,3 +106,9 @@ def view_report() -> AnalyticsReport:
     """
     report = prepare_analytics_report()
     return AnalyticsReport.from_dict(report)
+
+
+@mathesar_rpc_method(name="analytics.upload_feedback", auth="login")
+def upload_feedback(message: str) -> None:
+    """Upload a feedback message to Mathesar's servers."""
+    upload_feedback_message(message)
