@@ -64,7 +64,7 @@ class AnalyticsState(TypedDict):
 
 
 @mathesar_rpc_method(name="analytics.get_state")
-def get_state():
+def get_state() -> AnalyticsState:
     """
     Returns a boolean to identify if analytics is enabled
     """
@@ -109,6 +109,6 @@ def view_report() -> AnalyticsReport:
 
 
 @mathesar_rpc_method(name="analytics.upload_feedback", auth="login")
-def upload_feedback(message: str) -> None:
+def upload_feedback(message: str):
     """Upload a feedback message to Mathesar's servers."""
     upload_feedback_message(message)
