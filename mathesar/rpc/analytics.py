@@ -26,7 +26,7 @@ class AnalyticsReport(TypedDict):
         connected_database_schema_count: The number of all schemas in
             all connected databases.
         connected_database_table_count: The total number of tables in
-            all conncted databasees.
+            all connected databasees.
         connected_database_record_count: The total number of records in
             all connected databasees (approximated)
         exploration_count: The number of explorations.
