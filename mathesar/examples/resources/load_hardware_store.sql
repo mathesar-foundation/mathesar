@@ -284,7 +284,7 @@ SELECT pg_catalog.setval('"Assets_id_seq"', 50, true);
 SELECT pg_catalog.setval('"Customers_id_seq"', 20, true);
 SELECT pg_catalog.setval('"Rentals_id_seq"', 30, true);
 SELECT pg_catalog.setval('"Store Locations_id_seq"', 5, true);
-SELECT pg_catalog.setval('"Transactions_id_seq"', 60, );
+SELECT pg_catalog.setval('"Transactions_id_seq"', 60, true);
 
 
 ALTER TABLE ONLY "Assets"
