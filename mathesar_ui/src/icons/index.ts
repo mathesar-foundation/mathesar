@@ -4,6 +4,7 @@ import {
   faArrowRight,
   faArrowRightFromBracket,
   faBackspace,
+  faBook,
   faCalendarDay,
   faCalendarWeek,
   faCaretRight,
@@ -15,6 +16,7 @@ import {
   faClock,
   faClone,
   faCogs,
+  faComments,
   faCopy,
   faDatabase,
   faDiagramNext,
@@ -32,6 +34,7 @@ import {
   faGrip,
   faHammer,
   faHashtag,
+  faHeart,
   faICursor,
   faInfo,
   faKey,
@@ -161,12 +164,15 @@ export const iconReinstall = { data: faRotateBack };
 //
 // (These names should all be nouns)
 
+export const iconCommunityChat: IconProps = { data: faComments };
 export const iconConnection: IconProps = { data: faPlug };
 export const iconConstraint: IconProps = { data: faKey };
 export const iconConstraintUnique: IconProps = { data: faSnowflake };
 export const iconDatabase: IconProps = { data: faDatabase };
 export const iconDbIdentifierDelimiter: IconProps = { data: faArrowRight };
 export const iconDisplayOptions: IconProps = { data: faPalette };
+export const iconDocumentation: IconProps = { data: faBook };
+export const iconDonation: IconProps = { data: faHeart };
 export const iconExploration: IconProps = { data: explorationIcon };
 export const iconExternalHyperlink: IconProps = { data: faUpRightFromSquare };
 export const iconFiltering: IconProps = { data: faFilter };

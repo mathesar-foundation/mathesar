@@ -3,6 +3,7 @@
 
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import ErrorBox from '@mathesar/components/message-boxes/ErrorBox.svelte';
+  import DonateResource from '@mathesar/components/resources/DonateResource.svelte';
   import { RichText } from '@mathesar/components/rich-text';
   import { iconRefresh } from '@mathesar/icons';
   import type { ReleaseDataStore } from '@mathesar/stores/releases';
@@ -85,6 +86,10 @@
   {/if}
 </div>
 
+<div class="donate">
+  <DonateResource />
+</div>
+
 <style>
   .releases > :global(*) {
     margin-bottom: 1rem;
@@ -96,5 +101,10 @@
   }
   .check-button {
     margin-bottom: 0.25rem;
+  }
+  .donate {
+    margin-top: 2rem;
+    max-width: 40rem;
+    text-wrap: balance;
   }
 </style>

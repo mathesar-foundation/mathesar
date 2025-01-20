@@ -3,7 +3,6 @@
   import { router } from 'tinro';
 
   import AppSecondaryHeader from '@mathesar/components/AppSecondaryHeader.svelte';
-  import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
   import SeeDocsToLearnMore from '@mathesar/components/SeeDocsToLearnMore.svelte';
   import { DatabaseRouteContext } from '@mathesar/contexts/DatabaseRouteContext';
   import {
@@ -20,10 +19,8 @@
     getDatabasePageSchemasSectionUrl,
     getDatabasePageSettingsSectionUrl,
   } from '@mathesar/routes/urls';
-  import { confirm } from '@mathesar/stores/confirmation';
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
-  import { toast } from '@mathesar/stores/toast';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -36,6 +33,7 @@
     TabContainer,
   } from '@mathesar-component-library';
 
+  import DisconnectDatabaseModal from './disconnect/DisconnectDatabaseModal.svelte';
   import DatabasePermissionsModal from './permissions/DatabasePermissionsModal.svelte';
 
   const databaseRouteContext = DatabaseRouteContext.get();
@@ -51,6 +49,7 @@
     database.server.port === commonData.internal_db.port;
 
   const permissionsModal = modal.spawnModalController();
+  const disconnectModal = modal.spawnModalController<Database>();
   const reinstallModal = modal.spawnModalController<Database>();
 
   const userProfileStore = getUserProfileStoreFromContext();
@@ -75,39 +74,6 @@
 
   export function setSection(_section: Section) {
     section = _section;
-  }
-
-  async function disconnectDatabase() {
-    await confirm({
-      title: {
-        component: PhraseContainingIdentifier,
-        props: {
-          identifier: database.name,
-          wrappingString: $_('disconnect_database_with_name'),
-        },
-      },
-      body: [
-        $_('action_cannot_be_undone'),
-        $_('disconnect_database_info'),
-        $_('disconnect_database_db_delete_info'),
-        $_('are_you_sure_to_proceed'),
-      ],
-      proceedButton: {
-        label: $_('disconnect_database'),
-        icon: undefined,
-      },
-      onProceed: async () => {
-        await databasesStore.disconnectDatabase(database);
-      },
-      onSuccess: () => {
-        toast.success($_('database_disconnect_success'));
-        router.goto('/');
-      },
-      onError: (e) =>
-        toast.error({
-          message: `${$_('database_disconnect_failed')} ${e.message}`,
-        }),
-    });
   }
 </script>
 
@@ -145,7 +111,10 @@
           icon={iconMoreActions}
           preferredPlacement="bottom-end"
         >
-          <ButtonMenuItem icon={iconDeleteMajor} on:click={disconnectDatabase}>
+          <ButtonMenuItem
+            icon={iconDeleteMajor}
+            on:click={() => disconnectModal.open(database)}
+          >
             {$_('disconnect_database')}
           </ButtonMenuItem>
           <ButtonMenuItem
@@ -203,6 +172,13 @@
 
 <DatabasePermissionsModal controller={permissionsModal} />
 <UpgradeDatabaseModal controller={reinstallModal} isReinstall />
+<DisconnectDatabaseModal
+  controller={disconnectModal}
+  disconnect={async (opts) => {
+    await databasesStore.disconnectDatabase(opts);
+    router.goto('/');
+  }}
+/>
 
 <style>
   .tab-container {
