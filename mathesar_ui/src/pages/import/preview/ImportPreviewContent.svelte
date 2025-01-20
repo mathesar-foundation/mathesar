@@ -216,9 +216,7 @@
   </FieldLayout>
 
   <svelte:fragment slot="preview">
-    <h2 class="large-bold-header preview-header">
-      {$_('table_preview')}
-    </h2>
+    <h2 class="preview-header">{$_('table_preview')}</h2>
     <div class="preview-content">
       {#if $columnsFetch.error}
         <ErrorInfo

@@ -13,7 +13,10 @@
   import { databasesStore } from '@mathesar/stores/databases';
   import { modal } from '@mathesar/stores/modal';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
-  import { ConnectDatabaseModal } from '@mathesar/systems/databases';
+  import {
+    ConnectDatabaseModal,
+    DatabasesEmptyState,
+  } from '@mathesar/systems/databases';
   import BulkUpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/BulkUpgradeDatabaseModal.svelte';
   import UpgradeDatabaseModal from '@mathesar/systems/databases/upgrade-database/UpgradeDatabaseModal.svelte';
   import {
@@ -69,112 +72,110 @@
 </script>
 
 <div class="databases-list">
-  <div class="header">
-    <span class="title">{$_('databases')}</span>
-    <span class="help">
-      <Help>
-        <RichText
-          text={$_('databases_list_help')}
-          let:slotName
-          let:translatedArg
-        >
-          {#if slotName === 'docsLink'}
-            <DocsLink page="databases">{translatedArg}</DocsLink>
-          {/if}
-        </RichText>
-      </Help>
-    </span>
-  </div>
+  <h2>
+    {$_('databases')}
+    <Help>
+      <RichText text={$_('databases_list_help')} let:slotName let:translatedArg>
+        {#if slotName === 'docsLink'}
+          <DocsLink page="databases">{translatedArg}</DocsLink>
+        {/if}
+      </RichText>
+    </Help>
+  </h2>
 
   <section class="databases-container">
-    <EntityContainerWithFilterBar
-      searchPlaceholder={$_('search_databases')}
-      bind:searchQuery={filterQuery}
-      on:clear={handleClearFilterQuery}
-    >
-      <svelte:fragment slot="action">
-        {#if isMathesarAdmin}
-          <Button
-            appearance="primary"
-            on:click={() => connectDbModalController.open()}
-          >
-            <Icon {...iconConnection} />
-            <span>{$_('connect_database')}</span>
-          </Button>
-        {/if}
-      </svelte:fragment>
-
-      <span slot="resultInfo">
-        <RichText
-          text={$_('databases_matching_search', {
-            values: {
-              count: filteredDatabases.length,
-            },
-          })}
-          let:slotName
-        >
-          {#if slotName === 'searchValue'}
-            <strong>{filterQuery}</strong>
+    {#if countDatabases}
+      <EntityContainerWithFilterBar
+        searchPlaceholder={$_('search_databases')}
+        bind:searchQuery={filterQuery}
+        on:clear={handleClearFilterQuery}
+      >
+        <svelte:fragment slot="action">
+          {#if isMathesarAdmin}
+            <Button
+              appearance="primary"
+              on:click={() => connectDbModalController.open()}
+            >
+              <Icon {...iconConnection} />
+              <span>{$_('connect_database')}</span>
+            </Button>
           {/if}
-        </RichText>
-      </span>
+        </svelte:fragment>
 
-      <div class="content" slot="content">
-        <div class="message-area">
-          {#if needToUpgrade !== 'none'}
-            <WarningBox>
-              <div class="bulk-upgrade-message">
-                <div class="text trim-child-margins">
-                  <p>{$_('service_upgraded_notice')}</p>
-                  <p>
-                    {#if needToUpgrade === 'all'}
-                      {$_('upgrade_all_databases_notice')}
-                    {:else if needToUpgrade === 'some'}
-                      {$_('upgrade_some_databases_notice')}
-                    {:else}
-                      {assertExhaustive(needToUpgrade)}
-                    {/if}
-                  </p>
+        <span slot="resultInfo">
+          <RichText
+            text={$_('databases_matching_search', {
+              values: {
+                count: filteredDatabases.length,
+              },
+            })}
+            let:slotName
+          >
+            {#if slotName === 'searchValue'}
+              <strong>{filterQuery}</strong>
+            {/if}
+          </RichText>
+        </span>
+
+        <div class="content" slot="content">
+          <div class="message-area">
+            {#if needToUpgrade !== 'none'}
+              <WarningBox>
+                <div class="bulk-upgrade-message">
+                  <div class="text trim-child-margins">
+                    <p>{$_('service_upgraded_notice')}</p>
+                    <p>
+                      {#if needToUpgrade === 'all'}
+                        {$_('upgrade_all_databases_notice')}
+                      {:else if needToUpgrade === 'some'}
+                        {$_('upgrade_some_databases_notice')}
+                      {:else}
+                        {assertExhaustive(needToUpgrade)}
+                      {/if}
+                    </p>
+                  </div>
+                  <div class="button">
+                    <Button
+                      on:click={() =>
+                        bulkUpgradeDbModalController.open(
+                          databasesNeedingUpgrade,
+                        )}
+                    >
+                      {#if needToUpgrade === 'all'}
+                        {$_('upgrade_all_databases')}
+                      {:else if needToUpgrade === 'some'}
+                        {$_('upgrade_remaining_databases')}
+                      {:else}
+                        {assertExhaustive(needToUpgrade)}
+                      {/if}
+                    </Button>
+                  </div>
                 </div>
-                <div class="button">
-                  <Button
-                    on:click={() =>
-                      bulkUpgradeDbModalController.open(
-                        databasesNeedingUpgrade,
-                      )}
-                  >
-                    {#if needToUpgrade === 'all'}
-                      {$_('upgrade_all_databases')}
-                    {:else if needToUpgrade === 'some'}
-                      {$_('upgrade_remaining_databases')}
-                    {:else}
-                      {assertExhaustive(needToUpgrade)}
-                    {/if}
-                  </Button>
-                </div>
-              </div>
-            </WarningBox>
+              </WarningBox>
+            {/if}
+          </div>
+
+          {#if filteredDatabases.length}
+            <div
+              class="databases-list-grid"
+              use:highlightNewItems={{
+                scrollHint: $_('database_new_items_scroll_hint'),
+                enabled: highlightingEnabled,
+              }}
+            >
+              {#each filteredDatabases as database (database.id)}
+                <DatabaseCard
+                  {database}
+                  onTriggerUpgrade={(d) => upgradeDbModalController.open(d)}
+                />
+              {/each}
+            </div>
           {/if}
         </div>
-
-        {#if filteredDatabases.length}
-          <div
-            class="databases-list-grid"
-            use:highlightNewItems={{
-              scrollHint: $_('database_new_items_scroll_hint'),
-              enabled: highlightingEnabled,
-            }}
-          >
-            {#each filteredDatabases as database (database.id)}
-              <DatabaseCard
-                {database}
-                onTriggerUpgrade={(d) => upgradeDbModalController.open(d)}
-              />
-            {/each}
-          </div>
-        {/if}
-      </div>
-    </EntityContainerWithFilterBar>
+      </EntityContainerWithFilterBar>
+    {:else}
+      <DatabasesEmptyState />
+    {/if}
   </section>
 </div>
 
@@ -189,10 +190,6 @@
 />
 
 <style lang="scss">
-  .databases-list {
-    padding: var(--size-xx-large) var(--size-x-large);
-  }
-
   .message-area {
     margin-bottom: 1rem;
   }
@@ -211,17 +208,6 @@
     .button {
       flex: 0 0 auto;
     }
-  }
-
-  .title {
-    flex: 1 0 0;
-    color: var(--slate-900);
-    font-size: var(--text-size-ultra-large);
-    font-weight: var(--font-weight-medium);
-  }
-  .help {
-    margin-left: 0.5rem;
-    vertical-align: super;
   }
 
   .databases-container {

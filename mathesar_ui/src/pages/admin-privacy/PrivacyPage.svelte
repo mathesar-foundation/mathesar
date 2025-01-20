@@ -74,10 +74,3 @@
     </LabeledInput>
   </div>
 </div>
-
-<style>
-  h2 {
-    font-size: var(--size-x-large);
-    font-weight: var(--font-weight-medium);
-  }
-</style>
