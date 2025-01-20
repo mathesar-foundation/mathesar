@@ -54,7 +54,15 @@ def create_new(
         database: The name of the new database.
         sample_data: A list of strings requesting that some example data
             sets be installed on the underlying database. Valid list
-            members are 'library_management' and 'movie_collection'.
+            members are:
+            - 'bike_shop'
+            - 'hardware_store'
+            - 'ice_cream_employees'
+            - 'library_management'
+            - 'library_makerspace'
+            - 'movie_collection'
+            - 'museum_exhibits'
+            - 'nonprofit_grants'
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_new_database_for_user_on_internal_server(
@@ -88,7 +96,15 @@ def connect_existing(
         password: A password valid for the role.
         sample_data: A list of strings requesting that some example data
             sets be installed on the underlying database. Valid list
-            members are 'library_management' and 'movie_collection'.
+            members are:
+            - 'bike_shop'
+            - 'hardware_store'
+            - 'ice_cream_employees'
+            - 'library_management'
+            - 'library_makerspace'
+            - 'movie_collection'
+            - 'museum_exhibits'
+            - 'nonprofit_grants'
     """
     user = kwargs.get(REQUEST_KEY).user
     result = permissions.set_up_preexisting_database_for_user(

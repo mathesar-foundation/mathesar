@@ -1,5 +1,4 @@
 import os
-from psycopg import sql
 
 from mathesar.examples.base import RESOURCES
 
