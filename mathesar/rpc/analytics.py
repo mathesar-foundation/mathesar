@@ -110,5 +110,10 @@ def view_report() -> AnalyticsReport:
 
 @mathesar_rpc_method(name="analytics.upload_feedback", auth="login")
 def upload_feedback(message: str):
-    """Upload a feedback message to Mathesar's servers."""
+    """
+    Upload a feedback message to Mathesar's servers.
+
+    Args:
+        message: The feedback message to send.
+    """
     upload_feedback_message(message)
