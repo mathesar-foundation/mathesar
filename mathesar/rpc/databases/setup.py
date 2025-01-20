@@ -60,7 +60,6 @@ def create_new(
             - 'ice_cream_employees'
             - 'library_management'
             - 'library_makerspace'
-            - 'movie_collection'
             - 'museum_exhibits'
             - 'nonprofit_grants'
     """
@@ -102,7 +101,6 @@ def connect_existing(
             - 'ice_cream_employees'
             - 'library_management'
             - 'library_makerspace'
-            - 'movie_collection'
             - 'museum_exhibits'
             - 'nonprofit_grants'
     """
