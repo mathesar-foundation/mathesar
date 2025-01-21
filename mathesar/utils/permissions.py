@@ -115,8 +115,8 @@ def _load_sample_data(conn, sample_data):
         'bike_shop': load_bike_shop_dataset,
         'hardware_store': load_hardware_store_dataset,
         'ice_cream_employees': load_ice_cream_employees_dataset,
-        'library_management': load_library_dataset,
         'library_makerspace': load_library_makerspace_dataset,
+        'library_management': load_library_dataset,
         'museum_exhibits': load_museum_exhibits_dataset,
         'nonprofit_grants': load_nonprofit_grants_dataset,
     }
