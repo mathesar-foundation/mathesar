@@ -10,4 +10,28 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL(
+            sql="""
+            ALTER TABLE mathesar_userdatabaserolemap
+            ADD CONSTRAINT userdatabaserolemap_database_server_integrity
+              FOREIGN KEY (database_id, server_id)
+              REFERENCES mathesar_database(id, server_id);
+            """,
+            reverse_sql="""
+            ALTER TABLE mathesar_userdatabaserolemap
+            DROP CONSTRAINT userdatabaserolemap_database_server_integrity;
+            """
+        ),
+        migrations.RunSQL(
+            sql="""
+            ALTER TABLE mathesar_userdatabaserolemap
+            ADD CONSTRAINT userdatabaserolemap_role_server_integrity
+              FOREIGN KEY (role_id, server_id)
+              REFERENCES mathesar_role(id, server_id);
+            """,
+            reverse_sql="""
+            ALTER TABLE mathesar_userdatabaserolemap
+            DROP CONSTRAINT userdatabaserolemap_role_server_integrity;
+            """
+        ),
     ]
