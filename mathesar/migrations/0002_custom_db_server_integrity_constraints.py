@@ -26,8 +26,8 @@ class Migration(migrations.Migration):
             sql="""
             ALTER TABLE mathesar_userdatabaserolemap
             ADD CONSTRAINT userdatabaserolemap_role_server_integrity
-              FOREIGN KEY (role_id, server_id)
-              REFERENCES mathesar_role(id, server_id);
+              FOREIGN KEY (configured_role_id, server_id)
+              REFERENCES mathesar_configuredrole(id, server_id);
             """,
             reverse_sql="""
             ALTER TABLE mathesar_userdatabaserolemap
