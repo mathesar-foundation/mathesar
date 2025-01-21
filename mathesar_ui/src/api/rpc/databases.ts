@@ -27,8 +27,13 @@ export interface RawUnderlyingDatabase {
 }
 
 export const sampleDataOptions = [
+  'bike_shop',
+  'hardware_store',
+  'ice_cream_employees',
+  'library_makerspace',
   'library_management',
-  'movie_collection',
+  'museum_exhibits',
+  'nonprofit_grants',
 ] as const;
 
 export type SampleDataSchemaIdentifier = (typeof sampleDataOptions)[number];

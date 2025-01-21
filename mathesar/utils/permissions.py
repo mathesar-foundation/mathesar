@@ -4,8 +4,13 @@ import psycopg
 from psycopg.errors import DuplicateSchema
 
 from db.databases import create_database
+from mathesar.examples.bike_shop_dataset import load_bike_shop_dataset
+from mathesar.examples.hardware_store_dataset import load_hardware_store_dataset
+from mathesar.examples.ice_cream_employees_dataset import load_ice_cream_employees_dataset
 from mathesar.examples.library_dataset import load_library_dataset
-from mathesar.examples.movies_dataset import load_movies_dataset
+from mathesar.examples.library_makerspace_dataset import load_library_makerspace_dataset
+from mathesar.examples.museum_exhibits_dataset import load_museum_exhibits_dataset
+from mathesar.examples.nonprofit_grants_dataset import load_nonprofit_grants_dataset
 from mathesar.models.base import Server, Database, ConfiguredRole, UserDatabaseRoleMap
 
 INTERNAL_DB_KEY = 'default'
@@ -107,8 +112,13 @@ def _setup_connection_models(
 
 def _load_sample_data(conn, sample_data):
     DATASET_MAP = {
+        'bike_shop': load_bike_shop_dataset,
+        'hardware_store': load_hardware_store_dataset,
+        'ice_cream_employees': load_ice_cream_employees_dataset,
+        'library_makerspace': load_library_makerspace_dataset,
         'library_management': load_library_dataset,
-        'movie_collection': load_movies_dataset,
+        'museum_exhibits': load_museum_exhibits_dataset,
+        'nonprofit_grants': load_nonprofit_grants_dataset,
     }
     for key in sample_data:
         try:
