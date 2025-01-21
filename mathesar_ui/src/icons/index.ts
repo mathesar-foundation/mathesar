@@ -43,6 +43,7 @@ import {
   faLock,
   faMicroscope,
   faPalette,
+  faPaperPlane,
   faPaste,
   faPencilAlt,
   faPlug,
@@ -145,6 +146,7 @@ export const iconSave: IconProps = { data: faSave };
 /** Open the record selector */
 export const iconSelectRecord: IconProps = { data: faSearchPlus };
 export const iconSetToNull: IconProps = { data: faBackspace };
+export const iconSend: IconProps = { data: faPaperPlane };
 export const iconSortAscending: IconProps = { data: faSortAmountDownAlt };
 export const iconSortDescending: IconProps = { data: faSortAmountDown };
 export const iconUndo: IconProps = { data: faUndo };
@@ -179,6 +181,7 @@ export const iconFiltering: IconProps = { data: faFilter };
 export const iconGrouping: IconProps = { data: faListUl };
 export const iconInwardLink: IconProps = { data: faArrowRight };
 export const iconLinkToRecordPage: IconProps = { data: faExternalLinkAlt };
+export const iconMessage: IconProps = { data: faEnvelope };
 export const iconMultipleRecords: IconProps = { data: faCopy };
 export const iconOutcome: IconProps = { data: outcomeIcon };
 export const iconOutwardLink: IconProps = { data: faArrowLeft };
