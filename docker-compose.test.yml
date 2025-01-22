@@ -25,7 +25,7 @@ services:
       target: testing
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
+        PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     environment:
       - ALLOWED_HOSTS=*
       - DJANGO_SUPERUSER_PASSWORD=password
@@ -52,7 +52,7 @@ services:
     build:
       context: api_tests
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION-3.9-bookworm}
+        PYTHON_VERSION: ${PYTHON_VERSION-3.13-bookworm}
     depends_on:
       api-test-service:
         condition: service_healthy

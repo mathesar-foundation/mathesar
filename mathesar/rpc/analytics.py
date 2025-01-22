@@ -8,6 +8,7 @@ from mathesar.analytics import (
     initialize_analytics,
     disable_analytics,
     prepare_analytics_report,
+    upload_feedback_message,
 )
 
 
@@ -25,7 +26,7 @@ class AnalyticsReport(TypedDict):
         connected_database_schema_count: The number of all schemas in
             all connected databases.
         connected_database_table_count: The total number of tables in
-            all conncted databasees.
+            all connected databasees.
         connected_database_record_count: The total number of records in
             all connected databasees (approximated)
         exploration_count: The number of explorations.
@@ -63,9 +64,10 @@ class AnalyticsState(TypedDict):
 
 
 @mathesar_rpc_method(name="analytics.get_state")
-def get_state():
+def get_state() -> AnalyticsState:
     """
-    Returns a boolean to identify if analytics is enabled
+    Returns:
+        A boolean to identify if analytics is enabled.
     """
     return AnalyticsState.from_boolean(is_analytics_enabled())
 
@@ -105,3 +107,14 @@ def view_report() -> AnalyticsReport:
     """
     report = prepare_analytics_report()
     return AnalyticsReport.from_dict(report)
+
+
+@mathesar_rpc_method(name="analytics.upload_feedback", auth="login")
+def upload_feedback(message: str):
+    """
+    Upload a feedback message to Mathesar's servers.
+
+    Args:
+        message: The feedback message to send.
+    """
+    upload_feedback_message(message)

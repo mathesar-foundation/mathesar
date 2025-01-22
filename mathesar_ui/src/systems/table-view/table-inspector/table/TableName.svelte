@@ -45,7 +45,4 @@
       margin-top: 0.25rem;
     }
   }
-  .label {
-    font-weight: var(--font-weight-medium);
-  }
 </style>

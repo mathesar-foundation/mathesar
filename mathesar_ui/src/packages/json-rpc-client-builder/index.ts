@@ -1,4 +1,4 @@
-export { type RpcError } from './RpcError';
+export { RpcError } from './RpcError';
 export { buildRpcApi, rpcMethodTypeContainer } from './builder';
 export {
   batchRun,

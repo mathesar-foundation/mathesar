@@ -117,9 +117,15 @@
   }
 
   h1 {
-    margin: 0 0 1rem 0;
+    margin: 0 0 1.5rem 0;
     font-size: var(--size-ultra-large);
     font-weight: 500;
+  }
+
+  h2 {
+    font-size: var(--size-x-large);
+    font-weight: 600;
+    margin: 0 0 1rem 0;
   }
 
   hr {
@@ -171,11 +177,6 @@
     border-radius: 3px;
     color: rgba(0, 0, 0, 0.6);
     font-weight: bold;
-  }
-
-  .large-bold-header {
-    font-size: var(--size-large);
-    font-weight: 600;
   }
 
   .bold-header {

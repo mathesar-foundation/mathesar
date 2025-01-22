@@ -153,3 +153,22 @@ def upload_initial_report():
         settings.MATHESAR_INIT_REPORT_URL,
         json={"mathesar_version": __version__}
     )
+
+
+def upload_feedback_message(message):
+    if message is None:
+        # No point in proceeding without a message.
+        return
+    installation_id_obj = InstallationID.objects.first()
+    if installation_id_obj is not None:
+        installation_id = str(installation_id_obj.value)
+    else:
+        installation_id = None
+    requests.post(
+        settings.MATHESAR_FEEDBACK_URL,
+        json={
+            "installation_id": installation_id,
+            "mathesar_version": __version__,
+            "message": message
+        }
+    )

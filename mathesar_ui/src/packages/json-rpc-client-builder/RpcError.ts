@@ -24,6 +24,10 @@ export class RpcError extends Error {
     // This is so we can handle creating RpcError instances from various types
     // of errors that might be thrown, e.g. from fetch if there's a network
     // problem.
+    if (value instanceof RpcError) {
+      return value;
+    }
+
     if (value instanceof Error) {
       return new RpcError({
         code: FALLBACK_ERROR_CODE,
