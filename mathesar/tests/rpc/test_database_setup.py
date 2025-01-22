@@ -14,7 +14,7 @@ from mathesar.rpc.servers import configured as configured_servers
 
 
 def test_create_new(monkeypatch, rf):
-    test_sample_data = ["movie_collection"]
+    test_sample_data = ["library_management"]
     test_database = "mathesar42"
     request = rf.post("/api/rpc/v0/", data={})
     request.user = User(username="alice", password="pass1234")
@@ -51,7 +51,7 @@ def test_create_new(monkeypatch, rf):
 
 
 def test_connect_existing(monkeypatch, rf):
-    test_sample_data = ["movie_collection"]
+    test_sample_data = ["library_management"]
     test_database = "mathesar42"
     test_host = "example.com"
     test_port = 6543

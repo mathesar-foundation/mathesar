@@ -46,6 +46,7 @@
 <style lang="scss">
   [data-identifier='connection-empty-text'] {
     text-align: center;
+    --tutorial_padding: 3.5rem 1.5rem;
 
     [data-identifier='connection-icon'] {
       color: var(--sand-800);

@@ -8,11 +8,18 @@
   } from '@mathesar/components/resources';
   import LayoutWithHeader from '@mathesar/layouts/LayoutWithHeader.svelte';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { databasesStore } from '@mathesar/stores/databases';
+  import { useCaseFeedbackVisible } from '@mathesar/stores/localStorage';
   import { getUserProfileStoreFromContext } from '@mathesar/stores/userProfile';
 
   import DatabasesList from './DatabasesList.svelte';
+  import UseCaseFeedback from './UseCaseFeedback.svelte';
 
   const userProfileStore = getUserProfileStoreFromContext();
+
+  $: ({ databases } = databasesStore);
+  $: countDatabases = $databases.size;
+  $: showUseCaseFeedbackPanel = countDatabases === 0 && $useCaseFeedbackVisible;
 </script>
 
 <svelte:head>
@@ -33,7 +40,12 @@
     })}
   </h1>
   <div class="content">
-    <DatabasesList />
+    <div class="databases-section">
+      <DatabasesList />
+      {#if showUseCaseFeedbackPanel}
+        <UseCaseFeedback />
+      {/if}
+    </div>
     <div class="resources">
       <h2>{$_('resources')}</h2>
       <div class="cards">
@@ -52,6 +64,11 @@
     @media screen and (min-width: 50rem) {
       grid-template: auto / 1fr 20rem;
     }
+  }
+  .databases-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
   }
   .cards {
     display: flex;
