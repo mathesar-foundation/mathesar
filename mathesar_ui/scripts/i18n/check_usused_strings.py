@@ -10,6 +10,7 @@ MATHESAR_UI_DIR = Path(__file__).resolve().parent.parent.parent
 
 EN_DICT_FILE = os.path.join(MATHESAR_UI_DIR, 'src/i18n/languages/en/dict.json')
 
+
 # Checks for usage of `$_('string'` or `get(_)('string'`.
 # Scenarios handled:
 #   - Direct usage: eg., `$_('string')`
@@ -31,7 +32,7 @@ def grep_i18n_string(string):
                 pattern,
                 '--include=**.svelte',
                 '--include=**.ts',
-                '--exclude=\*i18n\*',
+                r'--exclude=\*i18n\*',
                 os.path.join(MATHESAR_UI_DIR, 'src')
             ],
             check=True,
@@ -39,7 +40,7 @@ def grep_i18n_string(string):
             stderr=subprocess.DEVNULL
         )
         return True
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         return False
     except Exception:
         raise
@@ -52,4 +53,4 @@ with open(EN_DICT_FILE, 'r') as en_dict_file:
         if not grep_i18n_string(key):
             print("NOT FOUND: " + key)
             not_found_count += 1
-    print("Number of strings not found: " + str(not_found_count));
+    print("Number of strings not found: " + str(not_found_count))
