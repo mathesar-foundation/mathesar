@@ -143,7 +143,7 @@ services:
   #
   service:
     container_name: mathesar_service
-    image: mathesar/mathesar-testing:latest
+    image: mathesar/mathesar:latest
     environment: 
       # First we load the variables configured above.
       <<: *config
