@@ -190,7 +190,7 @@ Django uses gettext, which require the `.po` files to be compiled into a more ef
 - If you encounter merge conflicts in `en/dict.json`, run this script to automatically resolve them:
 
     ```
-    python3 mathesar_ui/src/i18n/scripts/resolve_dict_merge_conflicts.py
+    python3 mathesar_ui/scripts/i18n/resolve_dict_merge_conflicts.py
     ```
 
 ## Translation process
