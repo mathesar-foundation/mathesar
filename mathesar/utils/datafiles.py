@@ -41,7 +41,6 @@ def _get_file_type(raw_file):
 
 
 def create_datafile(data):
-    print(data)
     header = data.get('header', True)
 
     # Validation guarentees only one arg will be present
@@ -75,7 +74,6 @@ def create_datafile(data):
         dialect = get_sv_dialect(text_file)
         datafile = DataFile(
             file=raw_file,
-            user=data['user'],
             base_name=base_name,
             type=type,
             created_from=created_from,
@@ -89,7 +87,6 @@ def create_datafile(data):
         sheet_index = data.get('sheet_index', 0)
         datafile = DataFile(
             file=raw_file,
-            user=data['user'],
             base_name=base_name,
             type=type,
             created_from=created_from,

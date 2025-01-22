@@ -264,7 +264,7 @@ class Explorations(BaseModel):
 
 class DataFile(BaseModel):
     def _user_directory_path(instance, filename):
-        user_identifier = instance.user.username
+        user_identifier = instance.user.username if instance.user else 'anonymous'
         # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
         return os.path.join(user_identifier, filename)
 
@@ -272,7 +272,7 @@ class DataFile(BaseModel):
     file_type_choices = models.TextChoices("type", "CSV TSV JSON")
 
     file = models.FileField(upload_to=_user_directory_path)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.CASCADE)
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     type = models.CharField(max_length=128, choices=file_type_choices.choices)
     base_name = models.CharField(max_length=100)
