@@ -1,6 +1,6 @@
 # Optional Data Collection
 
-If you choose to allow Mathesar to collect analytics data, the following information is sent every 24 hours:
+If you allow Mathesar to collect analytics data, the following information is sent every 24 hours:
 
 - **created_at**: A timestamp giving the time the report was created.
 - **installation_id**: This is a randomized UUID unique to your Mathesar installation.
