@@ -18,8 +18,8 @@ SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
 
-def import_csv(data_file_id, table_name, schema_oid, conn, comment=None):
-    data_file = DataFile.objects.get(id=data_file_id)
+def import_csv(user, data_file_id, table_name, schema_oid, conn, comment=None):
+    data_file = DataFile.objects.get(id=data_file_id, user=user)
     file_path = data_file.file.path
     header = data_file.header
     if table_name is None or table_name == '':
