@@ -5,6 +5,8 @@ services:
     extends:
       file: docker-compose.dev.yml
       service: dev-db-base
+    cap_add:
+      - NET_ADMIN
     expose:
       - "5432"
     healthcheck:
@@ -14,6 +16,8 @@ services:
     container_name: mathesar-test-user-db
     extends:
       service: test-db
+    cap_add:
+      - NET_ADMIN
     environment:
       - POSTGRES_DB=my_data
       - POSTGRES_USER=data_admin
@@ -42,7 +46,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:8000/ || exit 1"]
       interval: 1s
-      timeout: 1s
+      timeout: 5s
       retries: 30
       start_period: 3s
     expose:

@@ -3,4 +3,4 @@ FROM postgres:${PG_VERSION}
 ARG PG_VERSION
 
 RUN apt update
-RUN apt install -y postgresql-${PG_VERSION}-pgtap postgresql-${PG_VERSION}-pldebugger && rm -rf /var/lib/apt/lists/*
+RUN apt install -y postgresql-${PG_VERSION}-pgtap postgresql-${PG_VERSION}-pldebugger iproute2 && rm -rf /var/lib/apt/lists/*
