@@ -10,7 +10,7 @@ Mathesar is built using:
 - [Python](https://www.python.org/) for the backend
 - [Django](https://www.djangoproject.com/) for the web application
 - [SQLAlchemy](https://www.sqlalchemy.org/) to talk to the database
-- [Django REST Framework](https://www.django-rest-framework.org/) for the API 
+- [Django REST Framework](https://www.django-rest-framework.org/) for the API
 - [Svelte](https://svelte.dev/) and [TypeScript](https://www.typescriptlang.org/) for the frontend
 
 ## Local development setup
@@ -77,7 +77,7 @@ We use [pytest](https://docs.pytest.org) for our backend tests.
     ```
     docker exec mathesar_service_dev pytest -k "test_name"
     ```
-    
+
 - See the [pytest documentation](https://docs.pytest.org/en/latest/how-to/usage.html), or run pytest with the `--help` flag to learn about more options for running tests.
 
 - Run all SQL tests:
@@ -172,7 +172,7 @@ Django uses gettext, which require the `.po` files to be compiled into a more ef
 ## Translation process
 
 - We use [Transifex](https://app.transifex.com/mathesar/mathesar/dashboard/) for managing our translation process.
-- You'll need to be a member of the Mathesar organization in Transifex, inorder to work with translations. Please reach out to us for information on how to join. 
+- You'll need to be a member of the Mathesar organization in Transifex, inorder to work with translations. Please reach out to us for information on how to join.
 
 ### For Translators
 
@@ -216,13 +216,6 @@ If you'd like to manually push or pull translations, follow the instructions in 
 
 1. Commit and push the changes to our repo.
 
-## Demo mode
-
-Mathesar can be run in "demo mode" to meet the specific needs of our [live demo site](https://demo.mathesar.org).
-
-See our [Live demo mode](./demo/README.md) guide for more information on enabling live demo mode locally
-
-
 ## Opening a shell in the container
 
 - If you need to do some work within the container you can open a bash shell via:
@@ -241,7 +234,7 @@ See our [Live demo mode](./demo/README.md) guide for more information on enablin
 ## Building Debian package
 
 - On a Debian machine, install the following dependencies
-    
+
     ```
     sudo apt install debhelper-compat dh-virtualenv libsystemd-dev libpq-dev libicu-dev pkg-config lsb-release python3-dev python3 python3-setuptools python3-pip python3-venv tar
     ```
@@ -261,18 +254,18 @@ See our [Live demo mode](./demo/README.md) guide for more information on enablin
     cd ..
     python manage.py collectstatic
     ```
-  
+
 - From the mathesar directory, run the build script to generate the debian package
-  
+
     ```
     cd release-scripts && source build-debian.sh
     ```
- 
+
 ## Troubleshooting
 
 ### Permissions within Windows
 
-- Running Script in powershell is disabled by default in windows , you have to change permission to run scripts  [Official Docs ](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.2) 
+- Running Script in powershell is disabled by default in windows , you have to change permission to run scripts  [Official Docs ](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.2)
 
 ### Fixing line endings on Windows
 
