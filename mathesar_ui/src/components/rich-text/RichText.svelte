@@ -32,7 +32,7 @@
   example:
 
   ```svelte
-  <RichText text={$_(sometext)} let:slotName let:translatedArg>
+  <RichText text={$_('sometext')} let:slotName let:translatedArg>
     {#if slotName === 'tableName'}
       <TableName {table} />
     {:else if slotName === 'schemaName'}
