@@ -1,7 +1,8 @@
-#
+# 
 # Translators:
 # Kriti Godey, 2024
-#
+# Tanya Nguyen, 2025
+# 
 #, fuzzy
 msgid ""
 msgstr ""
@@ -9,7 +10,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-01-13 21:33+0000\n"
 "PO-Revision-Date: 2024-03-04 05:44+0000\n"
-"Last-Translator: Kriti Godey, 2024\n"
+"Last-Translator: Tanya Nguyen, 2025\n"
 "Language-Team: Japanese (https://app.transifex.com/mathesar/teams/172265/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,44 +20,36 @@ msgstr ""
 
 #: mathesar/templates/installation/complete_installation.html:3
 msgid "Finalizing Installation..."
-msgstr ""
+msgstr "インストールを完了しています…"
 
 #: mathesar/templates/installation/complete_installation.html:5
 #: mathesar/templates/installation/complete_installation.html:268
 msgid "Complete Installation"
-msgstr ""
+msgstr "インストールを完了"
 
 #: mathesar/templates/installation/complete_installation.html:129
 msgid "Finish Setting Up Mathesar"
-msgstr ""
+msgstr "Mathesarの設定を完了"
 
 #: mathesar/templates/installation/complete_installation.html:132
-#, fuzzy
-#| msgid "Log in to Mathesar"
 msgid "Welcome to Mathesar!"
-msgstr "Mathesarにログインする"
+msgstr "Mathesarへようこそ！"
 
 #: mathesar/templates/installation/complete_installation.html:135
 msgid ""
 "Create an Admin user to start using Mathesar. You can also choose to share "
 "anonymous data to help us improve."
-msgstr ""
+msgstr "Mathesarの利用を開始するには管理者ユーザーを作成してください。匿名データを共有して改善にご協力いただく選択肢もあります。"
 
 #: mathesar/templates/installation/complete_installation.html:142
 msgid "Create Admin User"
 msgstr "管理者ユーザーを作成する"
 
 #: mathesar/templates/installation/complete_installation.html:144
-#, fuzzy
-#| msgid ""
-#| "To get started with Mathesar, you need to create an Admin user. This user "
-#| "will have full control over your Mathesar installation."
 msgid ""
 "Set up an Admin user account. This account will have full control over your "
 "Mathesar installation."
-msgstr ""
-"Mathesarを使い始めるには、管理者ユーザーを作成する必要があります。このユー"
-"ザーは、Mathesarのインストールを完全に制御できます。"
+msgstr "管理者ユーザーのアカウントを設定してください。このアカウントはMathesarのインストールに全面的な権限を有します。"
 
 #: mathesar/templates/installation/complete_installation.html:153
 #: mathesar/templates/registration/login.html:16
@@ -74,45 +67,47 @@ msgstr "パスワードを確認する"
 
 #: mathesar/templates/installation/complete_installation.html:193
 msgid "Your password must be at least 8 characters long."
-msgstr ""
+msgstr "パスワードは8文字以上にしてください。"
 
 #: mathesar/templates/installation/complete_installation.html:194
-msgid "We recommend a mix of letters, numbers, and symbols for added security."
-msgstr ""
+msgid ""
+"We recommend a mix of letters, numbers, and symbols for added security."
+msgstr "安全性を高めるため、文字・数字・記号の組み合わせが推奨されます。"
 
 #: mathesar/templates/installation/complete_installation.html:228
 msgid "Support Mathesar's Growth"
-msgstr ""
+msgstr "Mathesarの発展をサポート"
 
 #: mathesar/templates/installation/complete_installation.html:237
 msgid "Send a one-time confirmation to let us know you've installed Mathesar"
-msgstr ""
+msgstr "ワンタイム確認を送信してMathesarのインストール完了を知らせる"
 
 #: mathesar/templates/installation/complete_installation.html:240
 msgid "Let our open-source team know we have real users out there."
-msgstr ""
+msgstr "生身のユーザーの存在をこちらのオープンソースのチームに知らせてください。"
 
 #: mathesar/templates/installation/complete_installation.html:241
 msgid ""
 "No personal data is shared, just an acknowledgment of your installation."
-msgstr ""
+msgstr "インストール完了を知らせるだけで、個人データは共有されません。"
 
 #: mathesar/templates/installation/complete_installation.html:243
 #: mathesar/templates/installation/complete_installation.html:259
 msgid "See what's shared."
-msgstr ""
+msgstr "共有された内容を確認してください。"
 
 #: mathesar/templates/installation/complete_installation.html:253
 msgid "Enable anonymous usage data collection"
-msgstr ""
+msgstr "匿名利用データの収集を有効にする"
 
 #: mathesar/templates/installation/complete_installation.html:256
 msgid "Share anonymous usage data periodically to help us improve features."
-msgstr ""
+msgstr "機能改善のため、匿名の利用データを定期的に共有してください。"
 
 #: mathesar/templates/installation/complete_installation.html:257
-msgid "No personal data is collected, and you can change this setting anytime."
-msgstr ""
+msgid ""
+"No personal data is collected, and you can change this setting anytime."
+msgstr "個人情報は収集されず、この設定はいつでも変更できます。"
 
 #: mathesar/templates/mathesar/login_base.html:4
 msgid "Login"
@@ -138,9 +133,7 @@ msgstr "パスワードを更新する"
 msgid ""
 "Since your password was set by an administrator, you need to update your "
 "password to continue."
-msgstr ""
-"パスワードは管理者が設定したものなので、続行するにはパスワードを更新する必要"
-"があります。"
+msgstr "パスワードは管理者が設定したものなので、続行するにはパスワードを更新する必要があります。"
 
 #: mathesar/templates/users/password_reset_confirmation.html:14
 msgid "New Password"
@@ -162,9 +155,7 @@ msgstr "パスワードを更新したら、再度ログインする必要があ
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
 "used.  Please request a new password reset."
-msgstr ""
-"パスワードリセットリンクは、おそらくすでに使用されているため、無効でした。新"
-"しいパスワードのリセットをリクエストしてください。"
+msgstr "パスワードリセットリンクは、おそらくすでに使用されているため、無効でした。新しいパスワードのリセットをリクエストしてください。"
 
 #: mathesar/views/users/password_reset.py:24
 msgid "Change Default Password"
