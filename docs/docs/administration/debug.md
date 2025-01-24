@@ -4,7 +4,7 @@ For now, we only support turning on Debugging by using our special docker image.
 
 ## Use the debugging Mathesar docker image
 
-There is a debugging-enabled Mathesar docker image available at `mathesar/mathesar-debug` that is the same as the `mathesar/mathesar-prod` image, except that it has more debugging output available in the console where it's run, and it also produces more verbose errors in the browser when something goes wrong.
+There is a debugging-enabled Mathesar docker image available at `mathesar/mathesar-debug` that is the same as the `mathesar/mathesar` image, except that it has more debugging output available in the console where it's run, and it also produces more verbose errors in the browser when something goes wrong.
 
 You can use this image to figure out (or to help the Mathesar team figure out) what's wrong if your Mathesar installation isn't working as expected. The procedure is to
 
@@ -16,7 +16,7 @@ You can use this image to figure out (or to help the Mathesar team figure out) w
 Just replace the line
 
 ```
-    image: mathesar/mathesar-prod:latest
+    image: mathesar/mathesar:latest
 ```
 
 with
@@ -30,7 +30,7 @@ with
 If you are just trying the Mathesar Docker image directly as instructed in the [introduction](../index.md#try-locally), replace the command
 
 ```
-docker run -it --name mathesar -p 8000:8000 mathesar/mathesar-prod:latest
+docker run -it --name mathesar -p 8000:8000 mathesar/mathesar:latest
 ```
 
 with 
@@ -41,4 +41,4 @@ docker run -it --name mathesar -p 8000:8000 mathesar/mathesar-debug:latest
 
 ### Other setups
 
-The debugging docker image should work anywhere the production image works. This means you can just replace any pull or run of the image `mathesar/mathesar-prod:latest` with `mathesar/mathesar-debug:latest`.
+The debugging docker image should work anywhere the production image works. This means you can just replace any pull or run of the image `mathesar/mathesar:latest` with `mathesar/mathesar-debug:latest`.

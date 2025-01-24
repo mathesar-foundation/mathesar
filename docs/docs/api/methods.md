@@ -4,9 +4,13 @@
 ::: analytics
     options:
       members:
+      - get_state
       - initialize
       - disable
       - view_report
+      - upload_feedback
+      - AnalyticsReport
+      - AnalyticsState
 
 ## Collaborators
 

@@ -15,6 +15,7 @@ nav:
       - Uninstall Mathesar: administration/uninstall.md
       - Debug Mathesar: administration/debug.md
       - Version Support: administration/version-support.md
+      - Optional Data Collection: analytics.md
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:

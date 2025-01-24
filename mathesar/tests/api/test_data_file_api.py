@@ -27,9 +27,9 @@ def verify_data_file_data(data_file, data_file_dict):
 
 
 @pytest.fixture
-def data_file(patents_csv_filepath):
+def data_file(patents_csv_filepath, user_alice):
     with open(patents_csv_filepath, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file), type='csv')
+        data_file = DataFile.objects.create(file=File(csv_file), type='csv', user=user_alice)
     return data_file
 
 

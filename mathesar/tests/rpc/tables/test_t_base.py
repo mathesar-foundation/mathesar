@@ -194,8 +194,12 @@ def test_tables_import(rf, monkeypatch):
         else:
             raise AssertionError('incorrect parameters passed')
 
-    def mock_table_import(_data_file_id, table_name, _schema_oid, conn, comment):
-        if _schema_oid != schema_oid and _data_file_id != data_file_id:
+    def mock_table_import(_user, _data_file_id, table_name, _schema_oid, conn, comment):
+        if (
+            _user != request.user
+            and _schema_oid != schema_oid
+            and _data_file_id != data_file_id
+        ):
             raise AssertionError('incorrect parameters passed')
         return {"oid": 1964474, "name": "imported_table"}
     monkeypatch.setattr(tables.base, 'connect', mock_connect)

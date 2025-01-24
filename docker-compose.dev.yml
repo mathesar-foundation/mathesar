@@ -50,6 +50,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - MATHESAR_ANALYTICS_URL=${MATHESAR_ANALYTICS_URL-https://example.com/collector}
       - MATHESAR_INIT_REPORT_URL=${MATHESAR_INIT_REPORT_URL-https://example.com/hello}
+      - MATHESAR_FEEDBACK_URL=${MATHESAR_FEEDBACK_URL-https://example.com/feedback}
       - MATHESAR_DATABASES=(mathesar_tables|postgresql://mathesar:mathesar@mathesar_dev_db:5432/mathesar)
       - DJANGO_SUPERUSER_PASSWORD=password
       - POSTGRES_DB=mathesar_django
