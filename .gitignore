@@ -16,7 +16,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -198,3 +197,6 @@ config/settings/local.py
 
 # Transifex binary
 tx
+
+dist/__temp__
+dist/__python__
