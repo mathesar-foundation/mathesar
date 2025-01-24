@@ -31,6 +31,7 @@ BEGIN
     WHERE pronamespace::regnamespace::text='msar' AND proname='drop_all_msar_objects'
     ON CONFLICT DO NOTHING;
 
+  SET client_min_messages = WARNING;
   FOR i in 1..10 LOOP
     FOR obj IN
       SELECT obj_schema, obj_name, obj_kind, custom_type
@@ -50,10 +51,11 @@ BEGIN
           GET STACKED DIAGNOSTICS
             message = MESSAGE_TEXT,
             detail = PG_EXCEPTION_DETAIL;
-          RAISE NOTICE E'% \nDETAIL: %\n\n', message, detail;
+          RAISE WARNING E'% \nDETAIL: %\n\n', message, detail;
       END;
     END LOOP;
   END LOOP;
+  SET client_min_messages = NOTICE;
   IF failed IS TRUE AND NOT strict THEN
     RAISE NOTICE 'Some objects not dropped!';
   ELSIF failed IS TRUE AND strict THEN
