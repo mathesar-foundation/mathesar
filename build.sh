@@ -56,6 +56,9 @@ echo "Copying Licenses and README to __temp__"
 cp -p {README.md,LICENSE,THIRDPARTY} dist/__temp__/
 rsync -a --exclude-from='.gitignore' LICENSES dist/__temp__/
 
+echo "Copying Project files to __temp__"
+cp -p {pyproject.toml,uv.lock} dist/__temp__/
+
 echo "Copying backend sources to __temp__"
 rsync -a --exclude-from='.gitignore' config db mathesar dist/__temp__/
 cp -p {manage.py,run-uv.sh,requirements.txt} dist/__temp__/
