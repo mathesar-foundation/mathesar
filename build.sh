@@ -83,9 +83,9 @@ rsync -a dist/__temp__/* dist/apple_silicon/
 rsync -a dist/__temp__/* dist/apple_intel/
 
 echo "Packaging each distribution"
-tar -cvzf dist/linux_x64.tar.gz dist/linux_x64
-tar -cvzf dist/apple_silicon.tar.gz dist/apple_silicon
-tar -cvzf dist/apple_intel.tar.gz dist/apple_intel
+tar -C dist/linux_x64/ -cvzf dist/mathesar-linux_x64.tar.gz .
+tar -C dist/apple_silicon/ -cvzf dist/mathesar-apple_silicon.tar.gz .
+tar -C dist/apple_intel/ -cvzf dist/mathesar-apple_intel.tar.gz .
 
 echo "Cleaning up"
 rm -rf dist/__temp__
