@@ -11,6 +11,12 @@ set -e
 # - tar
 
 # THIS SCRIPT CAN ONLY BE RUN ON A LINUX x64 MACHINE
+# EDIT THE BUILD_RUNNER ENV VARIABLE TO RUN ON A DIFFERENT PLATFORM
+# TODO: AUTODETECT MAINTAINER'S PLATFORM
+# THIS SETTING DOES NOT CHOOSE WHICH PLATFORM TO BUILD FOR, IT'S FOR THE SCRIPT
+# TO IDENTIFY WHICH PLATFORM THE MAINTAINER IS CALLING THE BUILD SCRIPT FROM
+# Mathesar is built for all supported platforms no matter what the following value is
+export BUILD_RUNNER=linux_x64
 
 mkdir -p dist
 rm -rf dist/*
@@ -61,12 +67,12 @@ rsync -a mathesar/static/mathesar dist/__temp__/mathesar/static/
 echo "Installing python in __temp__/__python__/"
 mkdir -p dist/__python__/
 export UV_PYTHON_INSTALL_DIR=$(pwd)/dist/__python__/
-./dist/apple_silicon/uv python install 3.13
+./dist/$BUILD_RUNNER/uv python install 3.13
 
 echo "Compiling translations"
-./dist/apple_silicon/uv add -r requirements.txt
-./dist/apple_silicon/uv venv
-./dist/apple_silicon/uv run manage.py compilemessages
+./dist/$BUILD_RUNNER/uv add -r requirements.txt
+./dist/$BUILD_RUNNER/uv venv
+./dist/$BUILD_RUNNER/uv run manage.py compilemessages
 
 echo "Copy compiled translations: only copy .mo files not .po files"
 rsync -a --exclude="*.po" --include="*.mo" translations dist/__temp__/
