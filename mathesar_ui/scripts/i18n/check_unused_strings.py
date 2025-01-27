@@ -5,6 +5,13 @@ import os
 import subprocess
 from pathlib import Path
 import json
+from check_invalid_calls import has_invalid_calls
+
+
+if has_invalid_calls():
+    print("There are invalid i18n invocations. Please fix them before checking for unused strings")
+    exit(1)
+
 
 MATHESAR_UI_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -51,6 +58,6 @@ with open(EN_DICT_FILE, 'r') as en_dict_file:
     not_found_count = 0
     for key in en_dict_json:
         if not grep_i18n_string(key):
-            print("NOT FOUND: " + key)
+            print("UNUSED: " + key)
             not_found_count += 1
-    print("Number of strings not found: " + str(not_found_count))
+    print("Number of unused strings: " + str(not_found_count))

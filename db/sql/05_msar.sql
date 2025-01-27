@@ -1,5 +1,5 @@
 SELECT msar.drop_all_msar_objects(
-  schemas_to_remove => ARRAY['msar', '__msar', 'mathesar_types'],
+  schemas_to_remove => ARRAY['msar', '__msar', 'mathesar_types', 'mathesar_inference_schema', 'msar_views'],
   remove_custom_types => false,
   strict => false
 );
