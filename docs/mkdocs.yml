@@ -13,8 +13,8 @@ nav:
       - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
       - Debugging Mathesar: administration/debug.md
-      - Version Support: administration/version-support.md
-      - Optional Data Collection: analytics.md
+      - Postgres & Python Versions: administration/version-support.md
+      - Usage Data Collection: administration/usage-data-collection.md
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
