@@ -6,8 +6,6 @@ Mathesar is a self-hostable open source project that provides a spreadsheet-like
 
 ## Try Mathesar
 
-### Try locally
-
 This is a quick way to play with Mathesar locally, but is not appropriate for saving data that you care about or setting up a long-term installation.
 
 1. With [Docker](https://docs.docker.com/get-docker/) installed, run:
