@@ -1258,7 +1258,7 @@
 </li>
 <li>
 <p>Let&rsquo;s create a Postgres user for Mathesar</p>
-<div class="language-postgresql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="n">mathesar</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="k">ENCRYPTED</span><span class="w"> </span><span class="k">PASSWORD</span><span class="w"> </span><span class="s1">&#39;1234&#39;</span><span class="p">;</span><span class="w"></span>
+<div class="language-postgresql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="n">mathesar</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="k">ENCRYPTED</span><span class="w"> </span><span class="k">PASSWORD</span><span class="w"> </span><span class="s1">&#39;1234&#39;</span><span class="p">;</span>
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Customize your password</p>
@@ -1267,7 +1267,7 @@
 </li>
 <li>
 <p>Next, we have to create a database for storing Mathesar metadata. Your PostgreSQL user will either need to be a <code>SUPERUSER</code> or <code>OWNER</code> of the database. In this guide, we will be setting the user to be <code>OWNER</code> of the database as it is slightly restrictive compared to a <code>SUPERUSER</code>.</p>
-<div class="language-postgresql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_django</span><span class="w"> </span><span class="k">OWNER</span><span class="w"> </span><span class="n">mathesar</span><span class="p">;</span><span class="w"></span>
+<div class="language-postgresql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="n">mathesar_django</span><span class="w"> </span><span class="k">OWNER</span><span class="w"> </span><span class="n">mathesar</span><span class="p">;</span>
 </span></code></pre></div>
 </li>
 <li>
