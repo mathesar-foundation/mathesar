@@ -5660,7 +5660,7 @@ DECLARE
 BEGIN
   EXECUTE format(
     $q$
-    WITH insert_cte AS (%1$s RETURNING %2$s)
+    WITH insert_cte AS (%1$s RETURNING %2$I)
     SELECT *
     FROM insert_cte
     $q$,
