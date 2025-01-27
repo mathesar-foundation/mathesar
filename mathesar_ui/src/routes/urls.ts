@@ -141,7 +141,7 @@ export function getSharedExplorationPageUrl(slug: string): string {
 }
 
 const docsPages = {
-  analytics: '/analytics/',
+  usageDataCollection: '/administration/usage-data-collection/',
   collaborators: '/user-guide/collaborators/',
   databasePermissions: '/user-guide/databases/#permissions',
   databases: '/user-guide/databases/',
