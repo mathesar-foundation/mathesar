@@ -2,7 +2,7 @@
 
 !!! question "Help us get our beta out sooner – send us feedback!"
     You're looking at the documentation for our **✨ new test build ✨**, see [release notes here](releases/0.2.0-testing.1.md).
-    
+
     For a timely and stable beta release, we need feedback from as many users as possible about how this new version of Mathesar is working for you. Let us know on [this GitHub discussion](https://github.com/mathesar-foundation/mathesar/discussions/3956) or drop us a line at <hello@mathesar.org>.
 
 ## Welcome!
@@ -10,12 +10,6 @@
 Mathesar is a self-hostable open source project that provides a spreadsheet-like interface to a PostgreSQL database. Our web-based interface helps you and your collaborators set up data models, edit data, and build custom reports &mdash; no technical skills needed. You can create a new PostgreSQL database while setting up Mathesar or use our UI to interact with an existing database (or do both).
 
 ## Try Mathesar
-
-### Live demo
-
-See our [live demo site](https://demo.mathesar.org/) to try Mathesar without installing anything.
-
-### Try locally
 
 This is a quick way to play with Mathesar locally, but is not appropriate for saving data that you care about or setting up a long-term installation.
 
@@ -25,11 +19,11 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
     docker run -it --name mathesar -p 8000:8000 mathesar/mathesar-testing:latest
     ```
 
-1. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
+2. Visit [http://localhost:8000/](http://localhost:8000/) to set up an admin user account and create a database connection.
 
     ??? tip "Tips when trying Mathesar locally"
         - To open a [psql](https://www.postgresql.org/docs/current/app-psql.html) shell within the container, run:
-        
+
             ```
             docker exec -it mathesar sudo -u postgres psql
             ```
