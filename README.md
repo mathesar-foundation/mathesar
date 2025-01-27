@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://demo.mathesar.org?ref=github-readme" target="_blank">Live Demo</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
+  <a href="https://mathesar.org?ref=github-readme" target="_blank">Website</a> • <a href="https://docs.mathesar.org?ref=github-readme" target="_blank">Docs</a> • <a href="https://wiki.mathesar.org/en/community/matrix" target="_blank">Matrix (chat)</a> • <a href="https://discord.gg/enaKqGn5xx" target="_blank">Discord</a> • <a href="https://wiki.mathesar.org/" target="_blank">Wiki</a>
 </p>
 
 
@@ -63,7 +63,7 @@ Our top sponsors! Become a sponsor on [GitHub](https://github.com/sponsors/mathe
 We are currently in the **public alpha** stage.
 
 ## Join our community!
-The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list. 
+The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) (chat service). We also have [mailing lists](https://wiki.mathesar.org/en/community/mailing-lists) and the core team discusses day-to-day work on our developer mailing list.
 
 ## Screenshots
 
@@ -77,7 +77,7 @@ The Mathesar team is on [Matrix](https://wiki.mathesar.org/en/community/matrix) 
 
 ![arxiv-schema](https://user-images.githubusercontent.com/287034/220773323-bd6ffb31-835b-4df5-981e-dae6341d42bb.png)
 
-![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)  
+![db-page](https://user-images.githubusercontent.com/287034/220773522-8c1c1483-2389-4f5e-83b2-e54836983035.png)
 
 ## Live Demo
 Check out a [live demo of Mathesar here](https://demo.mathesar.org)!
