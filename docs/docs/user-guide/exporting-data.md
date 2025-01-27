@@ -1,5 +1,3 @@
 # Exporting Data From Mathesar
 
-Mathesar does not currently support exporting data directly from the application.
-
-Exporting functionality is coming soon!
+Mathesar supports exporting individual [Tables](tables.md) as CSV files. Filters and sorting set in the UI are automatically applied to your exported file.
