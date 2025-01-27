@@ -6,10 +6,6 @@ Mathesar is a self-hostable open source project that provides a spreadsheet-like
 
 ## Try Mathesar
 
-### Live demo
-
-See our [live demo site](https://demo.mathesar.org/) to try Mathesar without installing anything.
-
 ### Try locally
 
 This is a quick way to play with Mathesar locally, but is not appropriate for saving data that you care about or setting up a long-term installation.
@@ -24,7 +20,7 @@ This is a quick way to play with Mathesar locally, but is not appropriate for sa
 
     ??? tip "Tips when trying Mathesar locally"
         - To open a [psql](https://www.postgresql.org/docs/current/app-psql.html) shell within the container, run:
-        
+
             ```
             docker exec -it mathesar sudo -u postgres psql
             ```
