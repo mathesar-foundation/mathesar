@@ -7,7 +7,7 @@ This page contains all available environment variables supported by Mathesar. Se
 
 ### `SECRET_KEY` {: #secret_key}
 
-- **Description**: A unique random string used by Django for cryptographic signing ([see Django docs](https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-SECRET_KEY)). It helps Mathesar secure user sessions and encrypt saved PostgreSQL passwords.
+- **Description**: A unique random string used by Django for cryptographic signing ([see Django docs](https://docs.djangoproject.com/en/4.2/ref/settings/#std:setting-SECRET_KEY)). It helps Mathesar secure user sessions and encrypt saved PostgreSQL passwords.
 - **Format**: A 50 character string
 - **Additional information**:
 
@@ -16,6 +16,13 @@ This page contains all available environment variables supported by Mathesar. Se
     ```
     echo $(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 50)
     ```
+
+### `ALLOWED_HOSTS` {: #allowed_hosts}
+
+- **Description**: A set of strings representing the host/domain names that Django is allowed to serve. This is a security measure to prevent HTTP Host header attacks ([see Django docs](https://docs.djangoproject.com/en/4.2/ref/settings/#allowed-hosts)).
+- **Format**: A set of host/domain names separated by a comma
+- **Default value**: .localhost,127.0.0.1,[::1]
+
 
 ## Internal Database configuration {: #db}
 
