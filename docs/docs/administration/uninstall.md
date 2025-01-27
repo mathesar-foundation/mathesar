@@ -1,4 +1,4 @@
-# Uninstall Mathesar
+# TODO: Uninstall Mathesar
 
 The uninstall instructions vary depending on the [installation method](../index.md#installing-mathesar) you chose. Select your installation method below to proceed.
 
