@@ -11,7 +11,7 @@ If the password for a role is modified within PostgreSQL, you'll need to update 
 How passwords are stored:
 
 - Passwords are stored in Mathesar's [internal database](./databases.md#internal).
-- They are encrypted at rest with your [SECRET_KEY](../administration/configuration.md#secret_key) generated at installation time.
+- They are encrypted at rest with your [SECRET_KEY](../administration/environment-variables.md#secret_key) generated at installation time.
 - They are stored per-database-_server_. This means that if you connect two databases on the same server, then the same role password can be used for both databases.
 
 To manage the stored passwords:
