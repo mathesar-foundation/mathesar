@@ -1,12 +1,10 @@
-# Debug Mathesar
+# Debugging Mathesar
 
-For now, we only support turning on debugging by using our special docker image. More methods will follow in future releases.
+If your Mathesar installation isn't working as expected, you can use our `mathesar-debug` Docker image that adds more debugging output to the console and more verbose errors in the browser when something goes wrong. The additional information logged should help you or the Mathesar team diagnose the installation issue.
 
 ## Use the debugging Mathesar docker image
 
-There is a debugging-enabled Mathesar docker image available at `mathesar/mathesar-debug` that is the same as the `mathesar/mathesar` image, except that it has more debugging output available in the console where it's run, and it also produces more verbose errors in the browser when something goes wrong.
-
-You can use this image to figure out (or to help the Mathesar team figure out) what's wrong if your Mathesar installation isn't working as expected. The procedure is to
+The debugging-enabled Mathesar docker image is available at the `mathesar/mathesar-debug` Docker repo. It's the same as the `mathesar/mathesar` image, other than adding more debugging output. To set it up:
 
 1. Run Mathesar with the `mathesar/mathesar-debug` image, and then
 1. Observe and report any additional output or clues to the Mathesar team.

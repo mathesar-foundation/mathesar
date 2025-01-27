@@ -9,10 +9,10 @@ nav:
   - Administration:
       - Install using Docker Compose: administration/install-via-docker-compose.md
       - Install from scratch: administration/install-from-scratch.md
-      - Configuration: administration/configuration.md
+      - Environment Variables: administration/environment-variables.md
       - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
-      - Debug Mathesar: administration/debug.md
+      - Debugging Mathesar: administration/debug.md
       - Version Support: administration/version-support.md
       - Optional Data Collection: analytics.md
   - User Guide:
@@ -66,6 +66,7 @@ plugins:
         "user-guide/glossary.md": "user-guide/index.md"
         "user-guide/permissions.md": "user-guide/access-control.md"
         "configuration/env-variables.md": "administration/configuration.md"
+        "administration/configuration.md": "administration/environment-variables.md"
         "installation/docker-compose/index.md": "administration/install-via-docker-compose.md"
         "installation/build-from-source/index.md": "administration/install-from-scratch.md"
   - macros
