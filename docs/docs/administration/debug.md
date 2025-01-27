@@ -1,6 +1,6 @@
 # Debug Mathesar
 
-For now, we only support turning on Debugging by using our special docker image. More methods will follow in future releases.
+For now, we only support turning on debugging by using our special docker image. More methods will follow in future releases.
 
 ## Use the debugging Mathesar docker image
 

@@ -29,7 +29,7 @@ The uninstall instructions vary depending on the [installation method](../index.
 {% include 'snippets/uninstall-schemas.md' %}
 
 
-## Uninstall a Guided script or Docker compose installation of Mathesar
+## Uninstall a guided script or Docker compose installation of Mathesar
 
 1. Remove all Mathesar Docker images and containers.
 
