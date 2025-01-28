@@ -5,8 +5,10 @@
   import { api } from '@mathesar/api/rpc';
   import Spinner from '@mathesar/component-library/spinner/Spinner.svelte';
   import DocsLink from '@mathesar/components/DocsLink.svelte';
+  import { RichText } from '@mathesar/components/rich-text';
   import { iconExternalHyperlink } from '@mathesar/icons';
   import { makeSimplePageTitle } from '@mathesar/pages/pageTitleUtils';
+  import { getMarketingLink } from '@mathesar/routes/urls';
   import AsyncRpcApiStore from '@mathesar/stores/AsyncRpcApiStore';
   import { toast } from '@mathesar/stores/toast';
   import { getErrorMessage } from '@mathesar/utils/errors';
@@ -65,11 +67,24 @@
         />
       {/if}
       <div slot="help">
-        <div>{$_('anonymous_usage_data_collection_help')}</div>
-        <DocsLink page="usageDataCollection">
-          <span>{$_('see_whats_shared')}</span>
-          <Icon {...iconExternalHyperlink} />
-        </DocsLink>
+        <RichText
+          text={$_('anonymous_usage_data_collection_help')}
+          let:slotName
+          let:translatedArg
+        >
+          {#if slotName === 'docsLink'}
+            <DocsLink page="usageDataCollection">
+              {translatedArg}
+              <Icon {...iconExternalHyperlink} />
+            </DocsLink>
+          {/if}
+          {#if slotName === 'privacyPolicyLink'}
+            <a href={getMarketingLink('privacy')} tinro-ignore target="_blank">
+              {translatedArg}
+              <Icon {...iconExternalHyperlink} />
+            </a>
+          {/if}
+        </RichText>
       </div>
     </LabeledInput>
   </div>
