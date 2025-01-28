@@ -66,7 +66,7 @@
       {/if}
       <div slot="help">
         <div>{$_('anonymous_usage_data_collection_help')}</div>
-        <DocsLink page="analytics">
+        <DocsLink page="usageDataCollection">
           <span>{$_('see_whats_shared')}</span>
           <Icon {...iconExternalHyperlink} />
         </DocsLink>

@@ -18,7 +18,7 @@ Click the **Connect Database** button from the home page of your Mathesar applic
 
 Once you've connected a database, you can navigate to Mathesar's page for it where you can browse the database's [schemas](./schemas.md) and configure various settings for it.
 
-Mathesar will remember the connection even after the application is shut down. Your Mathesar [user](./users.md) will be added as a [collaborator](./collaborators.md) on the database (along with the PostgreSQL [role](./roles.md) you entered). The password you entered for that role will be stored in Mathesar's [internal database](#internal), encrypted using Mathesar's [SECRET_KEY](../administration/configuration.md#secret_key).
+Mathesar will remember the connection even after the application is shut down. Your Mathesar [user](./users.md) will be added as a [collaborator](./collaborators.md) on the database (along with the PostgreSQL [role](./roles.md) you entered). The password you entered for that role will be stored in Mathesar's [internal database](#internal), encrypted using Mathesar's [SECRET_KEY](../administration/environment-variables.md#secret_key).
 
 ## Creating a new database
 

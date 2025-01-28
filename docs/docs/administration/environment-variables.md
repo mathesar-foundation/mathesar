@@ -1,4 +1,4 @@
-# Configuring Mathesar with environment variables
+# Environment Variables for Configuration
 
 This page contains all available environment variables supported by Mathesar. See the specific installation guides for the applicable environment variables and instructions on how to set them.
 

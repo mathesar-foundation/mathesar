@@ -4431,6 +4431,28 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE OR REPLACE FUNCTION test_add_record_to_table_pkey_quoting() RETURNS SETOF TEXT AS $$
+DECLARE
+  rel_id oid;
+BEGIN
+  PERFORM __setup_add_record_table();
+  ALTER TABLE atable RENAME COLUMN id TO "ID";
+  rel_id := 'atable'::regclass::oid;
+  RETURN NEXT is(
+    msar.add_record_to_table(
+      rel_id,
+      '{}'
+    ),
+    $a${
+      "results": [{"1": 4, "2": 200, "3": null, "4": null, "5": null}],
+      "linked_record_summaries": null,
+      "record_summaries": null
+    }$a$
+  );
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION test_add_record_to_table_stringified_json() RETURNS SETOF TEXT AS $$
 DECLARE
   rel_id oid;
