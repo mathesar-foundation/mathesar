@@ -168,8 +168,9 @@ export function getDocsLink(page: DocsPage): string {
 }
 
 const marketingPages = {
-  community: '/community/',
-  donate: '/donate/',
+  community: '/community',
+  donate: '/donate',
+  privacy: '/privacy',
 };
 
 export type MarketingPage = keyof typeof marketingPages;
