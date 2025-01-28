@@ -16,7 +16,7 @@ urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/export/v0/tables/', views.export.export_table, name="export_table"),
     path('complete_installation/', installation_incomplete(CompleteInstallationFormView.as_view()), name='complete_installation'),
-    path('auth/password_reset_confirm', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('auth/password_reset_confirm/', MathesarPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('auth/login/', installation_complete(LoginView.as_view(redirect_authenticated_user=True)), name='login'),
     path('auth/', include('django.contrib.auth.urls')),
     path('', views.home, name='home'),

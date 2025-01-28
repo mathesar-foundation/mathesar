@@ -17,7 +17,7 @@ Other permission systems commonly have a _separate_ concept of "groups", wherein
 
 To see the roles available on your server, navigate to the **Database Settings** tab within the page for one of your connected databases. From there, you'll be able to add roles, drop roles, and edit role inheritance.
 
-Role passwords are stored in Mathesar's [internal database](./databases.md#internal) and encrypted with your [SECRET_KEY](../administration/configuration.md#secret_key).
+Role passwords are stored in Mathesar's [internal database](./databases.md#internal) and encrypted with your [SECRET_KEY](../administration/environment-variables.md#secret_key).
 
 Renaming roles and modifying role properties (e.g. `LOGIN` status) is not supported within Mathesar.
 

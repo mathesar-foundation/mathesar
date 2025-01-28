@@ -9,12 +9,12 @@ nav:
   - Administration:
       - Install using Docker Compose: administration/install-via-docker-compose.md
       - Install from scratch: administration/install-from-scratch.md
-      - Configuration: administration/configuration.md
-      - Backup & Restore: administration/backup-restore.md
+      - Environment Variables: administration/environment-variables.md
       - Upgrade Mathesar: administration/upgrade.md
       - Uninstall Mathesar: administration/uninstall.md
-      - Debug Mathesar: administration/debug.md
-      - Version Support: administration/version-support.md
+      - Debugging Mathesar: administration/debug.md
+      - Postgres & Python Versions: administration/version-support.md
+      - Usage Data Collection: administration/usage-data-collection.md
   - User Guide:
       - Introduction: user-guide/index.md
       - Your data in PostgreSQL:
@@ -65,7 +65,8 @@ plugins:
         "api/rest.md": "api/index.md"
         "user-guide/glossary.md": "user-guide/index.md"
         "user-guide/permissions.md": "user-guide/access-control.md"
-        "configuration/env-variables.md": "administration/configuration.md"
+        "configuration/env-variables.md": "administration/environment-variables.md"
+        "administration/configuration.md": "administration/environment-variables.md"
         "installation/docker-compose/index.md": "administration/install-via-docker-compose.md"
         "installation/build-from-source/index.md": "administration/install-from-scratch.md"
   - macros
