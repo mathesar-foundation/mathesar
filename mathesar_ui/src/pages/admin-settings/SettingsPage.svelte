@@ -44,13 +44,13 @@
 </script>
 
 <svelte:head>
-  <title>{makeSimplePageTitle($_('privacy'))}</title>
+  <title>{makeSimplePageTitle($_('settings'))}</title>
 </svelte:head>
 
-<h1>{$_('privacy')}</h1>
+<h1>{$_('settings')}</h1>
 
 <div>
-  <h2>{$_('usage_statistics')}</h2>
+  <h2>{$_('usage_data_collection')}</h2>
   <div>
     <LabeledInput layout="inline-input-first">
       <span slot="label">

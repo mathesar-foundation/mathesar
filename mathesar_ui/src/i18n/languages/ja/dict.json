@@ -396,7 +396,6 @@
   "primary_key_column_cannot_be_moved": "プライマリキー列は移動できません。",
   "primary_key_help": "プライマリキー制約は、テーブル内の各レコードを一意に識別します。",
   "primary_keys": "プライマリキー",
-  "privacy": "プライバシー",
   "privileges_new_items_scroll_hint": "ロールを見るには、スクロールするか、ここをクリックしてください。",
   "processing_data": "データの処理",
   "prompt_new_password_next_login": "パスワードをリセットすると、ユーザーは次回ログイン時にパスワードを変更するように求められます。",
