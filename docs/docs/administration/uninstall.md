@@ -7,6 +7,8 @@ The uninstall instructions vary depending on the [installation method](../index.
 !!!note
     Depending on your Docker setup, you may need to run `docker` commands with `sudo`.
 
+{% include 'snippets/uninstall-schemas.md' %}
+
 1. Remove the Mathesar container.
 
     ```
@@ -26,10 +28,10 @@ The uninstall instructions vary depending on the [installation method](../index.
     docker volume rm media
     ```
 
-{% include 'snippets/uninstall-schemas.md' %}
-
 
 ## Uninstall a guided script or Docker compose installation of Mathesar
+
+{% include 'snippets/uninstall-schemas.md' %}
 
 1. Remove all Mathesar Docker images and containers.
 
@@ -43,9 +45,9 @@ The uninstall instructions vary depending on the [installation method](../index.
     rm -rf xMATHESAR_INSTALLATION_DIRx  # may need sudo, depending on location
     ```
 
-{% include 'snippets/uninstall-schemas.md' %}
-
 ## Uninstall a source installation of Mathesar
+
+{% include 'snippets/uninstall-schemas.md' %}
 
 1. Stop Caddy service
 
@@ -95,5 +97,3 @@ The uninstall instructions vary depending on the [installation method](../index.
         ```postgresql
         DROP DATABASE mathesar_django;
         ```
-
-{% include 'snippets/uninstall-schemas.md' %}
